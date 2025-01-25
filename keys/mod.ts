@@ -106,7 +106,7 @@ export function randomPresharedKeyBytes(): Uint8Array {
  * @returns {Uint8Array} publicKey bytes
  */
 export function publicBytesFromPrivateBytes(
-  privateKey: Uint8Array
+  privateKey: Uint8Array,
 ): Uint8Array {
   return x25519.scalarMultBase(privateKey);
 }
