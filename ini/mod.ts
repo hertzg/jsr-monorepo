@@ -1,5 +1,37 @@
+/**
+ * This module provides functions to parse and stringify wireguard configuration files.
+ *
+ * ```typescript
+ * import { parse, stringify } from "@hertzg/wg-ini";
+ * import { assertEquals } from "@std/assert";
+ *
+ * const str = `
+ * [Interface]
+ * PrivateKey = A
+ * Address = 10.0.0.1/24
+ *
+ * [Peer]
+ * PublicKey = B
+ * AllowedIPs = 10.0.0.2/32
+ *
+ * [Peer]
+ * PublicKey = C
+ * AllowedIPs = 10.0.0.3/32
+ * `;
+ *
+ * assertEquals(parse(str), [
+ *  { section: null, entries: [], trailer: "" },
+ *  { section: "Interface", entries: [["PrivateKey", "A", ""], ["Address", "10.0.0.1/24", ""]], trailer: "" },
+ *  { section: "Peer", entries: [["PublicKey", "B", ""], ["AllowedIPs", "10.0.0.2/32", ""]], trailer: "" },
+ *  { section: "Peer", entries: [["PublicKey", "C", ""], ["AllowedIPs", "10.0.0.3/32", ""]], trailer: "" }
+ * ])
+ *
+ * ```
+ *
+ * @module
+ */
 function lineType(
-  line: string,
+  line: string
 ): "comment" | "section-start" | "key-value" | "other" {
   if (line.startsWith("[")) {
     return "section-start";
@@ -16,14 +48,6 @@ function lineType(
  * Section entry in an INI file. Can be a string if it's a comment or a 3 element array if it's a key-value-trailer pair.
  * trailer = comment in most cases.
  *
- * @example
- * ```ts
- * // key-value pair
- * // "key=value ; comment" -> ["key", "value ", "; comment"]
- * // "; comment" -> "; comment"
- * // "[]" -> nothing
- * ```
- *
  * @see {@link IniEntry} for more information on how this is used in the context of an INI file.
  */
 export type Entry = [string, string, string] | string;
@@ -32,13 +56,7 @@ export type Entry = [string, string, string] | string;
  * The sectioned entry in an INI file, with a section name, entries and a trailer that the section header might have had.
  * Entries array can be an array of array or array of string. If it's a string, it's a comment or non key-value pair.
  *
- * @example
- * ```ts
- * // "[mysection]; comment goes here" -> { section: "mysection", entries: [], trailer: "; comment goes here" }
- * // if the previous section was as shown above and the next line is as shown next
- * // "key = value ; comment" -> { section: "mysection", entries: [["key", "value", "; comment"]], trailer: "" }
- * // at some point if the next line is as shown below
- * // "; just comment here" -> { section: "mysection", entries: ["; just comment here"], trailer: "" }
+ * @see {@link Entry} for more information on how this is used in the context of an INI file.
  */
 export type IniEntry = {
   section: string | null;
@@ -58,6 +76,9 @@ export type IniEntry = {
  *
  * @example
  * ```ts
+ * import { parse } from "@hertzg/wg-ini";
+ * import { assertEquals } from "@std/assert";
+ *
  * const text = `
  * [Interface]
  * PrivateKey = ... ; This is a private key
@@ -69,24 +90,13 @@ export type IniEntry = {
  * PublicKey = ... ; This is another public key
  * `;
  *
- * const parsed = parse(text);
- *
- * // parsed = [
- * //   {
- * //     section: "Interface",
- * //     entries: [["PrivateKey", "... ", "; This is a private key"]],
- * //     trailer: ""
- * //   },
- * //   {
- * //     section: "Peer",
- * //     entries: [["PublicKey", "... ", "; This is a public key"]],
- * //     trailer: ""
- * //   },
- * //   {
- * //     section: "Peer",
- * //     entries: [["PublicKey", "... ", "; This is another public key"]],
- * //     trailer: " ; This is another peer"
- * //   }
+ * assertEquals(parse(text), [
+ *  { section: null, entries: [], trailer: "" },
+ *  { section: "Interface", entries: [["PrivateKey", "...", " This is a private key"]], trailer: "" },
+ *  { section: "Peer", entries: [["PublicKey", "...", " This is a public key"]], trailer: "" },
+ *  { section: "Peer", entries: [["PublicKey", "...", " This is another public key"]], trailer: " ; This is another peer" }
+ * ]);
+ * ```
  */
 export function parse(text: string): IniEntry[] {
   const lines = text.split("\n");
@@ -145,14 +155,14 @@ export function stringify(parsed: IniEntry[]): string {
       (iniEntry) =>
         iniEntry.section != null ||
         iniEntry.entries.length > 0 ||
-        iniEntry.trailer.length > 0,
+        iniEntry.trailer.length > 0
     )
     .map(({ section, entries, trailer }, index, array) => {
       const block: string[] = [];
 
       const sectionHeader = `[${section}]`;
       block.push(
-        section != null ? `${sectionHeader}${trailer ?? ""}` : trailer ?? "",
+        section != null ? `${sectionHeader}${trailer ?? ""}` : trailer ?? ""
       );
 
       for (const [key, value, trailer] of entries) {
