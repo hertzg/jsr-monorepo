@@ -31,7 +31,7 @@ jobs:
           deno-version: ${{ matrix.deno }}
 
       - name: Install dependencies
-        run: apt install -y wireguard-tools
+        run: sudo apt-get install -y wireguard-tools
         if: ${{ matrix.os == 'ubuntu-latest' }}
 
       - name: Run tests
