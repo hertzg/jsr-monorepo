@@ -6,7 +6,9 @@
     "dev": "deno test --watch mod.ts",
     "test": "deno test -A"
   },
-  "license": "MIT",
+  "include": [
+    "mod.ts"
+  ],
   "imports": {
     "@noble/curves": "jsr:@noble/curves@^1.8.1",
     "@std/assert": "jsr:@std/assert@^1.0.11"
