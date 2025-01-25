@@ -3,10 +3,11 @@ name: version_bump
 on: workflow_dispatch
 
 jobs:
-  build:
+  bump:
     name: version bump
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    environment: jsr
+    timeout-minutes: 10
 
     steps:
       - name: Clone repository
