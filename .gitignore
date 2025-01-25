@@ -1,4 +1,9 @@
-coverage/
 cov/
 docs/
+
+# coverage
+coverage/
 cov.lcov
+codecov
+codecov.SHA256SUM
+codecov.SHA256SUM.sig
