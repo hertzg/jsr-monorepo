@@ -1,13 +1,13 @@
 import {
-  assertStrictEquals,
   assertExists,
   assertNotStrictEquals,
+  assertStrictEquals,
 } from "@std/assert";
 import {
-  wgGenKey,
-  wgPubKey,
   publicBytesFromPrivateBytes,
   randomPrivateKeyBytes,
+  wgGenKey,
+  wgPubKey,
 } from "./mod.ts";
 import { Buffer } from "node:buffer";
 import { spawn } from "node:child_process";
@@ -31,7 +31,7 @@ test("public key values are interchangable", () => {
 
   assertStrictEquals(
     wgPubKey(privKeyBase64),
-    Buffer.from(publicBytesFromPrivateBytes(privKeyBytes)).toString("base64")
+    Buffer.from(publicBytesFromPrivateBytes(privKeyBytes)).toString("base64"),
   );
 });
 
@@ -81,5 +81,5 @@ test(
     });
 
     assertStrictEquals(pubKey, execResult.trim());
-  }
+  },
 );

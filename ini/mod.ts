@@ -1,5 +1,5 @@
 function lineType(
-  line: string
+  line: string,
 ): "comment" | "section-start" | "key-value" | "other" {
   if (line.startsWith("[")) {
     return "section-start";
@@ -87,7 +87,6 @@ export type IniEntry = {
  * //     entries: [["PublicKey", "... ", "; This is another public key"]],
  * //     trailer: " ; This is another peer"
  * //   }
- *
  */
 export function parse(text: string): IniEntry[] {
   const lines = text.split("\n");
@@ -146,14 +145,14 @@ export function stringify(parsed: IniEntry[]): string {
       (iniEntry) =>
         iniEntry.section != null ||
         iniEntry.entries.length > 0 ||
-        iniEntry.trailer.length > 0
+        iniEntry.trailer.length > 0,
     )
     .map(({ section, entries, trailer }, index, array) => {
       const block: string[] = [];
 
       const sectionHeader = `[${section}]`;
       block.push(
-        section != null ? `${sectionHeader}${trailer ?? ""}` : trailer ?? ""
+        section != null ? `${sectionHeader}${trailer ?? ""}` : trailer ?? "",
       );
 
       for (const [key, value, trailer] of entries) {

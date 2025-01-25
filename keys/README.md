@@ -1,8 +1,9 @@
 ## Overview
 
-This module provides functions to generate wireguard private keys, preshared keys and public keys.
-Exposes functions that mimic `wg genkey`, `wg genpsk` and `wg pubkey` commands that work with strings.
-As well as underlying functions that work with Uint8Arrays.
+This module provides functions to generate wireguard private keys, preshared
+keys and public keys. Exposes functions that mimic `wg genkey`, `wg genpsk` and
+`wg pubkey` commands that work with strings. As well as underlying functions
+that work with Uint8Arrays.
 
 ## Usage
 
@@ -28,9 +29,9 @@ or
 
 ```typescript
 import {
-  randomPrivateKeyBytes,
   publicBytesFromPrivateBytes,
   randomPresharedKeyBytes,
+  randomPrivateKeyBytes,
 } from "@hertzg/wg-keys";
 
 const privateKey = randomPrivateKeyBytes(); // returns Uint8Array
@@ -42,9 +43,11 @@ console.log({ privateKey, publicKey, presharedKey });
 
 ## OK, But Why?
 
-Normally one can use `CryptoSubtle` to generate and export keys, but since in Deno `x25519` private key export
-as `jwk` is not implemented, this module provides a workaround using @noble/curves package. See
-[X25519 issue](https://github.com/denoland/deno/issues/26431#issuecomment-2592044073) for more info.
+Normally one can use `CryptoSubtle` to generate and export keys, but since in
+Deno `x25519` private key export as `jwk` is not implemented, this module
+provides a workaround using @noble/curves package. See
+[X25519 issue](https://github.com/denoland/deno/issues/26431#issuecomment-2592044073)
+for more info.
 
 ## References
 

@@ -31,7 +31,6 @@
  * as `jwk` is not implemented, this module provides a workaround using @noble/curves package. See
  * [X25519 issue]({@link https://github.com/denoland/deno/issues/26431#issuecomment-2592044073 }) for more info.
  *
- *
  * ## References
  * - [RFC 7748](https://datatracker.ietf.org/doc/html/rfc7748)
  * - [Curve25519](https://en.wikipedia.org/wiki/Curve25519)
@@ -93,7 +92,7 @@ export function randomPresharedKeyBytes(): Uint8Array {
  * @returns {Uint8Array} publicKey bytes
  */
 export function publicBytesFromPrivateBytes(
-  privateKey: Uint8Array
+  privateKey: Uint8Array,
 ): Uint8Array {
   return x25519.scalarMultBase(privateKey);
 }
