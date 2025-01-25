@@ -30,6 +30,10 @@ jobs:
         with:
           deno-version: ${{ matrix.deno }}
 
+      - name: Install dependencies
+        run: apt install -y wireguard-tools
+        if: ${{ matrix.os == 'ubuntu-latest' }}
+
       - name: Run tests
         run: |
           deno task test
