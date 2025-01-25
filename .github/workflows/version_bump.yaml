@@ -5,7 +5,7 @@ on: workflow_dispatch
 jobs:
   bump:
     name: version bump
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     environment: jsr
     timeout-minutes: 10
 
@@ -23,3 +23,5 @@ jobs:
           deno run -A jsr:@deno/bump-workspaces@0.1.22/cli
         env:
           GITHUB_TOKEN: ${{ secrets.BOT_TOKEN }}
+          GIT_USER_NAME: ${{ vars.GIT_USER_NAME }}
+          GIT_USER_EMAIL: ${{ vars.GIT_USER_EMAIL }}
