@@ -1,0 +1,6 @@
+wg-ini:
+  - changed-files:
+      - any-glob-to-any-file: ini/**
+wg-keys:
+  - changed-files:
+      - any-glob-to-any-file: keys/**
