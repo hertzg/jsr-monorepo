@@ -6,24 +6,38 @@
  *
  * ```typescript
  * import { wgGenKey, wgGenPsk, wgPubKey } from "@hertzg/wg-keys";
+ * import { assertExists, assertNotEquals } from "@std/assert";
  *
  * const privateKey = wgGenKey(); // returns string
  * const publicKey = wgPubKey(privateKey); // returns string
  * const presharedKey = wgGenPsk(); // returns string
  *
- * console.log({ privateKey, publicKey, presharedKey });
+ * assertExists(privateKey);
+ * assertExists(presharedKey);
+ * assertExists(publicKey);
+ *
+ * assertNotEquals(privateKey, publicKey);
+ * assertNotEquals(privateKey, presharedKey);
+ * assertNotEquals(publicKey, presharedKey);
  * ```
  *
  * or
  *
  * ```typescript
  * import { randomPrivateKeyBytes, publicBytesFromPrivateBytes, randomPresharedKeyBytes } from "@hertzg/wg-keys";
+ * import { assertEquals, assertNotEquals } from "@std/assert";
  *
  * const privateKey = randomPrivateKeyBytes(); // returns Uint8Array
  * const publicKey = publicBytesFromPrivateBytes(privateKey); // returns Uint8Array
  * const presharedKey = randomPresharedKeyBytes(); // returns Uint8Array
  *
- * console.log({ privateKey, publicKey, presharedKey });
+ * assertEquals(privateKey.length, 32);
+ * assertEquals(publicKey.length, 32);
+ * assertEquals(presharedKey.length, 32);
+ *
+ * assertNotEquals(privateKey, publicKey);
+ * assertNotEquals(privateKey, presharedKey);
+ * assertNotEquals(publicKey, presharedKey);
  * ```
  *
  * ## OK, But Why?
@@ -92,7 +106,7 @@ export function randomPresharedKeyBytes(): Uint8Array {
  * @returns {Uint8Array} publicKey bytes
  */
 export function publicBytesFromPrivateBytes(
-  privateKey: Uint8Array,
+  privateKey: Uint8Array
 ): Uint8Array {
   return x25519.scalarMultBase(privateKey);
 }
