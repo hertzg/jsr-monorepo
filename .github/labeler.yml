@@ -1,6 +1,9 @@
 wg-ini:
   - changed-files:
-      - any-glob-to-any-file: ini/**
+      - any-glob-to-any-file: wg-ini/**
 wg-keys:
+  - changed-files:
+      - any-glob-to-any-file: wg-keys/**
+wg-conf:
   - changed-files:
       - any-glob-to-any-file: keys/**
