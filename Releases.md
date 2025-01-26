@@ -1,5 +1,19 @@
 ### 2025.01.26
 
+#### @hertzg/wg-conf 0.1.4 (patch)
+
+- feat(*): manual version bump
+
+#### @hertzg/wg-ini 0.1.4 (patch)
+
+- feat(*): manual version bump
+
+#### @hertzg/wg-keys 0.1.4 (patch)
+
+- feat(*): manual version bump
+
+### 2025.01.26
+
 #### @hertzg/wg-conf 0.1.2 (minor)
 
 - feat(wg-conf,wg-ini,wg-keys): rename folders to match the name
