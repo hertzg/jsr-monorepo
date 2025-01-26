@@ -1,4 +1,4 @@
-import { parseArray, stringifyArray } from "@hertzg/wg-wg-ini";
+import { parseArray, stringifyArray } from "@hertzg/wg-ini";
 
 export interface WGQuickInterface {
   ListenPort?: number;

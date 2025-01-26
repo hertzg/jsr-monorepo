@@ -4,7 +4,7 @@ import type {
   IniLineComment,
   IniLineSection,
   IniLineTrailer,
-} from "@hertzg/wg-wg-ini/lines";
+} from "@hertzg/wg-ini/lines";
 
 export type IniSection = {
   section: IniLineSection | null;
