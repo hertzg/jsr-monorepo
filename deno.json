@@ -15,8 +15,8 @@
     "docs"
   ],
   "workspace": [
-    "./keys",
-    "./ini",
-    "./conf"
+    "./wg-keys",
+    "./wg-ini",
+    "./wg-conf"
   ]
 }
