@@ -1,3 +1,18 @@
+### 2025.01.26
+
+#### @hertzg/wg-conf 0.1.2 (minor)
+
+- feat(wg-conf): wg-quick config parser and serializer
+
+#### @hertzg/wg-ini 0.1.3 (patch)
+
+- BREAKING(wg-ini)!: rewrite to use streams
+
+#### @hertzg/wg-keys 0.1.3 (patch)
+
+- chore(*): dry run before test
+- chore(*): use import_map.json when bumping
+
 ### 2025.01.25
 
 #### @hertzg/wg-ini 0.1.2 (minor)
