@@ -1,6 +1,6 @@
 import { test } from "node:test";
 import { assertStrictEquals } from "@std/assert";
-import { parse, stringify } from "./mod.ts";
+import { parseArray, stringifyArray } from "./mod.ts";
 
 const SAMPLE = `[Interface]
 Address = 172.31.170.1/24
@@ -18,11 +18,30 @@ PersistentKeepalive = 25
 PublicKey = B
 PresharedKey = A
 AllowedIPs = 172.31.170.101/32
-PersistentKeepalive = 25`;
+PersistentKeepalive = 25
+`;
 
-test("should parse and generate the same output", () => {
-  const obj = parse(SAMPLE);
-  const str = stringify(obj);
+test("should parse and generate the same output", async () => {
+  const arr = await parseArray(SAMPLE);
+  const str = await stringifyArray(arr);
 
   assertStrictEquals(str, SAMPLE);
+});
+
+test(`should stringify global properties correctly`, async () => {
+  const str = await stringifyArray([
+    ["section", [["key", "value"]]],
+    [null, [["a", "1"]]],
+  ]);
+
+  assertStrictEquals(
+    str,
+    [
+      "a=1",
+      "",
+      "[section]",
+      "key=value",
+      "",
+    ].join("\n"),
+  );
 });

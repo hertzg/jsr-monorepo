@@ -1,9 +1,10 @@
 {
   "name": "@hertzg/wg-ini",
   "version": "0.1.2",
-  "exports": "./mod.ts",
-  "tasks": {
-    "dev": "deno test --watch mod.ts"
+  "exports": {
+    ".": "./mod.ts",
+    "./lines": "./lines.ts",
+    "./sections": "./sections.ts"
   },
   "include": [
     "mod.ts"
