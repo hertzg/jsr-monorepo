@@ -1,3 +1,22 @@
+### 2025.01.26
+
+#### @hertzg/wg-conf 0.1.2 (minor)
+
+- feat(wg-conf,wg-ini,wg-keys): rename folders to match the name
+- feat(wg-conf): wg-quick config parser and serializer
+- fix(wg-conf,wg-ini): fix wrong imports
+
+#### @hertzg/wg-ini 0.1.2 (minor)
+
+- BREAKING(wg-ini)!: rewrite to use streams
+- feat(wg-conf,wg-ini,wg-keys): rename folders to match the name
+- fix(wg-conf,wg-ini): fix wrong imports
+- chore(wg-ini): ser version manually to 0.1.0
+
+#### @hertzg/wg-keys 0.1.2 (patch)
+
+- feat(wg-conf,wg-ini,wg-keys): rename folders to match the name
+
 ### 2025.01.25
 
 #### @hertzg/wg-ini 0.1.2 (minor)
