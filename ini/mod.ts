@@ -41,7 +41,7 @@ import {
  * ```
  */
 export async function parseArray(
-  text: string
+  text: string,
 ): Promise<[string | null, string[][]][]> {
   const sections = await decodeText(text);
 
@@ -83,17 +83,18 @@ export async function parseArray(
  * ```
  */
 export async function stringifyArray(
-  array: [string | null, string[][]][]
+  array: [string | null, string[][]][],
 ): Promise<string> {
   const sections: IniSection[] = array
     .map(([sectionName, assigns]) => {
-      const section: IniLineSection | null =
-        sectionName == null ? null : { $section: sectionName };
+      const section: IniLineSection | null = sectionName == null
+        ? null
+        : { $section: sectionName };
 
       const entries: (IniLineAssign | IniLineTrailer)[] = assigns.map(
         ([key, value]) => ({
           $assign: [key, value],
-        })
+        }),
       );
       entries.push({ $trailer: "" });
 
@@ -137,7 +138,7 @@ export async function stringifyArray(
  * @returns
  */
 export async function parseObject(
-  text: string
+  text: string,
 ): Promise<Record<string, Record<string, unknown>>> {
   const sections = await parseArray(text);
 
@@ -184,21 +185,21 @@ export async function parseObject(
  * @returns {string} The INI string.
  */
 export async function stringifyObject(
-  obj: Record<string, Record<string, unknown>>
+  obj: Record<string, Record<string, unknown>>,
 ): Promise<string> {
   const array = Object.entries(obj).map(
     ([sectionName, entries]) =>
       [
         sectionName === "" ? null : sectionName,
         Object.entries(entries) as string[][],
-      ] satisfies [string | null, string[][]]
+      ] satisfies [string | null, string[][]],
   );
 
   return await stringifyArray(array);
 }
 
 export function decodeTextStream(
-  stream: ReadableStream<string>
+  stream: ReadableStream<string>,
 ): ReadableStream<IniSection> {
   return stream
     .pipeThrough(new TextLineStream())
@@ -211,7 +212,7 @@ async function decodeText(text: string): Promise<IniSection[]> {
 }
 
 export function encodeSectionStream(
-  stream: ReadableStream<IniSection>
+  stream: ReadableStream<IniSection>,
 ): ReadableStream<string> {
   return stream
     .pipeThrough(new IniSectionEncoderStream())
@@ -220,7 +221,7 @@ export function encodeSectionStream(
 
 async function encodeString(sections: IniSection[]): Promise<string> {
   const lines = await Array.fromAsync(
-    encodeSectionStream(ReadableStream.from(sections))
+    encodeSectionStream(ReadableStream.from(sections)),
   );
   return lines.join("\n");
 }

@@ -16,7 +16,9 @@ for (const denoJson of await denoJsonList) {
   const dependency = imports[denoJson.name];
 
   if (!dependency) {
-    console.warn(`check_import_map: No import map entry found for ${denoJson.name}`);
+    console.warn(
+      `check_import_map: No import map entry found for ${denoJson.name}`,
+    );
     failed = true;
     continue;
   }
