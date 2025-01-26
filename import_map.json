@@ -4,8 +4,8 @@
     "@std/streams": "jsr:@std/streams@^1.0.8",
     "@noble/curves": "jsr:@noble/curves@^1.8.1",
     "@noble/curves/ed25519": "jsr:@noble/curves@^1.8.1/ed25519",
-    "@hertzg/wg-keys": "jsr:@hertzg/wg-keys@^0.1.2",
-    "@hertzg/wg-ini": "jsr:@hertzg/wg-ini@^0.1.2",
-    "@hertzg/wg-conf": "jsr:@hertzg/wg-conf@^0.1.2"
+    "@hertzg/wg-keys": "jsr:@hertzg/wg-keys@^0.1.4",
+    "@hertzg/wg-ini": "jsr:@hertzg/wg-ini@^0.1.4",
+    "@hertzg/wg-conf": "jsr:@hertzg/wg-conf@^0.1.4"
   }
 }
