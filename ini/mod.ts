@@ -1,179 +1,225 @@
-/**
- * This module provides functions to parse and stringify wireguard configuration files.
- *
- * ```typescript
- * import { parse, stringify } from "@hertzg/wg-ini";
- * import { assertEquals } from "@std/assert";
- *
- * const str = `
- * [Interface]
- * PrivateKey = A
- * Address = 10.0.0.1/24
- *
- * [Peer]
- * PublicKey = B
- * AllowedIPs = 10.0.0.2/32
- *
- * [Peer]
- * PublicKey = C
- * AllowedIPs = 10.0.0.3/32
- * `;
- *
- * assertEquals(parse(str), [
- *  { section: null, entries: [], trailer: "" },
- *  { section: "Interface", entries: [["PrivateKey", "A", ""], ["Address", "10.0.0.1/24", ""]], trailer: "" },
- *  { section: "Peer", entries: [["PublicKey", "B", ""], ["AllowedIPs", "10.0.0.2/32", ""]], trailer: "" },
- *  { section: "Peer", entries: [["PublicKey", "C", ""], ["AllowedIPs", "10.0.0.3/32", ""]], trailer: "" }
- * ])
- *
- * ```
- *
- * @module
- */
-function lineType(
-  line: string,
-): "comment" | "section-start" | "key-value" | "other" {
-  if (line.startsWith("[")) {
-    return "section-start";
-  } else if (line.includes("=")) {
-    return "key-value";
-  } else if (line.trim().startsWith(";")) {
-    return "comment";
-  } else {
-    return "other";
-  }
-}
+import { TextLineStream } from "@std/streams";
+import {
+  type IniLineAssign,
+  IniLineDecoderStream,
+  IniLineEncoderStream,
+  type IniLineSection,
+  type IniLineTrailer,
+} from "./lines.ts";
+import {
+  type IniSection,
+  IniSectionDecoderStream,
+  IniSectionEncoderStream,
+} from "./sections.ts";
 
 /**
- * Section entry in an INI file. Can be a string if it's a comment or a 3 element array if it's a key-value-trailer pair.
- * trailer = comment in most cases.
+ * Utility function to parse an INI string into an array of sections.
+ * Since it returns an array, it supports duplicate keys and sections.
+ * This is the reverse of {@link stringifyArray}.
  *
- * @see {@link IniEntry} for more information on how this is used in the context of an INI file.
- */
-export type Entry = [string, string, string] | string;
-
-/**
- * The sectioned entry in an INI file, with a section name, entries and a trailer that the section header might have had.
- * Entries array can be an array of array or array of string. If it's a string, it's a comment or non key-value pair.
- *
- * @see {@link Entry} for more information on how this is used in the context of an INI file.
- */
-export type IniEntry = {
-  section: string | null;
-  entries: Entry[];
-  trailer: string;
-};
-
-/**
- * Parses an INI file text into an array of IniEntry objects.
- *
- * If the line starts with a `[`, it's considered a section start.
- * If the line contains a `=`, it's considered a key-value pair in the current section.
- * If the line is neither of the above, it's considered a comment.
- *
- * Since the section names can be repeated, the parsed object is an array of IniEntry objects
- * instead of a single object with section names as keys.
+ * Returns an array of sections, each section is represented by a tuple of section name and an array of key-value pairs.
+ * If section name is `null`, it represents the global section. Order of sections is preserved.
  *
  * @example
  * ```ts
- * import { parse } from "@hertzg/wg-ini";
+ * import { parseArray } from "@hertzg/wg-ini";
  * import { assertEquals } from "@std/assert";
  *
- * const text = `
- * [Interface]
- * PrivateKey = ... ; This is a private key
+ * const text = [
+ *   "global_key=global_value",
+ *   "",
+ *   "[mysection]",
+ *   "key1=1",
+ *   "key2=2",
+ *   "",
+ * ].join("\n")
  *
- * [Peer]
- * PublicKey = ... ; This is a public key
- *
- * [Peer] ; This is another peer
- * PublicKey = ... ; This is another public key
- * `;
- *
- * assertEquals(parse(text), [
- *  { section: null, entries: [], trailer: "" },
- *  { section: "Interface", entries: [["PrivateKey", "...", " This is a private key"]], trailer: "" },
- *  { section: "Peer", entries: [["PublicKey", "...", " This is a public key"]], trailer: "" },
- *  { section: "Peer", entries: [["PublicKey", "...", " This is another public key"]], trailer: " ; This is another peer" }
+ * assertEquals(await parseArray(text), [
+ *  [null, [["global_key", "global_value"]]],
+ *  ["mysection", [["key1", "1"], ["key2", "2"]]],
  * ]);
  * ```
  */
-export function parse(text: string): IniEntry[] {
-  const lines = text.split("\n");
+export async function parseArray(
+  text: string,
+): Promise<[string | null, string[][]][]> {
+  const sections = await decodeText(text);
 
-  const parsed: IniEntry[] = [{ section: null, entries: [], trailer: "" }];
-  let index = 0;
-  for (let i = 0; i < lines.length; i++) {
-    const line = lines[i];
-    const type = lineType(line);
+  return sections.map((section) => {
+    const entries = section.entries
+      .filter((entry) => "$assign" in entry)
+      .map((entry) => entry.$assign as string[]);
 
-    switch (type) {
-      case "key-value":
-        {
-          const [key, ...rest] = line.split("=");
-          const [value, ...trailers] = rest.join("=").split(";");
-          parsed[index].entries.push([
-            key.trim(),
-            value.trim(),
-            trailers.join(";"),
-          ]);
-        }
-        break;
-
-      case "comment":
-        {
-          parsed[index].entries.push(line.trim());
-        }
-        break;
-
-      case "section-start":
-        {
-          index++;
-          const indexOfNameEnd = line.indexOf("]");
-          const section = line.slice(1, indexOfNameEnd);
-          const trailer = line.slice(indexOfNameEnd + 1);
-          parsed[index] = { section: section, entries: [], trailer };
-        }
-        break;
-    }
-  }
-
-  return parsed;
+    return [section.section?.$section ?? null, entries];
+  });
 }
 
 /**
- * Does the opposite of {@link parse}. Converts an array of IniEntry objects into an INI file text.
- * Albeit, the output might not be exactly the same as the input, it should be semantically equivalent
- * and parsable by {@link parse} as well as wireguard.
+ * Utility function to convert an array of sections to an INI string.
+ * Since it takes an array, it supports duplicate keys and sections.
+ * This is the reverse of {@link parseArray}.
  *
- * @param {IniEntry[]} parsed - The parsed INI file text.
- * @returns {string} - The INI file text.
+ * Takes an array of sections, each section must be represented by a tuple of section name and an array of key-value pairs.
+ * If section name is `null`, it's considered as the global section. Order of sections is preserved except for the global section which is always first.
+ *
+ * @example
+ * ```ts
+ * import { stringifyArray } from "@hertzg/wg-ini";
+ * import { assertEquals } from "@std/assert";
+ *
+ * const array = [
+ *  [null, [["global_key_null", "global_value"]]],
+ *  ["mysection", [["key1", "1"], ["key2", "2"]]],
+ * ] as any;
+ *
+ * assertEquals(await stringifyArray(array), [
+ *  "global_key_null=global_value",
+ *  "",
+ *  "[mysection]",
+ *  "key1=1",
+ *  "key2=2",
+ *  "",
+ * ].join("\n"));
+ * ```
  */
-export function stringify(parsed: IniEntry[]): string {
-  const text = parsed
-    .filter(
-      (iniEntry) =>
-        iniEntry.section != null ||
-        iniEntry.entries.length > 0 ||
-        iniEntry.trailer.length > 0,
-    )
-    .map(({ section, entries, trailer }, index, array) => {
-      const block: string[] = [];
+export async function stringifyArray(
+  array: [string | null, string[][]][],
+): Promise<string> {
+  const sections: IniSection[] = array.map(([sectionName, assigns]) => {
+    const section: IniLineSection | null = sectionName == null
+      ? null
+      : { $section: sectionName };
 
-      const sectionHeader = `[${section}]`;
-      block.push(
-        section != null ? `${sectionHeader}${trailer ?? ""}` : trailer ?? "",
-      );
+    const entries: (IniLineAssign | IniLineTrailer)[] = assigns.map((
+      [key, value],
+    ) => ({
+      $assign: [key, value],
+    }));
+    entries.push({ $trailer: "" });
 
-      for (const [key, value, trailer] of entries) {
-        block.push(`${key} = ${value}${trailer ?? ""}`);
-      }
+    return { section, entries };
+  }).sort((a, b) => {
+    if (a.section === null) return -1;
+    if (b.section === null) return 1;
+    return 0;
+  });
 
-      if (index !== array.length - 1) {
-        block.push("");
-      }
-      return block.join("\n");
-    })
-    .join("\n");
-  return text;
+  return await encodeString(sections);
+}
+
+/**
+ * Utility function to parse an INI string into an object.
+ * Since it returns an object, it does not support duplicate keys or sections.
+ * This is the reverse of {@link stringifyObject} and uses {@link parseArray} under the hood.
+ *
+ * @example
+ * ```ts
+ * import { parseObject } from "@hertzg/wg-ini";
+ * import { assertEquals } from "@std/assert";
+ *
+ * const text = [
+ *   "global_key=global_value",
+ *   "",
+ *   "[mysection]",
+ *   "key1=1",
+ *   "key2=2",
+ *   "",
+ * ].join("\n")
+ *
+ * assertEquals(await parseObject(text), {
+ *  "": { global_key: "global_value" },
+ *  mysection: { key1: "1", key2: "2" },
+ * });
+ * ```
+ *
+ * @param text
+ * @returns
+ */
+export async function parseObject(
+  text: string,
+): Promise<Record<string, Record<string, unknown>>> {
+  const sections = await parseArray(text);
+
+  const obj: Record<string, Record<string, string>> = {};
+  for (const [sectionName, assigns] of sections) {
+    const entries: Record<string, string> = {};
+    for (const [key, value] of assigns) {
+      entries[key] = value;
+    }
+    obj[sectionName ?? ""] = entries;
+  }
+
+  return obj;
+}
+
+/**
+ * Utility function to convert an object to an INI string.
+ * Since it takes an object, it does not support duplicate keys or sections.
+ * This is the reverse of {@link parseObject} and uses {@link stringifyArray} under the hood.
+ *
+ * Global properties are represented by an empty string key.
+ *
+ * @example
+ * ```ts
+ * import { stringifyObject } from "@hertzg/wg-ini";
+ * import { assertEquals } from "@std/assert";
+ *
+ * const obj = {
+ *  "": { global_key: "global_value" },
+ *  mysection: { key1: "1", key2: "2" },
+ * };
+ *
+ * assertEquals(await stringifyObject(obj), [
+ *   "global_key=global_value",
+ *   "",
+ *   "[mysection]",
+ *   "key1=1",
+ *   "key2=2",
+ *   "",
+ * ].join("\n"));
+ * ```
+ *
+ * @param {Record<string, Record<string, unknown>>} obj - The object to convert to an INI string.
+ * @returns {string} The INI string.
+ */
+export async function stringifyObject(
+  obj: Record<string, Record<string, unknown>>,
+): Promise<string> {
+  const array = Object.entries(obj)
+    .map(([sectionName, entries]) =>
+      [
+        sectionName === "" ? null : sectionName,
+        Object.entries(entries) as string[][],
+      ] satisfies [string | null, string[][]]
+    );
+
+  return await stringifyArray(array);
+}
+
+export function decodeTextStream(
+  stream: ReadableStream<string>,
+): ReadableStream<IniSection> {
+  return stream.pipeThrough(new TextLineStream())
+    .pipeThrough(new IniLineDecoderStream())
+    .pipeThrough(new IniSectionDecoderStream());
+}
+
+async function decodeText(text: string): Promise<IniSection[]> {
+  return await Array.fromAsync(decodeTextStream(ReadableStream.from([text])));
+}
+
+export function encodeSectionStream(
+  stream: ReadableStream<IniSection>,
+): ReadableStream<string> {
+  return stream.pipeThrough(new IniSectionEncoderStream())
+    .pipeThrough(new IniLineEncoderStream());
+}
+
+async function encodeString(
+  sections: IniSection[],
+): Promise<string> {
+  const lines = await Array.fromAsync(
+    encodeSectionStream(ReadableStream.from(sections)),
+  );
+  return lines.join("\n");
 }
