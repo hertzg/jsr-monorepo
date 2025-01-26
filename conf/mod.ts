@@ -120,7 +120,7 @@ export async function parse(text: string): Promise<WGQuickConf> {
                 break;
             }
             return acc;
-          }, {} as WGQuickPeer)
+          }, {} as WGQuickPeer),
         );
         break;
     }
@@ -221,8 +221,8 @@ export async function stringify(conf: WGQuickConf): Promise<string> {
       ([section, entries]) =>
         [section, entries.map(([key, value]) => [`${key} `, ` ${value}`])] as [
           string | null,
-          string[][]
-        ]
-    )
+          string[][],
+        ],
+    ),
   );
 }
