@@ -1,10 +1,9 @@
 {
-  "imports": {
-    "@std/assert": "jsr:@std/assert@1"
-  },
+  "importMap": "./import_map.json",
   "tasks": {
     "test": "deno test --doc --allow-all --parallel --coverage --trace-leaks --clean",
-    "lint": "deno lint",
+    "lint": "deno lint && deno task lint:import-map",
+    "lint:import-map": "deno run -A _tools/check_import_map.ts",
     "cov": "deno coverage --ignore=\"**/*.generated.mjs,**/_test_utils.ts,.github\"",
     "cov:gen": "deno task cov --lcov --output=cov.lcov",
     "cov:view": "deno task cov --html"
@@ -17,6 +16,7 @@
   ],
   "workspace": [
     "./keys",
-    "./ini"
+    "./ini",
+    "./conf"
   ]
 }
