@@ -34,6 +34,9 @@ jobs:
         run: sudo apt-get install -y wireguard-tools
         if: ${{ matrix.os == 'ubuntu-latest' }}
 
+      - name: Publish dry run
+        run: deno publish --dry-run
+
       - name: Run tests
         run: |
           deno task test
@@ -48,9 +51,6 @@ jobs:
           CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
         with:
           name: ${{ matrix.os }}-${{ matrix.deno }}
-
-      - name: Publish dry run
-        run: deno publish --dry-run
 
   lint:
     runs-on: ${{ matrix.os }}
