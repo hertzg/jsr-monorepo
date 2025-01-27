@@ -47,7 +47,7 @@ async function fetchOauth(
   type: keyof typeof DEFAULTS,
   subUrl: URL | string,
   init: RequestInit = {},
-  options: FetchOauthOptions = {}
+  options: FetchOauthOptions = {},
 ) {
   const {
     fetch = globalThis.fetch,
@@ -71,7 +71,7 @@ async function fetchOauth(
 async function oauthGrant(
   type: keyof typeof DEFAULTS,
   formdata: Record<string, string>,
-  options: FetchOauthOptions = {}
+  options: FetchOauthOptions = {},
 ) {
   const { url, grantType, clientId } = DEFAULTS[type];
 
@@ -92,20 +92,20 @@ async function oauthGrant(
       },
       body: body.toString(),
     },
-    options
+    options,
   );
 }
 
 export type FetchTokenRequest =
   | {
-      type: "login";
-      username: string;
-      password: string;
-    }
+    type: "login";
+    username: string;
+    password: string;
+  }
   | {
-      type: "refresh";
-      refreshToken: string;
-    };
+    type: "refresh";
+    refreshToken: string;
+  };
 
 export interface GenericErrorResponse {
   error: string;
@@ -127,19 +127,19 @@ export interface TokenInfo {
 
 export type LoginResult =
   | {
-      result: "error";
-      statusCode: number;
-      data: GenericErrorResponse;
-    }
+    result: "error";
+    statusCode: number;
+    data: GenericErrorResponse;
+  }
   | {
-      result: "success";
-      statusCode: number;
-      data: TokenInfo;
-    };
+    result: "success";
+    statusCode: number;
+    data: TokenInfo;
+  };
 
 export async function fetchToken(
   request: FetchTokenRequest,
-  options: FetchOauthOptions = {}
+  options: FetchOauthOptions = {},
 ): Promise<LoginResult> {
   let response;
   switch (request.type) {
@@ -150,7 +150,7 @@ export async function fetchToken(
           username: request.username,
           password: request.password,
         },
-        options
+        options,
       );
       break;
     case "refresh":
@@ -159,7 +159,7 @@ export async function fetchToken(
         {
           refresh_token: request.refreshToken,
         },
-        options
+        options,
       );
       break;
   }

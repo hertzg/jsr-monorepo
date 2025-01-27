@@ -1,10 +1,10 @@
 import { afterEach, beforeEach, describe, it } from "@std/testing/bdd";
 import {
+  assertSpyCallAsync,
+  assertSpyCalls,
+  resolvesNext,
   type Stub,
   stub,
-  resolvesNext,
-  assertSpyCalls,
-  assertSpyCallAsync,
 } from "@std/testing/mock";
 import { DEFAULT_USER_AGENT, DEFAULTS, fetchToken } from "./oauth.ts";
 import { assertEquals } from "@std/assert";
@@ -38,7 +38,7 @@ describe("oauth", () => {
           status: 200,
           json: resolvesNext([FAKE_TOKEN_INFO]),
         } as unknown as Response,
-      ])
+      ]),
     );
   });
 
@@ -58,7 +58,7 @@ describe("oauth", () => {
       },
       {
         fetch: fetchStub,
-      }
+      },
     );
 
     assertSpyCalls(fetchStub, 1);
