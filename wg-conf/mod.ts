@@ -42,6 +42,9 @@ export interface WGQuickConf {
  *  '',
  *  '[Peer]',
  *  'PublicKey = PUB',
+ *  '',
+ * '[Peer]',
+ *  'PublicKey = PUB2',
  *  ''
  * ].join("\n");
  *
@@ -52,6 +55,7 @@ export interface WGQuickConf {
  *  },
  *  Peers: [
  *    {PublicKey: "PUB"},
+ *    {PublicKey: "PUB2"},
  *  ],
  * });
  * ```
@@ -120,7 +124,7 @@ export async function parse(text: string): Promise<WGQuickConf> {
                 break;
             }
             return acc;
-          }, {} as WGQuickPeer),
+          }, {} as WGQuickPeer)
         );
         break;
     }
@@ -143,6 +147,7 @@ export async function parse(text: string): Promise<WGQuickConf> {
  *  },
  *  Peers: [
  *    {PublicKey: "PUB"},
+ *    {PublicKey: "PUB2"},
  *  ],
  * };
  *
@@ -153,6 +158,9 @@ export async function parse(text: string): Promise<WGQuickConf> {
  *  '',
  *  '[Peer]',
  *  'PublicKey = PUB',
+ *  '',
+ *  '[Peer]',
+ *  'PublicKey = PUB2',
  *  ''
  * ].join("\n"));
  * ```
@@ -221,8 +229,8 @@ export async function stringify(conf: WGQuickConf): Promise<string> {
       ([section, entries]) =>
         [section, entries.map(([key, value]) => [`${key} `, ` ${value}`])] as [
           string | null,
-          string[][],
-        ],
-    ),
+          string[][]
+        ]
+    )
   );
 }
