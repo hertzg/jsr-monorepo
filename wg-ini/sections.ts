@@ -12,7 +12,7 @@ export type IniSection = {
 };
 
 /**
- * A transform stream that decodes structured line objects of an INI file (from {@link IniLineDecoderStream}) further into sections and their entries.
+ * A transform stream that decodes structured line objects of an INI file further into sections and their entries.
  * This builds upon the ini line decoder and groups lines into sections.
  *
  * The root section is represented by `null`, it is only emitted if there are entries in it otherwise empty root section is not emitted.
@@ -90,7 +90,7 @@ export class IniSectionDecoderStream
 }
 
 /**
- * A transform stream that encodes structured sections of an INI file (from {@link IniSectionDecoderStream}) back into structured ini line objects (for {@link IniLineEncoderStream}).
+ * A transform stream that encodes structured sections of an INI file (from {@link IniSectionDecoderStream}) back into structured ini line objects.
  *
  * @example
  * ```ts
