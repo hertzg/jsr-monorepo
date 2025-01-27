@@ -1,5 +1,21 @@
 ### 2025.01.27
 
+#### @hertzg/bx 3.0.1 (major)
+
+- feat(bx): import bx package
+- chore(bx,mymagti-api): add to import_map.json
+- chore(bx): fix module graph was expcluded error
+- chore(mymagti-api,bx): add to labeler
+
+#### @hertzg/mymagti-api 0.0.4 (patch)
+
+- feat(mymagti-api): import mymagti-api project
+- chore(bx,mymagti-api): add to import_map.json
+- chore(mymagti-api,bx): add to labeler
+- chore(mymagti-api): deno fmt
+
+### 2025.01.27
+
 #### @hertzg/wg-conf 0.1.7 (patch)
 
 - chore(*): remove submodules from importMap
