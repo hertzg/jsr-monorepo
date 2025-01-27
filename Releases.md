@@ -1,3 +1,9 @@
+### 2025.01.27
+
+#### @hertzg/wg-conf 0.1.5 (patch)
+
+- chore(wg-conf): improve the examples
+
 ### 2025.01.26
 
 #### @hertzg/wg-conf 0.1.4 (patch)
