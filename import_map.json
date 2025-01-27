@@ -4,6 +4,7 @@
     "@std/testing": "jsr:@std/testing@^1.0.9",
     "@std/testing/bdd": "jsr:@std/testing@^1.0.9/bdd",
     "@std/testing/mock": "jsr:@std/testing@^1.0.9/mock",
+    "@std/expect": "jsr:@std/expect@1.0.12",
     "@std/streams": "jsr:@std/streams@^1.0.8",
     "@noble/curves": "jsr:@noble/curves@^1.8.1",
     "@noble/curves/ed25519": "jsr:@noble/curves@^1.8.1/ed25519",

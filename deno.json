@@ -18,6 +18,7 @@
     "./wg-keys",
     "./wg-ini",
     "./wg-conf",
-    "./mymagti-api"
+    "./mymagti-api",
+    "./bx"
   ]
 }
