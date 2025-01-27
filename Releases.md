@@ -1,5 +1,21 @@
 ### 2025.01.27
 
+#### @hertzg/wg-conf 0.1.6 (patch)
+
+- chore(*): remove submodules from importMap
+
+#### @hertzg/wg-ini 0.1.6 (patch)
+
+- fix(wg-ini): use relative import within the same module
+- chore(wg-ini): deno fmt
+- chore(wg-ini): remove dead links from docs
+
+#### @hertzg/wg-keys 0.1.6 (patch)
+
+- chore(*): remove submodules from importMap
+
+### 2025.01.27
+
 #### @hertzg/wg-conf 0.1.5 (patch)
 
 - chore(wg-conf): improve the examples
