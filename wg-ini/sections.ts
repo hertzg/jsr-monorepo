@@ -62,8 +62,10 @@ export type IniSection = {
  * }]);
  * ```
  */
-export class IniSectionDecoderStream
-  extends TransformStream<IniLine, IniSection> {
+export class IniSectionDecoderStream extends TransformStream<
+  IniLine,
+  IniSection
+> {
   constructor() {
     let section: IniSection = { section: null, entries: [] };
     super({
@@ -136,8 +138,10 @@ export class IniSectionDecoderStream
  * ]);
  * ```
  */
-export class IniSectionEncoderStream
-  extends TransformStream<IniSection, IniLine> {
+export class IniSectionEncoderStream extends TransformStream<
+  IniSection,
+  IniLine
+> {
   constructor() {
     super({
       transform(
