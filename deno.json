@@ -17,6 +17,7 @@
   "workspace": [
     "./wg-keys",
     "./wg-ini",
-    "./wg-conf"
+    "./wg-conf",
+    "./mymagti-api"
   ]
 }

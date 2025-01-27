@@ -1,0 +1,8 @@
+{
+  "name": "@hertzg/mymagti-api",
+  "version": "0.0.4",
+  "exports": {
+    ".": "./mod.ts",
+    "./oauth": "./oauth/oauth.ts"
+  }
+}
