@@ -66,7 +66,6 @@ import BinaryWriter, { byteSetBit } from "./writer.ts";
  * assertEquals(seeker.bytes(3), new Uint8Array([0x01, 0x02, 0xff]));
  * assertEquals(seeker.bytes(), new Uint8Array([0x03, 0x04, 0xff]));
  *
- *
  * seeker.reset();
  * assertEquals(seeker.bytes(2), new Uint8Array([0x01, 0x02]));
  * assertEquals(seeker.skip(1).bytes(2), new Uint8Array([0x03, 0x04]));
