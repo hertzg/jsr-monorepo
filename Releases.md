@@ -1,3 +1,10 @@
+### 2025.03.09
+
+#### @hertzg/binseek 0.0.1 (patch)
+
+- feat(binseek): initial release
+- chore(binseek): format
+
 ### 2025.01.27
 
 #### @hertzg/bx 3.0.1 (major)
