@@ -1,5 +1,11 @@
 ### 2025.03.09
 
+#### @hertzg/binseek 0.0.2 (patch)
+
+- fix(binseek): relative imports in code
+
+### 2025.03.09
+
 #### @hertzg/binseek 0.0.1 (patch)
 
 - feat(binseek): initial release
