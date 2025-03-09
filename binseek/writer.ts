@@ -18,7 +18,7 @@
  * All 64-bit integer methods work with a {@link bigint}.
  */
 
-import BinarySeeker from "@hertzg/binseek/seeker";
+import BinarySeeker from "./seeker.ts";
 
 /**
  * Sets the bit at the specified index in the byte to the specified value.

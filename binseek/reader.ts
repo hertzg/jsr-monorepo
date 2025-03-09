@@ -124,7 +124,7 @@
  * @module reader
  */
 
-import BinarySeeker from "@hertzg/binseek/seeker";
+import BinarySeeker from "./seeker.ts";
 
 /**
  * Retrieves the bit value at a specific index from a given byte.
