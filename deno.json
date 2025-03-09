@@ -15,6 +15,7 @@
     "docs"
   ],
   "workspace": [
+    "./binseek",
     "./wg-keys",
     "./wg-ini",
     "./wg-conf",
