@@ -20,38 +20,7 @@
 
 import BinarySeeker from "./seeker.ts";
 
-/**
- * Sets the bit at the specified index in the byte to the specified value.
- *
- * @example
- * ```ts
- * import { byteSetBit } from "@hertzg/binseek/writer";
- * import { assertEquals } from "@std/assert";
- *
- * const byte = 0b10101010;
- *
- * assertEquals(byte.toString(2).padStart(8, '0'), '10101010');
- *
- * let result = byteSetBit(byte, 0, 1);
- * result = byteSetBit(result, 1, 0);
- * result = byteSetBit(result, 2, 1);
- * result = byteSetBit(result, 3, 0);
- * result = byteSetBit(result, 4, 1);
- * result = byteSetBit(result, 5, 0);
- * result = byteSetBit(result, 6, 1);
- * result = byteSetBit(result, 7, 0);
- *
- * assertEquals(result.toString(2).padStart(8, '0'), '01010101');
- * ```
- *
- * @param byte - The byte to set the bit in.
- * @param index - The index of the bit to set (0 for the least significant bit, up to 7).
- * @param value - The value to set the bit to (0 or 1).
- * @returns The byte with the bit set.
- */
-export function byteSetBit(byte: number, index: number, value: number): number {
-  return (byte & ~(1 << index)) | ((value != 0 ? 1 : 0) << index);
-}
+import { writeBit } from "./mod.ts";
 
 /**
  * BinaryWriter for writing binary data to a buffer.
@@ -137,7 +106,7 @@ export default class BinaryWriter {
   b8(value: number[]): this {
     const bits = Array.from({ length: 8 }, (_, index) => value[index] ?? 0);
     const byte = bits.reduce(
-      (acc, bit, index) => byteSetBit(acc, index, bit),
+      (acc, bit, index) => writeBit(acc, index, bit),
       0,
     );
     return this.u8(byte);

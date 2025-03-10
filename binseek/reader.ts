@@ -126,33 +126,7 @@
 
 import BinarySeeker from "./seeker.ts";
 
-/**
- * Retrieves the bit value at a specific index from a given byte.
- *
- * @example
- * ```ts
- * import { byteGetBit } from "@hertzg/binseek/reader";
- * import { assertEquals } from "@std/assert";
- *
- * const byte = 0b10000001;
- *
- * assertEquals(byteGetBit(byte, 0), 1);
- * assertEquals(byteGetBit(byte, 1), 0);
- * assertEquals(byteGetBit(byte, 2), 0);
- * assertEquals(byteGetBit(byte, 3), 0);
- * assertEquals(byteGetBit(byte, 4), 0);
- * assertEquals(byteGetBit(byte, 5), 0);
- * assertEquals(byteGetBit(byte, 6), 0);
- * assertEquals(byteGetBit(byte, 7), 1);
- * ```
- *
- * @param {number} byte - The byte from which to extract the bit.
- * @param {number} index - The bit position (0 for least significant bit, up to 7).
- * @returns {number} The bit value (0 or 1) at the specified index.
- */
-export function byteGetBit(byte: number, index: number): number {
-  return (byte & (1 << index)) >> index;
-}
+import { readBit } from "./mod.ts";
 
 /**
  * BinaryReader for reading binary data with a seekable cursor.
@@ -231,7 +205,7 @@ export default class BinaryReader {
    */
   b8(): number[] {
     const byte = this.u8();
-    return Array.from({ length: 8 }, (_, index) => byteGetBit(byte, index));
+    return Array.from({ length: 8 }, (_, index) => readBit(byte, index));
   }
 
   /**

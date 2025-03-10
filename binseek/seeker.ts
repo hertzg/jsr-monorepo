@@ -37,6 +37,8 @@
  * @module seeker
  */
 
+import { asBytes, asView } from "./util.ts";
+
 /**
  * BinarySeeker for navigating a binary buffer.
  * Seek and Peek methods return a view into the buffer without copying the data see {@link Uint8Array.prototype.subarray}.
@@ -163,12 +165,7 @@ export default class BinarySeeker {
    * @returns {Uint8Array} subarray of the buffer.
    */
   peekBytes(offset?: number, length?: number): Uint8Array {
-    const _offset = this.#buffer.byteOffset + (offset ?? this.#cursor);
-    return new Uint8Array(
-      this.#buffer.buffer,
-      _offset,
-      length ?? this.#buffer.byteLength,
-    );
+    return asBytes(this.#buffer, offset ?? this.#cursor, length);
   }
 
   /**
@@ -229,8 +226,7 @@ export default class BinarySeeker {
    * @returns {DataView} representing the slice.
    */
   peekView(offset?: number, length?: number): DataView {
-    const buffer = this.peekBytes(offset, length);
-    return new DataView(buffer.buffer, buffer.byteOffset, buffer.byteLength);
+    return asView(this.#buffer, offset ?? this.#cursor, length);
   }
 
   /**

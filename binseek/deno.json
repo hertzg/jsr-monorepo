@@ -5,7 +5,8 @@
     ".": "./mod.ts",
     "./seeker": "./seeker.ts",
     "./reader": "./reader.ts",
-    "./writer": "./writer.ts"
+    "./writer": "./writer.ts",
+    "./view": "./view.ts"
   },
   "include": [
     "mod.ts"
