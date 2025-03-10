@@ -1,5 +1,11 @@
 ### 2025.03.10
 
+#### @hertzg/binseek 0.0.4 (patch)
+
+- feat(binseek): improvements for the BinaryView
+
+### 2025.03.10
+
 #### @hertzg/binseek 0.0.3 (patch)
 
 - feat(binseek): implement BinaryView
