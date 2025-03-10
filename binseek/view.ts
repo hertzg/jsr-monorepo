@@ -61,13 +61,52 @@ const dataViewMethods = Object.seal({
 
 /**
  * A class similar to DataView that allows reading and writing binary data with a seekable cursor.
+ * To read data from the buffer, use the {@link BinaryView.get} method and to write data to the buffer, use the
+ * {@link BinaryView.set} method.
+ *
+ * The cursor is automatically moved to the next position after reading or writing data. The cursor can be reset to the
+ * beginning of the buffer using the {@link BinaryView.reset} method or moved to a position relative to the current
+ * position using the {@link BinaryView.seek} method.
+ *
+ * The {@link BinaryView.get} and {@link BinaryView.set} methods support reading and writing of the following data types:
+ * - Unsigned integers: 8, 16, 32, 64 bits
+ * - Signed integers: 8, 16, 32, 64 bits
+ * - Floating point numbers: 16, 32, 64 bits
+ * - Bit arrays: 8 bits
+ * - Byte arrays: any number of bytes
+ *
+ * Those methods sometimes take a `format` string that specifies the type of data to read or write. The format string
+ * is in the following format `"<type><byteLength><endianness>"`. Endianness is optional and defaults to big-endian (be).
+ *
+ * Available format are defined in the {@link BitFormats}, {@link NumberFormats}, and {@link BigIntFormats} types.
+ *
+ * Explanation of the format string: `${type}${bitLength}${endianess}`
+ * - `u` - Unsigned integer
+ * - `s` - Signed integer
+ * - `f` - Floating point number
+ * - `8`, `16`, `32`, `64` - Number of bits
+ * - `be`, `le` - Big endian or little endian
+ *
+ * Examples:
+ * - `b8` - Array of 8 bits (1 byte)
+ * - `u8` - Unsigned 8-bit integer
+ * - `u64` - Unsigned 64-bit integer (big endian by default)
+ * - `u64le` - Unsigned 64-bit integer in little endian
+ * - `s16` - Signed 16-bit integer (big endian by default)
+ * - `s16be` - Signed 16-bit integer in big endian
+ * - `f32` - 32-bit floating point number
+ * - `f64le` - 64-bit floating point number in little endian
  *
  * @example
  * ```ts
  * import BinaryView from "@hertzg/binseek/view";
  * import { assertEquals } from "@std/assert";
  *
- * const buffer = new Uint8Array([0xf1, 0xf2, 0xf3, 0xf4, 0xf5, 0xf6, 0xf7, 0xf8, 0xf9, 0xfa, 0xfb, 0xfc, 0xfd, 0xfe, 0xff]);
+ * const buffer = new Uint8Array([
+ *   0xf1, 0xf2, 0xf3, 0xf4, 0xf5, 0xf6, 0xf7, 0xf8,
+ *   0xf9, 0xfa, 0xfb, 0xfc, 0xfd, 0xfe, 0xff
+ * ]);
+ *
  * const view = new BinaryView(buffer);
  *
  * assertEquals(view.get('u8'), 0xf1);
@@ -82,42 +121,112 @@ const dataViewMethods = Object.seal({
  *       .set(0x04050607, 'u32')
  *       .set(0x08090a0b0c0d0e0fn, 'u64')
  *       .reset().get(),
- *   new Uint8Array([0x01, 0x02, 0xf3, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09, 0x0a, 0x0b, 0x0c, 0x0d, 0x0e, 0x0f])
+ *   new Uint8Array([
+ *     0x01, 0x02, 0xf3, 0x04, 0x05, 0x06, 0x07, 0x08,
+ *     0x09, 0x0a, 0x0b, 0x0c, 0x0d, 0x0e, 0x0f
+ *   ])
  * );
  *
- * assertEquals(buffer, new Uint8Array([0x01, 0x02, 0xf3, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09, 0x0a, 0x0b, 0x0c, 0x0d, 0x0e, 0x0f]));
+ * assertEquals(buffer, new Uint8Array([
+ *    0x01, 0x02, 0xf3, 0x04, 0x05, 0x06, 0x07, 0x08,
+ *    0x09, 0x0a, 0x0b, 0x0c, 0x0d, 0x0e, 0x0f
+ * ]));
  * ```
  */
 export default class BinaryView {
   #buffer: Uint8Array;
   #cursor = 0;
 
+  /**
+   * Creates a new BinaryView instance with the given buffer.
+   * The cursor is set to the beginning of the buffer, respecting the byteOffset of the buffer.
+   *
+   * @param buffer
+   */
   constructor(buffer: Uint8Array) {
     this.#buffer = buffer;
   }
 
+  /**
+   * The buffer that the view is reading from.
+   */
   get buffer(): Uint8Array {
     return this.#buffer;
   }
 
+  /**
+   * The current position of the cursor in the buffer.
+   */
   get cursor(): number {
     return this.#cursor;
   }
 
+  /**
+   * The number of bytes left in the buffer from the cursor until the end of buffer.
+   */
   get bytesLeft(): number {
     return this.#buffer.byteLength - this.#cursor;
   }
 
+  /**
+   * Resets the cursor to the beginning of the buffer.
+   */
   reset(): this {
     this.#cursor = 0;
     return this;
   }
 
-  advance(offset: number): this {
-    this.#cursor += offset;
+  /**
+   * Moves the cursor by the given offset.
+   *
+   * @param bytes - The number of bytes to move the cursor by. Can be negative to move the cursor backwards.
+   * @throws {Error} If the new cursor position is out of bounds.
+   */
+  seek(bytes: number): this {
+    const cursor = this.#cursor + bytes;
+    if (cursor < 0 || cursor > this.#buffer.byteLength) {
+      throw new Error(
+        `seek: offset out of bounds: must be: 0 <= ${bytes} <= ${this.#buffer.byteLength}`,
+      );
+    }
+    this.#cursor = cursor;
     return this;
   }
 
+  /**
+   * Reads data from the buffer according to the given format and advances the cursor accordingly.
+   *
+   * Passing a number will return a Uint8Array view of the buffer starting from the current cursor position with the
+   * given number as the byte length.
+   *
+   * Passing a format string will return the data read from the buffer according to the format. The format string is in
+   * the following format `"<type><byteLength><endianness>"`. Endianness is optional and defaults to big-endian (be).
+   *
+   * Types of data that can be read:
+   * - `b` - Array of bits (1 byte)
+   * - `u` - Unsigned integer
+   * - `s` - Signed integer
+   * - `f` - Floating point number
+   *
+   * Byte length can be any of the following:
+   * - `8` - 1 byte - returns a number
+   * - `16` - 2 bytes - returns a number
+   * - `32` - 4 bytes - returns a number
+   * - `64` - 8 bytes - returns a number (floats) or bigint
+   *
+   * Endianness can be either (can be skipped all together):
+   * - `be` - Big endian (default)
+   * - `le` - Little endian
+   *
+   * Passing 0 arguments will return a Uint8Array view of the buffer starting from the current cursor position with the
+   * remaining bytes in the buffer.
+   *
+   * In all cases the underlying buffer is not copied, only a view is returned with adjusted byteOffset and byteLength.
+   *
+   * @param format - The format of the data to read.
+   * @throws {Error} If the format string is invalid.
+   * @throws {Error} If the cursor is out of bounds. See {@link BinaryView.seek}.
+   */
   get(format: BitFormats): number[];
   get(format: NumberFormats): number;
   get(format: BigIntFormats): bigint;
@@ -132,7 +241,7 @@ export default class BinaryView {
         this.#buffer.byteOffset + this.#cursor,
         byteLength,
       );
-      this.#cursor += byteLength;
+      this.seek(byteLength);
       return bytes;
     }
 
@@ -159,11 +268,45 @@ export default class BinaryView {
         this.#buffer.byteOffset + this.#cursor,
         byteLength,
       );
-      this.#cursor += byteLength;
+      this.seek(byteLength);
       return view[method](0, isLittle);
     }
   }
 
+  /**
+   * Writes the value to the buffer according to the given format and advances the cursor accordingly.
+   *
+   * Passing an array of numbers will write the array as a bit array to the buffer. The array must be an array of 8
+   * numbers representing the bits to write. Optionally, format can be set to "b8" but it is redundant.
+   *
+   * Passing a number or bigint will write the number to the buffer according to the format. The format string must be
+   * one of the formats defined in the {@link BinaryView.get} method.
+   *
+   * Passing a Uint8Array will write the array to the buffer. The entire array will be copied into the buffer.
+   *
+   * @example
+   * ```ts
+   * import BinaryView from "@hertzg/binseek/view";
+   * import { assertEquals } from "@std/assert";
+   *
+   * const buffer = new Uint8Array(4096);
+   * const view = new BinaryView(buffer);
+   *
+   * assertEquals(
+   *   view.set(42, 'u8')
+   *    .set(42, 'u16')
+   *    .set(42, 'u32')
+   *    .set(42n, 'u64')
+   *    .set([1, 0, 1, 0, 1, 0, 1, 0])
+   *    .set(new Uint8Array([1, 2, 3, 4, 5, 6, 7, 8]))
+   *    .reset().get()
+   *
+   * @param value - The data to write.
+   * @param format - The format of the data to write.
+   * @throws {Error} If the format string is invalid.
+   * @throws {Error} If the cursor is out of bounds. See {@link BinaryView.seek}.
+   * @returns {this} The instance of the BinaryView for chaining.
+   */
   set(value: number[], format?: BitFormats): this;
   set(value: number, format: NumberFormats): this;
   set(value: bigint, format: BigIntFormats): this;
@@ -174,7 +317,7 @@ export default class BinaryView {
   ): this {
     if (value instanceof Uint8Array) {
       this.#buffer.set(value, this.#cursor);
-      this.#cursor += value.byteLength;
+      this.seek(value.byteLength);
     } else if (Array.isArray(value)) {
       if (value.length !== 8) {
         throw new Error(
@@ -213,9 +356,47 @@ export default class BinaryView {
         value: bigint | number,
         little: boolean,
       ) => void)(0, value, isLittle);
-      this.#cursor += byteLength;
+      this.seek(byteLength);
     }
 
     return this;
+  }
+
+  /**
+   * Returns a view of the buffer from the byteOffset to the cursor. Useful for getting a view of the buffer that was
+   * read or written to up until the current cursor position.
+   *
+   * @example
+   * ```ts
+   * import BinaryView from "@hertzg/binseek/view";
+   * import { assertEquals } from "@std/assert";
+   *
+   * // Create a buffer big enough to hold all the data
+   * const buffer = new Uint8Array(4096);
+   * const view = new BinaryView(buffer);
+   *
+   * assertEquals(
+   *   view.set(42, 'u8')
+   *     .set(42, 'u16')
+   *     .set(42, 'u32')
+   *     .set(42n, 'u64')
+   *     .set([1, 0, 1, 0, 1, 0, 1, 0])
+   *     .set(new Uint8Array([1, 2, 3, 4, 5, 6, 7, 8]))
+   *     .bytes(),
+   *   new Uint8Array([
+   *      42, 0, 42, 0, 0, 0, 42, 0, 0, 0, 0, 0, 0, 0, 42,
+   *      170, 1, 2, 3, 4, 5, 6, 7, 8
+   *   ])
+   * );
+   * ```
+   *
+   * @returns {Uint8Array} A view of the buffer from the byteOffset to the cursor.
+   */
+  bytes(): Uint8Array {
+    return new Uint8Array(
+      this.#buffer.buffer,
+      this.#buffer.byteOffset,
+      this.#cursor,
+    );
   }
 }
