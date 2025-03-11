@@ -1,5 +1,12 @@
 ### 2025.03.11
 
+#### @hertzg/binseek 0.1.1 (patch)
+
+- chore(binseek): format
+- chore(binseek): test overflow cases
+
+### 2025.03.11
+
 #### @hertzg/binseek 0.1.0 (minor)
 
 - feat(binseek)!: shrink the module

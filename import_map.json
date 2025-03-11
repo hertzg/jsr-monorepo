@@ -8,7 +8,7 @@
     "@std/streams": "jsr:@std/streams@^1.0.8",
     "@noble/curves": "jsr:@noble/curves@^1.8.1",
     "@noble/curves/ed25519": "jsr:@noble/curves@^1.8.1/ed25519",
-    "@hertzg/binseek": "jsr:@hertzg/binseek@^0.1.0",
+    "@hertzg/binseek": "jsr:@hertzg/binseek@^0.1.1",
     "@hertzg/bx": "jsr:@hertzg/bx@^3.0.1",
     "@hertzg/mymagti-api": "jsr:@hertzg/mymagti-api@^0.0.4",
     "@hertzg/wg-keys": "jsr:@hertzg/wg-keys@^0.1.7",
