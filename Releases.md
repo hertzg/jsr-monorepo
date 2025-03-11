@@ -1,3 +1,10 @@
+### 2025.03.11
+
+#### @hertzg/binseek 0.1.0 (minor)
+
+- feat(binseek)!: shrink the module
+- fix(binseek): fix packaging
+
 ### 2025.03.10
 
 #### @hertzg/binseek 0.0.4 (patch)
