@@ -1,6 +1,6 @@
 // deno-lint-ignore-file no-explicit-any
 import { BinaryView } from "./mod.ts";
-import { assertEquals } from "@std/assert";
+import { assertEquals, assertThrows } from "@std/assert";
 
 // deno-fmt-ignore
 const DATA = [241, 242, 243, 244, 245, 246, 247, 248, 255, 255, 255, 255];
@@ -111,3 +111,22 @@ Deno.test("properties", () => {
   assertEquals(view.cursor, 4);
   assertEquals(view.bytesLeft, 8);
 });
+
+Deno.test('overflows', async (t) => {
+
+  await t.step('seek out of bounds', () => {
+    const view = new BinaryView(new Uint8Array(DATA));
+
+    assertThrows(() => view.seek(-1));
+    assertThrows(() => view.seek(DATA.length+1));
+
+    assertThrows(() => new BinaryView(new Uint8Array(0)).get(1));
+    assertThrows(() => new BinaryView(new Uint8Array(0)).set(1, 'u8'));
+  });
+
+  await t.step('invalid format', () => {
+    assertThrows(() => new BinaryView(new Uint8Array(10)).get('invalid' as any));
+    assertThrows(() => new BinaryView(new Uint8Array(10)).set(0, 'invalid' as any));
+  });
+
+})
