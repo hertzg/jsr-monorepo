@@ -98,7 +98,7 @@ Deno.test("read", async (t) => {
     ));
 });
 
-Deno.test("properties", async (t) => {
+Deno.test("properties", () => {
   const buffer = new Uint8Array(DATA);
   const view = new BinaryView(buffer);
 

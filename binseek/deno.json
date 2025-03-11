@@ -2,8 +2,7 @@
   "name": "@hertzg/binseek",
   "version": "0.0.4",
   "exports": {
-    ".": "./mod.ts",
-    "./view": "./view.ts"
+    ".": "./mod.ts"
   },
   "include": [
     "mod.ts"
