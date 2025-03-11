@@ -1,5 +1,5 @@
 // deno-lint-ignore-file no-explicit-any
-import BinaryView from "./view.ts";
+import { BinaryView } from "./mod.ts";
 import { assertEquals } from "@std/assert";
 
 // deno-fmt-ignore
@@ -96,4 +96,18 @@ Deno.test("read", async (t) => {
         0xff,
       ]).subarray(4, -4),
     ));
+});
+
+Deno.test("properties", async (t) => {
+  const buffer = new Uint8Array(DATA);
+  const view = new BinaryView(buffer);
+
+  assertEquals(view.buffer, buffer);
+
+  assertEquals(view.cursor, 0);
+  assertEquals(view.bytesLeft, 12);
+
+  view.seek(4);
+  assertEquals(view.cursor, 4);
+  assertEquals(view.bytesLeft, 8);
 });

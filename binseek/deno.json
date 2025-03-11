@@ -3,9 +3,6 @@
   "version": "0.0.4",
   "exports": {
     ".": "./mod.ts",
-    "./seeker": "./seeker.ts",
-    "./reader": "./reader.ts",
-    "./writer": "./writer.ts",
     "./view": "./view.ts"
   },
   "include": [
