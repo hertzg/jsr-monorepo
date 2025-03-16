@@ -1,6 +1,11 @@
 {
   "deno.enable": true,
+  "deno.lint": true,
+  "deno.config": "./deno.json",
   "editor.formatOnSave": true,
   "editor.defaultFormatter": "denoland.vscode-deno",
-  "files.insertFinalNewline": true
+  "files.insertFinalNewline": true,
+  "[typescript]": {
+    "editor.defaultFormatter": "denoland.vscode-deno"
+  }
 }
