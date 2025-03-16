@@ -1,6 +1,6 @@
 {
   "name": "@hertzg/wg-keys",
-  "version": "0.1.7",
+  "version": "1.0.0",
   "exports": "./mod.ts",
   "include": [
     "mod.ts"

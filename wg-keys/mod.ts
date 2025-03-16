@@ -9,7 +9,7 @@
  * import { assertExists, assertNotEquals } from "@std/assert";
  *
  * const privateKey = wgGenKey(); // returns string
- * const publicKey = wgPubKey(privateKey); // returns string
+ * const publicKey = await wgPubKey(privateKey); // returns string
  * const presharedKey = wgGenPsk(); // returns string
  *
  * assertExists(privateKey);
@@ -28,7 +28,7 @@
  * import { assertEquals, assertNotEquals } from "@std/assert";
  *
  * const privateKey = randomPrivateKeyBytes(); // returns Uint8Array
- * const publicKey = publicBytesFromPrivateBytes(privateKey); // returns Uint8Array
+ * const publicKey = await publicBytesFromPrivateBytes(privateKey); // returns Uint8Array
  * const presharedKey = randomPresharedKeyBytes(); // returns Uint8Array
  *
  * assertEquals(privateKey.length, 32);
@@ -41,9 +41,12 @@
  * ```
  *
  * ## OK, But Why?
- * Normally one can use {@link CryptoSubtle} to generate and export keys, but since in Deno `x25519` private key export
- * as `jwk` is not implemented, this module provides a workaround using @noble/curves package. See
- * [X25519 issue]({@link https://github.com/denoland/deno/issues/26431#issuecomment-2592044073 }) for more info.
+ * ℹ️ Since [deno v2.1.4](https://github.com/denoland/deno/issues/26431#issuecomment-2638264802) supports JWK export of
+ * x25519 private keys, this module has dropped the dependency on `@noble/curves` and uses `CryptoSubtle` directly.
+ * If you need to support older versions of Deno, you can use [wg-keys@0.1.7](https://jsr.io/@hertzg/wg-keys@0.1.7) version
+ * of this module
+ *
+ * See [X25519 issue](https://github.com/denoland/deno/issues/26431#issuecomment-2592044073) for more info.
  *
  * ## References
  * - [RFC 7748](https://datatracker.ietf.org/doc/html/rfc7748)
@@ -51,8 +54,8 @@
  *
  * @module
  */
-import { x25519 } from "@noble/curves/ed25519";
-import { Buffer } from "node:buffer";
+import { decodeBase64Url } from "@std/encoding/base64url";
+import { decodeBase64, encodeBase64 } from "@std/encoding/base64";
 
 /**
  * Generates __UNCLAMPED__ 32 bytes of random data.
@@ -97,6 +100,16 @@ export function randomPresharedKeyBytes(): Uint8Array {
   return randomBytes();
 }
 
+// deno-fmt-ignore
+const PKCS8_PREAMBLE = new Uint8Array([
+  0x30, 0x2e, // SEQUENCE(46)
+  0x02, 0x01, 0x00, // INTEGER(1) - version 0
+  0x30, 0x05, // SEQUENCE(5)
+    0x06, 0x03, 0x2b, 0x65, 0x6e, // OID: 1.3.101.110 (x25519)
+  0x04, 0x22, // OCTET STRING(34)
+  0x20, 0x04, // OCTET STRING(32): private key bytes follow 
+]);
+
 /**
  * Derives public key from private key using x25519 curve.
  *
@@ -105,10 +118,25 @@ export function randomPresharedKeyBytes(): Uint8Array {
  * @param {Uint8Array} privateKey private key bytes
  * @returns {Uint8Array} publicKey bytes
  */
-export function publicBytesFromPrivateBytes(
+export async function publicBytesFromPrivateBytes(
   privateKey: Uint8Array,
-): Uint8Array {
-  return x25519.scalarMultBase(privateKey);
+): Promise<Uint8Array> {
+  const pkcs8 = new Uint8Array(privateKey.length + 16);
+  pkcs8.set(
+    PKCS8_PREAMBLE,
+  );
+  pkcs8.set(privateKey, PKCS8_PREAMBLE.length);
+
+  const cryptoKey = await crypto.subtle.importKey(
+    "pkcs8",
+    pkcs8,
+    { name: "x25519" },
+    true,
+    ["deriveBits", "deriveKey"],
+  );
+
+  const jwk = await crypto.subtle.exportKey("jwk", cryptoKey);
+  return decodeBase64Url(jwk.x!);
 }
 
 /**
@@ -120,7 +148,7 @@ export function publicBytesFromPrivateBytes(
  * @returns {string} base64 encoded private key
  */
 export function wgGenKey(): string {
-  return toBase64(randomPrivateKeyBytes());
+  return encodeBase64(randomPrivateKeyBytes());
 }
 
 /**
@@ -132,7 +160,7 @@ export function wgGenKey(): string {
  * @returns {string} base64 encoded preshared key
  */
 export function wgGenPsk(): string {
-  return toBase64(randomPresharedKeyBytes());
+  return encodeBase64(randomPresharedKeyBytes());
 }
 
 /**
@@ -143,27 +171,8 @@ export function wgGenPsk(): string {
  * @param {string} privateKeyBase64 base64 encoded private key
  * @returns
  */
-export function wgPubKey(privateKeyBase64: string): string {
-  return toBase64(publicBytesFromPrivateBytes(toBytes(privateKeyBase64)));
-}
-
-/**
- * Converts bytes to base64 string.
- *
- * @param {Uint8Array} bytes
- * @returns {string} base64 string
- */
-function toBase64(bytes: Uint8Array): string {
-  return Buffer.from(bytes).toString("base64");
-}
-
-/**
- * Converts base64 string to bytes.
- *
- * @param {string} base64
- * @returns {Uint8Array} bytes
- */
-function toBytes(base64: string): Uint8Array {
-  const buffer = Buffer.from(base64, "base64");
-  return new Uint8Array(buffer.buffer, buffer.byteOffset, buffer.byteLength);
+export async function wgPubKey(privateKeyBase64: string): Promise<string> {
+  return encodeBase64(
+    await publicBytesFromPrivateBytes(decodeBase64(privateKeyBase64)),
+  );
 }

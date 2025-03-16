@@ -25,13 +25,15 @@ test("private key is clamped", () => {
   assertStrictEquals(bytes[31] & 0b01000000, 0b01000000);
 });
 
-test("public key values are interchangable", () => {
+test("public key values are interchangable", async () => {
   const privKeyBytes = randomPrivateKeyBytes();
   const privKeyBase64 = Buffer.from(privKeyBytes).toString("base64");
 
   assertStrictEquals(
-    wgPubKey(privKeyBase64),
-    Buffer.from(publicBytesFromPrivateBytes(privKeyBytes)).toString("base64"),
+    await wgPubKey(privKeyBase64),
+    Buffer.from(await publicBytesFromPrivateBytes(privKeyBytes)).toString(
+      "base64",
+    ),
   );
 });
 
@@ -60,7 +62,7 @@ test(
     const privKey = wgGenKey();
     assertExists(privKey);
 
-    const pubKey = wgPubKey(privKey);
+    const pubKey = await wgPubKey(privKey);
     assertNotStrictEquals(pubKey, privKey);
 
     const proc = spawn("wg", ["pubkey"], {
