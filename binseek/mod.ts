@@ -63,6 +63,8 @@
  */
 import { type BigIntFormat, type NumberFormat, numeric } from "./numeric.ts";
 
+export type BinaryViewFormat = "binary";
+
 export function isArrayLike<T>(value: unknown): value is ArrayLike<T> {
   return value !== null && typeof value === "object" && "length" in value &&
     typeof value.length === "number";
@@ -221,12 +223,20 @@ export class BinaryView<T extends ArrayBufferLike = ArrayBuffer> {
    * const view = new BinaryView(buffer);
    *
    * assertEquals(
-   *   view.set(42, 'u8')
+   *   view
+   *    .set(42, 'u8')
    *    .set(42, 'u16')
    *    .set(42, 'u32')
    *    .set(42n, 'u64')
    *    .set(new Uint8Array([1, 2, 3, 4, 5, 6, 7, 8]))
-   *    .reset().get()
+   *    .build(),
+   *
+   *   new Uint8Array([
+   *    42, 0, 42, 0, 0, 0, 42, 0, 0, 0, 0, 0, 0, 0, 42,
+   *    1, 2, 3, 4, 5, 6, 7, 8
+   *   ])
+   * );
+   * ```
    *
    * @param value - The data to write.
    * @param format - The format of the data to write.
@@ -241,38 +251,49 @@ export class BinaryView<T extends ArrayBufferLike = ArrayBuffer> {
   set(value: bigint, format: BigIntFormat): this;
   set(value: number | bigint, format: NumberFormat | BigIntFormat): this;
   set(
-    value: ArrayLike<number> | number | bigint,
-    maybeFormat?: NumberFormat | BigIntFormat,
+    value:
+      | ArrayLike<number>
+      | number
+      | bigint,
+    format?: NumberFormat | BigIntFormat | BinaryViewFormat,
   ): this;
   set(
-    value: ArrayLike<number> | number | bigint,
-    arg2?: NumberFormat | BigIntFormat,
+    value:
+      | ArrayLike<number>
+      | number
+      | bigint,
+    format: NumberFormat | BigIntFormat | BinaryViewFormat = "binary",
   ): this {
-    if (isArrayLike(value)) {
-      this.#buffer.set(value, this.#cursor);
-      this.seek(value.length);
-      return this;
+    let seekLength = 0;
+    switch (format) {
+      case "binary":
+        if (isArrayLike<number>(value)) {
+          this.#buffer.set(value, this.#cursor);
+          seekLength = value.length;
+        }
+        break;
+      default:
+        {
+          if (typeof value === "number" || typeof value === "bigint") {
+            const { byteLength } = numeric(
+              this.#buffer,
+              this.#cursor,
+              format,
+              value,
+            );
+            seekLength = byteLength;
+          }
+        }
+        break;
     }
 
-    const format = arg2;
-    if (format == null) {
-      throw new Error("set: format is required");
-    }
-
-    const { byteLength: seekLength } = numeric(
-      this.#buffer,
-      this.#cursor,
-      format,
-      value,
-    );
     this.seek(seekLength);
-
     return this;
   }
 
   /**
    * Returns a view of the buffer from the byteOffset to the cursor. Useful for getting a view of the buffer that was
-   * read or written to up until the current cursor position.
+   * read or written up until the current cursor position.
    *
    * @example
    * ```ts
@@ -290,7 +311,7 @@ export class BinaryView<T extends ArrayBufferLike = ArrayBuffer> {
    *     .set(42n, 'u64')
    *     //.set([1, 0, 1, 0, 1, 0, 1, 0])
    *     .set(new Uint8Array([1, 2, 3, 4, 5, 6, 7, 8]))
-   *     .bytes(),
+   *     .build(),
    *   new Uint8Array([
    *      42, 0, 42, 0, 0, 0, 42, 0, 0, 0, 0, 0, 0, 0, 42,
    *      1, 2, 3, 4, 5, 6, 7, 8
@@ -300,7 +321,7 @@ export class BinaryView<T extends ArrayBufferLike = ArrayBuffer> {
    *
    * @returns {Uint8Array<T>} A view of the buffer from the byteOffset to the cursor.
    */
-  bytes(): Uint8Array<T> {
+  build(): Uint8Array<T> {
     return new Uint8Array(
       this.#buffer.buffer,
       this.#buffer.byteOffset,
