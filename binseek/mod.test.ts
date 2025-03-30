@@ -1,6 +1,6 @@
 // deno-lint-ignore-file no-explicit-any
-import { BinaryView } from "./mod.ts";
 import { assertEquals, assertThrows } from "@std/assert";
+import { BinaryView } from "./mod.ts";
 
 // deno-fmt-ignore
 const DATA = [241, 242, 243, 244, 245, 246, 247, 248, 255, 255, 255, 255];
@@ -17,23 +17,23 @@ const TRUTH_TABLE = [
 
   //{formatOrLength: 'b8', value: [1, 1, 1, 1, 0, 0, 0, 1], bytes: [241]},
 
-  {formatOrLength: 'u8', value: 241, bytes: [241]},
-  {formatOrLength: 's8', value: -15, bytes: [241]},
+  {formatOrLength: 'u8' as const, value: 241, bytes: [241]},
+  {formatOrLength: 's8' as const, value: -15, bytes: [241]},
 
-  {formatOrLength: 'u16be', value: 61938, bytes: [241, 242]},
-  {formatOrLength: 'u16le', value: 62193, bytes: [241, 242]},
-  {formatOrLength: 's16be', value: -3598, bytes: [241, 242]},
-  {formatOrLength: 's16le', value: -3343, bytes: [241, 242]},
+  {formatOrLength: 'u16be' as const, value: 61938, bytes: [241, 242]},
+  {formatOrLength: 'u16le' as const, value: 62193, bytes: [241, 242]},
+  {formatOrLength: 's16be' as const, value: -3598, bytes: [241, 242]},
+  {formatOrLength: 's16le' as const, value: -3343, bytes: [241, 242]},
 
-  {formatOrLength: 'u32be', value: 4059231220, bytes: [241, 242, 243, 244]},
-  {formatOrLength: 'u32le', value: 4109628145, bytes: [241, 242, 243, 244]},
-  {formatOrLength: 's32be', value: -235736076, bytes: [241, 242, 243, 244]},
-  {formatOrLength: 's32le', value: -185339151, bytes: [241, 242, 243, 244]},
+  {formatOrLength: 'u32be' as const, value: 4059231220, bytes: [241, 242, 243, 244]},
+  {formatOrLength: 'u32le' as const, value: 4109628145, bytes: [241, 242, 243, 244]},
+  {formatOrLength: 's32be' as const, value: -235736076, bytes: [241, 242, 243, 244]},
+  {formatOrLength: 's32le' as const, value: -185339151, bytes: [241, 242, 243, 244]},
 
-  {formatOrLength: 'u64be', value: 17434265340928784376n, bytes: [241, 242, 243, 244, 245, 246, 247, 248]},
-  {formatOrLength: 'u64le', value: 17940079176890708721n, bytes: [241, 242, 243, 244, 245, 246, 247, 248]},
-  {formatOrLength: 's64be', value: -1012478732780767240n, bytes: [241, 242, 243, 244, 245, 246, 247, 248]},
-  {formatOrLength: 's64le', value: -506664896818842895n, bytes: [241, 242, 243, 244, 245, 246, 247, 248]},
+  {formatOrLength: 'u64be' as const, value: 17434265340928784376n, bytes: [241, 242, 243, 244, 245, 246, 247, 248]},
+  {formatOrLength: 'u64le' as const, value: 17940079176890708721n, bytes: [241, 242, 243, 244, 245, 246, 247, 248]},
+  {formatOrLength: 's64be' as const, value: -1012478732780767240n, bytes: [241, 242, 243, 244, 245, 246, 247, 248]},
+  {formatOrLength: 's64le' as const, value: -506664896818842895n, bytes: [241, 242, 243, 244, 245, 246, 247, 248]},
 ]
 
 function generateStepName(formatOrLength: any): string {
@@ -50,7 +50,7 @@ for (const { formatOrLength, value, bytes: expectedBytes } of TRUTH_TABLE) {
     const view = new BinaryView(buffer);
 
     await t.step(`get`, () => {
-      assertEquals(view.reset().get(formatOrLength as any), value);
+      assertEquals(view.reset().get(formatOrLength), value);
     });
 
     await t.step(`set`, () => {
@@ -59,7 +59,10 @@ for (const { formatOrLength, value, bytes: expectedBytes } of TRUTH_TABLE) {
       if (value instanceof Uint8Array) {
         view.set(value);
       } else {
-        view.set(value as any, formatOrLength as any);
+        view.set(
+          value,
+          formatOrLength as Exclude<typeof formatOrLength, number>,
+        );
       }
 
       const affectedBytes = buffer.subarray(0, expectedBytes.length);
@@ -71,7 +74,7 @@ for (const { formatOrLength, value, bytes: expectedBytes } of TRUTH_TABLE) {
     });
 
     await t.step(`chk`, () => {
-      assertEquals(view.reset().get(formatOrLength as any), value);
+      assertEquals(view.reset().get(formatOrLength), value);
     });
   });
 }
