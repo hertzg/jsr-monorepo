@@ -1,4 +1,4 @@
-import { ValueWithByteLength } from "./mod.ts";
+import type { ValueWithByteLength } from "./mod.ts";
 
 export type NumberIntBitLength = 8 | 16 | 32;
 export type NumberFloatBitLength = 16 | 32 | 64;
