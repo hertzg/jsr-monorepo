@@ -74,8 +74,8 @@ export function isArrayLike<T>(value: unknown): value is ArrayLike<T> {
  * See {@link BinaryView.get} and {@link BinaryView.set} for more information on reading and writing data.
  * The {@link BinaryView.bytes} can be used in conjunction with {@link BinaryView.set} to get the constructed buffer.
  */
-export class BinaryView {
-  #buffer: Uint8Array;
+export class BinaryView<T extends ArrayBufferLike = ArrayBuffer> {
+  #buffer: Uint8Array<T>;
   #cursor = 0;
 
   /**
@@ -84,7 +84,7 @@ export class BinaryView {
    *
    * @param buffer
    */
-  constructor(buffer: Uint8Array) {
+  constructor(buffer: Uint8Array<T>) {
     this.#buffer = buffer;
   }
 
@@ -168,14 +168,23 @@ export class BinaryView {
    * @throws {Error} If the format string is invalid.
    * @throws {Error} If the cursor is out of bounds. See {@link BinaryView.seek}.
    */
-  get(format: NumberFormat): number;
-  get(format: BigIntFormat): bigint;
-  get(byteLength?: number): Uint8Array;
+  get(
+    byteLength?: number,
+  ): Uint8Array<T>;
+  get(
+    format: NumberFormat,
+  ): number;
+  get(
+    format: BigIntFormat,
+  ): bigint;
   get(
     formatOrByteLength?: NumberFormat | BigIntFormat | number,
-  ): number[] | number | bigint | Uint8Array {
-    if (typeof formatOrByteLength === "number" || formatOrByteLength == null) {
-      const byteLength = formatOrByteLength ?? this.bytesLeft;
+  ): Uint8Array<T> | number | bigint;
+  get(
+    arg1?: NumberFormat | BigIntFormat | number,
+  ): Uint8Array<T> | number | bigint {
+    if (typeof arg1 === "number" || arg1 == null) {
+      const byteLength = arg1 ?? this.bytesLeft;
       const bytes = new Uint8Array(
         this.#buffer.buffer,
         this.#buffer.byteOffset + this.#cursor,
@@ -188,7 +197,7 @@ export class BinaryView {
     const { byteLength: byteLength, value } = numeric(
       this.#buffer,
       this.#cursor,
-      formatOrByteLength,
+      arg1,
     );
     this.seek(byteLength);
 
@@ -233,7 +242,11 @@ export class BinaryView {
   set(value: number | bigint, format: NumberFormat | BigIntFormat): this;
   set(
     value: ArrayLike<number> | number | bigint,
-    format?: NumberFormat | BigIntFormat,
+    maybeFormat?: NumberFormat | BigIntFormat,
+  ): this;
+  set(
+    value: ArrayLike<number> | number | bigint,
+    arg2?: NumberFormat | BigIntFormat,
   ): this {
     if (isArrayLike(value)) {
       this.#buffer.set(value, this.#cursor);
@@ -241,6 +254,7 @@ export class BinaryView {
       return this;
     }
 
+    const format = arg2;
     if (format == null) {
       throw new Error("set: format is required");
     }
@@ -284,9 +298,9 @@ export class BinaryView {
    * );
    * ```
    *
-   * @returns {Uint8Array} A view of the buffer from the byteOffset to the cursor.
+   * @returns {Uint8Array<T>} A view of the buffer from the byteOffset to the cursor.
    */
-  bytes(): Uint8Array {
+  bytes(): Uint8Array<T> {
     return new Uint8Array(
       this.#buffer.buffer,
       this.#buffer.byteOffset,
