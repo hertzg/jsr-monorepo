@@ -5,6 +5,7 @@
     ".": "./mod.ts"
   },
   "include": [
-    "mod.ts"
+    "mod.ts",
+    "numeric.ts"
   ]
 }
