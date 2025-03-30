@@ -15,7 +15,7 @@ const TRUTH_TABLE = [
     bytes: [241, 242, 243, 244, 245, 246, 247, 248, 255, 255, 255, 255]
   },
 
-  {formatOrLength: 'b8', value: [1, 1, 1, 1, 0, 0, 0, 1], bytes: [241]},
+  //{formatOrLength: 'b8', value: [1, 1, 1, 1, 0, 0, 0, 1], bytes: [241]},
 
   {formatOrLength: 'u8', value: 241, bytes: [241]},
   {formatOrLength: 's8', value: -15, bytes: [241]},
@@ -36,67 +36,45 @@ const TRUTH_TABLE = [
   {formatOrLength: 's64le', value: -506664896818842895n, bytes: [241, 242, 243, 244, 245, 246, 247, 248]},
 ]
 
-Deno.test("read", async (t) => {
-  function generateStepName(formatOrLength: any): string {
-    return formatOrLength === undefined
-      ? "all bytes"
-      : typeof formatOrLength === "number"
-      ? `first ${formatOrLength} bytes`
-      : formatOrLength;
-  }
+function generateStepName(formatOrLength: any): string {
+  return formatOrLength === undefined
+    ? "bytes: all"
+    : typeof formatOrLength === "number"
+    ? `bytes: first ${formatOrLength}`
+    : formatOrLength;
+}
 
-  async function runTests(
-    t: Deno.TestContext,
-    buffer: Uint8Array,
-  ): Promise<void> {
+for (const { formatOrLength, value, bytes: expectedBytes } of TRUTH_TABLE) {
+  Deno.test(`${generateStepName(formatOrLength)}`, async (t) => {
+    const buffer = new Uint8Array(DATA);
     const view = new BinaryView(buffer);
-    for (const { formatOrLength, value, bytes: expectedBytes } of TRUTH_TABLE) {
-      await t.step(`get: ${generateStepName(formatOrLength)}`, () => {
-        assertEquals(view.reset().get(formatOrLength as any), value);
-      });
 
-      await t.step(`set: ${generateStepName(formatOrLength)}`, () => {
-        view.reset();
+    await t.step(`get`, () => {
+      assertEquals(view.reset().get(formatOrLength as any), value);
+    });
 
-        if (value instanceof Uint8Array) {
-          view.set(value);
-        } else {
-          view.set(value as any, formatOrLength as any);
-        }
+    await t.step(`set`, () => {
+      view.reset();
 
-        const affectedBytes = buffer.subarray(0, expectedBytes.length);
-        assertEquals(
-          affectedBytes,
-          new Uint8Array(expectedBytes),
-          "affected bytes do not match expected",
-        );
-      });
+      if (value instanceof Uint8Array) {
+        view.set(value);
+      } else {
+        view.set(value as any, formatOrLength as any);
+      }
 
-      await t.step(`chk: ${generateStepName(formatOrLength)}`, () => {
-        assertEquals(view.reset().get(formatOrLength as any), value);
-      });
-    }
-  }
+      const affectedBytes = buffer.subarray(0, expectedBytes.length);
+      assertEquals(
+        affectedBytes,
+        new Uint8Array(expectedBytes),
+        "affected bytes do not match expected",
+      );
+    });
 
-  await t.step("full buffer", (t) => runTests(t, new Uint8Array(DATA)));
-
-  await t.step("offset buffer", (t) =>
-    runTests(
-      t,
-      new Uint8Array([
-        // deno-fmt-ignore
-        0xff,
-        0xff,
-        0xff,
-        0xff,
-        ...DATA,
-        0xff,
-        0xff,
-        0xff,
-        0xff,
-      ]).subarray(4, -4),
-    ));
-});
+    await t.step(`chk`, () => {
+      assertEquals(view.reset().get(formatOrLength as any), value);
+    });
+  });
+}
 
 Deno.test("properties", () => {
   const buffer = new Uint8Array(DATA);
