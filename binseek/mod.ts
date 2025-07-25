@@ -170,15 +170,10 @@ export class BinaryView<T extends ArrayBufferLike = ArrayBuffer> {
    * @throws {Error} If the format string is invalid.
    * @throws {Error} If the cursor is out of bounds. See {@link BinaryView.seek}.
    */
-  get(
-    byteLength?: number,
-  ): Uint8Array<T>;
-  get(
-    format: NumberFormat,
-  ): number;
-  get(
-    format: BigIntFormat,
-  ): bigint;
+  get(): Uint8Array<T>;
+  get(byteLength: number): Uint8Array<T>;
+  get(format: NumberFormat): number;
+  get(format: BigIntFormat): bigint;
   get(
     formatOrByteLength?: NumberFormat | BigIntFormat | number,
   ): Uint8Array<T> | number | bigint;
@@ -244,9 +239,7 @@ export class BinaryView<T extends ArrayBufferLike = ArrayBuffer> {
    * @throws {Error} If the cursor is out of bounds. See {@link BinaryView.seek}.
    * @returns {this} The instance of the BinaryView for chaining.
    */
-  set(
-    value: ArrayLike<number>,
-  ): this;
+  set(value: ArrayLike<number>): this;
   set(value: number, format: NumberFormat): this;
   set(value: bigint, format: BigIntFormat): this;
   set(value: number | bigint, format: NumberFormat | BigIntFormat): this;
