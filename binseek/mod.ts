@@ -178,10 +178,10 @@ export class BinaryView<T extends ArrayBufferLike = ArrayBuffer> {
     formatOrByteLength?: NumberFormat | BigIntFormat | number,
   ): Uint8Array<T> | number | bigint;
   get(
-    arg1?: NumberFormat | BigIntFormat | number,
+    formatOrByteLength?: NumberFormat | BigIntFormat | number,
   ): Uint8Array<T> | number | bigint {
-    if (typeof arg1 === "number" || arg1 == null) {
-      const byteLength = arg1 ?? this.bytesLeft;
+    if (typeof formatOrByteLength === "number" || formatOrByteLength == null) {
+      const byteLength = formatOrByteLength ?? this.bytesLeft;
       const bytes = new Uint8Array(
         this.#buffer.buffer,
         this.#buffer.byteOffset + this.#cursor,
@@ -194,7 +194,7 @@ export class BinaryView<T extends ArrayBufferLike = ArrayBuffer> {
     const { byteLength: byteLength, value } = numeric(
       this.#buffer,
       this.#cursor,
-      arg1,
+      formatOrByteLength,
     );
     this.seek(byteLength);
 
