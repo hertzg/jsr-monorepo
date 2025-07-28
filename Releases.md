@@ -1,3 +1,20 @@
+### 2025.07.28
+
+#### @hertzg/binseek 0.2.0 (minor)
+
+- feat(binseek): include numeric.ts
+- feat(binseek)!: get rid of bitarray and rename .bytes() to .build()
+- feat(binseek): better type support
+- chore(binseek): rename parameter in get method for clarity
+- chore(binseek): improve type definitions for get method
+- chore(binseek): change import to type for ValueWithByteLength
+- chore(binseek): type support
+- chore(binseek): refactor code a bit
+
+#### @hertzg/binstruct 0.1.0 (minor)
+
+- feat(binstruct): introduce binstruct
+
 ### 2025.03.11
 
 #### @hertzg/binseek 0.1.1 (patch)
