@@ -1,0 +1,20 @@
+{
+  "name": "@hertzg/binstruct",
+  "version": "0.1.0",
+  "exports": {
+    ".": "./mod.ts",
+    "./numeric": "./numeric.ts",
+    "./array": "./array.ts",
+    "./struct": "./struct.ts",
+    "./string": "./string.ts"
+  },
+  "types": "./mod.ts",
+  "files": [
+    "mod.ts",
+    "types.ts",
+    "numeric.ts",
+    "array.ts",
+    "struct.ts",
+    "string.ts"
+  ]
+}

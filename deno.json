@@ -16,6 +16,7 @@
   ],
   "workspace": [
     "./binseek",
+    "./binstruct",
     "./wg-keys",
     "./wg-ini",
     "./wg-conf",
