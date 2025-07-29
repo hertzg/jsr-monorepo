@@ -1,27 +1,12 @@
 /**
- * A module providing type-safe binary structure encoding and decoding utilities for TypeScript.
+ * Binary structure encoding/decoding utilities for TypeScript.
  *
- * The following data types are supported:
- * - Unsigned integers: 8, 16, 32, 64 bits (big-endian and little-endian)
- * - Signed integers: 8, 16, 32, 64 bits (big-endian and little-endian)
- * - Floating point numbers: 16, 32, 64 bits (big-endian and little-endian)
- * - Strings: length-prefixed and null-terminated
- * - Arrays: variable-length arrays with configurable length encoding
- * - Structs: complex nested data structures
+ * This module provides a type-safe way to encode and decode binary data structures.
+ * It supports various data types including numbers, strings, arrays, and complex structs.
  *
- * To encode data to binary, use the various coder functions and call their `encode` method.
- * To decode data from binary, use the same coder functions and call their `decode` method.
- *
- * The module provides the following main functions:
- * - {@link struct}: Create coders for structured data
- * - {@link stringLP}: Create coders for length-prefixed strings
- * - {@link stringNT}: Create coders for null-terminated strings
- * - {@link arrayOf}: Create coders for arrays
- * - Numeric coders: `u8`, `u16`, `u32`, `u64`, `s8`, `s16`, `s32`, `s64`, `f16`, `f32`, `f64`
- *
- * @example Reading and writing structured data:
+ * @example
  * ```ts
- * import { assertEquals } from "@std/assert";
+ * import { assertEquals } from "jsr:@std/assert";
  * import { struct } from "@hertzg/binstruct/struct";
  * import { stringLP, stringNT } from "@hertzg/binstruct/string";
  * import { arrayOf } from "@hertzg/binstruct/array";
@@ -44,7 +29,7 @@
  *   sender: "alice@example.com",
  *   recipients: ["bob@example.com", "charlie@example.com"],
  *   message: "Hello, სამყარო! 🌍",
- *   timestamp: 1704067200,
+ *   timestamp: 1704067200, // Fixed timestamp for reproducible example
  * };
  *
  * // Encode to binary
@@ -53,10 +38,8 @@
  *
  * // Decode from binary
  * const [decoded, bytesRead] = packetCoder.decode(buffer);
- * assertEquals(decoded, packet, 'packet should be identical after roundtrip');
- * assertEquals(bytesWritten, bytesRead, 'bytes written should equal bytes read');
+ * assertEquals(decoded, packet); // Same as original packet
  * ```
- * @module
  */
 
 export type ValueWithBytes<T> = [T, number];

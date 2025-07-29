@@ -11,7 +11,7 @@ import type { Coder } from "./mod.ts";
  *
  * @example
  * ```ts
- * import { assertEquals } from "@std/assert";
+ * import { assertEquals } from "jsr:@std/assert";
  * import { stringLP } from "@hertzg/binstruct/string";
  * import { u32be } from "@hertzg/binstruct/numeric";
  *
@@ -57,7 +57,7 @@ export function stringLP(lengthType: Coder<number>): Coder<string> {
  *
  * @example
  * ```ts
- * import { assertEquals } from "@std/assert";
+ * import { assertEquals } from "jsr:@std/assert";
  * import { stringNT } from "@hertzg/binstruct/string";
  *
  * const stringCoder = stringNT();
