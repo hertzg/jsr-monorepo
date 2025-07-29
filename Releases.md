@@ -1,3 +1,9 @@
+### 2025.07.29
+
+#### @hertzg/binseek 0.2.1 (patch)
+
+- fix(binseek): update import paths and enhance module documentation
+
 ### 2025.07.28
 
 #### @hertzg/binseek 0.2.0 (minor)
