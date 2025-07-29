@@ -8,7 +8,7 @@
     "@std/streams": "jsr:@std/streams@^1.0.8",
     "@std/encoding/base64": "jsr:@std/encoding@^1.0.7/base64",
     "@std/encoding/base64url": "jsr:@std/encoding@^1.0.7/base64url",
-    "@hertzg/binseek": "jsr:@hertzg/binseek@^0.2.0",
+    "@hertzg/binseek": "jsr:@hertzg/binseek@^0.2.1",
     "@hertzg/binstruct": "jsr:@hertzg/binstruct@^0.1.0",
     "@hertzg/bx": "jsr:@hertzg/bx@^3.0.1",
     "@hertzg/mymagti-api": "jsr:@hertzg/mymagti-api@^0.0.4",
