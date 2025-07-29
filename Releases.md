@@ -1,3 +1,13 @@
+### 2025.07.29
+
+#### @hertzg/binseek 0.2.2 (patch)
+
+- chore(binseek): update version to 0.2.1 in import map and deno.json
+
+#### @hertzg/binstruct 0.1.1 (patch)
+
+- fix(binstruct): update import paths and enhance module documentation
+
 ### 2025.07.28
 
 #### @hertzg/binseek 0.2.0 (minor)
