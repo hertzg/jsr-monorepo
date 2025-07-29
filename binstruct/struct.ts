@@ -11,7 +11,7 @@ import type { Coder } from "./mod.ts";
  *
  * @example
  * ```ts
- * import { assertEquals } from "jsr:@std/assert";
+ * import { assertEquals } from "@std/assert";
  * import { struct } from "@hertzg/binstruct/struct";
  * import { u32be, u8be, f32be } from "@hertzg/binstruct/numeric";
  *

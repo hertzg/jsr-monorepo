@@ -12,7 +12,7 @@ import type { Coder } from "./mod.ts";
  *
  * @example
  * ```ts
- * import { assertEquals } from "jsr:@std/assert";
+ * import { assertEquals } from "@std/assert";
  * import { arrayOf } from "@hertzg/binstruct/array";
  * import { u32be, u8be } from "@hertzg/binstruct/numeric";
  *
