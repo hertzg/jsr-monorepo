@@ -16,7 +16,7 @@
  * - {@link struct}: Create coders for structured data
  * - {@link stringLP}: Create coders for length-prefixed strings
  * - {@link stringNT}: Create coders for null-terminated strings
- * - {@link arrayOf}: Create coders for arrays
+ * - {@link arrayLP}: Create coders for arrays
  * - Numeric coders: `u8`, `u16`, `u32`, `u64`, `s8`, `s16`, `s32`, `s64`, `f16`, `f32`, `f64`
  *
  * @example Reading and writing structured data with arrays:
@@ -24,7 +24,7 @@
  * import { assertEquals } from "@std/assert";
  * import { struct } from "@hertzg/binstruct/struct";
  * import { stringLP } from "@hertzg/binstruct/string";
- * import { arrayOf } from "@hertzg/binstruct/array";
+ * import { arrayLP } from "@hertzg/binstruct/array";
  * import { u32be, u16be, u8be, f64be } from "@hertzg/binstruct/numeric";
  *
  * // Define a user profile structure
@@ -40,7 +40,7 @@
  * const teamCoder = struct({
  *   teamId: u32be,
  *   teamName: stringLP(u16be),
- *   members: arrayOf(userProfileCoder, u16be),
+ *   members: arrayLP(userProfileCoder, u16be),
  *   createdAt: u32be,
  * });
  *

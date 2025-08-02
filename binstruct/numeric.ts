@@ -225,29 +225,73 @@ export function f64(
 /**
  * Big-endian aliases
  */
-export const u8be: Coder<number> = u8("be");
-export const s8be: Coder<number> = s8("be");
-export const f16be: Coder<number> = f16("be");
-export const u16be: Coder<number> = u16("be");
-export const s16be: Coder<number> = s16("be");
-export const f32be: Coder<number> = f32("be");
-export const u32be: Coder<number> = u32("be");
-export const s32be: Coder<number> = s32("be");
-export const f64be: Coder<number> = f64("be");
-export const u64be: Coder<bigint> = u64("be");
-export const s64be: Coder<bigint> = s64("be");
+export function u8be(): Coder<number> {
+  return u8("be");
+}
+export function s8be(): Coder<number> {
+  return s8("be");
+}
+export function f16be(): Coder<number> {
+  return f16("be");
+}
+export function u16be(): Coder<number> {
+  return u16("be");
+}
+export function s16be(): Coder<number> {
+  return s16("be");
+}
+export function f32be(): Coder<number> {
+  return f32("be");
+}
+export function u32be(): Coder<number> {
+  return u32("be");
+}
+export function s32be(): Coder<number> {
+  return s32("be");
+}
+export function f64be(): Coder<number> {
+  return f64("be");
+}
+export function u64be(): Coder<bigint> {
+  return u64("be");
+}
+export function s64be(): Coder<bigint> {
+  return s64("be");
+}
 
 /**
  * Little-endian aliases
  */
-export const u8le: Coder<number> = u8("le");
-export const s8le: Coder<number> = s8("le");
-export const f16le: Coder<number> = f16("le");
-export const u16le: Coder<number> = u16("le");
-export const s16le: Coder<number> = s16("le");
-export const f32le: Coder<number> = f32("le");
-export const u32le: Coder<number> = u32("le");
-export const s32le: Coder<number> = s32("le");
-export const f64le: Coder<number> = f64("le");
-export const u64le: Coder<bigint> = u64("le");
-export const s64le: Coder<bigint> = s64("le");
+export function u8le(): Coder<number> {
+  return u8("le");
+}
+export function s8le(): Coder<number> {
+  return s8("le");
+}
+export function f16le(): Coder<number> {
+  return f16("le");
+}
+export function u16le(): Coder<number> {
+  return u16("le");
+}
+export function s16le(): Coder<number> {
+  return s16("le");
+}
+export function f32le(): Coder<number> {
+  return f32("le");
+}
+export function u32le(): Coder<number> {
+  return u32("le");
+}
+export function s32le(): Coder<number> {
+  return s32("le");
+}
+export function f64le(): Coder<number> {
+  return f64("le");
+}
+export function u64le(): Coder<bigint> {
+  return u64("le");
+}
+export function s64le(): Coder<bigint> {
+  return s64("le");
+}

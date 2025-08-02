@@ -10,7 +10,7 @@ import {
   u32be,
   u8be,
 } from "./numeric.ts";
-import { arrayOf } from "./array.ts";
+import { arrayLP } from "./array.ts";
 import { stringLP, stringNT } from "./string.ts";
 
 Deno.test("struct: basic functionality", async (t) => {
@@ -83,8 +83,8 @@ Deno.test("struct: basic functionality", async (t) => {
   await t.step("encodes and decodes struct with arrays", () => {
     const gameStateCoder = struct({
       playerCount: u8be,
-      scores: arrayOf(u16be, u8be),
-      positions: arrayOf(f32be, u8be),
+      scores: arrayLP(u16be, u8be),
+      positions: arrayLP(f32be, u8be),
     });
 
     const gameState = {
@@ -298,8 +298,8 @@ Deno.test("struct: edge cases", async (t) => {
   await t.step("handles struct with arrays of strings", () => {
     const configCoder = struct({
       version: u8be,
-      names: arrayOf(stringLP(u16be), u8be),
-      tags: arrayOf(stringNT(), u8be),
+      names: arrayLP(stringLP(u16be), u8be),
+      tags: arrayLP(stringNT(), u8be),
       description: stringLP(u32be),
     });
 
@@ -457,8 +457,8 @@ Deno.test("struct: complex nested structures", async (t) => {
   await t.step("handles struct with nested arrays", () => {
     const nestedCoder = struct({
       id: u32be,
-      tags: arrayOf(u8be, u8be),
-      scores: arrayOf(u16be, u8be),
+      tags: arrayLP(u8be, u8be),
+      scores: arrayLP(u16be, u8be),
       metadata: struct({
         created: u32be,
         updated: u32be,
@@ -490,13 +490,13 @@ Deno.test("struct: complex nested structures", async (t) => {
   await t.step("handles struct with arrays of structs", () => {
     const playerCoder = struct({
       id: u8be,
-      name: arrayOf(u8be, u8be), // array of bytes representing string
+      name: arrayLP(u8be, u8be), // array of bytes representing string
       score: u32be,
     });
 
     const gameCoder = struct({
       gameId: u32be,
-      players: arrayOf(playerCoder, u8be),
+      players: arrayLP(playerCoder, u8be),
     });
 
     const data = {

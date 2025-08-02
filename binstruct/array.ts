@@ -1,7 +1,7 @@
 import type { Coder } from "./mod.ts";
 
 /**
- * Creates a Coder for arrays of a given element type.
+ * Creates a Coder for length-prefixed arrays of a given element type.
  *
  * The array is encoded with a length prefix followed by the elements.
  * The length is encoded using the provided lengthType coder.
@@ -13,10 +13,10 @@ import type { Coder } from "./mod.ts";
  * @example
  * ```ts
  * import { assertEquals } from "@std/assert";
- * import { arrayOf } from "@hertzg/binstruct/array";
+ * import { arrayLP } from "@hertzg/binstruct/array";
  * import { u32be, u8be } from "@hertzg/binstruct/numeric";
  *
- * const numberArrayCoder = arrayOf(u8be, u32be);
+ * const numberArrayCoder = arrayLP(u8be, u32be);
  *
  * const buffer = new Uint8Array(100);
  * const bytesWritten = numberArrayCoder.encode([1, 2, 3, 4], buffer);
@@ -24,7 +24,7 @@ import type { Coder } from "./mod.ts";
  * assertEquals(decoded, [1, 2, 3, 4]);
  * ```
  */
-export function arrayOf<TDecoded>(
+export function arrayLP<TDecoded>(
   elementType: Coder<TDecoded>,
   lengthType: Coder<number>,
 ): Coder<TDecoded[]> {
