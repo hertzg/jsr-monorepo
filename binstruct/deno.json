@@ -6,7 +6,8 @@
     "./numeric": "./numeric.ts",
     "./array": "./array.ts",
     "./struct": "./struct.ts",
-    "./string": "./string.ts"
+    "./string": "./string.ts",
+    "./bytes": "./bytes.ts"
   },
   "types": "./mod.ts",
   "files": [
@@ -15,6 +16,7 @@
     "numeric.ts",
     "array.ts",
     "struct.ts",
-    "string.ts"
+    "string.ts",
+    "bytes.ts"
   ]
 }
