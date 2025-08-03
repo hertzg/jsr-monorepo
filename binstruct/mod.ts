@@ -29,19 +29,19 @@
  *
  * // Define a user profile structure
  * const userProfileCoder = struct({
- *   id: u32be,
- *   name: stringLP(u16be),
- *   age: u8be,
- *   score: f64be,
- *   isActive: u8be, // boolean as 0/1
+ *   id: u32be(),
+ *   name: stringLP(u16be()),
+ *   age: u8be(),
+ *   score: f64be(),
+ *   isActive: u8be(), // boolean as 0/1
  * });
  *
  * // Define a team structure containing an array of user profiles
  * const teamCoder = struct({
- *   teamId: u32be,
- *   teamName: stringLP(u16be),
- *   members: arrayLP(userProfileCoder, u16be),
- *   createdAt: u32be,
+ *   teamId: u32be(),
+ *   teamName: stringLP(u16be()),
+ *   members: arrayLP(userProfileCoder, u16be()),
+ *   createdAt: u32be(),
  * });
  *
  * // Create team data with array of user profiles
