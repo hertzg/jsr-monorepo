@@ -86,8 +86,6 @@
  * @module
  */
 
-import { isRef, type RefValue } from "./ref.ts";
-
 export type ValueWithBytes<T> = [T, number];
 
 export type Context = {
