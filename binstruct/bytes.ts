@@ -1,4 +1,10 @@
 import type { Coder } from "./mod.ts";
+import {
+  isRef,
+  isValidLength,
+  type LengthType,
+  tryUnrefLength,
+} from "./ref.ts";
 
 /**
  * Creates a Coder for byte slices.
@@ -27,32 +33,52 @@ import type { Coder } from "./mod.ts";
  * assertEquals(varDecoded.slice(0, 3), varData);
  * ```
  */
-export function bytes(length?: number): Coder<Uint8Array> {
-  if (length === undefined) {
-    return {
-      encode: (value, target) => {
-        target.set(value, 0);
-        return value.length;
-      },
-      decode: (encoded) => [encoded.slice(), encoded.length],
-    };
-  }
 
-  if (!Number.isInteger(length) || length < 0) {
-    throw new Error(`Invalid length: ${length}. Must be non-negative integer.`);
+export function bytes(
+  length?: LengthType,
+): Coder<Uint8Array> {
+  if (
+    length != null &&
+    !isRef<number>(length) &&
+    !isValidLength(length)
+  ) {
+    throw new Error(
+      `Invalid length: ${length}. Must be a reference to or a literal non-negative integer.`,
+    );
   }
 
   return {
-    encode: (value, target) => {
-      const truncated = value.slice(0, length);
-      target.set(truncated, 0);
-      return length;
-    },
-    decode: (encoded) => {
-      if (encoded.length < length) {
-        throw new Error(`Need ${length} bytes, got ${encoded.length}`);
+    encode: (value, target, ctx): number => {
+      const len = tryUnrefLength(length, ctx) ?? value.length;
+
+      if (!isValidLength(len)) {
+        throw new Error(
+          `Invalid length: ${len}. Must be a non-negative integer.`,
+        );
       }
-      return [encoded.slice(0, length), length];
+
+      const toWrite = value.subarray(0, len);
+      target.set(toWrite, 0);
+      return len;
+    },
+    decode: (encoded, ctx) => {
+      const len = tryUnrefLength(length, ctx) ?? encoded.length;
+
+      if (!isValidLength(len)) {
+        throw new Error(
+          `Invalid length: ${len}. Must be a non-negative integer.`,
+        );
+      }
+
+      if (encoded.length < len) {
+        throw new Error(
+          `Need ${len} bytes, got ${encoded.length}`,
+        );
+      }
+
+      // For fixed length, only read the specified number of bytes
+      const result = encoded.subarray(0, len);
+      return [result, len];
     },
   };
 }

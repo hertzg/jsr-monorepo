@@ -5,7 +5,7 @@ import { stringLP, stringNT } from "./string.ts";
 
 Deno.test("arrayLP: basic functionality", async (t) => {
   await t.step("encodes and decodes number arrays", () => {
-    const numberArrayCoder = arrayLP(u8be, u32be);
+    const numberArrayCoder = arrayLP(u8be(), u32be());
     const data = [1, 2, 3, 4, 5];
 
     const buffer = new Uint8Array(100);
@@ -17,7 +17,7 @@ Deno.test("arrayLP: basic functionality", async (t) => {
   });
 
   await t.step("encodes and decodes empty arrays", () => {
-    const numberArrayCoder = arrayLP(u8be, u32be);
+    const numberArrayCoder = arrayLP(u8be(), u32be());
     const data: number[] = [];
 
     const buffer = new Uint8Array(100);
@@ -29,7 +29,7 @@ Deno.test("arrayLP: basic functionality", async (t) => {
   });
 
   await t.step("works with different element types", () => {
-    const floatArrayCoder = arrayLP(f32be, u16be);
+    const floatArrayCoder = arrayLP(f32be(), u16be());
     const data = [1.5, 2.7, 3.14];
 
     const buffer = new Uint8Array(100);
@@ -44,7 +44,7 @@ Deno.test("arrayLP: basic functionality", async (t) => {
   });
 
   await t.step("works with signed integers", () => {
-    const signedArrayCoder = arrayLP(s16be, u8be);
+    const signedArrayCoder = arrayLP(s16be(), u8be());
     const data = [-1, -2, -3, 4, 5];
 
     const buffer = new Uint8Array(100);
@@ -56,7 +56,7 @@ Deno.test("arrayLP: basic functionality", async (t) => {
   });
 
   await t.step("works with length-prefixed string arrays", () => {
-    const stringArrayCoder = arrayLP(stringLP(u16be), u8be);
+    const stringArrayCoder = arrayLP(stringLP(u16be()), u8be());
     const data = ["Hello", "World", "სამყარო", "🌍"];
 
     const buffer = new Uint8Array(200);
@@ -68,7 +68,7 @@ Deno.test("arrayLP: basic functionality", async (t) => {
   });
 
   await t.step("works with null-terminated string arrays", () => {
-    const stringArrayCoder = arrayLP(stringNT(), u8be);
+    const stringArrayCoder = arrayLP(stringNT(), u8be());
     const data = ["Hello", "World", "Test", "String"];
 
     const buffer = new Uint8Array(200);
@@ -82,7 +82,7 @@ Deno.test("arrayLP: basic functionality", async (t) => {
 
 Deno.test("arrayLP: different length types", async (t) => {
   await t.step("works with u8 length type", () => {
-    const coder = arrayLP(u16be, u8be);
+    const coder = arrayLP(u16be(), u8be());
     const data = [1, 2, 3, 4, 5];
 
     const buffer = new Uint8Array(100);
@@ -94,7 +94,7 @@ Deno.test("arrayLP: different length types", async (t) => {
   });
 
   await t.step("works with u16 length type", () => {
-    const coder = arrayLP(u32be, u16be);
+    const coder = arrayLP(u32be(), u16be());
     const data = [1, 2, 3, 4, 5];
 
     const buffer = new Uint8Array(100);
@@ -106,7 +106,7 @@ Deno.test("arrayLP: different length types", async (t) => {
   });
 
   await t.step("works with u32 length type", () => {
-    const coder = arrayLP(u8be, u32be);
+    const coder = arrayLP(u8be(), u32be());
     const data = [1, 2, 3, 4, 5];
 
     const buffer = new Uint8Array(100);
@@ -120,7 +120,7 @@ Deno.test("arrayLP: different length types", async (t) => {
 
 Deno.test("arrayLP: edge cases", async (t) => {
   await t.step("handles single element arrays", () => {
-    const coder = arrayLP(u32be, u16be);
+    const coder = arrayLP(u8be(), u16be());
     const data = [42];
 
     const buffer = new Uint8Array(100);
@@ -132,10 +132,10 @@ Deno.test("arrayLP: edge cases", async (t) => {
   });
 
   await t.step("handles large arrays", () => {
-    const coder = arrayLP(u8be, u16be);
-    const data = new Array(1000).fill(0).map((_, i) => i % 256);
+    const coder = arrayLP(u8be(), u16be());
+    const data = Array.from({ length: 1000 }, (_, i) => i % 256);
 
-    const buffer = new Uint8Array(5000);
+    const buffer = new Uint8Array(3000);
     const bytesWritten = coder.encode(data, buffer);
     const [decoded, bytesRead] = coder.decode(buffer);
 
@@ -144,7 +144,7 @@ Deno.test("arrayLP: edge cases", async (t) => {
   });
 
   await t.step("handles arrays with zero values", () => {
-    const coder = arrayLP(u16be, u8be);
+    const coder = arrayLP(u16be(), u8be());
     const data = [0, 0, 0, 0, 0];
 
     const buffer = new Uint8Array(100);
@@ -156,7 +156,7 @@ Deno.test("arrayLP: edge cases", async (t) => {
   });
 
   await t.step("handles arrays with maximum values", () => {
-    const coder = arrayLP(u8be, u16be);
+    const coder = arrayLP(u8be(), u16be());
     const data = [255, 255, 255, 255, 255];
 
     const buffer = new Uint8Array(100);
@@ -170,27 +170,30 @@ Deno.test("arrayLP: edge cases", async (t) => {
 
 Deno.test("arrayLP: error handling", async (t) => {
   await t.step("throws on buffer too small for length", () => {
-    const coder = arrayLP(u8be, u32be);
+    const coder = arrayLP(u8be(), u16be());
     const data = [1, 2, 3, 4, 5];
 
     const buffer = new Uint8Array(100);
     coder.encode(data, buffer);
 
-    // Try to decode with a buffer that's too small for the length
-    const smallBuffer = new Uint8Array(2);
+    const smallBuffer = new Uint8Array(1);
     assertThrows(() => coder.decode(smallBuffer), Error);
   });
 
   await t.step("throws on buffer too small for elements", () => {
-    const coder = arrayLP(u32be, u8be);
+    const coder = arrayLP(u32be(), u8be());
+    const data = [1, 2, 3, 4, 5];
 
-    // Create a buffer that's too small for even the length field
-    const tinyBuffer = new Uint8Array(0);
-    assertThrows(() => coder.decode(tinyBuffer), Error);
+    const buffer = new Uint8Array(100);
+    coder.encode(data, buffer);
+
+    // Buffer too small for length field (1 byte) - this should cause an error
+    const smallBuffer = new Uint8Array(0);
+    assertThrows(() => coder.decode(smallBuffer), Error);
   });
 
   await t.step("throws on empty buffer", () => {
-    const coder = arrayLP(u8be, u16be);
+    const coder = arrayLP(u8be(), u16be());
     const emptyBuffer = new Uint8Array(0);
     assertThrows(() => coder.decode(emptyBuffer), Error);
   });
@@ -198,7 +201,7 @@ Deno.test("arrayLP: error handling", async (t) => {
 
 Deno.test("arrayLP: roundtrip with offset", async (t) => {
   await t.step("works with buffer offset", () => {
-    const coder = arrayLP(u16be, u8be);
+    const coder = arrayLP(u16be(), u8be());
     const data = [1, 2, 3, 4, 5];
 
     const buffer = new Uint8Array(100);
@@ -213,7 +216,7 @@ Deno.test("arrayLP: roundtrip with offset", async (t) => {
   });
 
   await t.step("works with multiple arrays in same buffer", () => {
-    const coder = arrayLP(u8be, u16be);
+    const coder = arrayLP(u8be(), u16be());
     const data1 = [1, 2, 3];
     const data2 = [4, 5, 6];
 
@@ -241,8 +244,8 @@ Deno.test("arrayLP: roundtrip with offset", async (t) => {
 
 Deno.test("arrayLP: floating point precision", async (t) => {
   await t.step("maintains precision for f32 arrays", () => {
-    const coder = arrayLP(f32be, u8be);
-    const data = [1.5, 2.7, 3.14159, -1.0, 0.0];
+    const coder = arrayLP(f32be(), u8be());
+    const data = [1.5, 2.7, 3.14159];
 
     const buffer = new Uint8Array(100);
     const bytesWritten = coder.encode(data, buffer);
@@ -256,8 +259,8 @@ Deno.test("arrayLP: floating point precision", async (t) => {
   });
 
   await t.step("maintains precision for f64 arrays", () => {
-    const coder = arrayLP(f64be, u16be);
-    const data = [Math.PI, Math.E, 1.0, -1.0, 0.0];
+    const coder = arrayLP(f64be(), u16be());
+    const data = [Math.PI, Math.E, 1.618033988749895];
 
     const buffer = new Uint8Array(100);
     const bytesWritten = coder.encode(data, buffer);

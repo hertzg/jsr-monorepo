@@ -1,4 +1,9 @@
-import type { Coder } from "./mod.ts";
+import {
+  type Coder,
+  isValidLength,
+  LengthType,
+  tryUnrefLength,
+} from "./mod.ts";
 
 /**
  * Creates a Coder for length-prefixed arrays of a given element type.
@@ -29,28 +34,96 @@ export function arrayLP<TDecoded>(
   lengthType: Coder<number>,
 ): Coder<TDecoded[]> {
   return {
-    encode: (decoded, target) => {
+    encode: (decoded, target, context) => {
       let cursor = 0;
-      cursor += lengthType.encode(decoded.length, target.subarray(cursor));
+      cursor += lengthType.encode(
+        decoded.length,
+        target.subarray(cursor),
+        context,
+      );
+
       for (let i = 0; i < decoded.length; i++) {
-        cursor += elementType.encode(decoded[i], target.subarray(cursor));
+        cursor += elementType.encode(
+          decoded[i],
+          target.subarray(cursor),
+          context,
+        );
       }
       return cursor;
     },
-    decode: (encoded) => {
+    decode: (encoded, context) => {
       let cursor = 0;
-      const [length, bytesRead] = lengthType.decode(encoded.subarray(cursor));
+      const [length, bytesRead] = lengthType.decode(
+        encoded.subarray(cursor),
+        context,
+      );
       cursor += bytesRead;
 
       const decoded = new Array<TDecoded>(length);
       for (let i = 0; i < length; i++) {
         const [element, bytesRead] = elementType.decode(
           encoded.subarray(cursor),
+          context,
         );
         cursor += bytesRead;
         decoded[i] = element;
       }
 
+      return [decoded, cursor];
+    },
+  };
+}
+
+export function arrayFL<TDecoded>(
+  elementType: Coder<TDecoded>,
+  length: LengthType,
+): Coder<TDecoded[]> {
+  return {
+    encode: (decoded, target, context) => {
+      const len = tryUnrefLength(length, context) ?? decoded.length;
+
+      if (!isValidLength(len)) {
+        throw new Error(
+          `Invalid length: ${len}. Must be a non-negative integer.`,
+        );
+      }
+
+      if (len != decoded.length) {
+        throw new Error(
+          `Invalid length: ${len}. Must be equal to the decoded length.`,
+        );
+      }
+
+      let cursor = 0;
+      for (let i = 0; i < len; i++) {
+        cursor += elementType.encode(
+          decoded[i],
+          target.subarray(cursor),
+          context,
+        );
+      }
+
+      return cursor;
+    },
+    decode: (encoded, context) => {
+      const len = tryUnrefLength(length, context);
+
+      if (len == null || !isValidLength(len)) {
+        throw new Error(
+          `Invalid length: ${len}. Must be a non-negative integer.`,
+        );
+      }
+
+      const decoded = new Array<TDecoded>();
+      let cursor = 0;
+      for (let i = 0; i < len; i++) {
+        const [element, bytesRead] = elementType.decode(
+          encoded.subarray(cursor),
+          context,
+        );
+        cursor += bytesRead;
+        decoded[i] = element;
+      }
       return [decoded, cursor];
     },
   };

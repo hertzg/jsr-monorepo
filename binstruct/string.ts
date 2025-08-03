@@ -1,4 +1,9 @@
-import type { Coder } from "./mod.ts";
+import {
+  type Coder,
+  isValidLength,
+  type LengthType,
+  tryUnrefLength,
+} from "./mod.ts";
 
 /**
  * Creates a Coder for length-prefixed strings.
@@ -78,7 +83,7 @@ export function stringNT(): Coder<string> {
     },
     decode: (encoded) => {
       let cursor = 0;
-      while (cursor < encoded.length && encoded[cursor] !== 0) {
+      while (cursor < encoded.length && encoded[cursor] !== 0x00) {
         cursor++;
       }
 
@@ -87,6 +92,51 @@ export function stringNT(): Coder<string> {
 
       // Include the null terminator in bytes read
       return [decoded, cursor + 1];
+    },
+  };
+}
+
+export function stringFL(
+  byteLength?: LengthType,
+  decoderEncoding: string = "utf-8",
+  decoderOptions: TextDecoderOptions = {},
+): Coder<string> {
+  return {
+    encode: (decoded, target, ctx) => {
+      const len = tryUnrefLength(byteLength, ctx);
+
+      if (len != null && !isValidLength(len)) {
+        throw new Error(
+          `Invalid length: ${len}. Must be a non-negative integer.`,
+        );
+      }
+
+      const truncated = decoded.slice(0, len);
+      const result = new TextEncoder().encodeInto(
+        truncated,
+        target.subarray(0, len),
+      );
+      return result.written;
+    },
+    decode: (encoded, ctx) => {
+      const len = tryUnrefLength(byteLength, ctx);
+
+      if (len != null && !isValidLength(len)) {
+        throw new Error(
+          `Invalid length: ${len}. Must be a non-negative integer.`,
+        );
+      }
+
+      const stringBytes = encoded.subarray(0, len ?? undefined);
+      const decoded = new TextDecoder(decoderEncoding, {
+        fatal: true,
+        ignoreBOM: true,
+        ...decoderOptions,
+      }).decode(
+        stringBytes,
+      );
+
+      return [decoded, stringBytes.length];
     },
   };
 }

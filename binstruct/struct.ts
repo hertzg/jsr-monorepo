@@ -35,15 +35,15 @@ export function struct<T extends Record<string, Coder<any>>>(
   const keys = Object.keys(schema) as (keyof T)[];
 
   return {
-    encode: (decoded, target) => {
+    encode: (decoded, target, context) => {
       let cursor = 0;
       for (const key of keys) {
         const coder = schema[key];
-        cursor += coder.encode(decoded[key], target.subarray(cursor));
+        cursor += coder.encode(decoded[key], target.subarray(cursor), context);
       }
       return cursor;
     },
-    decode: (encoded) => {
+    decode: (encoded, context) => {
       let cursor = 0;
       const result = {} as {
         [K in keyof T]: T[K] extends Coder<infer U> ? U : never;
@@ -51,7 +51,10 @@ export function struct<T extends Record<string, Coder<any>>>(
 
       for (const key of keys) {
         const coder = schema[key];
-        const [value, bytesRead] = coder.decode(encoded.subarray(cursor));
+        const [value, bytesRead] = coder.decode(
+          encoded.subarray(cursor),
+          context,
+        );
         cursor += bytesRead;
         result[key] = value;
       }

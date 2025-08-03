@@ -16,9 +16,9 @@ import { stringLP, stringNT } from "./string.ts";
 Deno.test("struct: basic functionality", async (t) => {
   await t.step("encodes and decodes simple struct", () => {
     const personCoder = struct({
-      id: u32be,
-      age: u8be,
-      height: f32be,
+      id: u32be(),
+      age: u8be(),
+      height: f32be(),
     });
 
     const person = { id: 12345, age: 30, height: 1.75 };
@@ -32,14 +32,14 @@ Deno.test("struct: basic functionality", async (t) => {
 
   await t.step("encodes and decodes struct with all numeric types", () => {
     const dataCoder = struct({
-      u8: u8be,
-      u16: u16be,
-      u32: u32be,
-      s8: s8be,
-      s16: s16be,
-      s32: s32be,
-      f32: f32be,
-      f64: f64be,
+      u8: u8be(),
+      u16: u16be(),
+      u32: u32be(),
+      s8: s8be(),
+      s16: s16be(),
+      s32: s32be(),
+      f32: f32be(),
+      f64: f64be(),
     });
 
     const data = {
@@ -82,9 +82,9 @@ Deno.test("struct: basic functionality", async (t) => {
 
   await t.step("encodes and decodes struct with arrays", () => {
     const gameStateCoder = struct({
-      playerCount: u8be,
-      scores: arrayLP(u16be, u8be),
-      positions: arrayLP(f32be, u8be),
+      playerCount: u8be(),
+      scores: arrayLP(u16be(), u8be()),
+      positions: arrayLP(f32be(), u8be()),
     });
 
     const gameState = {
@@ -111,10 +111,10 @@ Deno.test("struct: basic functionality", async (t) => {
 
   await t.step("encodes and decodes struct with string fields", () => {
     const userCoder = struct({
-      id: u32be,
-      name: stringLP(u16be),
+      id: u32be(),
+      name: stringLP(u16be()),
       email: stringNT(),
-      bio: stringLP(u32be),
+      bio: stringLP(u32be()),
     });
 
     const user = {
@@ -139,9 +139,9 @@ Deno.test("struct: basic functionality", async (t) => {
 Deno.test("struct: property order", async (t) => {
   await t.step("maintains property order", () => {
     const orderCoder = struct({
-      first: u8be,
-      second: u16be,
-      third: u32be,
+      first: u8be(),
+      second: u16be(),
+      third: u32be(),
     });
 
     const data = { first: 1, second: 2, third: 3 };
@@ -159,15 +159,15 @@ Deno.test("struct: property order", async (t) => {
 
   await t.step("works with different property orders", () => {
     const coder1 = struct({
-      a: u8be,
-      b: u16be,
-      c: u32be,
+      a: u8be(),
+      b: u16be(),
+      c: u32be(),
     });
 
     const coder2 = struct({
-      c: u32be,
-      a: u8be,
-      b: u16be,
+      c: u32be(),
+      a: u8be(),
+      b: u16be(),
     });
 
     const data1 = { a: 1, b: 2, c: 3 };
@@ -192,7 +192,7 @@ Deno.test("struct: property order", async (t) => {
 Deno.test("struct: edge cases", async (t) => {
   await t.step("handles struct with single property", () => {
     const singleCoder = struct({
-      value: u32be,
+      value: u32be(),
     });
 
     const data = { value: 42 };
@@ -206,16 +206,16 @@ Deno.test("struct: edge cases", async (t) => {
 
   await t.step("handles struct with many properties", () => {
     const manyPropsCoder = struct({
-      p1: u8be,
-      p2: u8be,
-      p3: u8be,
-      p4: u8be,
-      p5: u8be,
-      p6: u8be,
-      p7: u8be,
-      p8: u8be,
-      p9: u8be,
-      p10: u8be,
+      p1: u8be(),
+      p2: u8be(),
+      p3: u8be(),
+      p4: u8be(),
+      p5: u8be(),
+      p6: u8be(),
+      p7: u8be(),
+      p8: u8be(),
+      p9: u8be(),
+      p10: u8be(),
     });
 
     const data = {
@@ -241,11 +241,11 @@ Deno.test("struct: edge cases", async (t) => {
 
   await t.step("handles struct with zero values", () => {
     const zeroCoder = struct({
-      u8: u8be,
-      u16: u16be,
-      u32: u32be,
-      f32: f32be,
-      f64: f64be,
+      u8: u8be(),
+      u16: u16be(),
+      u32: u32be(),
+      f32: f32be(),
+      f64: f64be(),
     });
 
     const data = {
@@ -270,12 +270,12 @@ Deno.test("struct: edge cases", async (t) => {
 
   await t.step("handles struct with maximum values", () => {
     const maxCoder = struct({
-      u8: u8be,
-      u16: u16be,
-      u32: u32be,
-      s8: s8be,
-      s16: s16be,
-      s32: s32be,
+      u8: u8be(),
+      u16: u16be(),
+      u32: u32be(),
+      s8: s8be(),
+      s16: s16be(),
+      s32: s32be(),
     });
 
     const data = {
@@ -297,10 +297,10 @@ Deno.test("struct: edge cases", async (t) => {
 
   await t.step("handles struct with arrays of strings", () => {
     const configCoder = struct({
-      version: u8be,
-      names: arrayLP(stringLP(u16be), u8be),
-      tags: arrayLP(stringNT(), u8be),
-      description: stringLP(u32be),
+      version: u8be(),
+      names: arrayLP(stringLP(u16be()), u8be()),
+      tags: arrayLP(stringNT(), u8be()),
+      description: stringLP(u32be()),
     });
 
     const config = {
@@ -325,8 +325,8 @@ Deno.test("struct: edge cases", async (t) => {
 Deno.test("struct: error handling", async (t) => {
   await t.step("throws on buffer too small for first property", () => {
     const coder = struct({
-      id: u32be,
-      age: u8be,
+      id: u32be(),
+      age: u8be(),
     });
 
     const data = { id: 12345, age: 30 };
@@ -340,8 +340,8 @@ Deno.test("struct: error handling", async (t) => {
 
   await t.step("throws on buffer too small for later property", () => {
     const coder = struct({
-      id: u8be,
-      age: u32be,
+      id: u8be(),
+      age: u32be(),
     });
 
     const data = { id: 123, age: 30 };
@@ -355,8 +355,8 @@ Deno.test("struct: error handling", async (t) => {
 
   await t.step("throws on empty buffer", () => {
     const coder = struct({
-      id: u32be,
-      age: u8be,
+      id: u32be(),
+      age: u8be(),
     });
 
     const emptyBuffer = new Uint8Array(0);
@@ -367,9 +367,9 @@ Deno.test("struct: error handling", async (t) => {
 Deno.test("struct: roundtrip with offset", async (t) => {
   await t.step("works with buffer offset", () => {
     const coder = struct({
-      id: u16be,
-      age: u8be,
-      height: f32be,
+      id: u16be(),
+      age: u8be(),
+      height: f32be(),
     });
 
     const data = { id: 12345, age: 30, height: 1.75 };
@@ -386,8 +386,8 @@ Deno.test("struct: roundtrip with offset", async (t) => {
 
   await t.step("works with multiple structs in same buffer", () => {
     const coder = struct({
-      id: u8be,
-      value: u16be,
+      id: u8be(),
+      value: u16be(),
     });
 
     const data1 = { id: 1, value: 100 };
@@ -418,9 +418,9 @@ Deno.test("struct: roundtrip with offset", async (t) => {
 Deno.test("struct: floating point precision", async (t) => {
   await t.step("maintains precision for f32 properties", () => {
     const coder = struct({
-      x: f32be,
-      y: f32be,
-      z: f32be,
+      x: f32be(),
+      y: f32be(),
+      z: f32be(),
     });
 
     const data = { x: 1.5, y: 2.7, z: 3.14159 };
@@ -436,9 +436,9 @@ Deno.test("struct: floating point precision", async (t) => {
 
   await t.step("maintains precision for f64 properties", () => {
     const coder = struct({
-      pi: f64be,
-      e: f64be,
-      phi: f64be,
+      pi: f64be(),
+      e: f64be(),
+      phi: f64be(),
     });
 
     const data = { pi: Math.PI, e: Math.E, phi: 1.618033988749895 };
@@ -456,12 +456,12 @@ Deno.test("struct: floating point precision", async (t) => {
 Deno.test("struct: complex nested structures", async (t) => {
   await t.step("handles struct with nested arrays", () => {
     const nestedCoder = struct({
-      id: u32be,
-      tags: arrayLP(u8be, u8be),
-      scores: arrayLP(u16be, u8be),
+      id: u32be(),
+      tags: arrayLP(u8be(), u8be()),
+      scores: arrayLP(u16be(), u8be()),
       metadata: struct({
-        created: u32be,
-        updated: u32be,
+        created: u32be(),
+        updated: u32be(),
       }),
     });
 
@@ -489,14 +489,14 @@ Deno.test("struct: complex nested structures", async (t) => {
 
   await t.step("handles struct with arrays of structs", () => {
     const playerCoder = struct({
-      id: u8be,
-      name: arrayLP(u8be, u8be), // array of bytes representing string
-      score: u32be,
+      id: u8be(),
+      name: arrayLP(u8be(), u8be()), // array of bytes representing string
+      score: u32be(),
     });
 
     const gameCoder = struct({
-      gameId: u32be,
-      players: arrayLP(playerCoder, u8be),
+      gameId: u32be(),
+      players: arrayLP(playerCoder, u8be()),
     });
 
     const data = {

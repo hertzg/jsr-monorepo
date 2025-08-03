@@ -75,6 +75,10 @@ function dataViewType<TValue extends number | bigint>(
       return bytes;
     },
     decode: (encoded) => {
+      if (encoded.length < bytes) {
+        throw new Error(`Need ${bytes} bytes, got ${encoded.length}`);
+      }
+
       const dataView = new DataView(
         encoded.buffer,
         encoded.byteOffset,

@@ -86,14 +86,23 @@
  * @module
  */
 
+import { isRef, type RefValue } from "./ref.ts";
+
 export type ValueWithBytes<T> = [T, number];
+
+export type Context = {
+  direction: "encode" | "decode";
+  refs: WeakMap<Coder<any>, any>;
+};
 
 export type Encoder<TDecoded> = (
   decoded: TDecoded,
   target: Uint8Array,
+  context?: Context,
 ) => number;
 export type Decoder<TDecoded> = (
   encoded: Uint8Array,
+  context?: Context,
 ) => ValueWithBytes<TDecoded>;
 
 export type Coder<TDecoded> = {
@@ -105,3 +114,4 @@ export * from "./array.ts";
 export * from "./numeric.ts";
 export * from "./string.ts";
 export * from "./struct.ts";
+export * from "./ref.ts";
