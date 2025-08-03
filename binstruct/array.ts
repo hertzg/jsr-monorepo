@@ -21,7 +21,7 @@ import {
  * import { arrayLP } from "@hertzg/binstruct/array";
  * import { u32be, u8be } from "@hertzg/binstruct/numeric";
  *
- * const numberArrayCoder = arrayLP(u8be, u32be);
+ * const numberArrayCoder = arrayLP(u8be(), u32be());
  *
  * const buffer = new Uint8Array(100);
  * const bytesWritten = numberArrayCoder.encode([1, 2, 3, 4], buffer);

@@ -16,9 +16,9 @@ import type { Coder } from "./mod.ts";
  * import { u32be, u8be, f32be } from "@hertzg/binstruct/numeric";
  *
  * const personCoder = struct({
- *   id: u32be,
- *   age: u8be,
- *   height: f32be,
+ *   id: u32be(),
+ *   age: u8be(),
+ *   height: f32be(),
  * });
  *
  * const buffer = new Uint8Array(100);

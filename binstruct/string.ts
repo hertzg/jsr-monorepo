@@ -20,7 +20,7 @@ import {
  * import { stringLP } from "@hertzg/binstruct/string";
  * import { u32be } from "@hertzg/binstruct/numeric";
  *
- * const stringCoder = stringLP(u32be);
+ * const stringCoder = stringLP(u32be());
  *
  * const buffer = new Uint8Array(100);
  * const bytesWritten = stringCoder.encode("Hello, World!", buffer);

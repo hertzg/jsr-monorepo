@@ -23,7 +23,7 @@ import {
  * const buffer = new Uint8Array(100);
  * const written = fixed.encode(data, buffer);
  * const [decoded] = fixed.decode(buffer);
- * assertEquals(decoded, new Uint8Array([1, 2, 3, 4]));
+ * assertEquals(Array.from(decoded), [1, 2, 3, 4]);
  *
  * // Variable length - consumes all bytes
  * const variable = bytes();
