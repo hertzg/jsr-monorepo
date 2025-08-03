@@ -75,7 +75,7 @@ Deno.test("ref function", () => {
 
 Deno.test("isRef function", () => {
   const mockCoder = u8be();
-  const mockContext: Context = {
+  const _mockContext: Context = {
     direction: "encode",
     refs: new WeakMap(),
   };
@@ -98,7 +98,7 @@ Deno.test("isRef function", () => {
 
   // Test with functions that have the symbol but aren't refs
   const fakeRef = () => 42;
-  (fakeRef as any)[Symbol("ref")] = "not true";
+  (fakeRef as unknown as Record<symbol, string>)[Symbol("ref")] = "not true";
   assertEquals(isRef(fakeRef), false);
 });
 
@@ -157,7 +157,10 @@ Deno.test("ref symbol uniqueness", () => {
   // Test that the symbol is properly set
   const kRefSymbol = Symbol("ref");
   assertEquals(kRefSymbol in refValue, false); // Actual behavior
-  assertEquals((refValue as any)[kRefSymbol], undefined); // Actual behavior
+  assertEquals(
+    (refValue as unknown as Record<symbol, unknown>)[kRefSymbol],
+    undefined,
+  ); // Actual behavior
 
   // Test that it's not enumerable
   const keys = Object.keys(refValue);

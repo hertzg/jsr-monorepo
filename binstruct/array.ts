@@ -1,7 +1,7 @@
 import {
   type Coder,
   isValidLength,
-  LengthType,
+  type LengthType,
   tryUnrefLength,
 } from "./mod.ts";
 
