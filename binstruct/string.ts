@@ -1,5 +1,5 @@
-import { type Coder, type Context, createContext } from "./mod.ts";
 import { isValidLength, type LengthType, tryUnrefLength } from "./length.ts";
+import { type Coder, createContext } from "./mod.ts";
 
 /**
  * Creates a Coder for length-prefixed strings.
