@@ -1,5 +1,12 @@
 ### 2025.08.06
 
+#### @hertzg/binstruct 0.1.3 (patch)
+
+- feat(binstruct): improve context handling in coders and update imports for
+  consistency
+
+### 2025.08.06
+
 #### @hertzg/binstruct 0.1.2 (patch)
 
 - feat(binstruct): add support for bytes and enhance module documentation
