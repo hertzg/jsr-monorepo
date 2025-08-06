@@ -90,7 +90,7 @@ export type ValueWithBytes<T> = [T, number];
 
 export type Context = {
   direction: "encode" | "decode";
-  refs: WeakMap<Coder<number>, number>;
+  refs: WeakMap<Coder<unknown>, unknown>;
 };
 
 export type Encoder<TDecoded> = (

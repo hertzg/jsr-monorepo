@@ -62,23 +62,29 @@ export function bytes(
       return len;
     },
     decode: (encoded, ctx) => {
-      const len = tryUnrefLength(length, ctx) ?? encoded.length;
+      const len = tryUnrefLength(length, ctx);
 
-      if (!isValidLength(len)) {
-        throw new Error(
-          `Invalid length: ${len}. Must be a non-negative integer.`,
-        );
+      if (len != null) {
+        // Fixed length case
+        if (!isValidLength(len)) {
+          throw new Error(
+            `Invalid length: ${len}. Must be a non-negative integer.`,
+          );
+        }
+
+        if (encoded.length < len) {
+          throw new Error(
+            `Need ${len} bytes, got ${encoded.length}`,
+          );
+        }
+
+        // For fixed length, only read the specified number of bytes
+        const result = encoded.subarray(0, len);
+        return [result, len];
+      } else {
+        // Variable length case - read all available bytes
+        return [encoded, encoded.length];
       }
-
-      if (encoded.length < len) {
-        throw new Error(
-          `Need ${len} bytes, got ${encoded.length}`,
-        );
-      }
-
-      // For fixed length, only read the specified number of bytes
-      const result = encoded.subarray(0, len);
-      return [result, len];
     },
   };
 }

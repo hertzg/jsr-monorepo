@@ -11,12 +11,12 @@ export function isValidLength(length: number): boolean {
 export function tryUnrefLength(
   length: LengthType | undefined | null,
   ctx: Context | undefined | null,
-): number | undefined {
-  if (length == null || ctx == null) {
-    return undefined;
+): number | undefined | null {
+  if (ctx != null) {
+    return isRef<number>(length) ? length(ctx) : length;
   }
 
-  return isRef<number>(length) ? length(ctx) : length;
+  return length as number | undefined | null;
 }
 
 export type RefValue<TDecoded> = {
@@ -26,11 +26,11 @@ export type RefValue<TDecoded> = {
 
 export function ref<TDecoded>(coder: Coder<TDecoded>): RefValue<TDecoded> {
   const unref: RefValue<TDecoded> = (ctx: Context) => {
-    if (!ctx.refs.has(coder)) {
+    if (!ctx.refs.has(coder as Coder<unknown>)) {
       throw new Error("Ref not found");
     }
 
-    return ctx.refs.get(coder)!;
+    return ctx.refs.get(coder as Coder<unknown>)! as TDecoded;
   };
 
   unref[kRefSymbol] = true;

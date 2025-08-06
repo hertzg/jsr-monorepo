@@ -103,7 +103,7 @@ export function stringFL(
 ): Coder<string> {
   return {
     encode: (decoded, target, ctx) => {
-      const len = tryUnrefLength(byteLength, ctx);
+      const len = tryUnrefLength(byteLength, ctx) ?? decoded.length;
 
       if (len != null && !isValidLength(len)) {
         throw new Error(
@@ -111,17 +111,14 @@ export function stringFL(
         );
       }
 
-      const truncated = decoded.slice(0, len);
-      const result = new TextEncoder().encodeInto(
-        truncated,
-        target.subarray(0, len),
-      );
-      return result.written;
+      const truncated = target.subarray(0, len);
+      const encoded = new TextEncoder().encodeInto(decoded, truncated);
+      return encoded.written;
     },
     decode: (encoded, ctx) => {
-      const len = tryUnrefLength(byteLength, ctx);
+      const len = tryUnrefLength(byteLength, ctx) ?? encoded.length;
 
-      if (len != null && !isValidLength(len)) {
+      if (!isValidLength(len)) {
         throw new Error(
           `Invalid length: ${len}. Must be a non-negative integer.`,
         );

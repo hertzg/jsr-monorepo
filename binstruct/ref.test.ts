@@ -1,5 +1,5 @@
 import { assertEquals, assertThrows } from "@std/assert";
-import type { Context } from "./mod.ts";
+import type { Coder, Context } from "./mod.ts";
 import { u8be } from "./numeric.ts";
 import { isRef, isValidLength, ref, tryUnrefLength } from "./ref.ts";
 
@@ -27,10 +27,10 @@ Deno.test("tryUnrefLength", () => {
   };
 
   // Test with null/undefined values
-  assertEquals(tryUnrefLength(null, null), undefined);
+  assertEquals(tryUnrefLength(null, null), null);
   assertEquals(tryUnrefLength(undefined, undefined), undefined);
-  assertEquals(tryUnrefLength(5, null), undefined);
-  assertEquals(tryUnrefLength(10, undefined), undefined);
+  assertEquals(tryUnrefLength(5, null), 5);
+  assertEquals(tryUnrefLength(10, undefined), 10);
 
   // Test with numeric values
   assertEquals(tryUnrefLength(0, mockContext), 0);
@@ -40,7 +40,7 @@ Deno.test("tryUnrefLength", () => {
   // Test with ref values
   const mockCoder = u8be();
   const mockRef = ref(mockCoder);
-  mockContext.refs.set(mockCoder, 123);
+  mockContext.refs.set(mockCoder as Coder<unknown>, 123);
 
   assertEquals(tryUnrefLength(mockRef, mockContext), 123);
 });
@@ -53,7 +53,7 @@ Deno.test("ref function", () => {
   };
 
   // Set up a ref value in the context
-  mockContext.refs.set(mockCoder, 42);
+  mockContext.refs.set(mockCoder as Coder<unknown>, 42);
 
   // Create a ref
   const refValue = ref(mockCoder);
@@ -116,13 +116,13 @@ Deno.test("ref integration with context", () => {
   assertThrows(() => refValue(context), Error, "Ref not found");
 
   // Set the ref value
-  context.refs.set(mockCoder, 99);
+  context.refs.set(mockCoder as Coder<unknown>, 99);
 
   // Now should resolve correctly
   assertEquals(refValue(context), 99);
 
   // Test with different values
-  context.refs.set(mockCoder, 255);
+  context.refs.set(mockCoder as Coder<unknown>, 255);
   assertEquals(refValue(context), 255);
 });
 
@@ -138,14 +138,14 @@ Deno.test("ref with multiple coders", () => {
   const ref2 = ref(coder2);
 
   // Set different values for different coders
-  context.refs.set(coder1, 10);
-  context.refs.set(coder2, 20);
+  context.refs.set(coder1 as Coder<unknown>, 10);
+  context.refs.set(coder2 as Coder<unknown>, 20);
 
   assertEquals(ref1(context), 10);
   assertEquals(ref2(context), 20);
 
   // Verify they don't interfere with each other
-  context.refs.set(coder1, 30);
+  context.refs.set(coder1 as Coder<unknown>, 30);
   assertEquals(ref1(context), 30);
   assertEquals(ref2(context), 20);
 });
@@ -179,7 +179,7 @@ Deno.test("tryUnrefLength with refs", () => {
 
   // Test with ref length
   const refLength = ref(mockCoder);
-  context.refs.set(mockCoder, 100);
+  context.refs.set(mockCoder as Coder<unknown>, 100);
   assertEquals(tryUnrefLength(refLength, context), 100); // Actual behavior
 
   // Test with ref that doesn't exist in context - should throw

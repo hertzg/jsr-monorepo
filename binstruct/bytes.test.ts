@@ -9,10 +9,10 @@ Deno.test("bytes - fixed length", () => {
   const written = coder.encode(data, buffer);
   const [decoded, read] = coder.decode(buffer);
 
-  // Current implementation writes the full data length and reads the full buffer
-  assertEquals(decoded, buffer);
-  assertEquals(written, data.length);
-  assertEquals(read, buffer.length);
+  // Should truncate to the specified length
+  assertEquals(Array.from(decoded), [1, 2, 3, 4]);
+  assertEquals(written, 4);
+  assertEquals(read, 4);
 });
 
 Deno.test("bytes - variable length", () => {
@@ -43,10 +43,10 @@ Deno.test("bytes - different lengths", () => {
     const written = coder.encode(data, buffer);
     const [decoded, read] = coder.decode(buffer);
 
-    // Current implementation always writes full data length and reads full buffer
-    assertEquals(decoded, buffer);
-    assertEquals(written, data.length);
-    assertEquals(read, buffer.length);
+    // Should decode only the specified length, and match the first `length` bytes of data
+    assertEquals(Array.from(decoded), Array.from(data.subarray(0, length)));
+    assertEquals(written, length);
+    assertEquals(read, length);
   }
 });
 
@@ -57,11 +57,8 @@ Deno.test("bytes - error on invalid length", () => {
 
 Deno.test("bytes - error on insufficient buffer", () => {
   const coder = bytes(4);
-  const shortBuffer = new Uint8Array(2);
+  const shortBuffer = new Uint8Array([1, 2]); // Only 2 bytes
 
-  // Current implementation doesn't throw for insufficient buffer
-  // It just reads what it can
-  const [decoded, read] = coder.decode(shortBuffer);
-  assertEquals(decoded, shortBuffer);
-  assertEquals(read, 2);
+  // Should throw for insufficient buffer
+  assertThrows(() => coder.decode(shortBuffer), Error, "Need 4 bytes, got 2");
 });
