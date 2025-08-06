@@ -7,7 +7,8 @@
     "./array": "./array.ts",
     "./struct": "./struct.ts",
     "./string": "./string.ts",
-    "./bytes": "./bytes.ts"
+    "./bytes": "./bytes.ts",
+    "./ref": "./ref.ts"
   },
   "types": "./mod.ts",
   "files": [
@@ -17,6 +18,7 @@
     "array.ts",
     "struct.ts",
     "string.ts",
-    "bytes.ts"
+    "bytes.ts",
+    "ref.ts"
   ]
 }

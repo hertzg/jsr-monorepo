@@ -19,69 +19,80 @@
  * - {@link arrayLP}: Create coders for arrays
  * - Numeric coders: `u8`, `u16`, `u32`, `u64`, `s8`, `s16`, `s32`, `s64`, `f16`, `f32`, `f64`
  *
- * @example Reading and writing structured data with arrays:
+ * @example Reading and writing BMP file headers:
  * ```ts
  * import { assertEquals } from "@std/assert";
  * import { struct } from "@hertzg/binstruct/struct";
- * import { stringLP } from "@hertzg/binstruct/string";
- * import { arrayLP } from "@hertzg/binstruct/array";
- * import { u32be, u16be, u8be, f64be } from "@hertzg/binstruct/numeric";
+ * import { u16le, u32le, s32le } from "@hertzg/binstruct/numeric";
  *
- * // Define a user profile structure
- * const userProfileCoder = struct({
- *   id: u32be(),
- *   name: stringLP(u16be()),
- *   age: u8be(),
- *   score: f64be(),
- *   isActive: u8be(), // boolean as 0/1
+ * // Define BMP file header structure (little-endian format)
+ * const bmpHeaderCoder = struct({
+ *   // BMP file signature
+ *   signature: u16le(), // "BM" (0x4D42)
+ *   fileSize: u32le(),  // Size of the BMP file in bytes
+ *   reserved1: u16le(), // Reserved field (must be 0)
+ *   reserved2: u16le(), // Reserved field (must be 0)
+ *   dataOffset: u32le(), // Offset to image data
  * });
  *
- * // Define a team structure containing an array of user profiles
- * const teamCoder = struct({
- *   teamId: u32be(),
- *   teamName: stringLP(u16be()),
- *   members: arrayLP(userProfileCoder, u16be()),
- *   createdAt: u32be(),
+ * // Define DIB header structure (BITMAPINFOHEADER format)
+ * const dibHeaderCoder = struct({
+ *   headerSize: u32le(),     // Size of DIB header (40 bytes for BITMAPINFOHEADER)
+ *   width: s32le(),          // Image width in pixels
+ *   height: s32le(),         // Image height in pixels (positive = bottom-up)
+ *   colorPlanes: u16le(),    // Number of color planes (must be 1)
+ *   bitsPerPixel: u16le(),   // Bits per pixel (1, 4, 8, 16, 24, 32)
+ *   compression: u32le(),     // Compression method (0 = none)
+ *   imageSize: u32le(),      // Size of image data in bytes
+ *   xPixelsPerMeter: s32le(), // Horizontal resolution (pixels per meter)
+ *   yPixelsPerMeter: s32le(), // Vertical resolution (pixels per meter)
+ *   colorsInPalette: u32le(), // Number of colors in palette (0 = 2^n)
+ *   importantColors: u32le(), // Number of important colors (0 = all)
  * });
  *
- * // Create team data with array of user profiles
- * const team = {
- *   teamId: 1001,
- *   teamName: "Engineering Team",
- *   members: [
- *     {
- *       id: 1,
- *       name: "Alice Johnson",
- *       age: 28,
- *       score: 95.5,
- *       isActive: 1,
- *     },
- *     {
- *       id: 2,
- *       name: "Bob Smith",
- *       age: 32,
- *       score: 87.2,
- *       isActive: 1,
- *     },
- *     {
- *       id: 3,
- *       name: "Carol Davis",
- *       age: 25,
- *       score: 92.8,
- *       isActive: 0,
- *     },
- *   ],
- *   createdAt: 1704067200,
+ * // Define complete BMP file structure
+ * const bmpFileCoder = struct({
+ *   header: bmpHeaderCoder,
+ *   dibHeader: dibHeaderCoder,
+ *   // Note: Pixel data would be added here in a real implementation
+ * });
+ *
+ * // Create a sample BMP file data
+ * const bmpData = {
+ *   header: {
+ *     signature: 0x4D42, // "BM"
+ *     fileSize: 54,      // Header size (14 + 40 bytes)
+ *     reserved1: 0,
+ *     reserved2: 0,
+ *     dataOffset: 54,    // Offset to pixel data
+ *   },
+ *   dibHeader: {
+ *     headerSize: 40,           // BITMAPINFOHEADER size
+ *     width: 100,               // 100 pixels wide
+ *     height: 100,              // 100 pixels tall
+ *     colorPlanes: 1,           // Single color plane
+ *     bitsPerPixel: 24,         // 24-bit color (RGB)
+ *     compression: 0,            // No compression
+ *     imageSize: 30000,         // 100 * 100 * 3 bytes
+ *     xPixelsPerMeter: 2835,    // 72 DPI equivalent
+ *     yPixelsPerMeter: 2835,    // 72 DPI equivalent
+ *     colorsInPalette: 0,       // No palette for 24-bit
+ *     importantColors: 0,       // All colors important
+ *   },
  * };
  *
- * // Encode to binary
- * const buffer = new Uint8Array(2048);
- * const bytesWritten = teamCoder.encode(team, buffer);
+ * // Encode BMP data to binary
+ * const buffer = new Uint8Array(1024);
+ * const bytesWritten = bmpFileCoder.encode(bmpData, buffer);
  *
- * // Decode from binary
- * const [decoded, bytesRead] = teamCoder.decode(buffer);
- * assertEquals(decoded, team, 'team data should be identical after roundtrip');
+ * // Decode BMP data from binary
+ * const [decoded, bytesRead] = bmpFileCoder.decode(buffer);
+ * assertEquals(decoded, bmpData, 'BMP data should be identical after roundtrip');
  * assertEquals(bytesWritten, bytesRead, 'bytes written should equal bytes read');
+ *
+ * // Verify BMP signature
+ * assertEquals(decoded.header.signature, 0x4D42, 'BMP signature should be "BM"');
+ * assertEquals(decoded.dibHeader.bitsPerPixel, 24, 'Should be 24-bit color');
  * ```
  * @module
  */
