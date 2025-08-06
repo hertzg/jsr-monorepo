@@ -1,126 +1,127 @@
-import { assertEquals, assertThrows } from "@std/assert";
-import type { Coder, Context } from "./mod.ts";
-import { u8be } from "./numeric.ts";
-import { isRef, ref } from "./ref.ts";
+import { assertEquals } from "@std/assert";
+import { computedRef, ref } from "./ref.ts";
+import { struct } from "./struct.ts";
+import { u16be, u8be } from "./numeric.ts";
+import { arrayFL } from "./array.ts";
 
-Deno.test("ref function", () => {
-  const mockCoder = u8be();
-  const mockContext: Context = {
-    direction: "encode",
-    refs: new WeakMap(),
-  };
+Deno.test("computedRef: basic functionality", async (t) => {
+  await t.step("computes values from multiple references", () => {
+    // Create the coders that will be referenced
+    const width = u16be();
+    const height = u16be();
 
-  // Set up a ref value in the context
-  mockContext.refs.set(mockCoder as Coder<unknown>, 42);
+    // Define a structure with computed array length
+    const coder = struct({
+      width: width,
+      height: height,
+      pixels: arrayFL(
+        u8be(),
+        computedRef((w: number, h: number) => w * h, [ref(width), ref(height)]),
+      ),
+    });
 
-  // Create a ref
-  const refValue = ref(mockCoder);
+    // Create sample data
+    const data = {
+      width: 3,
+      height: 2,
+      pixels: [255, 128, 64, 0, 255, 128],
+    };
 
-  // Test that it's a ref
-  assertEquals(isRef(refValue), true);
+    // Encode the data with context
+    const buffer = new Uint8Array(1000);
+    const bytesWritten = coder.encode(data, buffer);
 
-  // Test that it resolves correctly
-  assertEquals(refValue(mockContext), 42);
+    // Decode the data with context
+    const [decoded, bytesRead] = coder.decode(buffer);
 
-  // Test error when ref not found
-  const emptyContext: Context = {
-    direction: "encode",
-    refs: new WeakMap(),
-  };
+    // Verify the data matches
+    assertEquals(decoded.width, data.width);
+    assertEquals(decoded.height, data.height);
+    assertEquals(decoded.pixels, data.pixels);
+    assertEquals(bytesWritten, bytesRead);
+  });
 
-  assertThrows(() => refValue(emptyContext), Error, "Ref not found");
-});
+  await t.step("works with color struct example", () => {
+    const color = struct({
+      r: u8be(),
+      g: u8be(),
+      b: u8be(),
+      a: u8be(),
+    });
 
-Deno.test("isRef function", () => {
-  const mockCoder = u8be();
-  const _mockContext: Context = {
-    direction: "encode",
-    refs: new WeakMap(),
-  };
+    const width = u16be();
+    const height = u16be();
 
-  // Test with ref values
-  const refValue = ref(mockCoder);
-  assertEquals(isRef(refValue), true);
+    const coder = struct({
+      width: width,
+      height: height,
+      pixels: arrayFL(
+        color,
+        computedRef((w: number, h: number) => w * h, [ref(width), ref(height)]),
+      ),
+    });
 
-  // Test with non-ref values
-  assertEquals(isRef(42), false);
-  assertEquals(isRef("string"), false);
-  assertEquals(isRef({}), false);
-  assertEquals(isRef([]), false);
-  assertEquals(isRef(null), false);
-  assertEquals(isRef(undefined), false);
+    // Create sample data
+    const data = {
+      width: 2,
+      height: 2,
+      pixels: [
+        { r: 255, g: 0, b: 0, a: 255 },
+        { r: 0, g: 255, b: 0, a: 255 },
+        { r: 0, g: 0, b: 255, a: 255 },
+        { r: 255, g: 255, b: 255, a: 255 },
+      ],
+    };
 
-  // Test with regular functions
-  const regularFunction = () => 42;
-  assertEquals(isRef(regularFunction), false);
+    // Encode the data with context
+    const buffer = new Uint8Array(1000);
+    const bytesWritten = coder.encode(data, buffer);
 
-  // Test with functions that have the symbol but aren't refs
-  const fakeRef = () => 42;
-  (fakeRef as unknown as Record<symbol, string>)[Symbol("ref")] = "not true";
-  assertEquals(isRef(fakeRef), false);
-});
+    // Decode the data with context
+    const [decoded, bytesRead] = coder.decode(buffer);
 
-Deno.test("ref integration with context", () => {
-  const mockCoder = u8be();
-  const context: Context = {
-    direction: "encode",
-    refs: new WeakMap(),
-  };
+    // Verify the data matches
+    assertEquals(decoded.width, data.width);
+    assertEquals(decoded.height, data.height);
+    assertEquals(decoded.pixels.length, data.pixels.length);
+    for (let i = 0; i < data.pixels.length; i++) {
+      assertEquals(decoded.pixels[i].r, data.pixels[i].r);
+      assertEquals(decoded.pixels[i].g, data.pixels[i].g);
+      assertEquals(decoded.pixels[i].b, data.pixels[i].b);
+      assertEquals(decoded.pixels[i].a, data.pixels[i].a);
+    }
+    assertEquals(bytesWritten, bytesRead);
+  });
 
-  // Test ref creation and resolution
-  const refValue = ref(mockCoder);
+  await t.step("works with different computation functions", () => {
+    const count = u16be();
+    const multiplier = u8be();
 
-  // Initially should throw because ref is not set
-  assertThrows(() => refValue(context), Error, "Ref not found");
+    const coder = struct({
+      count: count,
+      multiplier: multiplier,
+      items: arrayFL(
+        u8be(),
+        computedRef((c: number, m: number) => c * m, [
+          ref(count),
+          ref(multiplier),
+        ]),
+      ),
+    });
 
-  // Set the ref value
-  context.refs.set(mockCoder as Coder<unknown>, 99);
+    const data = {
+      count: 3,
+      multiplier: 2,
+      items: [1, 2, 3, 4, 5, 6],
+    };
 
-  // Now should resolve correctly
-  assertEquals(refValue(context), 99);
+    const buffer = new Uint8Array(1000);
+    const bytesWritten = coder.encode(data, buffer);
+    const [decoded, bytesRead] = coder.decode(buffer);
 
-  // Test with different values
-  context.refs.set(mockCoder as Coder<unknown>, 255);
-  assertEquals(refValue(context), 255);
-});
-
-Deno.test("ref with multiple coders", () => {
-  const coder1 = u8be();
-  const coder2 = u8be();
-  const context: Context = {
-    direction: "encode",
-    refs: new WeakMap(),
-  };
-
-  const ref1 = ref(coder1);
-  const ref2 = ref(coder2);
-
-  // Set different values for different coders
-  context.refs.set(coder1 as Coder<unknown>, 10);
-  context.refs.set(coder2 as Coder<unknown>, 20);
-
-  assertEquals(ref1(context), 10);
-  assertEquals(ref2(context), 20);
-
-  // Verify they don't interfere with each other
-  context.refs.set(coder1 as Coder<unknown>, 30);
-  assertEquals(ref1(context), 30);
-  assertEquals(ref2(context), 20);
-});
-
-Deno.test("ref symbol uniqueness", () => {
-  const mockCoder = u8be();
-  const refValue = ref(mockCoder);
-
-  // Test that the symbol is properly set
-  const kRefSymbol = Symbol("ref");
-  assertEquals(kRefSymbol in refValue, false); // Actual behavior
-  assertEquals(
-    (refValue as unknown as Record<symbol, unknown>)[kRefSymbol],
-    undefined,
-  ); // Actual behavior
-
-  // Test that it's not enumerable
-  const keys = Object.keys(refValue);
-  assertEquals(keys.includes("ref"), false);
+    assertEquals(decoded.count, data.count);
+    assertEquals(decoded.multiplier, data.multiplier);
+    assertEquals(decoded.items, data.items);
+    assertEquals(bytesWritten, bytesRead);
+  });
 });

@@ -87,6 +87,70 @@ export function ref<TDecoded>(coder: Coder<TDecoded>): RefValue<TDecoded> {
 }
 
 /**
+ * Creates a computed reference that can be resolved during encoding/decoding.
+ *
+ * Computed references allow for dynamic calculations based on multiple references
+ * by deferring the computation until the context is available.
+ *
+ * @param computation - The function to compute the final value
+ * @param refs - Array of references to resolve and pass to the computation function
+ * @returns A RefValue that can be resolved with a context
+ *
+ * @example
+ * ```ts
+ * import { assertEquals } from "@std/assert";
+ * import { computedRef, ref } from "@hertzg/binstruct/ref";
+ * import { struct } from "@hertzg/binstruct/struct";
+ * import { u16be, u8be } from "@hertzg/binstruct/numeric";
+ * import { arrayFL } from "@hertzg/binstruct/array";
+ * import { createContext } from "@hertzg/binstruct";
+ *
+ * // Create the coders that will be referenced
+ * const width = u16be();
+ * const height = u16be();
+ *
+ * // Define a structure with computed array length
+ * const coder = struct({
+ *   width: width,
+ *   height: height,
+ *   pixels: arrayFL(u8be(), computedRef((w, h) => w * h, [ref(width), ref(height)]))
+ * });
+ *
+ * // Create sample data
+ * const data = {
+ *   width: 3,
+ *   height: 2,
+ *   pixels: [255, 128, 64, 0, 255, 128],
+ * };
+ *
+ * // Encode the data with context
+ * const buffer = new Uint8Array(1000);
+ * const bytesWritten = coder.encode(data, buffer);
+ *
+ * // Decode the data with context
+ * const [decoded, bytesRead] = coder.decode(buffer);
+ *
+ * // Verify the data matches
+ * assertEquals(decoded.width, data.width);
+ * assertEquals(decoded.height, data.height);
+ * assertEquals(decoded.pixels, data.pixels);
+ * assertEquals(bytesWritten, bytesRead);
+ * ```
+ */
+export function computedRef<TDecoded, TArgs extends unknown[]>(
+  computation: (...args: TArgs) => TDecoded,
+  refs: RefValue<TArgs[number]>[],
+): RefValue<TDecoded> {
+  const computedRef: RefValue<TDecoded> = (ctx: Context) => {
+    const resolvedRefs = refs.map((ref) => ref(ctx)) as TArgs;
+    return computation(...resolvedRefs);
+  };
+
+  computedRef[kRefSymbol] = true;
+  return computedRef;
+}
+
+/**
  * Checks if a value is a reference created by the ref function.
  *
  * This function is used to distinguish between literal values and references
