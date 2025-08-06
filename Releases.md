@@ -1,3 +1,20 @@
+### 2025.08.06
+
+#### @hertzg/binstruct 0.1.2 (patch)
+
+- feat(binstruct): add support for bytes and enhance module documentation
+- fix(binstruct): improve bytes encoding/decoding logic to handle fixed and
+  variable lengths correctly
+- fix(binstruct): update type definitions for improved type safety in array and
+  mod modules
+- fix(binstruct): update coders to use function calls for numeric types
+- refactor(binstruct): enhance array and bytes coders with context support and
+  add new fixed-length string coder
+- refactor(binstruct): rename arrayOf to arrayLP and make numeric aliases
+  functions
+- chore(binstruct): enhanced encoding/decoding examples
+- chore(binstruct): remove unused import of RefValue from ref.ts
+
 ### 2025.07.29
 
 #### @hertzg/binseek 0.2.2 (patch)
