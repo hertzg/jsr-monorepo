@@ -1,10 +1,6 @@
-import type { Coder } from "./mod.ts";
-import {
-  isRef,
-  isValidLength,
-  type LengthType,
-  tryUnrefLength,
-} from "./ref.ts";
+import { type Coder, createContext } from "./mod.ts";
+import { isRef } from "./ref.ts";
+import { isValidLength, type LengthType, tryUnrefLength } from "./length.ts";
 
 /**
  * Creates a Coder for byte slices.
@@ -48,7 +44,8 @@ export function bytes(
   }
 
   return {
-    encode: (value, target, ctx): number => {
+    encode: (value, target, context): number => {
+      const ctx = context ?? createContext("encode");
       const len = tryUnrefLength(length, ctx) ?? value.length;
 
       if (!isValidLength(len)) {
@@ -57,11 +54,17 @@ export function bytes(
         );
       }
 
+      // Add the length value to context so refs can resolve it
+      if (length != null && typeof length === "object") {
+        ctx.refs.set(length, len);
+      }
+
       const toWrite = value.subarray(0, len);
       target.set(toWrite, 0);
       return len;
     },
-    decode: (encoded, ctx) => {
+    decode: (encoded, context) => {
+      const ctx = context ?? createContext("decode");
       const len = tryUnrefLength(length, ctx);
 
       if (len != null) {
@@ -70,6 +73,11 @@ export function bytes(
           throw new Error(
             `Invalid length: ${len}. Must be a non-negative integer.`,
           );
+        }
+
+        // Add the length value to context so refs can resolve it
+        if (length != null && typeof length === "object") {
+          ctx.refs.set(length, len);
         }
 
         if (encoded.length < len) {

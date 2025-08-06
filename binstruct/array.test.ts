@@ -1,4 +1,4 @@
-import { assertEquals, assertThrows } from "jsr:@std/assert";
+import { assertEquals, assertThrows } from "@std/assert";
 import { arrayLP } from "./array.ts";
 import { f32be, f64be, s16be, u16be, u32be, u8be } from "./numeric.ts";
 import { stringLP, stringNT } from "./string.ts";

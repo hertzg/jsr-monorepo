@@ -8,6 +8,7 @@
     "./struct": "./struct.ts",
     "./string": "./string.ts",
     "./bytes": "./bytes.ts",
+    "./length": "./length.ts",
     "./ref": "./ref.ts"
   },
   "types": "./mod.ts",
@@ -19,6 +20,7 @@
     "struct.ts",
     "string.ts",
     "bytes.ts",
+    "length.ts",
     "ref.ts"
   ]
 }

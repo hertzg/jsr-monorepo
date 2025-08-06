@@ -1,9 +1,5 @@
-import {
-  type Coder,
-  isValidLength,
-  type LengthType,
-  tryUnrefLength,
-} from "./mod.ts";
+import { type Coder, type Context, createContext } from "./mod.ts";
+import { isValidLength, type LengthType, tryUnrefLength } from "./length.ts";
 
 /**
  * Creates a Coder for length-prefixed strings.
@@ -46,18 +42,34 @@ import {
  */
 export function stringLP(lengthType: Coder<number>): Coder<string> {
   return {
-    encode: (decoded, target) => {
+    encode: (decoded, target, context) => {
+      const ctx = context ?? createContext("encode");
       let cursor = 0;
       const stringBytes = new TextEncoder().encode(decoded);
-      cursor += lengthType.encode(stringBytes.length, target.subarray(cursor));
+
+      // Add the length value to context so refs can resolve it
+      ctx.refs.set(lengthType, stringBytes.length);
+
+      cursor += lengthType.encode(
+        stringBytes.length,
+        target.subarray(cursor),
+        ctx,
+      );
       target.set(stringBytes, cursor);
       cursor += stringBytes.length;
       return cursor;
     },
-    decode: (encoded) => {
+    decode: (encoded, context) => {
+      const ctx = context ?? createContext("decode");
       let cursor = 0;
-      const [length, bytesRead] = lengthType.decode(encoded.subarray(cursor));
+      const [length, bytesRead] = lengthType.decode(
+        encoded.subarray(cursor),
+        ctx,
+      );
       cursor += bytesRead;
+
+      // Add the length value to context so refs can resolve it
+      ctx.refs.set(lengthType, length);
 
       const stringBytes = encoded.subarray(cursor, cursor + length);
       const decoded = new TextDecoder().decode(stringBytes);
@@ -149,7 +161,8 @@ export function stringFL(
   decoderOptions: TextDecoderOptions = {},
 ): Coder<string> {
   return {
-    encode: (decoded, target, ctx) => {
+    encode: (decoded, target, context) => {
+      const ctx = context ?? createContext("encode");
       const len = tryUnrefLength(byteLength, ctx) ?? decoded.length;
 
       if (len != null && !isValidLength(len)) {
@@ -158,17 +171,28 @@ export function stringFL(
         );
       }
 
+      // Add the length value to context so refs can resolve it
+      if (byteLength != null && typeof byteLength === "object") {
+        ctx.refs.set(byteLength, len);
+      }
+
       const truncated = target.subarray(0, len);
       const encoded = new TextEncoder().encodeInto(decoded, truncated);
       return encoded.written;
     },
-    decode: (encoded, ctx) => {
+    decode: (encoded, context) => {
+      const ctx = context ?? createContext("decode");
       const len = tryUnrefLength(byteLength, ctx) ?? encoded.length;
 
       if (!isValidLength(len)) {
         throw new Error(
           `Invalid length: ${len}. Must be a non-negative integer.`,
         );
+      }
+
+      // Add the length value to context so refs can resolve it
+      if (byteLength != null && typeof byteLength === "object") {
+        ctx.refs.set(byteLength, len);
       }
 
       const stringBytes = encoded.subarray(0, len ?? undefined);

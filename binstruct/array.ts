@@ -1,9 +1,5 @@
-import {
-  type Coder,
-  isValidLength,
-  type LengthType,
-  tryUnrefLength,
-} from "./mod.ts";
+import { type Coder, type Context, createContext } from "./mod.ts";
+import { isValidLength, type LengthType, tryUnrefLength } from "./length.ts";
 
 /**
  * Creates a Coder for length-prefixed arrays of a given element type.
@@ -68,35 +64,44 @@ export function arrayLP<TDecoded>(
 ): Coder<TDecoded[]> {
   return {
     encode: (decoded, target, context) => {
+      const ctx = context ?? createContext("encode");
       let cursor = 0;
+
+      // Add the length value to context so refs can resolve it
+      ctx.refs.set(lengthType, decoded.length);
+
       cursor += lengthType.encode(
         decoded.length,
         target.subarray(cursor),
-        context,
+        ctx,
       );
 
       for (let i = 0; i < decoded.length; i++) {
         cursor += elementType.encode(
           decoded[i],
           target.subarray(cursor),
-          context,
+          ctx,
         );
       }
       return cursor;
     },
     decode: (encoded, context) => {
+      const ctx = context ?? createContext("decode");
       let cursor = 0;
       const [length, bytesRead] = lengthType.decode(
         encoded.subarray(cursor),
-        context,
+        ctx,
       );
       cursor += bytesRead;
+
+      // Add the length value to context so refs can resolve it
+      ctx.refs.set(lengthType, length);
 
       const decoded = new Array<TDecoded>(length);
       for (let i = 0; i < length; i++) {
         const [element, bytesRead] = elementType.decode(
           encoded.subarray(cursor),
-          context,
+          ctx,
         );
         cursor += bytesRead;
         decoded[i] = element;
@@ -151,7 +156,8 @@ export function arrayFL<TDecoded>(
 ): Coder<TDecoded[]> {
   return {
     encode: (decoded, target, context) => {
-      const len = tryUnrefLength(length, context) ?? decoded.length;
+      const ctx = context ?? createContext("encode");
+      const len = tryUnrefLength(length, ctx) ?? decoded.length;
 
       if (!isValidLength(len)) {
         throw new Error(
@@ -165,19 +171,25 @@ export function arrayFL<TDecoded>(
         );
       }
 
+      // Add the length value to context so refs can resolve it
+      if (typeof length === "object" && length !== null) {
+        ctx.refs.set(length, len);
+      }
+
       let cursor = 0;
       for (let i = 0; i < len; i++) {
         cursor += elementType.encode(
           decoded[i],
           target.subarray(cursor),
-          context,
+          ctx,
         );
       }
 
       return cursor;
     },
     decode: (encoded, context) => {
-      const len = tryUnrefLength(length, context);
+      const ctx = context ?? createContext("decode");
+      const len = tryUnrefLength(length, ctx);
 
       if (len == null || !isValidLength(len)) {
         throw new Error(
@@ -185,12 +197,17 @@ export function arrayFL<TDecoded>(
         );
       }
 
+      // Add the length value to context so refs can resolve it
+      if (typeof length === "object" && length !== null) {
+        ctx.refs.set(length, len);
+      }
+
       const decoded = new Array<TDecoded>();
       let cursor = 0;
       for (let i = 0; i < len; i++) {
         const [element, bytesRead] = elementType.decode(
           encoded.subarray(cursor),
-          context,
+          ctx,
         );
         cursor += bytesRead;
         decoded[i] = element;

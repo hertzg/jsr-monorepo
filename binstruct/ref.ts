@@ -2,71 +2,9 @@ import type { Coder, Context } from "./mod.ts";
 
 const kRefSymbol = Symbol("ref");
 
-export type LengthType = number | RefValue<number>;
-
 /**
- * Validates if a length value is valid for binary encoding.
- *
- * A valid length must be a non-negative integer.
- *
- * @param length - The length value to validate
- * @returns True if the length is valid, false otherwise
- *
- * @example
- * ```ts
- * import { assertEquals } from "@std/assert";
- * import { isValidLength } from "@hertzg/binstruct/ref";
- *
- * assertEquals(isValidLength(0), true);      // Valid: zero
- * assertEquals(isValidLength(100), true);    // Valid: positive integer
- * assertEquals(isValidLength(-1), false);    // Invalid: negative
- * assertEquals(isValidLength(3.14), false);  // Invalid: not integer
- * assertEquals(isValidLength(NaN), false);   // Invalid: NaN
- * ```
+ * A type representing a reference value that can be resolved during encoding/decoding.
  */
-export function isValidLength(length: number): boolean {
-  return Number.isInteger(length) && length >= 0;
-}
-
-/**
- * Attempts to resolve a length value from a reference or literal.
- *
- * If the length is a reference, it will be resolved using the provided context.
- * If the length is a literal number, it will be returned as-is.
- * If no context is provided, the length is returned unchanged.
- *
- * @param length - The length value (can be a number, reference, or null/undefined)
- * @param ctx - The context for resolving references
- * @returns The resolved length value, or the original value if no resolution is possible
- *
- * @example
- * ```ts
- * import { assertEquals } from "@std/assert";
- * import { tryUnrefLength } from "@hertzg/binstruct/ref";
- *
- * // Literal value (no resolution needed)
- * const literal = tryUnrefLength(5, null);
- * assertEquals(literal, 5);
- *
- * // Null/undefined values
- * const nullValue = tryUnrefLength(null, null);
- * assertEquals(nullValue, null);
- *
- * const undefinedValue = tryUnrefLength(undefined, null);
- * assertEquals(undefinedValue, undefined);
- * ```
- */
-export function tryUnrefLength(
-  length: LengthType | undefined | null,
-  ctx: Context | undefined | null,
-): number | undefined | null {
-  if (ctx != null) {
-    return isRef<number>(length) ? length(ctx) : length;
-  }
-
-  return length as number | undefined | null;
-}
-
 export type RefValue<TDecoded> = {
   (ctx: Context): TDecoded;
   [kRefSymbol]: true;
@@ -86,29 +24,52 @@ export type RefValue<TDecoded> = {
  * import { assertEquals } from "@std/assert";
  * import { ref } from "@hertzg/binstruct/ref";
  * import { struct } from "@hertzg/binstruct/struct";
- * import { u32le, u16le } from "@hertzg/binstruct/numeric";
- * import { stringLP } from "@hertzg/binstruct/string";
+ * import { u16le, u8, u32le } from "@hertzg/binstruct/numeric";
+ * import { arrayFL } from "@hertzg/binstruct/array";
+ * import { createContext } from "@hertzg/binstruct";
  *
- * // Define a simple structure with a reference field
- * const itemCoder = struct({
- *   id: u32le(),                    // Item identifier
- *   name: stringLP(u16le()),        // Item name
- *   parentId: u32le(),              // Reference to parent item ID
+ * // Create the coders that will be referenced
+ * const channelsLength = u16le();
+ * const pointsLength = u16le();
+ *
+ * // Define a complex structure with shared length references
+ * const coder = struct({
+ *   channelsLength: channelsLength,
+ *   channels: struct({
+ *     r: arrayFL(u8(), ref(channelsLength)),
+ *     g: arrayFL(u8(), ref(channelsLength)),
+ *     b: arrayFL(u8(), ref(channelsLength)),
+ *   }),
+ *   pointsLength: pointsLength,
+ *   points: arrayFL(u32le(), ref(pointsLength)),
  * });
  *
- * // Create sample item data
- * const item = {
- *   id: 1,
- *   name: "Root Item",
- *   parentId: 0, // No parent
+ * // Create sample data
+ * const data = {
+ *   channelsLength: 3,
+ *   channels: {
+ *     r: [255, 128, 64],
+ *     g: [0, 255, 128],
+ *     b: [0, 0, 255],
+ *   },
+ *   pointsLength: 2,
+ *   points: [12345, 67890],
  * };
  *
- * const buffer = new Uint8Array(100);
- * const bytesWritten = itemCoder.encode(item, buffer);
- * const [decoded, bytesRead] = itemCoder.decode(buffer);
- * assertEquals(decoded.id, item.id);
- * assertEquals(decoded.name, item.name);
- * assertEquals(decoded.parentId, item.parentId);
+ * // Encode the data with context
+ * const buffer = new Uint8Array(1000);
+ * const bytesWritten = coder.encode(data, buffer);
+ *
+ * // Decode the data with context
+ * const [decoded, bytesRead] = coder.decode(buffer);
+ *
+ * // Verify the data matches
+ * assertEquals(decoded.channelsLength, data.channelsLength);
+ * assertEquals(decoded.channels.r, data.channels.r);
+ * assertEquals(decoded.channels.g, data.channels.g);
+ * assertEquals(decoded.channels.b, data.channels.b);
+ * assertEquals(decoded.pointsLength, data.pointsLength);
+ * assertEquals(decoded.points, data.points);
  * assertEquals(bytesWritten, bytesRead);
  * ```
  */

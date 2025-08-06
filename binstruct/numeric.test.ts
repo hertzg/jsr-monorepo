@@ -1,19 +1,13 @@
-import { assertEquals, assertThrows } from "jsr:@std/assert";
+import { assertEquals, assertThrows } from "@std/assert";
 import type { Coder } from "./mod.ts";
 // deno-fmt-ignore
 import {
   type Endianness,
-  f16, f16be, f16le,
-  f32, f32be, f32le,
-  f64, f64be, f64le,
-  s16, s16be, s16le,
-  s32, s32be, s32le,
-  s64, s64be, s64le,
-  s8, s8be, s8le,
-  u16, u16be, u16le,
-  u32, u32be, u32le,
-  u64, u64be, u64le,
-  u8, u8be, u8le,
+  f16, f16be, f16le, f32, f32be, f32le, f64, f64be, f64le,
+  u8, u8be, u8le, s8, s8be, s8le,
+  u16, u16be, u16le, s16, s16be, s16le,
+  u32, u32be, u32le, s32, s32be, s32le,
+  s64, s64be, s64le, u64, u64be, u64le,
 } from "./numeric.ts";
 
 // Truth table for testing numeric types

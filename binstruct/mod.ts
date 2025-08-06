@@ -5,19 +5,35 @@
  * - Unsigned integers: 8, 16, 32, 64 bits (big-endian and little-endian)
  * - Signed integers: 8, 16, 32, 64 bits (big-endian and little-endian)
  * - Floating point numbers: 16, 32, 64 bits (big-endian and little-endian)
- * - Strings: length-prefixed and null-terminated
- * - Arrays: variable-length arrays with configurable length encoding
+ * - Strings: length-prefixed, null-terminated, and fixed-length
+ * - Arrays: variable-length arrays (length-prefixed), and fixed-length arrays
  * - Structs: complex nested data structures
+ * - References: support for referencing values within the context (see {@link ref})
  *
  * To encode data to binary, use the various coder functions and call their `encode` method.
  * To decode data from binary, use the same coder functions and call their `decode` method.
  *
  * The module provides the following main functions:
- * - {@link struct}: Create coders for structured data
+ * - {@link struct}: Create coders for structured data (objects)
+ * - {@link arrayLP}: Create coders for length-prefixed arrays
+ * - {@link arrayFL}: Create coders for fixed-length arrays
  * - {@link stringLP}: Create coders for length-prefixed strings
  * - {@link stringNT}: Create coders for null-terminated strings
- * - {@link arrayLP}: Create coders for arrays
- * - Numeric coders: `u8`, `u16`, `u32`, `u64`, `s8`, `s16`, `s32`, `s64`, `f16`, `f32`, `f64`
+ * - {@link stringFL}: Create coders for fixed-length strings
+ * - {@link ref}: Create reference values for context-aware encoding/decoding
+ *
+ * - Numeric coders:
+ *   - {@link u8}, {@link u8le}, {@link u8be}: Unsigned 8-bit integer
+ *   - {@link s8}, {@link s8le}, {@link s8be}: Signed 8-bit integer
+ *   - {@link u16}, {@link u16le}, {@link u16be}: Unsigned 16-bit integer
+ *   - {@link s16}, {@link s16le}, {@link s16be}: Signed 16-bit integer
+ *   - {@link u32}, {@link u32le}, {@link u32be}: Unsigned 32-bit integer
+ *   - {@link s32}, {@link s32le}, {@link s32be}: Signed 32-bit integer
+ *   - {@link u64}, {@link u64le}, {@link u64be}: Unsigned 64-bit integer (bigint)
+ *   - {@link s64}, {@link s64le}, {@link s64be}: Signed 64-bit integer (bigint)
+ *   - {@link f16}, {@link f16le}, {@link f16be}: 16-bit floating point number
+ *   - {@link f32}, {@link f32le}, {@link f32be}: 32-bit floating point number
+ *   - {@link f64}, {@link f64le}, {@link f64be}: 64-bit floating point number
  *
  * @example Reading and writing BMP file headers:
  * ```ts
@@ -101,8 +117,21 @@ export type ValueWithBytes<T> = [T, number];
 
 export type Context = {
   direction: "encode" | "decode";
-  refs: WeakMap<Coder<unknown>, unknown>;
+  refs: WeakMap<object, unknown>;
 };
+
+/**
+ * Creates a default context for encoding or decoding operations.
+ *
+ * @param direction - The direction of the operation ("encode" or "decode")
+ * @returns A new Context with the specified direction and an empty refs WeakMap
+ */
+export function createContext(direction: "encode" | "decode"): Context {
+  return {
+    direction,
+    refs: new WeakMap(),
+  };
+}
 
 export type Encoder<TDecoded> = (
   decoded: TDecoded,
@@ -123,4 +152,5 @@ export * from "./array.ts";
 export * from "./numeric.ts";
 export * from "./string.ts";
 export * from "./struct.ts";
-export * from "./ref.ts";
+export * from "./length.ts";
+export { ref, type RefValue } from "./ref.ts";

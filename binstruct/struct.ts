@@ -1,4 +1,5 @@
 import type { Coder } from "./mod.ts";
+import { createContext } from "./mod.ts";
 
 /**
  * Creates a Coder for structured data from an object of property names to coders.
@@ -63,25 +64,39 @@ export function struct<T extends Record<string, Coder<any>>>(
 
   return {
     encode: (decoded, target, context) => {
+      const ctx = context ?? createContext("encode");
       let cursor = 0;
+
+      // First pass: encode all fields and collect their values for context
       for (const key of keys) {
         const coder = schema[key];
-        cursor += coder.encode(decoded[key], target.subarray(cursor), context);
+        const value = decoded[key];
+
+        // Add the value to context so refs can resolve it
+        ctx.refs.set(coder, value);
+
+        cursor += coder.encode(value, target.subarray(cursor), ctx);
       }
       return cursor;
     },
     decode: (encoded, context) => {
+      const ctx = context ?? createContext("decode");
       let cursor = 0;
       const result = {} as {
         [K in keyof T]: T[K] extends Coder<infer U> ? U : never;
       };
 
+      // First pass: decode all fields and collect their values for context
       for (const key of keys) {
         const coder = schema[key];
         const [value, bytesRead] = coder.decode(
           encoded.subarray(cursor),
-          context,
+          ctx,
         );
+
+        // Add the value to context so refs can resolve it
+        ctx.refs.set(coder, value);
+
         cursor += bytesRead;
         result[key] = value;
       }
