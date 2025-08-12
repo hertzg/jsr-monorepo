@@ -1,4 +1,5 @@
 import type { Coder, Context } from "./mod.ts";
+import { u16le } from "@hertzg/binstruct/numeric";
 
 const kRefSymbol = Symbol("ref");
 
@@ -86,6 +87,8 @@ export function ref<TDecoded>(coder: Coder<TDecoded>): RefValue<TDecoded> {
   return unref;
 }
 
+type UnwrapRefValue<T> = T extends RefValue<infer U> ? U : never;
+
 /**
  * Creates a computed reference that can be resolved during encoding/decoding.
  *
@@ -113,7 +116,7 @@ export function ref<TDecoded>(coder: Coder<TDecoded>): RefValue<TDecoded> {
  * const coder = struct({
  *   width: width,
  *   height: height,
- *   pixels: arrayFL(u8be(), computedRef((w, h) => w * h, [ref(width), ref(height)]))
+ *   pixels: arrayFL(u8be(), computedRef((w: number, h: number) => w * h, [ref(width), ref(height)]))
  * });
  *
  * // Create sample data
@@ -137,12 +140,19 @@ export function ref<TDecoded>(coder: Coder<TDecoded>): RefValue<TDecoded> {
  * assertEquals(bytesWritten, bytesRead);
  * ```
  */
-export function computedRef<TDecoded, TArgs extends unknown[]>(
-  computation: (...args: TArgs) => TDecoded,
-  refs: RefValue<TArgs[number]>[],
+export function computedRef<
+  TRefs extends readonly RefValue<unknown>[],
+  TDecoded,
+>(
+  computation: (
+    ...args: { [K in keyof TRefs]: UnwrapRefValue<TRefs[K]> }
+  ) => TDecoded,
+  refs: TRefs,
 ): RefValue<TDecoded> {
   const computedRef: RefValue<TDecoded> = (ctx: Context) => {
-    const resolvedRefs = refs.map((ref) => ref(ctx)) as TArgs;
+    const resolvedRefs = refs.map((ref) => ref(ctx)) as {
+      [K in keyof TRefs]: UnwrapRefValue<TRefs[K]>;
+    };
     return computation(...resolvedRefs);
   };
 

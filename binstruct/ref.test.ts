@@ -16,7 +16,10 @@ Deno.test("computedRef: basic functionality", async (t) => {
       height: height,
       pixels: arrayFL(
         u8be(),
-        computedRef((w: number, h: number) => w * h, [ref(width), ref(height)]),
+        computedRef(
+          (w: number, h: number) => w * h,
+          [ref(width), ref(height)],
+        ),
       ),
     });
 
@@ -57,7 +60,10 @@ Deno.test("computedRef: basic functionality", async (t) => {
       height: height,
       pixels: arrayFL(
         color,
-        computedRef((w: number, h: number) => w * h, [ref(width), ref(height)]),
+        computedRef(
+          (w: number, h: number) => w * h,
+          [ref(width), ref(height)],
+        ),
       ),
     });
 
@@ -102,10 +108,10 @@ Deno.test("computedRef: basic functionality", async (t) => {
       multiplier: multiplier,
       items: arrayFL(
         u8be(),
-        computedRef((c: number, m: number) => c * m, [
-          ref(count),
-          ref(multiplier),
-        ]),
+        computedRef(
+          (c: number, m: number) => c * m,
+          [ref(count), ref(multiplier)],
+        ),
       ),
     });
 
