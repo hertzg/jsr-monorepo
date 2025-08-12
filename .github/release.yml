@@ -1,0 +1,51 @@
+# Release configuration for conventional commits
+# This file helps the release workflow understand how to handle different types of commits
+
+# Conventional commit types that trigger version bumps
+types:
+  feat: minor # New features trigger minor version bumps
+  fix: patch # Bug fixes trigger patch version bumps
+  perf: patch # Performance improvements trigger patch version bumps
+  docs: none # Documentation changes don't trigger version bumps
+  style: none # Style changes don't trigger version bumps
+  refactor: patch # Refactoring triggers patch version bumps
+  test: none # Test changes don't trigger version bumps
+  chore: none # Chore changes don't trigger version bumps
+  ci: none # CI changes don't trigger version bumps
+  build: none # Build changes don't trigger version bumps
+  revert: patch # Reverts trigger patch version bumps
+
+# Scopes that should trigger version bumps for specific packages
+scopes:
+  binseek: true # Changes to binseek package
+  binstruct: true # Changes to binstruct package
+  wg-keys: true # Changes to wg-keys package
+  wg-ini: true # Changes to wg-ini package
+  wg-conf: true # Changes to wg-conf package
+  mymagti-api: true # Changes to mymagti-api package
+  bx: true # Changes to bx package
+
+# Breaking changes always trigger major version bumps
+breaking:
+  major: true
+
+# Pre-release configuration
+prerelease:
+  enabled: false
+  branches: []
+
+# Release notes configuration
+notes:
+  enabled: true
+  template: |
+    ## What's Changed
+
+    {changes}
+
+    ## Breaking Changes
+
+    {breaking}
+
+    ## Contributors
+
+    {contributors}
