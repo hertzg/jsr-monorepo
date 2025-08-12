@@ -1,5 +1,4 @@
 import type { Coder, Context } from "./mod.ts";
-import { u16le } from "@hertzg/binstruct/numeric";
 
 const kRefSymbol = Symbol("ref");
 
