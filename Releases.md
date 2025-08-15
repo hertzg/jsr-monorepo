@@ -1,3 +1,18 @@
+### 2025.08.15
+
+#### @hertzg/binstruct 0.1.4 (patch)
+
+- feat(binstruct): more examples
+- feat(binstruct): enhance string coder with automatic type selection and
+  comprehensive tests
+- feat(binstruct): implement unified array coder for flexible length handling
+  and add related tests
+- feat(binstruct): add computedRef function for dynamic reference calculations
+  in encoding/decoding
+- refactor(binstruct): enhance formatting and type safety in computedRef
+  function and related tests
+- chore(binstruct): remove unused import of u16le from ref.ts for cleaner code
+
 ### 2025.08.06
 
 #### @hertzg/binstruct 0.1.3 (patch)
