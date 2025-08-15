@@ -1,5 +1,62 @@
 import { isValidLength, type LengthType, tryUnrefLength } from "./length.ts";
-import { type Coder, createContext } from "./mod.ts";
+import { type Coder, createContext, isCoder } from "./mod.ts";
+
+/**
+ * Creates a Coder for strings that automatically chooses between length-prefixed,
+ * null-terminated, and fixed-length based on the arguments provided.
+ *
+ * - If a lengthType coder is provided as the first argument, it creates a length-prefixed string
+ * - If no arguments are provided, it creates a null-terminated string
+ * - If a length value/reference is provided as the first argument, it creates a fixed-length string
+ *
+ * @param lengthOrLengthType - Optional length coder (for length-prefixed) or length value/reference (for fixed-length)
+ * @param decoderEncoding - Text encoding for decoding (default: "utf-8", only used for fixed-length)
+ * @param decoderOptions - Options for the TextDecoder (only used for fixed-length)
+ * @returns A Coder that can encode/decode strings
+ *
+ * @example
+ * ```ts
+ * import { assertEquals } from "@std/assert";
+ * import { string } from "@hertzg/binstruct/string";
+ * import { u16le, u8le } from "@hertzg/binstruct/numeric";
+ * import { struct } from "@hertzg/binstruct/struct";
+ *
+ * // Create a struct demonstrating length-prefixed and null-terminated strings
+ * const personCoder = struct({
+ *   name: string(u16le()),           // Length-prefixed string (uses u16le as length coder)
+ *   bio: string(),                   // Null-terminated string (no arguments)
+ *   age: u8le(),
+ * });
+ *
+ * const person = {
+ *   name: "John Doe",
+ *   bio: "Software Developer",
+ *   age: 30,
+ * };
+ *
+ * const buffer = new Uint8Array(200);
+ * const bytesWritten = personCoder.encode(person, buffer);
+ * const [decoded, bytesRead] = personCoder.decode(buffer);
+ * assertEquals(decoded.name, person.name);
+ * assertEquals(decoded.age, person.age);
+ * assertEquals(decoded.bio, person.bio);
+ * assertEquals(bytesWritten, bytesRead);
+ * ```
+ */
+export function string(
+  lengthOrLengthType?: Coder<number> | LengthType | null,
+  decoderEncoding: string = "utf-8",
+  decoderOptions: TextDecoderOptions = {},
+): Coder<string> {
+  // If no arguments provided, create a null-terminated string
+  if (lengthOrLengthType == null) {
+    return stringNT();
+  }
+
+  return isCoder<number>(lengthOrLengthType)
+    ? stringLP(lengthOrLengthType)
+    : stringFL(lengthOrLengthType, decoderEncoding, decoderOptions);
+}
 
 /**
  * Creates a Coder for length-prefixed strings.
