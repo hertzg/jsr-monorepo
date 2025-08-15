@@ -15,8 +15,10 @@
  *
  * The module provides the following main functions:
  * - {@link struct}: Create coders for structured data (objects)
+ * - {@link array}: Universal array coder that automatically chooses between length-prefixed and fixed-length
  * - {@link arrayLP}: Create coders for length-prefixed arrays
  * - {@link arrayFL}: Create coders for fixed-length arrays
+ * - {@link string}: Universal string coder that automatically chooses between length-prefixed, null-terminated, and fixed-length
  * - {@link stringLP}: Create coders for length-prefixed strings
  * - {@link stringNT}: Create coders for null-terminated strings
  * - {@link stringFL}: Create coders for fixed-length strings
@@ -35,81 +37,265 @@
  *   - {@link f32}, {@link f32le}, {@link f32be}: 32-bit floating point number
  *   - {@link f64}, {@link f64le}, {@link f64be}: 64-bit floating point number
  *
- * @example Reading and writing BMP file headers:
+ * @example Reading and writing WAV (RIFF) file format:
  * ```ts
  * import { assertEquals } from "@std/assert";
- * import { struct } from "@hertzg/binstruct/struct";
- * import { u16le, u32le, s32le } from "@hertzg/binstruct/numeric";
+ * import { struct, array, string } from "@hertzg/binstruct";
+ * import { u16le, u32le, u8le } from "@hertzg/binstruct/numeric";
  *
- * // Define BMP file header structure (little-endian format)
- * const bmpHeaderCoder = struct({
- *   // BMP file signature
- *   signature: u16le(), // "BM" (0x4D42)
- *   fileSize: u32le(),  // Size of the BMP file in bytes
- *   reserved1: u16le(), // Reserved field (must be 0)
- *   reserved2: u16le(), // Reserved field (must be 0)
- *   dataOffset: u32le(), // Offset to image data
+ * // Define WAV file structure following RIFF format specification
+ * const riffChunkCoder = struct({
+ *   chunkID: string(4),           // "RIFF" (fixed 4-byte string)
+ *   chunkSize: u32le(),           // File size - 8 bytes
+ *   format: string(4),            // "WAVE" (fixed 4-byte string)
  * });
  *
- * // Define DIB header structure (BITMAPINFOHEADER format)
- * const dibHeaderCoder = struct({
- *   headerSize: u32le(),     // Size of DIB header (40 bytes for BITMAPINFOHEADER)
- *   width: s32le(),          // Image width in pixels
- *   height: s32le(),         // Image height in pixels (positive = bottom-up)
- *   colorPlanes: u16le(),    // Number of color planes (must be 1)
- *   bitsPerPixel: u16le(),   // Bits per pixel (1, 4, 8, 16, 24, 32)
- *   compression: u32le(),     // Compression method (0 = none)
- *   imageSize: u32le(),      // Size of image data in bytes
- *   xPixelsPerMeter: s32le(), // Horizontal resolution (pixels per meter)
- *   yPixelsPerMeter: s32le(), // Vertical resolution (pixels per meter)
- *   colorsInPalette: u32le(), // Number of colors in palette (0 = 2^n)
- *   importantColors: u32le(), // Number of important colors (0 = all)
+ * const fmtChunkCoder = struct({
+ *   chunkID: string(4),           // "fmt " (fixed 4-byte string)
+ *   chunkSize: u32le(),           // Size of fmt chunk (16 for PCM)
+ *   audioFormat: u16le(),         // Audio format (1 = PCM)
+ *   numChannels: u16le(),         // Number of channels (1 = mono, 2 = stereo)
+ *   sampleRate: u32le(),          // Sample rate (e.g., 44100 Hz)
+ *   byteRate: u32le(),            // Byte rate (sampleRate * numChannels * bitsPerSample / 8)
+ *   blockAlign: u16le(),          // Block align (numChannels * bitsPerSample / 8)
+ *   bitsPerSample: u16le(),       // Bits per sample (8, 16, 24, 32)
  * });
  *
- * // Define complete BMP file structure
- * const bmpFileCoder = struct({
- *   header: bmpHeaderCoder,
- *   dibHeader: dibHeaderCoder,
- *   // Note: Pixel data would be added here in a real implementation
+ * const dataChunkCoder = struct({
+ *   chunkID: string(4),           // "data" (fixed 4-byte string)
+ *   chunkSize: u32le(),           // Size of audio data
+ *   audioData: array(u8le(), u32le()), // Audio samples as length-prefixed array
  * });
  *
- * // Create a sample BMP file data
- * const bmpData = {
- *   header: {
- *     signature: 0x4D42, // "BM"
- *     fileSize: 54,      // Header size (14 + 40 bytes)
- *     reserved1: 0,
- *     reserved2: 0,
- *     dataOffset: 54,    // Offset to pixel data
+ * // Complete WAV file structure
+ * const wavFileCoder = struct({
+ *   riff: riffChunkCoder,
+ *   fmt: fmtChunkCoder,
+ *   data: dataChunkCoder,
+ * });
+ *
+ * // Create sample WAV data (8kHz, 8-bit, mono, 0.1 second - small example)
+ * const sampleRate = 8000;
+ * const numChannels = 1;
+ * const bitsPerSample = 8;
+ * const durationSeconds = 0.1;
+ * const numSamples = Math.floor(sampleRate * durationSeconds);
+ *
+ * // Generate a simple sine wave (440 Hz) with 8-bit samples
+ * const audioData = new Array(numSamples);
+ * for (let i = 0; i < numSamples; i++) {
+ *   const t = i / sampleRate;
+ *   audioData[i] = Math.floor(Math.sin(2 * Math.PI * 440 * t) * 127) + 128; // 8-bit amplitude (0-255)
+ * }
+ *
+ * const wavData = {
+ *   riff: {
+ *     chunkID: "RIFF",
+ *     chunkSize: 0, // Will be calculated
+ *     format: "WAVE",
  *   },
- *   dibHeader: {
- *     headerSize: 40,           // BITMAPINFOHEADER size
- *     width: 100,               // 100 pixels wide
- *     height: 100,              // 100 pixels tall
- *     colorPlanes: 1,           // Single color plane
- *     bitsPerPixel: 24,         // 24-bit color (RGB)
- *     compression: 0,            // No compression
- *     imageSize: 30000,         // 100 * 100 * 3 bytes
- *     xPixelsPerMeter: 2835,    // 72 DPI equivalent
- *     yPixelsPerMeter: 2835,    // 72 DPI equivalent
- *     colorsInPalette: 0,       // No palette for 24-bit
- *     importantColors: 0,       // All colors important
+ *   fmt: {
+ *     chunkID: "fmt ",
+ *     chunkSize: 16,
+ *     audioFormat: 1, // PCM
+ *     numChannels,
+ *     sampleRate,
+ *     byteRate: sampleRate * numChannels * bitsPerSample / 8,
+ *     blockAlign: numChannels * bitsPerSample / 8,
+ *     bitsPerSample,
+ *   },
+ *   data: {
+ *     chunkID: "data",
+ *     chunkSize: 0, // Will be calculated
+ *     audioData,
  *   },
  * };
  *
- * // Encode BMP data to binary
+ * // Calculate chunk sizes
+ * const dataSize = audioData.length * (bitsPerSample / 8);
+ * wavData.data.chunkSize = dataSize;
+ * wavData.riff.chunkSize = 36 + dataSize; // 36 = 12 (RIFF) + 24 (fmt) + data size
+ *
+ * // Encode WAV data to binary
  * const buffer = new Uint8Array(1024);
- * const bytesWritten = bmpFileCoder.encode(bmpData, buffer);
+ * const bytesWritten = wavFileCoder.encode(wavData, buffer);
  *
- * // Decode BMP data from binary
- * const [decoded, bytesRead] = bmpFileCoder.decode(buffer);
- * assertEquals(decoded, bmpData, 'BMP data should be identical after roundtrip');
- * assertEquals(bytesWritten, bytesRead, 'bytes written should equal bytes read');
+ * // Decode WAV data from binary
+ * const [decoded, bytesRead] = wavFileCoder.decode(buffer);
  *
- * // Verify BMP signature
- * assertEquals(decoded.header.signature, 0x4D42, 'BMP signature should be "BM"');
- * assertEquals(decoded.dibHeader.bitsPerPixel, 24, 'Should be 24-bit color');
+ * // Verify the data matches using assertions
+ * assertEquals(decoded.riff.chunkID, "RIFF", 'RIFF chunk ID should be "RIFF"');
+ * assertEquals(decoded.riff.format, "WAVE", 'RIFF format should be "WAVE"');
+ * assertEquals(decoded.fmt.chunkID, "fmt ", 'fmt chunk ID should be "fmt "');
+ * assertEquals(decoded.fmt.audioFormat, 1, 'Audio format should be PCM (1)');
+ * assertEquals(decoded.fmt.numChannels, numChannels, 'Number of channels should match');
+ * assertEquals(decoded.fmt.sampleRate, sampleRate, 'Sample rate should match');
+ * assertEquals(decoded.fmt.bitsPerSample, bitsPerSample, 'Bits per sample should match');
+ * assertEquals(decoded.data.chunkID, "data", 'Data chunk ID should be "data"');
+ * assertEquals(decoded.data.audioData.length, audioData.length, 'Audio data length should match');
+ * assertEquals(bytesWritten, bytesRead, 'Bytes written should equal bytes read');
+ * assertEquals(decoded.riff.chunkSize, wavData.riff.chunkSize, 'RIFF chunk size should match');
+ * assertEquals(decoded.data.chunkSize, wavData.data.chunkSize, 'Data chunk size should match');
+ *
+ * // Verify audio data integrity
+ * for (let i = 0; i < Math.min(100, audioData.length); i++) {
+ *   assertEquals(decoded.data.audioData[i], audioData[i], `Audio sample at index ${i} should match`);
+ * }
  * ```
+
+ *
+ * @example Parsing complete network stack (Ethernet + IP + TCP):
+ * ```ts
+ * import { assertEquals } from "@std/assert";
+ * import { struct, array, string } from "@hertzg/binstruct";
+ * import { u16be, u32be, u8be } from "@hertzg/binstruct/numeric";
+ *
+ * // Define Ethernet frame structure (IEEE 802.3)
+ * const ethernetFrameCoder = struct({
+ *   destinationMAC: array(u8be(), 6),     // Destination MAC address (6 bytes)
+ *   sourceMAC: array(u8be(), 6),          // Source MAC address (6 bytes)
+ *   etherType: u16be(),                   // EtherType (0x0800 for IPv4)
+ * });
+ *
+ * // Define IPv4 header structure (RFC 791)
+ * const ipv4HeaderCoder = struct({
+ *   version: u8be(),                       // Version (4) and IHL (5 words = 20 bytes)
+ *   tos: u8be(),                          // Type of Service
+ *   totalLength: u16be(),                  // Total packet length
+ *   identification: u16be(),               // Packet identification
+ *   flags: u16be(),                        // Flags and fragment offset
+ *   ttl: u8be(),                          // Time to Live
+ *   protocol: u8be(),                      // Protocol (6 for TCP)
+ *   checksum: u16be(),                     // Header checksum
+ *   sourceIP: array(u8be(), 4),           // Source IP address
+ *   destIP: array(u8be(), 4),             // Destination IP address
+ *   options: array(u8be(), 0),            // IP options (empty for this example)
+ * });
+ *
+ * // Define TCP header structure (RFC 793)
+ * const tcpHeaderCoder = struct({
+ *   sourcePort: u16be(),                   // Source port
+ *   destPort: u16be(),                     // Destination port
+ *   sequenceNumber: u32be(),               // Sequence number
+ *   ackNumber: u32be(),                    // Acknowledgment number
+ *   dataOffset: u8be(),                    // Data offset and flags
+ *   flags: u8be(),                         // Control flags
+ *   windowSize: u16be(),                   // Window size
+ *   checksum: u16be(),                     // TCP checksum
+ *   urgentPointer: u16be(),                // Urgent pointer
+ *   options: array(u8be(), 0),             // TCP options (empty for this example)
+ * });
+ *
+ * // Define complete network packet structure
+ * const networkPacketCoder = struct({
+ *   ethernet: ethernetFrameCoder,
+ *   ip: ipv4HeaderCoder,
+ *   tcp: tcpHeaderCoder,
+ *   payload: array(u8be(), u16be()),       // Length-prefixed payload
+ * });
+ *
+ * // Create sample network packet data
+ * const networkPacket = {
+ *   ethernet: {
+ *     destinationMAC: [0x00, 0x1B, 0x21, 0xBB, 0x0F, 0x3B], // Router MAC
+ *     sourceMAC: [0x00, 0x0C, 0x29, 0x2E, 0x84, 0x5A],      // Host MAC
+ *     etherType: 0x0800,                                      // IPv4
+ *   },
+ *   ip: {
+ *     version: 0x45,                       // IPv4, 5 words header
+ *     tos: 0x00,                          // Normal precedence
+ *     totalLength: 0,                      // Will be calculated
+ *     identification: 0x1234,              // Packet ID
+ *     flags: 0x4000,                       // Don't fragment
+ *     ttl: 64,                            // Time to live
+ *     protocol: 6,                         // TCP
+ *     checksum: 0,                         // Will be calculated
+ *     sourceIP: [192, 168, 1, 100],       // Source IP
+ *     destIP: [10, 0, 0, 50],             // Destination IP
+ *     options: [],                         // No IP options
+ *   },
+ *   tcp: {
+ *     sourcePort: 49152,                   // Dynamic port
+ *     destPort: 80,                        // HTTP port
+ *     sequenceNumber: 0x12345678,          // Initial sequence
+ *     ackNumber: 0,                        // No acknowledgment
+ *     dataOffset: 0x50,                    // 5 words header
+ *     flags: 0x02,                         // SYN flag
+ *     windowSize: 65535,                   // Maximum window
+ *     checksum: 0,                         // Will be calculated
+ *     urgentPointer: 0,                    // No urgent data
+ *     options: [],                         // No TCP options
+ *   },
+ *   payload: [0x48, 0x65, 0x6c, 0x6c, 0x6f], // "Hello" payload
+ * };
+ *
+ * // Calculate packet lengths
+ * const tcpHeaderLength = 20;              // Standard TCP header
+ * const payloadLength = networkPacket.payload.length;
+ * const payloadLengthPrefix = 2;           // u16 length prefix for array
+ * const totalTcpLength = tcpHeaderLength + payloadLength + payloadLengthPrefix;
+ * const ipHeaderLength = 20;               // Standard IP header
+ * const totalPacketLength = ipHeaderLength + totalTcpLength;
+ * const ethernetHeaderLength = 14;         // Ethernet header (6+6+2 bytes)
+ * const totalFrameLength = ethernetHeaderLength + totalPacketLength;
+ *
+ * // Update length fields
+ * networkPacket.ip.totalLength = totalPacketLength;
+ * networkPacket.tcp.dataOffset = 0x50;     // 5 words header
+ *
+ * // Encode complete network packet
+ * const buffer = new Uint8Array(2048);
+ * const bytesWritten = networkPacketCoder.encode(networkPacket, buffer);
+ *
+ * // Decode complete network packet
+ * const [decoded, bytesRead] = networkPacketCoder.decode(buffer);
+ *
+ * // Verify Ethernet frame using assertions
+ * assertEquals(decoded.ethernet.destinationMAC, [0x00, 0x1B, 0x21, 0xBB, 0x0F, 0x3B], 'Destination MAC should match router');
+ * assertEquals(decoded.ethernet.sourceMAC, [0x00, 0x0C, 0x29, 0x2E, 0x84, 0x5A], 'Source MAC should match host');
+ * assertEquals(decoded.ethernet.etherType, 0x0800, 'EtherType should be IPv4 (0x0800)');
+ *
+ * // Verify IP header using assertions
+ * assertEquals(decoded.ip.version, 0x45, 'IP version should be IPv4 with 5 words header');
+ * assertEquals(decoded.ip.protocol, 6, 'Protocol should be TCP (6)');
+ * assertEquals(decoded.ip.ttl, 64, 'TTL should be 64');
+ * assertEquals(decoded.ip.sourceIP, [192, 168, 1, 100], 'Source IP should match');
+ * assertEquals(decoded.ip.destIP, [10, 0, 0, 50], 'Destination IP should match');
+ * assertEquals(decoded.ip.totalLength, totalPacketLength, 'IP total length should match calculated value');
+ * assertEquals(decoded.ip.identification, 0x1234, 'Packet ID should match');
+ * assertEquals(decoded.ip.flags, 0x4000, 'Flags should indicate no fragmentation');
+ *
+ * // Verify TCP header using assertions
+ * assertEquals(decoded.tcp.sourcePort, 49152, 'Source port should be 49152');
+ * assertEquals(decoded.tcp.destPort, 80, 'Destination port should be 80 (HTTP)');
+ * assertEquals(decoded.tcp.sequenceNumber, 0x12345678, 'Sequence number should match');
+ * assertEquals(decoded.tcp.ackNumber, 0, 'Acknowledgment number should be 0');
+ * assertEquals(decoded.tcp.dataOffset, 0x50, 'Data offset should be 5 words');
+ * assertEquals(decoded.tcp.flags, 0x02, 'SYN flag should be set');
+ * assertEquals(decoded.tcp.windowSize, 65535, 'Window size should be maximum');
+ * assertEquals(decoded.tcp.urgentPointer, 0, 'Urgent pointer should be 0');
+ *
+ * // Verify payload using assertions
+ * assertEquals(decoded.payload.length, 5, 'Payload should have 5 bytes');
+ * assertEquals(decoded.payload, [0x48, 0x65, 0x6c, 0x6c, 0x6f], 'Payload should be "Hello"');
+ * assertEquals(String.fromCharCode(...decoded.payload), "Hello", 'Payload should decode to "Hello"');
+ *
+ * // Verify complete packet integrity using assertions
+ * assertEquals(bytesWritten, bytesRead, 'Bytes written should equal bytes read');
+ * assertEquals(decoded.ip.totalLength, totalPacketLength, 'IP total length should match calculated value');
+ * assertEquals(decoded.tcp.dataOffset & 0xf0, 0x50, 'TCP data offset should be 5 words');
+ *
+ * // Verify frame size calculations
+ * const calculatedFrameSize = ethernetHeaderLength + ipHeaderLength + tcpHeaderLength + payloadLength + payloadLengthPrefix;
+ * assertEquals(bytesWritten, calculatedFrameSize, 'Total frame size should match calculated value');
+ * assertEquals(calculatedFrameSize, 61, 'Frame size should be 61 bytes (14+20+20+2+5)');
+ *
+ * // Verify protocol stack hierarchy
+ * assertEquals(decoded.ethernet.etherType, 0x0800, 'Ethernet should carry IPv4');
+ * assertEquals(decoded.ip.protocol, 6, 'IPv4 should carry TCP');
+ * assertEquals(decoded.tcp.destPort, 80, 'TCP should be destined for HTTP');
+ * ```
+ *
  * @module
  */
 
