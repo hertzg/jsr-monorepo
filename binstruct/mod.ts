@@ -148,6 +148,63 @@ export type Coder<TDecoded> = {
   decode: Decoder<TDecoded>;
 };
 
+/**
+ * Type guard to check if a value is a Coder.
+ *
+ * @param value - The value to check
+ * @returns True if the value is a Coder, false otherwise
+ *
+ * @example
+ * ```ts
+ * import { assertEquals } from "@std/assert";
+ * import { isCoder } from "@hertzg/binstruct";
+ * import { u16le, u32le } from "@hertzg/binstruct/numeric";
+ * import { struct } from "@hertzg/binstruct/struct";
+ *
+ * // Example: Dynamic coder selection based on runtime type checking
+ * function createFlexibleCoder(value: unknown) {
+ *   if (isCoder(value)) {
+ *     // TypeScript now knows value is a Coder<unknown>
+ *     // We can use it directly or with type assertion for specific types
+ *     return value;
+ *   } else {
+ *     // Fallback to a default coder
+ *     return u16le();
+ *   }
+ * }
+ *
+ * // Example: Processing different coder types
+ * const numericCoder = u16le();
+ * const structCoder = struct({ id: u32le(), value: u16le() });
+ *
+ * // Type-safe coder usage after type guard
+ * if (isCoder(numericCoder)) {
+ *   const buffer = new Uint8Array(100);
+ *   const bytes = numericCoder.encode(42, buffer);
+ *   const [decoded, bytesRead] = numericCoder.decode(buffer);
+ *   assertEquals(decoded, 42);
+ *   assertEquals(bytes, bytesRead);
+ * }
+ *
+ * // The type guard works with any coder type
+ * assertEquals(isCoder(numericCoder), true);
+ * assertEquals(isCoder(structCoder), true);
+ * assertEquals(isCoder("not a coder"), false);
+ * assertEquals(isCoder(null), false);
+ * assertEquals(isCoder(undefined), false);
+ * ```
+ */
+export function isCoder<TDecoded>(value: unknown): value is Coder<TDecoded> {
+  return (
+    typeof value === "object" &&
+    value !== null &&
+    "encode" in value &&
+    "decode" in value &&
+    typeof value.encode === "function" &&
+    typeof value.decode === "function"
+  );
+}
+
 export * from "./array.ts";
 export * from "./numeric.ts";
 export * from "./string.ts";
