@@ -1,3 +1,73 @@
+/**
+ * Reference system for binary data encoding and decoding.
+ *
+ * This module provides a reference system that allows for self-referential and
+ * circular data structures by deferring the resolution of values until encoding/decoding
+ * time. It includes:
+ *
+ * - **Basic References**: Defer value resolution using coders as keys
+ * - **Computed References**: Dynamic calculations based on multiple references
+ * - **Context Integration**: Seamless integration with the encoding/decoding context
+ * - **Type Safety**: Full TypeScript support with proper type inference
+ * - **Circular Structure Support**: Handle self-referential data structures
+ *
+ * References are essential for complex binary formats where field lengths
+ * depend on other fields or where circular references are needed.
+ *
+ * @example
+ * ```ts
+ * import { assertEquals } from "@std/assert";
+ * import { ref, computedRef } from "./ref.ts";
+ * import { struct } from "./struct.ts";
+ * import { u16le, u8le } from "./numeric.ts";
+ * import { arrayFL } from "./array.ts";
+ *
+ * // Create references for shared lengths
+ * const channelsLength = u16le();
+ * const pointsLength = u16le();
+ *
+ * // Define a structure with shared length references
+ * const coder = struct({
+ *   channelsLength: channelsLength,
+ *   channels: struct({
+ *     r: arrayFL(u8le(), ref(channelsLength)),
+ *     g: arrayFL(u8le(), ref(channelsLength)),
+ *     b: arrayFL(u8le(), ref(channelsLength)),
+ *   }),
+ *   pointsLength: pointsLength,
+ *   points: arrayFL(u16le(), ref(pointsLength)),
+ * });
+ *
+ * // Test data
+ * const testData = {
+ *   channelsLength: 3,
+ *   channels: {
+ *     r: [255, 128, 64],
+ *     g: [0, 255, 128],
+ *     b: [0, 0, 255],
+ *   },
+ *   pointsLength: 2,
+ *   points: [100, 200],
+ * };
+ *
+ * // Encode and decode
+ * const buffer = new Uint8Array(1000);
+ * const bytesWritten = coder.encode(testData, buffer);
+ * const [decoded, bytesRead] = coder.decode(buffer);
+ *
+ * // Verify the data
+ * assertEquals(decoded.channelsLength, testData.channelsLength);
+ * assertEquals(decoded.channels.r, testData.channels.r);
+ * assertEquals(decoded.channels.g, testData.channels.g);
+ * assertEquals(decoded.channels.b, testData.channels.b);
+ * assertEquals(decoded.pointsLength, testData.pointsLength);
+ * assertEquals(decoded.points, testData.points);
+ * assertEquals(bytesWritten, bytesRead);
+ * ```
+ *
+ * @module
+ */
+
 import type { Coder, Context } from "./mod.ts";
 
 const kRefSymbol = Symbol("ref");
@@ -18,6 +88,8 @@ export type RefValue<TDecoded> = {
  *
  * @param coder - The coder to reference
  * @returns A RefValue that can be resolved with a context
+ *
+ * It's the user's responsibility to provide a buffer big enough to fit the whole data.
  *
  * @example
  * ```ts

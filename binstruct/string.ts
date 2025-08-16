@@ -1,3 +1,43 @@
+/**
+ * String coders for binary structures.
+ *
+ * This module provides utilities for encoding and decoding strings in three modes:
+ * - Length-prefixed strings using a numeric length coder
+ * - Null-terminated strings
+ * - Fixed-length strings using a literal length or a {@link import("./ref.ts").RefValue}
+ *
+ * All coders follow the common {@link import("./mod.ts").Coder} interface.
+ *
+ * It's the user's responsibility to provide a buffer big enough to fit the whole data.
+ *
+ * @example Using all string variants
+ * ```ts
+ * import { assertEquals } from "@std/assert";
+ * import { string, stringLP, stringNT, stringFL } from "@hertzg/binstruct/string";
+ * import { struct } from "@hertzg/binstruct/struct";
+ * import { u8le, u16le } from "@hertzg/binstruct/numeric";
+ *
+ * const coder = struct({
+ *   lp: stringLP(u16le()), // [len:u16] followed by UTF-8
+ *   nt: stringNT(),        // UTF-8 bytes followed by 0x00
+ *   fl: stringFL(5),       // exactly 5 bytes
+ *   age: u8le(),
+ * });
+ *
+ * const value = { lp: "alpha", nt: "beta", fl: "gamma", age: 42 };
+ * const buf = new Uint8Array(256);
+ * const written = coder.encode(value, buf);
+ * const [decoded, read] = coder.decode(buf);
+ *
+ * assertEquals(decoded.lp, value.lp);
+ * assertEquals(decoded.nt, value.nt);
+ * assertEquals(decoded.fl, value.fl);
+ * assertEquals(decoded.age, value.age);
+ * assertEquals(written, read);
+ * ```
+ *
+ * @module
+ */
 import { isValidLength, type LengthType, tryUnrefLength } from "./length.ts";
 import { type Coder, createContext, isCoder } from "./mod.ts";
 

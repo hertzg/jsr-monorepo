@@ -1,3 +1,31 @@
+/**
+ * Length helpers for binary structures.
+ *
+ * This module defines the {@link LengthType} union and helpers for validating and
+ * resolving length values, including support for {@link import("./ref.ts").RefValue}.
+ *
+ * It's the user's responsibility to provide a buffer big enough to fit the whole data.
+ *
+ * @example Validating and resolving length values
+ * ```ts
+ * import { assertEquals } from "@std/assert";
+ * import { isValidLength, tryUnrefLength, type LengthType } from "@hertzg/binstruct/length";
+ * import { ref } from "@hertzg/binstruct/ref";
+ * import { createContext } from "@hertzg/binstruct";
+ * import { u16le } from "@hertzg/binstruct/numeric";
+ *
+ * const lenCoder = u16le();
+ * const lenRef = ref(lenCoder);
+ * const ctx = createContext("encode");
+ * ctx.refs.set(lenCoder, 5);
+ *
+ * const resolved = tryUnrefLength(lenRef, ctx);
+ * assertEquals(resolved, 5);
+ * assertEquals(isValidLength(resolved!), true);
+ * ```
+ *
+ * @module
+ */
 import type { Context } from "./mod.ts";
 import { isRef, type RefValue } from "./ref.ts";
 

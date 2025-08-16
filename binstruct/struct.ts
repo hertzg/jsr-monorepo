@@ -1,3 +1,32 @@
+/**
+ * Struct coder for binary structures.
+ *
+ * Creates a coder from an object schema of property-name to {@link import("./mod.ts").Coder}.
+ * Encodes fields in order and decodes them into an object of the same shape.
+ *
+ * Values are added to the shared context during encode/decode, enabling
+ * {@link import("./ref.ts").ref} based length references.
+ *
+ * It's the user's responsibility to provide a buffer big enough to fit the whole data.
+ *
+ * @example Minimal usage
+ * ```ts
+ * import { assertEquals } from "@std/assert";
+ * import { struct } from "@hertzg/binstruct/struct";
+ * import { u16le, u8le } from "@hertzg/binstruct/numeric";
+ *
+ * const coder = struct({ id: u16le(), flag: u8le() });
+ * const value = { id: 513, flag: 7 };
+ * const buf = new Uint8Array(32);
+ * const written = coder.encode(value, buf);
+ * const [decoded, read] = coder.decode(buf);
+ *
+ * assertEquals(decoded, value);
+ * assertEquals(written, read);
+ * ```
+ *
+ * @module
+ */
 import type { Coder } from "./mod.ts";
 import { createContext } from "./mod.ts";
 

@@ -1,3 +1,35 @@
+/**
+ * Byte-slice coder for binary structures.
+ *
+ * Encodes/decodes raw bytes either as a fixed-length slice or as a variable-length
+ * view that consumes all available bytes.
+ *
+ * It's the user's responsibility to provide a buffer big enough to fit the whole data.
+ *
+ * @example Fixed and variable length
+ * ```ts
+ * import { assertEquals } from "@std/assert";
+ * import { bytes } from "@hertzg/binstruct/bytes";
+ *
+ * const fixed = bytes(4);
+ * const variable = bytes();
+ *
+ * const input = new Uint8Array([1, 2, 3, 4, 5]);
+ * const buf = new Uint8Array(32);
+ *
+ * const w1 = fixed.encode(input, buf);
+ * const [d1] = fixed.decode(buf);
+ * assertEquals(Array.from(d1), [1, 2, 3, 4]);
+ *
+ * const w2 = variable.encode(input, buf);
+ * const [d2] = variable.decode(buf);
+ * assertEquals(Array.from(d2.slice(0, input.length)), Array.from(input));
+ * assertEquals(typeof w1, "number");
+ * assertEquals(typeof w2, "number");
+ * ```
+ *
+ * @module
+ */
 import { type Coder, createContext } from "./mod.ts";
 import { isRef } from "./ref.ts";
 import { isValidLength, type LengthType, tryUnrefLength } from "./length.ts";

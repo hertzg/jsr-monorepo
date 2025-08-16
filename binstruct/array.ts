@@ -1,3 +1,39 @@
+/**
+ * Array coders for binary structures.
+ *
+ * This module provides utilities for encoding and decoding arrays in two modes:
+ * - Length-prefixed arrays using a numeric length coder
+ * - Fixed-length arrays using a literal length or a {@link import("./ref.ts").RefValue}
+ *
+ * All coders follow the common {@link import("./mod.ts").Coder} interface.
+ *
+ * It's the user's responsibility to provide a buffer big enough to fit the whole data.
+ *
+ * @example Length-prefixed and fixed-length arrays
+ * ```ts
+ * import { assertEquals } from "@std/assert";
+ * import { array, arrayLP, arrayFL } from "@hertzg/binstruct/array";
+ * import { struct } from "@hertzg/binstruct/struct";
+ * import { u8le, u16le } from "@hertzg/binstruct/numeric";
+ *
+ * // A structure mixing both array kinds
+ * const coder = struct({
+ *   lenPref: arrayLP(u8le(), u16le()), // [len:u16] followed by items
+ *   fixed: arrayFL(u8le(), 3),         // exactly 3 items
+ *   auto: array(u8le(), 2),            // auto-selects fixed-length
+ * });
+ *
+ * const value = { lenPref: [1, 2, 3], fixed: [4, 5, 6], auto: [7, 8] };
+ * const buf = new Uint8Array(1024);
+ * const written = coder.encode(value, buf);
+ * const [decoded, read] = coder.decode(buf);
+ *
+ * assertEquals(decoded, value);
+ * assertEquals(written, read);
+ * ```
+ *
+ * @module
+ */
 import { isValidLength, type LengthType, tryUnrefLength } from "./length.ts";
 import { type Coder, createContext, isCoder } from "./mod.ts";
 
