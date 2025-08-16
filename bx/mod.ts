@@ -29,35 +29,46 @@ import { Buffer } from "node:buffer";
  *
  * @example
  * ```ts
+ * import { assertEquals } from "@std/assert";
+ *
  * // Using spaces to separate bytes
- * const HEADER = bx('00 ff 00 ff'); // ArrayBuffer { [Uint8Contents]: <00 ff 00 ff>, byteLength: 4 }
+ * const HEADER = bx('00 ff 00 ff');
+ * assertEquals(new Uint8Array(HEADER), new Uint8Array([0x00, 0xff, 0x00, 0xff]));
  * ```
  *
  * @example
  * ```ts
+ * import { assertEquals } from "@std/assert";
+ *
  * // Using underscores, dashes and other symbols to separate bytes
- * const SYNC1 = bx('00ff00ff_b4_01020304'); // ArrayBuffer { [Uint8Contents]: <00 ff 00 ff b4 01 02 03 04>, byteLength: 9 }
+ * const SYNC1 = bx('00ff00ff_b4_01020304');
+ * assertEquals(new Uint8Array(SYNC1), new Uint8Array([0x00,0xff,0x00,0xff,0xb4,0x01,0x02,0x03,0x04]));
  * ```
  *
  * @example
- * ```ts ignore
+ * ```ts
+ * import { assertEquals, assertThrows } from "@std/assert";
+ *
  * // Empty string will return an empty ArrayBuffer
- * const ZEROLENGTH = bx(''); // ArrayBuffer { [Uint8Contents]: <>, byteLength: 0 }
+ * const ZEROLENGTH = bx('');
+ * assertEquals(ZEROLENGTH.byteLength, 0);
  *
  * // Only empty strings yield empty ArrayBuffer otherwise it throws
- * const SPACES_THROWS = bx('          '); // throws TypeError
+ * assertThrows(() => bx('          '), TypeError);
  * ```
  *
  * @example
- * ```ts ignore
- * // Invalid hex strings will throw a TypeError
- * const WRONGHEX = bx('z ff 00 00'); // throws TypeError
+ * ```ts
+ * import { assertThrows } from "@std/assert";
+ * // Odd number of hex characters will throw a TypeError
+ * assertThrows(() => bx('0 0 0'), TypeError);
  * ```
  *
  * @example
- * ```ts ignore
+ * ```ts
+ * import { assertThrows } from "@std/assert";
  * // Each byte must be represented by two characters
- * const MISSZERO = bx('f2-00_0_00'); // throws TypeError
+ * assertThrows(() => bx('f2-00_0_00'), TypeError);
  * ```
  *
  * @param hex The string containing hex encoded data
