@@ -13,6 +13,35 @@ import {
 } from "./sections.ts";
 
 /**
+ * High-level utilities for working with INI data.
+ *
+ * Provides helpers to parse and stringify INI text as arrays or objects, and
+ * stream-based transformers via {@link decodeTextStream} and {@link encodeSectionStream}.
+ *
+ * @example Parse/roundtrip via arrays
+ * ```ts
+ * import { assertEquals } from "@std/assert";
+ * import { parseArray, stringifyArray } from "@hertzg/wg-ini";
+ *
+ * const text = [
+ *   "global_key=global_value",
+ *   "",
+ *   "[mysection]",
+ *   "key1=1",
+ *   "key2=2",
+ *   "",
+ * ].join("\n");
+ *
+ * const arr = await parseArray(text);
+ * assertEquals(arr, [[null, [["global_key","global_value"]]], ["mysection", [["key1","1"],["key2","2"]]]]);
+ *
+ * const roundtrip = await stringifyArray(arr as any);
+ * assertEquals(typeof roundtrip, "string");
+ * ```
+ *
+ * @module
+ */
+/**
  * Utility function to parse an INI string into an array of sections.
  * Since it returns an array, it supports duplicate keys and sections.
  * This is the reverse of {@link stringifyArray}.

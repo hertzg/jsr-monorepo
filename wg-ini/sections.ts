@@ -12,6 +12,13 @@ export type IniSection = {
 };
 
 /**
+ * Section transformers for INI data.
+ *
+ * This module converts decoded INI lines into grouped sections and vice versa.
+ *
+ * @module
+ */
+/**
  * A transform stream that decodes structured line objects of an INI file further into sections and their entries.
  * This builds upon the ini line decoder and groups lines into sections.
  *
