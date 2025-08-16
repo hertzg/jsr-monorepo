@@ -30,6 +30,9 @@ export interface WGQuickConf {
 /**
  * Parse a wg-quick(8) configuration file into a JavaScript object.
  *
+ * This module provides high-level helpers to parse and stringify WireGuard
+ * wg-quick configuration files using the lower-level `@hertzg/wg-ini` streams.
+ *
  * @example
  * ```ts
  * import { parse } from "@hertzg/wg-conf";
@@ -59,6 +62,8 @@ export interface WGQuickConf {
  *  ],
  * });
  * ```
+ *
+ * @module
  */
 export async function parse(text: string): Promise<WGQuickConf> {
   const conf: WGQuickConf = { Interface: {}, Peers: [] };
