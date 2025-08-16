@@ -1,3 +1,29 @@
+### 2025.08.16
+
+#### @hertzg/binstruct 0.1.5 (patch)
+
+- docs(binstruct): enhance examples with assertions for better clarity and error
+  handling
+- docs(binstruct): clarify user responsibility for buffer size in module
+  documentation
+- chore(binstruct): add comprehensive module documentation and examples for
+  array, bytes, length, numeric, ref, string, and struct coders
+
+#### @hertzg/mymagti-api 0.0.5 (patch)
+
+- docs(mymagti-api): add comprehensive module documentation and usage examples
+  for OAuth token fetching
+
+#### @hertzg/wg-conf 0.1.8 (patch)
+
+- docs(wg-conf): enhance module documentation with high-level helpers for
+  parsing and stringifying WireGuard wg-quick configuration files
+
+#### @hertzg/wg-ini 0.1.8 (patch)
+
+- docs(wg-ini): add high-level module documentation and usage examples for INI
+  data parsing and stringifying utilities
+
 ### 2025.08.15
 
 #### @hertzg/binstruct 0.1.4 (patch)
