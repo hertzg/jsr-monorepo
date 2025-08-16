@@ -9,11 +9,11 @@
     "@std/encoding/base64": "jsr:@std/encoding@^1.0.10/base64",
     "@std/encoding/base64url": "jsr:@std/encoding@^1.0.10/base64url",
     "@hertzg/binseek": "jsr:@hertzg/binseek@^0.2.2",
-    "@hertzg/binstruct": "jsr:@hertzg/binstruct@^0.1.4",
+    "@hertzg/binstruct": "jsr:@hertzg/binstruct@^0.1.5",
     "@hertzg/bx": "jsr:@hertzg/bx@^3.0.1",
-    "@hertzg/mymagti-api": "jsr:@hertzg/mymagti-api@^0.0.4",
+    "@hertzg/mymagti-api": "jsr:@hertzg/mymagti-api@^0.0.5",
     "@hertzg/wg-keys": "jsr:@hertzg/wg-keys@^1.0.0",
-    "@hertzg/wg-ini": "jsr:@hertzg/wg-ini@^0.1.7",
-    "@hertzg/wg-conf": "jsr:@hertzg/wg-conf@^0.1.7"
+    "@hertzg/wg-ini": "jsr:@hertzg/wg-ini@^0.1.8",
+    "@hertzg/wg-conf": "jsr:@hertzg/wg-conf@^0.1.8"
   }
 }
