@@ -59,6 +59,8 @@
  *    'original should be modified as well'
  * );
  * ```
+ *
+ * It's the user's responsibility to provide a buffer big enough to fit the whole data.
  * @module
  */
 import { type BigIntFormat, type NumberFormat, numeric } from "./numeric.ts";
