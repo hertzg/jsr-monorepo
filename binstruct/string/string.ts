@@ -100,3 +100,5 @@ export function string(
     ? stringLP(lengthOrLengthType)
     : stringFL(lengthOrLengthType, decoderEncoding, decoderOptions);
 }
+
+export { stringFL, stringLP, stringNT };
