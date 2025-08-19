@@ -34,8 +34,9 @@
  *
  * @module
  */
-import type { LengthOrRef } from "../length.ts";
 import { type Coder, isCoder } from "../core.ts";
+import { isLengthOrRef, type LengthOrRef } from "../length.ts";
+import { arrayWhile, type ArrayWhileCondition } from "./conditional-while.ts";
 import { arrayFL } from "./fixed-length.ts";
 import { arrayLP } from "./length-prefixed.ts";
 
@@ -83,9 +84,24 @@ import { arrayLP } from "./length-prefixed.ts";
  */
 export function array<TDecoded>(
   elementType: Coder<TDecoded>,
+  condition: ArrayWhileCondition<TDecoded>,
+): Coder<TDecoded[]>;
+export function array<TDecoded>(
+  elementType: Coder<TDecoded>,
   lengthCoderOrLengthType: Coder<number> | LengthOrRef,
+): Coder<TDecoded[]>;
+export function array<TDecoded>(
+  elementType: Coder<TDecoded>,
+  lengthCoderOrLengthTypeOrCondition:
+    | Coder<number>
+    | LengthOrRef
+    | ArrayWhileCondition<TDecoded>,
 ): Coder<TDecoded[]> {
-  return isCoder<number>(lengthCoderOrLengthType)
-    ? arrayLP(elementType, lengthCoderOrLengthType)
-    : arrayFL(elementType, lengthCoderOrLengthType);
+  if (isLengthOrRef(lengthCoderOrLengthTypeOrCondition)) {
+    return arrayFL(elementType, lengthCoderOrLengthTypeOrCondition);
+  }
+
+  return isCoder<number>(lengthCoderOrLengthTypeOrCondition)
+    ? arrayLP(elementType, lengthCoderOrLengthTypeOrCondition)
+    : arrayWhile(elementType, lengthCoderOrLengthTypeOrCondition);
 }

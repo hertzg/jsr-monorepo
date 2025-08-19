@@ -27,12 +27,16 @@
  * @module
  */
 import type { Coder, Context } from "./core.ts";
-import { refGetValue, refSetValue, type RefValue } from "./ref/ref.ts";
+import { isRef, refGetValue, refSetValue, type RefValue } from "./ref/ref.ts";
 
 /**
  * A type representing a length value that can be either a number or a reference to a number.
  */
 export type LengthOrRef = number | RefValue<number>;
+
+export function isLengthOrRef(value: unknown): value is LengthOrRef {
+  return typeof value === "number" || isRef<number>(value);
+}
 
 /**
  * Validates if a length value is valid for binary encoding.
