@@ -1,31 +1,3 @@
-/**
- * Length helpers for binary structures.
- *
- * This module defines the {@link LengthType} union and helpers for validating and
- * resolving length values, including support for {@link import("./ref.ts").RefValue}.
- *
- * It's the user's responsibility to provide a buffer big enough to fit the whole data.
- *
- * @example Validating and resolving length values
- * ```ts
- * import { assertEquals } from "@std/assert";
- * import { isValidLength, resolveLength, type LengthType } from "./length.ts";
- * import { ref, refSetValue } from "@hertzg/binstruct/ref";
- * import { createContext } from "@hertzg/binstruct";
- * import { u16le } from "@hertzg/binstruct/numeric";
- *
- * const lenCoder = u16le();
- * const lenRef = ref(lenCoder);
- * const ctx = createContext("encode");
- * refSetValue(ctx, lenCoder, 5);
- *
- * const resolved = resolveLength(lenRef, ctx);
- * assertEquals(resolved, 5);
- * assertEquals(isValidLength(resolved!), true);
- * ```
- *
- * @module
- */
 import type { Coder, Context } from "./core.ts";
 import { isRef, refGetValue, refSetValue, type RefValue } from "./ref/ref.ts";
 
@@ -72,23 +44,6 @@ export function isValidLength(length: number): boolean {
  * @param lengthOrRef - The length value (can be a number, reference, or null/undefined)
  * @param ctx - The context for resolving references
  * @returns The resolved length value, or the original value if no resolution is possible
- *
- * @example
- * ```ts
- * import { assertEquals } from "@std/assert";
- * import { resolveLength } from "./length.ts";
- *
- * // Literal value (no resolution needed)
- * const literal = resolveLength(5, null);
- * assertEquals(literal, 5);
- *
- * // Null/undefined values
- * const nullValue = resolveLength(null, null);
- * assertEquals(nullValue, null);
- *
- * const undefinedValue = resolveLength(undefined, null);
- * assertEquals(undefinedValue, undefined);
- * ```
  */
 export function lengthRefGet(
   ctx: Context | undefined | null,
