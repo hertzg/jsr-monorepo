@@ -6,7 +6,7 @@ import {
 } from "../core.ts";
 import { refSetValue } from "../ref/ref.ts";
 
-const kKindArrayWhile = Symbol("arrayWhile");
+export const kKindArrayWhile = Symbol("arrayWhile");
 
 /**
  * Condition function type for arrayWhile that determines when to continue processing array elements.
