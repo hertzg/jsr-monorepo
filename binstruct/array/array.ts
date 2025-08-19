@@ -21,9 +21,10 @@
  *   lenPref: arrayLP(u8le(), u16le()), // [len:u16] followed by items
  *   fixed: arrayFL(u8le(), 3),         // exactly 3 items
  *   auto: array(u8le(), 2),            // auto-selects fixed-length
+ *   while: array(u8le(), ({ index }) => index < 2), // while index < 2
  * });
  *
- * const value = { lenPref: [1, 2, 3], fixed: [4, 5, 6], auto: [7, 8] };
+ * const value = { lenPref: [1, 2, 3], fixed: [4, 5, 6], auto: [7, 8], while: [9, 10] };
  * const buf = new Uint8Array(1024);
  * const written = coder.encode(value, buf);
  * const [decoded, read] = coder.decode(buf);
@@ -57,14 +58,14 @@ import { arrayLP } from "./length-prefixed.ts";
  * import { array } from "@hertzg/binstruct/array";
  * import { u16le, u32le, s32le, f32le, u8le } from "@hertzg/binstruct/numeric";
  * import { struct } from "@hertzg/binstruct/struct";
- * import { stringLP } from "@hertzg/binstruct/string";
+ * import { string } from "@hertzg/binstruct/string";
  *
  * // Define a flexible data structure that can handle both array types
  * const flexibleDataCoder = struct({
  *   id: u32le(),                                    // Record identifier
  *   dynamicItems: array(u16le(), u8le()),           // Length-prefixed array (uses u8le as length coder)
  *   fixedItems: array(u16le(), 3),                  // Fixed-length array of exactly 3 items
- *   metadata: stringLP(u16le()),                    // Metadata string
+ *   metadata: string(u16le()),                      // Metadata string
  * });
  *
  * // Create sample data with both array types
@@ -105,3 +106,5 @@ export function array<TDecoded>(
     ? arrayLP(elementType, lengthCoderOrLengthTypeOrCondition)
     : arrayWhile(elementType, lengthCoderOrLengthTypeOrCondition);
 }
+
+export { arrayFL, arrayLP, arrayWhile, type ArrayWhileCondition };
