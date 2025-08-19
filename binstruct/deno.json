@@ -10,16 +10,5 @@
     "./bytes": "./bytes/bytes.ts",
     "./ref": "./ref/ref.ts"
   },
-  "types": "./mod.ts",
-  "files": [
-    "mod.ts",
-    "types.ts",
-    "numeric.ts",
-    "array.ts",
-    "struct.ts",
-    "string.ts",
-    "bytes.ts",
-    "length.ts",
-    "ref.ts"
-  ]
+  "types": "./mod.ts"
 }
