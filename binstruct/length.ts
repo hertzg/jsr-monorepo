@@ -9,7 +9,7 @@
  * @example Validating and resolving length values
  * ```ts
  * import { assertEquals } from "@std/assert";
- * import { isValidLength, resolveLength, type LengthType } from "@hertzg/binstruct/length";
+ * import { isValidLength, resolveLength, type LengthType } from "./length.ts";
  * import { ref, refSetValue } from "@hertzg/binstruct/ref";
  * import { createContext } from "@hertzg/binstruct";
  * import { u16le } from "@hertzg/binstruct/numeric";
@@ -49,7 +49,7 @@ export function isLengthOrRef(value: unknown): value is LengthOrRef {
  * @example
  * ```ts
  * import { assertEquals } from "@std/assert";
- * import { isValidLength } from "@hertzg/binstruct/length";
+ * import { isValidLength } from "./length.ts";
  *
  * assertEquals(isValidLength(0), true);      // Valid: zero
  * assertEquals(isValidLength(100), true);    // Valid: positive integer
@@ -76,7 +76,7 @@ export function isValidLength(length: number): boolean {
  * @example
  * ```ts
  * import { assertEquals } from "@std/assert";
- * import { resolveLength } from "@hertzg/binstruct/length";
+ * import { resolveLength } from "./length.ts";
  *
  * // Literal value (no resolution needed)
  * const literal = resolveLength(5, null);

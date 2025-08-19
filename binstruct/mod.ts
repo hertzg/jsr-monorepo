@@ -142,7 +142,6 @@
  *   assertEquals(decoded.data.audioData[i], audioData[i], `Audio sample at index ${i} should match`);
  * }
  * ```
-
  *
  * @example Parsing complete network stack (Ethernet + IP + TCP):
  * ```ts
