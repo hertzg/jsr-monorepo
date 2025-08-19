@@ -1,7 +1,7 @@
 import { refSetValue } from "../ref/ref.ts";
 import { type Coder, createContext, kCoderKind } from "../core.ts";
 
-const kKindArrayLP = Symbol("arrayLP");
+export const kKindArrayLP = Symbol("arrayLP");
 
 /**
  * Creates a Coder for length-prefixed arrays of a given element type.

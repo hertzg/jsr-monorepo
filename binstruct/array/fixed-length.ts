@@ -1,7 +1,7 @@
 import { type Coder, createContext, kCoderKind } from "../core.ts";
 import { isValidLength, type LengthOrRef, lengthRefGet } from "../length.ts";
 
-const kKindArrayFL = Symbol("arrayFL");
+export const kKindArrayFL = Symbol("arrayFL");
 
 export function arrayFL<TDecoded>(
   elementType: Coder<TDecoded>,
