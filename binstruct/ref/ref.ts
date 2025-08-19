@@ -17,10 +17,7 @@
  * @example
  * ```ts
  * import { assertEquals } from "@std/assert";
- * import { ref, computedRef } from "./ref.ts";
- * import { struct } from "./struct.ts";
- * import { u16le, u8le } from "./numeric.ts";
- * import { arrayFL } from "./array.ts";
+ * import { ref, computedRef, struct, u16le, u8, array } from "@hertzg/binstruct";
  *
  * // Create references for shared lengths
  * const channelsLength = u16le();
@@ -30,12 +27,12 @@
  * const coder = struct({
  *   channelsLength: channelsLength,
  *   channels: struct({
- *     r: arrayFL(u8le(), ref(channelsLength)),
- *     g: arrayFL(u8le(), ref(channelsLength)),
- *     b: arrayFL(u8le(), ref(channelsLength)),
+ *     r: array(u8(), ref(channelsLength)),
+ *     g: array(u8(), ref(channelsLength)),
+ *     b: array(u8(), ref(channelsLength)),
  *   }),
  *   pointsLength: pointsLength,
- *   points: arrayFL(u16le(), ref(pointsLength)),
+ *   points: array(u16le(), ref(pointsLength)),
  * });
  *
  * // Test data
@@ -107,8 +104,7 @@ export type RefValue<TDecoded> = {
  * @example
  * ```ts
  * import { assertEquals } from "@std/assert";
- * import { isRef, ref } from "@hertzg/binstruct/ref";
- * import { u16le } from "@hertzg/binstruct/numeric";
+ * import { isRef, ref, u16le } from "@hertzg/binstruct";
  *
  * // Create a reference
  * const lengthRef = ref(u16le());
@@ -145,11 +141,7 @@ function isRefsInContext(ctx: Context | null | undefined): ctx is Context & {
  * @example
  * ```ts
  * import { assertEquals } from "@std/assert";
- * import { ref } from "@hertzg/binstruct/ref";
- * import { struct } from "@hertzg/binstruct/struct";
- * import { u16le, u8, u32le } from "@hertzg/binstruct/numeric";
- * import { arrayFL } from "@hertzg/binstruct/array";
- * import { createContext } from "@hertzg/binstruct";
+ * import { ref, struct, u16le, u8, u32le, array, createContext } from "@hertzg/binstruct";
  *
  * // Create the coders that will be referenced
  * const channelsLength = u16le();
@@ -159,12 +151,12 @@ function isRefsInContext(ctx: Context | null | undefined): ctx is Context & {
  * const coder = struct({
  *   channelsLength: channelsLength,
  *   channels: struct({
- *     r: arrayFL(u8(), ref(channelsLength)),
- *     g: arrayFL(u8(), ref(channelsLength)),
- *     b: arrayFL(u8(), ref(channelsLength)),
+ *     r: array(u8(), ref(channelsLength)),
+ *     g: array(u8(), ref(channelsLength)),
+ *     b: array(u8(), ref(channelsLength)),
  *   }),
  *   pointsLength: pointsLength,
- *   points: arrayFL(u32le(), ref(pointsLength)),
+ *   points: array(u32le(), ref(pointsLength)),
  * });
  *
  * // Create sample data
