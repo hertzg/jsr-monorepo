@@ -1,3 +1,33 @@
+### 2025.08.19
+
+#### @hertzg/binstruct 0.1.6 (patch)
+
+- feat(binstruct): enhance array function to support conditional arrays and add
+  isLengthOrRef utility
+- fix(binstruct): update import paths in length.ts for consistency
+- fix(binstruct): update import path for assertion functions in struct tests
+- fix(binstruct): refactor the whole thing
+- refactor(binstruct): consolidate imports and replace arrayFL with array for
+  consistency in ref.ts
+- refactor(binstruct): add support for conditional arrays and update example
+  data in array.ts
+- refactor(binstruct): reorganize exports in string.ts for better accessibility
+- refactor(binstruct): remove example documentation from isCoder function for
+  improved readability
+- refactor(binstruct): remove extensive documentation comments from length.ts
+  for cleaner code
+- refactor(binstruct): reorganize exports in mod.ts for improved structure and
+  clarity
+- refactor(binstruct): remove redundant file list from deno.json
+- refactor(binstruct): export string kind symbols for fixed-length,
+  length-prefixed, and null-terminated strings
+- test(binstruct): add unit tests for arrayWhile functionality and export
+  kKindArrayWhile symbol
+- test(binstruct): add unit tests for fixed-length array coder functionality
+- test(binstruct): add tests for array coders and export kind symbols
+- test(binstruct): refactor string tests for clarity and consistency
+- chore(binstruct): remove unnecessary blank line in length-prefixed array file
+
 ### 2025.08.16
 
 #### @hertzg/binstruct 0.1.5 (patch)
