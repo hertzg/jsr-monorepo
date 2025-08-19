@@ -60,7 +60,6 @@ export const kKindArrayLP = Symbol("arrayLP");
  * assertEquals(bytesWritten, bytesRead);
  * ```
  */
-
 export function arrayLP<TDecoded>(
   elementType: Coder<TDecoded>,
   lengthType: Coder<number>,
