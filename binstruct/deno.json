@@ -3,13 +3,12 @@
   "version": "0.1.5",
   "exports": {
     ".": "./mod.ts",
-    "./numeric": "./numeric.ts",
-    "./array": "./array.ts",
-    "./struct": "./struct.ts",
-    "./string": "./string.ts",
-    "./bytes": "./bytes.ts",
-    "./length": "./length.ts",
-    "./ref": "./ref.ts"
+    "./numeric": "./numeric/numeric.ts",
+    "./array": "./array/array.ts",
+    "./struct": "./struct/struct.ts",
+    "./string": "./string/string.ts",
+    "./bytes": "./bytes/bytes.ts",
+    "./ref": "./ref/ref.ts"
   },
   "types": "./mod.ts",
   "files": [

@@ -1,8 +1,8 @@
 import { assertEquals } from "@std/assert";
 import { computedRef, ref } from "./ref.ts";
-import { struct } from "./struct.ts";
-import { u16be, u8be } from "./numeric.ts";
-import { arrayFL } from "./array.ts";
+import { struct } from "../struct/struct.ts";
+import { u16be, u8be } from "../numeric/numeric.ts";
+import { arrayFL } from "../array/fixed-length.ts";
 
 Deno.test("computedRef: basic functionality", async (t) => {
   await t.step("computes values from multiple references", () => {
@@ -17,8 +17,11 @@ Deno.test("computedRef: basic functionality", async (t) => {
       pixels: arrayFL(
         u8be(),
         computedRef(
-          (w: number, h: number) => w * h,
-          [ref(width), ref(height)],
+          [
+            ref(width),
+            ref(height),
+          ],
+          (w, h) => w * h,
         ),
       ),
     });
@@ -61,8 +64,11 @@ Deno.test("computedRef: basic functionality", async (t) => {
       pixels: arrayFL(
         color,
         computedRef(
-          (w: number, h: number) => w * h,
-          [ref(width), ref(height)],
+          [
+            ref(width),
+            ref(height),
+          ],
+          (w, h) => w * h,
         ),
       ),
     });
@@ -109,8 +115,11 @@ Deno.test("computedRef: basic functionality", async (t) => {
       items: arrayFL(
         u8be(),
         computedRef(
-          (c: number, m: number) => c * m,
-          [ref(count), ref(multiplier)],
+          [
+            ref(count),
+            ref(multiplier),
+          ],
+          (c, m) => c * m,
         ),
       ),
     });

@@ -9,9 +9,10 @@ import {
   u16be,
   u32be,
   u8be,
-} from "./numeric.ts";
-import { arrayLP } from "./array.ts";
-import { stringLP, stringNT } from "./string.ts";
+} from "../numeric/numeric.ts";
+import { arrayLP } from "../array/length-prefixed.ts";
+import { stringNT } from "../string/null-terminated.ts";
+import { stringLP } from "../string/length-prefixed.ts";
 
 Deno.test("struct: basic functionality", async (t) => {
   await t.step("encodes and decodes simple struct", () => {

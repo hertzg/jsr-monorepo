@@ -1,8 +1,8 @@
 import { assertEquals, assertThrows } from "@std/assert";
-import type { Coder, Context } from "./mod.ts";
-import { u8be } from "./numeric.ts";
-import { isValidLength, tryUnrefLength } from "./length.ts";
-import { ref } from "./ref.ts";
+import { isValidLength, lengthRefGet } from "./length.ts";
+import { type Context, createContext } from "./core.ts";
+import { u8be } from "./numeric/numeric.ts";
+import { ref, refSetValue } from "./ref/ref.ts";
 
 Deno.test("isValidLength", () => {
   // Valid lengths
@@ -21,52 +21,31 @@ Deno.test("isValidLength", () => {
   assertEquals(isValidLength(-Infinity), false);
 });
 
-Deno.test("tryUnrefLength", () => {
-  const mockContext: Context = {
-    direction: "encode",
-    refs: new WeakMap(),
-  };
+Deno.test("lengthRefGetSet", async (t) => {
+  await t.step("without context", () => {
+    const mockCoder = u8be();
+    const mockCoderRef = ref(mockCoder);
+    assertEquals(lengthRefGet(null, 5), 5);
+    assertEquals(lengthRefGet(undefined, 10), 10);
+    assertEquals(lengthRefGet(null, mockCoderRef), undefined);
+    assertEquals(lengthRefGet(undefined, mockCoderRef), undefined);
+  });
 
-  // Test with null/undefined values
-  assertEquals(tryUnrefLength(null, null), null);
-  assertEquals(tryUnrefLength(undefined, undefined), undefined);
-  assertEquals(tryUnrefLength(5, null), 5);
-  assertEquals(tryUnrefLength(10, undefined), 10);
+  await t.step("with context", () => {
+    const context = createContext("encode");
+    const mockCoder = u8be();
+    const mockCoderRef = ref(mockCoder);
+    assertEquals(lengthRefGet(context, 42), 42);
+    assertEquals(lengthRefGet(context, 1000), 1000);
 
-  // Test with numeric values
-  assertEquals(tryUnrefLength(0, mockContext), 0);
-  assertEquals(tryUnrefLength(42, mockContext), 42);
-  assertEquals(tryUnrefLength(1000, mockContext), 1000);
+    assertEquals(lengthRefGet({} as Context, mockCoderRef), undefined);
+    assertThrows(
+      () => lengthRefGet(context, mockCoderRef),
+      Error,
+      "Ref not found",
+    );
 
-  // Test with ref values
-  const mockCoder = u8be();
-  const mockRef = ref(mockCoder);
-  mockContext.refs.set(mockCoder as Coder<unknown>, 123);
-
-  assertEquals(tryUnrefLength(mockRef, mockContext), 123);
-});
-
-Deno.test("tryUnrefLength with refs", () => {
-  const mockCoder = u8be();
-  const context: Context = {
-    direction: "encode",
-    refs: new WeakMap(),
-  };
-
-  // Test with numeric length
-  assertEquals(tryUnrefLength(42, context), 42);
-
-  // Test with ref length
-  const refLength = ref(mockCoder);
-  context.refs.set(mockCoder as Coder<unknown>, 100);
-  assertEquals(tryUnrefLength(refLength, context), 100); // Actual behavior
-
-  // Test with ref that doesn't exist in context - should throw
-  const anotherCoder = u8be();
-  const anotherRef = ref(anotherCoder);
-  assertThrows(
-    () => tryUnrefLength(anotherRef, context),
-    Error,
-    "Ref not found",
-  );
+    refSetValue(context, mockCoder, 123);
+    assertEquals(lengthRefGet(context, mockCoderRef), 123);
+  });
 });

@@ -1,4 +1,27 @@
-import type { Coder } from "./mod.ts";
+import { type Coder, kCoderKind } from "../core.ts";
+import { refSetValue } from "../ref/ref.ts";
+
+// Symbol definitions for numeric types
+const kKindU8 = Symbol("u8");
+const kKindS8 = Symbol("s8");
+const kKindU16BE = Symbol("u16be");
+const kKindU16LE = Symbol("u16le");
+const kKindS16BE = Symbol("s16be");
+const kKindS16LE = Symbol("s16le");
+const kKindU32BE = Symbol("u32be");
+const kKindU32LE = Symbol("u32le");
+const kKindS32BE = Symbol("s32be");
+const kKindS32LE = Symbol("s32le");
+const kKindU64BE = Symbol("u64be");
+const kKindU64LE = Symbol("u64le");
+const kKindS64BE = Symbol("s64be");
+const kKindS64LE = Symbol("s64le");
+const kKindF16BE = Symbol("f16be");
+const kKindF16LE = Symbol("f16le");
+const kKindF32BE = Symbol("f32be");
+const kKindF32LE = Symbol("f32le");
+const kKindF64BE = Symbol("f64be");
+const kKindF64LE = Symbol("f64le");
 
 /**
  * Numeric data encoding and decoding utilities for binary structures.
@@ -110,17 +133,20 @@ function dataViewType(
     | "Float32"
     | "Float64",
   endianness: Endianness,
+  kind: symbol,
 ): Coder<number>;
 function dataViewType(
   type:
     | "BigInt64"
     | "BigUint64",
   endianness: Endianness,
+  kind: symbol,
 ): Coder<bigint>;
-function dataViewType<TValue extends number | bigint>(
+function dataViewType<TDecoded extends number | bigint>(
   type: DataViewMethodSuffixes,
   endianness: Endianness,
-): Coder<TValue> {
+  kind: symbol,
+): Coder<TDecoded> {
   const bits = Number(type.match(/[0-9]+$/)?.[0]!);
 
   if (isNaN(bits)) {
@@ -131,8 +157,12 @@ function dataViewType<TValue extends number | bigint>(
 
   const methodSuffix = `${type}` as const;
 
-  return {
-    encode: (value, target, _context) => {
+  let self: Coder<TDecoded>;
+  return self = {
+    [kCoderKind]: kind,
+    encode: (value, target, ctx) => {
+      refSetValue(ctx, self, value);
+
       const dataView = new DataView(
         target.buffer,
         target.byteOffset,
@@ -163,7 +193,7 @@ function dataViewType<TValue extends number | bigint>(
       }
       return bytes;
     },
-    decode: (encoded, _context) => {
+    decode: (encoded, ctx) => {
       if (encoded.length < bytes) {
         throw new Error(`Need ${bytes} bytes, got ${encoded.length}`);
       }
@@ -174,20 +204,22 @@ function dataViewType<TValue extends number | bigint>(
         encoded.byteLength,
       );
 
-      let value: TValue;
+      let value: TDecoded;
       switch (methodSuffix) {
         case "Uint8":
         case "Int8":
-          value = dataView[`get${methodSuffix}`](0) as TValue;
+          value = dataView[`get${methodSuffix}`](0) as TDecoded;
           break;
 
         default:
           value = dataView[`get${methodSuffix}`](
             0,
             endianness === "le",
-          ) as TValue;
+          ) as TDecoded;
           break;
       }
+
+      refSetValue(ctx, self, value);
 
       return [value, bytes];
     },
@@ -231,7 +263,11 @@ function dataViewType<TValue extends number | bigint>(
 export function u8(
   endianness: Endianness = "be",
 ): Coder<number> {
-  return dataViewType("Uint8", endianness);
+  return dataViewType(
+    "Uint8",
+    endianness,
+    kKindU8,
+  );
 }
 
 /**
@@ -274,7 +310,7 @@ export function u8(
 export function s8(
   endianness: Endianness = "be",
 ): Coder<number> {
-  return dataViewType("Int8", endianness);
+  return dataViewType("Int8", endianness, kKindS8);
 }
 
 /**
@@ -316,7 +352,11 @@ export function s8(
 export function u16(
   endianness: Endianness = "be",
 ): Coder<number> {
-  return dataViewType("Uint16", endianness);
+  return dataViewType(
+    "Uint16",
+    endianness,
+    endianness === "be" ? kKindU16BE : kKindU16LE,
+  );
 }
 
 /**
@@ -359,7 +399,11 @@ export function u16(
 export function s16(
   endianness: Endianness = "be",
 ): Coder<number> {
-  return dataViewType("Int16", endianness);
+  return dataViewType(
+    "Int16",
+    endianness,
+    endianness === "be" ? kKindS16BE : kKindS16LE,
+  );
 }
 
 /**
@@ -411,7 +455,11 @@ export function s16(
 export function f16(
   endianness: Endianness = "be",
 ): Coder<number> {
-  return dataViewType("Float16", endianness);
+  return dataViewType(
+    "Float16",
+    endianness,
+    endianness === "be" ? kKindF16BE : kKindF16LE,
+  );
 }
 
 /**
@@ -453,7 +501,11 @@ export function f16(
 export function u32(
   endianness: Endianness = "be",
 ): Coder<number> {
-  return dataViewType("Uint32", endianness);
+  return dataViewType(
+    "Uint32",
+    endianness,
+    endianness === "be" ? kKindU32BE : kKindU32LE,
+  );
 }
 
 /**
@@ -500,7 +552,11 @@ export function u32(
 export function s32(
   endianness: Endianness = "be",
 ): Coder<number> {
-  return dataViewType("Int32", endianness);
+  return dataViewType(
+    "Int32",
+    endianness,
+    endianness === "be" ? kKindS32BE : kKindS32LE,
+  );
 }
 
 /**
@@ -547,7 +603,11 @@ export function s32(
 export function f32(
   endianness: Endianness = "be",
 ): Coder<number> {
-  return dataViewType("Float32", endianness);
+  return dataViewType(
+    "Float32",
+    endianness,
+    endianness === "be" ? kKindF32BE : kKindF32LE,
+  );
 }
 
 /**
@@ -596,7 +656,11 @@ export function f32(
 export function u64(
   endianness: Endianness = "be",
 ): Coder<bigint> {
-  return dataViewType("BigUint64", endianness);
+  return dataViewType(
+    "BigUint64",
+    endianness,
+    endianness === "be" ? kKindU64BE : kKindU64LE,
+  );
 }
 
 /**
@@ -645,7 +709,11 @@ export function u64(
 export function s64(
   endianness: Endianness = "be",
 ): Coder<bigint> {
-  return dataViewType("BigInt64", endianness);
+  return dataViewType(
+    "BigInt64",
+    endianness,
+    endianness === "be" ? kKindS64BE : kKindS64LE,
+  );
 }
 
 /**
@@ -700,7 +768,11 @@ export function s64(
 export function f64(
   endianness: Endianness = "be",
 ): Coder<number> {
-  return dataViewType("Float64", endianness);
+  return dataViewType(
+    "Float64",
+    endianness,
+    endianness === "be" ? kKindF64BE : kKindF64LE,
+  );
 }
 
 /**

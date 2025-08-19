@@ -68,17 +68,68 @@
  * @module
  */
 
-import type { Coder, Context } from "./mod.ts";
+import type { Coder, Context } from "../core.ts";
+import { kCtxRefs } from "../core.ts";
 
-const kRefSymbol = Symbol("ref");
+const kIsRefValue = Symbol("isRef");
+
+export interface RefsWeakMap extends WeakMap<Coder<unknown>, unknown> {
+  get<T>(coder: Coder<T>): T | undefined;
+  set<T>(coder: Coder<T>, value: T): this;
+  has<T>(coder: Coder<T>): boolean;
+}
+
+export function withRefsInContext(ctx: Context): Context {
+  if (!isRefsInContext(ctx)) {
+    ctx[kCtxRefs] = new WeakMap() as RefsWeakMap;
+  }
+
+  return ctx;
+}
 
 /**
  * A type representing a reference value that can be resolved during encoding/decoding.
  */
 export type RefValue<TDecoded> = {
   (ctx: Context): TDecoded;
-  [kRefSymbol]: true;
+  [kIsRefValue]: true;
 };
+
+/**
+ * Checks if a value is a reference created by the ref function.
+ *
+ * This function is used to distinguish between literal values and references
+ * during encoding/decoding operations.
+ *
+ * @param value - The value to check
+ * @returns True if the value is a reference, false otherwise
+ *
+ * @example
+ * ```ts
+ * import { assertEquals } from "@std/assert";
+ * import { isRef, ref } from "@hertzg/binstruct/ref";
+ * import { u16le } from "@hertzg/binstruct/numeric";
+ *
+ * // Create a reference
+ * const lengthRef = ref(u16le());
+ * assertEquals(isRef(lengthRef), true);
+ *
+ * // Check literal values
+ * assertEquals(isRef(5), false);
+ * assertEquals(isRef("string"), false);
+ * assertEquals(isRef(null), false);
+ * assertEquals(isRef(undefined), false);
+ * ```
+ */
+export function isRef<T>(value: unknown): value is RefValue<T> {
+  return typeof value === "function" && kIsRefValue in value;
+}
+
+function isRefsInContext(ctx: Context | null | undefined): ctx is Context & {
+  [kCtxRefs]: RefsWeakMap;
+} {
+  return ctx != null && kCtxRefs in ctx;
+}
 
 /**
  * Creates a reference value that can be resolved during encoding/decoding.
@@ -145,118 +196,64 @@ export type RefValue<TDecoded> = {
  * assertEquals(bytesWritten, bytesRead);
  * ```
  */
-export function ref<TDecoded>(coder: Coder<TDecoded>): RefValue<TDecoded> {
-  const unref: RefValue<TDecoded> = (ctx: Context) => {
-    if (!ctx.refs.has(coder as Coder<unknown>)) {
-      throw new Error("Ref not found");
+export function ref<TDecoded>(
+  coder: Coder<TDecoded>,
+): RefValue<TDecoded> {
+  const unref: RefValue<TDecoded> = (ctx: Context | null | undefined) => {
+    if (!isRefsInContext(ctx)) {
+      throw new Error("Context initiatized without refs");
     }
 
-    return ctx.refs.get(coder as Coder<unknown>)! as TDecoded;
+    if (ctx[kCtxRefs].has(coder)) {
+      return ctx[kCtxRefs].get(coder)!;
+    }
+
+    throw new Error("Ref not found in context");
   };
 
-  unref[kRefSymbol] = true;
+  unref[kIsRefValue] = true;
+
   return unref;
 }
 
-type UnwrapRefValue<T> = T extends RefValue<infer U> ? U : never;
+export function refGetValue<T>(
+  ctx: Context | null | undefined,
+  refOrValue: RefValue<T> | NoInfer<T>,
+): NoInfer<T> | undefined {
+  if (isRef<T>(refOrValue)) {
+    return isRefsInContext(ctx) ? refOrValue(ctx) : undefined;
+  }
 
-/**
- * Creates a computed reference that can be resolved during encoding/decoding.
- *
- * Computed references allow for dynamic calculations based on multiple references
- * by deferring the computation until the context is available.
- *
- * @param computation - The function to compute the final value
- * @param refs - Array of references to resolve and pass to the computation function
- * @returns A RefValue that can be resolved with a context
- *
- * @example
- * ```ts
- * import { assertEquals } from "@std/assert";
- * import { computedRef, ref } from "@hertzg/binstruct/ref";
- * import { struct } from "@hertzg/binstruct/struct";
- * import { u16be, u8be } from "@hertzg/binstruct/numeric";
- * import { arrayFL } from "@hertzg/binstruct/array";
- * import { createContext } from "@hertzg/binstruct";
- *
- * // Create the coders that will be referenced
- * const width = u16be();
- * const height = u16be();
- *
- * // Define a structure with computed array length
- * const coder = struct({
- *   width: width,
- *   height: height,
- *   pixels: arrayFL(u8be(), computedRef((w: number, h: number) => w * h, [ref(width), ref(height)]))
- * });
- *
- * // Create sample data
- * const data = {
- *   width: 3,
- *   height: 2,
- *   pixels: [255, 128, 64, 0, 255, 128],
- * };
- *
- * // Encode the data with context
- * const buffer = new Uint8Array(1000);
- * const bytesWritten = coder.encode(data, buffer);
- *
- * // Decode the data with context
- * const [decoded, bytesRead] = coder.decode(buffer);
- *
- * // Verify the data matches
- * assertEquals(decoded.width, data.width);
- * assertEquals(decoded.height, data.height);
- * assertEquals(decoded.pixels, data.pixels);
- * assertEquals(bytesWritten, bytesRead);
- * ```
- */
-export function computedRef<
-  TRefs extends readonly RefValue<unknown>[],
-  TDecoded,
->(
-  computation: (
-    ...args: { [K in keyof TRefs]: UnwrapRefValue<TRefs[K]> }
-  ) => TDecoded,
-  refs: TRefs,
-): RefValue<TDecoded> {
-  const computedRef: RefValue<TDecoded> = (ctx: Context) => {
-    const resolvedRefs = refs.map((ref) => ref(ctx)) as {
-      [K in keyof TRefs]: UnwrapRefValue<TRefs[K]>;
-    };
-    return computation(...resolvedRefs);
-  };
-
-  computedRef[kRefSymbol] = true;
-  return computedRef;
+  return refOrValue;
 }
 
-/**
- * Checks if a value is a reference created by the ref function.
- *
- * This function is used to distinguish between literal values and references
- * during encoding/decoding operations.
- *
- * @param value - The value to check
- * @returns True if the value is a reference, false otherwise
- *
- * @example
- * ```ts
- * import { assertEquals } from "@std/assert";
- * import { isRef, ref } from "@hertzg/binstruct/ref";
- * import { u16le } from "@hertzg/binstruct/numeric";
- *
- * // Create a reference
- * const lengthRef = ref(u16le());
- * assertEquals(isRef(lengthRef), true);
- *
- * // Check literal values
- * assertEquals(isRef(5), false);
- * assertEquals(isRef("string"), false);
- * assertEquals(isRef(null), false);
- * assertEquals(isRef(undefined), false);
- * ```
- */
-export function isRef<T>(value: unknown): value is RefValue<T> {
-  return typeof value === "function" && kRefSymbol in value;
+export function refSetValue<T>(
+  ctx: Context | null | undefined,
+  coder: Coder<T>,
+  value: T,
+): void {
+  if (isRefsInContext(ctx)) {
+    ctx[kCtxRefs].set(coder, value);
+  }
+}
+
+type UnwrapRefTuple<TTuple extends readonly RefValue<unknown>[]> = {
+  [K in keyof TTuple]: TTuple[K] extends RefValue<infer TDecoded> ? TDecoded
+    : never;
+};
+
+export function computedRef<
+  const TArgs extends readonly RefValue<unknown>[],
+  TDecoded,
+>(
+  refs: [...TArgs],
+  computation: (...args: [...UnwrapRefTuple<TArgs>]) => TDecoded,
+): RefValue<TDecoded> {
+  const fn = (ctx: Context) => {
+    const resolved = refs.map((r) => r(ctx)) as UnwrapRefTuple<TArgs>;
+    return computation(...resolved);
+  };
+
+  fn[kIsRefValue] = true as const;
+  return fn;
 }

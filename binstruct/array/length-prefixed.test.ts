@@ -1,10 +1,8 @@
 import { assertEquals, assertThrows } from "@std/assert";
-import { arrayLP } from "./array.ts";
-import { f32be, f64be, s16be, u16be, u32be, u8be } from "./numeric.ts";
-import { stringLP, stringNT } from "./string.ts";
-import { array } from "./array.ts";
-import { ref } from "./ref.ts";
-import { u16le, u32le } from "./numeric.ts";
+import { f32be, f64be, s16be, u16be, u32be, u8be } from "../numeric/numeric.ts";
+import { stringNT } from "../string/null-terminated.ts";
+import { stringLP } from "../string/length-prefixed.ts";
+import { arrayLP } from "./length-prefixed.ts";
 
 Deno.test("arrayLP: basic functionality", async (t) => {
   await t.step("encodes and decodes number arrays", () => {
@@ -274,94 +272,5 @@ Deno.test("arrayLP: floating point precision", async (t) => {
       assertEquals(Math.abs(decoded[i] - data[i]) < 0.000000000000001, true);
     }
     assertEquals(bytesWritten, bytesRead);
-  });
-});
-
-Deno.test("array: unified function", async (t) => {
-  await t.step(
-    "creates length-prefixed array when second arg is a coder",
-    () => {
-      const coder = array(u16le(), u32le());
-      const data = [100, 200, 300];
-      const buffer = new Uint8Array(100);
-
-      const bytesWritten = coder.encode(data, buffer);
-      const [decoded, bytesRead] = coder.decode(buffer);
-
-      assertEquals(decoded, data);
-      assertEquals(bytesWritten, bytesRead);
-      // Should behave exactly like arrayLP
-      assertEquals(bytesWritten > 0, true, "Should write some bytes");
-    },
-  );
-
-  await t.step("creates fixed-length array when second arg is a number", () => {
-    const coder = array(u16le(), 3);
-    const data = [100, 200, 300];
-    const buffer = new Uint8Array(100);
-
-    const bytesWritten = coder.encode(data, buffer);
-    const [decoded, bytesRead] = coder.decode(buffer);
-
-    assertEquals(decoded, data);
-    assertEquals(bytesWritten, bytesRead);
-    // Should behave exactly like arrayFL
-    assertEquals(bytesWritten > 0, true, "Should write some bytes");
-  });
-
-  await t.step(
-    "creates fixed-length array when second arg is a reference",
-    () => {
-      const countCoder = u16le();
-      const countRef = ref(countCoder);
-      const coder = array(u16le(), countRef);
-
-      // Test that the coder is created correctly (type checking)
-      assertEquals(typeof coder.encode, "function");
-      assertEquals(typeof coder.decode, "function");
-
-      // Note: Reference resolution requires proper context setup which is tested in ref.test.ts
-      // This test just verifies that the array function correctly creates a fixed-length array coder
-    },
-  );
-
-  await t.step("throws error for fixed-length array with wrong length", () => {
-    const coder = array(u16le(), 3);
-    const data = [100, 200]; // Wrong length: 2 instead of 3
-    const buffer = new Uint8Array(100);
-
-    assertThrows(
-      () => {
-        coder.encode(data, buffer);
-      },
-      Error,
-      "Invalid length: 3. Must be equal to the decoded length.",
-    );
-  });
-
-  await t.step("handles empty arrays correctly", () => {
-    // Length-prefixed empty array
-    const lpCoder = array(u16le(), u32le());
-    const lpData: number[] = [];
-    const lpBuffer = new Uint8Array(100);
-
-    const lpBytesWritten = lpCoder.encode(lpData, lpBuffer);
-    const [lpDecoded, lpBytesRead] = lpCoder.decode(lpBuffer);
-
-    assertEquals(lpDecoded, lpData);
-    assertEquals(lpBytesWritten, lpBytesRead);
-    assertEquals(lpBytesWritten >= 0, true, "Should write length prefix");
-
-    // Fixed-length empty array
-    const flCoder = array(u16le(), 0);
-    const flData: number[] = [];
-    const flBuffer = new Uint8Array(100);
-
-    const flBytesWritten = flCoder.encode(flData, flBuffer);
-    const [flDecoded, flBytesRead] = flCoder.decode(flBuffer);
-
-    assertEquals(flDecoded, flData);
-    assertEquals(flBytesWritten, flBytesRead);
-    assertEquals(flBytesWritten >= 0, true, "Should handle empty array");
   });
 });

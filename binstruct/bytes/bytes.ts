@@ -30,14 +30,16 @@
  *
  * @module
  */
-import { type Coder, createContext } from "./mod.ts";
-import { isRef } from "./ref.ts";
-import { isValidLength, type LengthType, tryUnrefLength } from "./length.ts";
+import { isValidLength, type LengthOrRef, lengthRefGet } from "../length.ts";
+import { type Coder, createContext, kCoderKind } from "../core.ts";
+import { isRef, refSetValue } from "../ref/ref.ts";
+
+const kKindBytes = Symbol("bytes");
 
 /**
  * Creates a Coder for byte slices.
  *
- * @param length - Optional fixed length. If not provided, consumes all available bytes
+ * @param lengthOrRef - Optional fixed length. If not provided, consumes all available bytes
  * @returns A Coder for byte slices
  *
  * @example
@@ -63,22 +65,30 @@ import { isValidLength, type LengthType, tryUnrefLength } from "./length.ts";
  */
 
 export function bytes(
-  length?: LengthType,
+  lengthOrRef?: LengthOrRef | null,
 ): Coder<Uint8Array> {
   if (
-    length != null &&
-    !isRef<number>(length) &&
-    !isValidLength(length)
+    lengthOrRef != null &&
+    !isRef<number>(lengthOrRef) &&
+    !isValidLength(lengthOrRef)
   ) {
     throw new Error(
-      `Invalid length: ${length}. Must be a reference to or a literal non-negative integer.`,
+      `Invalid length: ${lengthOrRef}. Must be a reference to or a literal non-negative integer.`,
     );
   }
 
-  return {
+  let self: Coder<Uint8Array>;
+  return self = {
+    [kCoderKind]: kKindBytes,
     encode: (value, target, context): number => {
       const ctx = context ?? createContext("encode");
-      const len = tryUnrefLength(length, ctx) ?? value.length;
+      const len = lengthOrRef == null
+        ? value.length
+        : lengthRefGet(ctx, lengthOrRef);
+
+      if (len === undefined) {
+        throw new Error("Invalid length: Unable to resolve length");
+      }
 
       if (!isValidLength(len)) {
         throw new Error(
@@ -86,10 +96,7 @@ export function bytes(
         );
       }
 
-      // Add the length value to context so refs can resolve it
-      if (length != null && typeof length === "object") {
-        ctx.refs.set(length, len);
-      }
+      refSetValue(ctx, self, value);
 
       const toWrite = value.subarray(0, len);
       target.set(toWrite, 0);
@@ -97,34 +104,32 @@ export function bytes(
     },
     decode: (encoded, context) => {
       const ctx = context ?? createContext("decode");
-      const len = tryUnrefLength(length, ctx);
 
-      if (len != null) {
-        // Fixed length case
-        if (!isValidLength(len)) {
-          throw new Error(
-            `Invalid length: ${len}. Must be a non-negative integer.`,
-          );
-        }
-
-        // Add the length value to context so refs can resolve it
-        if (length != null && typeof length === "object") {
-          ctx.refs.set(length, len);
-        }
-
-        if (encoded.length < len) {
-          throw new Error(
-            `Need ${len} bytes, got ${encoded.length}`,
-          );
-        }
-
-        // For fixed length, only read the specified number of bytes
-        const result = encoded.subarray(0, len);
-        return [result, len];
-      } else {
-        // Variable length case - read all available bytes
+      if (lengthOrRef == null) {
+        refSetValue(ctx, self, encoded);
         return [encoded, encoded.length];
       }
+
+      const len = lengthRefGet(ctx, lengthOrRef);
+      if (len === undefined) {
+        throw new Error("Invalid length: Unable to resolve length");
+      }
+
+      if (!isValidLength(len)) {
+        throw new Error(
+          `Invalid length: ${len}. Must be a non-negative integer.`,
+        );
+      }
+
+      if (encoded.length < len) {
+        throw new Error(
+          `Need ${len} bytes, got only ${encoded.length}`,
+        );
+      }
+
+      const truncated = encoded.subarray(0, len);
+      refSetValue(ctx, self, truncated);
+      return [truncated, len];
     },
   };
 }

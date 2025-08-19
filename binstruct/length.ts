@@ -9,30 +9,30 @@
  * @example Validating and resolving length values
  * ```ts
  * import { assertEquals } from "@std/assert";
- * import { isValidLength, tryUnrefLength, type LengthType } from "@hertzg/binstruct/length";
- * import { ref } from "@hertzg/binstruct/ref";
+ * import { isValidLength, resolveLength, type LengthType } from "@hertzg/binstruct/length";
+ * import { ref, refSetValue } from "@hertzg/binstruct/ref";
  * import { createContext } from "@hertzg/binstruct";
  * import { u16le } from "@hertzg/binstruct/numeric";
  *
  * const lenCoder = u16le();
  * const lenRef = ref(lenCoder);
  * const ctx = createContext("encode");
- * ctx.refs.set(lenCoder, 5);
+ * refSetValue(ctx, lenCoder, 5);
  *
- * const resolved = tryUnrefLength(lenRef, ctx);
+ * const resolved = resolveLength(lenRef, ctx);
  * assertEquals(resolved, 5);
  * assertEquals(isValidLength(resolved!), true);
  * ```
  *
  * @module
  */
-import type { Context } from "./mod.ts";
-import { isRef, type RefValue } from "./ref.ts";
+import type { Coder, Context } from "./core.ts";
+import { refGetValue, refSetValue, type RefValue } from "./ref/ref.ts";
 
 /**
  * A type representing a length value that can be either a number or a reference to a number.
  */
-export type LengthType = number | RefValue<number>;
+export type LengthOrRef = number | RefValue<number>;
 
 /**
  * Validates if a length value is valid for binary encoding.
@@ -65,34 +65,38 @@ export function isValidLength(length: number): boolean {
  * If the length is a literal number, it will be returned as-is.
  * If no context is provided, the length is returned unchanged.
  *
- * @param length - The length value (can be a number, reference, or null/undefined)
+ * @param lengthOrRef - The length value (can be a number, reference, or null/undefined)
  * @param ctx - The context for resolving references
  * @returns The resolved length value, or the original value if no resolution is possible
  *
  * @example
  * ```ts
  * import { assertEquals } from "@std/assert";
- * import { tryUnrefLength } from "@hertzg/binstruct/length";
+ * import { resolveLength } from "@hertzg/binstruct/length";
  *
  * // Literal value (no resolution needed)
- * const literal = tryUnrefLength(5, null);
+ * const literal = resolveLength(5, null);
  * assertEquals(literal, 5);
  *
  * // Null/undefined values
- * const nullValue = tryUnrefLength(null, null);
+ * const nullValue = resolveLength(null, null);
  * assertEquals(nullValue, null);
  *
- * const undefinedValue = tryUnrefLength(undefined, null);
+ * const undefinedValue = resolveLength(undefined, null);
  * assertEquals(undefinedValue, undefined);
  * ```
  */
-export function tryUnrefLength(
-  length: LengthType | undefined | null,
+export function lengthRefGet(
   ctx: Context | undefined | null,
-): number | undefined | null {
-  if (ctx != null) {
-    return isRef<number>(length) ? length(ctx) : length;
-  }
+  lengthOrRef: LengthOrRef,
+): number | undefined {
+  return refGetValue(ctx, lengthOrRef);
+}
 
-  return length as number | undefined | null;
+export function lengthRefSet(
+  ctx: Context | null | undefined,
+  coder: Coder<number>,
+  length: number,
+): void {
+  refSetValue(ctx, coder, length);
 }

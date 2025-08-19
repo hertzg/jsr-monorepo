@@ -1,5 +1,5 @@
 import { assertEquals, assertThrows } from "@std/assert";
-import type { Coder } from "./mod.ts";
+import type { Coder } from "../core.ts";
 // deno-fmt-ignore
 import {
   type Endianness,

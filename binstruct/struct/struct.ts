@@ -27,8 +27,10 @@
  *
  * @module
  */
-import type { Coder } from "./mod.ts";
-import { createContext } from "./mod.ts";
+import { type Coder, createContext, kCoderKind } from "../core.ts";
+import { refSetValue } from "../ref/ref.ts";
+
+const kKindStruct = Symbol("struct");
 
 /**
  * Creates a Coder for structured data from an object of property names to coders.
@@ -91,18 +93,18 @@ export function struct<T extends Record<string, Coder<any>>>(
 ): Coder<{ [K in keyof T]: T[K] extends Coder<infer U> ? U : never }> {
   const keys = Object.keys(schema) as (keyof T)[];
 
-  return {
+  let self: Coder<{ [K in keyof T]: T[K] extends Coder<infer U> ? U : never }>;
+  return self = {
+    [kCoderKind]: kKindStruct,
     encode: (decoded, target, context) => {
       const ctx = context ?? createContext("encode");
       let cursor = 0;
 
-      // First pass: encode all fields and collect their values for context
+      refSetValue(ctx, self, decoded);
+
       for (const key of keys) {
         const coder = schema[key];
         const value = decoded[key];
-
-        // Add the value to context so refs can resolve it
-        ctx.refs.set(coder, value);
 
         cursor += coder.encode(value, target.subarray(cursor), ctx);
       }
@@ -115,16 +117,14 @@ export function struct<T extends Record<string, Coder<any>>>(
         [K in keyof T]: T[K] extends Coder<infer U> ? U : never;
       };
 
-      // First pass: decode all fields and collect their values for context
+      refSetValue(ctx, self, result);
+
       for (const key of keys) {
         const coder = schema[key];
         const [value, bytesRead] = coder.decode(
           encoded.subarray(cursor),
           ctx,
         );
-
-        // Add the value to context so refs can resolve it
-        ctx.refs.set(coder, value);
 
         cursor += bytesRead;
         result[key] = value;
