@@ -1,7 +1,7 @@
 import { type Coder, createContext, kCoderKind } from "../core.ts";
 import { refSetValue } from "@hertzg/binstruct/ref";
 
-const kKindStringLP = Symbol("stringLP");
+export const kKindStringLP = Symbol("stringLP");
 
 /**
  * Creates a Coder for length-prefixed strings.

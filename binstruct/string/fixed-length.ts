@@ -2,7 +2,7 @@ import { type Coder, createContext, kCoderKind } from "../core.ts";
 import { isValidLength, type LengthOrRef, lengthRefGet } from "../length.ts";
 import { refSetValue } from "@hertzg/binstruct/ref";
 
-const kKindStringFL = Symbol("stringFL");
+export const kKindStringFL = Symbol("stringFL");
 
 /**
  * Creates a Coder for fixed-length strings.

@@ -40,9 +40,9 @@
  */
 import type { LengthOrRef } from "../length.ts";
 import { type Coder, isCoder } from "../core.ts";
+import { stringFL } from "./fixed-length.ts";
 import { stringLP } from "./length-prefixed.ts";
 import { stringNT } from "./null-terminated.ts";
-import { stringFL } from "./fixed-length.ts";
 
 /**
  * Creates a Coder for strings that automatically chooses between length-prefixed,

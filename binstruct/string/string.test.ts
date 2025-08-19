@@ -1,71 +1,33 @@
-import { assertEquals, assertNotEquals } from "@std/assert";
+import { assertEquals } from "@std/assert";
+import { kCoderKind } from "../core.ts";
 import { u16 } from "../numeric/numeric.ts";
-import { string } from "./string.ts";
 import { ref } from "../ref/ref.ts";
-import { struct } from "../struct/struct.ts";
+import { kKindStringFL } from "./fixed-length.ts";
+import { kKindStringLP } from "./length-prefixed.ts";
+import { kKindStringNT } from "./null-terminated.ts";
+import { string } from "./string.ts";
 
-Deno.test("string - automatic type selection - no arguments creates null-terminated", () => {
-  const coder = string(); // No arguments
-  const testString = "Hello, World!";
-  const buffer = new Uint8Array(100);
-
-  const bytesWritten = coder.encode(testString, buffer);
-  const [decoded, bytesRead] = coder.decode(buffer);
-
-  assertEquals(decoded, testString);
-  assertEquals(bytesWritten, bytesRead);
-  assertEquals(bytesWritten, testString.length + 1); // +1 for null terminator
+Deno.test("string() with no arguments creates null-terminated coder", () => {
+  const coder = string();
+  assertEquals(coder[kCoderKind], kKindStringNT);
 });
 
-Deno.test("string - automatic type selection - coder argument creates length-prefixed", () => {
-  const coder = string(u16()); // u16 coder argument
-  const testString = "Hello, World!";
-  const buffer = new Uint8Array(100);
-
-  const bytesWritten = coder.encode(testString, buffer);
-  const [decoded, bytesRead] = coder.decode(buffer);
-
-  assertEquals(decoded, testString);
-  assertEquals(bytesWritten, bytesRead);
-  assertEquals(bytesWritten, testString.length + 2); // +2 for u16 length
+Deno.test("string(coder) creates length-prefixed coder", () => {
+  const coder = string(u16());
+  assertEquals(coder[kCoderKind], kKindStringLP);
 });
 
-Deno.test("string - automatic type selection - length value creates fixed-length", () => {
-  const length = 20;
-  const coder = string(length); // Numeric length argument
-  const testString = "Hello, World!";
-  const buffer = new Uint8Array(100);
-
-  const bytesWritten = coder.encode(testString, buffer);
-  const [decoded, bytesRead] = coder.decode(buffer);
-
-  assertEquals(
-    decoded,
-    `${testString}${"\0".repeat(length - testString.length)}`,
-  );
-  assertNotEquals(bytesWritten, bytesRead);
-  assertEquals(bytesWritten, testString.length);
-  assertEquals(bytesRead, length);
+Deno.test("string(number) creates fixed-length coder", () => {
+  const coder = string(10);
+  assertEquals(coder[kCoderKind], kKindStringFL);
 });
 
-Deno.test("string - automatic type selection - ref argument creates fixed-length", () => {
-  const lengthCoder = u16();
-  const coder = struct({
-    length: lengthCoder,
-    text: string(ref(lengthCoder)), // Ref argument
-  });
+Deno.test("string(coder) creates length-prefixed coder", () => {
+  const coder = string(u16());
+  assertEquals(coder[kCoderKind], kKindStringLP);
+});
 
-  const data = {
-    length: 10,
-    text: "Hello",
-  };
-
-  const buffer = new Uint8Array(100);
-  const bytesWritten = coder.encode(data, buffer);
-  const [decoded, bytesRead] = coder.decode(buffer);
-
-  assertEquals(decoded.length, data.length);
-  assertEquals(decoded.text, "Hello\0\0\0\0\0"); // Padded to length 10
-  assertEquals(bytesWritten, 7); // 2 bytes for u16 length + 5 bytes for string
-  assertEquals(bytesRead, 12); // 2 bytes for u16 length + 10 bytes for fixed length
+Deno.test("string(ref) creates fixed-length coder with reference", () => {
+  const coder = string(ref(u16()));
+  assertEquals(coder[kCoderKind], kKindStringFL);
 });

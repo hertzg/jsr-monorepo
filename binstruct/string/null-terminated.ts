@@ -1,7 +1,7 @@
 import { type Coder, createContext, kCoderKind } from "../core.ts";
 import { refSetValue } from "@hertzg/binstruct/ref";
 
-const kKindStringNT = Symbol("stringNT");
+export const kKindStringNT = Symbol("stringNT");
 
 /**
  * Creates a Coder for null-terminated strings.
