@@ -1,5 +1,6 @@
 import { assertEquals } from "@std/assert";
-import { array, bytes, ref, struct } from "./mod.ts";
+import { array, type ArrayWhileCondition, bytes, ref, struct } from "./mod.ts";
+import { arrayWhile } from "./array/conditional-while.ts";
 import { s32be, u16be, u32be, u8be } from "./numeric/numeric.ts";
 
 Deno.test("PacketHead, TLV, and HelloReply datastructure", () => {
@@ -22,7 +23,7 @@ Deno.test("PacketHead, TLV, and HelloReply datastructure", () => {
     flag: u16be(),
     tokenId: u16be(),
     reserved: u32be(),
-    tlvs: array(tlvCoder, 13), // Fixed length array with exactly 13 TLVs
+    tlvs: array(tlvCoder, (params) => params.buffer.length > 0), // Conditional array that continues while condition is true
   });
 
   // Create anonymized test data maintaining the same structure
@@ -171,7 +172,9 @@ Deno.test("PacketHead, TLV, and HelloReply datastructure", () => {
   const bytesWritten = helloReplyCoder.encode(testData, buffer);
 
   // Test decoding
-  const [decoded, bytesRead] = helloReplyCoder.decode(buffer);
+  const [decoded, bytesRead] = helloReplyCoder.decode(
+    buffer.subarray(0, bytesWritten),
+  );
 
   // Verify the data matches
   assertEquals(
