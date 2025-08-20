@@ -1,6 +1,6 @@
 import { type Coder, createContext, kCoderKind } from "../core.ts";
 import { isValidLength, type LengthOrRef, lengthRefGet } from "../length.ts";
-import { refSetValue } from "@hertzg/binstruct/ref";
+import { refSetValue } from "../ref/ref.ts";
 
 export const kKindStringFL = Symbol("stringFL");
 

@@ -1,5 +1,5 @@
 import { type Coder, createContext, kCoderKind } from "../core.ts";
-import { refSetValue } from "@hertzg/binstruct/ref";
+import { refSetValue } from "../ref/ref.ts";
 
 export const kKindStringLP = Symbol("stringLP");
 
