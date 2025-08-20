@@ -1,3 +1,10 @@
+### 2025.08.20
+
+#### @hertzg/binstruct 0.1.7 (patch)
+
+- fix(binstruct): import paths in binstruct string modules to use relative paths
+  instead of @hertzg/binstruct/ref
+
 ### 2025.08.19
 
 #### @hertzg/binstruct 0.1.6 (patch)
