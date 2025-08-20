@@ -1,6 +1,5 @@
 import { assertEquals } from "@std/assert";
-import { array, type ArrayWhileCondition, bytes, ref, struct } from "./mod.ts";
-import { arrayWhile } from "./array/conditional-while.ts";
+import { array, bytes, ref, struct } from "./mod.ts";
 import { s32be, u16be, u32be, u8be } from "./numeric/numeric.ts";
 
 Deno.test("PacketHead, TLV, and HelloReply datastructure", () => {
