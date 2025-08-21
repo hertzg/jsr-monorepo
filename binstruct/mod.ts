@@ -39,6 +39,9 @@
  * - {@link ref}: Create reference values for context-aware encoding/decoding
  * - {@link computedRef}: Create computed references from multiple values
  *
+ * ### Data Refinement
+ * - {@link refine}: Transform decoded values into refined types and vice versa
+ *
  * ### Raw Data
  * - {@link bytes}: Handle raw byte slices with length control
  *
@@ -71,42 +74,6 @@
  * - **Error Handling**: Comprehensive error handling for malformed data
  * - **Performance**: Optimized for high-performance binary operations
  *
- * ## Usage Patterns
- *
- * ### Basic Encoding/Decoding
- * ```ts
- * import { struct, u16le, string } from "@hertzg/binstruct";
- *
- * const personCoder = struct({
- *   age: u16le(),
- *   name: string(u16le()), // length-prefixed string
- * });
- *
- * const person = { age: 30, name: "John" };
- * const buffer = new Uint8Array(100);
- * const bytesWritten = personCoder.encode(person, buffer);
- * const [decoded, bytesRead] = personCoder.decode(buffer);
- * ```
- *
- * ### Advanced References
- * ```ts
- * import { struct, ref, u16le, array } from "@hertzg/binstruct";
- *
- * const lengthCoder = u16le();
- * const dataCoder = struct({
- *   length: lengthCoder,
- *   items: array(u16le(), ref(lengthCoder)), // reference to length field
- * });
- * ```
- *
- * ### Conditional Arrays
- * ```ts
- * import { array, u8 } from "@hertzg/binstruct";
- *
- * // Array that continues until null terminator
- * const nullTerminatedArray = array(u8(), 10); // Fixed length array of 10 elements
- * ```
- *
  * ## Common Use Cases
  *
  * - **File Format Parsing**: WAV, PNG, ZIP, and other binary formats
@@ -115,6 +82,7 @@
  * - **Embedded Systems**: Device communication protocols
  * - **Game Development**: Save files, network packets
  * - **Scientific Computing**: Binary data analysis
+ * - **Network Protocols**: MAC addresses, IP addresses, custom protocol transformations
  *
  * @example Reading and writing WAV (RIFF) file format:
  * ```ts
@@ -225,28 +193,38 @@
  * @example Parsing complete network stack (Ethernet + IP + TCP):
  * ```ts
  * import { assertEquals } from "@std/assert";
- * import { struct, array, string } from "@hertzg/binstruct";
+ * import { struct, array, string, refine } from "@hertzg/binstruct";
  * import { u16be, u32be, u8be } from "@hertzg/binstruct/numeric";
+ *
+ * const macAddr = refine(array(u8be(), 6), {
+ *   decode: (arr: number[]) => arr.map(b => b.toString(16).padStart(2, '0').toUpperCase()).join(':'),
+ *   encode: (mac: string) => mac.split(':').map(hex => parseInt(hex, 16)),
+ * });
+ *
+ * const ipAddr = refine(array(u8be(), 4), {
+ *   decode: (arr: number[]) => arr.join('.'),
+ *   encode: (ip: string) => ip.split('.').map(octet => parseInt(octet, 10)),
+ * });
  *
  * // Define Ethernet frame structure (IEEE 802.3)
  * const ethernetFrameCoder = struct({
- *   destinationMAC: array(u8be(), 6),     // Destination MAC address (6 bytes)
- *   sourceMAC: array(u8be(), 6),          // Source MAC address (6 bytes)
+ *   destinationMAC: macAddr(),            // MAC address as colon-separated hex string
+ *   sourceMAC: macAddr(),                 // MAC address as colon-separated hex string
  *   etherType: u16be(),                   // EtherType (0x0800 for IPv4)
  * });
  *
  * // Define IPv4 header structure (RFC 791)
  * const ipv4HeaderCoder = struct({
- *   version: u8be(),                       // Version (4) and IHL (5 words = 20 bytes)
+ *   version: u8be(),                      // Version (4) and IHL (5 words = 20 bytes)
  *   tos: u8be(),                          // Type of Service
- *   totalLength: u16be(),                  // Total packet length
- *   identification: u16be(),               // Packet identification
- *   flags: u16be(),                        // Flags and fragment offset
+ *   totalLength: u16be(),                 // Total packet length
+ *   identification: u16be(),              // Packet identification
+ *   flags: u16be(),                       // Flags and fragment offset
  *   ttl: u8be(),                          // Time to Live
- *   protocol: u8be(),                      // Protocol (6 for TCP)
- *   checksum: u16be(),                     // Header checksum
- *   sourceIP: array(u8be(), 4),           // Source IP address
- *   destIP: array(u8be(), 4),             // Destination IP address
+ *   protocol: u8be(),                     // Protocol (6 for TCP)
+ *   checksum: u16be(),                    // Header checksum
+ *   sourceIP: ipAddr(),                   // IP address as dot-separated decimal string
+ *   destIP: ipAddr(),                     // IP address as dot-separated decimal string
  *   options: array(u8be(), 0),            // IP options (empty for this example)
  * });
  *
@@ -275,8 +253,8 @@
  * // Create sample network packet data
  * const networkPacket = {
  *   ethernet: {
- *     destinationMAC: [0x00, 0x1B, 0x21, 0xBB, 0x0F, 0x3B], // Router MAC
- *     sourceMAC: [0x00, 0x0C, 0x29, 0x2E, 0x84, 0x5A],      // Host MAC
+ *     destinationMAC: "00:1B:21:BB:0F:3B",                    // Router MAC as string
+ *     sourceMAC: "00:0C:29:2E:84:5A",                         // Host MAC as string
  *     etherType: 0x0800,                                      // IPv4
  *   },
  *   ip: {
@@ -288,8 +266,8 @@
  *     ttl: 64,                            // Time to live
  *     protocol: 6,                         // TCP
  *     checksum: 0,                         // Will be calculated
- *     sourceIP: [192, 168, 1, 100],       // Source IP
- *     destIP: [10, 0, 0, 50],             // Destination IP
+ *     sourceIP: "192.168.1.100",           // Source IP as string
+ *     destIP: "10.0.0.50",                 // Destination IP as string
  *     options: [],                         // No IP options
  *   },
  *   tcp: {
@@ -329,16 +307,16 @@
  * const [decoded, bytesRead] = networkPacketCoder.decode(buffer);
  *
  * // Verify Ethernet frame using assertions
- * assertEquals(decoded.ethernet.destinationMAC, [0x00, 0x1B, 0x21, 0xBB, 0x0F, 0x3B], 'Destination MAC should match router');
- * assertEquals(decoded.ethernet.sourceMAC, [0x00, 0x0C, 0x29, 0x2E, 0x84, 0x5A], 'Source MAC should match host');
+ * assertEquals(decoded.ethernet.destinationMAC, "00:1B:21:BB:0F:3B", 'Destination MAC should match router');
+ * assertEquals(decoded.ethernet.sourceMAC, "00:0C:29:2E:84:5A", 'Source MAC should match host');
  * assertEquals(decoded.ethernet.etherType, 0x0800, 'EtherType should be IPv4 (0x0800)');
  *
  * // Verify IP header using assertions
  * assertEquals(decoded.ip.version, 0x45, 'IP version should be IPv4 with 5 words header');
  * assertEquals(decoded.ip.protocol, 6, 'Protocol should be TCP (6)');
  * assertEquals(decoded.ip.ttl, 64, 'TTL should be 64');
- * assertEquals(decoded.ip.sourceIP, [192, 168, 1, 100], 'Source IP should match');
- * assertEquals(decoded.ip.destIP, [10, 0, 0, 50], 'Destination IP should match');
+ * assertEquals(decoded.ip.sourceIP, "192.168.1.100", 'Source IP should match');
+ * assertEquals(decoded.ip.destIP, "10.0.0.50", 'Destination IP should match');
  * assertEquals(decoded.ip.totalLength, totalPacketLength, 'IP total length should match calculated value');
  * assertEquals(decoded.ip.identification, 0x1234, 'Packet ID should match');
  * assertEquals(decoded.ip.flags, 0x4000, 'Flags should indicate no fragmentation');
@@ -398,3 +376,4 @@ export {
 export { string } from "./string/string.ts";
 export { struct } from "./struct/struct.ts";
 export { bytes } from "./bytes/bytes.ts";
+export { refine, type Refiner } from "./refine/refine.ts";

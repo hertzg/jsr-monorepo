@@ -8,6 +8,7 @@
     "./struct": "./struct/struct.ts",
     "./string": "./string/string.ts",
     "./bytes": "./bytes/bytes.ts",
+    "./refine": "./refine/refine.ts",
     "./ref": "./ref/ref.ts"
   },
   "types": "./mod.ts"
