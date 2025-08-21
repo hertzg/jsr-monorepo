@@ -1,41 +1,120 @@
 /**
- * A module providing type-safe binary structure encoding and decoding utilities for TypeScript.
+ * A comprehensive module providing type-safe binary structure encoding and decoding utilities for TypeScript.
  *
- * The following data types are supported:
- * - Unsigned integers: 8, 16, 32, 64 bits (big-endian and little-endian)
- * - Signed integers: 8, 16, 32, 64 bits (big-endian and little-endian)
- * - Floating point numbers: 16, 32, 64 bits (big-endian and little-endian)
- * - Strings: length-prefixed, null-terminated, and fixed-length
- * - Arrays: variable-length arrays (length-prefixed), and fixed-length arrays
- * - Structs: complex nested data structures
- * - References: support for referencing values within the context (see {@link ref})
+ * This library offers a complete toolkit for working with binary data formats, supporting:
  *
- * To encode data to binary, use the various coder functions and call their `encode` method.
- * To decode data from binary, use the same coder functions and call their `decode` method.
+ * ## Core Data Types
  *
- * The module provides the following main functions:
+ * ### Numeric Types
+ * - **Unsigned integers**: 8, 16, 32, 64 bits (big-endian and little-endian)
+ * - **Signed integers**: 8, 16, 32, 64 bits (big-endian and little-endian)
+ * - **Floating point numbers**: 16, 32, 64 bits (big-endian and little-endian)
+ *
+ * ### String Types
+ * - **Length-prefixed strings**: Variable-length strings with size prefix
+ * - **Null-terminated strings**: Strings ending with null byte (0x00)
+ * - **Fixed-length strings**: Strings of exact byte length
+ *
+ * ### Array Types
+ * - **Length-prefixed arrays**: Variable-length arrays with size prefix
+ * - **Fixed-length arrays**: Arrays of exact element count
+ *
+ * ### Complex Types
+ * - **Structs**: Complex nested data structures with type safety
+ * - **References**: Self-referential and circular data structures
+ * - **Bytes**: Raw byte slices with fixed or variable length
+ *
+ * ## Main Functions
+ *
+ * ### Structure Creation
  * - {@link struct}: Create coders for structured data (objects)
- * - {@link array}: Universal array coder that automatically chooses between length-prefixed and fixed-length
- * - {@link arrayLP}: Create coders for length-prefixed arrays
- * - {@link arrayFL}: Create coders for fixed-length arrays
- * - {@link string}: Universal string coder that automatically chooses between length-prefixed, null-terminated, and fixed-length
- * - {@link stringLP}: Create coders for length-prefixed strings
- * - {@link stringNT}: Create coders for null-terminated strings
- * - {@link stringFL}: Create coders for fixed-length strings
- * - {@link ref}: Create reference values for context-aware encoding/decoding
  *
- * - Numeric coders:
- *   - {@link u8}, {@link u8le}, {@link u8be}: Unsigned 8-bit integer
- *   - {@link s8}, {@link s8le}, {@link s8be}: Signed 8-bit integer
- *   - {@link u16}, {@link u16le}, {@link u16be}: Unsigned 16-bit integer
- *   - {@link s16}, {@link s16le}, {@link s16be}: Signed 16-bit integer
- *   - {@link u32}, {@link u32le}, {@link u32be}: Unsigned 32-bit integer
- *   - {@link s32}, {@link s32le}, {@link s32be}: Signed 32-bit integer
- *   - {@link u64}, {@link u64le}, {@link u64be}: Unsigned 64-bit integer (bigint)
- *   - {@link s64}, {@link s64le}, {@link s64be}: Signed 64-bit integer (bigint)
- *   - {@link f16}, {@link f16le}, {@link f16be}: 16-bit floating point number
- *   - {@link f32}, {@link f32le}, {@link f32be}: 32-bit floating point number
- *   - {@link f64}, {@link f64le}, {@link f64be}: 64-bit floating point number
+ * ### Array Handling
+ * - {@link array}: Universal array coder with automatic type selection
+ *
+ * ### String Handling
+ * - {@link string}: Universal string coder with automatic type selection
+ *
+ * ### Reference System
+ * - {@link ref}: Create reference values for context-aware encoding/decoding
+ * - {@link computedRef}: Create computed references from multiple values
+ *
+ * ### Raw Data
+ * - {@link bytes}: Handle raw byte slices with length control
+ *
+ * ### Numeric Coders
+ *
+ * **Unsigned Integers:**
+ * - {@link u8}, {@link u8le}, {@link u8be}: 8-bit unsigned integer
+ * - {@link u16}, {@link u16le}, {@link u16be}: 16-bit unsigned integer
+ * - {@link u32}, {@link u32le}, {@link u32be}: 32-bit unsigned integer
+ * - {@link u64}, {@link u64le}, {@link u64be}: 64-bit unsigned integer (bigint)
+ *
+ * **Signed Integers:**
+ * - {@link s8}, {@link s8le}, {@link s8be}: 8-bit signed integer
+ * - {@link s16}, {@link s16le}, {@link s16be}: 16-bit signed integer
+ * - {@link s32}, {@link s32le}, {@link s32be}: 32-bit signed integer
+ * - {@link s64}, {@link s64le}, {@link s64be}: 64-bit signed integer (bigint)
+ *
+ * **Floating Point:**
+ * - {@link f16}, {@link f16le}, {@link f16be}: 16-bit floating point number
+ * - {@link f32}, {@link f32le}, {@link f32be}: 32-bit floating point number
+ * - {@link f64}, {@link f64le}, {@link f64be}: 64-bit floating point number
+ *
+ * ## Key Features
+ *
+ * - **Type Safety**: Full TypeScript support with proper type inference
+ * - **Endianness Control**: Explicit big-endian and little-endian support
+ * - **Reference System**: Handle self-referential and circular structures
+ * - **Context Management**: Advanced context handling for complex scenarios
+ * - **Buffer Management**: Efficient buffer handling with offset support
+ * - **Error Handling**: Comprehensive error handling for malformed data
+ * - **Performance**: Optimized for high-performance binary operations
+ *
+ * ## Usage Patterns
+ *
+ * ### Basic Encoding/Decoding
+ * ```ts
+ * import { struct, u16le, string } from "@hertzg/binstruct";
+ *
+ * const personCoder = struct({
+ *   age: u16le(),
+ *   name: string(u16le()), // length-prefixed string
+ * });
+ *
+ * const person = { age: 30, name: "John" };
+ * const buffer = new Uint8Array(100);
+ * const bytesWritten = personCoder.encode(person, buffer);
+ * const [decoded, bytesRead] = personCoder.decode(buffer);
+ * ```
+ *
+ * ### Advanced References
+ * ```ts
+ * import { struct, ref, u16le, array } from "@hertzg/binstruct";
+ *
+ * const lengthCoder = u16le();
+ * const dataCoder = struct({
+ *   length: lengthCoder,
+ *   items: array(u16le(), ref(lengthCoder)), // reference to length field
+ * });
+ * ```
+ *
+ * ### Conditional Arrays
+ * ```ts
+ * import { array, u8 } from "@hertzg/binstruct";
+ *
+ * // Array that continues until null terminator
+ * const nullTerminatedArray = array(u8(), 10); // Fixed length array of 10 elements
+ * ```
+ *
+ * ## Common Use Cases
+ *
+ * - **File Format Parsing**: WAV, PNG, ZIP, and other binary formats
+ * - **Network Protocols**: TCP/IP, HTTP, custom protocols
+ * - **Data Serialization**: Efficient binary data storage
+ * - **Embedded Systems**: Device communication protocols
+ * - **Game Development**: Save files, network packets
+ * - **Scientific Computing**: Binary data analysis
  *
  * @example Reading and writing WAV (RIFF) file format:
  * ```ts
