@@ -6,7 +6,8 @@
     "lint:import-map": "deno run -A _tools/check_import_map.ts",
     "cov": "deno coverage --ignore=\"**/*.generated.mjs,**/_test_utils.ts,.github\"",
     "cov:gen": "deno task cov --lcov --output=cov.lcov",
-    "cov:view": "deno task cov --html"
+    "cov:view": "deno task cov --html",
+    "bump": "deno run -A jsr:@deno/bump-workspaces@^0.1/cli --import-map import_map.json"
   },
   "exclude": [
     ".git",
