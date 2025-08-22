@@ -68,7 +68,10 @@
 import type { Coder, Context } from "../core.ts";
 import { kCtxRefs } from "../core.ts";
 
-const kIsRefValue = Symbol("isRef");
+/**
+ * Symbol identifier for reference values.
+ */
+export const kIsRefValue = Symbol("isRef");
 
 /**
  * A weak map interface for storing references in the encoding/decoding context.
