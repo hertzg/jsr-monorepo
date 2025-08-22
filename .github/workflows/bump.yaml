@@ -1,8 +1,6 @@
-name: Release
+name: Bump
 
 on:
-  push:
-    branches: [main]
   workflow_dispatch:
     inputs:
       package:
@@ -18,12 +16,17 @@ on:
           - wg-conf
           - wg-ini
           - wg-keys
+      prerelease:
+        description: "Pre-release"
+        required: false
+        type: boolean
 
 permissions:
   contents: write
+  pull-requests: write
 
 jobs:
-  release:
+  bump:
     runs-on: ubuntu-latest
 
     steps:
@@ -36,11 +39,16 @@ jobs:
       - name: Setup
         uses: denoland/setup-deno@v2
 
-      - name: Release packages
+      - name: Bump versions
         run: |
           if [ "${{ inputs.package }}" != "All packages" ]; then
             PACKAGE="${{ inputs.package }}"
           fi
-          deno task forge release $PACKAGE --draft --emoji
+          if [ "${{ inputs.prerelease }}" != "true" ]; then
+            ARGS="--release --changelog=CHANGELOG.md"
+          fi
+          deno task forge bump $PACKAGE $ARGS --pr --emoji
         env:
+          GIT_NAME: "${{ github.actor }}"
+          GIT_EMAIL: "${{ github.actor_id }}+${{ github.actor }}@users.noreply.github.com"
           GITHUB_TOKEN: ${{ secrets.BOT_TOKEN }}
