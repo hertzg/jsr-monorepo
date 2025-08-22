@@ -70,12 +70,47 @@ import { kCtxRefs } from "../core.ts";
 
 const kIsRefValue = Symbol("isRef");
 
+/**
+ * A weak map interface for storing references in the encoding/decoding context.
+ *
+ * This interface extends WeakMap to provide type-safe access to stored reference values
+ * using coders as keys. It ensures that the correct types are retrieved when accessing
+ * stored references.
+ *
+ * @template T - The type of the stored value
+ */
 export interface RefsWeakMap extends WeakMap<Coder<unknown>, unknown> {
   get<T>(coder: Coder<T>): T | undefined;
   set<T>(coder: Coder<T>, value: T): this;
   has<T>(coder: Coder<T>): boolean;
 }
 
+/**
+ * Ensures that a context has the necessary reference storage initialized.
+ *
+ * This function checks if the given context already has reference storage
+ * and initializes it if not. It's typically called before encoding/decoding
+ * operations that use references.
+ *
+ * @param ctx - The context to initialize with references
+ * @returns The context with reference storage initialized
+ *
+ * @example
+ * ```ts
+ * import { assertEquals } from "@std/assert";
+ * import { withRefsInContext } from "./ref.ts";
+ * import { createContext } from "../core.ts";
+ *
+ * // Create a basic context
+ * const ctx = createContext("encode");
+ *
+ * // Initialize it with reference support
+ * const ctxWithRefs = withRefsInContext(ctx);
+ *
+ * // Verify the context now has reference storage
+ * assertEquals(ctxWithRefs === ctx, true);
+ * ```
+ */
 export function withRefsInContext(ctx: Context): Context {
   if (!isRefsInContext(ctx)) {
     ctx[kCtxRefs] = new WeakMap() as RefsWeakMap;
@@ -86,6 +121,12 @@ export function withRefsInContext(ctx: Context): Context {
 
 /**
  * A type representing a reference value that can be resolved during encoding/decoding.
+ *
+ * This type represents a function that takes a context and returns the resolved value.
+ * References are used to defer value resolution until the encoding/decoding context
+ * is available, enabling circular and self-referential data structures.
+ *
+ * @template TDecoded - The type of the decoded value
  */
 export type RefValue<TDecoded> = {
   (ctx: Context): TDecoded;
@@ -121,6 +162,15 @@ export function isRef<T>(value: unknown): value is RefValue<T> {
   return typeof value === "function" && kIsRefValue in value;
 }
 
+/**
+ * Type guard to check if a context has reference storage initialized.
+ *
+ * This internal function checks if the given context has the necessary
+ * reference storage structure for resolving references.
+ *
+ * @param ctx - The context to check
+ * @returns True if the context has reference storage, false otherwise
+ */
 function isRefsInContext(ctx: Context | null | undefined): ctx is Context & {
   [kCtxRefs]: RefsWeakMap;
 } {
@@ -141,7 +191,7 @@ function isRefsInContext(ctx: Context | null | undefined): ctx is Context & {
  * @example
  * ```ts
  * import { assertEquals } from "@std/assert";
- * import { ref, struct, u16le, u8, u32le, array, createContext } from "@hertzg/binstruct";
+ * import { ref, struct, u16le, u8, u32le, array } from "@hertzg/binstruct";
  *
  * // Create the coders that will be referenced
  * const channelsLength = u16le();
@@ -208,6 +258,17 @@ export function ref<TDecoded>(
   return unref;
 }
 
+/**
+ * Retrieves the value from a reference or returns the value directly if it's not a reference.
+ *
+ * This function is a utility that handles both reference values and literal values.
+ * If the input is a reference, it attempts to resolve it using the provided context.
+ * If the input is not a reference, it returns the value as-is.
+ *
+ * @param ctx - The context to use for resolving references
+ * @param refOrValue - Either a reference value or a literal value
+ * @returns The resolved value or the literal value, or undefined if the reference cannot be resolved
+ */
 export function refGetValue<T>(
   ctx: Context | null | undefined,
   refOrValue: RefValue<T> | NoInfer<T>,
@@ -219,6 +280,18 @@ export function refGetValue<T>(
   return refOrValue;
 }
 
+/**
+ * Sets a value in the context for a specific coder reference.
+ *
+ * This function stores a value in the context's reference storage, making it
+ * available for resolution by references that use the same coder. It's typically
+ * used during encoding/decoding operations to populate the context with values
+ * that references need to resolve.
+ *
+ * @param ctx - The context to store the value in
+ * @param coder - The coder to associate with the value
+ * @param value - The value to store
+ */
 export function refSetValue<T>(
   ctx: Context | null | undefined,
   coder: Coder<T>,
@@ -229,11 +302,117 @@ export function refSetValue<T>(
   }
 }
 
+/**
+ * Type utility to unwrap reference types from a tuple of references.
+ *
+ * This type extracts the decoded types from an array of references, making it
+ * easier to work with computed references that depend on multiple other references.
+ *
+ * @template TTuple - A tuple of reference values
+ */
 type UnwrapRefTuple<TTuple extends readonly RefValue<unknown>[]> = {
   [K in keyof TTuple]: TTuple[K] extends RefValue<infer TDecoded> ? TDecoded
     : never;
 };
 
+/**
+ * Creates a computed reference that depends on multiple other references.
+ *
+ * Computed references allow you to create dynamic values that are calculated
+ * from other references during encoding/decoding. This is useful for scenarios
+ * where a value depends on multiple other values, such as calculating array
+ * lengths, offsets, or derived values.
+ *
+ * @param refs - An array of references that the computation depends on
+ * @param computation - A function that computes the final value from the resolved references
+ * @returns A new reference that computes its value from the input references
+ *
+ * @example
+ * ```ts
+ * import { assertEquals } from "@std/assert";
+ * import { computedRef, ref, struct, u16le, u8, array } from "@hertzg/binstruct";
+ *
+ * // Create the base references
+ * const width = u16le();
+ * const height = u16le();
+ *
+ * // Create a computed reference for total pixels
+ * const totalPixels = computedRef(
+ *   [ref(width), ref(height)],
+ *   (w, h) => w * h
+ * );
+ *
+ * // Define a structure using the computed reference
+ * const coder = struct({
+ *   width: width,
+ *   height: height,
+ *   pixels: array(u8(), totalPixels),
+ * });
+ *
+ * // Test data
+ * const data = {
+ *   width: 3,
+ *   height: 2,
+ *   pixels: [255, 128, 64, 0, 255, 128],
+ * };
+ *
+ * // Encode and decode
+ * const buffer = new Uint8Array(1000);
+ * const bytesWritten = coder.encode(data, buffer);
+ * const [decoded, bytesRead] = coder.decode(buffer);
+ *
+ * // Verify the computed value
+ * assertEquals(decoded.width, 3);
+ * assertEquals(decoded.height, 2);
+ * assertEquals(decoded.pixels.length, 6); // 3 * 2
+ * assertEquals(decoded.pixels, data.pixels);
+ * assertEquals(bytesWritten, bytesRead);
+ * ```
+ *
+ * @example
+ * ```ts
+ * import { assertEquals } from "@std/assert";
+ * import { computedRef, ref, struct, u16le, u32le, array } from "@hertzg/binstruct";
+ *
+ * // Create references for different counts
+ * const headerCount = u16le();
+ * const dataCount = u16le();
+ *
+ * // Create a computed reference for total count
+ * const totalCount = computedRef(
+ *   [ref(headerCount), ref(dataCount)],
+ *   (header, data) => header + data
+ * );
+ *
+ * // Define a structure with the computed reference
+ * const coder = struct({
+ *   headerCount: headerCount,
+ *   dataCount: dataCount,
+ *   headers: array(u32le(), ref(headerCount)),
+ *   dataItems: array(u32le(), ref(dataCount)),
+ * });
+ *
+ * // Test data
+ * const data = {
+ *   headerCount: 2,
+ *   dataCount: 3,
+ *   headers: [100, 200],
+ *   dataItems: [300, 400, 500],
+ * };
+ *
+ * // Encode and decode
+ * const buffer = new Uint8Array(1000);
+ * const bytesWritten = coder.encode(data, buffer);
+ * const [decoded, bytesRead] = coder.decode(buffer);
+ *
+ * // Verify the computed total
+ * assertEquals(decoded.headerCount, 2);
+ * assertEquals(decoded.dataCount, 3);
+ * assertEquals(decoded.headers.length, 2);
+ * assertEquals(decoded.dataItems.length, 3);
+ * assertEquals(bytesWritten, bytesRead);
+ * ```
+ */
 export function computedRef<
   const TArgs extends readonly RefValue<unknown>[],
   TDecoded,
