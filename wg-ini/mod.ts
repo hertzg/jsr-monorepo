@@ -227,6 +227,11 @@ export async function stringifyObject(
   return await stringifyArray(array);
 }
 
+/**
+ * Decodes a text stream into INI sections.
+ * @param stream - The text stream to decode
+ * @returns A stream of INI sections
+ */
 export function decodeTextStream(
   stream: ReadableStream<string>,
 ): ReadableStream<IniSection> {
@@ -240,6 +245,11 @@ async function decodeText(text: string): Promise<IniSection[]> {
   return await Array.fromAsync(decodeTextStream(ReadableStream.from([text])));
 }
 
+/**
+ * Encodes a stream of INI sections into text.
+ * @param stream - The stream of INI sections to encode
+ * @returns A text stream
+ */
 export function encodeSectionStream(
   stream: ReadableStream<IniSection>,
 ): ReadableStream<string> {

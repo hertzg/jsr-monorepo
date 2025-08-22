@@ -6,19 +6,38 @@
  * @module
  */
 export interface IniLineDecoderStreamOptions {
+  /** Delimiter for comments (default: "#") */
   commentDelimiter?: string;
+  /** Delimiter for section start (default: "[") */
   sectionStartDelimiter?: string;
+  /** Delimiter for section end (default: "]") */
   sectionEndDelimiter?: string;
+  /** Delimiter for key-value pairs (default: "=") */
   keyValueDelimiter?: string;
 }
 
+/**
+ * Represents an INI section line.
+ */
 export type IniLineSection = { $section: string; $trailer?: string };
+/**
+ * Represents an INI key-value assignment line.
+ */
 export type IniLineAssign = {
   $assign: [string, string];
   $comment?: string | null;
 };
+/**
+ * Represents an INI comment line.
+ */
 export type IniLineComment = { $comment: string };
+/**
+ * Represents an INI trailer line.
+ */
 export type IniLineTrailer = { $trailer: string };
+/**
+ * Union type for all INI line types.
+ */
 export type IniLine =
   | IniLineSection
   | IniLineAssign
@@ -111,6 +130,10 @@ export type IniLine =
  * ```
  */
 export class IniLineDecoderStream extends TransformStream<string, IniLine> {
+  /**
+   * Creates a new INI line decoder stream.
+   * @param options - Configuration options for the decoder
+   */
   constructor(options: IniLineDecoderStreamOptions = {}) {
     const {
       commentDelimiter = "#",
@@ -155,10 +178,17 @@ export class IniLineDecoderStream extends TransformStream<string, IniLine> {
   }
 }
 
+/**
+ * Options for the INI line encoder stream.
+ */
 export interface IniLineEncoderStreamOptions {
+  /** Delimiter for comments (default: "#") */
   commentDelimiter?: string;
+  /** Delimiter for section start (default: "[") */
   sectionStartDelimiter?: string;
+  /** Delimiter for section end (default: "]") */
   sectionEndDelimiter?: string;
+  /** Delimiter for key-value pairs (default: "=") */
   keyValueDelimiter?: string;
 }
 
@@ -202,6 +232,10 @@ export interface IniLineEncoderStreamOptions {
  * ```
  */
 export class IniLineEncoderStream extends TransformStream<IniLine, string> {
+  /**
+   * Creates a new INI line encoder stream.
+   * @param options - Configuration options for the encoder
+   */
   constructor(options: IniLineEncoderStreamOptions = {}) {
     const {
       commentDelimiter = "#",

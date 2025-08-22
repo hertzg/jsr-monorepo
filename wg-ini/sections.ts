@@ -6,6 +6,9 @@ import type {
   IniLineTrailer,
 } from "./lines.ts";
 
+/**
+ * Represents an INI section with its entries.
+ */
 export type IniSection = {
   section: IniLineSection | null;
   entries: (IniLineAssign | IniLineComment | IniLineTrailer)[];
@@ -73,6 +76,9 @@ export class IniSectionDecoderStream extends TransformStream<
   IniLine,
   IniSection
 > {
+  /**
+   * Creates a new INI section decoder stream.
+   */
   constructor() {
     let section: IniSection = { section: null, entries: [] };
     super({
