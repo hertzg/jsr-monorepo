@@ -1,6 +1,6 @@
 {
   "name": "@hertzg/binstruct",
-  "version": "0.1.9",
+  "version": "0.1.10-pre.1+798a04f",
   "exports": {
     ".": "./mod.ts",
     "./numeric": "./numeric/numeric.ts",
