@@ -20,20 +20,22 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           types: |
-            BREAKING
-            [unstable] BREAKING
-            deprecation
-            [unstable] deprecation
+            build
+            chore
+            ci
+            docs
             feat
             fix
-            docs
-            refactor
             perf
-            test
-            ci
-            chore
+            refactor
             revert
-          # This should be kept up-to-date with the current packages list
+            style
+            test
           scopes: |
-            ini(/unstable)?
-            keys(/unstable)?
+            binseek(/unstable)?
+            binstruct(/unstable)?
+            bx(/unstable)?
+            mymagti-api(/unstable)?
+            wg-conf(/unstable)?
+            wg-ini(/unstable)?
+            wg-keys(/unstable)?
