@@ -1,6 +1,6 @@
 import { type Coder, kCoderKind } from "../core.ts";
-import { refSetValue } from "@hertzg/binstruct/ref";
-import type { Endianness } from "@hertzg/binstruct/numeric";
+import { refSetValue } from "../ref/ref.ts";
+import type { Endianness } from "./numeric.ts";
 
 export type DataViewMethodSuffixes =
   Extract<keyof DataView, `get${string}` | `set${string}`> extends
