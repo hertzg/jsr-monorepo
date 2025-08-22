@@ -40,9 +40,15 @@
  */
 export const DEFAULT_BASE_URL = "https://oauth.magticom.ge/auth/";
 
+/**
+ * Default user agent string for OAuth requests.
+ */
 export const DEFAULT_USER_AGENT =
   "MyMagti/11.9.96 (Magticom.MyMagti; build:1; iOS 18.1.0) Alamofire/5.9.1";
 
+/**
+ * Default OAuth configuration values.
+ */
 export const DEFAULTS: {
   login: {
     url: string;
@@ -73,6 +79,9 @@ export const DEFAULTS: {
   },
 });
 
+/**
+ * Options for OAuth fetch operations.
+ */
 export type FetchOauthOptions = {
   fetch?: typeof fetch;
   url?: string;
@@ -136,6 +145,9 @@ async function oauthGrant(
   );
 }
 
+/**
+ * Request type for fetching OAuth tokens.
+ */
 export type FetchTokenRequest =
   | {
     type: "login";
@@ -147,24 +159,45 @@ export type FetchTokenRequest =
     refreshToken: string;
   };
 
+/**
+ * Generic error response from OAuth server.
+ */
 export interface GenericErrorResponse {
+  /** Error code */
   error: string;
+  /** Error description */
   error_description: string;
 }
 
+/**
+ * OAuth token information.
+ */
 export interface TokenInfo {
+  /** Access token for API requests */
   access_token: string;
+  /** Auto-login flag */
   autoLogin: number;
+  /** Token expiration time in seconds */
   expires_in: number;
+  /** JWT ID */
   jti: string;
+  /** Phone number */
   phoneNo: string;
+  /** Refresh token for getting new access tokens */
   refresh_token: string;
+  /** Token scope */
   scope: string;
+  /** Token type */
   token_type: string;
+  /** User ID */
   userId: number;
+  /** User identifier */
   userIdentifier: string;
 }
 
+/**
+ * Result of login/refresh operations.
+ */
 export type LoginResult =
   | {
     result: "error";
@@ -177,6 +210,12 @@ export type LoginResult =
     data: TokenInfo;
   };
 
+/**
+ * Fetches an OAuth token using the provided request.
+ * @param request - The token request details
+ * @param options - Optional OAuth configuration
+ * @returns Promise resolving to the login result
+ */
 export async function fetchToken(
   request: FetchTokenRequest,
   options: FetchOauthOptions = {},
