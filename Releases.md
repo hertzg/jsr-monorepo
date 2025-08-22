@@ -2,6 +2,16 @@
 
 #### @hertzg/binstruct 0.1.8 (patch)
 
+- refactor(binstruct): reorganize and clean up symbol definitions for numeric
+  types
+- chore(binstruct): update @hertzg/binstruct version to 0.1.8
+- chore(binstruct): document changes for version 0.1.8 in Releases.md
+- chore(binstruct): update version to 0.1.8 in deno.json
+
+### 2025.08.22
+
+#### @hertzg/binstruct 0.1.8 (patch)
+
 - chore(binstruct): update version to 0.1.8 in deno.json
 
 ### 2025.08.22
