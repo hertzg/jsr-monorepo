@@ -1,11 +1,13 @@
 {
   "tasks": {
     "test": "deno test --doc --allow-all --parallel --coverage --trace-leaks --clean",
-    "lint": "deno lint",
     "cov": "deno coverage --ignore=\"**/*.generated.mjs,**/_test_utils.ts,.github\"",
     "cov:gen": "deno task cov --lcov --output=cov.lcov",
     "cov:view": "deno task cov --html",
-    "forge": "deno run -A jsr:@roka/forge"
+    "forge": "deno run -A jsr:@roka/forge",
+    "lint": "deno fmt -q --check && deno lint -q && deno check -q **/*.ts",
+    "docs": "deno doc --lint --html $(find . -path '**/*.ts' -type file)",
+    "ok": "deno task lint && deno task docs && deno task test && deno publish --quiet --dry-run --allow-dirty"
   },
   "exclude": [
     ".git",
@@ -30,6 +32,7 @@
     "@std/streams": "jsr:@std/streams@^1.0.11",
     "@std/encoding/base64": "jsr:@std/encoding@^1.0.10/base64",
     "@std/encoding/base64url": "jsr:@std/encoding@^1.0.10/base64url",
+    "@hertzg/binseek": "jsr:@hertzg/binseek@^0.2.2",
     "@hertzg/binstruct": "jsr:@hertzg/binstruct@^0.1.8",
     "@hertzg/bx": "jsr:@hertzg/bx@^3.0.1",
     "@hertzg/mymagti-api": "jsr:@hertzg/mymagti-api@^0.0.5",
