@@ -1,5 +1,11 @@
 ### 2025.08.22
 
+#### @hertzg/binstruct 0.1.8 (patch)
+
+- chore(binstruct): update version to 0.1.8 in deno.json
+
+### 2025.08.22
+
 #### @hertzg/binstruct 0.1.7 (patch)
 
 - feat(binstruct): add data refinement functionality
