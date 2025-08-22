@@ -1,29 +1,56 @@
 import { parseArray, stringifyArray } from "@hertzg/wg-ini";
 
+/**
+ * Interface configuration for WireGuard wg-quick.
+ */
 export interface WGQuickInterface {
+  /** The port to listen on for incoming connections */
   ListenPort?: number;
+  /** The private key for this interface */
   PrivateKey?: string;
+  /** Array of IP addresses to assign to this interface */
   Address?: string[];
+  /** Maximum Transmission Unit size */
   MTU?: number;
+  /** Array of DNS server addresses */
   DNS?: string[];
+  /** Routing table to use */
   Table?: string;
+  /** Commands to run before bringing up the interface */
   PreUp?: string[];
+  /** Commands to run before bringing down the interface */
   PreDown?: string[];
+  /** Commands to run after bringing up the interface */
   PostUp?: string[];
+  /** Commands to run after bringing down the interface */
   PostDown?: string[];
+  /** Whether to save the configuration */
   SaveConfig?: boolean;
 }
 
+/**
+ * Peer configuration for WireGuard wg-quick.
+ */
 export interface WGQuickPeer {
+  /** The public key of the peer */
   PublicKey?: string;
+  /** Pre-shared key for additional security */
   PresharedKey?: string;
+  /** Array of allowed IP addresses for this peer */
   AllowedIPs?: string[];
+  /** Endpoint address and port for this peer */
   Endpoint?: string;
+  /** Keepalive interval in seconds */
   PersistentKeepalive?: number;
 }
 
+/**
+ * Complete WireGuard wg-quick configuration.
+ */
 export interface WGQuickConf {
+  /** Interface configuration */
   Interface: WGQuickInterface;
+  /** Array of peer configurations */
   Peers: WGQuickPeer[];
 }
 
