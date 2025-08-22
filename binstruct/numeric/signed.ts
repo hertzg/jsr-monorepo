@@ -287,36 +287,66 @@ export function s64(endianness: "be" | "le" = "be"): Coder<bigint> {
   );
 }
 
-// Convenience functions for big-endian (network byte order)
+/**
+ * Convenience function for 8-bit signed integer with big-endian byte order.
+ * @see {@link s8} for implementation details and examples.
+ */
 export function s8be(): Coder<number> {
   return s8("be");
 }
 
-export function s16be(): Coder<number> {
-  return s16("be");
-}
-
-export function s32be(): Coder<number> {
-  return s32("be");
-}
-
-export function s64be(): Coder<bigint> {
-  return s64("be");
-}
-
-// Convenience functions for little-endian
+/**
+ * Convenience function for 8-bit signed integer with little-endian byte order.
+ * @see {@link s8} for implementation details and examples.
+ */
 export function s8le(): Coder<number> {
   return s8("le");
 }
 
+/**
+ * Convenience function for 16-bit signed integer with big-endian byte order.
+ * @see {@link s16} for implementation details and examples.
+ */
+export function s16be(): Coder<number> {
+  return s16("be");
+}
+
+/**
+ * Convenience function for 16-bit signed integer with little-endian byte order.
+ * @see {@link s16} for implementation details and examples.
+ */
 export function s16le(): Coder<number> {
   return s16("le");
 }
 
+/**
+ * Convenience function for 32-bit signed integer with big-endian byte order.
+ * @see {@link s32} for implementation details and examples.
+ */
+export function s32be(): Coder<number> {
+  return s32("be");
+}
+
+/**
+ * Convenience function for 32-bit signed integer with little-endian byte order.
+ * @see {@link s32} for implementation details and examples.
+ */
 export function s32le(): Coder<number> {
   return s32("le");
 }
 
+/**
+ * Convenience function for 64-bit signed integer with big-endian byte order.
+ * @see {@link s64} for implementation details and examples.
+ */
+export function s64be(): Coder<bigint> {
+  return s64("be");
+}
+
+/**
+ * Convenience function for 64-bit signed integer with little-endian byte order.
+ * @see {@link s64} for implementation details and examples.
+ */
 export function s64le(): Coder<bigint> {
   return s64("le");
 }

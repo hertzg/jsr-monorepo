@@ -2,10 +2,21 @@ import { type Coder, kCoderKind } from "../core.ts";
 import { refSetValue } from "../ref/ref.ts";
 import type { Endianness } from "./numeric.ts";
 
+/**
+ * Extracts method suffixes from DataView methods for get/set operations.
+ */
 export type DataViewMethodSuffixes =
   Extract<keyof DataView, `get${string}` | `set${string}`> extends
     `${"get" | "set"}${infer Suffix}` ? Suffix : never;
 
+/**
+ * Creates a DataView-based coder for numeric types.
+ *
+ * @param type - The DataView type to use
+ * @param endianness - The endianness (little or big)
+ * @param kind - The coder kind symbol
+ * @returns A Coder for the specified numeric type
+ */
 export function dataViewType(
   type:
     | "Int8"
@@ -20,6 +31,14 @@ export function dataViewType(
   endianness: Endianness,
   kind: symbol,
 ): Coder<number>;
+/**
+ * Creates a DataView-based coder for BigInt types.
+ *
+ * @param type - The DataView BigInt type to use
+ * @param endianness - The endianness (little or big)
+ * @param kind - The coder kind symbol
+ * @returns A Coder for the specified BigInt type
+ */
 export function dataViewType(
   type:
     | "BigInt64"
@@ -27,6 +46,14 @@ export function dataViewType(
   endianness: Endianness,
   kind: symbol,
 ): Coder<bigint>;
+/**
+ * Creates a DataView-based coder for numeric types.
+ *
+ * @param type - The DataView type to use
+ * @param endianness - The endianness (little or big)
+ * @param kind - The coder kind symbol
+ * @returns A Coder for the specified numeric type
+ */
 export function dataViewType<TDecoded extends number | bigint>(
   type: DataViewMethodSuffixes,
   endianness: Endianness,

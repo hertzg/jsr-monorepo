@@ -2,6 +2,9 @@ import { type Coder, createContext, kCoderKind } from "../core.ts";
 import { isValidLength, type LengthOrRef, lengthRefGet } from "../length.ts";
 import { refSetValue } from "../ref/ref.ts";
 
+/**
+ * Symbol identifier for fixed-length string coders.
+ */
 export const kKindStringFL = Symbol("stringFL");
 
 /**

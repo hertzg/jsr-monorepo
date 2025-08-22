@@ -1,6 +1,9 @@
 import { type Coder, createContext, kCoderKind } from "../core.ts";
 import { refSetValue } from "../ref/ref.ts";
 
+/**
+ * Symbol identifier for null-terminated string coders.
+ */
 export const kKindStringNT = Symbol("stringNT");
 
 /**

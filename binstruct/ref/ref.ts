@@ -80,8 +80,24 @@ const kIsRefValue = Symbol("isRef");
  * @template T - The type of the stored value
  */
 export interface RefsWeakMap extends WeakMap<Coder<unknown>, unknown> {
+  /**
+   * Gets a reference value for the given coder.
+   * @param coder - The coder to look up
+   * @returns The stored value or undefined if not found
+   */
   get<T>(coder: Coder<T>): T | undefined;
+  /**
+   * Sets a reference value for the given coder.
+   * @param coder - The coder to store the value for
+   * @param value - The value to store
+   * @returns This instance for chaining
+   */
   set<T>(coder: Coder<T>, value: T): this;
+  /**
+   * Checks if a reference value exists for the given coder.
+   * @param coder - The coder to check
+   * @returns True if a value exists, false otherwise
+   */
   has<T>(coder: Coder<T>): boolean;
 }
 
@@ -310,7 +326,7 @@ export function refSetValue<T>(
  *
  * @template TTuple - A tuple of reference values
  */
-type UnwrapRefTuple<TTuple extends readonly RefValue<unknown>[]> = {
+export type UnwrapRefTuple<TTuple extends readonly RefValue<unknown>[]> = {
   [K in keyof TTuple]: TTuple[K] extends RefValue<infer TDecoded> ? TDecoded
     : never;
 };

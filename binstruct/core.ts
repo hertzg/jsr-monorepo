@@ -1,12 +1,27 @@
 import { type RefsWeakMap, withRefsInContext } from "./ref/ref.ts";
 
+/**
+ * Symbol identifier for coder kind.
+ */
 export const kCoderKind = Symbol("kCoderKind");
+/**
+ * Symbol identifier for context references.
+ */
 export const kCtxRefs = Symbol("ctxRefs");
 
+/**
+ * Type representing a value with its byte count.
+ * @template T - The type of the value
+ */
 export type ValueWithBytes<T> = [T, number];
 
+/**
+ * Context for encoding/decoding operations.
+ */
 export interface Context {
+  /** The direction of the operation */
   direction: "encode" | "decode";
+  /** Optional references storage */
   [kCtxRefs]?: RefsWeakMap;
 }
 
@@ -20,16 +35,28 @@ export function createContext(direction: "encode" | "decode"): Context {
   return withRefsInContext({ direction });
 }
 
+/**
+ * Function type for encoding values.
+ * @template TDecoded - The type of the value to encode
+ */
 export type Encoder<TDecoded> = (
   decoded: TDecoded,
   target: Uint8Array,
   context?: Context,
 ) => number;
+/**
+ * Function type for decoding values.
+ * @template TDecoded - The type of the value to decode
+ */
 export type Decoder<TDecoded> = (
   encoded: Uint8Array,
   context?: Context,
 ) => ValueWithBytes<TDecoded>;
 
+/**
+ * Interface for coders that can encode and decode values.
+ * @template TDecoded - The type of the value to encode/decode
+ */
 export type Coder<TDecoded> = {
   [kCoderKind]: symbol;
   encode: Encoder<TDecoded>;

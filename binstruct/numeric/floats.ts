@@ -250,28 +250,50 @@ export function f64(endianness: "be" | "le" = "be"): Coder<number> {
   );
 }
 
-// Convenience functions for big-endian (network byte order)
+/**
+ * Convenience function for 16-bit floating point with big-endian byte order.
+ * @see {@link f16} for implementation details and examples.
+ */
 export function f16be(): Coder<number> {
   return f16("be");
 }
 
-export function f32be(): Coder<number> {
-  return f32("be");
-}
-
-export function f64be(): Coder<number> {
-  return f64("be");
-}
-
-// Convenience functions for little-endian
+/**
+ * Convenience function for 16-bit floating point with little-endian byte order.
+ * @see {@link f16} for implementation details and examples.
+ */
 export function f16le(): Coder<number> {
   return f16("le");
 }
 
+/**
+ * Convenience function for 32-bit floating point with big-endian byte order.
+ * @see {@link f32} for implementation details and examples.
+ */
+export function f32be(): Coder<number> {
+  return f32("be");
+}
+
+/**
+ * Convenience function for 32-bit floating point with little-endian byte order.
+ * @see {@link f32} for implementation details and examples.
+ */
 export function f32le(): Coder<number> {
   return f32("le");
 }
 
+/**
+ * Convenience function for 64-bit floating point with big-endian byte order.
+ * @see {@link f64} for implementation details and examples.
+ */
+export function f64be(): Coder<number> {
+  return f64("be");
+}
+
+/**
+ * Convenience function for 64-bit floating point with little-endian byte order.
+ * @see {@link f64} for implementation details and examples.
+ */
 export function f64le(): Coder<number> {
   return f64("le");
 }

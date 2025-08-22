@@ -290,36 +290,66 @@ export function u64(endianness: "be" | "le" = "be"): Coder<bigint> {
   );
 }
 
-// Convenience functions for big-endian (network byte order)
+/**
+ * Convenience function for 8-bit unsigned integer with big-endian byte order.
+ * @see {@link u8} for implementation details and examples.
+ */
 export function u8be(): Coder<number> {
   return u8("be");
 }
 
-export function u16be(): Coder<number> {
-  return u16("be");
-}
-
-export function u32be(): Coder<number> {
-  return u32("be");
-}
-
-export function u64be(): Coder<bigint> {
-  return u64("be");
-}
-
-// Convenience functions for little-endian
+/**
+ * Convenience function for 8-bit unsigned integer with little-endian byte order.
+ * @see {@link u8} for implementation details and examples.
+ */
 export function u8le(): Coder<number> {
   return u8("le");
 }
 
+/**
+ * Convenience function for 16-bit unsigned integer with big-endian byte order.
+ * @see {@link u16} for implementation details and examples.
+ */
+export function u16be(): Coder<number> {
+  return u16("be");
+}
+
+/**
+ * Convenience function for 16-bit unsigned integer with little-endian byte order.
+ * @see {@link u16} for implementation details and examples.
+ */
 export function u16le(): Coder<number> {
   return u16("le");
 }
 
+/**
+ * Convenience function for 32-bit unsigned integer with big-endian byte order.
+ * @see {@link u32} for implementation details and examples.
+ */
+export function u32be(): Coder<number> {
+  return u32("be");
+}
+
+/**
+ * Convenience function for 32-bit unsigned integer with little-endian byte order.
+ * @see {@link u32} for implementation details and examples.
+ */
 export function u32le(): Coder<number> {
   return u32("le");
 }
 
+/**
+ * Convenience function for 64-bit unsigned integer with big-endian byte order.
+ * @see {@link u64} for implementation details and examples.
+ */
+export function u64be(): Coder<bigint> {
+  return u64("be");
+}
+
+/**
+ * Convenience function for 64-bit unsigned integer with little-endian byte order.
+ * @see {@link u64} for implementation details and examples.
+ */
 export function u64le(): Coder<bigint> {
   return u64("le");
 }

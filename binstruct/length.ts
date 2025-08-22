@@ -6,6 +6,11 @@ import { isRef, refGetValue, refSetValue, type RefValue } from "./ref/ref.ts";
  */
 export type LengthOrRef = number | RefValue<number>;
 
+/**
+ * Type guard to check if a value is a length or reference.
+ * @param value - The value to check
+ * @returns True if the value is a length or reference, false otherwise
+ */
 export function isLengthOrRef(value: unknown): value is LengthOrRef {
   return typeof value === "number" || isRef<number>(value);
 }
@@ -52,6 +57,12 @@ export function lengthRefGet(
   return refGetValue(ctx, lengthOrRef);
 }
 
+/**
+ * Sets a length value in the context for the given coder.
+ * @param ctx - The context to set the length in
+ * @param coder - The coder to set the length for
+ * @param length - The length value to set
+ */
 export function lengthRefSet(
   ctx: Context | null | undefined,
   coder: Coder<number>,

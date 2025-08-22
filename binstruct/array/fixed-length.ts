@@ -1,8 +1,18 @@
 import { type Coder, createContext, kCoderKind } from "../core.ts";
 import { isValidLength, type LengthOrRef, lengthRefGet } from "../length.ts";
 
+/**
+ * Symbol identifier for fixed-length array coders.
+ */
 export const kKindArrayFL = Symbol("arrayFL");
 
+/**
+ * Creates a Coder for fixed-length arrays of a given element type.
+ *
+ * @param elementType - The coder for individual array elements
+ * @param lengthOrRef - The fixed length or reference to the length
+ * @returns A Coder that can encode/decode arrays of the element type
+ */
 export function arrayFL<TDecoded>(
   elementType: Coder<TDecoded>,
   lengthOrRef: LengthOrRef,

@@ -49,48 +49,39 @@ import { arrayLP } from "./length-prefixed.ts";
  * - If a length number/reference is provided as the second argument, it creates a fixed-length array
  *
  * @param elementType - The coder for individual array elements
- * @param lengthCoderOrLengthType - Either a length coder (for length-prefixed) or length value/reference (for fixed-length)
+ * @param condition - A condition function for while-loop arrays
  * @returns A Coder that can encode/decode arrays of the element type
- *
- * @example
- * ```ts
- * import { assertEquals } from "@std/assert";
- * import { array } from "@hertzg/binstruct/array";
- * import { u16le, u32le, s32le, f32le, u8le } from "@hertzg/binstruct/numeric";
- * import { struct } from "@hertzg/binstruct/struct";
- * import { string } from "@hertzg/binstruct/string";
- *
- * // Define a flexible data structure that can handle both array types
- * const flexibleDataCoder = struct({
- *   id: u32le(),                                    // Record identifier
- *   dynamicItems: array(u16le(), u8le()),           // Length-prefixed array (uses u8le as length coder)
- *   fixedItems: array(u16le(), 3),                  // Fixed-length array of exactly 3 items
- *   metadata: string(u16le()),                      // Metadata string
- * });
- *
- * // Create sample data with both array types
- * const data = {
- *   id: 1001,
- *   dynamicItems: [100, 200, 300, 400],            // Variable length array
- *   fixedItems: [500, 600, 700],                   // Exactly 3 items
- *   metadata: "flexible_data",
- * };
- *
- * const buffer = new Uint8Array(1000);
- * const bytesWritten = flexibleDataCoder.encode(data, buffer);
- * const [decoded, bytesRead] = flexibleDataCoder.decode(buffer);
- * assertEquals(decoded, data);
- * assertEquals(bytesWritten, bytesRead);
- * ```
  */
 export function array<TDecoded>(
   elementType: Coder<TDecoded>,
   condition: ArrayWhileCondition<TDecoded>,
 ): Coder<TDecoded[]>;
+/**
+ * Creates a Coder for arrays that automatically chooses between length-prefixed and fixed-length
+ * based on the arguments provided.
+ *
+ * - If a lengthType coder is provided as the second argument, it creates a length-prefixed array
+ * - If a length number/reference is provided as the second argument, it creates a fixed-length array
+ *
+ * @param elementType - The coder for individual array elements
+ * @param lengthCoderOrLengthType - Either a length coder (for length-prefixed) or length value/reference (for fixed-length)
+ * @returns A Coder that can encode/decode arrays of the element type
+ */
 export function array<TDecoded>(
   elementType: Coder<TDecoded>,
   lengthCoderOrLengthType: Coder<number> | LengthOrRef,
 ): Coder<TDecoded[]>;
+/**
+ * Creates a Coder for arrays that automatically chooses between length-prefixed and fixed-length
+ * based on the arguments provided.
+ *
+ * - If a lengthType coder is provided as the second argument, it creates a length-prefixed array
+ * - If a length number/reference is provided as the second argument, it creates a fixed-length array
+ *
+ * @param elementType - The coder for individual array elements
+ * @param lengthCoderOrLengthTypeOrCondition - Either a length coder, length value/reference, or condition function
+ * @returns A Coder that can encode/decode arrays of the element type
+ */
 export function array<TDecoded>(
   elementType: Coder<TDecoded>,
   lengthCoderOrLengthTypeOrCondition:

@@ -6,6 +6,9 @@ import {
 } from "../core.ts";
 import { refSetValue } from "../ref/ref.ts";
 
+/**
+ * Symbol identifier for conditional while-loop array coders.
+ */
 export const kKindArrayWhile = Symbol("arrayWhile");
 
 /**

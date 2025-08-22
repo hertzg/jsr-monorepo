@@ -1,6 +1,9 @@
 import { type Coder, createContext, kCoderKind } from "../core.ts";
 import { refSetValue } from "../ref/ref.ts";
 
+/**
+ * Symbol identifier for length-prefixed string coders.
+ */
 export const kKindStringLP = Symbol("stringLP");
 
 /**
