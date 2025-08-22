@@ -1,28 +1,3 @@
-import { type Coder, kCoderKind } from "../core.ts";
-import { refSetValue } from "../ref/ref.ts";
-
-// Symbol definitions for numeric types
-const kKindU8 = Symbol("u8");
-const kKindS8 = Symbol("s8");
-const kKindU16BE = Symbol("u16be");
-const kKindU16LE = Symbol("u16le");
-const kKindS16BE = Symbol("s16be");
-const kKindS16LE = Symbol("s16le");
-const kKindU32BE = Symbol("u32be");
-const kKindU32LE = Symbol("u32le");
-const kKindS32BE = Symbol("s32be");
-const kKindS32LE = Symbol("s32le");
-const kKindU64BE = Symbol("u64be");
-const kKindU64LE = Symbol("u64le");
-const kKindS64BE = Symbol("s64be");
-const kKindS64LE = Symbol("s64le");
-const kKindF16BE = Symbol("f16be");
-const kKindF16LE = Symbol("f16le");
-const kKindF32BE = Symbol("f32be");
-const kKindF32LE = Symbol("f32le");
-const kKindF64BE = Symbol("f64be");
-const kKindF64LE = Symbol("f64le");
-
 /**
  * Numeric data encoding and decoding utilities for binary structures.
  *
@@ -111,6 +86,30 @@ const kKindF64LE = Symbol("f64le");
  *
  * @module
  */
+import { type Coder, kCoderKind } from "../core.ts";
+import { refSetValue } from "../ref/ref.ts";
+
+// Symbol definitions for numeric types
+const kKindU8 = Symbol("u8");
+const kKindS8 = Symbol("s8");
+const kKindU16BE = Symbol("u16be");
+const kKindU16LE = Symbol("u16le");
+const kKindS16BE = Symbol("s16be");
+const kKindS16LE = Symbol("s16le");
+const kKindU32BE = Symbol("u32be");
+const kKindU32LE = Symbol("u32le");
+const kKindS32BE = Symbol("s32be");
+const kKindS32LE = Symbol("s32le");
+const kKindU64BE = Symbol("u64be");
+const kKindU64LE = Symbol("u64le");
+const kKindS64BE = Symbol("s64be");
+const kKindS64LE = Symbol("s64le");
+const kKindF16BE = Symbol("f16be");
+const kKindF16LE = Symbol("f16le");
+const kKindF32BE = Symbol("f32be");
+const kKindF32LE = Symbol("f32le");
+const kKindF64BE = Symbol("f64be");
+const kKindF64LE = Symbol("f64le");
 
 /**
  * Endianness types for binary data
