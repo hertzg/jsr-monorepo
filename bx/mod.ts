@@ -17,6 +17,7 @@
  * const MISSZERO = bx('f2-00_0_00'); // throws TypeError
  * const SPACES = bx('          '); // throws TypeError
  * ```
+ *
  * @module
  */
 import { Buffer } from "node:buffer";
