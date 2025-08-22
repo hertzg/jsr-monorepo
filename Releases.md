@@ -1,3 +1,22 @@
+### 2025.08.22
+
+#### @hertzg/binstruct 0.1.7 (patch)
+
+- feat(binstruct): add data refinement functionality
+- fix(binstruct): import paths in binstruct string modules to use relative paths
+  instead of @hertzg/binstruct/ref
+- refactor(binstruct): improve documentation in mod.ts
+- refactor(binstruct): clean up imports in examples.test.ts by removing unused
+  ArrayWhileCondition
+- refactor(binstruct): update examples.test.ts to use conditional array for TLVs
+  and improve decoding buffer handling
+- refactor(binstruct): add ArrayWhileCondition type export to array module for
+  enhanced type support
+- chore(binstruct): remove unused test files test_type_inference.ts and
+  validate_computed_ref_fix.ts
+- chore(binstruct): add tlsg example
+- chore(binstruct): update version to 0.1.7 and document changes in Releases.md
+
 ### 2025.08.20
 
 #### @hertzg/binstruct 0.1.7 (patch)
