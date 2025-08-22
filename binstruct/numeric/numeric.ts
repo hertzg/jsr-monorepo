@@ -93,38 +93,14 @@
  * This type defines the byte order used when encoding/decoding multi-byte numeric values.
  * - "be": Big-endian (network byte order, most significant byte first)
  * - "le": Little-endian (least significant byte first)
- *
- * @example
- * ```ts
- * import { assertEquals } from "@std/assert";
- * import { u16, type Endianness } from "@hertzg/binstruct/numeric";
- *
- * // Create coders with different endianness
- * const bigEndian: Endianness = "be";
- * const littleEndian: Endianness = "le";
- *
- * const u16be = u16(bigEndian);
- * const u16le = u16(littleEndian);
- *
- * // Test data
- * const testValue = 258; // 0x0102 in hex
- *
- * // Encode with big-endian
- * const bufferBE = new Uint8Array(2);
- * u16be.encode(testValue, bufferBE);
- * assertEquals(bufferBE[0], 0x01); // Most significant byte first
- * assertEquals(bufferBE[1], 0x02);
- *
- * // Encode with little-endian
- * const bufferLE = new Uint8Array(2);
- * u16le.encode(testValue, bufferLE);
- * assertEquals(bufferLE[0], 0x02); // Least significant byte first
- * assertEquals(bufferLE[1], 0x01);
- * ```
  */
 export type Endianness = "be" | "le";
 
-// Re-export all numeric coders from their respective modules
-export * from "./unsigned.ts";
-export * from "./signed.ts";
-export * from "./floats.ts";
+// deno-fmt-ignore
+export { u8, u16, u32, u64, u8be, u16be, u32be, u64be, u8le, u16le, u32le, u64le } from "./unsigned.ts";
+
+// deno-fmt-ignore
+export { s8, s16, s32, s64, s8be, s16be, s32be, s64be, s8le, s16le, s32le, s64le } from "./signed.ts";
+
+// deno-fmt-ignore
+export { f16, f32, f64, f16be, f32be, f64be, f16le, f32le, f64le } from "./floats.ts";
