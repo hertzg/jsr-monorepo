@@ -7,7 +7,8 @@
     "forge": "deno run -A jsr:@roka/forge",
     "lint": "deno fmt -q --check && deno lint -q && deno check -q **/*.ts",
     "docs": "deno doc --lint --html $(find . -path '**/*.ts' -type file)",
-    "ok": "deno task lint && deno task docs && deno task test && deno publish --quiet --dry-run --allow-dirty"
+    "ok": "deno task lint && deno task docs && deno task test && deno publish --quiet --dry-run --allow-dirty",
+    "bump": "deno run -A auto-bump.ts --verbose"
   },
   "exclude": [
     ".git",
@@ -29,6 +30,7 @@
     "@std/testing/bdd": "jsr:@std/testing@^1.0.15/bdd",
     "@std/testing/mock": "jsr:@std/testing@^1.0.15/mock",
     "@std/expect": "jsr:@std/expect@1.0.12",
+    "@std/semver": "jsr:@std/semver@^1.0.5",
     "@std/streams": "jsr:@std/streams@^1.0.11",
     "@std/encoding/base64": "jsr:@std/encoding@^1.0.10/base64",
     "@std/encoding/base64url": "jsr:@std/encoding@^1.0.10/base64url",
