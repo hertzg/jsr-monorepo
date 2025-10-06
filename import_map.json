@@ -1,0 +1,19 @@
+{
+  "imports": {
+    "@std/assert": "jsr:@std/assert@^1.0.14",
+    "@std/testing": "jsr:@std/testing@^1.0.15",
+    "@std/testing/bdd": "jsr:@std/testing@^1.0.15/bdd",
+    "@std/testing/mock": "jsr:@std/testing@^1.0.15/mock",
+    "@std/expect": "jsr:@std/expect@1.0.12",
+    "@std/streams": "jsr:@std/streams@^1.0.11",
+    "@std/encoding/base64": "jsr:@std/encoding@^1.0.10/base64",
+    "@std/encoding/base64url": "jsr:@std/encoding@^1.0.10/base64url",
+    "@std/path": "jsr:@std/path@^1.0.0",
+    "@hertzg/binstruct": "jsr:@hertzg/binstruct@^0.2.0",
+    "@hertzg/bx": "jsr:@hertzg/bx@^3.0.2",
+    "@hertzg/mymagti-api": "jsr:@hertzg/mymagti-api@^0.1.0",
+    "@hertzg/wg-keys": "jsr:@hertzg/wg-keys@^1.0.0",
+    "@hertzg/wg-ini": "jsr:@hertzg/wg-ini@^0.2.0",
+    "@hertzg/wg-conf": "jsr:@hertzg/wg-conf@^0.2.0"
+  }
+}

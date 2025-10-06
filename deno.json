@@ -1,13 +1,13 @@
 {
+  "importMap": "./import_map.json",
   "tasks": {
     "test": "deno test --doc --allow-all --parallel --coverage --trace-leaks --clean",
+    "lint": "deno lint && deno task lint:import-map",
+    "lint:import-map": "deno run -A _tools/check_import_map.ts",
     "cov": "deno coverage --ignore=\"**/*.generated.mjs,**/_test_utils.ts,.github\"",
     "cov:gen": "deno task cov --lcov --output=cov.lcov",
     "cov:view": "deno task cov --html",
-    "forge": "deno run -A jsr:@roka/forge",
-    "lint": "deno fmt -q --check && deno lint -q && deno check -q **/*.ts",
-    "docs": "deno doc --lint --html $(find . -path '**/*.ts' -type file)",
-    "ok": "deno task lint && deno task docs && deno task test && deno publish --quiet --dry-run --allow-dirty"
+    "bump": "deno run -A jsr:@deno/bump-workspaces@^0.1/cli --import-map import_map.json"
   },
   "exclude": [
     ".git",
@@ -22,22 +22,5 @@
     "./wg-conf",
     "./mymagti-api",
     "./bx"
-  ],
-  "imports": {
-    "@std/assert": "jsr:@std/assert@^1.0.14",
-    "@std/testing": "jsr:@std/testing@^1.0.15",
-    "@std/testing/bdd": "jsr:@std/testing@^1.0.15/bdd",
-    "@std/testing/mock": "jsr:@std/testing@^1.0.15/mock",
-    "@std/expect": "jsr:@std/expect@1.0.12",
-    "@std/streams": "jsr:@std/streams@^1.0.11",
-    "@std/encoding/base64": "jsr:@std/encoding@^1.0.10/base64",
-    "@std/encoding/base64url": "jsr:@std/encoding@^1.0.10/base64url",
-    "@hertzg/binseek": "jsr:@hertzg/binseek@*",
-    "@hertzg/binstruct": "jsr:@hertzg/binstruct@*",
-    "@hertzg/bx": "jsr:@hertzg/bx@*",
-    "@hertzg/mymagti-api": "jsr:@hertzg/mymagti-api@*",
-    "@hertzg/wg-keys": "jsr:@hertzg/wg-keys@*",
-    "@hertzg/wg-ini": "jsr:@hertzg/wg-ini@*",
-    "@hertzg/wg-conf": "jsr:@hertzg/wg-conf@*"
-  }
+  ]
 }
