@@ -1,0 +1,8 @@
+{
+  "name": "@binstruct/ethernet",
+  "version": "0.1.0",
+  "exports": {
+    ".": "./mod.ts"
+  },
+  "types": "./mod.ts"
+}
