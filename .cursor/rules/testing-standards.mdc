@@ -137,6 +137,119 @@ await assertRejects(async () => {
 }, SpecificError);
 ```
 
+## Testing & Linting Requirements
+
+### Core Requirements
+
+- **ALWAYS** run `deno task lint` and `deno task test` at the root of the
+  project at the very end of any development work
+- These commands must be executed before considering any task complete
+- All code changes must pass both linting and testing before being finalized
+- No code should be considered production-ready without passing these checks
+
+### Command Execution
+
+#### Development Commands (Faster Feedback)
+
+For faster development feedback, you can run these commands in individual
+workspaces:
+
+```bash
+# Run in individual workspace directories for faster feedback
+deno test
+deno test --doc
+deno lint
+```
+
+#### Final Required Commands (Mandatory)
+
+**ALWAYS** run these commands at the project root before completing any task:
+
+```bash
+# Run from project root - MANDATORY final check
+deno task lint
+deno task test
+```
+
+#### Command Details
+
+- **Development commands**: Faster feedback loop during development
+- **Final commands**: Comprehensive validation with import map checking,
+  coverage, leak detection, and parallel execution
+- Both final commands must complete successfully with exit code 0
+
+### Workflow Integration
+
+#### When to Run
+
+**Development Commands (Workspace Level):**
+
+- During active development for faster feedback
+- When testing specific functionality
+- For quick validation of changes
+
+**Final Commands (Project Root):**
+
+- **Before completing any coding task**
+- **After making any code changes**
+- **Before committing code changes**
+- **As the final step in any development session**
+- **When fixing bugs or implementing features**
+
+#### Execution Order
+
+**During Development:**
+
+1. Make code changes
+2. Run workspace-level commands for quick feedback (`deno test`, `deno lint`)
+3. Fix issues and iterate
+
+**Final Validation:**
+
+1. Complete all code changes
+2. Run `deno task lint` from project root
+3. Fix any linting issues if they occur
+4. Run `deno task test` from project root
+5. Fix any test failures if they occur
+6. Repeat steps 2-5 until both commands pass
+7. Only then consider the task complete
+
+### Quality Assurance
+
+#### Linting Checks
+
+- Code style compliance
+- Import map validation
+- TypeScript type checking
+- Best practice enforcement
+- Security vulnerability detection
+
+#### Testing Checks
+
+- All unit tests pass
+- Integration tests pass
+- JSDoc examples execute successfully
+- Coverage requirements met
+- Memory leak detection
+- Performance benchmarks
+
+### Error Handling
+
+#### If Linting Fails
+
+- Review and fix all linting errors
+- Address import map issues
+- Ensure proper code formatting
+- Re-run `deno task lint` until it passes
+
+#### If Testing Fails
+
+- Review test failures and error messages
+- Fix broken functionality
+- Update tests if requirements changed
+- Ensure JSDoc examples are executable
+- Re-run `deno task test` until it passes
+
 ## Best Practices
 
 - **Comprehensive Coverage**: Test all public APIs and edge cases
@@ -145,3 +258,7 @@ await assertRejects(async () => {
 - **Isolation**: Each test should be independent and not rely on other tests
 - **Performance Awareness**: Include tests for performance-critical operations
 - **Documentation**: Treat tests as living documentation of expected behavior
+- **Quality Gates**: Always run linting and testing commands before finalizing
+  work
+- **Continuous Validation**: Use these commands as mandatory quality assurance
+  steps
