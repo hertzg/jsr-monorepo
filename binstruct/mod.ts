@@ -355,7 +355,15 @@
  * @module
  */
 
-export { type Context, createContext, isCoder } from "./core.ts";
+export {
+  type Coder,
+  type Context,
+  createContext,
+  type Decoder,
+  type Encoder,
+  isCoder,
+  type ValueWithBytes,
+} from "./core.ts";
 export { computedRef, isRef, ref, type RefValue } from "./ref/ref.ts";
 export { isValidLength, type LengthOrRef } from "./length.ts";
 export { array, type ArrayWhileCondition } from "./array/array.ts";
