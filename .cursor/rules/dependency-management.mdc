@@ -1,0 +1,34 @@
+---
+description: Enforce dependency management through import_map.json
+globs: ["**/*.ts", "**/*.tsx", "**/deno.json", "**/import_map.json"]
+alwaysApply: true
+---
+
+# Dependency Management Rules
+
+- **NEVER** use `deps.ts` for dependency management
+- All dependencies are defined in `import_map.json` at the root
+- Use bare imports (e.g., `@std/assert`, `@hertzg/binstruct`) throughout the
+  monorepo
+- Import from JSR packages using `jsr:` protocol in `import_map.json`
+- Internal packages reference each other using their appropriate namespace
+  (e.g., `@hertzg/`, or other relevant scopes)
+
+## Correct Import Patterns
+
+```typescript
+// ✅ Correct - Bare imports from import_map.json
+import { assertEquals } from "@std/assert";
+import { struct } from "@hertzg/binstruct";
+
+// ❌ Incorrect - Relative deps.ts imports
+import { assertEquals } from "./deps.ts";
+```
+
+## Project Structure Requirements
+
+- This is a Deno monorepo published to `jsr.io`
+- Each package is a workspace member with its own `deno.json`
+- Packages follow JSR publishing conventions
+- Use absolute imports from `import_map.json` - NO `deps.ts` files
+- All dependencies are managed through `import_map.json` at the root

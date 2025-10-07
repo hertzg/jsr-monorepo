@@ -1,0 +1,104 @@
+---
+description: Enforce comprehensive code patterns and architecture standards
+globs: ["**/*.ts", "**/*.tsx"]
+alwaysApply: true
+---
+
+# Code Patterns & Architecture
+
+- Assume user knows what they are doing, if they don't provide buffer big enough
+  it's their fault
+- We are not here to babysit the user and we are not doin defensive programming
+- Missuse causes weird or wrong behavior
+- We don't write defensive code, we write JSDoc that explains the correct use
+
+- **User Responsibility**: Users must provide adequate buffer sizes - misuse
+  causes undefined behavior
+- **No Defensive Programming**: Write clear JSDoc instead of runtime checks
+- **Fail Fast**: Validate inputs early and throw meaningful errors
+- **Performance First**: Consider performance implications in all design
+  decisions
+
+## Module Structure
+
+- Main module exports (`mod.ts`) have comprehensive module-level JSDoc with
+  `@module` tag
+- Use `deno-fmt-ignore` only for complex constant structures (headers, tests)
+- Export types, functions, and symbols with proper JSDoc
+- Use named exports for all public APIs to enable tree-shaking
+- Re-export only public APIs from submodules in main `mod.ts`
+- Keep public interface minimal - do not export internal implementation details
+- Use `export type` for type-only exports
+- Import types with `import type` when possible
+- Use relative imports for internal modules
+
+## Type Definitions
+
+- Use descriptive type names with proper JSDoc
+- Include `@template` tags for generic types
+- Document all type parameters and their constraints
+- Place type definitions alongside relevant implementation (not separate
+  `types.ts`)
+- Prefer functions over classes for utilities and logic
+- Avoid classes where functions suffice
+
+## Function Documentation
+
+- Every function must have JSDoc with description
+- Document all parameters with `@param` tags
+- Document return values with `@returns` tags
+- Include `@example` blocks with assertions (treated as executable tests)
+- Use descriptive parameter names in JSDoc
+
+## Code Organization
+
+### File Structure
+
+- Group related functionality in subdirectories
+- Use descriptive file names based on package context (`numeric.ts`,
+  `string.ts`, `struct.ts`)
+- Separate implementation from public API
+
+### Naming Conventions
+
+- camelCase for functions and variables
+- PascalCase for types and interfaces
+- kebab-case for file names when appropriate
+- Descriptive names for test cases
+
+## Performance & Architecture
+
+### Binary Data Operations
+
+- Use `DataView` for efficient binary operations
+- Implement endianness support (big-endian, little-endian)
+- Provide both platform-default and explicit endianness variants
+- Use symbols for internal identification to avoid string comparisons
+
+### Context Management
+
+- Avoid module-level global lookup maps
+- Apply `Context` concept to method calls (helps with testing)
+- Use symbols for internal identifiers (`kCoderKind`, `kCtxRefs`, etc.)
+- Provide `createContext()` helper functions for convenience
+
+## Code Quality
+
+### Comments
+
+- No redundant comments that restate code
+- Explain complex algorithms or business logic
+- Document non-obvious implementation details
+
+### Error Handling
+
+- Provide meaningful error messages with context
+- Include context information in error objects
+- Use `assertThrows` in tests to verify error conditions
+
+### Type Safety
+
+- Prefer compile-time type checking over runtime checks
+- Use type guards for runtime validation only when necessary
+- Avoid `any` type; use `unknown` when necessary
+- Leverage TypeScript's strict mode features
