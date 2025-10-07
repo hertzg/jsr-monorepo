@@ -1,0 +1,147 @@
+---
+description: Enforce comprehensive testing standards and patterns for Deno projects
+globs: ["**/*.test.ts", "**/examples.test.ts", "**/mod.test.ts"]
+alwaysApply: true
+---
+
+# Testing Standards
+
+## Core Requirements
+
+- Use `Deno.test()` for test organization
+- Use `Deno.test()` with descriptive names for test cases
+- Use `await t.step()` for sub-tests
+- All tests use `assertEquals`, `assertThrows`, `assertExists`, `assertRejects`,
+  etc. from `@std/assert`
+- Test both positive and negative cases
+- Include comprehensive test coverage for all functionality
+- Test all public APIs
+- Include edge cases and error conditions
+- Use descriptive test names
+- Group related tests logically
+- Verify round-trip when it makes sense
+- Include performance-critical path tests
+
+## Test Structure & Organization
+
+### Basic Test Structure
+
+```typescript
+Deno.test("isValidLength", () => {
+  // Valid lengths
+  assertEquals(isValidLength(0), true);
+  assertEquals(isValidLength(1), true);
+  assertEquals(isValidLength(100), true);
+
+  // Invalid lengths
+  assertEquals(isValidLength(-1), false);
+  assertEquals(isValidLength(1.5), false);
+  assertEquals(isValidLength(NaN), false);
+});
+```
+
+### Complex Test with Sub-tests
+
+```typescript
+Deno.test("binary encoding/decoding", async (t) => {
+  await t.step("basic encoding", () => {
+    const coder = u16le();
+    const buffer = new Uint8Array(2);
+    const bytesWritten = coder.encode(42, buffer);
+    assertEquals(bytesWritten, 2);
+  });
+
+  await t.step("round-trip integrity", () => {
+    const coder = u16le();
+    const originalValue = 12345;
+    const buffer = new Uint8Array(2);
+
+    const bytesWritten = coder.encode(originalValue, buffer);
+    const [decodedValue, bytesRead] = coder.decode(buffer);
+
+    assertEquals(bytesRead, bytesWritten);
+    assertEquals(decodedValue, originalValue);
+  });
+
+  await t.step("error handling", () => {
+    const coder = u16le();
+    const buffer = new Uint8Array(1); // Too small
+
+    assertThrows(() => {
+      coder.encode(65535, buffer);
+    }, RangeError);
+  });
+});
+```
+
+## File Organization
+
+- Separate test files with `.test.ts` suffix
+- Use `mod.test.ts` for main usage examples
+- Use `examples.test.ts` for comprehensive usage demonstrations
+- Group related tests logically
+- Use descriptive names for test cases
+- JSDoc examples are also tested and must pass
+
+## Test Categories
+
+### Unit Tests
+
+- Test individual functions and methods
+- Focus on specific functionality
+- Include edge cases and error conditions
+- Verify input validation and output correctness
+
+### Integration Tests
+
+- Test component interactions
+- Verify data flow between modules
+- Test error propagation
+- Validate API contracts
+
+### Round-trip Tests
+
+- Essential for binary encoding/decoding
+- Verify data integrity through encode/decode cycles
+- Test with various data types and sizes
+- Ensure no data loss or corruption
+
+### Performance Tests
+
+- Test performance-critical paths
+- Measure encoding/decoding speed
+- Verify memory usage patterns
+- Include benchmarks for optimization validation
+
+## Assertion Patterns
+
+### Data Integrity
+
+```typescript
+// Verify round-trip data integrity
+assertEquals(decodedValue, originalValue);
+assertEquals(bytesRead, bytesWritten);
+```
+
+### Error Handling
+
+```typescript
+// Test expected exceptions
+assertThrows(() => {
+  invalidOperation();
+}, SpecificError);
+
+// Test async error handling
+await assertRejects(async () => {
+  await asyncInvalidOperation();
+}, SpecificError);
+```
+
+## Best Practices
+
+- **Comprehensive Coverage**: Test all public APIs and edge cases
+- **Realistic Data**: Use meaningful test data that reflects real-world usage
+- **Clear Intent**: Test names should clearly describe what is being tested
+- **Isolation**: Each test should be independent and not rely on other tests
+- **Performance Awareness**: Include tests for performance-critical operations
+- **Documentation**: Treat tests as living documentation of expected behavior
