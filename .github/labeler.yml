@@ -6,7 +6,7 @@ wg-keys:
       - any-glob-to-any-file: wg-keys/**
 wg-conf:
   - changed-files:
-      - any-glob-to-any-file: keys/**
+      - any-glob-to-any-file: wg-conf/**
 mymagti-api:
   - changed-files:
       - any-glob-to-any-file: mymagti-api/**
