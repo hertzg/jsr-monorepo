@@ -1,3 +1,41 @@
+### 2025.10.13
+
+#### @hertzg/binstruct 0.2.0 (minor)
+
+- feat(binstruct): enhance documentation with detailed comments for coders,
+  contexts, and numeric types
+- fix(binstruct): update import paths for refSetValue and Endianness
+- fix(binstruct): bump version
+- refactor(binstruct): consolidate numeric exports and remove example code from
+  Endianness documentation
+- refactor(binstruct): streamline numeric type definitions and enhance
+  documentation for endianness handling
+- refactor(binstruct): reorganize and clean up symbol definitions for numeric
+  types
+- chore(binstruct): add docs for ref exports
+- chore(binstruct): update @hertzg/binstruct version to 0.1.8
+- chore(binstruct): document changes for version 0.1.8 in Releases.md
+- chore(binstruct): update version to 0.1.8 in deno.json
+
+#### @hertzg/bx 3.0.2 (patch)
+
+- fix(bx): fake fix
+
+#### @hertzg/mymagti-api 0.1.0 (minor)
+
+- feat(mymagti-api): add comprehensive documentation for OAuth types and
+  functions
+
+#### @hertzg/wg-conf 0.2.0 (minor)
+
+- feat(wg-conf): enhance WireGuard configuration interfaces with detailed
+  documentation
+
+#### @hertzg/wg-ini 0.2.0 (minor)
+
+- feat(wg-ini): enhance INI line and section handling with detailed
+  documentation for streams and options
+
 ### 2025.08.22
 
 #### @hertzg/binstruct 0.1.8 (patch)
