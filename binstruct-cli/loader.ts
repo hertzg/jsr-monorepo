@@ -31,7 +31,7 @@ import type { Coder } from "@hertzg/binstruct";
  * import { assertEquals } from "@std/assert";
  * import { loadCoder } from "./loader.ts";
  *
- * const coder = await loadCoder("./my-package", "myStruct");
+ * const coder = await loadCoder("../binstruct-png/mod.ts", "pngFile");
  * assertEquals(typeof coder.decode, "function");
  * assertEquals(typeof coder.encode, "function");
  * ```
@@ -41,7 +41,7 @@ import type { Coder } from "@hertzg/binstruct";
  * import { assertEquals } from "@std/assert";
  * import { loadCoder } from "./loader.ts";
  *
- * const coder = await loadCoder("npm:my-binary-package", "myCoder");
+ * const coder = await loadCoder("jsr:@binstruct/png", "pngFile");
  * assertEquals(typeof coder.decode, "function");
  * assertEquals(typeof coder.encode, "function");
  * ```

@@ -30,8 +30,7 @@
  * import { main } from "@binstruct/cli";
  *
  * // Run CLI with custom arguments
- * await main(["-p", "jsr:@binstruct/png", "-c", "pngFile", "decode"]);
- * await main(["-p", "jsr:@binstruct/png", "-c", "pngFile", "encode"]);
+ * await main(["--help"]);
  * ```
  *
  * @module

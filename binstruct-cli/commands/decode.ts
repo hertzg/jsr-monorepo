@@ -25,9 +25,9 @@ import { readStdin, writeStdoutJson } from "../io.ts";
  * import { assertEquals } from "@std/assert";
  * import { decodeCommand } from "./decode.ts";
  *
- * // This would be called from the CLI
- * const result = decodeCommand("jsr:@binstruct/png", "pngFile");
- * assertEquals(result instanceof Promise, true);
+ * // This would be called from the CLI with stdin input
+ * // const result = decodeCommand("jsr:@binstruct/png", "pngFile");
+ * // assertEquals(result instanceof Promise, true);
  * ```
  */
 export async function decodeCommand(

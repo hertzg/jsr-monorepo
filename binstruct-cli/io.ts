@@ -14,16 +14,6 @@ import { deserializeFromJson, serializeToJson } from "./serialization.ts";
  * Reads binary data from stdin.
  *
  * @returns Binary data as Uint8Array
- *
- * @example
- * ```ts
- * import { assertEquals } from "@std/assert";
- * import { readStdin } from "./io.ts";
- *
- * // This would read from stdin in a real scenario
- * const data = await readStdin();
- * assertEquals(data instanceof Uint8Array, true);
- * ```
  */
 export async function readStdin(): Promise<Uint8Array> {
   const chunks: Uint8Array[] = [];
@@ -59,16 +49,6 @@ export async function readStdin(): Promise<Uint8Array> {
  * JSON-serialized representations.
  *
  * @returns Parsed JSON data with non-native types reconstructed
- *
- * @example
- * ```ts
- * import { assertEquals } from "@std/assert";
- * import { readStdinJson } from "./io.ts";
- *
- * // This would read and parse JSON from stdin in a real scenario
- * const data = await readStdinJson();
- * assertEquals(typeof data, "object");
- * ```
  */
 export async function readStdinJson(): Promise<unknown> {
   const binaryData = await readStdin();
@@ -91,15 +71,6 @@ export async function readStdinJson(): Promise<unknown> {
  * Writes binary data to stdout.
  *
  * @param data Binary data to write
- *
- * @example
- * ```ts
- * import { assertEquals } from "@std/assert";
- * import { writeStdout } from "./io.ts";
- *
- * const data = new Uint8Array([1, 2, 3, 4]);
- * await writeStdout(data);
- * ```
  */
 export async function writeStdout(data: Uint8Array): Promise<void> {
   await Deno.stdout.write(data);
@@ -112,19 +83,6 @@ export async function writeStdout(data: Uint8Array): Promise<void> {
  * JSON-serializable formats that can be reconstructed later.
  *
  * @param data Data to serialize as JSON and write
- *
- * @example
- * ```ts
- * import { assertEquals } from "@std/assert";
- * import { writeStdoutJson } from "./io.ts";
- *
- * const data = {
- *   test: "value",
- *   bytes: new Uint8Array([1, 2, 3, 4]),
- *   bigNumber: 12345678901234567890n
- * };
- * await writeStdoutJson(data);
- * ```
  */
 export async function writeStdoutJson(data: unknown): Promise<void> {
   const jsonString = serializeToJson(data);

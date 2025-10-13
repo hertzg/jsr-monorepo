@@ -51,7 +51,7 @@ export interface CliOptions {
  * import { main } from "./cli.ts";
  *
  * // The parseCliArgs function is used internally by main
- * const result = main(["-p", "jsr:@binstruct/png", "-c", "pngFile", "decode"]);
+ * const result = main(["--help"]);
  * assertEquals(result instanceof Promise, true);
  * ```
  */
@@ -150,7 +150,8 @@ function showVersion(): void {
  * import { main } from "./cli.ts";
  *
  * // Called automatically when run as script
- * await main();
+ * // Show help information
+ * await main(["--help"]);
  * ```
  */
 export async function main(args: string[] = Deno.args): Promise<void> {

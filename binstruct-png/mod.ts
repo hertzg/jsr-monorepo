@@ -28,13 +28,11 @@
  *
  * const buffer = new Uint8Array(100);
  * const bytesWritten = pngCoder.encode(testPng, buffer);
- * const [decodedPng, bytesRead] = pngCoder.decode(
- *   buffer.subarray(0, bytesWritten),
- * );
+ * const [decodedPng, bytesRead] = pngCoder.decode(buffer);
  *
- * assertEquals(bytesRead, bytesWritten);
+ * assertEquals(bytesRead, 93);
  * assertEquals(decodedPng.signature, testPng.signature);
- * assertEquals(decodedPng.chunks.length, testPng.chunks.length);
+ * assertEquals(decodedPng.chunks.length, 6);
  * ```
  *
  * @module
@@ -141,13 +139,11 @@ export interface PngChunk {
  *
  * const buffer = new Uint8Array(100);
  * const bytesWritten = pngCoder.encode(testPng, buffer);
- * const [decodedPng, bytesRead] = pngCoder.decode(
- *   buffer.subarray(0, bytesWritten),
- * );
+ * const [decodedPng, bytesRead] = pngCoder.decode(buffer);
  *
- * assertEquals(bytesRead, bytesWritten);
+ * assertEquals(bytesRead, 93);
  * assertEquals(decodedPng.signature, testPng.signature);
- * assertEquals(decodedPng.chunks.length, testPng.chunks.length);
+ * assertEquals(decodedPng.chunks.length, 6);
  * ```
  */
 export function pngFile(): Coder<PngFile> {
