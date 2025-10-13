@@ -6,8 +6,13 @@
  * This ensures that data decoded from binary can be properly serialized to JSON
  * and then reconstructed when encoding back to binary.
  *
+ * Uses @std/jsonc for parsing JSONC (JSON with comments) and custom logic for
+ * handling non-native types during serialization.
+ *
  * @module
  */
+
+import { parse } from "@std/jsonc";
 
 /**
  * Serializes a value to JSON with support for non-native types.
@@ -53,9 +58,10 @@ export function serializeToJson(value: unknown): string {
  * Deserializes JSON with support for non-native types.
  *
  * This function reconstructs Uint8Array and BigInt values from their
- * JSON-serialized representations.
+ * JSON-serialized representations. Uses @std/jsonc to support JSONC
+ * (JSON with comments) format.
  *
- * @param json The JSON string to deserialize
+ * @param json The JSON or JSONC string to deserialize
  * @returns Deserialized value with non-native types reconstructed
  *
  * @example
@@ -72,13 +78,44 @@ export function serializeToJson(value: unknown): string {
  * ```
  */
 export function deserializeFromJson(json: string): unknown {
-  return JSON.parse(json, (_key, val) => {
-    if (val && typeof val === "object" && val.$bytes) {
-      return new Uint8Array(val.$bytes);
+  // Use @std/jsonc to parse JSONC (JSON with comments)
+  const parsed = parse(json);
+
+  // Apply custom reviver for non-native types
+  return applyReviver(parsed);
+}
+
+/**
+ * Recursively applies the reviver function to reconstruct non-native types.
+ *
+ * @param value The value to process
+ * @returns Value with non-native types reconstructed
+ */
+function applyReviver(value: unknown): unknown {
+  if (value && typeof value === "object" && !Array.isArray(value)) {
+    const obj = value as Record<string, unknown>;
+
+    // Handle Uint8Array reconstruction
+    if (obj.$bytes && Array.isArray(obj.$bytes)) {
+      return new Uint8Array(obj.$bytes);
     }
-    if (val && typeof val === "object" && val.$bigint) {
-      return BigInt(val.$bigint);
+
+    // Handle BigInt reconstruction
+    if (obj.$bigint && typeof obj.$bigint === "string") {
+      return BigInt(obj.$bigint);
     }
-    return val;
-  });
+
+    // Recursively process object properties
+    const result: Record<string, unknown> = {};
+    for (const [key, val] of Object.entries(obj)) {
+      result[key] = applyReviver(val);
+    }
+    return result;
+  }
+
+  if (Array.isArray(value)) {
+    return value.map(applyReviver);
+  }
+
+  return value;
 }

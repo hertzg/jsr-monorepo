@@ -3,7 +3,8 @@
  *
  * This module provides shared utilities for reading from stdin and writing to stdout,
  * used by both encode and decode commands. It includes support for serializing and
- * deserializing non-JSON-native types like Uint8Array and BigInt.
+ * deserializing non-JSON-native types like Uint8Array and BigInt, and supports
+ * JSONC (JSON with comments) format through @std/jsonc.
  *
  * @module
  */
@@ -43,12 +44,12 @@ export async function readStdin(): Promise<Uint8Array> {
 }
 
 /**
- * Reads JSON data from stdin and parses it with support for non-native types.
+ * Reads JSON or JSONC data from stdin and parses it with support for non-native types.
  *
  * This function can reconstruct Uint8Array and BigInt values from their
- * JSON-serialized representations.
+ * JSON-serialized representations. Supports JSONC (JSON with comments) format.
  *
- * @returns Parsed JSON data with non-native types reconstructed
+ * @returns Parsed JSON/JSONC data with non-native types reconstructed
  */
 export async function readStdinJson(): Promise<unknown> {
   const binaryData = await readStdin();
@@ -60,7 +61,7 @@ export async function readStdinJson(): Promise<unknown> {
     return deserializeFromJson(jsonString);
   } catch (error) {
     throw new Error(
-      `Failed to parse JSON from stdin: ${
+      `Failed to parse JSON/JSONC from stdin: ${
         error instanceof Error ? error.message : String(error)
       }`,
     );

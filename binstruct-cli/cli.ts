@@ -19,7 +19,7 @@
  * @module
  */
 
-import { parseArgs } from "node:util";
+import { parseArgs } from "@std/cli";
 import { decodeCommand } from "./commands/decode.ts";
 import { encodeCommand } from "./commands/encode.ts";
 
@@ -56,39 +56,23 @@ export interface CliOptions {
  * ```
  */
 function parseCliArgs(args: string[]): CliOptions {
-  const { values, positionals } = parseArgs({
-    args,
-    options: {
-      package: {
-        type: "string",
-        short: "p",
-        description: "Package specifier (JSR URL, local path, or npm package)",
-      },
-      coder: {
-        type: "string",
-        short: "c",
-        description: "Coder name to use from the package",
-      },
-      help: {
-        type: "boolean",
-        short: "h",
-        description: "Show help information",
-      },
-      version: {
-        type: "boolean",
-        short: "v",
-        description: "Show version information",
-      },
+  const parsed = parseArgs(args, {
+    string: ["package", "coder"],
+    boolean: ["help", "version"],
+    alias: {
+      package: "p",
+      coder: "c",
+      help: "h",
+      version: "v",
     },
-    allowPositionals: true,
   });
 
   return {
-    package: values.package as string || "",
-    coder: values.coder as string || "",
-    command: positionals[0] || "",
-    help: values.help as boolean || false,
-    version: values.version as boolean || false,
+    package: parsed.package || "",
+    coder: parsed.coder || "",
+    command: typeof parsed._[0] === "string" ? parsed._[0] : "",
+    help: parsed.help || false,
+    version: parsed.version || false,
   };
 }
 
