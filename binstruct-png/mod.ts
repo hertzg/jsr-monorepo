@@ -1,6 +1,11 @@
-import { bytes, ref, struct, u32be } from "@hertzg/binstruct";
-import { arrayWhile } from "@hertzg/binstruct/array";
-import type { Coder } from "@hertzg/binstruct";
+import {
+  arrayWhile,
+  bytes,
+  type Coder,
+  ref,
+  struct,
+  u32be,
+} from "@hertzg/binstruct";
 
 /**
  * PNG file structure containing signature and chunks.
@@ -45,7 +50,9 @@ export interface PngChunk {
  *
  * const buffer = new Uint8Array(100);
  * const bytesWritten = pngCoder.encode(testPng, buffer);
- * const [decodedPng, bytesRead] = pngCoder.decode(buffer);
+ * const [decodedPng, bytesRead] = pngCoder.decode(
+ *   buffer.subarray(0, bytesWritten),
+ * );
  *
  * assertEquals(bytesRead, bytesWritten);
  * assertEquals(decodedPng.signature, testPng.signature);
