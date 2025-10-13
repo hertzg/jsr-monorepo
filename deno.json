@@ -18,6 +18,7 @@
   "workspace": [
     "./binstruct",
     "./binstruct-ethernet",
+    "./binstruct-wav",
     "./wg-keys",
     "./wg-ini",
     "./wg-conf",
