@@ -1,0 +1,13 @@
+{
+  "name": "@binstruct/cli",
+  "version": "0.1.0",
+  "exports": {
+    ".": "./mod.ts",
+    "./cli": "./cli.ts"
+  },
+  "types": "./mod.ts",
+  "tasks": {
+    "test": "deno test --allow-all",
+    "lint": "deno lint"
+  }
+}

@@ -17,6 +17,7 @@
   ],
   "workspace": [
     "./binstruct",
+    "./binstruct-cli",
     "./binstruct-ethernet",
     "./binstruct-png",
     "./binstruct-wav",
