@@ -3,8 +3,8 @@
  *
  * This module provides shared utilities for reading from stdin and writing to stdout,
  * used by both encode and decode commands. It includes support for serializing and
- * deserializing non-JSON-native types like Uint8Array and BigInt, and supports
- * JSONC (JSON with comments) format through @std/jsonc.
+ * deserializing non-native types like Uint8Array and BigInt, and supports JSONC
+ * format through @std/jsonc.
  *
  * @module
  */
@@ -69,6 +69,38 @@ export async function readStdinJson(): Promise<unknown> {
 }
 
 /**
+ * Reads JSONC data from stdin and parses it with support for non-native types.
+ *
+ * This function can reconstruct Uint8Array and BigInt values from their
+ * JSON-serialized representations. Supports JSONC (JSON with comments) format.
+ *
+ * @param format The format to parse: "jsonc" (default)
+ * @returns Parsed data with non-native types reconstructed
+ */
+export async function readStdinFormatted(
+  format: string = "jsonc",
+): Promise<unknown> {
+  const binaryData = await readStdin();
+  const textString = new TextDecoder().decode(binaryData);
+
+  try {
+    if (format === "jsonc") {
+      return deserializeFromJson(textString);
+    } else {
+      throw new Error(
+        `Unsupported format: ${format}. Only 'jsonc' is supported.`,
+      );
+    }
+  } catch (error) {
+    throw new Error(
+      `Failed to parse JSONC from stdin: ${
+        error instanceof Error ? error.message : String(error)
+      }`,
+    );
+  }
+}
+
+/**
  * Writes binary data to stdout.
  *
  * @param data Binary data to write
@@ -88,5 +120,32 @@ export async function writeStdout(data: Uint8Array): Promise<void> {
 export async function writeStdoutJson(data: unknown): Promise<void> {
   const jsonString = serializeToJson(data);
   const binaryData = new TextEncoder().encode(jsonString);
+  await writeStdout(binaryData);
+}
+
+/**
+ * Writes JSONC data to stdout with support for non-native types.
+ *
+ * This function handles Uint8Array and BigInt values by converting them to
+ * JSON-serializable formats that can be reconstructed later.
+ *
+ * @param data Data to serialize and write
+ * @param format The format to use: "jsonc" (default)
+ */
+export async function writeStdoutFormatted(
+  data: unknown,
+  format: string = "jsonc",
+): Promise<void> {
+  let serializedString: string;
+
+  if (format === "jsonc") {
+    serializedString = serializeToJson(data);
+  } else {
+    throw new Error(
+      `Unsupported format: ${format}. Only 'jsonc' is supported.`,
+    );
+  }
+
+  const binaryData = new TextEncoder().encode(serializedString);
   await writeStdout(binaryData);
 }

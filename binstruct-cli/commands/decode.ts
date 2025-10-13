@@ -9,7 +9,7 @@
  */
 
 import { loadCoder } from "../loader.ts";
-import { readStdin, writeStdoutJson } from "../io.ts";
+import { readStdin, writeStdoutFormatted } from "../io.ts";
 
 /**
  * Executes the decode command.
@@ -19,6 +19,7 @@ import { readStdin, writeStdoutJson } from "../io.ts";
  *
  * @param packageSpec Package specifier (JSR URL, local path, or npm package)
  * @param coderName Name of the coder to use from the package
+ * @param format Output format: "jsonc" (default)
  *
  * @example
  * ```ts
@@ -26,13 +27,14 @@ import { readStdin, writeStdoutJson } from "../io.ts";
  * import { decodeCommand } from "./decode.ts";
  *
  * // This would be called from the CLI with stdin input
- * // const result = decodeCommand("jsr:@binstruct/png", "pngFile");
+ * // const result = decodeCommand("jsr:@binstruct/png", "pngFile", "jsonc");
  * // assertEquals(result instanceof Promise, true);
  * ```
  */
 export async function decodeCommand(
   packageSpec: string,
   coderName: string,
+  format: string = "jsonc",
 ): Promise<void> {
   // Load the package and get the coder
   const coder = await loadCoder(packageSpec, coderName);
@@ -44,5 +46,5 @@ export async function decodeCommand(
   const decoded = coder.decode(binaryData);
 
   // Output as JSON to stdout
-  await writeStdoutJson(decoded[0]);
+  await writeStdoutFormatted(decoded[0], format);
 }

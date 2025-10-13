@@ -1,18 +1,18 @@
 /**
- * JSON serialization utilities for non-native types.
+ * Serialization utilities for non-native types.
  *
- * This module provides utilities for serializing and deserializing non-JSON-native
+ * This module provides utilities for serializing and deserializing non-native
  * types like Uint8Array and BigInt that are commonly used in binary structures.
- * This ensures that data decoded from binary can be properly serialized to JSON
+ * This ensures that data decoded from binary can be properly serialized to JSONC
  * and then reconstructed when encoding back to binary.
  *
- * Uses @std/jsonc for parsing JSONC (JSON with comments) and custom logic for
- * handling non-native types during serialization.
+ * Uses @std/jsonc for JSONC parsing with custom logic for handling non-native
+ * types during serialization.
  *
  * @module
  */
 
-import { parse } from "@std/jsonc";
+import { parse as parseJsonc } from "@std/jsonc";
 
 /**
  * Serializes a value to JSON with support for non-native types.
@@ -79,7 +79,7 @@ export function serializeToJson(value: unknown): string {
  */
 export function deserializeFromJson(json: string): unknown {
   // Use @std/jsonc to parse JSONC (JSON with comments)
-  const parsed = parse(json);
+  const parsed = parseJsonc(json);
 
   // Apply custom reviver for non-native types
   return applyReviver(parsed);

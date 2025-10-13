@@ -9,7 +9,7 @@
  */
 
 import { loadCoder } from "../loader.ts";
-import { readStdinJson, writeStdout } from "../io.ts";
+import { readStdinFormatted, writeStdout } from "../io.ts";
 
 /**
  * Executes the encode command.
@@ -19,6 +19,7 @@ import { readStdinJson, writeStdout } from "../io.ts";
  *
  * @param packageSpec Package specifier (JSR URL, local path, or npm package)
  * @param coderName Name of the coder to use from the package
+ * @param format Input format: "jsonc" (default)
  *
  * @example
  * ```ts
@@ -26,23 +27,24 @@ import { readStdinJson, writeStdout } from "../io.ts";
  * import { encodeCommand } from "./encode.ts";
  *
  * // This would be called from the CLI with stdin input
- * // const result = encodeCommand("jsr:@binstruct/png", "pngFile");
+ * // const result = encodeCommand("jsr:@binstruct/png", "pngFile", "jsonc");
  * // assertEquals(result instanceof Promise, true);
  * ```
  */
 export async function encodeCommand(
   packageSpec: string,
   coderName: string,
+  format: string = "jsonc",
 ): Promise<void> {
   // Load the package and get the coder
   const coder = await loadCoder(packageSpec, coderName);
 
   // Read JSON data from stdin
-  const jsonData = await readStdinJson();
+  const data = await readStdinFormatted(format);
 
   // Encode the data
   const buffer = new Uint8Array(1024 * 1024); // 1MB buffer
-  const bytesWritten = coder.encode(jsonData, buffer);
+  const bytesWritten = coder.encode(data, buffer);
 
   // Output binary data to stdout
   await writeStdout(buffer.subarray(0, bytesWritten));

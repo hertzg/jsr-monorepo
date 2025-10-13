@@ -67,10 +67,29 @@ function parseCliArgs(args: string[]): CliOptions {
     },
   });
 
+  // Support both syntaxes:
+  // 1. -p <PACKAGE> -c <CODER> <COMMAND> (current)
+  // 2. <PACKAGE> <CODER> <COMMAND> (new)
+
+  const packageValue = parsed.package || "";
+  const coderValue = parsed.coder || "";
+  const commandValue = typeof parsed._[0] === "string" ? parsed._[0] : "";
+
+  // If no flags were used, try positional arguments
+  if (!packageValue && !coderValue && parsed._.length >= 3) {
+    return {
+      package: typeof parsed._[0] === "string" ? parsed._[0] : "",
+      coder: typeof parsed._[1] === "string" ? parsed._[1] : "",
+      command: typeof parsed._[2] === "string" ? parsed._[2] : "",
+      help: parsed.help || false,
+      version: parsed.version || false,
+    };
+  }
+
   return {
-    package: parsed.package || "",
-    coder: parsed.coder || "",
-    command: typeof parsed._[0] === "string" ? parsed._[0] : "",
+    package: packageValue,
+    coder: coderValue,
+    command: commandValue,
     help: parsed.help || false,
     version: parsed.version || false,
   };
@@ -85,6 +104,7 @@ Binary Structure CLI Tool
 
 USAGE:
     deno run -A @binstruct/cli [OPTIONS] <COMMAND>
+    deno run -A @binstruct/cli <PACKAGE> <CODER> <COMMAND>
 
 OPTIONS:
     -p, --package <PACKAGE>    Package specifier (JSR URL, local path, or npm package)
@@ -97,23 +117,21 @@ COMMANDS:
     encode                     Encode JSON data from stdin to binary on stdout
 
 EXAMPLES:
-    # Decode PNG file using JSR package
+    # Using flags (recommended) - JSON output
     deno run -A @binstruct/cli -p jsr:@binstruct/png -c pngFile decode < input.png > struct.json
-    
-    # Encode JSON to PNG file using JSR package
     deno run -A @binstruct/cli -p jsr:@binstruct/png -c pngFile encode < struct.json > output.png
     
-    # Decode with local package
-    deno run -A @binstruct/cli -p ./my-package -c myStruct decode < input.bin > output.json
+    # Using positional arguments - JSON output
+    deno run -A @binstruct/cli jsr:@binstruct/png pngFile decode < input.png > struct.json
+    deno run -A @binstruct/cli jsr:@binstruct/png pngFile encode < struct.json > output.png
     
-    # Encode with local package
-    deno run -A @binstruct/cli -p ./my-package -c myStruct encode < input.json > output.bin
+    # With local packages
+    deno run -A @binstruct/cli ./my-package myStruct decode < input.bin > output.json
+    deno run -A @binstruct/cli ./my-package myStruct encode < input.json > output.bin
     
-    # Decode with npm package
-    deno run -A @binstruct/cli -p npm:my-binary-package -c myCoder decode < input.bin > output.json
-    
-    # Encode with npm package
-    deno run -A @binstruct/cli -p npm:my-binary-package -c myCoder encode < input.json > output.bin
+    # With npm packages
+    deno run -A @binstruct/cli npm:my-binary-package myCoder decode < input.bin > output.json
+    deno run -A @binstruct/cli npm:my-binary-package myCoder encode < input.json > output.bin
 `);
 }
 
@@ -172,10 +190,10 @@ export async function main(args: string[] = Deno.args): Promise<void> {
   try {
     switch (options.command) {
       case "decode":
-        await decodeCommand(options.package, options.coder);
+        await decodeCommand(options.package, options.coder, "jsonc");
         break;
       case "encode":
-        await encodeCommand(options.package, options.coder);
+        await encodeCommand(options.package, options.coder, "jsonc");
         break;
       default:
         console.error(`Error: Unknown command '${options.command}'`);
