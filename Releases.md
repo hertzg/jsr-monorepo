@@ -1,5 +1,12 @@
 ### 2025.10.13
 
+#### @binstruct/png 0.1.2 (patch)
+
+- feat(@binstruct/png): add chunkCrc function and enhance tests for PNG chunk
+  handling
+
+### 2025.10.13
+
 #### @binstruct/ethernet 0.1.1 (minor)
 
 - feat(binstruct,@binstruct/ethernet): update binstruct module exports and add
