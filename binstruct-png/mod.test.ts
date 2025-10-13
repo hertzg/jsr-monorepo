@@ -1,5 +1,11 @@
 import { assertEquals } from "@std/assert";
-import { type PngChunk, pngChunk, type PngFile, pngFile } from "./mod.ts";
+import {
+  chunkCrc,
+  type PngChunk,
+  pngChunk,
+  type PngFile,
+  pngFile,
+} from "@binstruct/png";
 
 Deno.test("PNG file encoding and decoding", async (t) => {
   await t.step("basic PNG file", () => {
@@ -405,5 +411,136 @@ Deno.test("PNG chunk encoding and decoding", async (t) => {
     assertEquals(decodedChunk.type, testChunk.type);
     assertEquals(decodedChunk.data, testChunk.data);
     assertEquals(decodedChunk.crc, testChunk.crc);
+  });
+});
+
+Deno.test("chunkCrc function", async (t) => {
+  await t.step("CRC calculation with raw bytes", () => {
+    // Test with IHDR chunk data
+    const ihdrData = new Uint8Array([
+      73,
+      72,
+      68,
+      82,
+      0,
+      0,
+      0,
+      1,
+      0,
+      0,
+      0,
+      1,
+      8,
+      2,
+      0,
+      0,
+      0,
+    ]);
+    const crc = chunkCrc(ihdrData);
+
+    assertEquals(typeof crc, "number");
+    assertEquals(crc >= 0, true);
+    assertEquals(crc <= 0xFFFFFFFF, true);
+  });
+
+  await t.step("CRC calculation with chunk object", () => {
+    const chunk = {
+      type: new Uint8Array([73, 72, 68, 82]), // "IHDR"
+      data: new Uint8Array([0, 0, 0, 1, 0, 0, 0, 1, 8, 2, 0, 0, 0]),
+    };
+    const crc = chunkCrc(chunk);
+
+    assertEquals(typeof crc, "number");
+    assertEquals(crc >= 0, true);
+    assertEquals(crc <= 0xFFFFFFFF, true);
+  });
+
+  await t.step("CRC consistency between overloads", () => {
+    const type = new Uint8Array([73, 72, 68, 82]); // "IHDR"
+    const data = new Uint8Array([0, 0, 0, 1, 0, 0, 0, 1, 8, 2, 0, 0, 0]);
+
+    // Create combined bytes manually
+    const combinedBytes = new Uint8Array(type.length + data.length);
+    combinedBytes.set(type, 0);
+    combinedBytes.set(data, type.length);
+
+    const crcFromBytes = chunkCrc(combinedBytes);
+    const crcFromChunk = chunkCrc({ type, data });
+
+    assertEquals(crcFromBytes, crcFromChunk);
+  });
+
+  await t.step("CRC with empty data", () => {
+    const chunk = {
+      type: new Uint8Array([73, 69, 78, 68]), // "IEND"
+      data: new Uint8Array(0),
+    };
+    const crc = chunkCrc(chunk);
+
+    assertEquals(typeof crc, "number");
+    assertEquals(crc >= 0, true);
+    assertEquals(crc <= 0xFFFFFFFF, true);
+  });
+
+  await t.step("CRC with different chunk types", () => {
+    const testCases = [
+      {
+        type: new Uint8Array([73, 72, 68, 82]),
+        data: new Uint8Array([0, 0, 0, 1, 0, 0, 0, 1, 8, 2, 0, 0, 0]),
+      }, // IHDR
+      {
+        type: new Uint8Array([80, 76, 84, 69]),
+        data: new Uint8Array([255, 0, 0, 0, 255, 0, 0, 0, 255]),
+      }, // PLTE
+      {
+        type: new Uint8Array([73, 68, 65, 84]),
+        data: new Uint8Array([120, 156, 99, 96, 0, 0, 0, 0, 0, 0]),
+      }, // IDAT
+      { type: new Uint8Array([73, 69, 78, 68]), data: new Uint8Array(0) }, // IEND
+    ];
+
+    const crcs = testCases.map((chunk) => chunkCrc(chunk));
+
+    // All CRCs should be different for different data
+    for (let i = 0; i < crcs.length; i++) {
+      for (let j = i + 1; j < crcs.length; j++) {
+        assertEquals(
+          crcs[i] !== crcs[j],
+          true,
+          `CRCs should be different for different chunk types`,
+        );
+      }
+    }
+  });
+
+  await t.step("CRC with large data", () => {
+    const largeData = new Uint8Array(1000);
+    for (let i = 0; i < largeData.length; i++) {
+      largeData[i] = i % 256;
+    }
+
+    const chunk = {
+      type: new Uint8Array([73, 68, 65, 84]), // "IDAT"
+      data: largeData,
+    };
+    const crc = chunkCrc(chunk);
+
+    assertEquals(typeof crc, "number");
+    assertEquals(crc >= 0, true);
+    assertEquals(crc <= 0xFFFFFFFF, true);
+  });
+
+  await t.step("CRC determinism", () => {
+    const chunk = {
+      type: new Uint8Array([73, 72, 68, 82]), // "IHDR"
+      data: new Uint8Array([0, 0, 0, 1, 0, 0, 0, 1, 8, 2, 0, 0, 0]),
+    };
+
+    const crc1 = chunkCrc(chunk);
+    const crc2 = chunkCrc(chunk);
+    const crc3 = chunkCrc(chunk);
+
+    assertEquals(crc1, crc2);
+    assertEquals(crc2, crc3);
   });
 });
