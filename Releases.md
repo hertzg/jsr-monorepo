@@ -1,5 +1,16 @@
 ### 2025.10.13
 
+#### @binstruct/cli 0.1.0 (minor)
+
+- feat(@binstruct/cli): enhance CLI to support JSONC format and positional
+  arguments
+- feat(@binstruct/cli): integrate @std/cli and @std/jsonc for enhanced CLI
+  functionality
+- feat(@binstruct/cli): update CLI help command and clean up examples
+- feat(@binstruct/cli): introduce @binstruct/cli helper
+
+### 2025.10.13
+
 #### @binstruct/png 0.1.2 (patch)
 
 - feat(@binstruct/png): add chunkCrc function and enhance tests for PNG chunk
