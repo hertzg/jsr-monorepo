@@ -36,7 +36,7 @@ Deno.test("WAV package - basic PCM encoding/decoding", () => {
 
   const buffer = new Uint8Array(2048);
   const bytesWritten = wavCoder.encode(testWav, buffer);
-  const [decoded, bytesRead] = wavCoder.decode(buffer);
+  const [decoded, _bytesRead] = wavCoder.decode(buffer);
 
   assertEquals(bytesWritten, 1050); // 12 (RIFF) + 24 (fmt) + 1012 (data with length prefix)
   assertEquals(decoded.riff.chunkId, "RIFF");
@@ -44,7 +44,7 @@ Deno.test("WAV package - basic PCM encoding/decoding", () => {
   assertEquals(decoded.fmt.audioFormat, 1);
   assertEquals(decoded.fmt.numChannels, 1);
   assertEquals(decoded.fmt.sampleRate, 44100);
-  assertEquals(decoded.data.audioData.length, 2002); // bytes() consumes all available bytes
+  assertEquals(decoded.data.audioData.length, 1000); // Length-prefixed array matches original length
 });
 
 Deno.test("WAV package - IEEE float format", () => {
@@ -75,13 +75,13 @@ Deno.test("WAV package - IEEE float format", () => {
 
   const buffer = new Uint8Array(2048);
   const bytesWritten = wavCoder.encode(floatWav, buffer);
-  const [decoded, bytesRead] = wavCoder.decode(buffer);
+  const [decoded, _bytesRead] = wavCoder.decode(buffer);
 
   assertEquals(bytesWritten, 850); // 12 (RIFF) + 24 (fmt) + 812 (data with length prefix)
   assertEquals(decoded.fmt.audioFormat, 3);
   assertEquals(decoded.fmt.numChannels, 2);
   assertEquals(decoded.fmt.sampleRate, 48000);
-  assertEquals(decoded.data.audioData.length, 2002); // bytes() consumes all available bytes
+  assertEquals(decoded.data.audioData.length, 800); // Length-prefixed array matches original length
 });
 
 Deno.test("WAV package - multiple channel configurations", async (t) => {
@@ -113,7 +113,7 @@ Deno.test("WAV package - multiple channel configurations", async (t) => {
 
     const buffer = new Uint8Array(2048);
     const bytesWritten = wavCoder.encode(monoWav, buffer);
-    const [decoded, bytesRead] = wavCoder.decode(buffer);
+    const [decoded, _bytesRead] = wavCoder.decode(buffer);
 
     assertEquals(bytesWritten, 1050); // 12 (RIFF) + 24 (fmt) + 1012 (data with length prefix)
     assertEquals(decoded.fmt.numChannels, 1);
@@ -146,11 +146,11 @@ Deno.test("WAV package - multiple channel configurations", async (t) => {
       },
     };
 
-    const buffer = new Uint8Array(2048);
+    const buffer = new Uint8Array(3000);
     const bytesWritten = wavCoder.encode(stereoWav, buffer);
-    const [decoded, bytesRead] = wavCoder.decode(buffer);
+    const [decoded, _bytesRead] = wavCoder.decode(buffer);
 
-    assertEquals(bytesWritten, 2046); // 12 (RIFF) + 24 (fmt) + 2016 (data)
+    assertEquals(bytesWritten, 2050); // 12 (RIFF) + 24 (fmt) + 2014 (data with length prefix)
     assertEquals(decoded.fmt.numChannels, 2);
     assertEquals(decoded.fmt.bitsPerSample, 16);
   });
@@ -185,7 +185,7 @@ Deno.test("WAV package - different sample rates", async (t) => {
 
     const buffer = new Uint8Array(2048);
     const bytesWritten = wavCoder.encode(wav8k, buffer);
-    const [decoded, bytesRead] = wavCoder.decode(buffer);
+    const [decoded, _bytesRead] = wavCoder.decode(buffer);
 
     assertEquals(bytesWritten, 1050); // 12 (RIFF) + 24 (fmt) + 1012 (data with length prefix)
     assertEquals(decoded.fmt.sampleRate, 8000);
@@ -219,7 +219,7 @@ Deno.test("WAV package - different sample rates", async (t) => {
 
     const buffer = new Uint8Array(2048);
     const bytesWritten = wavCoder.encode(wav44k, buffer);
-    const [decoded, bytesRead] = wavCoder.decode(buffer);
+    const [decoded, _bytesRead] = wavCoder.decode(buffer);
 
     assertEquals(bytesWritten, 1050); // 12 (RIFF) + 24 (fmt) + 1012 (data with length prefix)
     assertEquals(decoded.fmt.sampleRate, 44100);
@@ -253,7 +253,7 @@ Deno.test("WAV package - different sample rates", async (t) => {
 
     const buffer = new Uint8Array(2048);
     const bytesWritten = wavCoder.encode(wav48k, buffer);
-    const [decoded, bytesRead] = wavCoder.decode(buffer);
+    const [decoded, _bytesRead] = wavCoder.decode(buffer);
 
     assertEquals(bytesWritten, 1050); // 12 (RIFF) + 24 (fmt) + 1012 (data with length prefix)
     assertEquals(decoded.fmt.sampleRate, 48000);
@@ -295,7 +295,7 @@ Deno.test("WAV package - round-trip integrity", () => {
 
   const buffer = new Uint8Array(2048);
   const bytesWritten = wavCoder.encode(originalWav, buffer);
-  const [decoded, bytesRead] = wavCoder.decode(buffer);
+  const [decoded, _bytesRead] = wavCoder.decode(buffer);
 
   assertEquals(bytesWritten, 1050); // 12 (RIFF) + 24 (fmt) + 1012 (data with length prefix)
   assertEquals(decoded.riff.chunkId, originalWav.riff.chunkId);
@@ -308,7 +308,7 @@ Deno.test("WAV package - round-trip integrity", () => {
   assertEquals(decoded.fmt.bitsPerSample, originalWav.fmt.bitsPerSample);
   assertEquals(decoded.data.chunkId, originalWav.data.chunkId);
   assertEquals(decoded.data.chunkSize, originalWav.data.chunkSize);
-  assertEquals(decoded.data.audioData.length, 2002); // Length-prefixed array includes length field
+  assertEquals(decoded.data.audioData.length, 1000); // Length-prefixed array matches original length
 
   // Verify audio data integrity
   for (let i = 0; i < Math.min(100, audioData.length); i++) {
@@ -349,12 +349,12 @@ Deno.test("WAV package - optional chunks", async (t) => {
 
     const buffer = new Uint8Array(2048);
     const bytesWritten = wavCoder.encode(basicWav, buffer);
-    const [decoded, bytesRead] = wavCoder.decode(buffer);
+    const [decoded, _bytesRead] = wavCoder.decode(buffer);
 
     assertEquals(bytesWritten, 1050); // 12 (RIFF) + 24 (fmt) + 1012 (data with length prefix)
     assertEquals(decoded.riff.chunkId, "RIFF");
     assertEquals(decoded.fmt.audioFormat, 1);
-    assertEquals(decoded.data.audioData.length, 2002); // bytes() consumes all available bytes
+    assertEquals(decoded.data.audioData.length, 1000); // Length-prefixed array matches original length
   });
 });
 
@@ -415,12 +415,12 @@ Deno.test("WAV package - individual chunk coders", async (t) => {
 
     const buffer = new Uint8Array(2048);
     const bytesWritten = dataCoder.encode(testData, buffer);
-    const [decoded, bytesRead] = dataCoder.decode(buffer);
+    const [decoded, _bytesRead] = dataCoder.decode(buffer);
 
     assertEquals(bytesWritten, 1012); // 4 (chunkId) + 4 (chunkSize) + 4 (length) + 1000 (audioData)
     assertEquals(decoded.chunkId, "data");
     assertEquals(decoded.chunkSize, 1000);
-    assertEquals(decoded.audioData.length, 2002); // Length-prefixed array includes length field
+    assertEquals(decoded.audioData.length, 1000); // Length-prefixed array matches original length
   });
 
   await t.step("fact chunk coder", () => {
@@ -453,7 +453,7 @@ Deno.test("WAV package - individual chunk coders", async (t) => {
 
     const buffer = new Uint8Array(100);
     const bytesWritten = listCoder.encode(testList, buffer);
-    const [decoded, bytesRead] = listCoder.decode(buffer);
+    const [decoded, _bytesRead] = listCoder.decode(buffer);
 
     assertEquals(bytesWritten, 28); // 4 (chunkId) + 4 (chunkSize) + 4 (listType) + 4 (length) + 12 (data)
     assertEquals(decoded.chunkId, "LIST");
