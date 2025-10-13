@@ -1,3 +1,73 @@
+### 2025.10.13
+
+#### @binstruct/ethernet 0.1.1 (minor)
+
+- feat(binstruct,@binstruct/ethernet): update binstruct module exports and add
+  new dependency
+- fix(*): bump all versions
+- fix(*): add missing newline at end of deno.json file
+
+#### @binstruct/png 0.1.1 (minor)
+
+- feat(binstruct,@binstruct/png): enhance binstruct module exports and improve
+  PNG import structure
+- feat(@binstruct/png): add binstruct-png module for PNG encoding/decoding
+- fix(*): bump all versions
+- fix(*): add missing newline at end of deno.json file
+
+#### @binstruct/wav 0.1.1 (minor)
+
+- feat(@binstruct/wav): add new binstruct-wav
+- fix(*): bump all versions
+- fix(@binstruct/wav): update WAV encoding/decoding tests for accuracy
+- fix(*): add missing newline at end of deno.json file
+
+#### @hertzg/binstruct 0.2.0 (minor)
+
+- feat(binstruct,@binstruct/png): enhance binstruct module exports and improve
+  PNG import structure
+- feat(binstruct,@binstruct/ethernet): update binstruct module exports and add
+  new dependency
+- feat(binstruct): add documentation for kIsRefValue symbol identifier
+- feat(binstruct): enhance documentation with detailed comments for coders,
+  contexts, and numeric types
+- fix(binstruct): update import paths for refSetValue and Endianness
+- fix(binstruct): bump version
+- refactor(binstruct): consolidate numeric exports and remove example code from
+  Endianness documentation
+- refactor(binstruct): streamline numeric type definitions and enhance
+  documentation for endianness handling
+- refactor(binstruct): reorganize and clean up symbol definitions for numeric
+  types
+- chore(binstruct): add docs for ref exports
+- chore(binstruct): update @hertzg/binstruct version to 0.1.8
+- chore(binstruct): document changes for version 0.1.8 in Releases.md
+- chore(binstruct): update version to 0.1.8 in deno.json
+
+#### @hertzg/bx 3.0.2 (patch)
+
+- fix(bx): fake fix
+
+#### @hertzg/mymagti-api 0.1.0 (minor)
+
+- feat(mymagti-api): add comprehensive documentation for OAuth types and
+  functions
+
+#### @hertzg/wg-conf 0.2.0 (minor)
+
+- feat(wg-conf): enhance WireGuard configuration interfaces with detailed
+  documentation
+
+#### @hertzg/wg-ini 0.2.0 (minor)
+
+- feat(wg-ini): enhance INI line and section handling with detailed
+  documentation for streams and options
+
+#### @hertzg/wg-keys 1.0.1 (patch)
+
+- fix(*): bump all versions
+- fix(*): add missing newline at end of deno.json file
+
 ### 2025.08.22
 
 #### @hertzg/binstruct 0.1.8 (patch)

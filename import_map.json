@@ -12,7 +12,7 @@
     "@hertzg/binstruct": "jsr:@hertzg/binstruct@^0.2.0",
     "@hertzg/bx": "jsr:@hertzg/bx@^3.0.2",
     "@hertzg/mymagti-api": "jsr:@hertzg/mymagti-api@^0.1.0",
-    "@hertzg/wg-keys": "jsr:@hertzg/wg-keys@^1.0.0",
+    "@hertzg/wg-keys": "jsr:@hertzg/wg-keys@^1.0.1",
     "@hertzg/wg-ini": "jsr:@hertzg/wg-ini@^0.2.0",
     "@hertzg/wg-conf": "jsr:@hertzg/wg-conf@^0.2.0",
     "@binstruct/ethernet": "jsr:@binstruct/ethernet@^0.1.0",
