@@ -1,5 +1,12 @@
 ### 2025.10.13
 
+#### @binstruct/cli 0.1.1 (patch)
+
+- feat(@binstruct/cli): improve JSON serialization by modularizing conversion
+  and formatting
+
+### 2025.10.13
+
 #### @hertzg/binstruct 0.2.1 (patch)
 
 - fix(binstruct): force release
