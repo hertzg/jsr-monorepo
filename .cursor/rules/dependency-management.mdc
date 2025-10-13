@@ -8,6 +8,7 @@ alwaysApply: true
 
 - **NEVER** use `deps.ts` for dependency management
 - All dependencies are defined in `import_map.json` at the root
+- `node:` imports are allowed
 - Use bare imports (e.g., `@std/assert`, `@hertzg/binstruct`) throughout the
   monorepo
 - Import from JSR packages using `jsr:` protocol in `import_map.json`
