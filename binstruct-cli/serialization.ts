@@ -39,19 +39,11 @@ import { parse as parseJsonc } from "@std/jsonc";
  * ```
  */
 export function serializeToJson(value: unknown): string {
-  return JSON.stringify(value, (_key, val) => {
-    if (val instanceof Uint8Array) {
-      return {
-        $bytes: Array.from(val),
-      };
-    }
-    if (typeof val === "bigint") {
-      return {
-        $bigint: val.toString(),
-      };
-    }
-    return val;
-  }, 2);
+  // First convert non-native types to serializable format
+  const serializableValue = convertForSerialization(value);
+
+  // Then format with custom byte array formatting
+  return formatJsonWithByteArrays(serializableValue, 0);
 }
 
 /**
@@ -118,4 +110,114 @@ function applyReviver(value: unknown): unknown {
   }
 
   return value;
+}
+
+/**
+ * Converts non-native types to serializable format for JSON serialization.
+ *
+ * @param value The value to convert
+ * @returns Value with non-native types converted to serializable format
+ */
+function convertForSerialization(value: unknown): unknown {
+  if (value instanceof Uint8Array) {
+    return {
+      $bytes: Array.from(value),
+    };
+  }
+
+  if (typeof value === "bigint") {
+    return {
+      $bigint: value.toString(),
+    };
+  }
+
+  if (value && typeof value === "object" && !Array.isArray(value)) {
+    const obj = value as Record<string, unknown>;
+    const result: Record<string, unknown> = {};
+    for (const [key, val] of Object.entries(obj)) {
+      result[key] = convertForSerialization(val);
+    }
+    return result;
+  }
+
+  if (Array.isArray(value)) {
+    return value.map(convertForSerialization);
+  }
+
+  return value;
+}
+
+/**
+ * Formats JSON with special handling for byte arrays to display them as blocks of 32 items per line.
+ *
+ * @param value The value to format
+ * @param indentLevel Current indentation level
+ * @returns Formatted JSON string
+ */
+function formatJsonWithByteArrays(value: unknown, indentLevel: number): string {
+  const indent = "  ".repeat(indentLevel);
+  const nextIndent = "  ".repeat(indentLevel + 1);
+
+  if (value === null) {
+    return "null";
+  }
+
+  if (typeof value === "string") {
+    return JSON.stringify(value);
+  }
+
+  if (typeof value === "number" || typeof value === "boolean") {
+    return String(value);
+  }
+
+  if (Array.isArray(value)) {
+    if (value.length === 0) {
+      return "[]";
+    }
+
+    // Check if this is a byte array (all numbers 0-255)
+    const isByteArray = value.every((item) =>
+      typeof item === "number" && item >= 0 && item <= 255
+    );
+
+    if (isByteArray) {
+      // Format as blocks of 16 items per line with column alignment
+      const lines: string[] = [];
+      for (let i = 0; i < value.length; i += 16) {
+        const chunk = value.slice(i, i + 16);
+        // Pad each number to 3 characters for alignment
+        const chunkStr = chunk.map((num) => num.toString().padStart(3)).join(
+          ", ",
+        );
+        lines.push(`${nextIndent}${chunkStr}`);
+      }
+
+      return `[\n${lines.join(",\n")}\n${indent}]`;
+    } else {
+      // Regular array formatting
+      const items = value.map((item) =>
+        `${nextIndent}${formatJsonWithByteArrays(item, indentLevel + 1)}`
+      );
+      return `[\n${items.join(",\n")}\n${indent}]`;
+    }
+  }
+
+  if (value && typeof value === "object") {
+    const obj = value as Record<string, unknown>;
+    const entries = Object.entries(obj);
+
+    if (entries.length === 0) {
+      return "{}";
+    }
+
+    const items = entries.map(([key, val]) => {
+      const keyStr = JSON.stringify(key);
+      const valStr = formatJsonWithByteArrays(val, indentLevel + 1);
+      return `${nextIndent}${keyStr}: ${valStr}`;
+    });
+
+    return `{\n${items.join(",\n")}\n${indent}}`;
+  }
+
+  return String(value);
 }
