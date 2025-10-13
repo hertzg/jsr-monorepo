@@ -86,7 +86,7 @@
  * const [decoded, bytesRead] = floatWavCoder.decode(buffer);
  *
  * assertEquals(bytesRead, bytesWritten);
- * assertEquals(bytesWritten, 846); // 12 (RIFF) + 24 (fmt) + 12 (fact) + 808 (data)
+ * assertEquals(bytesWritten, 850); // 12 (RIFF) + 24 (fmt) + 12 (fact) + 812 (data with length prefix)
  * assertEquals(decoded.fmt.audioFormat, 3);
  * assertEquals(decoded.fmt.numChannels, 2);
  * assertEquals(decoded.data.audioData.length, 800);
@@ -96,7 +96,7 @@
  */
 
 import { array, string, struct, u16le, u32le, u8le } from "@hertzg/binstruct";
-import type { Coder, LengthOrRef } from "@hertzg/binstruct";
+import type { Coder } from "@hertzg/binstruct";
 
 /**
  * Represents a RIFF chunk structure.
@@ -263,8 +263,8 @@ export function riffChunk(): Coder<RiffChunk> {
  * const bytesWritten = fmtCoder.encode(testFmt, buffer);
  * const [decoded, bytesRead] = fmtCoder.decode(buffer);
  *
- * assertEquals(bytesRead, 24);
- * assertEquals(bytesWritten, 24);
+ * assertEquals(bytesRead, 26);
+ * assertEquals(bytesWritten, 26); // 4 (chunkId) + 4 (chunkSize) + 18 (fmt data)
  * assertEquals(decoded.chunkId, "fmt ");
  * assertEquals(decoded.audioFormat, 1);
  * assertEquals(decoded.numChannels, 2);
@@ -313,9 +313,8 @@ export function fmtChunk(): Coder<FmtChunk> {
  * const bytesWritten = dataCoder.encode(testData, buffer);
  * const [decoded, bytesRead] = dataCoder.decode(buffer);
  *
- * assertEquals(bytesRead, 1008);
- * assertEquals(bytesWritten, 1008);
- * assertEquals(bytesWritten, 1008); // 4 (chunkId) + 4 (chunkSize) + 1000 (audioData)
+ * assertEquals(bytesRead, 1012);
+ * assertEquals(bytesWritten, 1012); // 4 (chunkId) + 4 (chunkSize) + 4 (length) + 1000 (audioData)
  * assertEquals(decoded.chunkId, "data");
  * assertEquals(decoded.chunkSize, 1000);
  * assertEquals(decoded.audioData.length, 1000); // Uses chunkSize reference
@@ -399,8 +398,8 @@ export function factChunk(): Coder<FactChunk> {
  * const bytesWritten = listCoder.encode(testList, buffer);
  * const [decoded, bytesRead] = listCoder.decode(buffer);
  *
- * assertEquals(bytesRead, 24);
- * assertEquals(bytesWritten, 24);
+ * assertEquals(bytesRead, 28);
+ * assertEquals(bytesWritten, 28); // 4 (chunkId) + 4 (chunkSize) + 4 (listType) + 4 (length) + 12 (data)
  * assertEquals(decoded.chunkId, "LIST");
  * assertEquals(decoded.chunkSize, 20);
  * assertEquals(decoded.listType, "INFO");
@@ -465,7 +464,7 @@ export function listChunk(): Coder<ListChunk> {
  * const [decoded, bytesRead] = wavCoder.decode(buffer);
  *
  * assertEquals(bytesRead, bytesWritten);
- * assertEquals(bytesWritten, 1046); // 12 (RIFF) + 24 (fmt) + 1008 (data)
+ * assertEquals(bytesWritten, 1050); // 12 (RIFF) + 24 (fmt) + 1012 (data with length prefix)
  * assertEquals(decoded.riff.chunkId, "RIFF");
  * assertEquals(decoded.riff.format, "WAVE");
  * assertEquals(decoded.fmt.audioFormat, 1);
