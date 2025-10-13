@@ -1,5 +1,11 @@
 ### 2025.10.13
 
+#### @hertzg/binstruct 0.2.1 (patch)
+
+- fix(binstruct): force release
+
+### 2025.10.13
+
 #### @binstruct/cli 0.1.0 (minor)
 
 - feat(@binstruct/cli): enhance CLI to support JSONC format and positional
