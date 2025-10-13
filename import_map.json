@@ -16,6 +16,7 @@
     "@hertzg/wg-ini": "jsr:@hertzg/wg-ini@^0.2.0",
     "@hertzg/wg-conf": "jsr:@hertzg/wg-conf@^0.2.0",
     "@binstruct/ethernet": "jsr:@binstruct/ethernet@^0.1.0",
+    "@binstruct/png": "jsr:@binstruct/png@^0.1.0",
     "@binstruct/wav": "jsr:@binstruct/wav@^0.1.0"
   }
 }
