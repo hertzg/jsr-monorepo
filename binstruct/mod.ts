@@ -204,13 +204,13 @@
  * import { u16be, u32be, u8be } from "@hertzg/binstruct/numeric";
  *
  * const macAddr = refine(array(u8be(), 6), {
- *   decode: (arr: number[]) => arr.map(b => b.toString(16).padStart(2, '0').toUpperCase()).join(':'),
- *   encode: (mac: string) => mac.split(':').map(hex => parseInt(hex, 16)),
+ *   refine: (arr: number[]) => arr.map(b => b.toString(16).padStart(2, '0').toUpperCase()).join(':'),
+ *   unrefine: (mac: string) => mac.split(':').map(hex => parseInt(hex, 16)),
  * });
  *
  * const ipAddr = refine(array(u8be(), 4), {
- *   decode: (arr: number[]) => arr.join('.'),
- *   encode: (ip: string) => ip.split('.').map(octet => parseInt(octet, 10)),
+ *   refine: (arr: number[]) => arr.join('.'),
+ *   unrefine: (ip: string) => ip.split('.').map(octet => parseInt(octet, 10)),
  * });
  *
  * // Define Ethernet frame structure (IEEE 802.3)

@@ -9,12 +9,12 @@
  * import { u8, refine } from "@hertzg/binstruct";
  *
  * const bitfield = refine(u8(), {
- *   decode: (decoded: number) =>
- *     decoded.toString(2)
+ *   refine: (unrefined: number) =>
+ *     unrefined.toString(2)
  *       .padStart(8, "0")
  *       .split("")
  *       .map(Number),
- *   encode: (refined) => parseInt(refined.join(""), 2),
+ *   unrefine: (refined) => parseInt(refined.join(""), 2),
  * });
  *
  * const coder = bitfield();
@@ -35,9 +35,9 @@
  * import { u8, refine } from "@hertzg/binstruct";
  *
  * const u8Mapped = refine(u8(), {
- *   decode: (decoded: number, min: number, max: number) =>
- *     (min + (max - min) * decoded / 0xff) >>> 0,
- *   encode: (refined, min, max) => ((refined - min) / (max - min) * 0xff) >>> 0,
+ *   refine: (unrefined: number, min: number, max: number) =>
+ *     (min + (max - min) * unrefined / 0xff) >>> 0,
+ *   unrefine: (refined, min, max) => ((refined - min) / (max - min) * 0xff) >>> 0,
  * });
  *
  * const coder = u8Mapped(-100, 100);
@@ -68,8 +68,8 @@ const kKindRefine = Symbol("refine");
 /**
  * A refiner that transforms decoded values into refined types and vice versa.
  *
- * @template TDecoded - The original decoded type from the base coder
- * @template TRefinedDecoded - The refined type after transformation
+ * @template TUnrefined - The original decoded type from the base coder
+ * @template TRefined - The refined type after transformation
  * @template TArgs - Additional arguments passed to the refiner functions
  *
  * @example
@@ -77,25 +77,25 @@ const kKindRefine = Symbol("refine");
  * import { assertEquals } from "@std/assert";
  *
  * const booleanRefiner: Refiner<number, boolean, []> = {
- *   decode: (decoded: number) => decoded !== 0,
- *   encode: (refined: boolean) => refined ? 1 : 0,
+ *   refine: (unrefined: number) => unrefined !== 0,
+ *   unrefine: (refined: boolean) => refined ? 1 : 0,
  * };
  *
- * assertEquals(booleanRefiner.decode(1), true);
- * assertEquals(booleanRefiner.decode(0), false);
- * assertEquals(booleanRefiner.encode(true), 1);
- * assertEquals(booleanRefiner.encode(false), 0);
+ * assertEquals(booleanRefiner.refine(1), true);
+ * assertEquals(booleanRefiner.refine(0), false);
+ * assertEquals(booleanRefiner.unrefine(true), 1);
+ * assertEquals(booleanRefiner.unrefine(false), 0);
  * ```
  */
-export type Refiner<TDecoded, TRefinedDecoded, TArgs extends unknown[]> = {
+export type Refiner<TUnrefined, TRefined, TArgs extends unknown[]> = {
   /**
    * Transforms a decoded value into a refined value.
    *
-   * @param decoded - The value decoded by the base coder
+   * @param unrefined - The value decoded by the base coder
    * @param args - Additional arguments for the transformation
    * @returns The refined value
    */
-  decode: (decoded: TDecoded, ...args: TArgs) => TRefinedDecoded;
+  refine: (unrefined: TUnrefined, ...args: TArgs) => TRefined;
 
   /**
    * Transforms a refined value back to the original decoded format.
@@ -104,7 +104,7 @@ export type Refiner<TDecoded, TRefinedDecoded, TArgs extends unknown[]> = {
    * @param args - Additional arguments for the transformation
    * @returns The value in the format expected by the base coder
    */
-  encode: (refined: TRefinedDecoded, ...args: TArgs) => TDecoded;
+  unrefine: (refined: TRefined, ...args: TArgs) => TUnrefined;
 };
 
 /**
@@ -114,9 +114,9 @@ export type Refiner<TDecoded, TRefinedDecoded, TArgs extends unknown[]> = {
  * creates refined coders. The returned function accepts arguments that are passed
  * to the refiner's encode and decode methods.
  *
- * @template TDecoded - The original decoded type from the base coder
+ * @template TUnrefined - The original decoded type from the base coder
  * @template TArgs - Additional arguments for the refiner
- * @template TRefinedDecoded - The refined type after transformation
+ * @template TRefined - The refined type after transformation
  *
  * @param coder - The base coder to refine
  * @param refiner - The refiner that defines the transformation logic
@@ -129,8 +129,8 @@ export type Refiner<TDecoded, TRefinedDecoded, TArgs extends unknown[]> = {
  *
  * // Create a refiner for date encoding/decoding
  * const isoDateString = refine(string(), {
- *   decode: (decoded: string) => new Date(decoded),
- *   encode: (refined: Date) => refined.toISOString(),
+ *   refine: (unrefined: string) => new Date(unrefined),
+ *   unrefine: (refined: Date) => refined.toISOString(),
  * });
  *
  * // Create a date coder that works with Unix timestamps
@@ -147,26 +147,26 @@ export type Refiner<TDecoded, TRefinedDecoded, TArgs extends unknown[]> = {
  * ```
  */
 export function refine<
-  TDecoded,
+  TUnrefined,
   const TArgs extends unknown[],
-  TRefinedDecoded,
+  TRefined,
 >(
-  coder: Coder<TDecoded>,
-  refiner: Refiner<TDecoded, TRefinedDecoded, TArgs>,
-): (...args: TArgs) => Coder<TRefinedDecoded> {
+  coder: Coder<TUnrefined>,
+  refiner: Refiner<TUnrefined, TRefined, TArgs>,
+): (...args: TArgs) => Coder<TRefined> {
   return (...args: TArgs) => {
-    let self: Coder<TRefinedDecoded>;
+    let self: Coder<TRefined>;
     return self = {
       [kCoderKind]: kKindRefine,
       encode: (
-        refined: TRefinedDecoded,
+        refined: TRefined,
         buffer: Uint8Array,
         context?: Context,
       ) => {
         const ctx = context ?? createContext("encode");
         refSetValue(ctx, self, refined);
         const bytesWritten = coder.encode(
-          refiner.encode(refined, ...args),
+          refiner.unrefine(refined, ...args),
           buffer,
           ctx,
         );
@@ -175,7 +175,7 @@ export function refine<
       decode: (buffer: Uint8Array, context?: Context) => {
         const ctx = context ?? createContext("decode");
         const [decoded, bytesRead] = coder.decode(buffer, ctx);
-        const refined = refiner.decode(decoded, ...args);
+        const refined = refiner.refine(decoded, ...args);
         refSetValue(ctx, self, refined);
 
         return [refined, bytesRead];
