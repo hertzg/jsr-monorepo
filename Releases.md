@@ -1,3 +1,9 @@
+### 2025.10.16
+
+#### @hertzg/binstruct 0.2.2 (patch)
+
+- feat(binstruct): export decode and encode helpers functions
+
 ### 2025.10.13
 
 #### @binstruct/cli 0.1.1 (patch)
