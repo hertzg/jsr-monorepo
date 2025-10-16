@@ -386,3 +386,4 @@ export { string } from "./string/string.ts";
 export { struct } from "./struct/struct.ts";
 export { bytes } from "./bytes/bytes.ts";
 export { refine, type Refiner } from "./refine/refine.ts";
+export { decode, encode } from "./helpers.ts";
