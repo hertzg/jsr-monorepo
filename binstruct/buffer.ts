@@ -45,6 +45,17 @@
  * - Buffer growth reaching maximum size limits
  * - Non-RangeError exceptions are propagated unchanged
  *
+ * ## Robustness Features
+ *
+ * The implementation includes safeguards against infinite loops and edge cases:
+ *
+ * - **Growth Factor Validation**: Rejects growth factors ≤ 1 to prevent infinite
+ *   loops where buffers never actually grow
+ * - **Minimum Growth Guarantee**: Ensures buffers always grow by at least 1 byte,
+ *   preventing infinite loops when truncation results in no size increase
+ * - **Integer Truncation Safety**: Uses `Math.trunc()` to ensure valid buffer
+ *   sizes while guaranteeing forward progress
+ *
  * @module
  */
 
@@ -94,7 +105,7 @@ export interface AutogrowOptions {
  * @param autogrowOptions Configuration options for buffer growth behavior
  * @returns The result of the successful encoding operation
  * @throws {RangeError} When buffer growth reaches the maximum size limit
- * @throws {Error} When initial size is invalid or growth factor is less than 1
+ * @throws {Error} When initial size is negative or growth factor is less than or equal to 1
  *
  * @example Basic usage with automatic buffer growth
  * ```ts
@@ -178,12 +189,12 @@ export function autoGrowBuffer<T>(
   } = autogrowOptions;
 
   if (initialSize < 0) {
-    throw new Error("Initial size must be greater than 0");
+    throw new Error("Initial size must be non-negative");
   } else if (initialSize > maxByteLength) {
     throw new Error(
       "Initial size must be less than or equal to maximum byte length",
     );
-  } else if (growthFactor < 1) {
+  } else if (growthFactor <= 1) {
     throw new Error("Growth factor must be greater than 1");
   }
 
@@ -207,7 +218,10 @@ export function autoGrowBuffer<T>(
         buffer.buffer.resize(
           Math.min(
             maxByteLength,
-            Math.trunc(buffer.buffer.byteLength * growthFactor),
+            Math.max(
+              Math.trunc(buffer.buffer.byteLength * growthFactor),
+              buffer.buffer.byteLength + 1,
+            ),
           ),
         );
         continue;
