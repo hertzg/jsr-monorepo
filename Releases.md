@@ -1,3 +1,10 @@
+### 2025.10.17
+
+#### @hertzg/binstruct 1.0.0 (major)
+
+- feat(binstruct): add autoGrowBuffer for dynamic buffer management
+- chore(binstruct): bump version to 1.0.0
+
 ### 2025.10.16
 
 #### @hertzg/binstruct 0.2.2 (patch)
