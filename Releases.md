@@ -1,5 +1,11 @@
 ### 2025.10.17
 
+#### @hertzg/binstruct 1.0.1 (patch)
+
+- fix(binstruct): enhance autoGrowBuffer tests for edge cases and validation
+
+### 2025.10.17
+
 #### @hertzg/binstruct 1.0.0 (major)
 
 - feat(binstruct): add autoGrowBuffer for dynamic buffer management
