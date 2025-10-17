@@ -3,13 +3,15 @@
   "version": "0.2.2",
   "exports": {
     ".": "./mod.ts",
+    "./buffer": "./buffer/buffer.ts",
     "./numeric": "./numeric/numeric.ts",
     "./array": "./array/array.ts",
     "./struct": "./struct/struct.ts",
     "./string": "./string/string.ts",
     "./bytes": "./bytes/bytes.ts",
     "./refine": "./refine/refine.ts",
-    "./ref": "./ref/ref.ts"
+    "./ref": "./ref/ref.ts",
+    "./helpers": "./helpers.ts"
   },
   "types": "./mod.ts"
 }

@@ -45,6 +45,13 @@
  * ### Raw Data
  * - {@link bytes}: Handle raw byte slices with length control
  *
+ * ### Buffer Management
+ * - {@link autoGrowBuffer}: Automatically grow buffers during encoding operations
+ *
+ * ### Helper Functions
+ * - {@link encode}: Simplified encoding with automatic buffer allocation
+ * - {@link decode}: Simplified decoding that returns only the decoded value
+ *
  * ### Numeric Coders
  *
  * **Unsigned Integers:**
@@ -387,3 +394,4 @@ export { struct } from "./struct/struct.ts";
 export { bytes } from "./bytes/bytes.ts";
 export { refine, type Refiner } from "./refine/refine.ts";
 export { decode, encode } from "./helpers.ts";
+export { autoGrowBuffer, type AutogrowOptions } from "./buffer.ts";

@@ -7,7 +7,8 @@
  *
  * The helper functions automatically manage buffer allocation using resizable
  * ArrayBuffers with exponential growth strategies, following best practices
- * for efficient memory usage and performance.
+ * for efficient memory usage and performance. Buffers start at 4KB and grow
+ * by 2x when needed, up to a maximum of 400MB by default.
  *
  * @example Basic encoding and decoding
  * ```ts
@@ -91,6 +92,7 @@
  * @module
  */
 
+import { autoGrowBuffer, type AutogrowOptions } from "./buffer.ts";
 import { type Coder, type Context, createContext } from "./core.ts";
 
 /**
@@ -98,7 +100,7 @@ import { type Coder, type Context, createContext } from "./core.ts";
  *
  * When no target buffer is provided, this function automatically allocates
  * a resizable buffer using exponential growth strategy. The buffer starts
- * at 4KB and grows by 1.5x when needed, up to a maximum of 1GB. This approach
+ * at 4KB and grows by 2x when needed, up to a maximum of 400MB. This approach
  * minimizes memory waste while ensuring efficient encoding.
  *
  * @template T - The type of data to encode
@@ -106,6 +108,7 @@ import { type Coder, type Context, createContext } from "./core.ts";
  * @param data - The data to encode
  * @param context - Optional context for encoding (defaults to encode context)
  * @param target - Optional target buffer to encode into
+ * @param autogrowOptions - Optional configuration for buffer growth behavior
  * @returns A Uint8Array containing the encoded data
  *
  * @example Auto-allocation for small data
@@ -148,12 +151,33 @@ import { type Coder, type Context, createContext } from "./core.ts";
  * const encoded = encode(coder, data);
  * assertEquals(encoded.length, 10002); // 2 bytes length + 10000 bytes data
  * ```
+ *
+ * @example Custom buffer growth configuration
+ * ```ts
+ * import { assertEquals } from "@std/assert";
+ * import { encode, struct, array, u8le, u16le } from "@hertzg/binstruct";
+ *
+ * const coder = struct({
+ *   data: array(u8le(), u16le())
+ * });
+ * const largeArray = new Array(50000).fill(42);
+ * const data = { data: largeArray };
+ *
+ * // Use custom buffer growth settings
+ * const encoded = encode(coder, data, undefined, undefined, {
+ *   initialSize: 8192,    // Start with 8KB
+ *   maxByteLength: 1024 * 1024 * 200, // Max 200MB
+ *   growthFactor: 1.5,    // Grow by 1.5x each time
+ * });
+ * assertEquals(encoded.length, 50002); // 2 bytes length + 50000 bytes data
+ * ```
  */
 export function encode<T>(
   coder: Coder<T>,
   data: T,
   context?: Context,
   target?: Uint8Array,
+  autogrowOptions: AutogrowOptions = {},
 ): Uint8Array {
   const ctx = context ?? createContext("encode");
 
@@ -162,27 +186,12 @@ export function encode<T>(
     return target.subarray(0, bytesWritten);
   }
 
-  const buffer = new Uint8Array(
-    new ArrayBuffer(4096, { // Start with 4KB
-      maxByteLength: 1024 * 1024 * 1024, // 1GB max
-    }),
-  );
+  const buffer = autoGrowBuffer((buffer) => {
+    const bytesWritten = coder.encode(data, buffer, ctx);
+    return buffer.subarray(0, bytesWritten);
+  }, autogrowOptions);
 
-  while (true) {
-    try {
-      const bytesWritten = coder.encode(data, buffer, ctx);
-      return buffer.subarray(
-        0,
-        bytesWritten,
-      );
-    } catch (e) {
-      if (e instanceof RangeError && buffer.buffer.resizable) {
-        buffer.buffer.resize(buffer.byteLength * 1.5);
-        continue;
-      }
-      throw e;
-    }
-  }
+  return buffer;
 }
 
 /**
