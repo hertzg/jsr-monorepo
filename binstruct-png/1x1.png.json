@@ -1,0 +1,38 @@
+{
+  "signature": {
+    "$bytes": [
+      137,  80,  78,  71,  13,  10,  26,  10
+    ]
+  },
+  "chunks": [
+    {
+      "length": 13,
+      "type": "IHDR",
+      "data": {
+        "width": 1,
+        "height": 1,
+        "bitDepth": 8,
+        "colorType": 2,
+        "compressionMethod": 0,
+        "filterMethod": 0,
+        "interlaceMethod": 0
+      },
+      "crc": 2423739358
+    },
+    {
+      "length": 15,
+      "type": "IDAT",
+      "data": {
+        "$bytes": [
+          120,   1,   1,   4,   0, 251, 255,   0,  60, 239,  61,   2, 211,   1, 105
+        ]
+      },
+      "crc": 3432311347
+    },
+    {
+      "length": 0,
+      "type": "IEND",
+      "crc": 2923585666
+    }
+  ]
+}
