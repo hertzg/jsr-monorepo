@@ -42,11 +42,28 @@ import {
   arrayWhile,
   bytes,
   type Coder,
+  type Context,
+  createContext,
+  decode,
+  encode,
   ref,
+  refine,
+  Refiner,
+  string,
   struct,
   u32be,
 } from "@hertzg/binstruct";
 import { crc32 } from "node:zlib";
+import {
+  IhdrChunk,
+  ihdrChunk,
+  IhdrChunkData,
+  ihdrChunkRefiner,
+} from "./chunks/ihdr.ts";
+import { IdatChunk, idatChunkRefiner } from "./chunks/idat.ts";
+import { IendChunk, iendChunkRefiner } from "./chunks/iend.ts";
+import { PlteChunk, plteChunkRefiner } from "./chunks/plte.ts";
+import { type } from "node:os";
 
 /**
  * PNG file structure containing signature and chunks.
@@ -74,11 +91,11 @@ import { crc32 } from "node:zlib";
  * assertEquals(pngFile.chunks.length, 1);
  * ```
  */
-export interface PngFile {
+export interface PngFile<TChunk> {
   /** The 8-byte PNG signature: [137, 80, 78, 71, 13, 10, 26, 10] */
   signature: Uint8Array;
   /** Array of PNG chunks in the file */
-  chunks: PngChunk[];
+  chunks: TChunk[];
 }
 
 /**
@@ -103,86 +120,18 @@ export interface PngFile {
  * assertEquals(chunk.type.length, 4);
  * ```
  */
-export interface PngChunk {
+export interface PngChunkUnknown {
   /** Length of the data field in bytes (4-byte big-endian) */
   length: number;
-  /** 4-byte chunk type identifier (e.g., "IHDR", "IDAT", "IEND") */
+  /** Type (4 bytes) */
   type: Uint8Array;
-  /** Variable-length chunk data */
+  /** Data (variable length) */
   data: Uint8Array;
-  /** 4-byte CRC checksum (big-endian) */
+  /** CRC (4 bytes) */
   crc: number;
 }
 
-/**
- * Creates a coder for PNG files.
- *
- * @returns A coder that encodes/decodes PNG files
- *
- * @example
- * ```ts
- * import { assertEquals } from "@std/assert";
- * import { pngFile } from "@binstruct/png";
- *
- * const pngCoder = pngFile();
- * const testPng: PngFile = {
- *   signature: new Uint8Array([137, 80, 78, 71, 13, 10, 26, 10]),
- *   chunks: [
- *     {
- *       length: 13,
- *       type: new Uint8Array([73, 72, 68, 82]), // "IHDR"
- *       data: new Uint8Array([0, 0, 0, 1, 0, 0, 0, 1, 8, 2, 0, 0, 0]),
- *       crc: 0x12345678,
- *     },
- *   ],
- * };
- *
- * const buffer = new Uint8Array(100);
- * const bytesWritten = pngCoder.encode(testPng, buffer);
- * const [decodedPng, bytesRead] = pngCoder.decode(buffer);
- *
- * assertEquals(bytesRead, 93);
- * assertEquals(decodedPng.signature, testPng.signature);
- * assertEquals(decodedPng.chunks.length, 6);
- * ```
- */
-export function pngFile(): Coder<PngFile> {
-  return struct({
-    signature: bytes(8),
-    chunks: arrayWhile(pngChunk(), ({ buffer }) => buffer.length >= 12),
-  });
-}
-
-/**
- * Creates a coder for PNG chunks.
- *
- * @returns A coder that encodes/decodes PNG chunks
- *
- * @example
- * ```ts
- * import { assertEquals } from "@std/assert";
- * import { pngChunk } from "@binstruct/png";
- *
- * const chunkCoder = pngChunk();
- * const testChunk: PngChunk = {
- *   length: 13,
- *   type: new Uint8Array([73, 72, 68, 82]), // "IHDR"
- *   data: new Uint8Array([0, 0, 0, 1, 0, 0, 0, 1, 8, 2, 0, 0, 0]),
- *   crc: 0x12345678,
- * };
- *
- * const buffer = new Uint8Array(32);
- * const bytesWritten = chunkCoder.encode(testChunk, buffer);
- * const [decodedChunk, bytesRead] = chunkCoder.decode(buffer);
- *
- * assertEquals(bytesRead, bytesWritten);
- * assertEquals(decodedChunk.length, testChunk.length);
- * assertEquals(decodedChunk.type, testChunk.type);
- * assertEquals(decodedChunk.data, testChunk.data);
- * assertEquals(decodedChunk.crc, testChunk.crc);
- * ```
- */
-export function pngChunk(): Coder<PngChunk> {
+export function pngChunkUnknown(): Coder<PngChunkUnknown> {
   const lengthCoder = u32be();
   return struct({
     length: lengthCoder,
@@ -190,6 +139,63 @@ export function pngChunk(): Coder<PngChunk> {
     data: bytes(ref(lengthCoder)),
     crc: u32be(),
   });
+}
+
+export function pngFileChunks<TChunk>(
+  chunkCoder: Coder<TChunk>,
+): Coder<PngFile<TChunk>> {
+  return struct({
+    signature: bytes(8),
+    chunks: arrayWhile(chunkCoder, ({ buffer }) => buffer.length >= 12),
+  });
+}
+
+export function pngChunkRefined(): Coder<
+  PngChunkUnknown | IhdrChunk | PlteChunk | IdatChunk | IendChunk
+> {
+  const typeCoder = string(4);
+  const refiners = Object.freeze({
+    IHDR: ihdrChunkRefiner(),
+    PLTE: plteChunkRefiner(),
+    IDAT: idatChunkRefiner(),
+    IEND: iendChunkRefiner(),
+  });
+
+  const getRefiner = (type: unknown) => {
+    if (type as string in refiners) {
+      return refiners[type as keyof typeof refiners];
+    }
+    return undefined;
+  };
+
+  return refine(pngChunkUnknown(), {
+    refine: (
+      unrefined: PngChunkUnknown,
+      buffer,
+      context,
+    ): PngChunkUnknown | IhdrChunk | PlteChunk | IdatChunk | IendChunk => {
+      const type = decode(typeCoder, unrefined.type);
+
+      const refiner = getRefiner(type);
+      if (refiner) {
+        return refiner.refine(unrefined, buffer, context);
+      }
+
+      return unrefined;
+    },
+    unrefine: (refined, buffer, context): PngChunkUnknown => {
+      const refiner = getRefiner(refined.type);
+      if (refiner) {
+        return refiner.unrefine(refined as any, buffer, context);
+      }
+
+      return refined as PngChunkUnknown;
+    },
+  })();
+}
+
+export function pngFile() {
+  return pngFileChunks(pngChunkRefined());
 }
 
 /**
