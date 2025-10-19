@@ -260,7 +260,7 @@ export function encode<T>(
 export function decode<T>(
   coder: Coder<T>,
   buffer: Uint8Array,
-  context?: Context,
+  context?: Context | undefined,
 ): T {
   const ctx = context ?? createContext("decode");
   const [value] = coder.decode(buffer, ctx);
