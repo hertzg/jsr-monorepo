@@ -33,11 +33,12 @@
  * ```typescript
  * import { assertEquals } from "@std/assert";
  * import { u8, refine } from "@hertzg/binstruct";
+ * import type { Context } from "@hertzg/binstruct";
  *
  * const u8Mapped = refine(u8(), {
- *   refine: (unrefined: number, min: number, max: number) =>
- *     (min + (max - min) * unrefined / 0xff) >>> 0,
- *   unrefine: (refined, min, max) => ((refined - min) / (max - min) * 0xff) >>> 0,
+ *   refine: (unrefined: number, _buffer: Uint8Array, _context?: Context, min?: number, max?: number) =>
+ *     (min! + (max! - min!) * unrefined / 0xff) >>> 0,
+ *   unrefine: (refined: number, _buffer: Uint8Array, _context?: Context, min?: number, max?: number) => ((refined - min!) / (max! - min!) * 0xff) >>> 0,
  * });
  *
  * const coder = u8Mapped(-100, 100);
@@ -75,16 +76,17 @@ const kKindRefine = Symbol("refine");
  * @example
  * ```typescript
  * import { assertEquals } from "@std/assert";
+ * import type { Context } from "@hertzg/binstruct";
  *
  * const booleanRefiner: Refiner<number, boolean, []> = {
- *   refine: (unrefined: number) => unrefined !== 0,
- *   unrefine: (refined: boolean) => refined ? 1 : 0,
+ *   refine: (unrefined: number, _buffer: Uint8Array, _context?: Context) => unrefined !== 0,
+ *   unrefine: (refined: boolean, _buffer: Uint8Array, _context?: Context) => refined ? 1 : 0,
  * };
  *
- * assertEquals(booleanRefiner.refine(1), true);
- * assertEquals(booleanRefiner.refine(0), false);
- * assertEquals(booleanRefiner.unrefine(true), 1);
- * assertEquals(booleanRefiner.unrefine(false), 0);
+ * assertEquals(booleanRefiner.refine(1, new Uint8Array(1)), true);
+ * assertEquals(booleanRefiner.refine(0, new Uint8Array(1)), false);
+ * assertEquals(booleanRefiner.unrefine(true, new Uint8Array(1)), 1);
+ * assertEquals(booleanRefiner.unrefine(false, new Uint8Array(1)), 0);
  * ```
  */
 export type Refiner<TUnrefined, TRefined, TArgs extends unknown[]> = {

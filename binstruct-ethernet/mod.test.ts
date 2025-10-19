@@ -259,7 +259,7 @@ Deno.test("Ethernet frame integration", async (t) => {
     const refinedEthernet2Frame = refine(
       ethernet2Frame(),
       {
-        decode: (decoded: Ethernet2Frame): RefinedEthernet2Frame => {
+        refine: (decoded: Ethernet2Frame): RefinedEthernet2Frame => {
           return {
             dstMac: stringifyMacAddress(decoded.dstMac),
             srcMac: stringifyMacAddress(decoded.srcMac),
@@ -267,7 +267,7 @@ Deno.test("Ethernet frame integration", async (t) => {
             payload: decoded.payload,
           };
         },
-        encode: (refined: RefinedEthernet2Frame) => {
+        unrefine: (refined: RefinedEthernet2Frame) => {
           return {
             dstMac: parseMacAddress(refined.dstMac),
             srcMac: parseMacAddress(refined.srcMac),
@@ -291,9 +291,15 @@ Deno.test("Ethernet frame integration", async (t) => {
     const [decodedFrame, bytesRead] = refinedFrameCoder.decode(buffer);
 
     assertBytesReadAndWritten(bytesWritten, bytesRead, buffer, frame.payload);
-    assertEquals(decodedFrame.dstMac, frame.dstMac);
-    assertEquals(decodedFrame.srcMac, frame.srcMac);
-    assertEquals(decodedFrame.etherType, frame.etherType);
-    assertPayloadEquals(decodedFrame.payload, frame.payload);
+    assertEquals((decodedFrame as RefinedEthernet2Frame).dstMac, frame.dstMac);
+    assertEquals((decodedFrame as RefinedEthernet2Frame).srcMac, frame.srcMac);
+    assertEquals(
+      (decodedFrame as RefinedEthernet2Frame).etherType,
+      frame.etherType,
+    );
+    assertPayloadEquals(
+      (decodedFrame as RefinedEthernet2Frame).payload,
+      frame.payload,
+    );
   });
 });

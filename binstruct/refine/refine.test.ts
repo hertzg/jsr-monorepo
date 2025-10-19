@@ -27,7 +27,7 @@ Deno.test("refine - bitfield", () => {
 Deno.test("refine with args", () => {
   const u8Mapped = refine(u8(), {
     refine: (
-      decoded: number,
+      decoded,
       _buffer,
       _context,
       min: number,
