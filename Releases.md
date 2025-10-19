@@ -1,3 +1,14 @@
+### 2025.10.19
+
+#### @hertzg/binstruct 2.0.0 (major)
+
+- fix(binstruct)!: update refine and unrefine methods to include context and
+  buffer parameters in tests
+- fix(binstruct)!: update refine and unrefine methods to include buffer and
+  context parameters
+- fix(binstruct): clarify context parameter type in decode function
+- fix(binstruct)!: rename refiner methods for clarity
+
 ### 2025.10.17
 
 #### @hertzg/binstruct 1.0.1 (patch)
