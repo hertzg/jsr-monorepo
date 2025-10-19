@@ -95,7 +95,12 @@ export type Refiner<TUnrefined, TRefined, TArgs extends unknown[]> = {
    * @param args - Additional arguments for the transformation
    * @returns The refined value
    */
-  refine: (unrefined: TUnrefined, ...args: TArgs) => TRefined;
+  refine: (
+    unrefined: TUnrefined,
+    buffer: Uint8Array,
+    context?: Context,
+    ...args: TArgs
+  ) => TRefined;
 
   /**
    * Transforms a refined value back to the original decoded format.
@@ -104,7 +109,12 @@ export type Refiner<TUnrefined, TRefined, TArgs extends unknown[]> = {
    * @param args - Additional arguments for the transformation
    * @returns The value in the format expected by the base coder
    */
-  unrefine: (refined: TRefined, ...args: TArgs) => TUnrefined;
+  unrefine: (
+    refined: TRefined,
+    buffer: Uint8Array,
+    context?: Context,
+    ...args: TArgs
+  ) => TUnrefined;
 };
 
 /**
@@ -166,7 +176,7 @@ export function refine<
         const ctx = context ?? createContext("encode");
         refSetValue(ctx, self, refined);
         const bytesWritten = coder.encode(
-          refiner.unrefine(refined, ...args),
+          refiner.unrefine(refined, buffer, ctx, ...args),
           buffer,
           ctx,
         );
@@ -175,7 +185,7 @@ export function refine<
       decode: (buffer: Uint8Array, context?: Context) => {
         const ctx = context ?? createContext("decode");
         const [decoded, bytesRead] = coder.decode(buffer, ctx);
-        const refined = refiner.refine(decoded, ...args);
+        const refined = refiner.refine(decoded, buffer, ctx, ...args);
         refSetValue(ctx, self, refined);
 
         return [refined, bytesRead];

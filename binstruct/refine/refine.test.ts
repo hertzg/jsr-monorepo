@@ -26,10 +26,20 @@ Deno.test("refine - bitfield", () => {
 
 Deno.test("refine with args", () => {
   const u8Mapped = refine(u8(), {
-    refine: (decoded: number, min: number, max: number) =>
-      (min + (max - min) * decoded / 0xff) >>> 0,
-    unrefine: (refined, min, max) =>
-      ((refined - min) / (max - min) * 0xff) >>> 0,
+    refine: (
+      decoded: number,
+      _buffer,
+      _context,
+      min: number,
+      max: number,
+    ): number => (min + (max - min) * decoded / 0xff) >>> 0,
+    unrefine: (
+      refined,
+      _buffer,
+      _context,
+      min: number,
+      max: number,
+    ): number => ((refined - min) / (max - min) * 0xff) >>> 0,
   });
 
   const coder = u8Mapped(-100, 100);
