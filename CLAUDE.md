@@ -86,6 +86,13 @@ The `@hertzg/binstruct` package is built around three fundamental concepts:
    - `computedRef()` creates computed references from multiple values
    - References stored in context via WeakMap for memory efficiency
 
+4. **Single-Pass Processing**: All encoding/decoding operations work in a single forward pass
+   - Fields are processed in declaration order (top to bottom)
+   - References can only access **earlier** fields (forward-only references)
+   - No backward references - fields cannot depend on values that come later
+   - Structure field order matters - organize fields in dependency order
+   - Enables optimal performance without multiple buffer passes or lookahead
+
 ### Refiner Pattern
 
 The `refine()` function transforms decoded values into refined types:
@@ -277,5 +284,36 @@ const lengthCoder = u32le();
 const data = struct({
   length: lengthCoder,
   payload: bytes(ref(lengthCoder)), // payload size from length field
+});
+```
+
+### Forward-Only References
+
+Due to single-pass processing, fields can only reference earlier fields:
+
+```typescript
+// ✅ Correct - length comes before data
+const length = u32le()
+const data = struct({
+  length,      // Decoded first
+  payload: bytes(ref(length)), // Can reference earlier field
+});
+
+// ❌ Incorrect - cannot reference later fields
+const length = u32le()
+const invalid = struct({
+  payload: bytes(ref(length)), // Error: length not in context yet
+  length,              // Decoded after payload
+});
+
+// ✅ Workaround - compute lengths during encode, structure fields in order
+const dataLength = u32le()
+const fileWithPadding = struct({
+  dataLength,          // Store computed length first
+  data: bytes(ref(dataLength)), // Then the data
+  padding: bytes(computedRef(   // Then padding based on earlier fields
+    [ref(dataLength)],
+    (len) => (4 - (len % 4)) % 4 // Align to 4-byte boundary
+  )),
 });
 ```

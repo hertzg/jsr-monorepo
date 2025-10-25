@@ -89,7 +89,7 @@ const kKindRefine = Symbol("refine");
  * assertEquals(booleanRefiner.unrefine(false, new Uint8Array(1)), 0);
  * ```
  */
-export type Refiner<TUnrefined, TRefined, TArgs extends unknown[]> = {
+export type Refiner<TUnrefined, TRefined, TArgs extends never[] = []> = {
   /**
    * Transforms a decoded value into a refined value.
    *
@@ -99,8 +99,7 @@ export type Refiner<TUnrefined, TRefined, TArgs extends unknown[]> = {
    */
   refine: (
     unrefined: TUnrefined,
-    buffer: Uint8Array,
-    context?: Context,
+    context: Context,
     ...args: TArgs
   ) => TRefined;
 
@@ -113,8 +112,7 @@ export type Refiner<TUnrefined, TRefined, TArgs extends unknown[]> = {
    */
   unrefine: (
     refined: TRefined,
-    buffer: Uint8Array,
-    context?: Context,
+    context: Context,
     ...args: TArgs
   ) => TUnrefined;
 };
@@ -160,8 +158,8 @@ export type Refiner<TUnrefined, TRefined, TArgs extends unknown[]> = {
  */
 export function refine<
   TUnrefined,
-  const TArgs extends unknown[],
   TRefined,
+  const TArgs extends never[] = [],
 >(
   coder: Coder<TUnrefined>,
   refiner: Refiner<TUnrefined, TRefined, TArgs>,
@@ -178,7 +176,7 @@ export function refine<
         const ctx = context ?? createContext("encode");
         refSetValue(ctx, self, refined);
         const bytesWritten = coder.encode(
-          refiner.unrefine(refined, buffer, ctx, ...args),
+          refiner.unrefine(refined, ctx, ...args),
           buffer,
           ctx,
         );
@@ -187,7 +185,7 @@ export function refine<
       decode: (buffer: Uint8Array, context?: Context) => {
         const ctx = context ?? createContext("decode");
         const [decoded, bytesRead] = coder.decode(buffer, ctx);
-        const refined = refiner.refine(decoded, buffer, ctx, ...args);
+        const refined = refiner.refine(decoded, ctx, ...args);
         refSetValue(ctx, self, refined);
 
         return [refined, bytesRead];
