@@ -24,13 +24,14 @@
  * - **References**: Self-referential and circular data structures
  * - **Bytes**: Raw byte slices with fixed or variable length
  *
- * ## Main Functions
+* ## Main Functions
  *
  * ### Structure Creation
  * - {@link struct}: Create coders for structured data (objects)
  *
  * ### Array Handling
  * - {@link array}: Universal array coder with automatic type selection
+ * - {@link arrayWhile}: Create arrays with custom termination conditions
  *
  * ### String Handling
  * - {@link string}: Universal string coder with automatic type selection
@@ -38,9 +39,11 @@
  * ### Reference System
  * - {@link ref}: Create reference values for context-aware encoding/decoding
  * - {@link computedRef}: Create computed references from multiple values
+ * - {@link isRef}: Type guard to check if a value is a reference
  *
  * ### Data Refinement
  * - {@link refine}: Transform decoded values into refined types and vice versa
+ * - {@link refineSwitch}: Conditionally apply refiners based on selector functions
  *
  * ### Raw Data
  * - {@link bytes}: Handle raw byte slices with length control
@@ -51,6 +54,9 @@
  * ### Helper Functions
  * - {@link encode}: Simplified encoding with automatic buffer allocation
  * - {@link decode}: Simplified decoding that returns only the decoded value
+ * - {@link createContext}: Create encoding/decoding contexts
+ * - {@link isCoder}: Type guard to check if a value is a Coder
+ * - {@link isValidLength}: Validate if a length value is valid for binary encoding
  *
  * ### Numeric Coders
  *
