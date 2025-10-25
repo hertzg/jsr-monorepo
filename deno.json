@@ -13,7 +13,8 @@
     ".git",
     "cov",
     "coverage",
-    "docs"
+    "docs",
+    "CLAUDE.md"
   ],
   "workspace": [
     "./binstruct",

@@ -43,10 +43,7 @@ export function plteChunkRefiner(): Refiner<PngChunkUnknown, PlteChunk, []> {
         type: encode(typeCoder, refined.type, context, new Uint8Array(4)),
         data: encode(
           struct({
-            colors: array(
-              rgpTupleCoder,
-              Math.trunc(refined.data.colors.length / 3),
-            ),
+            colors: array(rgpTupleCoder, refined.data.colors.length),
           }),
           refined.data,
           context,
