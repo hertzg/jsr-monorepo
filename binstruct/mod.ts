@@ -59,15 +59,15 @@
  * - {@link isValidLength}: Validate if a length value is valid for binary encoding
  *
  * ### Submodules
- * - {@link module:@hertzg/binstruct/array}: Array coders including {@link arrayWhile}
- * - {@link module:@hertzg/binstruct/buffer}: Buffer helpers like {@link autoGrowBuffer}
- * - {@link module:@hertzg/binstruct/bytes}: Raw byte slice coders via {@link bytes}
- * - {@link module:@hertzg/binstruct/helpers}: High-level {@link encode} / {@link decode}
- * - {@link module:@hertzg/binstruct/numeric}: Numeric coder factories such as {@link u32le}
- * - {@link module:@hertzg/binstruct/ref}: Reference primitives ({@link ref}, {@link computedRef}, {@link isRef})
- * - {@link module:@hertzg/binstruct/refine}: Refinement utilities ({@link refine}, {@link refineSwitch})
- * - {@link module:@hertzg/binstruct/string}: String coder constructors from {@link string}
- * - {@link module:@hertzg/binstruct/struct}: Struct composition helpers from {@link struct}
+ * - [`array`](https://jsr.io/@hertzg/binstruct/doc/array): Array coders including {@link arrayWhile}
+ * - [`buffer`](https://jsr.io/@hertzg/binstruct/doc/buffer): Buffer helpers like {@link autoGrowBuffer}
+ * - [`bytes`](https://jsr.io/@hertzg/binstruct/doc/bytes): Raw byte slice coders via {@link bytes}
+ * - [`helpers`](https://jsr.io/@hertzg/binstruct/doc/helpers): High-level {@link encode} / {@link decode}
+ * - [`numeric`](https://jsr.io/@hertzg/binstruct/doc/numeric): Numeric coder factories such as {@link u32le}
+ * - [`ref`](https://jsr.io/@hertzg/binstruct/doc/ref): Reference primitives ({@link ref}, {@link computedRef}, {@link isRef})
+ * - [`refine`](https://jsr.io/@hertzg/binstruct/doc/refine): Refinement utilities ({@link refine}, {@link refineSwitch})
+ * - [`string`](https://jsr.io/@hertzg/binstruct/doc/string): String coder constructors from {@link string}
+ * - [`struct`](https://jsr.io/@hertzg/binstruct/doc/struct): Struct composition helpers from {@link struct}
  *
  * ### Numeric Coders
  *

@@ -97,7 +97,7 @@ The `@hertzg/binstruct` package is built around three fundamental concepts:
 
 The `refine()` function transforms decoded values into refined types:
 
-```typescript
+```typescript ignore
 // Transforms arrays to/from formatted strings
 const macAddr = refine(array(u8be(), 6), {
   refine: (arr: number[]) => arr.map(b => b.toString(16).padStart(2, '0')).join(':'),
@@ -120,7 +120,7 @@ Used extensively in format-specific packages (PNG, Ethernet) to convert between 
 
 ### Correct Import Patterns
 
-```typescript
+```typescript ignore
 // ✅ Correct - Bare imports from import_map.json
 import { assertEquals } from "@std/assert";
 import { struct } from "@hertzg/binstruct";
@@ -178,7 +178,7 @@ import { assertEquals } from "./deps.ts";
 
 Example structure:
 
-```typescript
+```typescript ignore
 /**
  * Function description
  *
@@ -186,7 +186,7 @@ Example structure:
  * @returns Return value description
  *
  * @example Brief example description
- * ```ts
+ * ```ts ignore
  * import { assertEquals } from "@std/assert";
  * import { func } from "@hertzg/package";
  *
@@ -217,7 +217,7 @@ Example structure:
 
 ### Assertion Patterns
 
-```typescript
+```typescript ignore
 // Data integrity
 assertEquals(decodedValue, originalValue);
 // Note: Only when encode / decode is symmetrical (this is not always the case)
@@ -250,6 +250,41 @@ Both `deno task lint` and `deno task test` must pass before:
 - Committing code changes
 - Considering work production-ready
 
+### Commit Message Rules
+
+- Use Conventional Commits in the form `type(scope): summary`; these messages are consumed by CI.
+- Only `feat`, `fix`, or `chore` types are allowed.
+- A scope is mandatory and must consist solely of package names; use commas to list multiple packages.
+- The `version_bump` GitHub Action parses commit messages to decide which packages to bump and the increment level.
+- Commit messages are used to generate the changelog—write concise, user-facing summaries.
+
+#### Commit Message Examples
+
+- ✅ `feat(@hertzg/binstruct): link submodule docs to jsr pages`
+- ✅ `feat(@binstruct/png): fixed the png idat chunk parsing`
+- ❌ `feat(hertzg/binstruct): link submodule docs to jsr pages`
+- ❌ `feat(binstruct): bla bla`
+- ❌ `feat(@nonexistent/pacakgename): bla bla`
+
+#### Valid Commit Scopes
+
+Commit scopes must match the `name` property in each workspace's `deno.json`. The CI pipeline fails if scopes are wrong, and the only recovery is to rebase and reword commits—avoid this by double-checking scopes before committing. Currently allowed scopes:
+
+It is imperative that scopes are specified correctly or else the whole CI pipeline fails and the only remedy is rebasing and rewording commits, which is both tiresome and error-prone.
+
+- `@hertzg/binstruct`
+- `@binstruct/cli`
+- `@binstruct/ethernet`
+- `@binstruct/png`
+- `@binstruct/wav`
+- `@hertzg/wg-keys`
+- `@hertzg/wg-ini`
+- `@hertzg/wg-conf`
+- `@hertzg/mymagti-api`
+- `@hertzg/bx`
+
+Update this list whenever new workspaces are added or renamed.
+
 ## Common Patterns
 
 ### Binary Data Operations
@@ -263,7 +298,7 @@ Both `deno task lint` and `deno task test` must pass before:
 
 Complex binary formats are built by composing coders:
 
-```typescript
+```typescript ignore
 const header = struct({
   magic: string(4),
   version: u16le(),
@@ -280,7 +315,7 @@ const fileFormat = struct({
 
 Use `ref()` for field-to-field dependencies (e.g., length-prefixed data):
 
-```typescript
+```typescript ignore
 const lengthCoder = u32le();
 const data = struct({
   length: lengthCoder,
@@ -292,7 +327,7 @@ const data = struct({
 
 Due to single-pass processing, fields can only reference earlier fields:
 
-```typescript
+```typescript ignore
 // ✅ Correct - length comes before data
 const length = u32le()
 const data = struct({
