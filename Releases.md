@@ -1,5 +1,11 @@
 ### 2025.10.25
 
+#### @hertzg/binstruct 3.0.2 (patch)
+
+- chore(@hertzg/binstruct): refresh documentation guidance
+
+### 2025.10.25
+
 #### @hertzg/binstruct 3.0.1 (patch)
 
 - fix(binstruct): cross-link exported submodules in module docs\
