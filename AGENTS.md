@@ -1,16 +1,22 @@
 # AGENTS.md
 
-This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
+This file provides guidance to Claude Code (claude.ai/code) when working with
+code in this repository.
 
 ## Project Overview
 
-This is a Deno monorepo published to JSR (jsr.io) containing binary structure encoding/decoding libraries and related utilities. The core package is `@hertzg/binstruct`, which provides type-safe binary data serialization with full TypeScript support. Additional packages implement format-specific decoders (PNG, WAV, Ethernet) and utilities (WireGuard configuration, CLI tools).
+This is a Deno monorepo published to JSR (jsr.io) containing binary structure
+encoding/decoding libraries and related utilities. The core package is
+`@hertzg/binstruct`, which provides type-safe binary data serialization with
+full TypeScript support. Additional packages implement format-specific decoders
+(PNG, WAV, Ethernet) and utilities (WireGuard configuration, CLI tools).
 
 ## Essential Commands
 
 ### Testing and Linting (MANDATORY)
 
-**ALWAYS run these commands from project root before completing ANY coding task:**
+**ALWAYS run these commands from project root before completing ANY coding
+task:**
 
 ```bash
 # Run from project root - MANDATORY final check before completing work
@@ -22,7 +28,8 @@ Both commands must pass with exit code 0 before any task is considered complete.
 
 ### Development Commands (Workspace Level)
 
-For faster feedback during active development, run in individual workspace directories:
+For faster feedback during active development, run in individual workspace
+directories:
 
 ```bash
 # Quick feedback loop during development
@@ -47,8 +54,10 @@ deno task bump
 
 ### Workspace Organization
 
-- **Root**: Contains shared `import_map.json` and workspace configuration in `deno.json`
-- **Packages**: Each workspace has its own `deno.json` with name, version, and exports
+- **Root**: Contains shared `import_map.json` and workspace configuration in
+  `deno.json`
+- **Packages**: Each workspace has its own `deno.json` with name, version, and
+  exports
 - **Publishing**: All packages follow JSR publishing conventions
 
 ### Workspaces
@@ -86,7 +95,8 @@ The `@hertzg/binstruct` package is built around three fundamental concepts:
    - `computedRef()` creates computed references from multiple values
    - References stored in context via WeakMap for memory efficiency
 
-4. **Single-Pass Processing**: All encoding/decoding operations work in a single forward pass
+4. **Single-Pass Processing**: All encoding/decoding operations work in a single
+   forward pass
    - Fields are processed in declaration order (top to bottom)
    - References can only access **earlier** fields (forward-only references)
    - No backward references - fields cannot depend on values that come later
@@ -100,12 +110,14 @@ The `refine()` function transforms decoded values into refined types:
 ```typescript ignore
 // Transforms arrays to/from formatted strings
 const macAddr = refine(array(u8be(), 6), {
-  refine: (arr: number[]) => arr.map(b => b.toString(16).padStart(2, '0')).join(':'),
-  unrefine: (mac: string) => mac.split(':').map(hex => parseInt(hex, 16)),
+  refine: (arr: number[]) =>
+    arr.map((b) => b.toString(16).padStart(2, "0")).join(":"),
+  unrefine: (mac: string) => mac.split(":").map((hex) => parseInt(hex, 16)),
 });
 ```
 
-Used extensively in format-specific packages (PNG, Ethernet) to convert between binary and domain-specific representations.
+Used extensively in format-specific packages (PNG, Ethernet) to convert between
+binary and domain-specific representations.
 
 ## Dependency Management
 
@@ -174,11 +186,12 @@ import { assertEquals } from "./deps.ts";
 - Use realistic data demonstrating real-world usage
 - Show both encoding and decoding operations
 - Verify data integrity with assertions
-- Use `// deno-fmt-ignore` to preserve formatting of byte arrays and binary data when specific formatting aids readability
+- Use `// deno-fmt-ignore` to preserve formatting of byte arrays and binary data
+  when specific formatting aids readability
 
 Example structure:
 
-```typescript ignore
+````typescript ignore
 /**
  * Function description
  *
@@ -197,7 +210,7 @@ Example structure:
  * assertEquals(result, expected);
  * ```
  */
-```
+````
 
 ## Testing Standards
 
@@ -212,7 +225,8 @@ Example structure:
 
 1. **Unit Tests**: Individual function testing with edge cases
 2. **Integration Tests**: Component interaction and data flow
-3. **Round-trip Tests**: Essential for binary encoding/decoding - verify data integrity
+3. **Round-trip Tests**: Essential for binary encoding/decoding - verify data
+   integrity
 4. **JSDoc Examples**: Treated as executable tests
 
 ### Assertion Patterns
@@ -246,17 +260,22 @@ await assertRejects(async () => await asyncInvalidOperation(), SpecificError);
 ### Quality Gates
 
 Both `deno task lint` and `deno task test` must pass before:
+
 - Completing any coding task
 - Committing code changes
 - Considering work production-ready
 
 ### Commit Message Rules
 
-- Use Conventional Commits in the form `type(scope): summary`; these messages are consumed by CI.
+- Use Conventional Commits in the form `type(scope): summary`; these messages
+  are consumed by CI.
 - Only `feat`, `fix`, or `chore` types are allowed.
-- A scope is mandatory and must consist solely of package names; use commas to list multiple packages.
-- The `version_bump` GitHub Action parses commit messages to decide which packages to bump and the increment level.
-- Commit messages are used to generate the changelog—write concise, user-facing summaries.
+- A scope is mandatory and must consist solely of package names; use commas to
+  list multiple packages.
+- The `version_bump` GitHub Action parses commit messages to decide which
+  packages to bump and the increment level.
+- Commit messages are used to generate the changelog—write concise, user-facing
+  summaries.
 
 #### Commit Message Examples
 
@@ -268,9 +287,14 @@ Both `deno task lint` and `deno task test` must pass before:
 
 #### Valid Commit Scopes
 
-Commit scopes must match the `name` property in each workspace's `deno.json`. The CI pipeline fails if scopes are wrong, and the only recovery is to rebase and reword commits—avoid this by double-checking scopes before committing. Currently allowed scopes:
+Commit scopes must match the `name` property in each workspace's `deno.json`.
+The CI pipeline fails if scopes are wrong, and the only recovery is to rebase
+and reword commits—avoid this by double-checking scopes before committing.
+Currently allowed scopes:
 
-It is imperative that scopes are specified correctly or else the whole CI pipeline fails and the only remedy is rebasing and rewording commits, which is both tiresome and error-prone.
+It is imperative that scopes are specified correctly or else the whole CI
+pipeline fails and the only remedy is rebasing and rewording commits, which is
+both tiresome and error-prone.
 
 - `@hertzg/binstruct`
 - `@binstruct/cli`
@@ -329,27 +353,27 @@ Due to single-pass processing, fields can only reference earlier fields:
 
 ```typescript ignore
 // ✅ Correct - length comes before data
-const length = u32le()
+const length = u32le();
 const data = struct({
-  length,      // Decoded first
+  length, // Decoded first
   payload: bytes(ref(length)), // Can reference earlier field
 });
 
 // ❌ Incorrect - cannot reference later fields
-const length = u32le()
+const length = u32le();
 const invalid = struct({
   payload: bytes(ref(length)), // Error: length not in context yet
-  length,              // Decoded after payload
+  length, // Decoded after payload
 });
 
 // ✅ Workaround - compute lengths during encode, structure fields in order
-const dataLength = u32le()
+const dataLength = u32le();
 const fileWithPadding = struct({
-  dataLength,          // Store computed length first
+  dataLength, // Store computed length first
   data: bytes(ref(dataLength)), // Then the data
-  padding: bytes(computedRef(   // Then padding based on earlier fields
+  padding: bytes(computedRef( // Then padding based on earlier fields
     [ref(dataLength)],
-    (len) => (4 - (len % 4)) % 4 // Align to 4-byte boundary
+    (len) => (4 - (len % 4)) % 4, // Align to 4-byte boundary
   )),
 });
 ```
