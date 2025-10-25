@@ -66,8 +66,32 @@ export type Coder<TDecoded> = {
 /**
  * Type guard to check if a value is a Coder.
  *
+ * This function verifies that a value implements the Coder interface by checking
+ * for the presence of encode and decode methods and the kCoderKind symbol.
+ *
  * @param value - The value to check
  * @returns True if the value is a Coder, false otherwise
+ *
+ * @example
+ * ```ts
+ * import { assertEquals } from "@std/assert";
+ * import { isCoder, u16le, u32be } from "@hertzg/binstruct";
+ *
+ * // Check valid coders
+ * const validCoder = u16le();
+ * assertEquals(isCoder(validCoder), true);
+ *
+ * const anotherCoder = u32be();
+ * assertEquals(isCoder(anotherCoder), true);
+ *
+ * // Check invalid values
+ * assertEquals(isCoder(null), false);
+ * assertEquals(isCoder(undefined), false);
+ * assertEquals(isCoder(42), false);
+ * assertEquals(isCoder("string"), false);
+ * assertEquals(isCoder({ encode: "not a function" }), false);
+ * assertEquals(isCoder({ decode: () => {} }), false);
+ * ```
  */
 export function isCoder<TDecoded>(value: unknown): value is Coder<TDecoded> {
   return (
