@@ -36,9 +36,9 @@
  * import type { Context } from "@hertzg/binstruct";
  *
  * const u8Mapped = refine(u8(), {
- *   refine: (unrefined: number, _buffer: Uint8Array, _context?: Context, min?: number, max?: number) =>
- *     (min! + (max! - min!) * unrefined / 0xff) >>> 0,
- *   unrefine: (refined: number, _buffer: Uint8Array, _context?: Context, min?: number, max?: number) => ((refined - min!) / (max! - min!) * 0xff) >>> 0,
+ *   refine: (unrefined, _context, min: number, max: number) : number =>
+ *     (min + (max - min) * unrefined / 0xff) >>> 0,
+ *   unrefine: (refined, _context, min: number, max: number) => ((refined - min) / (max - min) * 0xff) >>> 0,
  * });
  *
  * const coder = u8Mapped(-100, 100);
@@ -77,19 +77,21 @@ const kKindRefine = Symbol("refine");
  * ```typescript
  * import { assertEquals } from "@std/assert";
  * import type { Context } from "@hertzg/binstruct";
+ * import { createContext } from "@hertzg/binstruct";
  *
  * const booleanRefiner: Refiner<number, boolean, []> = {
- *   refine: (unrefined: number, _buffer: Uint8Array, _context?: Context) => unrefined !== 0,
- *   unrefine: (refined: boolean, _buffer: Uint8Array, _context?: Context) => refined ? 1 : 0,
+ *   refine: (unrefined: number, _context: Context) => unrefined !== 0,
+ *   unrefine: (refined: boolean, _context: Context) => refined ? 1 : 0,
  * };
  *
- * assertEquals(booleanRefiner.refine(1, new Uint8Array(1)), true);
- * assertEquals(booleanRefiner.refine(0, new Uint8Array(1)), false);
- * assertEquals(booleanRefiner.unrefine(true, new Uint8Array(1)), 1);
- * assertEquals(booleanRefiner.unrefine(false, new Uint8Array(1)), 0);
+ * const ctx = createContext("decode");
+ * assertEquals(booleanRefiner.refine(1, ctx), true);
+ * assertEquals(booleanRefiner.refine(0, ctx), false);
+ * assertEquals(booleanRefiner.unrefine(true, ctx), 1);
+ * assertEquals(booleanRefiner.unrefine(false, ctx), 0);
  * ```
  */
-export type Refiner<TUnrefined, TRefined, TArgs extends never[] = []> = {
+export type Refiner<TUnrefined, TRefined, TArgs extends unknown[] = []> = {
   /**
    * Transforms a decoded value into a refined value.
    *
@@ -159,7 +161,7 @@ export type Refiner<TUnrefined, TRefined, TArgs extends never[] = []> = {
 export function refine<
   TUnrefined,
   TRefined,
-  const TArgs extends never[] = [],
+  const TArgs extends unknown[] = [],
 >(
   coder: Coder<TUnrefined>,
   refiner: Refiner<TUnrefined, TRefined, TArgs>,
