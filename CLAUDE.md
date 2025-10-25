@@ -174,6 +174,7 @@ import { assertEquals } from "./deps.ts";
 - Use realistic data demonstrating real-world usage
 - Show both encoding and decoding operations
 - Verify data integrity with assertions
+- Use `// deno-fmt-ignore` to preserve formatting of byte arrays and binary data when specific formatting aids readability
 
 Example structure:
 
