@@ -11,10 +11,10 @@
  * @example Basic PNG file encoding and decoding
  * ```ts
  * import { assertEquals } from "@std/assert";
- * import { pngFile } from "@binstruct/png";
+ * import { pngFile, type PngChunkUnknown } from "@binstruct/png";
  *
  * const pngCoder = pngFile();
- * const testPng: PngFile = {
+ * const testPng = {
  *   signature: new Uint8Array([137, 80, 78, 71, 13, 10, 26, 10]),
  *   chunks: [
  *     {
@@ -22,7 +22,7 @@
  *       type: new Uint8Array([73, 72, 68, 82]), // "IHDR"
  *       data: new Uint8Array([0, 0, 0, 1, 0, 0, 0, 1, 8, 2, 0, 0, 0]),
  *       crc: 0x12345678,
- *     },
+ *     } as PngChunkUnknown,
  *   ],
  * };
  *
@@ -42,28 +42,19 @@ import {
   arrayWhile,
   bytes,
   type Coder,
-  type Context,
-  createContext,
   decode,
-  encode,
   ref,
-  refine,
-  Refiner,
+  type Refiner,
+  refineSwitch,
   string,
   struct,
   u32be,
 } from "@hertzg/binstruct";
 import { crc32 } from "node:zlib";
-import {
-  IhdrChunk,
-  ihdrChunk,
-  IhdrChunkData,
-  ihdrChunkRefiner,
-} from "./chunks/ihdr.ts";
-import { IdatChunk, idatChunkRefiner } from "./chunks/idat.ts";
-import { IendChunk, iendChunkRefiner } from "./chunks/iend.ts";
-import { PlteChunk, plteChunkRefiner } from "./chunks/plte.ts";
-import { type } from "node:os";
+import { type IhdrChunk, ihdrChunkRefiner } from "./chunks/ihdr.ts";
+import { type IdatChunk, idatChunkRefiner } from "./chunks/idat.ts";
+import { type IendChunk, iendChunkRefiner } from "./chunks/iend.ts";
+import { type PlteChunk, plteChunkRefiner } from "./chunks/plte.ts";
 
 /**
  * PNG file structure containing signature and chunks.
@@ -74,8 +65,9 @@ import { type } from "node:os";
  * @example Creating a PNG file structure
  * ```ts
  * import { assertEquals } from "@std/assert";
+ * import type { PngFile, PngChunkUnknown } from "@binstruct/png";
  *
- * const pngFile: PngFile = {
+ * const pngFile: PngFile<PngChunkUnknown> = {
  *   signature: new Uint8Array([137, 80, 78, 71, 13, 10, 26, 10]),
  *   chunks: [
  *     {
@@ -108,8 +100,9 @@ export interface PngFile<TChunk> {
  * @example Creating a PNG chunk
  * ```ts
  * import { assertEquals } from "@std/assert";
+ * import type { PngChunkUnknown } from "@binstruct/png";
  *
- * const chunk: PngChunk = {
+ * const chunk: PngChunkUnknown = {
  *   length: 13,
  *   type: new Uint8Array([73, 72, 68, 82]), // "IHDR"
  *   data: new Uint8Array([0, 0, 0, 1, 0, 0, 0, 1, 8, 2, 0, 0, 0]),
@@ -154,47 +147,52 @@ export function pngChunkRefined(): Coder<
   PngChunkUnknown | IhdrChunk | PlteChunk | IdatChunk | IendChunk
 > {
   const typeCoder = string(4);
-  const refiners = Object.freeze({
-    IHDR: ihdrChunkRefiner(),
-    PLTE: plteChunkRefiner(),
-    IDAT: idatChunkRefiner(),
-    IEND: iendChunkRefiner(),
+
+  // Passthrough refiner for unknown chunk types
+  const identityRefiner = (): Refiner<
+    PngChunkUnknown,
+    PngChunkUnknown,
+    []
+  > => ({
+    refine: (chunk, _ctx) => chunk,
+    unrefine: (chunk, _ctx) => chunk,
   });
 
-  const getRefiner = (type: unknown) => {
-    if (type as string in refiners) {
-      return refiners[type as keyof typeof refiners];
-    }
-    return undefined;
-  };
-
-  return refine(pngChunkUnknown(), {
-    refine: (
-      unrefined: PngChunkUnknown,
-      buffer,
-      context,
-    ): PngChunkUnknown | IhdrChunk | PlteChunk | IdatChunk | IendChunk => {
-      const type = decode(typeCoder, unrefined.type);
-
-      const refiner = getRefiner(type);
-      if (refiner) {
-        return refiner.refine(unrefined, buffer, context);
-      }
-
-      return unrefined;
+  const coder = refineSwitch(
+    pngChunkUnknown(),
+    {
+      IHDR: ihdrChunkRefiner(),
+      PLTE: plteChunkRefiner(),
+      IDAT: idatChunkRefiner(),
+      IEND: iendChunkRefiner(),
+      UNKNOWN: identityRefiner(),
     },
-    unrefine: (refined, buffer, context): PngChunkUnknown => {
-      const refiner = getRefiner(refined.type);
-      if (refiner) {
-        return refiner.unrefine(refined as any, buffer, context);
-      }
-
-      return refined as PngChunkUnknown;
+    {
+      refine: (chunk, ctx) => {
+        const type = decode(typeCoder, chunk.type, ctx);
+        // Return refiner key if known, otherwise use UNKNOWN passthrough
+        return (type === "IHDR" || type === "PLTE" || type === "IDAT" ||
+            type === "IEND")
+          ? type
+          : "UNKNOWN";
+      },
+      unrefine: (chunk, _ctx) => {
+        // For refined chunks, type is already a string
+        const type = chunk.type as string;
+        return (type === "IHDR" || type === "PLTE" || type === "IDAT" ||
+            type === "IEND")
+          ? type as "IHDR" | "PLTE" | "IDAT" | "IEND" | "UNKNOWN"
+          : "UNKNOWN";
+      },
     },
-  })();
+  );
+
+  return coder;
 }
 
-export function pngFile() {
+export function pngFile(): Coder<
+  PngFile<PngChunkUnknown | IhdrChunk | PlteChunk | IdatChunk | IendChunk>
+> {
   return pngFileChunks(pngChunkRefined());
 }
 
