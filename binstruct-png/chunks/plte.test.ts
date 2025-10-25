@@ -1,7 +1,7 @@
 import { assertEquals } from "@std/assert";
 import { createContext } from "@hertzg/binstruct";
 import type { PngChunkUnknown } from "../mod.ts";
-import { plteChunkRefiner, type PlteChunk } from "./plte.ts";
+import { type PlteChunk, plteChunkRefiner } from "./plte.ts";
 
 Deno.test("plteChunkRefiner() - refines PLTE chunk with single color", () => {
   const refiner = plteChunkRefiner();
@@ -30,6 +30,7 @@ Deno.test("plteChunkRefiner() - refines PLTE chunk with multiple colors", () => 
   const unknownChunk: PngChunkUnknown = {
     length: 9,
     type: new Uint8Array([80, 76, 84, 69]), // "PLTE"
+    // deno-fmt-ignore
     data: new Uint8Array([
       255, 0, 0, // Red
       0, 255, 0, // Green

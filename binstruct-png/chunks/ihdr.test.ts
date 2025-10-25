@@ -1,7 +1,7 @@
 import { assertEquals } from "@std/assert";
 import { createContext } from "@hertzg/binstruct";
 import type { PngChunkUnknown } from "../mod.ts";
-import { ihdrChunkRefiner, type IhdrChunk } from "./ihdr.ts";
+import { type IhdrChunk, ihdrChunkRefiner } from "./ihdr.ts";
 
 Deno.test("ihdrChunkRefiner() - refines IHDR chunk", () => {
   const refiner = ihdrChunkRefiner();
@@ -10,6 +10,7 @@ Deno.test("ihdrChunkRefiner() - refines IHDR chunk", () => {
   const unknownChunk: PngChunkUnknown = {
     length: 13,
     type: new Uint8Array([73, 72, 68, 82]), // "IHDR"
+    // deno-fmt-ignore
     data: new Uint8Array([
       0, 0, 0, 100, // width: 100
       0, 0, 0, 200, // height: 200

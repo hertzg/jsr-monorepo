@@ -393,9 +393,6 @@ export { string } from "./string/string.ts";
 export { struct } from "./struct/struct.ts";
 export { bytes } from "./bytes/bytes.ts";
 export { refine, type Refiner } from "./refine/refine.ts";
-export {
-  refineSwitch,
-  type RefinedUnion,
-} from "./refine/switch.ts";
+export { type RefinedUnion, refineSwitch } from "./refine/switch.ts";
 export { decode, encode } from "./helpers.ts";
 export { autoGrowBuffer, type AutogrowOptions } from "./buffer.ts";

@@ -1,7 +1,7 @@
 import { assertEquals } from "@std/assert";
 import { createContext } from "@hertzg/binstruct";
 import type { PngChunkUnknown } from "../mod.ts";
-import { idatChunkRefiner, type IdatChunk } from "./idat.ts";
+import { type IdatChunk, idatChunkRefiner } from "./idat.ts";
 
 Deno.test("idatChunkRefiner() - refines IDAT chunk", () => {
   const refiner = idatChunkRefiner();
@@ -10,6 +10,7 @@ Deno.test("idatChunkRefiner() - refines IDAT chunk", () => {
   const unknownChunk: PngChunkUnknown = {
     length: 10,
     type: new Uint8Array([73, 68, 65, 84]), // "IDAT"
+    // deno-fmt-ignore
     data: new Uint8Array([1, 2, 3, 4, 5, 6, 7, 8, 9, 10]),
     crc: 0x12345678,
   };
@@ -18,6 +19,7 @@ Deno.test("idatChunkRefiner() - refines IDAT chunk", () => {
 
   assertEquals(refined.type, "IDAT");
   assertEquals(refined.length, 10);
+  // deno-fmt-ignore
   assertEquals(refined.data, new Uint8Array([1, 2, 3, 4, 5, 6, 7, 8, 9, 10]));
   assertEquals(refined.crc, 0x12345678);
 });
@@ -89,6 +91,7 @@ Deno.test("idatChunkRefiner() - round-trip with compressed data", () => {
   const decodeContext = createContext("decode");
 
   // Simulated compressed data (ZLIB header + deflate data)
+  // deno-fmt-ignore
   const compressedData = new Uint8Array([
     0x78, 0x9C, // ZLIB header
     0x63, 0x60, 0x00, 0x00, 0x00, 0x02, 0x00, 0x01, // deflate data
@@ -143,6 +146,7 @@ Deno.test("idatChunkRefiner() - preserves data bytes exactly", () => {
   const decodeContext = createContext("decode");
 
   // Test with various byte patterns
+  // deno-fmt-ignore
   const testPatterns = [
     new Uint8Array([0, 0, 0, 0]),
     new Uint8Array([255, 255, 255, 255]),

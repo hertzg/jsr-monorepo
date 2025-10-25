@@ -88,7 +88,12 @@ Deno.test("refineSwitch - multiple refiners with different types", () => {
     }),
     unrefine: (data, ctx) => ({
       type: data.type,
-      data: encode(string(data.payload.length), data.payload, ctx, new Uint8Array(100)),
+      data: encode(
+        string(data.payload.length),
+        data.payload,
+        ctx,
+        new Uint8Array(100),
+      ),
     }),
   };
 
