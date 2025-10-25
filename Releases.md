@@ -1,3 +1,26 @@
+### 2025.10.25
+
+#### @binstruct/png 0.1.3 (patch)
+
+- feat(@binstruct/png): enhance PNG file structure and chunk handling
+- fix(@binstruct/png): add context parameter to refine and unrefine methods in
+  IEND and IHDR chunk refiners for proper decoding and encoding
+- fix(@binstruct/png): include context parameter in refine and unrefine methods
+  for proper decoding and encoding
+- refactor(@binstruct/png): migrate to refineSwitch for chunk type handling
+- refactor(@binstruct/png): remove 1x1 PNG file and associated JSON metadata,
+  update idatChunkRefiner to include context parameter for decoding and encoding
+
+#### @hertzg/binstruct 3.0.0 (major)
+
+- feat(binstruct): add refineSwitch for conditional refinement and multi-stage
+  encoding/decoding
+- fix(binstruct)!: remove unused buffer parameter from refine and unrefine
+  methods
+- fix(binstruct)!: update Refiner type to use never[] for TArgs and simplify
+  function signatures
+- chore(binstruct): apply linting fixes for import ordering and formatting
+
 ### 2025.10.19
 
 #### @hertzg/binstruct 2.0.0 (major)
