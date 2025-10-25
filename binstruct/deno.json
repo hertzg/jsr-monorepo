@@ -1,6 +1,6 @@
 {
   "name": "@hertzg/binstruct",
-  "version": "3.0.0",
+  "version": "3.0.1",
   "exports": {
     ".": "./mod.ts",
     "./buffer": "./buffer.ts",
