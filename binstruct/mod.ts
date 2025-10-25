@@ -58,6 +58,17 @@
  * - {@link isCoder}: Type guard to check if a value is a Coder
  * - {@link isValidLength}: Validate if a length value is valid for binary encoding
  *
+ * ### Submodules
+ * - {@link module:@hertzg/binstruct/array}: Array coders including {@link arrayWhile}
+ * - {@link module:@hertzg/binstruct/buffer}: Buffer helpers like {@link autoGrowBuffer}
+ * - {@link module:@hertzg/binstruct/bytes}: Raw byte slice coders via {@link bytes}
+ * - {@link module:@hertzg/binstruct/helpers}: High-level {@link encode} / {@link decode}
+ * - {@link module:@hertzg/binstruct/numeric}: Numeric coder factories such as {@link u32le}
+ * - {@link module:@hertzg/binstruct/ref}: Reference primitives ({@link ref}, {@link computedRef}, {@link isRef})
+ * - {@link module:@hertzg/binstruct/refine}: Refinement utilities ({@link refine}, {@link refineSwitch})
+ * - {@link module:@hertzg/binstruct/string}: String coder constructors from {@link string}
+ * - {@link module:@hertzg/binstruct/struct}: Struct composition helpers from {@link struct}
+ *
  * ### Numeric Coders
  *
  * **Unsigned Integers:**
