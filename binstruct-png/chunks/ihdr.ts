@@ -35,18 +35,18 @@ export function ihdrChunkRefiner(): Refiner<PngChunkUnknown, IhdrChunk, []> {
   }); // total 13
 
   return {
-    refine: (decoded: PngChunkUnknown): IhdrChunk => {
+    refine: (decoded: PngChunkUnknown, context): IhdrChunk => {
       return {
         ...decoded,
-        type: decode(typeCoder, decoded.type) as "IHDR",
-        data: decode(dataCoder, decoded.data),
+        type: decode(typeCoder, decoded.type, context) as "IHDR",
+        data: decode(dataCoder, decoded.data, context),
       };
     },
-    unrefine: (refined: IhdrChunk) => {
+    unrefine: (refined: IhdrChunk, context) => {
       return {
         ...refined,
-        type: encode(typeCoder, refined.type, undefined, new Uint8Array(4)),
-        data: encode(dataCoder, refined.data, undefined, new Uint8Array(13)),
+        type: encode(typeCoder, refined.type, context, new Uint8Array(4)),
+        data: encode(dataCoder, refined.data, context, new Uint8Array(13)),
       };
     },
   };

@@ -10,17 +10,17 @@ export function iendChunkRefiner(): Refiner<PngChunkUnknown, IendChunk, []> {
   const typeCoder = string(4);
 
   return {
-    refine: (decoded: PngChunkUnknown): IendChunk => {
+    refine: (decoded: PngChunkUnknown, context): IendChunk => {
       return {
         length: decoded.length,
-        type: decode(typeCoder, decoded.type) as "IEND",
+        type: decode(typeCoder, decoded.type, context) as "IEND",
         crc: decoded.crc,
       };
     },
-    unrefine: (refined: IendChunk): PngChunkUnknown => {
+    unrefine: (refined: IendChunk, context): PngChunkUnknown => {
       return {
         length: refined.length,
-        type: encode(typeCoder, refined.type, undefined, new Uint8Array(4)),
+        type: encode(typeCoder, refined.type, context, new Uint8Array(4)),
         data: new Uint8Array(0),
         crc: refined.crc,
       };
