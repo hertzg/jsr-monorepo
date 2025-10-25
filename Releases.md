@@ -1,5 +1,14 @@
 ### 2025.10.25
 
+#### @hertzg/binstruct 3.0.1 (patch)
+
+- fix(binstruct): cross-link exported submodules in module docs\
+- fix(binstruct): update docs
+- chore(binstruct): length docs
+- chore(binstruct): isCoder docs
+
+### 2025.10.25
+
 #### @binstruct/png 0.1.3 (patch)
 
 - feat(@binstruct/png): enhance PNG file structure and chunk handling
