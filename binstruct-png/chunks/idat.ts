@@ -11,21 +11,21 @@ export function idatChunkRefiner(): Refiner<PngChunkUnknown, IdatChunk, []> {
   const dataCoder = bytes();
 
   return {
-    refine: (decoded: PngChunkUnknown): IdatChunk => {
+    refine: (decoded: PngChunkUnknown, context): IdatChunk => {
       return {
         ...decoded,
-        type: decode(typeCoder, decoded.type) as "IDAT",
-        data: decode(dataCoder, decoded.data),
+        type: decode(typeCoder, decoded.type, context) as "IDAT",
+        data: decode(dataCoder, decoded.data, context),
       };
     },
-    unrefine: (refined: IdatChunk): PngChunkUnknown => {
+    unrefine: (refined: IdatChunk, context): PngChunkUnknown => {
       return {
         ...refined,
-        type: encode(typeCoder, refined.type, undefined, new Uint8Array(4)),
+        type: encode(typeCoder, refined.type, context, new Uint8Array(4)),
         data: encode(
           dataCoder,
           refined.data,
-          undefined,
+          context,
           new Uint8Array(refined.data.length),
         ),
       };
