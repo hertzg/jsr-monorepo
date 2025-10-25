@@ -28,14 +28,12 @@ Deno.test("refine with args", () => {
   const u8Mapped = refine(u8(), {
     refine: (
       decoded,
-      _buffer,
       _context,
       min: number,
       max: number,
     ): number => (min + (max - min) * decoded / 0xff) >>> 0,
     unrefine: (
       refined,
-      _buffer,
       _context,
       min: number,
       max: number,
