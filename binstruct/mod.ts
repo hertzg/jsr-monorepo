@@ -24,7 +24,7 @@
  * - **References**: Self-referential and circular data structures
  * - **Bytes**: Raw byte slices with fixed or variable length
  *
-* ## Main Functions
+ * ## Main Functions
  *
  * ### Structure Creation
  * - {@link struct}: Create coders for structured data (objects)
