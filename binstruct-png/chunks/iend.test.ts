@@ -1,7 +1,7 @@
 import { assertEquals } from "@std/assert";
 import { createContext } from "@hertzg/binstruct";
 import type { PngChunkUnknown } from "../mod.ts";
-import { iendChunkRefiner, type IendChunk } from "./iend.ts";
+import { type IendChunk, iendChunkRefiner } from "./iend.ts";
 
 Deno.test("iendChunkRefiner() - refines IEND chunk", () => {
   const refiner = iendChunkRefiner();
@@ -99,6 +99,7 @@ Deno.test("iendChunkRefiner() - preserves CRC through round-trip", () => {
   const encodeContext = createContext("encode");
   const decodeContext = createContext("decode");
 
+  // deno-fmt-ignore
   const testCrcs = [
     0xAE426082, // Standard
     0x00000000,
