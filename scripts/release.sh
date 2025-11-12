@@ -275,15 +275,15 @@ log_success "GitHub release created"
 # Step 9: Wait for and verify release workflow
 log_info "Step 9/9: Monitoring release workflow..."
 
-log_info "Waiting for release workflow to start..."
+log_info "Waiting for workspace_publish workflow to start..."
 sleep 10
 
-# Find the release workflow run
-WORKFLOW_RUN=$(gh run list --workflow="release" --limit 1 --json databaseId,status --jq '.[0]')
+# Find the workspace_publish workflow run
+WORKFLOW_RUN=$(gh run list --workflow="workspace_publish" --limit 1 --json databaseId,status --jq '.[0]')
 RUN_ID=$(echo "$WORKFLOW_RUN" | jq -r '.databaseId')
 
 if [ -z "$RUN_ID" ] || [ "$RUN_ID" = "null" ]; then
-  log_warning "Could not find release workflow run"
+  log_warning "Could not find workspace_publish workflow run"
 else
   log_info "Monitoring workflow run #$RUN_ID..."
 
