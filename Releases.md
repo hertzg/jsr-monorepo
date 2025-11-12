@@ -1,3 +1,10 @@
+### 2025.11.12
+
+#### @hertzg/routeros-api 0.1.0 (minor)
+
+- feat(@hertzg/routeros-api): add MikroTik Router API stream library with
+  complete JSDoc documentation
+
 ### 2025.10.25
 
 #### @hertzg/binstruct 3.0.2 (patch)
