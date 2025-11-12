@@ -26,6 +26,7 @@
     "./wg-ini",
     "./wg-conf",
     "./mymagti-api",
-    "./bx"
+    "./bx",
+    "./routeros-api"
   ]
 }

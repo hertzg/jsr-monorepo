@@ -306,6 +306,7 @@ both tiresome and error-prone.
 - `@hertzg/wg-conf`
 - `@hertzg/mymagti-api`
 - `@hertzg/bx`
+- `@hertzg/routeros-api`
 
 Update this list whenever new workspaces are added or renamed.
 
