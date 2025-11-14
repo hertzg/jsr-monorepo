@@ -1,3 +1,9 @@
+### 2025.11.14
+
+#### @hertzg/routeros-api 0.1.1 (patch)
+
+- fix(@hertzg/routeros-api): unprefix .tag attribute
+
 ### 2025.11.12
 
 #### @hertzg/routeros-api 0.1.0 (minor)
