@@ -66,7 +66,8 @@ export function buildCommand(command: string, options?: {
   // Add attribute words (=name=value)
   if (options?.attributes) {
     for (const [key, value] of Object.entries(options.attributes)) {
-      words.push(`=${key}=${value}`);
+      const prefix = key === ".tag" ? "" : "=";
+      words.push(`${prefix}${key}=${value}`);
     }
   }
 

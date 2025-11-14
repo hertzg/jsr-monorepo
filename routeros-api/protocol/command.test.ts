@@ -6,6 +6,17 @@ Deno.test("buildCommand - simple command", () => {
   assertEquals(result, ["/login"]);
 });
 
+Deno.test("buildCommand - .tag attribute", () => {
+  const result = buildCommand("/system/identity/set", {
+    attributes: { ".tag": "session123", name: "MyRouter" },
+  });
+  assertEquals(result, [
+    "/system/identity/set",
+    ".tag=session123",
+    "=name=MyRouter",
+  ]);
+});
+
 Deno.test("buildCommand - with attributes", () => {
   const result = buildCommand("/login", {
     attributes: { name: "admin", password: "secret" },
