@@ -12,7 +12,7 @@
  * @module
  */
 
-import { parse as parseJsonc } from "@std/jsonc";
+import JSON5 from "json5";
 
 /**
  * Serializes a value to JSON with support for non-native types.
@@ -71,7 +71,7 @@ export function serializeToJson(value: unknown): string {
  */
 export function deserializeFromJson(json: string): unknown {
   // Use @std/jsonc to parse JSONC (JSON with comments)
-  const parsed = parseJsonc(json);
+  const parsed = JSON5.parse(json);
 
   // Apply custom reviver for non-native types
   return applyReviver(parsed);
@@ -163,7 +163,7 @@ function formatJsonWithByteArrays(value: unknown, indentLevel: number): string {
   }
 
   if (typeof value === "string") {
-    return JSON.stringify(value);
+    return JSON5.stringify(value);
   }
 
   if (typeof value === "number" || typeof value === "boolean") {
@@ -181,18 +181,27 @@ function formatJsonWithByteArrays(value: unknown, indentLevel: number): string {
     );
 
     if (isByteArray) {
-      // Format as blocks of 16 items per line with column alignment
+      // Format as blocks of 16 items per line with column alignment and ASCII comment
       const lines: string[] = [];
       for (let i = 0; i < value.length; i += 16) {
         const chunk = value.slice(i, i + 16);
-        // Pad each number to 3 characters for alignment
-        const chunkStr = chunk.map((num) => num.toString().padStart(3)).join(
-          ", ",
-        );
-        lines.push(`${nextIndent}${chunkStr}`);
+        const isLastChunk = i + 16 >= value.length;
+        // Format hex values
+        const chunkStr = chunk.map((num) =>
+          `0x${num.toString(16).padStart(2, "0")}`
+        ).join(", ");
+        // Generate ASCII representation (printable chars or '.' for non-printable)
+        const asciiStr = chunk.map((num) =>
+          num >= 0x20 && num <= 0x7e ? String.fromCharCode(num) : "."
+        ).join("");
+        // Pad hex portion to fixed width for alignment (16 entries * 6 chars each - 2 for last ", ")
+        const paddedChunkStr = chunkStr.padEnd(16 * 6 - 2);
+        // Add comma before comment (except for last line)
+        const comma = isLastChunk ? " " : ",";
+        lines.push(`${nextIndent}${paddedChunkStr}${comma} // |${asciiStr}|`);
       }
 
-      return `[\n${lines.join(",\n")}\n${indent}]`;
+      return `[\n${lines.join("\n")}\n${indent}]`;
     } else {
       // Regular array formatting
       const items = value.map((item) =>
@@ -211,7 +220,7 @@ function formatJsonWithByteArrays(value: unknown, indentLevel: number): string {
     }
 
     const items = entries.map(([key, val]) => {
-      const keyStr = JSON.stringify(key);
+      const keyStr = JSON5.stringify(key);
       const valStr = formatJsonWithByteArrays(val, indentLevel + 1);
       return `${nextIndent}${keyStr}: ${valStr}`;
     });

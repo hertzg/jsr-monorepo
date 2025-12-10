@@ -4,6 +4,7 @@
 
 import { assertEquals } from "@std/assert";
 import { deserializeFromJson, serializeToJson } from "./serialization.ts";
+import JSON5 from "json5";
 
 Deno.test("serializeToJson with Uint8Array", () => {
   const data = {
@@ -12,7 +13,7 @@ Deno.test("serializeToJson with Uint8Array", () => {
   };
 
   const json = serializeToJson(data);
-  const parsed = JSON.parse(json);
+  const parsed = JSON5.parse(json);
 
   assertEquals(parsed.bytes.$bytes, [1, 2, 3, 4]);
   assertEquals(parsed.regularNumber, 42);
@@ -25,7 +26,7 @@ Deno.test("serializeToJson with BigInt", () => {
   };
 
   const json = serializeToJson(data);
-  const parsed = JSON.parse(json);
+  const parsed = JSON5.parse(json);
 
   assertEquals(parsed.bigNumber.$bigint, "12345678901234567890");
   assertEquals(parsed.regularNumber, 42);
@@ -41,7 +42,7 @@ Deno.test("serializeToJson with mixed types", () => {
   };
 
   const json = serializeToJson(data);
-  const parsed = JSON.parse(json);
+  const parsed = JSON5.parse(json);
 
   assertEquals(parsed.bytes.$bytes, [255, 128, 64]);
   assertEquals(parsed.bigNumber.$bigint, "98765432109876543210");
