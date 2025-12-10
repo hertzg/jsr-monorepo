@@ -49,10 +49,11 @@ import {
   string,
   struct,
   u32be,
+  u8,
 } from "@hertzg/binstruct";
 import { crc32 } from "node:zlib";
 import { type IhdrChunk, ihdrChunkRefiner } from "./chunks/ihdr.ts";
-import { type IdatChunk, idatChunkRefiner } from "./chunks/idat.ts";
+import { type IdatChunk, idatChunkRefiner } from "./chunks/idat/idat.ts";
 import { type IendChunk, iendChunkRefiner } from "./chunks/iend.ts";
 import { type PlteChunk, plteChunkRefiner } from "./chunks/plte.ts";
 
@@ -85,7 +86,13 @@ import { type PlteChunk, plteChunkRefiner } from "./chunks/plte.ts";
  */
 export interface PngFile<TChunk> {
   /** The 8-byte PNG signature: [137, 80, 78, 71, 13, 10, 26, 10] */
-  signature: Uint8Array;
+  signature: {
+    highBitByte: number;
+    signature: string;
+    dosLineEnding: string;
+    dosEOF: string;
+    unixLineEnding: string;
+  };
   /** Array of PNG chunks in the file */
   chunks: TChunk[];
 }
@@ -138,7 +145,13 @@ export function pngFileChunks<TChunk>(
   chunkCoder: Coder<TChunk>,
 ): Coder<PngFile<TChunk>> {
   return struct({
-    signature: bytes(8),
+    signature: struct({
+      highBitByte: u8(),
+      signature: string(3),
+      dosLineEnding: string(2),
+      dosEOF: string(1),
+      unixLineEnding: string(1),
+    }),
     chunks: arrayWhile(chunkCoder, ({ buffer }) => buffer.length >= 12),
   });
 }
