@@ -53,7 +53,7 @@ import {
 } from "@hertzg/binstruct";
 import { crc32 } from "node:zlib";
 import { type IhdrChunk, ihdrChunkRefiner } from "./chunks/ihdr.ts";
-import { type IdatChunk, idatChunkRefiner } from "./chunks/idat/idat.ts";
+import { type IdatChunk, idatChunkRefiner } from "./chunks/idat.ts";
 import { type IendChunk, iendChunkRefiner } from "./chunks/iend.ts";
 import { type PlteChunk, plteChunkRefiner } from "./chunks/plte.ts";
 
