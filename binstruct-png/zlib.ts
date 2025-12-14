@@ -6,126 +6,165 @@ import {
   struct,
   u8,
 } from "@hertzg/binstruct";
-import { deflateSync, inflateRawSync } from "node:zlib";
+import { deflateSync, inflateSync } from "node:zlib";
 
-export interface ZlibCompressedData {
+export interface ZlibCompressedWithChecksum {
   cmf: number;
   flg: number;
 
-  raw: Uint8Array;
+  compressedWithChecksum: Uint8Array;
 }
 
-export function zlibCompressedDataCoder(): Coder<ZlibCompressedData> {
+export function zlibCompressedWithChecksumCoder(): Coder<
+  ZlibCompressedWithChecksum
+> {
   return struct({
     cmf: u8(),
     flg: u8(),
-    raw: bytes(),
+    compressedWithChecksum: bytes(),
   });
 }
 
-export interface ZlibRawCompressedRefinedData {
+interface ZlibHeaderParsed {
   compressionMethod: number;
   compressionInfo: number;
   checksum: number;
   isDictionaryPresent: number;
   compressionLevel: number;
-  raw: Uint8Array;
 }
 
-function zlibRawCompressedDataRefiner(): Refiner<
-  ZlibCompressedData,
-  ZlibRawCompressedRefinedData
+function decodeHeader([cmf, flg]: [number, number]): ZlibHeaderParsed {
+  return {
+    compressionMethod: (cmf >> 0) & 0b1111,
+    compressionInfo: (cmf >> 4) & 0b1111,
+    checksum: (flg >> 0) & 0b1111,
+    isDictionaryPresent: (flg >> 4) & 0b1,
+    compressionLevel: (flg >> 6) & 0b11,
+  };
+}
+
+function encodeHeader(data: ZlibHeaderParsed): [number, number] {
+  const cmf = (data.compressionInfo << 4) |
+    (data.compressionMethod << 0);
+
+  const flg = (data.compressionLevel << 6) |
+    (data.isDictionaryPresent << 4) |
+    (data.checksum << 0);
+
+  return [cmf, flg];
+}
+
+export interface ZlibCompressedData {
+  header: ZlibHeaderParsed;
+  compressed: Uint8Array;
+  checksum: Uint8Array;
+}
+
+function zlibCompressedRefiner(): Refiner<
+  ZlibCompressedWithChecksum,
+  ZlibCompressedData
 > {
   return {
-    refine: (data) => {
-      const { cmf, flg } = data;
+    refine: (unrefined) => {
+      const { cmf, flg } = unrefined;
+
+      const compressed = unrefined.compressedWithChecksum.subarray(
+        0,
+        unrefined.compressedWithChecksum.length - 4,
+      ); // Exclude ADLER32 checksum
+      const checksum = unrefined.compressedWithChecksum.subarray(
+        compressed.length,
+      );
 
       return {
-        compressionMethod: (cmf >> 0) & 0b1111,
-        compressionInfo: (cmf >> 4) & 0b1111,
-        checksum: (flg >> 0) & 0b1111,
-        isDictionaryPresent: (flg >> 4) & 0b1,
-        compressionLevel: (flg >> 6) & 0b11,
-        raw: data.raw,
+        header: decodeHeader([cmf, flg]),
+        compressed,
+        checksum,
       };
     },
-    unrefine: (data) => {
+
+    unrefine: (refined) => {
+      const [cmf, flg] = encodeHeader(refined.header);
+
+      const rawWithChecksum = new Uint8Array(
+        refined.compressed.length + refined.checksum.length,
+      );
+      rawWithChecksum.set(refined.compressed, 0);
+      rawWithChecksum.set(refined.checksum, refined.compressed.length);
+
       return {
-        cmf: (data.compressionInfo << 4) |
-          (data.compressionMethod << 0),
-        flg: (data.compressionLevel << 6) |
-          (data.isDictionaryPresent << 4) |
-          (data.checksum << 0),
-        raw: data.raw,
+        cmf,
+        flg,
+        compressedWithChecksum: rawWithChecksum,
       };
     },
   };
 }
 
-export function zlibRawCompressedDataCoder(): Coder<
-  ZlibRawCompressedRefinedData
+export function zlibCompressedCoder(): Coder<
+  ZlibCompressedData
 > {
   return refine(
-    zlibCompressedDataCoder(),
-    zlibRawCompressedDataRefiner(),
+    zlibCompressedWithChecksumCoder(),
+    zlibCompressedRefiner(),
   )();
 }
 
-export interface ZlibRefinedData {
-  header: {
-    compressionMethod: number;
-    compressionInfo: number;
-    checksum: number;
-    isDictionaryPresent: number;
-    compressionLevel: number;
-  };
-  data: Uint8Array;
+export interface ZlibUncompressedData {
+  header: ZlibHeaderParsed;
+  uncompressed: Uint8Array;
+  checksum: Uint8Array;
 }
 
-export function zlibDataRefiner(): Refiner<
-  ZlibRawCompressedRefinedData,
-  ZlibRefinedData
+export function zlibUncompressRefiner(): Refiner<
+  ZlibCompressedData,
+  ZlibUncompressedData
 > {
   return {
-    refine: (data): ZlibRefinedData => {
-      const decompressed = new Uint8Array(inflateRawSync(data.raw, {
-        level: data.compressionLevel,
-      }));
+    refine: (unrefined): ZlibUncompressedData => {
+      const zlibCompressedData = new Uint8Array(
+        2 + unrefined.compressed.length + unrefined.checksum.length,
+      );
+      zlibCompressedData.set(
+        encodeHeader(unrefined.header),
+        0,
+      );
+      zlibCompressedData.set(unrefined.compressed, 2);
+      zlibCompressedData.set(
+        unrefined.checksum,
+        2 + unrefined.compressed.length,
+      );
+
+      const decompressed = new Uint8Array(
+        inflateSync(zlibCompressedData),
+      );
 
       return {
-        header: {
-          compressionMethod: data.compressionMethod,
-          compressionInfo: data.compressionInfo,
-          checksum: data.checksum,
-          isDictionaryPresent: data.isDictionaryPresent,
-          compressionLevel: data.compressionLevel,
-        },
-        data: decompressed,
+        header: unrefined.header,
+        uncompressed: decompressed,
+        checksum: unrefined.checksum,
       };
     },
-    unrefine: (data) => {
-      const compressed = deflateSync(data.data, {
-        level: data.header.compressionLevel,
-      });
+    unrefine: (refined) => {
+      const compressed = new Uint8Array(deflateSync(refined.uncompressed, {
+        level: refined.header.compressionLevel,
+      }));
+
+      const raw = compressed.subarray(2, compressed.length - 4);
+      const checksum = compressed.subarray(compressed.length - 4);
+
       return {
-        compressionMethod: data.header.compressionMethod,
-        compressionInfo: data.header.compressionInfo,
-        checksum: data.header.checksum,
-        isDictionaryPresent: data.header.isDictionaryPresent,
-        compressionLevel: data.header.compressionLevel,
-        raw: new Uint8Array(
-          compressed.buffer,
-          compressed.byteOffset + 2, // SKIP zlib header
-          compressed.byteLength - 2,
-        ),
+        header: refined.header,
+        compressed: raw,
+        checksum,
       };
     },
   };
 }
 
-export function zlibDataCoder(): Coder<ZlibRefinedData> {
+export function zlibUncompressedCoder(): Coder<ZlibUncompressedData> {
   return refine(
-    zlibRawCompressedDataCoder(),
-    zlibDataRefiner(),
+    zlibCompressedCoder(),
+    zlibUncompressRefiner(),
   )();
 }

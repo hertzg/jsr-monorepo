@@ -1,7 +1,7 @@
 import { assertEquals } from "@std/assert";
 import { promisify } from "node:util";
 import { deflate, deflateRaw, inflateRaw } from "node:zlib";
-import { zlibDataCoder } from "./zlib.ts";
+import { zlibUncompressedCoder } from "./zlib.ts";
 
 const deflateAsync = promisify(deflate);
 const deflateRawAsync = promisify(deflateRaw);
@@ -26,8 +26,8 @@ function zlibLevelToFLevel(level: number): number {
   return 3; // maximum (7–9)
 }
 
-Deno.test("zlibDataCoder() - decodes zlib compressed data and extracts header fields", async () => {
-  const coder = zlibDataCoder();
+Deno.test("zlibUncompressedCoder() - decodes zlib compressed data and extracts header fields", async () => {
+  const coder = zlibUncompressedCoder();
 
   const originalData = new TextEncoder().encode("Hello, PNG!");
   const compressedBuffer = new Uint8Array(await deflateAsync(originalData));
@@ -40,18 +40,18 @@ Deno.test("zlibDataCoder() - decodes zlib compressed data and extracts header fi
   assertEquals(decoded.header.compressionInfo, 7); // 32K window
 
   // Verify data was decompressed
-  assertEquals(decoded.data, originalData);
+  assertEquals(decoded.uncompressed, originalData);
   assertEquals(bytesRead, compressed.length);
 });
 
-Deno.test("zlibDataCoder() - validates real zlib compression", async (t) => {
-  const coder = zlibDataCoder();
+Deno.test("zlibUncompressedCoder() - validates real zlib compression", async (t) => {
+  const coder = zlibUncompressedCoder();
 
   const originalData = new TextEncoder().encode(
-    "@binstruct-pngpngpngpngpngpngpngpngpng",
+    "@binstruct-png",
   );
 
-  for (const compressionLevel of [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]) {
+  for (const compressionLevel of [-1, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9]) {
     await t.step(`compression level ${compressionLevel}`, async () => {
       const original = new Uint8Array(
         await deflateAsync(originalData, {
@@ -70,7 +70,7 @@ Deno.test("zlibDataCoder() - validates real zlib compression", async (t) => {
       );
 
       assertEquals(bytesRead, original.length);
-      assertEquals(decoded.data, originalData);
+      assertEquals(decoded.uncompressed, originalData);
 
       let encoded = new Uint8Array(4096);
       const bytesWritten = coder.encode(decoded, encoded);
