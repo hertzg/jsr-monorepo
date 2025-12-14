@@ -6,7 +6,7 @@ import {
   struct,
   u8,
 } from "@hertzg/binstruct";
-import { deflateRawSync, inflateRawSync } from "node:zlib";
+import { deflateSync, inflateRawSync } from "node:zlib";
 
 export interface ZlibCompressedData {
   cmf: number;
@@ -37,7 +37,7 @@ function zlibRawCompressedDataRefiner(): Refiner<
   ZlibRawCompressedRefinedData
 > {
   return {
-    refine: (data, ctx) => {
+    refine: (data) => {
       const { cmf, flg } = data;
 
       return {
@@ -88,15 +88,9 @@ export function zlibDataRefiner(): Refiner<
 > {
   return {
     refine: (data): ZlibRefinedData => {
-      let decompressed: Uint8Array;
-      try {
-        decompressed = new Uint8Array(inflateRawSync(data.raw, {
-          level: data.compressionLevel,
-        }));
-      } catch (e) {
-        console.error("Error during inflateRawSync:", e);
-        throw e;
-      }
+      const decompressed = new Uint8Array(inflateRawSync(data.raw, {
+        level: data.compressionLevel,
+      }));
 
       return {
         header: {
@@ -110,7 +104,7 @@ export function zlibDataRefiner(): Refiner<
       };
     },
     unrefine: (data) => {
-      const compressed = deflateRawSync(data.data, {
+      const compressed = deflateSync(data.data, {
         level: data.header.compressionLevel,
       });
       return {
@@ -121,8 +115,8 @@ export function zlibDataRefiner(): Refiner<
         compressionLevel: data.header.compressionLevel,
         raw: new Uint8Array(
           compressed.buffer,
-          compressed.byteOffset,
-          compressed.byteLength,
+          compressed.byteOffset + 2, // SKIP zlib header
+          compressed.byteLength - 2,
         ),
       };
     },
