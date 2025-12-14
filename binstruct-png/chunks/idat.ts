@@ -1,14 +1,15 @@
-import { bytes, decode, encode, type Refiner, string } from "@hertzg/binstruct";
+import { decode, encode, type Refiner, string } from "@hertzg/binstruct";
 import type { PngChunkUnknown } from "../mod.ts";
+import { zlibUncompressedCoder, type ZlibUncompressedData } from "../zlib.ts";
 
 export interface IdatChunk extends Omit<PngChunkUnknown, "type" | "data"> {
   type: "IDAT";
-  data: Uint8Array;
+  data: ZlibUncompressedData;
 }
 
 export function idatChunkRefiner(): Refiner<PngChunkUnknown, IdatChunk, []> {
   const typeCoder = string(4);
-  const dataCoder = bytes();
+  const dataCoder = zlibUncompressedCoder();
 
   return {
     refine: (decoded: PngChunkUnknown, context): IdatChunk => {
@@ -26,7 +27,6 @@ export function idatChunkRefiner(): Refiner<PngChunkUnknown, IdatChunk, []> {
           dataCoder,
           refined.data,
           context,
-          new Uint8Array(refined.data.length),
         ),
       };
     },

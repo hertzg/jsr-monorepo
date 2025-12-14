@@ -12,6 +12,8 @@ import type { IhdrChunk } from "./chunks/ihdr.ts";
 import type { IdatChunk } from "./chunks/idat.ts";
 import type { IendChunk } from "./chunks/iend.ts";
 import type { PlteChunk } from "./chunks/plte.ts";
+import { deflateSync } from "node:zlib";
+import { decodeHeader } from "./zlib.ts";
 
 const PNG_SIGNATURE = new Uint8Array([137, 80, 78, 71, 13, 10, 26, 10]);
 const PNG_SIGNATURE_DECODED = {
@@ -211,19 +213,21 @@ Deno.test("pngChunkRefined() - encodes IHDR chunk", () => {
 
 Deno.test("pngChunkRefined() - decodes IDAT chunk", () => {
   const coder = pngChunkRefined();
+  const uncompressed = new Uint8Array([1, 2, 3, 4, 5]);
+  const compressedData = new Uint8Array(deflateSync(uncompressed));
   // deno-fmt-ignore
   const buffer = new Uint8Array([
-    0, 0, 0, 5, // length: 5
+    0, 0, 0, compressedData.length, // length
     73, 68, 65, 84, // type: "IDAT"
-    1, 2, 3, 4, 5, // data
+    ...compressedData, // data
     0x11, 0x22, 0x33, 0x44, // crc
   ]);
 
   const [decoded, bytesRead] = coder.decode(buffer);
 
-  assertEquals(bytesRead, 17);
+  assertEquals(bytesRead, 12 + compressedData.length);
   assertEquals((decoded as IdatChunk).type, "IDAT");
-  assertEquals((decoded as IdatChunk).data, new Uint8Array([1, 2, 3, 4, 5]));
+  assertEquals((decoded as IdatChunk).data.uncompressed, uncompressed);
 });
 
 Deno.test("pngChunkRefined() - decodes IEND chunk", () => {
@@ -349,6 +353,8 @@ Deno.test("pngFile() - encodes complete PNG file", () => {
 
 Deno.test("pngFile() - round-trip with mixed chunk types", () => {
   const coder = pngFile();
+  const uncompressed = new Uint8Array([1, 2, 3]);
+  const compressedData = new Uint8Array(deflateSync(uncompressed));
   const pngData: PngFile<IhdrChunk | IdatChunk | IendChunk> = {
     signature: PNG_SIGNATURE_DECODED,
     chunks: [
@@ -367,9 +373,13 @@ Deno.test("pngFile() - round-trip with mixed chunk types", () => {
         crc: 0x12345678,
       },
       {
-        length: 3,
+        length: compressedData.length,
         type: "IDAT",
-        data: new Uint8Array([1, 2, 3]),
+        data: {
+          header: decodeHeader(Array.from(compressedData.subarray(0, 2))),
+          uncompressed: uncompressed,
+          checksum: compressedData.subarray(-4),
+        },
         crc: 0x11223344,
       },
       {

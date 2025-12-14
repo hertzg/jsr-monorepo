@@ -8,14 +8,14 @@ import {
 } from "@hertzg/binstruct";
 import { deflateSync, inflateSync } from "node:zlib";
 
-export interface ZlibCompressedWithChecksum {
+interface ZlibCompressedWithChecksum {
   cmf: number;
   flg: number;
 
   compressedWithChecksum: Uint8Array;
 }
 
-export function zlibCompressedWithChecksumCoder(): Coder<
+function zlibCompressedWithChecksumCoder(): Coder<
   ZlibCompressedWithChecksum
 > {
   return struct({
@@ -33,7 +33,7 @@ interface ZlibHeaderParsed {
   compressionLevel: number;
 }
 
-function decodeHeader([cmf, flg]: [number, number]): ZlibHeaderParsed {
+export function decodeHeader([cmf, flg]: number[]): ZlibHeaderParsed {
   return {
     compressionMethod: (cmf >> 0) & 0b1111,
     compressionInfo: (cmf >> 4) & 0b1111,
@@ -43,7 +43,7 @@ function decodeHeader([cmf, flg]: [number, number]): ZlibHeaderParsed {
   };
 }
 
-function encodeHeader(data: ZlibHeaderParsed): [number, number] {
+export function encodeHeader(data: ZlibHeaderParsed): number[] {
   const cmf = ((data.compressionInfo & 0b1111) << 4) |
     ((data.compressionMethod & 0b1111) << 0);
 
@@ -54,7 +54,7 @@ function encodeHeader(data: ZlibHeaderParsed): [number, number] {
   return [cmf, flg];
 }
 
-export interface ZlibCompressedData {
+interface ZlibCompressedData {
   header: ZlibHeaderParsed;
   compressed: Uint8Array;
   checksum: Uint8Array;
@@ -102,7 +102,7 @@ function zlibCompressedRefiner(): Refiner<
   };
 }
 
-export function zlibCompressedCoder(): Coder<
+function zlibCompressedCoder(): Coder<
   ZlibCompressedData
 > {
   return refine(
@@ -117,7 +117,7 @@ export interface ZlibUncompressedData {
   checksum: Uint8Array;
 }
 
-export function zlibUncompressRefiner(): Refiner<
+function zlibUncompressRefiner(): Refiner<
   ZlibCompressedData,
   ZlibUncompressedData
 > {

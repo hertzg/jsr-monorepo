@@ -2,7 +2,6 @@ import { createAssertSnapshot } from "@std/testing/snapshot";
 import { pngFile } from "../mod.ts";
 import { assertEquals, assertExists } from "@std/assert";
 import { basename, join } from "node:path";
-import { zlibCmfFlg } from "./_helpers.ts";
 
 const assertSnapshot = createAssertSnapshot({
   serializer: (value) =>
@@ -110,7 +109,7 @@ Deno.test(`compression`, async (t) => {
         const idat = decoded.chunks.find((c) => c.type === "IDAT");
         assertExists(idat), "IDAT chunk not found";
 
-        const { fLevel: actualLevel } = zlibCmfFlg(idat.data);
+        const actualLevel = idat.data.header.compressionLevel;
         assertEquals(
           actualLevel,
           expectedLevel,
