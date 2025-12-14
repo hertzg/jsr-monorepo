@@ -1,3 +1,26 @@
+### 2025.12.14
+
+#### @binstruct/cli 0.1.2 (patch)
+
+- feat(@binstruct/cli): integrate JSON5 for improved serialization handling
+
+#### @binstruct/png 0.2.0 (minor)
+
+- feat(@binstruct/png): implement zlib compression and decompression
+  functionality with tests
+- feat(@binstruct/png)!: expand signature
+- feat(@binstruct/png): add PNGSuite tests
+- fix(@binstruct/png): remove unused zlibCmfFlg helper function
+- fix(@binstruct/png): decode idat payload
+- fix(@binstruct/png): update PNG signature representation to use structured
+  object
+- fix(@binstruct/png): update zlib header parsing to correctly handle checksum
+  and dictionary presence
+- fix(@binstruct/png): use same zlib functions for compression and uncompression
+- fix(@binstruct/png): update zlib import and refine data handling in
+  zlibDataRefiner
+- fix(@binstruct/png): correct import path for IdatChunk refiner
+
 ### 2025.11.14
 
 #### @hertzg/routeros-api 0.1.1 (patch)
