@@ -14,6 +14,13 @@ import type { IendChunk } from "./chunks/iend.ts";
 import type { PlteChunk } from "./chunks/plte.ts";
 
 const PNG_SIGNATURE = new Uint8Array([137, 80, 78, 71, 13, 10, 26, 10]);
+const PNG_SIGNATURE_DECODED = {
+  highBitByte: 137,
+  signature: "PNG",
+  dosEOF: "\u001a",
+  dosLineEnding: "\r\n",
+  unixLineEnding: "\n",
+};
 
 Deno.test("pngChunkUnknown() - decodes unknown chunk", () => {
   const coder = pngChunkUnknown();
@@ -96,7 +103,7 @@ Deno.test("pngFileChunks() - decodes PNG file with multiple chunks", () => {
   const [decoded, bytesRead] = coder.decode(buffer);
 
   assertEquals(bytesRead, 8 + 15 + 14);
-  assertEquals(decoded.signature, PNG_SIGNATURE);
+  assertEquals(decoded.signature, PNG_SIGNATURE_DECODED);
   assertEquals(decoded.chunks.length, 2);
   assertEquals(decoded.chunks[0].length, 3);
   assertEquals(decoded.chunks[0].data, new Uint8Array([1, 2, 3]));
@@ -107,7 +114,7 @@ Deno.test("pngFileChunks() - decodes PNG file with multiple chunks", () => {
 Deno.test("pngFileChunks() - encodes PNG file with multiple chunks", () => {
   const coder = pngFileChunks(pngChunkUnknown());
   const pngData: PngFile<PngChunkUnknown> = {
-    signature: PNG_SIGNATURE,
+    signature: PNG_SIGNATURE_DECODED,
     chunks: [
       {
         length: 3,
@@ -134,7 +141,7 @@ Deno.test("pngFileChunks() - encodes PNG file with multiple chunks", () => {
 Deno.test("pngFileChunks() - round-trip with empty chunks array", () => {
   const coder = pngFileChunks(pngChunkUnknown());
   const pngData: PngFile<PngChunkUnknown> = {
-    signature: PNG_SIGNATURE,
+    signature: PNG_SIGNATURE_DECODED,
     chunks: [],
   };
 
@@ -300,7 +307,7 @@ Deno.test("pngFile() - decodes complete PNG file with IHDR and IEND", () => {
   const [decoded, bytesRead] = coder.decode(buffer);
 
   assertEquals(bytesRead, 8 + 25 + 12);
-  assertEquals(decoded.signature, PNG_SIGNATURE);
+  assertEquals(decoded.signature, PNG_SIGNATURE_DECODED);
   assertEquals(decoded.chunks.length, 2);
   assertEquals((decoded.chunks[0] as IhdrChunk).type, "IHDR");
   assertEquals((decoded.chunks[1] as IendChunk).type, "IEND");
@@ -309,7 +316,7 @@ Deno.test("pngFile() - decodes complete PNG file with IHDR and IEND", () => {
 Deno.test("pngFile() - encodes complete PNG file", () => {
   const coder = pngFile();
   const pngData: PngFile<IhdrChunk | IendChunk> = {
-    signature: PNG_SIGNATURE,
+    signature: PNG_SIGNATURE_DECODED,
     chunks: [
       {
         length: 13,
@@ -343,7 +350,7 @@ Deno.test("pngFile() - encodes complete PNG file", () => {
 Deno.test("pngFile() - round-trip with mixed chunk types", () => {
   const coder = pngFile();
   const pngData: PngFile<IhdrChunk | IdatChunk | IendChunk> = {
-    signature: PNG_SIGNATURE,
+    signature: PNG_SIGNATURE_DECODED,
     chunks: [
       {
         length: 13,

@@ -15,7 +15,13 @@
  *
  * const pngCoder = pngFile();
  * const testPng = {
- *   signature: new Uint8Array([137, 80, 78, 71, 13, 10, 26, 10]),
+ *   signature: {
+ *     highBitByte: 137,
+ *     signature: "PNG",
+ *     dosEOF: "\u001a",
+ *     dosLineEnding: "\r\n",
+ *     unixLineEnding: "\n"
+ *   },
  *   chunks: [
  *     {
  *       length: 13,
@@ -61,28 +67,13 @@ import { type PlteChunk, plteChunkRefiner } from "./chunks/plte.ts";
  * PNG file structure containing signature and chunks.
  *
  * A PNG file consists of an 8-byte signature followed by a series of chunks.
- * The signature is always the same: [137, 80, 78, 71, 13, 10, 26, 10].
- *
- * @example Creating a PNG file structure
- * ```ts
- * import { assertEquals } from "@std/assert";
- * import type { PngFile, PngChunkUnknown } from "@binstruct/png";
- *
- * const pngFile: PngFile<PngChunkUnknown> = {
- *   signature: new Uint8Array([137, 80, 78, 71, 13, 10, 26, 10]),
- *   chunks: [
- *     {
- *       length: 13,
- *       type: new Uint8Array([73, 72, 68, 82]), // "IHDR"
- *       data: new Uint8Array([0, 0, 0, 1, 0, 0, 0, 1, 8, 2, 0, 0, 0]),
- *       crc: 0x12345678,
- *     },
- *   ],
- * };
- *
- * assertEquals(pngFile.signature.length, 8);
- * assertEquals(pngFile.chunks.length, 1);
- * ```
+ * The signature is always the same: {
+ *   highBitByte: 137,
+ *   signature: "PNG",
+ *   dosEOF: "\u001a",
+ *   dosLineEnding: "\r\n",
+ *   unixLineEnding: "\n"
+ * }.
  */
 export interface PngFile<TChunk> {
   /** The 8-byte PNG signature: [137, 80, 78, 71, 13, 10, 26, 10] */
