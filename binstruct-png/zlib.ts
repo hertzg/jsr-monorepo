@@ -37,19 +37,19 @@ function decodeHeader([cmf, flg]: [number, number]): ZlibHeaderParsed {
   return {
     compressionMethod: (cmf >> 0) & 0b1111,
     compressionInfo: (cmf >> 4) & 0b1111,
-    checksum: (flg >> 0) & 0b1111,
-    isDictionaryPresent: (flg >> 4) & 0b1,
+    checksum: (flg >> 0) & 0b11111,
+    isDictionaryPresent: (flg >> 5) & 0b1,
     compressionLevel: (flg >> 6) & 0b11,
   };
 }
 
 function encodeHeader(data: ZlibHeaderParsed): [number, number] {
-  const cmf = (data.compressionInfo << 4) |
-    (data.compressionMethod << 0);
+  const cmf = ((data.compressionInfo & 0b1111) << 4) |
+    ((data.compressionMethod & 0b1111) << 0);
 
-  const flg = (data.compressionLevel << 6) |
-    (data.isDictionaryPresent << 4) |
-    (data.checksum << 0);
+  const flg = ((data.compressionLevel & 0b11) << 6) |
+    ((data.isDictionaryPresent & 0b1) << 4) |
+    ((data.checksum & 0b11111) << 0);
 
   return [cmf, flg];
 }
@@ -71,7 +71,8 @@ function zlibCompressedRefiner(): Refiner<
       const compressed = unrefined.compressedWithChecksum.subarray(
         0,
         unrefined.compressedWithChecksum.length - 4,
-      ); // Exclude ADLER32 checksum
+      );
+
       const checksum = unrefined.compressedWithChecksum.subarray(
         compressed.length,
       );

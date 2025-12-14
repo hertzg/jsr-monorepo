@@ -1,82 +1,86 @@
 import { assertEquals } from "@std/assert";
 import { promisify } from "node:util";
-import { deflate, deflateRaw, inflateRaw } from "node:zlib";
+import { deflate } from "node:zlib";
 import { zlibUncompressedCoder } from "./zlib.ts";
+import { encode } from "@hertzg/binstruct";
 
 const deflateAsync = promisify(deflate);
-const deflateRawAsync = promisify(deflateRaw);
-
-/**
- * Maps zlib compression level (0-9) to RFC 1950 FLEVEL field (0-3).
- *
- * RFC 1950 FLEVEL encoding:
- * - 0: fastest algorithm
- * - 1: fast algorithm
- * - 2: default algorithm
- * - 3: maximum compression, slowest algorithm
- *
- * @param level - zlib compression level (0-9, or -1 for default)
- * @returns RFC 1950 FLEVEL value (0-3)
- */
-function zlibLevelToFLevel(level: number): number {
-  if (level === -1) return 2; // Z_DEFAULT_COMPRESSION
-  if (level <= 1) return 0; // fastest
-  if (level <= 5) return 1; // fast
-  if (level === 6) return 2; // default
-  return 3; // maximum (7–9)
-}
 
 Deno.test("zlibUncompressedCoder() - decodes zlib compressed data and extracts header fields", async () => {
   const coder = zlibUncompressedCoder();
 
-  const originalData = new TextEncoder().encode("Hello, PNG!");
-  const compressedBuffer = new Uint8Array(await deflateAsync(originalData));
-  const compressed = new Uint8Array(compressedBuffer);
+  const originalUncompressed = new TextEncoder().encode("Hello, PNG!");
+  const originalCompressed = new Uint8Array(
+    await deflateAsync(originalUncompressed),
+  );
 
-  const [decoded, bytesRead] = coder.decode(compressed);
+  const [decoded, bytesRead] = coder.decode(originalCompressed);
 
   // Verify header fields were extracted
-  assertEquals(decoded.header.compressionMethod, 8); // DEFLATE
-  assertEquals(decoded.header.compressionInfo, 7); // 32K window
+  assertEquals(
+    decoded.header.compressionMethod,
+    8,
+    "Compression Method does not match",
+  );
+  assertEquals(
+    decoded.header.compressionInfo,
+    7,
+    "Compression Info does not match",
+  );
+  assertEquals(
+    decoded.header.isDictionaryPresent,
+    0,
+    "Dictionary should not be preset",
+  );
 
   // Verify data was decompressed
-  assertEquals(decoded.uncompressed, originalData);
-  assertEquals(bytesRead, compressed.length);
+  assertEquals(decoded.uncompressed, originalUncompressed);
+  assertEquals(bytesRead, originalCompressed.length);
 });
 
 Deno.test("zlibUncompressedCoder() - validates real zlib compression", async (t) => {
   const coder = zlibUncompressedCoder();
 
-  const originalData = new TextEncoder().encode(
-    "@binstruct-png",
+  const originalUncompressed = new TextEncoder().encode(
+    "abcccccccc",
   );
 
-  for (const compressionLevel of [-1, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9]) {
-    await t.step(`compression level ${compressionLevel}`, async () => {
-      const original = new Uint8Array(
-        await deflateAsync(originalData, {
-          level: compressionLevel,
+  // deno-fmt-ignore
+  for (const { cLevel, fLevel } of [
+    { cLevel: 0, fLevel: 0 },
+    { cLevel: 1, fLevel: 0 },
+    { cLevel: 2, fLevel: 1 },
+    { cLevel: 3, fLevel: 1 },
+    { cLevel: 4, fLevel: 1 },
+    { cLevel: 5, fLevel: 1 },
+    { cLevel: -1, fLevel: 2 },
+    { cLevel: 6, fLevel: 2 },
+    { cLevel: 7, fLevel: 3 },
+    { cLevel: 8, fLevel: 3 },
+    { cLevel: 9, fLevel: 3 },
+  ]) {
+    await t.step(`compression level ${cLevel}`, async () => {
+      const originalCompressed = new Uint8Array(
+        await deflateAsync(originalUncompressed, {
+          level: cLevel,
         }),
       );
 
-      const [decoded, bytesRead] = coder.decode(original);
+      const [decoded, bytesRead] = coder.decode(originalCompressed);
 
-      assertEquals(decoded.header.compressionMethod, 8);
-      assertEquals(decoded.header.compressionInfo, 7);
+      assertEquals(decoded.header.compressionMethod, 8, 'Compression Method does not match');
+      assertEquals(decoded.header.compressionInfo, 7, 'Compression Info does not match');
+      assertEquals(decoded.header.isDictionaryPresent, 0, 'Dictionary should not be preset')
+      assertEquals(decoded.header.compressionLevel, fLevel, 'Compression Level does not match (flags)');
 
-      assertEquals(
-        decoded.header.compressionLevel,
-        zlibLevelToFLevel(compressionLevel),
-      );
+      assertEquals(bytesRead, originalCompressed.length);
+      assertEquals(decoded.uncompressed, originalUncompressed, 'Decompressed data does not match');
 
-      assertEquals(bytesRead, original.length);
-      assertEquals(decoded.uncompressed, originalData);
-
-      let encoded = new Uint8Array(4096);
-      const bytesWritten = coder.encode(decoded, encoded);
-      encoded = new Uint8Array(encoded.buffer, 0, bytesWritten);
-
-      assertEquals(encoded, original);
-    });
+      // HACK: At CLEVEL 1 the recompression is non-deterministic. CLEVELS 0 and 1 both end up FLEVEL = 0
+      if (cLevel !== 1) {
+        const encoded = encode(coder, decoded);
+        assertEquals(encoded, originalCompressed, 'Recompression did not produce the same bytes');
+      }
+    })
   }
 });
