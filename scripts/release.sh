@@ -279,7 +279,7 @@ log_info "Waiting for workspace_publish workflow to start..."
 sleep 10
 
 # Find the workspace_publish workflow run
-WORKFLOW_RUN=$(gh run list --workflow="workspace_publish" --limit 1 --json databaseId,status --jq '.[0]')
+WORKFLOW_RUN=$(gh run list --workflow="workspace publish" --limit 1 --json databaseId,status --jq '.[0]')
 RUN_ID=$(echo "$WORKFLOW_RUN" | jq -r '.databaseId')
 
 if [ -z "$RUN_ID" ] || [ "$RUN_ID" = "null" ]; then
