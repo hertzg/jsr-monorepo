@@ -1,6 +1,9 @@
 import { decode, encode, type Refiner, string } from "@hertzg/binstruct";
 import type { PngChunkUnknown } from "../mod.ts";
-import { zlibUncompressedCoder, type ZlibUncompressedData } from "../zlib.ts";
+import {
+  zlibUncompressedCoder,
+  type ZlibUncompressedData,
+} from "../zlib/zlib.ts";
 
 export interface IdatChunk extends Omit<PngChunkUnknown, "type" | "data"> {
   type: "IDAT";
