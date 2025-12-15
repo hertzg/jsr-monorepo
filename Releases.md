@@ -1,3 +1,9 @@
+### 2025.12.15
+
+#### @binstruct/png 0.2.1 (patch)
+
+- fix(@binstruct/png): add pngsuite to exclude list in deno.json
+
 ### 2025.12.14
 
 #### @binstruct/cli 0.1.2 (patch)
