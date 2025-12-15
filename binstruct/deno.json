@@ -3,6 +3,7 @@
   "version": "3.0.2",
   "exports": {
     ".": "./mod.ts",
+    "./bits": "./bits/mod.ts",
     "./buffer": "./buffer.ts",
     "./numeric": "./numeric/numeric.ts",
     "./array": "./array/array.ts",
