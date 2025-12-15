@@ -411,7 +411,7 @@ export {
 export { string } from "./string/string.ts";
 export { struct } from "./struct/struct.ts";
 export { bytes } from "./bytes/bytes.ts";
-export { bitStruct, type BitSchema } from "./bits/bit-struct.ts";
+export { type BitSchema, bitStruct } from "./bits/bit-struct.ts";
 export { refine, type Refiner } from "./refine/refine.ts";
 export { type RefinedUnion, refineSwitch } from "./refine/switch.ts";
 export { decode, encode } from "./helpers.ts";

@@ -442,12 +442,12 @@ Deno.test("bitStruct: real-world use cases", async (t) => {
   await t.step("PNG/Zlib header (2 bytes)", () => {
     const zlibHeader = bitStruct({
       // Byte 0 (CMF): MSB-first means CINFO comes first, then CM
-      compressionInfo: 4,    // CMF bits 7-4: Compression info
-      compressionMethod: 4,   // CMF bits 3-0: Compression method
+      compressionInfo: 4, // CMF bits 7-4: Compression info
+      compressionMethod: 4, // CMF bits 3-0: Compression method
       // Byte 1 (FLG)
-      fcheck: 5,             // FLG bits 7-3: Check bits
-      fdict: 1,              // FLG bit 2: Preset dictionary flag
-      flevel: 2,             // FLG bits 1-0: Compression level
+      fcheck: 5, // FLG bits 7-3: Check bits
+      fdict: 1, // FLG bit 2: Preset dictionary flag
+      flevel: 2, // FLG bits 1-0: Compression level
     });
 
     // Common zlib header: 0x78 0x9C
@@ -458,9 +458,9 @@ Deno.test("bitStruct: real-world use cases", async (t) => {
 
     assertEquals(decoded.compressionInfo, 7);
     assertEquals(decoded.compressionMethod, 8);
-    assertEquals(decoded.fcheck, 19);  // 0b10011 = 19, not 28
+    assertEquals(decoded.fcheck, 19); // 0b10011 = 19, not 28
     assertEquals(decoded.fdict, 1);
-    assertEquals(decoded.flevel, 0);   // bits 1-0 of 0x9C = 00
+    assertEquals(decoded.flevel, 0); // bits 1-0 of 0x9C = 00
   });
 
   await t.step("Ethernet VLAN tag (2 bytes)", () => {
@@ -487,7 +487,12 @@ Deno.test("bitStruct: real-world use cases", async (t) => {
       fragmentOffset: 13,
     });
 
-    const value = { reserved: 0, dontFragment: 1, moreFragments: 0, fragmentOffset: 0 };
+    const value = {
+      reserved: 0,
+      dontFragment: 1,
+      moreFragments: 0,
+      fragmentOffset: 0,
+    };
     const buffer = new Uint8Array(2);
 
     ipv4FragmentField.encode(value, buffer);
