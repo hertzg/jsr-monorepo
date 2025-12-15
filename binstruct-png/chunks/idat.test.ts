@@ -3,7 +3,7 @@ import { createContext } from "@hertzg/binstruct";
 import type { PngChunkUnknown } from "../mod.ts";
 import { type IdatChunk, idatChunkRefiner } from "./idat.ts";
 import { deflateSync, inflateSync } from "node:zlib";
-import { decodeHeader } from "../zlib.ts";
+import { decodeHeader } from "../zlib/header.ts";
 
 Deno.test("idatChunkRefiner() - refines IDAT chunk", () => {
   const refiner = idatChunkRefiner();

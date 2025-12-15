@@ -28,7 +28,7 @@ Deno.test("zlibUncompressedCoder() - decodes zlib compressed data and extracts h
     "Compression Info does not match",
   );
   assertEquals(
-    decoded.header.isDictionaryPresent,
+    decoded.header.fdict,
     0,
     "Dictionary should not be preset",
   );
@@ -70,8 +70,8 @@ Deno.test("zlibUncompressedCoder() - validates real zlib compression", async (t)
 
       assertEquals(decoded.header.compressionMethod, 8, 'Compression Method does not match');
       assertEquals(decoded.header.compressionInfo, 7, 'Compression Info does not match');
-      assertEquals(decoded.header.isDictionaryPresent, 0, 'Dictionary should not be preset')
-      assertEquals(decoded.header.compressionLevel, fLevel, 'Compression Level does not match (flags)');
+      assertEquals(decoded.header.fdict, 0, 'Dictionary should not be preset')
+      assertEquals(decoded.header.flevel, fLevel, 'Compression Level does not match (flags)');
 
       assertEquals(bytesRead, originalCompressed.length);
       assertEquals(decoded.uncompressed, originalUncompressed, 'Decompressed data does not match');

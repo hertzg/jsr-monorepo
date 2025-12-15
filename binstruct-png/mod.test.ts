@@ -13,7 +13,7 @@ import type { IdatChunk } from "./chunks/idat.ts";
 import type { IendChunk } from "./chunks/iend.ts";
 import type { PlteChunk } from "./chunks/plte.ts";
 import { deflateSync } from "node:zlib";
-import { decodeHeader } from "./zlib.ts";
+import { decodeHeader } from "./zlib/header.ts";
 
 const PNG_SIGNATURE = new Uint8Array([137, 80, 78, 71, 13, 10, 26, 10]);
 const PNG_SIGNATURE_DECODED = {
