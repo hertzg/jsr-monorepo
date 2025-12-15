@@ -28,6 +28,7 @@
  *
  * ### Structure Creation
  * - {@link struct}: Create coders for structured data (objects)
+ * - {@link bitStruct}: Create coders for bit-packed structures (sub-byte fields)
  *
  * ### Array Handling
  * - {@link array}: Universal array coder with automatic type selection
@@ -60,6 +61,7 @@
  *
  * ### Submodules
  * - [`array`](https://jsr.io/@hertzg/binstruct/doc/array): Array coders including {@link arrayWhile}
+ * - [`bits`](https://jsr.io/@hertzg/binstruct/doc/bits): Bit-level packed field encoding/decoding via {@link bitStruct}
  * - [`buffer`](https://jsr.io/@hertzg/binstruct/doc/buffer): Buffer helpers like {@link autoGrowBuffer}
  * - [`bytes`](https://jsr.io/@hertzg/binstruct/doc/bytes): Raw byte slice coders via {@link bytes}
  * - [`helpers`](https://jsr.io/@hertzg/binstruct/doc/helpers): High-level {@link encode} / {@link decode}
@@ -409,6 +411,7 @@ export {
 export { string } from "./string/string.ts";
 export { struct } from "./struct/struct.ts";
 export { bytes } from "./bytes/bytes.ts";
+export { bitStruct, type BitSchema } from "./bits/bit-struct.ts";
 export { refine, type Refiner } from "./refine/refine.ts";
 export { type RefinedUnion, refineSwitch } from "./refine/switch.ts";
 export { decode, encode } from "./helpers.ts";
