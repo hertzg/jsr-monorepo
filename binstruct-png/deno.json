@@ -4,5 +4,8 @@
   "exports": {
     ".": "./mod.ts"
   },
+  "exclude": [
+    "./pngsuite"
+  ],
   "types": "./mod.ts"
 }
