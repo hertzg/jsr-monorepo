@@ -123,3 +123,57 @@ Deno.test(`compression`, async (t) => {
     });
   }
 });
+
+Deno.test(`transparency (tRNS)`, async (t) => {
+  await t.step(`basn3p08-trns.png - indexed color with transparency`, async (t) => {
+    const bytes = await Deno.readFile(
+      join(PNGSUITE_DIR, "./fixtures/basn3p08-trns.png"),
+    );
+    const [decoded] = pngFile().decode(bytes);
+
+    await t.step(`IHDR chunk`, () => {
+      const ihdr = decoded.chunks.find((c) => c.type === "IHDR");
+      assertExists(ihdr, "IHDR chunk not found");
+      assertEquals(ihdr.data.colorType, 3, "Expected indexed color type");
+      assertEquals(ihdr.data.bitDepth, 8, "Expected 8-bit depth");
+    });
+
+    await t.step(`tRNS chunk exists`, () => {
+      const trns = decoded.chunks.find((c) => c.type === "tRNS");
+      assertExists(trns, "tRNS chunk not found");
+      assertEquals(trns.type, "tRNS", "Chunk type should be tRNS");
+    });
+
+    await t.step(`tRNS chunk has alpha values`, () => {
+      const trns = decoded.chunks.find((c) => c.type === "tRNS");
+      assertExists(trns);
+      assertEquals(trns.data.values.length, 173, "Expected 173 alpha values");
+      assertEquals(Array.isArray(trns.data.values), true, "Values should be an array");
+    });
+
+    await t.step(`tRNS comes after PLTE and before IDAT`, () => {
+      const plteIndex = decoded.chunks.findIndex((c) => c.type === "PLTE");
+      const trnsIndex = decoded.chunks.findIndex((c) => c.type === "tRNS");
+      const idatIndex = decoded.chunks.findIndex((c) => c.type === "IDAT");
+
+      assertExists(plteIndex >= 0, "PLTE chunk should exist");
+      assertExists(trnsIndex >= 0, "tRNS chunk should exist");
+      assertExists(idatIndex >= 0, "IDAT chunk should exist");
+
+      assertEquals(
+        trnsIndex > plteIndex,
+        true,
+        "tRNS should come after PLTE",
+      );
+      assertEquals(
+        trnsIndex < idatIndex,
+        true,
+        "tRNS should come before IDAT",
+      );
+    });
+
+    await t.step(`snapshot`, async () => {
+      await assertSnapshot(t, decoded);
+    });
+  });
+});

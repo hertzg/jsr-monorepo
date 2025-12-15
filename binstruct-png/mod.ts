@@ -62,6 +62,7 @@ import { type IhdrChunk, ihdrChunkRefiner } from "./chunks/ihdr.ts";
 import { type IdatChunk, idatChunkRefiner } from "./chunks/idat.ts";
 import { type IendChunk, iendChunkRefiner } from "./chunks/iend.ts";
 import { type PlteChunk, plteChunkRefiner } from "./chunks/plte.ts";
+import { type TrnsChunk, trnsChunkRefiner } from "./chunks/trns.ts";
 
 /**
  * PNG file structure containing signature and chunks.
@@ -148,7 +149,7 @@ export function pngFileChunks<TChunk>(
 }
 
 export function pngChunkRefined(): Coder<
-  PngChunkUnknown | IhdrChunk | PlteChunk | IdatChunk | IendChunk
+  PngChunkUnknown | IhdrChunk | PlteChunk | TrnsChunk | IdatChunk | IendChunk
 > {
   const typeCoder = string(4);
 
@@ -167,6 +168,7 @@ export function pngChunkRefined(): Coder<
     {
       IHDR: ihdrChunkRefiner(),
       PLTE: plteChunkRefiner(),
+      tRNS: trnsChunkRefiner(),
       IDAT: idatChunkRefiner(),
       IEND: iendChunkRefiner(),
       UNKNOWN: identityRefiner(),
@@ -175,17 +177,17 @@ export function pngChunkRefined(): Coder<
       refine: (chunk, ctx) => {
         const type = decode(typeCoder, chunk.type, ctx);
         // Return refiner key if known, otherwise use UNKNOWN passthrough
-        return (type === "IHDR" || type === "PLTE" || type === "IDAT" ||
-            type === "IEND")
+        return (type === "IHDR" || type === "PLTE" || type === "tRNS" ||
+            type === "IDAT" || type === "IEND")
           ? type
           : "UNKNOWN";
       },
       unrefine: (chunk, _ctx) => {
         // For refined chunks, type is already a string
         const type = chunk.type as string;
-        return (type === "IHDR" || type === "PLTE" || type === "IDAT" ||
-            type === "IEND")
-          ? type as "IHDR" | "PLTE" | "IDAT" | "IEND" | "UNKNOWN"
+        return (type === "IHDR" || type === "PLTE" || type === "tRNS" ||
+            type === "IDAT" || type === "IEND")
+          ? type as "IHDR" | "PLTE" | "tRNS" | "IDAT" | "IEND" | "UNKNOWN"
           : "UNKNOWN";
       },
     },
@@ -195,7 +197,7 @@ export function pngChunkRefined(): Coder<
 }
 
 export function pngFile(): Coder<
-  PngFile<PngChunkUnknown | IhdrChunk | PlteChunk | IdatChunk | IendChunk>
+  PngFile<PngChunkUnknown | IhdrChunk | PlteChunk | TrnsChunk | IdatChunk | IendChunk>
 > {
   return pngFileChunks(pngChunkRefined());
 }
