@@ -177,3 +177,46 @@ Deno.test(`transparency (tRNS)`, async (t) => {
     });
   });
 });
+
+Deno.test(`background (bKGD)`, async (t) => {
+  for (
+    const { file, colorType, bitDepth, expectedValues } of [
+      { file: "./fixtures/bgbn4a08.png", colorType: 4, bitDepth: 8, expectedValues: [0, 0] }, // Grayscale black
+      { file: "./fixtures/bggn4a16.png", colorType: 4, bitDepth: 16, expectedValues: [171, 132] }, // Grayscale gray
+      { file: "./fixtures/bgwn6a08.png", colorType: 6, bitDepth: 8, expectedValues: [0, 255, 0, 255, 0, 255] }, // RGB white
+      { file: "./fixtures/bgyn6a16.png", colorType: 6, bitDepth: 16, expectedValues: [255, 255, 255, 255, 0, 0] }, // RGB yellow
+    ]
+  ) {
+    await t.step(`${basename(file)} - color:${colorType}, bits:${bitDepth}`, async (t) => {
+      const bytes = await Deno.readFile(join(PNGSUITE_DIR, file));
+      const [decoded] = pngFile().decode(bytes);
+
+      await t.step(`IHDR chunk`, () => {
+        const ihdr = decoded.chunks.find((c) => c.type === "IHDR");
+        assertExists(ihdr, "IHDR chunk not found");
+        assertEquals(ihdr.data.colorType, colorType, "Unexpected color type");
+        assertEquals(ihdr.data.bitDepth, bitDepth, "Unexpected bit depth");
+      });
+
+      await t.step(`bKGD chunk`, () => {
+        const bkgd = decoded.chunks.find((c) => c.type === "bKGD");
+        assertExists(bkgd, "bKGD chunk not found");
+        assertEquals(bkgd.type, "bKGD", "Chunk type should be bKGD");
+        assertEquals(bkgd.data.values, expectedValues, "Unexpected background color values");
+      });
+
+      await t.step(`bKGD comes before IDAT`, () => {
+        const bkgdIndex = decoded.chunks.findIndex((c) => c.type === "bKGD");
+        const idatIndex = decoded.chunks.findIndex((c) => c.type === "IDAT");
+
+        assertExists(bkgdIndex >= 0, "bKGD chunk should exist");
+        assertExists(idatIndex >= 0, "IDAT chunk should exist");
+        assertEquals(bkgdIndex < idatIndex, true, "bKGD should come before IDAT");
+      });
+
+      await t.step(`snapshot`, async () => {
+        await assertSnapshot(t, decoded);
+      });
+    });
+  }
+});
