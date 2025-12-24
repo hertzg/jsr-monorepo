@@ -64,6 +64,9 @@ import { type IendChunk, iendChunkRefiner } from "./chunks/iend.ts";
 import { type PlteChunk, plteChunkRefiner } from "./chunks/plte.ts";
 import { type TrnsChunk, trnsChunkRefiner } from "./chunks/trns.ts";
 import { type BkgdChunk, bkgdChunkRefiner } from "./chunks/bkgd.ts";
+import { type GamaChunk, gamaChunkRefiner } from "./chunks/gama.ts";
+import { type SrgbChunk, srgbChunkRefiner } from "./chunks/srgb.ts";
+import { type PhysChunk, physChunkRefiner } from "./chunks/phys.ts";
 
 /**
  * PNG file structure containing signature and chunks.
@@ -150,7 +153,16 @@ export function pngFileChunks<TChunk>(
 }
 
 export function pngChunkRefined(): Coder<
-  PngChunkUnknown | IhdrChunk | PlteChunk | TrnsChunk | BkgdChunk | IdatChunk | IendChunk
+  | PngChunkUnknown
+  | IhdrChunk
+  | PlteChunk
+  | TrnsChunk
+  | BkgdChunk
+  | GamaChunk
+  | SrgbChunk
+  | PhysChunk
+  | IdatChunk
+  | IendChunk
 > {
   const typeCoder = string(4);
 
@@ -171,6 +183,9 @@ export function pngChunkRefined(): Coder<
       PLTE: plteChunkRefiner(),
       tRNS: trnsChunkRefiner(),
       bKGD: bkgdChunkRefiner(),
+      gAMA: gamaChunkRefiner(),
+      sRGB: srgbChunkRefiner(),
+      pHYs: physChunkRefiner(),
       IDAT: idatChunkRefiner(),
       IEND: iendChunkRefiner(),
       UNKNOWN: identityRefiner(),
@@ -180,7 +195,8 @@ export function pngChunkRefined(): Coder<
         const type = decode(typeCoder, chunk.type, ctx);
         // Return refiner key if known, otherwise use UNKNOWN passthrough
         return (type === "IHDR" || type === "PLTE" || type === "tRNS" ||
-            type === "bKGD" || type === "IDAT" || type === "IEND")
+            type === "bKGD" || type === "gAMA" || type === "sRGB" ||
+            type === "pHYs" || type === "IDAT" || type === "IEND")
           ? type
           : "UNKNOWN";
       },
@@ -188,8 +204,19 @@ export function pngChunkRefined(): Coder<
         // For refined chunks, type is already a string
         const type = chunk.type as string;
         return (type === "IHDR" || type === "PLTE" || type === "tRNS" ||
-            type === "bKGD" || type === "IDAT" || type === "IEND")
-          ? type as "IHDR" | "PLTE" | "tRNS" | "bKGD" | "IDAT" | "IEND" | "UNKNOWN"
+            type === "bKGD" || type === "gAMA" || type === "sRGB" ||
+            type === "pHYs" || type === "IDAT" || type === "IEND")
+          ? type as
+            | "IHDR"
+            | "PLTE"
+            | "tRNS"
+            | "bKGD"
+            | "gAMA"
+            | "sRGB"
+            | "pHYs"
+            | "IDAT"
+            | "IEND"
+            | "UNKNOWN"
           : "UNKNOWN";
       },
     },
@@ -199,7 +226,18 @@ export function pngChunkRefined(): Coder<
 }
 
 export function pngFile(): Coder<
-  PngFile<PngChunkUnknown | IhdrChunk | PlteChunk | TrnsChunk | BkgdChunk | IdatChunk | IendChunk>
+  PngFile<
+    | PngChunkUnknown
+    | IhdrChunk
+    | PlteChunk
+    | TrnsChunk
+    | BkgdChunk
+    | GamaChunk
+    | SrgbChunk
+    | PhysChunk
+    | IdatChunk
+    | IendChunk
+  >
 > {
   return pngFileChunks(pngChunkRefined());
 }
