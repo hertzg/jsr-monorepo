@@ -150,7 +150,13 @@ export function pngFileChunks<TChunk>(
 }
 
 export function pngChunkRefined(): Coder<
-  PngChunkUnknown | IhdrChunk | PlteChunk | TrnsChunk | BkgdChunk | IdatChunk | IendChunk
+  | PngChunkUnknown
+  | IhdrChunk
+  | PlteChunk
+  | TrnsChunk
+  | BkgdChunk
+  | IdatChunk
+  | IendChunk
 > {
   const typeCoder = string(4);
 
@@ -189,7 +195,14 @@ export function pngChunkRefined(): Coder<
         const type = chunk.type as string;
         return (type === "IHDR" || type === "PLTE" || type === "tRNS" ||
             type === "bKGD" || type === "IDAT" || type === "IEND")
-          ? type as "IHDR" | "PLTE" | "tRNS" | "bKGD" | "IDAT" | "IEND" | "UNKNOWN"
+          ? type as
+            | "IHDR"
+            | "PLTE"
+            | "tRNS"
+            | "bKGD"
+            | "IDAT"
+            | "IEND"
+            | "UNKNOWN"
           : "UNKNOWN";
       },
     },
@@ -199,7 +212,15 @@ export function pngChunkRefined(): Coder<
 }
 
 export function pngFile(): Coder<
-  PngFile<PngChunkUnknown | IhdrChunk | PlteChunk | TrnsChunk | BkgdChunk | IdatChunk | IendChunk>
+  PngFile<
+    | PngChunkUnknown
+    | IhdrChunk
+    | PlteChunk
+    | TrnsChunk
+    | BkgdChunk
+    | IdatChunk
+    | IendChunk
+  >
 > {
   return pngFileChunks(pngChunkRefined());
 }

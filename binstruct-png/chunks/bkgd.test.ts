@@ -329,11 +329,12 @@ Deno.test("bkgdChunkRefiner() - grayscale with common values", () => {
   const encodeContext = createContext("encode");
   const decodeContext = createContext("decode");
 
-  const testCases: { name: string; values: [number, number]; value: number }[] = [
-    { name: "Black", values: [0, 0], value: 0 },
-    { name: "Mid-gray", values: [128, 0], value: 32768 },
-    { name: "White", values: [255, 255], value: 65535 },
-  ];
+  const testCases: { name: string; values: [number, number]; value: number }[] =
+    [
+      { name: "Black", values: [0, 0], value: 0 },
+      { name: "Mid-gray", values: [128, 0], value: 32768 },
+      { name: "White", values: [255, 255], value: 65535 },
+    ];
 
   for (const { values, value } of testCases) {
     const original: BkgdChunk = {
