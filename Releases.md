@@ -1,3 +1,21 @@
+### 2025.12.24
+
+#### @binstruct/png 0.3.0 (minor)
+
+- feat(@binstruct/png): add bKGD chunk support with refiner and tests
+- feat(@binstruct/png)!: refactor zlib handling with bit-packed header and
+  remove legacy code
+- chore(@binstruct/png): improve code readability by formatting type definitions
+
+#### @hertzg/binstruct 3.0.3 (patch)
+
+- feat(binstruct): add support for tRNS chunk handling and associated tests
+- feat(binstruct): add bitStruct for bit-level packed field decoding
+
+#### @hertzg/ip 0.1.0 (minor)
+
+- feat(@hertzg/ip): add IPv4 and CIDR utilities with address generation
+
 ### 2025.12.15
 
 #### @binstruct/png 0.2.1 (patch)
