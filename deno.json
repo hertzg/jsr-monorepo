@@ -27,6 +27,7 @@
     "./wg-conf",
     "./mymagti-api",
     "./bx",
-    "./routeros-api"
+    "./routeros-api",
+    "./ip"
   ]
 }

@@ -1,0 +1,9 @@
+{
+  "name": "@hertzg/ip",
+  "version": "0.1.0",
+  "exports": {
+    ".": "./mod.ts",
+    "./ipv4": "./ipv4.ts",
+    "./cidrv4": "./cidrv4.ts"
+  }
+}
