@@ -70,8 +70,11 @@ deno task bump
 - `wg-keys` - WireGuard key management
 - `wg-ini` - INI file parsing
 - `wg-conf` - WireGuard configuration handling
+- `routeros-api` - MikroTik RouterOS API client
+- `tplink-api` - TP-Link Router API client
 - `mymagti-api` - MyMagti API client
-- `bx` - Binary utilities
+- `bx` - Binary hex string utilities
+- `ip` - IPv4/CIDR utilities
 
 ## Core Architecture
 
@@ -306,6 +309,7 @@ both tiresome and error-prone.
 - `@hertzg/wg-conf`
 - `@hertzg/mymagti-api`
 - `@hertzg/bx`
+- `@hertzg/ip`
 - `@hertzg/routeros-api`
 - `@hertzg/tplink-api`
 
