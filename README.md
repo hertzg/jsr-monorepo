@@ -42,10 +42,11 @@ deno task lint
 
 # View coverage
 deno task cov
-
-# Bump workspace versions
-deno task bump
 ```
+
+## Releasing
+
+See [RELEASE.md](RELEASE.md) for the release process.
 
 ## License
 
