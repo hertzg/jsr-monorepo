@@ -2,8 +2,10 @@
   "importMap": "./import_map.json",
   "tasks": {
     "test": "deno test --doc --allow-all --parallel --coverage --trace-leaks --clean",
-    "lint": "deno lint && deno task lint:import-map",
+    "lint": "deno lint && deno task lint:import-map && deno task lint:labeler && deno task lint:title",
     "lint:import-map": "deno run -A _tools/check_import_map.ts",
+    "lint:labeler": "deno run -A _tools/check_labeler.ts",
+    "lint:title": "deno run -A _tools/check_title.ts",
     "cov": "deno coverage --ignore=\"**/*.generated.mjs,**/_test_utils.ts,.github\"",
     "cov:gen": "deno task cov --lcov --output=cov.lcov",
     "cov:view": "deno task cov --html",
@@ -17,18 +19,18 @@
     "CLAUDE.md"
   ],
   "workspace": [
-    "./binstruct",
-    "./binstruct-cli",
-    "./binstruct-ethernet",
-    "./binstruct-png",
-    "./binstruct-wav",
-    "./wg-keys",
-    "./wg-ini",
-    "./wg-conf",
-    "./mymagti-api",
-    "./bx",
-    "./routeros-api",
-    "./tplink-api",
-    "./ip"
+    "./packages/binstruct",
+    "./packages/binstruct-cli",
+    "./packages/binstruct-ethernet",
+    "./packages/binstruct-png",
+    "./packages/binstruct-wav",
+    "./packages/wg-keys",
+    "./packages/wg-ini",
+    "./packages/wg-conf",
+    "./packages/mymagti-api",
+    "./packages/bx",
+    "./packages/routeros-api",
+    "./packages/tplink-api",
+    "./packages/ip"
   ]
 }

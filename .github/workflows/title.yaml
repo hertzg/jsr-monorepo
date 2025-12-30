@@ -32,10 +32,16 @@ jobs:
             style
             test
           scopes: |
-            binseek(/unstable)?
-            binstruct(/unstable)?
-            bx(/unstable)?
-            mymagti-api(/unstable)?
-            wg-conf(/unstable)?
-            wg-ini(/unstable)?
-            wg-keys(/unstable)?
+            @binstruct/cli
+            @binstruct/ethernet
+            @binstruct/png
+            @binstruct/wav
+            @hertzg/binstruct
+            @hertzg/bx
+            @hertzg/ip
+            @hertzg/mymagti-api
+            @hertzg/routeros-api
+            @hertzg/tplink-api
+            @hertzg/wg-conf
+            @hertzg/wg-ini
+            @hertzg/wg-keys

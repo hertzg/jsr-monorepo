@@ -8,6 +8,7 @@
     "@std/testing/bdd": "jsr:@std/testing@^1.0.15/bdd",
     "@std/testing/mock": "jsr:@std/testing@^1.0.15/mock",
     "@std/testing/snapshot": "jsr:@std/testing@^1.0.15/snapshot",
+    "@std/yaml": "jsr:@std/yaml@^1.0.5",
     "@std/expect": "jsr:@std/expect@1.0.12",
     "@std/streams": "jsr:@std/streams@^1.0.11",
     "@std/encoding/base64": "jsr:@std/encoding@^1.0.10/base64",

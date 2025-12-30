@@ -1,15 +1,39 @@
-wg-ini:
+"@binstruct/cli":
   - changed-files:
-      - any-glob-to-any-file: wg-ini/**
-wg-keys:
+      - any-glob-to-any-file: packages/binstruct-cli/**
+"@binstruct/ethernet":
   - changed-files:
-      - any-glob-to-any-file: wg-keys/**
-wg-conf:
+      - any-glob-to-any-file: packages/binstruct-ethernet/**
+"@binstruct/png":
   - changed-files:
-      - any-glob-to-any-file: wg-conf/**
-mymagti-api:
+      - any-glob-to-any-file: packages/binstruct-png/**
+"@binstruct/wav":
   - changed-files:
-      - any-glob-to-any-file: mymagti-api/**
-bx:
+      - any-glob-to-any-file: packages/binstruct-wav/**
+"@hertzg/binstruct":
   - changed-files:
-      - any-glob-to-any-file: bx/**
+      - any-glob-to-any-file: packages/binstruct/**
+"@hertzg/bx":
+  - changed-files:
+      - any-glob-to-any-file: packages/bx/**
+"@hertzg/ip":
+  - changed-files:
+      - any-glob-to-any-file: packages/ip/**
+"@hertzg/mymagti-api":
+  - changed-files:
+      - any-glob-to-any-file: packages/mymagti-api/**
+"@hertzg/routeros-api":
+  - changed-files:
+      - any-glob-to-any-file: packages/routeros-api/**
+"@hertzg/tplink-api":
+  - changed-files:
+      - any-glob-to-any-file: packages/tplink-api/**
+"@hertzg/wg-conf":
+  - changed-files:
+      - any-glob-to-any-file: packages/wg-conf/**
+"@hertzg/wg-ini":
+  - changed-files:
+      - any-glob-to-any-file: packages/wg-ini/**
+"@hertzg/wg-keys":
+  - changed-files:
+      - any-glob-to-any-file: packages/wg-keys/**

@@ -62,19 +62,21 @@ deno task bump
 
 ### Workspaces
 
-- `binstruct` - Core binary structure encoding/decoding library
-- `binstruct-cli` - CLI tools for binary structure operations
-- `binstruct-ethernet` - Ethernet frame parsing
-- `binstruct-png` - PNG file format support
-- `binstruct-wav` - WAV audio file format support
-- `wg-keys` - WireGuard key management
-- `wg-ini` - INI file parsing
-- `wg-conf` - WireGuard configuration handling
-- `routeros-api` - MikroTik RouterOS API client
-- `tplink-api` - TP-Link Router API client
-- `mymagti-api` - MyMagti API client
-- `bx` - Binary hex string utilities
-- `ip` - IPv4/CIDR utilities
+All packages are located in the `packages/` directory:
+
+- `packages/binstruct` - Core binary structure encoding/decoding library
+- `packages/binstruct-cli` - CLI tools for binary structure operations
+- `packages/binstruct-ethernet` - Ethernet frame parsing
+- `packages/binstruct-png` - PNG file format support
+- `packages/binstruct-wav` - WAV audio file format support
+- `packages/wg-keys` - WireGuard key management
+- `packages/wg-ini` - INI file parsing
+- `packages/wg-conf` - WireGuard configuration handling
+- `packages/routeros-api` - MikroTik RouterOS API client
+- `packages/tplink-api` - TP-Link Router API client
+- `packages/mymagti-api` - MyMagti API client
+- `packages/bx` - Binary hex string utilities
+- `packages/ip` - IPv4/CIDR utilities
 
 ## Core Architecture
 
@@ -315,17 +317,23 @@ both tiresome and error-prone.
 
 ## Adding New Workspaces
 
-When adding a new workspace to the monorepo, the following files require manual
-updates:
+When adding a new workspace to the monorepo, update these files:
 
 1. **CLAUDE.md** (this file):
    - Add the workspace to the "Workspaces" list
    - Add the package name to the "Valid Commit Scopes" list
 
 2. **README.md**:
-   - Add the new package to the appropriate category table with JSR badge
+   - Add the new package to the table with JSR badge
 
-These updates are required before releasing the new workspace.
+3. **Configuration files** (validated by `deno task lint`):
+   - `.github/labeler.yml` - Add label with package name and glob pattern
+   - `.github/workflows/title.yaml` - Add package name to scopes
+   - `.github/release.yml` - Add package name to scopes
+   - `import_map.json` - Add JSR import for the package
+
+The lint tools `lint:labeler`, `lint:title`, and `lint:import-map` will fail if
+these files are not updated correctly.
 
 ## Common Patterns
 
