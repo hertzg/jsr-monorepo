@@ -1,6 +1,7 @@
 {
   "imports": {
     "@std/assert": "jsr:@std/assert@^1.0.14",
+    "@std/bytes": "jsr:@std/bytes@^1.0.6",
     "@std/cli": "jsr:@std/cli@^1.0.0",
     "@std/jsonc": "jsr:@std/jsonc@^1.0.0",
     "@std/testing": "jsr:@std/testing@^1.0.15",
@@ -24,6 +25,8 @@
     "@binstruct/ethernet": "jsr:@binstruct/ethernet@^0.1.1",
     "@binstruct/png": "jsr:@binstruct/png@^0.3.0",
     "@binstruct/wav": "jsr:@binstruct/wav@^0.1.1",
-    "json5": "npm:json5@^2.2.3"
+    "json5": "npm:json5@^2.2.3",
+    "@noble/ciphers/aes": "jsr:@noble/ciphers@1.2.1/aes",
+    "@noble/hashes/legacy": "jsr:@noble/hashes@2.0.1/legacy.js"
   }
 }

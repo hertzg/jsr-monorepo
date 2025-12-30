@@ -28,6 +28,7 @@
     "./mymagti-api",
     "./bx",
     "./routeros-api",
+    "./tplink-api",
     "./ip"
   ]
 }

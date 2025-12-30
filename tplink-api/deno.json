@@ -1,0 +1,13 @@
+{
+  "name": "@hertzg/tplink-api",
+  "version": "1.0.0",
+  "exports": "./mod.ts",
+  "publish": {
+    "include": [
+      "**/*.ts"
+    ],
+    "exclude": [
+      "**/*.test.ts"
+    ]
+  }
+}
