@@ -1,0 +1,21 @@
+#!/bin/sh
+# Pre-push hook to ensure CI will pass
+# Install with: deno task setup:hooks
+
+set -e
+
+echo "Running pre-push checks..."
+
+echo "=> Checking formatting..."
+deno fmt --check
+
+echo "=> Running linter..."
+deno task lint
+
+echo "=> Running tests..."
+deno task test
+
+echo "=> Verifying publish would succeed..."
+deno publish --dry-run
+
+echo "All pre-push checks passed!"

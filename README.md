@@ -32,6 +32,13 @@ All packages are published to JSR. Install using your preferred package manager:
 
 - [Deno](https://deno.land/) 2.1.4 or later
 
+### Setup
+
+```bash
+# Install pre-push hook (runs all CI checks before push)
+deno task setup:hooks
+```
+
 ### Commands
 
 ```bash

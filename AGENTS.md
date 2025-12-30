@@ -270,6 +270,17 @@ Both `deno task lint` and `deno task test` must pass before:
 - Committing code changes
 - Considering work production-ready
 
+### Pre-Push Hook
+
+Install the pre-push hook to automatically run all CI checks before pushing:
+
+```bash
+deno task setup:hooks
+```
+
+This runs `deno fmt --check`, `deno task lint`, `deno task test`, and
+`deno publish --dry-run` before each push, ensuring CI will pass.
+
 ### Commit Message Rules
 
 - Use Conventional Commits in the form `type(scope): summary`; these messages
