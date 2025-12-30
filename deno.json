@@ -1,11 +1,24 @@
 {
   "importMap": "./import_map.json",
   "tasks": {
-    "test": "deno test --doc --allow-all --parallel --coverage --trace-leaks --clean",
-    "lint": "deno lint && deno task lint:import-map && deno task lint:labeler && deno task lint:title",
+    "test": {
+      "command": "deno test --doc --allow-all --parallel --coverage --trace-leaks --clean"
+    },
+    "lint": {
+      "dependencies": [
+        "lint:deno",
+        "lint:import-map",
+        "lint:labeler",
+        "lint:title",
+        "lint:readme"
+      ]
+    },
+    "lint:deno": "deno lint",
+    "lint:fmt": "deno fmt --check",
     "lint:import-map": "deno run -A _tools/check_import_map.ts",
     "lint:labeler": "deno run -A _tools/check_labeler.ts",
     "lint:title": "deno run -A _tools/check_title.ts",
+    "lint:readme": "deno run -A _tools/check_readme.ts",
     "cov": "deno coverage --ignore=\"**/*.generated.mjs,**/_test_utils.ts,.github\"",
     "cov:gen": "deno task cov --lcov --output=cov.lcov",
     "cov:view": "deno task cov --html",

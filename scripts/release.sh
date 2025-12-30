@@ -50,14 +50,6 @@ wait_with_spinner() {
 # Step 1: Pre-flight checks
 log_info "Step 1/9: Running pre-flight checks..."
 
-# Run tests
-log_info "Running tests..."
-if ! deno task test > /tmp/release_test.log 2>&1; then
-  log_error "Tests failed! See /tmp/release_test.log"
-  exit 1
-fi
-log_success "Tests passed"
-
 # Run lint
 log_info "Running linter..."
 if ! deno task lint > /tmp/release_lint.log 2>&1; then
@@ -66,13 +58,13 @@ if ! deno task lint > /tmp/release_lint.log 2>&1; then
 fi
 log_success "Linting passed"
 
-# Check formatting
-log_info "Checking formatting..."
-if ! deno fmt --check > /tmp/release_fmt.log 2>&1; then
-  log_error "Formatting check failed! Run: deno fmt"
+# Run tests
+log_info "Running tests..."
+if ! deno task test > /tmp/release_test.log 2>&1; then
+  log_error "Tests failed! See /tmp/release_test.log"
   exit 1
 fi
-log_success "Formatting check passed"
+log_success "Tests passed"
 
 log_success "All pre-flight checks passed"
 

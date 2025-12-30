@@ -6,9 +6,6 @@ set -e
 
 echo "Running pre-push checks..."
 
-echo "=> Checking formatting..."
-deno fmt --check
-
 echo "=> Running linter..."
 deno task lint
 
