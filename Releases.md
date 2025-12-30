@@ -1,5 +1,12 @@
 ### 2025.12.30
 
+#### @hertzg/tplink-api 1.0.1 (patch)
+
+- fix(@hertzg/tplink-api): update import paths for noble ciphers and hashes to
+  include file extensions
+
+### 2025.12.30
+
 #### @hertzg/tplink-api 1.0.0 (major)
 
 - feat(@hertzg/tplink-api): enhance documentation with detailed usage examples
