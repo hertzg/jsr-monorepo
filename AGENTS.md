@@ -313,7 +313,19 @@ both tiresome and error-prone.
 - `@hertzg/routeros-api`
 - `@hertzg/tplink-api`
 
-Update this list whenever new workspaces are added or renamed.
+## Adding New Workspaces
+
+When adding a new workspace to the monorepo, the following files require manual
+updates:
+
+1. **CLAUDE.md** (this file):
+   - Add the workspace to the "Workspaces" list
+   - Add the package name to the "Valid Commit Scopes" list
+
+2. **README.md**:
+   - Add the new package to the appropriate category table with JSR badge
+
+These updates are required before releasing the new workspace.
 
 ## Common Patterns
 
