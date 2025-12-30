@@ -1,3 +1,16 @@
+### 2025.12.30
+
+#### @hertzg/tplink-api 1.0.0 (major)
+
+- feat(@hertzg/tplink-api): enhance documentation with detailed usage examples
+  and supported models
+- feat(@hertzg/tplink-api): enhance documentation and add TP-Link API to import
+  map
+- feat(@hertzg/tplink-api): add TP-Link router API with authentication and
+  encryption
+- chore(@hertzg/tplink-api): no unused imports
+- chore(@hertzg/tplink-api): deno fmt
+
 ### 2025.12.24
 
 #### @binstruct/png 0.3.0 (minor)
