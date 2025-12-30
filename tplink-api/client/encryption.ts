@@ -2,7 +2,7 @@
  * Encryption orchestration for TP-Link router API
  */
 
-import { md5 } from "@noble/hashes/legacy";
+import { md5 } from "@noble/hashes/legacy.js";
 import { createCipher } from "./cipher/cipher.ts";
 
 export interface EncryptionOptions {

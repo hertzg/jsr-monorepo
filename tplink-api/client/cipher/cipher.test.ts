@@ -1,6 +1,6 @@
 import { assertEquals } from "@std/assert";
-import { cbc } from "@noble/ciphers/aes";
-import { md5 } from "@noble/hashes/legacy";
+import { cbc } from "@noble/ciphers/aes.js";
+import { md5 } from "@noble/hashes/legacy.js";
 import { concat } from "@std/bytes";
 import { rsaEncrypt, rsaPad } from "./rsa.ts";
 

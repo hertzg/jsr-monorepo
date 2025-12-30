@@ -27,7 +27,7 @@
     "@binstruct/png": "jsr:@binstruct/png@^0.3.0",
     "@binstruct/wav": "jsr:@binstruct/wav@^0.1.1",
     "json5": "npm:json5@^2.2.3",
-    "@noble/ciphers/aes": "jsr:@noble/ciphers@1.2.1/aes",
-    "@noble/hashes/legacy": "jsr:@noble/hashes@2.0.1/legacy.js"
+    "@noble/ciphers/aes.js": "jsr:@noble/ciphers@2.1.1/aes.js",
+    "@noble/hashes/legacy.js": "jsr:@noble/hashes@2.0.1/legacy.js"
   }
 }

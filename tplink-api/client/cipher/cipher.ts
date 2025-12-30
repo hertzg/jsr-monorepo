@@ -2,7 +2,7 @@
  * Cipher factory for TP-Link router encryption
  */
 
-import { cbc } from "@noble/ciphers/aes";
+import { cbc } from "@noble/ciphers/aes.js";
 import { concat } from "@std/bytes";
 import { rsaEncrypt, rsaPad } from "./rsa.ts";
 
