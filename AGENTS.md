@@ -307,6 +307,7 @@ both tiresome and error-prone.
 - `@hertzg/mymagti-api`
 - `@hertzg/bx`
 - `@hertzg/routeros-api`
+- `@hertzg/tplink-api`
 
 Update this list whenever new workspaces are added or renamed.
 

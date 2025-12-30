@@ -1,7 +1,32 @@
 /**
- * Payload serialization for TP-Link router API
+ * Payload serialization for TP-Link router API.
+ *
+ * Handles conversion between action arrays and the router's custom text-based
+ * protocol format used for API requests and responses.
  */
 
+/**
+ * Action type constants for TP-Link router commands.
+ *
+ * These values specify the operation type when constructing actions:
+ * - `GET` (1): Retrieve data
+ * - `SET` (2): Modify data
+ * - `ADD` (3): Add new entry
+ * - `DEL` (4): Delete entry
+ * - `GL` (5): Get list
+ * - `GS` (6): Get/Set combined operation
+ * - `OP` (7): Execute operation
+ * - `CGI` (8): CGI script execution
+ *
+ * @example Get LTE band information
+ * ```ts
+ * import { assertEquals } from "@std/assert";
+ * import { ACT } from "./payload.ts";
+ *
+ * assertEquals(ACT.GET, 1);
+ * assertEquals(ACT.SET, 2);
+ * ```
+ */
 export const ACT = {
   GET: 1,
   SET: 2,
@@ -13,8 +38,35 @@ export const ACT = {
   CGI: 8,
 } as const;
 
+/**
+ * Numeric action type value from the {@linkcode ACT} constant.
+ */
 export type ActionType = (typeof ACT)[keyof typeof ACT];
 
+/**
+ * Action tuple representing a single router command.
+ *
+ * @example Basic GET action
+ * ```ts
+ * import { ACT, type Action } from "./payload.ts";
+ *
+ * const action: Action = [ACT.GET, "LTE_BANDINFO"];
+ * ```
+ *
+ * @example GET with specific attributes to retrieve
+ * ```ts
+ * import { ACT, type Action } from "./payload.ts";
+ *
+ * const action: Action = [ACT.GET, "LTE_SMS_UNREADMSGBOX", ["totalNumber"]];
+ * ```
+ *
+ * @example SET with attribute values
+ * ```ts
+ * import { ACT, type Action } from "./payload.ts";
+ *
+ * const action: Action = [ACT.SET, "LTE_SMS_UNREADMSGBOX", { pageNumber: "1" }];
+ * ```
+ */
 export type Action = [
   type: ActionType,
   oid: string,
@@ -23,27 +75,82 @@ export type Action = [
   pStack?: string,
 ];
 
+/**
+ * A parsed section from a router response.
+ */
 export interface Section {
+  /** Stack identifier from the response header */
   stack: string;
+  /** Index of the action this section responds to */
   actionIndex: number;
+  /** Key-value attributes returned by the router */
   attributes?: Record<string, string>;
+  /** Script content for CGI responses */
   script?: string;
+  /** Error code for error sections */
   code?: number;
 }
 
+/**
+ * Placeholder for missing action indices in sparse responses.
+ */
 export interface PlaceholderSection {
+  /** Index of the placeholder action */
   actionIndex: number;
 }
 
+/**
+ * A parsed action from the response, which may be a single section,
+ * multiple sections (for actions returning multiple results), or a placeholder.
+ */
 export type ParsedAction = Section | Section[] | PlaceholderSection;
 
+/**
+ * Parsed response from the router containing error status and action results.
+ */
 export interface ParsedResponse {
+  /** Error code from the response, or null if no error */
   error: number | null;
+  /** Array of parsed actions corresponding to request action indices */
   actions: ParsedAction[];
 }
 
 const LINE_BREAK = "\r\n";
 
+/**
+ * Serializes an array of actions into the router's request payload format.
+ *
+ * The output format consists of:
+ * 1. A preamble line with action types joined by `&`
+ * 2. Action blocks with headers `[oid#stack#pStack]index,attrCount`
+ * 3. Attribute lines in `key=value` format
+ *
+ * @param actions Array of actions to serialize
+ * @returns Serialized payload string ready for encryption and transmission
+ *
+ * @example Stringify a single GET action
+ * ```ts
+ * import { assertEquals } from "@std/assert";
+ * import { ACT, stringify } from "./payload.ts";
+ *
+ * const payload = stringify([[ACT.GET, "LTE_BANDINFO"]]);
+ *
+ * assertEquals(payload, "1\r\n[LTE_BANDINFO#0,0,0,0,0,0#0,0,0,0,0,0]0,0\r\n");
+ * ```
+ *
+ * @example Stringify action with attributes
+ * ```ts
+ * import { assertEquals } from "@std/assert";
+ * import { ACT, stringify } from "./payload.ts";
+ *
+ * const payload = stringify([[ACT.SET, "OID", { key: "value" }]]);
+ *
+ * assertEquals(
+ *   payload,
+ *   "2\r\n[OID#0,0,0,0,0,0#0,0,0,0,0,0]0,1\r\nkey=value\r\n",
+ * );
+ * ```
+ */
 export function stringify(actions: Action[]): string {
   const { preamble, blocks } = actions.reduce(
     (
@@ -110,6 +217,40 @@ function parseScriptLine(line: string, section: Section): void {
   }
 }
 
+/**
+ * Parses a router response string into a structured response object.
+ *
+ * Handles various section types:
+ * - Regular sections with attributes
+ * - Error sections with error codes
+ * - CGI sections with script content
+ * - Multiple sections for the same action index
+ *
+ * @param data Raw response string from the router (after decryption)
+ * @returns Parsed response with error status and action results
+ *
+ * @example Parse a simple response
+ * ```ts
+ * import { assertEquals } from "@std/assert";
+ * import { parse, type Section } from "./payload.ts";
+ *
+ * const response = parse("[stack]0\nkey=value");
+ * const action = response.actions[0] as Section;
+ *
+ * assertEquals(response.error, null);
+ * assertEquals(action.attributes?.key, "value");
+ * ```
+ *
+ * @example Parse error response
+ * ```ts
+ * import { assertEquals } from "@std/assert";
+ * import { parse } from "./payload.ts";
+ *
+ * const response = parse("[error]5");
+ *
+ * assertEquals(response.error, 5);
+ * ```
+ */
 export function parse(data: string): ParsedResponse {
   const lines = data.split("\n");
 
