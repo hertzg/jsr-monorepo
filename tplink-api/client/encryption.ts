@@ -3,7 +3,7 @@
  */
 
 import { md5 } from "@noble/hashes/legacy";
-import { type Cipher, createCipher } from "./cipher/cipher.ts";
+import { createCipher } from "./cipher/cipher.ts";
 
 export interface EncryptionOptions {
   modulus: Uint8Array;
