@@ -1,5 +1,5 @@
-import { assertEquals, assert } from "@std/assert";
-import { ACT, stringify, parse, type Action, type Section } from "./payload.ts";
+import { assert, assertEquals } from "@std/assert";
+import { ACT, type Action, parse, type Section, stringify } from "./payload.ts";
 
 Deno.test("ACT enum has correct values", () => {
   assertEquals(ACT.GET, 1);
@@ -13,25 +13,37 @@ Deno.test("ACT enum has correct values", () => {
 });
 
 Deno.test("stringify single action with array attributes", () => {
-  const result = stringify([[ACT.GET, "some_oid", ["attr1=value1", "attr2=value2"]]]);
+  const result = stringify([[ACT.GET, "some_oid", [
+    "attr1=value1",
+    "attr2=value2",
+  ]]]);
 
   assertEquals(
     result,
-    "1\r\n[some_oid#0,0,0,0,0,0#0,0,0,0,0,0]0,2\r\nattr1=value1\r\nattr2=value2\r\n"
+    "1\r\n[some_oid#0,0,0,0,0,0#0,0,0,0,0,0]0,2\r\nattr1=value1\r\nattr2=value2\r\n",
   );
 });
 
 Deno.test("stringify single action with object attributes", () => {
-  const result = stringify([[ACT.SET, "some_oid", { key1: "val1", key2: "val2" }]]);
+  const result = stringify([[ACT.SET, "some_oid", {
+    key1: "val1",
+    key2: "val2",
+  }]]);
 
   assertEquals(
     result,
-    "2\r\n[some_oid#0,0,0,0,0,0#0,0,0,0,0,0]0,2\r\nkey1=val1\r\nkey2=val2\r\n"
+    "2\r\n[some_oid#0,0,0,0,0,0#0,0,0,0,0,0]0,2\r\nkey1=val1\r\nkey2=val2\r\n",
   );
 });
 
 Deno.test("stringify action with custom stack values", () => {
-  const result = stringify([[ACT.GET, "oid", [], "1,2,3,4,5,6", "7,8,9,10,11,12"]]);
+  const result = stringify([[
+    ACT.GET,
+    "oid",
+    [],
+    "1,2,3,4,5,6",
+    "7,8,9,10,11,12",
+  ]]);
 
   assertEquals(result, "1\r\n[oid#1,2,3,4,5,6#7,8,9,10,11,12]0,0\r\n");
 });
@@ -44,7 +56,7 @@ Deno.test("stringify multiple actions", () => {
 
   assertEquals(
     result,
-    "1&2\r\n[oid1#0,0,0,0,0,0#0,0,0,0,0,0]0,1\r\na=1\r\n[oid2#0,0,0,0,0,0#0,0,0,0,0,0]1,1\r\nb=2\r\n"
+    "1&2\r\n[oid1#0,0,0,0,0,0#0,0,0,0,0,0]0,1\r\na=1\r\n[oid2#0,0,0,0,0,0#0,0,0,0,0,0]1,1\r\nb=2\r\n",
   );
 });
 
@@ -120,12 +132,16 @@ Deno.test("parse attribute with equals sign in value", () => {
 });
 
 Deno.test("stringify and parse roundtrip preserves structure", () => {
-  const original: Action[] = [[ACT.GET, "test_oid", { foo: "bar", num: "123" }]];
+  const original: Action[] = [[ACT.GET, "test_oid", {
+    foo: "bar",
+    num: "123",
+  }]];
   const _stringified = stringify(original);
 
   // The response format is different from request format,
   // but we can verify the attributes are preserved in a response-like format
-  const responseFormat = "[test_oid#0,0,0,0,0,0#0,0,0,0,0,0]0\nfoo=bar\nnum=123";
+  const responseFormat =
+    "[test_oid#0,0,0,0,0,0#0,0,0,0,0,0]0\nfoo=bar\nnum=123";
   const parsed = parse(responseFormat);
   const action = parsed.actions[0] as Section;
 

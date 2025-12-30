@@ -48,10 +48,10 @@ export function createCipher(options: CipherOptions): Cipher {
         const offset = i * rsaChunkSize;
         const chunk = rsaPad(
           data.subarray(offset, offset + rsaChunkSize),
-          rsaChunkSize
+          rsaChunkSize,
         );
         encryptedChunks.push(
-          rsaEncrypt(chunk, options.modulus, options.exponent)
+          rsaEncrypt(chunk, options.modulus, options.exponent),
         );
       }
 

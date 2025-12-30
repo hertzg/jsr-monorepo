@@ -25,7 +25,7 @@ export interface AuthResult {
 
 export async function authenticate(
   baseUrl: string,
-  options: AuthOptions
+  options: AuthOptions,
 ): Promise<AuthResult | null> {
   const { username = "admin", password, forceLogin = true } = options;
 

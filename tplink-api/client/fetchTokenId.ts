@@ -9,7 +9,7 @@ export interface TokenOptions {
 
 export async function fetchTokenId(
   baseUrl: string,
-  options: TokenOptions
+  options: TokenOptions,
 ): Promise<string> {
   const { authTimes = 1, sessionId } = options;
 

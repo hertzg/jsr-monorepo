@@ -2,7 +2,13 @@
  * Execute commands on TP-Link router
  */
 
-import { parse, stringify, type Action, type ParsedAction, type Section } from "./payload.ts";
+import {
+  type Action,
+  parse,
+  type ParsedAction,
+  type Section,
+  stringify,
+} from "./payload.ts";
 import { fetchCgiGdpr } from "./client/fetchCgiGdpr.ts";
 import type { Encryption } from "./client/encryption.ts";
 
@@ -27,7 +33,7 @@ export interface ExecuteResult {
 export async function execute(
   baseUrl: string,
   actions: Action[],
-  options: ExecuteOptions
+  options: ExecuteOptions,
 ): Promise<ExecuteResult> {
   const { encryption, sequence, sessionId, tokenId, authTimes = 1 } = options;
 
@@ -47,30 +53,32 @@ export async function execute(
 
   const result = parse(response);
 
-  const mappedActions: ActionResult[] = result.actions.map((item: ParsedAction) => {
-    const actionIndex = Array.isArray(item)
-      ? item[0]?.actionIndex ?? 0
-      : item?.actionIndex ?? 0;
+  const mappedActions: ActionResult[] = result.actions.map(
+    (item: ParsedAction) => {
+      const actionIndex = Array.isArray(item)
+        ? item[0]?.actionIndex ?? 0
+        : item?.actionIndex ?? 0;
 
-    let newItem: Record<string, string> | Record<string, string>[] | null;
+      let newItem: Record<string, string> | Record<string, string>[] | null;
 
-    if (Array.isArray(item)) {
-      newItem = item.map((section: Section) => section.attributes ?? {});
-    } else if (item && "attributes" in item && item.attributes) {
-      if (Object.keys(item.attributes).length) {
-        newItem = item.attributes;
+      if (Array.isArray(item)) {
+        newItem = item.map((section: Section) => section.attributes ?? {});
+      } else if (item && "attributes" in item && item.attributes) {
+        if (Object.keys(item.attributes).length) {
+          newItem = item.attributes;
+        } else {
+          newItem = null;
+        }
       } else {
         newItem = null;
       }
-    } else {
-      newItem = null;
-    }
 
-    return {
-      req: actions[actionIndex],
-      res: newItem,
-    };
-  });
+      return {
+        req: actions[actionIndex],
+        res: newItem,
+      };
+    },
+  );
 
   return {
     error: result.error,

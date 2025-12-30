@@ -15,13 +15,13 @@ export interface CgiGdprOptions {
 export async function fetchCgiGdpr(
   baseUrl: string,
   payload: string,
-  options: CgiGdprOptions
+  options: CgiGdprOptions,
 ): Promise<string | null> {
   const { encryption, sequence, authTimes = 1, sessionId, tokenId } = options;
 
   const { data, sign } = encryption.encrypt(
     new TextEncoder().encode(payload),
-    sequence
+    sequence,
   );
 
   const res = await fetch(new URL("cgi_gdpr", baseUrl).href, {

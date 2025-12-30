@@ -20,7 +20,7 @@ export type Action = [
   oid: string,
   attributes?: Record<string, string> | string[],
   stack?: string,
-  pStack?: string
+  pStack?: string,
 ];
 
 export interface Section {
@@ -48,8 +48,14 @@ export function stringify(actions: Action[]): string {
   const { preamble, blocks } = actions.reduce(
     (
       acc,
-      [type, oid, attributes = [], stack = "0,0,0,0,0,0", pStack = "0,0,0,0,0,0"],
-      index
+      [
+        type,
+        oid,
+        attributes = [],
+        stack = "0,0,0,0,0,0",
+        pStack = "0,0,0,0,0,0",
+      ],
+      index,
     ) => {
       acc.preamble.push(type);
 
@@ -60,11 +66,13 @@ export function stringify(actions: Action[]): string {
       const header = [oid, stack, pStack].join("#");
       const marker = [index, attributeLines.length].join(",");
 
-      acc.blocks.push([`[${header}]${marker}`, ...attributeLines].join(LINE_BREAK));
+      acc.blocks.push(
+        [`[${header}]${marker}`, ...attributeLines].join(LINE_BREAK),
+      );
 
       return acc;
     },
-    { preamble: [] as number[], blocks: [] as string[] }
+    { preamble: [] as number[], blocks: [] as string[] },
   );
 
   return [preamble.join("&"), blocks.join(LINE_BREAK), ""].join(LINE_BREAK);
@@ -124,7 +132,10 @@ export function parse(data: string): ParsedResponse {
       if (section.stack === "error") {
         acc.error = section.code ?? null;
       } else {
-        const existing = acc.actions[section.actionIndex] as Section | Section[] | undefined;
+        const existing = acc.actions[section.actionIndex] as
+          | Section
+          | Section[]
+          | undefined;
         if (existing) {
           acc.actions[section.actionIndex] = Array.isArray(existing)
             ? [...existing, section]
@@ -135,7 +146,7 @@ export function parse(data: string): ParsedResponse {
       }
       return acc;
     },
-    { error: null, actions: [] } as ParsedResponse
+    { error: null, actions: [] } as ParsedResponse,
   );
 
   for (let i = 0; i < combined.actions.length; i++) {

@@ -42,7 +42,7 @@ Deno.test("AES-128-CBC encrypt matches node:crypto", () => {
     assertEquals(
       encrypted.toHex(),
       tc.expected,
-      `AES encrypt failed for "${tc.plaintext}"`
+      `AES encrypt failed for "${tc.plaintext}"`,
     );
   }
 });
@@ -80,7 +80,7 @@ Deno.test("AES-128-CBC decrypt matches node:crypto", () => {
     assertEquals(
       new TextDecoder().decode(decrypted),
       tc.expected,
-      `AES decrypt failed for ciphertext "${tc.ciphertext}"`
+      `AES decrypt failed for ciphertext "${tc.ciphertext}"`,
     );
   }
 });
@@ -96,7 +96,7 @@ Deno.test("AES-128-CBC roundtrip", () => {
 
   assertEquals(
     new TextDecoder().decode(decrypted),
-    "roundtrip test data!"
+    "roundtrip test data!",
   );
 });
 
@@ -127,7 +127,7 @@ Deno.test("MD5 hash matches node:crypto", () => {
     assertEquals(
       hash.toHex(),
       tc.expected,
-      `MD5 hash failed for "${tc.input}"`
+      `MD5 hash failed for "${tc.input}"`,
     );
   }
 });
@@ -136,13 +136,13 @@ Deno.test("RSA encrypt (no padding) matches node:crypto", () => {
   // Test vector generated with Node.js crypto module
   // Using a 1024-bit RSA key
   const modulus = Uint8Array.fromHex(
-    "b3096650d220465f74878dbbced0d240218e04068dbb7f2496019751b17066e46b58d5e9fdbc6a6201eb9cd1a611b94ceffec43563260a55922c520a760c32ecacfbc872006aacb202a5e573814c3e02a91fc4221635e2818a249629989d6a953eed30bd088dde1e6b933eea6f18c7f962b47e674c8f758059064178556320c7"
+    "b3096650d220465f74878dbbced0d240218e04068dbb7f2496019751b17066e46b58d5e9fdbc6a6201eb9cd1a611b94ceffec43563260a55922c520a760c32ecacfbc872006aacb202a5e573814c3e02a91fc4221635e2818a249629989d6a953eed30bd088dde1e6b933eea6f18c7f962b47e674c8f758059064178556320c7",
   );
   const exponent = Uint8Array.fromHex("010001");
 
   // Plaintext padded to modulus size (128 bytes)
   const plaintext = Uint8Array.fromHex(
-    "74657374206d65737361676520666f7220727361000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+    "74657374206d65737361676520666f7220727361000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000",
   );
 
   const expected =
@@ -177,7 +177,7 @@ Deno.test("RSA multi-chunk encryption matches node:crypto", () => {
   // Test vector generated with Node.js crypto module
   // Data that spans 3 chunks (300 bytes with 128-byte modulus = 3 chunks)
   const modulus = Uint8Array.fromHex(
-    "b3096650d220465f74878dbbced0d240218e04068dbb7f2496019751b17066e46b58d5e9fdbc6a6201eb9cd1a611b94ceffec43563260a55922c520a760c32ecacfbc872006aacb202a5e573814c3e02a91fc4221635e2818a249629989d6a953eed30bd088dde1e6b933eea6f18c7f962b47e674c8f758059064178556320c7"
+    "b3096650d220465f74878dbbced0d240218e04068dbb7f2496019751b17066e46b58d5e9fdbc6a6201eb9cd1a611b94ceffec43563260a55922c520a760c32ecacfbc872006aacb202a5e573814c3e02a91fc4221635e2818a249629989d6a953eed30bd088dde1e6b933eea6f18c7f962b47e674c8f758059064178556320c7",
   );
   const exponent = Uint8Array.fromHex("010001");
   const rsaChunkSize = modulus.length; // 128 bytes
@@ -185,7 +185,7 @@ Deno.test("RSA multi-chunk encryption matches node:crypto", () => {
   // 300 bytes of data: 50 A's + 50 B's + 50 C's + 50 D's + 50 E's + 50 F's
   const bigData = new TextEncoder().encode(
     "A".repeat(50) + "B".repeat(50) + "C".repeat(50) +
-    "D".repeat(50) + "E".repeat(50) + "F".repeat(50)
+      "D".repeat(50) + "E".repeat(50) + "F".repeat(50),
   );
 
   assertEquals(bigData.length, 300);
@@ -202,7 +202,7 @@ Deno.test("RSA multi-chunk encryption matches node:crypto", () => {
     const offset = i * rsaChunkSize;
     const chunk = rsaPad(
       bigData.subarray(offset, offset + rsaChunkSize),
-      rsaChunkSize
+      rsaChunkSize,
     );
     encryptedChunks.push(rsaEncrypt(chunk, modulus, exponent));
   }

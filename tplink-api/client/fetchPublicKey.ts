@@ -30,7 +30,7 @@ export function _extractVariables(js: string): ExtractedVars {
         }
         return acc;
       },
-      { exponent: "", modulus: "", sequence: "" }
+      { exponent: "", modulus: "", sequence: "" },
     );
 }
 

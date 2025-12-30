@@ -3,7 +3,7 @@
  */
 
 import { md5 } from "@noble/hashes/legacy";
-import { createCipher, type Cipher } from "./cipher/cipher.ts";
+import { type Cipher, createCipher } from "./cipher/cipher.ts";
 
 export interface EncryptionOptions {
   modulus: Uint8Array;
@@ -23,7 +23,7 @@ export interface Encryption {
   encrypt: (
     data: Uint8Array,
     sequence: number,
-    signature?: Record<string, string>
+    signature?: Record<string, string>,
   ) => EncryptedPayload;
   decrypt: (data: string) => string;
 }
@@ -40,7 +40,7 @@ export function createEncryption(options: EncryptionOptions): Encryption {
     encrypt: (
       data: Uint8Array,
       sequence: number,
-      signature: Record<string, string> = {}
+      signature: Record<string, string> = {},
     ): EncryptedPayload => {
       const encryptedData = cipher.aesEncrypt(data);
       const dataBase64 = encryptedData.toBase64();

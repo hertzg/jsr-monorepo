@@ -13,7 +13,7 @@ export interface SessionOptions {
 
 export async function fetchSessionId(
   baseUrl: string,
-  options: SessionOptions
+  options: SessionOptions,
 ): Promise<string | null> {
   const { encryption, sequence, username = "admin", password } = options;
 
@@ -23,7 +23,7 @@ export async function fetchSessionId(
     {
       key: new TextDecoder().decode(encryption.key),
       iv: new TextDecoder().decode(encryption.iv),
-    }
+    },
   );
 
   const url = new URL("cgi/login", baseUrl);
@@ -42,7 +42,7 @@ export async function fetchSessionId(
   const setCookie = response.headers.get("set-cookie");
   const cookieValue = setCookie?.slice(
     setCookie.indexOf("=") + 1,
-    setCookie.indexOf(";")
+    setCookie.indexOf(";"),
   );
 
   return cookieValue !== "deleted" ? cookieValue ?? null : null;
