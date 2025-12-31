@@ -27,7 +27,7 @@
     "@hertzg/wg-conf": "jsr:@hertzg/wg-conf@^0.2.1",
     "@binstruct/cli": "jsr:@binstruct/cli@^0.1.3",
     "@binstruct/ethernet": "jsr:@binstruct/ethernet@^0.1.2",
-    "@binstruct/png": "jsr:@binstruct/png@^0.3.1",
+    "@binstruct/png": "jsr:@binstruct/png@^0.3.2",
     "@binstruct/wav": "jsr:@binstruct/wav@^0.1.2",
     "json5": "npm:json5@^2.2.3",
     "fflate": "npm:fflate@0.8.2",
