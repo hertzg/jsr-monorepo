@@ -2,7 +2,7 @@ import { assertEquals } from "@std/assert";
 import { createContext } from "@hertzg/binstruct";
 import type { PngChunkUnknown } from "../mod.ts";
 import { type IdatChunk, idatChunkRefiner } from "./idat.ts";
-import { deflateSync, inflateSync } from "node:zlib";
+import { unzlibSync, zlibSync } from "fflate";
 import { decodeHeader } from "../zlib/header.ts";
 
 Deno.test("idatChunkRefiner() - refines IDAT chunk", () => {
@@ -15,7 +15,7 @@ Deno.test("idatChunkRefiner() - refines IDAT chunk", () => {
     length: 10,
     type: new Uint8Array([73, 68, 65, 84]), // "IDAT"
     // deno-fmt-ignore
-    data: new Uint8Array(deflateSync(uncompressed)),
+    data: new Uint8Array(zlibSync(uncompressed)),
     crc: 0x12345678,
   };
 
@@ -34,7 +34,7 @@ Deno.test("idatChunkRefiner() - unrefines IDAT chunk", () => {
   const uncompressed = new TextEncoder().encode("abcd");
 
   // deno-fmt-ignore
-  const compressedOriginal = new Uint8Array(deflateSync(uncompressed));
+  const compressedOriginal = new Uint8Array(zlibSync(uncompressed));
   const head = compressedOriginal.subarray(0, 2);
   const checksum = compressedOriginal.subarray(-4);
 
@@ -63,7 +63,7 @@ Deno.test("idatChunkRefiner() - round-trip with empty data", () => {
   const decodeContext = createContext("decode");
 
   const uncompressed = new Uint8Array(0);
-  const compressedData = new Uint8Array(deflateSync(uncompressed));
+  const compressedData = new Uint8Array(zlibSync(uncompressed));
 
   const original: IdatChunk = {
     length: 0,
@@ -91,7 +91,7 @@ Deno.test("idatChunkRefiner() - round-trip with small data", () => {
   const decodeContext = createContext("decode");
 
   const uncompressed = new Uint8Array([1, 2, 3, 4, 5]);
-  const compressedData = new Uint8Array(deflateSync(uncompressed));
+  const compressedData = new Uint8Array(zlibSync(uncompressed));
 
   const original: IdatChunk = {
     length: 5,
@@ -126,7 +126,7 @@ Deno.test("idatChunkRefiner() - round-trip with compressed data", () => {
   ]);
 
   // Decompress to get the original uncompressed data
-  const uncompressed = new Uint8Array(inflateSync(compressedData));
+  const uncompressed = new Uint8Array(unzlibSync(compressedData));
 
   const original: IdatChunk = {
     length: compressedData.length,
@@ -159,7 +159,7 @@ Deno.test("idatChunkRefiner() - round-trip with large data", () => {
     largeData[i] = i % 256;
   }
 
-  const compressedData = new Uint8Array(deflateSync(largeData));
+  const compressedData = new Uint8Array(zlibSync(largeData));
 
   const original: IdatChunk = {
     length: largeData.length,
@@ -197,7 +197,7 @@ Deno.test("idatChunkRefiner() - preserves data bytes exactly", () => {
   ];
 
   for (const pattern of testPatterns) {
-    const compressedData = new Uint8Array(deflateSync(pattern));
+    const compressedData = new Uint8Array(zlibSync(pattern));
 
     const original: IdatChunk = {
       length: pattern.length,
@@ -232,7 +232,7 @@ Deno.test("idatChunkRefiner() - handles multiple consecutive chunks", () => {
   const crcs = [0x11111111, 0x22222222, 0x33333333];
 
   const chunks: IdatChunk[] = uncompressedPatterns.map((uncompressed, i) => {
-    const compressedData = new Uint8Array(deflateSync(uncompressed));
+    const compressedData = new Uint8Array(zlibSync(uncompressed));
 
     return {
       length: uncompressed.length,

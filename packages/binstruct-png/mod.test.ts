@@ -12,7 +12,7 @@ import type { IhdrChunk } from "./chunks/ihdr.ts";
 import type { IdatChunk } from "./chunks/idat.ts";
 import type { IendChunk } from "./chunks/iend.ts";
 import type { PlteChunk } from "./chunks/plte.ts";
-import { deflateSync } from "node:zlib";
+import { zlibSync } from "fflate";
 import { decodeHeader } from "./zlib/header.ts";
 
 const PNG_SIGNATURE = new Uint8Array([137, 80, 78, 71, 13, 10, 26, 10]);
@@ -214,7 +214,7 @@ Deno.test("pngChunkRefined() - encodes IHDR chunk", () => {
 Deno.test("pngChunkRefined() - decodes IDAT chunk", () => {
   const coder = pngChunkRefined();
   const uncompressed = new Uint8Array([1, 2, 3, 4, 5]);
-  const compressedData = new Uint8Array(deflateSync(uncompressed));
+  const compressedData = new Uint8Array(zlibSync(uncompressed));
   // deno-fmt-ignore
   const buffer = new Uint8Array([
     0, 0, 0, compressedData.length, // length
@@ -354,7 +354,7 @@ Deno.test("pngFile() - encodes complete PNG file", () => {
 Deno.test("pngFile() - round-trip with mixed chunk types", () => {
   const coder = pngFile();
   const uncompressed = new Uint8Array([1, 2, 3]);
-  const compressedData = new Uint8Array(deflateSync(uncompressed));
+  const compressedData = new Uint8Array(zlibSync(uncompressed));
   const pngData: PngFile<IhdrChunk | IdatChunk | IendChunk> = {
     signature: PNG_SIGNATURE_DECODED,
     chunks: [

@@ -6,7 +6,7 @@ import {
   type Refiner,
   struct,
 } from "@hertzg/binstruct";
-import { deflateSync, inflateSync } from "node:zlib";
+import { unzlibSync, zlibSync } from "fflate";
 import { type ZlibHeader, zlibHeaderCoder } from "./header.ts";
 
 interface ZlibCompressedData {
@@ -71,7 +71,7 @@ function zlibFLevel2Clevel(fLevel: number): number {
     case 1:
       return 4; // fast
     case 2:
-      return -1; // default
+      return 6; // default
     case 3:
       return 9; // maximum
     default:
@@ -103,9 +103,7 @@ function zlibUncompressRefiner(): Refiner<
         2 + unrefined.compressed.length,
       );
 
-      const decompressed = new Uint8Array(
-        inflateSync(zlibCompressedData),
-      );
+      const decompressed = unzlibSync(zlibCompressedData);
 
       return {
         header: unrefined.header,
@@ -114,9 +112,19 @@ function zlibUncompressRefiner(): Refiner<
       };
     },
     unrefine: (refined) => {
-      const compressed = new Uint8Array(deflateSync(refined.uncompressed, {
-        level: zlibFLevel2Clevel(refined.header.flevel),
-      }));
+      const compressed = zlibSync(refined.uncompressed, {
+        level: zlibFLevel2Clevel(refined.header.flevel) as
+          | 0
+          | 1
+          | 2
+          | 3
+          | 4
+          | 5
+          | 6
+          | 7
+          | 8
+          | 9,
+      });
 
       const raw = compressed.subarray(2, compressed.length - 4);
       const checksum = compressed.subarray(compressed.length - 4);
