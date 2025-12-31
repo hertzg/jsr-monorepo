@@ -16,7 +16,8 @@
  * @module
  */
 
-import { createCrcBigint } from "./_internal.ts";
+import { memoize } from "@std/cache/memoize";
+import { createCrcBigint } from "./internal/create_crc_bigint.ts";
 
 /** CRC64-ECMA polynomial (XZ, 7z). */
 export const CRC64_ECMA_POLYNOMIAL = 0xc96c5795d7870f42n;
@@ -44,8 +45,32 @@ const CRC64_MASK = 0xffffffffffffffffn;
  * assertEquals(crc64(new TextEncoder().encode("123456789")), 0x995dc9bbdf1939fan);
  * ```
  */
-export const createCrc64 = (polynomial: bigint): ((data: Uint8Array) => bigint) =>
+export const createCrc64 = (
+  polynomial: bigint,
+): ((data: Uint8Array) => bigint) =>
   createCrcBigint(polynomial, CRC64_MASK, CRC64_MASK);
+
+/**
+ * Memoized version of {@link createCrc64}.
+ *
+ * Calling with the same polynomial returns the cached function.
+ *
+ * @param polynomial The CRC64 polynomial to use (must be BigInt)
+ * @returns A function that calculates CRC64 for given data
+ *
+ * @example
+ * ```ts
+ * import { assertEquals } from "@std/assert";
+ * import { memoizedCreateCrc64, CRC64_ECMA_POLYNOMIAL } from "@hertzg/crc/crc64";
+ *
+ * const crc64 = memoizedCreateCrc64(CRC64_ECMA_POLYNOMIAL);
+ *
+ * assertEquals(crc64(new TextEncoder().encode("123456789")), 0x995dc9bbdf1939fan);
+ * ```
+ */
+export const memoizedCreateCrc64: (
+  polynomial: bigint,
+) => (data: Uint8Array) => bigint = memoize(createCrc64);
 
 /**
  * Calculates CRC64 checksum for the given data.
@@ -67,4 +92,4 @@ export const createCrc64 = (polynomial: bigint): ((data: Uint8Array) => bigint) 
 export const crc64 = (
   data: Uint8Array,
   polynomial: bigint = CRC64_ECMA_POLYNOMIAL,
-): bigint => createCrc64(polynomial)(data);
+): bigint => memoizedCreateCrc64(polynomial)(data);

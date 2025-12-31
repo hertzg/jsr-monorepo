@@ -32,6 +32,7 @@ export {
   CRC8_CCITT_POLYNOMIAL,
   CRC8_MAXIM_POLYNOMIAL,
   createCrc8,
+  memoizedCreateCrc8,
 } from "./crc8.ts";
 
 export {
@@ -39,6 +40,7 @@ export {
   CRC16_CCITT_POLYNOMIAL,
   CRC16_IBM_POLYNOMIAL,
   createCrc16,
+  memoizedCreateCrc16,
 } from "./crc16.ts";
 
 export {
@@ -47,6 +49,7 @@ export {
   CRC32C_POLYNOMIAL,
   CRC32K_POLYNOMIAL,
   createCrc32,
+  memoizedCreateCrc32,
 } from "./crc32.ts";
 
 export {
@@ -54,4 +57,5 @@ export {
   CRC64_ECMA_POLYNOMIAL,
   CRC64_ISO_POLYNOMIAL,
   createCrc64,
+  memoizedCreateCrc64,
 } from "./crc64.ts";

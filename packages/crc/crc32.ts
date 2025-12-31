@@ -14,7 +14,8 @@
  * @module
  */
 
-import { createCrcNumber } from "./_internal.ts";
+import { memoize } from "@std/cache/memoize";
+import { createCrcNumber } from "./internal/create_crc_number.ts";
 
 /** Standard CRC32 polynomial (ISO 3309, PNG, ZIP, gzip). */
 export const CRC32_POLYNOMIAL = 0xedb88320;
@@ -41,8 +42,32 @@ export const CRC32K_POLYNOMIAL = 0xeb31d82e;
  * assertEquals(crc32(new TextEncoder().encode("123456789")), 0xcbf43926);
  * ```
  */
-export const createCrc32 = (polynomial: number): ((data: Uint8Array) => number) =>
+export const createCrc32 = (
+  polynomial: number,
+): ((data: Uint8Array) => number) =>
   createCrcNumber(Uint32Array, polynomial, 0xffffffff, 0xffffffff);
+
+/**
+ * Memoized version of {@link createCrc32}.
+ *
+ * Calling with the same polynomial returns the cached function.
+ *
+ * @param polynomial The CRC32 polynomial to use
+ * @returns A function that calculates CRC32 for given data
+ *
+ * @example
+ * ```ts
+ * import { assertEquals } from "@std/assert";
+ * import { memoizedCreateCrc32, CRC32_POLYNOMIAL } from "@hertzg/crc/crc32";
+ *
+ * const crc32 = memoizedCreateCrc32(CRC32_POLYNOMIAL);
+ *
+ * assertEquals(crc32(new TextEncoder().encode("123456789")), 0xcbf43926);
+ * ```
+ */
+export const memoizedCreateCrc32: (
+  polynomial: number,
+) => (data: Uint8Array) => number = memoize(createCrc32);
 
 /**
  * Calculates CRC32 checksum for the given data.
@@ -64,4 +89,4 @@ export const createCrc32 = (polynomial: number): ((data: Uint8Array) => number) 
 export const crc32 = (
   data: Uint8Array,
   polynomial: number = CRC32_POLYNOMIAL,
-): number => createCrc32(polynomial)(data);
+): number => memoizedCreateCrc32(polynomial)(data);

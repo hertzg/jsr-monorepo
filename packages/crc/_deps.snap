@@ -1,11 +1,41 @@
 export const snapshot = {};
 
-snapshot[`dependencies > @hertzg/crc 1`] = `[]`;
+snapshot[`dependencies > @hertzg/crc 1`] = `
+[
+  "https://jsr.io/@std/cache/0.2.1/_serialize_arg_list.ts",
+  "https://jsr.io/@std/cache/0.2.1/lru_cache.ts",
+  "https://jsr.io/@std/cache/0.2.1/memoize.ts",
+]
+`;
 
-snapshot[`dependencies > @hertzg/crc 2`] = `[]`;
+snapshot[`dependencies > @hertzg/crc 2`] = `
+[
+  "https://jsr.io/@std/cache/0.2.1/_serialize_arg_list.ts",
+  "https://jsr.io/@std/cache/0.2.1/lru_cache.ts",
+  "https://jsr.io/@std/cache/0.2.1/memoize.ts",
+]
+`;
 
-snapshot[`dependencies > @hertzg/crc 3`] = `[]`;
+snapshot[`dependencies > @hertzg/crc 3`] = `
+[
+  "https://jsr.io/@std/cache/0.2.1/_serialize_arg_list.ts",
+  "https://jsr.io/@std/cache/0.2.1/lru_cache.ts",
+  "https://jsr.io/@std/cache/0.2.1/memoize.ts",
+]
+`;
 
-snapshot[`dependencies > @hertzg/crc 4`] = `[]`;
+snapshot[`dependencies > @hertzg/crc 4`] = `
+[
+  "https://jsr.io/@std/cache/0.2.1/_serialize_arg_list.ts",
+  "https://jsr.io/@std/cache/0.2.1/lru_cache.ts",
+  "https://jsr.io/@std/cache/0.2.1/memoize.ts",
+]
+`;
 
-snapshot[`dependencies > @hertzg/crc 5`] = `[]`;
+snapshot[`dependencies > @hertzg/crc 5`] = `
+[
+  "https://jsr.io/@std/cache/0.2.1/_serialize_arg_list.ts",
+  "https://jsr.io/@std/cache/0.2.1/lru_cache.ts",
+  "https://jsr.io/@std/cache/0.2.1/memoize.ts",
+]
+`;
