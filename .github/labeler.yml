@@ -37,3 +37,6 @@
 "@hertzg/wg-keys":
   - changed-files:
       - any-glob-to-any-file: packages/wg-keys/**
+"@hertzg/crc":
+  - changed-files:
+      - any-glob-to-any-file: packages/crc/**
