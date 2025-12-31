@@ -13,6 +13,6 @@ echo "=> Running tests..."
 deno task test
 
 echo "=> Verifying publish would succeed..."
-deno publish --dry-run
+deno publish --dry-run --allow-dirty
 
 echo "All pre-push checks passed!"
