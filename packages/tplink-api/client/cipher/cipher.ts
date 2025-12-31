@@ -33,13 +33,11 @@ export function createCipher(options: CipherOptions): Cipher {
   const iv = options.iv ?? generateKey();
   const rsaChunkSize = options.modulus.length;
 
-  const aesCipher = cbc(key, iv);
-
   return {
     key,
     iv,
-    aesEncrypt: (data: Uint8Array) => aesCipher.encrypt(data),
-    aesDecrypt: (data: Uint8Array) => aesCipher.decrypt(data),
+    aesEncrypt: (data: Uint8Array) => cbc(key, iv).encrypt(data),
+    aesDecrypt: (data: Uint8Array) => cbc(key, iv).decrypt(data),
     rsaEncrypt: (data: Uint8Array) => {
       const chunkCount = Math.ceil(data.length / rsaChunkSize);
       const encryptedChunks: Uint8Array[] = [];
