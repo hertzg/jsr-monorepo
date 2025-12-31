@@ -1,3 +1,9 @@
+### 2025.12.31
+
+#### @hertzg/tplink-api 1.0.2 (patch)
+
+- fix(@hertzg/tplink-api): do not re-use the cbc cipher instance (#68)
+
 ### 2025.12.30
 
 #### @hertzg/tplink-api 1.0.1 (patch)
