@@ -57,7 +57,7 @@ import {
   u32be,
   u8,
 } from "@hertzg/binstruct";
-import { crc32 } from "node:zlib";
+import { crc32 } from "@hertzg/crc";
 import { type IhdrChunk, ihdrChunkRefiner } from "./chunks/ihdr.ts";
 import { type IdatChunk, idatChunkRefiner } from "./chunks/idat.ts";
 import { type IendChunk, iendChunkRefiner } from "./chunks/iend.ts";
