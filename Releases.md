@@ -1,5 +1,12 @@
 ### 2025.12.31
 
+#### @binstruct/png 0.3.2 (patch)
+
+- feat(@binstruct/png): replace node:zlib with fflate for compression (#73)
+- feat(@binstruct/png): use @hertzg/crc for CRC32 calculation (#72)
+
+### 2025.12.31
+
 #### @binstruct/cli 0.1.3 (patch)
 
 - chore(*): freeze the versions
