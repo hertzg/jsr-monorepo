@@ -3,6 +3,7 @@ import { cbc } from "@noble/ciphers/aes.js";
 import { md5 } from "@noble/hashes/legacy.js";
 import { concat } from "@std/bytes";
 import { rsaEncrypt, rsaPad } from "./rsa.ts";
+import { createCipher } from "./cipher.ts";
 
 /**
  * Snapshot tests to verify cipher implementations match Node.js crypto behavior.
@@ -211,4 +212,35 @@ Deno.test("RSA multi-chunk encryption matches node:crypto", () => {
 
   assertEquals(fullEncrypted.length, 384);
   assertEquals(fullEncrypted.toHex(), expected);
+});
+
+Deno.test("createCipher allows multiple encryptions with same instance", () => {
+  const modulus = Uint8Array.fromHex(
+    "b3096650d220465f74878dbbced0d240218e04068dbb7f2496019751b17066e46b58d5e9fdbc6a6201eb9cd1a611b94ceffec43563260a55922c520a760c32ecacfbc872006aacb202a5e573814c3e02a91fc4221635e2818a249629989d6a953eed30bd088dde1e6b933eea6f18c7f962b47e674c8f758059064178556320c7",
+  );
+  const exponent = Uint8Array.fromHex("010001");
+  const key = new TextEncoder().encode("0123456789abcdef");
+  const iv = new TextEncoder().encode("fedcba9876543210");
+
+  const cipher = createCipher({ modulus, exponent, key, iv });
+
+  // First encryption should work (15 bytes -> 16 bytes with PKCS7 padding)
+  const plaintext1 = new TextEncoder().encode("first message!!");
+  const encrypted1 = cipher.aesEncrypt(plaintext1);
+  assertEquals(encrypted1.length, 16);
+
+  // Second encryption with same cipher instance should also work
+  const plaintext2 = new TextEncoder().encode("second message!");
+  const encrypted2 = cipher.aesEncrypt(plaintext2);
+  assertEquals(encrypted2.length, 16);
+
+  // Third encryption should also work
+  const plaintext3 = new TextEncoder().encode("third message!!");
+  const encrypted3 = cipher.aesEncrypt(plaintext3);
+  assertEquals(encrypted3.length, 16);
+
+  // Verify decryption works for all
+  assertEquals(new TextDecoder().decode(cipher.aesDecrypt(encrypted1)), "first message!!");
+  assertEquals(new TextDecoder().decode(cipher.aesDecrypt(encrypted2)), "second message!");
+  assertEquals(new TextDecoder().decode(cipher.aesDecrypt(encrypted3)), "third message!!");
 });
