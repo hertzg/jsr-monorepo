@@ -1,0 +1,7 @@
+export const snapshot = {};
+
+snapshot[`dependencies > @binstruct/png 1`] = `
+[
+  "node:zlib",
+]
+`;

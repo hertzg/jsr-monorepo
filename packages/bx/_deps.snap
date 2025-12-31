@@ -1,0 +1,7 @@
+export const snapshot = {};
+
+snapshot[`dependencies > @hertzg/bx 1`] = `
+[
+  "node:buffer",
+]
+`;

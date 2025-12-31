@@ -1,0 +1,3 @@
+export const snapshot = {};
+
+snapshot[`dependencies > @binstruct/ethernet 1`] = `[]`;

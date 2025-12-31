@@ -1,0 +1,29 @@
+export const snapshot = {};
+
+snapshot[`dependencies > @binstruct/cli 1`] = `
+[
+  "https://jsr.io/@std/cli/1.0.25/_data.json",
+  "https://jsr.io/@std/cli/1.0.25/_run_length.ts",
+  "https://jsr.io/@std/cli/1.0.25/mod.ts",
+  "https://jsr.io/@std/cli/1.0.25/parse_args.ts",
+  "https://jsr.io/@std/cli/1.0.25/prompt_secret.ts",
+  "https://jsr.io/@std/cli/1.0.25/unicode_width.ts",
+  "https://jsr.io/@std/internal/1.0.12/_os.ts",
+  "https://jsr.io/@std/internal/1.0.12/os.ts",
+  "npm:/json5@2.2.3",
+]
+`;
+
+snapshot[`dependencies > @binstruct/cli 2`] = `
+[
+  "https://jsr.io/@std/cli/1.0.25/_data.json",
+  "https://jsr.io/@std/cli/1.0.25/_run_length.ts",
+  "https://jsr.io/@std/cli/1.0.25/mod.ts",
+  "https://jsr.io/@std/cli/1.0.25/parse_args.ts",
+  "https://jsr.io/@std/cli/1.0.25/prompt_secret.ts",
+  "https://jsr.io/@std/cli/1.0.25/unicode_width.ts",
+  "https://jsr.io/@std/internal/1.0.12/_os.ts",
+  "https://jsr.io/@std/internal/1.0.12/os.ts",
+  "npm:/json5@2.2.3",
+]
+`;

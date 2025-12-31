@@ -1,31 +1,26 @@
-import denoJson from "../deno.json" with { type: "json" };
 import importMap from "../import_map.json" with { type: "json" };
-import { join } from "@std/path";
+import { getPackages } from "./utils.ts";
 
 // deno-lint-ignore no-explicit-any
 const imports = importMap.imports as any;
-const denoJsonList = Promise.all(
-  denoJson.workspace.map((w) =>
-    Deno.readTextFile(join(w, "deno.json")).then(JSON.parse)
-  ),
-);
+const packages = await getPackages();
 
 let failed = false;
 
-for (const denoJson of await denoJsonList) {
-  const dependency = imports[denoJson.name];
+for (const pkg of packages) {
+  const dependency = imports[pkg.name];
 
   if (!dependency) {
     console.warn(
-      `check_import_map: No import map entry found for ${denoJson.name}`,
+      `check_import_map: No import map entry found for ${pkg.name}`,
     );
     failed = true;
     continue;
   }
-  const correctDependency = `jsr:${denoJson.name}@^${denoJson.version}`;
+  const correctDependency = `jsr:${pkg.name}@^${pkg.version}`;
   if (dependency !== correctDependency) {
     console.warn(
-      `check_import_map: Invalid import map entry for ${denoJson.name}: ${dependency}`,
+      `check_import_map: Invalid import map entry for ${pkg.name}: ${dependency}`,
     );
     console.warn(
       `check_import_map: Expected: ${correctDependency}`,

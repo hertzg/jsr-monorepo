@@ -30,7 +30,8 @@
     "cov",
     "coverage",
     "docs",
-    "CLAUDE.md"
+    "CLAUDE.md",
+    "**/_deps.snap"
   ],
   "workspace": [
     "./packages/binstruct",

@@ -1,0 +1,11 @@
+export const snapshot = {};
+
+snapshot[`dependencies > @hertzg/wg-keys 1`] = `
+[
+  "https://jsr.io/@std/encoding/1.0.10/_common64.ts",
+  "https://jsr.io/@std/encoding/1.0.10/_common_detach.ts",
+  "https://jsr.io/@std/encoding/1.0.10/_types.ts",
+  "https://jsr.io/@std/encoding/1.0.10/base64.ts",
+  "https://jsr.io/@std/encoding/1.0.10/base64url.ts",
+]
+`;
