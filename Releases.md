@@ -1,5 +1,65 @@
 ### 2025.12.31
 
+#### @binstruct/cli 0.1.3 (patch)
+
+- chore(*): freeze the versions
+
+#### @binstruct/ethernet 0.1.2 (patch)
+
+- chore(*): freeze the versions
+
+#### @binstruct/png 0.3.1 (patch)
+
+- chore(*): freeze the versions
+
+#### @binstruct/wav 0.1.2 (patch)
+
+- chore(*): freeze the versions
+
+#### @hertzg/binstruct 3.0.4 (patch)
+
+- chore(*): freeze the versions
+
+#### @hertzg/bx 3.0.3 (patch)
+
+- chore(*): freeze the versions
+
+#### @hertzg/crc 0.1.0 (minor)
+
+- feat(@hertzg/crc): add CRC implementations for CRC8, CRC16, CRC32, and CRC64 …
+  (#70)
+- chore(*): freeze the versions
+
+#### @hertzg/ip 0.1.1 (patch)
+
+- chore(*): freeze the versions
+
+#### @hertzg/mymagti-api 0.1.1 (patch)
+
+- chore(*): freeze the versions
+
+#### @hertzg/routeros-api 0.1.2 (patch)
+
+- chore(*): freeze the versions
+
+#### @hertzg/tplink-api 1.0.3 (patch)
+
+- chore(*): freeze the versions
+
+#### @hertzg/wg-conf 0.2.1 (patch)
+
+- chore(*): freeze the versions
+
+#### @hertzg/wg-ini 0.2.1 (patch)
+
+- chore(*): freeze the versions
+
+#### @hertzg/wg-keys 1.0.2 (patch)
+
+- chore(*): freeze the versions
+
+### 2025.12.31
+
 #### @hertzg/tplink-api 1.0.2 (patch)
 
 - fix(@hertzg/tplink-api): do not re-use the cbc cipher instance (#68)
