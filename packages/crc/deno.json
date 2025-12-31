@@ -1,0 +1,11 @@
+{
+  "name": "@hertzg/crc",
+  "version": "0.1.0",
+  "exports": {
+    ".": "./mod.ts",
+    "./crc8": "./crc8.ts",
+    "./crc16": "./crc16.ts",
+    "./crc32": "./crc32.ts",
+    "./crc64": "./crc64.ts"
+  }
+}

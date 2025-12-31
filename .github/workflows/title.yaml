@@ -38,6 +38,7 @@ jobs:
             @binstruct/wav
             @hertzg/binstruct
             @hertzg/bx
+            @hertzg/crc
             @hertzg/ip
             @hertzg/mymagti-api
             @hertzg/routeros-api

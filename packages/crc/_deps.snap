@@ -1,0 +1,11 @@
+export const snapshot = {};
+
+snapshot[`dependencies > @hertzg/crc 1`] = `[]`;
+
+snapshot[`dependencies > @hertzg/crc 2`] = `[]`;
+
+snapshot[`dependencies > @hertzg/crc 3`] = `[]`;
+
+snapshot[`dependencies > @hertzg/crc 4`] = `[]`;
+
+snapshot[`dependencies > @hertzg/crc 5`] = `[]`;
