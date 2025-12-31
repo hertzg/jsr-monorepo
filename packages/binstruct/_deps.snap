@@ -1,0 +1,23 @@
+export const snapshot = {};
+
+snapshot[`dependencies > @hertzg/binstruct 1`] = `[]`;
+
+snapshot[`dependencies > @hertzg/binstruct 2`] = `[]`;
+
+snapshot[`dependencies > @hertzg/binstruct 3`] = `[]`;
+
+snapshot[`dependencies > @hertzg/binstruct 4`] = `[]`;
+
+snapshot[`dependencies > @hertzg/binstruct 5`] = `[]`;
+
+snapshot[`dependencies > @hertzg/binstruct 6`] = `[]`;
+
+snapshot[`dependencies > @hertzg/binstruct 7`] = `[]`;
+
+snapshot[`dependencies > @hertzg/binstruct 8`] = `[]`;
+
+snapshot[`dependencies > @hertzg/binstruct 9`] = `[]`;
+
+snapshot[`dependencies > @hertzg/binstruct 10`] = `[]`;
+
+snapshot[`dependencies > @hertzg/binstruct 11`] = `[]`;

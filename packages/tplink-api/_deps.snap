@@ -1,0 +1,23 @@
+export const snapshot = {};
+
+snapshot[`dependencies > @hertzg/tplink-api 1`] = `
+[
+  "https://jsr.io/@noble/ciphers/2.1.1/src/_polyval.ts",
+  "https://jsr.io/@noble/ciphers/2.1.1/src/aes.ts",
+  "https://jsr.io/@noble/ciphers/2.1.1/src/utils.ts",
+  "https://jsr.io/@noble/hashes/2.0.1/src/_md.ts",
+  "https://jsr.io/@noble/hashes/2.0.1/src/legacy.ts",
+  "https://jsr.io/@noble/hashes/2.0.1/src/utils.ts",
+  "https://jsr.io/@std/bytes/1.0.6/_types.ts",
+  "https://jsr.io/@std/bytes/1.0.6/concat.ts",
+  "https://jsr.io/@std/bytes/1.0.6/copy.ts",
+  "https://jsr.io/@std/bytes/1.0.6/ends_with.ts",
+  "https://jsr.io/@std/bytes/1.0.6/equals.ts",
+  "https://jsr.io/@std/bytes/1.0.6/includes_needle.ts",
+  "https://jsr.io/@std/bytes/1.0.6/index_of_needle.ts",
+  "https://jsr.io/@std/bytes/1.0.6/last_index_of_needle.ts",
+  "https://jsr.io/@std/bytes/1.0.6/mod.ts",
+  "https://jsr.io/@std/bytes/1.0.6/repeat.ts",
+  "https://jsr.io/@std/bytes/1.0.6/starts_with.ts",
+]
+`;

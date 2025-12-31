@@ -1,6 +1,5 @@
-import denoJson from "../deno.json" with { type: "json" };
 import { parse as parseYaml } from "@std/yaml";
-import { basename, join } from "@std/path";
+import { getPackageNames, getPackages } from "./utils.ts";
 
 type LabelerRule = { "changed-files"?: { "any-glob-to-any-file": string }[] }[];
 type Labeler = Record<string, LabelerRule>;
@@ -9,20 +8,11 @@ const labeler = parseYaml(
   await Deno.readTextFile(".github/labeler.yml"),
 ) as Labeler;
 
-const workspaceJsonList = Promise.all(
-  denoJson.workspace.map((w) =>
-    Deno.readTextFile(join(w, "deno.json")).then(JSON.parse).then((
-      json: { name: string },
-    ) => ({
-      name: json.name,
-      dirName: basename(w),
-    }))
-  ),
-);
+const packages = await getPackages();
 
 let failed = false;
 
-for (const pkg of await workspaceJsonList) {
+for (const pkg of packages) {
   const label = labeler[pkg.name];
   const expectedGlob = `packages/${pkg.dirName}/**`;
 
@@ -46,9 +36,9 @@ for (const pkg of await workspaceJsonList) {
 }
 
 // Warn about extra labels (does not cause failure)
-const workspaceNames = new Set((await workspaceJsonList).map((p) => p.name));
+const packageNames = getPackageNames(packages);
 for (const label of Object.keys(labeler)) {
-  if (!workspaceNames.has(label)) {
+  if (!packageNames.has(label)) {
     console.warn(
       `check_labeler: Extra label "${label}" does not match any workspace`,
     );

@@ -1,0 +1,5 @@
+export const snapshot = {};
+
+snapshot[`dependencies > @hertzg/mymagti-api 1`] = `[]`;
+
+snapshot[`dependencies > @hertzg/mymagti-api 2`] = `[]`;

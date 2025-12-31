@@ -1,6 +1,5 @@
-import denoJson from "../deno.json" with { type: "json" };
 import { parse as parseYaml } from "@std/yaml";
-import { join } from "@std/path";
+import { getPackageNames, getPackages } from "./utils.ts";
 
 type TitleWorkflow = {
   jobs: {
@@ -24,27 +23,21 @@ const scopes = new Set(
   scopesString.split("\n").map((s) => s.trim()).filter((s) => s),
 );
 
-const workspaceJsonList = Promise.all(
-  denoJson.workspace.map((w) =>
-    Deno.readTextFile(join(w, "deno.json")).then(JSON.parse).then((
-      json: { name: string },
-    ) => json.name)
-  ),
-);
+const packages = await getPackages();
 
 let failed = false;
 
-for (const name of await workspaceJsonList) {
-  if (!scopes.has(name)) {
-    console.warn(`check_title: No scope found for ${name}`);
+for (const pkg of packages) {
+  if (!scopes.has(pkg.name)) {
+    console.warn(`check_title: No scope found for ${pkg.name}`);
     failed = true;
   }
 }
 
 // Warn about extra scopes (does not cause failure)
-const workspaceNames = new Set(await workspaceJsonList);
+const packageNames = getPackageNames(packages);
 for (const scope of scopes) {
-  if (!workspaceNames.has(scope)) {
+  if (!packageNames.has(scope)) {
     console.warn(
       `check_title: Extra scope "${scope}" does not match any workspace`,
     );

@@ -1,0 +1,7 @@
+export const snapshot = {};
+
+snapshot[`dependencies > @hertzg/ip 1`] = `[]`;
+
+snapshot[`dependencies > @hertzg/ip 2`] = `[]`;
+
+snapshot[`dependencies > @hertzg/ip 3`] = `[]`;
