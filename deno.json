@@ -2,8 +2,14 @@
   "importMap": "./import_map.json",
   "tasks": {
     "test": {
-      "command": "deno test --doc --allow-all --parallel --coverage --trace-leaks --clean"
+      "dependencies": [
+        "test:doc",
+        "test:parallel"
+      ]
     },
+    "test:parallel": "deno task test:sequential -- --parallel",
+    "test:sequential": "deno test --allow-all --coverage --trace-leaks --clean",
+    "test:doc": "deno test --allow-all --coverage --trace-leaks --clean --doc",
     "lint": {
       "dependencies": [
         "lint:deno",
