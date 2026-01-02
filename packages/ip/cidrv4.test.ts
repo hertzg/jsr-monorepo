@@ -12,20 +12,20 @@ import { parseIpv4, stringifyIpv4 } from "./ipv4.ts";
 
 Deno.test("maskFromPrefixLength", async (t) => {
   await t.step("common prefix lengths", () => {
-    assertEquals(maskFromPrefixLength(24), 0xFFFFFF00n);
-    assertEquals(maskFromPrefixLength(16), 0xFFFF0000n);
-    assertEquals(maskFromPrefixLength(8), 0xFF000000n);
+    assertEquals(maskFromPrefixLength(24), 0xFFFFFF00);
+    assertEquals(maskFromPrefixLength(16), 0xFFFF0000);
+    assertEquals(maskFromPrefixLength(8), 0xFF000000);
   });
 
   await t.step("edge cases", () => {
-    assertEquals(maskFromPrefixLength(0), 0n);
-    assertEquals(maskFromPrefixLength(32), 0xFFFFFFFFn);
+    assertEquals(maskFromPrefixLength(0), 0);
+    assertEquals(maskFromPrefixLength(32), 0xFFFFFFFF);
   });
 
   await t.step("various prefix lengths", () => {
-    assertEquals(maskFromPrefixLength(1), 0x80000000n);
-    assertEquals(maskFromPrefixLength(30), 0xFFFFFFFCn);
-    assertEquals(maskFromPrefixLength(31), 0xFFFFFFFEn);
+    assertEquals(maskFromPrefixLength(1), 0x80000000);
+    assertEquals(maskFromPrefixLength(30), 0xFFFFFFFC);
+    assertEquals(maskFromPrefixLength(31), 0xFFFFFFFE);
   });
 
   await t.step("out of range prefix lengths", () => {
@@ -227,14 +227,14 @@ Deno.test("IP assignment workflow", async (t) => {
     const broadcastAddr = cidr4BroadcastAddress(cidr);
 
     // Start from first usable IP (network + 1)
-    let currentIp = networkAddr + 1n;
+    let currentIp = networkAddr + 1;
     const assigned: string[] = [];
 
     // Assign IPs until broadcast (exclusive)
     while (currentIp < broadcastAddr) {
       assertEquals(cidr4Contains(cidr, currentIp), true);
       assigned.push(stringifyIpv4(currentIp));
-      currentIp = currentIp + 1n;
+      currentIp = currentIp + 1;
     }
 
     // Should have assigned: 10.0.0.1, 10.0.0.2, ..., 10.0.0.6
@@ -262,16 +262,16 @@ Deno.test("IP assignment workflow", async (t) => {
     const ip = parseIpv4("192.168.1.10");
 
     // Next IP
-    assertEquals(stringifyIpv4(ip + 1n), "192.168.1.11");
+    assertEquals(stringifyIpv4(ip + 1), "192.168.1.11");
 
     // Previous IP
-    assertEquals(stringifyIpv4(ip - 1n), "192.168.1.9");
+    assertEquals(stringifyIpv4(ip - 1), "192.168.1.9");
 
     // Add offset
-    assertEquals(stringifyIpv4(ip + 10n), "192.168.1.20");
+    assertEquals(stringifyIpv4(ip + 10), "192.168.1.20");
 
     // Crossing octet boundary
-    assertEquals(stringifyIpv4(parseIpv4("192.168.1.255") + 1n), "192.168.2.0");
+    assertEquals(stringifyIpv4(parseIpv4("192.168.1.255") + 1), "192.168.2.0");
   });
 });
 
@@ -390,11 +390,11 @@ Deno.test("cidr4Addresses", async (t) => {
     );
   });
 
-  await t.step("accepts bigint parameters", () => {
+  await t.step("accepts number parameters", () => {
     const cidr = parseCidr4("192.168.1.0/24");
 
     const addresses = Array.from(
-      cidr4Addresses(cidr, { offset: 5n, count: 3n, step: 1n }),
+      cidr4Addresses(cidr, { offset: 5, count: 3, step: 1 }),
     );
 
     assertEquals(addresses, [

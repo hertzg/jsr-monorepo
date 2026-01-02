@@ -4,6 +4,8 @@
   "exports": {
     ".": "./mod.ts",
     "./ipv4": "./ipv4.ts",
-    "./cidrv4": "./cidrv4.ts"
+    "./cidrv4": "./cidrv4.ts",
+    "./ipv6": "./ipv6.ts",
+    "./cidrv6": "./cidrv6.ts"
   }
 }

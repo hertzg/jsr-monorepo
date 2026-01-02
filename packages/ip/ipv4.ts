@@ -2,7 +2,7 @@
  * IPv4 address parsing and stringifying utilities.
  *
  * This module provides functions to convert between IPv4 dotted decimal
- * notation and bigint representation, enabling arithmetic operations on
+ * notation and number representation, enabling arithmetic operations on
  * IP addresses.
  *
  * @example Basic IPv4 operations
@@ -11,9 +11,9 @@
  * import { parseIpv4, stringifyIpv4 } from "@hertzg/ip/ipv4";
  *
  * const ip = parseIpv4("192.168.1.1");
- * assertEquals(ip, 3232235777n);
+ * assertEquals(ip, 3232235777);
  *
- * const next = ip + 1n;
+ * const next = ip + 1;
  * assertEquals(stringifyIpv4(next), "192.168.1.2");
  * ```
  *
@@ -21,13 +21,13 @@
  */
 
 /**
- * Parses an IPv4 address in dotted decimal notation to a bigint.
+ * Parses an IPv4 address in dotted decimal notation to a number.
  *
  * The function validates the format and range of each octet. Leading zeros
  * are not allowed (except for "0" itself).
  *
  * @param ip The IPv4 address string in dotted decimal notation
- * @returns The IPv4 address as a 32-bit bigint
+ * @returns The IPv4 address as a 32-bit unsigned integer
  * @throws {TypeError} If the format is invalid (wrong number of octets, non-numeric, leading zeros)
  * @throws {RangeError} If any octet is out of range (not 0-255)
  *
@@ -36,10 +36,10 @@
  * import { assertEquals } from "@std/assert";
  * import { parseIpv4 } from "@hertzg/ip/ipv4";
  *
- * assertEquals(parseIpv4("192.168.1.1"), 3232235777n);
- * assertEquals(parseIpv4("10.0.0.1"), 167772161n);
- * assertEquals(parseIpv4("0.0.0.0"), 0n);
- * assertEquals(parseIpv4("255.255.255.255"), 4294967295n);
+ * assertEquals(parseIpv4("192.168.1.1"), 3232235777);
+ * assertEquals(parseIpv4("10.0.0.1"), 167772161);
+ * assertEquals(parseIpv4("0.0.0.0"), 0);
+ * assertEquals(parseIpv4("255.255.255.255"), 4294967295);
  * ```
  *
  * @example Error handling
@@ -52,7 +52,7 @@
  * assertThrows(() => parseIpv4("192.168.01.1"), TypeError);
  * ```
  */
-export function parseIpv4(ip: string): bigint {
+export function parseIpv4(ip: string): number {
   const parts = ip.split(".");
 
   if (parts.length !== 4) {
@@ -92,7 +92,7 @@ export function parseIpv4(ip: string): bigint {
   const value = (octets[0] << 24) | (octets[1] << 16) | (octets[2] << 8) |
     octets[3];
 
-  return BigInt(value >>> 0); // Unsigned 32-bit
+  return value >>> 0; // Unsigned 32-bit
 }
 
 /**
@@ -125,16 +125,19 @@ export function parseIpv4(ip: string): bigint {
  * ```
  */
 export function stringifyIpv4(value: number | bigint): string {
-  if (BigInt(value) < 0n || BigInt(value) > 4294967295n) {
+  // Convert to number for faster bit operations (IPv4 fits in 32 bits)
+  const num = typeof value === "bigint" ? Number(value) : value;
+
+  if (num < 0 || num > 4294967295 || !Number.isInteger(num)) {
     throw new RangeError(
       `IPv4 value out of range: ${value} (must be 0 to 4294967295)`,
     );
   }
 
-  const octet0 = (BigInt(value) >> 24n) & 0xFFn;
-  const octet1 = (BigInt(value) >> 16n) & 0xFFn;
-  const octet2 = (BigInt(value) >> 8n) & 0xFFn;
-  const octet3 = BigInt(value) & 0xFFn;
+  const octet0 = (num >>> 24) & 0xFF;
+  const octet1 = (num >>> 16) & 0xFF;
+  const octet2 = (num >>> 8) & 0xFF;
+  const octet3 = num & 0xFF;
 
   return `${octet0}.${octet1}.${octet2}.${octet3}`;
 }

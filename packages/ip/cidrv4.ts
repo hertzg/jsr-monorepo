@@ -2,7 +2,7 @@
  * IPv4 CIDR notation parsing and utilities.
  *
  * This module provides CIDR parsing, network calculations, and IP range
- * checking for IPv4 networks. Works with bigint representations to enable
+ * checking for IPv4 networks. Works with number representations to enable
  * efficient IP assignment workflows.
  *
  * @example CIDR operations
@@ -17,11 +17,11 @@
  * import { parseIpv4, stringifyIpv4 } from "@hertzg/ip/ipv4";
  *
  * const cidr = parseCidr4("192.168.1.0/24");
- * let currentIp = cidr4NetworkAddress(cidr) + 1n;
+ * let currentIp = cidr4NetworkAddress(cidr) + 1;
  *
  * while (cidr4Contains(cidr, currentIp)) {
  *   const assigned = stringifyIpv4(currentIp);
- *   currentIp = currentIp + 1n;
+ *   currentIp = currentIp + 1;
  *   if (currentIp > cidr4BroadcastAddress(cidr)) break;
  * }
  *
@@ -41,7 +41,7 @@ import { parseIpv4, stringifyIpv4 } from "./ipv4.ts";
  */
 export type Cidr4 = {
   /** The IPv4 address from the CIDR notation */
-  readonly address: bigint;
+  readonly address: number;
   /** The prefix length (0-32) */
   readonly prefixLength: number;
 };
@@ -52,7 +52,7 @@ export type Cidr4 = {
  * The prefix length must be between 0 and 32 (inclusive).
  *
  * @param prefixLength The CIDR prefix length (0-32)
- * @returns The network mask as a bigint
+ * @returns The network mask as a 32-bit unsigned integer
  * @throws {RangeError} If the prefix length is out of range
  *
  * @example Creating masks
@@ -60,11 +60,11 @@ export type Cidr4 = {
  * import { assertEquals } from "@std/assert";
  * import { maskFromPrefixLength } from "@hertzg/ip/cidrv4";
  *
- * assertEquals(maskFromPrefixLength(24), 0xFFFFFF00n);
- * assertEquals(maskFromPrefixLength(16), 0xFFFF0000n);
- * assertEquals(maskFromPrefixLength(8), 0xFF000000n);
- * assertEquals(maskFromPrefixLength(32), 0xFFFFFFFFn);
- * assertEquals(maskFromPrefixLength(0), 0n);
+ * assertEquals(maskFromPrefixLength(24), 0xFFFFFF00);
+ * assertEquals(maskFromPrefixLength(16), 0xFFFF0000);
+ * assertEquals(maskFromPrefixLength(8), 0xFF000000);
+ * assertEquals(maskFromPrefixLength(32), 0xFFFFFFFF);
+ * assertEquals(maskFromPrefixLength(0), 0);
  * ```
  *
  * @example Error handling
@@ -76,20 +76,18 @@ export type Cidr4 = {
  * assertThrows(() => maskFromPrefixLength(33), RangeError);
  * ```
  */
-export function maskFromPrefixLength(prefixLength: number | bigint): bigint {
-  if (BigInt(prefixLength) < 0n || BigInt(prefixLength) > 32n) {
+export function maskFromPrefixLength(prefixLength: number): number {
+  if (prefixLength < 0 || prefixLength > 32 || !Number.isInteger(prefixLength)) {
     throw new RangeError(
       `CIDR prefix length must be 0-32, got ${prefixLength}`,
     );
   }
 
   if (prefixLength === 0) {
-    return 0n;
+    return 0;
   }
 
-  const mask = (0xFFFFFFFFn << BigInt(32n - BigInt(prefixLength))) &
-    0xFFFFFFFFn;
-  return mask;
+  return ((0xFFFFFFFF << (32 - prefixLength)) >>> 0);
 }
 
 /**
@@ -109,7 +107,7 @@ export function maskFromPrefixLength(prefixLength: number | bigint): bigint {
  * import { parseCidr4 } from "@hertzg/ip/cidrv4";
  *
  * const cidr = parseCidr4("192.168.1.0/24");
- * assertEquals(cidr.address, 3232235776n);
+ * assertEquals(cidr.address, 3232235776);
  * assertEquals(cidr.prefixLength, 24);
  * ```
  *
@@ -169,7 +167,7 @@ export function stringifyCidr4(cidr: Cidr4): string {
 }
 
 /**
- * Checks if an IPv4 address (as bigint) is contained within a CIDR block.
+ * Checks if an IPv4 address is contained within a CIDR block.
  *
  * @param cidr The CIDR block to check against
  * @param ip The IPv4 address to check
@@ -201,27 +199,27 @@ export function stringifyCidr4(cidr: Cidr4): string {
  * } from "@hertzg/ip/cidrv4";
  *
  * const cidr = parseCidr4("10.0.0.0/29");
- * let currentIp = cidr4NetworkAddress(cidr) + 1n;
+ * let currentIp = cidr4NetworkAddress(cidr) + 1;
  *
- * const assigned: bigint[] = [];
+ * const assigned: number[] = [];
  * while (currentIp < cidr4BroadcastAddress(cidr)) {
  *   assert(cidr4Contains(cidr, currentIp));
  *   assigned.push(currentIp);
- *   currentIp = currentIp + 1n;
+ *   currentIp = currentIp + 1;
  * }
  * ```
  */
-export function cidr4Contains(cidr: Cidr4, ip: bigint): boolean {
+export function cidr4Contains(cidr: Cidr4, ip: number): boolean {
   const mask = maskFromPrefixLength(cidr.prefixLength);
-  const network = cidr.address & mask;
-  return (ip & mask) === network;
+  const network = (cidr.address & mask) >>> 0;
+  return ((ip & mask) >>> 0) === network;
 }
 
 /**
  * Returns the network address (first IP) of a CIDR block.
  *
  * @param cidr The CIDR block
- * @returns The network address as a bigint
+ * @returns The network address as a 32-bit unsigned integer
  *
  * @example Getting network address
  * ```ts
@@ -233,16 +231,16 @@ export function cidr4Contains(cidr: Cidr4, ip: bigint): boolean {
  * assertEquals(cidr4NetworkAddress(cidr), parseIpv4("192.168.1.0"));
  * ```
  */
-export function cidr4NetworkAddress(cidr: Cidr4): bigint {
+export function cidr4NetworkAddress(cidr: Cidr4): number {
   const mask = maskFromPrefixLength(cidr.prefixLength);
-  return cidr.address & mask;
+  return (cidr.address & mask) >>> 0;
 }
 
 /**
  * Returns the broadcast address (last IP) of a CIDR block.
  *
  * @param cidr The CIDR block
- * @returns The broadcast address as a bigint
+ * @returns The broadcast address as a 32-bit unsigned integer
  *
  * @example Getting broadcast address
  * ```ts
@@ -254,10 +252,10 @@ export function cidr4NetworkAddress(cidr: Cidr4): bigint {
  * assertEquals(cidr4BroadcastAddress(cidr), parseIpv4("192.168.1.255"));
  * ```
  */
-export function cidr4BroadcastAddress(cidr: Cidr4): bigint {
+export function cidr4BroadcastAddress(cidr: Cidr4): number {
   const mask = maskFromPrefixLength(cidr.prefixLength);
-  const network = cidr.address & mask;
-  return network | (~mask & 0xFFFFFFFFn);
+  const network = (cidr.address & mask) >>> 0;
+  return (network | (~mask >>> 0)) >>> 0;
 }
 
 /**
@@ -276,7 +274,7 @@ export function cidr4BroadcastAddress(cidr: Cidr4): bigint {
  * @param options.offset The offset from the network address (0-based, defaults to 1 for first usable IP)
  * @param options.count The maximum number of addresses to generate (defaults to undefined = iterate until CIDR boundary)
  * @param options.step The increment between addresses (positive or negative, defaults to 1)
- * @returns A generator yielding IP addresses as bigints (may yield less than count if CIDR boundary is reached)
+ * @returns A generator yielding IP addresses as 32-bit unsigned integers (may yield less than count if CIDR boundary is reached)
  *
  * @example Default behavior - iterate full CIDR range
  * ```ts
@@ -396,24 +394,23 @@ export function cidr4BroadcastAddress(cidr: Cidr4): bigint {
 export function* cidr4Addresses(
   cidr: Cidr4,
   options?: {
-    offset?: number | bigint;
-    count?: number | bigint;
-    step?: number | bigint;
+    offset?: number;
+    count?: number;
+    step?: number;
   },
-): Generator<bigint> {
+): Generator<number> {
   const network = cidr4NetworkAddress(cidr);
   const offset = options?.offset ?? 1;
   const count = options?.count;
   const step = options?.step ?? 1;
 
-  let currentIp = network + BigInt(offset);
-  const stepSize = BigInt(step);
-  const maxCount = count !== undefined ? Number(count) : Infinity;
+  let currentIp = (network + offset) >>> 0;
+  const maxCount = count !== undefined ? count : Infinity;
 
   let i = 0;
   while (i < maxCount && cidr4Contains(cidr, currentIp)) {
     yield currentIp;
-    currentIp += stepSize;
+    currentIp = (currentIp + step) >>> 0;
     i++;
   }
 }
