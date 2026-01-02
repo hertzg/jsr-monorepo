@@ -77,19 +77,21 @@ export type Cidr4 = {
  * ```
  */
 export function maskFromPrefixLength(prefixLength: number | bigint): bigint {
-  if (BigInt(prefixLength) < 0n || BigInt(prefixLength) > 32n) {
+  const pl = typeof prefixLength === "bigint"
+    ? Number(prefixLength)
+    : prefixLength;
+
+  if (pl < 0 || pl > 32 || !Number.isInteger(pl)) {
     throw new RangeError(
       `CIDR prefix length must be 0-32, got ${prefixLength}`,
     );
   }
 
-  if (prefixLength === 0) {
+  if (pl === 0) {
     return 0n;
   }
 
-  const mask = (0xFFFFFFFFn << BigInt(32n - BigInt(prefixLength))) &
-    0xFFFFFFFFn;
-  return mask;
+  return (0xFFFFFFFFn << BigInt(32 - pl)) & 0xFFFFFFFFn;
 }
 
 /**

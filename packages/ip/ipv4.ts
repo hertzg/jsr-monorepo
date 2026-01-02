@@ -125,16 +125,19 @@ export function parseIpv4(ip: string): bigint {
  * ```
  */
 export function stringifyIpv4(value: number | bigint): string {
-  if (BigInt(value) < 0n || BigInt(value) > 4294967295n) {
+  // Convert to number for faster bit operations (IPv4 fits in 32 bits)
+  const num = typeof value === "bigint" ? Number(value) : value;
+
+  if (num < 0 || num > 4294967295 || !Number.isInteger(num)) {
     throw new RangeError(
       `IPv4 value out of range: ${value} (must be 0 to 4294967295)`,
     );
   }
 
-  const octet0 = (BigInt(value) >> 24n) & 0xFFn;
-  const octet1 = (BigInt(value) >> 16n) & 0xFFn;
-  const octet2 = (BigInt(value) >> 8n) & 0xFFn;
-  const octet3 = BigInt(value) & 0xFFn;
+  const octet0 = (num >>> 24) & 0xFF;
+  const octet1 = (num >>> 16) & 0xFF;
+  const octet2 = (num >>> 8) & 0xFF;
+  const octet3 = num & 0xFF;
 
   return `${octet0}.${octet1}.${octet2}.${octet3}`;
 }

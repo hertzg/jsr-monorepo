@@ -95,9 +95,10 @@ export function parseIpv6(ip: string): bigint {
   }
 
   // Handle :: expansion
-  if (ip.includes("::")) {
-    const doubleColonCount = (ip.match(/::/g) || []).length;
-    if (doubleColonCount > 1) {
+  const firstDoubleColon = ip.indexOf("::");
+  if (firstDoubleColon !== -1) {
+    // Check for multiple :: by comparing first and last occurrence
+    if (ip.indexOf("::", firstDoubleColon + 2) !== -1) {
       throw new TypeError("IPv6 address can only contain one '::'");
     }
 
@@ -138,18 +139,20 @@ function parseFullIpv6(parts: string[]): bigint {
 
   for (let i = 0; i < 8; i++) {
     const part = parts[i];
+    const len = part.length;
 
-    // Validate hex format
-    if (!/^[0-9a-fA-F]{1,4}$/.test(part)) {
+    // Validate: must be 1-4 characters
+    if (len === 0 || len > 4) {
       throw new TypeError(
         `Invalid IPv6 group: '${part}' (must be 1-4 hex digits)`,
       );
     }
 
+    // Parse as hex - parseInt returns NaN for invalid hex
     const value = parseInt(part, 16);
-    if (value < 0 || value > 0xFFFF) {
-      throw new RangeError(
-        `IPv6 group out of range: ${value} (must be 0-65535)`,
+    if (Number.isNaN(value)) {
+      throw new TypeError(
+        `Invalid IPv6 group: '${part}' (must be 1-4 hex digits)`,
       );
     }
 
