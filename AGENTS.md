@@ -72,6 +72,7 @@ All packages are located in the `packages/` directory:
 - `packages/wg-keys` - WireGuard key management
 - `packages/wg-ini` - INI file parsing
 - `packages/wg-conf` - WireGuard configuration handling
+- `packages/wg-ctl` - WireGuard control library (wg-quick parity)
 - `packages/routeros-api` - MikroTik RouterOS API client
 - `packages/tplink-api` - TP-Link Router API client
 - `packages/mymagti-api` - MyMagti API client
@@ -320,6 +321,7 @@ both tiresome and error-prone.
 - `@hertzg/wg-keys`
 - `@hertzg/wg-ini`
 - `@hertzg/wg-conf`
+- `@hertzg/wg-ctl`
 - `@hertzg/mymagti-api`
 - `@hertzg/bx`
 - `@hertzg/ip`
