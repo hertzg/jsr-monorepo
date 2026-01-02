@@ -1,17 +1,56 @@
 /**
- * IPv4 address parsing, stringifying, and CIDR utilities.
+ * IPv4 and IPv6 address parsing, stringifying, and CIDR utilities.
  *
- * This module provides functions for working with IPv4 addresses and CIDR notation.
+ * This module provides functions for working with IPv4 and IPv6 addresses and CIDR notation.
  * IP addresses are represented as bigints, enabling efficient arithmetic operations
  * and range manipulation for network programming tasks.
  *
+ * ## API Reference
+ *
+ * ### IPv4
+ * - {@link parseIpv4}: Parse dotted decimal notation to bigint
+ * - {@link stringifyIpv4}: Convert bigint to dotted decimal notation
+ *
+ * ### IPv4 CIDR
+ * - {@link Cidr4}: Type representing an IPv4 CIDR block
+ * - {@link parseCidr4}: Parse CIDR notation string to Cidr4
+ * - {@link stringifyCidr4}: Convert Cidr4 to CIDR notation string
+ * - {@link maskFromPrefixLength}: Create network mask from prefix length (0-32)
+ * - {@link cidr4Contains}: Check if IP is within CIDR range
+ * - {@link cidr4NetworkAddress}: Get network address (first IP)
+ * - {@link cidr4BroadcastAddress}: Get broadcast address (last IP)
+ * - {@link cidr4Addresses}: Generate IP addresses in CIDR range
+ *
+ * ### IPv6
+ * - {@link parseIpv6}: Parse colon-hexadecimal notation to bigint
+ * - {@link stringifyIpv6}: Convert bigint to compressed colon-hexadecimal
+ * - {@link expandIpv6}: Expand to full uncompressed form
+ * - {@link compressIpv6}: Compress to canonical shortest form
+ *
+ * ### IPv6 CIDR
+ * - {@link Cidr6}: Type representing an IPv6 CIDR block
+ * - {@link parseCidr6}: Parse CIDR notation string to Cidr6
+ * - {@link stringifyCidr6}: Convert Cidr6 to CIDR notation string
+ * - {@link mask6FromPrefixLength}: Create network mask from prefix length (0-128)
+ * - {@link cidr6Contains}: Check if IP is within CIDR range
+ * - {@link cidr6NetworkAddress}: Get network address (first IP)
+ * - {@link cidr6BroadcastAddress}: Get last address in range
+ * - {@link cidr6Addresses}: Generate IP addresses in CIDR range
+ *
+ * ### Submodules
+ * - [`ipv4`](https://jsr.io/@hertzg/ip/doc/ipv4): IPv4 parsing via {@link parseIpv4} and {@link stringifyIpv4}
+ * - [`cidrv4`](https://jsr.io/@hertzg/ip/doc/cidrv4): IPv4 CIDR utilities via {@link parseCidr4}, {@link cidr4Contains}
+ * - [`ipv6`](https://jsr.io/@hertzg/ip/doc/ipv6): IPv6 parsing via {@link parseIpv6}, {@link expandIpv6}, {@link compressIpv6}
+ * - [`cidrv6`](https://jsr.io/@hertzg/ip/doc/cidrv6): IPv6 CIDR utilities via {@link parseCidr6}, {@link cidr6Contains}
+ *
  * ## Features
  *
- * - **IPv4 Parsing & Stringifying**: Convert between dotted decimal notation and bigint
+ * - **IPv4 & IPv6 Parsing & Stringifying**: Convert between standard notation and bigint
  * - **CIDR Support**: Parse CIDR notation and perform network calculations
  * - **Range Checking**: Verify if IPs are within CIDR blocks
  * - **Address Generation**: Generate IP ranges with custom offsets and steps
  * - **Arithmetic Operations**: Use bigint math for IP address manipulation
+ * - **IPv6 Compression**: Expand and compress IPv6 addresses
  *
  * ## Basic IPv4 Operations
  *
@@ -33,6 +72,25 @@
  *
  * const prev = ip - 1n;
  * assertEquals(stringifyIpv4(prev), "192.168.1.0");
+ * ```
+ *
+ * ## Basic IPv6 Operations
+ *
+ * @example Parse and stringify IPv6 addresses
+ * ```ts
+ * import { assertEquals } from "@std/assert";
+ * import { parseIpv6, stringifyIpv6 } from "@hertzg/ip";
+ *
+ * // Parse colon-hexadecimal to bigint
+ * const ip = parseIpv6("2001:db8::1");
+ * assertEquals(ip, 42540766411282592856903984951653826561n);
+ *
+ * // Stringify bigint back to compressed form
+ * assertEquals(stringifyIpv6(ip), "2001:db8::1");
+ *
+ * // Arithmetic operations
+ * const next = ip + 1n;
+ * assertEquals(stringifyIpv6(next), "2001:db8::2");
  * ```
  *
  * ## CIDR Notation
@@ -61,6 +119,29 @@
  *
  * // Stringify back to CIDR notation
  * assertEquals(stringifyCidr4(cidr), "192.168.1.0/24");
+ * ```
+ *
+ * @example IPv6 CIDR operations
+ * ```ts
+ * import { assertEquals } from "@std/assert";
+ * import {
+ *   cidr6BroadcastAddress,
+ *   cidr6NetworkAddress,
+ *   parseCidr6,
+ *   stringifyCidr6,
+ *   stringifyIpv6,
+ * } from "@hertzg/ip";
+ *
+ * // Parse IPv6 CIDR notation
+ * const cidr = parseCidr6("2001:db8::/32");
+ * assertEquals(cidr.prefixLength, 32);
+ *
+ * // Get network boundaries
+ * const network = cidr6NetworkAddress(cidr);
+ * assertEquals(stringifyIpv6(network), "2001:db8::");
+ *
+ * // Stringify back to CIDR notation
+ * assertEquals(stringifyCidr6(cidr), "2001:db8::/32");
  * ```
  *
  * ## Range Checking
@@ -153,13 +234,32 @@
  * }
  * ```
  *
+ * @example WireGuard mesh network with IPv6
+ * ```ts
+ * import { assertEquals } from "@std/assert";
+ * import { cidr6Addresses, parseCidr6, stringifyIpv6 } from "@hertzg/ip";
+ *
+ * // Allocate unique local addresses for mesh peers
+ * const meshSubnet = parseCidr6("fd00:abcd::/120");
+ *
+ * // Get addresses for mesh nodes
+ * const peerAddresses = Array.from(cidr6Addresses(meshSubnet, { offset: 1, count: 5 }));
+ * assertEquals(peerAddresses.map(stringifyIpv6), [
+ *   "fd00:abcd::1",
+ *   "fd00:abcd::2",
+ *   "fd00:abcd::3",
+ *   "fd00:abcd::4",
+ *   "fd00:abcd::5",
+ * ]);
+ * ```
+ *
  * @module
  */
 
 // Re-export IPv4 utilities
 export { parseIpv4, stringifyIpv4 } from "./ipv4.ts";
 
-// Re-export CIDR utilities
+// Re-export CIDR4 utilities
 export {
   type Cidr4,
   cidr4Addresses,
@@ -170,3 +270,23 @@ export {
   parseCidr4,
   stringifyCidr4,
 } from "./cidrv4.ts";
+
+// Re-export IPv6 utilities
+export {
+  compressIpv6,
+  expandIpv6,
+  parseIpv6,
+  stringifyIpv6,
+} from "./ipv6.ts";
+
+// Re-export CIDR6 utilities
+export {
+  type Cidr6,
+  cidr6Addresses,
+  cidr6BroadcastAddress,
+  cidr6Contains,
+  cidr6NetworkAddress,
+  mask6FromPrefixLength,
+  parseCidr6,
+  stringifyCidr6,
+} from "./cidrv6.ts";
