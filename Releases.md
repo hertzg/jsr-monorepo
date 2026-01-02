@@ -1,3 +1,14 @@
+### 2026.01.02
+
+#### @hertzg/binstruct 3.0.5 (patch)
+
+- chore(@hertzg/binstruct): split test task into doc and parallel subtasks
+- chore(@hertzg/binstruct): add feature implementation guidelines to AGENTS.md
+
+#### @hertzg/ip 0.2.0 (minor)
+
+- feat(@hertzg/ip)!: add IPv6 support with feature parity to IPv4 (#75)
+
 ### 2025.12.31
 
 #### @binstruct/png 0.3.2 (patch)
