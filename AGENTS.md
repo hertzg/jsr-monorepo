@@ -172,6 +172,13 @@ import { assertEquals } from "./deps.ts";
 - Prefer functions over classes
 - Export types with `export type` for type-only exports
 
+### Feature Implementation Guidelines
+
+- **CRITICAL:** Make MINIMAL CHANGES to existing patterns and structures.
+- **CRITICAL:** Preserve existing naming conventions and file organization.
+- Follow project's established architecture and component patterns.
+- Use existing utility functions and avoid duplicating functionality.
+
 ## Documentation Requirements
 
 ### JSDoc Standards
