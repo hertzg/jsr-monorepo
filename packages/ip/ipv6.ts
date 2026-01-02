@@ -89,8 +89,8 @@ export function parseIpv6(ip: string): bigint {
     // Parse using the IPv4 parser for proper validation and consistency
     const ipv4Value = parseIpv4(possibleIpv4);
     // Replace the IPv4 portion with two hex groups (high 16 bits, low 16 bits)
-    const hexGroup1 = ((ipv4Value >> 16n) & 0xFFFFn).toString(16);
-    const hexGroup2 = (ipv4Value & 0xFFFFn).toString(16);
+    const hexGroup1 = ((ipv4Value >>> 16) & 0xFFFF).toString(16);
+    const hexGroup2 = (ipv4Value & 0xFFFF).toString(16);
     ip = ip.slice(0, lastColonIndex + 1) + hexGroup1 + ":" + hexGroup2;
   }
 

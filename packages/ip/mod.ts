@@ -2,14 +2,14 @@
  * IPv4 and IPv6 address parsing, stringifying, and CIDR utilities.
  *
  * This module provides functions for working with IPv4 and IPv6 addresses and CIDR notation.
- * IP addresses are represented as bigints, enabling efficient arithmetic operations
- * and range manipulation for network programming tasks.
+ * IPv4 addresses are represented as numbers (32-bit), IPv6 as bigints (128-bit), enabling
+ * efficient arithmetic operations and range manipulation for network programming tasks.
  *
  * ## API Reference
  *
  * ### IPv4
- * - {@link parseIpv4}: Parse dotted decimal notation to bigint
- * - {@link stringifyIpv4}: Convert bigint to dotted decimal notation
+ * - {@link parseIpv4}: Parse dotted decimal notation to number
+ * - {@link stringifyIpv4}: Convert number to dotted decimal notation
  *
  * ### IPv4 CIDR
  * - {@link Cidr4}: Type representing an IPv4 CIDR block
@@ -45,11 +45,11 @@
  *
  * ## Features
  *
- * - **IPv4 & IPv6 Parsing & Stringifying**: Convert between standard notation and bigint
+ * - **IPv4 & IPv6 Parsing & Stringifying**: Convert between standard notation and number/bigint
  * - **CIDR Support**: Parse CIDR notation and perform network calculations
  * - **Range Checking**: Verify if IPs are within CIDR blocks
  * - **Address Generation**: Generate IP ranges with custom offsets and steps
- * - **Arithmetic Operations**: Use bigint math for IP address manipulation
+ * - **Arithmetic Operations**: Use number (IPv4) or bigint (IPv6) math for IP address manipulation
  * - **IPv6 Compression**: Expand and compress IPv6 addresses
  *
  * ## Basic IPv4 Operations
@@ -59,18 +59,18 @@
  * import { assertEquals } from "@std/assert";
  * import { parseIpv4, stringifyIpv4 } from "@hertzg/ip";
  *
- * // Parse dotted decimal to bigint
+ * // Parse dotted decimal to number
  * const ip = parseIpv4("192.168.1.1");
- * assertEquals(ip, 3232235777n);
+ * assertEquals(ip, 3232235777);
  *
- * // Stringify bigint back to dotted decimal
+ * // Stringify number back to dotted decimal
  * assertEquals(stringifyIpv4(ip), "192.168.1.1");
  *
  * // Arithmetic operations
- * const next = ip + 1n;
+ * const next = ip + 1;
  * assertEquals(stringifyIpv4(next), "192.168.1.2");
  *
- * const prev = ip - 1n;
+ * const prev = ip - 1;
  * assertEquals(stringifyIpv4(prev), "192.168.1.0");
  * ```
  *
