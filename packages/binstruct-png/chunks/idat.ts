@@ -21,21 +21,21 @@ import {
  *   length: 100,
  *   type: "IDAT",
  *   data: {
- *     compressionMethod: 8,
- *     compressionInfo: 7,
- *     fCheck: 1,
- *     fDict: false,
- *     fLevel: 2,
- *     dictId: undefined,
- *     compressedData: new Uint8Array([1, 2, 3]),
- *     uncompressedData: new Uint8Array([4, 5, 6]),
- *     checksum: 0x12345678,
+ *     header: {
+ *       compressionMethod: 8,
+ *       compressionInfo: 7,
+ *       fcheck: 1,
+ *       fdict: 0,
+ *       flevel: 2,
+ *     },
+ *     uncompressed: new Uint8Array([4, 5, 6]),
+ *     checksum: new Uint8Array([0x12, 0x34, 0x56, 0x78]),
  *   },
  *   crc: 0x87654321,
  * };
  *
  * assertEquals(idat.type, "IDAT");
- * assertEquals(idat.data.compressionMethod, 8);
+ * assertEquals(idat.data.header.compressionMethod, 8);
  * ```
  */
 export interface IdatChunk extends Omit<PngChunkUnknown, "type" | "data"> {

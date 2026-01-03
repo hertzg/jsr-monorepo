@@ -58,12 +58,24 @@ import {
   u8,
 } from "@hertzg/binstruct";
 import { crc32 } from "@hertzg/crc";
+
+// Chunk types and refiners - re-exported for public API and used internally
 import { type IhdrChunk, ihdrChunkRefiner } from "./chunks/ihdr.ts";
 import { type IdatChunk, idatChunkRefiner } from "./chunks/idat.ts";
 import { type IendChunk, iendChunkRefiner } from "./chunks/iend.ts";
 import { type PlteChunk, plteChunkRefiner } from "./chunks/plte.ts";
 import { type TrnsChunk, trnsChunkRefiner } from "./chunks/trns.ts";
 import { type BkgdChunk, bkgdChunkRefiner } from "./chunks/bkgd.ts";
+
+export type { IhdrChunk, IdatChunk, IendChunk, PlteChunk, TrnsChunk, BkgdChunk };
+export {
+  ihdrChunkRefiner,
+  idatChunkRefiner,
+  iendChunkRefiner,
+  plteChunkRefiner,
+  trnsChunkRefiner,
+  bkgdChunkRefiner,
+};
 
 /**
  * PNG file structure containing signature and chunks.
