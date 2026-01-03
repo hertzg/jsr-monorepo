@@ -34,6 +34,5 @@
     "fflate": "npm:fflate@0.8.2",
     "@noble/ciphers/aes.js": "jsr:@noble/ciphers@^2.1.1/aes.js",
     "@noble/hashes/legacy.js": "jsr:@noble/hashes@^2.0.1/legacy.js"
-
   }
 }
