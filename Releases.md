@@ -1,3 +1,30 @@
+### 2026.01.03
+
+#### @binstruct/png 0.3.3 (patch)
+
+- fix(@binstruct/png): add missing JSDoc documentation (#78)
+- chore(@binstruct/png): format code with deno fmt
+
+#### @hertzg/crc 0.1.1 (patch)
+
+- chore(@hertzg/crc): format code with deno fmt
+
+#### @hertzg/ip 0.2.1 (patch)
+
+- chore(@hertzg/ip): format code with deno fmt
+
+#### @hertzg/tplink-api 1.0.4 (patch)
+
+- chore(@hertzg/tplink-api): format code with deno fmt
+
+#### @hertzg/wg-conf 0.2.2 (patch)
+
+- fix(@hertzg/wg-conf): fix JSDoc documentation (#77)
+
+#### @hertzg/wg-keys 1.0.3 (patch)
+
+- fix(@hertzg/wg-keys): fix typos and improve JSDoc (#79)
+
 ### 2026.01.02
 
 #### @hertzg/binstruct 3.0.5 (patch)
