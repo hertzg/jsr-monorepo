@@ -240,7 +240,16 @@ Deno.test("createCipher allows multiple encryptions with same instance", () => {
   assertEquals(encrypted3.length, 16);
 
   // Verify decryption works for all
-  assertEquals(new TextDecoder().decode(cipher.aesDecrypt(encrypted1)), "first message!!");
-  assertEquals(new TextDecoder().decode(cipher.aesDecrypt(encrypted2)), "second message!");
-  assertEquals(new TextDecoder().decode(cipher.aesDecrypt(encrypted3)), "third message!!");
+  assertEquals(
+    new TextDecoder().decode(cipher.aesDecrypt(encrypted1)),
+    "first message!!",
+  );
+  assertEquals(
+    new TextDecoder().decode(cipher.aesDecrypt(encrypted2)),
+    "second message!",
+  );
+  assertEquals(
+    new TextDecoder().decode(cipher.aesDecrypt(encrypted3)),
+    "third message!!",
+  );
 });
