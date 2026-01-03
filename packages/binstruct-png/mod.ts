@@ -67,14 +67,21 @@ import { type PlteChunk, plteChunkRefiner } from "./chunks/plte.ts";
 import { type TrnsChunk, trnsChunkRefiner } from "./chunks/trns.ts";
 import { type BkgdChunk, bkgdChunkRefiner } from "./chunks/bkgd.ts";
 
-export type { IhdrChunk, IdatChunk, IendChunk, PlteChunk, TrnsChunk, BkgdChunk };
+export type {
+  BkgdChunk,
+  IdatChunk,
+  IendChunk,
+  IhdrChunk,
+  PlteChunk,
+  TrnsChunk,
+};
 export {
-  ihdrChunkRefiner,
+  bkgdChunkRefiner,
   idatChunkRefiner,
   iendChunkRefiner,
+  ihdrChunkRefiner,
   plteChunkRefiner,
   trnsChunkRefiner,
-  bkgdChunkRefiner,
 };
 
 /**
