@@ -49,15 +49,24 @@ Deno.test("parseIpv6", async (t) => {
   });
 
   await t.step("lowercase hex", () => {
-    assertEquals(parseIpv6("abcd:ef01::1"), 0xabcdef01000000000000000000000001n);
+    assertEquals(
+      parseIpv6("abcd:ef01::1"),
+      0xabcdef01000000000000000000000001n,
+    );
   });
 
   await t.step("uppercase hex", () => {
-    assertEquals(parseIpv6("ABCD:EF01::1"), 0xabcdef01000000000000000000000001n);
+    assertEquals(
+      parseIpv6("ABCD:EF01::1"),
+      0xabcdef01000000000000000000000001n,
+    );
   });
 
   await t.step("mixed case hex", () => {
-    assertEquals(parseIpv6("AbCd:eF01::1"), 0xabcdef01000000000000000000000001n);
+    assertEquals(
+      parseIpv6("AbCd:eF01::1"),
+      0xabcdef01000000000000000000000001n,
+    );
   });
 
   await t.step("IPv4-mapped addresses", () => {

@@ -77,7 +77,9 @@ export type Cidr4 = {
  * ```
  */
 export function maskFromPrefixLength(prefixLength: number): number {
-  if (prefixLength < 0 || prefixLength > 32 || !Number.isInteger(prefixLength)) {
+  if (
+    prefixLength < 0 || prefixLength > 32 || !Number.isInteger(prefixLength)
+  ) {
     throw new RangeError(
       `CIDR prefix length must be 0-32, got ${prefixLength}`,
     );

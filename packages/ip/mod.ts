@@ -272,12 +272,7 @@ export {
 } from "./cidrv4.ts";
 
 // Re-export IPv6 utilities
-export {
-  compressIpv6,
-  expandIpv6,
-  parseIpv6,
-  stringifyIpv6,
-} from "./ipv6.ts";
+export { compressIpv6, expandIpv6, parseIpv6, stringifyIpv6 } from "./ipv6.ts";
 
 // Re-export CIDR6 utilities
 export {
