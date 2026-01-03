@@ -1,3 +1,50 @@
+/**
+ * High-level helpers to parse and stringify WireGuard wg-quick configuration files.
+ *
+ * This module uses the lower-level `@hertzg/wg-ini` streams to provide convenient
+ * functions for working with wg-quick(8) configuration files.
+ *
+ * @example Parse a WireGuard configuration
+ * ```ts
+ * import { parse } from "@hertzg/wg-conf";
+ * import { assertEquals } from "@std/assert";
+ *
+ * const text = [
+ *   '[Interface]',
+ *   'ListenPort = 51820',
+ *   'PrivateKey = PRIV',
+ *   '',
+ *   '[Peer]',
+ *   'PublicKey = PUB',
+ *   ''
+ * ].join("\n");
+ *
+ * const conf = await parse(text);
+ * assertEquals(conf.Interface.ListenPort, 51820);
+ * assertEquals(conf.Interface.PrivateKey, "PRIV");
+ * assertEquals(conf.Peers[0].PublicKey, "PUB");
+ * ```
+ *
+ * @example Stringify a WireGuard configuration
+ * ```ts
+ * import { stringify } from "@hertzg/wg-conf";
+ * import { assert } from "@std/assert";
+ *
+ * const conf = {
+ *   Interface: { ListenPort: 51820, PrivateKey: "PRIV" },
+ *   Peers: [{ PublicKey: "PUB" }],
+ * };
+ *
+ * const text = await stringify(conf);
+ * assert(text.includes('[Interface]'));
+ * assert(text.includes('ListenPort = 51820'));
+ * assert(text.includes('[Peer]'));
+ * assert(text.includes('PublicKey = PUB'));
+ * ```
+ *
+ * @module
+ */
+
 import { parseArray, stringifyArray } from "@hertzg/wg-ini";
 
 /**
@@ -57,40 +104,38 @@ export interface WGQuickConf {
 /**
  * Parse a wg-quick(8) configuration file into a JavaScript object.
  *
- * This module provides high-level helpers to parse and stringify WireGuard
- * wg-quick configuration files using the lower-level `@hertzg/wg-ini` streams.
+ * @param text The wg-quick configuration file content as a string.
+ * @returns A promise that resolves to a {@link WGQuickConf} object.
  *
- * @example
+ * @example Parse a configuration with multiple peers
  * ```ts
  * import { parse } from "@hertzg/wg-conf";
  * import { assertEquals } from "@std/assert";
  *
  * const text = [
- *  '[Interface]',
- *  'ListenPort = 51820',
- *  'PrivateKey = PRIV',
- *  '',
- *  '[Peer]',
- *  'PublicKey = PUB',
- *  '',
- * '[Peer]',
- *  'PublicKey = PUB2',
- *  ''
+ *   '[Interface]',
+ *   'ListenPort = 51820',
+ *   'PrivateKey = PRIV',
+ *   '',
+ *   '[Peer]',
+ *   'PublicKey = PUB',
+ *   '',
+ *   '[Peer]',
+ *   'PublicKey = PUB2',
+ *   ''
  * ].join("\n");
  *
  * assertEquals(await parse(text), {
- *  Interface: {
- *    ListenPort: 51820,
- *    PrivateKey: "PRIV",
- *  },
- *  Peers: [
- *    {PublicKey: "PUB"},
- *    {PublicKey: "PUB2"},
- *  ],
+ *   Interface: {
+ *     ListenPort: 51820,
+ *     PrivateKey: "PRIV",
+ *   },
+ *   Peers: [
+ *     { PublicKey: "PUB" },
+ *     { PublicKey: "PUB2" },
+ *   ],
  * });
  * ```
- *
- * @module
  */
 export async function parse(text: string): Promise<WGQuickConf> {
   const conf: WGQuickConf = { Interface: {}, Peers: [] };
@@ -165,39 +210,41 @@ export async function parse(text: string): Promise<WGQuickConf> {
 }
 
 /**
- * Parse a wg-quick(8) configuration file into a JavaScript object.
+ * Stringify a WireGuard configuration object to wg-quick(8) format.
  *
- * @example
+ * @param conf The {@link WGQuickConf} object to stringify.
+ * @returns A promise that resolves to the configuration as a string.
+ *
+ * @example Stringify a configuration with multiple peers
  * ```ts
  * import { stringify } from "@hertzg/wg-conf";
  * import { assertEquals } from "@std/assert";
  *
  * const obj = {
- *  Interface: {
- *    ListenPort: 51820,
- *    PrivateKey: "PRIV",
- *  },
- *  Peers: [
- *    {PublicKey: "PUB"},
- *    {PublicKey: "PUB2"},
- *  ],
+ *   Interface: {
+ *     ListenPort: 51820,
+ *     PrivateKey: "PRIV",
+ *   },
+ *   Peers: [
+ *     { PublicKey: "PUB" },
+ *     { PublicKey: "PUB2" },
+ *   ],
  * };
  *
  * assertEquals(await stringify(obj), [
- *  '[Interface]',
- *  'ListenPort = 51820',
- *  'PrivateKey = PRIV',
- *  '',
- *  '[Peer]',
- *  'PublicKey = PUB',
- *  '',
- *  '[Peer]',
- *  'PublicKey = PUB2',
- *  ''
+ *   '[Interface]',
+ *   'ListenPort = 51820',
+ *   'PrivateKey = PRIV',
+ *   '',
+ *   '[Peer]',
+ *   'PublicKey = PUB',
+ *   '',
+ *   '[Peer]',
+ *   'PublicKey = PUB2',
+ *   ''
  * ].join("\n"));
  * ```
  */
-
 export async function stringify(conf: WGQuickConf): Promise<string> {
   const array: [string | null, string[][]][] = [];
   if (conf.Interface != null) {
