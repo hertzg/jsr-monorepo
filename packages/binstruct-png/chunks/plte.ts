@@ -10,13 +10,62 @@ import {
 } from "@hertzg/binstruct";
 import type { PngChunkUnknown } from "../mod.ts";
 
+/**
+ * Refined PLTE (Palette) chunk structure.
+ *
+ * The PLTE chunk contains the color palette for indexed-color PNG images
+ * (color type 3). Each palette entry is an RGB triplet.
+ *
+ * @example
+ * ```ts
+ * import { assertEquals } from "@std/assert";
+ * import type { PlteChunk } from "@binstruct/png";
+ *
+ * const plte: PlteChunk = {
+ *   length: 9,
+ *   type: "PLTE",
+ *   data: {
+ *     colors: [
+ *       [255, 0, 0],   // Red
+ *       [0, 255, 0],   // Green
+ *       [0, 0, 255],   // Blue
+ *     ],
+ *   },
+ *   crc: 0x12345678,
+ * };
+ *
+ * assertEquals(plte.data.colors.length, 3);
+ * assertEquals(plte.data.colors[0], [255, 0, 0]);
+ * ```
+ */
 export interface PlteChunk extends Omit<PngChunkUnknown, "type" | "data"> {
+  /** Chunk type identifier, always "PLTE" */
   type: "PLTE";
+  /** Parsed palette data */
   data: {
+    /** Array of RGB color triplets (0-255 for each component) */
     colors: [number, number, number][];
   };
 }
 
+/**
+ * Creates a refiner for PLTE (Palette) chunks.
+ *
+ * This refiner transforms raw PLTE chunk bytes into a structured {@link PlteChunk}
+ * object with parsed RGB color triplets.
+ *
+ * @returns A refiner that converts between raw chunks and {@link PlteChunk}.
+ *
+ * @example
+ * ```ts
+ * import { assert } from "@std/assert";
+ * import { plteChunkRefiner } from "@binstruct/png";
+ *
+ * const refiner = plteChunkRefiner();
+ * assert(typeof refiner.refine === "function");
+ * assert(typeof refiner.unrefine === "function");
+ * ```
+ */
 export function plteChunkRefiner(): Refiner<PngChunkUnknown, PlteChunk, []> {
   const typeCoder = string(4);
   const rgpTupleCoder = array(u8(), 3) as unknown as Coder<

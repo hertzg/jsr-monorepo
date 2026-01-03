@@ -124,6 +124,37 @@ export interface PngChunkUnknown {
   crc: number;
 }
 
+/**
+ * Creates a coder for unknown/generic PNG chunks.
+ *
+ * This coder handles the basic PNG chunk structure without any type-specific
+ * refinement. It encodes/decodes the length, type, data, and CRC fields.
+ *
+ * @returns A coder for {@link PngChunkUnknown} structures.
+ *
+ * @example Encode and decode an unknown chunk
+ * ```ts
+ * import { assertEquals } from "@std/assert";
+ * import { pngChunkUnknown, type PngChunkUnknown } from "@binstruct/png";
+ *
+ * const coder = pngChunkUnknown();
+ * const chunk: PngChunkUnknown = {
+ *   length: 4,
+ *   type: new Uint8Array([116, 69, 88, 116]), // "tEXt"
+ *   data: new Uint8Array([84, 101, 115, 116]), // "Test"
+ *   crc: 0x12345678,
+ * };
+ *
+ * const buffer = new Uint8Array(20);
+ * const bytesWritten = coder.encode(chunk, buffer);
+ * const [decoded, bytesRead] = coder.decode(buffer);
+ *
+ * assertEquals(bytesWritten, bytesRead);
+ * assertEquals(decoded.length, chunk.length);
+ * assertEquals(decoded.type, chunk.type);
+ * assertEquals(decoded.data, chunk.data);
+ * ```
+ */
 export function pngChunkUnknown(): Coder<PngChunkUnknown> {
   const lengthCoder = u32be();
   return struct({
@@ -134,6 +165,39 @@ export function pngChunkUnknown(): Coder<PngChunkUnknown> {
   });
 }
 
+/**
+ * Creates a coder for PNG files with a custom chunk coder.
+ *
+ * This function allows you to specify how individual chunks should be
+ * encoded/decoded, enabling custom chunk handling or type-specific refinement.
+ *
+ * @template TChunk The type of chunks in the PNG file.
+ * @param chunkCoder The coder to use for encoding/decoding individual chunks.
+ * @returns A coder for {@link PngFile} structures with the specified chunk type.
+ *
+ * @example Create a PNG file coder with unknown chunks
+ * ```ts
+ * import { assertEquals } from "@std/assert";
+ * import { pngFileChunks, pngChunkUnknown, type PngChunkUnknown } from "@binstruct/png";
+ *
+ * const coder = pngFileChunks(pngChunkUnknown());
+ * const png = {
+ *   signature: {
+ *     highBitByte: 137,
+ *     signature: "PNG",
+ *     dosLineEnding: "\r\n",
+ *     dosEOF: "\u001a",
+ *     unixLineEnding: "\n",
+ *   },
+ *   chunks: [] as PngChunkUnknown[],
+ * };
+ *
+ * const buffer = new Uint8Array(8);
+ * const bytesWritten = coder.encode(png, buffer);
+ *
+ * assertEquals(bytesWritten, 8); // Just the signature
+ * ```
+ */
 export function pngFileChunks<TChunk>(
   chunkCoder: Coder<TChunk>,
 ): Coder<PngFile<TChunk>> {
@@ -149,6 +213,29 @@ export function pngFileChunks<TChunk>(
   });
 }
 
+/**
+ * Creates a coder for PNG chunks with type-specific refinement.
+ *
+ * This coder automatically detects the chunk type and applies the appropriate
+ * refiner, transforming raw chunk data into structured objects for known chunk
+ * types (IHDR, PLTE, tRNS, bKGD, IDAT, IEND). Unknown chunk types are passed
+ * through as {@link PngChunkUnknown}.
+ *
+ * @returns A coder that produces refined chunk types based on the chunk's type field.
+ *
+ * @example Decode a PNG with refined chunks
+ * ```ts
+ * import { assert } from "@std/assert";
+ * import { pngChunkRefined, pngFileChunks } from "@binstruct/png";
+ *
+ * const coder = pngFileChunks(pngChunkRefined());
+ *
+ * // When decoding a PNG file, chunks will be automatically refined
+ * // to their specific types (IhdrChunk, PlteChunk, etc.)
+ * assert(typeof coder.decode === "function");
+ * assert(typeof coder.encode === "function");
+ * ```
+ */
 export function pngChunkRefined(): Coder<
   | PngChunkUnknown
   | IhdrChunk
@@ -211,6 +298,27 @@ export function pngChunkRefined(): Coder<
   return coder;
 }
 
+/**
+ * Creates a coder for complete PNG files with automatic chunk refinement.
+ *
+ * This is the main entry point for working with PNG files. It creates a coder
+ * that handles the PNG signature and automatically refines known chunk types
+ * (IHDR, PLTE, tRNS, bKGD, IDAT, IEND) to their structured representations.
+ *
+ * @returns A coder for complete PNG files with refined chunk types.
+ *
+ * @example Decode a PNG file
+ * ```ts
+ * import { assert } from "@std/assert";
+ * import { pngFile } from "@binstruct/png";
+ *
+ * const coder = pngFile();
+ *
+ * // The coder can encode and decode complete PNG files
+ * assert(typeof coder.decode === "function");
+ * assert(typeof coder.encode === "function");
+ * ```
+ */
 export function pngFile(): Coder<
   PngFile<
     | PngChunkUnknown
