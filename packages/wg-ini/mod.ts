@@ -18,7 +18,11 @@ import {
  * Provides helpers to parse and stringify INI text as arrays or objects, and
  * stream-based transformers via {@link decodeTextStream} and {@link encodeSectionStream}.
  *
- * @example Parse/roundtrip via arrays
+ * The array-based functions ({@link parseArray}, {@link stringifyArray}) preserve
+ * duplicate keys and sections, while the object-based functions ({@link parseObject},
+ * {@link stringifyObject}) collapse duplicates into single values.
+ *
+ * @example Parse and roundtrip via arrays
  * ```ts
  * import { assertEquals } from "@std/assert";
  * import { parseArray, stringifyArray } from "@hertzg/wg-ini";
@@ -33,23 +37,55 @@ import {
  * ].join("\n");
  *
  * const arr = await parseArray(text);
- * assertEquals(arr, [[null, [["global_key","global_value"]]], ["mysection", [["key1","1"],["key2","2"]]]]);
+ * assertEquals(arr, [
+ *   [null, [["global_key", "global_value"]]],
+ *   ["mysection", [["key1", "1"], ["key2", "2"]]],
+ * ]);
  *
- * const roundtrip = await stringifyArray(arr as any);
- * assertEquals(typeof roundtrip, "string");
+ * const roundtrip = await stringifyArray(arr);
+ * assertEquals(roundtrip, text);
+ * ```
+ *
+ * @example Parse and stringify via objects
+ * ```ts
+ * import { assertEquals } from "@std/assert";
+ * import { parseObject, stringifyObject } from "@hertzg/wg-ini";
+ *
+ * const text = [
+ *   "global_key=global_value",
+ *   "",
+ *   "[mysection]",
+ *   "key1=1",
+ *   "key2=2",
+ *   "",
+ * ].join("\n");
+ *
+ * const obj = await parseObject(text);
+ * assertEquals(obj, {
+ *   "": { global_key: "global_value" },
+ *   mysection: { key1: "1", key2: "2" },
+ * });
+ *
+ * const roundtrip = await stringifyObject(obj);
+ * assertEquals(roundtrip, text);
  * ```
  *
  * @module
  */
 /**
- * Utility function to parse an INI string into an array of sections.
+ * Parse an INI string into an array of sections.
+ *
  * Since it returns an array, it supports duplicate keys and sections.
  * This is the reverse of {@link stringifyArray}.
  *
- * Returns an array of sections, each section is represented by a tuple of section name and an array of key-value pairs.
- * If section name is `null`, it represents the global section. Order of sections is preserved.
+ * Each section is represented by a tuple of `[sectionName, entries]` where
+ * `sectionName` is `null` for the global section, and `entries` is an array
+ * of `[key, value]` pairs. Order of sections and entries is preserved.
  *
- * @example
+ * @param text The INI content as a string.
+ * @returns A promise resolving to an array of section tuples.
+ *
+ * @example Parse INI with global and named sections
  * ```ts
  * import { parseArray } from "@hertzg/wg-ini";
  * import { assertEquals } from "@std/assert";
@@ -61,11 +97,11 @@ import {
  *   "key1=1",
  *   "key2=2",
  *   "",
- * ].join("\n")
+ * ].join("\n");
  *
  * assertEquals(await parseArray(text), [
- *  [null, [["global_key", "global_value"]]],
- *  ["mysection", [["key1", "1"], ["key2", "2"]]],
+ *   [null, [["global_key", "global_value"]]],
+ *   ["mysection", [["key1", "1"], ["key2", "2"]]],
  * ]);
  * ```
  */
@@ -84,30 +120,35 @@ export async function parseArray(
 }
 
 /**
- * Utility function to convert an array of sections to an INI string.
+ * Convert an array of sections to an INI string.
+ *
  * Since it takes an array, it supports duplicate keys and sections.
  * This is the reverse of {@link parseArray}.
  *
- * Takes an array of sections, each section must be represented by a tuple of section name and an array of key-value pairs.
- * If section name is `null`, it's considered as the global section. Order of sections is preserved except for the global section which is always first.
+ * Each section must be a tuple of `[sectionName, entries]` where `sectionName`
+ * is `null` for the global section, and `entries` is an array of `[key, value]`
+ * pairs. The global section is always placed first in the output.
  *
- * @example
+ * @param array An array of section tuples to stringify.
+ * @returns A promise resolving to the INI content as a string.
+ *
+ * @example Stringify array with global and named sections
  * ```ts
  * import { stringifyArray } from "@hertzg/wg-ini";
  * import { assertEquals } from "@std/assert";
  *
- * const array = [
- *  [null, [["global_key_null", "global_value"]]],
- *  ["mysection", [["key1", "1"], ["key2", "2"]]],
- * ] as any;
+ * const array: [string | null, string[][]][] = [
+ *   [null, [["global_key", "global_value"]]],
+ *   ["mysection", [["key1", "1"], ["key2", "2"]]],
+ * ];
  *
  * assertEquals(await stringifyArray(array), [
- *  "global_key_null=global_value",
- *  "",
- *  "[mysection]",
- *  "key1=1",
- *  "key2=2",
- *  "",
+ *   "global_key=global_value",
+ *   "",
+ *   "[mysection]",
+ *   "key1=1",
+ *   "key2=2",
+ *   "",
  * ].join("\n"));
  * ```
  */
@@ -139,11 +180,19 @@ export async function stringifyArray(
 }
 
 /**
- * Utility function to parse an INI string into an object.
+ * Parse an INI string into an object.
+ *
  * Since it returns an object, it does not support duplicate keys or sections.
+ * If duplicates exist, later values overwrite earlier ones.
  * This is the reverse of {@link stringifyObject} and uses {@link parseArray} under the hood.
  *
- * @example
+ * The global section (entries before any `[section]` header) is stored under
+ * the empty string key `""`.
+ *
+ * @param text The INI content as a string.
+ * @returns A promise resolving to a nested object of sections and key-value pairs.
+ *
+ * @example Parse INI to object
  * ```ts
  * import { parseObject } from "@hertzg/wg-ini";
  * import { assertEquals } from "@std/assert";
@@ -155,16 +204,13 @@ export async function stringifyArray(
  *   "key1=1",
  *   "key2=2",
  *   "",
- * ].join("\n")
+ * ].join("\n");
  *
  * assertEquals(await parseObject(text), {
- *  "": { global_key: "global_value" },
- *  mysection: { key1: "1", key2: "2" },
+ *   "": { global_key: "global_value" },
+ *   mysection: { key1: "1", key2: "2" },
  * });
  * ```
- *
- * @param text
- * @returns
  */
 export async function parseObject(
   text: string,
@@ -184,20 +230,25 @@ export async function parseObject(
 }
 
 /**
- * Utility function to convert an object to an INI string.
+ * Convert an object to an INI string.
+ *
  * Since it takes an object, it does not support duplicate keys or sections.
  * This is the reverse of {@link parseObject} and uses {@link stringifyArray} under the hood.
  *
- * Global properties are represented by an empty string key.
+ * Global properties (entries before any section header) should be stored under
+ * the empty string key `""`.
  *
- * @example
+ * @param obj The object to convert to an INI string.
+ * @returns A promise resolving to the INI content as a string.
+ *
+ * @example Stringify object to INI
  * ```ts
  * import { stringifyObject } from "@hertzg/wg-ini";
  * import { assertEquals } from "@std/assert";
  *
  * const obj = {
- *  "": { global_key: "global_value" },
- *  mysection: { key1: "1", key2: "2" },
+ *   "": { global_key: "global_value" },
+ *   mysection: { key1: "1", key2: "2" },
  * };
  *
  * assertEquals(await stringifyObject(obj), [
@@ -209,9 +260,6 @@ export async function parseObject(
  *   "",
  * ].join("\n"));
  * ```
- *
- * @param {Record<string, Record<string, unknown>>} obj - The object to convert to an INI string.
- * @returns {string} The INI string.
  */
 export async function stringifyObject(
   obj: Record<string, Record<string, unknown>>,
@@ -228,9 +276,27 @@ export async function stringifyObject(
 }
 
 /**
- * Decodes a text stream into INI sections.
- * @param stream - The text stream to decode
- * @returns A stream of INI sections
+ * Decode a text stream into INI sections.
+ *
+ * Transforms a stream of text chunks into a stream of {@link IniSection} objects.
+ * The text is first split into lines, then parsed into INI line objects, and
+ * finally grouped into sections.
+ *
+ * @param stream A readable stream of text chunks.
+ * @returns A readable stream of INI section objects.
+ *
+ * @example Decode a text stream
+ * ```ts
+ * import { decodeTextStream } from "@hertzg/wg-ini";
+ * import { assertEquals } from "@std/assert";
+ *
+ * const text = "[section]\nkey=value\n";
+ * const stream = ReadableStream.from([text]);
+ * const sections = await Array.fromAsync(decodeTextStream(stream));
+ *
+ * assertEquals(sections.length, 1);
+ * assertEquals(sections[0].section?.$section, "section");
+ * ```
  */
 export function decodeTextStream(
   stream: ReadableStream<string>,
@@ -246,9 +312,30 @@ async function decodeText(text: string): Promise<IniSection[]> {
 }
 
 /**
- * Encodes a stream of INI sections into text.
- * @param stream - The stream of INI sections to encode
- * @returns A text stream
+ * Encode a stream of INI sections into text lines.
+ *
+ * Transforms a stream of {@link IniSection} objects into a stream of text lines.
+ * Each section is expanded into its header line (if not global) followed by
+ * its entry lines.
+ *
+ * @param stream A readable stream of INI section objects.
+ * @returns A readable stream of text lines.
+ *
+ * @example Encode sections to text lines
+ * ```ts
+ * import { encodeSectionStream } from "@hertzg/wg-ini";
+ * import type { IniSection } from "@hertzg/wg-ini/sections";
+ * import { assertEquals } from "@std/assert";
+ *
+ * const sections: IniSection[] = [{
+ *   section: { $section: "mysection" },
+ *   entries: [{ $assign: ["key", "value"] as [string, string], $comment: null }],
+ * }];
+ * const stream = ReadableStream.from(sections);
+ * const lines = await Array.fromAsync(encodeSectionStream(stream));
+ *
+ * assertEquals(lines, ["[mysection]", "key=value"]);
+ * ```
  */
 export function encodeSectionStream(
   stream: ReadableStream<IniSection>,
