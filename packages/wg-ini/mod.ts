@@ -1,17 +1,3 @@
-import { TextLineStream } from "@std/streams";
-import {
-  type IniLineAssign,
-  IniLineDecoderStream,
-  IniLineEncoderStream,
-  type IniLineSection,
-  type IniLineTrailer,
-} from "./lines.ts";
-import {
-  type IniSection,
-  IniSectionDecoderStream,
-  IniSectionEncoderStream,
-} from "./sections.ts";
-
 /**
  * High-level utilities for working with INI data.
  *
@@ -72,6 +58,20 @@ import {
  *
  * @module
  */
+import { TextLineStream } from "@std/streams";
+import {
+  type IniLineAssign,
+  IniLineDecoderStream,
+  IniLineEncoderStream,
+  type IniLineSection,
+  type IniLineTrailer,
+} from "./lines.ts";
+import {
+  type IniSection,
+  IniSectionDecoderStream,
+  IniSectionEncoderStream,
+} from "./sections.ts";
+
 /**
  * Parse an INI string into an array of sections.
  *
