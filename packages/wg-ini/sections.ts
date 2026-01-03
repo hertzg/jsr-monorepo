@@ -1,3 +1,40 @@
+/**
+ * Transform streams for grouping INI lines into sections.
+ *
+ * This module provides stream transformers that work with {@link IniSection}
+ * objects. Use {@link IniSectionDecoderStream} to group decoded INI lines
+ * into sections, and {@link IniSectionEncoderStream} to flatten sections
+ * back into individual lines.
+ *
+ * For line-level processing, see the `lines` module.
+ * For convenient parse/stringify functions, see the main module.
+ *
+ * @example Group lines into sections
+ * ```ts
+ * import { assertEquals } from "@std/assert";
+ * import { IniSectionDecoderStream } from "@hertzg/wg-ini/sections";
+ * import type { IniLine } from "@hertzg/wg-ini/lines";
+ *
+ * const lines: IniLine[] = [
+ *   { $assign: ["global", "value"], $comment: null },
+ *   { $section: "mysection", $trailer: "" },
+ *   { $assign: ["key", "value"], $comment: null },
+ * ];
+ *
+ * const sections = await Array.fromAsync(
+ *   ReadableStream.from(lines).pipeThrough(new IniSectionDecoderStream())
+ * );
+ *
+ * assertEquals(sections.length, 2);
+ * assertEquals(sections[0].section, null);
+ * assertEquals(sections[0].entries.length, 1);
+ * assertEquals(sections[1].section?.$section, "mysection");
+ * assertEquals(sections[1].entries.length, 1);
+ * ```
+ *
+ * @module
+ */
+
 import type {
   IniLine,
   IniLineAssign,
@@ -7,69 +44,80 @@ import type {
 } from "./lines.ts";
 
 /**
- * Represents an INI section with its entries.
+ * Represents an INI section with its header and entries.
+ *
+ * A section groups related INI lines together. The `section` property contains
+ * the section header (or `null` for the global section), and `entries` contains
+ * all lines that belong to this section (assignments, comments, and trailers).
  */
 export type IniSection = {
+  /** The section header, or `null` for the global section. */
   section: IniLineSection | null;
+  /** Lines belonging to this section (assignments, comments, trailers). */
   entries: (IniLineAssign | IniLineComment | IniLineTrailer)[];
 };
 
 /**
- * Section transformers for INI data.
+ * A transform stream that groups INI lines into sections.
  *
- * This module converts decoded INI lines into grouped sections and vice versa.
+ * Takes a stream of {@link IniLine} objects (from {@link IniLineDecoderStream})
+ * and groups them into {@link IniSection} objects. Each section contains a
+ * header and all entries until the next section header.
  *
- * @module
- */
-/**
- * A transform stream that decodes structured line objects of an INI file further into sections and their entries.
- * This builds upon the ini line decoder and groups lines into sections.
+ * The global section (lines before any `[section]` header) uses `null` for the
+ * section property. It is only emitted if it contains entries.
  *
- * The root section is represented by `null`, it is only emitted if there are entries in it otherwise empty root section is not emitted.
- *
- * @example
+ * @example Group INI lines into sections
  * ```ts
  * import { IniSectionDecoderStream } from "@hertzg/wg-ini/sections";
  * import { assertEquals } from "@std/assert";
+ * import type { IniLine } from "@hertzg/wg-ini/lines";
  *
- * const stream = ReadableStream.from([
- *  { $comment: " comment outside of section" },
- *  { $assign: ["global_key", "global_value "], $comment: " with comment" },
- *  { $trailer: "" },
- *  { $section: "mysection" },
- *  { $assign: ["key1", "1"] },
- *  { $assign: ["key2", "2"] },
- *  { $trailer: "" },
- *  { $section: "mysection", $trailer: " # and a comment" },
- *  { $assign: ["key1", "3"] },
- *  { $assign: ["key2", "4"] },
- *  { $trailer: "" }
- * ] as any).pipeThrough(new IniSectionDecoderStream());
+ * const lines: IniLine[] = [
+ *   { $comment: " comment outside of section" },
+ *   { $assign: ["global_key", "global_value "], $comment: " with comment" },
+ *   { $trailer: "" },
+ *   { $section: "mysection", $trailer: "" },
+ *   { $assign: ["key1", "1"], $comment: null },
+ *   { $assign: ["key2", "2"], $comment: null },
+ *   { $trailer: "" },
+ *   { $section: "mysection", $trailer: " # and a comment" },
+ *   { $assign: ["key1", "3"], $comment: null },
+ *   { $assign: ["key2", "4"], $comment: null },
+ *   { $trailer: "" },
+ * ];
  *
+ * const stream = ReadableStream.from(lines).pipeThrough(
+ *   new IniSectionDecoderStream()
+ * );
  * const sections = await Array.fromAsync(stream);
  *
- * assertEquals(sections, [{
- *   section: null,
- *   entries: [
- *     {$comment: " comment outside of section"},
- *     {$assign: ["global_key", "global_value "], $comment: " with comment"},
- *     {$trailer: ""},
- *   ]
- * }, {
- *   section: { $section: "mysection" },
- *   entries: [
- *     {$assign: ["key1", "1"]},
- *     {$assign: ["key2", "2"]},
- *     {$trailer: ""},
- *   ]
- * }, {
- *   section: { $section: "mysection", $trailer: " # and a comment" },
- *   entries: [
- *    {$assign: ["key1", "3"]},
- *    {$assign: ["key2", "4"]},
- *    {$trailer: ""},
- *   ]
- * }]);
+ * assertEquals(sections, [
+ *   {
+ *     section: null,
+ *     entries: [
+ *       { $comment: " comment outside of section" },
+ *       { $assign: ["global_key", "global_value "], $comment: " with comment" },
+ *       { $trailer: "" },
+ *     ],
+ *   },
+ *   {
+ *     section: { $section: "mysection", $trailer: "" },
+ *     entries: [
+ *       { $assign: ["key1", "1"], $comment: null },
+ *       { $assign: ["key2", "2"], $comment: null },
+ *       { $trailer: "" },
+ *     ],
+ *   },
+ *   {
+ *     section: { $section: "mysection", $trailer: " # and a comment" },
+ *     entries: [
+ *       { $assign: ["key1", "3"], $comment: null },
+ *       { $assign: ["key2", "4"], $comment: null },
+ *       { $trailer: "" },
+ *     ],
+ *   },
+ * ]);
  * ```
  */
 export class IniSectionDecoderStream extends TransformStream<
@@ -77,7 +125,7 @@ export class IniSectionDecoderStream extends TransformStream<
   IniSection
 > {
   /**
-   * Creates a new INI section decoder stream.
+   * Create a new INI section decoder stream.
    */
   constructor() {
     let section: IniSection = { section: null, entries: [] };
@@ -105,49 +153,61 @@ export class IniSectionDecoderStream extends TransformStream<
 }
 
 /**
- * A transform stream that encodes structured sections of an INI file (from {@link IniSectionDecoderStream}) back into structured ini line objects.
+ * A transform stream that flattens INI sections back into individual lines.
  *
- * @example
+ * This is the reverse of {@link IniSectionDecoderStream}. It takes a stream of
+ * {@link IniSection} objects and emits their lines in order: section header
+ * (if not global) followed by all entries.
+ *
+ * @example Flatten sections to INI lines
  * ```ts
- * import { IniSectionEncoderStream } from "@hertzg/wg-ini/sections";
+ * import { IniSectionEncoderStream, type IniSection } from "@hertzg/wg-ini/sections";
  * import { assertEquals } from "@std/assert";
  *
- * const stream = ReadableStream.from([{
- *   section: null,
- *   entries: [
- *     {$comment: " comment outside of section"},
- *     {$assign: ["global_key", "global_value "], $comment: " with comment"},
- *     {$trailer: ""},
- *   ]
- * }, {
- *   section: { $section: "mysection" },
- *   entries: [
- *     {$assign: ["key1", "1"]},
- *     {$assign: ["key2", "2"]},
- *     {$trailer: ""},
- *   ]
- * }, {
- *   section: { $section: "mysection", $trailer: " # and a comment" },
- *   entries: [
- *    {$assign: ["key1", "3"]},
- *    {$assign: ["key2", "4"]},
- *    {$trailer: ""},
- *   ]
- * }] as any).pipeThrough(new IniSectionEncoderStream());
+ * const sections: IniSection[] = [
+ *   {
+ *     section: null,
+ *     entries: [
+ *       { $comment: " comment outside of section" },
+ *       { $assign: ["global_key", "global_value "], $comment: " with comment" },
+ *       { $trailer: "" },
+ *     ],
+ *   },
+ *   {
+ *     section: { $section: "mysection" },
+ *     entries: [
+ *       { $assign: ["key1", "1"], $comment: null },
+ *       { $assign: ["key2", "2"], $comment: null },
+ *       { $trailer: "" },
+ *     ],
+ *   },
+ *   {
+ *     section: { $section: "mysection", $trailer: " # and a comment" },
+ *     entries: [
+ *       { $assign: ["key1", "3"], $comment: null },
+ *       { $assign: ["key2", "4"], $comment: null },
+ *       { $trailer: "" },
+ *     ],
+ *   },
+ * ];
  *
+ * const stream = ReadableStream.from(sections).pipeThrough(
+ *   new IniSectionEncoderStream()
+ * );
  * const lines = await Array.fromAsync(stream);
+ *
  * assertEquals(lines, [
- *  { $comment: " comment outside of section" },
- *  { $assign: ["global_key", "global_value "], $comment: " with comment" },
- *  { $trailer: "" },
- *  { $section: "mysection" },
- *  { $assign: ["key1", "1"] },
- *  { $assign: ["key2", "2"] },
- *  { $trailer: "" },
- *  { $section: "mysection", $trailer: " # and a comment" },
- *  { $assign: ["key1", "3"] },
- *  { $assign: ["key2", "4"] },
- *  { $trailer: "" }
+ *   { $comment: " comment outside of section" },
+ *   { $assign: ["global_key", "global_value "], $comment: " with comment" },
+ *   { $trailer: "" },
+ *   { $section: "mysection" },
+ *   { $assign: ["key1", "1"], $comment: null },
+ *   { $assign: ["key2", "2"], $comment: null },
+ *   { $trailer: "" },
+ *   { $section: "mysection", $trailer: " # and a comment" },
+ *   { $assign: ["key1", "3"], $comment: null },
+ *   { $assign: ["key2", "4"], $comment: null },
+ *   { $trailer: "" },
  * ]);
  * ```
  */
@@ -155,6 +215,9 @@ export class IniSectionEncoderStream extends TransformStream<
   IniSection,
   IniLine
 > {
+  /**
+   * Create a new INI section encoder stream.
+   */
   constructor() {
     super({
       transform(
