@@ -41,7 +41,7 @@ export const CRC16_IBM_POLYNOMIAL = 0xa001;
  */
 export const createCrc16 = (
   polynomial: number,
-): ((data: Uint8Array) => number) =>
+): (data: Uint8Array) => number =>
   createCrcNumber(Uint16Array, polynomial, 0xffff, 0xffff);
 
 /**

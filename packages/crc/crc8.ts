@@ -43,7 +43,7 @@ export const CRC8_MAXIM_POLYNOMIAL = 0x8c;
  */
 export const createCrc8 = (
   polynomial: number,
-): ((data: Uint8Array) => number) =>
+): (data: Uint8Array) => number =>
   createCrcNumber(Uint8Array, polynomial, 0, 0);
 
 /**

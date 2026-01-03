@@ -47,7 +47,7 @@ const CRC64_MASK = 0xffffffffffffffffn;
  */
 export const createCrc64 = (
   polynomial: bigint,
-): ((data: Uint8Array) => bigint) =>
+): (data: Uint8Array) => bigint =>
   createCrcBigint(polynomial, CRC64_MASK, CRC64_MASK);
 
 /**

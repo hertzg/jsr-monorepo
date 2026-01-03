@@ -44,7 +44,7 @@ export const CRC32K_POLYNOMIAL = 0xeb31d82e;
  */
 export const createCrc32 = (
   polynomial: number,
-): ((data: Uint8Array) => number) =>
+): (data: Uint8Array) => number =>
   createCrcNumber(Uint32Array, polynomial, 0xffffffff, 0xffffffff);
 
 /**
