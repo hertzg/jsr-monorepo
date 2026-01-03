@@ -18,7 +18,6 @@ libraries, format-specific parsers, router API clients, and various utilities.
 | [@hertzg/wg-conf](https://jsr.io/@hertzg/wg-conf)           | [![JSR](https://jsr.io/badges/@hertzg/wg-conf)](https://jsr.io/@hertzg/wg-conf)           |
 | [@hertzg/wg-ini](https://jsr.io/@hertzg/wg-ini)             | [![JSR](https://jsr.io/badges/@hertzg/wg-ini)](https://jsr.io/@hertzg/wg-ini)             |
 | [@hertzg/wg-keys](https://jsr.io/@hertzg/wg-keys)           | [![JSR](https://jsr.io/badges/@hertzg/wg-keys)](https://jsr.io/@hertzg/wg-keys)           |
-| [@hertzg/wg-ctl](https://jsr.io/@hertzg/wg-ctl)             | [![JSR](https://jsr.io/badges/@hertzg/wg-ctl)](https://jsr.io/@hertzg/wg-ctl)             |
 | [@binstruct/cli](https://jsr.io/@binstruct/cli)             | [![JSR](https://jsr.io/badges/@binstruct/cli)](https://jsr.io/@binstruct/cli)             |
 | [@binstruct/ethernet](https://jsr.io/@binstruct/ethernet)   | [![JSR](https://jsr.io/badges/@binstruct/ethernet)](https://jsr.io/@binstruct/ethernet)   |
 | [@binstruct/png](https://jsr.io/@binstruct/png)             | [![JSR](https://jsr.io/badges/@binstruct/png)](https://jsr.io/@binstruct/png)             |

@@ -44,6 +44,5 @@ jobs:
             @hertzg/routeros-api
             @hertzg/tplink-api
             @hertzg/wg-conf
-            @hertzg/wg-ctl
             @hertzg/wg-ini
             @hertzg/wg-keys
