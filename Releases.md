@@ -1,5 +1,11 @@
 ### 2026.01.03
 
+#### @hertzg/wg-ini 0.2.2 (patch)
+
+- fix(@hertzg/wg-ini): improve JSDoc documentation (#83)
+
+### 2026.01.03
+
 #### @binstruct/png 0.3.3 (patch)
 
 - fix(@binstruct/png): add missing JSDoc documentation (#78)
