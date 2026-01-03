@@ -1,5 +1,11 @@
 ### 2026.01.03
 
+#### @hertzg/wg-ini 0.2.3 (patch)
+
+- fix(@hertzg/wg-ini): add mod.ts jsdoc
+
+### 2026.01.03
+
 #### @hertzg/wg-ini 0.2.2 (patch)
 
 - fix(@hertzg/wg-ini): improve JSDoc documentation (#83)
