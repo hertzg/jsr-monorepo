@@ -60,7 +60,7 @@ import { decodeBase64, encodeBase64 } from "@std/encoding/base64";
 /**
  * Generates __UNCLAMPED__ 32 bytes of random data.
  *
- * Usefull for generating preshared keys, but NOT private keys.
+ * Useful for generating preshared keys, but NOT private keys.
  *
  * @see {@link https://datatracker.ietf.org/doc/html/rfc7748#section-5}
  * @returns {Uint8Array} 32 bytes of random data
@@ -76,7 +76,7 @@ export function randomBytes(): Uint8Array {
  *
  * Clamping is done by clearing bits 0, 1, 2 of the first byte, bit 7 of last byte and setting bit 6 of the last byte.
  *
- * Usefull for generating private key.
+ * Useful for generating private key.
  *
  * @see {@link https://datatracker.ietf.org/doc/html/rfc7748#section-5}
  * @returns {Uint8Array} private key bytes
@@ -91,7 +91,7 @@ export function randomPrivateKeyBytes(): Uint8Array {
 /**
  * Generates random preshared key bytes.
  *
- * Usefull for generating preshared keys.
+ * Useful for generating preshared keys.
  *
  * @alias randomBytes
  * @returns {Uint8Array} preshared key bytes
@@ -113,7 +113,7 @@ const PKCS8_PREAMBLE = new Uint8Array([
 /**
  * Derives public key from private key using x25519 curve.
  *
- * Usefull for getting public key from private key.
+ * Useful for getting public key from private key.
  *
  * @param {Uint8Array} privateKey private key bytes
  * @returns {Uint8Array} publicKey bytes
@@ -141,7 +141,7 @@ export async function publicBytesFromPrivateBytes(
 
 /**
  * Mimics WireGuard's `wg genkey` command.
- * Alias for randomPrivateKeyBytes, returns base64 encoded private key instead of Uin8Array.
+ * Alias for randomPrivateKeyBytes, returns base64 encoded private key instead of Uint8Array.
  * Can be used directly by WireGuard as Interface PrivateKey.
  *
  * @see {@link https://git.zx2c4.com/wireguard-tools/tree/src/genkey.c}
@@ -153,7 +153,7 @@ export function wgGenKey(): string {
 
 /**
  * Mimics WireGuard's `wg genpsk` command.
- * Alias for randomPresharedKeyBytes, returns base64 encoded preshared key instead of Uin8Array.
+ * Alias for randomPresharedKeyBytes, returns base64 encoded preshared key instead of Uint8Array.
  * Can be used directly by WireGuard as Peer PresharedKey.
  *
  * @see {@link https://git.zx2c4.com/wireguard-tools/tree/src/genkey.c}
@@ -165,11 +165,22 @@ export function wgGenPsk(): string {
 
 /**
  * Mimics WireGuard's `wg pubkey` command.
- * Alias for getPublicKey, deals with inputs and outputs as base64 encoded string instead of Uin8Arrays.
+ * Alias for getPublicKey, deals with inputs and outputs as base64 encoded string instead of Uint8Arrays.
  * Can be used directly by WireGuard as Peer PublicKey.
  *
  * @param {string} privateKeyBase64 base64 encoded private key
- * @returns
+ * @returns {Promise<string>} base64 encoded public key
+ *
+ * @example Derive public key from private key
+ * ```ts
+ * import { assertExists } from "@std/assert";
+ * import { wgGenKey, wgPubKey } from "@hertzg/wg-keys";
+ *
+ * const privateKey = wgGenKey();
+ * const publicKey = await wgPubKey(privateKey);
+ *
+ * assertExists(publicKey);
+ * ```
  */
 export async function wgPubKey(privateKeyBase64: string): Promise<string> {
   return encodeBase64(
