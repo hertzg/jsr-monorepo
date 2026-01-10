@@ -29,7 +29,9 @@
     "cov:gen": "deno task cov --lcov --output=cov.lcov",
     "cov:view": "deno task cov --html",
     "bump": "deno run -A jsr:@deno/bump-workspaces@^0.1/cli --import-map import_map.json",
-    "setup:hooks": "cp scripts/pre-push .git/hooks/pre-push && chmod +x .git/hooks/pre-push && echo 'Git hooks installed successfully'"
+    "setup:hooks": "cp scripts/pre-push .git/hooks/pre-push && chmod +x .git/hooks/pre-push && echo 'Git hooks installed successfully'",
+    "bench": "deno bench --allow-all",
+    "bench:json": "deno bench --allow-all --json"
   },
   "exclude": [
     ".git",
