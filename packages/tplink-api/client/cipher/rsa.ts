@@ -5,7 +5,7 @@
  * See: https://github.com/denoland/deno/issues/27295
  */
 
-import { bigIntToBytes, bytesToBigInt } from "./utils.ts";
+import { bytesToBigInt } from "./utils.ts";
 
 /**
  * Modular exponentiation using binary method
@@ -30,14 +30,11 @@ function modPow(base: bigint, exp: bigint, mod: bigint): bigint {
  */
 export function rsaEncrypt(
   message: Uint8Array,
-  modulus: Uint8Array,
-  exponent: Uint8Array,
-): Uint8Array {
+  modulus: bigint,
+  exponent: bigint,
+): bigint {
   const m = bytesToBigInt(message);
-  const n = bytesToBigInt(modulus);
-  const e = bytesToBigInt(exponent);
-  const c = modPow(m, e, n);
-  return bigIntToBytes(c, modulus.length);
+  return modPow(m, exponent, modulus);
 }
 
 /**
