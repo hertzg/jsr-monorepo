@@ -3,7 +3,8 @@
  */
 
 import { cbc } from "@noble/ciphers/aes.js";
-import { rsaEncrypt, rsaPad } from "./rsa.ts";
+import { createMontgomeryParams, modPowMontgomery } from "./montgomery.ts";
+import { rsaPad } from "./rsa.ts";
 import { bigIntToBytes, bytesToBigInt } from "./utils.ts";
 
 export interface CipherOptions {
@@ -36,6 +37,7 @@ export function createCipher(options: CipherOptions): Cipher {
   const chunkSizeBits = BigInt(chunkSizeBytes * 8);
   const n = bytesToBigInt(options.modulus);
   const e = bytesToBigInt(options.exponent);
+  const montParams = createMontgomeryParams(n);
 
   return {
     key,
@@ -53,7 +55,7 @@ export function createCipher(options: CipherOptions): Cipher {
         );
 
         acc <<= chunkSizeBits;
-        acc |= rsaEncrypt(chunk, n, e);
+        acc |= modPowMontgomery(bytesToBigInt(chunk), e, montParams);
       }
 
       return bigIntToBytes(acc, chunkCount * chunkSizeBytes);
