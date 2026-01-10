@@ -155,13 +155,14 @@ function generateReport(
   let totalNew = 0;
   let totalRemoved = 0;
 
-  const allResults: Array<{
+  const significantResults: Array<{
     key: string;
     name: string;
     origin: string;
     baseAvg?: number;
     prAvg?: number;
     change?: number;
+    type: "improved" | "regressed" | "new" | "removed";
   }> = [];
 
   for (const origin of allOrigins) {
@@ -180,42 +181,85 @@ function generateReport(
 
       if (base && pr) {
         const change = ((pr.avg - base.avg) / base.avg) * 100;
-        allResults.push({
+        if (change > 5) {
+          totalRegressed++;
+          significantResults.push({
+            key,
+            name,
+            origin,
+            baseAvg: base.avg,
+            prAvg: pr.avg,
+            change,
+            type: "regressed",
+          });
+        } else if (change < -5) {
+          totalImproved++;
+          significantResults.push({
+            key,
+            name,
+            origin,
+            baseAvg: base.avg,
+            prAvg: pr.avg,
+            change,
+            type: "improved",
+          });
+        } else {
+          totalUnchanged++;
+        }
+      } else if (pr && !base) {
+        significantResults.push({
+          key,
+          name,
+          origin,
+          prAvg: pr.avg,
+          type: "new",
+        });
+        totalNew++;
+      } else if (base && !pr) {
+        significantResults.push({
           key,
           name,
           origin,
           baseAvg: base.avg,
-          prAvg: pr.avg,
-          change,
+          type: "removed",
         });
-        if (change > 5) totalRegressed++;
-        else if (change < -5) totalImproved++;
-        else totalUnchanged++;
-      } else if (pr && !base) {
-        allResults.push({ key, name, origin, prAvg: pr.avg });
-        totalNew++;
-      } else if (base && !pr) {
-        allResults.push({ key, name, origin, baseAvg: base.avg });
         totalRemoved++;
       }
     }
   }
 
+  const hasSignificantChanges = significantResults.length > 0;
+
+  if (!hasSignificantChanges) {
+    lines.push(
+      `No significant changes detected. ${totalUnchanged} benchmark(s) within ±5% threshold.\n`,
+    );
+    return lines.join("\n");
+  }
+
   // Summary
-  lines.push("<details>");
-  lines.push("<summary><strong>Summary</strong></summary>\n");
   lines.push("| Category | Count |");
   lines.push("|----------|-------|");
-  lines.push(`| 🟢 Improved (>5% faster) | ${totalImproved} |`);
-  lines.push(`| 🔴 Regressed (>5% slower) | ${totalRegressed} |`);
-  lines.push(`| ⚪ Unchanged | ${totalUnchanged} |`);
+  if (totalImproved > 0) {
+    lines.push(`| 🟢 Improved (>5% faster) | ${totalImproved} |`);
+  }
+  if (totalRegressed > 0) {
+    lines.push(`| 🔴 Regressed (>5% slower) | ${totalRegressed} |`);
+  }
   if (totalNew > 0) lines.push(`| 🆕 New | ${totalNew} |`);
   if (totalRemoved > 0) lines.push(`| 🗑️ Removed | ${totalRemoved} |`);
-  lines.push("\n</details>\n");
+  if (totalUnchanged > 0) {
+    lines.push(`| ⚪ Unchanged | ${totalUnchanged} |`);
+  }
+  lines.push("");
 
-  // Detailed results by origin
-  for (const origin of [...allOrigins].sort()) {
-    const originResults = allResults.filter((r) => r.origin === origin);
+  // Detailed results by origin (only significant changes)
+  const originsWithChanges = [
+    ...new Set(significantResults.map((r) => r.origin)),
+  ].sort();
+
+  for (const origin of originsWithChanges) {
+    const originResults = significantResults.filter((r) => r.origin === origin);
     if (originResults.length === 0) continue;
 
     const shortOrigin = origin.replace(/^file:\/\//, "").replace(
