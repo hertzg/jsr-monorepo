@@ -33,6 +33,7 @@ export function createCipher(options: CipherOptions): Cipher {
   const iv = options.iv ?? generateKey();
 
   const k = options.modulus.length;
+  const bitsPerChunk = BigInt(k * 8);
   const n = bytesToBigInt(options.modulus);
   const e = bytesToBigInt(options.exponent);
 
@@ -44,19 +45,14 @@ export function createCipher(options: CipherOptions): Cipher {
     rsaEncrypt: (data: Uint8Array) => {
       const chunkCount = Math.ceil(data.length / k);
 
-      const out = new Uint8Array(chunkCount * k);
-
+      // Accumulate encrypted chunks in bigint, convert once at end
+      let accumulated = 0n;
       for (let i = 0; i < chunkCount; i++) {
-        const inOff = i * k;
-        const chunk = rsaPad(data.subarray(inOff, inOff + k), k);
-
-        const outSlice = out.subarray(i * k, (i + 1) * k);
-        const encrypted = rsaEncrypt(chunk, n, e);
-        const bytes = bigIntToBytes(encrypted, k);
-        outSlice.set(bytes);
+        const chunk = rsaPad(data.subarray(i * k, (i + 1) * k), k);
+        accumulated = (accumulated << bitsPerChunk) | rsaEncrypt(chunk, n, e);
       }
 
-      return out;
+      return bigIntToBytes(accumulated, chunkCount * k);
     },
   };
 }
