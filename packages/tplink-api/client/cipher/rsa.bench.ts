@@ -14,26 +14,14 @@ crypto.getRandomValues(smallMessage);
 const fullChunk = new Uint8Array(rsaChunkSize);
 crypto.getRandomValues(fullChunk);
 
-Deno.bench({
-  name: "rsaEncrypt (128-byte chunk)",
-  group: "rsaEncrypt",
-  fn() {
-    rsaEncrypt(fullChunk, modulus, exponent);
-  },
+Deno.bench("rsaEncrypt (128-byte chunk)", () => {
+  rsaEncrypt(fullChunk, modulus, exponent);
 });
 
-Deno.bench({
-  name: "rsaPad (16 -> 128 bytes)",
-  group: "rsaPad",
-  fn() {
-    rsaPad(smallMessage, rsaChunkSize);
-  },
+Deno.bench("rsaPad (16 -> 128 bytes)", () => {
+  rsaPad(smallMessage, rsaChunkSize);
 });
 
-Deno.bench({
-  name: "rsaPad (128 -> 128 bytes, no-op)",
-  group: "rsaPad",
-  fn() {
-    rsaPad(fullChunk, rsaChunkSize);
-  },
+Deno.bench("rsaPad (128 -> 128 bytes, no-op)", () => {
+  rsaPad(fullChunk, rsaChunkSize);
 });

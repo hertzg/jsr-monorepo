@@ -22,20 +22,12 @@ const testData = sizes.map((size) => {
 
 // AES benchmarks
 for (const { size, data, encrypted } of testData) {
-  Deno.bench({
-    name: `aesEncrypt (${size} bytes)`,
-    group: "aesEncrypt",
-    fn() {
-      cipher.aesEncrypt(data);
-    },
+  Deno.bench(`aesEncrypt (${size} bytes)`, () => {
+    cipher.aesEncrypt(data);
   });
 
-  Deno.bench({
-    name: `aesDecrypt (${size} bytes)`,
-    group: "aesDecrypt",
-    fn() {
-      cipher.aesDecrypt(encrypted);
-    },
+  Deno.bench(`aesDecrypt (${size} bytes)`, () => {
+    cipher.aesDecrypt(encrypted);
   });
 }
 
@@ -50,28 +42,19 @@ const rsaTestData = rsaSizes.map((size) => {
 
 for (const { size, data } of rsaTestData) {
   const chunks = Math.ceil(size / modulus.length);
-  Deno.bench({
-    name: `rsaEncrypt (${size} bytes, ${chunks} chunk${chunks > 1 ? "s" : ""})`,
-    group: "rsaEncrypt",
-    fn() {
+  Deno.bench(
+    `cipher.rsaEncrypt (${size} bytes, ${chunks} chunk${chunks > 1 ? "s" : ""})`,
+    () => {
       cipher.rsaEncrypt(data);
     },
-  });
+  );
 }
 
 // createCipher benchmark
-Deno.bench({
-  name: "createCipher (with provided key/iv)",
-  group: "createCipher",
-  fn() {
-    createCipher({ modulus, exponent, key, iv });
-  },
+Deno.bench("createCipher (with provided key/iv)", () => {
+  createCipher({ modulus, exponent, key, iv });
 });
 
-Deno.bench({
-  name: "createCipher (generate key/iv)",
-  group: "createCipher",
-  fn() {
-    createCipher({ modulus, exponent });
-  },
+Deno.bench("createCipher (generate key/iv)", () => {
+  createCipher({ modulus, exponent });
 });

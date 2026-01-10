@@ -11,19 +11,11 @@ const testData = sizes.map((size) => {
 });
 
 for (const { size, bytes, bigint } of testData) {
-  Deno.bench({
-    name: `bytesToBigInt (${size} bytes)`,
-    group: "bytesToBigInt",
-    fn() {
-      bytesToBigInt(bytes);
-    },
+  Deno.bench(`bytesToBigInt (${size} bytes)`, () => {
+    bytesToBigInt(bytes);
   });
 
-  Deno.bench({
-    name: `bigIntToBytes (${size} bytes)`,
-    group: "bigIntToBytes",
-    fn() {
-      bigIntToBytes(bigint, size);
-    },
+  Deno.bench(`bigIntToBytes (${size} bytes)`, () => {
+    bigIntToBytes(bigint, size);
   });
 }
