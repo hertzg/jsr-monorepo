@@ -32,8 +32,8 @@ export function createCipher(options: CipherOptions): Cipher {
   const key = options.key ?? generateKey();
   const iv = options.iv ?? generateKey();
 
-  const k = options.modulus.length;
-  const bitsPerChunk = BigInt(k * 8);
+  const chunkSizeBytes = options.modulus.length;
+  const chunkSizeBits = BigInt(chunkSizeBytes * 8);
   const n = bytesToBigInt(options.modulus);
   const e = bytesToBigInt(options.exponent);
 
@@ -43,16 +43,20 @@ export function createCipher(options: CipherOptions): Cipher {
     aesEncrypt: (data: Uint8Array) => cbc(key, iv).encrypt(data),
     aesDecrypt: (data: Uint8Array) => cbc(key, iv).decrypt(data),
     rsaEncrypt: (data: Uint8Array) => {
-      const chunkCount = Math.ceil(data.length / k);
+      const chunkCount = Math.ceil(data.length / chunkSizeBytes);
 
-      // Accumulate encrypted chunks in bigint, convert once at end
-      let accumulated = 0n;
+      let acc = 0n;
       for (let i = 0; i < chunkCount; i++) {
-        const chunk = rsaPad(data.subarray(i * k, (i + 1) * k), k);
-        accumulated = (accumulated << bitsPerChunk) | rsaEncrypt(chunk, n, e);
+        const chunk = rsaPad(
+          data.subarray(i * chunkSizeBytes, (i + 1) * chunkSizeBytes),
+          chunkSizeBytes,
+        );
+
+        acc <<= chunkSizeBits;
+        acc |= rsaEncrypt(chunk, n, e);
       }
 
-      return bigIntToBytes(accumulated, chunkCount * k);
+      return bigIntToBytes(acc, chunkCount * chunkSizeBytes);
     },
   };
 }
