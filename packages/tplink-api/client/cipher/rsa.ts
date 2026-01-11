@@ -5,25 +5,8 @@
  * See: https://github.com/denoland/deno/issues/27295
  */
 
+import { createMontgomeryParams, modPowMontgomery } from "./montgomery.ts";
 import { bytesToBigInt } from "./utils.ts";
-
-/**
- * Modular exponentiation using binary method
- * Computes: base^exp mod mod
- */
-function modPow(base: bigint, exp: bigint, mod: bigint): bigint {
-  if (mod === 1n) return 0n;
-  let result = 1n;
-  base = base % mod;
-  while (exp > 0n) {
-    if (exp % 2n === 1n) {
-      result = (result * base) % mod;
-    }
-    exp = exp >> 1n;
-    base = (base * base) % mod;
-  }
-  return result;
-}
 
 /**
  * Raw RSA encryption (no padding): c = m^e mod n
@@ -34,7 +17,8 @@ export function rsaEncrypt(
   exponent: bigint,
 ): bigint {
   const m = bytesToBigInt(message);
-  return modPow(m, exponent, modulus);
+  const params = createMontgomeryParams(modulus);
+  return modPowMontgomery(m, exponent, params);
 }
 
 /**
