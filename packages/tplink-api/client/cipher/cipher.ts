@@ -3,8 +3,8 @@
  */
 
 import { cbc } from "@noble/ciphers/aes.js";
-import { createMontgomeryParams, modPowMontgomery } from "./montgomery.ts";
-import { rsaPad } from "./rsa.ts";
+import { createMontgomeryParams } from "./montgomery.ts";
+import { rsaEncrypt, rsaPad } from "./rsa.ts";
 import { bigIntToBytes, bytesToBigInt } from "./utils.ts";
 
 export interface CipherOptions {
@@ -47,11 +47,13 @@ export function createCipher(options: CipherOptions): Cipher {
     rsaEncrypt: (data: Uint8Array) => {
       const chunkCount = Math.ceil(data.length / k);
 
-      let acc = 0n;
+      let acc = 0n, chunk: bigint;
       for (let i = 0; i < chunkCount; i++) {
-        const chunk = data.subarray(i * k, (i + 1) * k);
-        const msg = rsaPad(bytesToBigInt(chunk), chunk.length, k);
-        acc = (acc << kBits) | modPowMontgomery(msg, e, montParams);
+        const chunkBytes = data.subarray(i * k, (i + 1) * k);
+        chunk = bytesToBigInt(chunkBytes);
+        chunk = rsaPad(chunk, chunkBytes.length, k);
+        chunk = rsaEncrypt(chunk, e, montParams);
+        acc = (acc << kBits) | chunk;
       }
 
       return bigIntToBytes(acc, chunkCount * k);

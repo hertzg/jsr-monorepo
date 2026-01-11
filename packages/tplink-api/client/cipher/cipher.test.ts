@@ -2,6 +2,7 @@ import { assertEquals } from "@std/assert";
 import { cbc } from "@noble/ciphers/aes.js";
 import { md5 } from "@noble/hashes/legacy.js";
 import { concat } from "@std/bytes";
+import { createMontgomeryParams } from "./montgomery.ts";
 import { rsaEncrypt, rsaPad } from "./rsa.ts";
 import { createCipher } from "./cipher.ts";
 import { bigIntToBytes, bytesToBigInt } from "./utils.ts";
@@ -141,16 +142,17 @@ Deno.test("RSA encrypt (no padding) matches node:crypto", () => {
     "0xb3096650d220465f74878dbbced0d240218e04068dbb7f2496019751b17066e46b58d5e9fdbc6a6201eb9cd1a611b94ceffec43563260a55922c520a760c32ecacfbc872006aacb202a5e573814c3e02a91fc4221635e2818a249629989d6a953eed30bd088dde1e6b933eea6f18c7f962b47e674c8f758059064178556320c7",
   );
   const exponent = BigInt("0x010001");
+  const params = createMontgomeryParams(modulus);
 
   // Plaintext padded to modulus size (128 bytes)
-  const plaintext = Uint8Array.fromHex(
-    "74657374206d65737361676520666f7220727361000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000",
+  const plaintext = BigInt(
+    "0x74657374206d65737361676520666f7220727361000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000",
   );
 
   const expected =
     "4f3c883546f08ad5fdcf918a47015c769e8e589a7623c41a78e9e59091b80f496b159ea7d9f8fad180bac70269bbdc3076648f579c65c552e072f100a16ccee4effb2999a5631c7657e6f4737fa14cefe54d83cdd555812713ba1adc21efd54969a3b536c1479069f2ca8bc512decf73871075c61c68baab9ea17053df21ea69";
 
-  const encrypted = rsaEncrypt(plaintext, modulus, exponent);
+  const encrypted = rsaEncrypt(plaintext, exponent, params);
 
   assertEquals(encrypted.toString(16), expected);
 });
@@ -195,6 +197,7 @@ Deno.test("RSA multi-chunk encryption matches node:crypto", () => {
     "0xb3096650d220465f74878dbbced0d240218e04068dbb7f2496019751b17066e46b58d5e9fdbc6a6201eb9cd1a611b94ceffec43563260a55922c520a760c32ecacfbc872006aacb202a5e573814c3e02a91fc4221635e2818a249629989d6a953eed30bd088dde1e6b933eea6f18c7f962b47e674c8f758059064178556320c7",
   );
   const exponent = BigInt("0x010001");
+  const params = createMontgomeryParams(modulus);
   const rsaChunkSize = 128; // 1024-bit modulus = 128 bytes
 
   // 300 bytes of data: 50 A's + 50 B's + 50 C's + 50 D's + 50 E's + 50 F's
@@ -218,8 +221,7 @@ Deno.test("RSA multi-chunk encryption matches node:crypto", () => {
     const chunkBytes = bigData.subarray(offset, offset + rsaChunkSize);
     const chunkValue = bytesToBigInt(chunkBytes);
     const paddedValue = rsaPad(chunkValue, chunkBytes.length, rsaChunkSize);
-    const paddedBytes = bigIntToBytes(paddedValue, rsaChunkSize);
-    const encrypted = rsaEncrypt(paddedBytes, modulus, exponent);
+    const encrypted = rsaEncrypt(paddedValue, exponent, params);
     encryptedChunks.push(bigIntToBytes(encrypted, rsaChunkSize));
   }
 

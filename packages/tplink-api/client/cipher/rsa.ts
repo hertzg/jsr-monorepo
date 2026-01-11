@@ -5,20 +5,20 @@
  * See: https://github.com/denoland/deno/issues/27295
  */
 
-import { createMontgomeryParams, modPowMontgomery } from "./montgomery.ts";
-import { bytesToBigInt } from "./utils.ts";
+import {
+  type MontgomeryParams,
+  modPowMontgomery,
+} from "./montgomery.ts";
 
 /**
  * Raw RSA encryption (no padding): c = m^e mod n
  */
 export function rsaEncrypt(
-  message: Uint8Array,
-  modulus: bigint,
+  message: bigint,
   exponent: bigint,
+  params: MontgomeryParams,
 ): bigint {
-  const m = bytesToBigInt(message);
-  const params = createMontgomeryParams(modulus);
-  return modPowMontgomery(m, exponent, params);
+  return modPowMontgomery(message, exponent, params);
 }
 
 /**
