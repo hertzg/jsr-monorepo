@@ -1,7 +1,6 @@
 import { assertEquals } from "@std/assert";
 import { cbc } from "@noble/ciphers/aes.js";
 import { md5 } from "@noble/hashes/legacy.js";
-import { concat } from "@std/bytes";
 import { createMontgomeryParams } from "./montgomery.ts";
 import { rsaEncrypt, rsaPad } from "./rsa.ts";
 import { createCipher } from "./cipher.ts";
@@ -214,18 +213,19 @@ Deno.test("RSA multi-chunk encryption matches node:crypto", () => {
 
   // Encrypt using the same chunking logic as createCipher
   const chunkCount = Math.ceil(bigData.length / rsaChunkSize);
-  const encryptedChunks: Uint8Array[] = [];
+  const kBits = BigInt(rsaChunkSize * 8);
 
+  let acc = 0n;
   for (let i = 0; i < chunkCount; i++) {
     const offset = i * rsaChunkSize;
     const chunkBytes = bigData.subarray(offset, offset + rsaChunkSize);
     const chunkValue = bytesToBigInt(chunkBytes);
     const paddedValue = rsaPad(chunkValue, chunkBytes.length, rsaChunkSize);
     const encrypted = rsaEncrypt(paddedValue, exponent, params);
-    encryptedChunks.push(bigIntToBytes(encrypted, rsaChunkSize));
+    acc = (acc << kBits) | encrypted;
   }
 
-  const fullEncrypted = concat(encryptedChunks);
+  const fullEncrypted = bigIntToBytes(acc, chunkCount * rsaChunkSize);
 
   assertEquals(fullEncrypted.length, 384);
   assertEquals(fullEncrypted.toHex(), expected);
