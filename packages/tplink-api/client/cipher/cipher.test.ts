@@ -4,7 +4,7 @@ import { md5 } from "@noble/hashes/legacy.js";
 import { concat } from "@std/bytes";
 import { rsaEncrypt, rsaPad } from "./rsa.ts";
 import { createCipher } from "./cipher.ts";
-import { bigIntToBytes } from "./utils.ts";
+import { bigIntToBytes, bytesToBigInt } from "./utils.ts";
 
 /**
  * Snapshot tests to verify cipher implementations match Node.js crypto behavior.
@@ -155,24 +155,37 @@ Deno.test("RSA encrypt (no padding) matches node:crypto", () => {
   assertEquals(encrypted.toString(16), expected);
 });
 
-Deno.test("rsaPad pads message to specified size", () => {
+Deno.test("rsaPad pads value with zeros on the right (low bits)", () => {
   const message = new TextEncoder().encode("short");
-  const padded = rsaPad(message, 16);
+  const value = bytesToBigInt(message);
+  const padded = rsaPad(value, message.length, 16);
 
-  assertEquals(padded.length, 16);
-  assertEquals(new TextDecoder().decode(padded.subarray(0, 5)), "short");
+  // "short" is 5 bytes, padded to 16 bytes means shifting left by 11 bytes (88 bits)
+  const expected = value << BigInt((16 - 5) * 8);
+  assertEquals(padded, expected);
+
+  // Verify by converting back to bytes
+  const paddedBytes = bigIntToBytes(padded, 16);
+  assertEquals(paddedBytes.length, 16);
+  assertEquals(new TextDecoder().decode(paddedBytes.subarray(0, 5)), "short");
   // Rest should be zeros
   for (let i = 5; i < 16; i++) {
-    assertEquals(padded[i], 0);
+    assertEquals(paddedBytes[i], 0);
   }
 });
 
 Deno.test("rsaPad returns original if already correct size", () => {
   const message = new TextEncoder().encode("exactly16chars!!");
-  const padded = rsaPad(message, 16);
+  const value = bytesToBigInt(message);
+  const padded = rsaPad(value, message.length, 16);
 
-  assertEquals(padded.length, 16);
-  assertEquals(new TextDecoder().decode(padded), "exactly16chars!!");
+  // No shift needed when already correct size
+  assertEquals(padded, value);
+
+  // Verify by converting back to bytes
+  const paddedBytes = bigIntToBytes(padded, 16);
+  assertEquals(paddedBytes.length, 16);
+  assertEquals(new TextDecoder().decode(paddedBytes), "exactly16chars!!");
 });
 
 Deno.test("RSA multi-chunk encryption matches node:crypto", () => {
@@ -202,11 +215,11 @@ Deno.test("RSA multi-chunk encryption matches node:crypto", () => {
 
   for (let i = 0; i < chunkCount; i++) {
     const offset = i * rsaChunkSize;
-    const chunk = rsaPad(
-      bigData.subarray(offset, offset + rsaChunkSize),
-      rsaChunkSize,
-    );
-    const encrypted = rsaEncrypt(chunk, modulus, exponent);
+    const chunkBytes = bigData.subarray(offset, offset + rsaChunkSize);
+    const chunkValue = bytesToBigInt(chunkBytes);
+    const paddedValue = rsaPad(chunkValue, chunkBytes.length, rsaChunkSize);
+    const paddedBytes = bigIntToBytes(paddedValue, rsaChunkSize);
+    const encrypted = rsaEncrypt(paddedBytes, modulus, exponent);
     encryptedChunks.push(bigIntToBytes(encrypted, rsaChunkSize));
   }
 

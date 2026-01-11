@@ -33,8 +33,8 @@ export function createCipher(options: CipherOptions): Cipher {
   const key = options.key ?? generateKey();
   const iv = options.iv ?? generateKey();
 
-  const chunkSizeBytes = options.modulus.length;
-  const chunkSizeBits = BigInt(chunkSizeBytes * 8);
+  const k = options.modulus.length;
+  const kBits = BigInt(k * 8);
   const n = bytesToBigInt(options.modulus);
   const e = bytesToBigInt(options.exponent);
   const montParams = createMontgomeryParams(n);
@@ -45,20 +45,16 @@ export function createCipher(options: CipherOptions): Cipher {
     aesEncrypt: (data: Uint8Array) => cbc(key, iv).encrypt(data),
     aesDecrypt: (data: Uint8Array) => cbc(key, iv).decrypt(data),
     rsaEncrypt: (data: Uint8Array) => {
-      const chunkCount = Math.ceil(data.length / chunkSizeBytes);
+      const chunkCount = Math.ceil(data.length / k);
 
       let acc = 0n;
       for (let i = 0; i < chunkCount; i++) {
-        const chunk = rsaPad(
-          data.subarray(i * chunkSizeBytes, (i + 1) * chunkSizeBytes),
-          chunkSizeBytes,
-        );
-
-        acc <<= chunkSizeBits;
-        acc |= modPowMontgomery(bytesToBigInt(chunk), e, montParams);
+        const chunk = data.subarray(i * k, (i + 1) * k);
+        const msg = rsaPad(bytesToBigInt(chunk), chunk.length, k);
+        acc = (acc << kBits) | modPowMontgomery(msg, e, montParams);
       }
 
-      return bigIntToBytes(acc, chunkCount * chunkSizeBytes);
+      return bigIntToBytes(acc, chunkCount * k);
     },
   };
 }
