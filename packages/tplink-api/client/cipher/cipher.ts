@@ -3,8 +3,9 @@
  */
 
 import { cbc } from "@noble/ciphers/aes.js";
-import { concat } from "@std/bytes";
+import { createMontgomeryParams } from "./montgomery.ts";
 import { rsaEncrypt, rsaPad } from "./rsa.ts";
+import { bigIntToBytes, bytesToBigInt } from "./utils.ts";
 
 export interface CipherOptions {
   modulus: Uint8Array;
@@ -31,7 +32,12 @@ function generateKey(): Uint8Array {
 export function createCipher(options: CipherOptions): Cipher {
   const key = options.key ?? generateKey();
   const iv = options.iv ?? generateKey();
-  const rsaChunkSize = options.modulus.length;
+
+  const k = options.modulus.length;
+  const kBits = BigInt(k * 8);
+  const n = bytesToBigInt(options.modulus);
+  const e = bytesToBigInt(options.exponent);
+  const montParams = createMontgomeryParams(n);
 
   return {
     key,
@@ -39,21 +45,18 @@ export function createCipher(options: CipherOptions): Cipher {
     aesEncrypt: (data: Uint8Array) => cbc(key, iv).encrypt(data),
     aesDecrypt: (data: Uint8Array) => cbc(key, iv).decrypt(data),
     rsaEncrypt: (data: Uint8Array) => {
-      const chunkCount = Math.ceil(data.length / rsaChunkSize);
-      const encryptedChunks: Uint8Array[] = [];
+      const chunkCount = Math.ceil(data.length / k);
 
+      let acc = 0n, chunk: bigint;
       for (let i = 0; i < chunkCount; i++) {
-        const offset = i * rsaChunkSize;
-        const chunk = rsaPad(
-          data.subarray(offset, offset + rsaChunkSize),
-          rsaChunkSize,
-        );
-        encryptedChunks.push(
-          rsaEncrypt(chunk, options.modulus, options.exponent),
-        );
+        const chunkBytes = data.subarray(i * k, (i + 1) * k);
+        chunk = bytesToBigInt(chunkBytes);
+        chunk = rsaPad(chunk, chunkBytes.length, k);
+        chunk = rsaEncrypt(chunk, e, montParams);
+        acc = (acc << kBits) | chunk;
       }
 
-      return concat(encryptedChunks);
+      return bigIntToBytes(acc, chunkCount * k);
     },
   };
 }

@@ -5,49 +5,36 @@
  * See: https://github.com/denoland/deno/issues/27295
  */
 
-import { bigIntToBytes, bytesToBigInt } from "./utils.ts";
-
-/**
- * Modular exponentiation using binary method
- * Computes: base^exp mod mod
- */
-function modPow(base: bigint, exp: bigint, mod: bigint): bigint {
-  if (mod === 1n) return 0n;
-  let result = 1n;
-  base = base % mod;
-  while (exp > 0n) {
-    if (exp % 2n === 1n) {
-      result = (result * base) % mod;
-    }
-    exp = exp >> 1n;
-    base = (base * base) % mod;
-  }
-  return result;
-}
+import {
+  type MontgomeryParams,
+  modPowMontgomery,
+} from "./montgomery.ts";
 
 /**
  * Raw RSA encryption (no padding): c = m^e mod n
  */
 export function rsaEncrypt(
-  message: Uint8Array,
-  modulus: Uint8Array,
-  exponent: Uint8Array,
-): Uint8Array {
-  const m = bytesToBigInt(message);
-  const n = bytesToBigInt(modulus);
-  const e = bytesToBigInt(exponent);
-  const c = modPow(m, e, n);
-  return bigIntToBytes(c, modulus.length);
+  message: bigint,
+  exponent: bigint,
+  params: MontgomeryParams,
+): bigint {
+  return modPowMontgomery(message, exponent, params);
 }
 
 /**
- * Pad message to specified size (for RSA chunks)
+ * Pad a bigint value with zeros on the right (low bits) via bit shift.
+ *
+ * @param value The bigint value to pad
+ * @param valueBytes The byte length of the original value (before conversion)
+ * @param targetBytes The target byte length after padding
  */
-export function rsaPad(message: Uint8Array, size: number): Uint8Array {
-  if (message.length >= size) {
-    return message;
+export function rsaPad(
+  value: bigint,
+  valueBytes: number,
+  targetBytes: number,
+): bigint {
+  if (valueBytes >= targetBytes) {
+    return value;
   }
-  const padded = new Uint8Array(size);
-  padded.set(message);
-  return padded;
+  return value << BigInt((targetBytes - valueBytes) * 8);
 }
