@@ -1,9 +1,10 @@
 import { assertEquals } from "@std/assert";
 import { cbc } from "@noble/ciphers/aes.js";
 import { md5 } from "@noble/hashes/legacy.js";
-import { concat } from "@std/bytes";
+import { createMontgomeryParams } from "./montgomery.ts";
 import { rsaEncrypt, rsaPad } from "./rsa.ts";
 import { createCipher } from "./cipher.ts";
+import { bigIntToBytes, bytesToBigInt } from "./utils.ts";
 
 /**
  * Snapshot tests to verify cipher implementations match Node.js crypto behavior.
@@ -136,52 +137,67 @@ Deno.test("MD5 hash matches node:crypto", () => {
 Deno.test("RSA encrypt (no padding) matches node:crypto", () => {
   // Test vector generated with Node.js crypto module
   // Using a 1024-bit RSA key
-  const modulus = Uint8Array.fromHex(
-    "b3096650d220465f74878dbbced0d240218e04068dbb7f2496019751b17066e46b58d5e9fdbc6a6201eb9cd1a611b94ceffec43563260a55922c520a760c32ecacfbc872006aacb202a5e573814c3e02a91fc4221635e2818a249629989d6a953eed30bd088dde1e6b933eea6f18c7f962b47e674c8f758059064178556320c7",
+  const modulus = BigInt(
+    "0xb3096650d220465f74878dbbced0d240218e04068dbb7f2496019751b17066e46b58d5e9fdbc6a6201eb9cd1a611b94ceffec43563260a55922c520a760c32ecacfbc872006aacb202a5e573814c3e02a91fc4221635e2818a249629989d6a953eed30bd088dde1e6b933eea6f18c7f962b47e674c8f758059064178556320c7",
   );
-  const exponent = Uint8Array.fromHex("010001");
+  const exponent = BigInt("0x010001");
+  const params = createMontgomeryParams(modulus);
 
   // Plaintext padded to modulus size (128 bytes)
-  const plaintext = Uint8Array.fromHex(
-    "74657374206d65737361676520666f7220727361000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000",
+  const plaintext = BigInt(
+    "0x74657374206d65737361676520666f7220727361000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000",
   );
 
   const expected =
     "4f3c883546f08ad5fdcf918a47015c769e8e589a7623c41a78e9e59091b80f496b159ea7d9f8fad180bac70269bbdc3076648f579c65c552e072f100a16ccee4effb2999a5631c7657e6f4737fa14cefe54d83cdd555812713ba1adc21efd54969a3b536c1479069f2ca8bc512decf73871075c61c68baab9ea17053df21ea69";
 
-  const encrypted = rsaEncrypt(plaintext, modulus, exponent);
+  const encrypted = rsaEncrypt(plaintext, exponent, params);
 
-  assertEquals(encrypted.toHex(), expected);
+  assertEquals(encrypted.toString(16), expected);
 });
 
-Deno.test("rsaPad pads message to specified size", () => {
+Deno.test("rsaPad pads value with zeros on the right (low bits)", () => {
   const message = new TextEncoder().encode("short");
-  const padded = rsaPad(message, 16);
+  const value = bytesToBigInt(message);
+  const padded = rsaPad(value, message.length, 16);
 
-  assertEquals(padded.length, 16);
-  assertEquals(new TextDecoder().decode(padded.subarray(0, 5)), "short");
+  // "short" is 5 bytes, padded to 16 bytes means shifting left by 11 bytes (88 bits)
+  const expected = value << BigInt((16 - 5) * 8);
+  assertEquals(padded, expected);
+
+  // Verify by converting back to bytes
+  const paddedBytes = bigIntToBytes(padded, 16);
+  assertEquals(paddedBytes.length, 16);
+  assertEquals(new TextDecoder().decode(paddedBytes.subarray(0, 5)), "short");
   // Rest should be zeros
   for (let i = 5; i < 16; i++) {
-    assertEquals(padded[i], 0);
+    assertEquals(paddedBytes[i], 0);
   }
 });
 
 Deno.test("rsaPad returns original if already correct size", () => {
   const message = new TextEncoder().encode("exactly16chars!!");
-  const padded = rsaPad(message, 16);
+  const value = bytesToBigInt(message);
+  const padded = rsaPad(value, message.length, 16);
 
-  assertEquals(padded.length, 16);
-  assertEquals(new TextDecoder().decode(padded), "exactly16chars!!");
+  // No shift needed when already correct size
+  assertEquals(padded, value);
+
+  // Verify by converting back to bytes
+  const paddedBytes = bigIntToBytes(padded, 16);
+  assertEquals(paddedBytes.length, 16);
+  assertEquals(new TextDecoder().decode(paddedBytes), "exactly16chars!!");
 });
 
 Deno.test("RSA multi-chunk encryption matches node:crypto", () => {
   // Test vector generated with Node.js crypto module
   // Data that spans 3 chunks (300 bytes with 128-byte modulus = 3 chunks)
-  const modulus = Uint8Array.fromHex(
-    "b3096650d220465f74878dbbced0d240218e04068dbb7f2496019751b17066e46b58d5e9fdbc6a6201eb9cd1a611b94ceffec43563260a55922c520a760c32ecacfbc872006aacb202a5e573814c3e02a91fc4221635e2818a249629989d6a953eed30bd088dde1e6b933eea6f18c7f962b47e674c8f758059064178556320c7",
+  const modulus = BigInt(
+    "0xb3096650d220465f74878dbbced0d240218e04068dbb7f2496019751b17066e46b58d5e9fdbc6a6201eb9cd1a611b94ceffec43563260a55922c520a760c32ecacfbc872006aacb202a5e573814c3e02a91fc4221635e2818a249629989d6a953eed30bd088dde1e6b933eea6f18c7f962b47e674c8f758059064178556320c7",
   );
-  const exponent = Uint8Array.fromHex("010001");
-  const rsaChunkSize = modulus.length; // 128 bytes
+  const exponent = BigInt("0x010001");
+  const params = createMontgomeryParams(modulus);
+  const rsaChunkSize = 128; // 1024-bit modulus = 128 bytes
 
   // 300 bytes of data: 50 A's + 50 B's + 50 C's + 50 D's + 50 E's + 50 F's
   const bigData = new TextEncoder().encode(
@@ -197,18 +213,19 @@ Deno.test("RSA multi-chunk encryption matches node:crypto", () => {
 
   // Encrypt using the same chunking logic as createCipher
   const chunkCount = Math.ceil(bigData.length / rsaChunkSize);
-  const encryptedChunks: Uint8Array[] = [];
+  const kBits = BigInt(rsaChunkSize * 8);
 
+  let acc = 0n;
   for (let i = 0; i < chunkCount; i++) {
     const offset = i * rsaChunkSize;
-    const chunk = rsaPad(
-      bigData.subarray(offset, offset + rsaChunkSize),
-      rsaChunkSize,
-    );
-    encryptedChunks.push(rsaEncrypt(chunk, modulus, exponent));
+    const chunkBytes = bigData.subarray(offset, offset + rsaChunkSize);
+    const chunkValue = bytesToBigInt(chunkBytes);
+    const paddedValue = rsaPad(chunkValue, chunkBytes.length, rsaChunkSize);
+    const encrypted = rsaEncrypt(paddedValue, exponent, params);
+    acc = (acc << kBits) | encrypted;
   }
 
-  const fullEncrypted = concat(encryptedChunks);
+  const fullEncrypted = bigIntToBytes(acc, chunkCount * rsaChunkSize);
 
   assertEquals(fullEncrypted.length, 384);
   assertEquals(fullEncrypted.toHex(), expected);
