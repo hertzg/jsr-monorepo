@@ -242,14 +242,15 @@ export function wgGenPsk(): string {
 }
 
 /**
- * Mimics WireGuard's `wg pubkey` command.
- * Alias for getPublicKey, deals with inputs and outputs as base64 encoded string instead of Uint8Arrays.
- * Can be used directly by WireGuard as Peer PublicKey.
+ * Derives public key from private key using x25519 curve.
  *
- * @param {string} privateKeyBase64 base64 encoded private key
- * @returns {Promise<string>} base64 encoded public key
+ * When called with a base64 string, mimics WireGuard's `wg pubkey` command.
+ * When called with Uint8Array, works directly with raw bytes.
  *
- * @example Derive public key from private key
+ * @param privateKeyBase64 Base64 encoded private key
+ * @returns Base64 encoded public key
+ *
+ * @example Derive public key from base64 string
  * ```ts
  * import { assertExists } from "@std/assert";
  * import { wgGenKey, wgPubKey } from "@hertzg/wg-keys";
@@ -259,9 +260,27 @@ export function wgGenPsk(): string {
  *
  * assertExists(publicKey);
  * ```
+ *
+ * @example Derive public key from Uint8Array
+ * ```ts
+ * import { assertEquals } from "@std/assert";
+ * import { randomPrivateKeyBytes, wgPubKey } from "@hertzg/wg-keys";
+ *
+ * const privateKeyBytes = randomPrivateKeyBytes();
+ * const publicKeyBytes = await wgPubKey(privateKeyBytes);
+ *
+ * assertEquals(publicKeyBytes.length, 32);
+ * ```
  */
-export async function wgPubKey(privateKeyBase64: string): Promise<string> {
-  return encodeBase64(
-    await publicBytesFromPrivateBytes(decodeBase64(privateKeyBase64)),
-  );
+export async function wgPubKey(privateKeyBase64: string): Promise<string>;
+export async function wgPubKey(privateKey: Uint8Array): Promise<Uint8Array>;
+export async function wgPubKey(
+  privateKey: string | Uint8Array,
+): Promise<string | Uint8Array> {
+  if (typeof privateKey === "string") {
+    return encodeBase64(
+      await publicBytesFromPrivateBytes(decodeBase64(privateKey)),
+    );
+  }
+  return await publicBytesFromPrivateBytes(privateKey);
 }
