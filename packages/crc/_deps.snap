@@ -2,30 +2,30 @@ export const snapshot = {};
 
 snapshot[`dependencies > @hertzg/crc 1`] = `
 [
-  "jsr:@std/cache@0.2.1/memoize",
+  "jsr:@std/cache@^0.2.1/memoize",
 ]
 `;
 
 snapshot[`dependencies > @hertzg/crc 2`] = `
 [
-  "jsr:@std/cache@0.2.1/memoize",
+  "jsr:@std/cache@^0.2.1/memoize",
 ]
 `;
 
 snapshot[`dependencies > @hertzg/crc 3`] = `
 [
-  "jsr:@std/cache@0.2.1/memoize",
+  "jsr:@std/cache@^0.2.1/memoize",
 ]
 `;
 
 snapshot[`dependencies > @hertzg/crc 4`] = `
 [
-  "jsr:@std/cache@0.2.1/memoize",
+  "jsr:@std/cache@^0.2.1/memoize",
 ]
 `;
 
 snapshot[`dependencies > @hertzg/crc 5`] = `
 [
-  "jsr:@std/cache@0.2.1/memoize",
+  "jsr:@std/cache@^0.2.1/memoize",
 ]
 `;
