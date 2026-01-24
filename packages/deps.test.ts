@@ -20,14 +20,22 @@
  */
 
 import { assertSnapshot } from "@std/testing/snapshot";
-import { join } from "@std/path";
+import { join, toFileUrl } from "@std/path";
 import { getPackages } from "../_tools/utils.ts";
+
+interface DenoInfoDependency {
+  specifier: string;
+  code?: { specifier: string };
+  type?: { specifier: string };
+}
 
 interface DenoInfoModule {
   specifier: string;
+  dependencies?: DenoInfoDependency[];
 }
 
 interface DenoInfoOutput {
+  roots: string[];
   modules: DenoInfoModule[];
   npmPackages?: Record<string, { name: string; version: string }>;
 }
@@ -57,18 +65,39 @@ Deno.test(`dependencies`, async (t) => {
         ? { ".": pkg.exports }
         : pkg.exports;
 
+      const workspacePath = join(rootPath, pkg.workspacePath);
+      const workspacePathUrl = toFileUrl(workspacePath);
       for (const [mod, path] of Object.entries(exports)) {
         await t.step(`${mod}`, async () => {
-          const entryPath = join(rootPath, pkg.workspacePath, path);
+          const entrypointPath = join(workspacePath, path);
 
-          const info = await getDenoInfo(entryPath);
-          const deps = info.modules
-            .filter((module) => !module.specifier.startsWith("file://"))
-            .map((
-              module,
-            ) => module.specifier);
+          const info = await getDenoInfo(entrypointPath);
+          const workspaceModules = info.modules.filter((m) =>
+            m.specifier.startsWith(workspacePathUrl.href)
+          );
 
-          await assertSnapshot(t, deps, {
+          const deps = workspaceModules
+            .filter((m) => m.specifier.startsWith(`file://${rootPath}`))
+            .flatMap((m) => m.dependencies ?? [])
+            .map((d) => ({
+              source: d.specifier,
+              resolved: d.code?.specifier ?? d.type?.specifier ?? d.specifier,
+            }))
+            .filter(({ source, resolved }) => {
+              if (source.startsWith(".")) return false;
+              if (resolved.startsWith(workspacePathUrl.href)) return false;
+              return true;
+            })
+            .map(({ source, resolved }) => {
+              // Workspace members: use original alias, not file:// path
+              if (resolved.startsWith("file://")) {
+                return source; // e.g., "@hertzg/binstruct"
+              }
+              // External deps: use resolved (keeps semver range)
+              return resolved; // e.g., "jsr:@std/cli@^1.0.25"
+            });
+
+          await assertSnapshot(t, Array.from(new Set(deps)), {
             path: join(rootPath, pkg.workspacePath, "_deps.snap"),
           });
         });

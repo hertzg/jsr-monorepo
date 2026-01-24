@@ -2,11 +2,7 @@ export const snapshot = {};
 
 snapshot[`dependencies > @hertzg/tplink-api 1`] = `
 [
-  "https://jsr.io/@noble/ciphers/2.1.1/src/_polyval.ts",
-  "https://jsr.io/@noble/ciphers/2.1.1/src/aes.ts",
-  "https://jsr.io/@noble/ciphers/2.1.1/src/utils.ts",
-  "https://jsr.io/@noble/hashes/2.0.1/src/_md.ts",
-  "https://jsr.io/@noble/hashes/2.0.1/src/legacy.ts",
-  "https://jsr.io/@noble/hashes/2.0.1/src/utils.ts",
+  "jsr:@noble/ciphers@^2.1.1/aes.js",
+  "jsr:@noble/hashes@^2.0.1/legacy.js",
 ]
 `;

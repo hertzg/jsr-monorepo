@@ -1,3 +1,7 @@
 export const snapshot = {};
 
-snapshot[`dependencies > @binstruct/ethernet 1`] = `[]`;
+snapshot[`dependencies > @binstruct/ethernet 1`] = `
+[
+  "@hertzg/binstruct",
+]
+`;
