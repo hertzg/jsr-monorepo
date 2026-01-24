@@ -1,5 +1,12 @@
 ### 2026.01.24
 
+#### @hertzg/wg-keys 2.0.0 (major)
+
+- BREAKING(@hertzg/wg-keys): add importPublicKey and rename importPrivateBytes
+  to importPrivateKey (#92)
+
+### 2026.01.24
+
 #### @hertzg/tplink-api 1.1.0 (minor)
 
 - feat(@hertzg/tplink-api): optimize RSA cipher performance (#88)
