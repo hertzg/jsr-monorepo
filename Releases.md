@@ -1,3 +1,14 @@
+### 2026.01.24
+
+#### @hertzg/tplink-api 1.1.0 (minor)
+
+- feat(@hertzg/tplink-api): optimize RSA cipher performance (#88)
+- chore(@hertzg/tplink-api): add benchmark for cipher (#87)
+
+#### @hertzg/wg-keys 1.1.0 (minor)
+
+- feat(@hertzg/wg-keys): expose importPrivateBytes function (#89)
+
 ### 2026.01.03
 
 #### @hertzg/wg-ini 0.2.3 (patch)
