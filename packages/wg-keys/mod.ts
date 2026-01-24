@@ -40,6 +40,24 @@
  * assertNotEquals(publicKey, presharedKey);
  * ```
  *
+ * ## Importing Existing Keys
+ *
+ * You can import existing WireGuard keys using {@link importPrivateKey} and {@link importPublicKey}:
+ *
+ * ```typescript
+ * import { importPrivateKey, importPublicKey, wgGenKey, wgPubKey } from "@hertzg/wg-keys";
+ * import { assertEquals } from "@std/assert";
+ *
+ * const privateKeyBase64 = wgGenKey();
+ * const publicKeyBase64 = await wgPubKey(privateKeyBase64);
+ *
+ * const privateCryptoKey = await importPrivateKey(privateKeyBase64);
+ * const publicCryptoKey = await importPublicKey(publicKeyBase64);
+ *
+ * assertEquals(privateCryptoKey.type, "private");
+ * assertEquals(publicCryptoKey.type, "public");
+ * ```
+ *
  * ## OK, But Why?
  * ℹ️ Since [deno v2.1.4](https://github.com/denoland/deno/issues/26431#issuecomment-2638264802) supports JWK export of
  * x25519 private keys, this module has dropped the dependency on `@noble/curves` and uses `CryptoSubtle` directly.
@@ -111,11 +129,11 @@ const PKCS8_PREAMBLE = new Uint8Array([
 ]);
 
 /**
- * Options for importing private key bytes into a CryptoKey.
+ * Options for importing a private key into a CryptoKey.
  */
-export type ImportPrivateBytesOptions = {
+export type ImportPrivateKeyOptions = {
   /**
-   * Algorithm identifier for the key. Defaults to `{ name: "x25519" }`.
+   * Algorithm identifier for the key. Defaults to `{ name: "X25519" }`.
    */
   algorithm?: AlgorithmIdentifier;
   /**
@@ -123,29 +141,69 @@ export type ImportPrivateBytesOptions = {
    */
   extractable?: boolean;
   /**
-   * Array of key usages. Defaults to `["deriveKey", "deriveBits"]`.
+   * Array of key usages. Defaults to `["deriveBits"]`.
    */
   keyUsages?: KeyUsage[];
 };
 
 /**
- * Imports x25519 private key bytes as a CryptoKey by wrapping them in PKCS8 format.
+ * Options for importing a public key into a CryptoKey.
+ */
+export type ImportPublicKeyOptions = {
+  /**
+   * Algorithm identifier for the key. Defaults to `{ name: "X25519" }`.
+   */
+  algorithm?: AlgorithmIdentifier;
+  /**
+   * Whether the key can be exported. Defaults to `true`.
+   */
+  extractable?: boolean;
+};
+
+/**
+ * Imports an x25519 private key as a CryptoKey by wrapping it in PKCS8 format.
  *
  * This function wraps raw 32-byte x25519 private keys in the PKCS8 container format
  * required by the Web Crypto API. The PKCS8 wrapper includes the algorithm OID and
  * proper ASN.1 structure.
  *
- * @param privateKey The 32-byte private key to import
+ * @param privateKey The private key as base64 string
  * @param options Configuration options for key import
  * @returns A promise resolving to the imported CryptoKey
  *
- * @example Import private key with default options
+ * @example Import private key from base64 string
  * ```ts
  * import { assertEquals } from "@std/assert";
- * import { importPrivateBytes, randomPrivateKeyBytes } from "@hertzg/wg-keys";
+ * import { importPrivateKey, wgGenKey } from "@hertzg/wg-keys";
+ *
+ * const privateKeyBase64 = wgGenKey();
+ * const cryptoKey = await importPrivateKey(privateKeyBase64);
+ *
+ * assertEquals(cryptoKey.type, "private");
+ * ```
+ */
+export async function importPrivateKey(
+  privateKey: string,
+  options?: ImportPrivateKeyOptions,
+): Promise<CryptoKey>;
+/**
+ * Imports an x25519 private key as a CryptoKey by wrapping it in PKCS8 format.
+ *
+ * This function wraps raw 32-byte x25519 private keys in the PKCS8 container format
+ * required by the Web Crypto API. The PKCS8 wrapper includes the algorithm OID and
+ * proper ASN.1 structure.
+ *
+ * @param privateKey The 32-byte private key as Uint8Array
+ * @param options Configuration options for key import
+ * @returns A promise resolving to the imported CryptoKey
+ *
+ * @example Import private key from Uint8Array
+ * ```ts
+ * import { assertEquals } from "@std/assert";
+ * import { importPrivateKey, randomPrivateKeyBytes } from "@hertzg/wg-keys";
  *
  * const privateKeyBytes = randomPrivateKeyBytes();
- * const cryptoKey = await importPrivateBytes(privateKeyBytes);
+ * const cryptoKey = await importPrivateKey(privateKeyBytes);
  *
  * assertEquals(cryptoKey.type, "private");
  * ```
@@ -153,10 +211,10 @@ export type ImportPrivateBytesOptions = {
  * @example Import private key with custom key usages
  * ```ts
  * import { assertEquals } from "@std/assert";
- * import { importPrivateBytes, randomPrivateKeyBytes } from "@hertzg/wg-keys";
+ * import { importPrivateKey, randomPrivateKeyBytes } from "@hertzg/wg-keys";
  *
  * const privateKeyBytes = randomPrivateKeyBytes();
- * const cryptoKey = await importPrivateBytes(privateKeyBytes, {
+ * const cryptoKey = await importPrivateKey(privateKeyBytes, {
  *   keyUsages: ["deriveKey", "deriveBits"],
  * });
  *
@@ -164,19 +222,27 @@ export type ImportPrivateBytesOptions = {
  * assertEquals(cryptoKey.usages.length, 2);
  * ```
  */
-export async function importPrivateBytes(
+export async function importPrivateKey(
   privateKey: Uint8Array,
-  options: ImportPrivateBytesOptions = {},
+  options?: ImportPrivateKeyOptions,
+): Promise<CryptoKey>;
+export async function importPrivateKey(
+  privateKey: string | Uint8Array,
+  options: ImportPrivateKeyOptions = {},
 ): Promise<CryptoKey> {
   const {
-    algorithm = { name: "x25519" },
+    algorithm = { name: "X25519" },
     extractable = true,
-    keyUsages = ["deriveKey", "deriveBits"],
+    keyUsages = ["deriveBits"],
   } = options;
 
-  const pkcs8 = new Uint8Array(privateKey.length + 16);
+  const bytes = typeof privateKey === "string"
+    ? decodeBase64(privateKey)
+    : privateKey;
+
+  const pkcs8 = new Uint8Array(bytes.length + 16);
   pkcs8.set(PKCS8_PREAMBLE);
-  pkcs8.set(privateKey, PKCS8_PREAMBLE.length);
+  pkcs8.set(bytes, PKCS8_PREAMBLE.length);
 
   return await crypto.subtle.importKey(
     "pkcs8",
@@ -184,6 +250,83 @@ export async function importPrivateBytes(
     algorithm,
     extractable,
     keyUsages,
+  );
+}
+
+/**
+ * Imports an x25519 public key as a CryptoKey.
+ *
+ * This function imports raw 32-byte x25519 public keys using the "raw" format
+ * supported by the Web Crypto API.
+ *
+ * @param publicKey The public key as base64 string
+ * @param options Configuration options for key import
+ * @returns A promise resolving to the imported CryptoKey
+ *
+ * @example Import public key from base64 string
+ * ```ts
+ * import { assertEquals } from "@std/assert";
+ * import { importPublicKey, wgGenKey, wgPubKey } from "@hertzg/wg-keys";
+ *
+ * const privateKeyBase64 = wgGenKey();
+ * const publicKeyBase64 = await wgPubKey(privateKeyBase64);
+ * const cryptoKey = await importPublicKey(publicKeyBase64);
+ *
+ * assertEquals(cryptoKey.type, "public");
+ * ```
+ */
+export async function importPublicKey(
+  publicKey: string,
+  options?: ImportPublicKeyOptions,
+): Promise<CryptoKey>;
+/**
+ * Imports an x25519 public key as a CryptoKey.
+ *
+ * This function imports raw 32-byte x25519 public keys using the "raw" format
+ * supported by the Web Crypto API.
+ *
+ * @param publicKey The 32-byte public key as Uint8Array
+ * @param options Configuration options for key import
+ * @returns A promise resolving to the imported CryptoKey
+ *
+ * @example Import public key from Uint8Array
+ * ```ts
+ * import { assertEquals } from "@std/assert";
+ * import { importPublicKey, publicBytesFromPrivateBytes, randomPrivateKeyBytes } from "@hertzg/wg-keys";
+ *
+ * const privateKeyBytes = randomPrivateKeyBytes();
+ * const publicKeyBytes = await publicBytesFromPrivateBytes(privateKeyBytes);
+ * const cryptoKey = await importPublicKey(publicKeyBytes);
+ *
+ * assertEquals(cryptoKey.type, "public");
+ * ```
+ */
+export async function importPublicKey(
+  publicKey: Uint8Array,
+  options?: ImportPublicKeyOptions,
+): Promise<CryptoKey>;
+export async function importPublicKey(
+  publicKey: string | Uint8Array,
+  options: ImportPublicKeyOptions = {},
+): Promise<CryptoKey> {
+  const {
+    algorithm = { name: "X25519" },
+    extractable = true,
+  } = options;
+
+  const decoded = typeof publicKey === "string"
+    ? decodeBase64(publicKey)
+    : publicKey;
+
+  // Create a new Uint8Array to ensure ArrayBuffer backing (not SharedArrayBuffer)
+  const bytes = new Uint8Array(decoded);
+
+  return await crypto.subtle.importKey(
+    "raw",
+    bytes,
+    algorithm,
+    extractable,
+    [], // public keys have no usages for X25519
   );
 }
 
@@ -209,9 +352,9 @@ export async function importPrivateBytes(
  */
 export async function publicBytesFromPrivateBytes(
   privateKey: Uint8Array,
-  options: ImportPrivateBytesOptions = {},
+  options: ImportPrivateKeyOptions = {},
 ): Promise<Uint8Array> {
-  const cryptoKey = await importPrivateBytes(privateKey, options);
+  const cryptoKey = await importPrivateKey(privateKey, options);
 
   const jwk = await crypto.subtle.exportKey("jwk", cryptoKey);
   return decodeBase64Url(jwk.x!);
@@ -288,15 +431,15 @@ export function wgGenPsk(): string {
  */
 export async function wgPubKey(
   privateKeyBase64: string,
-  options?: ImportPrivateBytesOptions,
+  options?: ImportPrivateKeyOptions,
 ): Promise<string>;
 export async function wgPubKey(
   privateKey: Uint8Array,
-  options?: ImportPrivateBytesOptions,
+  options?: ImportPrivateKeyOptions,
 ): Promise<Uint8Array>;
 export async function wgPubKey(
   privateKey: string | Uint8Array,
-  options?: ImportPrivateBytesOptions,
+  options?: ImportPrivateKeyOptions,
 ): Promise<string | Uint8Array> {
   if (typeof privateKey === "string") {
     return encodeBase64(
