@@ -16,7 +16,8 @@
         "lint:import-map",
         "lint:labeler",
         "lint:title",
-        "lint:readme"
+        "lint:readme",
+        "lint:deps"
       ]
     },
     "lint:deno": "deno lint",
@@ -25,6 +26,7 @@
     "lint:labeler": "deno run -A _tools/check_labeler.ts",
     "lint:title": "deno run -A _tools/check_title.ts",
     "lint:readme": "deno run -A _tools/check_readme.ts",
+    "lint:deps": "deno run -A _tools/check_deps.ts",
     "cov": "deno coverage --ignore=\"**/*.generated.mjs,**/_test_utils.ts,.github\"",
     "cov:gen": "deno task cov --lcov --output=cov.lcov",
     "cov:view": "deno task cov --html",

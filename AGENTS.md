@@ -77,6 +77,7 @@ All packages are located in the `packages/` directory:
 - `packages/mymagti-api` - MyMagti API client
 - `packages/bx` - Binary hex string utilities
 - `packages/ip` - IPv4/CIDR utilities
+- `packages/crc` - CRC checksum utilities
 
 ## Core Architecture
 
@@ -137,15 +138,15 @@ binary and domain-specific representations.
 
 ### Updating Dependencies
 
-When updating dependency versions in `import_map.json`, the `deps.test.ts` file
+When updating dependency versions in `import_map.json`, the `lint:deps` check
 will fail because it uses snapshots to track dependency versions. This is
 expected behavior, not a breaking change. To fix:
 
 ```bash
-deno test --allow-all packages/deps.test.ts -- --update
+deno run -A _tools/check_deps.ts --update
 ```
 
-This updates the snapshots to reflect the new dependency versions.
+This updates the `_deps.snap` files to reflect the new dependency versions.
 
 ### Correct Import Patterns
 
@@ -342,6 +343,7 @@ both tiresome and error-prone.
 - `@hertzg/mymagti-api`
 - `@hertzg/bx`
 - `@hertzg/ip`
+- `@hertzg/crc`
 - `@hertzg/routeros-api`
 - `@hertzg/tplink-api`
 
@@ -362,8 +364,8 @@ When adding a new workspace to the monorepo, update these files:
    - `.github/release.yml` - Add package name to scopes
    - `import_map.json` - Add JSR import for the package
 
-The lint tools `lint:labeler`, `lint:title`, and `lint:import-map` will fail if
-these files are not updated correctly.
+The lint tools `lint:labeler`, `lint:title`, `lint:import-map`, and `lint:deps`
+will fail if these files are not updated correctly.
 
 ## Common Patterns
 
