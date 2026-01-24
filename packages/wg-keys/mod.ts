@@ -248,6 +248,7 @@ export function wgGenPsk(): string {
  * When called with Uint8Array, works directly with raw bytes.
  *
  * @param privateKeyBase64 Base64 encoded private key
+ * @param options Configuration options for key import
  * @returns Base64 encoded public key
  *
  * @example Derive public key from base64 string
@@ -271,16 +272,36 @@ export function wgGenPsk(): string {
  *
  * assertEquals(publicKeyBytes.length, 32);
  * ```
+ *
+ * @example Derive public key with custom key usages
+ * ```ts
+ * import { assertEquals } from "@std/assert";
+ * import { randomPrivateKeyBytes, wgPubKey } from "@hertzg/wg-keys";
+ *
+ * const privateKeyBytes = randomPrivateKeyBytes();
+ * const publicKeyBytes = await wgPubKey(privateKeyBytes, {
+ *   keyUsages: ["deriveBits"],
+ * });
+ *
+ * assertEquals(publicKeyBytes.length, 32);
+ * ```
  */
-export async function wgPubKey(privateKeyBase64: string): Promise<string>;
-export async function wgPubKey(privateKey: Uint8Array): Promise<Uint8Array>;
+export async function wgPubKey(
+  privateKeyBase64: string,
+  options?: ImportPrivateBytesOptions,
+): Promise<string>;
+export async function wgPubKey(
+  privateKey: Uint8Array,
+  options?: ImportPrivateBytesOptions,
+): Promise<Uint8Array>;
 export async function wgPubKey(
   privateKey: string | Uint8Array,
+  options?: ImportPrivateBytesOptions,
 ): Promise<string | Uint8Array> {
   if (typeof privateKey === "string") {
     return encodeBase64(
-      await publicBytesFromPrivateBytes(decodeBase64(privateKey)),
+      await publicBytesFromPrivateBytes(decodeBase64(privateKey), options),
     );
   }
-  return await publicBytesFromPrivateBytes(privateKey);
+  return await publicBytesFromPrivateBytes(privateKey, options);
 }
