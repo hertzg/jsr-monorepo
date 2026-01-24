@@ -4,6 +4,6 @@ snapshot[`dependencies > @binstruct/png 1`] = `
 [
   "@hertzg/binstruct",
   "@hertzg/crc",
-  "npm:fflate@0.8.2",
+  "npm:fflate@^0.8.2",
 ]
 `;
