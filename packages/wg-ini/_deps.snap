@@ -2,27 +2,7 @@ export const snapshot = {};
 
 snapshot[`dependencies > @hertzg/wg-ini 1`] = `
 [
-  "https://jsr.io/@std/bytes/1.0.6/_types.ts",
-  "https://jsr.io/@std/bytes/1.0.6/concat.ts",
-  "https://jsr.io/@std/bytes/1.0.6/copy.ts",
-  "https://jsr.io/@std/streams/1.0.16/_common.ts",
-  "https://jsr.io/@std/streams/1.0.16/buffer.ts",
-  "https://jsr.io/@std/streams/1.0.16/byte_slice_stream.ts",
-  "https://jsr.io/@std/streams/1.0.16/concat_readable_streams.ts",
-  "https://jsr.io/@std/streams/1.0.16/delimiter_stream.ts",
-  "https://jsr.io/@std/streams/1.0.16/early_zip_readable_streams.ts",
-  "https://jsr.io/@std/streams/1.0.16/limited_bytes_transform_stream.ts",
-  "https://jsr.io/@std/streams/1.0.16/limited_transform_stream.ts",
-  "https://jsr.io/@std/streams/1.0.16/merge_readable_streams.ts",
-  "https://jsr.io/@std/streams/1.0.16/mod.ts",
-  "https://jsr.io/@std/streams/1.0.16/text_delimiter_stream.ts",
-  "https://jsr.io/@std/streams/1.0.16/text_line_stream.ts",
-  "https://jsr.io/@std/streams/1.0.16/to_array_buffer.ts",
-  "https://jsr.io/@std/streams/1.0.16/to_blob.ts",
-  "https://jsr.io/@std/streams/1.0.16/to_json.ts",
-  "https://jsr.io/@std/streams/1.0.16/to_text.ts",
-  "https://jsr.io/@std/streams/1.0.16/to_transform_stream.ts",
-  "https://jsr.io/@std/streams/1.0.16/zip_readable_streams.ts",
+  "jsr:@std/streams@^1.0.16",
 ]
 `;
 

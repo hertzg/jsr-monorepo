@@ -1,3 +1,7 @@
 export const snapshot = {};
 
-snapshot[`dependencies > @binstruct/wav 1`] = `[]`;
+snapshot[`dependencies > @binstruct/wav 1`] = `
+[
+  "@hertzg/binstruct",
+]
+`;
