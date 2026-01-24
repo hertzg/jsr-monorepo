@@ -2,9 +2,8 @@ export const snapshot = {};
 
 snapshot[`dependencies > @binstruct/png 1`] = `
 [
-  "https://jsr.io/@std/cache/0.2.1/_serialize_arg_list.ts",
-  "https://jsr.io/@std/cache/0.2.1/lru_cache.ts",
-  "https://jsr.io/@std/cache/0.2.1/memoize.ts",
-  "npm:/fflate@0.8.2",
+  "@hertzg/binstruct",
+  "@hertzg/crc",
+  "npm:fflate@0.8.2",
 ]
 `;
