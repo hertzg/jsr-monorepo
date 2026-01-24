@@ -135,6 +135,18 @@ binary and domain-specific representations.
 - `node:` imports are allowed
 - Import validation enforced by `deno task lint:import-map`
 
+### Updating Dependencies
+
+When updating dependency versions in `import_map.json`, the `deps.test.ts` file
+will fail because it uses snapshots to track dependency versions. This is
+expected behavior, not a breaking change. To fix:
+
+```bash
+deno test --allow-all packages/deps.test.ts -- --update
+```
+
+This updates the snapshots to reflect the new dependency versions.
+
 ### Correct Import Patterns
 
 ```typescript ignore
