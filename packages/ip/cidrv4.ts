@@ -261,6 +261,61 @@ export function cidr4BroadcastAddress(cidr: Cidr4): number {
 }
 
 /**
+ * Returns the total number of IP addresses in a CIDR block or for a given prefix length.
+ *
+ * For a /24 network, this returns 256. For a /32, this returns 1.
+ *
+ * @param cidr The CIDR block
+ * @returns The total number of addresses in the CIDR range
+ *
+ * @example Getting CIDR size from Cidr4 object
+ * ```ts
+ * import { assertEquals } from "@std/assert";
+ * import { cidr4Size, parseCidr4 } from "@hertzg/ip/cidrv4";
+ *
+ * assertEquals(cidr4Size(parseCidr4("192.168.1.0/24")), 256);
+ * assertEquals(cidr4Size(parseCidr4("10.0.0.0/8")), 16777216);
+ * assertEquals(cidr4Size(parseCidr4("192.168.1.1/32")), 1);
+ * assertEquals(cidr4Size(parseCidr4("0.0.0.0/0")), 4294967296);
+ * ```
+ *
+ * @example Getting CIDR size from prefix length
+ * ```ts
+ * import { assertEquals } from "@std/assert";
+ * import { cidr4Size } from "@hertzg/ip/cidrv4";
+ *
+ * assertEquals(cidr4Size(24), 256);
+ * assertEquals(cidr4Size(8), 16777216);
+ * assertEquals(cidr4Size(32), 1);
+ * assertEquals(cidr4Size(0), 4294967296);
+ * ```
+ *
+ * @example Error handling for invalid prefix length
+ * ```ts
+ * import { assertThrows } from "@std/assert";
+ * import { cidr4Size } from "@hertzg/ip/cidrv4";
+ *
+ * assertThrows(() => cidr4Size(-1), RangeError);
+ * assertThrows(() => cidr4Size(33), RangeError);
+ * ```
+ */
+export function cidr4Size(cidr: Cidr4): number;
+export function cidr4Size(prefixLength: number): number;
+export function cidr4Size(cidrOrPrefixLength: Cidr4 | number): number {
+  const prefixLength = typeof cidrOrPrefixLength === "number"
+    ? cidrOrPrefixLength
+    : cidrOrPrefixLength.prefixLength;
+
+  if (prefixLength < 0 || prefixLength > 32 || !Number.isInteger(prefixLength)) {
+    throw new RangeError(
+      `CIDR prefix length must be 0-32, got ${prefixLength}`,
+    );
+  }
+
+  return 2 ** (32 - prefixLength);
+}
+
+/**
  * Generates a range of IP addresses from a CIDR block.
  *
  * Yields IP addresses starting at the specified offset from the
