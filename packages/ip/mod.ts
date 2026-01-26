@@ -19,6 +19,7 @@
  * - {@link cidr4Contains}: Check if IP is within CIDR range
  * - {@link cidr4NetworkAddress}: Get network address (first IP)
  * - {@link cidr4BroadcastAddress}: Get broadcast address (last IP)
+ * - {@link cidr4Size}: Get total number of addresses in CIDR range
  * - {@link cidr4Addresses}: Generate IP addresses in CIDR range
  *
  * ### IPv6
@@ -35,6 +36,7 @@
  * - {@link cidr6Contains}: Check if IP is within CIDR range
  * - {@link cidr6NetworkAddress}: Get network address (first IP)
  * - {@link cidr6BroadcastAddress}: Get last address in range
+ * - {@link cidr6Size}: Get total number of addresses in CIDR range
  * - {@link cidr6Addresses}: Generate IP addresses in CIDR range
  *
  * ### Submodules
@@ -266,6 +268,7 @@ export {
   cidr4BroadcastAddress,
   cidr4Contains,
   cidr4NetworkAddress,
+  cidr4Size,
   maskFromPrefixLength,
   parseCidr4,
   stringifyCidr4,
@@ -281,6 +284,7 @@ export {
   cidr6BroadcastAddress,
   cidr6Contains,
   cidr6NetworkAddress,
+  cidr6Size,
   mask6FromPrefixLength,
   parseCidr6,
   stringifyCidr6,

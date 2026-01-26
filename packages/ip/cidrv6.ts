@@ -273,6 +273,63 @@ export function cidr6BroadcastAddress(cidr: Cidr6): bigint {
 }
 
 /**
+ * Returns the total number of IP addresses in a CIDR block or for a given prefix length.
+ *
+ * For a /120 network, this returns 256n. For a /128, this returns 1n.
+ *
+ * **Warning**: IPv6 subnets can be enormous. A /64 has 2^64 addresses.
+ * The result is a bigint to handle these large values.
+ *
+ * @param cidr The CIDR block
+ * @returns The total number of addresses in the CIDR range as a bigint
+ *
+ * @example Getting CIDR size from Cidr6 object
+ * ```ts
+ * import { assertEquals } from "@std/assert";
+ * import { cidr6Size, parseCidr6 } from "@hertzg/ip/cidrv6";
+ *
+ * assertEquals(cidr6Size(parseCidr6("fd00::/120")), 256n);
+ * assertEquals(cidr6Size(parseCidr6("2001:db8::/32")), 79228162514264337593543950336n);
+ * assertEquals(cidr6Size(parseCidr6("::1/128")), 1n);
+ * assertEquals(cidr6Size(parseCidr6("::/64")), 18446744073709551616n);
+ * ```
+ *
+ * @example Getting CIDR size from prefix length
+ * ```ts
+ * import { assertEquals } from "@std/assert";
+ * import { cidr6Size } from "@hertzg/ip/cidrv6";
+ *
+ * assertEquals(cidr6Size(120), 256n);
+ * assertEquals(cidr6Size(128), 1n);
+ * assertEquals(cidr6Size(64), 18446744073709551616n);
+ * ```
+ *
+ * @example Error handling for invalid prefix length
+ * ```ts
+ * import { assertThrows } from "@std/assert";
+ * import { cidr6Size } from "@hertzg/ip/cidrv6";
+ *
+ * assertThrows(() => cidr6Size(-1), RangeError);
+ * assertThrows(() => cidr6Size(129), RangeError);
+ * ```
+ */
+export function cidr6Size(cidr: Cidr6): bigint;
+export function cidr6Size(prefixLength: number): bigint;
+export function cidr6Size(cidrOrPrefixLength: Cidr6 | number): bigint {
+  const prefixLength = typeof cidrOrPrefixLength === "number"
+    ? cidrOrPrefixLength
+    : cidrOrPrefixLength.prefixLength;
+
+  if (prefixLength < 0 || prefixLength > 128 || !Number.isInteger(prefixLength)) {
+    throw new RangeError(
+      `CIDR prefix length must be 0-128, got ${prefixLength}`,
+    );
+  }
+
+  return 2n ** BigInt(128 - prefixLength);
+}
+
+/**
  * Generates a range of IP addresses from a CIDR block.
  *
  * Yields IP addresses starting at the specified offset from the
