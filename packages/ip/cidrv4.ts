@@ -368,7 +368,7 @@ export function cidr4Size(cidrOrPrefixLength: Cidr4 | number): number {
  *
  * @param cidr The CIDR block to generate addresses from
  * @param options Optional configuration for address generation
- * @param options.offset The offset from the network address (0-based, defaults to 1 for first usable IP)
+ * @param options.offset The offset from the network address (0-based, defaults to 0 for network address)
  * @param options.count The maximum number of addresses to generate (defaults to undefined = iterate until CIDR boundary)
  * @param options.step The increment between addresses (positive or negative, defaults to 1)
  * @returns A generator yielding IP addresses as 32-bit unsigned integers (may yield less than count if CIDR boundary is reached)
@@ -381,16 +381,17 @@ export function cidr4Size(cidrOrPrefixLength: Cidr4 | number): number {
  *
  * const cidr = parseCidr4("10.0.0.0/29"); // 8 IPs: .0 to .7
  *
- * // By default, iterates from offset 1 (first usable) to CIDR boundary
- * const allUsable = Array.from(cidr4Addresses(cidr));
- * assertEquals(allUsable.map(stringifyIpv4), [
- *   "10.0.0.1", "10.0.0.2", "10.0.0.3",
+ * // By default, iterates from offset 0 (network address) to CIDR boundary
+ * const all = Array.from(cidr4Addresses(cidr));
+ * assertEquals(all.map(stringifyIpv4), [
+ *   "10.0.0.0", "10.0.0.1", "10.0.0.2", "10.0.0.3",
  *   "10.0.0.4", "10.0.0.5", "10.0.0.6", "10.0.0.7",
  * ]);
- *
- * // Iterate from network address through entire range
- * const all = Array.from(cidr4Addresses(cidr, { offset: 0 }));
  * assertEquals(all.length, 8); // All 8 IPs in /29
+ *
+ * // Skip network address by specifying offset 1
+ * const usable = Array.from(cidr4Addresses(cidr, { offset: 1 }));
+ * assertEquals(usable.length, 7); // Skip network address
  * ```
  *
  * @example Limiting with count parameter
@@ -497,7 +498,7 @@ export function* cidr4Addresses(
   },
 ): Generator<number> {
   const network = cidr4NetworkAddress(cidr);
-  const offset = options?.offset ?? 1;
+  const offset = options?.offset ?? 0;
   const count = options?.count;
   const step = options?.step ?? 1;
 
