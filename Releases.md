@@ -1,3 +1,17 @@
+### 2026.01.26
+
+#### @hertzg/ip 0.3.0 (minor)
+
+- BREAKING(@hertzg/ip): remove bigint from mask6FromPrefixLength signature
+  (#103)
+- BREAKING(@hertzg/ip): remove bigint from stringifyIpv4 signature (#102)
+- BREAKING(@hertzg/ip): rename maskFromPrefixLength to mask4FromPrefixLength
+  (#100)
+- BREAKING(@hertzg/ip): change default offset to 0 in cidrAddresses (#104)
+- BREAKING(@hertzg/ip): rename address functions to firstAddress/lastAddress
+  (#101)
+- feat(@hertzg/ip): add cidr4Size and cidr6Size functions (#99)
+
 ### 2026.01.24
 
 #### @hertzg/wg-keys 2.0.0 (major)

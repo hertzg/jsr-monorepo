@@ -17,7 +17,7 @@
     "@std/path": "jsr:@std/path@^1.1.4",
     "@hertzg/binstruct": "jsr:@hertzg/binstruct@^3.0.5",
     "@hertzg/bx": "jsr:@hertzg/bx@^3.0.3",
-    "@hertzg/ip": "jsr:@hertzg/ip@^0.2.1",
+    "@hertzg/ip": "jsr:@hertzg/ip@^0.3.0",
     "@hertzg/crc": "jsr:@hertzg/crc@^0.1.1",
     "@hertzg/mymagti-api": "jsr:@hertzg/mymagti-api@^0.1.1",
     "@hertzg/routeros-api": "jsr:@hertzg/routeros-api@^0.1.2",
