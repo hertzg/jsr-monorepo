@@ -342,12 +342,12 @@ export function cidr6Size(cidrOrPrefixLength: Cidr6 | number): bigint {
  *
  * @param cidr The CIDR block to generate addresses from
  * @param options Optional configuration for address generation
- * @param options.offset The offset from the network address (0-based, defaults to 1 for first usable IP)
+ * @param options.offset The offset from the network address (0-based, defaults to 0 for network address)
  * @param options.count The maximum number of addresses to generate (defaults to undefined = iterate until CIDR boundary)
  * @param options.step The increment between addresses (positive or negative, defaults to 1)
  * @returns A generator yielding IP addresses as bigints (may yield less than count if CIDR boundary is reached)
  *
- * @example Default behavior - iterate from offset 1
+ * @example Default behavior - iterate from offset 0
  * ```ts
  * import { assertEquals } from "@std/assert";
  * import { cidr6Addresses, parseCidr6 } from "@hertzg/ip/cidrv6";
@@ -355,10 +355,10 @@ export function cidr6Size(cidrOrPrefixLength: Cidr6 | number): bigint {
  *
  * const cidr = parseCidr6("fd00::/120"); // 256 IPs: ::0 to ::ff
  *
- * // Get first 5 usable IPs (offset=1 by default)
+ * // Get first 5 IPs (offset=0 by default, starts at network address)
  * const first5 = Array.from(cidr6Addresses(cidr, { count: 5 }));
  * assertEquals(first5.map(stringifyIpv6), [
- *   "fd00::1", "fd00::2", "fd00::3", "fd00::4", "fd00::5",
+ *   "fd00::", "fd00::1", "fd00::2", "fd00::3", "fd00::4",
  * ]);
  * ```
  *
@@ -442,7 +442,7 @@ export function* cidr6Addresses(
   },
 ): Generator<bigint> {
   const network = cidr6FirstAddress(cidr);
-  const offset = options?.offset ?? 1;
+  const offset = options?.offset ?? 0;
   const count = options?.count;
   const step = options?.step ?? 1;
 

@@ -284,28 +284,33 @@ Deno.test("IP assignment workflow", async (t) => {
 });
 
 Deno.test("cidr6Addresses", async (t) => {
-  await t.step("default behavior - iterates from offset 1", () => {
+  await t.step("default behavior - iterates from offset 0", () => {
     const cidr = parseCidr6("fd00::/125"); // 8 IPs: ::0 to ::7
 
-    const first5 = Array.from(cidr6Addresses(cidr, { count: 5 }));
+    // Default: offset=0, no count limit, step=1
+    const all = Array.from(cidr6Addresses(cidr));
 
-    assertEquals(first5.map(stringifyIpv6), [
+    assertEquals(all.map(stringifyIpv6), [
+      "fd00::",
       "fd00::1",
       "fd00::2",
       "fd00::3",
       "fd00::4",
       "fd00::5",
+      "fd00::6",
+      "fd00::7",
     ]);
+    assertEquals(all.length, 8);
   });
 
-  await t.step("iterates full range from offset 0", () => {
+  await t.step("iterates from offset 1 (skip network address)", () => {
     const cidr = parseCidr6("fd00::/125"); // 8 IPs
 
-    const all = Array.from(cidr6Addresses(cidr, { offset: 0 }));
+    const usable = Array.from(cidr6Addresses(cidr, { offset: 1 }));
 
-    assertEquals(all.length, 8);
-    assertEquals(all[0], parseIpv6("fd00::0"));
-    assertEquals(all[7], parseIpv6("fd00::7"));
+    assertEquals(usable.length, 7);
+    assertEquals(usable[0], parseIpv6("fd00::1"));
+    assertEquals(usable[6], parseIpv6("fd00::7"));
   });
 
   await t.step("generates addresses from network address", () => {

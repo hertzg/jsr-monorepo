@@ -176,19 +176,19 @@
  *
  * const cidr = parseCidr4("10.0.0.0/29"); // 8 IPs: .0 to .7
  *
- * // By default, iterates all usable IPs (offset=1, step=1, no count limit)
- * const allUsable = Array.from(cidr4Addresses(cidr));
- * assertEquals(allUsable.map(stringifyIpv4), [
- *   "10.0.0.1", "10.0.0.2", "10.0.0.3",
+ * // By default, iterates all IPs (offset=0, step=1, no count limit)
+ * const all = Array.from(cidr4Addresses(cidr));
+ * assertEquals(all.map(stringifyIpv4), [
+ *   "10.0.0.0", "10.0.0.1", "10.0.0.2", "10.0.0.3",
  *   "10.0.0.4", "10.0.0.5", "10.0.0.6", "10.0.0.7",
  * ]);
  *
- * // Limit with count parameter
- * const first3 = Array.from(cidr4Addresses(cidr, { offset: 0, count: 3 }));
- * assertEquals(first3.length, 3);
+ * // Skip network address with offset=1
+ * const usable = Array.from(cidr4Addresses(cidr, { offset: 1 }));
+ * assertEquals(usable.length, 7);
  *
- * // Get even addresses (step=2, no count = iterate until boundary)
- * const evenIps = Array.from(cidr4Addresses(cidr, { offset: 0, step: 2 }));
+ * // Get even addresses (step=2)
+ * const evenIps = Array.from(cidr4Addresses(cidr, { step: 2 }));
  * assertEquals(evenIps.map(stringifyIpv4), ["10.0.0.0", "10.0.0.2", "10.0.0.4", "10.0.0.6"]);
  *
  * // Reverse iteration from offset (negative step)

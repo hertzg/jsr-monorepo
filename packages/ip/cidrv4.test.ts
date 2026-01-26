@@ -276,13 +276,14 @@ Deno.test("IP assignment workflow", async (t) => {
 });
 
 Deno.test("cidr4Addresses", async (t) => {
-  await t.step("default behavior - iterates full range from offset 1", () => {
+  await t.step("default behavior - iterates full range from offset 0", () => {
     const cidr = parseCidr4("10.0.0.0/29"); // 8 IPs: .0 to .7
 
-    // Default: offset=1, no count limit, step=1
-    const allUsable = Array.from(cidr4Addresses(cidr));
+    // Default: offset=0, no count limit, step=1
+    const all = Array.from(cidr4Addresses(cidr));
 
-    assertEquals(allUsable.map(stringifyIpv4), [
+    assertEquals(all.map(stringifyIpv4), [
+      "10.0.0.0",
       "10.0.0.1",
       "10.0.0.2",
       "10.0.0.3",
@@ -291,16 +292,17 @@ Deno.test("cidr4Addresses", async (t) => {
       "10.0.0.6",
       "10.0.0.7",
     ]);
+    assertEquals(all.length, 8);
   });
 
-  await t.step("iterates full range from offset 0", () => {
+  await t.step("iterates from offset 1 (skip network address)", () => {
     const cidr = parseCidr4("10.0.0.0/29"); // 8 IPs
 
-    const all = Array.from(cidr4Addresses(cidr, { offset: 0 }));
+    const usable = Array.from(cidr4Addresses(cidr, { offset: 1 }));
 
-    assertEquals(all.length, 8);
-    assertEquals(all[0], parseIpv4("10.0.0.0"));
-    assertEquals(all[7], parseIpv4("10.0.0.7"));
+    assertEquals(usable.length, 7);
+    assertEquals(usable[0], parseIpv4("10.0.0.1"));
+    assertEquals(usable[6], parseIpv4("10.0.0.7"));
   });
 
   await t.step("generates addresses from network address", () => {
