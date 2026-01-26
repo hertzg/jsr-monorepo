@@ -218,7 +218,30 @@ export function cidr4Contains(cidr: Cidr4, ip: number): boolean {
 }
 
 /**
+ * Returns the first address of a CIDR block (network address).
+ *
+ * @param cidr The CIDR block
+ * @returns The first address as a 32-bit unsigned integer
+ *
+ * @example Getting first address
+ * ```ts
+ * import { assertEquals } from "@std/assert";
+ * import { cidr4FirstAddress, parseCidr4 } from "@hertzg/ip/cidrv4";
+ * import { parseIpv4 } from "@hertzg/ip/ipv4";
+ *
+ * const cidr = parseCidr4("192.168.1.0/24");
+ * assertEquals(cidr4FirstAddress(cidr), parseIpv4("192.168.1.0"));
+ * ```
+ */
+export function cidr4FirstAddress(cidr: Cidr4): number {
+  const mask = maskFromPrefixLength(cidr.prefixLength);
+  return (cidr.address & mask) >>> 0;
+}
+
+/**
  * Returns the network address (first IP) of a CIDR block.
+ *
+ * Alias for {@link cidr4FirstAddress}.
  *
  * @param cidr The CIDR block
  * @returns The network address as a 32-bit unsigned integer
@@ -233,13 +256,34 @@ export function cidr4Contains(cidr: Cidr4, ip: number): boolean {
  * assertEquals(cidr4NetworkAddress(cidr), parseIpv4("192.168.1.0"));
  * ```
  */
-export function cidr4NetworkAddress(cidr: Cidr4): number {
+export const cidr4NetworkAddress = cidr4FirstAddress;
+
+/**
+ * Returns the last address of a CIDR block (broadcast address for IPv4).
+ *
+ * @param cidr The CIDR block
+ * @returns The last address as a 32-bit unsigned integer
+ *
+ * @example Getting last address
+ * ```ts
+ * import { assertEquals } from "@std/assert";
+ * import { cidr4LastAddress, parseCidr4 } from "@hertzg/ip/cidrv4";
+ * import { parseIpv4 } from "@hertzg/ip/ipv4";
+ *
+ * const cidr = parseCidr4("192.168.1.0/24");
+ * assertEquals(cidr4LastAddress(cidr), parseIpv4("192.168.1.255"));
+ * ```
+ */
+export function cidr4LastAddress(cidr: Cidr4): number {
   const mask = maskFromPrefixLength(cidr.prefixLength);
-  return (cidr.address & mask) >>> 0;
+  const network = (cidr.address & mask) >>> 0;
+  return (network | (~mask >>> 0)) >>> 0;
 }
 
 /**
  * Returns the broadcast address (last IP) of a CIDR block.
+ *
+ * Alias for {@link cidr4LastAddress}.
  *
  * @param cidr The CIDR block
  * @returns The broadcast address as a 32-bit unsigned integer
@@ -254,11 +298,7 @@ export function cidr4NetworkAddress(cidr: Cidr4): number {
  * assertEquals(cidr4BroadcastAddress(cidr), parseIpv4("192.168.1.255"));
  * ```
  */
-export function cidr4BroadcastAddress(cidr: Cidr4): number {
-  const mask = maskFromPrefixLength(cidr.prefixLength);
-  const network = (cidr.address & mask) >>> 0;
-  return (network | (~mask >>> 0)) >>> 0;
-}
+export const cidr4BroadcastAddress = cidr4LastAddress;
 
 /**
  * Returns the total number of IP addresses in a CIDR block or for a given prefix length.

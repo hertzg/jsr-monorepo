@@ -9,20 +9,20 @@
  * ```ts
  * import { assert, assertEquals } from "@std/assert";
  * import {
- *   cidr6BroadcastAddress,
  *   cidr6Contains,
- *   cidr6NetworkAddress,
+ *   cidr6FirstAddress,
+ *   cidr6LastAddress,
  *   parseCidr6,
  * } from "@hertzg/ip/cidrv6";
  * import { parseIpv6, stringifyIpv6 } from "@hertzg/ip/ipv6";
  *
  * const cidr = parseCidr6("2001:db8:ffff:ffff:ffff:ffff::/120");
- * let currentIp = cidr6NetworkAddress(cidr) + 1n;
+ * let currentIp = cidr6FirstAddress(cidr) + 1n;
  *
  * while (cidr6Contains(cidr, currentIp)) {
  *   const assigned = stringifyIpv6(currentIp);
  *   currentIp = currentIp + 1n;
- *   if (currentIp > cidr6BroadcastAddress(cidr)) break;
+ *   if (currentIp > cidr6LastAddress(cidr)) break;
  * }
  *
  * assert(cidr6Contains(cidr, parseIpv6("2001:db8:ffff:ffff:ffff:ffff::1")));
@@ -203,17 +203,17 @@ export function stringifyCidr6(cidr: Cidr6): string {
  * ```ts
  * import { assert } from "@std/assert";
  * import {
- *   cidr6BroadcastAddress,
  *   cidr6Contains,
- *   cidr6NetworkAddress,
+ *   cidr6FirstAddress,
+ *   cidr6LastAddress,
  *   parseCidr6,
  * } from "@hertzg/ip/cidrv6";
  *
  * const cidr = parseCidr6("fd00::/120"); // 256 IPs
- * let currentIp = cidr6NetworkAddress(cidr) + 1n;
+ * let currentIp = cidr6FirstAddress(cidr) + 1n;
  *
  * const assigned: bigint[] = [];
- * while (currentIp < cidr6BroadcastAddress(cidr)) {
+ * while (currentIp < cidr6LastAddress(cidr)) {
  *   assert(cidr6Contains(cidr, currentIp));
  *   assigned.push(currentIp);
  *   currentIp = currentIp + 1n;
@@ -227,46 +227,43 @@ export function cidr6Contains(cidr: Cidr6, ip: bigint): boolean {
 }
 
 /**
- * Returns the network address (first IP) of a CIDR block.
+ * Returns the first address of a CIDR block.
  *
  * @param cidr The CIDR block
- * @returns The network address as a bigint
+ * @returns The first address as a bigint
  *
- * @example Getting network address
+ * @example Getting first address
  * ```ts
  * import { assertEquals } from "@std/assert";
- * import { cidr6NetworkAddress, parseCidr6 } from "@hertzg/ip/cidrv6";
+ * import { cidr6FirstAddress, parseCidr6 } from "@hertzg/ip/cidrv6";
  * import { parseIpv6 } from "@hertzg/ip/ipv6";
  *
  * const cidr = parseCidr6("2001:db8::/32");
- * assertEquals(cidr6NetworkAddress(cidr), parseIpv6("2001:db8::"));
+ * assertEquals(cidr6FirstAddress(cidr), parseIpv6("2001:db8::"));
  * ```
  */
-export function cidr6NetworkAddress(cidr: Cidr6): bigint {
+export function cidr6FirstAddress(cidr: Cidr6): bigint {
   const mask = mask6FromPrefixLength(cidr.prefixLength);
   return cidr.address & mask;
 }
 
 /**
- * Returns the broadcast address (last IP) of a CIDR block.
- *
- * Note: IPv6 doesn't have a traditional broadcast address like IPv4,
- * but this returns the last address in the range.
+ * Returns the last address of a CIDR block.
  *
  * @param cidr The CIDR block
- * @returns The last address in the range as a bigint
+ * @returns The last address as a bigint
  *
- * @example Getting broadcast/last address
+ * @example Getting last address
  * ```ts
  * import { assertEquals } from "@std/assert";
- * import { cidr6BroadcastAddress, parseCidr6 } from "@hertzg/ip/cidrv6";
+ * import { cidr6LastAddress, parseCidr6 } from "@hertzg/ip/cidrv6";
  * import { parseIpv6 } from "@hertzg/ip/ipv6";
  *
  * const cidr = parseCidr6("2001:db8::/120");
- * assertEquals(cidr6BroadcastAddress(cidr), parseIpv6("2001:db8::ff"));
+ * assertEquals(cidr6LastAddress(cidr), parseIpv6("2001:db8::ff"));
  * ```
  */
-export function cidr6BroadcastAddress(cidr: Cidr6): bigint {
+export function cidr6LastAddress(cidr: Cidr6): bigint {
   const mask = mask6FromPrefixLength(cidr.prefixLength);
   const network = cidr.address & mask;
   return network | (~mask & 0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFn);
@@ -444,7 +441,7 @@ export function* cidr6Addresses(
     step?: number | bigint;
   },
 ): Generator<bigint> {
-  const network = cidr6NetworkAddress(cidr);
+  const network = cidr6FirstAddress(cidr);
   const offset = options?.offset ?? 1;
   const count = options?.count;
   const step = options?.step ?? 1;

@@ -17,8 +17,10 @@
  * - {@link stringifyCidr4}: Convert Cidr4 to CIDR notation string
  * - {@link maskFromPrefixLength}: Create network mask from prefix length (0-32)
  * - {@link cidr4Contains}: Check if IP is within CIDR range
- * - {@link cidr4NetworkAddress}: Get network address (first IP)
- * - {@link cidr4BroadcastAddress}: Get broadcast address (last IP)
+ * - {@link cidr4FirstAddress}: Get first address in CIDR range
+ * - {@link cidr4LastAddress}: Get last address in CIDR range
+ * - {@link cidr4NetworkAddress}: Alias for cidr4FirstAddress
+ * - {@link cidr4BroadcastAddress}: Alias for cidr4LastAddress
  * - {@link cidr4Size}: Get total number of addresses in CIDR range
  * - {@link cidr4Addresses}: Generate IP addresses in CIDR range
  *
@@ -34,8 +36,8 @@
  * - {@link stringifyCidr6}: Convert Cidr6 to CIDR notation string
  * - {@link mask6FromPrefixLength}: Create network mask from prefix length (0-128)
  * - {@link cidr6Contains}: Check if IP is within CIDR range
- * - {@link cidr6NetworkAddress}: Get network address (first IP)
- * - {@link cidr6BroadcastAddress}: Get last address in range
+ * - {@link cidr6FirstAddress}: Get first address in CIDR range
+ * - {@link cidr6LastAddress}: Get last address in CIDR range
  * - {@link cidr6Size}: Get total number of addresses in CIDR range
  * - {@link cidr6Addresses}: Generate IP addresses in CIDR range
  *
@@ -127,8 +129,8 @@
  * ```ts
  * import { assertEquals } from "@std/assert";
  * import {
- *   cidr6BroadcastAddress,
- *   cidr6NetworkAddress,
+ *   cidr6FirstAddress,
+ *   cidr6LastAddress,
  *   parseCidr6,
  *   stringifyCidr6,
  *   stringifyIpv6,
@@ -138,9 +140,9 @@
  * const cidr = parseCidr6("2001:db8::/32");
  * assertEquals(cidr.prefixLength, 32);
  *
- * // Get network boundaries
- * const network = cidr6NetworkAddress(cidr);
- * assertEquals(stringifyIpv6(network), "2001:db8::");
+ * // Get range boundaries
+ * const first = cidr6FirstAddress(cidr);
+ * assertEquals(stringifyIpv6(first), "2001:db8::");
  *
  * // Stringify back to CIDR notation
  * assertEquals(stringifyCidr6(cidr), "2001:db8::/32");
@@ -267,6 +269,8 @@ export {
   cidr4Addresses,
   cidr4BroadcastAddress,
   cidr4Contains,
+  cidr4FirstAddress,
+  cidr4LastAddress,
   cidr4NetworkAddress,
   cidr4Size,
   maskFromPrefixLength,
@@ -281,9 +285,9 @@ export { compressIpv6, expandIpv6, parseIpv6, stringifyIpv6 } from "./ipv6.ts";
 export {
   type Cidr6,
   cidr6Addresses,
-  cidr6BroadcastAddress,
   cidr6Contains,
-  cidr6NetworkAddress,
+  cidr6FirstAddress,
+  cidr6LastAddress,
   cidr6Size,
   mask6FromPrefixLength,
   parseCidr6,
