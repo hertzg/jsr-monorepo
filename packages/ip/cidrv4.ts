@@ -58,25 +58,25 @@ export type Cidr4 = {
  * @example Creating masks
  * ```ts
  * import { assertEquals } from "@std/assert";
- * import { maskFromPrefixLength } from "@hertzg/ip/cidrv4";
+ * import { mask4FromPrefixLength } from "@hertzg/ip/cidrv4";
  *
- * assertEquals(maskFromPrefixLength(24), 0xFFFFFF00);
- * assertEquals(maskFromPrefixLength(16), 0xFFFF0000);
- * assertEquals(maskFromPrefixLength(8), 0xFF000000);
- * assertEquals(maskFromPrefixLength(32), 0xFFFFFFFF);
- * assertEquals(maskFromPrefixLength(0), 0);
+ * assertEquals(mask4FromPrefixLength(24), 0xFFFFFF00);
+ * assertEquals(mask4FromPrefixLength(16), 0xFFFF0000);
+ * assertEquals(mask4FromPrefixLength(8), 0xFF000000);
+ * assertEquals(mask4FromPrefixLength(32), 0xFFFFFFFF);
+ * assertEquals(mask4FromPrefixLength(0), 0);
  * ```
  *
  * @example Error handling
  * ```ts
  * import { assertThrows } from "@std/assert";
- * import { maskFromPrefixLength } from "@hertzg/ip/cidrv4";
+ * import { mask4FromPrefixLength } from "@hertzg/ip/cidrv4";
  *
- * assertThrows(() => maskFromPrefixLength(-1), RangeError);
- * assertThrows(() => maskFromPrefixLength(33), RangeError);
+ * assertThrows(() => mask4FromPrefixLength(-1), RangeError);
+ * assertThrows(() => mask4FromPrefixLength(33), RangeError);
  * ```
  */
-export function maskFromPrefixLength(prefixLength: number): number {
+export function mask4FromPrefixLength(prefixLength: number): number {
   if (
     prefixLength < 0 || prefixLength > 32 || !Number.isInteger(prefixLength)
   ) {
@@ -141,7 +141,7 @@ export function parseCidr4(cidr: string): Cidr4 {
   }
 
   // Validate prefix length
-  maskFromPrefixLength(prefixLength);
+  mask4FromPrefixLength(prefixLength);
 
   return {
     address,
@@ -212,7 +212,7 @@ export function stringifyCidr4(cidr: Cidr4): string {
  * ```
  */
 export function cidr4Contains(cidr: Cidr4, ip: number): boolean {
-  const mask = maskFromPrefixLength(cidr.prefixLength);
+  const mask = mask4FromPrefixLength(cidr.prefixLength);
   const network = (cidr.address & mask) >>> 0;
   return ((ip & mask) >>> 0) === network;
 }
@@ -234,7 +234,7 @@ export function cidr4Contains(cidr: Cidr4, ip: number): boolean {
  * ```
  */
 export function cidr4FirstAddress(cidr: Cidr4): number {
-  const mask = maskFromPrefixLength(cidr.prefixLength);
+  const mask = mask4FromPrefixLength(cidr.prefixLength);
   return (cidr.address & mask) >>> 0;
 }
 
@@ -275,7 +275,7 @@ export const cidr4NetworkAddress = cidr4FirstAddress;
  * ```
  */
 export function cidr4LastAddress(cidr: Cidr4): number {
-  const mask = maskFromPrefixLength(cidr.prefixLength);
+  const mask = mask4FromPrefixLength(cidr.prefixLength);
   const network = (cidr.address & mask) >>> 0;
   return (network | (~mask >>> 0)) >>> 0;
 }
