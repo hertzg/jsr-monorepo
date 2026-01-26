@@ -96,6 +96,47 @@ export function parseIpv4(ip: string): number {
 }
 
 /**
+ * Checks if a string is a valid IPv4 address in dotted decimal notation.
+ *
+ * Returns true if the string can be successfully parsed as an IPv4 address,
+ * false otherwise. This function does not throw exceptions.
+ *
+ * @param ip The string to validate
+ * @returns true if the string is a valid IPv4 address, false otherwise
+ *
+ * @example Valid IPv4 addresses
+ * ```ts
+ * import { assert, assertEquals } from "@std/assert";
+ * import { isValidIpv4 } from "@hertzg/ip/ipv4";
+ *
+ * assert(isValidIpv4("192.168.1.1"));
+ * assert(isValidIpv4("10.0.0.1"));
+ * assert(isValidIpv4("0.0.0.0"));
+ * assert(isValidIpv4("255.255.255.255"));
+ * ```
+ *
+ * @example Invalid IPv4 addresses
+ * ```ts
+ * import { assertEquals } from "@std/assert";
+ * import { isValidIpv4 } from "@hertzg/ip/ipv4";
+ *
+ * assertEquals(isValidIpv4("192.168.1"), false);
+ * assertEquals(isValidIpv4("192.168.1.256"), false);
+ * assertEquals(isValidIpv4("192.168.01.1"), false);
+ * assertEquals(isValidIpv4("not an ip"), false);
+ * assertEquals(isValidIpv4(""), false);
+ * ```
+ */
+export function isValidIpv4(ip: string): boolean {
+  try {
+    parseIpv4(ip);
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+/**
  * Stringifies a bigint to an IPv4 address in dotted decimal notation.
  *
  * The bigint must represent a valid 32-bit unsigned integer (0 to 4294967295).

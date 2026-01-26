@@ -10,6 +10,7 @@
  * ### IPv4
  * - {@link parseIpv4}: Parse dotted decimal notation to number
  * - {@link stringifyIpv4}: Convert number to dotted decimal notation
+ * - {@link isValidIpv4}: Check if string is a valid IPv4 address
  *
  * ### IPv4 CIDR
  * - {@link Cidr4}: Type representing an IPv4 CIDR block
@@ -29,6 +30,7 @@
  * - {@link stringifyIpv6}: Convert bigint to compressed colon-hexadecimal
  * - {@link expandIpv6}: Expand to full uncompressed form
  * - {@link compressIpv6}: Compress to canonical shortest form
+ * - {@link isValidIpv6}: Check if string is a valid IPv6 address
  *
  * ### IPv6 CIDR
  * - {@link Cidr6}: Type representing an IPv6 CIDR block
@@ -261,7 +263,7 @@
  */
 
 // Re-export IPv4 utilities
-export { parseIpv4, stringifyIpv4 } from "./ipv4.ts";
+export { isValidIpv4, parseIpv4, stringifyIpv4 } from "./ipv4.ts";
 
 // Re-export CIDR4 utilities
 export {
@@ -279,7 +281,13 @@ export {
 } from "./cidrv4.ts";
 
 // Re-export IPv6 utilities
-export { compressIpv6, expandIpv6, parseIpv6, stringifyIpv6 } from "./ipv6.ts";
+export {
+  compressIpv6,
+  expandIpv6,
+  isValidIpv6,
+  parseIpv6,
+  stringifyIpv6,
+} from "./ipv6.ts";
 
 // Re-export CIDR6 utilities
 export {

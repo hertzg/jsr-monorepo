@@ -326,3 +326,53 @@ export function expandIpv6(ip: string): string {
 export function compressIpv6(ip: string): string {
   return stringifyIpv6(parseIpv6(ip));
 }
+
+/**
+ * Checks if a string is a valid IPv6 address.
+ *
+ * Returns true if the string can be successfully parsed as an IPv6 address,
+ * false otherwise. This function does not throw exceptions.
+ *
+ * Supports the same formats as parseIpv6:
+ * - Full form: `2001:0db8:0000:0000:0000:0000:0000:0001`
+ * - Compressed form with `::`: `2001:db8::1`
+ * - Mixed IPv4 form: `::ffff:192.168.1.1`
+ * - Zone IDs: `fe80::1%eth0`
+ *
+ * @param ip The string to validate
+ * @returns true if the string is a valid IPv6 address, false otherwise
+ *
+ * @example Valid IPv6 addresses
+ * ```ts
+ * import { assert } from "@std/assert";
+ * import { isValidIpv6 } from "@hertzg/ip/ipv6";
+ *
+ * assert(isValidIpv6("::"));
+ * assert(isValidIpv6("::1"));
+ * assert(isValidIpv6("2001:db8::1"));
+ * assert(isValidIpv6("fe80::1%eth0"));
+ * assert(isValidIpv6("::ffff:192.168.1.1"));
+ * assert(isValidIpv6("ffff:ffff:ffff:ffff:ffff:ffff:ffff:ffff"));
+ * ```
+ *
+ * @example Invalid IPv6 addresses
+ * ```ts
+ * import { assertEquals } from "@std/assert";
+ * import { isValidIpv6 } from "@hertzg/ip/ipv6";
+ *
+ * assertEquals(isValidIpv6("192.168.1.1"), false);
+ * assertEquals(isValidIpv6("2001:db8:::1"), false);
+ * assertEquals(isValidIpv6("2001:db8::1::1"), false);
+ * assertEquals(isValidIpv6("2001:gggg::1"), false);
+ * assertEquals(isValidIpv6("not an ip"), false);
+ * assertEquals(isValidIpv6(""), false);
+ * ```
+ */
+export function isValidIpv6(ip: string): boolean {
+  try {
+    parseIpv6(ip);
+    return true;
+  } catch {
+    return false;
+  }
+}
