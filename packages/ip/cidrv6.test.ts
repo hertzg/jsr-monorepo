@@ -1,9 +1,9 @@
 import { assertEquals, assertThrows } from "@std/assert";
 import {
   cidr6Addresses,
-  cidr6BroadcastAddress,
   cidr6Contains,
-  cidr6NetworkAddress,
+  cidr6FirstAddress,
+  cidr6LastAddress,
   mask6FromPrefixLength,
   parseCidr6,
   stringifyCidr6,
@@ -195,41 +195,41 @@ Deno.test("cidr6Contains", async (t) => {
   });
 });
 
-Deno.test("cidr6NetworkAddress", async (t) => {
-  await t.step("returns network address", () => {
+Deno.test("cidr6FirstAddress", async (t) => {
+  await t.step("returns first address", () => {
     const cidr = parseCidr6("2001:db8::/32");
-    assertEquals(cidr6NetworkAddress(cidr), parseIpv6("2001:db8::"));
+    assertEquals(cidr6FirstAddress(cidr), parseIpv6("2001:db8::"));
   });
 
   await t.step("various CIDRs", () => {
     assertEquals(
-      cidr6NetworkAddress(parseCidr6("fd00::/8")),
+      cidr6FirstAddress(parseCidr6("fd00::/8")),
       parseIpv6("fd00::"),
     );
     assertEquals(
-      cidr6NetworkAddress(parseCidr6("2001:db8:abcd::/48")),
+      cidr6FirstAddress(parseCidr6("2001:db8:abcd::/48")),
       parseIpv6("2001:db8:abcd::"),
     );
     assertEquals(
-      cidr6NetworkAddress(parseCidr6("2001:db8::100/64")),
+      cidr6FirstAddress(parseCidr6("2001:db8::100/64")),
       parseIpv6("2001:db8::"),
     );
   });
 });
 
-Deno.test("cidr6BroadcastAddress", async (t) => {
+Deno.test("cidr6LastAddress", async (t) => {
   await t.step("returns last address in range", () => {
     const cidr = parseCidr6("fd00::/120");
-    assertEquals(cidr6BroadcastAddress(cidr), parseIpv6("fd00::ff"));
+    assertEquals(cidr6LastAddress(cidr), parseIpv6("fd00::ff"));
   });
 
   await t.step("various CIDRs", () => {
     assertEquals(
-      cidr6BroadcastAddress(parseCidr6("2001:db8::/125")),
+      cidr6LastAddress(parseCidr6("2001:db8::/125")),
       parseIpv6("2001:db8::7"),
     );
     assertEquals(
-      cidr6BroadcastAddress(parseCidr6("2001:db8::1/128")),
+      cidr6LastAddress(parseCidr6("2001:db8::1/128")),
       parseIpv6("2001:db8::1"),
     );
   });
@@ -239,13 +239,13 @@ Deno.test("IP assignment workflow", async (t) => {
   await t.step("sequential IP assignment in CIDR range", () => {
     const cidr = parseCidr6("fd00::/125"); // 8 IPs: fd00::0 to fd00::7
 
-    const networkAddr = cidr6NetworkAddress(cidr);
-    const broadcastAddr = cidr6BroadcastAddress(cidr);
+    const firstAddr = cidr6FirstAddress(cidr);
+    const lastAddr = cidr6LastAddress(cidr);
 
-    let currentIp = networkAddr + 1n;
+    let currentIp = firstAddr + 1n;
     const assigned: string[] = [];
 
-    while (currentIp < broadcastAddr) {
+    while (currentIp < lastAddr) {
       assertEquals(cidr6Contains(cidr, currentIp), true);
       assigned.push(stringifyIpv6(currentIp));
       currentIp = currentIp + 1n;
@@ -261,11 +261,11 @@ Deno.test("IP assignment workflow", async (t) => {
     ]);
   });
 
-  await t.step("verify network and last address are in range", () => {
+  await t.step("verify first and last address are in range", () => {
     const cidr = parseCidr6("2001:db8::/64");
 
-    assertEquals(cidr6Contains(cidr, cidr6NetworkAddress(cidr)), true);
-    assertEquals(cidr6Contains(cidr, cidr6BroadcastAddress(cidr)), true);
+    assertEquals(cidr6Contains(cidr, cidr6FirstAddress(cidr)), true);
+    assertEquals(cidr6Contains(cidr, cidr6LastAddress(cidr)), true);
   });
 
   await t.step("arithmetic operations on IPs", () => {
