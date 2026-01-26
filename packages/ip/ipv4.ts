@@ -96,11 +96,11 @@ export function parseIpv4(ip: string): number {
 }
 
 /**
- * Stringifies a bigint to an IPv4 address in dotted decimal notation.
+ * Stringifies a number to an IPv4 address in dotted decimal notation.
  *
- * The bigint must represent a valid 32-bit unsigned integer (0 to 4294967295).
+ * The number must represent a valid 32-bit unsigned integer (0 to 4294967295).
  *
- * @param value The IPv4 address as a bigint
+ * @param value The IPv4 address as a 32-bit unsigned integer
  * @returns The IPv4 address string in dotted decimal notation
  * @throws {RangeError} If the value is negative or greater than 2^32-1
  *
@@ -109,10 +109,10 @@ export function parseIpv4(ip: string): number {
  * import { assertEquals } from "@std/assert";
  * import { stringifyIpv4 } from "@hertzg/ip/ipv4";
  *
- * assertEquals(stringifyIpv4(3232235777n), "192.168.1.1");
- * assertEquals(stringifyIpv4(167772161n), "10.0.0.1");
- * assertEquals(stringifyIpv4(0n), "0.0.0.0");
- * assertEquals(stringifyIpv4(4294967295n), "255.255.255.255");
+ * assertEquals(stringifyIpv4(3232235777), "192.168.1.1");
+ * assertEquals(stringifyIpv4(167772161), "10.0.0.1");
+ * assertEquals(stringifyIpv4(0), "0.0.0.0");
+ * assertEquals(stringifyIpv4(4294967295), "255.255.255.255");
  * ```
  *
  * @example Error handling
@@ -120,24 +120,21 @@ export function parseIpv4(ip: string): number {
  * import { assertThrows } from "@std/assert";
  * import { stringifyIpv4 } from "@hertzg/ip/ipv4";
  *
- * assertThrows(() => stringifyIpv4(-1n), RangeError);
- * assertThrows(() => stringifyIpv4(4294967296n), RangeError);
+ * assertThrows(() => stringifyIpv4(-1), RangeError);
+ * assertThrows(() => stringifyIpv4(4294967296), RangeError);
  * ```
  */
-export function stringifyIpv4(value: number | bigint): string {
-  // Convert to number for faster bit operations (IPv4 fits in 32 bits)
-  const num = typeof value === "bigint" ? Number(value) : value;
-
-  if (num < 0 || num > 4294967295 || !Number.isInteger(num)) {
+export function stringifyIpv4(value: number): string {
+  if (value < 0 || value > 4294967295 || !Number.isInteger(value)) {
     throw new RangeError(
       `IPv4 value out of range: ${value} (must be 0 to 4294967295)`,
     );
   }
 
-  const octet0 = (num >>> 24) & 0xFF;
-  const octet1 = (num >>> 16) & 0xFF;
-  const octet2 = (num >>> 8) & 0xFF;
-  const octet3 = num & 0xFF;
+  const octet0 = (value >>> 24) & 0xFF;
+  const octet1 = (value >>> 16) & 0xFF;
+  const octet2 = (value >>> 8) & 0xFF;
+  const octet3 = value & 0xFF;
 
   return `${octet0}.${octet1}.${octet2}.${octet3}`;
 }
