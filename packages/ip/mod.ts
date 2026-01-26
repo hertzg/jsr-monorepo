@@ -15,7 +15,7 @@
  * - {@link Cidr4}: Type representing an IPv4 CIDR block
  * - {@link parseCidr4}: Parse CIDR notation string to Cidr4
  * - {@link stringifyCidr4}: Convert Cidr4 to CIDR notation string
- * - {@link maskFromPrefixLength}: Create network mask from prefix length (0-32)
+ * - {@link mask4FromPrefixLength}: Create network mask from prefix length (0-32)
  * - {@link cidr4Contains}: Check if IP is within CIDR range
  * - {@link cidr4FirstAddress}: Get first address in CIDR range
  * - {@link cidr4LastAddress}: Get last address in CIDR range
@@ -273,7 +273,7 @@ export {
   cidr4LastAddress,
   cidr4NetworkAddress,
   cidr4Size,
-  maskFromPrefixLength,
+  mask4FromPrefixLength,
   parseCidr4,
   stringifyCidr4,
 } from "./cidrv4.ts";
