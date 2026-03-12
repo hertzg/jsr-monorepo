@@ -182,8 +182,8 @@ Deno.test("Comprehensive examples showcasing all library functionality", async (
     };
 
     const buffer = new Uint8Array(200);
-    const bytesWritten = bytesStructCoder.encode(testData, buffer);
-    const [decoded, bytesRead] = bytesStructCoder.decode(buffer);
+    bytesStructCoder.encode(testData, buffer);
+    const [decoded] = bytesStructCoder.decode(buffer);
 
     assertEquals(
       Array.from(decoded.fixedBytes),
