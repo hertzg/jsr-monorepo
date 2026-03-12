@@ -76,6 +76,14 @@ Deno.test("parseXhb", async (t) => {
     assertEquals(elements[0].attrs, {});
   });
 
+  await t.step("handles escaped quotes inside attribute values", () => {
+    const xml =
+      '<pay name="he said &quot;hello&quot;" memo="it&apos;s fine"/>';
+    const elements = parseXhb(xml);
+    assertEquals(elements[0].attrs.name, 'he said "hello"');
+    assertEquals(elements[0].attrs.memo, "it's fine");
+  });
+
   await t.step("handles single-quoted attributes", () => {
     const xml = "<pay key='1' name='Test'/>";
     const elements = parseXhb(xml);

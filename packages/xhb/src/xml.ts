@@ -96,7 +96,9 @@ function parseAttributes(s: string): Record<string, string> {
     const name = s.slice(nameStart, i).trimEnd();
     i++; // skip '='
 
-    // Read quoted value
+    // Read quoted value. In valid XML, literal quote chars inside a value
+    // are always entity-escaped (&quot; / &apos;), so scanning for the
+    // matching literal quote is safe. unescapeXml handles entities after.
     const quote = s[i];
     if (quote !== '"' && quote !== "'") break;
     i++; // skip opening quote
