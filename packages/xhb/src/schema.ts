@@ -7,6 +7,8 @@
  * @module
  */
 
+import { escapeXml } from "./xml.ts";
+
 /**
  * Field types matching HomeBank's `hb_xml_append_*` functions.
  *
@@ -49,85 +51,36 @@ export interface EntitySchema {
 }
 
 /**
- * Escape a string for use in an XML attribute value.
- *
- * Handles the five standard XML entities: `&`, `<`, `>`, `'`, `"`.
- *
- * @param str The raw string to escape.
- * @returns The XML-escaped string.
+ * Check if a code point is a control character that HomeBank's
+ * `append_escaped_text` encodes as `&#xNN;`.
  */
-function xmlEscape(str: string): string {
-  let result = "";
-  for (let i = 0; i < str.length; i++) {
-    switch (str[i]) {
-      case "&":
-        result += "&amp;";
-        break;
-      case "<":
-        result += "&lt;";
-        break;
-      case ">":
-        result += "&gt;";
-        break;
-      case "'":
-        result += "&apos;";
-        break;
-      case '"':
-        result += "&quot;";
-        break;
-      default:
-        result += str[i];
-        break;
-    }
-  }
-  return result;
+function isHomebankControlChar(c: number): boolean {
+  return (0x1 <= c && c <= 0x8) ||
+    (0xa <= c && c <= 0xd) ||
+    (0xe <= c && c <= 0x1f) ||
+    (0x7f <= c && c <= 0x84) ||
+    (0x86 <= c && c <= 0x9f);
 }
 
 /**
  * Escape a string for use in a `txt_crlf` XML attribute value.
  *
- * In addition to standard XML escaping, this encodes control characters
+ * First applies standard XML escaping, then encodes control characters
  * in the ranges used by HomeBank's `append_escaped_text` function:
- * `\n` (0xa) becomes `&#xa;`, `\r` (0xd) becomes `&#xd;`, and other
- * control characters in specific ranges are hex-encoded.
+ * `\n` (0xa) becomes `&#xa;`, `\r` (0xd) becomes `&#xd;`, etc.
  *
  * @param str The raw string to escape.
  * @returns The escaped string with CR/LF encoding.
  */
-function xmlEscapeCrlf(str: string): string {
+function escapeCrlf(str: string): string {
+  const xmlEscaped = escapeXml(str);
   let result = "";
-  for (let i = 0; i < str.length; i++) {
-    switch (str[i]) {
-      case "&":
-        result += "&amp;";
-        break;
-      case "<":
-        result += "&lt;";
-        break;
-      case ">":
-        result += "&gt;";
-        break;
-      case "'":
-        result += "&apos;";
-        break;
-      case '"':
-        result += "&quot;";
-        break;
-      default: {
-        const c = str.charCodeAt(i);
-        if (
-          (0x1 <= c && c <= 0x8) ||
-          (0xa <= c && c <= 0xd) ||
-          (0xe <= c && c <= 0x1f) ||
-          (0x7f <= c && c <= 0x84) ||
-          (0x86 <= c && c <= 0x9f)
-        ) {
-          result += `&#x${c.toString(16)};`;
-        } else {
-          result += str[i];
-        }
-        break;
-      }
+  for (let i = 0; i < xmlEscaped.length; i++) {
+    const c = xmlEscaped.charCodeAt(i);
+    if (isHomebankControlChar(c)) {
+      result += `&#x${c.toString(16)};`;
+    } else {
+      result += xmlEscaped[i];
     }
   }
   return result;
@@ -218,9 +171,9 @@ export function serializeField(
     case "int0":
       return value === 0 ? "" : String(value);
     case "txt":
-      return xmlEscape(String(value));
+      return escapeXml(String(value));
     case "txt_crlf":
-      return xmlEscapeCrlf(String(value));
+      return escapeCrlf(String(value));
     case "amt": {
       // Match C's g_ascii_formatd with %.10g precision
       const num = Number(value);

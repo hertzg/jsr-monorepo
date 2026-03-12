@@ -19,42 +19,43 @@ export interface XmlElement {
   attrs: Record<string, string>;
 }
 
+const XML_ENTITY_MAP: Record<string, string> = {
+  amp: "&",
+  lt: "<",
+  gt: ">",
+  quot: '"',
+  apos: "'",
+};
+
+const XML_ESCAPE_MAP = new Map<string, string>([
+  ["&", "&amp;"],
+  ["<", "&lt;"],
+  [">", "&gt;"],
+  ['"', "&quot;"],
+  ["'", "&apos;"],
+]);
+
 /**
  * Unescape standard XML entities in an attribute value string.
  *
- * Handles the five predefined XML entities:
- * - `&amp;` to `&`
- * - `&lt;` to `<`
- * - `&gt;` to `>`
- * - `&quot;` to `"`
- * - `&apos;` to `'`
- *
- * Also handles numeric character references (`&#xNN;` and `&#NN;`).
+ * Handles the five predefined XML entities and numeric character references
+ * (`&#xNN;` and `&#NN;`).
  *
  * @param value The escaped attribute value string.
  * @returns The unescaped string.
  */
 function unescapeXml(value: string): string {
-  return value.replace(/&(amp|lt|gt|quot|apos|#x[0-9a-fA-F]+|#[0-9]+);/g,
-    (_match, entity: string) => {
-      switch (entity) {
-        case "amp":
-          return "&";
-        case "lt":
-          return "<";
-        case "gt":
-          return ">";
-        case "quot":
-          return '"';
-        case "apos":
-          return "'";
-        default:
-          if (entity.startsWith("#x")) {
-            return String.fromCharCode(parseInt(entity.slice(2), 16));
-          }
-          return String.fromCharCode(parseInt(entity.slice(1), 10));
-      }
-    });
+  if (!value.includes("&")) return value;
+  return value.replace(
+    /&(amp|lt|gt|quot|apos|#x[0-9a-fA-F]+|#[0-9]+);/g,
+    (_, entity: string) => {
+      if (entity in XML_ENTITY_MAP) return XML_ENTITY_MAP[entity];
+      const code = entity.startsWith("#x")
+        ? parseInt(entity.slice(2), 16)
+        : parseInt(entity.slice(1), 10);
+      return String.fromCharCode(code);
+    },
+  );
 }
 
 /**
@@ -65,49 +66,48 @@ function unescapeXml(value: string): string {
  * @param value The raw string.
  * @returns The XML-escaped string.
  */
-function escapeXml(value: string): string {
-  let result = "";
-  for (let i = 0; i < value.length; i++) {
-    switch (value[i]) {
-      case "&":
-        result += "&amp;";
-        break;
-      case "<":
-        result += "&lt;";
-        break;
-      case ">":
-        result += "&gt;";
-        break;
-      case '"':
-        result += "&quot;";
-        break;
-      case "'":
-        result += "&apos;";
-        break;
-      default:
-        result += value[i];
-        break;
-    }
-  }
-  return result;
+export function escapeXml(value: string): string {
+  return value.replace(/[&<>"']/g, (ch) => XML_ESCAPE_MAP.get(ch)!);
 }
 
 /**
- * Parse attributes from a tag string (the content between `<tag` and `>` or `/>`).
+ * Parse attributes from a tag's attribute string.
  *
- * @param attrString The raw attribute string.
+ * Scans character-by-character to extract `name="value"` and `name='value'`
+ * pairs. Values are unescaped after extraction.
+ *
+ * @param s The raw attribute string (content between tag name and `>` or `/>`).
  * @returns A map of attribute names to unescaped values.
  */
-function parseAttributes(attrString: string): Record<string, string> {
+function parseAttributes(s: string): Record<string, string> {
   const attrs: Record<string, string> = {};
-  // Match attribute="value" pairs, handling both single and double quotes
-  const attrRegex = /(\w[\w\-.]*)=(?:"([^"]*)"|'([^']*)')/g;
-  let match: RegExpExecArray | null;
-  while ((match = attrRegex.exec(attrString)) !== null) {
-    const name = match[1];
-    const value = match[2] !== undefined ? match[2] : match[3];
+  let i = 0;
+  const len = s.length;
+
+  while (i < len) {
+    // Skip whitespace
+    while (i < len && s.charCodeAt(i) <= 0x20) i++;
+    if (i >= len) break;
+
+    // Read attribute name up to '='
+    const nameStart = i;
+    while (i < len && s[i] !== "=") i++;
+    if (i >= len) break;
+    const name = s.slice(nameStart, i).trimEnd();
+    i++; // skip '='
+
+    // Read quoted value
+    const quote = s[i];
+    if (quote !== '"' && quote !== "'") break;
+    i++; // skip opening quote
+    const valStart = i;
+    while (i < len && s[i] !== quote) i++;
+    const value = s.slice(valStart, i);
+    i++; // skip closing quote
+
     attrs[name] = unescapeXml(value);
   }
+
   return attrs;
 }
 
@@ -117,7 +117,7 @@ function parseAttributes(attrString: string): Record<string, string> {
  * Handles the specific structure of HomeBank XHB files:
  * - Skips the XML declaration (`<?xml ...?>`)
  * - Parses the `<homebank ...>` root as an element with tag `"homebank"`
- * - Parses all self-closing child elements (`<tag .../>`  )
+ * - Parses all self-closing child elements (`<tag .../>`)
  * - Skips the closing `</homebank>` tag
  * - Unescapes standard XML entities in attribute values
  *
@@ -128,10 +128,10 @@ function parseAttributes(attrString: string): Record<string, string> {
  * @example Parse a minimal XHB file
  * ```ts ignore
  * import { assertEquals } from "@std/assert";
- * import { parseXml } from "@hertzg/xhb";
+ * import { parseXhb } from "@hertzg/xhb";
  *
  * const xml = '<?xml version="1.0"?>\n<homebank v="1.6">\n<pay key="1" name="Test"/>\n</homebank>\n';
- * const elements = parseXml(xml);
+ * const elements = parseXhb(xml);
  *
  * assertEquals(elements.length, 2);
  * assertEquals(elements[0].tag, "homebank");
@@ -140,42 +140,40 @@ function parseAttributes(attrString: string): Record<string, string> {
  * assertEquals(elements[1].attrs.key, "1");
  * ```
  */
-export function parseXml(xml: string): XmlElement[] {
+export function parseXhb(xml: string): XmlElement[] {
   const elements: XmlElement[] = [];
+  const lines = xml.split("\n");
 
-  // Match XML tags: processing instructions, opening, self-closing, and closing
-  const tagRegex = /<([?/]?)(\w[\w-]*)([^>]*?)([?/]?)>/g;
-  let match: RegExpExecArray | null;
-
-  while ((match = tagRegex.exec(xml)) !== null) {
-    const prefix = match[1]; // "?" for PI, "/" for closing, "" for opening
-    const tagName = match[2];
-    const attrString = match[3];
-    const suffix = match[4]; // "?" for PI end, "/" for self-closing
-
-    // Skip XML processing instructions (<?xml ...?>)
-    if (prefix === "?") {
+  for (const line of lines) {
+    const trimmed = line.trim();
+    if (!trimmed || trimmed.startsWith("<?") || trimmed.startsWith("</")) {
       continue;
     }
 
-    // Skip closing tags (</homebank>)
-    if (prefix === "/") {
-      continue;
-    }
+    // Extract tag name: starts after '<', ends at first whitespace or '>' or '/'
+    const tagStart = trimmed.indexOf("<");
+    if (tagStart === -1) continue;
 
+    let i = tagStart + 1;
+    while (i < trimmed.length && trimmed[i] !== " " && trimmed[i] !== "/" && trimmed[i] !== ">") {
+      i++;
+    }
+    const tag = trimmed.slice(tagStart + 1, i);
+    if (!tag) continue;
+
+    // Everything between end of tag name and closing '>' or '/>' is attributes
+    const closingSlash = trimmed.endsWith("/>") ? trimmed.length - 2 : trimmed.length - 1;
+    const attrString = trimmed.slice(i, closingSlash);
     const attrs = parseAttributes(attrString);
 
-    // Self-closing tag (<tag .../>) or opening tag (<homebank ...>)
-    if (suffix === "/" || tagName === "homebank") {
-      elements.push({ tag: tagName, attrs });
-    }
+    elements.push({ tag, attrs });
   }
 
   return elements;
 }
 
 /**
- * Serialize a list of XML elements back to an XHB XML string.
+ * Serialize a list of XHB XML elements to a HomeBank XHB string.
  *
  * Produces output matching HomeBank's serialization format:
  * - XML declaration: `<?xml version="1.0"?>`
@@ -192,20 +190,19 @@ export function parseXml(xml: string): XmlElement[] {
  * @example Serialize elements to XHB XML
  * ```ts ignore
  * import { assertEquals } from "@std/assert";
- * import { serializeXml } from "@hertzg/xhb";
+ * import { serializeXhb } from "@hertzg/xhb";
  *
  * const elements = [
  *   { tag: "homebank", attrs: { v: "1.6" } },
  *   { tag: "pay", attrs: { key: "1", name: "Test" } },
  * ];
  *
- * const xml = serializeXml(elements);
+ * const xml = serializeXhb(elements);
  * assertEquals(xml, '<?xml version="1.0"?>\n<homebank v="1.6">\n<pay key="1" name="Test"/>\n</homebank>\n');
  * ```
  */
-export function serializeXml(elements: XmlElement[]): string {
-  const lines: string[] = [];
-  lines.push('<?xml version="1.0"?>');
+export function serializeXhb(elements: XmlElement[]): string {
+  const lines: string[] = ['<?xml version="1.0"?>'];
 
   for (let i = 0; i < elements.length; i++) {
     const el = elements[i];
@@ -216,10 +213,8 @@ export function serializeXml(elements: XmlElement[]): string {
     const attrStr = attrParts.length > 0 ? " " + attrParts.join(" ") : "";
 
     if (i === 0) {
-      // First element is the root — emit as opening tag
       lines.push(`<${el.tag}${attrStr}>`);
     } else {
-      // Subsequent elements are self-closing
       lines.push(`<${el.tag}${attrStr}/>`);
     }
   }

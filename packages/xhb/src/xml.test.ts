@@ -1,12 +1,12 @@
 import { assertEquals } from "@std/assert";
-import { parseXml, serializeXml, type XmlElement } from "./xml.ts";
+import { parseXhb, serializeXhb, type XmlElement } from "./xml.ts";
 
-// --- parseXml ---
+// --- parseXhb ---
 
-Deno.test("parseXml", async (t) => {
+Deno.test("parseXhb", async (t) => {
   await t.step("parses self-closing tags", () => {
     const xml = '<pay key="1" name="Test"/>';
-    const elements = parseXml(xml);
+    const elements = parseXhb(xml);
     assertEquals(elements.length, 1);
     assertEquals(elements[0].tag, "pay");
     assertEquals(elements[0].attrs, { key: "1", name: "Test" });
@@ -14,7 +14,7 @@ Deno.test("parseXml", async (t) => {
 
   await t.step("parses homebank root tag as element", () => {
     const xml = '<homebank v="1.6" d="050201">';
-    const elements = parseXml(xml);
+    const elements = parseXhb(xml);
     assertEquals(elements.length, 1);
     assertEquals(elements[0].tag, "homebank");
     assertEquals(elements[0].attrs, { v: "1.6", d: "050201" });
@@ -22,7 +22,7 @@ Deno.test("parseXml", async (t) => {
 
   await t.step("skips XML declaration", () => {
     const xml = '<?xml version="1.0"?>\n<homebank v="1.6">';
-    const elements = parseXml(xml);
+    const elements = parseXhb(xml);
     assertEquals(elements.length, 1);
     assertEquals(elements[0].tag, "homebank");
   });
@@ -30,7 +30,7 @@ Deno.test("parseXml", async (t) => {
   await t.step("skips closing homebank tag", () => {
     const xml =
       '<?xml version="1.0"?>\n<homebank v="1.6">\n<pay key="1"/>\n</homebank>';
-    const elements = parseXml(xml);
+    const elements = parseXhb(xml);
     assertEquals(elements.length, 2);
     assertEquals(elements[0].tag, "homebank");
     assertEquals(elements[1].tag, "pay");
@@ -45,7 +45,7 @@ Deno.test("parseXml", async (t) => {
       '<pay key="2" name="Rent"/>',
       "</homebank>",
     ].join("\n");
-    const elements = parseXml(xml);
+    const elements = parseXhb(xml);
     assertEquals(elements.length, 4);
     assertEquals(elements[0].tag, "homebank");
     assertEquals(elements[1].tag, "account");
@@ -58,19 +58,19 @@ Deno.test("parseXml", async (t) => {
 
   await t.step("unescapes standard XML entities in attribute values", () => {
     const xml = '<pay name="A &amp; B &lt;C&gt; &quot;D&quot; &apos;E&apos;"/>';
-    const elements = parseXml(xml);
+    const elements = parseXhb(xml);
     assertEquals(elements[0].attrs.name, "A & B <C> \"D\" 'E'");
   });
 
   await t.step("handles numeric character references", () => {
     const xml = '<pay name="line1&#xa;line2"/>';
-    const elements = parseXml(xml);
+    const elements = parseXhb(xml);
     assertEquals(elements[0].attrs.name, "line1\nline2");
   });
 
   await t.step("handles tag with no attributes", () => {
     const xml = "<properties/>";
-    const elements = parseXml(xml);
+    const elements = parseXhb(xml);
     assertEquals(elements.length, 1);
     assertEquals(elements[0].tag, "properties");
     assertEquals(elements[0].attrs, {});
@@ -78,20 +78,20 @@ Deno.test("parseXml", async (t) => {
 
   await t.step("handles single-quoted attributes", () => {
     const xml = "<pay key='1' name='Test'/>";
-    const elements = parseXml(xml);
+    const elements = parseXhb(xml);
     assertEquals(elements[0].attrs, { key: "1", name: "Test" });
   });
 });
 
-// --- serializeXml ---
+// --- serializeXhb ---
 
-Deno.test("serializeXml", async (t) => {
+Deno.test("serializeXhb", async (t) => {
   await t.step("produces correct XHB format", () => {
     const elements: XmlElement[] = [
       { tag: "homebank", attrs: { v: "1.6" } },
       { tag: "pay", attrs: { key: "1", name: "Test" } },
     ];
-    const xml = serializeXml(elements);
+    const xml = serializeXhb(elements);
     assertEquals(
       xml,
       '<?xml version="1.0"?>\n<homebank v="1.6">\n<pay key="1" name="Test"/>\n</homebank>\n',
@@ -102,7 +102,7 @@ Deno.test("serializeXml", async (t) => {
     const elements: XmlElement[] = [
       { tag: "homebank", attrs: { v: "1.6" } },
     ];
-    const xml = serializeXml(elements);
+    const xml = serializeXhb(elements);
     assertEquals(
       xml,
       '<?xml version="1.0"?>\n<homebank v="1.6">\n</homebank>\n',
@@ -110,7 +110,7 @@ Deno.test("serializeXml", async (t) => {
   });
 
   await t.step("handles empty elements array", () => {
-    const xml = serializeXml([]);
+    const xml = serializeXhb([]);
     assertEquals(xml, '<?xml version="1.0"?>\n');
   });
 
@@ -119,7 +119,7 @@ Deno.test("serializeXml", async (t) => {
       { tag: "homebank", attrs: {} },
       { tag: "pay", attrs: { name: 'A & B "C"' } },
     ];
-    const xml = serializeXml(elements);
+    const xml = serializeXhb(elements);
     assertEquals(
       xml,
       '<?xml version="1.0"?>\n<homebank>\n<pay name="A &amp; B &quot;C&quot;"/>\n</homebank>\n',
@@ -133,7 +133,7 @@ Deno.test("serializeXml", async (t) => {
       { tag: "pay", attrs: { key: "1" } },
       { tag: "cat", attrs: { key: "1" } },
     ];
-    const xml = serializeXml(elements);
+    const xml = serializeXhb(elements);
     const lines = xml.split("\n");
     assertEquals(lines[0], '<?xml version="1.0"?>');
     assertEquals(lines[1], '<homebank v="1.6">');
@@ -147,12 +147,12 @@ Deno.test("serializeXml", async (t) => {
 
 // --- round-trip parse -> serialize ---
 
-Deno.test("parseXml/serializeXml round-trip", async (t) => {
+Deno.test("parseXhb/serializeXhb round-trip", async (t) => {
   await t.step("round-trip preserves structure", () => {
     const original =
       '<?xml version="1.0"?>\n<homebank v="1.6">\n<pay key="1" name="Test"/>\n</homebank>\n';
-    const elements = parseXml(original);
-    const serialized = serializeXml(elements);
+    const elements = parseXhb(original);
+    const serialized = serializeXhb(elements);
     assertEquals(serialized, original);
   });
 
@@ -166,17 +166,17 @@ Deno.test("parseXml/serializeXml round-trip", async (t) => {
       "</homebank>",
       "",
     ].join("\n");
-    const elements = parseXml(original);
-    const serialized = serializeXml(elements);
+    const elements = parseXhb(original);
+    const serialized = serializeXhb(elements);
     assertEquals(serialized, original);
   });
 
   await t.step("round-trip with escaped characters", () => {
     const original =
       '<?xml version="1.0"?>\n<homebank v="1.6">\n<pay key="1" name="A &amp; B"/>\n</homebank>\n';
-    const elements = parseXml(original);
+    const elements = parseXhb(original);
     assertEquals(elements[1].attrs.name, "A & B");
-    const serialized = serializeXml(elements);
+    const serialized = serializeXhb(elements);
     assertEquals(serialized, original);
   });
 });
