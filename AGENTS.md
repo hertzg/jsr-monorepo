@@ -78,6 +78,7 @@ All packages are located in the `packages/` directory:
 - `packages/bx` - Binary hex string utilities
 - `packages/ip` - IPv4/CIDR utilities
 - `packages/crc` - CRC checksum utilities
+- `packages/xhb` - HomeBank XHB file parse/serialize
 
 ## Core Architecture
 
@@ -346,6 +347,7 @@ both tiresome and error-prone.
 - `@hertzg/crc`
 - `@hertzg/routeros-api`
 - `@hertzg/tplink-api`
+- `@hertzg/xhb`
 
 ## Adding New Workspaces
 

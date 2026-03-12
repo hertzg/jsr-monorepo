@@ -40,3 +40,6 @@
 "@hertzg/crc":
   - changed-files:
       - any-glob-to-any-file: packages/crc/**
+"@hertzg/xhb":
+  - changed-files:
+      - any-glob-to-any-file: packages/xhb/**

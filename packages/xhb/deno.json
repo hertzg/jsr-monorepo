@@ -1,0 +1,16 @@
+{
+  "name": "@hertzg/xhb",
+  "version": "3.0.0",
+  "exports": {
+    ".": "./src/mod.ts"
+  },
+  "publish": {
+    "include": ["LICENSE", "src/**/*.ts"],
+    "exclude": ["src/**/*.test.ts"]
+  },
+  "tasks": {
+    "vendor": "deno run -A codegen/vendor.ts",
+    "codegen": "deno run -A codegen/mod.ts",
+    "codegen:check": "deno run -A codegen/mod.ts --check"
+  }
+}
