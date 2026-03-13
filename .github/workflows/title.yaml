@@ -47,3 +47,4 @@ jobs:
             @hertzg/wg-conf
             @hertzg/wg-ini
             @hertzg/wg-keys
+            @hertzg/xhb

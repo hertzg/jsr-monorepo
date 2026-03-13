@@ -57,6 +57,7 @@
     "./packages/routeros-api",
     "./packages/tplink-api",
     "./packages/ip",
-    "./packages/crc"
+    "./packages/crc",
+    "./packages/xhb"
   ]
 }
