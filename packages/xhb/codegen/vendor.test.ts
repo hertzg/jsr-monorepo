@@ -1,5 +1,9 @@
 import { assertEquals, assertThrows } from "@std/assert";
-import { buildManifest, parseVersion } from "./vendor.ts";
+import {
+  buildManifest,
+  parseHomebankReleaseBranches,
+  parseVersion,
+} from "./vendor.ts";
 
 Deno.test("parseVersion extracts HB_VERSION from homebank.h content", () => {
   const content = [
@@ -26,30 +30,63 @@ Deno.test("parseVersion handles different version formats", () => {
 });
 
 Deno.test("buildManifest produces correct manifest structure", () => {
-  const headers = ["homebank.h", "hb-types.h", "enums.h"];
   const includeTree = {
     "homebank.h": ["hb-types.h", "enums.h"],
     "hb-types.h": [],
     "enums.h": [],
   };
 
-  const manifest = buildManifest(
-    "5.10",
-    "abc1234",
-    "2026-03-12",
-    headers,
-    includeTree,
-  );
+  const manifest = buildManifest("5.10", includeTree);
 
   assertEquals(manifest.version, "5.10");
-  assertEquals(manifest.commit, "abc1234");
-  assertEquals(manifest.date, "2026-03-12");
   assertEquals(manifest.xmlSource, "hb-xml.c");
-  assertEquals(manifest.headers, headers);
   assertEquals(manifest.includeTree, includeTree);
 });
 
 Deno.test("buildManifest always sets xmlSource to hb-xml.c", () => {
-  const manifest = buildManifest("1.0", "def5678", "2025-01-01", [], {});
+  const manifest = buildManifest("1.0", {});
   assertEquals(manifest.xmlSource, "hb-xml.c");
+});
+
+Deno.test("parseHomebankReleaseBranches sorts by version descending", () => {
+  // deno-fmt-ignore
+  const output = [
+    ["aaa1111", "refs/heads/5.6.x" ],
+    ["bbb2222", "refs/heads/5.10.x"],
+    ["ccc3333", "refs/heads/5.9.x" ],
+    ["ddd4444", "refs/heads/5.8.x" ],
+  ].map((r) => r.join("\t")).join("\n");
+  assertEquals(parseHomebankReleaseBranches(output), [
+    "5.10.x",
+    "5.9.x",
+    "5.8.x",
+    "5.6.x",
+  ]);
+});
+
+Deno.test("parseHomebankReleaseBranches ignores non-release branches", () => {
+  // deno-fmt-ignore
+  const output = [
+    ["aaa1111", "refs/heads/master"    ],
+    ["bbb2222", "refs/heads/5.10.x"    ],
+    ["ccc3333", "refs/heads/feature/foo"],
+    ["ddd4444", "refs/heads/5.9.x"     ],
+  ].map((r) => r.join("\t")).join("\n");
+  assertEquals(parseHomebankReleaseBranches(output), ["5.10.x", "5.9.x"]);
+});
+
+Deno.test("parseHomebankReleaseBranches returns empty for no release branches", () => {
+  // deno-fmt-ignore
+  const output = [
+    ["aaa1111", "refs/heads/master"],
+  ].map((r) => r.join("\t")).join("\n");
+  assertEquals(parseHomebankReleaseBranches(output), []);
+});
+
+Deno.test("parseHomebankReleaseBranches handles single branch", () => {
+  // deno-fmt-ignore
+  const output = [
+    ["aaa1111", "refs/heads/4.0.x"],
+  ].map((r) => r.join("\t")).join("\n");
+  assertEquals(parseHomebankReleaseBranches(output), ["4.0.x"]);
 });

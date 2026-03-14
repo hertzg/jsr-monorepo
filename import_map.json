@@ -33,6 +33,8 @@
     "fflate": "npm:fflate@^0.8.2",
     "@noble/ciphers/aes.js": "jsr:@noble/ciphers@^2.1.1/aes.js",
     "@noble/hashes/legacy.js": "jsr:@noble/hashes@^2.0.1/legacy.js",
-    "@hertzg/xhb": "jsr:@hertzg/xhb@^3.0.0"
+    "@hertzg/xhb": "jsr:@hertzg/xhb@^3.0.0",
+    "web-tree-sitter": "npm:web-tree-sitter@0.24.7",
+    "@std/semver": "jsr:@std/semver@^1.0.4"
   }
 }
