@@ -33,23 +33,15 @@ Deno.test("buildManifest produces correct manifest structure", () => {
     "enums.h": [],
   };
 
-  const manifest = buildManifest(
-    "5.10",
-    "abc1234",
-    "2026-03-12",
-    headers,
-    includeTree,
-  );
+  const manifest = buildManifest("5.10", headers, includeTree);
 
   assertEquals(manifest.version, "5.10");
-  assertEquals(manifest.commit, "abc1234");
-  assertEquals(manifest.date, "2026-03-12");
   assertEquals(manifest.xmlSource, "hb-xml.c");
   assertEquals(manifest.headers, headers);
   assertEquals(manifest.includeTree, includeTree);
 });
 
 Deno.test("buildManifest always sets xmlSource to hb-xml.c", () => {
-  const manifest = buildManifest("1.0", "def5678", "2025-01-01", [], {});
+  const manifest = buildManifest("1.0", [], {});
   assertEquals(manifest.xmlSource, "hb-xml.c");
 });

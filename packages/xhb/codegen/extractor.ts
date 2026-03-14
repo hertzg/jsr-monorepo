@@ -67,11 +67,6 @@ export interface RawFunction {
 
 /** The complete extraction manifest. */
 export interface ExtractionManifest {
-  source: {
-    version: string;
-    commit: string;
-    date: string;
-  };
   headers: Record<string, RawHeaderFile>;
   functions: Record<string, RawFunction>;
 }
@@ -353,11 +348,6 @@ export async function extract(vendorDir: string): Promise<ExtractionManifest> {
   }
 
   return {
-    source: {
-      version: manifest.version,
-      commit: manifest.commit,
-      date: manifest.date,
-    },
     headers,
     functions,
   };
@@ -369,22 +359,9 @@ if (import.meta.main) {
   const vendorDir = new URL("./vendor/homebank", import.meta.url).pathname;
   const outputPath = new URL("./extracted.json", import.meta.url).pathname;
 
-  const checkMode = Deno.args.includes("--check");
-
   const manifest = await extract(vendorDir);
   const json = JSON.stringify(manifest, null, 2) + "\n";
 
-  if (checkMode) {
-    const existing = await Deno.readTextFile(outputPath);
-    if (existing !== json) {
-      console.error(
-        "extracted.json is out of date. Run: deno run -A codegen/extractor.ts",
-      );
-      Deno.exit(1);
-    }
-    console.log("extracted.json is up to date.");
-  } else {
-    await Deno.writeTextFile(outputPath, json);
-    console.log(`Wrote ${outputPath}`);
-  }
+  await Deno.writeTextFile(outputPath, json);
+  console.log(`Wrote ${outputPath}`);
 }

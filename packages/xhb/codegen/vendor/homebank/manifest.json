@@ -1,7 +1,5 @@
 {
-  "version": "5.10",
-  "commit": "6b2e02f",
-  "date": "2026-03-12",
+  "version": "5.9.7",
   "xmlSource": "hb-xml.c",
   "headers": [
     "enums.h",

@@ -1,9 +1,4 @@
 {
-  "source": {
-    "version": "5.10",
-    "commit": "6b2e02f",
-    "date": "2026-03-12"
-  },
   "headers": {
     "enums.h": {
       "defines": [

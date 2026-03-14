@@ -11,8 +11,8 @@ let manifest: ExtractionManifest;
 
 Deno.test("extract produces a valid manifest", async () => {
   manifest = await extract(VENDOR_DIR);
-  assertEquals(manifest.source.version, "5.10");
-  assertEquals(manifest.source.commit, "6b2e02f");
+  assertEquals(Object.keys(manifest.headers).length > 0, true);
+  assertEquals(Object.keys(manifest.functions).length > 0, true);
 });
 
 Deno.test("headers are keyed by filename", () => {
