@@ -1,5 +1,5 @@
 import { assertEquals, assertThrows } from "@std/assert";
-import { buildManifest, parseVersion } from "./vendor.ts";
+import { buildManifest, parseLatestBranch, parseVersion } from "./vendor.ts";
 
 Deno.test("parseVersion extracts HB_VERSION from homebank.h content", () => {
   const content = [
@@ -44,4 +44,39 @@ Deno.test("buildManifest produces correct manifest structure", () => {
 Deno.test("buildManifest always sets xmlSource to hb-xml.c", () => {
   const manifest = buildManifest("1.0", [], {});
   assertEquals(manifest.xmlSource, "hb-xml.c");
+});
+
+Deno.test("parseLatestBranch picks the highest version", () => {
+  const output = [
+    "aaa1111\trefs/heads/5.6.x",
+    "bbb2222\trefs/heads/5.10.x",
+    "ccc3333\trefs/heads/5.9.x",
+    "ddd4444\trefs/heads/5.8.x",
+  ].join("\n");
+  assertEquals(parseLatestBranch(output), "5.10.x");
+});
+
+Deno.test("parseLatestBranch ignores non-release branches", () => {
+  const output = [
+    "aaa1111\trefs/heads/master",
+    "bbb2222\trefs/heads/5.10.x",
+    "ccc3333\trefs/heads/feature/foo",
+    "ddd4444\trefs/heads/5.9.x",
+  ].join("\n");
+  assertEquals(parseLatestBranch(output), "5.10.x");
+});
+
+Deno.test("parseLatestBranch throws when no release branches exist", () => {
+  assertThrows(
+    () => parseLatestBranch("aaa1111\trefs/heads/master"),
+    Error,
+    "No release branches found",
+  );
+});
+
+Deno.test("parseLatestBranch handles single branch", () => {
+  assertEquals(
+    parseLatestBranch("aaa1111\trefs/heads/4.0.x"),
+    "4.0.x",
+  );
 });

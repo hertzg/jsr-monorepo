@@ -122,17 +122,28 @@ async function run(
 }
 
 /**
- * Finds the latest release branch from the remote repository.
+ * Parses `git ls-remote --heads` output and returns the latest release
+ * branch matching the `N.N.x` pattern, sorted by version number.
  *
- * Lists remote heads matching `*.x` (e.g. `5.10.x`, `5.9.x`) and
- * returns the one with the highest version number.
+ * @param lsRemoteOutput Raw output from `git ls-remote --heads`.
+ * @returns The branch name with the highest version (e.g. "5.10.x").
  *
- * @returns The branch name (e.g. "5.10.x").
+ * @example Pick the latest branch from ls-remote output
+ * ```ts
+ * import { assertEquals } from "@std/assert";
+ * import { parseLatestBranch } from "./vendor.ts";
+ *
+ * const output = [
+ *   "abc1234\trefs/heads/5.8.x",
+ *   "def5678\trefs/heads/5.10.x",
+ *   "fed9876\trefs/heads/5.9.x",
+ * ].join("\n");
+ * assertEquals(parseLatestBranch(output), "5.10.x");
+ * ```
  */
-export async function findLatestBranch(): Promise<string> {
-  const output = await run("git", ["ls-remote", "--heads", REPO_URL]);
+export function parseLatestBranch(lsRemoteOutput: string): string {
   const branches: string[] = [];
-  for (const line of output.split("\n")) {
+  for (const line of lsRemoteOutput.split("\n")) {
     const ref = line.split("\t")[1];
     if (!ref) continue;
     const name = ref.replace("refs/heads/", "");
@@ -153,6 +164,19 @@ export async function findLatestBranch(): Promise<string> {
     return 0;
   });
   return branches[branches.length - 1];
+}
+
+/**
+ * Finds the latest release branch from the remote repository.
+ *
+ * Lists remote heads matching `*.x` (e.g. `5.10.x`, `5.9.x`) and
+ * returns the one with the highest version number.
+ *
+ * @returns The branch name (e.g. "5.10.x").
+ */
+export async function findLatestBranch(): Promise<string> {
+  const output = await run("git", ["ls-remote", "--heads", REPO_URL]);
+  return parseLatestBranch(output);
 }
 
 async function cloneLatest(): Promise<
