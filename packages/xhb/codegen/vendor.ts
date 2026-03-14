@@ -37,14 +37,14 @@ export interface VendorManifest {
 
 /** Git metadata written to `source.json` when cloning. */
 export interface SourceInfo {
-  /** The repository URL that was cloned. */
-  repository: string;
-  /** The branch that was cloned. */
-  branch: string;
-  /** Short commit hash at time of clone. */
-  commit: string;
+  /** Git remote URL of the HomeBank repository. */
+  repositoryUrl: string;
+  /** Release branch that was cloned (e.g. "5.10.x"). */
+  releaseBranch: string;
+  /** Short commit hash at the tip of the branch. */
+  commitHash: string;
   /** ISO 8601 timestamp when vendoring was performed. */
-  date: string;
+  vendoredAt: string;
 }
 
 const VERSION_PATTERN = /#define\s+HB_VERSION\s+"([^"]+)"/;
@@ -264,10 +264,10 @@ async function main(): Promise<void> {
   await vendorHomebankSources(srcDir, vendorDir);
 
   const sourceInfo: SourceInfo = {
-    repository: REPO_URL,
-    branch,
-    commit,
-    date: new Date().toISOString(),
+    repositoryUrl: REPO_URL,
+    releaseBranch: branch,
+    commitHash: commit,
+    vendoredAt: new Date().toISOString(),
   };
   await Deno.writeTextFile(
     join(vendorDir, "source.json"),
