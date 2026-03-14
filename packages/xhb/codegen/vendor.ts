@@ -18,6 +18,11 @@ import { resolveIncludes } from "./include-resolver.ts";
 import { dirname, fromFileUrl, join } from "@std/path";
 
 const REPO_URL = "https://git.launchpad.net/homebank";
+const XML_SOURCE = "hb-xml.c";
+const DEFAULT_CLONE_DIR = join(
+  Deno.env.get("TMPDIR") ?? "/tmp",
+  "homebank-vendor",
+);
 
 /** Manifest describing the vendored HomeBank source snapshot. */
 export interface VendorManifest {
@@ -37,7 +42,7 @@ export interface SourceInfo {
   branch: string;
   /** Short commit hash at time of clone. */
   commit: string;
-  /** ISO date string when vendoring was performed. */
+  /** ISO 8601 timestamp when vendoring was performed. */
   date: string;
 }
 
@@ -89,11 +94,7 @@ export function buildManifest(
   version: string,
   includeTree: Record<string, string[]>,
 ): VendorManifest {
-  return {
-    version,
-    xmlSource: "hb-xml.c",
-    includeTree,
-  };
+  return { version, xmlSource: XML_SOURCE, includeTree };
 }
 
 async function run(
@@ -113,6 +114,16 @@ async function run(
     throw new Error(`${cmd} ${args.join(" ")} failed: ${stderr}`);
   }
   return new TextDecoder().decode(output.stdout).trim();
+}
+
+function compareVersions(a: string, b: string): number {
+  const pa = a.replace(".x", "").split(".").map(Number);
+  const pb = b.replace(".x", "").split(".").map(Number);
+  for (let i = 0; i < Math.max(pa.length, pb.length); i++) {
+    const diff = (pa[i] ?? 0) - (pb[i] ?? 0);
+    if (diff !== 0) return diff;
+  }
+  return 0;
 }
 
 /**
@@ -139,25 +150,11 @@ async function run(
 export function parseHomebankReleaseBranches(
   lsRemoteOutput: string,
 ): string[] {
-  const branches: string[] = [];
-  for (const line of lsRemoteOutput.split("\n")) {
-    const ref = line.split("\t")[1];
-    if (!ref) continue;
-    const name = ref.replace("refs/heads/", "");
-    if (/^\d+\.\d+\.x$/.test(name)) {
-      branches.push(name);
-    }
-  }
-  branches.sort((a, b) => {
-    const pa = a.replace(".x", "").split(".").map(Number);
-    const pb = b.replace(".x", "").split(".").map(Number);
-    for (let i = 0; i < Math.max(pa.length, pb.length); i++) {
-      const diff = (pa[i] ?? 0) - (pb[i] ?? 0);
-      if (diff !== 0) return diff;
-    }
-    return 0;
-  });
-  return branches;
+  return lsRemoteOutput
+    .split("\n")
+    .map((line) => line.split("\t")[1]?.replace("refs/heads/", ""))
+    .filter((name): name is string => !!name && /^\d+\.\d+\.x$/.test(name))
+    .sort(compareVersions);
 }
 
 /**
@@ -177,30 +174,30 @@ export async function findLatestBranch(): Promise<string> {
   return branches[branches.length - 1];
 }
 
-const CLONE_DIR = join(Deno.env.get("TMPDIR") ?? "/tmp", "homebank-vendor");
-
 /**
- * Clones the HomeBank repository to a stable temp path.
+ * Clones the HomeBank repository, or reuses an existing clone.
  *
- * If the directory already exists, fetches the latest instead of
- * cloning from scratch. Returns the path to the `src/` directory.
+ * On first call, shallow-clones the given branch. On subsequent calls,
+ * detects the existing `.git` and fetches/checks out the branch instead.
  *
  * @param branch The branch to clone or checkout.
+ * @param cloneDir Where to place the clone. Defaults to `$TMPDIR/homebank-vendor`.
  * @returns The repository root and `src/` directory paths.
  */
-async function cloneHomebankRepository(
+export async function cachedCloneHomebankRepo(
   branch: string,
+  cloneDir = DEFAULT_CLONE_DIR,
 ): Promise<{ repoDir: string; srcDir: string }> {
   try {
-    await Deno.stat(join(CLONE_DIR, ".git"));
-    console.log(`Reusing existing clone at ${CLONE_DIR}`);
+    await Deno.stat(join(cloneDir, ".git"));
+    console.log(`Reusing existing clone at ${cloneDir}`);
     await run("git", ["fetch", "--depth", "1", "origin", branch], {
-      cwd: CLONE_DIR,
+      cwd: cloneDir,
     });
-    await run("git", ["checkout", `origin/${branch}`], { cwd: CLONE_DIR });
+    await run("git", ["checkout", `origin/${branch}`], { cwd: cloneDir });
   } catch {
     console.log(`Cloning branch ${branch} from ${REPO_URL}...`);
-    await Deno.mkdir(CLONE_DIR, { recursive: true });
+    await Deno.mkdir(cloneDir, { recursive: true });
     await run("git", [
       "clone",
       "--depth",
@@ -208,65 +205,51 @@ async function cloneHomebankRepository(
       "--branch",
       branch,
       REPO_URL,
-      CLONE_DIR,
+      cloneDir,
     ]);
   }
-  return { repoDir: CLONE_DIR, srcDir: join(CLONE_DIR, "src") };
+  return { repoDir: cloneDir, srcDir: join(cloneDir, "src") };
 }
 
-async function getSourceInfo(
-  repoDir: string,
-  branch: string,
-): Promise<SourceInfo> {
-  const commit = await run("git", [
-    "-C",
-    repoDir,
-    "rev-parse",
-    "--short",
-    "HEAD",
-  ]);
-  return {
-    repository: REPO_URL,
-    branch,
-    commit,
-    date: new Date().toISOString().split("T")[0],
-  };
-}
-
-async function vendorFromPath(
+/**
+ * Copies HomeBank C source files into the vendor directory and writes
+ * a manifest.
+ *
+ * Resolves the transitive `#include` tree starting from `homebank.h`,
+ * copies each resolved header plus `hb-xml.c`, parses the version, and
+ * writes `manifest.json`.
+ *
+ * @param sourcePath Directory containing the HomeBank C sources.
+ * @param targetPath Destination vendor directory.
+ */
+async function vendorHomebankSources(
   sourcePath: string,
-  vendorDir: string,
+  targetPath: string,
 ): Promise<void> {
-  const resolution = resolveIncludes(
-    "homebank.h",
-    (name) => Deno.readTextFileSync(join(sourcePath, name)),
-  );
+  const readSource = (name: string) =>
+    Deno.readTextFileSync(join(sourcePath, name));
 
-  const homebankContent = Deno.readTextFileSync(
-    join(sourcePath, "homebank.h"),
-  );
-  const version = parseVersion(homebankContent);
+  const resolution = resolveIncludes("homebank.h", readSource);
+  const version = parseVersion(readSource("homebank.h"));
 
-  await Deno.mkdir(vendorDir, { recursive: true });
+  await Deno.mkdir(targetPath, { recursive: true });
 
-  for (const file of resolution.files) {
-    await Deno.copyFile(join(sourcePath, file), join(vendorDir, file));
-  }
-  await Deno.copyFile(
-    join(sourcePath, "hb-xml.c"),
-    join(vendorDir, "hb-xml.c"),
+  const filesToCopy = [...resolution.files, XML_SOURCE];
+  await Promise.all(
+    filesToCopy.map((file) =>
+      Deno.copyFile(join(sourcePath, file), join(targetPath, file))
+    ),
   );
 
   const manifest = buildManifest(version, resolution.includeTree);
-
   await Deno.writeTextFile(
-    join(vendorDir, "manifest.json"),
+    join(targetPath, "manifest.json"),
     JSON.stringify(manifest, null, 2) + "\n",
   );
 
-  console.log(`Vendored HomeBank ${version} to ${vendorDir}`);
+  console.log(`Vendored HomeBank ${version} to ${targetPath}`);
   console.log(`  Headers: ${resolution.files.length}`);
-  console.log(`  XML source: hb-xml.c`);
+  console.log(`  XML source: ${XML_SOURCE}`);
 }
 
 async function main(): Promise<void> {
@@ -275,19 +258,27 @@ async function main(): Promise<void> {
 
   const sourcePath = Deno.args[0];
   if (sourcePath) {
-    await vendorFromPath(sourcePath, vendorDir);
+    await vendorHomebankSources(sourcePath, vendorDir);
     return;
   }
 
   const branch = await findLatestBranch();
-  const { repoDir, srcDir } = await cloneHomebankRepository(branch);
-  const sourceInfo = await getSourceInfo(repoDir, branch);
-  await vendorFromPath(srcDir, vendorDir);
+  const { repoDir, srcDir } = await cachedCloneHomebankRepo(branch);
+  const commit = await run("git", ["-C", repoDir, "rev-parse", "--short", "HEAD"]);
+
+  await vendorHomebankSources(srcDir, vendorDir);
+
+  const sourceInfo: SourceInfo = {
+    repository: REPO_URL,
+    branch,
+    commit,
+    date: new Date().toISOString(),
+  };
   await Deno.writeTextFile(
     join(vendorDir, "source.json"),
     JSON.stringify(sourceInfo, null, 2) + "\n",
   );
-  console.log(`  Source: ${branch} @ ${sourceInfo.commit}`);
+  console.log(`  Source: ${branch} @ ${commit}`);
 }
 
 if (import.meta.main) {
