@@ -26,7 +26,7 @@ Deno.test("header defines are extracted with evaluated values", () => {
   const txn = manifest.headers["hb-transaction.h"];
   const ofIncome = txn.defines.find((d) => d.name === "OF_INCOME");
   assertEquals(ofIncome !== undefined, true);
-  assertEquals(ofIncome!.value, 2);
+  assertEquals(ofIncome!.evaluatedValue, 2);
 });
 
 Deno.test("header enums are extracted", () => {
@@ -34,7 +34,7 @@ Deno.test("header enums are extracted", () => {
     (e) => e.name === "ColorScheme",
   );
   assertEquals(colorScheme !== undefined, true);
-  assertEquals(colorScheme!.variants[0], { name: "DEFAULT", value: 0 });
+  assertEquals(colorScheme!.members[0], { name: "DEFAULT", value: 0 });
 });
 
 Deno.test("all function definitions are indexed", () => {
@@ -48,36 +48,45 @@ Deno.test("all function definitions are indexed", () => {
 Deno.test("call sites capture function name and string args", () => {
   const pay = manifest.functions["homebank_save_xml_pay"];
   const appendCalls = pay.callSites.filter((cs) =>
-    cs.fn === "hb_xml_append_int" || cs.fn === "hb_xml_append_txt" ||
-    cs.fn === "hb_xml_append_txt_crlf"
+    cs.calledFunction === "hb_xml_append_int" ||
+    cs.calledFunction === "hb_xml_append_txt" ||
+    cs.calledFunction === "hb_xml_append_txt_crlf"
   );
   assertEquals(appendCalls.length > 0, true);
-  const keyCall = appendCalls.find((cs) => cs.stringArgs.includes("key"));
-  assertEquals(keyCall?.fn, "hb_xml_append_int");
+  const keyCall = appendCalls.find((cs) =>
+    cs.stringLiteralArgs.includes("key")
+  );
+  assertEquals(keyCall?.calledFunction, "hb_xml_append_int");
 });
 
 Deno.test("call sites capture guard conditions", () => {
   const fav = manifest.functions["homebank_save_xml_fav"];
   const damtCall = fav.callSites.find(
-    (cs) => cs.fn === "hb_xml_append_amt" && cs.stringArgs.includes("damt"),
+    (cs) =>
+      cs.calledFunction === "hb_xml_append_amt" &&
+      cs.stringLiteralArgs.includes("damt"),
   );
   assertEquals(damtCall !== undefined, true);
-  assertEquals(damtCall!.guard?.includes("OF_ADVXFER"), true);
+  assertEquals(damtCall!.guardCondition?.includes("OF_ADVXFER"), true);
 });
 
 Deno.test("call sites with no guard have null", () => {
   const pay = manifest.functions["homebank_load_xml_pay"];
-  const malloc = pay.callSites.find((cs) => cs.fn === "da_pay_malloc");
-  assertEquals(malloc?.guard, null);
+  const malloc = pay.callSites.find((cs) =>
+    cs.calledFunction === "da_pay_malloc"
+  );
+  assertEquals(malloc?.guardCondition, null);
 });
 
 Deno.test("call sites capture identifier args", () => {
   const flt = manifest.functions["homebank_save_xml_flt"];
   const fltgrp = flt.callSites.filter(
-    (cs) => cs.fn === "hb_xml_append_fltgroup",
+    (cs) => cs.calledFunction === "hb_xml_append_fltgroup",
   );
   assertEquals(fltgrp.length > 0, true);
-  const datCall = fltgrp.find((cs) => cs.stringArgs.includes("dat"));
+  const datCall = fltgrp.find((cs) =>
+    cs.stringLiteralArgs.includes("dat")
+  );
   assertEquals(datCall?.identifierArgs.includes("FLT_GRP_DATE"), true);
 });
 
