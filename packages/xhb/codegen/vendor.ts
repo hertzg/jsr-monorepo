@@ -25,8 +25,6 @@ export interface VendorManifest {
   version: string;
   /** The C source file containing XML parsing logic. */
   xmlSource: string;
-  /** Header files resolved from homebank.h. */
-  headers: string[];
   /** Map of each header to the headers it directly includes. */
   includeTree: Record<string, string[]>;
 }
@@ -74,7 +72,6 @@ export function parseVersion(homebankH: string): string {
  * Builds a {@linkcode VendorManifest} from the resolved includes and metadata.
  *
  * @param version The HomeBank version string.
- * @param headers The list of resolved header file names.
  * @param includeTree The include dependency tree.
  * @returns A VendorManifest object.
  *
@@ -83,21 +80,18 @@ export function parseVersion(homebankH: string): string {
  * import { assertEquals } from "@std/assert";
  * import { buildManifest } from "./vendor.ts";
  *
- * const manifest = buildManifest("5.10", ["homebank.h"], { "homebank.h": [] });
+ * const manifest = buildManifest("5.10", { "homebank.h": [] });
  * assertEquals(manifest.version, "5.10");
  * assertEquals(manifest.xmlSource, "hb-xml.c");
- * assertEquals(manifest.headers, ["homebank.h"]);
  * ```
  */
 export function buildManifest(
   version: string,
-  headers: string[],
   includeTree: Record<string, string[]>,
 ): VendorManifest {
   return {
     version,
     xmlSource: "hb-xml.c",
-    headers,
     includeTree,
   };
 }
@@ -240,11 +234,7 @@ async function vendorFromPath(
     join(vendorDir, "hb-xml.c"),
   );
 
-  const manifest = buildManifest(
-    version,
-    resolution.files,
-    resolution.includeTree,
-  );
+  const manifest = buildManifest(version, resolution.includeTree);
 
   await Deno.writeTextFile(
     join(vendorDir, "manifest.json"),

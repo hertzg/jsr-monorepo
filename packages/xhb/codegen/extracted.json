@@ -1,5 +1,249 @@
 {
   "headers": {
+    "homebank.h": {
+      "defines": [
+        {
+          "name": "HB_PRIV_FUNC",
+          "rawValue": "FALSE",
+          "value": "FALSE"
+        },
+        {
+          "name": "HB_PRIV_FORCE_ENUS",
+          "rawValue": "FALSE",
+          "value": "FALSE"
+        },
+        {
+          "name": "HB_UNSTABLE",
+          "rawValue": "FALSE",
+          "value": "FALSE"
+        },
+        {
+          "name": "HB_UNSTABLE_SHOW",
+          "rawValue": "FALSE\t//show user RC header",
+          "value": "FALSE\t//show user RC header"
+        },
+        {
+          "name": "HOMEBANK_MAJOR",
+          "rawValue": "5",
+          "value": 5
+        },
+        {
+          "name": "HOMEBANK_MINOR",
+          "rawValue": "10",
+          "value": 10
+        },
+        {
+          "name": "HOMEBANK_MICRO",
+          "rawValue": "0",
+          "value": 0
+        },
+        {
+          "name": "HB_VERSION",
+          "rawValue": "\"5.10\"",
+          "value": "5.10"
+        },
+        {
+          "name": "HB_VERSION_NUM",
+          "rawValue": "(HOMEBANK_MAJOR*10000) + (HOMEBANK_MINOR*100) + HOMEBANK_MICRO",
+          "value": "(HOMEBANK_MAJOR*10000) + (HOMEBANK_MINOR*100) + HOMEBANK_MICRO"
+        },
+        {
+          "name": "FILE_VERSION",
+          "rawValue": "1.6",
+          "value": 1.6
+        },
+        {
+          "name": "PROGNAME",
+          "rawValue": "\"HomeBank\"",
+          "value": "HomeBank"
+        },
+        {
+          "name": "HB_DATA_PATH",
+          "rawValue": "\"homebank\"",
+          "value": "homebank"
+        },
+        {
+          "name": "PROGNAME",
+          "rawValue": "\"HomeBank \" HB_VERSION \" (unstable)\"",
+          "value": "HomeBank \" HB_VERSION \" (unstable)"
+        },
+        {
+          "name": "HB_DATA_PATH",
+          "rawValue": "\"homebank_unstable\"",
+          "value": "homebank_unstable"
+        },
+        {
+          "name": "GETTEXT_PACKAGE",
+          "rawValue": "\"homebank\"",
+          "value": "homebank"
+        },
+        {
+          "name": "LOCALE_DIR",
+          "rawValue": "\"locale\"",
+          "value": "locale"
+        },
+        {
+          "name": "PIXMAPS_DIR",
+          "rawValue": "\"images\"",
+          "value": "images"
+        },
+        {
+          "name": "HELP_DIR",
+          "rawValue": "\"help\"",
+          "value": "help"
+        },
+        {
+          "name": "PACKAGE_VERSION",
+          "rawValue": "HB_VERSION",
+          "value": "HB_VERSION"
+        },
+        {
+          "name": "PACKAGE",
+          "rawValue": "\"homebank\"",
+          "value": "homebank"
+        },
+        {
+          "name": "VERSION",
+          "rawValue": "HB_VERSION",
+          "value": "HB_VERSION"
+        },
+        {
+          "name": "ENABLE_NLS",
+          "rawValue": "1",
+          "value": 1
+        },
+        {
+          "name": "SPACING_TINY",
+          "rawValue": "3",
+          "value": 3
+        },
+        {
+          "name": "SPACING_SMALL",
+          "rawValue": "6",
+          "value": 6
+        },
+        {
+          "name": "SPACING_MEDIUM",
+          "rawValue": "12",
+          "value": 12
+        },
+        {
+          "name": "SPACING_LARGE",
+          "rawValue": "18",
+          "value": 18
+        },
+        {
+          "name": "SPACING_POPOVER",
+          "rawValue": "10",
+          "value": 10
+        },
+        {
+          "name": "HB_DATE_MAX_GAP",
+          "rawValue": "7",
+          "value": 7
+        },
+        {
+          "name": "HB_MINDATE",
+          "rawValue": "693596\t  //01/01/1900",
+          "value": 693596
+        },
+        {
+          "name": "HB_MAXDATE",
+          "rawValue": "803533\t  //31/12/2200",
+          "value": 803533
+        },
+        {
+          "name": "HB_MINWIDTH_LIST",
+          "rawValue": "161",
+          "value": 161
+        },
+        {
+          "name": "HB_MINHEIGHT_LIST",
+          "rawValue": "260",
+          "value": 260
+        },
+        {
+          "name": "HB_MINWIDTH_SEARCH",
+          "rawValue": "240",
+          "value": 240
+        },
+        {
+          "name": "HB_MINWIDTH_COLUMN",
+          "rawValue": "48",
+          "value": 48
+        },
+        {
+          "name": "PHI",
+          "rawValue": "1.61803399",
+          "value": 1.61803399
+        },
+        {
+          "name": "HB_NUMBER_SAMPLE",
+          "rawValue": "1234567.89",
+          "value": 1234567.89
+        }
+      ],
+      "enums": [
+        {
+          "name": null,
+          "variants": [
+            {
+              "name": "UF_TITLE",
+              "value": 1
+            },
+            {
+              "name": "UF_SENSITIVE",
+              "value": 2
+            },
+            {
+              "name": "UF_VISUAL",
+              "value": 4
+            },
+            {
+              "name": "UF_REFRESHALL",
+              "value": 8
+            },
+            {
+              "name": "UF_TXNLIST",
+              "value": 16
+            }
+          ]
+        },
+        {
+          "name": "HbFileType",
+          "variants": [
+            {
+              "name": "FILETYPE_UNKNOWN",
+              "value": 0
+            },
+            {
+              "name": "FILETYPE_HOMEBANK",
+              "value": 1
+            },
+            {
+              "name": "FILETYPE_OFX",
+              "value": 2
+            },
+            {
+              "name": "FILETYPE_QIF",
+              "value": 3
+            },
+            {
+              "name": "FILETYPE_CSV_HB",
+              "value": 4
+            },
+            {
+              "name": "NUM_FILETYPE",
+              "value": 5
+            }
+          ]
+        }
+      ]
+    },
+    "hb-types.h": {
+      "defines": [],
+      "enums": []
+    },
     "enums.h": {
       "defines": [
         {
@@ -347,1958 +591,6 @@
             {
               "name": "PRF_DTEX_CSVSEP_SPACE",
               "value": 3
-            }
-          ]
-        }
-      ]
-    },
-    "hb-account.h": {
-      "defines": [
-        {
-          "name": "AF_CLOSED",
-          "rawValue": "(1<<1)",
-          "value": 2
-        },
-        {
-          "name": "AF_NOSUMMARY",
-          "rawValue": "(1<<4)",
-          "value": 16
-        },
-        {
-          "name": "AF_NOBUDGET",
-          "rawValue": "(1<<5)",
-          "value": 32
-        },
-        {
-          "name": "AF_NOREPORT",
-          "rawValue": "(1<<6)",
-          "value": 64
-        },
-        {
-          "name": "AF_OUTFLOWSUM",
-          "rawValue": "(1<<7)",
-          "value": 128
-        },
-        {
-          "name": "AF_HASNOTICE",
-          "rawValue": "(1<< 9) //added 5.9 for pending/import",
-          "value": 512
-        },
-        {
-          "name": "AF_OLDBUDGET",
-          "rawValue": "(1<<0)",
-          "value": 1
-        },
-        {
-          "name": "FLAG_ACC_TMP_ADDED",
-          "rawValue": "(1<< 1)",
-          "value": 2
-        },
-        {
-          "name": "FLAG_ACC_TMP_EDITED",
-          "rawValue": "(1<< 2)",
-          "value": 4
-        },
-        {
-          "name": "FLAG_ACC_TMP_DIRTY",
-          "rawValue": "(1<< 3)\t//indicate any display needs a refresh",
-          "value": 8
-        }
-      ],
-      "enums": [
-        {
-          "name": null,
-          "variants": [
-            {
-              "name": "ACC_TYPE_NONE",
-              "value": 0
-            },
-            {
-              "name": "ACC_TYPE_BANK",
-              "value": 1
-            },
-            {
-              "name": "ACC_TYPE_CASH",
-              "value": 2
-            },
-            {
-              "name": "ACC_TYPE_ASSET",
-              "value": 3
-            },
-            {
-              "name": "ACC_TYPE_CREDITCARD",
-              "value": 4
-            },
-            {
-              "name": "ACC_TYPE_LIABILITY",
-              "value": 5
-            },
-            {
-              "name": "ACC_TYPE_CHECKING",
-              "value": 6
-            },
-            {
-              "name": "ACC_TYPE_SAVINGS",
-              "value": 7
-            },
-            {
-              "name": "ACC_TYPE_MAXVALUE",
-              "value": 8
-            }
-          ]
-        },
-        {
-          "name": null,
-          "variants": [
-            {
-              "name": "ACC_USAGE_NONE",
-              "value": 0
-            },
-            {
-              "name": "ACC_USAGE_TXN",
-              "value": 1
-            },
-            {
-              "name": "ACC_USAGE_TXN_XFER",
-              "value": 2
-            },
-            {
-              "name": "ACC_USAGE_ARC",
-              "value": 3
-            },
-            {
-              "name": "ACC_USAGE_ARC_XFER",
-              "value": 4
-            }
-          ]
-        }
-      ]
-    },
-    "hb-archive.h": {
-      "defines": [
-        {
-          "name": "TF_RECUR",
-          "rawValue": "(1<< 0)",
-          "value": 1
-        },
-        {
-          "name": "TF_LIMIT",
-          "rawValue": "(1<< 1)",
-          "value": 2
-        },
-        {
-          "name": "TF_RELATIVE",
-          "rawValue": "(1<< 2)",
-          "value": 4
-        }
-      ],
-      "enums": [
-        {
-          "name": null,
-          "variants": [
-            {
-              "name": "ARC_POSTMODE_DUEDATE",
-              "value": 0
-            },
-            {
-              "name": "ARC_POSTMODE_PAYOUT",
-              "value": 1
-            },
-            {
-              "name": "ARC_POSTMODE_ADVANCE",
-              "value": 2
-            }
-          ]
-        },
-        {
-          "name": null,
-          "variants": [
-            {
-              "name": "AUTO_FREQ_DAY",
-              "value": 0
-            },
-            {
-              "name": "AUTO_FREQ_WEEK",
-              "value": 1
-            },
-            {
-              "name": "AUTO_FREQ_MONTH",
-              "value": 2
-            },
-            {
-              "name": "AUTO_FREQ_YEAR",
-              "value": 3
-            }
-          ]
-        },
-        {
-          "name": null,
-          "variants": [
-            {
-              "name": "AUTO_ORDINAL_FIRST",
-              "value": 1
-            },
-            {
-              "name": "AUTO_ORDINAL_SECOND",
-              "value": 2
-            },
-            {
-              "name": "AUTO_ORDINAL_THIRD",
-              "value": 3
-            },
-            {
-              "name": "AUTO_ORDINAL_FOURTH",
-              "value": 4
-            },
-            {
-              "name": "AUTO_ORDINAL_LAST",
-              "value": 5
-            }
-          ]
-        },
-        {
-          "name": null,
-          "variants": [
-            {
-              "name": "AUTO_WEEKDAY_MONDAY",
-              "value": 1
-            },
-            {
-              "name": "AUTO_WEEKDAY_TUESDAY",
-              "value": 2
-            },
-            {
-              "name": "AUTO_WEEKDAY_WEDNESDAY",
-              "value": 3
-            },
-            {
-              "name": "AUTO_WEEKDAY_THURSDAY",
-              "value": 4
-            },
-            {
-              "name": "AUTO_WEEKDAY_FRIDAY",
-              "value": 5
-            },
-            {
-              "name": "AUTO_WEEKDAY_SATURDAY",
-              "value": 6
-            },
-            {
-              "name": "AUTO_WEEKDAY_SUNDAY",
-              "value": 7
-            },
-            {
-              "name": "AUTO_WEEKDAY_DAY",
-              "value": 8
-            },
-            {
-              "name": "AUTO_WEEKDAY_WEEKDAY",
-              "value": 9
-            },
-            {
-              "name": "AUTO_WEEKDAY_WEEKENDDAY",
-              "value": 10
-            }
-          ]
-        },
-        {
-          "name": null,
-          "variants": [
-            {
-              "name": "ARC_WEEKEND_POSSIBLE",
-              "value": 0
-            },
-            {
-              "name": "ARC_WEEKEND_BEFORE",
-              "value": 1
-            },
-            {
-              "name": "ARC_WEEKEND_AFTER",
-              "value": 2
-            },
-            {
-              "name": "ARC_WEEKEND_SKIP",
-              "value": 3
-            }
-          ]
-        },
-        {
-          "name": null,
-          "variants": [
-            {
-              "name": "FLT_SCHEDULED_THISMONTH",
-              "value": 1
-            },
-            {
-              "name": "FLT_SCHEDULED_NEXTMONTH",
-              "value": 2
-            },
-            {
-              "name": "FLT_SCHEDULED_NEXT30DAYS",
-              "value": 3
-            },
-            {
-              "name": "FLT_SCHEDULED_NEXT60DAYS",
-              "value": 4
-            },
-            {
-              "name": "FLT_SCHEDULED_NEXT90DAYS",
-              "value": 5
-            },
-            {
-              "name": "FLT_SCHEDULED_ALLDATE",
-              "value": 6
-            },
-            {
-              "name": "FLT_SCHEDULED_MAXPOSTDATE",
-              "value": 7
-            }
-          ]
-        }
-      ]
-    },
-    "hb-assign.h": {
-      "defines": [
-        {
-          "name": "ASGF_EXACT",
-          "rawValue": "(1<<0)",
-          "value": 1
-        },
-        {
-          "name": "ASGF_DOPAY",
-          "rawValue": "(1<<1)",
-          "value": 2
-        },
-        {
-          "name": "ASGF_DOCAT",
-          "rawValue": "(1<<2)",
-          "value": 4
-        },
-        {
-          "name": "ASGF_DOMOD",
-          "rawValue": "(1<<3)",
-          "value": 8
-        },
-        {
-          "name": "ASGF_DOTAG",
-          "rawValue": "(1<<4) //5.8",
-          "value": 16
-        },
-        {
-          "name": "ASGF_PREFILLED",
-          "rawValue": "(1<<5)",
-          "value": 32
-        },
-        {
-          "name": "ASGF_AMOUNT",
-          "rawValue": "(1<<7)\t//5.6",
-          "value": 128
-        },
-        {
-          "name": "ASGF_REGEX",
-          "rawValue": "(1<<8)",
-          "value": 256
-        },
-        {
-          "name": "ASGF_OVWPAY",
-          "rawValue": "(1<<9)",
-          "value": 512
-        },
-        {
-          "name": "ASGF_OVWCAT",
-          "rawValue": "(1<<10)",
-          "value": 1024
-        },
-        {
-          "name": "ASGF_OVWMOD",
-          "rawValue": "(1<<11)",
-          "value": 2048
-        },
-        {
-          "name": "ASGF_OVWTAG",
-          "rawValue": "(1<<12) //5.8",
-          "value": 4096
-        }
-      ],
-      "enums": []
-    },
-    "hb-category.h": {
-      "defines": [
-        {
-          "name": "GF_SUB",
-          "rawValue": "(1<<0)\t\t//? useful as we can check item->parent= 0",
-          "value": 1
-        },
-        {
-          "name": "GF_INCOME",
-          "rawValue": "(1<<1)",
-          "value": 2
-        },
-        {
-          "name": "GF_CUSTOM",
-          "rawValue": "(1<<2)",
-          "value": 4
-        },
-        {
-          "name": "GF_BUDGET",
-          "rawValue": "(1<<3)",
-          "value": 8
-        },
-        {
-          "name": "GF_FORCED",
-          "rawValue": "(1<<4)",
-          "value": 16
-        },
-        {
-          "name": "GF_MIXED",
-          "rawValue": "(1<<5)\t\t//#1740368 if cat has mixed exp/inc type",
-          "value": 32
-        },
-        {
-          "name": "GF_HIDDEN",
-          "rawValue": "(1<<8)\t\t//hidden by user",
-          "value": 256
-        }
-      ],
-      "enums": []
-    },
-    "hb-currency.h": {
-      "defines": [
-        {
-          "name": "CF_CUSTOM",
-          "rawValue": "(1<<1)",
-          "value": 2
-        }
-      ],
-      "enums": []
-    },
-    "hb-encoding.h": {
-      "defines": [],
-      "enums": [
-        {
-          "name": "GeditEncodingIndex",
-          "variants": [
-            {
-              "name": "GEDIT_ENCODING_ISO_8859_1",
-              "value": 0
-            },
-            {
-              "name": "GEDIT_ENCODING_ISO_8859_2",
-              "value": 1
-            },
-            {
-              "name": "GEDIT_ENCODING_ISO_8859_3",
-              "value": 2
-            },
-            {
-              "name": "GEDIT_ENCODING_ISO_8859_4",
-              "value": 3
-            },
-            {
-              "name": "GEDIT_ENCODING_ISO_8859_5",
-              "value": 4
-            },
-            {
-              "name": "GEDIT_ENCODING_ISO_8859_6",
-              "value": 5
-            },
-            {
-              "name": "GEDIT_ENCODING_ISO_8859_7",
-              "value": 6
-            },
-            {
-              "name": "GEDIT_ENCODING_ISO_8859_8",
-              "value": 7
-            },
-            {
-              "name": "GEDIT_ENCODING_ISO_8859_8_I",
-              "value": 8
-            },
-            {
-              "name": "GEDIT_ENCODING_ISO_8859_9",
-              "value": 9
-            },
-            {
-              "name": "GEDIT_ENCODING_ISO_8859_10",
-              "value": 10
-            },
-            {
-              "name": "GEDIT_ENCODING_ISO_8859_13",
-              "value": 11
-            },
-            {
-              "name": "GEDIT_ENCODING_ISO_8859_14",
-              "value": 12
-            },
-            {
-              "name": "GEDIT_ENCODING_ISO_8859_15",
-              "value": 13
-            },
-            {
-              "name": "GEDIT_ENCODING_ISO_8859_16",
-              "value": 14
-            },
-            {
-              "name": "GEDIT_ENCODING_UTF_7",
-              "value": 15
-            },
-            {
-              "name": "GEDIT_ENCODING_UTF_16",
-              "value": 16
-            },
-            {
-              "name": "GEDIT_ENCODING_UTF_16_BE",
-              "value": 17
-            },
-            {
-              "name": "GEDIT_ENCODING_UTF_16_LE",
-              "value": 18
-            },
-            {
-              "name": "GEDIT_ENCODING_UTF_32",
-              "value": 19
-            },
-            {
-              "name": "GEDIT_ENCODING_UCS_2",
-              "value": 20
-            },
-            {
-              "name": "GEDIT_ENCODING_UCS_4",
-              "value": 21
-            },
-            {
-              "name": "GEDIT_ENCODING_ARMSCII_8",
-              "value": 22
-            },
-            {
-              "name": "GEDIT_ENCODING_BIG5",
-              "value": 23
-            },
-            {
-              "name": "GEDIT_ENCODING_BIG5_HKSCS",
-              "value": 24
-            },
-            {
-              "name": "GEDIT_ENCODING_CP_866",
-              "value": 25
-            },
-            {
-              "name": "GEDIT_ENCODING_EUC_JP",
-              "value": 26
-            },
-            {
-              "name": "GEDIT_ENCODING_EUC_JP_MS",
-              "value": 27
-            },
-            {
-              "name": "GEDIT_ENCODING_CP932",
-              "value": 28
-            },
-            {
-              "name": "GEDIT_ENCODING_EUC_KR",
-              "value": 29
-            },
-            {
-              "name": "GEDIT_ENCODING_EUC_TW",
-              "value": 30
-            },
-            {
-              "name": "GEDIT_ENCODING_GB18030",
-              "value": 31
-            },
-            {
-              "name": "GEDIT_ENCODING_GB2312",
-              "value": 32
-            },
-            {
-              "name": "GEDIT_ENCODING_GBK",
-              "value": 33
-            },
-            {
-              "name": "GEDIT_ENCODING_GEOSTD8",
-              "value": 34
-            },
-            {
-              "name": "GEDIT_ENCODING_HZ",
-              "value": 35
-            },
-            {
-              "name": "GEDIT_ENCODING_IBM_850",
-              "value": 36
-            },
-            {
-              "name": "GEDIT_ENCODING_IBM_852",
-              "value": 37
-            },
-            {
-              "name": "GEDIT_ENCODING_IBM_855",
-              "value": 38
-            },
-            {
-              "name": "GEDIT_ENCODING_IBM_857",
-              "value": 39
-            },
-            {
-              "name": "GEDIT_ENCODING_IBM_862",
-              "value": 40
-            },
-            {
-              "name": "GEDIT_ENCODING_IBM_864",
-              "value": 41
-            },
-            {
-              "name": "GEDIT_ENCODING_ISO_2022_JP",
-              "value": 42
-            },
-            {
-              "name": "GEDIT_ENCODING_ISO_2022_KR",
-              "value": 43
-            },
-            {
-              "name": "GEDIT_ENCODING_ISO_IR_111",
-              "value": 44
-            },
-            {
-              "name": "GEDIT_ENCODING_JOHAB",
-              "value": 45
-            },
-            {
-              "name": "GEDIT_ENCODING_KOI8_R",
-              "value": 46
-            },
-            {
-              "name": "GEDIT_ENCODING_KOI8__R",
-              "value": 47
-            },
-            {
-              "name": "GEDIT_ENCODING_KOI8_U",
-              "value": 48
-            },
-            {
-              "name": "GEDIT_ENCODING_SHIFT_JIS",
-              "value": 49
-            },
-            {
-              "name": "GEDIT_ENCODING_TCVN",
-              "value": 50
-            },
-            {
-              "name": "GEDIT_ENCODING_TIS_620",
-              "value": 51
-            },
-            {
-              "name": "GEDIT_ENCODING_UHC",
-              "value": 52
-            },
-            {
-              "name": "GEDIT_ENCODING_VISCII",
-              "value": 53
-            },
-            {
-              "name": "GEDIT_ENCODING_WINDOWS_1250",
-              "value": 54
-            },
-            {
-              "name": "GEDIT_ENCODING_WINDOWS_1251",
-              "value": 55
-            },
-            {
-              "name": "GEDIT_ENCODING_WINDOWS_1252",
-              "value": 56
-            },
-            {
-              "name": "GEDIT_ENCODING_WINDOWS_1253",
-              "value": 57
-            },
-            {
-              "name": "GEDIT_ENCODING_WINDOWS_1254",
-              "value": 58
-            },
-            {
-              "name": "GEDIT_ENCODING_WINDOWS_1255",
-              "value": 59
-            },
-            {
-              "name": "GEDIT_ENCODING_WINDOWS_1256",
-              "value": 60
-            },
-            {
-              "name": "GEDIT_ENCODING_WINDOWS_1257",
-              "value": 61
-            },
-            {
-              "name": "GEDIT_ENCODING_WINDOWS_1258",
-              "value": 62
-            },
-            {
-              "name": "GEDIT_ENCODING_LAST",
-              "value": 63
-            },
-            {
-              "name": "GEDIT_ENCODING_UTF_8",
-              "value": 64
-            },
-            {
-              "name": "GEDIT_ENCODING_UNKNOWN",
-              "value": 65
-            }
-          ]
-        }
-      ]
-    },
-    "hb-export.h": {
-      "defines": [
-        {
-          "name": "HB_PRINT_TITLE_POINT",
-          "rawValue": "18",
-          "value": 18
-        },
-        {
-          "name": "HB_PRINT_HEAD_POINT",
-          "rawValue": "15",
-          "value": 15
-        },
-        {
-          "name": "HB_PRINT_BODY_POINT",
-          "rawValue": "12",
-          "value": 12
-        },
-        {
-          "name": "HB_PRINT_FOOT_POINT",
-          "rawValue": "9",
-          "value": 9
-        },
-        {
-          "name": "HB_PRINT_LINE_HEIGHT",
-          "rawValue": "1.2",
-          "value": 1.2
-        },
-        {
-          "name": "HB_PRINT_SPACING",
-          "rawValue": "6",
-          "value": 6
-        },
-        {
-          "name": "HB_PRINT_ALIGN_RIGHT",
-          "rawValue": "0",
-          "value": 0
-        },
-        {
-          "name": "HB_PRINT_ALIGN_LEFT",
-          "rawValue": "1",
-          "value": 1
-        }
-      ],
-      "enums": []
-    },
-    "hb-filter.h": {
-      "defines": [],
-      "enums": [
-        {
-          "name": null,
-          "variants": [
-            {
-              "name": "FLT_OFF",
-              "value": 0
-            },
-            {
-              "name": "FLT_INCLUDE",
-              "value": 1
-            },
-            {
-              "name": "FLT_EXCLUDE",
-              "value": 2
-            }
-          ]
-        },
-        {
-          "name": null,
-          "variants": [
-            {
-              "name": "FLT_GRP_DATE",
-              "value": 0
-            },
-            {
-              "name": "FLT_GRP_CATEGORY",
-              "value": 1
-            },
-            {
-              "name": "FLT_GRP_PAYEE",
-              "value": 2
-            },
-            {
-              "name": "FLT_GRP_ACCOUNT",
-              "value": 3
-            },
-            {
-              "name": "FLT_GRP_TAG",
-              "value": 4
-            },
-            {
-              "name": "FLT_GRP_TEXT",
-              "value": 5
-            },
-            {
-              "name": "FLT_GRP_AMOUNT",
-              "value": 6
-            },
-            {
-              "name": "FLT_GRP_PAYMODE",
-              "value": 7
-            },
-            {
-              "name": "FLT_GRP_STATUS",
-              "value": 8
-            },
-            {
-              "name": "FLT_GRP_TYPE",
-              "value": 9
-            },
-            {
-              "name": "FLT_GRP_MAX",
-              "value": 10
-            }
-          ]
-        },
-        {
-          "name": null,
-          "variants": [
-            {
-              "name": "OLD56_FLT_RANGE_THISMONTH",
-              "value": 0
-            },
-            {
-              "name": "OLD56_FLT_RANGE_LASTMONTH",
-              "value": 1
-            },
-            {
-              "name": "OLD56_FLT_RANGE_THISQUARTER",
-              "value": 2
-            },
-            {
-              "name": "OLD56_FLT_RANGE_LASTQUARTER",
-              "value": 3
-            },
-            {
-              "name": "OLD56_FLT_RANGE_THISYEAR",
-              "value": 4
-            },
-            {
-              "name": "OLD56_FLT_RANGE_LASTYEAR",
-              "value": 5
-            },
-            {
-              "name": "OLD56_FLT_RANGE_LAST30DAYS",
-              "value": 7
-            },
-            {
-              "name": "OLD56_FLT_RANGE_LAST60DAYS",
-              "value": 8
-            },
-            {
-              "name": "OLD56_FLT_RANGE_LAST90DAYS",
-              "value": 9
-            },
-            {
-              "name": "OLD56_FLT_RANGE_LAST12MONTHS",
-              "value": 10
-            },
-            {
-              "name": "OLD56_FLT_RANGE_OTHER",
-              "value": 12
-            },
-            {
-              "name": "OLD56_FLT_RANGE_ALLDATE",
-              "value": 14
-            }
-          ]
-        },
-        {
-          "name": null,
-          "variants": [
-            {
-              "name": "FLT_RANGE_UNSET",
-              "value": 0
-            },
-            {
-              "name": "FLT_RANGE_MISC_CUSTOM",
-              "value": 1
-            },
-            {
-              "name": "FLT_RANGE_MISC_ALLDATE",
-              "value": 2
-            },
-            {
-              "name": "FLT_RANGE_MISC_30DAYS",
-              "value": 3
-            },
-            {
-              "name": "FLT_RANGE_LAST_DAY",
-              "value": 20
-            },
-            {
-              "name": "FLT_RANGE_LAST_WEEK",
-              "value": 21
-            },
-            {
-              "name": "FLT_RANGE_LAST_FORTNIGHT",
-              "value": 22
-            },
-            {
-              "name": "FLT_RANGE_LAST_MONTH",
-              "value": 23
-            },
-            {
-              "name": "FLT_RANGE_LAST_QUARTER",
-              "value": 24
-            },
-            {
-              "name": "FLT_RANGE_LAST_YEAR",
-              "value": 25
-            },
-            {
-              "name": "FLT_RANGE_LAST_30DAYS",
-              "value": 26
-            },
-            {
-              "name": "FLT_RANGE_LAST_60DAYS",
-              "value": 27
-            },
-            {
-              "name": "FLT_RANGE_LAST_90DAYS",
-              "value": 28
-            },
-            {
-              "name": "FLT_RANGE_LAST_12MONTHS",
-              "value": 29
-            },
-            {
-              "name": "FLT_RANGE_LAST_6MONTHS",
-              "value": 30
-            },
-            {
-              "name": "FLT_RANGE_THIS_DAY",
-              "value": 40
-            },
-            {
-              "name": "FLT_RANGE_THIS_WEEK",
-              "value": 41
-            },
-            {
-              "name": "FLT_RANGE_THIS_FORTNIGHT",
-              "value": 42
-            },
-            {
-              "name": "FLT_RANGE_THIS_MONTH",
-              "value": 43
-            },
-            {
-              "name": "FLT_RANGE_THIS_QUARTER",
-              "value": 44
-            },
-            {
-              "name": "FLT_RANGE_THIS_YEAR",
-              "value": 45
-            },
-            {
-              "name": "FLT_RANGE_NEXT_DAY",
-              "value": 60
-            },
-            {
-              "name": "FLT_RANGE_NEXT_WEEK",
-              "value": 61
-            },
-            {
-              "name": "FLT_RANGE_NEXT_FORTNIGHT",
-              "value": 62
-            },
-            {
-              "name": "FLT_RANGE_NEXT_MONTH",
-              "value": 63
-            },
-            {
-              "name": "FLT_RANGE_NEXT_QUARTER",
-              "value": 64
-            },
-            {
-              "name": "FLT_RANGE_NEXT_YEAR",
-              "value": 65
-            },
-            {
-              "name": "FLT_RANGE_TODATE_YEAR",
-              "value": 80
-            },
-            {
-              "name": "FLT_RANGE_TODATE_MONTH",
-              "value": 81
-            },
-            {
-              "name": "FLT_RANGE_TODATE_ALL",
-              "value": 82
-            },
-            {
-              "name": "FLT_RANGE_MAX",
-              "value": 83
-            }
-          ]
-        },
-        {
-          "name": null,
-          "variants": [
-            {
-              "name": "FLT_TYPE_ALL",
-              "value": 0
-            },
-            {
-              "name": "FLT_TYPE_EXPENSE",
-              "value": 2
-            },
-            {
-              "name": "FLT_TYPE_INCOME",
-              "value": 3
-            },
-            {
-              "name": "FLT_TYPE_INTXFER",
-              "value": 4
-            },
-            {
-              "name": "FLT_TYPE_NOTXFER",
-              "value": 5
-            }
-          ]
-        },
-        {
-          "name": null,
-          "variants": [
-            {
-              "name": "FLT_STATUS_ALL",
-              "value": 0
-            },
-            {
-              "name": "FLT_STATUS_CLEARED",
-              "value": 2
-            },
-            {
-              "name": "FLT_STATUS_UNCLEARED",
-              "value": 3
-            },
-            {
-              "name": "FLT_STATUS_RECONCILED",
-              "value": 4
-            },
-            {
-              "name": "FLT_STATUS_UNRECONCILED",
-              "value": 5
-            },
-            {
-              "name": "FLT_STATUS_UNCATEGORIZED",
-              "value": 7
-            },
-            {
-              "name": "FLT_STATUS_UNAPPROVED",
-              "value": 8
-            }
-          ]
-        },
-        {
-          "name": null,
-          "variants": [
-            {
-              "name": "FLT_QSEARCH_MEMO",
-              "value": 1
-            },
-            {
-              "name": "FLT_QSEARCH_NUMBER",
-              "value": 2
-            },
-            {
-              "name": "FLT_QSEARCH_PAYEE",
-              "value": 4
-            },
-            {
-              "name": "FLT_QSEARCH_CATEGORY",
-              "value": 8
-            },
-            {
-              "name": "FLT_QSEARCH_TAGS",
-              "value": 16
-            },
-            {
-              "name": "FLT_QSEARCH_AMOUNT",
-              "value": 32
-            }
-          ]
-        }
-      ]
-    },
-    "hb-group.h": {
-      "defines": [],
-      "enums": []
-    },
-    "hb-hbfile.h": {
-      "defines": [],
-      "enums": []
-    },
-    "hb-import.h": {
-      "defines": [
-        {
-          "name": "DST_ACC_GLOBAL",
-          "rawValue": "100001",
-          "value": 100001
-        },
-        {
-          "name": "DST_ACC_NEW",
-          "rawValue": "100002",
-          "value": 100002
-        },
-        {
-          "name": "DST_ACC_SKIP",
-          "rawValue": "100010",
-          "value": 100010
-        }
-      ],
-      "enums": [
-        {
-          "name": null,
-          "variants": [
-            {
-              "name": "CSV_STRING",
-              "value": 0
-            },
-            {
-              "name": "CSV_DATE",
-              "value": 1
-            },
-            {
-              "name": "CSV_INT",
-              "value": 2
-            },
-            {
-              "name": "CSV_DOUBLE",
-              "value": 3
-            }
-          ]
-        },
-        {
-          "name": "QIF_Type",
-          "variants": [
-            {
-              "name": "QIF_NONE",
-              "value": 0
-            },
-            {
-              "name": "QIF_HEADER",
-              "value": 1
-            },
-            {
-              "name": "QIF_ACCOUNT",
-              "value": 2
-            },
-            {
-              "name": "QIF_CATEGORY",
-              "value": 3
-            },
-            {
-              "name": "QIF_CLASS",
-              "value": 4
-            },
-            {
-              "name": "QIF_MEMORIZED",
-              "value": 5
-            },
-            {
-              "name": "QIF_TRANSACTION",
-              "value": 6
-            },
-            {
-              "name": "QIF_SECURITY",
-              "value": 7
-            },
-            {
-              "name": "QIF_PRICES",
-              "value": 8
-            }
-          ]
-        }
-      ]
-    },
-    "hb-misc.h": {
-      "defines": [],
-      "enums": [
-        {
-          "name": null,
-          "variants": [
-            {
-              "name": "HB_AMT_SIGN_OFF",
-              "value": 0
-            },
-            {
-              "name": "HB_AMT_SIGN_EXP",
-              "value": 1
-            },
-            {
-              "name": "HB_AMT_SIGN_INC",
-              "value": 2
-            }
-          ]
-        },
-        {
-          "name": "HbDateBound",
-          "variants": [
-            {
-              "name": "HB_DATE_BOUND_FIRST",
-              "value": 0
-            },
-            {
-              "name": "HB_DATE_BOUND_LAST",
-              "value": 1
-            }
-          ]
-        }
-      ]
-    },
-    "hb-payee.h": {
-      "defines": [
-        {
-          "name": "PF_HIDDEN",
-          "rawValue": "(1<<8)\t//hidden by user",
-          "value": 256
-        }
-      ],
-      "enums": []
-    },
-    "hb-preferences.h": {
-      "defines": [
-        {
-          "name": "DEFAULT_FORMAT_DATE",
-          "rawValue": "\"%x\"",
-          "value": "%x"
-        },
-        {
-          "name": "MAX_FRAC_DIGIT",
-          "rawValue": "6",
-          "value": 6
-        },
-        {
-          "name": "DEFAULT_EXP_COLOR",
-          "rawValue": "\"#ce5c00\"\t//Orange",
-          "value": "\"#ce5c00\"\t//Orange"
-        },
-        {
-          "name": "DEFAULT_INC_COLOR",
-          "rawValue": "\"#4e9a36\"\t//Chameleon",
-          "value": "\"#4e9a36\"\t//Chameleon"
-        },
-        {
-          "name": "DEFAULT_WARN_COLOR",
-          "rawValue": "\"#a40000\"\t//Scarlett Red",
-          "value": "\"#a40000\"\t//Scarlett Red"
-        },
-        {
-          "name": "DEFAULT_FUTURE_BG_COLOR",
-          "rawValue": "\"#204a87\"",
-          "value": "#204a87"
-        }
-      ],
-      "enums": [
-        {
-          "name": "HbPrefWinGeoPreset",
-          "variants": [
-            {
-              "name": "HB_PREF_WINGEO_NONE",
-              "value": 0
-            },
-            {
-              "name": "HB_PREF_WINGEO_DEFAULT",
-              "value": 1
-            },
-            {
-              "name": "HB_PREF_WINGEO_SCREEN",
-              "value": 2
-            },
-            {
-              "name": "HB_PREF_WINGEO_NETBOOK",
-              "value": 3
-            },
-            {
-              "name": "HB_PREF_WINGEO_HD",
-              "value": 4
-            },
-            {
-              "name": "HB_PREF_WINGEO_HDPLUS",
-              "value": 5
-            },
-            {
-              "name": "HB_PREF_WINGEO_FHD",
-              "value": 6
-            }
-          ]
-        }
-      ]
-    },
-    "hb-report.h": {
-      "defines": [
-        {
-          "name": "RF_NEWYEAR",
-          "rawValue": "(1<<1)",
-          "value": 2
-        },
-        {
-          "name": "RF_FORECAST",
-          "rawValue": "(1<<2)",
-          "value": 4
-        }
-      ],
-      "enums": [
-        {
-          "name": "HbReportGrpBy",
-          "variants": [
-            {
-              "name": "REPORT_GRPBY_NONE",
-              "value": 0
-            },
-            {
-              "name": "REPORT_GRPBY_CATEGORY",
-              "value": 1
-            },
-            {
-              "name": "REPORT_GRPBY_PAYEE",
-              "value": 2
-            },
-            {
-              "name": "REPORT_GRPBY_ACCOUNT",
-              "value": 3
-            },
-            {
-              "name": "REPORT_GRPBY_TAG",
-              "value": 4
-            },
-            {
-              "name": "REPORT_GRPBY_MONTH",
-              "value": 5
-            },
-            {
-              "name": "REPORT_GRPBY_YEAR",
-              "value": 6
-            },
-            {
-              "name": "REPORT_GRPBY_ACCGROUP",
-              "value": 7
-            },
-            {
-              "name": "REPORT_GRPBY_TYPE",
-              "value": 8
-            }
-          ]
-        },
-        {
-          "name": "HbReportType",
-          "variants": [
-            {
-              "name": "REPORT_TYPE_NONE",
-              "value": 0
-            },
-            {
-              "name": "REPORT_TYPE_ALL",
-              "value": 1
-            },
-            {
-              "name": "REPORT_TYPE_EXPENSE",
-              "value": 2
-            },
-            {
-              "name": "REPORT_TYPE_INCOME",
-              "value": 3
-            },
-            {
-              "name": "REPORT_TYPE_TOTAL",
-              "value": 4
-            }
-          ]
-        },
-        {
-          "name": "HbReportIntvl",
-          "variants": [
-            {
-              "name": "REPORT_INTVL_NONE",
-              "value": 0
-            },
-            {
-              "name": "REPORT_INTVL_DAY",
-              "value": 1
-            },
-            {
-              "name": "REPORT_INTVL_WEEK",
-              "value": 2
-            },
-            {
-              "name": "REPORT_INTVL_FORTNIGHT",
-              "value": 3
-            },
-            {
-              "name": "REPORT_INTVL_MONTH",
-              "value": 4
-            },
-            {
-              "name": "REPORT_INTVL_QUARTER",
-              "value": 5
-            },
-            {
-              "name": "REPORT_INTVL_HALFYEAR",
-              "value": 6
-            },
-            {
-              "name": "REPORT_INTVL_YEAR",
-              "value": 7
-            }
-          ]
-        },
-        {
-          "name": "HbReportResult",
-          "variants": [
-            {
-              "name": "REPORT_RESULT_TOTAL",
-              "value": 0
-            },
-            {
-              "name": "REPORT_RESULT_CUMUL",
-              "value": 1
-            },
-            {
-              "name": "REPORT_RESULT_BALANCE",
-              "value": 2
-            }
-          ]
-        },
-        {
-          "name": "HbReportCompFlag",
-          "variants": [
-            {
-              "name": "REPORT_COMP_FLG_NONE",
-              "value": 0
-            },
-            {
-              "name": "REPORT_COMP_FLG_CATSIGN",
-              "value": 2
-            },
-            {
-              "name": "REPORT_COMP_FLG_SPENDING",
-              "value": 4
-            },
-            {
-              "name": "REPORT_COMP_FLG_REVENUE",
-              "value": 8
-            },
-            {
-              "name": "REPORT_COMP_FLG_BALANCE",
-              "value": 256
-            },
-            {
-              "name": "REPORT_COMP_FLG_FORECAST",
-              "value": 512
-            }
-          ]
-        },
-        {
-          "name": null,
-          "variants": [
-            {
-              "name": "REPORT_MODE_TOTAL",
-              "value": 0
-            },
-            {
-              "name": "REPORT_MODE_TREND",
-              "value": 1
-            }
-          ]
-        }
-      ]
-    },
-    "hb-split.h": {
-      "defines": [
-        {
-          "name": "TXN_MAX_SPLIT",
-          "rawValue": "62",
-          "value": 62
-        }
-      ],
-      "enums": []
-    },
-    "hb-tag.h": {
-      "defines": [],
-      "enums": []
-    },
-    "hb-transaction.h": {
-      "defines": [
-        {
-          "name": "OF_INCOME",
-          "rawValue": "(1<< 1)",
-          "value": 2
-        },
-        {
-          "name": "OF_INTXFER",
-          "rawValue": "(1<< 3)",
-          "value": 8
-        },
-        {
-          "name": "OF_ADVXFER",
-          "rawValue": "(1<< 4)\t//xfer with != kcur",
-          "value": 16
-        },
-        {
-          "name": "OF_REMIND",
-          "rawValue": "(1<< 5)\t//added 5.9",
-          "value": 32
-        },
-        {
-          "name": "OF_CHEQ2",
-          "rawValue": "(1<< 6)",
-          "value": 64
-        },
-        {
-          "name": "OF_SPLIT",
-          "rawValue": "(1<< 8)",
-          "value": 256
-        },
-        {
-          "name": "OF_ISIMPORT",
-          "rawValue": "(1<< 9) //added 5.9",
-          "value": 512
-        },
-        {
-          "name": "OF_ISPAST",
-          "rawValue": "(1<<10) //added 5.9",
-          "value": 1024
-        },
-        {
-          "name": "OLDF_VALID",
-          "rawValue": "(1<< 0)",
-          "value": 1
-        },
-        {
-          "name": "OLDF_REMIND",
-          "rawValue": "(1<< 5)",
-          "value": 32
-        },
-        {
-          "name": "OLDF_AUTO",
-          "rawValue": "(1<< 2)\t//scheduled",
-          "value": 4
-        },
-        {
-          "name": "OLDF_LIMIT",
-          "rawValue": "(1<< 7)\t//scheduled",
-          "value": 128
-        },
-        {
-          "name": "OLDF_ADDED",
-          "rawValue": "(1<< 9) //was 1<<3 < 5.3",
-          "value": 512
-        },
-        {
-          "name": "OLDF_CHANGED",
-          "rawValue": "(1<<10) //was 1<<4 < 5.3",
-          "value": 1024
-        },
-        {
-          "name": "OLDF_PREFILLED",
-          "rawValue": "(1<<11)",
-          "value": 2048
-        },
-        {
-          "name": "FLAG_TMP_ADDED",
-          "rawValue": "(1<< 1)",
-          "value": 2
-        },
-        {
-          "name": "FLAG_TMP_EDITED",
-          "rawValue": "(1<< 2)",
-          "value": 4
-        },
-        {
-          "name": "FLAG_TMP_PREFILLED",
-          "rawValue": "(1<< 3) //scheduled",
-          "value": 8
-        },
-        {
-          "name": "FLAG_TMP_OVER",
-          "rawValue": "(1<< 4)",
-          "value": 16
-        },
-        {
-          "name": "FLAG_TMP_LOWBAL",
-          "rawValue": "(1<< 5)",
-          "value": 32
-        },
-        {
-          "name": "FLAG_TMP_DUPSRC",
-          "rawValue": "(1<< 9)",
-          "value": 512
-        },
-        {
-          "name": "FLAG_TMP_DUPDST",
-          "rawValue": "(1<<10)",
-          "value": 1024
-        },
-        {
-          "name": "FLAG_TMP_CHKSIGN",
-          "rawValue": "(1<< 11)",
-          "value": 2048
-        },
-        {
-          "name": "TXN_OLDSTATUS_REMIND",
-          "rawValue": "3",
-          "value": 3
-        },
-        {
-          "name": "TXN_OLDSTATUS_VOID",
-          "rawValue": "4",
-          "value": 4
-        }
-      ],
-      "enums": [
-        {
-          "name": "HbTxnStatus",
-          "variants": [
-            {
-              "name": "TXN_STATUS_NONE",
-              "value": 0
-            },
-            {
-              "name": "TXN_STATUS_CLEARED",
-              "value": 1
-            },
-            {
-              "name": "TXN_STATUS_RECONCILED",
-              "value": 2
-            },
-            {
-              "name": "TXN_STATUS_VOID",
-              "value": 3
-            }
-          ]
-        },
-        {
-          "name": null,
-          "variants": [
-            {
-              "name": "TXN_MARK_NONE",
-              "value": 0
-            },
-            {
-              "name": "TXN_MARK_DUPSRC",
-              "value": 1
-            },
-            {
-              "name": "TXN_MARK_DUPDST",
-              "value": 2
-            }
-          ]
-        },
-        {
-          "name": null,
-          "variants": [
-            {
-              "name": "TXN_TYPE_EXPENSE",
-              "value": 0
-            },
-            {
-              "name": "TXN_TYPE_INCOME",
-              "value": 1
-            },
-            {
-              "name": "TXN_TYPE_INTXFER",
-              "value": 2
-            }
-          ]
-        },
-        {
-          "name": "HbTxnDlgAction",
-          "variants": [
-            {
-              "name": "TXN_DLG_ACTION_NONE",
-              "value": 0
-            },
-            {
-              "name": "TXN_DLG_ACTION_ADD",
-              "value": 1
-            },
-            {
-              "name": "TXN_DLG_ACTION_INHERIT",
-              "value": 2
-            },
-            {
-              "name": "TXN_DLG_ACTION_EDIT",
-              "value": 3
-            },
-            {
-              "name": "TXN_DLG_ACTION_VIEW",
-              "value": 4
-            }
-          ]
-        },
-        {
-          "name": "HbTxnDlgType",
-          "variants": [
-            {
-              "name": "TXN_DLG_TYPE_NONE",
-              "value": 0
-            },
-            {
-              "name": "TXN_DLG_TYPE_TXN",
-              "value": 1
-            },
-            {
-              "name": "TXN_DLG_TYPE_TPL",
-              "value": 2
-            },
-            {
-              "name": "TXN_DLG_TYPE_SCH",
-              "value": 3
-            }
-          ]
-        }
-      ]
-    },
-    "hb-types.h": {
-      "defines": [],
-      "enums": []
-    },
-    "homebank.h": {
-      "defines": [
-        {
-          "name": "HB_PRIV_FUNC",
-          "rawValue": "FALSE",
-          "value": "FALSE"
-        },
-        {
-          "name": "HB_PRIV_FORCE_ENUS",
-          "rawValue": "FALSE",
-          "value": "FALSE"
-        },
-        {
-          "name": "HB_UNSTABLE",
-          "rawValue": "FALSE",
-          "value": "FALSE"
-        },
-        {
-          "name": "HB_UNSTABLE_SHOW",
-          "rawValue": "FALSE\t//show user RC header",
-          "value": "FALSE\t//show user RC header"
-        },
-        {
-          "name": "HOMEBANK_MAJOR",
-          "rawValue": "5",
-          "value": 5
-        },
-        {
-          "name": "HOMEBANK_MINOR",
-          "rawValue": "10",
-          "value": 10
-        },
-        {
-          "name": "HOMEBANK_MICRO",
-          "rawValue": "0",
-          "value": 0
-        },
-        {
-          "name": "HB_VERSION",
-          "rawValue": "\"5.10\"",
-          "value": "5.10"
-        },
-        {
-          "name": "HB_VERSION_NUM",
-          "rawValue": "(HOMEBANK_MAJOR*10000) + (HOMEBANK_MINOR*100) + HOMEBANK_MICRO",
-          "value": "(HOMEBANK_MAJOR*10000) + (HOMEBANK_MINOR*100) + HOMEBANK_MICRO"
-        },
-        {
-          "name": "FILE_VERSION",
-          "rawValue": "1.6",
-          "value": 1.6
-        },
-        {
-          "name": "PROGNAME",
-          "rawValue": "\"HomeBank\"",
-          "value": "HomeBank"
-        },
-        {
-          "name": "HB_DATA_PATH",
-          "rawValue": "\"homebank\"",
-          "value": "homebank"
-        },
-        {
-          "name": "PROGNAME",
-          "rawValue": "\"HomeBank \" HB_VERSION \" (unstable)\"",
-          "value": "HomeBank \" HB_VERSION \" (unstable)"
-        },
-        {
-          "name": "HB_DATA_PATH",
-          "rawValue": "\"homebank_unstable\"",
-          "value": "homebank_unstable"
-        },
-        {
-          "name": "GETTEXT_PACKAGE",
-          "rawValue": "\"homebank\"",
-          "value": "homebank"
-        },
-        {
-          "name": "LOCALE_DIR",
-          "rawValue": "\"locale\"",
-          "value": "locale"
-        },
-        {
-          "name": "PIXMAPS_DIR",
-          "rawValue": "\"images\"",
-          "value": "images"
-        },
-        {
-          "name": "HELP_DIR",
-          "rawValue": "\"help\"",
-          "value": "help"
-        },
-        {
-          "name": "PACKAGE_VERSION",
-          "rawValue": "HB_VERSION",
-          "value": "HB_VERSION"
-        },
-        {
-          "name": "PACKAGE",
-          "rawValue": "\"homebank\"",
-          "value": "homebank"
-        },
-        {
-          "name": "VERSION",
-          "rawValue": "HB_VERSION",
-          "value": "HB_VERSION"
-        },
-        {
-          "name": "ENABLE_NLS",
-          "rawValue": "1",
-          "value": 1
-        },
-        {
-          "name": "SPACING_TINY",
-          "rawValue": "3",
-          "value": 3
-        },
-        {
-          "name": "SPACING_SMALL",
-          "rawValue": "6",
-          "value": 6
-        },
-        {
-          "name": "SPACING_MEDIUM",
-          "rawValue": "12",
-          "value": 12
-        },
-        {
-          "name": "SPACING_LARGE",
-          "rawValue": "18",
-          "value": 18
-        },
-        {
-          "name": "SPACING_POPOVER",
-          "rawValue": "10",
-          "value": 10
-        },
-        {
-          "name": "HB_DATE_MAX_GAP",
-          "rawValue": "7",
-          "value": 7
-        },
-        {
-          "name": "HB_MINDATE",
-          "rawValue": "693596\t  //01/01/1900",
-          "value": 693596
-        },
-        {
-          "name": "HB_MAXDATE",
-          "rawValue": "803533\t  //31/12/2200",
-          "value": 803533
-        },
-        {
-          "name": "HB_MINWIDTH_LIST",
-          "rawValue": "161",
-          "value": 161
-        },
-        {
-          "name": "HB_MINHEIGHT_LIST",
-          "rawValue": "260",
-          "value": 260
-        },
-        {
-          "name": "HB_MINWIDTH_SEARCH",
-          "rawValue": "240",
-          "value": 240
-        },
-        {
-          "name": "HB_MINWIDTH_COLUMN",
-          "rawValue": "48",
-          "value": 48
-        },
-        {
-          "name": "PHI",
-          "rawValue": "1.61803399",
-          "value": 1.61803399
-        },
-        {
-          "name": "HB_NUMBER_SAMPLE",
-          "rawValue": "1234567.89",
-          "value": 1234567.89
-        }
-      ],
-      "enums": [
-        {
-          "name": null,
-          "variants": [
-            {
-              "name": "UF_TITLE",
-              "value": 1
-            },
-            {
-              "name": "UF_SENSITIVE",
-              "value": 2
-            },
-            {
-              "name": "UF_VISUAL",
-              "value": 4
-            },
-            {
-              "name": "UF_REFRESHALL",
-              "value": 8
-            },
-            {
-              "name": "UF_TXNLIST",
-              "value": 16
-            }
-          ]
-        },
-        {
-          "name": "HbFileType",
-          "variants": [
-            {
-              "name": "FILETYPE_UNKNOWN",
-              "value": 0
-            },
-            {
-              "name": "FILETYPE_HOMEBANK",
-              "value": 1
-            },
-            {
-              "name": "FILETYPE_OFX",
-              "value": 2
-            },
-            {
-              "name": "FILETYPE_QIF",
-              "value": 3
-            },
-            {
-              "name": "FILETYPE_CSV_HB",
-              "value": 4
-            },
-            {
-              "name": "NUM_FILETYPE",
-              "value": 5
             }
           ]
         }
@@ -2789,6 +1081,85 @@
       ],
       "enums": []
     },
+    "hb-preferences.h": {
+      "defines": [
+        {
+          "name": "DEFAULT_FORMAT_DATE",
+          "rawValue": "\"%x\"",
+          "value": "%x"
+        },
+        {
+          "name": "MAX_FRAC_DIGIT",
+          "rawValue": "6",
+          "value": 6
+        },
+        {
+          "name": "DEFAULT_EXP_COLOR",
+          "rawValue": "\"#ce5c00\"\t//Orange",
+          "value": "\"#ce5c00\"\t//Orange"
+        },
+        {
+          "name": "DEFAULT_INC_COLOR",
+          "rawValue": "\"#4e9a36\"\t//Chameleon",
+          "value": "\"#4e9a36\"\t//Chameleon"
+        },
+        {
+          "name": "DEFAULT_WARN_COLOR",
+          "rawValue": "\"#a40000\"\t//Scarlett Red",
+          "value": "\"#a40000\"\t//Scarlett Red"
+        },
+        {
+          "name": "DEFAULT_FUTURE_BG_COLOR",
+          "rawValue": "\"#204a87\"",
+          "value": "#204a87"
+        }
+      ],
+      "enums": [
+        {
+          "name": "HbPrefWinGeoPreset",
+          "variants": [
+            {
+              "name": "HB_PREF_WINGEO_NONE",
+              "value": 0
+            },
+            {
+              "name": "HB_PREF_WINGEO_DEFAULT",
+              "value": 1
+            },
+            {
+              "name": "HB_PREF_WINGEO_SCREEN",
+              "value": 2
+            },
+            {
+              "name": "HB_PREF_WINGEO_NETBOOK",
+              "value": 3
+            },
+            {
+              "name": "HB_PREF_WINGEO_HD",
+              "value": 4
+            },
+            {
+              "name": "HB_PREF_WINGEO_HDPLUS",
+              "value": 5
+            },
+            {
+              "name": "HB_PREF_WINGEO_FHD",
+              "value": 6
+            }
+          ]
+        }
+      ]
+    },
+    "hb-currency.h": {
+      "defines": [
+        {
+          "name": "CF_CUSTOM",
+          "rawValue": "(1<<1)",
+          "value": 2
+        }
+      ],
+      "enums": []
+    },
     "list-account.h": {
       "defines": [],
       "enums": [
@@ -3016,6 +1387,1635 @@
             {
               "name": "COL_SCH_UID_ACCOUNT",
               "value": 18
+            }
+          ]
+        }
+      ]
+    },
+    "hb-account.h": {
+      "defines": [
+        {
+          "name": "AF_CLOSED",
+          "rawValue": "(1<<1)",
+          "value": 2
+        },
+        {
+          "name": "AF_NOSUMMARY",
+          "rawValue": "(1<<4)",
+          "value": 16
+        },
+        {
+          "name": "AF_NOBUDGET",
+          "rawValue": "(1<<5)",
+          "value": 32
+        },
+        {
+          "name": "AF_NOREPORT",
+          "rawValue": "(1<<6)",
+          "value": 64
+        },
+        {
+          "name": "AF_OUTFLOWSUM",
+          "rawValue": "(1<<7)",
+          "value": 128
+        },
+        {
+          "name": "AF_HASNOTICE",
+          "rawValue": "(1<< 9) //added 5.9 for pending/import",
+          "value": 512
+        },
+        {
+          "name": "AF_OLDBUDGET",
+          "rawValue": "(1<<0)",
+          "value": 1
+        },
+        {
+          "name": "FLAG_ACC_TMP_ADDED",
+          "rawValue": "(1<< 1)",
+          "value": 2
+        },
+        {
+          "name": "FLAG_ACC_TMP_EDITED",
+          "rawValue": "(1<< 2)",
+          "value": 4
+        },
+        {
+          "name": "FLAG_ACC_TMP_DIRTY",
+          "rawValue": "(1<< 3)\t//indicate any display needs a refresh",
+          "value": 8
+        }
+      ],
+      "enums": [
+        {
+          "name": null,
+          "variants": [
+            {
+              "name": "ACC_TYPE_NONE",
+              "value": 0
+            },
+            {
+              "name": "ACC_TYPE_BANK",
+              "value": 1
+            },
+            {
+              "name": "ACC_TYPE_CASH",
+              "value": 2
+            },
+            {
+              "name": "ACC_TYPE_ASSET",
+              "value": 3
+            },
+            {
+              "name": "ACC_TYPE_CREDITCARD",
+              "value": 4
+            },
+            {
+              "name": "ACC_TYPE_LIABILITY",
+              "value": 5
+            },
+            {
+              "name": "ACC_TYPE_CHECKING",
+              "value": 6
+            },
+            {
+              "name": "ACC_TYPE_SAVINGS",
+              "value": 7
+            },
+            {
+              "name": "ACC_TYPE_MAXVALUE",
+              "value": 8
+            }
+          ]
+        },
+        {
+          "name": null,
+          "variants": [
+            {
+              "name": "ACC_USAGE_NONE",
+              "value": 0
+            },
+            {
+              "name": "ACC_USAGE_TXN",
+              "value": 1
+            },
+            {
+              "name": "ACC_USAGE_TXN_XFER",
+              "value": 2
+            },
+            {
+              "name": "ACC_USAGE_ARC",
+              "value": 3
+            },
+            {
+              "name": "ACC_USAGE_ARC_XFER",
+              "value": 4
+            }
+          ]
+        }
+      ]
+    },
+    "hb-archive.h": {
+      "defines": [
+        {
+          "name": "TF_RECUR",
+          "rawValue": "(1<< 0)",
+          "value": 1
+        },
+        {
+          "name": "TF_LIMIT",
+          "rawValue": "(1<< 1)",
+          "value": 2
+        },
+        {
+          "name": "TF_RELATIVE",
+          "rawValue": "(1<< 2)",
+          "value": 4
+        }
+      ],
+      "enums": [
+        {
+          "name": null,
+          "variants": [
+            {
+              "name": "ARC_POSTMODE_DUEDATE",
+              "value": 0
+            },
+            {
+              "name": "ARC_POSTMODE_PAYOUT",
+              "value": 1
+            },
+            {
+              "name": "ARC_POSTMODE_ADVANCE",
+              "value": 2
+            }
+          ]
+        },
+        {
+          "name": null,
+          "variants": [
+            {
+              "name": "AUTO_FREQ_DAY",
+              "value": 0
+            },
+            {
+              "name": "AUTO_FREQ_WEEK",
+              "value": 1
+            },
+            {
+              "name": "AUTO_FREQ_MONTH",
+              "value": 2
+            },
+            {
+              "name": "AUTO_FREQ_YEAR",
+              "value": 3
+            }
+          ]
+        },
+        {
+          "name": null,
+          "variants": [
+            {
+              "name": "AUTO_ORDINAL_FIRST",
+              "value": 1
+            },
+            {
+              "name": "AUTO_ORDINAL_SECOND",
+              "value": 2
+            },
+            {
+              "name": "AUTO_ORDINAL_THIRD",
+              "value": 3
+            },
+            {
+              "name": "AUTO_ORDINAL_FOURTH",
+              "value": 4
+            },
+            {
+              "name": "AUTO_ORDINAL_LAST",
+              "value": 5
+            }
+          ]
+        },
+        {
+          "name": null,
+          "variants": [
+            {
+              "name": "AUTO_WEEKDAY_MONDAY",
+              "value": 1
+            },
+            {
+              "name": "AUTO_WEEKDAY_TUESDAY",
+              "value": 2
+            },
+            {
+              "name": "AUTO_WEEKDAY_WEDNESDAY",
+              "value": 3
+            },
+            {
+              "name": "AUTO_WEEKDAY_THURSDAY",
+              "value": 4
+            },
+            {
+              "name": "AUTO_WEEKDAY_FRIDAY",
+              "value": 5
+            },
+            {
+              "name": "AUTO_WEEKDAY_SATURDAY",
+              "value": 6
+            },
+            {
+              "name": "AUTO_WEEKDAY_SUNDAY",
+              "value": 7
+            },
+            {
+              "name": "AUTO_WEEKDAY_DAY",
+              "value": 8
+            },
+            {
+              "name": "AUTO_WEEKDAY_WEEKDAY",
+              "value": 9
+            },
+            {
+              "name": "AUTO_WEEKDAY_WEEKENDDAY",
+              "value": 10
+            }
+          ]
+        },
+        {
+          "name": null,
+          "variants": [
+            {
+              "name": "ARC_WEEKEND_POSSIBLE",
+              "value": 0
+            },
+            {
+              "name": "ARC_WEEKEND_BEFORE",
+              "value": 1
+            },
+            {
+              "name": "ARC_WEEKEND_AFTER",
+              "value": 2
+            },
+            {
+              "name": "ARC_WEEKEND_SKIP",
+              "value": 3
+            }
+          ]
+        },
+        {
+          "name": null,
+          "variants": [
+            {
+              "name": "FLT_SCHEDULED_THISMONTH",
+              "value": 1
+            },
+            {
+              "name": "FLT_SCHEDULED_NEXTMONTH",
+              "value": 2
+            },
+            {
+              "name": "FLT_SCHEDULED_NEXT30DAYS",
+              "value": 3
+            },
+            {
+              "name": "FLT_SCHEDULED_NEXT60DAYS",
+              "value": 4
+            },
+            {
+              "name": "FLT_SCHEDULED_NEXT90DAYS",
+              "value": 5
+            },
+            {
+              "name": "FLT_SCHEDULED_ALLDATE",
+              "value": 6
+            },
+            {
+              "name": "FLT_SCHEDULED_MAXPOSTDATE",
+              "value": 7
+            }
+          ]
+        }
+      ]
+    },
+    "hb-assign.h": {
+      "defines": [
+        {
+          "name": "ASGF_EXACT",
+          "rawValue": "(1<<0)",
+          "value": 1
+        },
+        {
+          "name": "ASGF_DOPAY",
+          "rawValue": "(1<<1)",
+          "value": 2
+        },
+        {
+          "name": "ASGF_DOCAT",
+          "rawValue": "(1<<2)",
+          "value": 4
+        },
+        {
+          "name": "ASGF_DOMOD",
+          "rawValue": "(1<<3)",
+          "value": 8
+        },
+        {
+          "name": "ASGF_DOTAG",
+          "rawValue": "(1<<4) //5.8",
+          "value": 16
+        },
+        {
+          "name": "ASGF_PREFILLED",
+          "rawValue": "(1<<5)",
+          "value": 32
+        },
+        {
+          "name": "ASGF_AMOUNT",
+          "rawValue": "(1<<7)\t//5.6",
+          "value": 128
+        },
+        {
+          "name": "ASGF_REGEX",
+          "rawValue": "(1<<8)",
+          "value": 256
+        },
+        {
+          "name": "ASGF_OVWPAY",
+          "rawValue": "(1<<9)",
+          "value": 512
+        },
+        {
+          "name": "ASGF_OVWCAT",
+          "rawValue": "(1<<10)",
+          "value": 1024
+        },
+        {
+          "name": "ASGF_OVWMOD",
+          "rawValue": "(1<<11)",
+          "value": 2048
+        },
+        {
+          "name": "ASGF_OVWTAG",
+          "rawValue": "(1<<12) //5.8",
+          "value": 4096
+        }
+      ],
+      "enums": []
+    },
+    "hb-category.h": {
+      "defines": [
+        {
+          "name": "GF_SUB",
+          "rawValue": "(1<<0)\t\t//? useful as we can check item->parent= 0",
+          "value": 1
+        },
+        {
+          "name": "GF_INCOME",
+          "rawValue": "(1<<1)",
+          "value": 2
+        },
+        {
+          "name": "GF_CUSTOM",
+          "rawValue": "(1<<2)",
+          "value": 4
+        },
+        {
+          "name": "GF_BUDGET",
+          "rawValue": "(1<<3)",
+          "value": 8
+        },
+        {
+          "name": "GF_FORCED",
+          "rawValue": "(1<<4)",
+          "value": 16
+        },
+        {
+          "name": "GF_MIXED",
+          "rawValue": "(1<<5)\t\t//#1740368 if cat has mixed exp/inc type",
+          "value": 32
+        },
+        {
+          "name": "GF_HIDDEN",
+          "rawValue": "(1<<8)\t\t//hidden by user",
+          "value": 256
+        }
+      ],
+      "enums": []
+    },
+    "hb-filter.h": {
+      "defines": [],
+      "enums": [
+        {
+          "name": null,
+          "variants": [
+            {
+              "name": "FLT_OFF",
+              "value": 0
+            },
+            {
+              "name": "FLT_INCLUDE",
+              "value": 1
+            },
+            {
+              "name": "FLT_EXCLUDE",
+              "value": 2
+            }
+          ]
+        },
+        {
+          "name": null,
+          "variants": [
+            {
+              "name": "FLT_GRP_DATE",
+              "value": 0
+            },
+            {
+              "name": "FLT_GRP_CATEGORY",
+              "value": 1
+            },
+            {
+              "name": "FLT_GRP_PAYEE",
+              "value": 2
+            },
+            {
+              "name": "FLT_GRP_ACCOUNT",
+              "value": 3
+            },
+            {
+              "name": "FLT_GRP_TAG",
+              "value": 4
+            },
+            {
+              "name": "FLT_GRP_TEXT",
+              "value": 5
+            },
+            {
+              "name": "FLT_GRP_AMOUNT",
+              "value": 6
+            },
+            {
+              "name": "FLT_GRP_PAYMODE",
+              "value": 7
+            },
+            {
+              "name": "FLT_GRP_STATUS",
+              "value": 8
+            },
+            {
+              "name": "FLT_GRP_TYPE",
+              "value": 9
+            },
+            {
+              "name": "FLT_GRP_MAX",
+              "value": 10
+            }
+          ]
+        },
+        {
+          "name": null,
+          "variants": [
+            {
+              "name": "OLD56_FLT_RANGE_THISMONTH",
+              "value": 0
+            },
+            {
+              "name": "OLD56_FLT_RANGE_LASTMONTH",
+              "value": 1
+            },
+            {
+              "name": "OLD56_FLT_RANGE_THISQUARTER",
+              "value": 2
+            },
+            {
+              "name": "OLD56_FLT_RANGE_LASTQUARTER",
+              "value": 3
+            },
+            {
+              "name": "OLD56_FLT_RANGE_THISYEAR",
+              "value": 4
+            },
+            {
+              "name": "OLD56_FLT_RANGE_LASTYEAR",
+              "value": 5
+            },
+            {
+              "name": "OLD56_FLT_RANGE_LAST30DAYS",
+              "value": 7
+            },
+            {
+              "name": "OLD56_FLT_RANGE_LAST60DAYS",
+              "value": 8
+            },
+            {
+              "name": "OLD56_FLT_RANGE_LAST90DAYS",
+              "value": 9
+            },
+            {
+              "name": "OLD56_FLT_RANGE_LAST12MONTHS",
+              "value": 10
+            },
+            {
+              "name": "OLD56_FLT_RANGE_OTHER",
+              "value": 12
+            },
+            {
+              "name": "OLD56_FLT_RANGE_ALLDATE",
+              "value": 14
+            }
+          ]
+        },
+        {
+          "name": null,
+          "variants": [
+            {
+              "name": "FLT_RANGE_UNSET",
+              "value": 0
+            },
+            {
+              "name": "FLT_RANGE_MISC_CUSTOM",
+              "value": 1
+            },
+            {
+              "name": "FLT_RANGE_MISC_ALLDATE",
+              "value": 2
+            },
+            {
+              "name": "FLT_RANGE_MISC_30DAYS",
+              "value": 3
+            },
+            {
+              "name": "FLT_RANGE_LAST_DAY",
+              "value": 20
+            },
+            {
+              "name": "FLT_RANGE_LAST_WEEK",
+              "value": 21
+            },
+            {
+              "name": "FLT_RANGE_LAST_FORTNIGHT",
+              "value": 22
+            },
+            {
+              "name": "FLT_RANGE_LAST_MONTH",
+              "value": 23
+            },
+            {
+              "name": "FLT_RANGE_LAST_QUARTER",
+              "value": 24
+            },
+            {
+              "name": "FLT_RANGE_LAST_YEAR",
+              "value": 25
+            },
+            {
+              "name": "FLT_RANGE_LAST_30DAYS",
+              "value": 26
+            },
+            {
+              "name": "FLT_RANGE_LAST_60DAYS",
+              "value": 27
+            },
+            {
+              "name": "FLT_RANGE_LAST_90DAYS",
+              "value": 28
+            },
+            {
+              "name": "FLT_RANGE_LAST_12MONTHS",
+              "value": 29
+            },
+            {
+              "name": "FLT_RANGE_LAST_6MONTHS",
+              "value": 30
+            },
+            {
+              "name": "FLT_RANGE_THIS_DAY",
+              "value": 40
+            },
+            {
+              "name": "FLT_RANGE_THIS_WEEK",
+              "value": 41
+            },
+            {
+              "name": "FLT_RANGE_THIS_FORTNIGHT",
+              "value": 42
+            },
+            {
+              "name": "FLT_RANGE_THIS_MONTH",
+              "value": 43
+            },
+            {
+              "name": "FLT_RANGE_THIS_QUARTER",
+              "value": 44
+            },
+            {
+              "name": "FLT_RANGE_THIS_YEAR",
+              "value": 45
+            },
+            {
+              "name": "FLT_RANGE_NEXT_DAY",
+              "value": 60
+            },
+            {
+              "name": "FLT_RANGE_NEXT_WEEK",
+              "value": 61
+            },
+            {
+              "name": "FLT_RANGE_NEXT_FORTNIGHT",
+              "value": 62
+            },
+            {
+              "name": "FLT_RANGE_NEXT_MONTH",
+              "value": 63
+            },
+            {
+              "name": "FLT_RANGE_NEXT_QUARTER",
+              "value": 64
+            },
+            {
+              "name": "FLT_RANGE_NEXT_YEAR",
+              "value": 65
+            },
+            {
+              "name": "FLT_RANGE_TODATE_YEAR",
+              "value": 80
+            },
+            {
+              "name": "FLT_RANGE_TODATE_MONTH",
+              "value": 81
+            },
+            {
+              "name": "FLT_RANGE_TODATE_ALL",
+              "value": 82
+            },
+            {
+              "name": "FLT_RANGE_MAX",
+              "value": 83
+            }
+          ]
+        },
+        {
+          "name": null,
+          "variants": [
+            {
+              "name": "FLT_TYPE_ALL",
+              "value": 0
+            },
+            {
+              "name": "FLT_TYPE_EXPENSE",
+              "value": 2
+            },
+            {
+              "name": "FLT_TYPE_INCOME",
+              "value": 3
+            },
+            {
+              "name": "FLT_TYPE_INTXFER",
+              "value": 4
+            },
+            {
+              "name": "FLT_TYPE_NOTXFER",
+              "value": 5
+            }
+          ]
+        },
+        {
+          "name": null,
+          "variants": [
+            {
+              "name": "FLT_STATUS_ALL",
+              "value": 0
+            },
+            {
+              "name": "FLT_STATUS_CLEARED",
+              "value": 2
+            },
+            {
+              "name": "FLT_STATUS_UNCLEARED",
+              "value": 3
+            },
+            {
+              "name": "FLT_STATUS_RECONCILED",
+              "value": 4
+            },
+            {
+              "name": "FLT_STATUS_UNRECONCILED",
+              "value": 5
+            },
+            {
+              "name": "FLT_STATUS_UNCATEGORIZED",
+              "value": 7
+            },
+            {
+              "name": "FLT_STATUS_UNAPPROVED",
+              "value": 8
+            }
+          ]
+        },
+        {
+          "name": null,
+          "variants": [
+            {
+              "name": "FLT_QSEARCH_MEMO",
+              "value": 1
+            },
+            {
+              "name": "FLT_QSEARCH_NUMBER",
+              "value": 2
+            },
+            {
+              "name": "FLT_QSEARCH_PAYEE",
+              "value": 4
+            },
+            {
+              "name": "FLT_QSEARCH_CATEGORY",
+              "value": 8
+            },
+            {
+              "name": "FLT_QSEARCH_TAGS",
+              "value": 16
+            },
+            {
+              "name": "FLT_QSEARCH_AMOUNT",
+              "value": 32
+            }
+          ]
+        }
+      ]
+    },
+    "hb-payee.h": {
+      "defines": [
+        {
+          "name": "PF_HIDDEN",
+          "rawValue": "(1<<8)\t//hidden by user",
+          "value": 256
+        }
+      ],
+      "enums": []
+    },
+    "hb-tag.h": {
+      "defines": [],
+      "enums": []
+    },
+    "hb-transaction.h": {
+      "defines": [
+        {
+          "name": "OF_INCOME",
+          "rawValue": "(1<< 1)",
+          "value": 2
+        },
+        {
+          "name": "OF_INTXFER",
+          "rawValue": "(1<< 3)",
+          "value": 8
+        },
+        {
+          "name": "OF_ADVXFER",
+          "rawValue": "(1<< 4)\t//xfer with != kcur",
+          "value": 16
+        },
+        {
+          "name": "OF_REMIND",
+          "rawValue": "(1<< 5)\t//added 5.9",
+          "value": 32
+        },
+        {
+          "name": "OF_CHEQ2",
+          "rawValue": "(1<< 6)",
+          "value": 64
+        },
+        {
+          "name": "OF_SPLIT",
+          "rawValue": "(1<< 8)",
+          "value": 256
+        },
+        {
+          "name": "OF_ISIMPORT",
+          "rawValue": "(1<< 9) //added 5.9",
+          "value": 512
+        },
+        {
+          "name": "OF_ISPAST",
+          "rawValue": "(1<<10) //added 5.9",
+          "value": 1024
+        },
+        {
+          "name": "OLDF_VALID",
+          "rawValue": "(1<< 0)",
+          "value": 1
+        },
+        {
+          "name": "OLDF_REMIND",
+          "rawValue": "(1<< 5)",
+          "value": 32
+        },
+        {
+          "name": "OLDF_AUTO",
+          "rawValue": "(1<< 2)\t//scheduled",
+          "value": 4
+        },
+        {
+          "name": "OLDF_LIMIT",
+          "rawValue": "(1<< 7)\t//scheduled",
+          "value": 128
+        },
+        {
+          "name": "OLDF_ADDED",
+          "rawValue": "(1<< 9) //was 1<<3 < 5.3",
+          "value": 512
+        },
+        {
+          "name": "OLDF_CHANGED",
+          "rawValue": "(1<<10) //was 1<<4 < 5.3",
+          "value": 1024
+        },
+        {
+          "name": "OLDF_PREFILLED",
+          "rawValue": "(1<<11)",
+          "value": 2048
+        },
+        {
+          "name": "FLAG_TMP_ADDED",
+          "rawValue": "(1<< 1)",
+          "value": 2
+        },
+        {
+          "name": "FLAG_TMP_EDITED",
+          "rawValue": "(1<< 2)",
+          "value": 4
+        },
+        {
+          "name": "FLAG_TMP_PREFILLED",
+          "rawValue": "(1<< 3) //scheduled",
+          "value": 8
+        },
+        {
+          "name": "FLAG_TMP_OVER",
+          "rawValue": "(1<< 4)",
+          "value": 16
+        },
+        {
+          "name": "FLAG_TMP_LOWBAL",
+          "rawValue": "(1<< 5)",
+          "value": 32
+        },
+        {
+          "name": "FLAG_TMP_DUPSRC",
+          "rawValue": "(1<< 9)",
+          "value": 512
+        },
+        {
+          "name": "FLAG_TMP_DUPDST",
+          "rawValue": "(1<<10)",
+          "value": 1024
+        },
+        {
+          "name": "FLAG_TMP_CHKSIGN",
+          "rawValue": "(1<< 11)",
+          "value": 2048
+        },
+        {
+          "name": "TXN_OLDSTATUS_REMIND",
+          "rawValue": "3",
+          "value": 3
+        },
+        {
+          "name": "TXN_OLDSTATUS_VOID",
+          "rawValue": "4",
+          "value": 4
+        }
+      ],
+      "enums": [
+        {
+          "name": "HbTxnStatus",
+          "variants": [
+            {
+              "name": "TXN_STATUS_NONE",
+              "value": 0
+            },
+            {
+              "name": "TXN_STATUS_CLEARED",
+              "value": 1
+            },
+            {
+              "name": "TXN_STATUS_RECONCILED",
+              "value": 2
+            },
+            {
+              "name": "TXN_STATUS_VOID",
+              "value": 3
+            }
+          ]
+        },
+        {
+          "name": null,
+          "variants": [
+            {
+              "name": "TXN_MARK_NONE",
+              "value": 0
+            },
+            {
+              "name": "TXN_MARK_DUPSRC",
+              "value": 1
+            },
+            {
+              "name": "TXN_MARK_DUPDST",
+              "value": 2
+            }
+          ]
+        },
+        {
+          "name": null,
+          "variants": [
+            {
+              "name": "TXN_TYPE_EXPENSE",
+              "value": 0
+            },
+            {
+              "name": "TXN_TYPE_INCOME",
+              "value": 1
+            },
+            {
+              "name": "TXN_TYPE_INTXFER",
+              "value": 2
+            }
+          ]
+        },
+        {
+          "name": "HbTxnDlgAction",
+          "variants": [
+            {
+              "name": "TXN_DLG_ACTION_NONE",
+              "value": 0
+            },
+            {
+              "name": "TXN_DLG_ACTION_ADD",
+              "value": 1
+            },
+            {
+              "name": "TXN_DLG_ACTION_INHERIT",
+              "value": 2
+            },
+            {
+              "name": "TXN_DLG_ACTION_EDIT",
+              "value": 3
+            },
+            {
+              "name": "TXN_DLG_ACTION_VIEW",
+              "value": 4
+            }
+          ]
+        },
+        {
+          "name": "HbTxnDlgType",
+          "variants": [
+            {
+              "name": "TXN_DLG_TYPE_NONE",
+              "value": 0
+            },
+            {
+              "name": "TXN_DLG_TYPE_TXN",
+              "value": 1
+            },
+            {
+              "name": "TXN_DLG_TYPE_TPL",
+              "value": 2
+            },
+            {
+              "name": "TXN_DLG_TYPE_SCH",
+              "value": 3
+            }
+          ]
+        }
+      ]
+    },
+    "hb-encoding.h": {
+      "defines": [],
+      "enums": [
+        {
+          "name": "GeditEncodingIndex",
+          "variants": [
+            {
+              "name": "GEDIT_ENCODING_ISO_8859_1",
+              "value": 0
+            },
+            {
+              "name": "GEDIT_ENCODING_ISO_8859_2",
+              "value": 1
+            },
+            {
+              "name": "GEDIT_ENCODING_ISO_8859_3",
+              "value": 2
+            },
+            {
+              "name": "GEDIT_ENCODING_ISO_8859_4",
+              "value": 3
+            },
+            {
+              "name": "GEDIT_ENCODING_ISO_8859_5",
+              "value": 4
+            },
+            {
+              "name": "GEDIT_ENCODING_ISO_8859_6",
+              "value": 5
+            },
+            {
+              "name": "GEDIT_ENCODING_ISO_8859_7",
+              "value": 6
+            },
+            {
+              "name": "GEDIT_ENCODING_ISO_8859_8",
+              "value": 7
+            },
+            {
+              "name": "GEDIT_ENCODING_ISO_8859_8_I",
+              "value": 8
+            },
+            {
+              "name": "GEDIT_ENCODING_ISO_8859_9",
+              "value": 9
+            },
+            {
+              "name": "GEDIT_ENCODING_ISO_8859_10",
+              "value": 10
+            },
+            {
+              "name": "GEDIT_ENCODING_ISO_8859_13",
+              "value": 11
+            },
+            {
+              "name": "GEDIT_ENCODING_ISO_8859_14",
+              "value": 12
+            },
+            {
+              "name": "GEDIT_ENCODING_ISO_8859_15",
+              "value": 13
+            },
+            {
+              "name": "GEDIT_ENCODING_ISO_8859_16",
+              "value": 14
+            },
+            {
+              "name": "GEDIT_ENCODING_UTF_7",
+              "value": 15
+            },
+            {
+              "name": "GEDIT_ENCODING_UTF_16",
+              "value": 16
+            },
+            {
+              "name": "GEDIT_ENCODING_UTF_16_BE",
+              "value": 17
+            },
+            {
+              "name": "GEDIT_ENCODING_UTF_16_LE",
+              "value": 18
+            },
+            {
+              "name": "GEDIT_ENCODING_UTF_32",
+              "value": 19
+            },
+            {
+              "name": "GEDIT_ENCODING_UCS_2",
+              "value": 20
+            },
+            {
+              "name": "GEDIT_ENCODING_UCS_4",
+              "value": 21
+            },
+            {
+              "name": "GEDIT_ENCODING_ARMSCII_8",
+              "value": 22
+            },
+            {
+              "name": "GEDIT_ENCODING_BIG5",
+              "value": 23
+            },
+            {
+              "name": "GEDIT_ENCODING_BIG5_HKSCS",
+              "value": 24
+            },
+            {
+              "name": "GEDIT_ENCODING_CP_866",
+              "value": 25
+            },
+            {
+              "name": "GEDIT_ENCODING_EUC_JP",
+              "value": 26
+            },
+            {
+              "name": "GEDIT_ENCODING_EUC_JP_MS",
+              "value": 27
+            },
+            {
+              "name": "GEDIT_ENCODING_CP932",
+              "value": 28
+            },
+            {
+              "name": "GEDIT_ENCODING_EUC_KR",
+              "value": 29
+            },
+            {
+              "name": "GEDIT_ENCODING_EUC_TW",
+              "value": 30
+            },
+            {
+              "name": "GEDIT_ENCODING_GB18030",
+              "value": 31
+            },
+            {
+              "name": "GEDIT_ENCODING_GB2312",
+              "value": 32
+            },
+            {
+              "name": "GEDIT_ENCODING_GBK",
+              "value": 33
+            },
+            {
+              "name": "GEDIT_ENCODING_GEOSTD8",
+              "value": 34
+            },
+            {
+              "name": "GEDIT_ENCODING_HZ",
+              "value": 35
+            },
+            {
+              "name": "GEDIT_ENCODING_IBM_850",
+              "value": 36
+            },
+            {
+              "name": "GEDIT_ENCODING_IBM_852",
+              "value": 37
+            },
+            {
+              "name": "GEDIT_ENCODING_IBM_855",
+              "value": 38
+            },
+            {
+              "name": "GEDIT_ENCODING_IBM_857",
+              "value": 39
+            },
+            {
+              "name": "GEDIT_ENCODING_IBM_862",
+              "value": 40
+            },
+            {
+              "name": "GEDIT_ENCODING_IBM_864",
+              "value": 41
+            },
+            {
+              "name": "GEDIT_ENCODING_ISO_2022_JP",
+              "value": 42
+            },
+            {
+              "name": "GEDIT_ENCODING_ISO_2022_KR",
+              "value": 43
+            },
+            {
+              "name": "GEDIT_ENCODING_ISO_IR_111",
+              "value": 44
+            },
+            {
+              "name": "GEDIT_ENCODING_JOHAB",
+              "value": 45
+            },
+            {
+              "name": "GEDIT_ENCODING_KOI8_R",
+              "value": 46
+            },
+            {
+              "name": "GEDIT_ENCODING_KOI8__R",
+              "value": 47
+            },
+            {
+              "name": "GEDIT_ENCODING_KOI8_U",
+              "value": 48
+            },
+            {
+              "name": "GEDIT_ENCODING_SHIFT_JIS",
+              "value": 49
+            },
+            {
+              "name": "GEDIT_ENCODING_TCVN",
+              "value": 50
+            },
+            {
+              "name": "GEDIT_ENCODING_TIS_620",
+              "value": 51
+            },
+            {
+              "name": "GEDIT_ENCODING_UHC",
+              "value": 52
+            },
+            {
+              "name": "GEDIT_ENCODING_VISCII",
+              "value": 53
+            },
+            {
+              "name": "GEDIT_ENCODING_WINDOWS_1250",
+              "value": 54
+            },
+            {
+              "name": "GEDIT_ENCODING_WINDOWS_1251",
+              "value": 55
+            },
+            {
+              "name": "GEDIT_ENCODING_WINDOWS_1252",
+              "value": 56
+            },
+            {
+              "name": "GEDIT_ENCODING_WINDOWS_1253",
+              "value": 57
+            },
+            {
+              "name": "GEDIT_ENCODING_WINDOWS_1254",
+              "value": 58
+            },
+            {
+              "name": "GEDIT_ENCODING_WINDOWS_1255",
+              "value": 59
+            },
+            {
+              "name": "GEDIT_ENCODING_WINDOWS_1256",
+              "value": 60
+            },
+            {
+              "name": "GEDIT_ENCODING_WINDOWS_1257",
+              "value": 61
+            },
+            {
+              "name": "GEDIT_ENCODING_WINDOWS_1258",
+              "value": 62
+            },
+            {
+              "name": "GEDIT_ENCODING_LAST",
+              "value": 63
+            },
+            {
+              "name": "GEDIT_ENCODING_UTF_8",
+              "value": 64
+            },
+            {
+              "name": "GEDIT_ENCODING_UNKNOWN",
+              "value": 65
+            }
+          ]
+        }
+      ]
+    },
+    "hb-export.h": {
+      "defines": [
+        {
+          "name": "HB_PRINT_TITLE_POINT",
+          "rawValue": "18",
+          "value": 18
+        },
+        {
+          "name": "HB_PRINT_HEAD_POINT",
+          "rawValue": "15",
+          "value": 15
+        },
+        {
+          "name": "HB_PRINT_BODY_POINT",
+          "rawValue": "12",
+          "value": 12
+        },
+        {
+          "name": "HB_PRINT_FOOT_POINT",
+          "rawValue": "9",
+          "value": 9
+        },
+        {
+          "name": "HB_PRINT_LINE_HEIGHT",
+          "rawValue": "1.2",
+          "value": 1.2
+        },
+        {
+          "name": "HB_PRINT_SPACING",
+          "rawValue": "6",
+          "value": 6
+        },
+        {
+          "name": "HB_PRINT_ALIGN_RIGHT",
+          "rawValue": "0",
+          "value": 0
+        },
+        {
+          "name": "HB_PRINT_ALIGN_LEFT",
+          "rawValue": "1",
+          "value": 1
+        }
+      ],
+      "enums": []
+    },
+    "hb-group.h": {
+      "defines": [],
+      "enums": []
+    },
+    "hb-hbfile.h": {
+      "defines": [],
+      "enums": []
+    },
+    "hb-import.h": {
+      "defines": [
+        {
+          "name": "DST_ACC_GLOBAL",
+          "rawValue": "100001",
+          "value": 100001
+        },
+        {
+          "name": "DST_ACC_NEW",
+          "rawValue": "100002",
+          "value": 100002
+        },
+        {
+          "name": "DST_ACC_SKIP",
+          "rawValue": "100010",
+          "value": 100010
+        }
+      ],
+      "enums": [
+        {
+          "name": null,
+          "variants": [
+            {
+              "name": "CSV_STRING",
+              "value": 0
+            },
+            {
+              "name": "CSV_DATE",
+              "value": 1
+            },
+            {
+              "name": "CSV_INT",
+              "value": 2
+            },
+            {
+              "name": "CSV_DOUBLE",
+              "value": 3
+            }
+          ]
+        },
+        {
+          "name": "QIF_Type",
+          "variants": [
+            {
+              "name": "QIF_NONE",
+              "value": 0
+            },
+            {
+              "name": "QIF_HEADER",
+              "value": 1
+            },
+            {
+              "name": "QIF_ACCOUNT",
+              "value": 2
+            },
+            {
+              "name": "QIF_CATEGORY",
+              "value": 3
+            },
+            {
+              "name": "QIF_CLASS",
+              "value": 4
+            },
+            {
+              "name": "QIF_MEMORIZED",
+              "value": 5
+            },
+            {
+              "name": "QIF_TRANSACTION",
+              "value": 6
+            },
+            {
+              "name": "QIF_SECURITY",
+              "value": 7
+            },
+            {
+              "name": "QIF_PRICES",
+              "value": 8
+            }
+          ]
+        }
+      ]
+    },
+    "hb-split.h": {
+      "defines": [
+        {
+          "name": "TXN_MAX_SPLIT",
+          "rawValue": "62",
+          "value": 62
+        }
+      ],
+      "enums": []
+    },
+    "hb-misc.h": {
+      "defines": [],
+      "enums": [
+        {
+          "name": null,
+          "variants": [
+            {
+              "name": "HB_AMT_SIGN_OFF",
+              "value": 0
+            },
+            {
+              "name": "HB_AMT_SIGN_EXP",
+              "value": 1
+            },
+            {
+              "name": "HB_AMT_SIGN_INC",
+              "value": 2
+            }
+          ]
+        },
+        {
+          "name": "HbDateBound",
+          "variants": [
+            {
+              "name": "HB_DATE_BOUND_FIRST",
+              "value": 0
+            },
+            {
+              "name": "HB_DATE_BOUND_LAST",
+              "value": 1
+            }
+          ]
+        }
+      ]
+    },
+    "hb-report.h": {
+      "defines": [
+        {
+          "name": "RF_NEWYEAR",
+          "rawValue": "(1<<1)",
+          "value": 2
+        },
+        {
+          "name": "RF_FORECAST",
+          "rawValue": "(1<<2)",
+          "value": 4
+        }
+      ],
+      "enums": [
+        {
+          "name": "HbReportGrpBy",
+          "variants": [
+            {
+              "name": "REPORT_GRPBY_NONE",
+              "value": 0
+            },
+            {
+              "name": "REPORT_GRPBY_CATEGORY",
+              "value": 1
+            },
+            {
+              "name": "REPORT_GRPBY_PAYEE",
+              "value": 2
+            },
+            {
+              "name": "REPORT_GRPBY_ACCOUNT",
+              "value": 3
+            },
+            {
+              "name": "REPORT_GRPBY_TAG",
+              "value": 4
+            },
+            {
+              "name": "REPORT_GRPBY_MONTH",
+              "value": 5
+            },
+            {
+              "name": "REPORT_GRPBY_YEAR",
+              "value": 6
+            },
+            {
+              "name": "REPORT_GRPBY_ACCGROUP",
+              "value": 7
+            },
+            {
+              "name": "REPORT_GRPBY_TYPE",
+              "value": 8
+            }
+          ]
+        },
+        {
+          "name": "HbReportType",
+          "variants": [
+            {
+              "name": "REPORT_TYPE_NONE",
+              "value": 0
+            },
+            {
+              "name": "REPORT_TYPE_ALL",
+              "value": 1
+            },
+            {
+              "name": "REPORT_TYPE_EXPENSE",
+              "value": 2
+            },
+            {
+              "name": "REPORT_TYPE_INCOME",
+              "value": 3
+            },
+            {
+              "name": "REPORT_TYPE_TOTAL",
+              "value": 4
+            }
+          ]
+        },
+        {
+          "name": "HbReportIntvl",
+          "variants": [
+            {
+              "name": "REPORT_INTVL_NONE",
+              "value": 0
+            },
+            {
+              "name": "REPORT_INTVL_DAY",
+              "value": 1
+            },
+            {
+              "name": "REPORT_INTVL_WEEK",
+              "value": 2
+            },
+            {
+              "name": "REPORT_INTVL_FORTNIGHT",
+              "value": 3
+            },
+            {
+              "name": "REPORT_INTVL_MONTH",
+              "value": 4
+            },
+            {
+              "name": "REPORT_INTVL_QUARTER",
+              "value": 5
+            },
+            {
+              "name": "REPORT_INTVL_HALFYEAR",
+              "value": 6
+            },
+            {
+              "name": "REPORT_INTVL_YEAR",
+              "value": 7
+            }
+          ]
+        },
+        {
+          "name": "HbReportResult",
+          "variants": [
+            {
+              "name": "REPORT_RESULT_TOTAL",
+              "value": 0
+            },
+            {
+              "name": "REPORT_RESULT_CUMUL",
+              "value": 1
+            },
+            {
+              "name": "REPORT_RESULT_BALANCE",
+              "value": 2
+            }
+          ]
+        },
+        {
+          "name": "HbReportCompFlag",
+          "variants": [
+            {
+              "name": "REPORT_COMP_FLG_NONE",
+              "value": 0
+            },
+            {
+              "name": "REPORT_COMP_FLG_CATSIGN",
+              "value": 2
+            },
+            {
+              "name": "REPORT_COMP_FLG_SPENDING",
+              "value": 4
+            },
+            {
+              "name": "REPORT_COMP_FLG_REVENUE",
+              "value": 8
+            },
+            {
+              "name": "REPORT_COMP_FLG_BALANCE",
+              "value": 256
+            },
+            {
+              "name": "REPORT_COMP_FLG_FORECAST",
+              "value": 512
+            }
+          ]
+        },
+        {
+          "name": null,
+          "variants": [
+            {
+              "name": "REPORT_MODE_TOTAL",
+              "value": 0
+            },
+            {
+              "name": "REPORT_MODE_TREND",
+              "value": 1
             }
           ]
         }

@@ -325,7 +325,7 @@ export async function extract(vendorDir: string): Promise<ExtractionManifest> {
 
   // Extract headers
   const headers: Record<string, RawHeaderFile> = {};
-  for (const headerName of manifest.headers as string[]) {
+  for (const headerName of Object.keys(manifest.includeTree)) {
     const source = await Deno.readTextFile(`${vendorDir}/${headerName}`);
     headers[headerName] = extractHeaderFile(parser, source);
   }

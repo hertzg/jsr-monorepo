@@ -26,23 +26,21 @@ Deno.test("parseVersion handles different version formats", () => {
 });
 
 Deno.test("buildManifest produces correct manifest structure", () => {
-  const headers = ["homebank.h", "hb-types.h", "enums.h"];
   const includeTree = {
     "homebank.h": ["hb-types.h", "enums.h"],
     "hb-types.h": [],
     "enums.h": [],
   };
 
-  const manifest = buildManifest("5.10", headers, includeTree);
+  const manifest = buildManifest("5.10", includeTree);
 
   assertEquals(manifest.version, "5.10");
   assertEquals(manifest.xmlSource, "hb-xml.c");
-  assertEquals(manifest.headers, headers);
   assertEquals(manifest.includeTree, includeTree);
 });
 
 Deno.test("buildManifest always sets xmlSource to hb-xml.c", () => {
-  const manifest = buildManifest("1.0", [], {});
+  const manifest = buildManifest("1.0", {});
   assertEquals(manifest.xmlSource, "hb-xml.c");
 });
 
