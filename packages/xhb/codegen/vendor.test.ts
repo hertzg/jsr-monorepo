@@ -47,36 +47,43 @@ Deno.test("buildManifest always sets xmlSource to hb-xml.c", () => {
 });
 
 Deno.test("parseLatestBranch picks the highest version", () => {
+  // deno-fmt-ignore
   const output = [
-    "aaa1111\trefs/heads/5.6.x",
-    "bbb2222\trefs/heads/5.10.x",
-    "ccc3333\trefs/heads/5.9.x",
-    "ddd4444\trefs/heads/5.8.x",
-  ].join("\n");
+    ["aaa1111", "refs/heads/5.6.x" ],
+    ["bbb2222", "refs/heads/5.10.x"],
+    ["ccc3333", "refs/heads/5.9.x" ],
+    ["ddd4444", "refs/heads/5.8.x" ],
+  ].map((r) => r.join("\t")).join("\n");
   assertEquals(parseLatestBranch(output), "5.10.x");
 });
 
 Deno.test("parseLatestBranch ignores non-release branches", () => {
+  // deno-fmt-ignore
   const output = [
-    "aaa1111\trefs/heads/master",
-    "bbb2222\trefs/heads/5.10.x",
-    "ccc3333\trefs/heads/feature/foo",
-    "ddd4444\trefs/heads/5.9.x",
-  ].join("\n");
+    ["aaa1111", "refs/heads/master"     ],
+    ["bbb2222", "refs/heads/5.10.x"     ],
+    ["ccc3333", "refs/heads/feature/foo" ],
+    ["ddd4444", "refs/heads/5.9.x"      ],
+  ].map((r) => r.join("\t")).join("\n");
   assertEquals(parseLatestBranch(output), "5.10.x");
 });
 
 Deno.test("parseLatestBranch throws when no release branches exist", () => {
+  // deno-fmt-ignore
+  const output = [
+    ["aaa1111", "refs/heads/master"],
+  ].map((r) => r.join("\t")).join("\n");
   assertThrows(
-    () => parseLatestBranch("aaa1111\trefs/heads/master"),
+    () => parseLatestBranch(output),
     Error,
     "No release branches found",
   );
 });
 
 Deno.test("parseLatestBranch handles single branch", () => {
-  assertEquals(
-    parseLatestBranch("aaa1111\trefs/heads/4.0.x"),
-    "4.0.x",
-  );
+  // deno-fmt-ignore
+  const output = [
+    ["aaa1111", "refs/heads/4.0.x"],
+  ].map((r) => r.join("\t")).join("\n");
+  assertEquals(parseLatestBranch(output), "4.0.x");
 });
