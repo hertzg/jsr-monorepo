@@ -116,26 +116,29 @@ async function run(
 }
 
 /**
- * Parses `git ls-remote --heads` output and returns the latest release
- * branch matching the `N.N.x` pattern, sorted by version number.
+ * Parses `git ls-remote --heads` output and returns HomeBank release
+ * branches matching the `N.N.x` pattern, sorted by version number
+ * (ascending).
  *
  * @param lsRemoteOutput Raw output from `git ls-remote --heads`.
- * @returns The branch name with the highest version (e.g. "5.10.x").
+ * @returns Sorted array of release branch names.
  *
- * @example Pick the latest branch from ls-remote output
+ * @example Parse and sort release branches
  * ```ts
  * import { assertEquals } from "@std/assert";
- * import { parseLatestBranch } from "./vendor.ts";
+ * import { parseHomebankReleaseBranches } from "./vendor.ts";
  *
  * const output = [
  *   "abc1234\trefs/heads/5.8.x",
  *   "def5678\trefs/heads/5.10.x",
  *   "fed9876\trefs/heads/5.9.x",
  * ].join("\n");
- * assertEquals(parseLatestBranch(output), "5.10.x");
+ * assertEquals(parseHomebankReleaseBranches(output), ["5.8.x", "5.9.x", "5.10.x"]);
  * ```
  */
-export function parseLatestBranch(lsRemoteOutput: string): string {
+export function parseHomebankReleaseBranches(
+  lsRemoteOutput: string,
+): string[] {
   const branches: string[] = [];
   for (const line of lsRemoteOutput.split("\n")) {
     const ref = line.split("\t")[1];
@@ -144,9 +147,6 @@ export function parseLatestBranch(lsRemoteOutput: string): string {
     if (/^\d+\.\d+\.x$/.test(name)) {
       branches.push(name);
     }
-  }
-  if (branches.length === 0) {
-    throw new Error("No release branches found");
   }
   branches.sort((a, b) => {
     const pa = a.replace(".x", "").split(".").map(Number);
@@ -157,38 +157,61 @@ export function parseLatestBranch(lsRemoteOutput: string): string {
     }
     return 0;
   });
-  return branches[branches.length - 1];
+  return branches;
 }
 
 /**
  * Finds the latest release branch from the remote repository.
  *
- * Lists remote heads matching `*.x` (e.g. `5.10.x`, `5.9.x`) and
- * returns the one with the highest version number.
+ * Lists remote heads matching `N.N.x`, sorts by version, and returns
+ * the highest.
  *
  * @returns The branch name (e.g. "5.10.x").
  */
 export async function findLatestBranch(): Promise<string> {
   const output = await run("git", ["ls-remote", "--heads", REPO_URL]);
-  return parseLatestBranch(output);
+  const branches = parseHomebankReleaseBranches(output);
+  if (branches.length === 0) {
+    throw new Error("No release branches found");
+  }
+  return branches[branches.length - 1];
 }
 
-async function cloneLatest(): Promise<
-  { srcDir: string; branch: string; tmpDir: string }
-> {
-  const branch = await findLatestBranch();
-  console.log(`Cloning branch ${branch} from ${REPO_URL}...`);
-  const tmpDir = await Deno.makeTempDir({ prefix: "homebank-vendor-" });
-  await run("git", [
-    "clone",
-    "--depth",
-    "1",
-    "--branch",
-    branch,
-    REPO_URL,
-    tmpDir,
-  ]);
-  return { srcDir: join(tmpDir, "src"), branch, tmpDir };
+const CLONE_DIR = join(Deno.env.get("TMPDIR") ?? "/tmp", "homebank-vendor");
+
+/**
+ * Clones the HomeBank repository to a stable temp path.
+ *
+ * If the directory already exists, fetches the latest instead of
+ * cloning from scratch. Returns the path to the `src/` directory.
+ *
+ * @param branch The branch to clone or checkout.
+ * @returns The repository root and `src/` directory paths.
+ */
+async function cloneHomebankRepository(
+  branch: string,
+): Promise<{ repoDir: string; srcDir: string }> {
+  try {
+    await Deno.stat(join(CLONE_DIR, ".git"));
+    console.log(`Reusing existing clone at ${CLONE_DIR}`);
+    await run("git", ["fetch", "--depth", "1", "origin", branch], {
+      cwd: CLONE_DIR,
+    });
+    await run("git", ["checkout", `origin/${branch}`], { cwd: CLONE_DIR });
+  } catch {
+    console.log(`Cloning branch ${branch} from ${REPO_URL}...`);
+    await Deno.mkdir(CLONE_DIR, { recursive: true });
+    await run("git", [
+      "clone",
+      "--depth",
+      "1",
+      "--branch",
+      branch,
+      REPO_URL,
+      CLONE_DIR,
+    ]);
+  }
+  return { repoDir: CLONE_DIR, srcDir: join(CLONE_DIR, "src") };
 }
 
 async function getSourceInfo(
@@ -256,18 +279,15 @@ async function main(): Promise<void> {
     return;
   }
 
-  const { srcDir, branch, tmpDir } = await cloneLatest();
-  try {
-    const sourceInfo = await getSourceInfo(tmpDir, branch);
-    await vendorFromPath(srcDir, vendorDir);
-    await Deno.writeTextFile(
-      join(vendorDir, "source.json"),
-      JSON.stringify(sourceInfo, null, 2) + "\n",
-    );
-    console.log(`  Source: ${branch} @ ${sourceInfo.commit}`);
-  } finally {
-    await Deno.remove(tmpDir, { recursive: true });
-  }
+  const branch = await findLatestBranch();
+  const { repoDir, srcDir } = await cloneHomebankRepository(branch);
+  const sourceInfo = await getSourceInfo(repoDir, branch);
+  await vendorFromPath(srcDir, vendorDir);
+  await Deno.writeTextFile(
+    join(vendorDir, "source.json"),
+    JSON.stringify(sourceInfo, null, 2) + "\n",
+  );
+  console.log(`  Source: ${branch} @ ${sourceInfo.commit}`);
 }
 
 if (import.meta.main) {

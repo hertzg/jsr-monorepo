@@ -1,5 +1,9 @@
 import { assertEquals, assertThrows } from "@std/assert";
-import { buildManifest, parseLatestBranch, parseVersion } from "./vendor.ts";
+import {
+  buildManifest,
+  parseHomebankReleaseBranches,
+  parseVersion,
+} from "./vendor.ts";
 
 Deno.test("parseVersion extracts HB_VERSION from homebank.h content", () => {
   const content = [
@@ -44,7 +48,7 @@ Deno.test("buildManifest always sets xmlSource to hb-xml.c", () => {
   assertEquals(manifest.xmlSource, "hb-xml.c");
 });
 
-Deno.test("parseLatestBranch picks the highest version", () => {
+Deno.test("parseHomebankReleaseBranches sorts by version ascending", () => {
   // deno-fmt-ignore
   const output = [
     ["aaa1111", "refs/heads/5.6.x" ],
@@ -52,36 +56,37 @@ Deno.test("parseLatestBranch picks the highest version", () => {
     ["ccc3333", "refs/heads/5.9.x" ],
     ["ddd4444", "refs/heads/5.8.x" ],
   ].map((r) => r.join("\t")).join("\n");
-  assertEquals(parseLatestBranch(output), "5.10.x");
+  assertEquals(parseHomebankReleaseBranches(output), [
+    "5.6.x",
+    "5.8.x",
+    "5.9.x",
+    "5.10.x",
+  ]);
 });
 
-Deno.test("parseLatestBranch ignores non-release branches", () => {
+Deno.test("parseHomebankReleaseBranches ignores non-release branches", () => {
   // deno-fmt-ignore
   const output = [
     ["aaa1111", "refs/heads/master"     ],
     ["bbb2222", "refs/heads/5.10.x"     ],
-    ["ccc3333", "refs/heads/feature/foo" ],
+    ["ccc3333", "refs/heads/feature/foo"],
     ["ddd4444", "refs/heads/5.9.x"      ],
   ].map((r) => r.join("\t")).join("\n");
-  assertEquals(parseLatestBranch(output), "5.10.x");
+  assertEquals(parseHomebankReleaseBranches(output), ["5.9.x", "5.10.x"]);
 });
 
-Deno.test("parseLatestBranch throws when no release branches exist", () => {
+Deno.test("parseHomebankReleaseBranches returns empty for no release branches", () => {
   // deno-fmt-ignore
   const output = [
     ["aaa1111", "refs/heads/master"],
   ].map((r) => r.join("\t")).join("\n");
-  assertThrows(
-    () => parseLatestBranch(output),
-    Error,
-    "No release branches found",
-  );
+  assertEquals(parseHomebankReleaseBranches(output), []);
 });
 
-Deno.test("parseLatestBranch handles single branch", () => {
+Deno.test("parseHomebankReleaseBranches handles single branch", () => {
   // deno-fmt-ignore
   const output = [
     ["aaa1111", "refs/heads/4.0.x"],
   ].map((r) => r.join("\t")).join("\n");
-  assertEquals(parseLatestBranch(output), "4.0.x");
+  assertEquals(parseHomebankReleaseBranches(output), ["4.0.x"]);
 });
