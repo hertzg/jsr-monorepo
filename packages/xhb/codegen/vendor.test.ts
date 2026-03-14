@@ -48,7 +48,7 @@ Deno.test("buildManifest always sets xmlSource to hb-xml.c", () => {
   assertEquals(manifest.xmlSource, "hb-xml.c");
 });
 
-Deno.test("parseHomebankReleaseBranches sorts by version ascending", () => {
+Deno.test("parseHomebankReleaseBranches sorts by version descending", () => {
   // deno-fmt-ignore
   const output = [
     ["aaa1111", "refs/heads/5.6.x" ],
@@ -57,22 +57,22 @@ Deno.test("parseHomebankReleaseBranches sorts by version ascending", () => {
     ["ddd4444", "refs/heads/5.8.x" ],
   ].map((r) => r.join("\t")).join("\n");
   assertEquals(parseHomebankReleaseBranches(output), [
-    "5.6.x",
-    "5.8.x",
-    "5.9.x",
     "5.10.x",
+    "5.9.x",
+    "5.8.x",
+    "5.6.x",
   ]);
 });
 
 Deno.test("parseHomebankReleaseBranches ignores non-release branches", () => {
   // deno-fmt-ignore
   const output = [
-    ["aaa1111", "refs/heads/master"     ],
-    ["bbb2222", "refs/heads/5.10.x"     ],
+    ["aaa1111", "refs/heads/master"    ],
+    ["bbb2222", "refs/heads/5.10.x"    ],
     ["ccc3333", "refs/heads/feature/foo"],
-    ["ddd4444", "refs/heads/5.9.x"      ],
+    ["ddd4444", "refs/heads/5.9.x"     ],
   ].map((r) => r.join("\t")).join("\n");
-  assertEquals(parseHomebankReleaseBranches(output), ["5.9.x", "5.10.x"]);
+  assertEquals(parseHomebankReleaseBranches(output), ["5.10.x", "5.9.x"]);
 });
 
 Deno.test("parseHomebankReleaseBranches returns empty for no release branches", () => {

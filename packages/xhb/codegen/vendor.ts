@@ -16,6 +16,7 @@
 
 import { resolveIncludes } from "./include-resolver.ts";
 import { dirname, fromFileUrl, join } from "@std/path";
+import { compare, parse } from "@std/semver";
 
 const REPO_URL = "https://git.launchpad.net/homebank";
 const XML_SOURCE = "hb-xml.c";
@@ -116,20 +117,10 @@ async function run(
   return new TextDecoder().decode(output.stdout).trim();
 }
 
-function compareVersions(a: string, b: string): number {
-  const pa = a.replace(".x", "").split(".").map(Number);
-  const pb = b.replace(".x", "").split(".").map(Number);
-  for (let i = 0; i < Math.max(pa.length, pb.length); i++) {
-    const diff = (pa[i] ?? 0) - (pb[i] ?? 0);
-    if (diff !== 0) return diff;
-  }
-  return 0;
-}
-
 /**
  * Parses `git ls-remote --heads` output and returns HomeBank release
  * branches matching the `N.N.x` pattern, sorted by version number
- * (ascending).
+ * (descending, latest first).
  *
  * @param lsRemoteOutput Raw output from `git ls-remote --heads`.
  * @returns Sorted array of release branch names.
@@ -144,17 +135,21 @@ function compareVersions(a: string, b: string): number {
  *   "def5678\trefs/heads/5.10.x",
  *   "fed9876\trefs/heads/5.9.x",
  * ].join("\n");
- * assertEquals(parseHomebankReleaseBranches(output), ["5.8.x", "5.9.x", "5.10.x"]);
+ * assertEquals(parseHomebankReleaseBranches(output), ["5.10.x", "5.9.x", "5.8.x"]);
  * ```
  */
 export function parseHomebankReleaseBranches(
   lsRemoteOutput: string,
 ): string[] {
-  return lsRemoteOutput
+  const branches = lsRemoteOutput
     .split("\n")
     .map((line) => line.split("\t")[1]?.replace("refs/heads/", ""))
-    .filter((name): name is string => !!name && /^\d+\.\d+\.x$/.test(name))
-    .sort(compareVersions);
+    .filter((name): name is string => !!name && /^\d+\.\d+\.x$/.test(name));
+
+  return branches
+    .map((b) => ({ branch: b, semver: parse(b.replace(".x", ".0")) }))
+    .sort((a, b) => compare(b.semver, a.semver))
+    .map(({ branch }) => branch);
 }
 
 /**
@@ -171,7 +166,7 @@ export async function findLatestBranch(): Promise<string> {
   if (branches.length === 0) {
     throw new Error("No release branches found");
   }
-  return branches[branches.length - 1];
+  return branches[0];
 }
 
 /**
