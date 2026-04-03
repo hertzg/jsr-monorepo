@@ -119,7 +119,7 @@
             <span class="text-Function">function</span>&nbsp;<span class="font-bold">isValidIpv4</span>
           </div></div><a
   class="sourceButton"
-  href="file:&#x2F;&#x2F;&#x2F;home&#x2F;runner&#x2F;work&#x2F;jsr-monorepo&#x2F;jsr-monorepo&#x2F;packages&#x2F;ip&#x2F;validate.ts"><svg
+  href="file:&#x2F;&#x2F;&#x2F;home&#x2F;runner&#x2F;work&#x2F;jsr-monorepo&#x2F;jsr-monorepo&#x2F;packages&#x2F;ip&#x2F;validatev4.ts"><svg
   width="14"
   height="14"
   viewBox="0 0 14 14"
@@ -215,13 +215,13 @@ Examples</h2></div><div class="space-y-8"><div class="anchorable"><a href="#exam
 <h3 class="example-header"><div class="markdown"><p>Valid addresses</p>
 </div></h3>
   <div><div class="markdown"><pre class="highlight"><code class="language-ts">import { assert } from &quot;@std/assert&quot;;
-import { isValidIpv4 } from &quot;@hertzg/ip/validate&quot;;
+import { isValidIpv4 } from &quot;@hertzg/ip/validatev4&quot;;
 
 assert(isValidIpv4(&quot;0.0.0.0&quot;));
 assert(isValidIpv4(&quot;192.168.1.1&quot;));
 assert(isValidIpv4(&quot;255.255.255.255&quot;));
 </code><button class="copyButton" data-copy="import { assert } from &quot;@std/assert&quot;;
-import { isValidIpv4 } from &quot;@hertzg/ip/validate&quot;;
+import { isValidIpv4 } from &quot;@hertzg/ip/validatev4&quot;;
 
 assert(isValidIpv4(&quot;0.0.0.0&quot;));
 assert(isValidIpv4(&quot;192.168.1.1&quot;));
@@ -284,7 +284,7 @@ assert(isValidIpv4(&quot;255.255.255.255&quot;));
 <h3 class="example-header"><div class="markdown"><p>Invalid addresses</p>
 </div></h3>
   <div><div class="markdown"><pre class="highlight"><code class="language-ts">import { assertEquals } from &quot;@std/assert&quot;;
-import { isValidIpv4 } from &quot;@hertzg/ip/validate&quot;;
+import { isValidIpv4 } from &quot;@hertzg/ip/validatev4&quot;;
 
 assertEquals(isValidIpv4(&quot;&quot;), false);
 assertEquals(isValidIpv4(&quot;256.0.0.1&quot;), false);
@@ -292,7 +292,7 @@ assertEquals(isValidIpv4(&quot;1.2.3&quot;), false);
 assertEquals(isValidIpv4(&quot;01.02.03.04&quot;), false);
 assertEquals(isValidIpv4(&quot;::1&quot;), false);
 </code><button class="copyButton" data-copy="import { assertEquals } from &quot;@std/assert&quot;;
-import { isValidIpv4 } from &quot;@hertzg/ip/validate&quot;;
+import { isValidIpv4 } from &quot;@hertzg/ip/validatev4&quot;;
 
 assertEquals(isValidIpv4(&quot;&quot;), false);
 assertEquals(isValidIpv4(&quot;256.0.0.1&quot;), false);
@@ -385,7 +385,7 @@ Parameters</h2></div><div class="space-y-8"><div class="anchorable docEntry" id=
       </code>
     </div><a
   class="sourceButton"
-  href="file:&#x2F;&#x2F;&#x2F;home&#x2F;runner&#x2F;work&#x2F;jsr-monorepo&#x2F;jsr-monorepo&#x2F;packages&#x2F;ip&#x2F;validate.ts"><svg
+  href="file:&#x2F;&#x2F;&#x2F;home&#x2F;runner&#x2F;work&#x2F;jsr-monorepo&#x2F;jsr-monorepo&#x2F;packages&#x2F;ip&#x2F;validatev4.ts"><svg
   width="14"
   height="14"
   viewBox="0 0 14 14"
@@ -441,7 +441,7 @@ Return Type</h2></div><div class="space-y-8"><div class=" docEntry" id="function
       </code>
     </div><a
   class="sourceButton"
-  href="file:&#x2F;&#x2F;&#x2F;home&#x2F;runner&#x2F;work&#x2F;jsr-monorepo&#x2F;jsr-monorepo&#x2F;packages&#x2F;ip&#x2F;validate.ts"><svg
+  href="file:&#x2F;&#x2F;&#x2F;home&#x2F;runner&#x2F;work&#x2F;jsr-monorepo&#x2F;jsr-monorepo&#x2F;packages&#x2F;ip&#x2F;validatev4.ts"><svg
   width="14"
   height="14"
   viewBox="0 0 14 14"

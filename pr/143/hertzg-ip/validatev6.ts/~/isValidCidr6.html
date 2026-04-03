@@ -1,10 +1,10 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>isValidCidr4 - validate.ts - @hertzg&#x2F;ip documentation</title>
+  <title>isValidCidr6 - validatev6.ts - @hertzg&#x2F;ip documentation</title>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="doc-current-file" content="validate.ts">
+  <meta name="doc-current-file" content="validatev6.ts">
   <link rel="stylesheet" href="..&#x2F;..&#x2F;styles.css">
   <link rel="stylesheet" href="..&#x2F;..&#x2F;page.css">
   <link id="ddocResetStylesheet" rel="stylesheet" href="..&#x2F;..&#x2F;reset.css"><link href="../../comrak.css" rel="stylesheet" /><link href="../../prism.css" rel="stylesheet" /><script src="../../prism.js"></script><script src="..&#x2F;..&#x2F;script.js" defer></script>
@@ -32,7 +32,7 @@
     fill="currentColor"
   />
 </svg>
-</span><a href="..&#x2F;..&#x2F;.&#x2F;validate.ts&#x2F;index.html" class="contextLink">validate.ts</a><span class="text-black dark:text-white"><svg
+</span><a href="..&#x2F;..&#x2F;.&#x2F;validatev6.ts&#x2F;index.html" class="contextLink">validatev6.ts</a><span class="text-black dark:text-white"><svg
   width="16"
   height="16"
   viewBox="0 0 16 16"
@@ -48,7 +48,7 @@
 </svg>
 </span>
 
-    <ul><li>isValidCidr4</li></ul></ul>
+    <ul><li>isValidCidr6</li></ul></ul>
 </div>
 
     <div class="flex items-center gap-2">
@@ -112,14 +112,14 @@
     </div>
   </div>
 </nav>
-<div id="searchResults"></div><div id="content"><main class="symbolGroup" id="symbol_isValidCidr4"><article>
+<div id="searchResults"></div><div id="content"><main class="symbolGroup" id="symbol_isValidCidr6"><article>
       <div class="symbolTitle">
         <div>
           <div class="text-2xl leading-none break-all">
-            <span class="text-Function">function</span>&nbsp;<span class="font-bold">isValidCidr4</span>
+            <span class="text-Function">function</span>&nbsp;<span class="font-bold">isValidCidr6</span>
           </div></div><a
   class="sourceButton"
-  href="file:&#x2F;&#x2F;&#x2F;home&#x2F;runner&#x2F;work&#x2F;jsr-monorepo&#x2F;jsr-monorepo&#x2F;packages&#x2F;ip&#x2F;validate.ts"><svg
+  href="file:&#x2F;&#x2F;&#x2F;home&#x2F;runner&#x2F;work&#x2F;jsr-monorepo&#x2F;jsr-monorepo&#x2F;packages&#x2F;ip&#x2F;validatev6.ts"><svg
   width="14"
   height="14"
   viewBox="0 0 14 14"
@@ -142,8 +142,8 @@
   />
 </svg>
 </a>
-</div><div><div class="mt-3 space-y-8"><div class="scroll-mt-16" id="function_isvalidcidr4_0">
-      <code class="anchorable text-base break-words"><a href="#function_isvalidcidr4_0" class="anchor" aria-label="Anchor" tabIndex="-1"><svg
+</div><div><div class="mt-3 space-y-8"><div class="scroll-mt-16" id="function_isvalidcidr6_0">
+      <code class="anchorable text-base break-words"><a href="#function_isvalidcidr6_0" class="anchor" aria-label="Anchor" tabIndex="-1"><svg
   width="16"
   height="16"
   viewBox="0 0 14 14"
@@ -165,8 +165,8 @@
   </defs>
 </svg>
 </a>
-<span class="font-bold">isValidCidr4</span><span class="font-medium">(<span><span>s<span>: <span class="td-kw">string</span></span></span></span>)<span>: <span class="td-kw">boolean</span></span> </span>
-      </code><div class="space-y-7" id=""><div class="markdown"><p>Checks if a string is valid IPv4 CIDR notation.</p>
+<span class="font-bold">isValidCidr6</span><span class="font-medium">(<span><span>s<span>: <span class="td-kw">string</span></span></span></span>)<span>: <span class="td-kw">boolean</span></span> </span>
+      </code><div class="space-y-7" id=""><div class="markdown"><p>Checks if a string is valid IPv6 CIDR notation.</p>
 </div><section class="section"  id="examples"><div>
       <h2 class="anchorable mb-1"><a href="#examples" class="anchor" aria-label="Anchor" tabIndex="-1"><svg
   width="16"
@@ -215,17 +215,17 @@ Examples</h2></div><div class="space-y-8"><div class="anchorable"><a href="#exam
 <h3 class="example-header"><div class="markdown"><p>Valid CIDR</p>
 </div></h3>
   <div><div class="markdown"><pre class="highlight"><code class="language-ts">import { assert } from &quot;@std/assert&quot;;
-import { isValidCidr4 } from &quot;@hertzg/ip/validate&quot;;
+import { isValidCidr6 } from &quot;@hertzg/ip/validatev6&quot;;
 
-assert(isValidCidr4(&quot;0.0.0.0/0&quot;));
-assert(isValidCidr4(&quot;192.168.1.0/24&quot;));
-assert(isValidCidr4(&quot;10.0.0.1/32&quot;));
+assert(isValidCidr6(&quot;::/0&quot;));
+assert(isValidCidr6(&quot;2001:db8::/32&quot;));
+assert(isValidCidr6(&quot;::1/128&quot;));
 </code><button class="copyButton" data-copy="import { assert } from &quot;@std/assert&quot;;
-import { isValidCidr4 } from &quot;@hertzg/ip/validate&quot;;
+import { isValidCidr6 } from &quot;@hertzg/ip/validatev6&quot;;
 
-assert(isValidCidr4(&quot;0.0.0.0/0&quot;));
-assert(isValidCidr4(&quot;192.168.1.0/24&quot;));
-assert(isValidCidr4(&quot;10.0.0.1/32&quot;));
+assert(isValidCidr6(&quot;::/0&quot;));
+assert(isValidCidr6(&quot;2001:db8::/32&quot;));
+assert(isValidCidr6(&quot;::1/128&quot;));
 "><svg
   class="copy"
   width="15"
@@ -284,21 +284,19 @@ assert(isValidCidr4(&quot;10.0.0.1/32&quot;));
 <h3 class="example-header"><div class="markdown"><p>Invalid CIDR</p>
 </div></h3>
   <div><div class="markdown"><pre class="highlight"><code class="language-ts">import { assertEquals } from &quot;@std/assert&quot;;
-import { isValidCidr4 } from &quot;@hertzg/ip/validate&quot;;
+import { isValidCidr6 } from &quot;@hertzg/ip/validatev6&quot;;
 
-assertEquals(isValidCidr4(&quot;&quot;), false);
-assertEquals(isValidCidr4(&quot;192.168.1.0&quot;), false);
-assertEquals(isValidCidr4(&quot;192.168.1.0/33&quot;), false);
-assertEquals(isValidCidr4(&quot;192.168.1.0/-1&quot;), false);
-assertEquals(isValidCidr4(&quot;2001:db8::/32&quot;), false);
+assertEquals(isValidCidr6(&quot;&quot;), false);
+assertEquals(isValidCidr6(&quot;2001:db8::1&quot;), false);
+assertEquals(isValidCidr6(&quot;2001:db8::/129&quot;), false);
+assertEquals(isValidCidr6(&quot;192.168.1.0/24&quot;), false);
 </code><button class="copyButton" data-copy="import { assertEquals } from &quot;@std/assert&quot;;
-import { isValidCidr4 } from &quot;@hertzg/ip/validate&quot;;
+import { isValidCidr6 } from &quot;@hertzg/ip/validatev6&quot;;
 
-assertEquals(isValidCidr4(&quot;&quot;), false);
-assertEquals(isValidCidr4(&quot;192.168.1.0&quot;), false);
-assertEquals(isValidCidr4(&quot;192.168.1.0/33&quot;), false);
-assertEquals(isValidCidr4(&quot;192.168.1.0/-1&quot;), false);
-assertEquals(isValidCidr4(&quot;2001:db8::/32&quot;), false);
+assertEquals(isValidCidr6(&quot;&quot;), false);
+assertEquals(isValidCidr6(&quot;2001:db8::1&quot;), false);
+assertEquals(isValidCidr6(&quot;2001:db8::/129&quot;), false);
+assertEquals(isValidCidr6(&quot;192.168.1.0/24&quot;), false);
 "><svg
   class="copy"
   width="15"
@@ -356,10 +354,10 @@ assertEquals(isValidCidr4(&quot;2001:db8::/32&quot;), false);
   </defs>
 </svg>
 </a>
-Parameters</h2></div><div class="space-y-8"><div class="anchorable docEntry" id="function_isvalidcidr4_0_parameter_s">
+Parameters</h2></div><div class="space-y-8"><div class="anchorable docEntry" id="function_isvalidcidr6_0_parameter_s">
 
   <div class="docEntryHeader">
-    <div><code><a href="#function_isvalidcidr4_0_parameter_s" class="anchor" aria-label="Anchor" tabIndex="-1"><svg
+    <div><code><a href="#function_isvalidcidr6_0_parameter_s" class="anchor" aria-label="Anchor" tabIndex="-1"><svg
   width="16"
   height="16"
   viewBox="0 0 14 14"
@@ -385,7 +383,7 @@ Parameters</h2></div><div class="space-y-8"><div class="anchorable docEntry" id=
       </code>
     </div><a
   class="sourceButton"
-  href="file:&#x2F;&#x2F;&#x2F;home&#x2F;runner&#x2F;work&#x2F;jsr-monorepo&#x2F;jsr-monorepo&#x2F;packages&#x2F;ip&#x2F;validate.ts"><svg
+  href="file:&#x2F;&#x2F;&#x2F;home&#x2F;runner&#x2F;work&#x2F;jsr-monorepo&#x2F;jsr-monorepo&#x2F;packages&#x2F;ip&#x2F;validatev6.ts"><svg
   width="14"
   height="14"
   viewBox="0 0 14 14"
@@ -434,14 +432,14 @@ Parameters</h2></div><div class="space-y-8"><div class="anchorable docEntry" id=
   </defs>
 </svg>
 </a>
-Return Type</h2></div><div class="space-y-8"><div class=" docEntry" id="function_isvalidcidr4_0_return">
+Return Type</h2></div><div class="space-y-8"><div class=" docEntry" id="function_isvalidcidr6_0_return">
 
   <div class="docEntryHeader">
     <div><code><span class="font-medium text-stone-500 dark:text-stone-200"><span class="td-kw">boolean</span></span>
       </code>
     </div><a
   class="sourceButton"
-  href="file:&#x2F;&#x2F;&#x2F;home&#x2F;runner&#x2F;work&#x2F;jsr-monorepo&#x2F;jsr-monorepo&#x2F;packages&#x2F;ip&#x2F;validate.ts"><svg
+  href="file:&#x2F;&#x2F;&#x2F;home&#x2F;runner&#x2F;work&#x2F;jsr-monorepo&#x2F;jsr-monorepo&#x2F;packages&#x2F;ip&#x2F;validatev6.ts"><svg
   width="14"
   height="14"
   viewBox="0 0 14 14"
@@ -464,7 +462,7 @@ Return Type</h2></div><div class="space-y-8"><div class=" docEntry" id="function
   />
 </svg>
 </a>
-</div><div class="max-w-[75ch]"><div class="markdown"><p><code>true</code> if the string is valid IPv4 CIDR notation</p>
+</div><div class="max-w-[75ch]"><div class="markdown"><p><code>true</code> if the string is valid IPv6 CIDR notation</p>
 </div></div></div>
 </div></section>
 </div>
@@ -473,8 +471,8 @@ Return Type</h2></div><div class="space-y-8"><div class=" docEntry" id="function
     </article></main>
 <div class="toc">
     <div><div class="usageContent">
-    <h3>Usage</h3><div class="markdown"><pre class="highlight"><code class="language-typescript">import { isValidCidr4 } from &quot;validate.ts&quot;;
-</code><button class="copyButton" data-copy="import { isValidCidr4 } from &quot;validate.ts&quot;;
+    <h3>Usage</h3><div class="markdown"><pre class="highlight"><code class="language-typescript">import { isValidCidr6 } from &quot;validatev6.ts&quot;;
+</code><button class="copyButton" data-copy="import { isValidCidr6 } from &quot;validatev6.ts&quot;;
 "><svg
   class="copy"
   width="15"
@@ -507,7 +505,7 @@ Return Type</h2></div><div class="space-y-8"><div class=" docEntry" id="function
 </svg>
 </button><code></code></pre>
 </div></div><nav class="documentNavigation">
-          <h3>Document Navigation</h3><ul><li><a href="#examples" title="Examples">Examples</a></li><li><ul><li><a href="#example_0" title="Valid CIDR">Valid CIDR</a></li><li><a href="#example_1" title="Invalid CIDR">Invalid CIDR</a></li></ul></li><li><a href="#parameters" title="Parameters">Parameters</a></li><li><ul><li><a href="#function_isvalidcidr4_0_parameter_s" title="s">s</a></li></ul></li><li><a href="#return-type" title="Return Type">Return Type</a></li></ul></nav></div>
+          <h3>Document Navigation</h3><ul><li><a href="#examples" title="Examples">Examples</a></li><li><ul><li><a href="#example_0" title="Valid CIDR">Valid CIDR</a></li><li><a href="#example_1" title="Invalid CIDR">Invalid CIDR</a></li></ul></li><li><a href="#parameters" title="Parameters">Parameters</a></li><li><ul><li><a href="#function_isvalidcidr6_0_parameter_s" title="s">s</a></li></ul></li><li><a href="#return-type" title="Return Type">Return Type</a></li></ul></nav></div>
   </div></div>
 </div>
 </div>

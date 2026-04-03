@@ -164,7 +164,9 @@ Submodules</h3>
 <li><a href="https://jsr.io/@hertzg/ip/doc/cidrv4"><code>cidrv4</code></a>: IPv4 CIDR utilities via <a href=".././mod.ts/~/parseCidr4.html">parseCidr4</a>, <a href=".././mod.ts/~/cidr4Contains.html">cidr4Contains</a></li>
 <li><a href="https://jsr.io/@hertzg/ip/doc/ipv6"><code>ipv6</code></a>: IPv6 parsing via <a href=".././mod.ts/~/parseIpv6.html">parseIpv6</a>, <a href=".././mod.ts/~/expandIpv6.html">expandIpv6</a>, <a href=".././mod.ts/~/compressIpv6.html">compressIpv6</a></li>
 <li><a href="https://jsr.io/@hertzg/ip/doc/cidrv6"><code>cidrv6</code></a>: IPv6 CIDR utilities via <a href=".././mod.ts/~/parseCidr6.html">parseCidr6</a>, <a href=".././mod.ts/~/cidr6Contains.html">cidr6Contains</a></li>
-<li><a href="https://jsr.io/@hertzg/ip/doc/validate"><code>validate</code></a>: Validation via <a href=".././mod.ts/~/validate.html">validate</a>, <a href=".././mod.ts/~/isValidIpv4.html">isValidIpv4</a>, <a href=".././mod.ts/~/isValidIpv6.html">isValidIpv6</a></li>
+<li><a href="https://jsr.io/@hertzg/ip/doc/validatev4"><code>validatev4</code></a>: IPv4 validation via <a href=".././mod.ts/~/isValidIpv4.html">isValidIpv4</a>, <a href=".././mod.ts/~/isValidCidr4.html">isValidCidr4</a></li>
+<li><a href="https://jsr.io/@hertzg/ip/doc/validatev6"><code>validatev6</code></a>: IPv6 validation via <a href=".././mod.ts/~/isValidIpv6.html">isValidIpv6</a>, <a href=".././mod.ts/~/isValidCidr6.html">isValidCidr6</a></li>
+<li><a href="https://jsr.io/@hertzg/ip/doc/validate"><code>validate</code></a>: Universal validation via <a href=".././mod.ts/~/isValid.html">isValid</a>, <a href=".././mod.ts/~/validate.html">validate</a></li>
 </ul>
 <h2 id="features">
 Features</h2>
@@ -1122,22 +1124,22 @@ Functions</h2></div><div class="namespaceSection"><div id="namespace_cidr4addres
 </div></div></div>
     </div><div id="namespace_isvalidcidr4" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-Function bg-Function/15 dark:text-FunctionDark dark:bg-FunctionDark/15" title="Function">f</div></div>
 <div class="namespaceItemContent">
-		    <a href="..&#x2F;.&#x2F;validate.ts&#x2F;~&#x2F;isValidCidr4.html" title="isValidCidr4">
+		    <a href="..&#x2F;.&#x2F;validatev4.ts&#x2F;~&#x2F;isValidCidr4.html" title="isValidCidr4">
 			    <span>isValidCidr4</span><span>(<span><span>s<span>: <span class="td-kw">string</span></span></span></span>)<span>: <span class="td-kw">boolean</span></span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Checks if a string is valid IPv4 CIDR notation.</p>
 </div></div></div>
     </div><div id="namespace_isvalidcidr6" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-Function bg-Function/15 dark:text-FunctionDark dark:bg-FunctionDark/15" title="Function">f</div></div>
 <div class="namespaceItemContent">
-		    <a href="..&#x2F;.&#x2F;validate.ts&#x2F;~&#x2F;isValidCidr6.html" title="isValidCidr6">
+		    <a href="..&#x2F;.&#x2F;validatev6.ts&#x2F;~&#x2F;isValidCidr6.html" title="isValidCidr6">
 			    <span>isValidCidr6</span><span>(<span><span>s<span>: <span class="td-kw">string</span></span></span></span>)<span>: <span class="td-kw">boolean</span></span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Checks if a string is valid IPv6 CIDR notation.</p>
 </div></div></div>
     </div><div id="namespace_isvalidipv4" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-Function bg-Function/15 dark:text-FunctionDark dark:bg-FunctionDark/15" title="Function">f</div></div>
 <div class="namespaceItemContent">
-		    <a href="..&#x2F;.&#x2F;validate.ts&#x2F;~&#x2F;isValidIpv4.html" title="isValidIpv4">
+		    <a href="..&#x2F;.&#x2F;validatev4.ts&#x2F;~&#x2F;isValidIpv4.html" title="isValidIpv4">
 			    <span>isValidIpv4</span><span>(<span><span>s<span>: <span class="td-kw">string</span></span></span></span>)<span>: <span class="td-kw">boolean</span></span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Checks if a string is a valid IPv4 address in dotted decimal notation.</p>
 </div></div></div>
     </div><div id="namespace_isvalidipv6" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-Function bg-Function/15 dark:text-FunctionDark dark:bg-FunctionDark/15" title="Function">f</div></div>
 <div class="namespaceItemContent">
-		    <a href="..&#x2F;.&#x2F;validate.ts&#x2F;~&#x2F;isValidIpv6.html" title="isValidIpv6">
+		    <a href="..&#x2F;.&#x2F;validatev6.ts&#x2F;~&#x2F;isValidIpv6.html" title="isValidIpv6">
 			    <span>isValidIpv6</span><span>(<span><span>s<span>: <span class="td-kw">string</span></span></span></span>)<span>: <span class="td-kw">boolean</span></span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Checks if a string is a valid IPv6 address in colon-hexadecimal notation.</p>
 </div></div></div>
     </div><div id="namespace_mask4fromprefixlength" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-Function bg-Function/15 dark:text-FunctionDark dark:bg-FunctionDark/15" title="Function">f</div></div>

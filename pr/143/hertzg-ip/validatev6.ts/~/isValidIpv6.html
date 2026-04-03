@@ -1,10 +1,10 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>isValidIpv6 - validate.ts - @hertzg&#x2F;ip documentation</title>
+  <title>isValidIpv6 - validatev6.ts - @hertzg&#x2F;ip documentation</title>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="doc-current-file" content="validate.ts">
+  <meta name="doc-current-file" content="validatev6.ts">
   <link rel="stylesheet" href="..&#x2F;..&#x2F;styles.css">
   <link rel="stylesheet" href="..&#x2F;..&#x2F;page.css">
   <link id="ddocResetStylesheet" rel="stylesheet" href="..&#x2F;..&#x2F;reset.css"><link href="../../comrak.css" rel="stylesheet" /><link href="../../prism.css" rel="stylesheet" /><script src="../../prism.js"></script><script src="..&#x2F;..&#x2F;script.js" defer></script>
@@ -32,7 +32,7 @@
     fill="currentColor"
   />
 </svg>
-</span><a href="..&#x2F;..&#x2F;.&#x2F;validate.ts&#x2F;index.html" class="contextLink">validate.ts</a><span class="text-black dark:text-white"><svg
+</span><a href="..&#x2F;..&#x2F;.&#x2F;validatev6.ts&#x2F;index.html" class="contextLink">validatev6.ts</a><span class="text-black dark:text-white"><svg
   width="16"
   height="16"
   viewBox="0 0 16 16"
@@ -119,7 +119,7 @@
             <span class="text-Function">function</span>&nbsp;<span class="font-bold">isValidIpv6</span>
           </div></div><a
   class="sourceButton"
-  href="file:&#x2F;&#x2F;&#x2F;home&#x2F;runner&#x2F;work&#x2F;jsr-monorepo&#x2F;jsr-monorepo&#x2F;packages&#x2F;ip&#x2F;validate.ts"><svg
+  href="file:&#x2F;&#x2F;&#x2F;home&#x2F;runner&#x2F;work&#x2F;jsr-monorepo&#x2F;jsr-monorepo&#x2F;packages&#x2F;ip&#x2F;validatev6.ts"><svg
   width="14"
   height="14"
   viewBox="0 0 14 14"
@@ -217,7 +217,7 @@ Examples</h2></div><div class="space-y-8"><div class="anchorable"><a href="#exam
 <h3 class="example-header"><div class="markdown"><p>Valid addresses</p>
 </div></h3>
   <div><div class="markdown"><pre class="highlight"><code class="language-ts">import { assert } from &quot;@std/assert&quot;;
-import { isValidIpv6 } from &quot;@hertzg/ip/validate&quot;;
+import { isValidIpv6 } from &quot;@hertzg/ip/validatev6&quot;;
 
 assert(isValidIpv6(&quot;::&quot;));
 assert(isValidIpv6(&quot;::1&quot;));
@@ -225,7 +225,7 @@ assert(isValidIpv6(&quot;2001:db8::1&quot;));
 assert(isValidIpv6(&quot;::ffff:192.168.1.1&quot;));
 assert(isValidIpv6(&quot;fe80::1%eth0&quot;));
 </code><button class="copyButton" data-copy="import { assert } from &quot;@std/assert&quot;;
-import { isValidIpv6 } from &quot;@hertzg/ip/validate&quot;;
+import { isValidIpv6 } from &quot;@hertzg/ip/validatev6&quot;;
 
 assert(isValidIpv6(&quot;::&quot;));
 assert(isValidIpv6(&quot;::1&quot;));
@@ -290,14 +290,14 @@ assert(isValidIpv6(&quot;fe80::1%eth0&quot;));
 <h3 class="example-header"><div class="markdown"><p>Invalid addresses</p>
 </div></h3>
   <div><div class="markdown"><pre class="highlight"><code class="language-ts">import { assertEquals } from &quot;@std/assert&quot;;
-import { isValidIpv6 } from &quot;@hertzg/ip/validate&quot;;
+import { isValidIpv6 } from &quot;@hertzg/ip/validatev6&quot;;
 
 assertEquals(isValidIpv6(&quot;&quot;), false);
 assertEquals(isValidIpv6(&quot;192.168.1.1&quot;), false);
 assertEquals(isValidIpv6(&quot;2001:db8:::1&quot;), false);
 assertEquals(isValidIpv6(&quot;gggg::1&quot;), false);
 </code><button class="copyButton" data-copy="import { assertEquals } from &quot;@std/assert&quot;;
-import { isValidIpv6 } from &quot;@hertzg/ip/validate&quot;;
+import { isValidIpv6 } from &quot;@hertzg/ip/validatev6&quot;;
 
 assertEquals(isValidIpv6(&quot;&quot;), false);
 assertEquals(isValidIpv6(&quot;192.168.1.1&quot;), false);
@@ -389,7 +389,7 @@ Parameters</h2></div><div class="space-y-8"><div class="anchorable docEntry" id=
       </code>
     </div><a
   class="sourceButton"
-  href="file:&#x2F;&#x2F;&#x2F;home&#x2F;runner&#x2F;work&#x2F;jsr-monorepo&#x2F;jsr-monorepo&#x2F;packages&#x2F;ip&#x2F;validate.ts"><svg
+  href="file:&#x2F;&#x2F;&#x2F;home&#x2F;runner&#x2F;work&#x2F;jsr-monorepo&#x2F;jsr-monorepo&#x2F;packages&#x2F;ip&#x2F;validatev6.ts"><svg
   width="14"
   height="14"
   viewBox="0 0 14 14"
@@ -445,7 +445,7 @@ Return Type</h2></div><div class="space-y-8"><div class=" docEntry" id="function
       </code>
     </div><a
   class="sourceButton"
-  href="file:&#x2F;&#x2F;&#x2F;home&#x2F;runner&#x2F;work&#x2F;jsr-monorepo&#x2F;jsr-monorepo&#x2F;packages&#x2F;ip&#x2F;validate.ts"><svg
+  href="file:&#x2F;&#x2F;&#x2F;home&#x2F;runner&#x2F;work&#x2F;jsr-monorepo&#x2F;jsr-monorepo&#x2F;packages&#x2F;ip&#x2F;validatev6.ts"><svg
   width="14"
   height="14"
   viewBox="0 0 14 14"
@@ -477,8 +477,8 @@ Return Type</h2></div><div class="space-y-8"><div class=" docEntry" id="function
     </article></main>
 <div class="toc">
     <div><div class="usageContent">
-    <h3>Usage</h3><div class="markdown"><pre class="highlight"><code class="language-typescript">import { isValidIpv6 } from &quot;validate.ts&quot;;
-</code><button class="copyButton" data-copy="import { isValidIpv6 } from &quot;validate.ts&quot;;
+    <h3>Usage</h3><div class="markdown"><pre class="highlight"><code class="language-typescript">import { isValidIpv6 } from &quot;validatev6.ts&quot;;
+</code><button class="copyButton" data-copy="import { isValidIpv6 } from &quot;validatev6.ts&quot;;
 "><svg
   class="copy"
   width="15"
