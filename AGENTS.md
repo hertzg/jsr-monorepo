@@ -45,9 +45,6 @@ deno lint
 deno task cov              # View coverage summary
 deno task cov:gen          # Generate lcov coverage
 deno task cov:view         # View HTML coverage report
-
-# Bump workspace versions
-deno task bump
 ```
 
 ## Monorepo Structure
@@ -291,26 +288,15 @@ Both `deno task lint` and `deno task test` must pass before:
 - Committing code changes
 - Considering work production-ready
 
-### Pre-Push Hook
-
-Install the pre-push hook to automatically run all CI checks before pushing:
-
-```bash
-deno task setup:hooks
-```
-
-This runs `deno fmt --check`, `deno task lint`, `deno task test`, and
-`deno publish --dry-run` before each push, ensuring CI will pass.
-
 ### Commit Message Rules
 
 - Use Conventional Commits in the form `type(scope): summary`; these messages
-  are consumed by CI.
+  are consumed by Release Please.
 - Only `feat`, `fix`, or `chore` types are allowed.
 - A scope is mandatory and must consist solely of package names; use commas to
   list multiple packages.
-- The `version_bump` GitHub Action parses commit messages to decide which
-  packages to bump and the increment level.
+- Release Please uses file paths to determine which packages are affected, and
+  commit types to determine version bump level.
 - Commit messages are used to generate the changelog—write concise, user-facing
   summaries.
 

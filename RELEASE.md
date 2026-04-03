@@ -1,12 +1,13 @@
 # Release Process
 
-This document describes how to release new versions of packages in this
-monorepo.
+This document describes how releases work in this monorepo.
 
 ## Overview
 
-Releases are fully automated through GitHub Actions. The `scripts/release.sh`
-script orchestrates the entire process.
+Releases are automated via
+[Release Please](https://github.com/googleapis/release-please). On every push
+to `main`, Release Please analyzes commits and maintains a release PR with
+version bumps and changelogs for affected packages.
 
 ## Commit Message Format
 
@@ -25,92 +26,43 @@ type(scope): description
 | `fix`   | Patch        | Bug fix               |
 | `chore` | None         | Maintenance (no bump) |
 
-### Scopes
+### How Packages Are Identified
 
-Scopes must exactly match the package `name` in each workspace's `deno.json`:
-
-- `@hertzg/binstruct`
-- `@hertzg/bx`
-- `@hertzg/ip`
-- `@hertzg/mymagti-api`
-- `@hertzg/routeros-api`
-- `@hertzg/tplink-api`
-- `@hertzg/wg-conf`
-- `@hertzg/wg-ini`
-- `@hertzg/wg-keys`
-- `@binstruct/cli`
-- `@binstruct/ethernet`
-- `@binstruct/png`
-- `@binstruct/wav`
-
-### Examples
-
-```bash
-# Minor version bump for @hertzg/binstruct
-feat(@hertzg/binstruct): add new array coder
-
-# Patch version bump for @binstruct/png
-fix(@binstruct/png): fix CRC calculation
-
-# No version bump
-chore(@hertzg/bx): update documentation
-```
+Release Please uses **file paths** to determine which packages are affected by a
+commit. A commit touching files in `packages/ip/` will bump `@hertzg/ip`,
+regardless of the commit scope. Scopes are still used for changelog formatting.
 
 ## Releasing
 
-### Using the Release Script (Recommended)
+1. Merge feature/fix commits to `main` using Conventional Commits
+2. Release Please automatically creates/updates a release PR with:
+   - Version bumps in each affected package's `deno.json`
+   - Updated `import_map.json` (synced automatically)
+   - Per-package `CHANGELOG.md` entries
+3. When ready to release, merge the release PR
+4. Release Please creates per-package GitHub Releases with tags
+5. `deno publish` runs automatically, publishing all packages to JSR
 
-The easiest way to release is using the automated script:
+## Configuration
 
-```bash
-./scripts/release.sh
-```
-
-This script performs all 9 steps automatically:
-
-1. **Pre-flight checks** - Runs tests, linting, and format checks locally
-2. **Push and wait for CI** - Pushes to origin and waits for CI checks to pass
-3. **Trigger version_bump** - Triggers the version_bump GitHub workflow
-4. **Wait for PR** - Waits for the version bump PR to be created
-5. **Note branch name** - Captures the release branch name for tagging
-6. **Merge PR** - Waits for PR checks then merges with squash
-7. **Create tag** - Creates and pushes a git tag on main
-8. **Create release** - Creates a GitHub release with changelog
-9. **Monitor publish** - Watches the workspace_publish workflow
-
-### Manual Steps (If Script Fails)
-
-If the script fails mid-way, you can complete the remaining steps manually:
-
-1. **Trigger version bump**: Actions → version_bump → Run workflow
-2. **Merge the PR**: Review and merge the version bump PR
-3. **Create release**: Releases → Create new release → Select/create tag →
-   Publish
-
-Creating a GitHub release triggers the `workspace_publish` workflow which
-publishes all packages to JSR.
+- `release-please-config.json` — package definitions and release types
+- `.release-please-manifest.json` — current version tracking
 
 ## Troubleshooting
-
-### CI Fails on Commit Scope
-
-If CI fails due to invalid commit scope:
-
-1. The scope must exactly match a package name
-2. Check for typos (e.g., `binstruct` vs `@hertzg/binstruct`)
-3. Recovery requires rebasing and rewording commits
 
 ### Version Not Bumped
 
 If a package version wasn't bumped:
 
 1. Verify commit type is `feat` or `fix` (not `chore`)
-2. Verify scope exactly matches the package name
-3. Check if the commit was included in the version bump range
+2. Verify the commit touches files within the package's directory
+3. Check the release PR for the package's changelog entry
 
-### Release Script Timeout
+### import_map.json Out of Sync
 
-The script has a 10-minute timeout for CI checks. If your CI takes longer:
+The release workflow automatically syncs `import_map.json` after version bumps.
+If it gets out of sync locally, run:
 
-1. Wait for CI to complete manually
-2. Continue with manual steps from where the script stopped
+```bash
+deno run -A _tools/sync_import_map.ts
+```
