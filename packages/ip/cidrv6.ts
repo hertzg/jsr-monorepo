@@ -453,3 +453,39 @@ export function* cidr6Addresses(
     i++;
   }
 }
+
+/**
+ * Checks if a string is valid IPv6 CIDR notation.
+ *
+ * @param s The string to validate
+ * @returns `true` if the string is valid IPv6 CIDR notation
+ *
+ * @example Valid CIDR
+ * ```ts
+ * import { assert } from "@std/assert";
+ * import { isValidCidr6 } from "@hertzg/ip/cidrv6";
+ *
+ * assert(isValidCidr6("::/0"));
+ * assert(isValidCidr6("2001:db8::/32"));
+ * assert(isValidCidr6("::1/128"));
+ * ```
+ *
+ * @example Invalid CIDR
+ * ```ts
+ * import { assertEquals } from "@std/assert";
+ * import { isValidCidr6 } from "@hertzg/ip/cidrv6";
+ *
+ * assertEquals(isValidCidr6(""), false);
+ * assertEquals(isValidCidr6("2001:db8::1"), false);
+ * assertEquals(isValidCidr6("2001:db8::/129"), false);
+ * assertEquals(isValidCidr6("192.168.1.0/24"), false);
+ * ```
+ */
+export function isValidCidr6(s: string): boolean {
+  try {
+    parseCidr6(s);
+    return true;
+  } catch {
+    return false;
+  }
+}

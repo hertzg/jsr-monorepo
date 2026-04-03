@@ -1,5 +1,11 @@
-import { assertEquals, assertThrows } from "@std/assert";
-import { compressIpv6, expandIpv6, parseIpv6, stringifyIpv6 } from "./ipv6.ts";
+import { assert, assertEquals, assertThrows } from "@std/assert";
+import {
+  compressIpv6,
+  expandIpv6,
+  isValidIpv6,
+  parseIpv6,
+  stringifyIpv6,
+} from "./ipv6.ts";
 
 Deno.test("parseIpv6", async (t) => {
   await t.step("full form addresses", () => {
@@ -384,5 +390,27 @@ Deno.test("IPv6 arithmetic", async (t) => {
   await t.step("add large offset", () => {
     const ip = parseIpv6("::");
     assertEquals(stringifyIpv6(ip + 0x10000n), "::1:0");
+  });
+});
+
+Deno.test("isValidIpv6", async (t) => {
+  await t.step("valid addresses", () => {
+    assert(isValidIpv6("::"));
+    assert(isValidIpv6("::1"));
+    assert(isValidIpv6("2001:db8::1"));
+    assert(isValidIpv6("fe80::1%eth0"));
+    assert(isValidIpv6("::ffff:192.168.1.1"));
+    assert(
+      isValidIpv6("2001:0db8:0000:0000:0000:0000:0000:0001"),
+    );
+  });
+
+  await t.step("invalid addresses", () => {
+    assertEquals(isValidIpv6(""), false);
+    assertEquals(isValidIpv6("192.168.1.1"), false);
+    assertEquals(isValidIpv6("2001:db8:::1"), false);
+    assertEquals(isValidIpv6("gggg::1"), false);
+    assertEquals(isValidIpv6("abc"), false);
+    assertEquals(isValidIpv6("2001:db8::/32"), false);
   });
 });

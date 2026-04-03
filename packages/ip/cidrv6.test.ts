@@ -1,9 +1,10 @@
-import { assertEquals, assertThrows } from "@std/assert";
+import { assert, assertEquals, assertThrows } from "@std/assert";
 import {
   cidr6Addresses,
   cidr6Contains,
   cidr6FirstAddress,
   cidr6LastAddress,
+  isValidCidr6,
   mask6FromPrefixLength,
   parseCidr6,
   stringifyCidr6,
@@ -518,5 +519,22 @@ Deno.test("WireGuard IPv6 use cases", async (t) => {
     }
 
     assertEquals(cidr6Contains(meshCidr, parseIpv6("fd00:abcd::100")), false);
+  });
+});
+
+Deno.test("isValidCidr6", async (t) => {
+  await t.step("valid CIDR", () => {
+    assert(isValidCidr6("::/0"));
+    assert(isValidCidr6("2001:db8::/32"));
+    assert(isValidCidr6("::1/128"));
+    assert(isValidCidr6("fe80::/10"));
+  });
+
+  await t.step("invalid CIDR", () => {
+    assertEquals(isValidCidr6(""), false);
+    assertEquals(isValidCidr6("2001:db8::1"), false);
+    assertEquals(isValidCidr6("2001:db8::/129"), false);
+    assertEquals(isValidCidr6("192.168.1.0/24"), false);
+    assertEquals(isValidCidr6("abc/32"), false);
   });
 });

@@ -10,6 +10,7 @@
  * ### IPv4
  * - {@link parseIpv4}: Parse dotted decimal notation to number
  * - {@link stringifyIpv4}: Convert number to dotted decimal notation
+ * - {@link isValidIpv4}: Check if a string is a valid IPv4 address
  *
  * ### IPv4 CIDR
  * - {@link Cidr4}: Type representing an IPv4 CIDR block
@@ -23,12 +24,14 @@
  * - {@link cidr4BroadcastAddress}: Alias for cidr4LastAddress
  * - {@link cidr4Size}: Get total number of addresses in CIDR range
  * - {@link cidr4Addresses}: Generate IP addresses in CIDR range
+ * - {@link isValidCidr4}: Check if a string is valid IPv4 CIDR notation
  *
  * ### IPv6
  * - {@link parseIpv6}: Parse colon-hexadecimal notation to bigint
  * - {@link stringifyIpv6}: Convert bigint to compressed colon-hexadecimal
  * - {@link expandIpv6}: Expand to full uncompressed form
  * - {@link compressIpv6}: Compress to canonical shortest form
+ * - {@link isValidIpv6}: Check if a string is a valid IPv6 address
  *
  * ### IPv6 CIDR
  * - {@link Cidr6}: Type representing an IPv6 CIDR block
@@ -40,24 +43,19 @@
  * - {@link cidr6LastAddress}: Get last address in CIDR range
  * - {@link cidr6Size}: Get total number of addresses in CIDR range
  * - {@link cidr6Addresses}: Generate IP addresses in CIDR range
+ * - {@link isValidCidr6}: Check if a string is valid IPv6 CIDR notation
  *
  * ### Validation
- * - {@link ValidationResult}: Discriminated union type for validation results
- * - {@link isValidIpv4}: Check if a string is a valid IPv4 address
- * - {@link isValidIpv6}: Check if a string is a valid IPv6 address
- * - {@link isValidCidr4}: Check if a string is valid IPv4 CIDR notation
- * - {@link isValidCidr6}: Check if a string is valid IPv6 CIDR notation
- * - {@link isValid}: Check if a string is any valid IP address or CIDR notation
- * - {@link validate}: Identify and parse any IP address or CIDR string
+ * - {@link IpValidationResult}: Discriminated union type for validation results
+ * - {@link isValidIp}: Check if a string is any valid IP address or CIDR notation
+ * - {@link validateIp}: Identify and parse any IP address or CIDR string
  *
  * ### Submodules
- * - [`ipv4`](https://jsr.io/@hertzg/ip/doc/ipv4): IPv4 parsing via {@link parseIpv4} and {@link stringifyIpv4}
- * - [`cidrv4`](https://jsr.io/@hertzg/ip/doc/cidrv4): IPv4 CIDR utilities via {@link parseCidr4}, {@link cidr4Contains}
- * - [`ipv6`](https://jsr.io/@hertzg/ip/doc/ipv6): IPv6 parsing via {@link parseIpv6}, {@link expandIpv6}, {@link compressIpv6}
- * - [`cidrv6`](https://jsr.io/@hertzg/ip/doc/cidrv6): IPv6 CIDR utilities via {@link parseCidr6}, {@link cidr6Contains}
- * - [`validatev4`](https://jsr.io/@hertzg/ip/doc/validatev4): IPv4 validation via {@link isValidIpv4}, {@link isValidCidr4}
- * - [`validatev6`](https://jsr.io/@hertzg/ip/doc/validatev6): IPv6 validation via {@link isValidIpv6}, {@link isValidCidr6}
- * - [`validate`](https://jsr.io/@hertzg/ip/doc/validate): Universal validation via {@link isValid}, {@link validate}
+ * - [`ipv4`](https://jsr.io/@hertzg/ip/doc/ipv4): IPv4 parsing and validation
+ * - [`cidrv4`](https://jsr.io/@hertzg/ip/doc/cidrv4): IPv4 CIDR utilities and validation
+ * - [`ipv6`](https://jsr.io/@hertzg/ip/doc/ipv6): IPv6 parsing and validation
+ * - [`cidrv6`](https://jsr.io/@hertzg/ip/doc/cidrv6): IPv6 CIDR utilities and validation
+ * - [`validate`](https://jsr.io/@hertzg/ip/doc/validate): Universal validation via {@link isValidIp}, {@link validateIp}
  *
  * ## Features
  *
@@ -274,7 +272,7 @@
  */
 
 // Re-export IPv4 utilities
-export { parseIpv4, stringifyIpv4 } from "./ipv4.ts";
+export { isValidIpv4, parseIpv4, stringifyIpv4 } from "./ipv4.ts";
 
 // Re-export CIDR4 utilities
 export {
@@ -286,13 +284,20 @@ export {
   cidr4LastAddress,
   cidr4NetworkAddress,
   cidr4Size,
+  isValidCidr4,
   mask4FromPrefixLength,
   parseCidr4,
   stringifyCidr4,
 } from "./cidrv4.ts";
 
 // Re-export IPv6 utilities
-export { compressIpv6, expandIpv6, parseIpv6, stringifyIpv6 } from "./ipv6.ts";
+export {
+  compressIpv6,
+  expandIpv6,
+  isValidIpv6,
+  parseIpv6,
+  stringifyIpv6,
+} from "./ipv6.ts";
 
 // Re-export CIDR6 utilities
 export {
@@ -302,20 +307,15 @@ export {
   cidr6FirstAddress,
   cidr6LastAddress,
   cidr6Size,
+  isValidCidr6,
   mask6FromPrefixLength,
   parseCidr6,
   stringifyCidr6,
 } from "./cidrv6.ts";
 
-// Re-export IPv4 validation utilities
-export { isValidCidr4, isValidIpv4 } from "./validatev4.ts";
-
-// Re-export IPv6 validation utilities
-export { isValidCidr6, isValidIpv6 } from "./validatev6.ts";
-
 // Re-export universal validation utilities
 export {
-  isValid,
-  validate,
-  type ValidationResult,
+  type IpValidationResult,
+  isValidIp,
+  validateIp,
 } from "./validate.ts";
