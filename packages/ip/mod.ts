@@ -10,8 +10,8 @@
  * ### Universal (auto-detect IPv4/IPv6)
  * - {@link parseIp}: Parse any IP address string to number (IPv4) or bigint (IPv6)
  * - {@link stringifyIp}: Convert number or bigint to IP address string
- * - {@link parseCidr}: Parse any CIDR notation string to Cidrv4 or Cidr6
- * - {@link stringifyCidr}: Convert Cidrv4 or Cidr6 to CIDR notation string
+ * - {@link parseCidr}: Parse any CIDR notation string to Cidrv4 or Cidrv6
+ * - {@link stringifyCidr}: Convert Cidrv4 or Cidrv6 to CIDR notation string
  * - {@link isValidCidr}: Check if a string is valid CIDR notation (IPv4 or IPv6)
  *
  * ### IPv4
@@ -41,16 +41,16 @@
  * - {@link isValidIpv6}: Check if a string is a valid IPv6 address
  *
  * ### IPv6 CIDR
- * - {@link Cidr6}: Type representing an IPv6 CIDR block
- * - {@link parseCidr6}: Parse CIDR notation string to Cidr6
- * - {@link stringifyCidr6}: Convert Cidr6 to CIDR notation string
+ * - {@link Cidrv6}: Type representing an IPv6 CIDR block
+ * - {@link parseCidrv6}: Parse CIDR notation string to Cidrv6
+ * - {@link stringifyCidrv6}: Convert Cidrv6 to CIDR notation string
  * - {@link cidrv6Mask}: Create network mask from prefix length (0-128)
- * - {@link cidr6Contains}: Check if IP is within CIDR range
- * - {@link cidr6FirstAddress}: Get first address in CIDR range
- * - {@link cidr6LastAddress}: Get last address in CIDR range
- * - {@link cidr6Size}: Get total number of addresses in CIDR range
- * - {@link cidr6Addresses}: Generate IP addresses in CIDR range
- * - {@link isValidCidr6}: Check if a string is valid IPv6 CIDR notation
+ * - {@link cidrv6Contains}: Check if IP is within CIDR range
+ * - {@link cidrv6FirstAddress}: Get first address in CIDR range
+ * - {@link cidrv6LastAddress}: Get last address in CIDR range
+ * - {@link cidrv6Size}: Get total number of addresses in CIDR range
+ * - {@link cidrv6Addresses}: Generate IP addresses in CIDR range
+ * - {@link isValidCidrv6}: Check if a string is valid IPv6 CIDR notation
  *
  * ### Validation
  * - {@link IpValidationResult}: Discriminated union type for validation results
@@ -188,23 +188,23 @@
  * ```ts
  * import { assertEquals } from "@std/assert";
  * import {
- *   cidr6FirstAddress,
- *   cidr6LastAddress,
- *   parseCidr6,
- *   stringifyCidr6,
+ *   cidrv6FirstAddress,
+ *   cidrv6LastAddress,
+ *   parseCidrv6,
+ *   stringifyCidrv6,
  *   stringifyIpv6,
  * } from "@hertzg/ip";
  *
  * // Parse IPv6 CIDR notation
- * const cidr = parseCidr6("2001:db8::/32");
+ * const cidr = parseCidrv6("2001:db8::/32");
  * assertEquals(cidr.prefixLength, 32);
  *
  * // Get range boundaries
- * const first = cidr6FirstAddress(cidr);
+ * const first = cidrv6FirstAddress(cidr);
  * assertEquals(stringifyIpv6(first), "2001:db8::");
  *
  * // Stringify back to CIDR notation
- * assertEquals(stringifyCidr6(cidr), "2001:db8::/32");
+ * assertEquals(stringifyCidrv6(cidr), "2001:db8::/32");
  * ```
  *
  * ## Range Checking
@@ -300,13 +300,13 @@
  * @example WireGuard mesh network with IPv6
  * ```ts
  * import { assertEquals } from "@std/assert";
- * import { cidr6Addresses, parseCidr6, stringifyIpv6 } from "@hertzg/ip";
+ * import { cidrv6Addresses, parseCidrv6, stringifyIpv6 } from "@hertzg/ip";
  *
  * // Allocate unique local addresses for mesh peers
- * const meshSubnet = parseCidr6("fd00:abcd::/120");
+ * const meshSubnet = parseCidrv6("fd00:abcd::/120");
  *
  * // Get addresses for mesh nodes
- * const peerAddresses = Array.from(cidr6Addresses(meshSubnet, { offset: 1, count: 5 }));
+ * const peerAddresses = Array.from(cidrv6Addresses(meshSubnet, { offset: 1, count: 5 }));
  * assertEquals(peerAddresses.map(stringifyIpv6), [
  *   "fd00:abcd::1",
  *   "fd00:abcd::2",
@@ -376,16 +376,16 @@ export {
 } from "./ipv6.ts";
 
 export {
-  type Cidr6,
-  cidr6Addresses,
-  cidr6Contains,
-  cidr6FirstAddress,
-  cidr6LastAddress,
-  cidr6Size,
-  isValidCidr6,
+  type Cidrv6,
+  cidrv6Addresses,
+  cidrv6Contains,
+  cidrv6FirstAddress,
+  cidrv6LastAddress,
+  cidrv6Size,
+  isValidCidrv6,
   cidrv6Mask,
-  parseCidr6,
-  stringifyCidr6,
+  parseCidrv6,
+  stringifyCidrv6,
 } from "./cidrv6.ts";
 
 export {

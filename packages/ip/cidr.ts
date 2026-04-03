@@ -7,7 +7,7 @@
  *
  * For version-specific functions, see:
  * - [`cidrv4`](https://jsr.io/@hertzg/ip/doc/cidrv4): {@link parseCidrv4}, {@link stringifyCidrv4}, {@link isValidCidrv4}
- * - [`cidrv6`](https://jsr.io/@hertzg/ip/doc/cidrv6): {@link parseCidr6}, {@link stringifyCidr6}, {@link isValidCidr6}
+ * - [`cidrv6`](https://jsr.io/@hertzg/ip/doc/cidrv6): {@link parseCidrv6}, {@link stringifyCidrv6}, {@link isValidCidrv6}
  *
  * @example Parse and stringify any CIDR block
  * ```ts
@@ -35,21 +35,21 @@ import {
   stringifyCidrv4,
 } from "./cidrv4.ts";
 import {
-  type Cidr6,
-  isValidCidr6,
-  parseCidr6,
-  stringifyCidr6,
+  type Cidrv6,
+  isValidCidrv6,
+  parseCidrv6,
+  stringifyCidrv6,
 } from "./cidrv6.ts";
 
 /**
  * Parses an IPv4 or IPv6 CIDR notation string.
  *
  * Detects the IP version by checking for `:` in the input — if present,
- * the CIDR is parsed as IPv6 (returning {@link Cidr6}), otherwise as IPv4
+ * the CIDR is parsed as IPv6 (returning {@link Cidrv6}), otherwise as IPv4
  * (returning {@link Cidrv4}).
  *
  * @param cidr The CIDR notation string (e.g., "192.168.1.0/24" or "2001:db8::/32")
- * @returns The parsed CIDR as `Cidrv4` or `Cidr6`
+ * @returns The parsed CIDR as `Cidrv4` or `Cidrv6`
  * @throws {TypeError} If the format is invalid
  * @throws {RangeError} If values are out of range
  *
@@ -65,15 +65,15 @@ import {
  * assertEquals(v6.prefixLength, 10);
  * ```
  */
-export function parseCidr(cidr: string): Cidrv4 | Cidr6 {
+export function parseCidr(cidr: string): Cidrv4 | Cidrv6 {
   if (cidr.includes(":")) {
-    return parseCidr6(cidr);
+    return parseCidrv6(cidr);
   }
   return parseCidrv4(cidr);
 }
 
 /**
- * Stringifies a {@link Cidrv4} or {@link Cidr6} to CIDR notation.
+ * Stringifies a {@link Cidrv4} or {@link Cidrv6} to CIDR notation.
  *
  * @param cidr The CIDR object
  * @returns The CIDR notation string
@@ -88,13 +88,13 @@ export function parseCidr(cidr: string): Cidrv4 | Cidr6 {
  * ```
  */
 export function stringifyCidr(cidr: Cidrv4): string;
-/** Stringifies a {@link Cidr6} to IPv6 CIDR notation. */
-export function stringifyCidr(cidr: Cidr6): string;
-/** Stringifies a {@link Cidrv4} or {@link Cidr6} to CIDR notation. */
-export function stringifyCidr(cidr: Cidrv4 | Cidr6): string;
-export function stringifyCidr(cidr: Cidrv4 | Cidr6): string {
+/** Stringifies a {@link Cidrv6} to IPv6 CIDR notation. */
+export function stringifyCidr(cidr: Cidrv6): string;
+/** Stringifies a {@link Cidrv4} or {@link Cidrv6} to CIDR notation. */
+export function stringifyCidr(cidr: Cidrv4 | Cidrv6): string;
+export function stringifyCidr(cidr: Cidrv4 | Cidrv6): string {
   if (typeof cidr.address === "bigint") {
-    return stringifyCidr6(cidr as Cidr6);
+    return stringifyCidrv6(cidr as Cidrv6);
   }
   return stringifyCidrv4(cidr as Cidrv4);
 }
@@ -117,5 +117,5 @@ export function stringifyCidr(cidr: Cidrv4 | Cidr6): string {
  * ```
  */
 export function isValidCidr(s: string): boolean {
-  return isValidCidrv4(s) || isValidCidr6(s);
+  return isValidCidrv4(s) || isValidCidrv6(s);
 }
