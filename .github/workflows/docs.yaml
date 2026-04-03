@@ -4,7 +4,6 @@ on:
   push:
     branches: [main]
   pull_request:
-    types: [opened, synchronize, reopened, closed]
   workflow_dispatch:
 
 permissions:
@@ -18,10 +17,12 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  build:
-    if: github.event.action != 'closed'
+  docs:
     runs-on: ubuntu-latest
     timeout-minutes: 15
+    environment:
+      name: ${{ github.event_name == 'pull_request' && format('pr-{0}', github.event.pull_request.number) || 'github-pages' }}
+      url: ${{ steps.deploy.outputs.page_url }}
     steps:
       - name: Checkout
         uses: actions/checkout@v6
@@ -45,58 +46,16 @@ jobs:
         with:
           path: docs/
 
-  deploy:
-    if: github.ref == 'refs/heads/main'
-    needs: build
-    runs-on: ubuntu-latest
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
-    steps:
-      - name: Deploy to GitHub Pages
-        id: deployment
-        uses: actions/deploy-pages@v5
-
-  preview:
-    if: github.event_name == 'pull_request' && github.event.action != 'closed'
-    needs: build
-    runs-on: ubuntu-latest
-    environment:
-      name: pr-${{ github.event.pull_request.number }}
-      url: ${{ steps.deployment.outputs.page_url }}
-    steps:
-      - name: Deploy preview
-        id: deployment
+      - name: Deploy
+        id: deploy
         uses: actions/deploy-pages@v5
         with:
-          preview: true
+          preview: ${{ github.event_name == 'pull_request' }}
 
       - name: Comment on PR
+        if: github.event_name == 'pull_request'
         uses: marocchino/sticky-pull-request-comment@v2
         with:
           header: docs-preview
           message: |
-            **Docs preview:** ${{ steps.deployment.outputs.page_url }}
-
-  cleanup:
-    if: github.event_name == 'pull_request' && github.event.action == 'closed'
-    runs-on: ubuntu-latest
-    steps:
-      - name: Close preview
-        uses: actions/github-script@v7
-        with:
-          script: |
-            const env = `pr-${context.payload.pull_request.number}`;
-            const { data: deployments } = await github.rest.repos.listDeployments({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              environment: env,
-            });
-            for (const deployment of deployments) {
-              await github.rest.repos.createDeploymentStatus({
-                owner: context.repo.owner,
-                repo: context.repo.repo,
-                deployment_id: deployment.id,
-                state: 'inactive',
-              });
-            }
+            **Docs preview:** ${{ steps.deploy.outputs.page_url }}
