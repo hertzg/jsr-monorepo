@@ -453,198 +453,15 @@ assertEquals(xhb.payees.length, 2);
   </defs>
 </svg>
 </a>
-Functions</h2></div><div class="namespaceSection"><div id="namespace_atoi" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-Function bg-Function/15 dark:text-FunctionDark dark:bg-FunctionDark/15" title="Function">f</div></div>
-<div class="namespaceItemContent">
-		    <a href=".&#x2F;.&#x2F;.&#x2F;~&#x2F;atoi.html" title="atoi">
-			    <span>atoi</span><span><span>&lt;<span><span class="td-tp">T</span><span><span class="td-kw"> extends </span><span class="td-kw">number</span></span></span>&gt;</span>(<span><span>s<span>: <span class="td-kw">string</span></span></span></span>)<span>: <span><span class="td-ref">T</span><span class="td-op"> | </span><span class="td-lit">0</span></span></span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Parses a string to an integer, returning <code>0</code> for null or undefined input.</p>
-</div></div></div>
-    </div><div id="namespace_dtostr" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-Function bg-Function/15 dark:text-FunctionDark dark:bg-FunctionDark/15" title="Function">f</div></div>
-<div class="namespaceItemContent">
-		    <a href=".&#x2F;.&#x2F;.&#x2F;~&#x2F;dtostr.html" title="dtostr">
-			    <span>dtostr</span><span>(<span><span>d<span>: <span class="td-ref">gDouble</span></span></span></span>)<span>: <span class="td-kw">string</span></span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Converts a <code>gDouble</code> to its string representation.</p>
-</div></div></div>
-    </div><div id="namespace_hb_escape_text" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-Function bg-Function/15 dark:text-FunctionDark dark:bg-FunctionDark/15" title="Function">f</div></div>
-<div class="namespaceItemContent">
-		    <a href=".&#x2F;.&#x2F;.&#x2F;~&#x2F;hb_escape_text.html" title="hb_escape_text">
-			    <span>hb_escape_text</span><span>(<span><span>str<span>: <span class="td-ref">gCharP</span></span></span></span>)<span>: <span class="td-kw">string</span></span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Escapes special XML characters and control characters in a string,
-following HomeBank's <code>hb_xml_escape_text</code> behavior.</p>
-</div></div></div>
-    </div><div id="namespace_hb_xml_attr_amt" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-Function bg-Function/15 dark:text-FunctionDark dark:bg-FunctionDark/15" title="Function">f</div></div>
-<div class="namespaceItemContent">
-		    <a href=".&#x2F;.&#x2F;.&#x2F;~&#x2F;hb_xml_attr_amt.html" title="hb_xml_attr_amt">
-			    <span>hb_xml_attr_amt</span><span>(<div class="ml-4"><div><span>attrName<span>: <span class="td-kw">string</span></span></span>,</div><div><span>amt<span>: <span class="td-ref">gDouble</span></span></span></div></div>)<span>: <span class="td-kw">string</span></span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Formats an amount (double) XML attribute.
-Returns an empty string if the value is null or undefined.</p>
-</div></div></div>
-    </div><div id="namespace_hb_xml_attr_int" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-Function bg-Function/15 dark:text-FunctionDark dark:bg-FunctionDark/15" title="Function">f</div></div>
-<div class="namespaceItemContent">
-		    <a href=".&#x2F;.&#x2F;.&#x2F;~&#x2F;hb_xml_attr_int.html" title="hb_xml_attr_int">
-			    <span>hb_xml_attr_int</span><span>(<div class="ml-4"><div><span>attrName<span>: <span class="td-kw">string</span></span></span>,</div><div><span>value<span>: <span class="td-kw">number</span></span></span></div></div>)<span>: <span class="td-kw">string</span></span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Formats an integer XML attribute, omitting it when the value is zero.</p>
-</div></div></div>
-    </div><div id="namespace_hb_xml_attr_int0" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-Function bg-Function/15 dark:text-FunctionDark dark:bg-FunctionDark/15" title="Function">f</div></div>
-<div class="namespaceItemContent">
-		    <a href=".&#x2F;.&#x2F;.&#x2F;~&#x2F;hb_xml_attr_int0.html" title="hb_xml_attr_int0">
-			    <span>hb_xml_attr_int0</span><span>(<div class="ml-4"><div><span>attrName<span>: <span class="td-kw">string</span></span></span>,</div><div><span>value<span>: <span class="td-kw">number</span></span></span></div></div>)<span>: <span class="td-kw">string</span></span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Formats an integer XML attribute, always emitting the value even if zero.
-Returns an empty string if the value is null or undefined.</p>
-</div></div></div>
-    </div><div id="namespace_hb_xml_attr_txt" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-Function bg-Function/15 dark:text-FunctionDark dark:bg-FunctionDark/15" title="Function">f</div></div>
-<div class="namespaceItemContent">
-		    <a href=".&#x2F;.&#x2F;.&#x2F;~&#x2F;hb_xml_attr_txt.html" title="hb_xml_attr_txt">
-			    <span>hb_xml_attr_txt</span><span>(<div class="ml-4"><div><span>attrName<span>: <span class="td-kw">string</span></span></span>,</div><div><span>value<span>: <span class="td-ref">gCharP</span></span></span></div></div>)<span>: <span class="td-kw">string</span></span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Formats a string XML attribute. Returns an empty string if the value is
-null or undefined.</p>
-</div></div></div>
-    </div><div id="namespace_hb_xml_attr_txt_crlf" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-Function bg-Function/15 dark:text-FunctionDark dark:bg-FunctionDark/15" title="Function">f</div></div>
-<div class="namespaceItemContent">
-		    <a href=".&#x2F;.&#x2F;.&#x2F;~&#x2F;hb_xml_attr_txt_crlf.html" title="hb_xml_attr_txt_crlf">
-			    <span>hb_xml_attr_txt_crlf</span><span>(<div class="ml-4"><div><span>attrName<span>: <span class="td-kw">string</span></span></span>,</div><div><span>value<span>: <span class="td-ref">gCharP</span></span></span></div></div>)<span>: <span class="td-kw">string</span></span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Formats a string XML attribute with CRLF/control-character escaping.
-Returns an empty string if the value is null or undefined.</p>
-</div></div></div>
-    </div><div id="namespace_hb_xml_attrs_splits" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-Function bg-Function/15 dark:text-FunctionDark dark:bg-FunctionDark/15" title="Function">f</div></div>
-<div class="namespaceItemContent">
-		    <a href=".&#x2F;.&#x2F;.&#x2F;~&#x2F;hb_xml_attrs_splits.html" title="hb_xml_attrs_splits">
-			    <span>hb_xml_attrs_splits</span><span>(<span><span>splits<span>: <span class="td-ref">AttrSplit</span>[]</span></span></span>)<span>: <span class="td-kw">string</span></span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Serializes an array of splits into <code>scat</code>, <code>samt</code>, and <code>smem</code> XML
-attribute strings separated by <code>||</code>.</p>
-</div></div></div>
-    </div><div id="namespace_hb_xml_tag" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-Function bg-Function/15 dark:text-FunctionDark dark:bg-FunctionDark/15" title="Function">f</div></div>
-<div class="namespaceItemContent">
-		    <a href=".&#x2F;.&#x2F;.&#x2F;~&#x2F;hb_xml_tag.html" title="hb_xml_tag">
-			    <span>hb_xml_tag</span><span>(<div class="ml-4"><div><span>prefix<span>: <span class="td-kw">string</span></span></span>,</div><div><span><span>..._attrs</span><span>: <span class="td-kw">string</span>[]</span></span></div></div>)<span>: <span class="td-kw">string</span></span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Builds a self-closing XML tag from a prefix and a list of attribute strings.
-Empty or falsy attributes are filtered out.</p>
-</div></div></div>
-    </div><div id="namespace_parse" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-Function bg-Function/15 dark:text-FunctionDark dark:bg-FunctionDark/15" title="Function">f</div></div>
+Functions</h2></div><div class="namespaceSection"><div id="namespace_parse" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-Function bg-Function/15 dark:text-FunctionDark dark:bg-FunctionDark/15" title="Function">f</div></div>
 <div class="namespaceItemContent">
 		    <a href=".&#x2F;.&#x2F;.&#x2F;~&#x2F;parse.html" title="parse">
 			    <span>parse</span><span>(<div class="ml-4"><div><span>xml<span>: <span class="td-kw">string</span></span></span>,</div><div><span>options<span class="td-op">?</span><span>: <span class="td-ref">ParseOptions</span></span></span></div></div>)<span>: <span class="td-ref">XHB</span></span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Parses an XHB XML string into a typed <code>XHB</code> object.</p>
-</div></div></div>
-    </div><div id="namespace_parseaccount" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-Function bg-Function/15 dark:text-FunctionDark dark:bg-FunctionDark/15" title="Function">f</div></div>
-<div class="namespaceItemContent">
-		    <a href=".&#x2F;.&#x2F;.&#x2F;~&#x2F;parseAccount.html" title="parseAccount">
-			    <span>parseAccount</span><span>(<span><span><span class="italic">unnamed 0</span><span>: <span class="td-ref">Node</span></span></span></span>)<span>: <span class="td-ref">Account</span></span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Parses an <code>&lt;account&gt;</code> XML node into an <code>Account</code> object.</p>
-</div></div></div>
-    </div><div id="namespace_parsearchive" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-Function bg-Function/15 dark:text-FunctionDark dark:bg-FunctionDark/15" title="Function">f</div></div>
-<div class="namespaceItemContent">
-		    <a href=".&#x2F;.&#x2F;.&#x2F;~&#x2F;parseArchive.html" title="parseArchive">
-			    <span>parseArchive</span><span>(<span><span><span class="italic">unnamed 0</span><span>: <span class="td-ref">Node</span></span></span></span>)<span>: <span class="td-ref">Archive</span></span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Parses a <code>&lt;fav&gt;</code> XML node into an <code>Archive</code> object.</p>
-</div></div></div>
-    </div><div id="namespace_parseassign" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-Function bg-Function/15 dark:text-FunctionDark dark:bg-FunctionDark/15" title="Function">f</div></div>
-<div class="namespaceItemContent">
-		    <a href=".&#x2F;.&#x2F;.&#x2F;~&#x2F;parseAssign.html" title="parseAssign">
-			    <span>parseAssign</span><span>(<div class="ml-4"><div><span><span class="italic">unnamed 0</span><span>: <span class="td-ref">Node</span></span></span>,</div><div><span>xhb<span>: <span class="td-ref">VolatileXHB</span></span></span></div></div>)<span>: <span class="td-ref">Assign</span></span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Parses an <code>&lt;asg&gt;</code> XML node into an <code>Assign</code> object.</p>
-</div></div></div>
-    </div><div id="namespace_parsecategory" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-Function bg-Function/15 dark:text-FunctionDark dark:bg-FunctionDark/15" title="Function">f</div></div>
-<div class="namespaceItemContent">
-		    <a href=".&#x2F;.&#x2F;.&#x2F;~&#x2F;parseCategory.html" title="parseCategory">
-			    <span>parseCategory</span><span>(<span><span><span class="italic">unnamed 0</span><span>: <span class="td-ref">Node</span></span></span></span>)<span>: <span class="td-ref">Category</span></span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Parses a <code>&lt;cat&gt;</code> XML node into a <code>Category</code> object.</p>
-</div></div></div>
-    </div><div id="namespace_parsecurrency" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-Function bg-Function/15 dark:text-FunctionDark dark:bg-FunctionDark/15" title="Function">f</div></div>
-<div class="namespaceItemContent">
-		    <a href=".&#x2F;.&#x2F;.&#x2F;~&#x2F;parseCurrency.html" title="parseCurrency">
-			    <span>parseCurrency</span><span>(<span><span><span class="italic">unnamed 0</span><span>: <span class="td-ref">Node</span></span></span></span>)<span>: <span class="td-ref">Currency</span></span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Parses a <code>&lt;cur&gt;</code> XML node into a <code>Currency</code> object.</p>
-</div></div></div>
-    </div><div id="namespace_parsegcharp" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-Function bg-Function/15 dark:text-FunctionDark dark:bg-FunctionDark/15" title="Function">f</div></div>
-<div class="namespaceItemContent">
-		    <a href=".&#x2F;.&#x2F;.&#x2F;~&#x2F;parseGCharP.html" title="parseGCharP">
-			    <span>parseGCharP</span><span>(<span><span>s<span>: <span class="td-kw">string</span></span></span></span>)<span>: <span class="td-ref">gCharP</span></span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Parses a string as a <code>gCharP</code>.</p>
-</div></div></div>
-    </div><div id="namespace_parsegdouble" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-Function bg-Function/15 dark:text-FunctionDark dark:bg-FunctionDark/15" title="Function">f</div></div>
-<div class="namespaceItemContent">
-		    <a href=".&#x2F;.&#x2F;.&#x2F;~&#x2F;parseGDouble.html" title="parseGDouble">
-			    <span>parseGDouble</span><span>(<span><span>s<span>: <span class="td-kw">string</span></span></span></span>)<span>: <span class="td-ref">gDouble</span></span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Parses a string as a <code>gDouble</code>, preserving the original string
-representation to avoid floating-point precision loss.</p>
-</div></div></div>
-    </div><div id="namespace_parsegint" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-Function bg-Function/15 dark:text-FunctionDark dark:bg-FunctionDark/15" title="Function">f</div></div>
-<div class="namespaceItemContent">
-		    <a href=".&#x2F;.&#x2F;.&#x2F;~&#x2F;parseGInt.html" title="parseGInt">
-			    <span>parseGInt</span><span>(<span><span>s<span>: <span class="td-kw">string</span></span></span></span>)<span>: <span class="td-ref">gInt</span></span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Parses a string as a <code>gInt</code>.</p>
-</div></div></div>
-    </div><div id="namespace_parseguint32" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-Function bg-Function/15 dark:text-FunctionDark dark:bg-FunctionDark/15" title="Function">f</div></div>
-<div class="namespaceItemContent">
-		    <a href=".&#x2F;.&#x2F;.&#x2F;~&#x2F;parseGUInt32.html" title="parseGUInt32">
-			    <span>parseGUInt32</span><span>(<span><span>s<span>: <span class="td-kw">string</span></span></span></span>)<span>: <span class="td-ref">gUInt32</span></span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Parses a string as a <code>gUInt32</code>.</p>
-</div></div></div>
-    </div><div id="namespace_parseoperation" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-Function bg-Function/15 dark:text-FunctionDark dark:bg-FunctionDark/15" title="Function">f</div></div>
-<div class="namespaceItemContent">
-		    <a href=".&#x2F;.&#x2F;.&#x2F;~&#x2F;parseOperation.html" title="parseOperation">
-			    <span>parseOperation</span><span>(<span><span><span class="italic">unnamed 0</span><span>: <span class="td-ref">Node</span></span></span></span>)<span>: <span class="td-ref">Operation</span></span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Parses an <code>&lt;ope&gt;</code> XML node into an <code>Operation</code> object.</p>
-</div></div></div>
-    </div><div id="namespace_parsepayee" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-Function bg-Function/15 dark:text-FunctionDark dark:bg-FunctionDark/15" title="Function">f</div></div>
-<div class="namespaceItemContent">
-		    <a href=".&#x2F;.&#x2F;.&#x2F;~&#x2F;parsePayee.html" title="parsePayee">
-			    <span>parsePayee</span><span>(<span><span><span class="italic">unnamed 0</span><span>: <span class="td-ref">Node</span></span></span></span>)<span>: <span class="td-ref">Payee</span></span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Parses a <code>&lt;pay&gt;</code> XML node into a <code>Payee</code> object.</p>
-</div></div></div>
-    </div><div id="namespace_parseproperties" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-Function bg-Function/15 dark:text-FunctionDark dark:bg-FunctionDark/15" title="Function">f</div></div>
-<div class="namespaceItemContent">
-		    <a href=".&#x2F;.&#x2F;.&#x2F;~&#x2F;parseProperties.html" title="parseProperties">
-			    <span>parseProperties</span><span>(<span><span><span class="italic">unnamed 0</span><span>: <span class="td-ref">Node</span></span></span></span>)<span>: <span class="td-ref">Properties</span></span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Parses the <code>&lt;properties&gt;</code> XML node into a <code>Properties</code> object.</p>
-</div></div></div>
-    </div><div id="namespace_parsetag" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-Function bg-Function/15 dark:text-FunctionDark dark:bg-FunctionDark/15" title="Function">f</div></div>
-<div class="namespaceItemContent">
-		    <a href=".&#x2F;.&#x2F;.&#x2F;~&#x2F;parseTag.html" title="parseTag">
-			    <span>parseTag</span><span>(<span><span><span class="italic">unnamed 0</span><span>: <span class="td-ref">Node</span></span></span></span>)<span>: <span class="td-ref">Tag</span></span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Parses a <code>&lt;tag&gt;</code> XML node into a <code>Tag</code> object.</p>
-</div></div></div>
-    </div><div id="namespace_parseversions" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-Function bg-Function/15 dark:text-FunctionDark dark:bg-FunctionDark/15" title="Function">f</div></div>
-<div class="namespaceItemContent">
-		    <a href=".&#x2F;.&#x2F;.&#x2F;~&#x2F;parseVersions.html" title="parseVersions">
-			    <span>parseVersions</span><span>(<span><span><span class="italic">unnamed 0</span><span>: <span class="td-ref">Node</span></span></span></span>)<span>: <span class="td-ref">Versions</span></span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Parses version attributes from the <code>&lt;homebank&gt;</code> root XML node.</p>
 </div></div></div>
     </div><div id="namespace_serialize" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-Function bg-Function/15 dark:text-FunctionDark dark:bg-FunctionDark/15" title="Function">f</div></div>
 <div class="namespaceItemContent">
 		    <a href=".&#x2F;.&#x2F;.&#x2F;~&#x2F;serialize.html" title="serialize">
 			    <span>serialize</span><span>(<div class="ml-4"><div><span>xhb<span>: <span class="td-ref">XHB</span></span></span>,</div><div><span>options<span class="td-op">?</span><span>: <span class="td-ref">SerializeOptions</span></span></span></div></div>)<span>: <span class="td-kw">string</span></span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Serializes an <code>XHB</code> object back into an XHB XML string.</p>
-</div></div></div>
-    </div><div id="namespace_serializeaccount" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-Function bg-Function/15 dark:text-FunctionDark dark:bg-FunctionDark/15" title="Function">f</div></div>
-<div class="namespaceItemContent">
-		    <a href=".&#x2F;.&#x2F;.&#x2F;~&#x2F;serializeAccount.html" title="serializeAccount">
-			    <span>serializeAccount</span><span>(<span><span>account<span>: <span class="td-ref">Account</span></span></span></span>)<span>: <span class="td-kw">string</span></span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Serializes an <code>Account</code> object into an <code>&lt;account ... /&gt;</code> XML tag.</p>
-</div></div></div>
-    </div><div id="namespace_serializearchive" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-Function bg-Function/15 dark:text-FunctionDark dark:bg-FunctionDark/15" title="Function">f</div></div>
-<div class="namespaceItemContent">
-		    <a href=".&#x2F;.&#x2F;.&#x2F;~&#x2F;serializeArchive.html" title="serializeArchive">
-			    <span>serializeArchive</span><span>(<span><span>archive<span>: <span class="td-ref">Archive</span></span></span></span>)<span>: <span class="td-kw">string</span></span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Serializes an <code>Archive</code> object into a <code>&lt;fav ... /&gt;</code> XML tag.</p>
-</div></div></div>
-    </div><div id="namespace_serializeassign" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-Function bg-Function/15 dark:text-FunctionDark dark:bg-FunctionDark/15" title="Function">f</div></div>
-<div class="namespaceItemContent">
-		    <a href=".&#x2F;.&#x2F;.&#x2F;~&#x2F;serializeAssign.html" title="serializeAssign">
-			    <span>serializeAssign</span><span>(<span><span>assign<span>: <span class="td-ref">Assign</span></span></span></span>)<span>: <span class="td-kw">string</span></span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Serializes an <code>Assign</code> object into an <code>&lt;asg ... /&gt;</code> XML tag.</p>
-</div></div></div>
-    </div><div id="namespace_serializecategory" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-Function bg-Function/15 dark:text-FunctionDark dark:bg-FunctionDark/15" title="Function">f</div></div>
-<div class="namespaceItemContent">
-		    <a href=".&#x2F;.&#x2F;.&#x2F;~&#x2F;serializeCategory.html" title="serializeCategory">
-			    <span>serializeCategory</span><span>(<span><span>category<span>: <span class="td-ref">Category</span></span></span></span>)<span>: <span class="td-kw">string</span></span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Serializes a <code>Category</code> object into a <code>&lt;cat ... /&gt;</code> XML tag.</p>
-</div></div></div>
-    </div><div id="namespace_serializecurrency" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-Function bg-Function/15 dark:text-FunctionDark dark:bg-FunctionDark/15" title="Function">f</div></div>
-<div class="namespaceItemContent">
-		    <a href=".&#x2F;.&#x2F;.&#x2F;~&#x2F;serializeCurrency.html" title="serializeCurrency">
-			    <span>serializeCurrency</span><span>(<span><span>currency<span>: <span class="td-ref">Currency</span></span></span></span>)<span>: <span class="td-kw">string</span></span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Serializes a <code>Currency</code> object into a <code>&lt;cur ... /&gt;</code> XML tag.</p>
-</div></div></div>
-    </div><div id="namespace_serializeoperation" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-Function bg-Function/15 dark:text-FunctionDark dark:bg-FunctionDark/15" title="Function">f</div></div>
-<div class="namespaceItemContent">
-		    <a href=".&#x2F;.&#x2F;.&#x2F;~&#x2F;serializeOperation.html" title="serializeOperation">
-			    <span>serializeOperation</span><span>(<span><span>operation<span>: <span class="td-ref">Operation</span></span></span></span>)<span>: <span class="td-kw">string</span></span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Serializes an <code>Operation</code> object into an <code>&lt;ope ... /&gt;</code> XML tag.</p>
-</div></div></div>
-    </div><div id="namespace_serializepayee" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-Function bg-Function/15 dark:text-FunctionDark dark:bg-FunctionDark/15" title="Function">f</div></div>
-<div class="namespaceItemContent">
-		    <a href=".&#x2F;.&#x2F;.&#x2F;~&#x2F;serializePayee.html" title="serializePayee">
-			    <span>serializePayee</span><span>(<span><span>payee<span>: <span class="td-ref">Payee</span></span></span></span>)<span>: <span class="td-kw">string</span></span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Serializes a <code>Payee</code> object into a <code>&lt;pay ... /&gt;</code> XML tag.</p>
-</div></div></div>
-    </div><div id="namespace_serializeproperties" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-Function bg-Function/15 dark:text-FunctionDark dark:bg-FunctionDark/15" title="Function">f</div></div>
-<div class="namespaceItemContent">
-		    <a href=".&#x2F;.&#x2F;.&#x2F;~&#x2F;serializeProperties.html" title="serializeProperties">
-			    <span>serializeProperties</span><span>(<span><span>properties<span>: <span class="td-ref">Properties</span></span></span></span>)<span>: <span class="td-kw">string</span></span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Serializes a <code>Properties</code> object into a <code>&lt;properties ... /&gt;</code> XML tag.</p>
-</div></div></div>
-    </div><div id="namespace_serializetag" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-Function bg-Function/15 dark:text-FunctionDark dark:bg-FunctionDark/15" title="Function">f</div></div>
-<div class="namespaceItemContent">
-		    <a href=".&#x2F;.&#x2F;.&#x2F;~&#x2F;serializeTag.html" title="serializeTag">
-			    <span>serializeTag</span><span>(<span><span>tag<span>: <span class="td-ref">Tag</span></span></span></span>)<span>: <span class="td-kw">string</span></span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Serializes a <code>Tag</code> object into a <code>&lt;tag ... /&gt;</code> XML tag.</p>
-</div></div></div>
-    </div><div id="namespace_serializeversions" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-Function bg-Function/15 dark:text-FunctionDark dark:bg-FunctionDark/15" title="Function">f</div></div>
-<div class="namespaceItemContent">
-		    <a href=".&#x2F;.&#x2F;.&#x2F;~&#x2F;serializeVersions.html" title="serializeVersions">
-			    <span>serializeVersions</span><span>(<span><span>versions<span>: <span class="td-ref">Versions</span></span></span></span>)<span>: <span class="td-kw">string</span></span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Serializes version information into the <code>&lt;homebank&gt;</code> opening tag.</p>
-</div></div></div>
-    </div><div id="namespace_tags_tostr" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-Function bg-Function/15 dark:text-FunctionDark dark:bg-FunctionDark/15" title="Function">f</div></div>
-<div class="namespaceItemContent">
-		    <a href=".&#x2F;.&#x2F;.&#x2F;~&#x2F;tags_toStr.html" title="tags_toStr">
-			    <span>tags_toStr</span><span>(<span><span>tags<span>: <span class="td-kw">unknown</span></span></span></span>)<span>: <span class="td-kw">string</span></span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Joins an array of tag names into a space-separated string.</p>
 </div></div></div>
     </div></div>
 </section>
@@ -816,20 +633,6 @@ Interfaces</h2></div><div class="namespaceSection"><div id="namespace_account" c
 </div></div></li><li>
                 <a href=".&#x2F;.&#x2F;.&#x2F;~&#x2F;Assign.html#property_payee">
                   <span>payee</span><span>: <span class="td-ref">gUInt32</span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Key of the payee to assign.</p>
-</div></div></li></ul></div>
-    </div><div id="namespace_attrsplit" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-Interface bg-Interface/15 dark:text-InterfaceDark dark:bg-InterfaceDark/15" title="Interface">I</div></div>
-<div class="namespaceItemContent">
-		    <a href=".&#x2F;.&#x2F;.&#x2F;~&#x2F;AttrSplit.html" title="AttrSplit">
-			    <span>AttrSplit</span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Raw split data used internally for XML attribute serialization.</p>
-</div></div><ul class="namespaceItemContentSubItems"><li>
-                <a href=".&#x2F;.&#x2F;.&#x2F;~&#x2F;AttrSplit.html#property_amt">
-                  <span>amt</span><span>: <span class="td-ref">gDouble</span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Amount as string-encoded double.</p>
-</div></div></li><li>
-                <a href=".&#x2F;.&#x2F;.&#x2F;~&#x2F;AttrSplit.html#property_cat">
-                  <span>cat</span><span>: <span class="td-ref">gUInt32</span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Category key.</p>
-</div></div></li><li>
-                <a href=".&#x2F;.&#x2F;.&#x2F;~&#x2F;AttrSplit.html#property_mem">
-                  <span>mem</span><span>: <span class="td-ref">gCharP</span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Memo text.</p>
 </div></div></li></ul></div>
     </div><div id="namespace_category" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-Interface bg-Interface/15 dark:text-InterfaceDark dark:bg-InterfaceDark/15" title="Interface">I</div></div>
 <div class="namespaceItemContent">
