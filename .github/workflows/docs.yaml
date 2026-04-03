@@ -4,23 +4,24 @@ on:
   push:
     branches: [main]
   pull_request:
-    types: [opened, synchronize, reopened, closed]
-
-concurrency:
-  group: docs-deploy
-  cancel-in-progress: false
+  workflow_dispatch:
 
 permissions:
-  contents: write
+  contents: read
+  pages: write
+  id-token: write
   pull-requests: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: false
 
 jobs:
   build:
-    if: github.event.action != 'closed'
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
-      - name: Clone repository
+      - name: Checkout
         uses: actions/checkout@v6
 
       - name: Set up Deno
@@ -34,118 +35,28 @@ jobs:
       - name: Generate docs
         run: deno run --allow-read --allow-write --allow-run _tools/gen_docs.ts docs
 
-      - name: Upload docs artifact
-        uses: actions/upload-artifact@v4
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v3
         with:
-          name: docs
           path: docs/
-          retention-days: 7
 
-  deploy-main:
+  deploy:
     if: github.ref == 'refs/heads/main'
     needs: build
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
     steps:
-      - name: Checkout gh-pages branch
-        uses: actions/checkout@v6
-        with:
-          ref: gh-pages
-          fetch-depth: 1
-        continue-on-error: true
-        id: checkout-gh-pages
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v5
 
-      - name: Init gh-pages branch if missing
-        if: steps.checkout-gh-pages.outcome == 'failure'
-        run: |
-          git checkout --orphan gh-pages
-          git rm -rf . 2>/dev/null || true
-          git commit --allow-empty -m "Init gh-pages"
-          git push origin gh-pages
-          git checkout gh-pages
-
-      - name: Download docs artifact
-        uses: actions/download-artifact@v4
-        with:
-          name: docs
-          path: _new_docs
-
-      - name: Update main docs
-        run: |
-          # Back up PR preview directories
-          if [ -d pr ]; then
-            cp -a pr /tmp/pr_backup
-          fi
-
-          # Remove everything except .git
-          find . -maxdepth 1 ! -name '.git' ! -name '.' -exec rm -rf {} +
-
-          # Move new docs into place
-          cp -a _new_docs/. .
-          rm -rf _new_docs
-
-          # Restore PR previews
-          if [ -d /tmp/pr_backup ]; then
-            cp -a /tmp/pr_backup pr
-          fi
-
-      - name: Deploy
-        run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add -A
-          git diff --cached --quiet && echo "No changes" && exit 0
-          git commit -m "docs: update from main (${GITHUB_SHA::7})"
-          git push origin gh-pages
-
-  deploy-pr:
-    if: github.event_name == 'pull_request' && github.event.action != 'closed'
+  preview:
+    if: github.event_name == 'pull_request'
     needs: build
     runs-on: ubuntu-latest
-    timeout-minutes: 10
     steps:
-      - name: Checkout gh-pages branch
-        uses: actions/checkout@v6
-        with:
-          ref: gh-pages
-          fetch-depth: 1
-        continue-on-error: true
-        id: checkout-gh-pages
-
-      - name: Init gh-pages branch if missing
-        if: steps.checkout-gh-pages.outcome == 'failure'
-        run: |
-          git checkout --orphan gh-pages
-          git rm -rf . 2>/dev/null || true
-          echo '<!DOCTYPE html><html><body>Docs not yet deployed from main.</body></html>' > index.html
-          echo '' > .nojekyll
-          git add -A
-          git commit -m "Init gh-pages"
-          git push origin gh-pages
-          git checkout gh-pages
-
-      - name: Download docs artifact
-        uses: actions/download-artifact@v4
-        with:
-          name: docs
-          path: _new_docs
-
-      - name: Deploy PR preview
-        env:
-          PR_NUMBER: ${{ github.event.pull_request.number }}
-        run: |
-          rm -rf "pr/${PR_NUMBER}"
-          mkdir -p "pr/${PR_NUMBER}"
-          cp -a _new_docs/. "pr/${PR_NUMBER}/"
-          rm -rf _new_docs
-
-          git config user.name "github-actions[bot]"
-          git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add -A
-          git diff --cached --quiet && echo "No changes" && exit 0
-          git commit -m "docs: update preview for PR #${PR_NUMBER}"
-          git push origin gh-pages
-
       - name: Comment on PR
         uses: actions/github-script@v7
         with:
@@ -153,10 +64,15 @@ jobs:
             const prNumber = context.payload.pull_request.number;
             const owner = context.repo.owner;
             const repo = context.repo.repo;
-            const url = `https://${owner}.github.io/${repo}/pr/${prNumber}/`;
+            const runId = context.runId;
+            const url = `https://github.com/${owner}/${repo}/actions/runs/${runId}`;
 
             const marker = '<!-- docs-preview -->';
-            const body = `${marker}\n**Docs preview:** ${url}`;
+            const body = [
+              marker,
+              `**Docs preview:** built successfully.`,
+              `Download the artifact from the [workflow run](${url}).`,
+            ].join('\n');
 
             const { data: comments } = await github.rest.issues.listComments({
               owner, repo, issue_number: prNumber,
@@ -172,40 +88,3 @@ jobs:
                 owner, repo, issue_number: prNumber, body,
               });
             }
-
-  cleanup-pr:
-    if: github.event_name == 'pull_request' && github.event.action == 'closed'
-    runs-on: ubuntu-latest
-    timeout-minutes: 10
-    steps:
-      - name: Checkout gh-pages branch
-        uses: actions/checkout@v6
-        with:
-          ref: gh-pages
-          fetch-depth: 1
-        continue-on-error: true
-        id: checkout-gh-pages
-
-      - name: Remove PR preview
-        if: steps.checkout-gh-pages.outcome == 'success'
-        env:
-          PR_NUMBER: ${{ github.event.pull_request.number }}
-        run: |
-          if [ ! -d "pr/${PR_NUMBER}" ]; then
-            echo "No preview directory for PR #${PR_NUMBER}"
-            exit 0
-          fi
-
-          rm -rf "pr/${PR_NUMBER}"
-
-          # Remove pr/ dir if empty
-          if [ -d pr ] && [ -z "$(ls -A pr)" ]; then
-            rm -rf pr
-          fi
-
-          git config user.name "github-actions[bot]"
-          git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add -A
-          git diff --cached --quiet && echo "No changes" && exit 0
-          git commit -m "docs: remove preview for PR #${PR_NUMBER}"
-          git push origin gh-pages
