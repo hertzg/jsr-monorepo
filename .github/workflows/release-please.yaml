@@ -30,7 +30,7 @@ jobs:
       # When the release PR is created/updated, sync import_map.json
       # to match the bumped package versions
       - if: ${{ steps.release.outputs.pr }}
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
         with:
           ref: ${{ fromJSON(steps.release.outputs.pr).headBranchName }}
           token: ${{ steps.app-token.outputs.token }}
@@ -51,7 +51,7 @@ jobs:
 
       # When releases are created, publish to JSR
       - if: ${{ steps.release.outputs.releases_created == 'true' }}
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
       - if: ${{ steps.release.outputs.releases_created == 'true' }}
         uses: denoland/setup-deno@v2
