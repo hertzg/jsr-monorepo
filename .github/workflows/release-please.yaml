@@ -50,11 +50,11 @@ jobs:
           git push
 
       # When releases are created, publish to JSR
-      - if: ${{ steps.release.outputs.releases_created }}
+      - if: ${{ steps.release.outputs.releases_created == 'true' }}
         uses: actions/checkout@v4
 
-      - if: ${{ steps.release.outputs.releases_created }}
+      - if: ${{ steps.release.outputs.releases_created == 'true' }}
         uses: denoland/setup-deno@v2
 
-      - if: ${{ steps.release.outputs.releases_created }}
+      - if: ${{ steps.release.outputs.releases_created == 'true' }}
         run: deno publish
