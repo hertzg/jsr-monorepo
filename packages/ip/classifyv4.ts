@@ -32,17 +32,17 @@
  * @module
  */
 
-import { mask4FromPrefixLength } from "./cidrv4.ts";
+import { cidrv4Mask } from "./cidrv4.ts";
 import { parseIpv4 } from "./ipv4.ts";
 
 // Precomputed masks and network addresses for range checks.
-const MASK_4 = mask4FromPrefixLength(4);
-const MASK_8 = mask4FromPrefixLength(8);
-const MASK_10 = mask4FromPrefixLength(10);
-const MASK_12 = mask4FromPrefixLength(12);
-const MASK_15 = mask4FromPrefixLength(15);
-const MASK_16 = mask4FromPrefixLength(16);
-const MASK_24 = mask4FromPrefixLength(24);
+const MASK_4 = cidrv4Mask(4);
+const MASK_8 = cidrv4Mask(8);
+const MASK_10 = cidrv4Mask(10);
+const MASK_12 = cidrv4Mask(12);
+const MASK_15 = cidrv4Mask(15);
+const MASK_16 = cidrv4Mask(16);
+const MASK_24 = cidrv4Mask(24);
 
 const NET_0 = parseIpv4("0.0.0.0"); // 0.0.0.0/8
 const NET_10 = parseIpv4("10.0.0.0"); // 10.0.0.0/8

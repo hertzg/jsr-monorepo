@@ -31,21 +31,21 @@
  * @module
  */
 
-import { mask6FromPrefixLength } from "./cidrv6.ts";
+import { cidrv6Mask } from "./cidrv6.ts";
 import { parseIpv6 } from "./ipv6.ts";
 
 // Precomputed masks and network addresses for range checks.
 // Each pair (MASK_n, NET_xxx) represents a CIDR range where
 // (ip & MASK_n) === NET_xxx means the IP is in that range.
 
-const MASK_3 = mask6FromPrefixLength(3);
-const MASK_7 = mask6FromPrefixLength(7);
-const MASK_8 = mask6FromPrefixLength(8);
-const MASK_10 = mask6FromPrefixLength(10);
-const MASK_28 = mask6FromPrefixLength(28);
-const MASK_32 = mask6FromPrefixLength(32);
-const MASK_48 = mask6FromPrefixLength(48);
-const MASK_96 = mask6FromPrefixLength(96);
+const MASK_3 = cidrv6Mask(3);
+const MASK_7 = cidrv6Mask(7);
+const MASK_8 = cidrv6Mask(8);
+const MASK_10 = cidrv6Mask(10);
+const MASK_28 = cidrv6Mask(28);
+const MASK_32 = cidrv6Mask(32);
+const MASK_48 = cidrv6Mask(48);
+const MASK_96 = cidrv6Mask(96);
 
 const NET_FC00 = parseIpv6("fc00::"); // fc00::/7
 const NET_FE80 = parseIpv6("fe80::"); // fe80::/10

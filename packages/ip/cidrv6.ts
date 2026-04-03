@@ -58,25 +58,25 @@ export type Cidr6 = {
  * @example Creating masks
  * ```ts
  * import { assertEquals } from "@std/assert";
- * import { mask6FromPrefixLength } from "@hertzg/ip/cidrv6";
+ * import { cidrv6Mask } from "@hertzg/ip/cidrv6";
  *
- * assertEquals(mask6FromPrefixLength(128), 0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFn);
- * assertEquals(mask6FromPrefixLength(64), 0xFFFFFFFFFFFFFFFF0000000000000000n);
- * assertEquals(mask6FromPrefixLength(48), 0xFFFFFFFFFFFF00000000000000000000n);
- * assertEquals(mask6FromPrefixLength(32), 0xFFFFFFFF000000000000000000000000n);
- * assertEquals(mask6FromPrefixLength(0), 0n);
+ * assertEquals(cidrv6Mask(128), 0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFn);
+ * assertEquals(cidrv6Mask(64), 0xFFFFFFFFFFFFFFFF0000000000000000n);
+ * assertEquals(cidrv6Mask(48), 0xFFFFFFFFFFFF00000000000000000000n);
+ * assertEquals(cidrv6Mask(32), 0xFFFFFFFF000000000000000000000000n);
+ * assertEquals(cidrv6Mask(0), 0n);
  * ```
  *
  * @example Error handling
  * ```ts
  * import { assertThrows } from "@std/assert";
- * import { mask6FromPrefixLength } from "@hertzg/ip/cidrv6";
+ * import { cidrv6Mask } from "@hertzg/ip/cidrv6";
  *
- * assertThrows(() => mask6FromPrefixLength(-1), RangeError);
- * assertThrows(() => mask6FromPrefixLength(129), RangeError);
+ * assertThrows(() => cidrv6Mask(-1), RangeError);
+ * assertThrows(() => cidrv6Mask(129), RangeError);
  * ```
  */
-export function mask6FromPrefixLength(prefixLength: number): bigint {
+export function cidrv6Mask(prefixLength: number): bigint {
   if (prefixLength < 0 || prefixLength > 128 || !Number.isInteger(prefixLength)) {
     throw new RangeError(
       `CIDR prefix length must be 0-128, got ${prefixLength}`,
@@ -146,7 +146,7 @@ export function parseCidr6(cidr: string): Cidr6 {
   }
 
   // Validate prefix length
-  mask6FromPrefixLength(prefixLength);
+  cidrv6Mask(prefixLength);
 
   return {
     address,
@@ -217,7 +217,7 @@ export function stringifyCidr6(cidr: Cidr6): string {
  * ```
  */
 export function cidr6Contains(cidr: Cidr6, ip: bigint): boolean {
-  const mask = mask6FromPrefixLength(cidr.prefixLength);
+  const mask = cidrv6Mask(cidr.prefixLength);
   const network = cidr.address & mask;
   return (ip & mask) === network;
 }
@@ -239,7 +239,7 @@ export function cidr6Contains(cidr: Cidr6, ip: bigint): boolean {
  * ```
  */
 export function cidr6FirstAddress(cidr: Cidr6): bigint {
-  const mask = mask6FromPrefixLength(cidr.prefixLength);
+  const mask = cidrv6Mask(cidr.prefixLength);
   return cidr.address & mask;
 }
 
@@ -260,7 +260,7 @@ export function cidr6FirstAddress(cidr: Cidr6): bigint {
  * ```
  */
 export function cidr6LastAddress(cidr: Cidr6): bigint {
-  const mask = mask6FromPrefixLength(cidr.prefixLength);
+  const mask = cidrv6Mask(cidr.prefixLength);
   const network = cidr.address & mask;
   return network | (~mask & 0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFn);
 }

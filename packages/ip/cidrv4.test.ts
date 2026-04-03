@@ -5,38 +5,38 @@ import {
   cidr4Contains,
   cidr4NetworkAddress,
   isValidCidr4,
-  mask4FromPrefixLength,
+  cidrv4Mask,
   parseCidr4,
   stringifyCidr4,
 } from "./cidrv4.ts";
 import { parseIpv4, stringifyIpv4 } from "./ipv4.ts";
 
-Deno.test("mask4FromPrefixLength", async (t) => {
+Deno.test("cidrv4Mask", async (t) => {
   await t.step("common prefix lengths", () => {
-    assertEquals(mask4FromPrefixLength(24), 0xFFFFFF00);
-    assertEquals(mask4FromPrefixLength(16), 0xFFFF0000);
-    assertEquals(mask4FromPrefixLength(8), 0xFF000000);
+    assertEquals(cidrv4Mask(24), 0xFFFFFF00);
+    assertEquals(cidrv4Mask(16), 0xFFFF0000);
+    assertEquals(cidrv4Mask(8), 0xFF000000);
   });
 
   await t.step("edge cases", () => {
-    assertEquals(mask4FromPrefixLength(0), 0);
-    assertEquals(mask4FromPrefixLength(32), 0xFFFFFFFF);
+    assertEquals(cidrv4Mask(0), 0);
+    assertEquals(cidrv4Mask(32), 0xFFFFFFFF);
   });
 
   await t.step("various prefix lengths", () => {
-    assertEquals(mask4FromPrefixLength(1), 0x80000000);
-    assertEquals(mask4FromPrefixLength(30), 0xFFFFFFFC);
-    assertEquals(mask4FromPrefixLength(31), 0xFFFFFFFE);
+    assertEquals(cidrv4Mask(1), 0x80000000);
+    assertEquals(cidrv4Mask(30), 0xFFFFFFFC);
+    assertEquals(cidrv4Mask(31), 0xFFFFFFFE);
   });
 
   await t.step("out of range prefix lengths", () => {
     assertThrows(
-      () => mask4FromPrefixLength(-1),
+      () => cidrv4Mask(-1),
       RangeError,
       "CIDR prefix length must be 0-32, got -1",
     );
     assertThrows(
-      () => mask4FromPrefixLength(33),
+      () => cidrv4Mask(33),
       RangeError,
       "CIDR prefix length must be 0-32, got 33",
     );

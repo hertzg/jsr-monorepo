@@ -5,63 +5,63 @@ import {
   cidr6FirstAddress,
   cidr6LastAddress,
   isValidCidr6,
-  mask6FromPrefixLength,
+  cidrv6Mask,
   parseCidr6,
   stringifyCidr6,
 } from "./cidrv6.ts";
 import { parseIpv6, stringifyIpv6 } from "./ipv6.ts";
 
-Deno.test("mask6FromPrefixLength", async (t) => {
+Deno.test("cidrv6Mask", async (t) => {
   await t.step("common prefix lengths", () => {
     assertEquals(
-      mask6FromPrefixLength(128),
+      cidrv6Mask(128),
       0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFn,
     );
     assertEquals(
-      mask6FromPrefixLength(64),
+      cidrv6Mask(64),
       0xFFFFFFFFFFFFFFFF0000000000000000n,
     );
     assertEquals(
-      mask6FromPrefixLength(48),
+      cidrv6Mask(48),
       0xFFFFFFFFFFFF00000000000000000000n,
     );
     assertEquals(
-      mask6FromPrefixLength(32),
+      cidrv6Mask(32),
       0xFFFFFFFF000000000000000000000000n,
     );
   });
 
   await t.step("edge cases", () => {
-    assertEquals(mask6FromPrefixLength(0), 0n);
+    assertEquals(cidrv6Mask(0), 0n);
     assertEquals(
-      mask6FromPrefixLength(128),
+      cidrv6Mask(128),
       0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFn,
     );
   });
 
   await t.step("various prefix lengths", () => {
     assertEquals(
-      mask6FromPrefixLength(1),
+      cidrv6Mask(1),
       0x80000000000000000000000000000000n,
     );
     assertEquals(
-      mask6FromPrefixLength(120),
+      cidrv6Mask(120),
       0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF00n,
     );
     assertEquals(
-      mask6FromPrefixLength(127),
+      cidrv6Mask(127),
       0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFEn,
     );
   });
 
   await t.step("out of range prefix lengths", () => {
     assertThrows(
-      () => mask6FromPrefixLength(-1),
+      () => cidrv6Mask(-1),
       RangeError,
       "CIDR prefix length must be 0-128",
     );
     assertThrows(
-      () => mask6FromPrefixLength(129),
+      () => cidrv6Mask(129),
       RangeError,
       "CIDR prefix length must be 0-128",
     );
