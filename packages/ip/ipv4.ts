@@ -26,9 +26,10 @@
  * ```ts
  * import { assertEquals } from "@std/assert";
  * import { parseIpv4, stringifyIpv4 } from "@hertzg/ip/ipv4";
+ * import { mask4FromPrefixLength } from "@hertzg/ip/cidrv4";
  *
  * const ip = parseIpv4("192.168.1.100");
- * const mask = parseIpv4("255.255.255.0");
+ * const mask = mask4FromPrefixLength(24);
  *
  * // Bitwise NOT (invert all bits)
  * const inverted = (~ip >>> 0);
