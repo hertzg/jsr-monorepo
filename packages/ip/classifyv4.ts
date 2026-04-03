@@ -380,15 +380,28 @@ export function isIpv4Public(ip: number): boolean {
  * ```
  */
 export function classifyIpv4(ip: number): Ipv4Classification {
-  if (isIpv4Broadcast(ip)) return "broadcast";
-  if (isIpv4ThisNetwork(ip)) return "this-network";
-  if (isIpv4Loopback(ip)) return "loopback";
-  if (isIpv4LinkLocal(ip)) return "link-local";
-  if (isIpv4Documentation(ip)) return "documentation";
-  if (isIpv4Benchmarking(ip)) return "benchmarking";
-  if (isIpv4CgNat(ip)) return "cg-nat";
-  if (isIpv4Private(ip)) return "private";
-  if (isIpv4Multicast(ip)) return "multicast";
-  if (isIpv4Reserved(ip)) return "reserved";
-  return "public";
+  switch (true) {
+    case isIpv4Broadcast(ip):
+      return "broadcast";
+    case isIpv4ThisNetwork(ip):
+      return "this-network";
+    case isIpv4Loopback(ip):
+      return "loopback";
+    case isIpv4LinkLocal(ip):
+      return "link-local";
+    case isIpv4Documentation(ip):
+      return "documentation";
+    case isIpv4Benchmarking(ip):
+      return "benchmarking";
+    case isIpv4CgNat(ip):
+      return "cg-nat";
+    case isIpv4Private(ip):
+      return "private";
+    case isIpv4Multicast(ip):
+      return "multicast";
+    case isIpv4Reserved(ip):
+      return "reserved";
+    default:
+      return "public";
+  }
 }

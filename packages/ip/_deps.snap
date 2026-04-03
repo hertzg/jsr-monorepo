@@ -6,6 +6,7 @@
     "./cidrv4": [],
     "./ipv6": [],
     "./cidrv6": [],
+    "./classify": [],
     "./classifyv4": [],
     "./classifyv6": []
   }

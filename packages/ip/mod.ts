@@ -73,6 +73,7 @@
  * - {@link isIpv6Orchidv2}: Check if address is ORCHIDv2 (2001:20::/28)
  *
  * ### Combined Classification
+ * - {@link IpClassification}: Union type of all classification labels
  * - {@link classifyIp}: Classify an IPv4 (number) or IPv6 (bigint) address
  *
  * ### Submodules
@@ -80,6 +81,7 @@
  * - [`cidrv4`](https://jsr.io/@hertzg/ip/doc/cidrv4): IPv4 CIDR utilities via {@link parseCidr4}, {@link cidr4Contains}
  * - [`ipv6`](https://jsr.io/@hertzg/ip/doc/ipv6): IPv6 parsing via {@link parseIpv6}, {@link expandIpv6}, {@link compressIpv6}
  * - [`cidrv6`](https://jsr.io/@hertzg/ip/doc/cidrv6): IPv6 CIDR utilities via {@link parseCidr6}, {@link cidr6Contains}
+ * - [`classify`](https://jsr.io/@hertzg/ip/doc/classify): Universal classifier via {@link classifyIp}
  * - [`classifyv4`](https://jsr.io/@hertzg/ip/doc/classifyv4): IPv4 classification via {@link classifyIpv4}, {@link isIpv4Private}, etc.
  * - [`classifyv6`](https://jsr.io/@hertzg/ip/doc/classifyv6): IPv6 classification via {@link classifyIpv6}, {@link isIpv6Loopback}, etc.
  *
@@ -366,45 +368,5 @@ export {
   isIpv6UniqueLocal,
 } from "./classifyv6.ts";
 
-import { classifyIpv4 } from "./classifyv4.ts";
-import type { Ipv4Classification } from "./classifyv4.ts";
-import { classifyIpv6 } from "./classifyv6.ts";
-import type { Ipv6Classification } from "./classifyv6.ts";
-
-/**
- * Classifies an IPv4 or IPv6 address into its well-known range.
- *
- * Dispatches based on type: `number` for IPv4, `bigint` for IPv6.
- *
- * @param ip The IP address as a number (IPv4) or bigint (IPv6)
- * @returns The classification label
- *
- * @example
- * ```ts
- * import { assertEquals } from "@std/assert";
- * import { classifyIp } from "@hertzg/ip";
- * import { parseIpv4 } from "@hertzg/ip/ipv4";
- * import { parseIpv6 } from "@hertzg/ip/ipv6";
- *
- * assertEquals(classifyIp(parseIpv4("192.168.1.1")), "private");
- * assertEquals(classifyIp(parseIpv4("8.8.8.8")), "public");
- * assertEquals(classifyIp(parseIpv6("::1")), "loopback");
- * assertEquals(classifyIp(parseIpv6("2001:db8::1")), "documentation");
- * ```
- */
-export function classifyIp(ip: number): Ipv4Classification;
-/**
- * Classifies an IPv6 address into its well-known range.
- *
- * @param ip The IPv6 address as a 128-bit bigint
- * @returns The classification label
- */
-export function classifyIp(ip: bigint): Ipv6Classification;
-export function classifyIp(
-  ip: number | bigint,
-): Ipv4Classification | Ipv6Classification {
-  if (typeof ip === "bigint") {
-    return classifyIpv6(ip);
-  }
-  return classifyIpv4(ip);
-}
+// Re-export universal classifier
+export { classifyIp, type IpClassification } from "./classify.ts";

@@ -396,17 +396,32 @@ export function isIpv6Orchidv2(ip: bigint): boolean {
  * ```
  */
 export function classifyIpv6(ip: bigint): Ipv6Classification {
-  if (isIpv6Loopback(ip)) return "loopback";
-  if (isIpv6Unspecified(ip)) return "unspecified";
-  if (isIpv6Ipv4Mapped(ip)) return "ipv4-mapped";
-  if (isIpv6Ipv4Translated(ip)) return "ipv4-translated";
-  if (isIpv6Documentation(ip)) return "documentation";
-  if (isIpv6Benchmarking(ip)) return "benchmarking";
-  if (isIpv6Orchidv2(ip)) return "orchidv2";
-  if (isIpv6Teredo(ip)) return "teredo";
-  if (isIpv6LinkLocal(ip)) return "link-local";
-  if (isIpv6Multicast(ip)) return "multicast";
-  if (isIpv6UniqueLocal(ip)) return "unique-local";
-  if (isIpv6GlobalUnicast(ip)) return "global-unicast";
-  return "unassigned";
+  switch (true) {
+    case isIpv6Loopback(ip):
+      return "loopback";
+    case isIpv6Unspecified(ip):
+      return "unspecified";
+    case isIpv6Ipv4Mapped(ip):
+      return "ipv4-mapped";
+    case isIpv6Ipv4Translated(ip):
+      return "ipv4-translated";
+    case isIpv6Documentation(ip):
+      return "documentation";
+    case isIpv6Benchmarking(ip):
+      return "benchmarking";
+    case isIpv6Orchidv2(ip):
+      return "orchidv2";
+    case isIpv6Teredo(ip):
+      return "teredo";
+    case isIpv6LinkLocal(ip):
+      return "link-local";
+    case isIpv6Multicast(ip):
+      return "multicast";
+    case isIpv6UniqueLocal(ip):
+      return "unique-local";
+    case isIpv6GlobalUnicast(ip):
+      return "global-unicast";
+    default:
+      return "unassigned";
+  }
 }
