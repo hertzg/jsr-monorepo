@@ -4,6 +4,9 @@
   "exports": {
     ".": "./mod.ts"
   },
+  "exclude": [
+    "**/*.d.ts"
+  ],
   "publish": {
     "include": [
       "LICENSE",
@@ -11,6 +14,7 @@
     ],
     "exclude": [
       "**/*.test.ts",
+      "**/*.d.ts",
       "fixtures/**"
     ]
   }

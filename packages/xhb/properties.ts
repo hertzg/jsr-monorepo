@@ -1,3 +1,4 @@
+// @deno-types="./xml-parser.d.ts"
 import type { Node } from "xml-parser";
 import { atoi, parseGCharP } from "./_parse.ts";
 import {
