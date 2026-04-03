@@ -55,7 +55,9 @@
  * - [`cidrv4`](https://jsr.io/@hertzg/ip/doc/cidrv4): IPv4 CIDR utilities via {@link parseCidr4}, {@link cidr4Contains}
  * - [`ipv6`](https://jsr.io/@hertzg/ip/doc/ipv6): IPv6 parsing via {@link parseIpv6}, {@link expandIpv6}, {@link compressIpv6}
  * - [`cidrv6`](https://jsr.io/@hertzg/ip/doc/cidrv6): IPv6 CIDR utilities via {@link parseCidr6}, {@link cidr6Contains}
- * - [`validate`](https://jsr.io/@hertzg/ip/doc/validate): Validation via {@link validate}, {@link isValidIpv4}, {@link isValidIpv6}
+ * - [`validatev4`](https://jsr.io/@hertzg/ip/doc/validatev4): IPv4 validation via {@link isValidIpv4}, {@link isValidCidr4}
+ * - [`validatev6`](https://jsr.io/@hertzg/ip/doc/validatev6): IPv6 validation via {@link isValidIpv6}, {@link isValidCidr6}
+ * - [`validate`](https://jsr.io/@hertzg/ip/doc/validate): Universal validation via {@link isValid}, {@link validate}
  *
  * ## Features
  *
@@ -305,13 +307,15 @@ export {
   stringifyCidr6,
 } from "./cidrv6.ts";
 
-// Re-export validation utilities
+// Re-export IPv4 validation utilities
+export { isValidCidr4, isValidIpv4 } from "./validatev4.ts";
+
+// Re-export IPv6 validation utilities
+export { isValidCidr6, isValidIpv6 } from "./validatev6.ts";
+
+// Re-export universal validation utilities
 export {
   isValid,
-  isValidCidr4,
-  isValidCidr6,
-  isValidIpv4,
-  isValidIpv6,
   validate,
   type ValidationResult,
 } from "./validate.ts";

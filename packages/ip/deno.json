@@ -7,6 +7,8 @@
     "./cidrv4": "./cidrv4.ts",
     "./ipv6": "./ipv6.ts",
     "./cidrv6": "./cidrv6.ts",
+    "./validatev4": "./validatev4.ts",
+    "./validatev6": "./validatev6.ts",
     "./validate": "./validate.ts"
   }
 }

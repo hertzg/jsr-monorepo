@@ -1,47 +1,26 @@
 /**
- * IP address and CIDR validation utilities.
+ * Universal IP address and CIDR validation utilities.
  *
- * This module provides non-throwing validation functions for IPv4/IPv6 addresses
- * and CIDR notation, as well as a universal {@link validate} function that
- * identifies and parses any valid IP or CIDR string.
+ * This module provides a universal {@link validate} function that identifies
+ * and parses any valid IP or CIDR string, and an {@link isValid} function
+ * that checks if a string is any valid format.
  *
- * @example Check if strings are valid
- * ```ts
- * import { assert, assertEquals } from "@std/assert";
- * import { isValidIpv4, isValidIpv6, isValidCidr4, isValidCidr6 } from "@hertzg/ip/validate";
- *
- * assert(isValidIpv4("192.168.1.1"));
- * assertEquals(isValidIpv4("999.0.0.1"), false);
- *
- * assert(isValidIpv6("2001:db8::1"));
- * assertEquals(isValidIpv6("not:an:address"), false);
- *
- * assert(isValidCidr4("10.0.0.0/8"));
- * assertEquals(isValidCidr4("10.0.0.0/33"), false);
- *
- * assert(isValidCidr6("2001:db8::/32"));
- * assertEquals(isValidCidr6("2001:db8::/129"), false);
- * ```
+ * For version-specific validators, see:
+ * - [`validatev4`](https://jsr.io/@hertzg/ip/doc/validatev4): {@link isValidIpv4}, {@link isValidCidr4}
+ * - [`validatev6`](https://jsr.io/@hertzg/ip/doc/validatev6): {@link isValidIpv6}, {@link isValidCidr6}
  *
  * @example Universal validation
  * ```ts
- * import { assertEquals } from "@std/assert";
- * import { validate } from "@hertzg/ip/validate";
+ * import { assert, assertEquals } from "@std/assert";
+ * import { isValid, validate } from "@hertzg/ip/validate";
  *
- * const r1 = validate("192.168.1.1");
- * assertEquals(r1.kind, "ipv4");
+ * assert(isValid("192.168.1.1"));
+ * assert(isValid("::1"));
+ * assert(isValid("10.0.0.0/8"));
+ * assertEquals(isValid("garbage"), false);
  *
- * const r2 = validate("2001:db8::1");
- * assertEquals(r2.kind, "ipv6");
- *
- * const r3 = validate("10.0.0.0/8");
- * assertEquals(r3.kind, "cidr4");
- *
- * const r4 = validate("2001:db8::/32");
- * assertEquals(r4.kind, "cidr6");
- *
- * const r5 = validate("not valid");
- * assertEquals(r5.kind, "invalid");
+ * const r = validate("192.168.1.1");
+ * assertEquals(r.kind, "ipv4");
  * ```
  *
  * @module
@@ -68,157 +47,6 @@ export type ValidationResult =
   | { readonly kind: "cidr4"; readonly value: Cidr4 }
   | { readonly kind: "cidr6"; readonly value: Cidr6 }
   | { readonly kind: "invalid" };
-
-/**
- * Checks if a string is a valid IPv4 address in dotted decimal notation.
- *
- * @param s The string to validate
- * @returns `true` if the string is a valid IPv4 address
- *
- * @example Valid addresses
- * ```ts
- * import { assert } from "@std/assert";
- * import { isValidIpv4 } from "@hertzg/ip/validate";
- *
- * assert(isValidIpv4("0.0.0.0"));
- * assert(isValidIpv4("192.168.1.1"));
- * assert(isValidIpv4("255.255.255.255"));
- * ```
- *
- * @example Invalid addresses
- * ```ts
- * import { assertEquals } from "@std/assert";
- * import { isValidIpv4 } from "@hertzg/ip/validate";
- *
- * assertEquals(isValidIpv4(""), false);
- * assertEquals(isValidIpv4("256.0.0.1"), false);
- * assertEquals(isValidIpv4("1.2.3"), false);
- * assertEquals(isValidIpv4("01.02.03.04"), false);
- * assertEquals(isValidIpv4("::1"), false);
- * ```
- */
-export function isValidIpv4(s: string): boolean {
-  try {
-    parseIpv4(s);
-    return true;
-  } catch {
-    return false;
-  }
-}
-
-/**
- * Checks if a string is a valid IPv6 address in colon-hexadecimal notation.
- *
- * Accepts full form, compressed form with `::`, IPv4-mapped addresses
- * (`::ffff:192.168.1.1`), and addresses with zone IDs (`fe80::1%eth0`).
- *
- * @param s The string to validate
- * @returns `true` if the string is a valid IPv6 address
- *
- * @example Valid addresses
- * ```ts
- * import { assert } from "@std/assert";
- * import { isValidIpv6 } from "@hertzg/ip/validate";
- *
- * assert(isValidIpv6("::"));
- * assert(isValidIpv6("::1"));
- * assert(isValidIpv6("2001:db8::1"));
- * assert(isValidIpv6("::ffff:192.168.1.1"));
- * assert(isValidIpv6("fe80::1%eth0"));
- * ```
- *
- * @example Invalid addresses
- * ```ts
- * import { assertEquals } from "@std/assert";
- * import { isValidIpv6 } from "@hertzg/ip/validate";
- *
- * assertEquals(isValidIpv6(""), false);
- * assertEquals(isValidIpv6("192.168.1.1"), false);
- * assertEquals(isValidIpv6("2001:db8:::1"), false);
- * assertEquals(isValidIpv6("gggg::1"), false);
- * ```
- */
-export function isValidIpv6(s: string): boolean {
-  try {
-    parseIpv6(s);
-    return true;
-  } catch {
-    return false;
-  }
-}
-
-/**
- * Checks if a string is valid IPv4 CIDR notation.
- *
- * @param s The string to validate
- * @returns `true` if the string is valid IPv4 CIDR notation
- *
- * @example Valid CIDR
- * ```ts
- * import { assert } from "@std/assert";
- * import { isValidCidr4 } from "@hertzg/ip/validate";
- *
- * assert(isValidCidr4("0.0.0.0/0"));
- * assert(isValidCidr4("192.168.1.0/24"));
- * assert(isValidCidr4("10.0.0.1/32"));
- * ```
- *
- * @example Invalid CIDR
- * ```ts
- * import { assertEquals } from "@std/assert";
- * import { isValidCidr4 } from "@hertzg/ip/validate";
- *
- * assertEquals(isValidCidr4(""), false);
- * assertEquals(isValidCidr4("192.168.1.0"), false);
- * assertEquals(isValidCidr4("192.168.1.0/33"), false);
- * assertEquals(isValidCidr4("192.168.1.0/-1"), false);
- * assertEquals(isValidCidr4("2001:db8::/32"), false);
- * ```
- */
-export function isValidCidr4(s: string): boolean {
-  try {
-    parseCidr4(s);
-    return true;
-  } catch {
-    return false;
-  }
-}
-
-/**
- * Checks if a string is valid IPv6 CIDR notation.
- *
- * @param s The string to validate
- * @returns `true` if the string is valid IPv6 CIDR notation
- *
- * @example Valid CIDR
- * ```ts
- * import { assert } from "@std/assert";
- * import { isValidCidr6 } from "@hertzg/ip/validate";
- *
- * assert(isValidCidr6("::/0"));
- * assert(isValidCidr6("2001:db8::/32"));
- * assert(isValidCidr6("::1/128"));
- * ```
- *
- * @example Invalid CIDR
- * ```ts
- * import { assertEquals } from "@std/assert";
- * import { isValidCidr6 } from "@hertzg/ip/validate";
- *
- * assertEquals(isValidCidr6(""), false);
- * assertEquals(isValidCidr6("2001:db8::1"), false);
- * assertEquals(isValidCidr6("2001:db8::/129"), false);
- * assertEquals(isValidCidr6("192.168.1.0/24"), false);
- * ```
- */
-export function isValidCidr6(s: string): boolean {
-  try {
-    parseCidr6(s);
-    return true;
-  } catch {
-    return false;
-  }
-}
 
 /**
  * Checks if a string is any valid IP address or CIDR notation.

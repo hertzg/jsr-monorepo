@@ -6,6 +6,8 @@
     "./cidrv4": [],
     "./ipv6": [],
     "./cidrv6": [],
+    "./validatev4": [],
+    "./validatev6": [],
     "./validate": []
   }
 }
