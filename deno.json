@@ -8,8 +8,8 @@
       ]
     },
     "test:parallel": "deno task test:sequential -- --parallel",
-    "test:sequential": "deno test --allow-all --coverage --trace-leaks --clean",
-    "test:doc": "deno test --allow-all --coverage --trace-leaks --clean --doc",
+    "test:sequential": "deno test --allow-all --coverage --clean",
+    "test:doc": "deno test --allow-all --coverage --clean --doc",
     "lint": {
       "dependencies": [
         "lint:deno",
