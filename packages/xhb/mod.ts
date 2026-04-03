@@ -329,36 +329,6 @@ export type {
   gUShort,
 } from "./_g_types.ts";
 
-// Parse helpers
-export { atoi, parseGCharP, parseGDouble, parseGInt, parseGUInt32 } from "./_parse.ts";
-
-// Serialize helpers
-export {
-  dtostr,
-  hb_escape_text,
-  hb_xml_attr_amt,
-  hb_xml_attr_int,
-  hb_xml_attr_int0,
-  hb_xml_attr_txt,
-  hb_xml_attr_txt_crlf,
-  hb_xml_attrs_splits,
-  hb_xml_tag,
-  tags_toStr,
-} from "./_serialize.ts";
-export type { AttrSplit } from "./_serialize.ts";
-
-// Entity parse/serialize functions
-export { parseAccount, serializeAccount } from "./account.ts";
-export { parseArchive, serializeArchive } from "./archive.ts";
-export { parseAssign, serializeAssign } from "./assign.ts";
-export { parseCategory, serializeCategory } from "./category.ts";
-export { parseCurrency, serializeCurrency } from "./currency.ts";
-export { parseOperation, serializeOperation } from "./operation.ts";
-export { parsePayee, serializePayee } from "./payee.ts";
-export { parseProperties, serializeProperties } from "./properties.ts";
-export { parseTag, serializeTag } from "./tag.ts";
-export { parseVersions, serializeVersions } from "./versions.ts";
-
 // Account constants
 export {
   ACCOUNT_FLAG_ADDED,
