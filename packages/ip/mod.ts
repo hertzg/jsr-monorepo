@@ -7,6 +7,13 @@
  *
  * ## API Reference
  *
+ * ### Universal (auto-detect IPv4/IPv6)
+ * - {@link parseIp}: Parse any IP address string to number (IPv4) or bigint (IPv6)
+ * - {@link stringifyIp}: Convert number or bigint to IP address string
+ * - {@link parseCidr}: Parse any CIDR notation string to Cidr4 or Cidr6
+ * - {@link stringifyCidr}: Convert Cidr4 or Cidr6 to CIDR notation string
+ * - {@link isValidCidr}: Check if a string is valid CIDR notation (IPv4 or IPv6)
+ *
  * ### IPv4
  * - {@link parseIpv4}: Parse dotted decimal notation to number
  * - {@link stringifyIpv4}: Convert number to dotted decimal notation
@@ -50,11 +57,51 @@
  * - {@link isValidIp}: Check if a string is any valid IP address or CIDR notation
  * - {@link validateIp}: Identify and parse any IP address or CIDR string
  *
+ * ### IPv4 Classification
+ * - {@link Ipv4Classification}: Type for all IPv4 classification labels
+ * - {@link classifyIpv4}: Classify an IPv4 address into its well-known range
+ * - {@link isIpv4Private}: Check if address is private (RFC 1918)
+ * - {@link isIpv4Loopback}: Check if address is loopback (127.0.0.0/8)
+ * - {@link isIpv4LinkLocal}: Check if address is link-local (169.254.0.0/16)
+ * - {@link isIpv4Multicast}: Check if address is multicast (224.0.0.0/4)
+ * - {@link isIpv4Reserved}: Check if address is reserved (240.0.0.0/4)
+ * - {@link isIpv4Broadcast}: Check if address is broadcast (255.255.255.255)
+ * - {@link isIpv4ThisNetwork}: Check if address is "this network" (0.0.0.0/8)
+ * - {@link isIpv4CgNat}: Check if address is Carrier-Grade NAT (100.64.0.0/10)
+ * - {@link isIpv4Benchmarking}: Check if address is benchmarking (198.18.0.0/15)
+ * - {@link isIpv4Documentation}: Check if address is documentation (RFC 5737)
+ * - {@link isIpv4Public}: Check if address is publicly routable
+ *
+ * ### IPv6 Classification
+ * - {@link Ipv6Classification}: Type for all IPv6 classification labels
+ * - {@link classifyIpv6}: Classify an IPv6 address into its well-known range
+ * - {@link isIpv6Loopback}: Check if address is loopback (::1)
+ * - {@link isIpv6Unspecified}: Check if address is unspecified (::)
+ * - {@link isIpv6LinkLocal}: Check if address is link-local (fe80::/10)
+ * - {@link isIpv6Multicast}: Check if address is multicast (ff00::/8)
+ * - {@link isIpv6UniqueLocal}: Check if address is unique local (fc00::/7)
+ * - {@link isIpv6GlobalUnicast}: Check if address is global unicast (2000::/3)
+ * - {@link isIpv6Ipv4Mapped}: Check if address is IPv4-mapped (::ffff:0:0/96)
+ * - {@link isIpv6Ipv4Translated}: Check if address is IPv4-translated (64:ff9b::/96)
+ * - {@link isIpv6Documentation}: Check if address is documentation (2001:db8::/32)
+ * - {@link isIpv6Teredo}: Check if address is Teredo (2001::/32)
+ * - {@link isIpv6Benchmarking}: Check if address is benchmarking (2001:2::/48)
+ * - {@link isIpv6Orchidv2}: Check if address is ORCHIDv2 (2001:20::/28)
+ *
+ * ### Combined Classification
+ * - {@link IpClassification}: Union type of all classification labels
+ * - {@link classifyIp}: Classify an IPv4 (number) or IPv6 (bigint) address
+ *
  * ### Submodules
+ * - [`ip`](https://jsr.io/@hertzg/ip/doc/ip): Universal IP parsing via {@link parseIp}, {@link stringifyIp}
+ * - [`cidr`](https://jsr.io/@hertzg/ip/doc/cidr): Universal CIDR parsing via {@link parseCidr}, {@link stringifyCidr}
  * - [`ipv4`](https://jsr.io/@hertzg/ip/doc/ipv4): IPv4 parsing and validation
  * - [`cidrv4`](https://jsr.io/@hertzg/ip/doc/cidrv4): IPv4 CIDR utilities and validation
  * - [`ipv6`](https://jsr.io/@hertzg/ip/doc/ipv6): IPv6 parsing and validation
  * - [`cidrv6`](https://jsr.io/@hertzg/ip/doc/cidrv6): IPv6 CIDR utilities and validation
+ * - [`classify`](https://jsr.io/@hertzg/ip/doc/classify): Universal classifier via {@link classifyIp}
+ * - [`classifyv4`](https://jsr.io/@hertzg/ip/doc/classifyv4): IPv4 classification via {@link classifyIpv4}, {@link isIpv4Private}, etc.
+ * - [`classifyv6`](https://jsr.io/@hertzg/ip/doc/classifyv6): IPv6 classification via {@link classifyIpv6}, {@link isIpv6Loopback}, etc.
  * - [`validate`](https://jsr.io/@hertzg/ip/doc/validate): Universal validation via {@link isValidIp}, {@link validateIp}
  *
  * ## Features
@@ -65,6 +112,7 @@
  * - **Address Generation**: Generate IP ranges with custom offsets and steps
  * - **Arithmetic Operations**: Use number (IPv4) or bigint (IPv6) math for IP address manipulation
  * - **IPv6 Compression**: Expand and compress IPv6 addresses
+ * - **IP Classification**: Identify private, loopback, multicast, and other well-known ranges
  * - **Validation**: Non-throwing validity checks and universal string identification
  *
  * ## Basic IPv4 Operations
@@ -271,10 +319,21 @@
  * @module
  */
 
-// Re-export IPv4 utilities
+// --- Universal (auto-detect IPv4/IPv6) ---
+
+export { parseIp, stringifyIp } from "./ip.ts";
+export { isValidCidr, parseCidr, stringifyCidr } from "./cidr.ts";
+export { classifyIp, type IpClassification } from "./classify.ts";
+export {
+  type IpValidationResult,
+  isValidIp,
+  validateIp,
+} from "./validate.ts";
+
+// --- IPv4 ---
+
 export { isValidIpv4, parseIpv4, stringifyIpv4 } from "./ipv4.ts";
 
-// Re-export CIDR4 utilities
 export {
   type Cidr4,
   cidr4Addresses,
@@ -290,7 +349,24 @@ export {
   stringifyCidr4,
 } from "./cidrv4.ts";
 
-// Re-export IPv6 utilities
+export {
+  classifyIpv4,
+  type Ipv4Classification,
+  isIpv4Benchmarking,
+  isIpv4Broadcast,
+  isIpv4CgNat,
+  isIpv4Documentation,
+  isIpv4LinkLocal,
+  isIpv4Loopback,
+  isIpv4Multicast,
+  isIpv4Private,
+  isIpv4Public,
+  isIpv4Reserved,
+  isIpv4ThisNetwork,
+} from "./classifyv4.ts";
+
+// --- IPv6 ---
+
 export {
   compressIpv6,
   expandIpv6,
@@ -299,7 +375,6 @@ export {
   stringifyIpv6,
 } from "./ipv6.ts";
 
-// Re-export CIDR6 utilities
 export {
   type Cidr6,
   cidr6Addresses,
@@ -313,9 +388,19 @@ export {
   stringifyCidr6,
 } from "./cidrv6.ts";
 
-// Re-export universal validation utilities
 export {
-  type IpValidationResult,
-  isValidIp,
-  validateIp,
-} from "./validate.ts";
+  classifyIpv6,
+  type Ipv6Classification,
+  isIpv6Benchmarking,
+  isIpv6Documentation,
+  isIpv6GlobalUnicast,
+  isIpv6Ipv4Mapped,
+  isIpv6Ipv4Translated,
+  isIpv6LinkLocal,
+  isIpv6Loopback,
+  isIpv6Multicast,
+  isIpv6Orchidv2,
+  isIpv6Teredo,
+  isIpv6Unspecified,
+  isIpv6UniqueLocal,
+} from "./classifyv6.ts";

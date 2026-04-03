@@ -17,6 +17,37 @@
  * assertEquals(stringifyIpv4(next), "192.168.1.2");
  * ```
  *
+ * @example Bitwise operations on IPv4 addresses
+ *
+ * Since IPv4 addresses are plain numbers, you can use standard JavaScript
+ * bitwise operators directly instead of library functions. Use `>>> 0` to
+ * keep results as unsigned 32-bit integers.
+ *
+ * ```ts
+ * import { assertEquals } from "@std/assert";
+ * import { parseIpv4, stringifyIpv4 } from "@hertzg/ip/ipv4";
+ * import { mask4FromPrefixLength } from "@hertzg/ip/cidrv4";
+ *
+ * const ip = parseIpv4("192.168.1.100");
+ * const mask = mask4FromPrefixLength(24);
+ *
+ * // Bitwise NOT (invert all bits)
+ * const inverted = (~ip >>> 0);
+ * assertEquals(stringifyIpv4(inverted), "63.87.254.155");
+ *
+ * // Bitwise AND (apply subnet mask to get network address)
+ * const network = ((ip & mask) >>> 0);
+ * assertEquals(stringifyIpv4(network), "192.168.1.0");
+ *
+ * // Bitwise OR (combine network with host bits for broadcast)
+ * const broadcast = ((network | (~mask >>> 0)) >>> 0);
+ * assertEquals(stringifyIpv4(broadcast), "192.168.1.255");
+ *
+ * // Direct comparison (no isEqual() needed)
+ * assertEquals(parseIpv4("10.0.0.1") === parseIpv4("10.0.0.1"), true);
+ * assertEquals(parseIpv4("10.0.0.1") === parseIpv4("10.0.0.2"), false);
+ * ```
+ *
  * @module
  */
 
