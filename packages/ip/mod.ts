@@ -89,7 +89,7 @@
  * - {@link isIpv6Orchidv2}: Check if address is ORCHIDv2 (2001:20::/28)
  *
  * ### Combined Classification
- * - {@link ClassifyIpResult}: Union type of all classification labels
+ * - {@link ClassifyIpResult}: Discriminated union with version and classification kind
  * - {@link classifyIp}: Classify an IPv4 (number) or IPv6 (bigint) address
  *
  * ### Submodules

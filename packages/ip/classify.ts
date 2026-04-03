@@ -3,7 +3,7 @@
  *
  * This module provides a single {@link classifyIp} function that accepts
  * both IPv4 (`number`) and IPv6 (`bigint`) addresses and returns the
- * appropriate classification label.
+ * appropriate classification with version information.
  *
  * For version-specific classifiers, see:
  * - [`classifyv4`](https://jsr.io/@hertzg/ip/doc/classifyv4): {@link classifyIpv4}, {@link isIpv4Private}, etc.
@@ -17,14 +17,22 @@
  * import { parseIpv6 } from "@hertzg/ip/ipv6";
  *
  * // IPv4
- * assertEquals(classifyIp(parseIpv4("192.168.1.1")), "private");
- * assertEquals(classifyIp(parseIpv4("8.8.8.8")), "public");
- * assertEquals(classifyIp(parseIpv4("127.0.0.1")), "loopback");
+ * const v4 = classifyIp(parseIpv4("192.168.1.1"));
+ * assertEquals(v4.version, 4);
+ * assertEquals(v4.kind, "private");
+ *
+ * const v4pub = classifyIp(parseIpv4("8.8.8.8"));
+ * assertEquals(v4pub.version, 4);
+ * assertEquals(v4pub.kind, "public");
  *
  * // IPv6
- * assertEquals(classifyIp(parseIpv6("::1")), "loopback");
- * assertEquals(classifyIp(parseIpv6("2001:db8::1")), "documentation");
- * assertEquals(classifyIp(parseIpv6("fe80::1")), "link-local");
+ * const v6 = classifyIp(parseIpv6("::1"));
+ * assertEquals(v6.version, 6);
+ * assertEquals(v6.kind, "loopback");
+ *
+ * const v6doc = classifyIp(parseIpv6("2001:db8::1"));
+ * assertEquals(v6doc.version, 6);
+ * assertEquals(v6doc.kind, "documentation");
  * ```
  *
  * @module
@@ -36,15 +44,21 @@ import { classifyIpv6 } from "./classifyv6.ts";
 import type { ClassifyIpv6Result } from "./classifyv6.ts";
 
 /**
- * Union of all possible classification labels for both IPv4 and IPv6.
+ * Result of classifying an IP address with version information.
+ *
+ * Discriminated union on `version`:
+ * - `4` — IPv4 classification with `kind` from {@link ClassifyIpv4Result}
+ * - `6` — IPv6 classification with `kind` from {@link ClassifyIpv6Result}
  */
-export type ClassifyIpResult = ClassifyIpv4Result | ClassifyIpv6Result;
+export type ClassifyIpResult =
+  | { readonly version: 4; readonly kind: ClassifyIpv4Result }
+  | { readonly version: 6; readonly kind: ClassifyIpv6Result };
 
 /**
  * Classifies an IPv4 address into its well-known range.
  *
  * @param ip The IPv4 address as a 32-bit unsigned integer
- * @returns The classification label
+ * @returns An object with `version: 4` and the classification `kind`
  *
  * @example
  * ```ts
@@ -52,18 +66,28 @@ export type ClassifyIpResult = ClassifyIpv4Result | ClassifyIpv6Result;
  * import { classifyIp } from "@hertzg/ip/classify";
  * import { parseIpv4 } from "@hertzg/ip/ipv4";
  *
- * assertEquals(classifyIp(parseIpv4("192.168.1.1")), "private");
- * assertEquals(classifyIp(parseIpv4("8.8.8.8")), "public");
+ * const result = classifyIp(parseIpv4("192.168.1.1"));
+ * assertEquals(result.version, 4);
+ * assertEquals(result.kind, "private");
  * ```
  */
-export function classifyIp(ip: number): ClassifyIpv4Result;
-/** Classifies an IPv6 (`bigint`) address into its well-known range. */
-export function classifyIp(ip: bigint): ClassifyIpv6Result;
+export function classifyIp(
+  ip: number,
+): { readonly version: 4; readonly kind: ClassifyIpv4Result };
+/**
+ * Classifies an IPv6 address into its well-known range.
+ *
+ * @param ip The IPv6 address as a 128-bit bigint
+ * @returns An object with `version: 6` and the classification `kind`
+ */
+export function classifyIp(
+  ip: bigint,
+): { readonly version: 6; readonly kind: ClassifyIpv6Result };
 export function classifyIp(
   ip: number | bigint,
-): ClassifyIpv4Result | ClassifyIpv6Result {
+): ClassifyIpResult {
   if (typeof ip === "bigint") {
-    return classifyIpv6(ip);
+    return { version: 6, kind: classifyIpv6(ip) };
   }
-  return classifyIpv4(ip);
+  return { version: 4, kind: classifyIpv4(ip) };
 }
