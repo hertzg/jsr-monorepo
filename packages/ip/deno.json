@@ -3,7 +3,9 @@
   "version": "1.0.0",
   "exports": {
     ".": "./mod.ts",
+    "./ip": "./ip.ts",
     "./ipv4": "./ipv4.ts",
+    "./cidr": "./cidr.ts",
     "./cidrv4": "./cidrv4.ts",
     "./ipv6": "./ipv6.ts",
     "./cidrv6": "./cidrv6.ts",

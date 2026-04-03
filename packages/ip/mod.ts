@@ -7,6 +7,12 @@
  *
  * ## API Reference
  *
+ * ### Universal (auto-detect IPv4/IPv6)
+ * - {@link parseIp}: Parse any IP address string to number (IPv4) or bigint (IPv6)
+ * - {@link stringifyIp}: Convert number or bigint to IP address string
+ * - {@link parseCidr}: Parse any CIDR notation string to Cidr4 or Cidr6
+ * - {@link stringifyCidr}: Convert Cidr4 or Cidr6 to CIDR notation string
+ *
  * ### IPv4
  * - {@link parseIpv4}: Parse dotted decimal notation to number
  * - {@link stringifyIpv4}: Convert number to dotted decimal notation
@@ -77,6 +83,8 @@
  * - {@link classifyIp}: Classify an IPv4 (number) or IPv6 (bigint) address
  *
  * ### Submodules
+ * - [`ip`](https://jsr.io/@hertzg/ip/doc/ip): Universal IP parsing via {@link parseIp}, {@link stringifyIp}
+ * - [`cidr`](https://jsr.io/@hertzg/ip/doc/cidr): Universal CIDR parsing via {@link parseCidr}, {@link stringifyCidr}
  * - [`ipv4`](https://jsr.io/@hertzg/ip/doc/ipv4): IPv4 parsing via {@link parseIpv4} and {@link stringifyIpv4}
  * - [`cidrv4`](https://jsr.io/@hertzg/ip/doc/cidrv4): IPv4 CIDR utilities via {@link parseCidr4}, {@link cidr4Contains}
  * - [`ipv6`](https://jsr.io/@hertzg/ip/doc/ipv6): IPv6 parsing via {@link parseIpv6}, {@link expandIpv6}, {@link compressIpv6}
@@ -298,6 +306,12 @@
  *
  * @module
  */
+
+// Re-export universal IP utilities
+export { parseIp, stringifyIp } from "./ip.ts";
+
+// Re-export universal CIDR utilities
+export { parseCidr, stringifyCidr } from "./cidr.ts";
 
 // Re-export IPv4 utilities
 export { parseIpv4, stringifyIpv4 } from "./ipv4.ts";
