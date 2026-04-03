@@ -59,19 +59,34 @@ import {
   serializeOperation,
 } from "./operation.ts";
 
+/** A complete HomeBank XHB file represented as a typed object. */
 export interface XHB {
+  /** File and data format version information. */
   versions: Versions;
+  /** Global file properties (owner, base currency, etc.). */
   properties?: Properties;
+  /** Bank accounts. */
   accounts: Account[];
+  /** Scheduled / recurring transaction templates. */
   archives: Archive[];
+  /** Auto-assignment rules. */
   assigns: Assign[];
+  /** Transaction categories. */
   categories: Category[];
+  /** Currency definitions. */
   currencies: Currency[];
+  /** Financial transactions. */
   operations: Operation[];
+  /** Transaction payees. */
   payees: Payee[];
+  /** User-defined tags. */
   tags: Tag[];
 }
 
+/**
+ * A partially-constructed {@linkcode XHB} where only `versions` is required.
+ * Used during parsing when the full object is still being built.
+ */
 export type VolatileXHB = Pick<XHB, "versions"> &
   Partial<Omit<XHB, "versions">>;
 
@@ -85,14 +100,24 @@ const NODE_NAME_CURRENCY = "cur";
 const NODE_NAME_TAG = "tag";
 const NODE_NAME_OPERATION = "ope";
 
+/** Options for {@linkcode parse}. */
 export interface ParseOptions {
+  /** Called for each parsed entity, allowing transformation before storage. */
   onEntity?: <T>(entity: T, node: Node) => T;
+  /** Called when an unrecognized XML node is encountered. */
   onUnknownNode?: (node: Node) => void;
 }
 
 const defaultParseOnEntity = <T>(entity: T): T => entity;
 const defaultParseOnUnknownNode = (): void => undefined;
 
+/**
+ * Parses an XHB XML string into a typed {@linkcode XHB} object.
+ *
+ * @param xml - The raw XHB XML string.
+ * @param options - Optional parse hooks.
+ * @returns The parsed XHB object.
+ */
 export function parse(xml: string, options: ParseOptions = {}): XHB {
   const doc = XMLParser(xml),
     opts: Required<ParseOptions> = {
@@ -150,13 +175,22 @@ export function parse(xml: string, options: ParseOptions = {}): XHB {
   return xhb;
 }
 
+/** Options for {@linkcode serialize}. */
 export interface SerializeOptions {
+  /** Called for each serialized entity, allowing transformation of the XML output. */
   onEntity?: <T>(entity: T, serialized: string) => string;
 }
 
 const defaultSerializeOnEntity = (_entity: unknown, serialized: string) =>
   serialized;
 
+/**
+ * Serializes an {@linkcode XHB} object back into an XHB XML string.
+ *
+ * @param xhb - The XHB object to serialize.
+ * @param options - Optional serialize hooks.
+ * @returns The XHB XML string.
+ */
 export const serialize = (xhb: XHB, options: SerializeOptions = {}): string => {
   const opts: Required<SerializeOptions> = {
     onEntity: options.onEntity || defaultSerializeOnEntity,

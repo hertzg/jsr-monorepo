@@ -11,53 +11,100 @@ import {
 } from "./_serialize.ts";
 import type { gCharP, gDouble, gUInt32, gUShort } from "./_g_types.ts";
 
+/** A financial transaction (operation) from the `<ope>` element. */
 export interface Operation {
+  /** Transaction date as a Julian day number. */
   date: gUInt32;
+  /** Transaction amount. */
   amount: gDouble;
+  /** Key of the source account. */
   account: gUInt32;
+  /** Key of the destination account (for transfers). */
   destinationAccount: gUInt32;
+  /** Payment mode (`PAY_MODE_*` constant). */
   payMode: gUShort;
+  /** Transaction status (none, cleared, reconciled, remind). */
   status: gUShort;
+  /** Bitmask of `OPERATION_FLAG_*` values. */
   flags: gUShort;
+  /** Key of the payee. */
   payee: gUInt32;
+  /** Key of the category. */
   category: gUInt32;
+  /** Transaction memo / description. */
   memo: gCharP;
+  /** Additional info (e.g. cheque number). */
   info: gCharP;
+  /** List of tag names attached to this transaction. */
   tags: gCharP[];
+  /** Internal transfer key linking paired transfer transactions. */
   kxfer: gUInt32;
+  /** Split transaction entries (when {@linkcode OPERATION_FLAG_SPLIT} is set). */
   splits: OperationSplit[];
 }
 
+/** No payment mode. */
 export const PAY_MODE_NONE = 0;
+/** Credit card. */
 export const PAY_MODE_CCARD = 1;
+/** Check / cheque. */
 export const PAY_MODE_CHECK = 2;
+/** Cash. */
 export const PAY_MODE_CASH = 3;
+/** Bank transfer. */
 export const PAY_MODE_XFER = 4;
+/** Internal transfer between accounts. */
 export const PAY_MODE_INTXFER = 5;
+/** Debit card. */
 export const PAY_MODE_DCARD = 6;
+/** Repeating / standing order payment. */
 export const PAY_MODE_REPEATPMT = 7;
+/** Electronic payment. */
 export const PAY_MODE_EPAYMENT = 8;
+/** Deposit. */
 export const PAY_MODE_DEPOSIT = 9;
+/** Fee / charge. */
 export const PAY_MODE_FEE = 10;
+/** Direct debit. */
 export const PAY_MODE_DIRECTDEBIT = 11;
+/** Total number of payment modes (upper bound sentinel). */
 export const PAY_MODE_NUM_MAX = 12;
 
+/** A single entry within a split transaction. */
 export interface OperationSplit {
+  /** Key of the split's category. */
   category: gUInt32;
+  /** Split memo text. */
   memo: gCharP;
+  /** Split amount. */
   amount: gDouble;
 }
 
+/** @deprecated Legacy valid flag (pre-5.x). */
 export const OPERATION_FLAG_OLDVALID = 1 << 0;
+/** Transaction is income. */
 export const OPERATION_FLAG_INCOME = 1 << 1;
+/** Transaction was auto-generated from a schedule. */
 export const OPERATION_FLAG_AUTO = 1 << 2;
+/** Transaction was recently added (temporary flag). */
 export const OPERATION_FLAG_ADDED = 1 << 3;
+/** Transaction was recently changed (temporary flag). */
 export const OPERATION_FLAG_CHANGED = 1 << 4;
+/** @deprecated Legacy remind flag (pre-5.x). */
 export const OPERATION_FLAG_OLDREMIND = 1 << 5;
+/** Use second cheque book numbering. */
 export const OPERATION_FLAG_CHEQ2 = 1 << 6;
+/** Scheduled transaction has a repeat limit. */
 export const OPERATION_FLAG_LIMIT = 1 << 7;
+/** Transaction contains split entries. */
 export const OPERATION_FLAG_SPLIT = 1 << 8;
 
+/**
+ * Parses an `<ope>` XML node into an {@linkcode Operation} object.
+ *
+ * @param node - The `<ope>` XML node.
+ * @returns The parsed operation.
+ */
 export function parseOperation({ attributes }: Node): Operation {
   const tags: gCharP[] = attributes.tags
     ? parseGCharP(attributes.tags).split(" ")
@@ -110,6 +157,12 @@ const operationSplitsToSplits = (aSplits: OperationSplit[]): AttrSplit[] =>
     mem: aSplit.memo,
   }));
 
+/**
+ * Serializes an {@linkcode Operation} object into an `<ope ... />` XML tag.
+ *
+ * @param operation - The operation to serialize.
+ * @returns The self-closing XML tag string.
+ */
 export const serializeOperation = (operation: Operation): string => {
   const tags = tags_toStr(operation.tags);
   const splits = operationSplitsToSplits(operation.splits);
