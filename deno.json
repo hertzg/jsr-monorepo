@@ -9,7 +9,7 @@
     },
     "test:parallel": "deno task test:sequential -- --parallel",
     "test:sequential": "deno test --allow-all --coverage --clean",
-    "test:doc": "deno test --allow-all --coverage --clean --doc",
+    "test:doc": "deno test --allow-all --coverage --clean --doc --ignore=\"**/*.test.ts\"",
     "lint": {
       "dependencies": [
         "lint:deno",
