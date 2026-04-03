@@ -134,18 +134,27 @@ async function main() {
     packages.map((pkg) => generatePackageDocs(pkg, outputDir)),
   );
 
-  const failures = results.filter((r) => r.status === "rejected");
-  if (failures.length > 0) {
-    for (const f of failures) {
-      console.error((f as PromiseRejectedResult).reason);
+  const succeeded: PackageInfo[] = [];
+  for (let i = 0; i < results.length; i++) {
+    const result = results[i];
+    if (result.status === "rejected") {
+      console.warn(`Warning: skipping ${packages[i].name}: ${result.reason}`);
+    } else {
+      succeeded.push(packages[i]);
     }
+  }
+
+  if (succeeded.length === 0) {
+    console.error("All packages failed doc generation");
     Deno.exit(1);
   }
 
-  const indexHtml = generateIndexHtml(packages);
+  const indexHtml = generateIndexHtml(succeeded);
   await Deno.writeTextFile(join(outputDir, "index.html"), indexHtml);
   await Deno.writeTextFile(join(outputDir, ".nojekyll"), "");
-  console.log("Generated index.html");
+  console.log(
+    `Generated index.html (${succeeded.length}/${packages.length} packages)`,
+  );
 }
 
 main();
