@@ -142,7 +142,12 @@
   />
 </svg>
 </a>
-</div><div><div class="space-y-7" id=""><div class="markdown"><p>Union of all possible classification labels for both IPv4 and IPv6.</p>
+</div><div><div class="space-y-7" id=""><div class="markdown"><p>Result of classifying an IP address with version information.</p>
+<p>Discriminated union on <code>version</code>:</p>
+<ul>
+<li><code>4</code> — IPv4 classification with <code>kind</code> from <a href="../.././mod.ts/~/ClassifyIpv4Result.html">ClassifyIpv4Result</a></li>
+<li><code>6</code> — IPv6 classification with <code>kind</code> from <a href="../.././mod.ts/~/ClassifyIpv6Result.html">ClassifyIpv6Result</a></li>
+</ul>
 </div><section class="section"  id="definition"><div>
       <h2 class="anchorable mb-1"><a href="#definition" class="anchor" aria-label="Anchor" tabIndex="-1"><svg
   width="16"
@@ -169,7 +174,7 @@
 Definition</h2></div><div class="space-y-8"><div class=" docEntry" id="typealias_classifyipresult">
 
   <div class="docEntryHeader">
-    <div><code><span class="font-medium text-stone-500 dark:text-stone-200"><span><a href="../.././mod.ts/~/ClassifyIpv4Result.html" class="link td-ref">ClassifyIpv4Result</a><span class="td-op"> | </span><a href="../.././mod.ts/~/ClassifyIpv6Result.html" class="link td-ref">ClassifyIpv6Result</a></span></span>
+    <div><code><span class="font-medium text-stone-500 dark:text-stone-200"><div class="ml-indent"><span>{ <span class="td-kw">readonly </span>version<span>: <span class="td-lit">4</span></span>; <span class="td-kw">readonly </span>kind<span>: <a href="../.././mod.ts/~/ClassifyIpv4Result.html" class="link td-ref">ClassifyIpv4Result</a></span>;  }</span><br /><span><span class="td-op"> | </span>{ <span class="td-kw">readonly </span>version<span>: <span class="td-lit">6</span></span>; <span class="td-kw">readonly </span>kind<span>: <a href="../.././mod.ts/~/ClassifyIpv6Result.html" class="link td-ref">ClassifyIpv6Result</a></span>;  }</span></div></span>
       </code>
     </div><a
   class="sourceButton"
