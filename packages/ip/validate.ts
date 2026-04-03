@@ -8,7 +8,7 @@
  * For version-specific validators, see:
  * - [`ipv4`](https://jsr.io/@hertzg/ip/doc/ipv4): {@link isValidIpv4}
  * - [`ipv6`](https://jsr.io/@hertzg/ip/doc/ipv6): {@link isValidIpv6}
- * - [`cidrv4`](https://jsr.io/@hertzg/ip/doc/cidrv4): {@link isValidCidr4}
+ * - [`cidrv4`](https://jsr.io/@hertzg/ip/doc/cidrv4): {@link isValidCidrv4}
  * - [`cidrv6`](https://jsr.io/@hertzg/ip/doc/cidrv6): {@link isValidCidr6}
  *
  * @example Universal validation
@@ -30,7 +30,7 @@
 
 import { parseIpv4 } from "./ipv4.ts";
 import { parseIpv6 } from "./ipv6.ts";
-import { type Cidr4, parseCidr4 } from "./cidrv4.ts";
+import { type Cidrv4, parseCidrv4 } from "./cidrv4.ts";
 import { type Cidr6, parseCidr6 } from "./cidrv6.ts";
 
 /**
@@ -39,14 +39,14 @@ import { type Cidr6, parseCidr6 } from "./cidrv6.ts";
  * Discriminated union on `kind`:
  * - `"ipv4"` — valid IPv4 address with parsed `value` as a 32-bit number
  * - `"ipv6"` — valid IPv6 address with parsed `value` as a 128-bit bigint
- * - `"cidr4"` — valid IPv4 CIDR with parsed `value` as a {@link Cidr4}
+ * - `"cidr4"` — valid IPv4 CIDR with parsed `value` as a {@link Cidrv4}
  * - `"cidr6"` — valid IPv6 CIDR with parsed `value` as a {@link Cidr6}
  * - `"invalid"` — the string is not a valid IP address or CIDR notation
  */
 export type IpValidationResult =
   | { readonly kind: "ipv4"; readonly value: number }
   | { readonly kind: "ipv6"; readonly value: bigint }
-  | { readonly kind: "cidr4"; readonly value: Cidr4 }
+  | { readonly kind: "cidr4"; readonly value: Cidrv4 }
   | { readonly kind: "cidr6"; readonly value: Cidr6 }
   | { readonly kind: "invalid" };
 
@@ -149,7 +149,7 @@ export function isValidIp(s: string): boolean {
 export function validateIp(s: string): IpValidationResult {
   if (s.includes("/")) {
     try {
-      return { kind: "cidr4", value: parseCidr4(s) };
+      return { kind: "cidr4", value: parseCidrv4(s) };
     } catch {
       // not cidr4
     }

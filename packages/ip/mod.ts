@@ -10,8 +10,8 @@
  * ### Universal (auto-detect IPv4/IPv6)
  * - {@link parseIp}: Parse any IP address string to number (IPv4) or bigint (IPv6)
  * - {@link stringifyIp}: Convert number or bigint to IP address string
- * - {@link parseCidr}: Parse any CIDR notation string to Cidr4 or Cidr6
- * - {@link stringifyCidr}: Convert Cidr4 or Cidr6 to CIDR notation string
+ * - {@link parseCidr}: Parse any CIDR notation string to Cidrv4 or Cidr6
+ * - {@link stringifyCidr}: Convert Cidrv4 or Cidr6 to CIDR notation string
  * - {@link isValidCidr}: Check if a string is valid CIDR notation (IPv4 or IPv6)
  *
  * ### IPv4
@@ -20,18 +20,18 @@
  * - {@link isValidIpv4}: Check if a string is a valid IPv4 address
  *
  * ### IPv4 CIDR
- * - {@link Cidr4}: Type representing an IPv4 CIDR block
- * - {@link parseCidr4}: Parse CIDR notation string to Cidr4
- * - {@link stringifyCidr4}: Convert Cidr4 to CIDR notation string
+ * - {@link Cidrv4}: Type representing an IPv4 CIDR block
+ * - {@link parseCidrv4}: Parse CIDR notation string to Cidrv4
+ * - {@link stringifyCidrv4}: Convert Cidrv4 to CIDR notation string
  * - {@link cidrv4Mask}: Create network mask from prefix length (0-32)
- * - {@link cidr4Contains}: Check if IP is within CIDR range
- * - {@link cidr4FirstAddress}: Get first address in CIDR range
- * - {@link cidr4LastAddress}: Get last address in CIDR range
- * - {@link cidr4NetworkAddress}: Alias for cidr4FirstAddress
- * - {@link cidr4BroadcastAddress}: Alias for cidr4LastAddress
- * - {@link cidr4Size}: Get total number of addresses in CIDR range
- * - {@link cidr4Addresses}: Generate IP addresses in CIDR range
- * - {@link isValidCidr4}: Check if a string is valid IPv4 CIDR notation
+ * - {@link cidrv4Contains}: Check if IP is within CIDR range
+ * - {@link cidrv4FirstAddress}: Get first address in CIDR range
+ * - {@link cidrv4LastAddress}: Get last address in CIDR range
+ * - {@link cidrv4NetworkAddress}: Alias for cidrv4FirstAddress
+ * - {@link cidrv4BroadcastAddress}: Alias for cidrv4LastAddress
+ * - {@link cidrv4Size}: Get total number of addresses in CIDR range
+ * - {@link cidrv4Addresses}: Generate IP addresses in CIDR range
+ * - {@link isValidCidrv4}: Check if a string is valid IPv4 CIDR notation
  *
  * ### IPv6
  * - {@link parseIpv6}: Parse colon-hexadecimal notation to bigint
@@ -162,26 +162,26 @@
  * ```ts
  * import { assertEquals } from "@std/assert";
  * import {
- *   cidr4BroadcastAddress,
- *   cidr4NetworkAddress,
- *   parseCidr4,
- *   stringifyCidr4,
+ *   cidrv4BroadcastAddress,
+ *   cidrv4NetworkAddress,
+ *   parseCidrv4,
+ *   stringifyCidrv4,
  *   stringifyIpv4,
  * } from "@hertzg/ip";
  *
  * // Parse CIDR notation
- * const cidr = parseCidr4("192.168.1.0/24");
+ * const cidr = parseCidrv4("192.168.1.0/24");
  * assertEquals(cidr.prefixLength, 24);
  *
  * // Get network boundaries
- * const network = cidr4NetworkAddress(cidr);
+ * const network = cidrv4NetworkAddress(cidr);
  * assertEquals(stringifyIpv4(network), "192.168.1.0");
  *
- * const broadcast = cidr4BroadcastAddress(cidr);
+ * const broadcast = cidrv4BroadcastAddress(cidr);
  * assertEquals(stringifyIpv4(broadcast), "192.168.1.255");
  *
  * // Stringify back to CIDR notation
- * assertEquals(stringifyCidr4(cidr), "192.168.1.0/24");
+ * assertEquals(stringifyCidrv4(cidr), "192.168.1.0/24");
  * ```
  *
  * @example IPv6 CIDR operations
@@ -212,18 +212,18 @@
  * @example Check if IPs are within CIDR range
  * ```ts
  * import { assert, assertEquals } from "@std/assert";
- * import { cidr4Contains, parseCidr4, parseIpv4 } from "@hertzg/ip";
+ * import { cidrv4Contains, parseCidrv4, parseIpv4 } from "@hertzg/ip";
  *
- * const cidr = parseCidr4("192.168.1.0/24");
+ * const cidr = parseCidrv4("192.168.1.0/24");
  *
  * // IPs within range
- * assert(cidr4Contains(cidr, parseIpv4("192.168.1.0")));   // network address
- * assert(cidr4Contains(cidr, parseIpv4("192.168.1.100"))); // middle of range
- * assert(cidr4Contains(cidr, parseIpv4("192.168.1.255"))); // broadcast address
+ * assert(cidrv4Contains(cidr, parseIpv4("192.168.1.0")));   // network address
+ * assert(cidrv4Contains(cidr, parseIpv4("192.168.1.100"))); // middle of range
+ * assert(cidrv4Contains(cidr, parseIpv4("192.168.1.255"))); // broadcast address
  *
  * // IPs outside range
- * assertEquals(cidr4Contains(cidr, parseIpv4("192.168.0.255")), false);
- * assertEquals(cidr4Contains(cidr, parseIpv4("192.168.2.0")), false);
+ * assertEquals(cidrv4Contains(cidr, parseIpv4("192.168.0.255")), false);
+ * assertEquals(cidrv4Contains(cidr, parseIpv4("192.168.2.0")), false);
  * ```
  *
  * ## Address Generation
@@ -231,27 +231,27 @@
  * @example Generate IP ranges with custom patterns
  * ```ts
  * import { assertEquals } from "@std/assert";
- * import { cidr4Addresses, parseCidr4, stringifyIpv4 } from "@hertzg/ip";
+ * import { cidrv4Addresses, parseCidrv4, stringifyIpv4 } from "@hertzg/ip";
  *
- * const cidr = parseCidr4("10.0.0.0/29"); // 8 IPs: .0 to .7
+ * const cidr = parseCidrv4("10.0.0.0/29"); // 8 IPs: .0 to .7
  *
  * // By default, iterates all IPs (offset=0, step=1, no count limit)
- * const all = Array.from(cidr4Addresses(cidr));
+ * const all = Array.from(cidrv4Addresses(cidr));
  * assertEquals(all.map(stringifyIpv4), [
  *   "10.0.0.0", "10.0.0.1", "10.0.0.2", "10.0.0.3",
  *   "10.0.0.4", "10.0.0.5", "10.0.0.6", "10.0.0.7",
  * ]);
  *
  * // Skip network address with offset=1
- * const usable = Array.from(cidr4Addresses(cidr, { offset: 1 }));
+ * const usable = Array.from(cidrv4Addresses(cidr, { offset: 1 }));
  * assertEquals(usable.length, 7);
  *
  * // Get even addresses (step=2)
- * const evenIps = Array.from(cidr4Addresses(cidr, { step: 2 }));
+ * const evenIps = Array.from(cidrv4Addresses(cidr, { step: 2 }));
  * assertEquals(evenIps.map(stringifyIpv4), ["10.0.0.0", "10.0.0.2", "10.0.0.4", "10.0.0.6"]);
  *
  * // Reverse iteration from offset (negative step)
- * const backwards = Array.from(cidr4Addresses(cidr, { offset: 5, step: -1 }));
+ * const backwards = Array.from(cidrv4Addresses(cidr, { offset: 5, step: -1 }));
  * assertEquals(backwards.map(stringifyIpv4), ["10.0.0.5", "10.0.0.4", "10.0.0.3", "10.0.0.2", "10.0.0.1", "10.0.0.0"]);
  * ```
  *
@@ -261,20 +261,20 @@
  * ```ts
  * import { assert } from "@std/assert";
  * import {
- *   cidr4Addresses,
- *   cidr4Contains,
- *   parseCidr4,
+ *   cidrv4Addresses,
+ *   cidrv4Contains,
+ *   parseCidrv4,
  *   stringifyIpv4,
  * } from "@hertzg/ip";
  *
- * const cidr = parseCidr4("10.0.0.0/24");
+ * const cidr = parseCidrv4("10.0.0.0/24");
  *
  * // Allocate batch of IPs for servers
- * const serverIps = Array.from(cidr4Addresses(cidr, { offset: 10, count: 5, step: 1 }));
+ * const serverIps = Array.from(cidrv4Addresses(cidr, { offset: 10, count: 5, step: 1 }));
  *
  * // Verify all allocated IPs are in range
  * for (const ip of serverIps) {
- *   assert(cidr4Contains(cidr, ip));
+ *   assert(cidrv4Contains(cidr, ip));
  * }
  *
  * // Convert to strings for configuration
@@ -284,13 +284,13 @@
  *
  * @example Memory-efficient iteration over large ranges
  * ```ts
- * import { cidr4Addresses, parseCidr4, stringifyIpv4 } from "@hertzg/ip";
+ * import { cidrv4Addresses, parseCidrv4, stringifyIpv4 } from "@hertzg/ip";
  *
- * const cidr = parseCidr4("10.0.0.0/16"); // 65,536 addresses
+ * const cidr = parseCidrv4("10.0.0.0/16"); // 65,536 addresses
  *
  * // Process entire CIDR lazily without loading all into memory
  * // No need to specify count - iterates until CIDR boundary
- * for (const ip of cidr4Addresses(cidr, { offset: 0 })) {
+ * for (const ip of cidrv4Addresses(cidr, { offset: 0 })) {
  *   const ipStr = stringifyIpv4(ip);
  *   // Process each IP (e.g., scan, allocate, log)
  *   break; // Just showing the pattern
@@ -335,18 +335,18 @@ export {
 export { isValidIpv4, parseIpv4, stringifyIpv4 } from "./ipv4.ts";
 
 export {
-  type Cidr4,
-  cidr4Addresses,
-  cidr4BroadcastAddress,
-  cidr4Contains,
-  cidr4FirstAddress,
-  cidr4LastAddress,
-  cidr4NetworkAddress,
-  cidr4Size,
-  isValidCidr4,
+  type Cidrv4,
+  cidrv4Addresses,
+  cidrv4BroadcastAddress,
+  cidrv4Contains,
+  cidrv4FirstAddress,
+  cidrv4LastAddress,
+  cidrv4NetworkAddress,
+  cidrv4Size,
+  isValidCidrv4,
   cidrv4Mask,
-  parseCidr4,
-  stringifyCidr4,
+  parseCidrv4,
+  stringifyCidrv4,
 } from "./cidrv4.ts";
 
 export {

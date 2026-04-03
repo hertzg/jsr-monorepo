@@ -1,9 +1,9 @@
 import { assertEquals } from "@std/assert";
 import {
-  cidr4BroadcastAddress,
-  cidr4Contains,
-  cidr4NetworkAddress,
-  parseCidr4,
+  cidrv4BroadcastAddress,
+  cidrv4Contains,
+  cidrv4NetworkAddress,
+  parseCidrv4,
   parseIpv4,
   stringifyIpv4,
 } from "./mod.ts";
@@ -16,12 +16,12 @@ Deno.test("mod.ts re-exports", async (t) => {
   });
 
   await t.step("CIDR functions work via main module", () => {
-    const cidr = parseCidr4("192.168.1.0/24");
+    const cidr = parseCidrv4("192.168.1.0/24");
     assertEquals(cidr.address, 3232235776);
     assertEquals(cidr.prefixLength, 24);
 
-    assertEquals(cidr4NetworkAddress(cidr), 3232235776);
-    assertEquals(cidr4BroadcastAddress(cidr), 3232236031);
-    assertEquals(cidr4Contains(cidr, parseIpv4("192.168.1.100")), true);
+    assertEquals(cidrv4NetworkAddress(cidr), 3232235776);
+    assertEquals(cidrv4BroadcastAddress(cidr), 3232236031);
+    assertEquals(cidrv4Contains(cidr, parseIpv4("192.168.1.100")), true);
   });
 });

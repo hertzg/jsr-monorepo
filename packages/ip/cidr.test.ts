@@ -1,11 +1,11 @@
 import { assert, assertEquals } from "@std/assert";
 import { isValidCidr, parseCidr, stringifyCidr } from "./cidr.ts";
-import type { Cidr4 } from "./cidrv4.ts";
+import type { Cidrv4 } from "./cidrv4.ts";
 import type { Cidr6 } from "./cidrv6.ts";
 
 Deno.test("parseCidr", async (t) => {
   await t.step("parses IPv4 CIDR", () => {
-    const cidr = parseCidr("192.168.1.0/24") as Cidr4;
+    const cidr = parseCidr("192.168.1.0/24") as Cidrv4;
     assertEquals(typeof cidr.address, "number");
     assertEquals(cidr.prefixLength, 24);
   });
@@ -17,10 +17,10 @@ Deno.test("parseCidr", async (t) => {
   });
 
   await t.step("parses various IPv4 CIDRs", () => {
-    const cidr = parseCidr("10.0.0.0/8") as Cidr4;
+    const cidr = parseCidr("10.0.0.0/8") as Cidrv4;
     assertEquals(cidr.prefixLength, 8);
 
-    const cidr2 = parseCidr("172.16.0.0/12") as Cidr4;
+    const cidr2 = parseCidr("172.16.0.0/12") as Cidrv4;
     assertEquals(cidr2.prefixLength, 12);
   });
 
@@ -36,7 +36,7 @@ Deno.test("parseCidr", async (t) => {
 Deno.test("stringifyCidr", async (t) => {
   await t.step("stringifies IPv4 CIDR", () => {
     const cidr = parseCidr("192.168.1.0/24");
-    assertEquals(stringifyCidr(cidr as Cidr4), "192.168.1.0/24");
+    assertEquals(stringifyCidr(cidr as Cidrv4), "192.168.1.0/24");
   });
 
   await t.step("stringifies IPv6 CIDR", () => {
@@ -50,7 +50,7 @@ Deno.test("parseCidr round-trip", async (t) => {
     const cidrs = ["10.0.0.0/8", "192.168.1.0/24", "172.16.0.0/12"];
     for (const c of cidrs) {
       const parsed = parseCidr(c);
-      assertEquals(stringifyCidr(parsed as Cidr4), c);
+      assertEquals(stringifyCidr(parsed as Cidrv4), c);
     }
   });
 
