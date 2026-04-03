@@ -2,10 +2,10 @@
   "name": "@hertzg/xhb",
   "version": "3.0.0",
   "exports": {
-    ".": "./src/index.ts"
+    ".": "./mod.ts"
   },
   "publish": {
-    "include": ["LICENSE", "src/**/*.ts"],
-    "exclude": ["src/**/*.test.ts"]
+    "include": ["LICENSE", "**/*.ts"],
+    "exclude": ["**/*.test.ts", "fixtures/**"]
   }
 }

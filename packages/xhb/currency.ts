@@ -1,8 +1,8 @@
-import type { Node } from 'xml-parser'
-import { atoi, parseGCharP, parseGDouble } from './_parse.ts'
-import printj from 'printj'
-const { sprintf } = printj
-import { dtostr } from './_serialize.ts'
+import type { Node } from "xml-parser";
+import { atoi, parseGCharP, parseGDouble } from "./_parse.ts";
+import printj from "printj";
+const { sprintf } = printj;
+import { dtostr } from "./_serialize.ts";
 import type {
   gBoolean,
   gCharP,
@@ -10,26 +10,23 @@ import type {
   gShort,
   gUInt32,
   gUShort,
-} from './_g_types.ts'
+} from "./_g_types.ts";
 
 export interface Currency {
-  key: gUInt32
-  flags: gUShort
-  name: gCharP
-  isoCode: gCharP
-  symbol: gCharP
-  symbolIsPrefixed: gBoolean
-  decimalCharacter: gCharP
-  groupingCharacter: gCharP
-  fractionDigits: gShort
-  exchangeRate: gDouble
-  lastUpdatedDate: gUInt32
+  key: gUInt32;
+  flags: gUShort;
+  name: gCharP;
+  isoCode: gCharP;
+  symbol: gCharP;
+  symbolIsPrefixed: gBoolean;
+  decimalCharacter: gCharP;
+  groupingCharacter: gCharP;
+  fractionDigits: gShort;
+  exchangeRate: gDouble;
+  lastUpdatedDate: gUInt32;
 }
 
-export enum CurrencyFlag {
-  // 0 is free
-  CUSTOM = (1 << 1) as gUShort,
-}
+export const CURRENCY_FLAG_CUSTOM = 1 << 1;
 
 export function parseCurrency({ attributes }: Node): Currency {
   return {
@@ -44,7 +41,7 @@ export function parseCurrency({ attributes }: Node): Currency {
     fractionDigits: atoi(attributes.frac),
     exchangeRate: parseGDouble(attributes.rate),
     lastUpdatedDate: atoi(attributes.mdate),
-  }
+  };
 }
 
 export const serializeCurrency = (currency: Currency): string =>
@@ -61,4 +58,4 @@ export const serializeCurrency = (currency: Currency): string =>
     currency.fractionDigits,
     dtostr(currency.exchangeRate),
     currency.lastUpdatedDate,
-  )
+  );
