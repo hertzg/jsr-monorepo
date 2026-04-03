@@ -53,7 +53,7 @@
  * - {@link isValidCidrv6}: Check if a string is valid IPv6 CIDR notation
  *
  * ### Validation
- * - {@link IpValidationResult}: Discriminated union type for validation results
+ * - {@link ValidateIpResult}: Discriminated union type for validation results
  * - {@link isValidIp}: Check if a string is any valid IP address or CIDR notation
  * - {@link validateIp}: Identify and parse any IP address or CIDR string
  *
@@ -325,7 +325,7 @@ export { parseIp, stringifyIp } from "./ip.ts";
 export { isValidCidr, parseCidr, stringifyCidr } from "./cidr.ts";
 export { classifyIp, type ClassifyIpResult } from "./classify.ts";
 export {
-  type IpValidationResult,
+  type ValidateIpResult,
   isValidIp,
   validateIp,
 } from "./validate.ts";

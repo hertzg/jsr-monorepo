@@ -39,15 +39,15 @@ import { type Cidrv6, parseCidrv6 } from "./cidrv6.ts";
  * Discriminated union on `kind`:
  * - `"ipv4"` — valid IPv4 address with parsed `value` as a 32-bit number
  * - `"ipv6"` — valid IPv6 address with parsed `value` as a 128-bit bigint
- * - `"cidr4"` — valid IPv4 CIDR with parsed `value` as a {@link Cidrv4}
- * - `"cidr6"` — valid IPv6 CIDR with parsed `value` as a {@link Cidrv6}
+ * - `"cidrv4"` — valid IPv4 CIDR with parsed `value` as a {@link Cidrv4}
+ * - `"cidrv6"` — valid IPv6 CIDR with parsed `value` as a {@link Cidrv6}
  * - `"invalid"` — the string is not a valid IP address or CIDR notation
  */
-export type IpValidationResult =
+export type ValidateIpResult =
   | { readonly kind: "ipv4"; readonly value: number }
   | { readonly kind: "ipv6"; readonly value: bigint }
-  | { readonly kind: "cidr4"; readonly value: Cidrv4 }
-  | { readonly kind: "cidr6"; readonly value: Cidrv6 }
+  | { readonly kind: "cidrv4"; readonly value: Cidrv4 }
+  | { readonly kind: "cidrv6"; readonly value: Cidrv6 }
   | { readonly kind: "invalid" };
 
 /**
@@ -93,7 +93,7 @@ export function isValidIp(s: string): boolean {
  * addresses.
  *
  * @param s The string to validate and identify
- * @returns An {@link IpValidationResult} with the parsed value, or `{ kind: "invalid" }`
+ * @returns An {@link ValidateIpResult} with the parsed value, or `{ kind: "invalid" }`
  *
  * @example Identify and use parsed values
  * ```ts
@@ -112,16 +112,16 @@ export function isValidIp(s: string): boolean {
  *   assertEquals(ipv6.value, 1n);
  * }
  *
- * const cidr4 = validateIp("10.0.0.0/8");
- * assertEquals(cidr4.kind, "cidr4");
- * if (cidr4.kind === "cidr4") {
- *   assertEquals(cidr4.value.prefixLength, 8);
+ * const cidrv4 = validateIp("10.0.0.0/8");
+ * assertEquals(cidrv4.kind, "cidrv4");
+ * if (cidrv4.kind === "cidrv4") {
+ *   assertEquals(cidrv4.value.prefixLength, 8);
  * }
  *
- * const cidr6 = validateIp("2001:db8::/32");
- * assertEquals(cidr6.kind, "cidr6");
- * if (cidr6.kind === "cidr6") {
- *   assertEquals(cidr6.value.prefixLength, 32);
+ * const cidrv6 = validateIp("2001:db8::/32");
+ * assertEquals(cidrv6.kind, "cidrv6");
+ * if (cidrv6.kind === "cidrv6") {
+ *   assertEquals(cidrv6.value.prefixLength, 32);
  * }
  *
  * assertEquals(validateIp("garbage").kind, "invalid");
@@ -138,25 +138,25 @@ export function isValidIp(s: string): boolean {
  *   case "ipv6":
  *     assertEquals(typeof result.value === "bigint", true);
  *     break;
- *   case "cidr4":
- *   case "cidr6":
+ *   case "cidrv4":
+ *   case "cidrv6":
  *     break;
  *   case "invalid":
  *     break;
  * }
  * ```
  */
-export function validateIp(s: string): IpValidationResult {
+export function validateIp(s: string): ValidateIpResult {
   if (s.includes("/")) {
     try {
-      return { kind: "cidr4", value: parseCidrv4(s) };
+      return { kind: "cidrv4", value: parseCidrv4(s) };
     } catch {
-      // not cidr4
+      // not cidrv4
     }
     try {
-      return { kind: "cidr6", value: parseCidrv6(s) };
+      return { kind: "cidrv6", value: parseCidrv6(s) };
     } catch {
-      // not cidr6
+      // not cidrv6
     }
   } else {
     try {

@@ -42,15 +42,15 @@ Deno.test("validateIp", async (t) => {
 
   await t.step("identifies IPv4 CIDR", () => {
     const r = validateIp("10.0.0.0/8");
-    assertEquals(r.kind, "cidr4");
-    assert(r.kind === "cidr4");
+    assertEquals(r.kind, "cidrv4");
+    assert(r.kind === "cidrv4");
     assertEquals(r.value.prefixLength, 8);
   });
 
   await t.step("identifies IPv6 CIDR", () => {
     const r = validateIp("2001:db8::/32");
-    assertEquals(r.kind, "cidr6");
-    assert(r.kind === "cidr6");
+    assertEquals(r.kind, "cidrv6");
+    assert(r.kind === "cidrv6");
     assertEquals(r.value.prefixLength, 32);
   });
 
@@ -68,11 +68,11 @@ Deno.test("validateIp", async (t) => {
 
   await t.step("prefers cidr4 over cidr6 for slash strings", () => {
     const r = validateIp("10.0.0.0/8");
-    assertEquals(r.kind, "cidr4");
+    assertEquals(r.kind, "cidrv4");
   });
 
   await t.step("falls back to cidr6 when cidr4 fails", () => {
     const r = validateIp("2001:db8::/32");
-    assertEquals(r.kind, "cidr6");
+    assertEquals(r.kind, "cidrv6");
   });
 });
