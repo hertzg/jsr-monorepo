@@ -4,58 +4,53 @@ on:
   push:
     branches: [main]
   pull_request:
+    types: [opened, synchronize, reopened, closed]
   workflow_dispatch:
 
 permissions:
-  contents: read
-  pages: write
-  id-token: write
-  pull-requests: write
-
-concurrency:
-  group: pages-${{ github.event.pull_request.number || 'main' }}
-  cancel-in-progress: true
+  contents: write
 
 jobs:
   docs:
     runs-on: ubuntu-latest
     timeout-minutes: 15
-    environment:
-      name: ${{ github.event_name == 'pull_request' && format('pr-{0}', github.event.pull_request.number) || 'github-pages' }}
-      url: ${{ steps.deploy.outputs.page_url }}
     steps:
       - name: Checkout
+        if: github.event.action != 'closed'
         uses: actions/checkout@v6
 
       - name: Set up Deno
+        if: github.event.action != 'closed'
         uses: denoland/setup-deno@v2
         with:
           deno-version: v2.x
 
       - name: Cache dependencies
+        if: github.event.action != 'closed'
         run: deno install
 
       - name: Generate docs
+        if: github.event.action != 'closed'
         run: deno run --allow-read --allow-write --allow-run _tools/gen_docs.ts docs
 
-      - name: Setup Pages
-        uses: actions/configure-pages@v5
-
-      - name: Upload pages artifact
-        uses: actions/upload-pages-artifact@v3
+      - name: Deploy main
+        if: github.ref == 'refs/heads/main'
+        uses: JamesIves/github-pages-deploy-action@v4
         with:
-          path: docs/
+          folder: docs
+          clean: true
+          clean-exclude: pr/
 
-      - name: Deploy
-        id: deploy
-        uses: actions/deploy-pages@v5
+      - name: Deploy PR preview
+        if: github.event_name == 'pull_request' && github.event.action != 'closed'
+        uses: JamesIves/github-pages-deploy-action@v4
         with:
-          preview: ${{ github.event_name == 'pull_request' }}
+          folder: docs
+          target-folder: pr/${{ github.event.pull_request.number }}
 
-      - name: Comment on PR
-        if: github.event_name == 'pull_request'
-        uses: marocchino/sticky-pull-request-comment@v2
+      - name: Remove PR preview
+        if: github.event_name == 'pull_request' && github.event.action == 'closed'
+        uses: JamesIves/github-pages-deploy-action@v4
         with:
-          header: docs-preview
-          message: |
-            **Docs preview:** ${{ steps.deploy.outputs.page_url }}
+          folder: /tmp/empty
+          target-folder: pr/${{ github.event.pull_request.number }}
