@@ -41,11 +41,20 @@
  * - {@link cidr6Size}: Get total number of addresses in CIDR range
  * - {@link cidr6Addresses}: Generate IP addresses in CIDR range
  *
+ * ### Validation
+ * - {@link ValidationResult}: Discriminated union type for validation results
+ * - {@link isValidIpv4}: Check if a string is a valid IPv4 address
+ * - {@link isValidIpv6}: Check if a string is a valid IPv6 address
+ * - {@link isValidCidr4}: Check if a string is valid IPv4 CIDR notation
+ * - {@link isValidCidr6}: Check if a string is valid IPv6 CIDR notation
+ * - {@link validate}: Identify and parse any IP address or CIDR string
+ *
  * ### Submodules
  * - [`ipv4`](https://jsr.io/@hertzg/ip/doc/ipv4): IPv4 parsing via {@link parseIpv4} and {@link stringifyIpv4}
  * - [`cidrv4`](https://jsr.io/@hertzg/ip/doc/cidrv4): IPv4 CIDR utilities via {@link parseCidr4}, {@link cidr4Contains}
  * - [`ipv6`](https://jsr.io/@hertzg/ip/doc/ipv6): IPv6 parsing via {@link parseIpv6}, {@link expandIpv6}, {@link compressIpv6}
  * - [`cidrv6`](https://jsr.io/@hertzg/ip/doc/cidrv6): IPv6 CIDR utilities via {@link parseCidr6}, {@link cidr6Contains}
+ * - [`validate`](https://jsr.io/@hertzg/ip/doc/validate): Validation via {@link validate}, {@link isValidIpv4}, {@link isValidIpv6}
  *
  * ## Features
  *
@@ -55,6 +64,7 @@
  * - **Address Generation**: Generate IP ranges with custom offsets and steps
  * - **Arithmetic Operations**: Use number (IPv4) or bigint (IPv6) math for IP address manipulation
  * - **IPv6 Compression**: Expand and compress IPv6 addresses
+ * - **Validation**: Non-throwing validity checks and universal string identification
  *
  * ## Basic IPv4 Operations
  *
@@ -293,3 +303,13 @@ export {
   parseCidr6,
   stringifyCidr6,
 } from "./cidrv6.ts";
+
+// Re-export validation utilities
+export {
+  isValidCidr4,
+  isValidCidr6,
+  isValidIpv4,
+  isValidIpv6,
+  validate,
+  type ValidationResult,
+} from "./validate.ts";
