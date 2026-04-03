@@ -165,7 +165,7 @@
   </defs>
 </svg>
 </a>
-<span class="font-bold">classifyIp</span><span class="font-medium">(<span><span>ip<span>: <span class="td-kw">number</span></span></span></span>)<span>: <a href="../.././mod.ts/~/ClassifyIpv4Result.html" class="link td-ref">ClassifyIpv4Result</a></span> </span>
+<span class="font-bold">classifyIp</span><span class="font-medium">(<span><span>ip<span>: <span class="td-kw">number</span></span></span></span>)<span>: { <span class="td-kw">readonly </span>version<span>: <span class="td-lit">4</span></span>; <span class="td-kw">readonly </span>kind<span>: <a href="../.././mod.ts/~/ClassifyIpv4Result.html" class="link td-ref">ClassifyIpv4Result</a></span>;  }</span> </span>
       </code><div class="space-y-7" id=""><div class="markdown"><p>Classifies an IPv4 address into its well-known range.</p>
 </div><section class="section"  id="examples"><div>
       <h2 class="anchorable mb-1"><a href="#examples" class="anchor" aria-label="Anchor" tabIndex="-1"><svg
@@ -218,14 +218,16 @@ Examples</h2></div><div class="space-y-8"><div class="anchorable"><a href="#exam
 import { classifyIp } from &quot;@hertzg/ip/classify&quot;;
 import { parseIpv4 } from &quot;@hertzg/ip/ipv4&quot;;
 
-assertEquals(classifyIp(parseIpv4(&quot;192.168.1.1&quot;)), &quot;private&quot;);
-assertEquals(classifyIp(parseIpv4(&quot;8.8.8.8&quot;)), &quot;public&quot;);
+const result = classifyIp(parseIpv4(&quot;192.168.1.1&quot;));
+assertEquals(result.version, 4);
+assertEquals(result.kind, &quot;private&quot;);
 </code><button class="copyButton" data-copy="import { assertEquals } from &quot;@std/assert&quot;;
 import { classifyIp } from &quot;@hertzg/ip/classify&quot;;
 import { parseIpv4 } from &quot;@hertzg/ip/ipv4&quot;;
 
-assertEquals(classifyIp(parseIpv4(&quot;192.168.1.1&quot;)), &quot;private&quot;);
-assertEquals(classifyIp(parseIpv4(&quot;8.8.8.8&quot;)), &quot;public&quot;);
+const result = classifyIp(parseIpv4(&quot;192.168.1.1&quot;));
+assertEquals(result.version, 4);
+assertEquals(result.kind, &quot;private&quot;);
 "><svg
   class="copy"
   width="15"
@@ -364,7 +366,7 @@ Parameters</h2></div><div class="space-y-8"><div class="anchorable docEntry" id=
 Return Type</h2></div><div class="space-y-8"><div class=" docEntry" id="function_classifyip_0_return">
 
   <div class="docEntryHeader">
-    <div><code><span class="font-medium text-stone-500 dark:text-stone-200"><a href="../.././mod.ts/~/ClassifyIpv4Result.html" class="link td-ref">ClassifyIpv4Result</a></span>
+    <div><code><span class="font-medium text-stone-500 dark:text-stone-200">{ <span class="td-kw">readonly </span>version<span>: <span class="td-lit">4</span></span>; <span class="td-kw">readonly </span>kind<span>: <a href="../.././mod.ts/~/ClassifyIpv4Result.html" class="link td-ref">ClassifyIpv4Result</a></span>;  }</span>
       </code>
     </div><a
   class="sourceButton"
@@ -391,7 +393,7 @@ Return Type</h2></div><div class="space-y-8"><div class=" docEntry" id="function
   />
 </svg>
 </a>
-</div><div class="max-w-[75ch]"><div class="markdown"><p>The classification label</p>
+</div><div class="max-w-[75ch]"><div class="markdown"><p>An object with <code>version: 4</code> and the classification <code>kind</code></p>
 </div></div></div>
 </div></section>
 </div>
@@ -418,8 +420,8 @@ Return Type</h2></div><div class="space-y-8"><div class=" docEntry" id="function
   </defs>
 </svg>
 </a>
-<span class="font-bold">classifyIp</span><span class="font-medium">(<span><span>ip<span>: <span class="td-kw">bigint</span></span></span></span>)<span>: <a href="../.././mod.ts/~/ClassifyIpv6Result.html" class="link td-ref">ClassifyIpv6Result</a></span> </span>
-      </code><div class="space-y-7" id=""><div class="markdown"><p>Classifies an IPv6 (<code>bigint</code>) address into its well-known range.</p>
+<span class="font-bold">classifyIp</span><span class="font-medium">(<span><span>ip<span>: <span class="td-kw">bigint</span></span></span></span>)<span>: { <span class="td-kw">readonly </span>version<span>: <span class="td-lit">6</span></span>; <span class="td-kw">readonly </span>kind<span>: <a href="../.././mod.ts/~/ClassifyIpv6Result.html" class="link td-ref">ClassifyIpv6Result</a></span>;  }</span> </span>
+      </code><div class="space-y-7" id=""><div class="markdown"><p>Classifies an IPv6 address into its well-known range.</p>
 </div><section class="section"  id="parameters-1"><div>
       <h2 class="anchorable mb-1"><a href="#parameters-1" class="anchor" aria-label="Anchor" tabIndex="-1"><svg
   width="16"
@@ -495,7 +497,8 @@ Parameters</h2></div><div class="space-y-8"><div class="anchorable docEntry" id=
   />
 </svg>
 </a>
-</div></div>
+</div><div class="max-w-[75ch]"><div class="markdown"><p>The IPv6 address as a 128-bit bigint</p>
+</div></div></div>
 </div></section>
 <section class="section"  id="return-type-1"><div>
       <h2 class="anchorable mb-1"><a href="#return-type-1" class="anchor" aria-label="Anchor" tabIndex="-1"><svg
@@ -523,7 +526,7 @@ Parameters</h2></div><div class="space-y-8"><div class="anchorable docEntry" id=
 Return Type</h2></div><div class="space-y-8"><div class=" docEntry" id="function_classifyip_1_return">
 
   <div class="docEntryHeader">
-    <div><code><span class="font-medium text-stone-500 dark:text-stone-200"><a href="../.././mod.ts/~/ClassifyIpv6Result.html" class="link td-ref">ClassifyIpv6Result</a></span>
+    <div><code><span class="font-medium text-stone-500 dark:text-stone-200">{ <span class="td-kw">readonly </span>version<span>: <span class="td-lit">6</span></span>; <span class="td-kw">readonly </span>kind<span>: <a href="../.././mod.ts/~/ClassifyIpv6Result.html" class="link td-ref">ClassifyIpv6Result</a></span>;  }</span>
       </code>
     </div><a
   class="sourceButton"
@@ -550,7 +553,8 @@ Return Type</h2></div><div class="space-y-8"><div class=" docEntry" id="function
   />
 </svg>
 </a>
-</div></div>
+</div><div class="max-w-[75ch]"><div class="markdown"><p>An object with <code>version: 6</code> and the classification <code>kind</code></p>
+</div></div></div>
 </div></section>
 </div>
 </div></div>
