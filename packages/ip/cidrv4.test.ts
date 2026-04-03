@@ -1,9 +1,10 @@
-import { assertEquals, assertThrows } from "@std/assert";
+import { assert, assertEquals, assertThrows } from "@std/assert";
 import {
   cidr4Addresses,
   cidr4BroadcastAddress,
   cidr4Contains,
   cidr4NetworkAddress,
+  isValidCidr4,
   mask4FromPrefixLength,
   parseCidr4,
   stringifyCidr4,
@@ -623,5 +624,23 @@ Deno.test("cidr4Addresses", async (t) => {
     const second = gen.next();
     assertEquals(second.value, parseIpv4("192.168.1.1"));
     assertEquals(second.done, false);
+  });
+});
+
+Deno.test("isValidCidr4", async (t) => {
+  await t.step("valid CIDR", () => {
+    assert(isValidCidr4("0.0.0.0/0"));
+    assert(isValidCidr4("192.168.1.0/24"));
+    assert(isValidCidr4("10.0.0.1/32"));
+    assert(isValidCidr4("172.16.0.0/12"));
+  });
+
+  await t.step("invalid CIDR", () => {
+    assertEquals(isValidCidr4(""), false);
+    assertEquals(isValidCidr4("192.168.1.0"), false);
+    assertEquals(isValidCidr4("192.168.1.0/33"), false);
+    assertEquals(isValidCidr4("192.168.1.0/-1"), false);
+    assertEquals(isValidCidr4("2001:db8::/32"), false);
+    assertEquals(isValidCidr4("abc/24"), false);
   });
 });

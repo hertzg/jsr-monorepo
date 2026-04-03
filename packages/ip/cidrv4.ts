@@ -512,3 +512,40 @@ export function* cidr4Addresses(
     i++;
   }
 }
+
+/**
+ * Checks if a string is valid IPv4 CIDR notation.
+ *
+ * @param s The string to validate
+ * @returns `true` if the string is valid IPv4 CIDR notation
+ *
+ * @example Valid CIDR
+ * ```ts
+ * import { assert } from "@std/assert";
+ * import { isValidCidr4 } from "@hertzg/ip/cidrv4";
+ *
+ * assert(isValidCidr4("0.0.0.0/0"));
+ * assert(isValidCidr4("192.168.1.0/24"));
+ * assert(isValidCidr4("10.0.0.1/32"));
+ * ```
+ *
+ * @example Invalid CIDR
+ * ```ts
+ * import { assertEquals } from "@std/assert";
+ * import { isValidCidr4 } from "@hertzg/ip/cidrv4";
+ *
+ * assertEquals(isValidCidr4(""), false);
+ * assertEquals(isValidCidr4("192.168.1.0"), false);
+ * assertEquals(isValidCidr4("192.168.1.0/33"), false);
+ * assertEquals(isValidCidr4("192.168.1.0/-1"), false);
+ * assertEquals(isValidCidr4("2001:db8::/32"), false);
+ * ```
+ */
+export function isValidCidr4(s: string): boolean {
+  try {
+    parseCidr4(s);
+    return true;
+  } catch {
+    return false;
+  }
+}
