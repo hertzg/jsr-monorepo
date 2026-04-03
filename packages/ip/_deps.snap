@@ -10,6 +10,7 @@
     "./cidrv6": [],
     "./classify": [],
     "./classifyv4": [],
-    "./classifyv6": []
+    "./classifyv6": [],
+    "./validate": []
   }
 }

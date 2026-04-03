@@ -11,6 +11,7 @@
     "./cidrv6": "./cidrv6.ts",
     "./classify": "./classify.ts",
     "./classifyv4": "./classifyv4.ts",
-    "./classifyv6": "./classifyv6.ts"
+    "./classifyv6": "./classifyv6.ts",
+    "./validate": "./validate.ts"
   }
 }

@@ -169,3 +169,40 @@ export function stringifyIpv4(value: number): string {
 
   return `${octet0}.${octet1}.${octet2}.${octet3}`;
 }
+
+/**
+ * Checks if a string is a valid IPv4 address in dotted decimal notation.
+ *
+ * @param s The string to validate
+ * @returns `true` if the string is a valid IPv4 address
+ *
+ * @example Valid addresses
+ * ```ts
+ * import { assert } from "@std/assert";
+ * import { isValidIpv4 } from "@hertzg/ip/ipv4";
+ *
+ * assert(isValidIpv4("0.0.0.0"));
+ * assert(isValidIpv4("192.168.1.1"));
+ * assert(isValidIpv4("255.255.255.255"));
+ * ```
+ *
+ * @example Invalid addresses
+ * ```ts
+ * import { assertEquals } from "@std/assert";
+ * import { isValidIpv4 } from "@hertzg/ip/ipv4";
+ *
+ * assertEquals(isValidIpv4(""), false);
+ * assertEquals(isValidIpv4("256.0.0.1"), false);
+ * assertEquals(isValidIpv4("1.2.3"), false);
+ * assertEquals(isValidIpv4("01.02.03.04"), false);
+ * assertEquals(isValidIpv4("::1"), false);
+ * ```
+ */
+export function isValidIpv4(s: string): boolean {
+  try {
+    parseIpv4(s);
+    return true;
+  } catch {
+    return false;
+  }
+}
