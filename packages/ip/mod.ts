@@ -12,6 +12,7 @@
  * - {@link stringifyIp}: Convert number or bigint to IP address string
  * - {@link parseCidr}: Parse any CIDR notation string to Cidr4 or Cidr6
  * - {@link stringifyCidr}: Convert Cidr4 or Cidr6 to CIDR notation string
+ * - {@link isValidCidr}: Check if a string is valid CIDR notation (IPv4 or IPv6)
  *
  * ### IPv4
  * - {@link parseIpv4}: Parse dotted decimal notation to number
@@ -318,16 +319,21 @@
  * @module
  */
 
-// Re-export universal IP utilities
+// --- Universal (auto-detect IPv4/IPv6) ---
+
 export { parseIp, stringifyIp } from "./ip.ts";
+export { isValidCidr, parseCidr, stringifyCidr } from "./cidr.ts";
+export { classifyIp, type IpClassification } from "./classify.ts";
+export {
+  type IpValidationResult,
+  isValidIp,
+  validateIp,
+} from "./validate.ts";
 
-// Re-export universal CIDR utilities
-export { parseCidr, stringifyCidr } from "./cidr.ts";
+// --- IPv4 ---
 
-// Re-export IPv4 utilities
 export { isValidIpv4, parseIpv4, stringifyIpv4 } from "./ipv4.ts";
 
-// Re-export CIDR4 utilities
 export {
   type Cidr4,
   cidr4Addresses,
@@ -343,30 +349,6 @@ export {
   stringifyCidr4,
 } from "./cidrv4.ts";
 
-// Re-export IPv6 utilities
-export {
-  compressIpv6,
-  expandIpv6,
-  isValidIpv6,
-  parseIpv6,
-  stringifyIpv6,
-} from "./ipv6.ts";
-
-// Re-export CIDR6 utilities
-export {
-  type Cidr6,
-  cidr6Addresses,
-  cidr6Contains,
-  cidr6FirstAddress,
-  cidr6LastAddress,
-  cidr6Size,
-  isValidCidr6,
-  mask6FromPrefixLength,
-  parseCidr6,
-  stringifyCidr6,
-} from "./cidrv6.ts";
-
-// Re-export IPv4 classifiers
 export {
   classifyIpv4,
   type Ipv4Classification,
@@ -383,7 +365,29 @@ export {
   isIpv4ThisNetwork,
 } from "./classifyv4.ts";
 
-// Re-export IPv6 classifiers
+// --- IPv6 ---
+
+export {
+  compressIpv6,
+  expandIpv6,
+  isValidIpv6,
+  parseIpv6,
+  stringifyIpv6,
+} from "./ipv6.ts";
+
+export {
+  type Cidr6,
+  cidr6Addresses,
+  cidr6Contains,
+  cidr6FirstAddress,
+  cidr6LastAddress,
+  cidr6Size,
+  isValidCidr6,
+  mask6FromPrefixLength,
+  parseCidr6,
+  stringifyCidr6,
+} from "./cidrv6.ts";
+
 export {
   classifyIpv6,
   type Ipv6Classification,
@@ -400,13 +404,3 @@ export {
   isIpv6Unspecified,
   isIpv6UniqueLocal,
 } from "./classifyv6.ts";
-
-// Re-export universal classifier
-export { classifyIp, type IpClassification } from "./classify.ts";
-
-// Re-export universal validation utilities
-export {
-  type IpValidationResult,
-  isValidIp,
-  validateIp,
-} from "./validate.ts";

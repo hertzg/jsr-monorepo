@@ -5,6 +5,10 @@
  * auto-detect IPv4 vs IPv6 and delegate to the appropriate version-specific
  * function.
  *
+ * For version-specific functions, see:
+ * - [`ipv4`](https://jsr.io/@hertzg/ip/doc/ipv4): {@link parseIpv4}, {@link stringifyIpv4}
+ * - [`ipv6`](https://jsr.io/@hertzg/ip/doc/ipv6): {@link parseIpv6}, {@link stringifyIpv6}
+ *
  * @example Parse and stringify any IP address
  * ```ts
  * import { assertEquals } from "@std/assert";
@@ -74,7 +78,7 @@ export function parseIp(ip: string): number | bigint {
  * ```
  */
 export function stringifyIp(ip: number): string;
-/** Stringifies an IPv6 address (`bigint`) to compressed colon-hexadecimal notation. */
+/** Stringifies an IPv6 (`bigint`) address to compressed colon-hexadecimal notation. */
 export function stringifyIp(ip: bigint): string;
 export function stringifyIp(ip: number | bigint): string {
   if (typeof ip === "bigint") {

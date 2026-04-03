@@ -1,9 +1,13 @@
 /**
- * Universal CIDR notation parsing and stringifying.
+ * Universal CIDR notation parsing, stringifying, and validation.
  *
- * This module provides {@link parseCidr} and {@link stringifyCidr} that
- * auto-detect IPv4 vs IPv6 and delegate to the appropriate version-specific
- * function.
+ * This module provides {@link parseCidr}, {@link stringifyCidr}, and
+ * {@link isValidCidr} that auto-detect IPv4 vs IPv6 and delegate to
+ * the appropriate version-specific function.
+ *
+ * For version-specific functions, see:
+ * - [`cidrv4`](https://jsr.io/@hertzg/ip/doc/cidrv4): {@link parseCidr4}, {@link stringifyCidr4}, {@link isValidCidr4}
+ * - [`cidrv6`](https://jsr.io/@hertzg/ip/doc/cidrv6): {@link parseCidr6}, {@link stringifyCidr6}, {@link isValidCidr6}
  *
  * @example Parse and stringify any CIDR block
  * ```ts
@@ -24,8 +28,18 @@
  * @module
  */
 
-import { type Cidr4, parseCidr4, stringifyCidr4 } from "./cidrv4.ts";
-import { type Cidr6, parseCidr6, stringifyCidr6 } from "./cidrv6.ts";
+import {
+  type Cidr4,
+  isValidCidr4,
+  parseCidr4,
+  stringifyCidr4,
+} from "./cidrv4.ts";
+import {
+  type Cidr6,
+  isValidCidr6,
+  parseCidr6,
+  stringifyCidr6,
+} from "./cidrv6.ts";
 
 /**
  * Parses an IPv4 or IPv6 CIDR notation string.
@@ -81,4 +95,25 @@ export function stringifyCidr(cidr: Cidr4 | Cidr6): string {
     return stringifyCidr6(cidr as Cidr6);
   }
   return stringifyCidr4(cidr as Cidr4);
+}
+
+/**
+ * Checks if a string is valid IPv4 or IPv6 CIDR notation.
+ *
+ * @param s The string to validate
+ * @returns `true` if the string is valid CIDR notation
+ *
+ * @example
+ * ```ts
+ * import { assert, assertEquals } from "@std/assert";
+ * import { isValidCidr } from "@hertzg/ip/cidr";
+ *
+ * assert(isValidCidr("10.0.0.0/8"));
+ * assert(isValidCidr("2001:db8::/32"));
+ * assertEquals(isValidCidr("10.0.0.0"), false);
+ * assertEquals(isValidCidr("garbage/24"), false);
+ * ```
+ */
+export function isValidCidr(s: string): boolean {
+  return isValidCidr4(s) || isValidCidr6(s);
 }

@@ -1,5 +1,5 @@
-import { assertEquals } from "@std/assert";
-import { parseCidr, stringifyCidr } from "./cidr.ts";
+import { assert, assertEquals } from "@std/assert";
+import { isValidCidr, parseCidr, stringifyCidr } from "./cidr.ts";
 import type { Cidr4 } from "./cidrv4.ts";
 import type { Cidr6 } from "./cidrv6.ts";
 
@@ -60,5 +60,30 @@ Deno.test("parseCidr round-trip", async (t) => {
       const parsed = parseCidr(c);
       assertEquals(stringifyCidr(parsed as Cidr6), c);
     }
+  });
+});
+
+Deno.test("isValidCidr", async (t) => {
+  await t.step("accepts valid IPv4 CIDRs", () => {
+    assert(isValidCidr("10.0.0.0/8"));
+    assert(isValidCidr("192.168.1.0/24"));
+    assert(isValidCidr("0.0.0.0/0"));
+  });
+
+  await t.step("accepts valid IPv6 CIDRs", () => {
+    assert(isValidCidr("2001:db8::/32"));
+    assert(isValidCidr("fe80::/10"));
+    assert(isValidCidr("::/0"));
+  });
+
+  await t.step("rejects plain IP addresses", () => {
+    assertEquals(isValidCidr("10.0.0.1"), false);
+    assertEquals(isValidCidr("::1"), false);
+  });
+
+  await t.step("rejects invalid input", () => {
+    assertEquals(isValidCidr(""), false);
+    assertEquals(isValidCidr("garbage/24"), false);
+    assertEquals(isValidCidr("10.0.0.0/33"), false);
   });
 });
