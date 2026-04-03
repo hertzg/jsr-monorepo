@@ -58,7 +58,7 @@
  * - {@link validateIp}: Identify and parse any IP address or CIDR string
  *
  * ### IPv4 Classification
- * - {@link Ipv4Classification}: Type for all IPv4 classification labels
+ * - {@link ClassifyIpv4Result}: Type for all IPv4 classification labels
  * - {@link classifyIpv4}: Classify an IPv4 address into its well-known range
  * - {@link isIpv4Private}: Check if address is private (RFC 1918)
  * - {@link isIpv4Loopback}: Check if address is loopback (127.0.0.0/8)
@@ -73,7 +73,7 @@
  * - {@link isIpv4Public}: Check if address is publicly routable
  *
  * ### IPv6 Classification
- * - {@link Ipv6Classification}: Type for all IPv6 classification labels
+ * - {@link ClassifyIpv6Result}: Type for all IPv6 classification labels
  * - {@link classifyIpv6}: Classify an IPv6 address into its well-known range
  * - {@link isIpv6Loopback}: Check if address is loopback (::1)
  * - {@link isIpv6Unspecified}: Check if address is unspecified (::)
@@ -89,7 +89,7 @@
  * - {@link isIpv6Orchidv2}: Check if address is ORCHIDv2 (2001:20::/28)
  *
  * ### Combined Classification
- * - {@link IpClassification}: Union type of all classification labels
+ * - {@link ClassifyIpResult}: Union type of all classification labels
  * - {@link classifyIp}: Classify an IPv4 (number) or IPv6 (bigint) address
  *
  * ### Submodules
@@ -323,7 +323,7 @@
 
 export { parseIp, stringifyIp } from "./ip.ts";
 export { isValidCidr, parseCidr, stringifyCidr } from "./cidr.ts";
-export { classifyIp, type IpClassification } from "./classify.ts";
+export { classifyIp, type ClassifyIpResult } from "./classify.ts";
 export {
   type IpValidationResult,
   isValidIp,
@@ -351,7 +351,7 @@ export {
 
 export {
   classifyIpv4,
-  type Ipv4Classification,
+  type ClassifyIpv4Result,
   isIpv4Benchmarking,
   isIpv4Broadcast,
   isIpv4CgNat,
@@ -390,7 +390,7 @@ export {
 
 export {
   classifyIpv6,
-  type Ipv6Classification,
+  type ClassifyIpv6Result,
   isIpv6Benchmarking,
   isIpv6Documentation,
   isIpv6GlobalUnicast,

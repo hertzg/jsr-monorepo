@@ -65,7 +65,7 @@ const BROADCAST = parseIpv4("255.255.255.255");
  * Returned by {@link classifyIpv4} to identify which well-known range
  * an IPv4 address belongs to.
  */
-export type Ipv4Classification =
+export type ClassifyIpv4Result =
   | "broadcast"
   | "this-network"
   | "loopback"
@@ -379,7 +379,7 @@ export function isIpv4Public(ip: number): boolean {
  * assertEquals(classifyIpv4(parseIpv4("240.0.0.0")), "reserved");
  * ```
  */
-export function classifyIpv4(ip: number): Ipv4Classification {
+export function classifyIpv4(ip: number): ClassifyIpv4Result {
   switch (true) {
     case isIpv4Broadcast(ip):
       return "broadcast";

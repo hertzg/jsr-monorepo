@@ -31,14 +31,14 @@
  */
 
 import { classifyIpv4 } from "./classifyv4.ts";
-import type { Ipv4Classification } from "./classifyv4.ts";
+import type { ClassifyIpv4Result } from "./classifyv4.ts";
 import { classifyIpv6 } from "./classifyv6.ts";
-import type { Ipv6Classification } from "./classifyv6.ts";
+import type { ClassifyIpv6Result } from "./classifyv6.ts";
 
 /**
  * Union of all possible classification labels for both IPv4 and IPv6.
  */
-export type IpClassification = Ipv4Classification | Ipv6Classification;
+export type ClassifyIpResult = ClassifyIpv4Result | ClassifyIpv6Result;
 
 /**
  * Classifies an IPv4 address into its well-known range.
@@ -56,12 +56,12 @@ export type IpClassification = Ipv4Classification | Ipv6Classification;
  * assertEquals(classifyIp(parseIpv4("8.8.8.8")), "public");
  * ```
  */
-export function classifyIp(ip: number): Ipv4Classification;
+export function classifyIp(ip: number): ClassifyIpv4Result;
 /** Classifies an IPv6 (`bigint`) address into its well-known range. */
-export function classifyIp(ip: bigint): Ipv6Classification;
+export function classifyIp(ip: bigint): ClassifyIpv6Result;
 export function classifyIp(
   ip: number | bigint,
-): Ipv4Classification | Ipv6Classification {
+): ClassifyIpv4Result | ClassifyIpv6Result {
   if (typeof ip === "bigint") {
     return classifyIpv6(ip);
   }
