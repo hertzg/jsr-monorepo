@@ -99,13 +99,15 @@
 <div id="searchResults"></div><div id="content">
     <main><section>
   <div class="space-y-2 flex-1"><div class="space-y-7" id="module_doc"><div class="markdown"><p>Universal IP address and CIDR validation utilities.</p>
-<p>This module provides a universal <a href=".././validate.ts/~/validate.html">validate</a> function that identifies
-and parses any valid IP or CIDR string, and an <a href=".././validate.ts/~/isValid.html">isValid</a> function
+<p>This module provides a universal <a href=".././validate.ts/~/validateIp.html">validateIp</a> function that identifies
+and parses any valid IP or CIDR string, and an <a href=".././validate.ts/~/isValidIp.html">isValidIp</a> function
 that checks if a string is any valid format.</p>
 <p>For version-specific validators, see:</p>
 <ul>
-<li><a href="https://jsr.io/@hertzg/ip/doc/validatev4"><code>validatev4</code></a>: isValidIpv4, isValidCidr4</li>
-<li><a href="https://jsr.io/@hertzg/ip/doc/validatev6"><code>validatev6</code></a>: isValidIpv6, isValidCidr6</li>
+<li><a href="https://jsr.io/@hertzg/ip/doc/ipv4"><code>ipv4</code></a>: isValidIpv4</li>
+<li><a href="https://jsr.io/@hertzg/ip/doc/ipv6"><code>ipv6</code></a>: isValidIpv6</li>
+<li><a href="https://jsr.io/@hertzg/ip/doc/cidrv4"><code>cidrv4</code></a>: isValidCidr4</li>
+<li><a href="https://jsr.io/@hertzg/ip/doc/cidrv6"><code>cidrv6</code></a>: isValidCidr6</li>
 </ul>
 </div><section class="section"  id="examples"><div>
       <h2 class="anchorable mb-1"><a href="#examples" class="anchor" aria-label="Anchor" tabIndex="-1"><svg
@@ -155,24 +157,24 @@ Examples</h2></div><div class="space-y-8"><div class="anchorable"><a href="#exam
 <h3 class="example-header"><div class="markdown"><p>Universal validation</p>
 </div></h3>
   <div><div class="markdown"><pre class="highlight"><code class="language-ts">import { assert, assertEquals } from &quot;@std/assert&quot;;
-import { isValid, validate } from &quot;@hertzg/ip/validate&quot;;
+import { isValidIp, validateIp } from &quot;@hertzg/ip/validate&quot;;
 
-assert(isValid(&quot;192.168.1.1&quot;));
-assert(isValid(&quot;::1&quot;));
-assert(isValid(&quot;10.0.0.0/8&quot;));
-assertEquals(isValid(&quot;garbage&quot;), false);
+assert(isValidIp(&quot;192.168.1.1&quot;));
+assert(isValidIp(&quot;::1&quot;));
+assert(isValidIp(&quot;10.0.0.0/8&quot;));
+assertEquals(isValidIp(&quot;garbage&quot;), false);
 
-const r = validate(&quot;192.168.1.1&quot;);
+const r = validateIp(&quot;192.168.1.1&quot;);
 assertEquals(r.kind, &quot;ipv4&quot;);
 </code><button class="copyButton" data-copy="import { assert, assertEquals } from &quot;@std/assert&quot;;
-import { isValid, validate } from &quot;@hertzg/ip/validate&quot;;
+import { isValidIp, validateIp } from &quot;@hertzg/ip/validate&quot;;
 
-assert(isValid(&quot;192.168.1.1&quot;));
-assert(isValid(&quot;::1&quot;));
-assert(isValid(&quot;10.0.0.0/8&quot;));
-assertEquals(isValid(&quot;garbage&quot;), false);
+assert(isValidIp(&quot;192.168.1.1&quot;));
+assert(isValidIp(&quot;::1&quot;));
+assert(isValidIp(&quot;10.0.0.0/8&quot;));
+assertEquals(isValidIp(&quot;garbage&quot;), false);
 
-const r = validate(&quot;192.168.1.1&quot;);
+const r = validateIp(&quot;192.168.1.1&quot;);
 assertEquals(r.kind, &quot;ipv4&quot;);
 "><svg
   class="copy"
@@ -231,15 +233,15 @@ assertEquals(r.kind, &quot;ipv4&quot;);
   </defs>
 </svg>
 </a>
-Functions</h2></div><div class="namespaceSection"><div id="namespace_isvalid" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-Function bg-Function/15 dark:text-FunctionDark dark:bg-FunctionDark/15" title="Function">f</div></div>
+Functions</h2></div><div class="namespaceSection"><div id="namespace_isvalidip" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-Function bg-Function/15 dark:text-FunctionDark dark:bg-FunctionDark/15" title="Function">f</div></div>
 <div class="namespaceItemContent">
-		    <a href="..&#x2F;.&#x2F;validate.ts&#x2F;~&#x2F;isValid.html" title="isValid">
-			    <span>isValid</span><span>(<span><span>s<span>: <span class="td-kw">string</span></span></span></span>)<span>: <span class="td-kw">boolean</span></span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Checks if a string is any valid IP address or CIDR notation.</p>
+		    <a href="..&#x2F;.&#x2F;validate.ts&#x2F;~&#x2F;isValidIp.html" title="isValidIp">
+			    <span>isValidIp</span><span>(<span><span>s<span>: <span class="td-kw">string</span></span></span></span>)<span>: <span class="td-kw">boolean</span></span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Checks if a string is any valid IP address or CIDR notation.</p>
 </div></div></div>
-    </div><div id="namespace_validate" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-Function bg-Function/15 dark:text-FunctionDark dark:bg-FunctionDark/15" title="Function">f</div></div>
+    </div><div id="namespace_validateip" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-Function bg-Function/15 dark:text-FunctionDark dark:bg-FunctionDark/15" title="Function">f</div></div>
 <div class="namespaceItemContent">
-		    <a href="..&#x2F;.&#x2F;validate.ts&#x2F;~&#x2F;validate.html" title="validate">
-			    <span>validate</span><span>(<span><span>s<span>: <span class="td-kw">string</span></span></span></span>)<span>: <span class="td-ref">ValidationResult</span></span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Validates and identifies any IP address or CIDR notation string.</p>
+		    <a href="..&#x2F;.&#x2F;validate.ts&#x2F;~&#x2F;validateIp.html" title="validateIp">
+			    <span>validateIp</span><span>(<span><span>s<span>: <span class="td-kw">string</span></span></span></span>)<span>: <span class="td-ref">IpValidationResult</span></span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Validates and identifies any IP address or CIDR notation string.</p>
 </div></div></div>
     </div></div>
 </section>
@@ -266,10 +268,10 @@ Functions</h2></div><div class="namespaceSection"><div id="namespace_isvalid" cl
   </defs>
 </svg>
 </a>
-Type Aliases</h2></div><div class="namespaceSection"><div id="namespace_validationresult" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-TypeAlias bg-TypeAlias/15 dark:text-TypeAliasDark dark:bg-TypeAliasDark/15" title="Type Alias">T</div></div>
+Type Aliases</h2></div><div class="namespaceSection"><div id="namespace_ipvalidationresult" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-TypeAlias bg-TypeAlias/15 dark:text-TypeAliasDark dark:bg-TypeAliasDark/15" title="Type Alias">T</div></div>
 <div class="namespaceItemContent">
-		    <a href="..&#x2F;.&#x2F;validate.ts&#x2F;~&#x2F;ValidationResult.html" title="ValidationResult">
-			    <span>ValidationResult</span><span> = <div class="ml-indent"><span>{ <span class="td-kw">readonly </span>kind<span>: <span class="td-str">"ipv4"</span></span>; <span class="td-kw">readonly </span>value<span>: <span class="td-kw">number</span></span>;  }</span><br /><span><span class="td-op"> | </span>{ <span class="td-kw">readonly </span>kind<span>: <span class="td-str">"ipv6"</span></span>; <span class="td-kw">readonly </span>value<span>: <span class="td-kw">bigint</span></span>;  }</span><br /><span><span class="td-op"> | </span>{ <span class="td-kw">readonly </span>kind<span>: <span class="td-str">"cidr4"</span></span>; <span class="td-kw">readonly </span>value<span>: <span class="td-ref">Cidr4</span></span>;  }</span><br /><span><span class="td-op"> | </span>{ <span class="td-kw">readonly </span>kind<span>: <span class="td-str">"cidr6"</span></span>; <span class="td-kw">readonly </span>value<span>: <span class="td-ref">Cidr6</span></span>;  }</span><br /><span><span class="td-op"> | </span>{ <span class="td-kw">readonly </span>kind<span>: <span class="td-str">"invalid"</span></span>;  }</span></div></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>The result of the <a href=".././validate.ts/~/validate.html">validate</a> function.</p>
+		    <a href="..&#x2F;.&#x2F;validate.ts&#x2F;~&#x2F;IpValidationResult.html" title="IpValidationResult">
+			    <span>IpValidationResult</span><span> = <div class="ml-indent"><span>{ <span class="td-kw">readonly </span>kind<span>: <span class="td-str">"ipv4"</span></span>; <span class="td-kw">readonly </span>value<span>: <span class="td-kw">number</span></span>;  }</span><br /><span><span class="td-op"> | </span>{ <span class="td-kw">readonly </span>kind<span>: <span class="td-str">"ipv6"</span></span>; <span class="td-kw">readonly </span>value<span>: <span class="td-kw">bigint</span></span>;  }</span><br /><span><span class="td-op"> | </span>{ <span class="td-kw">readonly </span>kind<span>: <span class="td-str">"cidr4"</span></span>; <span class="td-kw">readonly </span>value<span>: <span class="td-ref">Cidr4</span></span>;  }</span><br /><span><span class="td-op"> | </span>{ <span class="td-kw">readonly </span>kind<span>: <span class="td-str">"cidr6"</span></span>; <span class="td-kw">readonly </span>value<span>: <span class="td-ref">Cidr6</span></span>;  }</span><br /><span><span class="td-op"> | </span>{ <span class="td-kw">readonly </span>kind<span>: <span class="td-str">"invalid"</span></span>;  }</span></div></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>The result of the <a href=".././validate.ts/~/validateIp.html">validateIp</a> function.</p>
 </div></div></div>
     </div></div>
 </section>
@@ -314,6 +316,12 @@ Type Aliases</h2></div><div class="namespaceSection"><div id="namespace_validati
 </div></div><nav class="topSymbols">
           <h3>Symbols</h3>
           <ul><li>
+                <a href="..&#x2F;.&#x2F;ipv4.ts&#x2F;~&#x2F;isValidIpv4.html" title="isValidIpv4"><div class="docNodeKindIcon"><div class="text-Function bg-Function/15 dark:text-FunctionDark dark:bg-FunctionDark/15" title="Function">f</div></div>
+<span class="hover:bg-Function/15 hover:bg-FunctionDark/15">
+                    isValidIpv4
+                  </span>
+                </a>
+              </li><li>
                 <a href="..&#x2F;.&#x2F;ipv4.ts&#x2F;~&#x2F;parseIpv4.html" title="parseIpv4"><div class="docNodeKindIcon"><div class="text-Function bg-Function/15 dark:text-FunctionDark dark:bg-FunctionDark/15" title="Function">f</div></div>
 <span class="hover:bg-Function/15 hover:bg-FunctionDark/15">
                     parseIpv4
@@ -337,12 +345,6 @@ Type Aliases</h2></div><div class="namespaceSection"><div id="namespace_validati
                     cidr4Addresses
                   </span>
                 </a>
-              </li><li>
-                <a href="..&#x2F;.&#x2F;cidrv4.ts&#x2F;~&#x2F;cidr4BroadcastAddress.html" title="cidr4BroadcastAddress"><div class="docNodeKindIcon"><div class="text-Variable bg-Variable/15 dark:text-VariableDark dark:bg-VariableDark/15" title="Variable">v</div></div>
-<span class="hover:bg-Variable/15 hover:bg-VariableDark/15">
-                    cidr4BroadcastAddress
-                  </span>
-                </a>
               </li></ul><a class="flex items-center gap-0.5" href="..&#x2F;.&#x2F;all_symbols.html">
               <span class="leading-none">view all 66 symbols</span><svg
   width="16"
@@ -359,7 +361,7 @@ Type Aliases</h2></div><div class="namespaceSection"><div id="namespace_validati
   />
 </svg>
 </a></nav><nav class="documentNavigation">
-          <h3>Document Navigation</h3><ul><li><a href="#examples" title="Examples">Examples</a></li><li><ul><li><a href="#example_0" title="Universal validation">Universal validation</a></li></ul></li><li><a href="#validate_ts_functions" title="Functions">Functions</a></li><li><ul><li><a href="#namespace_isvalid" title="isValid">isValid</a></li><li><a href="#namespace_validate" title="validate">validate</a></li></ul></li><li><a href="#validate_ts_type-aliases" title="Type Aliases">Type Aliases</a></li><li><ul><li><a href="#namespace_validationresult" title="ValidationResult">ValidationResult</a></li></ul></li></ul></nav></div>
+          <h3>Document Navigation</h3><ul><li><a href="#examples" title="Examples">Examples</a></li><li><ul><li><a href="#example_0" title="Universal validation">Universal validation</a></li></ul></li><li><a href="#validate_ts_functions" title="Functions">Functions</a></li><li><ul><li><a href="#namespace_isvalidip" title="isValidIp">isValidIp</a></li><li><a href="#namespace_validateip" title="validateIp">validateIp</a></li></ul></li><li><a href="#validate_ts_type-aliases" title="Type Aliases">Type Aliases</a></li><li><ul><li><a href="#namespace_ipvalidationresult" title="IpValidationResult">IpValidationResult</a></li></ul></li></ul></nav></div>
   </div></div>
 </div>
 </div>

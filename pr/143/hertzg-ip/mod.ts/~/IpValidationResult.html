@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>ValidationResult - mod.ts - @hertzg&#x2F;ip documentation</title>
+  <title>IpValidationResult - mod.ts - @hertzg&#x2F;ip documentation</title>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="doc-current-file" content="mod.ts">
@@ -48,7 +48,7 @@
 </svg>
 </span>
 
-    <ul><li>ValidationResult</li></ul></ul>
+    <ul><li>IpValidationResult</li></ul></ul>
 </div>
 
     <div class="flex items-center gap-2">
@@ -112,11 +112,11 @@
     </div>
   </div>
 </nav>
-<div id="searchResults"></div><div id="content"><main class="symbolGroup" id="symbol_ValidationResult"><article>
+<div id="searchResults"></div><div id="content"><main class="symbolGroup" id="symbol_IpValidationResult"><article>
       <div class="symbolTitle">
         <div>
           <div class="text-2xl leading-none break-all">
-            <span class="text-TypeAlias">type alias</span>&nbsp;<span class="font-bold">ValidationResult</span>
+            <span class="text-TypeAlias">type alias</span>&nbsp;<span class="font-bold">IpValidationResult</span>
           </div></div><a
   class="sourceButton"
   href="file:&#x2F;&#x2F;&#x2F;home&#x2F;runner&#x2F;work&#x2F;jsr-monorepo&#x2F;jsr-monorepo&#x2F;packages&#x2F;ip&#x2F;validate.ts"><svg
@@ -142,7 +142,7 @@
   />
 </svg>
 </a>
-</div><div><div class="space-y-7" id=""><div class="markdown"><p>The result of the <a href="../.././mod.ts/~/validate.html">validate</a> function.</p>
+</div><div><div class="space-y-7" id=""><div class="markdown"><p>The result of the <a href="../.././mod.ts/~/validateIp.html">validateIp</a> function.</p>
 <p>Discriminated union on <code>kind</code>:</p>
 <ul>
 <li><code>&quot;ipv4&quot;</code> — valid IPv4 address with parsed <code>value</code> as a 32-bit number</li>
@@ -174,7 +174,7 @@
   </defs>
 </svg>
 </a>
-Definition</h2></div><div class="space-y-8"><div class=" docEntry" id="typealias_validationresult">
+Definition</h2></div><div class="space-y-8"><div class=" docEntry" id="typealias_ipvalidationresult">
 
   <div class="docEntryHeader">
     <div><code><span class="font-medium text-stone-500 dark:text-stone-200"><div class="ml-indent"><span>{ <span class="td-kw">readonly </span>kind<span>: <span class="td-str">"ipv4"</span></span>; <span class="td-kw">readonly </span>value<span>: <span class="td-kw">number</span></span>;  }</span><br /><span><span class="td-op"> | </span>{ <span class="td-kw">readonly </span>kind<span>: <span class="td-str">"ipv6"</span></span>; <span class="td-kw">readonly </span>value<span>: <span class="td-kw">bigint</span></span>;  }</span><br /><span><span class="td-op"> | </span>{ <span class="td-kw">readonly </span>kind<span>: <span class="td-str">"cidr4"</span></span>; <span class="td-kw">readonly </span>value<span>: <a href="../.././mod.ts/~/Cidr4.html" class="link td-ref">Cidr4</a></span>;  }</span><br /><span><span class="td-op"> | </span>{ <span class="td-kw">readonly </span>kind<span>: <span class="td-str">"cidr6"</span></span>; <span class="td-kw">readonly </span>value<span>: <a href="../.././mod.ts/~/Cidr6.html" class="link td-ref">Cidr6</a></span>;  }</span><br /><span><span class="td-op"> | </span>{ <span class="td-kw">readonly </span>kind<span>: <span class="td-str">"invalid"</span></span>;  }</span></div></span>
@@ -211,8 +211,8 @@ Definition</h2></div><div class="space-y-8"><div class=" docEntry" id="typealias
     </article></main>
 <div class="toc">
     <div><div class="usageContent">
-    <h3>Usage</h3><div class="markdown"><pre class="highlight"><code class="language-typescript">import { type ValidationResult } from &quot;mod.ts&quot;;
-</code><button class="copyButton" data-copy="import { type ValidationResult } from &quot;mod.ts&quot;;
+    <h3>Usage</h3><div class="markdown"><pre class="highlight"><code class="language-typescript">import { type IpValidationResult } from &quot;mod.ts&quot;;
+</code><button class="copyButton" data-copy="import { type IpValidationResult } from &quot;mod.ts&quot;;
 "><svg
   class="copy"
   width="15"

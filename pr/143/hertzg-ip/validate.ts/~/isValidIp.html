@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>validate - validate.ts - @hertzg&#x2F;ip documentation</title>
+  <title>isValidIp - validate.ts - @hertzg&#x2F;ip documentation</title>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="doc-current-file" content="validate.ts">
@@ -48,7 +48,7 @@
 </svg>
 </span>
 
-    <ul><li>validate</li></ul></ul>
+    <ul><li>isValidIp</li></ul></ul>
 </div>
 
     <div class="flex items-center gap-2">
@@ -112,11 +112,11 @@
     </div>
   </div>
 </nav>
-<div id="searchResults"></div><div id="content"><main class="symbolGroup" id="symbol_validate"><article>
+<div id="searchResults"></div><div id="content"><main class="symbolGroup" id="symbol_isValidIp"><article>
       <div class="symbolTitle">
         <div>
           <div class="text-2xl leading-none break-all">
-            <span class="text-Function">function</span>&nbsp;<span class="font-bold">validate</span>
+            <span class="text-Function">function</span>&nbsp;<span class="font-bold">isValidIp</span>
           </div></div><a
   class="sourceButton"
   href="file:&#x2F;&#x2F;&#x2F;home&#x2F;runner&#x2F;work&#x2F;jsr-monorepo&#x2F;jsr-monorepo&#x2F;packages&#x2F;ip&#x2F;validate.ts"><svg
@@ -142,8 +142,8 @@
   />
 </svg>
 </a>
-</div><div><div class="mt-3 space-y-8"><div class="scroll-mt-16" id="function_validate_0">
-      <code class="anchorable text-base break-words"><a href="#function_validate_0" class="anchor" aria-label="Anchor" tabIndex="-1"><svg
+</div><div><div class="mt-3 space-y-8"><div class="scroll-mt-16" id="function_isvalidip_0">
+      <code class="anchorable text-base break-words"><a href="#function_isvalidip_0" class="anchor" aria-label="Anchor" tabIndex="-1"><svg
   width="16"
   height="16"
   viewBox="0 0 14 14"
@@ -165,12 +165,9 @@
   </defs>
 </svg>
 </a>
-<span class="font-bold">validate</span><span class="font-medium">(<span><span>s<span>: <span class="td-kw">string</span></span></span></span>)<span>: <a href="../.././validate.ts/~/ValidationResult.html" class="link td-ref">ValidationResult</a></span> </span>
-      </code><div class="space-y-7" id=""><div class="markdown"><p>Validates and identifies any IP address or CIDR notation string.</p>
-<p>Attempts to parse the string as IPv4, IPv6, IPv4 CIDR, or IPv6 CIDR
-and returns a discriminated union indicating what was found. Strings
-containing <code>/</code> are tested as CIDR first; others are tested as plain
-addresses.</p>
+<span class="font-bold">isValidIp</span><span class="font-medium">(<span><span>s<span>: <span class="td-kw">string</span></span></span></span>)<span>: <span class="td-kw">boolean</span></span> </span>
+      </code><div class="space-y-7" id=""><div class="markdown"><p>Checks if a string is any valid IP address or CIDR notation.</p>
+<p>Accepts IPv4, IPv6, IPv4 CIDR, and IPv6 CIDR formats.</p>
 </div><section class="section"  id="examples"><div>
       <h2 class="anchorable mb-1"><a href="#examples" class="anchor" aria-label="Anchor" tabIndex="-1"><svg
   width="16"
@@ -216,64 +213,22 @@ Examples</h2></div><div class="space-y-8"><div class="anchorable"><a href="#exam
   </defs>
 </svg>
 </a>
-<h3 class="example-header"><div class="markdown"><p>Identify and use parsed values</p>
+<h3 class="example-header"><div class="markdown"><p>Valid inputs</p>
 </div></h3>
-  <div><div class="markdown"><pre class="highlight"><code class="language-ts">import { assertEquals } from &quot;@std/assert&quot;;
-import { validate } from &quot;@hertzg/ip/validate&quot;;
+  <div><div class="markdown"><pre class="highlight"><code class="language-ts">import { assert } from &quot;@std/assert&quot;;
+import { isValidIp } from &quot;@hertzg/ip/validate&quot;;
 
-const ipv4 = validate(&quot;192.168.1.1&quot;);
-assertEquals(ipv4.kind, &quot;ipv4&quot;);
-if (ipv4.kind === &quot;ipv4&quot;) {
-  assertEquals(ipv4.value, 3232235777);
-}
+assert(isValidIp(&quot;192.168.1.1&quot;));
+assert(isValidIp(&quot;::1&quot;));
+assert(isValidIp(&quot;10.0.0.0/8&quot;));
+assert(isValidIp(&quot;2001:db8::/32&quot;));
+</code><button class="copyButton" data-copy="import { assert } from &quot;@std/assert&quot;;
+import { isValidIp } from &quot;@hertzg/ip/validate&quot;;
 
-const ipv6 = validate(&quot;::1&quot;);
-assertEquals(ipv6.kind, &quot;ipv6&quot;);
-if (ipv6.kind === &quot;ipv6&quot;) {
-  assertEquals(ipv6.value, 1n);
-}
-
-const cidr4 = validate(&quot;10.0.0.0/8&quot;);
-assertEquals(cidr4.kind, &quot;cidr4&quot;);
-if (cidr4.kind === &quot;cidr4&quot;) {
-  assertEquals(cidr4.value.prefixLength, 8);
-}
-
-const cidr6 = validate(&quot;2001:db8::/32&quot;);
-assertEquals(cidr6.kind, &quot;cidr6&quot;);
-if (cidr6.kind === &quot;cidr6&quot;) {
-  assertEquals(cidr6.value.prefixLength, 32);
-}
-
-assertEquals(validate(&quot;garbage&quot;).kind, &quot;invalid&quot;);
-</code><button class="copyButton" data-copy="import { assertEquals } from &quot;@std/assert&quot;;
-import { validate } from &quot;@hertzg/ip/validate&quot;;
-
-const ipv4 = validate(&quot;192.168.1.1&quot;);
-assertEquals(ipv4.kind, &quot;ipv4&quot;);
-if (ipv4.kind === &quot;ipv4&quot;) {
-  assertEquals(ipv4.value, 3232235777);
-}
-
-const ipv6 = validate(&quot;::1&quot;);
-assertEquals(ipv6.kind, &quot;ipv6&quot;);
-if (ipv6.kind === &quot;ipv6&quot;) {
-  assertEquals(ipv6.value, 1n);
-}
-
-const cidr4 = validate(&quot;10.0.0.0/8&quot;);
-assertEquals(cidr4.kind, &quot;cidr4&quot;);
-if (cidr4.kind === &quot;cidr4&quot;) {
-  assertEquals(cidr4.value.prefixLength, 8);
-}
-
-const cidr6 = validate(&quot;2001:db8::/32&quot;);
-assertEquals(cidr6.kind, &quot;cidr6&quot;);
-if (cidr6.kind === &quot;cidr6&quot;) {
-  assertEquals(cidr6.value.prefixLength, 32);
-}
-
-assertEquals(validate(&quot;garbage&quot;).kind, &quot;invalid&quot;);
+assert(isValidIp(&quot;192.168.1.1&quot;));
+assert(isValidIp(&quot;::1&quot;));
+assert(isValidIp(&quot;10.0.0.0/8&quot;));
+assert(isValidIp(&quot;2001:db8::/32&quot;));
 "><svg
   class="copy"
   width="15"
@@ -329,38 +284,22 @@ assertEquals(validate(&quot;garbage&quot;).kind, &quot;invalid&quot;);
   </defs>
 </svg>
 </a>
-<h3 class="example-header"><div class="markdown"><p>Use in input handling</p>
+<h3 class="example-header"><div class="markdown"><p>Invalid inputs</p>
 </div></h3>
   <div><div class="markdown"><pre class="highlight"><code class="language-ts">import { assertEquals } from &quot;@std/assert&quot;;
-import { validate } from &quot;@hertzg/ip/validate&quot;;
+import { isValidIp } from &quot;@hertzg/ip/validate&quot;;
 
-const result = validate(&quot;fe80::1&quot;);
-switch (result.kind) {
-  case &quot;ipv4&quot;:
-  case &quot;ipv6&quot;:
-    assertEquals(typeof result.value === &quot;bigint&quot;, true);
-    break;
-  case &quot;cidr4&quot;:
-  case &quot;cidr6&quot;:
-    break;
-  case &quot;invalid&quot;:
-    break;
-}
+assertEquals(isValidIp(&quot;&quot;), false);
+assertEquals(isValidIp(&quot;not an ip&quot;), false);
+assertEquals(isValidIp(&quot;999.999.999.999&quot;), false);
+assertEquals(isValidIp(&quot;10.0.0.0/33&quot;), false);
 </code><button class="copyButton" data-copy="import { assertEquals } from &quot;@std/assert&quot;;
-import { validate } from &quot;@hertzg/ip/validate&quot;;
+import { isValidIp } from &quot;@hertzg/ip/validate&quot;;
 
-const result = validate(&quot;fe80::1&quot;);
-switch (result.kind) {
-  case &quot;ipv4&quot;:
-  case &quot;ipv6&quot;:
-    assertEquals(typeof result.value === &quot;bigint&quot;, true);
-    break;
-  case &quot;cidr4&quot;:
-  case &quot;cidr6&quot;:
-    break;
-  case &quot;invalid&quot;:
-    break;
-}
+assertEquals(isValidIp(&quot;&quot;), false);
+assertEquals(isValidIp(&quot;not an ip&quot;), false);
+assertEquals(isValidIp(&quot;999.999.999.999&quot;), false);
+assertEquals(isValidIp(&quot;10.0.0.0/33&quot;), false);
 "><svg
   class="copy"
   width="15"
@@ -418,10 +357,10 @@ switch (result.kind) {
   </defs>
 </svg>
 </a>
-Parameters</h2></div><div class="space-y-8"><div class="anchorable docEntry" id="function_validate_0_parameter_s">
+Parameters</h2></div><div class="space-y-8"><div class="anchorable docEntry" id="function_isvalidip_0_parameter_s">
 
   <div class="docEntryHeader">
-    <div><code><a href="#function_validate_0_parameter_s" class="anchor" aria-label="Anchor" tabIndex="-1"><svg
+    <div><code><a href="#function_isvalidip_0_parameter_s" class="anchor" aria-label="Anchor" tabIndex="-1"><svg
   width="16"
   height="16"
   viewBox="0 0 14 14"
@@ -470,7 +409,7 @@ Parameters</h2></div><div class="space-y-8"><div class="anchorable docEntry" id=
   />
 </svg>
 </a>
-</div><div class="max-w-[75ch]"><div class="markdown"><p>The string to validate and identify</p>
+</div><div class="max-w-[75ch]"><div class="markdown"><p>The string to validate</p>
 </div></div></div>
 </div></section>
 <section class="section"  id="return-type"><div>
@@ -496,10 +435,10 @@ Parameters</h2></div><div class="space-y-8"><div class="anchorable docEntry" id=
   </defs>
 </svg>
 </a>
-Return Type</h2></div><div class="space-y-8"><div class=" docEntry" id="function_validate_0_return">
+Return Type</h2></div><div class="space-y-8"><div class=" docEntry" id="function_isvalidip_0_return">
 
   <div class="docEntryHeader">
-    <div><code><span class="font-medium text-stone-500 dark:text-stone-200"><a href="../.././validate.ts/~/ValidationResult.html" class="link td-ref">ValidationResult</a></span>
+    <div><code><span class="font-medium text-stone-500 dark:text-stone-200"><span class="td-kw">boolean</span></span>
       </code>
     </div><a
   class="sourceButton"
@@ -526,7 +465,7 @@ Return Type</h2></div><div class="space-y-8"><div class=" docEntry" id="function
   />
 </svg>
 </a>
-</div><div class="max-w-[75ch]"><div class="markdown"><p>A <a href="../.././validate.ts/~/ValidationResult.html">ValidationResult</a> with the parsed value, or <code>{ kind: &quot;invalid&quot; }</code></p>
+</div><div class="max-w-[75ch]"><div class="markdown"><p><code>true</code> if the string is a valid IP address or CIDR notation</p>
 </div></div></div>
 </div></section>
 </div>
@@ -535,8 +474,8 @@ Return Type</h2></div><div class="space-y-8"><div class=" docEntry" id="function
     </article></main>
 <div class="toc">
     <div><div class="usageContent">
-    <h3>Usage</h3><div class="markdown"><pre class="highlight"><code class="language-typescript">import { validate } from &quot;validate.ts&quot;;
-</code><button class="copyButton" data-copy="import { validate } from &quot;validate.ts&quot;;
+    <h3>Usage</h3><div class="markdown"><pre class="highlight"><code class="language-typescript">import { isValidIp } from &quot;validate.ts&quot;;
+</code><button class="copyButton" data-copy="import { isValidIp } from &quot;validate.ts&quot;;
 "><svg
   class="copy"
   width="15"
@@ -569,7 +508,7 @@ Return Type</h2></div><div class="space-y-8"><div class=" docEntry" id="function
 </svg>
 </button><code></code></pre>
 </div></div><nav class="documentNavigation">
-          <h3>Document Navigation</h3><ul><li><a href="#examples" title="Examples">Examples</a></li><li><ul><li><a href="#example_0" title="Identify and use parsed values">Identify and use parsed values</a></li><li><a href="#example_1" title="Use in input handling">Use in input handling</a></li></ul></li><li><a href="#parameters" title="Parameters">Parameters</a></li><li><ul><li><a href="#function_validate_0_parameter_s" title="s">s</a></li></ul></li><li><a href="#return-type" title="Return Type">Return Type</a></li></ul></nav></div>
+          <h3>Document Navigation</h3><ul><li><a href="#examples" title="Examples">Examples</a></li><li><ul><li><a href="#example_0" title="Valid inputs">Valid inputs</a></li><li><a href="#example_1" title="Invalid inputs">Invalid inputs</a></li></ul></li><li><a href="#parameters" title="Parameters">Parameters</a></li><li><ul><li><a href="#function_isvalidip_0_parameter_s" title="s">s</a></li></ul></li><li><a href="#return-type" title="Return Type">Return Type</a></li></ul></nav></div>
   </div></div>
 </div>
 </div>

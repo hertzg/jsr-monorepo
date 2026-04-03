@@ -119,7 +119,7 @@
             <span class="text-Function">function</span>&nbsp;<span class="font-bold">isValidCidr4</span>
           </div></div><a
   class="sourceButton"
-  href="file:&#x2F;&#x2F;&#x2F;home&#x2F;runner&#x2F;work&#x2F;jsr-monorepo&#x2F;jsr-monorepo&#x2F;packages&#x2F;ip&#x2F;validatev4.ts"><svg
+  href="file:&#x2F;&#x2F;&#x2F;home&#x2F;runner&#x2F;work&#x2F;jsr-monorepo&#x2F;jsr-monorepo&#x2F;packages&#x2F;ip&#x2F;cidrv4.ts"><svg
   width="14"
   height="14"
   viewBox="0 0 14 14"
@@ -215,13 +215,13 @@ Examples</h2></div><div class="space-y-8"><div class="anchorable"><a href="#exam
 <h3 class="example-header"><div class="markdown"><p>Valid CIDR</p>
 </div></h3>
   <div><div class="markdown"><pre class="highlight"><code class="language-ts">import { assert } from &quot;@std/assert&quot;;
-import { isValidCidr4 } from &quot;@hertzg/ip/validatev4&quot;;
+import { isValidCidr4 } from &quot;@hertzg/ip/cidrv4&quot;;
 
 assert(isValidCidr4(&quot;0.0.0.0/0&quot;));
 assert(isValidCidr4(&quot;192.168.1.0/24&quot;));
 assert(isValidCidr4(&quot;10.0.0.1/32&quot;));
 </code><button class="copyButton" data-copy="import { assert } from &quot;@std/assert&quot;;
-import { isValidCidr4 } from &quot;@hertzg/ip/validatev4&quot;;
+import { isValidCidr4 } from &quot;@hertzg/ip/cidrv4&quot;;
 
 assert(isValidCidr4(&quot;0.0.0.0/0&quot;));
 assert(isValidCidr4(&quot;192.168.1.0/24&quot;));
@@ -284,7 +284,7 @@ assert(isValidCidr4(&quot;10.0.0.1/32&quot;));
 <h3 class="example-header"><div class="markdown"><p>Invalid CIDR</p>
 </div></h3>
   <div><div class="markdown"><pre class="highlight"><code class="language-ts">import { assertEquals } from &quot;@std/assert&quot;;
-import { isValidCidr4 } from &quot;@hertzg/ip/validatev4&quot;;
+import { isValidCidr4 } from &quot;@hertzg/ip/cidrv4&quot;;
 
 assertEquals(isValidCidr4(&quot;&quot;), false);
 assertEquals(isValidCidr4(&quot;192.168.1.0&quot;), false);
@@ -292,7 +292,7 @@ assertEquals(isValidCidr4(&quot;192.168.1.0/33&quot;), false);
 assertEquals(isValidCidr4(&quot;192.168.1.0/-1&quot;), false);
 assertEquals(isValidCidr4(&quot;2001:db8::/32&quot;), false);
 </code><button class="copyButton" data-copy="import { assertEquals } from &quot;@std/assert&quot;;
-import { isValidCidr4 } from &quot;@hertzg/ip/validatev4&quot;;
+import { isValidCidr4 } from &quot;@hertzg/ip/cidrv4&quot;;
 
 assertEquals(isValidCidr4(&quot;&quot;), false);
 assertEquals(isValidCidr4(&quot;192.168.1.0&quot;), false);
@@ -385,7 +385,7 @@ Parameters</h2></div><div class="space-y-8"><div class="anchorable docEntry" id=
       </code>
     </div><a
   class="sourceButton"
-  href="file:&#x2F;&#x2F;&#x2F;home&#x2F;runner&#x2F;work&#x2F;jsr-monorepo&#x2F;jsr-monorepo&#x2F;packages&#x2F;ip&#x2F;validatev4.ts"><svg
+  href="file:&#x2F;&#x2F;&#x2F;home&#x2F;runner&#x2F;work&#x2F;jsr-monorepo&#x2F;jsr-monorepo&#x2F;packages&#x2F;ip&#x2F;cidrv4.ts"><svg
   width="14"
   height="14"
   viewBox="0 0 14 14"
@@ -441,7 +441,7 @@ Return Type</h2></div><div class="space-y-8"><div class=" docEntry" id="function
       </code>
     </div><a
   class="sourceButton"
-  href="file:&#x2F;&#x2F;&#x2F;home&#x2F;runner&#x2F;work&#x2F;jsr-monorepo&#x2F;jsr-monorepo&#x2F;packages&#x2F;ip&#x2F;validatev4.ts"><svg
+  href="file:&#x2F;&#x2F;&#x2F;home&#x2F;runner&#x2F;work&#x2F;jsr-monorepo&#x2F;jsr-monorepo&#x2F;packages&#x2F;ip&#x2F;cidrv4.ts"><svg
   width="14"
   height="14"
   viewBox="0 0 14 14"
