@@ -97,6 +97,7 @@
  * @module
  */
 
+// @deno-types="./xml-parser.d.ts"
 import XMLParser, { type Node } from "xml-parser";
 import {
   parseProperties,
