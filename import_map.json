@@ -17,7 +17,7 @@
     "@std/path": "jsr:@std/path@^1.1.4",
     "@hertzg/binstruct": "jsr:@hertzg/binstruct@^3.0.6",
     "@hertzg/bx": "jsr:@hertzg/bx@^3.0.3",
-    "@hertzg/ip": "jsr:@hertzg/ip@^1.0.0",
+    "@hertzg/ip": "jsr:@hertzg/ip@^2.0.0",
     "@hertzg/crc": "jsr:@hertzg/crc@^0.2.0",
     "@hertzg/mymagti-api": "jsr:@hertzg/mymagti-api@^0.1.1",
     "@hertzg/routeros-api": "jsr:@hertzg/routeros-api@^0.1.2",
@@ -33,7 +33,7 @@
     "fflate": "npm:fflate@^0.8.2",
     "@noble/ciphers/aes.js": "jsr:@noble/ciphers@^2.1.1/aes.js",
     "@noble/hashes/legacy.js": "jsr:@noble/hashes@^2.0.1/legacy.js",
-    "@hertzg/xhb": "jsr:@hertzg/xhb@^3.1.0",
+    "@hertzg/xhb": "jsr:@hertzg/xhb@^3.2.0",
     "@std/xml": "jsr:@std/xml@^0.1.0"
   }
 }
