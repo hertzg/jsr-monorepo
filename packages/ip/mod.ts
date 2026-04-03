@@ -47,6 +47,7 @@
  * - {@link isValidIpv6}: Check if a string is a valid IPv6 address
  * - {@link isValidCidr4}: Check if a string is valid IPv4 CIDR notation
  * - {@link isValidCidr6}: Check if a string is valid IPv6 CIDR notation
+ * - {@link isValid}: Check if a string is any valid IP address or CIDR notation
  * - {@link validate}: Identify and parse any IP address or CIDR string
  *
  * ### Submodules
@@ -306,6 +307,7 @@ export {
 
 // Re-export validation utilities
 export {
+  isValid,
   isValidCidr4,
   isValidCidr6,
   isValidIpv4,

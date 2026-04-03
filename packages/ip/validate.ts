@@ -221,6 +221,40 @@ export function isValidCidr6(s: string): boolean {
 }
 
 /**
+ * Checks if a string is any valid IP address or CIDR notation.
+ *
+ * Accepts IPv4, IPv6, IPv4 CIDR, and IPv6 CIDR formats.
+ *
+ * @param s The string to validate
+ * @returns `true` if the string is a valid IP address or CIDR notation
+ *
+ * @example Valid inputs
+ * ```ts
+ * import { assert } from "@std/assert";
+ * import { isValid } from "@hertzg/ip/validate";
+ *
+ * assert(isValid("192.168.1.1"));
+ * assert(isValid("::1"));
+ * assert(isValid("10.0.0.0/8"));
+ * assert(isValid("2001:db8::/32"));
+ * ```
+ *
+ * @example Invalid inputs
+ * ```ts
+ * import { assertEquals } from "@std/assert";
+ * import { isValid } from "@hertzg/ip/validate";
+ *
+ * assertEquals(isValid(""), false);
+ * assertEquals(isValid("not an ip"), false);
+ * assertEquals(isValid("999.999.999.999"), false);
+ * assertEquals(isValid("10.0.0.0/33"), false);
+ * ```
+ */
+export function isValid(s: string): boolean {
+  return validate(s).kind !== "invalid";
+}
+
+/**
  * Validates and identifies any IP address or CIDR notation string.
  *
  * Attempts to parse the string as IPv4, IPv6, IPv4 CIDR, or IPv6 CIDR

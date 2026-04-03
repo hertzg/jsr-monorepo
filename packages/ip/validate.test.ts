@@ -1,5 +1,6 @@
 import { assert, assertEquals } from "@std/assert";
 import {
+  isValid,
   isValidCidr4,
   isValidCidr6,
   isValidIpv4,
@@ -82,6 +83,25 @@ Deno.test("isValidCidr6", async (t) => {
     assertEquals(isValidCidr6("2001:db8::/129"), false);
     assertEquals(isValidCidr6("192.168.1.0/24"), false);
     assertEquals(isValidCidr6("abc/32"), false);
+  });
+});
+
+Deno.test("isValid", async (t) => {
+  await t.step("accepts all valid formats", () => {
+    assert(isValid("192.168.1.1"));
+    assert(isValid("::1"));
+    assert(isValid("10.0.0.0/8"));
+    assert(isValid("2001:db8::/32"));
+    assert(isValid("0.0.0.0"));
+    assert(isValid("fe80::1%eth0"));
+  });
+
+  await t.step("rejects invalid strings", () => {
+    assertEquals(isValid(""), false);
+    assertEquals(isValid("not an ip"), false);
+    assertEquals(isValid("999.999.999.999"), false);
+    assertEquals(isValid("10.0.0.0/33"), false);
+    assertEquals(isValid("abc/def"), false);
   });
 });
 
