@@ -41,6 +41,7 @@ interface ParsedBenchmark {
   p75: number;
   p99: number;
   iterations: number;
+  noise: number; // (max - min) / avg — natural variance of this benchmark
 }
 
 function parseBenchmarkFile(content: string): Map<string, ParsedBenchmark> {
@@ -77,6 +78,7 @@ function parseBenchmarkFile(content: string): Map<string, ParsedBenchmark> {
             p75: ok.p75,
             p99: ok.p99,
             iterations: ok.n,
+            noise: ok.avg > 0 ? (ok.max - ok.min) / ok.avg : 0,
           });
         }
       }
@@ -100,10 +102,15 @@ function formatDuration(ns: number): string {
   }
 }
 
-function formatChange(baseAvg: number, prAvg: number): string {
+function formatChange(
+  baseAvg: number,
+  prAvg: number,
+  noiseFloor: number,
+): string {
   const diff = ((prAvg - baseAvg) / baseAvg) * 100;
   const sign = diff > 0 ? "+" : "";
-  const emoji = diff > 5 ? "🔴" : diff < -5 ? "🟢" : "⚪";
+  const thresholdPct = noiseFloor * 100;
+  const emoji = diff > thresholdPct ? "🔴" : diff < -thresholdPct ? "🟢" : "⚪";
   return `${emoji} ${sign}${diff.toFixed(2)}%`;
 }
 
@@ -162,6 +169,7 @@ function generateReport(
     baseAvg?: number;
     prAvg?: number;
     change?: number;
+    noiseFloor?: number;
     type: "improved" | "regressed" | "new" | "removed";
   }> = [];
 
@@ -180,8 +188,11 @@ function generateReport(
       const key = `${origin}::${name}`;
 
       if (base && pr) {
-        const change = ((pr.avg - base.avg) / base.avg) * 100;
-        if (change > 5) {
+        const changePct = ((pr.avg - base.avg) / base.avg) * 100;
+        // Use the larger noise floor of the two runs as the threshold
+        const noiseFloor = Math.max(base.noise, pr.noise);
+        const thresholdPct = noiseFloor * 100;
+        if (changePct > thresholdPct) {
           totalRegressed++;
           significantResults.push({
             key,
@@ -189,10 +200,11 @@ function generateReport(
             origin,
             baseAvg: base.avg,
             prAvg: pr.avg,
-            change,
+            change: changePct,
+            noiseFloor,
             type: "regressed",
           });
-        } else if (change < -5) {
+        } else if (changePct < -thresholdPct) {
           totalImproved++;
           significantResults.push({
             key,
@@ -200,7 +212,8 @@ function generateReport(
             origin,
             baseAvg: base.avg,
             prAvg: pr.avg,
-            change,
+            change: changePct,
+            noiseFloor,
             type: "improved",
           });
         } else {
@@ -232,7 +245,7 @@ function generateReport(
 
   if (!hasSignificantChanges) {
     lines.push(
-      `No significant changes detected. ${totalUnchanged} benchmark(s) within ±5% threshold.\n`,
+      `No significant changes detected. ${totalUnchanged} benchmark(s) within their noise floor.\n`,
     );
     return lines.join("\n");
   }
@@ -241,10 +254,10 @@ function generateReport(
   lines.push("| Category | Count |");
   lines.push("|----------|-------|");
   if (totalImproved > 0) {
-    lines.push(`| 🟢 Improved (>5% faster) | ${totalImproved} |`);
+    lines.push(`| 🟢 Improved (beyond noise floor) | ${totalImproved} |`);
   }
   if (totalRegressed > 0) {
-    lines.push(`| 🔴 Regressed (>5% slower) | ${totalRegressed} |`);
+    lines.push(`| 🔴 Regressed (beyond noise floor) | ${totalRegressed} |`);
   }
   if (totalNew > 0) lines.push(`| 🆕 New | ${totalNew} |`);
   if (totalRemoved > 0) lines.push(`| 🗑️ Removed | ${totalRemoved} |`);
@@ -275,7 +288,11 @@ function generateReport(
       const result of originResults.sort((a, b) => a.name.localeCompare(b.name))
     ) {
       if (result.baseAvg !== undefined && result.prAvg !== undefined) {
-        const change = formatChange(result.baseAvg, result.prAvg);
+        const change = formatChange(
+          result.baseAvg,
+          result.prAvg,
+          result.noiseFloor ?? 0,
+        );
         const speed = formatSpeedChange(result.baseAvg, result.prAvg);
         lines.push(
           `| ${result.name} | ${formatDuration(result.baseAvg)} | ${

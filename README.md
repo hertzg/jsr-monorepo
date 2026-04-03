@@ -34,13 +34,6 @@ All packages are published to JSR. Install using your preferred package manager:
 
 - [Deno](https://deno.land/) 2.1.4 or later
 
-### Setup
-
-```bash
-# Install pre-push hook (runs all CI checks before push)
-deno task setup:hooks
-```
-
 ### Commands
 
 ```bash
@@ -56,7 +49,11 @@ deno task cov
 
 ## Releasing
 
-See [RELEASE.md](RELEASE.md) for the release process.
+Releases are automated via [Release Please](https://github.com/googleapis/release-please).
+Commits following [Conventional Commits](https://www.conventionalcommits.org/)
+are analyzed automatically, and a release PR is maintained with version bumps
+and changelogs. Merging the release PR creates GitHub Releases and publishes
+all packages to JSR.
 
 ## License
 
