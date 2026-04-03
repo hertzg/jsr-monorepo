@@ -4,6 +4,8 @@ A collection of TypeScript libraries published to [JSR](https://jsr.io/@hertzg)
 (JavaScript Registry). This monorepo contains binary structure encoding/decoding
 libraries, format-specific parsers, router API clients, and various utilities.
 
+**[API Documentation](https://hertzg.github.io/jsr-monorepo/)**
+
 ## Packages
 
 | Package                                                     | Version                                                                                   |

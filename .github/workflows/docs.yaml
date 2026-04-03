@@ -1,0 +1,65 @@
+name: docs
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    types: [opened, synchronize, reopened, closed]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  docs:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Checkout
+        if: github.event.action != 'closed'
+        uses: actions/checkout@v6
+
+      - name: Set up Deno
+        if: github.event.action != 'closed'
+        uses: denoland/setup-deno@v2
+        with:
+          deno-version: v2.x
+
+      - name: Cache dependencies
+        if: github.event.action != 'closed'
+        run: deno install
+
+      - name: Generate docs
+        if: github.event.action != 'closed'
+        run: deno run --allow-read --allow-write --allow-run _tools/gen_docs.ts docs
+
+      - name: Deploy main
+        if: github.ref == 'refs/heads/main'
+        uses: JamesIves/github-pages-deploy-action@v4
+        with:
+          folder: docs
+          clean: true
+          clean-exclude: pr/
+
+      - name: Deploy PR preview
+        if: github.event_name == 'pull_request' && github.event.action != 'closed'
+        uses: JamesIves/github-pages-deploy-action@v4
+        with:
+          folder: docs
+          target-folder: pr/${{ github.event.pull_request.number }}
+
+      - name: Comment on PR
+        if: github.event_name == 'pull_request' && github.event.action != 'closed'
+        uses: marocchino/sticky-pull-request-comment@v2
+        with:
+          header: docs-preview
+          message: |
+            **Docs preview:** https://hertzg.github.io/jsr-monorepo/pr/${{ github.event.pull_request.number }}/
+
+      - name: Remove PR preview
+        if: github.event_name == 'pull_request' && github.event.action == 'closed'
+        uses: JamesIves/github-pages-deploy-action@v4
+        with:
+          folder: /tmp/empty
+          target-folder: pr/${{ github.event.pull_request.number }}

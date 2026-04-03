@@ -1,3 +1,4 @@
+// @deno-types="./xml-parser.d.ts"
 import type { Node } from "xml-parser";
 import { atoi, parseGCharP } from "./_parse.ts";
 import { hb_xml_attr_int, hb_xml_attr_txt, hb_xml_tag } from "./_serialize.ts";
