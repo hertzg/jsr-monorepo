@@ -1,8 +1,5 @@
-// @deno-types="./xml-parser.d.ts"
-import type { Node } from "xml-parser";
+import type { XmlElement } from "@std/xml";
 import { parseGDouble, parseGInt } from "./_parse.ts";
-import printj from "printj";
-const { sprintf } = printj;
 import type { gDouble, gInt } from "./_g_types.ts";
 
 /** XHB file and data format version information from the `<homebank>` root element. */
@@ -19,7 +16,7 @@ export interface Versions {
  * @param node - The root XML node.
  * @returns The parsed version information.
  */
-export function parseVersions({ attributes }: Node): Versions {
+export function parseVersions({ attributes }: XmlElement): Versions {
   return {
     file: parseGDouble(attributes.v),
     data: parseGInt(attributes.d),
@@ -33,4 +30,4 @@ export function parseVersions({ attributes }: Node): Versions {
  * @returns The opening `<homebank v="..." d="...">` tag.
  */
 export const serializeVersions = (versions: Versions): string =>
-  sprintf('<homebank v="%s" d="%06d">', versions.file, versions.data);
+  `<homebank v="${versions.file}" d="${String(versions.data).padStart(6, "0")}">`;

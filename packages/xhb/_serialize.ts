@@ -1,5 +1,3 @@
-import printj from "printj";
-const { sprintf } = printj;
 import type { gCharP, gDouble, gUInt32 } from "./_g_types.ts";
 
 /**
@@ -13,7 +11,7 @@ import type { gCharP, gDouble, gUInt32 } from "./_g_types.ts";
 export const hb_xml_attr_txt = (attrName: string, value: gCharP): string =>
   value === null || value === undefined
     ? ""
-    : sprintf('%s="%s"', attrName, value);
+    : `${attrName}="${value}"`;
 
 /**
  * Escapes special XML characters and control characters in a string,
@@ -55,7 +53,7 @@ export const hb_escape_text = (str: gCharP): string => {
           (0x7f <= c && c <= 0x84) ||
           (0x86 <= c && c <= 0x9f)
         ) {
-          newStr += sprintf("&#x%x;", c);
+          newStr += `&#x${c.toString(16)};`;
         } else {
           newStr += str[i];
         }
@@ -93,7 +91,7 @@ export const hb_xml_attr_txt_crlf = (
 export const hb_xml_attr_int0 = (attrName: string, value: number): string =>
   value === null || value === undefined
     ? ""
-    : sprintf('%s="%d"', attrName, value);
+    : `${attrName}="${value}"`;
 
 /**
  * Formats an integer XML attribute, omitting it when the value is zero.
@@ -137,7 +135,7 @@ export const hb_xml_tag = (prefix: string, ..._attrs: string[]): string => {
 export const hb_xml_attr_amt = (attrName: string, amt: gDouble): string =>
   amt === null || amt === undefined
     ? ""
-    : sprintf('%s="%s"', attrName, dtostr(amt));
+    : `${attrName}="${dtostr(amt)}"`;
 
 /**
  * Joins an array of tag names into a space-separated string.

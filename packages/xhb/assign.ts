@@ -1,5 +1,4 @@
-// @deno-types="./xml-parser.d.ts"
-import type { Node } from "xml-parser";
+import type { XmlElement } from "@std/xml";
 import { atoi, parseGCharP } from "./_parse.ts";
 import type { VolatileXHB } from "./mod.ts";
 import { hb_xml_attr_int, hb_xml_attr_txt, hb_xml_tag } from "./_serialize.ts";
@@ -55,7 +54,7 @@ export const ASSIGN_FLAG_OVWMOD = 1 << 11;
  * @param xhb - The partially-parsed XHB (needed for version check).
  * @returns The parsed assign rule.
  */
-export function parseAssign({ attributes }: Node, xhb: VolatileXHB): Assign {
+export function parseAssign({ attributes }: XmlElement, xhb: VolatileXHB): Assign {
   const entry: Assign = {
     key: atoi(attributes.key),
     flags: atoi(attributes.flags),

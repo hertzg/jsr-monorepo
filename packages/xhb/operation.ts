@@ -1,5 +1,4 @@
-// @deno-types="./xml-parser.d.ts"
-import type { Node } from "xml-parser";
+import type { XmlElement } from "@std/xml";
 import { atoi, parseGCharP, parseGDouble, parseGUInt32 } from "./_parse.ts";
 import {
   type AttrSplit,
@@ -106,7 +105,7 @@ export const OPERATION_FLAG_SPLIT = 1 << 8;
  * @param node - The `<ope>` XML node.
  * @returns The parsed operation.
  */
-export function parseOperation({ attributes }: Node): Operation {
+export function parseOperation({ attributes }: XmlElement): Operation {
   const tags: gCharP[] = attributes.tags
     ? parseGCharP(attributes.tags).split(" ")
     : [];

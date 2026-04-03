@@ -1,5 +1,4 @@
-// @deno-types="./xml-parser.d.ts"
-import type { Node } from "xml-parser";
+import type { XmlElement } from "@std/xml";
 import { atoi, parseGCharP, parseGDouble } from "./_parse.ts";
 import {
   hb_xml_attr_amt,
@@ -76,7 +75,7 @@ export const ACCOUNT_TYPE_LIABILITY = 5;
  * @param node - The `<account>` XML node.
  * @returns The parsed account.
  */
-export function parseAccount({ attributes }: Node): Account {
+export function parseAccount({ attributes }: XmlElement): Account {
   return {
     key: atoi(attributes.key),
     flags: atoi(attributes.flags),

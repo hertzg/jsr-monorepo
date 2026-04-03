@@ -1,5 +1,4 @@
-// @deno-types="./xml-parser.d.ts"
-import type { Node } from "xml-parser";
+import type { XmlElement } from "@std/xml";
 import { atoi, parseGCharP } from "./_parse.ts";
 import {
   hb_xml_attr_int,
@@ -36,7 +35,7 @@ export const VEHICLE_SCHEDULED_TRANSACTION_MODE_NUMBER_OF_DAYS = 1;
  * @param node - The `<properties>` XML node.
  * @returns The parsed properties.
  */
-export function parseProperties({ attributes }: Node): Properties {
+export function parseProperties({ attributes }: XmlElement): Properties {
   return {
     owner: parseGCharP(attributes.title),
     baseCurrency: atoi(attributes.curr),
