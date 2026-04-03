@@ -165,7 +165,7 @@
   </defs>
 </svg>
 </a>
-<span class="font-bold">validateIp</span><span class="font-medium">(<span><span>s<span>: <span class="td-kw">string</span></span></span></span>)<span>: <a href="../.././mod.ts/~/IpValidationResult.html" class="link td-ref">IpValidationResult</a></span> </span>
+<span class="font-bold">validateIp</span><span class="font-medium">(<span><span>s<span>: <span class="td-kw">string</span></span></span></span>)<span>: <a href="../.././mod.ts/~/ValidateIpResult.html" class="link td-ref">ValidateIpResult</a></span> </span>
       </code><div class="space-y-7" id=""><div class="markdown"><p>Validates and identifies any IP address or CIDR notation string.</p>
 <p>Attempts to parse the string as IPv4, IPv6, IPv4 CIDR, or IPv6 CIDR
 and returns a discriminated union indicating what was found. Strings
@@ -233,16 +233,16 @@ if (ipv6.kind === &quot;ipv6&quot;) {
   assertEquals(ipv6.value, 1n);
 }
 
-const cidr4 = validateIp(&quot;10.0.0.0/8&quot;);
-assertEquals(cidr4.kind, &quot;cidr4&quot;);
-if (cidr4.kind === &quot;cidr4&quot;) {
-  assertEquals(cidr4.value.prefixLength, 8);
+const cidrv4 = validateIp(&quot;10.0.0.0/8&quot;);
+assertEquals(cidrv4.kind, &quot;cidrv4&quot;);
+if (cidrv4.kind === &quot;cidrv4&quot;) {
+  assertEquals(cidrv4.value.prefixLength, 8);
 }
 
-const cidr6 = validateIp(&quot;2001:db8::/32&quot;);
-assertEquals(cidr6.kind, &quot;cidr6&quot;);
-if (cidr6.kind === &quot;cidr6&quot;) {
-  assertEquals(cidr6.value.prefixLength, 32);
+const cidrv6 = validateIp(&quot;2001:db8::/32&quot;);
+assertEquals(cidrv6.kind, &quot;cidrv6&quot;);
+if (cidrv6.kind === &quot;cidrv6&quot;) {
+  assertEquals(cidrv6.value.prefixLength, 32);
 }
 
 assertEquals(validateIp(&quot;garbage&quot;).kind, &quot;invalid&quot;);
@@ -261,16 +261,16 @@ if (ipv6.kind === &quot;ipv6&quot;) {
   assertEquals(ipv6.value, 1n);
 }
 
-const cidr4 = validateIp(&quot;10.0.0.0/8&quot;);
-assertEquals(cidr4.kind, &quot;cidr4&quot;);
-if (cidr4.kind === &quot;cidr4&quot;) {
-  assertEquals(cidr4.value.prefixLength, 8);
+const cidrv4 = validateIp(&quot;10.0.0.0/8&quot;);
+assertEquals(cidrv4.kind, &quot;cidrv4&quot;);
+if (cidrv4.kind === &quot;cidrv4&quot;) {
+  assertEquals(cidrv4.value.prefixLength, 8);
 }
 
-const cidr6 = validateIp(&quot;2001:db8::/32&quot;);
-assertEquals(cidr6.kind, &quot;cidr6&quot;);
-if (cidr6.kind === &quot;cidr6&quot;) {
-  assertEquals(cidr6.value.prefixLength, 32);
+const cidrv6 = validateIp(&quot;2001:db8::/32&quot;);
+assertEquals(cidrv6.kind, &quot;cidrv6&quot;);
+if (cidrv6.kind === &quot;cidrv6&quot;) {
+  assertEquals(cidrv6.value.prefixLength, 32);
 }
 
 assertEquals(validateIp(&quot;garbage&quot;).kind, &quot;invalid&quot;);
@@ -340,8 +340,8 @@ switch (result.kind) {
   case &quot;ipv6&quot;:
     assertEquals(typeof result.value === &quot;bigint&quot;, true);
     break;
-  case &quot;cidr4&quot;:
-  case &quot;cidr6&quot;:
+  case &quot;cidrv4&quot;:
+  case &quot;cidrv6&quot;:
     break;
   case &quot;invalid&quot;:
     break;
@@ -355,8 +355,8 @@ switch (result.kind) {
   case &quot;ipv6&quot;:
     assertEquals(typeof result.value === &quot;bigint&quot;, true);
     break;
-  case &quot;cidr4&quot;:
-  case &quot;cidr6&quot;:
+  case &quot;cidrv4&quot;:
+  case &quot;cidrv6&quot;:
     break;
   case &quot;invalid&quot;:
     break;
@@ -499,7 +499,7 @@ Parameters</h2></div><div class="space-y-8"><div class="anchorable docEntry" id=
 Return Type</h2></div><div class="space-y-8"><div class=" docEntry" id="function_validateip_0_return">
 
   <div class="docEntryHeader">
-    <div><code><span class="font-medium text-stone-500 dark:text-stone-200"><a href="../.././mod.ts/~/IpValidationResult.html" class="link td-ref">IpValidationResult</a></span>
+    <div><code><span class="font-medium text-stone-500 dark:text-stone-200"><a href="../.././mod.ts/~/ValidateIpResult.html" class="link td-ref">ValidateIpResult</a></span>
       </code>
     </div><a
   class="sourceButton"
@@ -526,7 +526,7 @@ Return Type</h2></div><div class="space-y-8"><div class=" docEntry" id="function
   />
 </svg>
 </a>
-</div><div class="max-w-[75ch]"><div class="markdown"><p>An <a href="../.././mod.ts/~/IpValidationResult.html">IpValidationResult</a> with the parsed value, or <code>{ kind: &quot;invalid&quot; }</code></p>
+</div><div class="max-w-[75ch]"><div class="markdown"><p>An <a href="../.././mod.ts/~/ValidateIpResult.html">ValidateIpResult</a> with the parsed value, or <code>{ kind: &quot;invalid&quot; }</code></p>
 </div></div></div>
 </div></section>
 </div>
