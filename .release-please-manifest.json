@@ -13,5 +13,5 @@
   "packages/tplink-api": "1.2.0",
   "packages/ip": "1.0.0",
   "packages/crc": "0.2.0",
-  "packages/xhb": "3.0.0"
+  "packages/xhb": "3.1.0"
 }
