@@ -16,6 +16,84 @@
  * - Hooks for custom entity processing via {@linkcode ParseOptions.onEntity}
  *   and {@linkcode SerializeOptions.onEntity}
  *
+ * @example Parse an XHB string and inspect its contents
+ * ```ts
+ * import { assertEquals } from "@std/assert";
+ * import { parse } from "@hertzg/xhb";
+ *
+ * // deno-fmt-ignore
+ * const xml = [
+ *   '<?xml version="1.0"?>',
+ *   '<homebank v="1.3" d="050204">',
+ *   '<cur key="1" flags="0" iso="GBP" name="Pound Sterling" symb="£" syprf="1" dchar="." gchar="," frac="2" rate="0" mdate="0"/>',
+ *   '<account key="1" pos="1" type="1" curr="1" name="Cheque Account" number="01548726554" bankname="Amiga Universal Bank" initial="76.219999999999999" minimum="-30.489999999999998" cheque1="8760951"/>',
+ *   '<pay key="1" name="Amazon"/>',
+ *   '<cat key="1" flags="1" name="Food"/>',
+ *   '<tag key="1" name="groceries"/>',
+ *   '<ope date="736968" amount="-42.5" account="1" paymode="1" payee="1" category="1" wording="Weekly shop" tags="groceries"/>',
+ *   '</homebank>',
+ *   '',
+ * ].join("\n");
+ *
+ * const xhb = parse(xml);
+ *
+ * assertEquals(xhb.versions.file, "1.3");
+ * assertEquals(xhb.currencies.length, 1);
+ * assertEquals(xhb.currencies[0].isoCode, "GBP");
+ * assertEquals(xhb.accounts.length, 1);
+ * assertEquals(xhb.accounts[0].name, "Cheque Account");
+ * assertEquals(xhb.payees.length, 1);
+ * assertEquals(xhb.payees[0].name, "Amazon");
+ * assertEquals(xhb.operations.length, 1);
+ * assertEquals(xhb.operations[0].amount, "-42.5");
+ * assertEquals(xhb.operations[0].memo, "Weekly shop");
+ * assertEquals(xhb.operations[0].tags, ["groceries"]);
+ * ```
+ *
+ * @example Round-trip: parse then serialize produces identical output
+ * ```ts
+ * import { assertEquals } from "@std/assert";
+ * import { parse, serialize } from "@hertzg/xhb";
+ *
+ * // deno-fmt-ignore
+ * const xml = [
+ *   '<?xml version="1.0"?>',
+ *   '<homebank v="1.3" d="050204">',
+ *   '<cur key="1" flags="0" iso="GBP" name="Pound Sterling" symb="£" syprf="1" dchar="." gchar="," frac="2" rate="0" mdate="0"/>',
+ *   '<account key="1" pos="1" type="1" curr="1" name="Cheque Account" number="01548726554" bankname="Amiga Universal Bank" initial="76.219999999999999" minimum="-30.489999999999998" cheque1="8760951"/>',
+ *   '</homebank>',
+ *   '',
+ * ].join("\n");
+ *
+ * const xhb = parse(xml);
+ * const output = serialize(xhb);
+ *
+ * assertEquals(output, xml);
+ * ```
+ *
+ * @example Modify a parsed XHB and serialize it back
+ * ```ts
+ * import { assertEquals } from "@std/assert";
+ * import { parse, serialize } from "@hertzg/xhb";
+ *
+ * // deno-fmt-ignore
+ * const xml = [
+ *   '<?xml version="1.0"?>',
+ *   '<homebank v="1.3" d="050204">',
+ *   '<pay key="1" name="Amazon"/>',
+ *   '</homebank>',
+ *   '',
+ * ].join("\n");
+ *
+ * const xhb = parse(xml);
+ * xhb.payees.push({ key: 2, name: "Grocery Store", payMode: 0, category: 0 });
+ *
+ * const output = serialize(xhb);
+ *
+ * assertEquals(output.includes('name="Grocery Store"'), true);
+ * assertEquals(xhb.payees.length, 2);
+ * ```
+ *
  * @module
  */
 
