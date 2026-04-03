@@ -80,6 +80,8 @@ export function parseIp(ip: string): number | bigint {
 export function stringifyIp(ip: number): string;
 /** Stringifies an IPv6 (`bigint`) address to compressed colon-hexadecimal notation. */
 export function stringifyIp(ip: bigint): string;
+/** Stringifies an IPv4 or IPv6 address to its standard notation. */
+export function stringifyIp(ip: number | bigint): string;
 export function stringifyIp(ip: number | bigint): string {
   if (typeof ip === "bigint") {
     return stringifyIpv6(ip);

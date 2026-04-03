@@ -90,6 +90,8 @@ export function parseCidr(cidr: string): Cidr4 | Cidr6 {
 export function stringifyCidr(cidr: Cidr4): string;
 /** Stringifies a {@link Cidr6} to IPv6 CIDR notation. */
 export function stringifyCidr(cidr: Cidr6): string;
+/** Stringifies a {@link Cidr4} or {@link Cidr6} to CIDR notation. */
+export function stringifyCidr(cidr: Cidr4 | Cidr6): string;
 export function stringifyCidr(cidr: Cidr4 | Cidr6): string {
   if (typeof cidr.address === "bigint") {
     return stringifyCidr6(cidr as Cidr6);
