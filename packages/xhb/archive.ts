@@ -1,5 +1,4 @@
-// @deno-types="./xml-parser.d.ts"
-import type { Node } from "xml-parser";
+import type { XmlElement } from "@std/xml";
 import { atoi, parseGCharP, parseGDouble, parseGUInt32 } from "./_parse.ts";
 import {
   type AttrSplit,
@@ -112,7 +111,7 @@ export const SCHEDULED_WEEKEND_AFTER = 2;
  * @param node - The `<fav>` XML node.
  * @returns The parsed archive.
  */
-export function parseArchive({ attributes }: Node): Archive {
+export function parseArchive({ attributes }: XmlElement): Archive {
   const tags: gCharP[] = attributes.tags
     ? parseGCharP(attributes.tags).split(" ")
     : [];

@@ -1,5 +1,4 @@
-// @deno-types="./xml-parser.d.ts"
-import type { Node } from "xml-parser";
+import type { XmlElement } from "@std/xml";
 import { atoi, parseGCharP, parseGDouble } from "./_parse.ts";
 import {
   dtostr,
@@ -7,8 +6,6 @@ import {
   hb_xml_attr_txt,
   hb_xml_tag,
 } from "./_serialize.ts";
-import printj from "printj";
-const { sprintf } = printj;
 import type { gCharP, gDouble, gUInt32, gUShort } from "./_g_types.ts";
 
 /** A transaction category from the `<cat>` element. */
@@ -42,7 +39,7 @@ export const CATEGORY_FLAG_FORCED = 1 << 4;
  * @param node - The `<cat>` XML node.
  * @returns The parsed category.
  */
-export function parseCategory({ attributes }: Node): Category {
+export function parseCategory({ attributes }: XmlElement): Category {
   const budgets: gDouble[] = new Array(12);
   for (let i = 0, ln = 12; i <= ln; i++) {
     const bAttr = `b${i}`;
@@ -64,7 +61,8 @@ const hb_xml_attrs_budgets = (budget: gDouble[]) =>
   Array.isArray(budget)
     ? budget
       .filter((b) => b !== null && b !== undefined)
-      .map((v, i) => sprintf('b%d="%s"', i, dtostr(v)))
+      .map((v, i) => `b${i}="${dtostr(v)}"`)
+
       .join(" ")
     : "";
 

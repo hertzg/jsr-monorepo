@@ -1,8 +1,5 @@
-// @deno-types="./xml-parser.d.ts"
-import type { Node } from "xml-parser";
+import type { XmlElement } from "@std/xml";
 import { atoi, parseGCharP } from "./_parse.ts";
-import printj from "printj";
-const { sprintf } = printj;
 import type { gCharP, gUInt32 } from "./_g_types.ts";
 
 /** A user-defined tag from the `<tag>` element. */
@@ -19,7 +16,7 @@ export interface Tag {
  * @param node - The `<tag>` XML node.
  * @returns The parsed tag.
  */
-export function parseTag({ attributes }: Node): Tag {
+export function parseTag({ attributes }: XmlElement): Tag {
   return {
     key: atoi(attributes.key),
     name: parseGCharP(attributes.name),
@@ -33,4 +30,4 @@ export function parseTag({ attributes }: Node): Tag {
  * @returns The self-closing XML tag string.
  */
 export const serializeTag = (tag: Tag): string =>
-  sprintf('<tag key="%d" name="%s"/>', tag.key, tag.name);
+  `<tag key="${tag.key}" name="${tag.name}"/>`;

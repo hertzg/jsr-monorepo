@@ -1,8 +1,5 @@
-// @deno-types="./xml-parser.d.ts"
-import type { Node } from "xml-parser";
+import type { XmlElement } from "@std/xml";
 import { atoi, parseGCharP, parseGDouble } from "./_parse.ts";
-import printj from "printj";
-const { sprintf } = printj;
 import { dtostr } from "./_serialize.ts";
 import type {
   gBoolean,
@@ -48,7 +45,7 @@ export const CURRENCY_FLAG_CUSTOM = 1 << 1;
  * @param node - The `<cur>` XML node.
  * @returns The parsed currency.
  */
-export function parseCurrency({ attributes }: Node): Currency {
+export function parseCurrency({ attributes }: XmlElement): Currency {
   return {
     key: atoi(attributes.key),
     flags: atoi(attributes.flags),
@@ -71,17 +68,4 @@ export function parseCurrency({ attributes }: Node): Currency {
  * @returns The self-closing XML tag string.
  */
 export const serializeCurrency = (currency: Currency): string =>
-  sprintf(
-    '<cur key="%d" flags="%d" iso="%s" name="%s" symb="%s" syprf="%d" dchar="%s" gchar="%s" frac="%d" rate="%s" mdate="%d"/>',
-    currency.key,
-    currency.flags,
-    currency.isoCode,
-    currency.name,
-    currency.symbol,
-    currency.symbolIsPrefixed,
-    currency.decimalCharacter,
-    currency.groupingCharacter,
-    currency.fractionDigits,
-    dtostr(currency.exchangeRate),
-    currency.lastUpdatedDate,
-  );
+  `<cur key="${currency.key}" flags="${currency.flags}" iso="${currency.isoCode}" name="${currency.name}" symb="${currency.symbol}" syprf="${currency.symbolIsPrefixed}" dchar="${currency.decimalCharacter}" gchar="${currency.groupingCharacter}" frac="${currency.fractionDigits}" rate="${dtostr(currency.exchangeRate)}" mdate="${currency.lastUpdatedDate}"/>`;

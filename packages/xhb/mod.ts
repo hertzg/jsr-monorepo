@@ -97,8 +97,7 @@
  * @module
  */
 
-// @deno-types="./xml-parser.d.ts"
-import XMLParser, { type Node } from "xml-parser";
+import { isElement, parse as parseXml, type XmlElement } from "@std/xml";
 import {
   parseProperties,
   type Properties,
@@ -182,9 +181,9 @@ const NODE_NAME_OPERATION = "ope";
 /** Options for {@linkcode parse}. */
 export interface ParseOptions {
   /** Called for each parsed entity, allowing transformation before storage. */
-  onEntity?: <T>(entity: T, node: Node) => T;
+  onEntity?: <T>(entity: T, node: XmlElement) => T;
   /** Called when an unrecognized XML node is encountered. */
-  onUnknownNode?: (node: Node) => void;
+  onUnknownNode?: (node: XmlElement) => void;
 }
 
 const defaultParseOnEntity = <T>(entity: T): T => entity;
@@ -198,7 +197,7 @@ const defaultParseOnUnknownNode = (): void => undefined;
  * @returns The parsed XHB object.
  */
 export function parse(xml: string, options: ParseOptions = {}): XHB {
-  const doc = XMLParser(xml),
+  const doc = parseXml(xml, { ignoreWhitespace: true }),
     opts: Required<ParseOptions> = {
       onEntity: options.onEntity || defaultParseOnEntity,
       onUnknownNode: options.onUnknownNode || defaultParseOnUnknownNode,
@@ -217,8 +216,8 @@ export function parse(xml: string, options: ParseOptions = {}): XHB {
     tags: [],
   };
 
-  doc.root.children.forEach((node: Node) => {
-    switch (node.name) {
+  doc.root.children.filter(isElement).forEach((node: XmlElement) => {
+    switch (node.name.local) {
       case NODE_NAME_ACCOUNT:
         xhb.accounts.push(opts.onEntity(parseAccount(node), node));
         break;

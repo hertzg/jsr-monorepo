@@ -1,5 +1,4 @@
-// @deno-types="./xml-parser.d.ts"
-import type { Node } from "xml-parser";
+import type { XmlElement } from "@std/xml";
 import { atoi, parseGCharP } from "./_parse.ts";
 import { hb_xml_attr_int, hb_xml_attr_txt, hb_xml_tag } from "./_serialize.ts";
 import type { gCharP, gUInt32, gUShort } from "./_g_types.ts";
@@ -22,7 +21,7 @@ export interface Payee {
  * @param node - The `<pay>` XML node.
  * @returns The parsed payee.
  */
-export function parsePayee({ attributes }: Node): Payee {
+export function parsePayee({ attributes }: XmlElement): Payee {
   return {
     key: atoi(attributes.key),
     name: parseGCharP(attributes.name),
