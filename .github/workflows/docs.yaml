@@ -9,6 +9,7 @@ on:
 
 permissions:
   contents: write
+  pull-requests: write
 
 jobs:
   docs:
@@ -47,6 +48,14 @@ jobs:
         with:
           folder: docs
           target-folder: pr/${{ github.event.pull_request.number }}
+
+      - name: Comment on PR
+        if: github.event_name == 'pull_request' && github.event.action != 'closed'
+        uses: marocchino/sticky-pull-request-comment@v2
+        with:
+          header: docs-preview
+          message: |
+            **Docs preview:** https://hertzg.github.io/jsr-monorepo/pr/${{ github.event.pull_request.number }}/
 
       - name: Remove PR preview
         if: github.event_name == 'pull_request' && github.event.action == 'closed'
