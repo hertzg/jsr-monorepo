@@ -31,38 +31,32 @@
  * @module
  */
 
+import { mask6FromPrefixLength } from "./cidrv6.ts";
+import { parseIpv6 } from "./ipv6.ts";
+
 // Precomputed masks and network addresses for range checks.
 // Each pair (MASK_n, NET_xxx) represents a CIDR range where
 // (ip & MASK_n) === NET_xxx means the IP is in that range.
 
-// /7 mask
-const MASK_7 = 0xFE000000000000000000000000000000n;
-// /8 mask
-const MASK_8 = 0xFF000000000000000000000000000000n;
-// /10 mask
-const MASK_10 = 0xFFC00000000000000000000000000000n;
-// /3 mask
-const MASK_3 = 0xE0000000000000000000000000000000n;
-// /28 mask
-const MASK_28 = 0xFFFFFFF0000000000000000000000000n;
-// /32 mask
-const MASK_32 = 0xFFFFFFFF000000000000000000000000n;
-// /48 mask
-const MASK_48 = 0xFFFFFFFFFFFF00000000000000000000n;
-// /96 mask
-const MASK_96 = 0xFFFFFFFFFFFFFFFFFFFFFFFF00000000n;
+const MASK_3 = mask6FromPrefixLength(3);
+const MASK_7 = mask6FromPrefixLength(7);
+const MASK_8 = mask6FromPrefixLength(8);
+const MASK_10 = mask6FromPrefixLength(10);
+const MASK_28 = mask6FromPrefixLength(28);
+const MASK_32 = mask6FromPrefixLength(32);
+const MASK_48 = mask6FromPrefixLength(48);
+const MASK_96 = mask6FromPrefixLength(96);
 
-// Network addresses
-const NET_FC00 = 0xFC000000000000000000000000000000n; // fc00::/7
-const NET_FE80 = 0xFE800000000000000000000000000000n; // fe80::/10
-const NET_FF00 = 0xFF000000000000000000000000000000n; // ff00::/8
-const NET_2000 = 0x20000000000000000000000000000000n; // 2000::/3
-const NET_2001 = 0x20010000000000000000000000000000n; // 2001::/32
-const NET_2001_0002 = 0x20010002000000000000000000000000n; // 2001:2::/48
-const NET_2001_0020 = 0x20010020000000000000000000000000n; // 2001:20::/28
-const NET_2001_0DB8 = 0x20010DB8000000000000000000000000n; // 2001:db8::/32
-const NET_FFFF = 0x0000000000000000FFFF00000000n; // ::ffff:0:0/96
-const NET_64_FF9B = 0x0064FF9B000000000000000000000000n; // 64:ff9b::/96
+const NET_FC00 = parseIpv6("fc00::"); // fc00::/7
+const NET_FE80 = parseIpv6("fe80::"); // fe80::/10
+const NET_FF00 = parseIpv6("ff00::"); // ff00::/8
+const NET_2000 = parseIpv6("2000::"); // 2000::/3
+const NET_2001 = parseIpv6("2001::"); // 2001::/32
+const NET_2001_0002 = parseIpv6("2001:2::"); // 2001:2::/48
+const NET_2001_0020 = parseIpv6("2001:20::"); // 2001:20::/28
+const NET_2001_0DB8 = parseIpv6("2001:db8::"); // 2001:db8::/32
+const NET_FFFF = parseIpv6("::ffff:0:0"); // ::ffff:0:0/96
+const NET_64_FF9B = parseIpv6("64:ff9b::"); // 64:ff9b::/96
 
 /**
  * All possible IPv6 address classification labels.

@@ -32,6 +32,33 @@
  * @module
  */
 
+import { mask4FromPrefixLength } from "./cidrv4.ts";
+import { parseIpv4 } from "./ipv4.ts";
+
+// Precomputed masks and network addresses for range checks.
+const MASK_4 = mask4FromPrefixLength(4);
+const MASK_8 = mask4FromPrefixLength(8);
+const MASK_10 = mask4FromPrefixLength(10);
+const MASK_12 = mask4FromPrefixLength(12);
+const MASK_15 = mask4FromPrefixLength(15);
+const MASK_16 = mask4FromPrefixLength(16);
+const MASK_24 = mask4FromPrefixLength(24);
+
+const NET_0 = parseIpv4("0.0.0.0"); // 0.0.0.0/8
+const NET_10 = parseIpv4("10.0.0.0"); // 10.0.0.0/8
+const NET_100_64 = parseIpv4("100.64.0.0"); // 100.64.0.0/10
+const NET_127 = parseIpv4("127.0.0.0"); // 127.0.0.0/8
+const NET_169_254 = parseIpv4("169.254.0.0"); // 169.254.0.0/16
+const NET_172_16 = parseIpv4("172.16.0.0"); // 172.16.0.0/12
+const NET_192_0_2 = parseIpv4("192.0.2.0"); // 192.0.2.0/24
+const NET_192_168 = parseIpv4("192.168.0.0"); // 192.168.0.0/16
+const NET_198_18 = parseIpv4("198.18.0.0"); // 198.18.0.0/15
+const NET_198_51_100 = parseIpv4("198.51.100.0"); // 198.51.100.0/24
+const NET_203_0_113 = parseIpv4("203.0.113.0"); // 203.0.113.0/24
+const NET_224 = parseIpv4("224.0.0.0"); // 224.0.0.0/4
+const NET_240 = parseIpv4("240.0.0.0"); // 240.0.0.0/4
+const BROADCAST = parseIpv4("255.255.255.255");
+
 /**
  * All possible IPv4 address classification labels.
  *
@@ -75,9 +102,9 @@ export type Ipv4Classification =
  * ```
  */
 export function isIpv4Private(ip: number): boolean {
-  return ((ip & 0xFF000000) >>> 0) === 0x0A000000 || // 10.0.0.0/8
-    ((ip & 0xFFF00000) >>> 0) === 0xAC100000 || // 172.16.0.0/12
-    ((ip & 0xFFFF0000) >>> 0) === 0xC0A80000; // 192.168.0.0/16
+  return ((ip & MASK_8) >>> 0) === NET_10 ||
+    ((ip & MASK_12) >>> 0) === NET_172_16 ||
+    ((ip & MASK_16) >>> 0) === NET_192_168;
 }
 
 /**
@@ -100,7 +127,7 @@ export function isIpv4Private(ip: number): boolean {
  * ```
  */
 export function isIpv4Loopback(ip: number): boolean {
-  return ((ip & 0xFF000000) >>> 0) === 0x7F000000;
+  return ((ip & MASK_8) >>> 0) === NET_127;
 }
 
 /**
@@ -122,7 +149,7 @@ export function isIpv4Loopback(ip: number): boolean {
  * ```
  */
 export function isIpv4LinkLocal(ip: number): boolean {
-  return ((ip & 0xFFFF0000) >>> 0) === 0xA9FE0000;
+  return ((ip & MASK_16) >>> 0) === NET_169_254;
 }
 
 /**
@@ -145,7 +172,7 @@ export function isIpv4LinkLocal(ip: number): boolean {
  * ```
  */
 export function isIpv4Multicast(ip: number): boolean {
-  return ((ip & 0xF0000000) >>> 0) === 0xE0000000;
+  return ((ip & MASK_4) >>> 0) === NET_224;
 }
 
 /**
@@ -170,8 +197,8 @@ export function isIpv4Multicast(ip: number): boolean {
  * ```
  */
 export function isIpv4Reserved(ip: number): boolean {
-  return ((ip & 0xF0000000) >>> 0) === 0xF0000000 &&
-    (ip >>> 0) !== 0xFFFFFFFF;
+  return ((ip & MASK_4) >>> 0) === NET_240 &&
+    (ip >>> 0) !== BROADCAST;
 }
 
 /**
@@ -193,7 +220,7 @@ export function isIpv4Reserved(ip: number): boolean {
  * ```
  */
 export function isIpv4Broadcast(ip: number): boolean {
-  return (ip >>> 0) === 0xFFFFFFFF;
+  return (ip >>> 0) === BROADCAST;
 }
 
 /**
@@ -216,7 +243,7 @@ export function isIpv4Broadcast(ip: number): boolean {
  * ```
  */
 export function isIpv4ThisNetwork(ip: number): boolean {
-  return ((ip & 0xFF000000) >>> 0) === 0;
+  return ((ip & MASK_8) >>> 0) === NET_0;
 }
 
 /**
@@ -239,7 +266,7 @@ export function isIpv4ThisNetwork(ip: number): boolean {
  * ```
  */
 export function isIpv4CgNat(ip: number): boolean {
-  return ((ip & 0xFFC00000) >>> 0) === 0x64400000;
+  return ((ip & MASK_10) >>> 0) === NET_100_64;
 }
 
 /**
@@ -262,7 +289,7 @@ export function isIpv4CgNat(ip: number): boolean {
  * ```
  */
 export function isIpv4Benchmarking(ip: number): boolean {
-  return ((ip & 0xFFFE0000) >>> 0) === 0xC6120000;
+  return ((ip & MASK_15) >>> 0) === NET_198_18;
 }
 
 /**
@@ -289,9 +316,9 @@ export function isIpv4Benchmarking(ip: number): boolean {
  * ```
  */
 export function isIpv4Documentation(ip: number): boolean {
-  return ((ip & 0xFFFFFF00) >>> 0) === 0xC0000200 || // 192.0.2.0/24
-    ((ip & 0xFFFFFF00) >>> 0) === 0xC6336400 || // 198.51.100.0/24
-    ((ip & 0xFFFFFF00) >>> 0) === 0xCB007100; // 203.0.113.0/24
+  return ((ip & MASK_24) >>> 0) === NET_192_0_2 ||
+    ((ip & MASK_24) >>> 0) === NET_198_51_100 ||
+    ((ip & MASK_24) >>> 0) === NET_203_0_113;
 }
 
 /**
