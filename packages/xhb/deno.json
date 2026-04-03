@@ -5,13 +5,7 @@
     ".": "./mod.ts"
   },
   "publish": {
-    "include": [
-      "LICENSE",
-      "**/*.ts"
-    ],
-    "exclude": [
-      "**/*.test.ts",
-      "fixtures/**"
-    ]
+    "include": ["LICENSE", "**/*.ts"],
+    "exclude": ["**/*.test.ts", "fixtures/**"]
   }
 }
