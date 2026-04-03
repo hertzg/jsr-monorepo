@@ -17,6 +17,37 @@
  * assertEquals(stringifyIpv6(next), "2001:db8::2");
  * ```
  *
+ * @example Bitwise operations on IPv6 addresses
+ *
+ * Since IPv6 addresses are plain bigints, you can use standard JavaScript
+ * bitwise operators directly. For NOT, mask the result with the maximum
+ * 128-bit value to stay within range.
+ *
+ * ```ts
+ * import { assertEquals } from "@std/assert";
+ * import { parseIpv6, stringifyIpv6 } from "@hertzg/ip/ipv6";
+ *
+ * const ip = parseIpv6("2001:db8::1");
+ * const MAX_IPV6 = (1n << 128n) - 1n;
+ *
+ * // Bitwise NOT (invert all bits, mask to 128 bits)
+ * const inverted = ~ip & MAX_IPV6;
+ * assertEquals(stringifyIpv6(inverted), "dffe:f247:ffff:ffff:ffff:ffff:ffff:fffe");
+ *
+ * // Bitwise AND (apply prefix mask to get network address)
+ * const mask = (MAX_IPV6 << 96n) & MAX_IPV6; // /32 mask
+ * const network = ip & mask;
+ * assertEquals(stringifyIpv6(network), "2001:db8::");
+ *
+ * // Bitwise OR (set host bits)
+ * const result = network | 0xFFn;
+ * assertEquals(stringifyIpv6(result), "2001:db8::ff");
+ *
+ * // Direct comparison (no isEqual() needed)
+ * assertEquals(parseIpv6("::1") === parseIpv6("::1"), true);
+ * assertEquals(parseIpv6("::1") === parseIpv6("::2"), false);
+ * ```
+ *
  * @module
  */
 

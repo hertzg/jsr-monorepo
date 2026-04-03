@@ -41,11 +41,47 @@
  * - {@link cidr6Size}: Get total number of addresses in CIDR range
  * - {@link cidr6Addresses}: Generate IP addresses in CIDR range
  *
+ * ### IPv4 Classification
+ * - {@link Ipv4Classification}: Type for all IPv4 classification labels
+ * - {@link classifyIpv4}: Classify an IPv4 address into its well-known range
+ * - {@link isIpv4Private}: Check if address is private (RFC 1918)
+ * - {@link isIpv4Loopback}: Check if address is loopback (127.0.0.0/8)
+ * - {@link isIpv4LinkLocal}: Check if address is link-local (169.254.0.0/16)
+ * - {@link isIpv4Multicast}: Check if address is multicast (224.0.0.0/4)
+ * - {@link isIpv4Reserved}: Check if address is reserved (240.0.0.0/4)
+ * - {@link isIpv4Broadcast}: Check if address is broadcast (255.255.255.255)
+ * - {@link isIpv4ThisNetwork}: Check if address is "this network" (0.0.0.0/8)
+ * - {@link isIpv4CgNat}: Check if address is Carrier-Grade NAT (100.64.0.0/10)
+ * - {@link isIpv4Benchmarking}: Check if address is benchmarking (198.18.0.0/15)
+ * - {@link isIpv4Documentation}: Check if address is documentation (RFC 5737)
+ * - {@link isIpv4Public}: Check if address is publicly routable
+ *
+ * ### IPv6 Classification
+ * - {@link Ipv6Classification}: Type for all IPv6 classification labels
+ * - {@link classifyIpv6}: Classify an IPv6 address into its well-known range
+ * - {@link isIpv6Loopback}: Check if address is loopback (::1)
+ * - {@link isIpv6Unspecified}: Check if address is unspecified (::)
+ * - {@link isIpv6LinkLocal}: Check if address is link-local (fe80::/10)
+ * - {@link isIpv6Multicast}: Check if address is multicast (ff00::/8)
+ * - {@link isIpv6UniqueLocal}: Check if address is unique local (fc00::/7)
+ * - {@link isIpv6GlobalUnicast}: Check if address is global unicast (2000::/3)
+ * - {@link isIpv6Ipv4Mapped}: Check if address is IPv4-mapped (::ffff:0:0/96)
+ * - {@link isIpv6Ipv4Translated}: Check if address is IPv4-translated (64:ff9b::/96)
+ * - {@link isIpv6Documentation}: Check if address is documentation (2001:db8::/32)
+ * - {@link isIpv6Teredo}: Check if address is Teredo (2001::/32)
+ * - {@link isIpv6Benchmarking}: Check if address is benchmarking (2001:2::/48)
+ * - {@link isIpv6Orchidv2}: Check if address is ORCHIDv2 (2001:20::/28)
+ *
+ * ### Combined Classification
+ * - {@link classifyIp}: Classify an IPv4 (number) or IPv6 (bigint) address
+ *
  * ### Submodules
  * - [`ipv4`](https://jsr.io/@hertzg/ip/doc/ipv4): IPv4 parsing via {@link parseIpv4} and {@link stringifyIpv4}
  * - [`cidrv4`](https://jsr.io/@hertzg/ip/doc/cidrv4): IPv4 CIDR utilities via {@link parseCidr4}, {@link cidr4Contains}
  * - [`ipv6`](https://jsr.io/@hertzg/ip/doc/ipv6): IPv6 parsing via {@link parseIpv6}, {@link expandIpv6}, {@link compressIpv6}
  * - [`cidrv6`](https://jsr.io/@hertzg/ip/doc/cidrv6): IPv6 CIDR utilities via {@link parseCidr6}, {@link cidr6Contains}
+ * - [`classifyv4`](https://jsr.io/@hertzg/ip/doc/classifyv4): IPv4 classification via {@link classifyIpv4}, {@link isIpv4Private}, etc.
+ * - [`classifyv6`](https://jsr.io/@hertzg/ip/doc/classifyv6): IPv6 classification via {@link classifyIpv6}, {@link isIpv6Loopback}, etc.
  *
  * ## Features
  *
@@ -55,6 +91,7 @@
  * - **Address Generation**: Generate IP ranges with custom offsets and steps
  * - **Arithmetic Operations**: Use number (IPv4) or bigint (IPv6) math for IP address manipulation
  * - **IPv6 Compression**: Expand and compress IPv6 addresses
+ * - **IP Classification**: Identify private, loopback, multicast, and other well-known ranges
  *
  * ## Basic IPv4 Operations
  *
@@ -293,3 +330,81 @@ export {
   parseCidr6,
   stringifyCidr6,
 } from "./cidrv6.ts";
+
+// Re-export IPv4 classifiers
+export {
+  classifyIpv4,
+  type Ipv4Classification,
+  isIpv4Benchmarking,
+  isIpv4Broadcast,
+  isIpv4CgNat,
+  isIpv4Documentation,
+  isIpv4LinkLocal,
+  isIpv4Loopback,
+  isIpv4Multicast,
+  isIpv4Private,
+  isIpv4Public,
+  isIpv4Reserved,
+  isIpv4ThisNetwork,
+} from "./classifyv4.ts";
+
+// Re-export IPv6 classifiers
+export {
+  classifyIpv6,
+  type Ipv6Classification,
+  isIpv6Benchmarking,
+  isIpv6Documentation,
+  isIpv6GlobalUnicast,
+  isIpv6Ipv4Mapped,
+  isIpv6Ipv4Translated,
+  isIpv6LinkLocal,
+  isIpv6Loopback,
+  isIpv6Multicast,
+  isIpv6Orchidv2,
+  isIpv6Teredo,
+  isIpv6Unspecified,
+  isIpv6UniqueLocal,
+} from "./classifyv6.ts";
+
+import { classifyIpv4 } from "./classifyv4.ts";
+import type { Ipv4Classification } from "./classifyv4.ts";
+import { classifyIpv6 } from "./classifyv6.ts";
+import type { Ipv6Classification } from "./classifyv6.ts";
+
+/**
+ * Classifies an IPv4 or IPv6 address into its well-known range.
+ *
+ * Dispatches based on type: `number` for IPv4, `bigint` for IPv6.
+ *
+ * @param ip The IP address as a number (IPv4) or bigint (IPv6)
+ * @returns The classification label
+ *
+ * @example
+ * ```ts
+ * import { assertEquals } from "@std/assert";
+ * import { classifyIp } from "@hertzg/ip";
+ * import { parseIpv4 } from "@hertzg/ip/ipv4";
+ * import { parseIpv6 } from "@hertzg/ip/ipv6";
+ *
+ * assertEquals(classifyIp(parseIpv4("192.168.1.1")), "private");
+ * assertEquals(classifyIp(parseIpv4("8.8.8.8")), "public");
+ * assertEquals(classifyIp(parseIpv6("::1")), "loopback");
+ * assertEquals(classifyIp(parseIpv6("2001:db8::1")), "documentation");
+ * ```
+ */
+export function classifyIp(ip: number): Ipv4Classification;
+/**
+ * Classifies an IPv6 address into its well-known range.
+ *
+ * @param ip The IPv6 address as a 128-bit bigint
+ * @returns The classification label
+ */
+export function classifyIp(ip: bigint): Ipv6Classification;
+export function classifyIp(
+  ip: number | bigint,
+): Ipv4Classification | Ipv6Classification {
+  if (typeof ip === "bigint") {
+    return classifyIpv6(ip);
+  }
+  return classifyIpv4(ip);
+}
