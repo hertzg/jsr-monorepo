@@ -1042,7 +1042,7 @@ Functions</h2></div><div class="namespaceSection"><div id="namespace_cidrv4addre
     </div><div id="namespace_classifyip" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-Function bg-Function/15 dark:text-FunctionDark dark:bg-FunctionDark/15" title="Function">f</div></div>
 <div class="namespaceItemContent">
 		    <a href=".&#x2F;.&#x2F;classify.ts&#x2F;~&#x2F;classifyIp.html" title="classifyIp">
-			    <span>classifyIp</span><span>(<span><span>ip<span>: <span><span class="td-kw">number</span><span class="td-op"> | </span><span class="td-kw">bigint</span></span></span></span></span>)<span>: <span class="td-ref">ClassifyIpResult</span></span></span><div class="namespaceItemContentTypeInfo">2 overloads</div></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Classifies an IPv4 address into its well-known range.</p>
+			    <span>classifyIp</span><span>(<span><span>ip<span>: <span><span class="td-kw">number</span><span class="td-op"> | </span><span class="td-kw">bigint</span></span></span></span></span>)<span>: <span class="td-ref">ClassifyIpResult</span></span></span><div class="namespaceItemContentTypeInfo">3 overloads</div></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Classifies an IPv4 address into its well-known range.</p>
 </div></div></div>
     </div><div id="namespace_classifyipv4" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-Function bg-Function/15 dark:text-FunctionDark dark:bg-FunctionDark/15" title="Function">f</div></div>
 <div class="namespaceItemContent">
@@ -2765,6 +2765,7 @@ Examples</h2></div><div class="space-y-8"><div class="anchorable"><a href="#exam
 </div></h3>
   <div><div class="markdown"><pre class="highlight"><code class="language-ts">import { assertEquals } from &quot;@std/assert&quot;;
 import { classifyIp } from &quot;@hertzg/ip/classify&quot;;
+import { parseIp } from &quot;@hertzg/ip/ip&quot;;
 import { parseIpv4 } from &quot;@hertzg/ip/ipv4&quot;;
 import { parseIpv6 } from &quot;@hertzg/ip/ipv6&quot;;
 
@@ -2785,8 +2786,18 @@ assertEquals(v6.kind, &quot;loopback&quot;);
 const v6doc = classifyIp(parseIpv6(&quot;2001:db8::1&quot;));
 assertEquals(v6doc.version, 6);
 assertEquals(v6doc.kind, &quot;documentation&quot;);
+
+// Using parseIp which returns number | bigint
+const auto4 = classifyIp(parseIp(&quot;10.0.0.1&quot;));
+assertEquals(auto4.version, 4);
+assertEquals(auto4.kind, &quot;private&quot;);
+
+const auto6 = classifyIp(parseIp(&quot;fe80::1&quot;));
+assertEquals(auto6.version, 6);
+assertEquals(auto6.kind, &quot;link-local&quot;);
 </code><button class="copyButton" data-copy="import { assertEquals } from &quot;@std/assert&quot;;
 import { classifyIp } from &quot;@hertzg/ip/classify&quot;;
+import { parseIp } from &quot;@hertzg/ip/ip&quot;;
 import { parseIpv4 } from &quot;@hertzg/ip/ipv4&quot;;
 import { parseIpv6 } from &quot;@hertzg/ip/ipv6&quot;;
 
@@ -2807,6 +2818,15 @@ assertEquals(v6.kind, &quot;loopback&quot;);
 const v6doc = classifyIp(parseIpv6(&quot;2001:db8::1&quot;));
 assertEquals(v6doc.version, 6);
 assertEquals(v6doc.kind, &quot;documentation&quot;);
+
+// Using parseIp which returns number | bigint
+const auto4 = classifyIp(parseIp(&quot;10.0.0.1&quot;));
+assertEquals(auto4.version, 4);
+assertEquals(auto4.kind, &quot;private&quot;);
+
+const auto6 = classifyIp(parseIp(&quot;fe80::1&quot;));
+assertEquals(auto6.version, 6);
+assertEquals(auto6.kind, &quot;link-local&quot;);
 "><svg
   class="copy"
   width="15"
@@ -2867,7 +2887,7 @@ assertEquals(v6doc.kind, &quot;documentation&quot;);
 Functions</h2></div><div class="namespaceSection"><div id="namespace_classifyip-1" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-Function bg-Function/15 dark:text-FunctionDark dark:bg-FunctionDark/15" title="Function">f</div></div>
 <div class="namespaceItemContent">
 		    <a href=".&#x2F;.&#x2F;classify.ts&#x2F;~&#x2F;classifyIp.html" title="classifyIp">
-			    <span>classifyIp</span><span>(<span><span>ip<span>: <span><span class="td-kw">number</span><span class="td-op"> | </span><span class="td-kw">bigint</span></span></span></span></span>)<span>: <span class="td-ref">ClassifyIpResult</span></span></span><div class="namespaceItemContentTypeInfo">2 overloads</div></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Classifies an IPv4 address into its well-known range.</p>
+			    <span>classifyIp</span><span>(<span><span>ip<span>: <span><span class="td-kw">number</span><span class="td-op"> | </span><span class="td-kw">bigint</span></span></span></span></span>)<span>: <span class="td-ref">ClassifyIpResult</span></span></span><div class="namespaceItemContentTypeInfo">3 overloads</div></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Classifies an IPv4 address into its well-known range.</p>
 </div></div></div>
     </div></div>
 </section>
