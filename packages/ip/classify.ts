@@ -43,11 +43,21 @@
  * const auto6 = classifyIp(parseIp("fe80::1"));
  * assertEquals(auto6.version, 6);
  * assertEquals(auto6.kind, "link-local");
+ *
+ * // Using string directly
+ * const str4 = classifyIp("127.0.0.1");
+ * assertEquals(str4.version, 4);
+ * assertEquals(str4.kind, "loopback");
+ *
+ * const str6 = classifyIp("2001:db8::1");
+ * assertEquals(str6.version, 6);
+ * assertEquals(str6.kind, "documentation");
  * ```
  *
  * @module
  */
 
+import { parseIp } from "./ip.ts";
 import { classifyIpv4 } from "./classifyv4.ts";
 import type { ClassifyIpv4Result } from "./classifyv4.ts";
 import { classifyIpv6 } from "./classifyv6.ts";
@@ -94,6 +104,32 @@ export function classifyIp(
   ip: bigint,
 ): { readonly version: 6; readonly kind: ClassifyIpv6Result };
 /**
+ * Parses an IP address string and classifies it into its well-known range.
+ *
+ * The string is parsed using {@link parseIp} to detect IPv4 vs IPv6,
+ * then classified accordingly.
+ *
+ * @param ip The IP address string in dotted decimal or colon-hexadecimal notation
+ * @returns A {@link ClassifyIpResult} with the `version` and `kind` fields
+ * @throws {TypeError} If the string is not a valid IP address
+ * @throws {RangeError} If values are out of range
+ *
+ * @example
+ * ```ts
+ * import { assertEquals } from "@std/assert";
+ * import { classifyIp } from "@hertzg/ip/classify";
+ *
+ * const v4 = classifyIp("192.168.1.1");
+ * assertEquals(v4.version, 4);
+ * assertEquals(v4.kind, "private");
+ *
+ * const v6 = classifyIp("::1");
+ * assertEquals(v6.version, 6);
+ * assertEquals(v6.kind, "loopback");
+ * ```
+ */
+export function classifyIp(ip: string): ClassifyIpResult;
+/**
  * Classifies an IPv4 or IPv6 address into its well-known range.
  *
  * This overload accepts `number | bigint`, which is the return type of
@@ -118,8 +154,11 @@ export function classifyIp(
   ip: number | bigint,
 ): ClassifyIpResult;
 export function classifyIp(
-  ip: number | bigint,
+  ip: number | bigint | string,
 ): ClassifyIpResult {
+  if (typeof ip === "string") {
+    return classifyIp(parseIp(ip));
+  }
   if (typeof ip === "bigint") {
     return { version: 6, kind: classifyIpv6(ip) };
   }
