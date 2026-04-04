@@ -322,17 +322,19 @@
 // --- Universal (auto-detect IPv4/IPv6) ---
 
 export { parseIp, stringifyIp } from "./ip.ts";
-export { isValidCidr, parseCidr, stringifyCidr } from "./cidr.ts";
+export { parseCidr, stringifyCidr } from "./cidr.ts";
 export { classifyIp, type ClassifyIpResult } from "./classify.ts";
 export {
   type ValidateIpResult,
+  isValidCidr,
   isValidIp,
   validateIp,
 } from "./validate.ts";
 
 // --- IPv4 ---
 
-export { isValidIpv4, parseIpv4, stringifyIpv4 } from "./ipv4.ts";
+export { parseIpv4, stringifyIpv4 } from "./ipv4.ts";
+export { isValidCidrv4, isValidIpv4 } from "./validatev4.ts";
 
 export {
   type Cidrv4,
@@ -343,7 +345,6 @@ export {
   cidrv4LastAddress,
   cidrv4NetworkAddress,
   cidrv4Size,
-  isValidCidrv4,
   cidrv4Mask,
   parseCidrv4,
   stringifyCidrv4,
@@ -370,10 +371,10 @@ export {
 export {
   compressIpv6,
   expandIpv6,
-  isValidIpv6,
   parseIpv6,
   stringifyIpv6,
 } from "./ipv6.ts";
+export { isValidCidrv6, isValidIpv6 } from "./validatev6.ts";
 
 export {
   type Cidrv6,
@@ -382,7 +383,6 @@ export {
   cidrv6FirstAddress,
   cidrv6LastAddress,
   cidrv6Size,
-  isValidCidrv6,
   cidrv6Mask,
   parseCidrv6,
   stringifyCidrv6,

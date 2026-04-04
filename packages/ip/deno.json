@@ -12,6 +12,8 @@
     "./classify": "./classify.ts",
     "./classifyv4": "./classifyv4.ts",
     "./classifyv6": "./classifyv6.ts",
-    "./validate": "./validate.ts"
+    "./validate": "./validate.ts",
+    "./validatev4": "./validatev4.ts",
+    "./validatev6": "./validatev6.ts"
   }
 }

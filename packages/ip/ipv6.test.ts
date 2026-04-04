@@ -2,10 +2,10 @@ import { assert, assertEquals, assertThrows } from "@std/assert";
 import {
   compressIpv6,
   expandIpv6,
-  isValidIpv6,
   parseIpv6,
   stringifyIpv6,
 } from "./ipv6.ts";
+import { isValidIpv6 } from "./validatev6.ts";
 
 Deno.test("parseIpv6", async (t) => {
   await t.step("full form addresses", () => {

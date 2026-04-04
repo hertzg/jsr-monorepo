@@ -6,10 +6,8 @@
  * that checks if a string is any valid format.
  *
  * For version-specific validators, see:
- * - [`ipv4`](https://jsr.io/@hertzg/ip/doc/ipv4): {@link isValidIpv4}
- * - [`ipv6`](https://jsr.io/@hertzg/ip/doc/ipv6): {@link isValidIpv6}
- * - [`cidrv4`](https://jsr.io/@hertzg/ip/doc/cidrv4): {@link isValidCidrv4}
- * - [`cidrv6`](https://jsr.io/@hertzg/ip/doc/cidrv6): {@link isValidCidrv6}
+ * - [`validatev4`](https://jsr.io/@hertzg/ip/doc/validatev4): {@link isValidIpv4}, {@link isValidCidrv4}
+ * - [`validatev6`](https://jsr.io/@hertzg/ip/doc/validatev6): {@link isValidIpv6}, {@link isValidCidrv6}
  *
  * @example Universal validation
  * ```ts
@@ -32,6 +30,8 @@ import { parseIpv4 } from "./ipv4.ts";
 import { parseIpv6 } from "./ipv6.ts";
 import { type Cidrv4, parseCidrv4 } from "./cidrv4.ts";
 import { type Cidrv6, parseCidrv6 } from "./cidrv6.ts";
+import { isValidCidrv4 } from "./validatev4.ts";
+import { isValidCidrv6 } from "./validatev6.ts";
 
 /**
  * The result of the {@link validateIp} function.
@@ -171,4 +171,25 @@ export function validateIp(s: string): ValidateIpResult {
     }
   }
   return { kind: "invalid" };
+}
+
+/**
+ * Checks if a string is valid IPv4 or IPv6 CIDR notation.
+ *
+ * @param s The string to validate
+ * @returns `true` if the string is valid CIDR notation
+ *
+ * @example
+ * ```ts
+ * import { assert, assertEquals } from "@std/assert";
+ * import { isValidCidr } from "@hertzg/ip";
+ *
+ * assert(isValidCidr("10.0.0.0/8"));
+ * assert(isValidCidr("2001:db8::/32"));
+ * assertEquals(isValidCidr("10.0.0.0"), false);
+ * assertEquals(isValidCidr("garbage/24"), false);
+ * ```
+ */
+export function isValidCidr(s: string): boolean {
+  return isValidCidrv4(s) || isValidCidrv6(s);
 }

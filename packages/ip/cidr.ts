@@ -30,13 +30,11 @@
 
 import {
   type Cidrv4,
-  isValidCidrv4,
   parseCidrv4,
   stringifyCidrv4,
 } from "./cidrv4.ts";
 import {
   type Cidrv6,
-  isValidCidrv6,
   parseCidrv6,
   stringifyCidrv6,
 } from "./cidrv6.ts";
@@ -97,25 +95,4 @@ export function stringifyCidr(cidr: Cidrv4 | Cidrv6): string {
     return stringifyCidrv6(cidr as Cidrv6);
   }
   return stringifyCidrv4(cidr as Cidrv4);
-}
-
-/**
- * Checks if a string is valid IPv4 or IPv6 CIDR notation.
- *
- * @param s The string to validate
- * @returns `true` if the string is valid CIDR notation
- *
- * @example
- * ```ts
- * import { assert, assertEquals } from "@std/assert";
- * import { isValidCidr } from "@hertzg/ip/cidr";
- *
- * assert(isValidCidr("10.0.0.0/8"));
- * assert(isValidCidr("2001:db8::/32"));
- * assertEquals(isValidCidr("10.0.0.0"), false);
- * assertEquals(isValidCidr("garbage/24"), false);
- * ```
- */
-export function isValidCidr(s: string): boolean {
-  return isValidCidrv4(s) || isValidCidrv6(s);
 }
