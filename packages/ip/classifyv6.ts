@@ -31,32 +31,21 @@
  * @module
  */
 
-import { cidrv6Mask } from "./cidrv6.ts";
-import { parseIpv6 } from "./ipv6.ts";
+import { type Cidrv6, cidrv6Contains, parseCidrv6 } from "./cidrv6.ts";
 
-// Precomputed masks and network addresses for range checks.
-// Each pair (MASK_n, NET_xxx) represents a CIDR range where
-// (ip & MASK_n) === NET_xxx means the IP is in that range.
-
-const MASK_3 = cidrv6Mask(3);
-const MASK_7 = cidrv6Mask(7);
-const MASK_8 = cidrv6Mask(8);
-const MASK_10 = cidrv6Mask(10);
-const MASK_28 = cidrv6Mask(28);
-const MASK_32 = cidrv6Mask(32);
-const MASK_48 = cidrv6Mask(48);
-const MASK_96 = cidrv6Mask(96);
-
-const NET_FC00 = parseIpv6("fc00::"); // fc00::/7
-const NET_FE80 = parseIpv6("fe80::"); // fe80::/10
-const NET_FF00 = parseIpv6("ff00::"); // ff00::/8
-const NET_2000 = parseIpv6("2000::"); // 2000::/3
-const NET_2001 = parseIpv6("2001::"); // 2001::/32
-const NET_2001_0002 = parseIpv6("2001:2::"); // 2001:2::/48
-const NET_2001_0020 = parseIpv6("2001:20::"); // 2001:20::/28
-const NET_2001_0DB8 = parseIpv6("2001:db8::"); // 2001:db8::/32
-const NET_FFFF = parseIpv6("::ffff:0:0"); // ::ffff:0:0/96
-const NET_64_FF9B = parseIpv6("64:ff9b::"); // 64:ff9b::/96
+// Precomputed CIDR blocks for range checks.
+const CIDR_LOOPBACK: Cidrv6 = parseCidrv6("::1/128");
+const CIDR_UNSPECIFIED: Cidrv6 = parseCidrv6("::/128");
+const CIDR_UNIQUE_LOCAL: Cidrv6 = parseCidrv6("fc00::/7");
+const CIDR_LINK_LOCAL: Cidrv6 = parseCidrv6("fe80::/10");
+const CIDR_MULTICAST: Cidrv6 = parseCidrv6("ff00::/8");
+const CIDR_GLOBAL_UNICAST: Cidrv6 = parseCidrv6("2000::/3");
+const CIDR_TEREDO: Cidrv6 = parseCidrv6("2001::/32");
+const CIDR_BENCHMARKING: Cidrv6 = parseCidrv6("2001:2::/48");
+const CIDR_ORCHIDV2: Cidrv6 = parseCidrv6("2001:20::/28");
+const CIDR_DOCUMENTATION: Cidrv6 = parseCidrv6("2001:db8::/32");
+const CIDR_IPV4_MAPPED: Cidrv6 = parseCidrv6("::ffff:0:0/96");
+const CIDR_IPV4_TRANSLATED: Cidrv6 = parseCidrv6("64:ff9b::/96");
 
 /**
  * All possible IPv6 address classification labels.
@@ -99,7 +88,7 @@ export type ClassifyIpv6Result =
  * ```
  */
 export function isIpv6Loopback(ip: bigint): boolean {
-  return ip === 1n;
+  return cidrv6Contains(CIDR_LOOPBACK, ip);
 }
 
 /**
@@ -121,7 +110,7 @@ export function isIpv6Loopback(ip: bigint): boolean {
  * ```
  */
 export function isIpv6Unspecified(ip: bigint): boolean {
-  return ip === 0n;
+  return cidrv6Contains(CIDR_UNSPECIFIED, ip);
 }
 
 /**
@@ -144,7 +133,7 @@ export function isIpv6Unspecified(ip: bigint): boolean {
  * ```
  */
 export function isIpv6LinkLocal(ip: bigint): boolean {
-  return (ip & MASK_10) === NET_FE80;
+  return cidrv6Contains(CIDR_LINK_LOCAL, ip);
 }
 
 /**
@@ -167,7 +156,7 @@ export function isIpv6LinkLocal(ip: bigint): boolean {
  * ```
  */
 export function isIpv6Multicast(ip: bigint): boolean {
-  return (ip & MASK_8) === NET_FF00;
+  return cidrv6Contains(CIDR_MULTICAST, ip);
 }
 
 /**
@@ -192,7 +181,7 @@ export function isIpv6Multicast(ip: bigint): boolean {
  * ```
  */
 export function isIpv6UniqueLocal(ip: bigint): boolean {
-  return (ip & MASK_7) === NET_FC00;
+  return cidrv6Contains(CIDR_UNIQUE_LOCAL, ip);
 }
 
 /**
@@ -219,7 +208,7 @@ export function isIpv6UniqueLocal(ip: bigint): boolean {
  * ```
  */
 export function isIpv6GlobalUnicast(ip: bigint): boolean {
-  return (ip & MASK_3) === NET_2000;
+  return cidrv6Contains(CIDR_GLOBAL_UNICAST, ip);
 }
 
 /**
@@ -242,7 +231,7 @@ export function isIpv6GlobalUnicast(ip: bigint): boolean {
  * ```
  */
 export function isIpv6Ipv4Mapped(ip: bigint): boolean {
-  return (ip & MASK_96) === NET_FFFF;
+  return cidrv6Contains(CIDR_IPV4_MAPPED, ip);
 }
 
 /**
@@ -267,7 +256,7 @@ export function isIpv6Ipv4Mapped(ip: bigint): boolean {
  * ```
  */
 export function isIpv6Ipv4Translated(ip: bigint): boolean {
-  return (ip & MASK_96) === NET_64_FF9B;
+  return cidrv6Contains(CIDR_IPV4_TRANSLATED, ip);
 }
 
 /**
@@ -290,7 +279,7 @@ export function isIpv6Ipv4Translated(ip: bigint): boolean {
  * ```
  */
 export function isIpv6Documentation(ip: bigint): boolean {
-  return (ip & MASK_32) === NET_2001_0DB8;
+  return cidrv6Contains(CIDR_DOCUMENTATION, ip);
 }
 
 /**
@@ -317,7 +306,7 @@ export function isIpv6Documentation(ip: bigint): boolean {
  * ```
  */
 export function isIpv6Teredo(ip: bigint): boolean {
-  return (ip & MASK_32) === NET_2001;
+  return cidrv6Contains(CIDR_TEREDO, ip);
 }
 
 /**
@@ -339,7 +328,7 @@ export function isIpv6Teredo(ip: bigint): boolean {
  * ```
  */
 export function isIpv6Benchmarking(ip: bigint): boolean {
-  return (ip & MASK_48) === NET_2001_0002;
+  return cidrv6Contains(CIDR_BENCHMARKING, ip);
 }
 
 /**
@@ -362,7 +351,7 @@ export function isIpv6Benchmarking(ip: bigint): boolean {
  * ```
  */
 export function isIpv6Orchidv2(ip: bigint): boolean {
-  return (ip & MASK_28) === NET_2001_0020;
+  return cidrv6Contains(CIDR_ORCHIDV2, ip);
 }
 
 /**

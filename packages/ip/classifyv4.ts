@@ -32,32 +32,23 @@
  * @module
  */
 
-import { cidrv4Mask } from "./cidrv4.ts";
-import { parseIpv4 } from "./ipv4.ts";
+import { type Cidrv4, cidrv4Contains, parseCidrv4 } from "./cidrv4.ts";
 
-// Precomputed masks and network addresses for range checks.
-const MASK_4 = cidrv4Mask(4);
-const MASK_8 = cidrv4Mask(8);
-const MASK_10 = cidrv4Mask(10);
-const MASK_12 = cidrv4Mask(12);
-const MASK_15 = cidrv4Mask(15);
-const MASK_16 = cidrv4Mask(16);
-const MASK_24 = cidrv4Mask(24);
-
-const NET_0 = parseIpv4("0.0.0.0"); // 0.0.0.0/8
-const NET_10 = parseIpv4("10.0.0.0"); // 10.0.0.0/8
-const NET_100_64 = parseIpv4("100.64.0.0"); // 100.64.0.0/10
-const NET_127 = parseIpv4("127.0.0.0"); // 127.0.0.0/8
-const NET_169_254 = parseIpv4("169.254.0.0"); // 169.254.0.0/16
-const NET_172_16 = parseIpv4("172.16.0.0"); // 172.16.0.0/12
-const NET_192_0_2 = parseIpv4("192.0.2.0"); // 192.0.2.0/24
-const NET_192_168 = parseIpv4("192.168.0.0"); // 192.168.0.0/16
-const NET_198_18 = parseIpv4("198.18.0.0"); // 198.18.0.0/15
-const NET_198_51_100 = parseIpv4("198.51.100.0"); // 198.51.100.0/24
-const NET_203_0_113 = parseIpv4("203.0.113.0"); // 203.0.113.0/24
-const NET_224 = parseIpv4("224.0.0.0"); // 224.0.0.0/4
-const NET_240 = parseIpv4("240.0.0.0"); // 240.0.0.0/4
-const BROADCAST = parseIpv4("255.255.255.255");
+// Precomputed CIDR blocks for range checks.
+const CIDR_THIS_NETWORK: Cidrv4 = parseCidrv4("0.0.0.0/8");
+const CIDR_PRIVATE_10: Cidrv4 = parseCidrv4("10.0.0.0/8");
+const CIDR_CG_NAT: Cidrv4 = parseCidrv4("100.64.0.0/10");
+const CIDR_LOOPBACK: Cidrv4 = parseCidrv4("127.0.0.0/8");
+const CIDR_LINK_LOCAL: Cidrv4 = parseCidrv4("169.254.0.0/16");
+const CIDR_PRIVATE_172: Cidrv4 = parseCidrv4("172.16.0.0/12");
+const CIDR_DOC_1: Cidrv4 = parseCidrv4("192.0.2.0/24");
+const CIDR_PRIVATE_192: Cidrv4 = parseCidrv4("192.168.0.0/16");
+const CIDR_BENCHMARKING: Cidrv4 = parseCidrv4("198.18.0.0/15");
+const CIDR_DOC_2: Cidrv4 = parseCidrv4("198.51.100.0/24");
+const CIDR_DOC_3: Cidrv4 = parseCidrv4("203.0.113.0/24");
+const CIDR_MULTICAST: Cidrv4 = parseCidrv4("224.0.0.0/4");
+const CIDR_RESERVED: Cidrv4 = parseCidrv4("240.0.0.0/4");
+const CIDR_BROADCAST: Cidrv4 = parseCidrv4("255.255.255.255/32");
 
 /**
  * All possible IPv4 address classification labels.
@@ -102,9 +93,9 @@ export type ClassifyIpv4Result =
  * ```
  */
 export function isIpv4Private(ip: number): boolean {
-  return ((ip & MASK_8) >>> 0) === NET_10 ||
-    ((ip & MASK_12) >>> 0) === NET_172_16 ||
-    ((ip & MASK_16) >>> 0) === NET_192_168;
+  return cidrv4Contains(CIDR_PRIVATE_10, ip) ||
+    cidrv4Contains(CIDR_PRIVATE_172, ip) ||
+    cidrv4Contains(CIDR_PRIVATE_192, ip);
 }
 
 /**
@@ -127,7 +118,7 @@ export function isIpv4Private(ip: number): boolean {
  * ```
  */
 export function isIpv4Loopback(ip: number): boolean {
-  return ((ip & MASK_8) >>> 0) === NET_127;
+  return cidrv4Contains(CIDR_LOOPBACK, ip);
 }
 
 /**
@@ -149,7 +140,7 @@ export function isIpv4Loopback(ip: number): boolean {
  * ```
  */
 export function isIpv4LinkLocal(ip: number): boolean {
-  return ((ip & MASK_16) >>> 0) === NET_169_254;
+  return cidrv4Contains(CIDR_LINK_LOCAL, ip);
 }
 
 /**
@@ -172,7 +163,7 @@ export function isIpv4LinkLocal(ip: number): boolean {
  * ```
  */
 export function isIpv4Multicast(ip: number): boolean {
-  return ((ip & MASK_4) >>> 0) === NET_224;
+  return cidrv4Contains(CIDR_MULTICAST, ip);
 }
 
 /**
@@ -197,8 +188,8 @@ export function isIpv4Multicast(ip: number): boolean {
  * ```
  */
 export function isIpv4Reserved(ip: number): boolean {
-  return ((ip & MASK_4) >>> 0) === NET_240 &&
-    (ip >>> 0) !== BROADCAST;
+  return cidrv4Contains(CIDR_RESERVED, ip) &&
+    !cidrv4Contains(CIDR_BROADCAST, ip);
 }
 
 /**
@@ -220,7 +211,7 @@ export function isIpv4Reserved(ip: number): boolean {
  * ```
  */
 export function isIpv4Broadcast(ip: number): boolean {
-  return (ip >>> 0) === BROADCAST;
+  return cidrv4Contains(CIDR_BROADCAST, ip);
 }
 
 /**
@@ -243,7 +234,7 @@ export function isIpv4Broadcast(ip: number): boolean {
  * ```
  */
 export function isIpv4ThisNetwork(ip: number): boolean {
-  return ((ip & MASK_8) >>> 0) === NET_0;
+  return cidrv4Contains(CIDR_THIS_NETWORK, ip);
 }
 
 /**
@@ -266,7 +257,7 @@ export function isIpv4ThisNetwork(ip: number): boolean {
  * ```
  */
 export function isIpv4CgNat(ip: number): boolean {
-  return ((ip & MASK_10) >>> 0) === NET_100_64;
+  return cidrv4Contains(CIDR_CG_NAT, ip);
 }
 
 /**
@@ -289,7 +280,7 @@ export function isIpv4CgNat(ip: number): boolean {
  * ```
  */
 export function isIpv4Benchmarking(ip: number): boolean {
-  return ((ip & MASK_15) >>> 0) === NET_198_18;
+  return cidrv4Contains(CIDR_BENCHMARKING, ip);
 }
 
 /**
@@ -316,9 +307,9 @@ export function isIpv4Benchmarking(ip: number): boolean {
  * ```
  */
 export function isIpv4Documentation(ip: number): boolean {
-  return ((ip & MASK_24) >>> 0) === NET_192_0_2 ||
-    ((ip & MASK_24) >>> 0) === NET_198_51_100 ||
-    ((ip & MASK_24) >>> 0) === NET_203_0_113;
+  return cidrv4Contains(CIDR_DOC_1, ip) ||
+    cidrv4Contains(CIDR_DOC_2, ip) ||
+    cidrv4Contains(CIDR_DOC_3, ip);
 }
 
 /**
