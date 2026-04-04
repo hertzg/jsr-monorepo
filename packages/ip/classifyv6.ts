@@ -53,7 +53,7 @@ const CIDR_IPV4_TRANSLATED: Cidrv6 = parseCidrv6("64:ff9b::/96");
  * Returned by {@link classifyIpv6} to identify which well-known range
  * an IPv6 address belongs to.
  */
-export type ClassifyIpv6Result =
+export type ClassificationIpv6 =
   | "loopback"
   | "unspecified"
   | "ipv4-mapped"
@@ -384,7 +384,7 @@ export function isIpv6Orchidv2(ip: bigint): boolean {
  * assertEquals(classifyIpv6(parseIpv6("2607:f8b0:4004:800::200e")), "global-unicast");
  * ```
  */
-export function classifyIpv6(ip: bigint): ClassifyIpv6Result {
+export function classifyIpv6(ip: bigint): ClassificationIpv6 {
   switch (true) {
     case isIpv6Loopback(ip):
       return "loopback";

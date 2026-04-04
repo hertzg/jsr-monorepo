@@ -56,7 +56,7 @@ const CIDR_BROADCAST: Cidrv4 = parseCidrv4("255.255.255.255/32");
  * Returned by {@link classifyIpv4} to identify which well-known range
  * an IPv4 address belongs to.
  */
-export type ClassifyIpv4Result =
+export type ClassificationIpv4 =
   | "broadcast"
   | "this-network"
   | "loopback"
@@ -370,7 +370,7 @@ export function isIpv4Public(ip: number): boolean {
  * assertEquals(classifyIpv4(parseIpv4("240.0.0.0")), "reserved");
  * ```
  */
-export function classifyIpv4(ip: number): ClassifyIpv4Result {
+export function classifyIpv4(ip: number): ClassificationIpv4 {
   switch (true) {
     case isIpv4Broadcast(ip):
       return "broadcast";
