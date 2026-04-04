@@ -215,14 +215,14 @@ Examples</h2></div><div class="space-y-8"><div class="anchorable"><a href="#exam
 <h3 class="example-header"><div class="markdown"><p>Example 1</p>
 </div></h3>
   <div><div class="markdown"><pre class="highlight"><code class="language-ts">import { assert, assertEquals } from &quot;@std/assert&quot;;
-import { isValidCidr } from &quot;@hertzg/ip&quot;;
+import { isValidCidr } from &quot;@hertzg/ip/validate&quot;;
 
 assert(isValidCidr(&quot;10.0.0.0/8&quot;));
 assert(isValidCidr(&quot;2001:db8::/32&quot;));
 assertEquals(isValidCidr(&quot;10.0.0.0&quot;), false);
 assertEquals(isValidCidr(&quot;garbage/24&quot;), false);
 </code><button class="copyButton" data-copy="import { assert, assertEquals } from &quot;@std/assert&quot;;
-import { isValidCidr } from &quot;@hertzg/ip&quot;;
+import { isValidCidr } from &quot;@hertzg/ip/validate&quot;;
 
 assert(isValidCidr(&quot;10.0.0.0/8&quot;));
 assert(isValidCidr(&quot;2001:db8::/32&quot;));
