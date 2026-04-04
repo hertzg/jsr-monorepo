@@ -1,5 +1,32 @@
 # Changelog
 
+## [3.0.0](https://github.com/hertzg/jsr-monorepo/compare/@hertzg/ip-v2.0.0...@hertzg/ip-v3.0.0) (2026-04-04)
+
+
+### ⚠ BREAKING CHANGES
+
+* **@hertzg/ip:** parseIp("::ffff:192.168.1.1") now returns 3232235777 (number) instead of 0xFFFF_C0A8_0101n (bigint).
+* **@hertzg/ip:** validateIp and ValidateIpResult are removed. Use classifyIp for parse-and-identify workflows. isValidIp now only accepts plain IP addresses — use isValidCidr for CIDR notation.
+* **@hertzg/ip:** classifyIp now returns { kind: "ipv4" | "ipv6", value, classification } instead of { version: 4 | 6, kind }. The new types are ClassifiedIp, ClassifiedIpv4, and ClassifiedIpv6. The old ClassifyIpResult type is removed.
+* **@hertzg/ip:** ClassifyIpv4Result is now ClassificationIpv4, ClassifyIpv6Result is now ClassificationIpv6. The new names better distinguish the label union from the full result object types.
+
+### Features
+
+* **@hertzg/ip:** add IPv4-mapped IPv6 conversion module (4to6) ([a918aca](https://github.com/hertzg/jsr-monorepo/commit/a918aca2a8162eac6da0a860086344e8451ab152))
+* **@hertzg/ip:** add public classifyIp overload for number | bigint ([#144](https://github.com/hertzg/jsr-monorepo/issues/144)) ([e52c5fd](https://github.com/hertzg/jsr-monorepo/commit/e52c5fd3ceeee7fef1f7034c6ee4d682340b9c82))
+* **@hertzg/ip:** add string overload to classifyIp ([#147](https://github.com/hertzg/jsr-monorepo/issues/147)) ([7438bed](https://github.com/hertzg/jsr-monorepo/commit/7438bed9d02e214001b1377b075b391962a92501))
+* **@hertzg/ip:** auto-unwrap IPv4-mapped IPv6 in parseIp ([8aa51ba](https://github.com/hertzg/jsr-monorepo/commit/8aa51baa1355e7d5cd3a07204e0ec090db737e45))
+* **@hertzg/ip:** enhance cidrv4 and cidrv6 size functions with additional overloads ([562f5b7](https://github.com/hertzg/jsr-monorepo/commit/562f5b7e1d1689eeb9accb79a5f4d8e85659d93b))
+* **@hertzg/ip:** move validation functions to dedicated validatev4 and validatev6 modules ([#146](https://github.com/hertzg/jsr-monorepo/issues/146)) ([243cdf2](https://github.com/hertzg/jsr-monorepo/commit/243cdf2f2c421e84d74d3ae5ddd303ffa5adda66))
+* **@hertzg/ip:** remove validateIp and fix isValidIp to reject CIDRs ([b56f441](https://github.com/hertzg/jsr-monorepo/commit/b56f441dff0bff806db0b3368e3fe24370e868d6))
+* **@hertzg/ip:** rename ClassifyIpv4Result and ClassifyIpv6Result ([268ba29](https://github.com/hertzg/jsr-monorepo/commit/268ba295ca4ee67c3063fd5fceb1002f6887909e))
+* **@hertzg/ip:** reshape classifyIp result to include kind, value, and classification ([8dda688](https://github.com/hertzg/jsr-monorepo/commit/8dda688f8172bf8c249208ea11d4f9f3d80eecc7))
+
+
+### Bug Fixes
+
+* **@hertzg/ip:** use cidrContains for classify range checks ([3e8eae6](https://github.com/hertzg/jsr-monorepo/commit/3e8eae6cf06c176e1159955a5c6a1773bb33c4bd))
+
 ## [2.0.0](https://github.com/hertzg/jsr-monorepo/compare/@hertzg/ip-v1.0.0...@hertzg/ip-v2.0.0) (2026-04-03)
 
 
