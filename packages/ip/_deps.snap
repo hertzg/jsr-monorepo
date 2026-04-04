@@ -13,6 +13,7 @@
     "./classifyv6": [],
     "./validate": [],
     "./validatev4": [],
-    "./validatev6": []
+    "./validatev6": [],
+    "./4to6": []
   }
 }

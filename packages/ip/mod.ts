@@ -87,6 +87,12 @@
  * - {@link isIpv6Benchmarking}: Check if address is benchmarking (2001:2::/48)
  * - {@link isIpv6Orchidv2}: Check if address is ORCHIDv2 (2001:20::/28)
  *
+ * ### IPv4-Mapped IPv6 Conversion (4to6)
+ * - {@link ipv4To64Mapped}: Convert IPv4 number to IPv4-mapped IPv6 bigint
+ * - {@link ipv4From64Mapped}: Extract IPv4 number from IPv4-mapped IPv6 bigint
+ * - {@link cidrv4ToCidrv64Mapped}: Convert IPv4 CIDR to IPv4-mapped IPv6 CIDR
+ * - {@link cidrv4FromCidrv64Mapped}: Convert IPv4-mapped IPv6 CIDR to IPv4 CIDR
+ *
  * ### Combined Classification
  * - {@link ClassifiedIp}: Discriminated union result with kind, value, and classification
  * - {@link ClassifiedIpv4}: Result type for IPv4 classification
@@ -104,6 +110,7 @@
  * - [`classifyv4`](https://jsr.io/@hertzg/ip/doc/classifyv4): IPv4 classification via {@link classifyIpv4}, {@link isIpv4Private}, etc.
  * - [`classifyv6`](https://jsr.io/@hertzg/ip/doc/classifyv6): IPv6 classification via {@link classifyIpv6}, {@link isIpv6Loopback}, etc.
  * - [`validate`](https://jsr.io/@hertzg/ip/doc/validate): Universal validation via {@link isValidIp}, {@link isValidCidr}
+ * - [`4to6`](https://jsr.io/@hertzg/ip/doc/4to6): IPv4-mapped IPv6 conversion via {@link ipv4To64Mapped}, {@link ipv4From64Mapped}, {@link cidrv4ToCidrv64Mapped}, {@link cidrv4FromCidrv64Mapped}
  *
  * ## Features
  *
@@ -325,10 +332,10 @@
 export { parseIp, stringifyIp } from "./ip.ts";
 export { parseCidr, stringifyCidr } from "./cidr.ts";
 export {
-  classifyIp,
   type ClassifiedIp,
   type ClassifiedIpv4,
   type ClassifiedIpv6,
+  classifyIp,
 } from "./classify.ts";
 export { isValidCidr, isValidIp } from "./validate.ts";
 
@@ -400,3 +407,12 @@ export {
   isIpv6UniqueLocal,
   isIpv6Unspecified,
 } from "./classifyv6.ts";
+
+// --- IPv4-mapped IPv6 conversion ---
+
+export {
+  cidrv4FromCidrv64Mapped,
+  cidrv4ToCidrv64Mapped,
+  ipv4From64Mapped,
+  ipv4To64Mapped,
+} from "./4to6.ts";

@@ -28,16 +28,8 @@
  * @module
  */
 
-import {
-  type Cidrv4,
-  parseCidrv4,
-  stringifyCidrv4,
-} from "./cidrv4.ts";
-import {
-  type Cidrv6,
-  parseCidrv6,
-  stringifyCidrv6,
-} from "./cidrv6.ts";
+import { type Cidrv4, parseCidrv4, stringifyCidrv4 } from "./cidrv4.ts";
+import { type Cidrv6, parseCidrv6, stringifyCidrv6 } from "./cidrv6.ts";
 
 /**
  * Parses an IPv4 or IPv6 CIDR notation string.
