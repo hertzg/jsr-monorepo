@@ -53,12 +53,11 @@
  * - {@link isValidCidrv6}: Check if a string is valid IPv6 CIDR notation
  *
  * ### Validation
- * - {@link ValidateIpResult}: Discriminated union type for validation results
- * - {@link isValidIp}: Check if a string is any valid IP address or CIDR notation
- * - {@link validateIp}: Identify and parse any IP address or CIDR string
+ * - {@link isValidIp}: Check if a string is a valid plain IP address (IPv4 or IPv6)
+ * - {@link isValidCidr}: Check if a string is valid CIDR notation (IPv4 or IPv6)
  *
  * ### IPv4 Classification
- * - {@link ClassifyIpv4Result}: Type for all IPv4 classification labels
+ * - {@link ClassificationIpv4}: Type for all IPv4 classification labels
  * - {@link classifyIpv4}: Classify an IPv4 address into its well-known range
  * - {@link isIpv4Private}: Check if address is private (RFC 1918)
  * - {@link isIpv4Loopback}: Check if address is loopback (127.0.0.0/8)
@@ -73,7 +72,7 @@
  * - {@link isIpv4Public}: Check if address is publicly routable
  *
  * ### IPv6 Classification
- * - {@link ClassifyIpv6Result}: Type for all IPv6 classification labels
+ * - {@link ClassificationIpv6}: Type for all IPv6 classification labels
  * - {@link classifyIpv6}: Classify an IPv6 address into its well-known range
  * - {@link isIpv6Loopback}: Check if address is loopback (::1)
  * - {@link isIpv6Unspecified}: Check if address is unspecified (::)
@@ -89,7 +88,9 @@
  * - {@link isIpv6Orchidv2}: Check if address is ORCHIDv2 (2001:20::/28)
  *
  * ### Combined Classification
- * - {@link ClassifyIpResult}: Discriminated union with version and classification kind
+ * - {@link ClassifiedIp}: Discriminated union result with kind, value, and classification
+ * - {@link ClassifiedIpv4}: Result type for IPv4 classification
+ * - {@link ClassifiedIpv6}: Result type for IPv6 classification
  * - {@link classifyIp}: Classify an IPv4 (number) or IPv6 (bigint) address
  *
  * ### Submodules
@@ -102,7 +103,7 @@
  * - [`classify`](https://jsr.io/@hertzg/ip/doc/classify): Universal classifier via {@link classifyIp}
  * - [`classifyv4`](https://jsr.io/@hertzg/ip/doc/classifyv4): IPv4 classification via {@link classifyIpv4}, {@link isIpv4Private}, etc.
  * - [`classifyv6`](https://jsr.io/@hertzg/ip/doc/classifyv6): IPv6 classification via {@link classifyIpv6}, {@link isIpv6Loopback}, etc.
- * - [`validate`](https://jsr.io/@hertzg/ip/doc/validate): Universal validation via {@link isValidIp}, {@link validateIp}
+ * - [`validate`](https://jsr.io/@hertzg/ip/doc/validate): Universal validation via {@link isValidIp}, {@link isValidCidr}
  *
  * ## Features
  *
@@ -113,7 +114,7 @@
  * - **Arithmetic Operations**: Use number (IPv4) or bigint (IPv6) math for IP address manipulation
  * - **IPv6 Compression**: Expand and compress IPv6 addresses
  * - **IP Classification**: Identify private, loopback, multicast, and other well-known ranges
- * - **Validation**: Non-throwing validity checks and universal string identification
+ * - **Validation**: Non-throwing validity checks for IP addresses and CIDR notation
  *
  * ## Basic IPv4 Operations
  *
@@ -323,13 +324,13 @@
 
 export { parseIp, stringifyIp } from "./ip.ts";
 export { parseCidr, stringifyCidr } from "./cidr.ts";
-export { classifyIp, type ClassifyIpResult } from "./classify.ts";
 export {
-  type ValidateIpResult,
-  isValidCidr,
-  isValidIp,
-  validateIp,
-} from "./validate.ts";
+  classifyIp,
+  type ClassifiedIp,
+  type ClassifiedIpv4,
+  type ClassifiedIpv6,
+} from "./classify.ts";
+export { isValidCidr, isValidIp } from "./validate.ts";
 
 // --- IPv4 ---
 
@@ -343,16 +344,16 @@ export {
   cidrv4Contains,
   cidrv4FirstAddress,
   cidrv4LastAddress,
+  cidrv4Mask,
   cidrv4NetworkAddress,
   cidrv4Size,
-  cidrv4Mask,
   parseCidrv4,
   stringifyCidrv4,
 } from "./cidrv4.ts";
 
 export {
+  type ClassificationIpv4,
   classifyIpv4,
-  type ClassifyIpv4Result,
   isIpv4Benchmarking,
   isIpv4Broadcast,
   isIpv4CgNat,
@@ -368,12 +369,7 @@ export {
 
 // --- IPv6 ---
 
-export {
-  compressIpv6,
-  expandIpv6,
-  parseIpv6,
-  stringifyIpv6,
-} from "./ipv6.ts";
+export { compressIpv6, expandIpv6, parseIpv6, stringifyIpv6 } from "./ipv6.ts";
 export { isValidCidrv6, isValidIpv6 } from "./validatev6.ts";
 
 export {
@@ -382,15 +378,15 @@ export {
   cidrv6Contains,
   cidrv6FirstAddress,
   cidrv6LastAddress,
-  cidrv6Size,
   cidrv6Mask,
+  cidrv6Size,
   parseCidrv6,
   stringifyCidrv6,
 } from "./cidrv6.ts";
 
 export {
+  type ClassificationIpv6,
   classifyIpv6,
-  type ClassifyIpv6Result,
   isIpv6Benchmarking,
   isIpv6Documentation,
   isIpv6GlobalUnicast,
@@ -401,6 +397,6 @@ export {
   isIpv6Multicast,
   isIpv6Orchidv2,
   isIpv6Teredo,
-  isIpv6Unspecified,
   isIpv6UniqueLocal,
+  isIpv6Unspecified,
 } from "./classifyv6.ts";
