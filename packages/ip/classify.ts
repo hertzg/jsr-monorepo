@@ -13,6 +13,7 @@
  * ```ts
  * import { assertEquals } from "@std/assert";
  * import { classifyIp } from "@hertzg/ip/classify";
+ * import { parseIp } from "@hertzg/ip/ip";
  * import { parseIpv4 } from "@hertzg/ip/ipv4";
  * import { parseIpv6 } from "@hertzg/ip/ipv6";
  *
@@ -33,6 +34,15 @@
  * const v6doc = classifyIp(parseIpv6("2001:db8::1"));
  * assertEquals(v6doc.version, 6);
  * assertEquals(v6doc.kind, "documentation");
+ *
+ * // Using parseIp which returns number | bigint
+ * const auto4 = classifyIp(parseIp("10.0.0.1"));
+ * assertEquals(auto4.version, 4);
+ * assertEquals(auto4.kind, "private");
+ *
+ * const auto6 = classifyIp(parseIp("fe80::1"));
+ * assertEquals(auto6.version, 6);
+ * assertEquals(auto6.kind, "link-local");
  * ```
  *
  * @module
@@ -83,6 +93,30 @@ export function classifyIp(
 export function classifyIp(
   ip: bigint,
 ): { readonly version: 6; readonly kind: ClassifyIpv6Result };
+/**
+ * Classifies an IPv4 or IPv6 address into its well-known range.
+ *
+ * This overload accepts `number | bigint`, which is the return type of
+ * {@link parseIp}. At runtime, the value is dispatched to the
+ * version-specific classifier based on its type.
+ *
+ * @param ip The IP address as a `number` (IPv4) or `bigint` (IPv6)
+ * @returns A {@link ClassifyIpResult} with the `version` and `kind` fields
+ *
+ * @example
+ * ```ts
+ * import { assertEquals } from "@std/assert";
+ * import { classifyIp } from "@hertzg/ip/classify";
+ * import { parseIp } from "@hertzg/ip/ip";
+ *
+ * const result = classifyIp(parseIp("127.0.0.1"));
+ * assertEquals(result.version, 4);
+ * assertEquals(result.kind, "loopback");
+ * ```
+ */
+export function classifyIp(
+  ip: number | bigint,
+): ClassifyIpResult;
 export function classifyIp(
   ip: number | bigint,
 ): ClassifyIpResult {
