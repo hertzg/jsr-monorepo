@@ -1,0 +1,1605 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>mod.ts - @hertzg&#x2F;ip documentation</title>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="doc-current-file" content="">
+  <link rel="stylesheet" href="..&#x2F;styles.css">
+  <link rel="stylesheet" href="..&#x2F;page.css">
+  <link id="ddocResetStylesheet" rel="stylesheet" href="..&#x2F;reset.css"><link href="../comrak.css" rel="stylesheet" /><link href="../prism.css" rel="stylesheet" /><script src="../prism.js"></script><script src="..&#x2F;script.js" defer></script>
+  <script src="..&#x2F;darkmode_toggle.js"></script><script src="..&#x2F;search_index.js" defer></script>
+    <script src="..&#x2F;fuse.js" defer></script>
+    <script src="..&#x2F;search.js" defer></script></head>
+<body>
+<div class="ddoc">
+<div><nav id="topnav">
+  <div class="h-full">
+    <div class="flex items-center"><ul class="breadcrumbs">
+  <li>
+    <a href="..&#x2F;" class="contextLink">@hertzg&#x2F;ip</a>
+  </li><span class="text-black dark:text-white"><svg
+  width="16"
+  height="16"
+  viewBox="0 0 16 16"
+  fill="none"
+  xmlns="http://www.w3.org/2000/svg"
+>
+  <path
+    fill-rule="evenodd"
+    clip-rule="evenodd"
+    d="M5.76748 11.8159C5.5378 11.577 5.54525 11.1972 5.78411 10.9675L8.93431 8L5.78411 5.0325C5.54525 4.80282 5.5378 4.423 5.76748 4.18413C5.99715 3.94527 6.37698 3.93782 6.61584 4.1675L10.2158 7.5675C10.3335 7.68062 10.4 7.83679 10.4 8C10.4 8.16321 10.3335 8.31938 10.2158 8.4325L6.61584 11.8325C6.37698 12.0622 5.99715 12.0547 5.76748 11.8159Z"
+    fill="currentColor"
+  />
+</svg>
+</span>mod.ts</ul>
+</div>
+
+    <div class="flex items-center gap-2">
+      <button id="theme-toggle" type="button" aria-label="Toggle dark mode" style="display: none;"><svg
+  xmlns="http://www.w3.org/2000/svg"
+  width="14"
+  height="14"
+  viewBox="0 0 24 24"
+  fill="currentColor"
+>
+  <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+  <path
+    d="M12 1.992a10 10 0 1 0 9.236 13.838c.341 -.82 -.476 -1.644 -1.298 -1.31a6.5 6.5 0 0 1 -6.864 -10.787l.077 -.08c.551 -.63 .113 -1.653 -.758 -1.653h-.266l-.068 -.006l-.06 -.002z"
+  />
+</svg>
+<svg
+  xmlns="http://www.w3.org/2000/svg"
+  width="14"
+  height="14"
+  viewBox="0 0 24 24"
+  fill="currentColor"
+  class="hidden"
+>
+  <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+  <path
+    d="M12 19a1 1 0 0 1 .993 .883l.007 .117v1a1 1 0 0 1 -1.993 .117l-.007 -.117v-1a1 1 0 0 1 1 -1z"
+  />
+  <path
+    d="M18.313 16.91l.094 .083l.7 .7a1 1 0 0 1 -1.32 1.497l-.094 -.083l-.7 -.7a1 1 0 0 1 1.218 -1.567l.102 .07z"
+  />
+  <path
+    d="M7.007 16.993a1 1 0 0 1 .083 1.32l-.083 .094l-.7 .7a1 1 0 0 1 -1.497 -1.32l.083 -.094l.7 -.7a1 1 0 0 1 1.414 0z"
+  />
+  <path
+    d="M4 11a1 1 0 0 1 .117 1.993l-.117 .007h-1a1 1 0 0 1 -.117 -1.993l.117 -.007h1z"
+  />
+  <path
+    d="M21 11a1 1 0 0 1 .117 1.993l-.117 .007h-1a1 1 0 0 1 -.117 -1.993l.117 -.007h1z"
+  />
+  <path
+    d="M6.213 4.81l.094 .083l.7 .7a1 1 0 0 1 -1.32 1.497l-.094 -.083l-.7 -.7a1 1 0 0 1 1.217 -1.567l.102 .07z"
+  />
+  <path
+    d="M19.107 4.893a1 1 0 0 1 .083 1.32l-.083 .094l-.7 .7a1 1 0 0 1 -1.497 -1.32l.083 -.094l.7 -.7a1 1 0 0 1 1.414 0z"
+  />
+  <path
+    d="M12 2a1 1 0 0 1 .993 .883l.007 .117v1a1 1 0 0 1 -1.993 .117l-.007 -.117v-1a1 1 0 0 1 1 -1z"
+  />
+  <path
+    d="M12 7a5 5 0 1 1 -4.995 5.217l-.005 -.217l.005 -.217a5 5 0 0 1 4.995 -4.783z"
+  />
+</svg>
+</button>
+
+        <input
+          type="text"
+          id="searchbar"
+          style="display: none;"
+          class="py-2 px-2.5 mx-1 rounded text-sm border border-gray-300 bg-transparent dark:bg-gray-800 dark:border-gray-700"
+          />
+    </div>
+  </div>
+</nav>
+<div id="searchResults"></div><div id="content">
+    <main><section>
+  <div class="space-y-2 flex-1"><div class="space-y-7" id="module_doc"><div class="markdown"><p>IPv4 and IPv6 address parsing, stringifying, and CIDR utilities.</p>
+<p>This module provides functions for working with IPv4 and IPv6 addresses and CIDR notation.
+IPv4 addresses are represented as numbers (32-bit), IPv6 as bigints (128-bit), enabling
+efficient arithmetic operations and range manipulation for network programming tasks.</p>
+<h2 id="api-reference">
+API Reference</h2>
+<h3 id="universal-(auto-detect-ipv4/ipv6)">
+Universal (auto-detect IPv4/IPv6)</h3>
+<ul>
+<li><a href=".././mod.ts/~/parseIp.html">parseIp</a>: Parse any IP address string to number (IPv4) or bigint (IPv6)</li>
+<li><a href=".././mod.ts/~/stringifyIp.html">stringifyIp</a>: Convert number or bigint to IP address string</li>
+<li><a href=".././mod.ts/~/parseCidr.html">parseCidr</a>: Parse any CIDR notation string to Cidrv4 or Cidrv6</li>
+<li><a href=".././mod.ts/~/stringifyCidr.html">stringifyCidr</a>: Convert Cidrv4 or Cidrv6 to CIDR notation string</li>
+<li><a href=".././mod.ts/~/isValidCidr.html">isValidCidr</a>: Check if a string is valid CIDR notation (IPv4 or IPv6)</li>
+</ul>
+<h3 id="ipv4">
+IPv4</h3>
+<ul>
+<li><a href=".././mod.ts/~/parseIpv4.html">parseIpv4</a>: Parse dotted decimal notation to number</li>
+<li><a href=".././mod.ts/~/stringifyIpv4.html">stringifyIpv4</a>: Convert number to dotted decimal notation</li>
+<li><a href=".././mod.ts/~/isValidIpv4.html">isValidIpv4</a>: Check if a string is a valid IPv4 address</li>
+</ul>
+<h3 id="ipv4-cidr">
+IPv4 CIDR</h3>
+<ul>
+<li><a href=".././mod.ts/~/Cidrv4.html">Cidrv4</a>: Type representing an IPv4 CIDR block</li>
+<li><a href=".././mod.ts/~/parseCidrv4.html">parseCidrv4</a>: Parse CIDR notation string to Cidrv4</li>
+<li><a href=".././mod.ts/~/stringifyCidrv4.html">stringifyCidrv4</a>: Convert Cidrv4 to CIDR notation string</li>
+<li><a href=".././mod.ts/~/cidrv4Mask.html">cidrv4Mask</a>: Create network mask from prefix length (0-32)</li>
+<li><a href=".././mod.ts/~/cidrv4Contains.html">cidrv4Contains</a>: Check if IP is within CIDR range</li>
+<li><a href=".././mod.ts/~/cidrv4FirstAddress.html">cidrv4FirstAddress</a>: Get first address in CIDR range</li>
+<li><a href=".././mod.ts/~/cidrv4LastAddress.html">cidrv4LastAddress</a>: Get last address in CIDR range</li>
+<li><a href=".././mod.ts/~/cidrv4NetworkAddress.html">cidrv4NetworkAddress</a>: Alias for cidrv4FirstAddress</li>
+<li><a href=".././mod.ts/~/cidrv4BroadcastAddress.html">cidrv4BroadcastAddress</a>: Alias for cidrv4LastAddress</li>
+<li><a href=".././mod.ts/~/cidrv4Size.html">cidrv4Size</a>: Get total number of addresses in CIDR range</li>
+<li><a href=".././mod.ts/~/cidrv4Addresses.html">cidrv4Addresses</a>: Generate IP addresses in CIDR range</li>
+<li><a href=".././mod.ts/~/isValidCidrv4.html">isValidCidrv4</a>: Check if a string is valid IPv4 CIDR notation</li>
+</ul>
+<h3 id="ipv6">
+IPv6</h3>
+<ul>
+<li><a href=".././mod.ts/~/parseIpv6.html">parseIpv6</a>: Parse colon-hexadecimal notation to bigint</li>
+<li><a href=".././mod.ts/~/stringifyIpv6.html">stringifyIpv6</a>: Convert bigint to compressed colon-hexadecimal</li>
+<li><a href=".././mod.ts/~/expandIpv6.html">expandIpv6</a>: Expand to full uncompressed form</li>
+<li><a href=".././mod.ts/~/compressIpv6.html">compressIpv6</a>: Compress to canonical shortest form</li>
+<li><a href=".././mod.ts/~/isValidIpv6.html">isValidIpv6</a>: Check if a string is a valid IPv6 address</li>
+</ul>
+<h3 id="ipv6-cidr">
+IPv6 CIDR</h3>
+<ul>
+<li><a href=".././mod.ts/~/Cidrv6.html">Cidrv6</a>: Type representing an IPv6 CIDR block</li>
+<li><a href=".././mod.ts/~/parseCidrv6.html">parseCidrv6</a>: Parse CIDR notation string to Cidrv6</li>
+<li><a href=".././mod.ts/~/stringifyCidrv6.html">stringifyCidrv6</a>: Convert Cidrv6 to CIDR notation string</li>
+<li><a href=".././mod.ts/~/cidrv6Mask.html">cidrv6Mask</a>: Create network mask from prefix length (0-128)</li>
+<li><a href=".././mod.ts/~/cidrv6Contains.html">cidrv6Contains</a>: Check if IP is within CIDR range</li>
+<li><a href=".././mod.ts/~/cidrv6FirstAddress.html">cidrv6FirstAddress</a>: Get first address in CIDR range</li>
+<li><a href=".././mod.ts/~/cidrv6LastAddress.html">cidrv6LastAddress</a>: Get last address in CIDR range</li>
+<li><a href=".././mod.ts/~/cidrv6Size.html">cidrv6Size</a>: Get total number of addresses in CIDR range</li>
+<li><a href=".././mod.ts/~/cidrv6Addresses.html">cidrv6Addresses</a>: Generate IP addresses in CIDR range</li>
+<li><a href=".././mod.ts/~/isValidCidrv6.html">isValidCidrv6</a>: Check if a string is valid IPv6 CIDR notation</li>
+</ul>
+<h3 id="validation">
+Validation</h3>
+<ul>
+<li><a href=".././mod.ts/~/ValidateIpResult.html">ValidateIpResult</a>: Discriminated union type for validation results</li>
+<li><a href=".././mod.ts/~/isValidIp.html">isValidIp</a>: Check if a string is any valid IP address or CIDR notation</li>
+<li><a href=".././mod.ts/~/validateIp.html">validateIp</a>: Identify and parse any IP address or CIDR string</li>
+</ul>
+<h3 id="ipv4-classification">
+IPv4 Classification</h3>
+<ul>
+<li><a href=".././mod.ts/~/ClassifyIpv4Result.html">ClassifyIpv4Result</a>: Type for all IPv4 classification labels</li>
+<li><a href=".././mod.ts/~/classifyIpv4.html">classifyIpv4</a>: Classify an IPv4 address into its well-known range</li>
+<li><a href=".././mod.ts/~/isIpv4Private.html">isIpv4Private</a>: Check if address is private (RFC 1918)</li>
+<li><a href=".././mod.ts/~/isIpv4Loopback.html">isIpv4Loopback</a>: Check if address is loopback (127.0.0.0/8)</li>
+<li><a href=".././mod.ts/~/isIpv4LinkLocal.html">isIpv4LinkLocal</a>: Check if address is link-local (169.254.0.0/16)</li>
+<li><a href=".././mod.ts/~/isIpv4Multicast.html">isIpv4Multicast</a>: Check if address is multicast (224.0.0.0/4)</li>
+<li><a href=".././mod.ts/~/isIpv4Reserved.html">isIpv4Reserved</a>: Check if address is reserved (240.0.0.0/4)</li>
+<li><a href=".././mod.ts/~/isIpv4Broadcast.html">isIpv4Broadcast</a>: Check if address is broadcast (255.255.255.255)</li>
+<li><a href=".././mod.ts/~/isIpv4ThisNetwork.html">isIpv4ThisNetwork</a>: Check if address is &quot;this network&quot; (0.0.0.0/8)</li>
+<li><a href=".././mod.ts/~/isIpv4CgNat.html">isIpv4CgNat</a>: Check if address is Carrier-Grade NAT (100.64.0.0/10)</li>
+<li><a href=".././mod.ts/~/isIpv4Benchmarking.html">isIpv4Benchmarking</a>: Check if address is benchmarking (198.18.0.0/15)</li>
+<li><a href=".././mod.ts/~/isIpv4Documentation.html">isIpv4Documentation</a>: Check if address is documentation (RFC 5737)</li>
+<li><a href=".././mod.ts/~/isIpv4Public.html">isIpv4Public</a>: Check if address is publicly routable</li>
+</ul>
+<h3 id="ipv6-classification">
+IPv6 Classification</h3>
+<ul>
+<li><a href=".././mod.ts/~/ClassifyIpv6Result.html">ClassifyIpv6Result</a>: Type for all IPv6 classification labels</li>
+<li><a href=".././mod.ts/~/classifyIpv6.html">classifyIpv6</a>: Classify an IPv6 address into its well-known range</li>
+<li><a href=".././mod.ts/~/isIpv6Loopback.html">isIpv6Loopback</a>: Check if address is loopback (::1)</li>
+<li><a href=".././mod.ts/~/isIpv6Unspecified.html">isIpv6Unspecified</a>: Check if address is unspecified (::)</li>
+<li><a href=".././mod.ts/~/isIpv6LinkLocal.html">isIpv6LinkLocal</a>: Check if address is link-local (fe80::/10)</li>
+<li><a href=".././mod.ts/~/isIpv6Multicast.html">isIpv6Multicast</a>: Check if address is multicast (ff00::/8)</li>
+<li><a href=".././mod.ts/~/isIpv6UniqueLocal.html">isIpv6UniqueLocal</a>: Check if address is unique local (fc00::/7)</li>
+<li><a href=".././mod.ts/~/isIpv6GlobalUnicast.html">isIpv6GlobalUnicast</a>: Check if address is global unicast (2000::/3)</li>
+<li><a href=".././mod.ts/~/isIpv6Ipv4Mapped.html">isIpv6Ipv4Mapped</a>: Check if address is IPv4-mapped (::ffff:0:0/96)</li>
+<li><a href=".././mod.ts/~/isIpv6Ipv4Translated.html">isIpv6Ipv4Translated</a>: Check if address is IPv4-translated (64:ff9b::/96)</li>
+<li><a href=".././mod.ts/~/isIpv6Documentation.html">isIpv6Documentation</a>: Check if address is documentation (2001:db8::/32)</li>
+<li><a href=".././mod.ts/~/isIpv6Teredo.html">isIpv6Teredo</a>: Check if address is Teredo (2001::/32)</li>
+<li><a href=".././mod.ts/~/isIpv6Benchmarking.html">isIpv6Benchmarking</a>: Check if address is benchmarking (2001:2::/48)</li>
+<li><a href=".././mod.ts/~/isIpv6Orchidv2.html">isIpv6Orchidv2</a>: Check if address is ORCHIDv2 (2001:20::/28)</li>
+</ul>
+<h3 id="combined-classification">
+Combined Classification</h3>
+<ul>
+<li><a href=".././mod.ts/~/ClassifyIpResult.html">ClassifyIpResult</a>: Discriminated union with version and classification kind</li>
+<li><a href=".././mod.ts/~/classifyIp.html">classifyIp</a>: Classify an IPv4 (number) or IPv6 (bigint) address</li>
+</ul>
+<h3 id="submodules">
+Submodules</h3>
+<ul>
+<li><a href="https://jsr.io/@hertzg/ip/doc/ip"><code>ip</code></a>: Universal IP parsing via <a href=".././mod.ts/~/parseIp.html">parseIp</a>, <a href=".././mod.ts/~/stringifyIp.html">stringifyIp</a></li>
+<li><a href="https://jsr.io/@hertzg/ip/doc/cidr"><code>cidr</code></a>: Universal CIDR parsing via <a href=".././mod.ts/~/parseCidr.html">parseCidr</a>, <a href=".././mod.ts/~/stringifyCidr.html">stringifyCidr</a></li>
+<li><a href="https://jsr.io/@hertzg/ip/doc/ipv4"><code>ipv4</code></a>: IPv4 parsing and validation</li>
+<li><a href="https://jsr.io/@hertzg/ip/doc/cidrv4"><code>cidrv4</code></a>: IPv4 CIDR utilities and validation</li>
+<li><a href="https://jsr.io/@hertzg/ip/doc/ipv6"><code>ipv6</code></a>: IPv6 parsing and validation</li>
+<li><a href="https://jsr.io/@hertzg/ip/doc/cidrv6"><code>cidrv6</code></a>: IPv6 CIDR utilities and validation</li>
+<li><a href="https://jsr.io/@hertzg/ip/doc/classify"><code>classify</code></a>: Universal classifier via <a href=".././mod.ts/~/classifyIp.html">classifyIp</a></li>
+<li><a href="https://jsr.io/@hertzg/ip/doc/classifyv4"><code>classifyv4</code></a>: IPv4 classification via <a href=".././mod.ts/~/classifyIpv4.html">classifyIpv4</a>, <a href=".././mod.ts/~/isIpv4Private.html">isIpv4Private</a>, etc.</li>
+<li><a href="https://jsr.io/@hertzg/ip/doc/classifyv6"><code>classifyv6</code></a>: IPv6 classification via <a href=".././mod.ts/~/classifyIpv6.html">classifyIpv6</a>, <a href=".././mod.ts/~/isIpv6Loopback.html">isIpv6Loopback</a>, etc.</li>
+<li><a href="https://jsr.io/@hertzg/ip/doc/validate"><code>validate</code></a>: Universal validation via <a href=".././mod.ts/~/isValidIp.html">isValidIp</a>, <a href=".././mod.ts/~/validateIp.html">validateIp</a></li>
+</ul>
+<h2 id="features">
+Features</h2>
+<ul>
+<li><strong>IPv4 &amp; IPv6 Parsing &amp; Stringifying</strong>: Convert between standard notation and number/bigint</li>
+<li><strong>CIDR Support</strong>: Parse CIDR notation and perform network calculations</li>
+<li><strong>Range Checking</strong>: Verify if IPs are within CIDR blocks</li>
+<li><strong>Address Generation</strong>: Generate IP ranges with custom offsets and steps</li>
+<li><strong>Arithmetic Operations</strong>: Use number (IPv4) or bigint (IPv6) math for IP address manipulation</li>
+<li><strong>IPv6 Compression</strong>: Expand and compress IPv6 addresses</li>
+<li><strong>IP Classification</strong>: Identify private, loopback, multicast, and other well-known ranges</li>
+<li><strong>Validation</strong>: Non-throwing validity checks and universal string identification</li>
+</ul>
+<h2 id="basic-ipv4-operations">
+Basic IPv4 Operations</h2>
+</div><section class="section"  id="examples"><div>
+      <h2 class="anchorable mb-1"><a href="#examples" class="anchor" aria-label="Anchor" tabIndex="-1"><svg
+  width="16"
+  height="16"
+  viewBox="0 0 14 14"
+  fill="none"
+  xmlns="http://www.w3.org/2000/svg"
+>
+  <g clip-path="url(#clip0_1081_1237)">
+    <path
+      fill-rule="evenodd"
+      clip-rule="evenodd"
+      d="M6.80328 2.8656C6.68736 2.99 6.62425 3.15454 6.62725 3.32456C6.63025 3.49457 6.69913 3.65678 6.81936 3.77702C6.9396 3.89725 7.10181 3.96613 7.27182 3.96913C7.44184 3.97213 7.60638 3.90902 7.73078 3.7931L8.82453 2.69935C8.98712 2.53676 9.18015 2.40778 9.39259 2.31978C9.60503 2.23179 9.83272 2.1865 10.0627 2.1865C10.2926 2.1865 10.5203 2.23179 10.7327 2.31978C10.9452 2.40778 11.1382 2.53676 11.3008 2.69935C11.4634 2.86194 11.5923 3.05497 11.6803 3.2674C11.7683 3.47984 11.8136 3.70753 11.8136 3.93747C11.8136 4.16741 11.7683 4.3951 11.6803 4.60754C11.5923 4.81998 11.4634 5.013 11.3008 5.1756L9.11328 7.3631C8.95075 7.52581 8.75775 7.65488 8.5453 7.74295C8.33285 7.83102 8.10513 7.87635 7.87516 7.87635C7.64518 7.87635 7.41746 7.83102 7.20501 7.74295C6.99256 7.65488 6.79956 7.52581 6.63703 7.3631C6.51263 7.24718 6.34809 7.18407 6.17807 7.18707C6.00806 7.19007 5.84585 7.25894 5.72561 7.37918C5.60538 7.49942 5.5365 7.66163 5.5335 7.83164C5.5305 8.00165 5.59361 8.1662 5.70953 8.2906C5.99391 8.57501 6.33154 8.80062 6.70312 8.95455C7.0747 9.10847 7.47296 9.18769 7.87516 9.18769C8.27736 9.18769 8.67562 9.10847 9.0472 8.95455C9.41878 8.80062 9.7564 8.57501 10.0408 8.2906L12.2283 6.1031C12.8026 5.52874 13.1253 4.74974 13.1253 3.93747C13.1253 3.12521 12.8026 2.34621 12.2283 1.77185C11.6539 1.19749 10.8749 0.874817 10.0627 0.874817C9.25039 0.874817 8.47139 1.19749 7.89703 1.77185L6.80328 2.8656ZM2.69953 11.3006C2.53682 11.1381 2.40774 10.9451 2.31968 10.7326C2.23161 10.5202 2.18628 10.2924 2.18628 10.0625C2.18628 9.8325 2.23161 9.60477 2.31968 9.39233C2.40774 9.17988 2.53682 8.98688 2.69953 8.82435L4.88703 6.63685C5.04956 6.47414 5.24256 6.34506 5.45501 6.25699C5.66746 6.16893 5.89518 6.1236 6.12516 6.1236C6.35513 6.1236 6.58285 6.16893 6.7953 6.25699C7.00775 6.34506 7.20075 6.47414 7.36328 6.63685C7.48768 6.75277 7.65223 6.81588 7.82224 6.81288C7.99225 6.80988 8.15446 6.741 8.2747 6.62077C8.39494 6.50053 8.46381 6.33832 8.46681 6.1683C8.46981 5.99829 8.4067 5.83375 8.29078 5.70935C8.0064 5.42494 7.66878 5.19933 7.2972 5.0454C6.92562 4.89148 6.52736 4.81225 6.12516 4.81225C5.72296 4.81225 5.3247 4.89148 4.95312 5.0454C4.58154 5.19933 4.24391 5.42494 3.95953 5.70935L1.77203 7.89685C1.19767 8.47121 0.875 9.25021 0.875 10.0625C0.875 10.8747 1.19767 11.6537 1.77203 12.2281C2.34639 12.8025 3.12539 13.1251 3.93766 13.1251C4.74992 13.1251 5.52892 12.8025 6.10328 12.2281L7.19703 11.1343C7.31295 11.0099 7.37606 10.8454 7.37306 10.6754C7.37006 10.5054 7.30119 10.3432 7.18095 10.2229C7.06071 10.1027 6.8985 10.0338 6.72849 10.0308C6.55848 10.0278 6.39393 10.0909 6.26953 10.2068L5.17578 11.3006C5.01325 11.4633 4.82025 11.5924 4.6078 11.6805C4.39535 11.7685 4.16763 11.8138 3.93766 11.8138C3.70768 11.8138 3.47996 11.7685 3.26751 11.6805C3.05506 11.5924 2.86206 11.4633 2.69953 11.3006Z"
+      fill="currentColor"
+    />
+  </g>
+  <defs>
+    <clipPath id="clip0_1081_1237">
+      <rect width="14" height="14" fill="white" />
+    </clipPath>
+  </defs>
+</svg>
+</a>
+Examples</h2></div><div class="space-y-8"><div class="anchorable"><a href="#example_0" class="anchor" aria-label="Anchor" tabIndex="-1"><svg
+  width="16"
+  height="16"
+  viewBox="0 0 14 14"
+  fill="none"
+  xmlns="http://www.w3.org/2000/svg"
+>
+  <g clip-path="url(#clip0_1081_1237)">
+    <path
+      fill-rule="evenodd"
+      clip-rule="evenodd"
+      d="M6.80328 2.8656C6.68736 2.99 6.62425 3.15454 6.62725 3.32456C6.63025 3.49457 6.69913 3.65678 6.81936 3.77702C6.9396 3.89725 7.10181 3.96613 7.27182 3.96913C7.44184 3.97213 7.60638 3.90902 7.73078 3.7931L8.82453 2.69935C8.98712 2.53676 9.18015 2.40778 9.39259 2.31978C9.60503 2.23179 9.83272 2.1865 10.0627 2.1865C10.2926 2.1865 10.5203 2.23179 10.7327 2.31978C10.9452 2.40778 11.1382 2.53676 11.3008 2.69935C11.4634 2.86194 11.5923 3.05497 11.6803 3.2674C11.7683 3.47984 11.8136 3.70753 11.8136 3.93747C11.8136 4.16741 11.7683 4.3951 11.6803 4.60754C11.5923 4.81998 11.4634 5.013 11.3008 5.1756L9.11328 7.3631C8.95075 7.52581 8.75775 7.65488 8.5453 7.74295C8.33285 7.83102 8.10513 7.87635 7.87516 7.87635C7.64518 7.87635 7.41746 7.83102 7.20501 7.74295C6.99256 7.65488 6.79956 7.52581 6.63703 7.3631C6.51263 7.24718 6.34809 7.18407 6.17807 7.18707C6.00806 7.19007 5.84585 7.25894 5.72561 7.37918C5.60538 7.49942 5.5365 7.66163 5.5335 7.83164C5.5305 8.00165 5.59361 8.1662 5.70953 8.2906C5.99391 8.57501 6.33154 8.80062 6.70312 8.95455C7.0747 9.10847 7.47296 9.18769 7.87516 9.18769C8.27736 9.18769 8.67562 9.10847 9.0472 8.95455C9.41878 8.80062 9.7564 8.57501 10.0408 8.2906L12.2283 6.1031C12.8026 5.52874 13.1253 4.74974 13.1253 3.93747C13.1253 3.12521 12.8026 2.34621 12.2283 1.77185C11.6539 1.19749 10.8749 0.874817 10.0627 0.874817C9.25039 0.874817 8.47139 1.19749 7.89703 1.77185L6.80328 2.8656ZM2.69953 11.3006C2.53682 11.1381 2.40774 10.9451 2.31968 10.7326C2.23161 10.5202 2.18628 10.2924 2.18628 10.0625C2.18628 9.8325 2.23161 9.60477 2.31968 9.39233C2.40774 9.17988 2.53682 8.98688 2.69953 8.82435L4.88703 6.63685C5.04956 6.47414 5.24256 6.34506 5.45501 6.25699C5.66746 6.16893 5.89518 6.1236 6.12516 6.1236C6.35513 6.1236 6.58285 6.16893 6.7953 6.25699C7.00775 6.34506 7.20075 6.47414 7.36328 6.63685C7.48768 6.75277 7.65223 6.81588 7.82224 6.81288C7.99225 6.80988 8.15446 6.741 8.2747 6.62077C8.39494 6.50053 8.46381 6.33832 8.46681 6.1683C8.46981 5.99829 8.4067 5.83375 8.29078 5.70935C8.0064 5.42494 7.66878 5.19933 7.2972 5.0454C6.92562 4.89148 6.52736 4.81225 6.12516 4.81225C5.72296 4.81225 5.3247 4.89148 4.95312 5.0454C4.58154 5.19933 4.24391 5.42494 3.95953 5.70935L1.77203 7.89685C1.19767 8.47121 0.875 9.25021 0.875 10.0625C0.875 10.8747 1.19767 11.6537 1.77203 12.2281C2.34639 12.8025 3.12539 13.1251 3.93766 13.1251C4.74992 13.1251 5.52892 12.8025 6.10328 12.2281L7.19703 11.1343C7.31295 11.0099 7.37606 10.8454 7.37306 10.6754C7.37006 10.5054 7.30119 10.3432 7.18095 10.2229C7.06071 10.1027 6.8985 10.0338 6.72849 10.0308C6.55848 10.0278 6.39393 10.0909 6.26953 10.2068L5.17578 11.3006C5.01325 11.4633 4.82025 11.5924 4.6078 11.6805C4.39535 11.7685 4.16763 11.8138 3.93766 11.8138C3.70768 11.8138 3.47996 11.7685 3.26751 11.6805C3.05506 11.5924 2.86206 11.4633 2.69953 11.3006Z"
+      fill="currentColor"
+    />
+  </g>
+  <defs>
+    <clipPath id="clip0_1081_1237">
+      <rect width="14" height="14" fill="white" />
+    </clipPath>
+  </defs>
+</svg>
+</a>
+<h3 class="example-header"><div class="markdown"><p>Parse and stringify IPv4 addresses</p>
+</div></h3>
+  <div><div class="markdown"><pre class="highlight"><code class="language-ts">import { assertEquals } from &quot;@std/assert&quot;;
+import { parseIpv4, stringifyIpv4 } from &quot;@hertzg/ip&quot;;
+
+// Parse dotted decimal to number
+const ip = parseIpv4(&quot;192.168.1.1&quot;);
+assertEquals(ip, 3232235777);
+
+// Stringify number back to dotted decimal
+assertEquals(stringifyIpv4(ip), &quot;192.168.1.1&quot;);
+
+// Arithmetic operations
+const next = ip + 1;
+assertEquals(stringifyIpv4(next), &quot;192.168.1.2&quot;);
+
+const prev = ip - 1;
+assertEquals(stringifyIpv4(prev), &quot;192.168.1.0&quot;);
+</code><button class="copyButton" data-copy="import { assertEquals } from &quot;@std/assert&quot;;
+import { parseIpv4, stringifyIpv4 } from &quot;@hertzg/ip&quot;;
+
+// Parse dotted decimal to number
+const ip = parseIpv4(&quot;192.168.1.1&quot;);
+assertEquals(ip, 3232235777);
+
+// Stringify number back to dotted decimal
+assertEquals(stringifyIpv4(ip), &quot;192.168.1.1&quot;);
+
+// Arithmetic operations
+const next = ip + 1;
+assertEquals(stringifyIpv4(next), &quot;192.168.1.2&quot;);
+
+const prev = ip - 1;
+assertEquals(stringifyIpv4(prev), &quot;192.168.1.0&quot;);
+"><svg
+  class="copy"
+  width="15"
+  height="15"
+  viewBox="0 0 15 15"
+  fill="none"
+  xmlns="http://www.w3.org/2000/svg"
+>
+  <rect x="2" y="2" width="7" height="7" fill="none" />
+  <rect x="6" y="6" width="7" height="7" fill="none" />
+  <path
+    d="M1.55566 2.7C1.55566 2.03726 2.09292 1.5 2.75566 1.5H8.75566C9.41841 1.5 9.95566 2.03726 9.95566 2.7V5.1H12.3557C13.0184 5.1 13.5557 5.63726 13.5557 6.3V12.3C13.5557 12.9627 13.0184 13.5 12.3557 13.5H6.35566C5.69292 13.5 5.15566 12.9627 5.15566 12.3V9.9H2.75566C2.09292 9.9 1.55566 9.36274 1.55566 8.7V2.7ZM6.35566 9.9V12.3H12.3557V6.3H9.95566V8.7C9.95566 9.36274 9.41841 9.9 8.75566 9.9H6.35566ZM8.75566 8.7V2.7H2.75566V8.7H8.75566Z"
+    fill="currentColor"
+  />
+</svg>
+<svg
+  class="check"
+  width="15"
+  height="15"
+  viewBox="0 0 24 24"
+  stroke-width="2"
+  stroke="currentColor"
+  fill="none"
+  stroke-linecap="round"
+  stroke-linejoin="round"
+  xmlns="http://www.w3.org/2000/svg"
+>
+  <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+  <path d="M5 12l5 5l10 -10" />
+</svg>
+</button><code></code></pre>
+<h2 id="basic-ipv6-operations">
+Basic IPv6 Operations</h2>
+</div></div>
+</div>
+<div class="border-b border-gray-300 dark:border-gray-700"></div><div class="anchorable"><a href="#example_1" class="anchor" aria-label="Anchor" tabIndex="-1"><svg
+  width="16"
+  height="16"
+  viewBox="0 0 14 14"
+  fill="none"
+  xmlns="http://www.w3.org/2000/svg"
+>
+  <g clip-path="url(#clip0_1081_1237)">
+    <path
+      fill-rule="evenodd"
+      clip-rule="evenodd"
+      d="M6.80328 2.8656C6.68736 2.99 6.62425 3.15454 6.62725 3.32456C6.63025 3.49457 6.69913 3.65678 6.81936 3.77702C6.9396 3.89725 7.10181 3.96613 7.27182 3.96913C7.44184 3.97213 7.60638 3.90902 7.73078 3.7931L8.82453 2.69935C8.98712 2.53676 9.18015 2.40778 9.39259 2.31978C9.60503 2.23179 9.83272 2.1865 10.0627 2.1865C10.2926 2.1865 10.5203 2.23179 10.7327 2.31978C10.9452 2.40778 11.1382 2.53676 11.3008 2.69935C11.4634 2.86194 11.5923 3.05497 11.6803 3.2674C11.7683 3.47984 11.8136 3.70753 11.8136 3.93747C11.8136 4.16741 11.7683 4.3951 11.6803 4.60754C11.5923 4.81998 11.4634 5.013 11.3008 5.1756L9.11328 7.3631C8.95075 7.52581 8.75775 7.65488 8.5453 7.74295C8.33285 7.83102 8.10513 7.87635 7.87516 7.87635C7.64518 7.87635 7.41746 7.83102 7.20501 7.74295C6.99256 7.65488 6.79956 7.52581 6.63703 7.3631C6.51263 7.24718 6.34809 7.18407 6.17807 7.18707C6.00806 7.19007 5.84585 7.25894 5.72561 7.37918C5.60538 7.49942 5.5365 7.66163 5.5335 7.83164C5.5305 8.00165 5.59361 8.1662 5.70953 8.2906C5.99391 8.57501 6.33154 8.80062 6.70312 8.95455C7.0747 9.10847 7.47296 9.18769 7.87516 9.18769C8.27736 9.18769 8.67562 9.10847 9.0472 8.95455C9.41878 8.80062 9.7564 8.57501 10.0408 8.2906L12.2283 6.1031C12.8026 5.52874 13.1253 4.74974 13.1253 3.93747C13.1253 3.12521 12.8026 2.34621 12.2283 1.77185C11.6539 1.19749 10.8749 0.874817 10.0627 0.874817C9.25039 0.874817 8.47139 1.19749 7.89703 1.77185L6.80328 2.8656ZM2.69953 11.3006C2.53682 11.1381 2.40774 10.9451 2.31968 10.7326C2.23161 10.5202 2.18628 10.2924 2.18628 10.0625C2.18628 9.8325 2.23161 9.60477 2.31968 9.39233C2.40774 9.17988 2.53682 8.98688 2.69953 8.82435L4.88703 6.63685C5.04956 6.47414 5.24256 6.34506 5.45501 6.25699C5.66746 6.16893 5.89518 6.1236 6.12516 6.1236C6.35513 6.1236 6.58285 6.16893 6.7953 6.25699C7.00775 6.34506 7.20075 6.47414 7.36328 6.63685C7.48768 6.75277 7.65223 6.81588 7.82224 6.81288C7.99225 6.80988 8.15446 6.741 8.2747 6.62077C8.39494 6.50053 8.46381 6.33832 8.46681 6.1683C8.46981 5.99829 8.4067 5.83375 8.29078 5.70935C8.0064 5.42494 7.66878 5.19933 7.2972 5.0454C6.92562 4.89148 6.52736 4.81225 6.12516 4.81225C5.72296 4.81225 5.3247 4.89148 4.95312 5.0454C4.58154 5.19933 4.24391 5.42494 3.95953 5.70935L1.77203 7.89685C1.19767 8.47121 0.875 9.25021 0.875 10.0625C0.875 10.8747 1.19767 11.6537 1.77203 12.2281C2.34639 12.8025 3.12539 13.1251 3.93766 13.1251C4.74992 13.1251 5.52892 12.8025 6.10328 12.2281L7.19703 11.1343C7.31295 11.0099 7.37606 10.8454 7.37306 10.6754C7.37006 10.5054 7.30119 10.3432 7.18095 10.2229C7.06071 10.1027 6.8985 10.0338 6.72849 10.0308C6.55848 10.0278 6.39393 10.0909 6.26953 10.2068L5.17578 11.3006C5.01325 11.4633 4.82025 11.5924 4.6078 11.6805C4.39535 11.7685 4.16763 11.8138 3.93766 11.8138C3.70768 11.8138 3.47996 11.7685 3.26751 11.6805C3.05506 11.5924 2.86206 11.4633 2.69953 11.3006Z"
+      fill="currentColor"
+    />
+  </g>
+  <defs>
+    <clipPath id="clip0_1081_1237">
+      <rect width="14" height="14" fill="white" />
+    </clipPath>
+  </defs>
+</svg>
+</a>
+<h3 class="example-header"><div class="markdown"><p>Parse and stringify IPv6 addresses</p>
+</div></h3>
+  <div><div class="markdown"><pre class="highlight"><code class="language-ts">import { assertEquals } from &quot;@std/assert&quot;;
+import { parseIpv6, stringifyIpv6 } from &quot;@hertzg/ip&quot;;
+
+// Parse colon-hexadecimal to bigint
+const ip = parseIpv6(&quot;2001:db8::1&quot;);
+assertEquals(ip, 42540766411282592856903984951653826561n);
+
+// Stringify bigint back to compressed form
+assertEquals(stringifyIpv6(ip), &quot;2001:db8::1&quot;);
+
+// Arithmetic operations
+const next = ip + 1n;
+assertEquals(stringifyIpv6(next), &quot;2001:db8::2&quot;);
+</code><button class="copyButton" data-copy="import { assertEquals } from &quot;@std/assert&quot;;
+import { parseIpv6, stringifyIpv6 } from &quot;@hertzg/ip&quot;;
+
+// Parse colon-hexadecimal to bigint
+const ip = parseIpv6(&quot;2001:db8::1&quot;);
+assertEquals(ip, 42540766411282592856903984951653826561n);
+
+// Stringify bigint back to compressed form
+assertEquals(stringifyIpv6(ip), &quot;2001:db8::1&quot;);
+
+// Arithmetic operations
+const next = ip + 1n;
+assertEquals(stringifyIpv6(next), &quot;2001:db8::2&quot;);
+"><svg
+  class="copy"
+  width="15"
+  height="15"
+  viewBox="0 0 15 15"
+  fill="none"
+  xmlns="http://www.w3.org/2000/svg"
+>
+  <rect x="2" y="2" width="7" height="7" fill="none" />
+  <rect x="6" y="6" width="7" height="7" fill="none" />
+  <path
+    d="M1.55566 2.7C1.55566 2.03726 2.09292 1.5 2.75566 1.5H8.75566C9.41841 1.5 9.95566 2.03726 9.95566 2.7V5.1H12.3557C13.0184 5.1 13.5557 5.63726 13.5557 6.3V12.3C13.5557 12.9627 13.0184 13.5 12.3557 13.5H6.35566C5.69292 13.5 5.15566 12.9627 5.15566 12.3V9.9H2.75566C2.09292 9.9 1.55566 9.36274 1.55566 8.7V2.7ZM6.35566 9.9V12.3H12.3557V6.3H9.95566V8.7C9.95566 9.36274 9.41841 9.9 8.75566 9.9H6.35566ZM8.75566 8.7V2.7H2.75566V8.7H8.75566Z"
+    fill="currentColor"
+  />
+</svg>
+<svg
+  class="check"
+  width="15"
+  height="15"
+  viewBox="0 0 24 24"
+  stroke-width="2"
+  stroke="currentColor"
+  fill="none"
+  stroke-linecap="round"
+  stroke-linejoin="round"
+  xmlns="http://www.w3.org/2000/svg"
+>
+  <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+  <path d="M5 12l5 5l10 -10" />
+</svg>
+</button><code></code></pre>
+<h2 id="cidr-notation">
+CIDR Notation</h2>
+</div></div>
+</div>
+<div class="border-b border-gray-300 dark:border-gray-700"></div><div class="anchorable"><a href="#example_2" class="anchor" aria-label="Anchor" tabIndex="-1"><svg
+  width="16"
+  height="16"
+  viewBox="0 0 14 14"
+  fill="none"
+  xmlns="http://www.w3.org/2000/svg"
+>
+  <g clip-path="url(#clip0_1081_1237)">
+    <path
+      fill-rule="evenodd"
+      clip-rule="evenodd"
+      d="M6.80328 2.8656C6.68736 2.99 6.62425 3.15454 6.62725 3.32456C6.63025 3.49457 6.69913 3.65678 6.81936 3.77702C6.9396 3.89725 7.10181 3.96613 7.27182 3.96913C7.44184 3.97213 7.60638 3.90902 7.73078 3.7931L8.82453 2.69935C8.98712 2.53676 9.18015 2.40778 9.39259 2.31978C9.60503 2.23179 9.83272 2.1865 10.0627 2.1865C10.2926 2.1865 10.5203 2.23179 10.7327 2.31978C10.9452 2.40778 11.1382 2.53676 11.3008 2.69935C11.4634 2.86194 11.5923 3.05497 11.6803 3.2674C11.7683 3.47984 11.8136 3.70753 11.8136 3.93747C11.8136 4.16741 11.7683 4.3951 11.6803 4.60754C11.5923 4.81998 11.4634 5.013 11.3008 5.1756L9.11328 7.3631C8.95075 7.52581 8.75775 7.65488 8.5453 7.74295C8.33285 7.83102 8.10513 7.87635 7.87516 7.87635C7.64518 7.87635 7.41746 7.83102 7.20501 7.74295C6.99256 7.65488 6.79956 7.52581 6.63703 7.3631C6.51263 7.24718 6.34809 7.18407 6.17807 7.18707C6.00806 7.19007 5.84585 7.25894 5.72561 7.37918C5.60538 7.49942 5.5365 7.66163 5.5335 7.83164C5.5305 8.00165 5.59361 8.1662 5.70953 8.2906C5.99391 8.57501 6.33154 8.80062 6.70312 8.95455C7.0747 9.10847 7.47296 9.18769 7.87516 9.18769C8.27736 9.18769 8.67562 9.10847 9.0472 8.95455C9.41878 8.80062 9.7564 8.57501 10.0408 8.2906L12.2283 6.1031C12.8026 5.52874 13.1253 4.74974 13.1253 3.93747C13.1253 3.12521 12.8026 2.34621 12.2283 1.77185C11.6539 1.19749 10.8749 0.874817 10.0627 0.874817C9.25039 0.874817 8.47139 1.19749 7.89703 1.77185L6.80328 2.8656ZM2.69953 11.3006C2.53682 11.1381 2.40774 10.9451 2.31968 10.7326C2.23161 10.5202 2.18628 10.2924 2.18628 10.0625C2.18628 9.8325 2.23161 9.60477 2.31968 9.39233C2.40774 9.17988 2.53682 8.98688 2.69953 8.82435L4.88703 6.63685C5.04956 6.47414 5.24256 6.34506 5.45501 6.25699C5.66746 6.16893 5.89518 6.1236 6.12516 6.1236C6.35513 6.1236 6.58285 6.16893 6.7953 6.25699C7.00775 6.34506 7.20075 6.47414 7.36328 6.63685C7.48768 6.75277 7.65223 6.81588 7.82224 6.81288C7.99225 6.80988 8.15446 6.741 8.2747 6.62077C8.39494 6.50053 8.46381 6.33832 8.46681 6.1683C8.46981 5.99829 8.4067 5.83375 8.29078 5.70935C8.0064 5.42494 7.66878 5.19933 7.2972 5.0454C6.92562 4.89148 6.52736 4.81225 6.12516 4.81225C5.72296 4.81225 5.3247 4.89148 4.95312 5.0454C4.58154 5.19933 4.24391 5.42494 3.95953 5.70935L1.77203 7.89685C1.19767 8.47121 0.875 9.25021 0.875 10.0625C0.875 10.8747 1.19767 11.6537 1.77203 12.2281C2.34639 12.8025 3.12539 13.1251 3.93766 13.1251C4.74992 13.1251 5.52892 12.8025 6.10328 12.2281L7.19703 11.1343C7.31295 11.0099 7.37606 10.8454 7.37306 10.6754C7.37006 10.5054 7.30119 10.3432 7.18095 10.2229C7.06071 10.1027 6.8985 10.0338 6.72849 10.0308C6.55848 10.0278 6.39393 10.0909 6.26953 10.2068L5.17578 11.3006C5.01325 11.4633 4.82025 11.5924 4.6078 11.6805C4.39535 11.7685 4.16763 11.8138 3.93766 11.8138C3.70768 11.8138 3.47996 11.7685 3.26751 11.6805C3.05506 11.5924 2.86206 11.4633 2.69953 11.3006Z"
+      fill="currentColor"
+    />
+  </g>
+  <defs>
+    <clipPath id="clip0_1081_1237">
+      <rect width="14" height="14" fill="white" />
+    </clipPath>
+  </defs>
+</svg>
+</a>
+<h3 class="example-header"><div class="markdown"><p>Parse and work with CIDR blocks</p>
+</div></h3>
+  <div><div class="markdown"><pre class="highlight"><code class="language-ts">import { assertEquals } from &quot;@std/assert&quot;;
+import {
+  cidrv4BroadcastAddress,
+  cidrv4NetworkAddress,
+  parseCidrv4,
+  stringifyCidrv4,
+  stringifyIpv4,
+} from &quot;@hertzg/ip&quot;;
+
+// Parse CIDR notation
+const cidr = parseCidrv4(&quot;192.168.1.0/24&quot;);
+assertEquals(cidr.prefixLength, 24);
+
+// Get network boundaries
+const network = cidrv4NetworkAddress(cidr);
+assertEquals(stringifyIpv4(network), &quot;192.168.1.0&quot;);
+
+const broadcast = cidrv4BroadcastAddress(cidr);
+assertEquals(stringifyIpv4(broadcast), &quot;192.168.1.255&quot;);
+
+// Stringify back to CIDR notation
+assertEquals(stringifyCidrv4(cidr), &quot;192.168.1.0/24&quot;);
+</code><button class="copyButton" data-copy="import { assertEquals } from &quot;@std/assert&quot;;
+import {
+  cidrv4BroadcastAddress,
+  cidrv4NetworkAddress,
+  parseCidrv4,
+  stringifyCidrv4,
+  stringifyIpv4,
+} from &quot;@hertzg/ip&quot;;
+
+// Parse CIDR notation
+const cidr = parseCidrv4(&quot;192.168.1.0/24&quot;);
+assertEquals(cidr.prefixLength, 24);
+
+// Get network boundaries
+const network = cidrv4NetworkAddress(cidr);
+assertEquals(stringifyIpv4(network), &quot;192.168.1.0&quot;);
+
+const broadcast = cidrv4BroadcastAddress(cidr);
+assertEquals(stringifyIpv4(broadcast), &quot;192.168.1.255&quot;);
+
+// Stringify back to CIDR notation
+assertEquals(stringifyCidrv4(cidr), &quot;192.168.1.0/24&quot;);
+"><svg
+  class="copy"
+  width="15"
+  height="15"
+  viewBox="0 0 15 15"
+  fill="none"
+  xmlns="http://www.w3.org/2000/svg"
+>
+  <rect x="2" y="2" width="7" height="7" fill="none" />
+  <rect x="6" y="6" width="7" height="7" fill="none" />
+  <path
+    d="M1.55566 2.7C1.55566 2.03726 2.09292 1.5 2.75566 1.5H8.75566C9.41841 1.5 9.95566 2.03726 9.95566 2.7V5.1H12.3557C13.0184 5.1 13.5557 5.63726 13.5557 6.3V12.3C13.5557 12.9627 13.0184 13.5 12.3557 13.5H6.35566C5.69292 13.5 5.15566 12.9627 5.15566 12.3V9.9H2.75566C2.09292 9.9 1.55566 9.36274 1.55566 8.7V2.7ZM6.35566 9.9V12.3H12.3557V6.3H9.95566V8.7C9.95566 9.36274 9.41841 9.9 8.75566 9.9H6.35566ZM8.75566 8.7V2.7H2.75566V8.7H8.75566Z"
+    fill="currentColor"
+  />
+</svg>
+<svg
+  class="check"
+  width="15"
+  height="15"
+  viewBox="0 0 24 24"
+  stroke-width="2"
+  stroke="currentColor"
+  fill="none"
+  stroke-linecap="round"
+  stroke-linejoin="round"
+  xmlns="http://www.w3.org/2000/svg"
+>
+  <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+  <path d="M5 12l5 5l10 -10" />
+</svg>
+</button><code></code></pre>
+</div></div>
+</div>
+<div class="border-b border-gray-300 dark:border-gray-700"></div><div class="anchorable"><a href="#example_3" class="anchor" aria-label="Anchor" tabIndex="-1"><svg
+  width="16"
+  height="16"
+  viewBox="0 0 14 14"
+  fill="none"
+  xmlns="http://www.w3.org/2000/svg"
+>
+  <g clip-path="url(#clip0_1081_1237)">
+    <path
+      fill-rule="evenodd"
+      clip-rule="evenodd"
+      d="M6.80328 2.8656C6.68736 2.99 6.62425 3.15454 6.62725 3.32456C6.63025 3.49457 6.69913 3.65678 6.81936 3.77702C6.9396 3.89725 7.10181 3.96613 7.27182 3.96913C7.44184 3.97213 7.60638 3.90902 7.73078 3.7931L8.82453 2.69935C8.98712 2.53676 9.18015 2.40778 9.39259 2.31978C9.60503 2.23179 9.83272 2.1865 10.0627 2.1865C10.2926 2.1865 10.5203 2.23179 10.7327 2.31978C10.9452 2.40778 11.1382 2.53676 11.3008 2.69935C11.4634 2.86194 11.5923 3.05497 11.6803 3.2674C11.7683 3.47984 11.8136 3.70753 11.8136 3.93747C11.8136 4.16741 11.7683 4.3951 11.6803 4.60754C11.5923 4.81998 11.4634 5.013 11.3008 5.1756L9.11328 7.3631C8.95075 7.52581 8.75775 7.65488 8.5453 7.74295C8.33285 7.83102 8.10513 7.87635 7.87516 7.87635C7.64518 7.87635 7.41746 7.83102 7.20501 7.74295C6.99256 7.65488 6.79956 7.52581 6.63703 7.3631C6.51263 7.24718 6.34809 7.18407 6.17807 7.18707C6.00806 7.19007 5.84585 7.25894 5.72561 7.37918C5.60538 7.49942 5.5365 7.66163 5.5335 7.83164C5.5305 8.00165 5.59361 8.1662 5.70953 8.2906C5.99391 8.57501 6.33154 8.80062 6.70312 8.95455C7.0747 9.10847 7.47296 9.18769 7.87516 9.18769C8.27736 9.18769 8.67562 9.10847 9.0472 8.95455C9.41878 8.80062 9.7564 8.57501 10.0408 8.2906L12.2283 6.1031C12.8026 5.52874 13.1253 4.74974 13.1253 3.93747C13.1253 3.12521 12.8026 2.34621 12.2283 1.77185C11.6539 1.19749 10.8749 0.874817 10.0627 0.874817C9.25039 0.874817 8.47139 1.19749 7.89703 1.77185L6.80328 2.8656ZM2.69953 11.3006C2.53682 11.1381 2.40774 10.9451 2.31968 10.7326C2.23161 10.5202 2.18628 10.2924 2.18628 10.0625C2.18628 9.8325 2.23161 9.60477 2.31968 9.39233C2.40774 9.17988 2.53682 8.98688 2.69953 8.82435L4.88703 6.63685C5.04956 6.47414 5.24256 6.34506 5.45501 6.25699C5.66746 6.16893 5.89518 6.1236 6.12516 6.1236C6.35513 6.1236 6.58285 6.16893 6.7953 6.25699C7.00775 6.34506 7.20075 6.47414 7.36328 6.63685C7.48768 6.75277 7.65223 6.81588 7.82224 6.81288C7.99225 6.80988 8.15446 6.741 8.2747 6.62077C8.39494 6.50053 8.46381 6.33832 8.46681 6.1683C8.46981 5.99829 8.4067 5.83375 8.29078 5.70935C8.0064 5.42494 7.66878 5.19933 7.2972 5.0454C6.92562 4.89148 6.52736 4.81225 6.12516 4.81225C5.72296 4.81225 5.3247 4.89148 4.95312 5.0454C4.58154 5.19933 4.24391 5.42494 3.95953 5.70935L1.77203 7.89685C1.19767 8.47121 0.875 9.25021 0.875 10.0625C0.875 10.8747 1.19767 11.6537 1.77203 12.2281C2.34639 12.8025 3.12539 13.1251 3.93766 13.1251C4.74992 13.1251 5.52892 12.8025 6.10328 12.2281L7.19703 11.1343C7.31295 11.0099 7.37606 10.8454 7.37306 10.6754C7.37006 10.5054 7.30119 10.3432 7.18095 10.2229C7.06071 10.1027 6.8985 10.0338 6.72849 10.0308C6.55848 10.0278 6.39393 10.0909 6.26953 10.2068L5.17578 11.3006C5.01325 11.4633 4.82025 11.5924 4.6078 11.6805C4.39535 11.7685 4.16763 11.8138 3.93766 11.8138C3.70768 11.8138 3.47996 11.7685 3.26751 11.6805C3.05506 11.5924 2.86206 11.4633 2.69953 11.3006Z"
+      fill="currentColor"
+    />
+  </g>
+  <defs>
+    <clipPath id="clip0_1081_1237">
+      <rect width="14" height="14" fill="white" />
+    </clipPath>
+  </defs>
+</svg>
+</a>
+<h3 class="example-header"><div class="markdown"><p>IPv6 CIDR operations</p>
+</div></h3>
+  <div><div class="markdown"><pre class="highlight"><code class="language-ts">import { assertEquals } from &quot;@std/assert&quot;;
+import {
+  cidrv6FirstAddress,
+  cidrv6LastAddress,
+  parseCidrv6,
+  stringifyCidrv6,
+  stringifyIpv6,
+} from &quot;@hertzg/ip&quot;;
+
+// Parse IPv6 CIDR notation
+const cidr = parseCidrv6(&quot;2001:db8::/32&quot;);
+assertEquals(cidr.prefixLength, 32);
+
+// Get range boundaries
+const first = cidrv6FirstAddress(cidr);
+assertEquals(stringifyIpv6(first), &quot;2001:db8::&quot;);
+
+// Stringify back to CIDR notation
+assertEquals(stringifyCidrv6(cidr), &quot;2001:db8::/32&quot;);
+</code><button class="copyButton" data-copy="import { assertEquals } from &quot;@std/assert&quot;;
+import {
+  cidrv6FirstAddress,
+  cidrv6LastAddress,
+  parseCidrv6,
+  stringifyCidrv6,
+  stringifyIpv6,
+} from &quot;@hertzg/ip&quot;;
+
+// Parse IPv6 CIDR notation
+const cidr = parseCidrv6(&quot;2001:db8::/32&quot;);
+assertEquals(cidr.prefixLength, 32);
+
+// Get range boundaries
+const first = cidrv6FirstAddress(cidr);
+assertEquals(stringifyIpv6(first), &quot;2001:db8::&quot;);
+
+// Stringify back to CIDR notation
+assertEquals(stringifyCidrv6(cidr), &quot;2001:db8::/32&quot;);
+"><svg
+  class="copy"
+  width="15"
+  height="15"
+  viewBox="0 0 15 15"
+  fill="none"
+  xmlns="http://www.w3.org/2000/svg"
+>
+  <rect x="2" y="2" width="7" height="7" fill="none" />
+  <rect x="6" y="6" width="7" height="7" fill="none" />
+  <path
+    d="M1.55566 2.7C1.55566 2.03726 2.09292 1.5 2.75566 1.5H8.75566C9.41841 1.5 9.95566 2.03726 9.95566 2.7V5.1H12.3557C13.0184 5.1 13.5557 5.63726 13.5557 6.3V12.3C13.5557 12.9627 13.0184 13.5 12.3557 13.5H6.35566C5.69292 13.5 5.15566 12.9627 5.15566 12.3V9.9H2.75566C2.09292 9.9 1.55566 9.36274 1.55566 8.7V2.7ZM6.35566 9.9V12.3H12.3557V6.3H9.95566V8.7C9.95566 9.36274 9.41841 9.9 8.75566 9.9H6.35566ZM8.75566 8.7V2.7H2.75566V8.7H8.75566Z"
+    fill="currentColor"
+  />
+</svg>
+<svg
+  class="check"
+  width="15"
+  height="15"
+  viewBox="0 0 24 24"
+  stroke-width="2"
+  stroke="currentColor"
+  fill="none"
+  stroke-linecap="round"
+  stroke-linejoin="round"
+  xmlns="http://www.w3.org/2000/svg"
+>
+  <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+  <path d="M5 12l5 5l10 -10" />
+</svg>
+</button><code></code></pre>
+<h2 id="range-checking">
+Range Checking</h2>
+</div></div>
+</div>
+<div class="border-b border-gray-300 dark:border-gray-700"></div><div class="anchorable"><a href="#example_4" class="anchor" aria-label="Anchor" tabIndex="-1"><svg
+  width="16"
+  height="16"
+  viewBox="0 0 14 14"
+  fill="none"
+  xmlns="http://www.w3.org/2000/svg"
+>
+  <g clip-path="url(#clip0_1081_1237)">
+    <path
+      fill-rule="evenodd"
+      clip-rule="evenodd"
+      d="M6.80328 2.8656C6.68736 2.99 6.62425 3.15454 6.62725 3.32456C6.63025 3.49457 6.69913 3.65678 6.81936 3.77702C6.9396 3.89725 7.10181 3.96613 7.27182 3.96913C7.44184 3.97213 7.60638 3.90902 7.73078 3.7931L8.82453 2.69935C8.98712 2.53676 9.18015 2.40778 9.39259 2.31978C9.60503 2.23179 9.83272 2.1865 10.0627 2.1865C10.2926 2.1865 10.5203 2.23179 10.7327 2.31978C10.9452 2.40778 11.1382 2.53676 11.3008 2.69935C11.4634 2.86194 11.5923 3.05497 11.6803 3.2674C11.7683 3.47984 11.8136 3.70753 11.8136 3.93747C11.8136 4.16741 11.7683 4.3951 11.6803 4.60754C11.5923 4.81998 11.4634 5.013 11.3008 5.1756L9.11328 7.3631C8.95075 7.52581 8.75775 7.65488 8.5453 7.74295C8.33285 7.83102 8.10513 7.87635 7.87516 7.87635C7.64518 7.87635 7.41746 7.83102 7.20501 7.74295C6.99256 7.65488 6.79956 7.52581 6.63703 7.3631C6.51263 7.24718 6.34809 7.18407 6.17807 7.18707C6.00806 7.19007 5.84585 7.25894 5.72561 7.37918C5.60538 7.49942 5.5365 7.66163 5.5335 7.83164C5.5305 8.00165 5.59361 8.1662 5.70953 8.2906C5.99391 8.57501 6.33154 8.80062 6.70312 8.95455C7.0747 9.10847 7.47296 9.18769 7.87516 9.18769C8.27736 9.18769 8.67562 9.10847 9.0472 8.95455C9.41878 8.80062 9.7564 8.57501 10.0408 8.2906L12.2283 6.1031C12.8026 5.52874 13.1253 4.74974 13.1253 3.93747C13.1253 3.12521 12.8026 2.34621 12.2283 1.77185C11.6539 1.19749 10.8749 0.874817 10.0627 0.874817C9.25039 0.874817 8.47139 1.19749 7.89703 1.77185L6.80328 2.8656ZM2.69953 11.3006C2.53682 11.1381 2.40774 10.9451 2.31968 10.7326C2.23161 10.5202 2.18628 10.2924 2.18628 10.0625C2.18628 9.8325 2.23161 9.60477 2.31968 9.39233C2.40774 9.17988 2.53682 8.98688 2.69953 8.82435L4.88703 6.63685C5.04956 6.47414 5.24256 6.34506 5.45501 6.25699C5.66746 6.16893 5.89518 6.1236 6.12516 6.1236C6.35513 6.1236 6.58285 6.16893 6.7953 6.25699C7.00775 6.34506 7.20075 6.47414 7.36328 6.63685C7.48768 6.75277 7.65223 6.81588 7.82224 6.81288C7.99225 6.80988 8.15446 6.741 8.2747 6.62077C8.39494 6.50053 8.46381 6.33832 8.46681 6.1683C8.46981 5.99829 8.4067 5.83375 8.29078 5.70935C8.0064 5.42494 7.66878 5.19933 7.2972 5.0454C6.92562 4.89148 6.52736 4.81225 6.12516 4.81225C5.72296 4.81225 5.3247 4.89148 4.95312 5.0454C4.58154 5.19933 4.24391 5.42494 3.95953 5.70935L1.77203 7.89685C1.19767 8.47121 0.875 9.25021 0.875 10.0625C0.875 10.8747 1.19767 11.6537 1.77203 12.2281C2.34639 12.8025 3.12539 13.1251 3.93766 13.1251C4.74992 13.1251 5.52892 12.8025 6.10328 12.2281L7.19703 11.1343C7.31295 11.0099 7.37606 10.8454 7.37306 10.6754C7.37006 10.5054 7.30119 10.3432 7.18095 10.2229C7.06071 10.1027 6.8985 10.0338 6.72849 10.0308C6.55848 10.0278 6.39393 10.0909 6.26953 10.2068L5.17578 11.3006C5.01325 11.4633 4.82025 11.5924 4.6078 11.6805C4.39535 11.7685 4.16763 11.8138 3.93766 11.8138C3.70768 11.8138 3.47996 11.7685 3.26751 11.6805C3.05506 11.5924 2.86206 11.4633 2.69953 11.3006Z"
+      fill="currentColor"
+    />
+  </g>
+  <defs>
+    <clipPath id="clip0_1081_1237">
+      <rect width="14" height="14" fill="white" />
+    </clipPath>
+  </defs>
+</svg>
+</a>
+<h3 class="example-header"><div class="markdown"><p>Check if IPs are within CIDR range</p>
+</div></h3>
+  <div><div class="markdown"><pre class="highlight"><code class="language-ts">import { assert, assertEquals } from &quot;@std/assert&quot;;
+import { cidrv4Contains, parseCidrv4, parseIpv4 } from &quot;@hertzg/ip&quot;;
+
+const cidr = parseCidrv4(&quot;192.168.1.0/24&quot;);
+
+// IPs within range
+assert(cidrv4Contains(cidr, parseIpv4(&quot;192.168.1.0&quot;)));   // network address
+assert(cidrv4Contains(cidr, parseIpv4(&quot;192.168.1.100&quot;))); // middle of range
+assert(cidrv4Contains(cidr, parseIpv4(&quot;192.168.1.255&quot;))); // broadcast address
+
+// IPs outside range
+assertEquals(cidrv4Contains(cidr, parseIpv4(&quot;192.168.0.255&quot;)), false);
+assertEquals(cidrv4Contains(cidr, parseIpv4(&quot;192.168.2.0&quot;)), false);
+</code><button class="copyButton" data-copy="import { assert, assertEquals } from &quot;@std/assert&quot;;
+import { cidrv4Contains, parseCidrv4, parseIpv4 } from &quot;@hertzg/ip&quot;;
+
+const cidr = parseCidrv4(&quot;192.168.1.0/24&quot;);
+
+// IPs within range
+assert(cidrv4Contains(cidr, parseIpv4(&quot;192.168.1.0&quot;)));   // network address
+assert(cidrv4Contains(cidr, parseIpv4(&quot;192.168.1.100&quot;))); // middle of range
+assert(cidrv4Contains(cidr, parseIpv4(&quot;192.168.1.255&quot;))); // broadcast address
+
+// IPs outside range
+assertEquals(cidrv4Contains(cidr, parseIpv4(&quot;192.168.0.255&quot;)), false);
+assertEquals(cidrv4Contains(cidr, parseIpv4(&quot;192.168.2.0&quot;)), false);
+"><svg
+  class="copy"
+  width="15"
+  height="15"
+  viewBox="0 0 15 15"
+  fill="none"
+  xmlns="http://www.w3.org/2000/svg"
+>
+  <rect x="2" y="2" width="7" height="7" fill="none" />
+  <rect x="6" y="6" width="7" height="7" fill="none" />
+  <path
+    d="M1.55566 2.7C1.55566 2.03726 2.09292 1.5 2.75566 1.5H8.75566C9.41841 1.5 9.95566 2.03726 9.95566 2.7V5.1H12.3557C13.0184 5.1 13.5557 5.63726 13.5557 6.3V12.3C13.5557 12.9627 13.0184 13.5 12.3557 13.5H6.35566C5.69292 13.5 5.15566 12.9627 5.15566 12.3V9.9H2.75566C2.09292 9.9 1.55566 9.36274 1.55566 8.7V2.7ZM6.35566 9.9V12.3H12.3557V6.3H9.95566V8.7C9.95566 9.36274 9.41841 9.9 8.75566 9.9H6.35566ZM8.75566 8.7V2.7H2.75566V8.7H8.75566Z"
+    fill="currentColor"
+  />
+</svg>
+<svg
+  class="check"
+  width="15"
+  height="15"
+  viewBox="0 0 24 24"
+  stroke-width="2"
+  stroke="currentColor"
+  fill="none"
+  stroke-linecap="round"
+  stroke-linejoin="round"
+  xmlns="http://www.w3.org/2000/svg"
+>
+  <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+  <path d="M5 12l5 5l10 -10" />
+</svg>
+</button><code></code></pre>
+<h2 id="address-generation">
+Address Generation</h2>
+</div></div>
+</div>
+<div class="border-b border-gray-300 dark:border-gray-700"></div><div class="anchorable"><a href="#example_5" class="anchor" aria-label="Anchor" tabIndex="-1"><svg
+  width="16"
+  height="16"
+  viewBox="0 0 14 14"
+  fill="none"
+  xmlns="http://www.w3.org/2000/svg"
+>
+  <g clip-path="url(#clip0_1081_1237)">
+    <path
+      fill-rule="evenodd"
+      clip-rule="evenodd"
+      d="M6.80328 2.8656C6.68736 2.99 6.62425 3.15454 6.62725 3.32456C6.63025 3.49457 6.69913 3.65678 6.81936 3.77702C6.9396 3.89725 7.10181 3.96613 7.27182 3.96913C7.44184 3.97213 7.60638 3.90902 7.73078 3.7931L8.82453 2.69935C8.98712 2.53676 9.18015 2.40778 9.39259 2.31978C9.60503 2.23179 9.83272 2.1865 10.0627 2.1865C10.2926 2.1865 10.5203 2.23179 10.7327 2.31978C10.9452 2.40778 11.1382 2.53676 11.3008 2.69935C11.4634 2.86194 11.5923 3.05497 11.6803 3.2674C11.7683 3.47984 11.8136 3.70753 11.8136 3.93747C11.8136 4.16741 11.7683 4.3951 11.6803 4.60754C11.5923 4.81998 11.4634 5.013 11.3008 5.1756L9.11328 7.3631C8.95075 7.52581 8.75775 7.65488 8.5453 7.74295C8.33285 7.83102 8.10513 7.87635 7.87516 7.87635C7.64518 7.87635 7.41746 7.83102 7.20501 7.74295C6.99256 7.65488 6.79956 7.52581 6.63703 7.3631C6.51263 7.24718 6.34809 7.18407 6.17807 7.18707C6.00806 7.19007 5.84585 7.25894 5.72561 7.37918C5.60538 7.49942 5.5365 7.66163 5.5335 7.83164C5.5305 8.00165 5.59361 8.1662 5.70953 8.2906C5.99391 8.57501 6.33154 8.80062 6.70312 8.95455C7.0747 9.10847 7.47296 9.18769 7.87516 9.18769C8.27736 9.18769 8.67562 9.10847 9.0472 8.95455C9.41878 8.80062 9.7564 8.57501 10.0408 8.2906L12.2283 6.1031C12.8026 5.52874 13.1253 4.74974 13.1253 3.93747C13.1253 3.12521 12.8026 2.34621 12.2283 1.77185C11.6539 1.19749 10.8749 0.874817 10.0627 0.874817C9.25039 0.874817 8.47139 1.19749 7.89703 1.77185L6.80328 2.8656ZM2.69953 11.3006C2.53682 11.1381 2.40774 10.9451 2.31968 10.7326C2.23161 10.5202 2.18628 10.2924 2.18628 10.0625C2.18628 9.8325 2.23161 9.60477 2.31968 9.39233C2.40774 9.17988 2.53682 8.98688 2.69953 8.82435L4.88703 6.63685C5.04956 6.47414 5.24256 6.34506 5.45501 6.25699C5.66746 6.16893 5.89518 6.1236 6.12516 6.1236C6.35513 6.1236 6.58285 6.16893 6.7953 6.25699C7.00775 6.34506 7.20075 6.47414 7.36328 6.63685C7.48768 6.75277 7.65223 6.81588 7.82224 6.81288C7.99225 6.80988 8.15446 6.741 8.2747 6.62077C8.39494 6.50053 8.46381 6.33832 8.46681 6.1683C8.46981 5.99829 8.4067 5.83375 8.29078 5.70935C8.0064 5.42494 7.66878 5.19933 7.2972 5.0454C6.92562 4.89148 6.52736 4.81225 6.12516 4.81225C5.72296 4.81225 5.3247 4.89148 4.95312 5.0454C4.58154 5.19933 4.24391 5.42494 3.95953 5.70935L1.77203 7.89685C1.19767 8.47121 0.875 9.25021 0.875 10.0625C0.875 10.8747 1.19767 11.6537 1.77203 12.2281C2.34639 12.8025 3.12539 13.1251 3.93766 13.1251C4.74992 13.1251 5.52892 12.8025 6.10328 12.2281L7.19703 11.1343C7.31295 11.0099 7.37606 10.8454 7.37306 10.6754C7.37006 10.5054 7.30119 10.3432 7.18095 10.2229C7.06071 10.1027 6.8985 10.0338 6.72849 10.0308C6.55848 10.0278 6.39393 10.0909 6.26953 10.2068L5.17578 11.3006C5.01325 11.4633 4.82025 11.5924 4.6078 11.6805C4.39535 11.7685 4.16763 11.8138 3.93766 11.8138C3.70768 11.8138 3.47996 11.7685 3.26751 11.6805C3.05506 11.5924 2.86206 11.4633 2.69953 11.3006Z"
+      fill="currentColor"
+    />
+  </g>
+  <defs>
+    <clipPath id="clip0_1081_1237">
+      <rect width="14" height="14" fill="white" />
+    </clipPath>
+  </defs>
+</svg>
+</a>
+<h3 class="example-header"><div class="markdown"><p>Generate IP ranges with custom patterns</p>
+</div></h3>
+  <div><div class="markdown"><pre class="highlight"><code class="language-ts">import { assertEquals } from &quot;@std/assert&quot;;
+import { cidrv4Addresses, parseCidrv4, stringifyIpv4 } from &quot;@hertzg/ip&quot;;
+
+const cidr = parseCidrv4(&quot;10.0.0.0/29&quot;); // 8 IPs: .0 to .7
+
+// By default, iterates all IPs (offset=0, step=1, no count limit)
+const all = Array.from(cidrv4Addresses(cidr));
+assertEquals(all.map(stringifyIpv4), [
+  &quot;10.0.0.0&quot;, &quot;10.0.0.1&quot;, &quot;10.0.0.2&quot;, &quot;10.0.0.3&quot;,
+  &quot;10.0.0.4&quot;, &quot;10.0.0.5&quot;, &quot;10.0.0.6&quot;, &quot;10.0.0.7&quot;,
+]);
+
+// Skip network address with offset=1
+const usable = Array.from(cidrv4Addresses(cidr, { offset: 1 }));
+assertEquals(usable.length, 7);
+
+// Get even addresses (step=2)
+const evenIps = Array.from(cidrv4Addresses(cidr, { step: 2 }));
+assertEquals(evenIps.map(stringifyIpv4), [&quot;10.0.0.0&quot;, &quot;10.0.0.2&quot;, &quot;10.0.0.4&quot;, &quot;10.0.0.6&quot;]);
+
+// Reverse iteration from offset (negative step)
+const backwards = Array.from(cidrv4Addresses(cidr, { offset: 5, step: -1 }));
+assertEquals(backwards.map(stringifyIpv4), [&quot;10.0.0.5&quot;, &quot;10.0.0.4&quot;, &quot;10.0.0.3&quot;, &quot;10.0.0.2&quot;, &quot;10.0.0.1&quot;, &quot;10.0.0.0&quot;]);
+</code><button class="copyButton" data-copy="import { assertEquals } from &quot;@std/assert&quot;;
+import { cidrv4Addresses, parseCidrv4, stringifyIpv4 } from &quot;@hertzg/ip&quot;;
+
+const cidr = parseCidrv4(&quot;10.0.0.0/29&quot;); // 8 IPs: .0 to .7
+
+// By default, iterates all IPs (offset=0, step=1, no count limit)
+const all = Array.from(cidrv4Addresses(cidr));
+assertEquals(all.map(stringifyIpv4), [
+  &quot;10.0.0.0&quot;, &quot;10.0.0.1&quot;, &quot;10.0.0.2&quot;, &quot;10.0.0.3&quot;,
+  &quot;10.0.0.4&quot;, &quot;10.0.0.5&quot;, &quot;10.0.0.6&quot;, &quot;10.0.0.7&quot;,
+]);
+
+// Skip network address with offset=1
+const usable = Array.from(cidrv4Addresses(cidr, { offset: 1 }));
+assertEquals(usable.length, 7);
+
+// Get even addresses (step=2)
+const evenIps = Array.from(cidrv4Addresses(cidr, { step: 2 }));
+assertEquals(evenIps.map(stringifyIpv4), [&quot;10.0.0.0&quot;, &quot;10.0.0.2&quot;, &quot;10.0.0.4&quot;, &quot;10.0.0.6&quot;]);
+
+// Reverse iteration from offset (negative step)
+const backwards = Array.from(cidrv4Addresses(cidr, { offset: 5, step: -1 }));
+assertEquals(backwards.map(stringifyIpv4), [&quot;10.0.0.5&quot;, &quot;10.0.0.4&quot;, &quot;10.0.0.3&quot;, &quot;10.0.0.2&quot;, &quot;10.0.0.1&quot;, &quot;10.0.0.0&quot;]);
+"><svg
+  class="copy"
+  width="15"
+  height="15"
+  viewBox="0 0 15 15"
+  fill="none"
+  xmlns="http://www.w3.org/2000/svg"
+>
+  <rect x="2" y="2" width="7" height="7" fill="none" />
+  <rect x="6" y="6" width="7" height="7" fill="none" />
+  <path
+    d="M1.55566 2.7C1.55566 2.03726 2.09292 1.5 2.75566 1.5H8.75566C9.41841 1.5 9.95566 2.03726 9.95566 2.7V5.1H12.3557C13.0184 5.1 13.5557 5.63726 13.5557 6.3V12.3C13.5557 12.9627 13.0184 13.5 12.3557 13.5H6.35566C5.69292 13.5 5.15566 12.9627 5.15566 12.3V9.9H2.75566C2.09292 9.9 1.55566 9.36274 1.55566 8.7V2.7ZM6.35566 9.9V12.3H12.3557V6.3H9.95566V8.7C9.95566 9.36274 9.41841 9.9 8.75566 9.9H6.35566ZM8.75566 8.7V2.7H2.75566V8.7H8.75566Z"
+    fill="currentColor"
+  />
+</svg>
+<svg
+  class="check"
+  width="15"
+  height="15"
+  viewBox="0 0 24 24"
+  stroke-width="2"
+  stroke="currentColor"
+  fill="none"
+  stroke-linecap="round"
+  stroke-linejoin="round"
+  xmlns="http://www.w3.org/2000/svg"
+>
+  <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+  <path d="M5 12l5 5l10 -10" />
+</svg>
+</button><code></code></pre>
+<h2 id="real-world-use-cases">
+Real-World Use Cases</h2>
+</div></div>
+</div>
+<div class="border-b border-gray-300 dark:border-gray-700"></div><div class="anchorable"><a href="#example_6" class="anchor" aria-label="Anchor" tabIndex="-1"><svg
+  width="16"
+  height="16"
+  viewBox="0 0 14 14"
+  fill="none"
+  xmlns="http://www.w3.org/2000/svg"
+>
+  <g clip-path="url(#clip0_1081_1237)">
+    <path
+      fill-rule="evenodd"
+      clip-rule="evenodd"
+      d="M6.80328 2.8656C6.68736 2.99 6.62425 3.15454 6.62725 3.32456C6.63025 3.49457 6.69913 3.65678 6.81936 3.77702C6.9396 3.89725 7.10181 3.96613 7.27182 3.96913C7.44184 3.97213 7.60638 3.90902 7.73078 3.7931L8.82453 2.69935C8.98712 2.53676 9.18015 2.40778 9.39259 2.31978C9.60503 2.23179 9.83272 2.1865 10.0627 2.1865C10.2926 2.1865 10.5203 2.23179 10.7327 2.31978C10.9452 2.40778 11.1382 2.53676 11.3008 2.69935C11.4634 2.86194 11.5923 3.05497 11.6803 3.2674C11.7683 3.47984 11.8136 3.70753 11.8136 3.93747C11.8136 4.16741 11.7683 4.3951 11.6803 4.60754C11.5923 4.81998 11.4634 5.013 11.3008 5.1756L9.11328 7.3631C8.95075 7.52581 8.75775 7.65488 8.5453 7.74295C8.33285 7.83102 8.10513 7.87635 7.87516 7.87635C7.64518 7.87635 7.41746 7.83102 7.20501 7.74295C6.99256 7.65488 6.79956 7.52581 6.63703 7.3631C6.51263 7.24718 6.34809 7.18407 6.17807 7.18707C6.00806 7.19007 5.84585 7.25894 5.72561 7.37918C5.60538 7.49942 5.5365 7.66163 5.5335 7.83164C5.5305 8.00165 5.59361 8.1662 5.70953 8.2906C5.99391 8.57501 6.33154 8.80062 6.70312 8.95455C7.0747 9.10847 7.47296 9.18769 7.87516 9.18769C8.27736 9.18769 8.67562 9.10847 9.0472 8.95455C9.41878 8.80062 9.7564 8.57501 10.0408 8.2906L12.2283 6.1031C12.8026 5.52874 13.1253 4.74974 13.1253 3.93747C13.1253 3.12521 12.8026 2.34621 12.2283 1.77185C11.6539 1.19749 10.8749 0.874817 10.0627 0.874817C9.25039 0.874817 8.47139 1.19749 7.89703 1.77185L6.80328 2.8656ZM2.69953 11.3006C2.53682 11.1381 2.40774 10.9451 2.31968 10.7326C2.23161 10.5202 2.18628 10.2924 2.18628 10.0625C2.18628 9.8325 2.23161 9.60477 2.31968 9.39233C2.40774 9.17988 2.53682 8.98688 2.69953 8.82435L4.88703 6.63685C5.04956 6.47414 5.24256 6.34506 5.45501 6.25699C5.66746 6.16893 5.89518 6.1236 6.12516 6.1236C6.35513 6.1236 6.58285 6.16893 6.7953 6.25699C7.00775 6.34506 7.20075 6.47414 7.36328 6.63685C7.48768 6.75277 7.65223 6.81588 7.82224 6.81288C7.99225 6.80988 8.15446 6.741 8.2747 6.62077C8.39494 6.50053 8.46381 6.33832 8.46681 6.1683C8.46981 5.99829 8.4067 5.83375 8.29078 5.70935C8.0064 5.42494 7.66878 5.19933 7.2972 5.0454C6.92562 4.89148 6.52736 4.81225 6.12516 4.81225C5.72296 4.81225 5.3247 4.89148 4.95312 5.0454C4.58154 5.19933 4.24391 5.42494 3.95953 5.70935L1.77203 7.89685C1.19767 8.47121 0.875 9.25021 0.875 10.0625C0.875 10.8747 1.19767 11.6537 1.77203 12.2281C2.34639 12.8025 3.12539 13.1251 3.93766 13.1251C4.74992 13.1251 5.52892 12.8025 6.10328 12.2281L7.19703 11.1343C7.31295 11.0099 7.37606 10.8454 7.37306 10.6754C7.37006 10.5054 7.30119 10.3432 7.18095 10.2229C7.06071 10.1027 6.8985 10.0338 6.72849 10.0308C6.55848 10.0278 6.39393 10.0909 6.26953 10.2068L5.17578 11.3006C5.01325 11.4633 4.82025 11.5924 4.6078 11.6805C4.39535 11.7685 4.16763 11.8138 3.93766 11.8138C3.70768 11.8138 3.47996 11.7685 3.26751 11.6805C3.05506 11.5924 2.86206 11.4633 2.69953 11.3006Z"
+      fill="currentColor"
+    />
+  </g>
+  <defs>
+    <clipPath id="clip0_1081_1237">
+      <rect width="14" height="14" fill="white" />
+    </clipPath>
+  </defs>
+</svg>
+</a>
+<h3 class="example-header"><div class="markdown"><p>IP address allocation system</p>
+</div></h3>
+  <div><div class="markdown"><pre class="highlight"><code class="language-ts">import { assert } from &quot;@std/assert&quot;;
+import {
+  cidrv4Addresses,
+  cidrv4Contains,
+  parseCidrv4,
+  stringifyIpv4,
+} from &quot;@hertzg/ip&quot;;
+
+const cidr = parseCidrv4(&quot;10.0.0.0/24&quot;);
+
+// Allocate batch of IPs for servers
+const serverIps = Array.from(cidrv4Addresses(cidr, { offset: 10, count: 5, step: 1 }));
+
+// Verify all allocated IPs are in range
+for (const ip of serverIps) {
+  assert(cidrv4Contains(cidr, ip));
+}
+
+// Convert to strings for configuration
+const serverAddresses = serverIps.map(stringifyIpv4);
+assert(serverAddresses[0] === &quot;10.0.0.10&quot;);
+</code><button class="copyButton" data-copy="import { assert } from &quot;@std/assert&quot;;
+import {
+  cidrv4Addresses,
+  cidrv4Contains,
+  parseCidrv4,
+  stringifyIpv4,
+} from &quot;@hertzg/ip&quot;;
+
+const cidr = parseCidrv4(&quot;10.0.0.0/24&quot;);
+
+// Allocate batch of IPs for servers
+const serverIps = Array.from(cidrv4Addresses(cidr, { offset: 10, count: 5, step: 1 }));
+
+// Verify all allocated IPs are in range
+for (const ip of serverIps) {
+  assert(cidrv4Contains(cidr, ip));
+}
+
+// Convert to strings for configuration
+const serverAddresses = serverIps.map(stringifyIpv4);
+assert(serverAddresses[0] === &quot;10.0.0.10&quot;);
+"><svg
+  class="copy"
+  width="15"
+  height="15"
+  viewBox="0 0 15 15"
+  fill="none"
+  xmlns="http://www.w3.org/2000/svg"
+>
+  <rect x="2" y="2" width="7" height="7" fill="none" />
+  <rect x="6" y="6" width="7" height="7" fill="none" />
+  <path
+    d="M1.55566 2.7C1.55566 2.03726 2.09292 1.5 2.75566 1.5H8.75566C9.41841 1.5 9.95566 2.03726 9.95566 2.7V5.1H12.3557C13.0184 5.1 13.5557 5.63726 13.5557 6.3V12.3C13.5557 12.9627 13.0184 13.5 12.3557 13.5H6.35566C5.69292 13.5 5.15566 12.9627 5.15566 12.3V9.9H2.75566C2.09292 9.9 1.55566 9.36274 1.55566 8.7V2.7ZM6.35566 9.9V12.3H12.3557V6.3H9.95566V8.7C9.95566 9.36274 9.41841 9.9 8.75566 9.9H6.35566ZM8.75566 8.7V2.7H2.75566V8.7H8.75566Z"
+    fill="currentColor"
+  />
+</svg>
+<svg
+  class="check"
+  width="15"
+  height="15"
+  viewBox="0 0 24 24"
+  stroke-width="2"
+  stroke="currentColor"
+  fill="none"
+  stroke-linecap="round"
+  stroke-linejoin="round"
+  xmlns="http://www.w3.org/2000/svg"
+>
+  <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+  <path d="M5 12l5 5l10 -10" />
+</svg>
+</button><code></code></pre>
+</div></div>
+</div>
+<div class="border-b border-gray-300 dark:border-gray-700"></div><div class="anchorable"><a href="#example_7" class="anchor" aria-label="Anchor" tabIndex="-1"><svg
+  width="16"
+  height="16"
+  viewBox="0 0 14 14"
+  fill="none"
+  xmlns="http://www.w3.org/2000/svg"
+>
+  <g clip-path="url(#clip0_1081_1237)">
+    <path
+      fill-rule="evenodd"
+      clip-rule="evenodd"
+      d="M6.80328 2.8656C6.68736 2.99 6.62425 3.15454 6.62725 3.32456C6.63025 3.49457 6.69913 3.65678 6.81936 3.77702C6.9396 3.89725 7.10181 3.96613 7.27182 3.96913C7.44184 3.97213 7.60638 3.90902 7.73078 3.7931L8.82453 2.69935C8.98712 2.53676 9.18015 2.40778 9.39259 2.31978C9.60503 2.23179 9.83272 2.1865 10.0627 2.1865C10.2926 2.1865 10.5203 2.23179 10.7327 2.31978C10.9452 2.40778 11.1382 2.53676 11.3008 2.69935C11.4634 2.86194 11.5923 3.05497 11.6803 3.2674C11.7683 3.47984 11.8136 3.70753 11.8136 3.93747C11.8136 4.16741 11.7683 4.3951 11.6803 4.60754C11.5923 4.81998 11.4634 5.013 11.3008 5.1756L9.11328 7.3631C8.95075 7.52581 8.75775 7.65488 8.5453 7.74295C8.33285 7.83102 8.10513 7.87635 7.87516 7.87635C7.64518 7.87635 7.41746 7.83102 7.20501 7.74295C6.99256 7.65488 6.79956 7.52581 6.63703 7.3631C6.51263 7.24718 6.34809 7.18407 6.17807 7.18707C6.00806 7.19007 5.84585 7.25894 5.72561 7.37918C5.60538 7.49942 5.5365 7.66163 5.5335 7.83164C5.5305 8.00165 5.59361 8.1662 5.70953 8.2906C5.99391 8.57501 6.33154 8.80062 6.70312 8.95455C7.0747 9.10847 7.47296 9.18769 7.87516 9.18769C8.27736 9.18769 8.67562 9.10847 9.0472 8.95455C9.41878 8.80062 9.7564 8.57501 10.0408 8.2906L12.2283 6.1031C12.8026 5.52874 13.1253 4.74974 13.1253 3.93747C13.1253 3.12521 12.8026 2.34621 12.2283 1.77185C11.6539 1.19749 10.8749 0.874817 10.0627 0.874817C9.25039 0.874817 8.47139 1.19749 7.89703 1.77185L6.80328 2.8656ZM2.69953 11.3006C2.53682 11.1381 2.40774 10.9451 2.31968 10.7326C2.23161 10.5202 2.18628 10.2924 2.18628 10.0625C2.18628 9.8325 2.23161 9.60477 2.31968 9.39233C2.40774 9.17988 2.53682 8.98688 2.69953 8.82435L4.88703 6.63685C5.04956 6.47414 5.24256 6.34506 5.45501 6.25699C5.66746 6.16893 5.89518 6.1236 6.12516 6.1236C6.35513 6.1236 6.58285 6.16893 6.7953 6.25699C7.00775 6.34506 7.20075 6.47414 7.36328 6.63685C7.48768 6.75277 7.65223 6.81588 7.82224 6.81288C7.99225 6.80988 8.15446 6.741 8.2747 6.62077C8.39494 6.50053 8.46381 6.33832 8.46681 6.1683C8.46981 5.99829 8.4067 5.83375 8.29078 5.70935C8.0064 5.42494 7.66878 5.19933 7.2972 5.0454C6.92562 4.89148 6.52736 4.81225 6.12516 4.81225C5.72296 4.81225 5.3247 4.89148 4.95312 5.0454C4.58154 5.19933 4.24391 5.42494 3.95953 5.70935L1.77203 7.89685C1.19767 8.47121 0.875 9.25021 0.875 10.0625C0.875 10.8747 1.19767 11.6537 1.77203 12.2281C2.34639 12.8025 3.12539 13.1251 3.93766 13.1251C4.74992 13.1251 5.52892 12.8025 6.10328 12.2281L7.19703 11.1343C7.31295 11.0099 7.37606 10.8454 7.37306 10.6754C7.37006 10.5054 7.30119 10.3432 7.18095 10.2229C7.06071 10.1027 6.8985 10.0338 6.72849 10.0308C6.55848 10.0278 6.39393 10.0909 6.26953 10.2068L5.17578 11.3006C5.01325 11.4633 4.82025 11.5924 4.6078 11.6805C4.39535 11.7685 4.16763 11.8138 3.93766 11.8138C3.70768 11.8138 3.47996 11.7685 3.26751 11.6805C3.05506 11.5924 2.86206 11.4633 2.69953 11.3006Z"
+      fill="currentColor"
+    />
+  </g>
+  <defs>
+    <clipPath id="clip0_1081_1237">
+      <rect width="14" height="14" fill="white" />
+    </clipPath>
+  </defs>
+</svg>
+</a>
+<h3 class="example-header"><div class="markdown"><p>Memory-efficient iteration over large ranges</p>
+</div></h3>
+  <div><div class="markdown"><pre class="highlight"><code class="language-ts">import { cidrv4Addresses, parseCidrv4, stringifyIpv4 } from &quot;@hertzg/ip&quot;;
+
+const cidr = parseCidrv4(&quot;10.0.0.0/16&quot;); // 65,536 addresses
+
+// Process entire CIDR lazily without loading all into memory
+// No need to specify count - iterates until CIDR boundary
+for (const ip of cidrv4Addresses(cidr, { offset: 0 })) {
+  const ipStr = stringifyIpv4(ip);
+  // Process each IP (e.g., scan, allocate, log)
+  break; // Just showing the pattern
+}
+</code><button class="copyButton" data-copy="import { cidrv4Addresses, parseCidrv4, stringifyIpv4 } from &quot;@hertzg/ip&quot;;
+
+const cidr = parseCidrv4(&quot;10.0.0.0/16&quot;); // 65,536 addresses
+
+// Process entire CIDR lazily without loading all into memory
+// No need to specify count - iterates until CIDR boundary
+for (const ip of cidrv4Addresses(cidr, { offset: 0 })) {
+  const ipStr = stringifyIpv4(ip);
+  // Process each IP (e.g., scan, allocate, log)
+  break; // Just showing the pattern
+}
+"><svg
+  class="copy"
+  width="15"
+  height="15"
+  viewBox="0 0 15 15"
+  fill="none"
+  xmlns="http://www.w3.org/2000/svg"
+>
+  <rect x="2" y="2" width="7" height="7" fill="none" />
+  <rect x="6" y="6" width="7" height="7" fill="none" />
+  <path
+    d="M1.55566 2.7C1.55566 2.03726 2.09292 1.5 2.75566 1.5H8.75566C9.41841 1.5 9.95566 2.03726 9.95566 2.7V5.1H12.3557C13.0184 5.1 13.5557 5.63726 13.5557 6.3V12.3C13.5557 12.9627 13.0184 13.5 12.3557 13.5H6.35566C5.69292 13.5 5.15566 12.9627 5.15566 12.3V9.9H2.75566C2.09292 9.9 1.55566 9.36274 1.55566 8.7V2.7ZM6.35566 9.9V12.3H12.3557V6.3H9.95566V8.7C9.95566 9.36274 9.41841 9.9 8.75566 9.9H6.35566ZM8.75566 8.7V2.7H2.75566V8.7H8.75566Z"
+    fill="currentColor"
+  />
+</svg>
+<svg
+  class="check"
+  width="15"
+  height="15"
+  viewBox="0 0 24 24"
+  stroke-width="2"
+  stroke="currentColor"
+  fill="none"
+  stroke-linecap="round"
+  stroke-linejoin="round"
+  xmlns="http://www.w3.org/2000/svg"
+>
+  <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+  <path d="M5 12l5 5l10 -10" />
+</svg>
+</button><code></code></pre>
+</div></div>
+</div>
+<div class="border-b border-gray-300 dark:border-gray-700"></div><div class="anchorable"><a href="#example_8" class="anchor" aria-label="Anchor" tabIndex="-1"><svg
+  width="16"
+  height="16"
+  viewBox="0 0 14 14"
+  fill="none"
+  xmlns="http://www.w3.org/2000/svg"
+>
+  <g clip-path="url(#clip0_1081_1237)">
+    <path
+      fill-rule="evenodd"
+      clip-rule="evenodd"
+      d="M6.80328 2.8656C6.68736 2.99 6.62425 3.15454 6.62725 3.32456C6.63025 3.49457 6.69913 3.65678 6.81936 3.77702C6.9396 3.89725 7.10181 3.96613 7.27182 3.96913C7.44184 3.97213 7.60638 3.90902 7.73078 3.7931L8.82453 2.69935C8.98712 2.53676 9.18015 2.40778 9.39259 2.31978C9.60503 2.23179 9.83272 2.1865 10.0627 2.1865C10.2926 2.1865 10.5203 2.23179 10.7327 2.31978C10.9452 2.40778 11.1382 2.53676 11.3008 2.69935C11.4634 2.86194 11.5923 3.05497 11.6803 3.2674C11.7683 3.47984 11.8136 3.70753 11.8136 3.93747C11.8136 4.16741 11.7683 4.3951 11.6803 4.60754C11.5923 4.81998 11.4634 5.013 11.3008 5.1756L9.11328 7.3631C8.95075 7.52581 8.75775 7.65488 8.5453 7.74295C8.33285 7.83102 8.10513 7.87635 7.87516 7.87635C7.64518 7.87635 7.41746 7.83102 7.20501 7.74295C6.99256 7.65488 6.79956 7.52581 6.63703 7.3631C6.51263 7.24718 6.34809 7.18407 6.17807 7.18707C6.00806 7.19007 5.84585 7.25894 5.72561 7.37918C5.60538 7.49942 5.5365 7.66163 5.5335 7.83164C5.5305 8.00165 5.59361 8.1662 5.70953 8.2906C5.99391 8.57501 6.33154 8.80062 6.70312 8.95455C7.0747 9.10847 7.47296 9.18769 7.87516 9.18769C8.27736 9.18769 8.67562 9.10847 9.0472 8.95455C9.41878 8.80062 9.7564 8.57501 10.0408 8.2906L12.2283 6.1031C12.8026 5.52874 13.1253 4.74974 13.1253 3.93747C13.1253 3.12521 12.8026 2.34621 12.2283 1.77185C11.6539 1.19749 10.8749 0.874817 10.0627 0.874817C9.25039 0.874817 8.47139 1.19749 7.89703 1.77185L6.80328 2.8656ZM2.69953 11.3006C2.53682 11.1381 2.40774 10.9451 2.31968 10.7326C2.23161 10.5202 2.18628 10.2924 2.18628 10.0625C2.18628 9.8325 2.23161 9.60477 2.31968 9.39233C2.40774 9.17988 2.53682 8.98688 2.69953 8.82435L4.88703 6.63685C5.04956 6.47414 5.24256 6.34506 5.45501 6.25699C5.66746 6.16893 5.89518 6.1236 6.12516 6.1236C6.35513 6.1236 6.58285 6.16893 6.7953 6.25699C7.00775 6.34506 7.20075 6.47414 7.36328 6.63685C7.48768 6.75277 7.65223 6.81588 7.82224 6.81288C7.99225 6.80988 8.15446 6.741 8.2747 6.62077C8.39494 6.50053 8.46381 6.33832 8.46681 6.1683C8.46981 5.99829 8.4067 5.83375 8.29078 5.70935C8.0064 5.42494 7.66878 5.19933 7.2972 5.0454C6.92562 4.89148 6.52736 4.81225 6.12516 4.81225C5.72296 4.81225 5.3247 4.89148 4.95312 5.0454C4.58154 5.19933 4.24391 5.42494 3.95953 5.70935L1.77203 7.89685C1.19767 8.47121 0.875 9.25021 0.875 10.0625C0.875 10.8747 1.19767 11.6537 1.77203 12.2281C2.34639 12.8025 3.12539 13.1251 3.93766 13.1251C4.74992 13.1251 5.52892 12.8025 6.10328 12.2281L7.19703 11.1343C7.31295 11.0099 7.37606 10.8454 7.37306 10.6754C7.37006 10.5054 7.30119 10.3432 7.18095 10.2229C7.06071 10.1027 6.8985 10.0338 6.72849 10.0308C6.55848 10.0278 6.39393 10.0909 6.26953 10.2068L5.17578 11.3006C5.01325 11.4633 4.82025 11.5924 4.6078 11.6805C4.39535 11.7685 4.16763 11.8138 3.93766 11.8138C3.70768 11.8138 3.47996 11.7685 3.26751 11.6805C3.05506 11.5924 2.86206 11.4633 2.69953 11.3006Z"
+      fill="currentColor"
+    />
+  </g>
+  <defs>
+    <clipPath id="clip0_1081_1237">
+      <rect width="14" height="14" fill="white" />
+    </clipPath>
+  </defs>
+</svg>
+</a>
+<h3 class="example-header"><div class="markdown"><p>WireGuard mesh network with IPv6</p>
+</div></h3>
+  <div><div class="markdown"><pre class="highlight"><code class="language-ts">import { assertEquals } from &quot;@std/assert&quot;;
+import { cidrv6Addresses, parseCidrv6, stringifyIpv6 } from &quot;@hertzg/ip&quot;;
+
+// Allocate unique local addresses for mesh peers
+const meshSubnet = parseCidrv6(&quot;fd00:abcd::/120&quot;);
+
+// Get addresses for mesh nodes
+const peerAddresses = Array.from(cidrv6Addresses(meshSubnet, { offset: 1, count: 5 }));
+assertEquals(peerAddresses.map(stringifyIpv6), [
+  &quot;fd00:abcd::1&quot;,
+  &quot;fd00:abcd::2&quot;,
+  &quot;fd00:abcd::3&quot;,
+  &quot;fd00:abcd::4&quot;,
+  &quot;fd00:abcd::5&quot;,
+]);
+</code><button class="copyButton" data-copy="import { assertEquals } from &quot;@std/assert&quot;;
+import { cidrv6Addresses, parseCidrv6, stringifyIpv6 } from &quot;@hertzg/ip&quot;;
+
+// Allocate unique local addresses for mesh peers
+const meshSubnet = parseCidrv6(&quot;fd00:abcd::/120&quot;);
+
+// Get addresses for mesh nodes
+const peerAddresses = Array.from(cidrv6Addresses(meshSubnet, { offset: 1, count: 5 }));
+assertEquals(peerAddresses.map(stringifyIpv6), [
+  &quot;fd00:abcd::1&quot;,
+  &quot;fd00:abcd::2&quot;,
+  &quot;fd00:abcd::3&quot;,
+  &quot;fd00:abcd::4&quot;,
+  &quot;fd00:abcd::5&quot;,
+]);
+"><svg
+  class="copy"
+  width="15"
+  height="15"
+  viewBox="0 0 15 15"
+  fill="none"
+  xmlns="http://www.w3.org/2000/svg"
+>
+  <rect x="2" y="2" width="7" height="7" fill="none" />
+  <rect x="6" y="6" width="7" height="7" fill="none" />
+  <path
+    d="M1.55566 2.7C1.55566 2.03726 2.09292 1.5 2.75566 1.5H8.75566C9.41841 1.5 9.95566 2.03726 9.95566 2.7V5.1H12.3557C13.0184 5.1 13.5557 5.63726 13.5557 6.3V12.3C13.5557 12.9627 13.0184 13.5 12.3557 13.5H6.35566C5.69292 13.5 5.15566 12.9627 5.15566 12.3V9.9H2.75566C2.09292 9.9 1.55566 9.36274 1.55566 8.7V2.7ZM6.35566 9.9V12.3H12.3557V6.3H9.95566V8.7C9.95566 9.36274 9.41841 9.9 8.75566 9.9H6.35566ZM8.75566 8.7V2.7H2.75566V8.7H8.75566Z"
+    fill="currentColor"
+  />
+</svg>
+<svg
+  class="check"
+  width="15"
+  height="15"
+  viewBox="0 0 24 24"
+  stroke-width="2"
+  stroke="currentColor"
+  fill="none"
+  stroke-linecap="round"
+  stroke-linejoin="round"
+  xmlns="http://www.w3.org/2000/svg"
+>
+  <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+  <path d="M5 12l5 5l10 -10" />
+</svg>
+</button><code></code></pre>
+</div></div>
+</div>
+</div></section>
+<section class="section"  id="mod_ts_functions"><div>
+      <h2 class="anchorable mb-1"><a href="#mod_ts_functions" class="anchor" aria-label="Anchor" tabIndex="-1"><svg
+  width="16"
+  height="16"
+  viewBox="0 0 14 14"
+  fill="none"
+  xmlns="http://www.w3.org/2000/svg"
+>
+  <g clip-path="url(#clip0_1081_1237)">
+    <path
+      fill-rule="evenodd"
+      clip-rule="evenodd"
+      d="M6.80328 2.8656C6.68736 2.99 6.62425 3.15454 6.62725 3.32456C6.63025 3.49457 6.69913 3.65678 6.81936 3.77702C6.9396 3.89725 7.10181 3.96613 7.27182 3.96913C7.44184 3.97213 7.60638 3.90902 7.73078 3.7931L8.82453 2.69935C8.98712 2.53676 9.18015 2.40778 9.39259 2.31978C9.60503 2.23179 9.83272 2.1865 10.0627 2.1865C10.2926 2.1865 10.5203 2.23179 10.7327 2.31978C10.9452 2.40778 11.1382 2.53676 11.3008 2.69935C11.4634 2.86194 11.5923 3.05497 11.6803 3.2674C11.7683 3.47984 11.8136 3.70753 11.8136 3.93747C11.8136 4.16741 11.7683 4.3951 11.6803 4.60754C11.5923 4.81998 11.4634 5.013 11.3008 5.1756L9.11328 7.3631C8.95075 7.52581 8.75775 7.65488 8.5453 7.74295C8.33285 7.83102 8.10513 7.87635 7.87516 7.87635C7.64518 7.87635 7.41746 7.83102 7.20501 7.74295C6.99256 7.65488 6.79956 7.52581 6.63703 7.3631C6.51263 7.24718 6.34809 7.18407 6.17807 7.18707C6.00806 7.19007 5.84585 7.25894 5.72561 7.37918C5.60538 7.49942 5.5365 7.66163 5.5335 7.83164C5.5305 8.00165 5.59361 8.1662 5.70953 8.2906C5.99391 8.57501 6.33154 8.80062 6.70312 8.95455C7.0747 9.10847 7.47296 9.18769 7.87516 9.18769C8.27736 9.18769 8.67562 9.10847 9.0472 8.95455C9.41878 8.80062 9.7564 8.57501 10.0408 8.2906L12.2283 6.1031C12.8026 5.52874 13.1253 4.74974 13.1253 3.93747C13.1253 3.12521 12.8026 2.34621 12.2283 1.77185C11.6539 1.19749 10.8749 0.874817 10.0627 0.874817C9.25039 0.874817 8.47139 1.19749 7.89703 1.77185L6.80328 2.8656ZM2.69953 11.3006C2.53682 11.1381 2.40774 10.9451 2.31968 10.7326C2.23161 10.5202 2.18628 10.2924 2.18628 10.0625C2.18628 9.8325 2.23161 9.60477 2.31968 9.39233C2.40774 9.17988 2.53682 8.98688 2.69953 8.82435L4.88703 6.63685C5.04956 6.47414 5.24256 6.34506 5.45501 6.25699C5.66746 6.16893 5.89518 6.1236 6.12516 6.1236C6.35513 6.1236 6.58285 6.16893 6.7953 6.25699C7.00775 6.34506 7.20075 6.47414 7.36328 6.63685C7.48768 6.75277 7.65223 6.81588 7.82224 6.81288C7.99225 6.80988 8.15446 6.741 8.2747 6.62077C8.39494 6.50053 8.46381 6.33832 8.46681 6.1683C8.46981 5.99829 8.4067 5.83375 8.29078 5.70935C8.0064 5.42494 7.66878 5.19933 7.2972 5.0454C6.92562 4.89148 6.52736 4.81225 6.12516 4.81225C5.72296 4.81225 5.3247 4.89148 4.95312 5.0454C4.58154 5.19933 4.24391 5.42494 3.95953 5.70935L1.77203 7.89685C1.19767 8.47121 0.875 9.25021 0.875 10.0625C0.875 10.8747 1.19767 11.6537 1.77203 12.2281C2.34639 12.8025 3.12539 13.1251 3.93766 13.1251C4.74992 13.1251 5.52892 12.8025 6.10328 12.2281L7.19703 11.1343C7.31295 11.0099 7.37606 10.8454 7.37306 10.6754C7.37006 10.5054 7.30119 10.3432 7.18095 10.2229C7.06071 10.1027 6.8985 10.0338 6.72849 10.0308C6.55848 10.0278 6.39393 10.0909 6.26953 10.2068L5.17578 11.3006C5.01325 11.4633 4.82025 11.5924 4.6078 11.6805C4.39535 11.7685 4.16763 11.8138 3.93766 11.8138C3.70768 11.8138 3.47996 11.7685 3.26751 11.6805C3.05506 11.5924 2.86206 11.4633 2.69953 11.3006Z"
+      fill="currentColor"
+    />
+  </g>
+  <defs>
+    <clipPath id="clip0_1081_1237">
+      <rect width="14" height="14" fill="white" />
+    </clipPath>
+  </defs>
+</svg>
+</a>
+Functions</h2></div><div class="namespaceSection"><div id="namespace_cidrv4addresses" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-Function bg-Function/15 dark:text-FunctionDark dark:bg-FunctionDark/15" title="Function">f</div></div>
+<div class="namespaceItemContent">
+		    <a href="..&#x2F;.&#x2F;cidrv4.ts&#x2F;~&#x2F;cidrv4Addresses.html" title="cidrv4Addresses">
+			    <span>cidrv4Addresses</span><span>(<div class="ml-4"><div><span>cidr<span>: <span class="td-ref">Cidrv4</span></span></span>,</div><div><span>options<span class="td-op">?</span><span>: { offset<span class="td-op">?</span><span>: <span class="td-kw">number</span></span>; count<span class="td-op">?</span><span>: <span class="td-kw">number</span></span>; step<span class="td-op">?</span><span>: <span class="td-kw">number</span></span>;  }</span></span></div></div>)<span>: <span class="td-ref">Generator</span>&lt;<span class="td-kw">number</span>&gt;</span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Generates a range of IP addresses from a CIDR block.</p>
+</div></div></div>
+    </div><div id="namespace_cidrv4contains" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-Function bg-Function/15 dark:text-FunctionDark dark:bg-FunctionDark/15" title="Function">f</div></div>
+<div class="namespaceItemContent">
+		    <a href="..&#x2F;.&#x2F;cidrv4.ts&#x2F;~&#x2F;cidrv4Contains.html" title="cidrv4Contains">
+			    <span>cidrv4Contains</span><span>(<div class="ml-4"><div><span>cidr<span>: <span class="td-ref">Cidrv4</span></span></span>,</div><div><span>ip<span>: <span class="td-kw">number</span></span></span></div></div>)<span>: <span class="td-kw">boolean</span></span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Checks if an IPv4 address is contained within a CIDR block.</p>
+</div></div></div>
+    </div><div id="namespace_cidrv4firstaddress" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-Function bg-Function/15 dark:text-FunctionDark dark:bg-FunctionDark/15" title="Function">f</div></div>
+<div class="namespaceItemContent">
+		    <a href="..&#x2F;.&#x2F;cidrv4.ts&#x2F;~&#x2F;cidrv4FirstAddress.html" title="cidrv4FirstAddress">
+			    <span>cidrv4FirstAddress</span><span>(<span><span>cidr<span>: <span class="td-ref">Cidrv4</span></span></span></span>)<span>: <span class="td-kw">number</span></span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Returns the first address of a CIDR block (network address).</p>
+</div></div></div>
+    </div><div id="namespace_cidrv4lastaddress" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-Function bg-Function/15 dark:text-FunctionDark dark:bg-FunctionDark/15" title="Function">f</div></div>
+<div class="namespaceItemContent">
+		    <a href="..&#x2F;.&#x2F;cidrv4.ts&#x2F;~&#x2F;cidrv4LastAddress.html" title="cidrv4LastAddress">
+			    <span>cidrv4LastAddress</span><span>(<span><span>cidr<span>: <span class="td-ref">Cidrv4</span></span></span></span>)<span>: <span class="td-kw">number</span></span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Returns the last address of a CIDR block (broadcast address for IPv4).</p>
+</div></div></div>
+    </div><div id="namespace_cidrv4mask" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-Function bg-Function/15 dark:text-FunctionDark dark:bg-FunctionDark/15" title="Function">f</div></div>
+<div class="namespaceItemContent">
+		    <a href="..&#x2F;.&#x2F;cidrv4.ts&#x2F;~&#x2F;cidrv4Mask.html" title="cidrv4Mask">
+			    <span>cidrv4Mask</span><span>(<span><span>prefixLength<span>: <span class="td-kw">number</span></span></span></span>)<span>: <span class="td-kw">number</span></span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Creates a network mask from an IPv4 prefix length.</p>
+</div></div></div>
+    </div><div id="namespace_cidrv4size" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-Function bg-Function/15 dark:text-FunctionDark dark:bg-FunctionDark/15" title="Function">f</div></div>
+<div class="namespaceItemContent">
+		    <a href="..&#x2F;.&#x2F;cidrv4.ts&#x2F;~&#x2F;cidrv4Size.html" title="cidrv4Size">
+			    <span>cidrv4Size</span><span>(<span><span>cidrOrPrefixLength<span>: <span><span class="td-ref">Cidrv4</span><span class="td-op"> | </span><span class="td-kw">number</span></span></span></span></span>)<span>: <span class="td-kw">number</span></span></span><div class="namespaceItemContentTypeInfo">2 overloads</div></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Returns the total number of IP addresses in a CIDR block or for a given prefix length.</p>
+</div></div></div>
+    </div><div id="namespace_cidrv6addresses" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-Function bg-Function/15 dark:text-FunctionDark dark:bg-FunctionDark/15" title="Function">f</div></div>
+<div class="namespaceItemContent">
+		    <a href="..&#x2F;.&#x2F;cidrv6.ts&#x2F;~&#x2F;cidrv6Addresses.html" title="cidrv6Addresses">
+			    <span>cidrv6Addresses</span><span>(<div class="ml-4"><div><span>cidr<span>: <span class="td-ref">Cidrv6</span></span></span>,</div><div><span>options<span class="td-op">?</span><span>: { offset<span class="td-op">?</span><span>: <span><span class="td-kw">number</span><span class="td-op"> | </span><span class="td-kw">bigint</span></span></span>; count<span class="td-op">?</span><span>: <span><span class="td-kw">number</span><span class="td-op"> | </span><span class="td-kw">bigint</span></span></span>; step<span class="td-op">?</span><span>: <span><span class="td-kw">number</span><span class="td-op"> | </span><span class="td-kw">bigint</span></span></span>;  }</span></span></div></div>)<span>: <span class="td-ref">Generator</span>&lt;<span class="td-kw">bigint</span>&gt;</span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Generates a range of IP addresses from a CIDR block.</p>
+</div></div></div>
+    </div><div id="namespace_cidrv6contains" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-Function bg-Function/15 dark:text-FunctionDark dark:bg-FunctionDark/15" title="Function">f</div></div>
+<div class="namespaceItemContent">
+		    <a href="..&#x2F;.&#x2F;cidrv6.ts&#x2F;~&#x2F;cidrv6Contains.html" title="cidrv6Contains">
+			    <span>cidrv6Contains</span><span>(<div class="ml-4"><div><span>cidr<span>: <span class="td-ref">Cidrv6</span></span></span>,</div><div><span>ip<span>: <span class="td-kw">bigint</span></span></span></div></div>)<span>: <span class="td-kw">boolean</span></span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Checks if an IPv6 address (as bigint) is contained within a CIDR block.</p>
+</div></div></div>
+    </div><div id="namespace_cidrv6firstaddress" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-Function bg-Function/15 dark:text-FunctionDark dark:bg-FunctionDark/15" title="Function">f</div></div>
+<div class="namespaceItemContent">
+		    <a href="..&#x2F;.&#x2F;cidrv6.ts&#x2F;~&#x2F;cidrv6FirstAddress.html" title="cidrv6FirstAddress">
+			    <span>cidrv6FirstAddress</span><span>(<span><span>cidr<span>: <span class="td-ref">Cidrv6</span></span></span></span>)<span>: <span class="td-kw">bigint</span></span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Returns the first address of a CIDR block.</p>
+</div></div></div>
+    </div><div id="namespace_cidrv6lastaddress" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-Function bg-Function/15 dark:text-FunctionDark dark:bg-FunctionDark/15" title="Function">f</div></div>
+<div class="namespaceItemContent">
+		    <a href="..&#x2F;.&#x2F;cidrv6.ts&#x2F;~&#x2F;cidrv6LastAddress.html" title="cidrv6LastAddress">
+			    <span>cidrv6LastAddress</span><span>(<span><span>cidr<span>: <span class="td-ref">Cidrv6</span></span></span></span>)<span>: <span class="td-kw">bigint</span></span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Returns the last address of a CIDR block.</p>
+</div></div></div>
+    </div><div id="namespace_cidrv6mask" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-Function bg-Function/15 dark:text-FunctionDark dark:bg-FunctionDark/15" title="Function">f</div></div>
+<div class="namespaceItemContent">
+		    <a href="..&#x2F;.&#x2F;cidrv6.ts&#x2F;~&#x2F;cidrv6Mask.html" title="cidrv6Mask">
+			    <span>cidrv6Mask</span><span>(<span><span>prefixLength<span>: <span class="td-kw">number</span></span></span></span>)<span>: <span class="td-kw">bigint</span></span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Creates a network mask from an IPv6 prefix length.</p>
+</div></div></div>
+    </div><div id="namespace_cidrv6size" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-Function bg-Function/15 dark:text-FunctionDark dark:bg-FunctionDark/15" title="Function">f</div></div>
+<div class="namespaceItemContent">
+		    <a href="..&#x2F;.&#x2F;cidrv6.ts&#x2F;~&#x2F;cidrv6Size.html" title="cidrv6Size">
+			    <span>cidrv6Size</span><span>(<span><span>cidrOrPrefixLength<span>: <span><span class="td-ref">Cidrv6</span><span class="td-op"> | </span><span class="td-kw">number</span></span></span></span></span>)<span>: <span class="td-kw">bigint</span></span></span><div class="namespaceItemContentTypeInfo">2 overloads</div></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Returns the total number of IP addresses in a CIDR block or for a given prefix length.</p>
+</div></div></div>
+    </div><div id="namespace_classifyip" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-Function bg-Function/15 dark:text-FunctionDark dark:bg-FunctionDark/15" title="Function">f</div></div>
+<div class="namespaceItemContent">
+		    <a href="..&#x2F;.&#x2F;classify.ts&#x2F;~&#x2F;classifyIp.html" title="classifyIp">
+			    <span>classifyIp</span><span>(<span><span>ip<span>: <span><span class="td-kw">number</span><span class="td-op"> | </span><span class="td-kw">bigint</span><span class="td-op"> | </span><span class="td-kw">string</span></span></span></span></span>)<span>: <span class="td-ref">ClassifyIpResult</span></span></span><div class="namespaceItemContentTypeInfo">4 overloads</div></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Classifies an IPv4 address into its well-known range.</p>
+</div></div></div>
+    </div><div id="namespace_classifyipv4" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-Function bg-Function/15 dark:text-FunctionDark dark:bg-FunctionDark/15" title="Function">f</div></div>
+<div class="namespaceItemContent">
+		    <a href="..&#x2F;.&#x2F;classifyv4.ts&#x2F;~&#x2F;classifyIpv4.html" title="classifyIpv4">
+			    <span>classifyIpv4</span><span>(<span><span>ip<span>: <span class="td-kw">number</span></span></span></span>)<span>: <span class="td-ref">ClassifyIpv4Result</span></span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Classifies an IPv4 address into its well-known range.</p>
+</div></div></div>
+    </div><div id="namespace_classifyipv6" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-Function bg-Function/15 dark:text-FunctionDark dark:bg-FunctionDark/15" title="Function">f</div></div>
+<div class="namespaceItemContent">
+		    <a href="..&#x2F;.&#x2F;classifyv6.ts&#x2F;~&#x2F;classifyIpv6.html" title="classifyIpv6">
+			    <span>classifyIpv6</span><span>(<span><span>ip<span>: <span class="td-kw">bigint</span></span></span></span>)<span>: <span class="td-ref">ClassifyIpv6Result</span></span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Classifies an IPv6 address into its well-known range.</p>
+</div></div></div>
+    </div><div id="namespace_compressipv6" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-Function bg-Function/15 dark:text-FunctionDark dark:bg-FunctionDark/15" title="Function">f</div></div>
+<div class="namespaceItemContent">
+		    <a href="..&#x2F;.&#x2F;ipv6.ts&#x2F;~&#x2F;compressIpv6.html" title="compressIpv6">
+			    <span>compressIpv6</span><span>(<span><span>ip<span>: <span class="td-kw">string</span></span></span></span>)<span>: <span class="td-kw">string</span></span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Compresses an IPv6 address to its shortest canonical form.</p>
+</div></div></div>
+    </div><div id="namespace_expandipv6" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-Function bg-Function/15 dark:text-FunctionDark dark:bg-FunctionDark/15" title="Function">f</div></div>
+<div class="namespaceItemContent">
+		    <a href="..&#x2F;.&#x2F;ipv6.ts&#x2F;~&#x2F;expandIpv6.html" title="expandIpv6">
+			    <span>expandIpv6</span><span>(<span><span>ip<span>: <span class="td-kw">string</span></span></span></span>)<span>: <span class="td-kw">string</span></span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Expands an IPv6 address to its full uncompressed form.</p>
+</div></div></div>
+    </div><div id="namespace_isipv4benchmarking" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-Function bg-Function/15 dark:text-FunctionDark dark:bg-FunctionDark/15" title="Function">f</div></div>
+<div class="namespaceItemContent">
+		    <a href="..&#x2F;.&#x2F;classifyv4.ts&#x2F;~&#x2F;isIpv4Benchmarking.html" title="isIpv4Benchmarking">
+			    <span>isIpv4Benchmarking</span><span>(<span><span>ip<span>: <span class="td-kw">number</span></span></span></span>)<span>: <span class="td-kw">boolean</span></span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Checks if an IPv4 address is in the benchmarking range (RFC 2544).</p>
+</div></div></div>
+    </div><div id="namespace_isipv4broadcast" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-Function bg-Function/15 dark:text-FunctionDark dark:bg-FunctionDark/15" title="Function">f</div></div>
+<div class="namespaceItemContent">
+		    <a href="..&#x2F;.&#x2F;classifyv4.ts&#x2F;~&#x2F;isIpv4Broadcast.html" title="isIpv4Broadcast">
+			    <span>isIpv4Broadcast</span><span>(<span><span>ip<span>: <span class="td-kw">number</span></span></span></span>)<span>: <span class="td-kw">boolean</span></span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Checks if an IPv4 address is the limited broadcast address.</p>
+</div></div></div>
+    </div><div id="namespace_isipv4cgnat" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-Function bg-Function/15 dark:text-FunctionDark dark:bg-FunctionDark/15" title="Function">f</div></div>
+<div class="namespaceItemContent">
+		    <a href="..&#x2F;.&#x2F;classifyv4.ts&#x2F;~&#x2F;isIpv4CgNat.html" title="isIpv4CgNat">
+			    <span>isIpv4CgNat</span><span>(<span><span>ip<span>: <span class="td-kw">number</span></span></span></span>)<span>: <span class="td-kw">boolean</span></span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Checks if an IPv4 address is in the Carrier-Grade NAT range (RFC 6598).</p>
+</div></div></div>
+    </div><div id="namespace_isipv4documentation" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-Function bg-Function/15 dark:text-FunctionDark dark:bg-FunctionDark/15" title="Function">f</div></div>
+<div class="namespaceItemContent">
+		    <a href="..&#x2F;.&#x2F;classifyv4.ts&#x2F;~&#x2F;isIpv4Documentation.html" title="isIpv4Documentation">
+			    <span>isIpv4Documentation</span><span>(<span><span>ip<span>: <span class="td-kw">number</span></span></span></span>)<span>: <span class="td-kw">boolean</span></span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Checks if an IPv4 address is in a documentation range (RFC 5737).</p>
+</div></div></div>
+    </div><div id="namespace_isipv4linklocal" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-Function bg-Function/15 dark:text-FunctionDark dark:bg-FunctionDark/15" title="Function">f</div></div>
+<div class="namespaceItemContent">
+		    <a href="..&#x2F;.&#x2F;classifyv4.ts&#x2F;~&#x2F;isIpv4LinkLocal.html" title="isIpv4LinkLocal">
+			    <span>isIpv4LinkLocal</span><span>(<span><span>ip<span>: <span class="td-kw">number</span></span></span></span>)<span>: <span class="td-kw">boolean</span></span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Checks if an IPv4 address is a link-local address (RFC 3927).</p>
+</div></div></div>
+    </div><div id="namespace_isipv4loopback" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-Function bg-Function/15 dark:text-FunctionDark dark:bg-FunctionDark/15" title="Function">f</div></div>
+<div class="namespaceItemContent">
+		    <a href="..&#x2F;.&#x2F;classifyv4.ts&#x2F;~&#x2F;isIpv4Loopback.html" title="isIpv4Loopback">
+			    <span>isIpv4Loopback</span><span>(<span><span>ip<span>: <span class="td-kw">number</span></span></span></span>)<span>: <span class="td-kw">boolean</span></span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Checks if an IPv4 address is a loopback address (RFC 1122).</p>
+</div></div></div>
+    </div><div id="namespace_isipv4multicast" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-Function bg-Function/15 dark:text-FunctionDark dark:bg-FunctionDark/15" title="Function">f</div></div>
+<div class="namespaceItemContent">
+		    <a href="..&#x2F;.&#x2F;classifyv4.ts&#x2F;~&#x2F;isIpv4Multicast.html" title="isIpv4Multicast">
+			    <span>isIpv4Multicast</span><span>(<span><span>ip<span>: <span class="td-kw">number</span></span></span></span>)<span>: <span class="td-kw">boolean</span></span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Checks if an IPv4 address is a multicast address (RFC 5771).</p>
+</div></div></div>
+    </div><div id="namespace_isipv4private" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-Function bg-Function/15 dark:text-FunctionDark dark:bg-FunctionDark/15" title="Function">f</div></div>
+<div class="namespaceItemContent">
+		    <a href="..&#x2F;.&#x2F;classifyv4.ts&#x2F;~&#x2F;isIpv4Private.html" title="isIpv4Private">
+			    <span>isIpv4Private</span><span>(<span><span>ip<span>: <span class="td-kw">number</span></span></span></span>)<span>: <span class="td-kw">boolean</span></span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Checks if an IPv4 address is in a private range (RFC 1918).</p>
+</div></div></div>
+    </div><div id="namespace_isipv4public" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-Function bg-Function/15 dark:text-FunctionDark dark:bg-FunctionDark/15" title="Function">f</div></div>
+<div class="namespaceItemContent">
+		    <a href="..&#x2F;.&#x2F;classifyv4.ts&#x2F;~&#x2F;isIpv4Public.html" title="isIpv4Public">
+			    <span>isIpv4Public</span><span>(<span><span>ip<span>: <span class="td-kw">number</span></span></span></span>)<span>: <span class="td-kw">boolean</span></span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Checks if an IPv4 address is a public (globally routable) address.</p>
+</div></div></div>
+    </div><div id="namespace_isipv4reserved" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-Function bg-Function/15 dark:text-FunctionDark dark:bg-FunctionDark/15" title="Function">f</div></div>
+<div class="namespaceItemContent">
+		    <a href="..&#x2F;.&#x2F;classifyv4.ts&#x2F;~&#x2F;isIpv4Reserved.html" title="isIpv4Reserved">
+			    <span>isIpv4Reserved</span><span>(<span><span>ip<span>: <span class="td-kw">number</span></span></span></span>)<span>: <span class="td-kw">boolean</span></span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Checks if an IPv4 address is in the reserved range (RFC 1112).</p>
+</div></div></div>
+    </div><div id="namespace_isipv4thisnetwork" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-Function bg-Function/15 dark:text-FunctionDark dark:bg-FunctionDark/15" title="Function">f</div></div>
+<div class="namespaceItemContent">
+		    <a href="..&#x2F;.&#x2F;classifyv4.ts&#x2F;~&#x2F;isIpv4ThisNetwork.html" title="isIpv4ThisNetwork">
+			    <span>isIpv4ThisNetwork</span><span>(<span><span>ip<span>: <span class="td-kw">number</span></span></span></span>)<span>: <span class="td-kw">boolean</span></span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Checks if an IPv4 address is in the &quot;this network&quot; range (RFC 791).</p>
+</div></div></div>
+    </div><div id="namespace_isipv6benchmarking" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-Function bg-Function/15 dark:text-FunctionDark dark:bg-FunctionDark/15" title="Function">f</div></div>
+<div class="namespaceItemContent">
+		    <a href="..&#x2F;.&#x2F;classifyv6.ts&#x2F;~&#x2F;isIpv6Benchmarking.html" title="isIpv6Benchmarking">
+			    <span>isIpv6Benchmarking</span><span>(<span><span>ip<span>: <span class="td-kw">bigint</span></span></span></span>)<span>: <span class="td-kw">boolean</span></span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Checks if an IPv6 address is in the benchmarking range (RFC 5180).</p>
+</div></div></div>
+    </div><div id="namespace_isipv6documentation" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-Function bg-Function/15 dark:text-FunctionDark dark:bg-FunctionDark/15" title="Function">f</div></div>
+<div class="namespaceItemContent">
+		    <a href="..&#x2F;.&#x2F;classifyv6.ts&#x2F;~&#x2F;isIpv6Documentation.html" title="isIpv6Documentation">
+			    <span>isIpv6Documentation</span><span>(<span><span>ip<span>: <span class="td-kw">bigint</span></span></span></span>)<span>: <span class="td-kw">boolean</span></span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Checks if an IPv6 address is in the documentation range (RFC 3849).</p>
+</div></div></div>
+    </div><div id="namespace_isipv6globalunicast" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-Function bg-Function/15 dark:text-FunctionDark dark:bg-FunctionDark/15" title="Function">f</div></div>
+<div class="namespaceItemContent">
+		    <a href="..&#x2F;.&#x2F;classifyv6.ts&#x2F;~&#x2F;isIpv6GlobalUnicast.html" title="isIpv6GlobalUnicast">
+			    <span>isIpv6GlobalUnicast</span><span>(<span><span>ip<span>: <span class="td-kw">bigint</span></span></span></span>)<span>: <span class="td-kw">boolean</span></span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Checks if an IPv6 address is a global unicast address (RFC 4291).</p>
+</div></div></div>
+    </div><div id="namespace_isipv6ipv4mapped" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-Function bg-Function/15 dark:text-FunctionDark dark:bg-FunctionDark/15" title="Function">f</div></div>
+<div class="namespaceItemContent">
+		    <a href="..&#x2F;.&#x2F;classifyv6.ts&#x2F;~&#x2F;isIpv6Ipv4Mapped.html" title="isIpv6Ipv4Mapped">
+			    <span>isIpv6Ipv4Mapped</span><span>(<span><span>ip<span>: <span class="td-kw">bigint</span></span></span></span>)<span>: <span class="td-kw">boolean</span></span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Checks if an IPv6 address is an IPv4-mapped address (RFC 4291).</p>
+</div></div></div>
+    </div><div id="namespace_isipv6ipv4translated" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-Function bg-Function/15 dark:text-FunctionDark dark:bg-FunctionDark/15" title="Function">f</div></div>
+<div class="namespaceItemContent">
+		    <a href="..&#x2F;.&#x2F;classifyv6.ts&#x2F;~&#x2F;isIpv6Ipv4Translated.html" title="isIpv6Ipv4Translated">
+			    <span>isIpv6Ipv4Translated</span><span>(<span><span>ip<span>: <span class="td-kw">bigint</span></span></span></span>)<span>: <span class="td-kw">boolean</span></span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Checks if an IPv6 address is an IPv4-translated address (RFC 6052).</p>
+</div></div></div>
+    </div><div id="namespace_isipv6linklocal" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-Function bg-Function/15 dark:text-FunctionDark dark:bg-FunctionDark/15" title="Function">f</div></div>
+<div class="namespaceItemContent">
+		    <a href="..&#x2F;.&#x2F;classifyv6.ts&#x2F;~&#x2F;isIpv6LinkLocal.html" title="isIpv6LinkLocal">
+			    <span>isIpv6LinkLocal</span><span>(<span><span>ip<span>: <span class="td-kw">bigint</span></span></span></span>)<span>: <span class="td-kw">boolean</span></span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Checks if an IPv6 address is a link-local address (RFC 4291).</p>
+</div></div></div>
+    </div><div id="namespace_isipv6loopback" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-Function bg-Function/15 dark:text-FunctionDark dark:bg-FunctionDark/15" title="Function">f</div></div>
+<div class="namespaceItemContent">
+		    <a href="..&#x2F;.&#x2F;classifyv6.ts&#x2F;~&#x2F;isIpv6Loopback.html" title="isIpv6Loopback">
+			    <span>isIpv6Loopback</span><span>(<span><span>ip<span>: <span class="td-kw">bigint</span></span></span></span>)<span>: <span class="td-kw">boolean</span></span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Checks if an IPv6 address is the loopback address (RFC 4291).</p>
+</div></div></div>
+    </div><div id="namespace_isipv6multicast" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-Function bg-Function/15 dark:text-FunctionDark dark:bg-FunctionDark/15" title="Function">f</div></div>
+<div class="namespaceItemContent">
+		    <a href="..&#x2F;.&#x2F;classifyv6.ts&#x2F;~&#x2F;isIpv6Multicast.html" title="isIpv6Multicast">
+			    <span>isIpv6Multicast</span><span>(<span><span>ip<span>: <span class="td-kw">bigint</span></span></span></span>)<span>: <span class="td-kw">boolean</span></span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Checks if an IPv6 address is a multicast address (RFC 4291).</p>
+</div></div></div>
+    </div><div id="namespace_isipv6orchidv2" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-Function bg-Function/15 dark:text-FunctionDark dark:bg-FunctionDark/15" title="Function">f</div></div>
+<div class="namespaceItemContent">
+		    <a href="..&#x2F;.&#x2F;classifyv6.ts&#x2F;~&#x2F;isIpv6Orchidv2.html" title="isIpv6Orchidv2">
+			    <span>isIpv6Orchidv2</span><span>(<span><span>ip<span>: <span class="td-kw">bigint</span></span></span></span>)<span>: <span class="td-kw">boolean</span></span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Checks if an IPv6 address is an ORCHIDv2 address (RFC 7343).</p>
+</div></div></div>
+    </div><div id="namespace_isipv6teredo" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-Function bg-Function/15 dark:text-FunctionDark dark:bg-FunctionDark/15" title="Function">f</div></div>
+<div class="namespaceItemContent">
+		    <a href="..&#x2F;.&#x2F;classifyv6.ts&#x2F;~&#x2F;isIpv6Teredo.html" title="isIpv6Teredo">
+			    <span>isIpv6Teredo</span><span>(<span><span>ip<span>: <span class="td-kw">bigint</span></span></span></span>)<span>: <span class="td-kw">boolean</span></span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Checks if an IPv6 address is a Teredo address (RFC 4380).</p>
+</div></div></div>
+    </div><div id="namespace_isipv6uniquelocal" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-Function bg-Function/15 dark:text-FunctionDark dark:bg-FunctionDark/15" title="Function">f</div></div>
+<div class="namespaceItemContent">
+		    <a href="..&#x2F;.&#x2F;classifyv6.ts&#x2F;~&#x2F;isIpv6UniqueLocal.html" title="isIpv6UniqueLocal">
+			    <span>isIpv6UniqueLocal</span><span>(<span><span>ip<span>: <span class="td-kw">bigint</span></span></span></span>)<span>: <span class="td-kw">boolean</span></span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Checks if an IPv6 address is a unique local address (RFC 4193).</p>
+</div></div></div>
+    </div><div id="namespace_isipv6unspecified" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-Function bg-Function/15 dark:text-FunctionDark dark:bg-FunctionDark/15" title="Function">f</div></div>
+<div class="namespaceItemContent">
+		    <a href="..&#x2F;.&#x2F;classifyv6.ts&#x2F;~&#x2F;isIpv6Unspecified.html" title="isIpv6Unspecified">
+			    <span>isIpv6Unspecified</span><span>(<span><span>ip<span>: <span class="td-kw">bigint</span></span></span></span>)<span>: <span class="td-kw">boolean</span></span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Checks if an IPv6 address is the unspecified address (RFC 4291).</p>
+</div></div></div>
+    </div><div id="namespace_isvalidcidr" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-Function bg-Function/15 dark:text-FunctionDark dark:bg-FunctionDark/15" title="Function">f</div></div>
+<div class="namespaceItemContent">
+		    <a href="..&#x2F;.&#x2F;cidr.ts&#x2F;~&#x2F;isValidCidr.html" title="isValidCidr">
+			    <span>isValidCidr</span><span>(<span><span>s<span>: <span class="td-kw">string</span></span></span></span>)<span>: <span class="td-kw">boolean</span></span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Checks if a string is valid IPv4 or IPv6 CIDR notation.</p>
+</div></div></div>
+    </div><div id="namespace_isvalidcidrv4" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-Function bg-Function/15 dark:text-FunctionDark dark:bg-FunctionDark/15" title="Function">f</div></div>
+<div class="namespaceItemContent">
+		    <a href="..&#x2F;.&#x2F;cidrv4.ts&#x2F;~&#x2F;isValidCidrv4.html" title="isValidCidrv4">
+			    <span>isValidCidrv4</span><span>(<span><span>s<span>: <span class="td-kw">string</span></span></span></span>)<span>: <span class="td-kw">boolean</span></span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Checks if a string is valid IPv4 CIDR notation.</p>
+</div></div></div>
+    </div><div id="namespace_isvalidcidrv6" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-Function bg-Function/15 dark:text-FunctionDark dark:bg-FunctionDark/15" title="Function">f</div></div>
+<div class="namespaceItemContent">
+		    <a href="..&#x2F;.&#x2F;cidrv6.ts&#x2F;~&#x2F;isValidCidrv6.html" title="isValidCidrv6">
+			    <span>isValidCidrv6</span><span>(<span><span>s<span>: <span class="td-kw">string</span></span></span></span>)<span>: <span class="td-kw">boolean</span></span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Checks if a string is valid IPv6 CIDR notation.</p>
+</div></div></div>
+    </div><div id="namespace_isvalidip" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-Function bg-Function/15 dark:text-FunctionDark dark:bg-FunctionDark/15" title="Function">f</div></div>
+<div class="namespaceItemContent">
+		    <a href="..&#x2F;.&#x2F;validate.ts&#x2F;~&#x2F;isValidIp.html" title="isValidIp">
+			    <span>isValidIp</span><span>(<span><span>s<span>: <span class="td-kw">string</span></span></span></span>)<span>: <span class="td-kw">boolean</span></span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Checks if a string is any valid IP address or CIDR notation.</p>
+</div></div></div>
+    </div><div id="namespace_isvalidipv4" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-Function bg-Function/15 dark:text-FunctionDark dark:bg-FunctionDark/15" title="Function">f</div></div>
+<div class="namespaceItemContent">
+		    <a href="..&#x2F;.&#x2F;ipv4.ts&#x2F;~&#x2F;isValidIpv4.html" title="isValidIpv4">
+			    <span>isValidIpv4</span><span>(<span><span>s<span>: <span class="td-kw">string</span></span></span></span>)<span>: <span class="td-kw">boolean</span></span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Checks if a string is a valid IPv4 address in dotted decimal notation.</p>
+</div></div></div>
+    </div><div id="namespace_isvalidipv6" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-Function bg-Function/15 dark:text-FunctionDark dark:bg-FunctionDark/15" title="Function">f</div></div>
+<div class="namespaceItemContent">
+		    <a href="..&#x2F;.&#x2F;ipv6.ts&#x2F;~&#x2F;isValidIpv6.html" title="isValidIpv6">
+			    <span>isValidIpv6</span><span>(<span><span>s<span>: <span class="td-kw">string</span></span></span></span>)<span>: <span class="td-kw">boolean</span></span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Checks if a string is a valid IPv6 address in colon-hexadecimal notation.</p>
+</div></div></div>
+    </div><div id="namespace_parsecidr" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-Function bg-Function/15 dark:text-FunctionDark dark:bg-FunctionDark/15" title="Function">f</div></div>
+<div class="namespaceItemContent">
+		    <a href="..&#x2F;.&#x2F;cidr.ts&#x2F;~&#x2F;parseCidr.html" title="parseCidr">
+			    <span>parseCidr</span><span>(<span><span>cidr<span>: <span class="td-kw">string</span></span></span></span>)<span>: <span><span class="td-ref">Cidrv4</span><span class="td-op"> | </span><span class="td-ref">Cidrv6</span></span></span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Parses an IPv4 or IPv6 CIDR notation string.</p>
+</div></div></div>
+    </div><div id="namespace_parsecidrv4" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-Function bg-Function/15 dark:text-FunctionDark dark:bg-FunctionDark/15" title="Function">f</div></div>
+<div class="namespaceItemContent">
+		    <a href="..&#x2F;.&#x2F;cidrv4.ts&#x2F;~&#x2F;parseCidrv4.html" title="parseCidrv4">
+			    <span>parseCidrv4</span><span>(<span><span>cidr<span>: <span class="td-kw">string</span></span></span></span>)<span>: <span class="td-ref">Cidrv4</span></span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Parses an IPv4 CIDR notation string to a Cidrv4 object.</p>
+</div></div></div>
+    </div><div id="namespace_parsecidrv6" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-Function bg-Function/15 dark:text-FunctionDark dark:bg-FunctionDark/15" title="Function">f</div></div>
+<div class="namespaceItemContent">
+		    <a href="..&#x2F;.&#x2F;cidrv6.ts&#x2F;~&#x2F;parseCidrv6.html" title="parseCidrv6">
+			    <span>parseCidrv6</span><span>(<span><span>cidr<span>: <span class="td-kw">string</span></span></span></span>)<span>: <span class="td-ref">Cidrv6</span></span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Parses an IPv6 CIDR notation string to a Cidrv6 object.</p>
+</div></div></div>
+    </div><div id="namespace_parseip" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-Function bg-Function/15 dark:text-FunctionDark dark:bg-FunctionDark/15" title="Function">f</div></div>
+<div class="namespaceItemContent">
+		    <a href="..&#x2F;.&#x2F;ip.ts&#x2F;~&#x2F;parseIp.html" title="parseIp">
+			    <span>parseIp</span><span>(<span><span>ip<span>: <span class="td-kw">string</span></span></span></span>)<span>: <span><span class="td-kw">number</span><span class="td-op"> | </span><span class="td-kw">bigint</span></span></span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Parses an IPv4 or IPv6 address string to its numeric representation.</p>
+</div></div></div>
+    </div><div id="namespace_parseipv4" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-Function bg-Function/15 dark:text-FunctionDark dark:bg-FunctionDark/15" title="Function">f</div></div>
+<div class="namespaceItemContent">
+		    <a href="..&#x2F;.&#x2F;ipv4.ts&#x2F;~&#x2F;parseIpv4.html" title="parseIpv4">
+			    <span>parseIpv4</span><span>(<span><span>ip<span>: <span class="td-kw">string</span></span></span></span>)<span>: <span class="td-kw">number</span></span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Parses an IPv4 address in dotted decimal notation to a number.</p>
+</div></div></div>
+    </div><div id="namespace_parseipv6" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-Function bg-Function/15 dark:text-FunctionDark dark:bg-FunctionDark/15" title="Function">f</div></div>
+<div class="namespaceItemContent">
+		    <a href="..&#x2F;.&#x2F;ipv6.ts&#x2F;~&#x2F;parseIpv6.html" title="parseIpv6">
+			    <span>parseIpv6</span><span>(<span><span>ip<span>: <span class="td-kw">string</span></span></span></span>)<span>: <span class="td-kw">bigint</span></span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Parses an IPv6 address in colon-hexadecimal notation to a bigint.</p>
+</div></div></div>
+    </div><div id="namespace_stringifycidr" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-Function bg-Function/15 dark:text-FunctionDark dark:bg-FunctionDark/15" title="Function">f</div></div>
+<div class="namespaceItemContent">
+		    <a href="..&#x2F;.&#x2F;cidr.ts&#x2F;~&#x2F;stringifyCidr.html" title="stringifyCidr">
+			    <span>stringifyCidr</span><span>(<span><span>cidr<span>: <span><span class="td-ref">Cidrv4</span><span class="td-op"> | </span><span class="td-ref">Cidrv6</span></span></span></span></span>)<span>: <span class="td-kw">string</span></span></span><div class="namespaceItemContentTypeInfo">3 overloads</div></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Stringifies a <a href=".././mod.ts/~/Cidrv4.html">Cidrv4</a> or <a href=".././mod.ts/~/Cidrv6.html">Cidrv6</a> to CIDR notation.</p>
+</div></div></div>
+    </div><div id="namespace_stringifycidrv4" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-Function bg-Function/15 dark:text-FunctionDark dark:bg-FunctionDark/15" title="Function">f</div></div>
+<div class="namespaceItemContent">
+		    <a href="..&#x2F;.&#x2F;cidrv4.ts&#x2F;~&#x2F;stringifyCidrv4.html" title="stringifyCidrv4">
+			    <span>stringifyCidrv4</span><span>(<span><span>cidr<span>: <span class="td-ref">Cidrv4</span></span></span></span>)<span>: <span class="td-kw">string</span></span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Stringifies a Cidrv4 object to CIDR notation.</p>
+</div></div></div>
+    </div><div id="namespace_stringifycidrv6" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-Function bg-Function/15 dark:text-FunctionDark dark:bg-FunctionDark/15" title="Function">f</div></div>
+<div class="namespaceItemContent">
+		    <a href="..&#x2F;.&#x2F;cidrv6.ts&#x2F;~&#x2F;stringifyCidrv6.html" title="stringifyCidrv6">
+			    <span>stringifyCidrv6</span><span>(<span><span>cidr<span>: <span class="td-ref">Cidrv6</span></span></span></span>)<span>: <span class="td-kw">string</span></span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Stringifies a Cidrv6 object to CIDR notation.</p>
+</div></div></div>
+    </div><div id="namespace_stringifyip" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-Function bg-Function/15 dark:text-FunctionDark dark:bg-FunctionDark/15" title="Function">f</div></div>
+<div class="namespaceItemContent">
+		    <a href="..&#x2F;.&#x2F;ip.ts&#x2F;~&#x2F;stringifyIp.html" title="stringifyIp">
+			    <span>stringifyIp</span><span>(<span><span>ip<span>: <span><span class="td-kw">number</span><span class="td-op"> | </span><span class="td-kw">bigint</span></span></span></span></span>)<span>: <span class="td-kw">string</span></span></span><div class="namespaceItemContentTypeInfo">3 overloads</div></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Stringifies an IPv4 (<code>number</code>) or IPv6 (<code>bigint</code>) address to its
+standard notation.</p>
+</div></div></div>
+    </div><div id="namespace_stringifyipv4" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-Function bg-Function/15 dark:text-FunctionDark dark:bg-FunctionDark/15" title="Function">f</div></div>
+<div class="namespaceItemContent">
+		    <a href="..&#x2F;.&#x2F;ipv4.ts&#x2F;~&#x2F;stringifyIpv4.html" title="stringifyIpv4">
+			    <span>stringifyIpv4</span><span>(<span><span>value<span>: <span class="td-kw">number</span></span></span></span>)<span>: <span class="td-kw">string</span></span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Stringifies a number to an IPv4 address in dotted decimal notation.</p>
+</div></div></div>
+    </div><div id="namespace_stringifyipv6" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-Function bg-Function/15 dark:text-FunctionDark dark:bg-FunctionDark/15" title="Function">f</div></div>
+<div class="namespaceItemContent">
+		    <a href="..&#x2F;.&#x2F;ipv6.ts&#x2F;~&#x2F;stringifyIpv6.html" title="stringifyIpv6">
+			    <span>stringifyIpv6</span><span>(<span><span>value<span>: <span class="td-kw">bigint</span></span></span></span>)<span>: <span class="td-kw">string</span></span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Stringifies a bigint to an IPv6 address in compressed colon-hexadecimal notation.</p>
+</div></div></div>
+    </div><div id="namespace_validateip" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-Function bg-Function/15 dark:text-FunctionDark dark:bg-FunctionDark/15" title="Function">f</div></div>
+<div class="namespaceItemContent">
+		    <a href="..&#x2F;.&#x2F;validate.ts&#x2F;~&#x2F;validateIp.html" title="validateIp">
+			    <span>validateIp</span><span>(<span><span>s<span>: <span class="td-kw">string</span></span></span></span>)<span>: <span class="td-ref">ValidateIpResult</span></span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Validates and identifies any IP address or CIDR notation string.</p>
+</div></div></div>
+    </div></div>
+</section>
+<section class="section"  id="mod_ts_type-aliases"><div>
+      <h2 class="anchorable mb-1"><a href="#mod_ts_type-aliases" class="anchor" aria-label="Anchor" tabIndex="-1"><svg
+  width="16"
+  height="16"
+  viewBox="0 0 14 14"
+  fill="none"
+  xmlns="http://www.w3.org/2000/svg"
+>
+  <g clip-path="url(#clip0_1081_1237)">
+    <path
+      fill-rule="evenodd"
+      clip-rule="evenodd"
+      d="M6.80328 2.8656C6.68736 2.99 6.62425 3.15454 6.62725 3.32456C6.63025 3.49457 6.69913 3.65678 6.81936 3.77702C6.9396 3.89725 7.10181 3.96613 7.27182 3.96913C7.44184 3.97213 7.60638 3.90902 7.73078 3.7931L8.82453 2.69935C8.98712 2.53676 9.18015 2.40778 9.39259 2.31978C9.60503 2.23179 9.83272 2.1865 10.0627 2.1865C10.2926 2.1865 10.5203 2.23179 10.7327 2.31978C10.9452 2.40778 11.1382 2.53676 11.3008 2.69935C11.4634 2.86194 11.5923 3.05497 11.6803 3.2674C11.7683 3.47984 11.8136 3.70753 11.8136 3.93747C11.8136 4.16741 11.7683 4.3951 11.6803 4.60754C11.5923 4.81998 11.4634 5.013 11.3008 5.1756L9.11328 7.3631C8.95075 7.52581 8.75775 7.65488 8.5453 7.74295C8.33285 7.83102 8.10513 7.87635 7.87516 7.87635C7.64518 7.87635 7.41746 7.83102 7.20501 7.74295C6.99256 7.65488 6.79956 7.52581 6.63703 7.3631C6.51263 7.24718 6.34809 7.18407 6.17807 7.18707C6.00806 7.19007 5.84585 7.25894 5.72561 7.37918C5.60538 7.49942 5.5365 7.66163 5.5335 7.83164C5.5305 8.00165 5.59361 8.1662 5.70953 8.2906C5.99391 8.57501 6.33154 8.80062 6.70312 8.95455C7.0747 9.10847 7.47296 9.18769 7.87516 9.18769C8.27736 9.18769 8.67562 9.10847 9.0472 8.95455C9.41878 8.80062 9.7564 8.57501 10.0408 8.2906L12.2283 6.1031C12.8026 5.52874 13.1253 4.74974 13.1253 3.93747C13.1253 3.12521 12.8026 2.34621 12.2283 1.77185C11.6539 1.19749 10.8749 0.874817 10.0627 0.874817C9.25039 0.874817 8.47139 1.19749 7.89703 1.77185L6.80328 2.8656ZM2.69953 11.3006C2.53682 11.1381 2.40774 10.9451 2.31968 10.7326C2.23161 10.5202 2.18628 10.2924 2.18628 10.0625C2.18628 9.8325 2.23161 9.60477 2.31968 9.39233C2.40774 9.17988 2.53682 8.98688 2.69953 8.82435L4.88703 6.63685C5.04956 6.47414 5.24256 6.34506 5.45501 6.25699C5.66746 6.16893 5.89518 6.1236 6.12516 6.1236C6.35513 6.1236 6.58285 6.16893 6.7953 6.25699C7.00775 6.34506 7.20075 6.47414 7.36328 6.63685C7.48768 6.75277 7.65223 6.81588 7.82224 6.81288C7.99225 6.80988 8.15446 6.741 8.2747 6.62077C8.39494 6.50053 8.46381 6.33832 8.46681 6.1683C8.46981 5.99829 8.4067 5.83375 8.29078 5.70935C8.0064 5.42494 7.66878 5.19933 7.2972 5.0454C6.92562 4.89148 6.52736 4.81225 6.12516 4.81225C5.72296 4.81225 5.3247 4.89148 4.95312 5.0454C4.58154 5.19933 4.24391 5.42494 3.95953 5.70935L1.77203 7.89685C1.19767 8.47121 0.875 9.25021 0.875 10.0625C0.875 10.8747 1.19767 11.6537 1.77203 12.2281C2.34639 12.8025 3.12539 13.1251 3.93766 13.1251C4.74992 13.1251 5.52892 12.8025 6.10328 12.2281L7.19703 11.1343C7.31295 11.0099 7.37606 10.8454 7.37306 10.6754C7.37006 10.5054 7.30119 10.3432 7.18095 10.2229C7.06071 10.1027 6.8985 10.0338 6.72849 10.0308C6.55848 10.0278 6.39393 10.0909 6.26953 10.2068L5.17578 11.3006C5.01325 11.4633 4.82025 11.5924 4.6078 11.6805C4.39535 11.7685 4.16763 11.8138 3.93766 11.8138C3.70768 11.8138 3.47996 11.7685 3.26751 11.6805C3.05506 11.5924 2.86206 11.4633 2.69953 11.3006Z"
+      fill="currentColor"
+    />
+  </g>
+  <defs>
+    <clipPath id="clip0_1081_1237">
+      <rect width="14" height="14" fill="white" />
+    </clipPath>
+  </defs>
+</svg>
+</a>
+Type Aliases</h2></div><div class="namespaceSection"><div id="namespace_cidrv4" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-TypeAlias bg-TypeAlias/15 dark:text-TypeAliasDark dark:bg-TypeAliasDark/15" title="Type Alias">T</div></div>
+<div class="namespaceItemContent">
+		    <a href="..&#x2F;.&#x2F;cidrv4.ts&#x2F;~&#x2F;Cidrv4.html" title="Cidrv4">
+			    <span>Cidrv4</span><span> = { <span class="td-kw">readonly </span>address<span>: <span class="td-kw">number</span></span>; <span class="td-kw">readonly </span>prefixLength<span>: <span class="td-kw">number</span></span>;  }</span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Represents an IPv4 CIDR block.</p>
+</div></div><ul class="namespaceItemContentSubItems"><li>
+                <a href="..&#x2F;.&#x2F;cidrv4.ts&#x2F;~&#x2F;Cidrv4.html#property_address">
+                  <span>address</span><span>: <span class="td-kw">number</span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>The IPv4 address from the CIDR notation</p>
+</div></div></li><li>
+                <a href="..&#x2F;.&#x2F;cidrv4.ts&#x2F;~&#x2F;Cidrv4.html#property_prefixlength">
+                  <span>prefixLength</span><span>: <span class="td-kw">number</span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>The prefix length (0-32)</p>
+</div></div></li></ul></div>
+    </div><div id="namespace_cidrv6" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-TypeAlias bg-TypeAlias/15 dark:text-TypeAliasDark dark:bg-TypeAliasDark/15" title="Type Alias">T</div></div>
+<div class="namespaceItemContent">
+		    <a href="..&#x2F;.&#x2F;cidrv6.ts&#x2F;~&#x2F;Cidrv6.html" title="Cidrv6">
+			    <span>Cidrv6</span><span> = { <span class="td-kw">readonly </span>address<span>: <span class="td-kw">bigint</span></span>; <span class="td-kw">readonly </span>prefixLength<span>: <span class="td-kw">number</span></span>;  }</span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Represents an IPv6 CIDR block.</p>
+</div></div><ul class="namespaceItemContentSubItems"><li>
+                <a href="..&#x2F;.&#x2F;cidrv6.ts&#x2F;~&#x2F;Cidrv6.html#property_address">
+                  <span>address</span><span>: <span class="td-kw">bigint</span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>The IPv6 address from the CIDR notation</p>
+</div></div></li><li>
+                <a href="..&#x2F;.&#x2F;cidrv6.ts&#x2F;~&#x2F;Cidrv6.html#property_prefixlength">
+                  <span>prefixLength</span><span>: <span class="td-kw">number</span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>The prefix length (0-128)</p>
+</div></div></li></ul></div>
+    </div><div id="namespace_classifyipresult" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-TypeAlias bg-TypeAlias/15 dark:text-TypeAliasDark dark:bg-TypeAliasDark/15" title="Type Alias">T</div></div>
+<div class="namespaceItemContent">
+		    <a href="..&#x2F;.&#x2F;classify.ts&#x2F;~&#x2F;ClassifyIpResult.html" title="ClassifyIpResult">
+			    <span>ClassifyIpResult</span><span> = <div class="ml-indent"><span>{ <span class="td-kw">readonly </span>version<span>: <span class="td-lit">4</span></span>; <span class="td-kw">readonly </span>kind<span>: <span class="td-ref">ClassifyIpv4Result</span></span>;  }</span><br /><span><span class="td-op"> | </span>{ <span class="td-kw">readonly </span>version<span>: <span class="td-lit">6</span></span>; <span class="td-kw">readonly </span>kind<span>: <span class="td-ref">ClassifyIpv6Result</span></span>;  }</span></div></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Result of classifying an IP address with version information.</p>
+</div></div></div>
+    </div><div id="namespace_classifyipv4result" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-TypeAlias bg-TypeAlias/15 dark:text-TypeAliasDark dark:bg-TypeAliasDark/15" title="Type Alias">T</div></div>
+<div class="namespaceItemContent">
+		    <a href="..&#x2F;.&#x2F;classifyv4.ts&#x2F;~&#x2F;ClassifyIpv4Result.html" title="ClassifyIpv4Result">
+			    <span>ClassifyIpv4Result</span><span> = <div class="ml-indent"><span><span class="td-str">"broadcast"</span></span><br /><span><span class="td-op"> | </span><span class="td-str">"this-network"</span></span><br /><span><span class="td-op"> | </span><span class="td-str">"loopback"</span></span><br /><span><span class="td-op"> | </span><span class="td-str">"link-local"</span></span><br /><span><span class="td-op"> | </span><span class="td-str">"documentation"</span></span><br /><span><span class="td-op"> | </span><span class="td-str">"benchmarking"</span></span><br /><span><span class="td-op"> | </span><span class="td-str">"cg-nat"</span></span><br /><span><span class="td-op"> | </span><span class="td-str">"private"</span></span><br /><span><span class="td-op"> | </span><span class="td-str">"multicast"</span></span><br /><span><span class="td-op"> | </span><span class="td-str">"reserved"</span></span><br /><span><span class="td-op"> | </span><span class="td-str">"public"</span></span></div></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>All possible IPv4 address classification labels.</p>
+</div></div></div>
+    </div><div id="namespace_classifyipv6result" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-TypeAlias bg-TypeAlias/15 dark:text-TypeAliasDark dark:bg-TypeAliasDark/15" title="Type Alias">T</div></div>
+<div class="namespaceItemContent">
+		    <a href="..&#x2F;.&#x2F;classifyv6.ts&#x2F;~&#x2F;ClassifyIpv6Result.html" title="ClassifyIpv6Result">
+			    <span>ClassifyIpv6Result</span><span> = <div class="ml-indent"><span><span class="td-str">"loopback"</span></span><br /><span><span class="td-op"> | </span><span class="td-str">"unspecified"</span></span><br /><span><span class="td-op"> | </span><span class="td-str">"ipv4-mapped"</span></span><br /><span><span class="td-op"> | </span><span class="td-str">"ipv4-translated"</span></span><br /><span><span class="td-op"> | </span><span class="td-str">"documentation"</span></span><br /><span><span class="td-op"> | </span><span class="td-str">"benchmarking"</span></span><br /><span><span class="td-op"> | </span><span class="td-str">"orchidv2"</span></span><br /><span><span class="td-op"> | </span><span class="td-str">"teredo"</span></span><br /><span><span class="td-op"> | </span><span class="td-str">"link-local"</span></span><br /><span><span class="td-op"> | </span><span class="td-str">"multicast"</span></span><br /><span><span class="td-op"> | </span><span class="td-str">"unique-local"</span></span><br /><span><span class="td-op"> | </span><span class="td-str">"global-unicast"</span></span><br /><span><span class="td-op"> | </span><span class="td-str">"unassigned"</span></span></div></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>All possible IPv6 address classification labels.</p>
+</div></div></div>
+    </div><div id="namespace_validateipresult" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-TypeAlias bg-TypeAlias/15 dark:text-TypeAliasDark dark:bg-TypeAliasDark/15" title="Type Alias">T</div></div>
+<div class="namespaceItemContent">
+		    <a href="..&#x2F;.&#x2F;validate.ts&#x2F;~&#x2F;ValidateIpResult.html" title="ValidateIpResult">
+			    <span>ValidateIpResult</span><span> = <div class="ml-indent"><span>{ <span class="td-kw">readonly </span>kind<span>: <span class="td-str">"ipv4"</span></span>; <span class="td-kw">readonly </span>value<span>: <span class="td-kw">number</span></span>;  }</span><br /><span><span class="td-op"> | </span>{ <span class="td-kw">readonly </span>kind<span>: <span class="td-str">"ipv6"</span></span>; <span class="td-kw">readonly </span>value<span>: <span class="td-kw">bigint</span></span>;  }</span><br /><span><span class="td-op"> | </span>{ <span class="td-kw">readonly </span>kind<span>: <span class="td-str">"cidrv4"</span></span>; <span class="td-kw">readonly </span>value<span>: <span class="td-ref">Cidrv4</span></span>;  }</span><br /><span><span class="td-op"> | </span>{ <span class="td-kw">readonly </span>kind<span>: <span class="td-str">"cidrv6"</span></span>; <span class="td-kw">readonly </span>value<span>: <span class="td-ref">Cidrv6</span></span>;  }</span><br /><span><span class="td-op"> | </span>{ <span class="td-kw">readonly </span>kind<span>: <span class="td-str">"invalid"</span></span>;  }</span></div></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>The result of the <a href=".././mod.ts/~/validateIp.html">validateIp</a> function.</p>
+</div></div></div>
+    </div></div>
+</section>
+<section class="section"  id="mod_ts_variables"><div>
+      <h2 class="anchorable mb-1"><a href="#mod_ts_variables" class="anchor" aria-label="Anchor" tabIndex="-1"><svg
+  width="16"
+  height="16"
+  viewBox="0 0 14 14"
+  fill="none"
+  xmlns="http://www.w3.org/2000/svg"
+>
+  <g clip-path="url(#clip0_1081_1237)">
+    <path
+      fill-rule="evenodd"
+      clip-rule="evenodd"
+      d="M6.80328 2.8656C6.68736 2.99 6.62425 3.15454 6.62725 3.32456C6.63025 3.49457 6.69913 3.65678 6.81936 3.77702C6.9396 3.89725 7.10181 3.96613 7.27182 3.96913C7.44184 3.97213 7.60638 3.90902 7.73078 3.7931L8.82453 2.69935C8.98712 2.53676 9.18015 2.40778 9.39259 2.31978C9.60503 2.23179 9.83272 2.1865 10.0627 2.1865C10.2926 2.1865 10.5203 2.23179 10.7327 2.31978C10.9452 2.40778 11.1382 2.53676 11.3008 2.69935C11.4634 2.86194 11.5923 3.05497 11.6803 3.2674C11.7683 3.47984 11.8136 3.70753 11.8136 3.93747C11.8136 4.16741 11.7683 4.3951 11.6803 4.60754C11.5923 4.81998 11.4634 5.013 11.3008 5.1756L9.11328 7.3631C8.95075 7.52581 8.75775 7.65488 8.5453 7.74295C8.33285 7.83102 8.10513 7.87635 7.87516 7.87635C7.64518 7.87635 7.41746 7.83102 7.20501 7.74295C6.99256 7.65488 6.79956 7.52581 6.63703 7.3631C6.51263 7.24718 6.34809 7.18407 6.17807 7.18707C6.00806 7.19007 5.84585 7.25894 5.72561 7.37918C5.60538 7.49942 5.5365 7.66163 5.5335 7.83164C5.5305 8.00165 5.59361 8.1662 5.70953 8.2906C5.99391 8.57501 6.33154 8.80062 6.70312 8.95455C7.0747 9.10847 7.47296 9.18769 7.87516 9.18769C8.27736 9.18769 8.67562 9.10847 9.0472 8.95455C9.41878 8.80062 9.7564 8.57501 10.0408 8.2906L12.2283 6.1031C12.8026 5.52874 13.1253 4.74974 13.1253 3.93747C13.1253 3.12521 12.8026 2.34621 12.2283 1.77185C11.6539 1.19749 10.8749 0.874817 10.0627 0.874817C9.25039 0.874817 8.47139 1.19749 7.89703 1.77185L6.80328 2.8656ZM2.69953 11.3006C2.53682 11.1381 2.40774 10.9451 2.31968 10.7326C2.23161 10.5202 2.18628 10.2924 2.18628 10.0625C2.18628 9.8325 2.23161 9.60477 2.31968 9.39233C2.40774 9.17988 2.53682 8.98688 2.69953 8.82435L4.88703 6.63685C5.04956 6.47414 5.24256 6.34506 5.45501 6.25699C5.66746 6.16893 5.89518 6.1236 6.12516 6.1236C6.35513 6.1236 6.58285 6.16893 6.7953 6.25699C7.00775 6.34506 7.20075 6.47414 7.36328 6.63685C7.48768 6.75277 7.65223 6.81588 7.82224 6.81288C7.99225 6.80988 8.15446 6.741 8.2747 6.62077C8.39494 6.50053 8.46381 6.33832 8.46681 6.1683C8.46981 5.99829 8.4067 5.83375 8.29078 5.70935C8.0064 5.42494 7.66878 5.19933 7.2972 5.0454C6.92562 4.89148 6.52736 4.81225 6.12516 4.81225C5.72296 4.81225 5.3247 4.89148 4.95312 5.0454C4.58154 5.19933 4.24391 5.42494 3.95953 5.70935L1.77203 7.89685C1.19767 8.47121 0.875 9.25021 0.875 10.0625C0.875 10.8747 1.19767 11.6537 1.77203 12.2281C2.34639 12.8025 3.12539 13.1251 3.93766 13.1251C4.74992 13.1251 5.52892 12.8025 6.10328 12.2281L7.19703 11.1343C7.31295 11.0099 7.37606 10.8454 7.37306 10.6754C7.37006 10.5054 7.30119 10.3432 7.18095 10.2229C7.06071 10.1027 6.8985 10.0338 6.72849 10.0308C6.55848 10.0278 6.39393 10.0909 6.26953 10.2068L5.17578 11.3006C5.01325 11.4633 4.82025 11.5924 4.6078 11.6805C4.39535 11.7685 4.16763 11.8138 3.93766 11.8138C3.70768 11.8138 3.47996 11.7685 3.26751 11.6805C3.05506 11.5924 2.86206 11.4633 2.69953 11.3006Z"
+      fill="currentColor"
+    />
+  </g>
+  <defs>
+    <clipPath id="clip0_1081_1237">
+      <rect width="14" height="14" fill="white" />
+    </clipPath>
+  </defs>
+</svg>
+</a>
+Variables</h2></div><div class="namespaceSection"><div id="namespace_cidrv4broadcastaddress" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-Variable bg-Variable/15 dark:text-VariableDark dark:bg-VariableDark/15" title="Variable">v</div></div>
+<div class="namespaceItemContent">
+		    <a href="..&#x2F;.&#x2F;cidrv4.ts&#x2F;~&#x2F;cidrv4BroadcastAddress.html" title="cidrv4BroadcastAddress">
+			    <span>cidrv4BroadcastAddress</span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Returns the broadcast address (last IP) of a CIDR block.</p>
+</div></div></div>
+    </div><div id="namespace_cidrv4networkaddress" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-Variable bg-Variable/15 dark:text-VariableDark dark:bg-VariableDark/15" title="Variable">v</div></div>
+<div class="namespaceItemContent">
+		    <a href="..&#x2F;.&#x2F;cidrv4.ts&#x2F;~&#x2F;cidrv4NetworkAddress.html" title="cidrv4NetworkAddress">
+			    <span>cidrv4NetworkAddress</span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Returns the network address (first IP) of a CIDR block.</p>
+</div></div></div>
+    </div></div>
+</section>
+</div>
+</div>
+</section>
+</main><div class="toc">
+    <div><div class="usageContent">
+    <h3>Usage</h3><div class="markdown"><pre class="highlight"><code class="language-typescript">import * as mod from &quot;mod.ts&quot;;
+</code><button class="copyButton" data-copy="import * as mod from &quot;mod.ts&quot;;
+"><svg
+  class="copy"
+  width="15"
+  height="15"
+  viewBox="0 0 15 15"
+  fill="none"
+  xmlns="http://www.w3.org/2000/svg"
+>
+  <rect x="2" y="2" width="7" height="7" fill="none" />
+  <rect x="6" y="6" width="7" height="7" fill="none" />
+  <path
+    d="M1.55566 2.7C1.55566 2.03726 2.09292 1.5 2.75566 1.5H8.75566C9.41841 1.5 9.95566 2.03726 9.95566 2.7V5.1H12.3557C13.0184 5.1 13.5557 5.63726 13.5557 6.3V12.3C13.5557 12.9627 13.0184 13.5 12.3557 13.5H6.35566C5.69292 13.5 5.15566 12.9627 5.15566 12.3V9.9H2.75566C2.09292 9.9 1.55566 9.36274 1.55566 8.7V2.7ZM6.35566 9.9V12.3H12.3557V6.3H9.95566V8.7C9.95566 9.36274 9.41841 9.9 8.75566 9.9H6.35566ZM8.75566 8.7V2.7H2.75566V8.7H8.75566Z"
+    fill="currentColor"
+  />
+</svg>
+<svg
+  class="check"
+  width="15"
+  height="15"
+  viewBox="0 0 24 24"
+  stroke-width="2"
+  stroke="currentColor"
+  fill="none"
+  stroke-linecap="round"
+  stroke-linejoin="round"
+  xmlns="http://www.w3.org/2000/svg"
+>
+  <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+  <path d="M5 12l5 5l10 -10" />
+</svg>
+</button><code></code></pre>
+</div></div><nav class="topSymbols">
+          <h3>Symbols</h3>
+          <ul><li>
+                <a href="..&#x2F;.&#x2F;ip.ts&#x2F;~&#x2F;parseIp.html" title="parseIp"><div class="docNodeKindIcon"><div class="text-Function bg-Function/15 dark:text-FunctionDark dark:bg-FunctionDark/15" title="Function">f</div></div>
+<span class="hover:bg-Function/15 hover:bg-FunctionDark/15">
+                    parseIp
+                  </span>
+                </a>
+              </li><li>
+                <a href="..&#x2F;.&#x2F;ip.ts&#x2F;~&#x2F;stringifyIp.html" title="stringifyIp"><div class="docNodeKindIcon"><div class="text-Function bg-Function/15 dark:text-FunctionDark dark:bg-FunctionDark/15" title="Function">f</div></div>
+<span class="hover:bg-Function/15 hover:bg-FunctionDark/15">
+                    stringifyIp
+                  </span>
+                </a>
+              </li><li>
+                <a href="..&#x2F;.&#x2F;cidr.ts&#x2F;~&#x2F;isValidCidr.html" title="isValidCidr"><div class="docNodeKindIcon"><div class="text-Function bg-Function/15 dark:text-FunctionDark dark:bg-FunctionDark/15" title="Function">f</div></div>
+<span class="hover:bg-Function/15 hover:bg-FunctionDark/15">
+                    isValidCidr
+                  </span>
+                </a>
+              </li><li>
+                <a href="..&#x2F;.&#x2F;cidr.ts&#x2F;~&#x2F;parseCidr.html" title="parseCidr"><div class="docNodeKindIcon"><div class="text-Function bg-Function/15 dark:text-FunctionDark dark:bg-FunctionDark/15" title="Function">f</div></div>
+<span class="hover:bg-Function/15 hover:bg-FunctionDark/15">
+                    parseCidr
+                  </span>
+                </a>
+              </li><li>
+                <a href="..&#x2F;.&#x2F;cidr.ts&#x2F;~&#x2F;stringifyCidr.html" title="stringifyCidr"><div class="docNodeKindIcon"><div class="text-Function bg-Function/15 dark:text-FunctionDark dark:bg-FunctionDark/15" title="Function">f</div></div>
+<span class="hover:bg-Function/15 hover:bg-FunctionDark/15">
+                    stringifyCidr
+                  </span>
+                </a>
+              </li></ul><a class="flex items-center gap-0.5" href="..&#x2F;.&#x2F;all_symbols.html">
+              <span class="leading-none">view all 134 symbols</span><svg
+  width="16"
+  height="16"
+  viewBox="0 0 16 16"
+  fill="none"
+  xmlns="http://www.w3.org/2000/svg"
+>
+  <path
+    fill-rule="evenodd"
+    clip-rule="evenodd"
+    d="M5.76748 11.8159C5.5378 11.577 5.54525 11.1972 5.78411 10.9675L8.93431 8L5.78411 5.0325C5.54525 4.80282 5.5378 4.423 5.76748 4.18413C5.99715 3.94527 6.37698 3.93782 6.61584 4.1675L10.2158 7.5675C10.3335 7.68062 10.4 7.83679 10.4 8C10.4 8.16321 10.3335 8.31938 10.2158 8.4325L6.61584 11.8325C6.37698 12.0622 5.99715 12.0547 5.76748 11.8159Z"
+    fill="currentColor"
+  />
+</svg>
+</a></nav><nav class="documentNavigation">
+          <h3>Document Navigation</h3><ul><li><a href="#examples" title="Examples">Examples</a></li><li><ul><li><a href="#example_0" title="Parse and stringify IPv4 addresses">Parse and stringify IPv4 addresses</a></li><li><a href="#example_1" title="Parse and stringify IPv6 addresses">Parse and stringify IPv6 addresses</a></li><li><a href="#example_2" title="Parse and work with CIDR blocks">Parse and work with CIDR blocks</a></li><li><a href="#example_3" title="IPv6 CIDR operations">IPv6 CIDR operations</a></li><li><a href="#example_4" title="Check if IPs are within CIDR range">Check if IPs are within CIDR range</a></li><li><a href="#example_5" title="Generate IP ranges with custom patterns">Generate IP ranges with custom patterns</a></li><li><a href="#example_6" title="IP address allocation system">IP address allocation system</a></li><li><a href="#example_7" title="Memory-efficient iteration over large ranges">Memory-efficient iteration over large ranges</a></li><li><a href="#example_8" title="WireGuard mesh network with IPv6">WireGuard mesh network with IPv6</a></li><li><ul><li><a href="#api-reference" title="API Reference">API Reference</a></li><li><ul><li><a href="#universal-(auto-detect-ipv4/ipv6)" title="Universal (auto-detect IPv4/IPv6)">Universal (auto-detect IPv4/IPv6)</a></li><li><a href="#ipv4" title="IPv4">IPv4</a></li><li><a href="#ipv4-cidr" title="IPv4 CIDR">IPv4 CIDR</a></li><li><a href="#ipv6" title="IPv6">IPv6</a></li><li><a href="#ipv6-cidr" title="IPv6 CIDR">IPv6 CIDR</a></li><li><a href="#validation" title="Validation">Validation</a></li><li><a href="#ipv4-classification" title="IPv4 Classification">IPv4 Classification</a></li><li><a href="#ipv6-classification" title="IPv6 Classification">IPv6 Classification</a></li><li><a href="#combined-classification" title="Combined Classification">Combined Classification</a></li><li><a href="#submodules" title="Submodules">Submodules</a></li></ul></li><li><a href="#features" title="Features">Features</a></li><li><a href="#basic-ipv4-operations" title="Basic IPv4 Operations">Basic IPv4 Operations</a></li></ul></li><li><a href="#mod_ts_functions" title="Functions">Functions</a></li><li><ul><li><a href="#namespace_cidrv4addresses" title="cidrv4Addresses">cidrv4Addresses</a></li><li><a href="#namespace_cidrv4contains" title="cidrv4Contains">cidrv4Contains</a></li><li><a href="#namespace_cidrv4firstaddress" title="cidrv4FirstAddress">cidrv4FirstAddress</a></li><li><a href="#namespace_cidrv4lastaddress" title="cidrv4LastAddress">cidrv4LastAddress</a></li><li><a href="#namespace_cidrv4mask" title="cidrv4Mask">cidrv4Mask</a></li><li><a href="#namespace_cidrv4size" title="cidrv4Size">cidrv4Size</a></li><li><a href="#namespace_cidrv6addresses" title="cidrv6Addresses">cidrv6Addresses</a></li><li><a href="#namespace_cidrv6contains" title="cidrv6Contains">cidrv6Contains</a></li><li><a href="#namespace_cidrv6firstaddress" title="cidrv6FirstAddress">cidrv6FirstAddress</a></li><li><a href="#namespace_cidrv6lastaddress" title="cidrv6LastAddress">cidrv6LastAddress</a></li><li><a href="#namespace_cidrv6mask" title="cidrv6Mask">cidrv6Mask</a></li><li><a href="#namespace_cidrv6size" title="cidrv6Size">cidrv6Size</a></li><li><a href="#namespace_classifyip" title="classifyIp">classifyIp</a></li><li><a href="#namespace_classifyipv4" title="classifyIpv4">classifyIpv4</a></li><li><a href="#namespace_classifyipv6" title="classifyIpv6">classifyIpv6</a></li><li><a href="#namespace_compressipv6" title="compressIpv6">compressIpv6</a></li><li><a href="#namespace_expandipv6" title="expandIpv6">expandIpv6</a></li><li><a href="#namespace_isipv4benchmarking" title="isIpv4Benchmarking">isIpv4Benchmarking</a></li><li><a href="#namespace_isipv4broadcast" title="isIpv4Broadcast">isIpv4Broadcast</a></li><li><a href="#namespace_isipv4cgnat" title="isIpv4CgNat">isIpv4CgNat</a></li><li><a href="#namespace_isipv4documentation" title="isIpv4Documentation">isIpv4Documentation</a></li><li><a href="#namespace_isipv4linklocal" title="isIpv4LinkLocal">isIpv4LinkLocal</a></li><li><a href="#namespace_isipv4loopback" title="isIpv4Loopback">isIpv4Loopback</a></li><li><a href="#namespace_isipv4multicast" title="isIpv4Multicast">isIpv4Multicast</a></li><li><a href="#namespace_isipv4private" title="isIpv4Private">isIpv4Private</a></li><li><a href="#namespace_isipv4public" title="isIpv4Public">isIpv4Public</a></li><li><a href="#namespace_isipv4reserved" title="isIpv4Reserved">isIpv4Reserved</a></li><li><a href="#namespace_isipv4thisnetwork" title="isIpv4ThisNetwork">isIpv4ThisNetwork</a></li><li><a href="#namespace_isipv6benchmarking" title="isIpv6Benchmarking">isIpv6Benchmarking</a></li><li><a href="#namespace_isipv6documentation" title="isIpv6Documentation">isIpv6Documentation</a></li><li><a href="#namespace_isipv6globalunicast" title="isIpv6GlobalUnicast">isIpv6GlobalUnicast</a></li><li><a href="#namespace_isipv6ipv4mapped" title="isIpv6Ipv4Mapped">isIpv6Ipv4Mapped</a></li><li><a href="#namespace_isipv6ipv4translated" title="isIpv6Ipv4Translated">isIpv6Ipv4Translated</a></li><li><a href="#namespace_isipv6linklocal" title="isIpv6LinkLocal">isIpv6LinkLocal</a></li><li><a href="#namespace_isipv6loopback" title="isIpv6Loopback">isIpv6Loopback</a></li><li><a href="#namespace_isipv6multicast" title="isIpv6Multicast">isIpv6Multicast</a></li><li><a href="#namespace_isipv6orchidv2" title="isIpv6Orchidv2">isIpv6Orchidv2</a></li><li><a href="#namespace_isipv6teredo" title="isIpv6Teredo">isIpv6Teredo</a></li><li><a href="#namespace_isipv6uniquelocal" title="isIpv6UniqueLocal">isIpv6UniqueLocal</a></li><li><a href="#namespace_isipv6unspecified" title="isIpv6Unspecified">isIpv6Unspecified</a></li><li><a href="#namespace_isvalidcidr" title="isValidCidr">isValidCidr</a></li><li><a href="#namespace_isvalidcidrv4" title="isValidCidrv4">isValidCidrv4</a></li><li><a href="#namespace_isvalidcidrv6" title="isValidCidrv6">isValidCidrv6</a></li><li><a href="#namespace_isvalidip" title="isValidIp">isValidIp</a></li><li><a href="#namespace_isvalidipv4" title="isValidIpv4">isValidIpv4</a></li><li><a href="#namespace_isvalidipv6" title="isValidIpv6">isValidIpv6</a></li><li><a href="#namespace_parsecidr" title="parseCidr">parseCidr</a></li><li><a href="#namespace_parsecidrv4" title="parseCidrv4">parseCidrv4</a></li><li><a href="#namespace_parsecidrv6" title="parseCidrv6">parseCidrv6</a></li><li><a href="#namespace_parseip" title="parseIp">parseIp</a></li><li><a href="#namespace_parseipv4" title="parseIpv4">parseIpv4</a></li><li><a href="#namespace_parseipv6" title="parseIpv6">parseIpv6</a></li><li><a href="#namespace_stringifycidr" title="stringifyCidr">stringifyCidr</a></li><li><a href="#namespace_stringifycidrv4" title="stringifyCidrv4">stringifyCidrv4</a></li><li><a href="#namespace_stringifycidrv6" title="stringifyCidrv6">stringifyCidrv6</a></li><li><a href="#namespace_stringifyip" title="stringifyIp">stringifyIp</a></li><li><a href="#namespace_stringifyipv4" title="stringifyIpv4">stringifyIpv4</a></li><li><a href="#namespace_stringifyipv6" title="stringifyIpv6">stringifyIpv6</a></li><li><a href="#namespace_validateip" title="validateIp">validateIp</a></li></ul></li><li><a href="#mod_ts_type-aliases" title="Type Aliases">Type Aliases</a></li><li><ul><li><a href="#namespace_cidrv4" title="Cidrv4">Cidrv4</a></li><li><a href="#namespace_cidrv6" title="Cidrv6">Cidrv6</a></li><li><a href="#namespace_classifyipresult" title="ClassifyIpResult">ClassifyIpResult</a></li><li><a href="#namespace_classifyipv4result" title="ClassifyIpv4Result">ClassifyIpv4Result</a></li><li><a href="#namespace_classifyipv6result" title="ClassifyIpv6Result">ClassifyIpv6Result</a></li><li><a href="#namespace_validateipresult" title="ValidateIpResult">ValidateIpResult</a></li></ul></li><li><a href="#mod_ts_variables" title="Variables">Variables</a></li><li><ul><li><a href="#namespace_cidrv4broadcastaddress" title="cidrv4BroadcastAddress">cidrv4BroadcastAddress</a></li><li><a href="#namespace_cidrv4networkaddress" title="cidrv4NetworkAddress">cidrv4NetworkAddress</a></li></ul></li></ul></li></ul></nav></div>
+  </div></div>
+</div>
+</div>
+</body>
+</html>
