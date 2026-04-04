@@ -166,8 +166,8 @@
 </svg>
 </a>
 <span class="font-bold">isValidIp</span><span class="font-medium">(<span><span>s<span>: <span class="td-kw">string</span></span></span></span>)<span>: <span class="td-kw">boolean</span></span> </span>
-      </code><div class="space-y-7" id=""><div class="markdown"><p>Checks if a string is any valid IP address or CIDR notation.</p>
-<p>Accepts IPv4, IPv6, IPv4 CIDR, and IPv6 CIDR formats.</p>
+      </code><div class="space-y-7" id=""><div class="markdown"><p>Checks if a string is a valid plain IP address (IPv4 or IPv6).</p>
+<p>Does <strong>not</strong> accept CIDR notation — use <a href="../.././mod.ts/~/isValidCidr.html">isValidCidr</a> for that.</p>
 </div><section class="section"  id="examples"><div>
       <h2 class="anchorable mb-1"><a href="#examples" class="anchor" aria-label="Anchor" tabIndex="-1"><svg
   width="16"
@@ -220,15 +220,15 @@ import { isValidIp } from &quot;@hertzg/ip/validate&quot;;
 
 assert(isValidIp(&quot;192.168.1.1&quot;));
 assert(isValidIp(&quot;::1&quot;));
-assert(isValidIp(&quot;10.0.0.0/8&quot;));
-assert(isValidIp(&quot;2001:db8::/32&quot;));
+assert(isValidIp(&quot;0.0.0.0&quot;));
+assert(isValidIp(&quot;fe80::1%eth0&quot;));
 </code><button class="copyButton" data-copy="import { assert } from &quot;@std/assert&quot;;
 import { isValidIp } from &quot;@hertzg/ip/validate&quot;;
 
 assert(isValidIp(&quot;192.168.1.1&quot;));
 assert(isValidIp(&quot;::1&quot;));
-assert(isValidIp(&quot;10.0.0.0/8&quot;));
-assert(isValidIp(&quot;2001:db8::/32&quot;));
+assert(isValidIp(&quot;0.0.0.0&quot;));
+assert(isValidIp(&quot;fe80::1%eth0&quot;));
 "><svg
   class="copy"
   width="15"
@@ -292,14 +292,16 @@ import { isValidIp } from &quot;@hertzg/ip/validate&quot;;
 assertEquals(isValidIp(&quot;&quot;), false);
 assertEquals(isValidIp(&quot;not an ip&quot;), false);
 assertEquals(isValidIp(&quot;999.999.999.999&quot;), false);
-assertEquals(isValidIp(&quot;10.0.0.0/33&quot;), false);
+assertEquals(isValidIp(&quot;10.0.0.0/8&quot;), false);
+assertEquals(isValidIp(&quot;2001:db8::/32&quot;), false);
 </code><button class="copyButton" data-copy="import { assertEquals } from &quot;@std/assert&quot;;
 import { isValidIp } from &quot;@hertzg/ip/validate&quot;;
 
 assertEquals(isValidIp(&quot;&quot;), false);
 assertEquals(isValidIp(&quot;not an ip&quot;), false);
 assertEquals(isValidIp(&quot;999.999.999.999&quot;), false);
-assertEquals(isValidIp(&quot;10.0.0.0/33&quot;), false);
+assertEquals(isValidIp(&quot;10.0.0.0/8&quot;), false);
+assertEquals(isValidIp(&quot;2001:db8::/32&quot;), false);
 "><svg
   class="copy"
   width="15"
@@ -465,7 +467,7 @@ Return Type</h2></div><div class="space-y-8"><div class=" docEntry" id="function
   />
 </svg>
 </a>
-</div><div class="max-w-[75ch]"><div class="markdown"><p><code>true</code> if the string is a valid IP address or CIDR notation</p>
+</div><div class="max-w-[75ch]"><div class="markdown"><p><code>true</code> if the string is a valid IPv4 or IPv6 address</p>
 </div></div></div>
 </div></section>
 </div>

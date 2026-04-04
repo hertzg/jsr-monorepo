@@ -101,7 +101,7 @@
   <div class="space-y-2 flex-1"><div class="space-y-7" id="module_doc"><div class="markdown"><p>Universal IP address classification.</p>
 <p>This module provides a single <a href=".././classify.ts/~/classifyIp.html">classifyIp</a> function that accepts
 both IPv4 (<code>number</code>) and IPv6 (<code>bigint</code>) addresses and returns the
-appropriate classification with version information.</p>
+appropriate classification with version information and parsed value.</p>
 <p>For version-specific classifiers, see:</p>
 <ul>
 <li><a href="https://jsr.io/@hertzg/ip/doc/classifyv4"><code>classifyv4</code></a>: <a href=".././classifyv4.ts/~/classifyIpv4.html">classifyIpv4</a>, isIpv4Private, etc.</li>
@@ -156,86 +156,54 @@ Examples</h2></div><div class="space-y-8"><div class="anchorable"><a href="#exam
 </div></h3>
   <div><div class="markdown"><pre class="highlight"><code class="language-ts">import { assertEquals } from &quot;@std/assert&quot;;
 import { classifyIp } from &quot;@hertzg/ip/classify&quot;;
-import { parseIp } from &quot;@hertzg/ip/ip&quot;;
 import { parseIpv4 } from &quot;@hertzg/ip/ipv4&quot;;
 import { parseIpv6 } from &quot;@hertzg/ip/ipv6&quot;;
 
-// IPv4
+// IPv4 from parsed value
 const v4 = classifyIp(parseIpv4(&quot;192.168.1.1&quot;));
-assertEquals(v4.version, 4);
-assertEquals(v4.kind, &quot;private&quot;);
+assertEquals(v4.kind, &quot;ipv4&quot;);
+assertEquals(v4.value, 3232235777);
+assertEquals(v4.classification, &quot;private&quot;);
 
-const v4pub = classifyIp(parseIpv4(&quot;8.8.8.8&quot;));
-assertEquals(v4pub.version, 4);
-assertEquals(v4pub.kind, &quot;public&quot;);
-
-// IPv6
+// IPv6 from parsed value
 const v6 = classifyIp(parseIpv6(&quot;::1&quot;));
-assertEquals(v6.version, 6);
-assertEquals(v6.kind, &quot;loopback&quot;);
+assertEquals(v6.kind, &quot;ipv6&quot;);
+assertEquals(v6.value, 1n);
+assertEquals(v6.classification, &quot;loopback&quot;);
 
-const v6doc = classifyIp(parseIpv6(&quot;2001:db8::1&quot;));
-assertEquals(v6doc.version, 6);
-assertEquals(v6doc.kind, &quot;documentation&quot;);
-
-// Using parseIp which returns number | bigint
-const auto4 = classifyIp(parseIp(&quot;10.0.0.1&quot;));
-assertEquals(auto4.version, 4);
-assertEquals(auto4.kind, &quot;private&quot;);
-
-const auto6 = classifyIp(parseIp(&quot;fe80::1&quot;));
-assertEquals(auto6.version, 6);
-assertEquals(auto6.kind, &quot;link-local&quot;);
-
-// Using string directly
+// From string directly
 const str4 = classifyIp(&quot;127.0.0.1&quot;);
-assertEquals(str4.version, 4);
-assertEquals(str4.kind, &quot;loopback&quot;);
+assertEquals(str4.kind, &quot;ipv4&quot;);
+assertEquals(str4.classification, &quot;loopback&quot;);
 
 const str6 = classifyIp(&quot;2001:db8::1&quot;);
-assertEquals(str6.version, 6);
-assertEquals(str6.kind, &quot;documentation&quot;);
+assertEquals(str6.kind, &quot;ipv6&quot;);
+assertEquals(str6.classification, &quot;documentation&quot;);
 </code><button class="copyButton" data-copy="import { assertEquals } from &quot;@std/assert&quot;;
 import { classifyIp } from &quot;@hertzg/ip/classify&quot;;
-import { parseIp } from &quot;@hertzg/ip/ip&quot;;
 import { parseIpv4 } from &quot;@hertzg/ip/ipv4&quot;;
 import { parseIpv6 } from &quot;@hertzg/ip/ipv6&quot;;
 
-// IPv4
+// IPv4 from parsed value
 const v4 = classifyIp(parseIpv4(&quot;192.168.1.1&quot;));
-assertEquals(v4.version, 4);
-assertEquals(v4.kind, &quot;private&quot;);
+assertEquals(v4.kind, &quot;ipv4&quot;);
+assertEquals(v4.value, 3232235777);
+assertEquals(v4.classification, &quot;private&quot;);
 
-const v4pub = classifyIp(parseIpv4(&quot;8.8.8.8&quot;));
-assertEquals(v4pub.version, 4);
-assertEquals(v4pub.kind, &quot;public&quot;);
-
-// IPv6
+// IPv6 from parsed value
 const v6 = classifyIp(parseIpv6(&quot;::1&quot;));
-assertEquals(v6.version, 6);
-assertEquals(v6.kind, &quot;loopback&quot;);
+assertEquals(v6.kind, &quot;ipv6&quot;);
+assertEquals(v6.value, 1n);
+assertEquals(v6.classification, &quot;loopback&quot;);
 
-const v6doc = classifyIp(parseIpv6(&quot;2001:db8::1&quot;));
-assertEquals(v6doc.version, 6);
-assertEquals(v6doc.kind, &quot;documentation&quot;);
-
-// Using parseIp which returns number | bigint
-const auto4 = classifyIp(parseIp(&quot;10.0.0.1&quot;));
-assertEquals(auto4.version, 4);
-assertEquals(auto4.kind, &quot;private&quot;);
-
-const auto6 = classifyIp(parseIp(&quot;fe80::1&quot;));
-assertEquals(auto6.version, 6);
-assertEquals(auto6.kind, &quot;link-local&quot;);
-
-// Using string directly
+// From string directly
 const str4 = classifyIp(&quot;127.0.0.1&quot;);
-assertEquals(str4.version, 4);
-assertEquals(str4.kind, &quot;loopback&quot;);
+assertEquals(str4.kind, &quot;ipv4&quot;);
+assertEquals(str4.classification, &quot;loopback&quot;);
 
 const str6 = classifyIp(&quot;2001:db8::1&quot;);
-assertEquals(str6.version, 6);
-assertEquals(str6.kind, &quot;documentation&quot;);
+assertEquals(str6.kind, &quot;ipv6&quot;);
+assertEquals(str6.classification, &quot;documentation&quot;);
 "><svg
   class="copy"
   width="15"
@@ -296,7 +264,7 @@ assertEquals(str6.kind, &quot;documentation&quot;);
 Functions</h2></div><div class="namespaceSection"><div id="namespace_classifyip" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-Function bg-Function/15 dark:text-FunctionDark dark:bg-FunctionDark/15" title="Function">f</div></div>
 <div class="namespaceItemContent">
 		    <a href="..&#x2F;.&#x2F;classify.ts&#x2F;~&#x2F;classifyIp.html" title="classifyIp">
-			    <span>classifyIp</span><span>(<span><span>ip<span>: <span><span class="td-kw">number</span><span class="td-op"> | </span><span class="td-kw">bigint</span><span class="td-op"> | </span><span class="td-kw">string</span></span></span></span></span>)<span>: <span class="td-ref">ClassifyIpResult</span></span></span><div class="namespaceItemContentTypeInfo">4 overloads</div></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Classifies an IPv4 address into its well-known range.</p>
+			    <span>classifyIp</span><span>(<span><span>ip<span>: <span><span class="td-kw">number</span><span class="td-op"> | </span><span class="td-kw">bigint</span><span class="td-op"> | </span><span class="td-kw">string</span></span></span></span></span>)<span>: <span class="td-ref">ClassifiedIp</span></span></span><div class="namespaceItemContentTypeInfo">4 overloads</div></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Classifies an IPv4 address into its well-known range.</p>
 </div></div></div>
     </div></div>
 </section>
@@ -323,11 +291,33 @@ Functions</h2></div><div class="namespaceSection"><div id="namespace_classifyip"
   </defs>
 </svg>
 </a>
-Type Aliases</h2></div><div class="namespaceSection"><div id="namespace_classifyipresult" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-TypeAlias bg-TypeAlias/15 dark:text-TypeAliasDark dark:bg-TypeAliasDark/15" title="Type Alias">T</div></div>
+Type Aliases</h2></div><div class="namespaceSection"><div id="namespace_classifiedip" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-TypeAlias bg-TypeAlias/15 dark:text-TypeAliasDark dark:bg-TypeAliasDark/15" title="Type Alias">T</div></div>
 <div class="namespaceItemContent">
-		    <a href="..&#x2F;.&#x2F;classify.ts&#x2F;~&#x2F;ClassifyIpResult.html" title="ClassifyIpResult">
-			    <span>ClassifyIpResult</span><span> = <div class="ml-indent"><span>{ <span class="td-kw">readonly </span>version<span>: <span class="td-lit">4</span></span>; <span class="td-kw">readonly </span>kind<span>: <span class="td-ref">ClassifyIpv4Result</span></span>;  }</span><br /><span><span class="td-op"> | </span>{ <span class="td-kw">readonly </span>version<span>: <span class="td-lit">6</span></span>; <span class="td-kw">readonly </span>kind<span>: <span class="td-ref">ClassifyIpv6Result</span></span>;  }</span></div></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Result of classifying an IP address with version information.</p>
+		    <a href="..&#x2F;.&#x2F;classify.ts&#x2F;~&#x2F;ClassifiedIp.html" title="ClassifiedIp">
+			    <span>ClassifiedIp</span><span> = <span><span class="td-ref">ClassifiedIpv4</span><span class="td-op"> | </span><span class="td-ref">ClassifiedIpv6</span></span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Result of classifying an IP address with version information and parsed value.</p>
 </div></div></div>
+    </div><div id="namespace_classifiedipv4" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-TypeAlias bg-TypeAlias/15 dark:text-TypeAliasDark dark:bg-TypeAliasDark/15" title="Type Alias">T</div></div>
+<div class="namespaceItemContent">
+		    <a href="..&#x2F;.&#x2F;classify.ts&#x2F;~&#x2F;ClassifiedIpv4.html" title="ClassifiedIpv4">
+			    <span>ClassifiedIpv4</span><span> = { <span class="td-kw">readonly </span>kind<span>: <span class="td-str">"ipv4"</span></span>; <span class="td-kw">readonly </span>value<span>: <span class="td-kw">number</span></span>; <span class="td-kw">readonly </span>classification<span>: <span class="td-ref">ClassificationIpv4</span></span>;  }</span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Result of classifying an IPv4 address.</p>
+</div></div><ul class="namespaceItemContentSubItems"><li>
+                <a href="..&#x2F;.&#x2F;classify.ts&#x2F;~&#x2F;ClassifiedIpv4.html#property_classification">
+                  <span>classification</span><span>: <span class="td-ref">ClassificationIpv4</span></span></a></li><li>
+                <a href="..&#x2F;.&#x2F;classify.ts&#x2F;~&#x2F;ClassifiedIpv4.html#property_kind">
+                  <span>kind</span><span>: <span class="td-str">"ipv4"</span></span></a></li><li>
+                <a href="..&#x2F;.&#x2F;classify.ts&#x2F;~&#x2F;ClassifiedIpv4.html#property_value">
+                  <span>value</span><span>: <span class="td-kw">number</span></span></a></li></ul></div>
+    </div><div id="namespace_classifiedipv6" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-TypeAlias bg-TypeAlias/15 dark:text-TypeAliasDark dark:bg-TypeAliasDark/15" title="Type Alias">T</div></div>
+<div class="namespaceItemContent">
+		    <a href="..&#x2F;.&#x2F;classify.ts&#x2F;~&#x2F;ClassifiedIpv6.html" title="ClassifiedIpv6">
+			    <span>ClassifiedIpv6</span><span> = { <span class="td-kw">readonly </span>kind<span>: <span class="td-str">"ipv6"</span></span>; <span class="td-kw">readonly </span>value<span>: <span class="td-kw">bigint</span></span>; <span class="td-kw">readonly </span>classification<span>: <span class="td-ref">ClassificationIpv6</span></span>;  }</span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Result of classifying an IPv6 address.</p>
+</div></div><ul class="namespaceItemContentSubItems"><li>
+                <a href="..&#x2F;.&#x2F;classify.ts&#x2F;~&#x2F;ClassifiedIpv6.html#property_classification">
+                  <span>classification</span><span>: <span class="td-ref">ClassificationIpv6</span></span></a></li><li>
+                <a href="..&#x2F;.&#x2F;classify.ts&#x2F;~&#x2F;ClassifiedIpv6.html#property_kind">
+                  <span>kind</span><span>: <span class="td-str">"ipv6"</span></span></a></li><li>
+                <a href="..&#x2F;.&#x2F;classify.ts&#x2F;~&#x2F;ClassifiedIpv6.html#property_value">
+                  <span>value</span><span>: <span class="td-kw">bigint</span></span></a></li></ul></div>
     </div></div>
 </section>
 </div>
@@ -416,7 +406,7 @@ Type Aliases</h2></div><div class="namespaceSection"><div id="namespace_classify
   />
 </svg>
 </a></nav><nav class="documentNavigation">
-          <h3>Document Navigation</h3><ul><li><a href="#examples" title="Examples">Examples</a></li><li><ul><li><a href="#example_0" title="Classify any IP address">Classify any IP address</a></li></ul></li><li><a href="#classify_ts_functions" title="Functions">Functions</a></li><li><ul><li><a href="#namespace_classifyip" title="classifyIp">classifyIp</a></li></ul></li><li><a href="#classify_ts_type-aliases" title="Type Aliases">Type Aliases</a></li><li><ul><li><a href="#namespace_classifyipresult" title="ClassifyIpResult">ClassifyIpResult</a></li></ul></li></ul></nav></div>
+          <h3>Document Navigation</h3><ul><li><a href="#examples" title="Examples">Examples</a></li><li><ul><li><a href="#example_0" title="Classify any IP address">Classify any IP address</a></li></ul></li><li><a href="#classify_ts_functions" title="Functions">Functions</a></li><li><ul><li><a href="#namespace_classifyip" title="classifyIp">classifyIp</a></li></ul></li><li><a href="#classify_ts_type-aliases" title="Type Aliases">Type Aliases</a></li><li><ul><li><a href="#namespace_classifiedip" title="ClassifiedIp">ClassifiedIp</a></li><li><a href="#namespace_classifiedipv4" title="ClassifiedIpv4">ClassifiedIpv4</a></li><li><a href="#namespace_classifiedipv6" title="ClassifiedIpv6">ClassifiedIpv6</a></li></ul></li></ul></nav></div>
   </div></div>
 </div>
 </div>

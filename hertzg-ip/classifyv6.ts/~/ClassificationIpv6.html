@@ -1,10 +1,10 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>ValidateIpResult - validate.ts - @hertzg&#x2F;ip documentation</title>
+  <title>ClassificationIpv6 - classifyv6.ts - @hertzg&#x2F;ip documentation</title>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="doc-current-file" content="validate.ts">
+  <meta name="doc-current-file" content="classifyv6.ts">
   <link rel="stylesheet" href="..&#x2F;..&#x2F;styles.css">
   <link rel="stylesheet" href="..&#x2F;..&#x2F;page.css">
   <link id="ddocResetStylesheet" rel="stylesheet" href="..&#x2F;..&#x2F;reset.css"><link href="../../comrak.css" rel="stylesheet" /><link href="../../prism.css" rel="stylesheet" /><script src="../../prism.js"></script><script src="..&#x2F;..&#x2F;script.js" defer></script>
@@ -32,7 +32,7 @@
     fill="currentColor"
   />
 </svg>
-</span><a href="..&#x2F;..&#x2F;.&#x2F;validate.ts&#x2F;index.html" class="contextLink">validate.ts</a><span class="text-black dark:text-white"><svg
+</span><a href="..&#x2F;..&#x2F;.&#x2F;classifyv6.ts&#x2F;index.html" class="contextLink">classifyv6.ts</a><span class="text-black dark:text-white"><svg
   width="16"
   height="16"
   viewBox="0 0 16 16"
@@ -48,7 +48,7 @@
 </svg>
 </span>
 
-    <ul><li>ValidateIpResult</li></ul></ul>
+    <ul><li>ClassificationIpv6</li></ul></ul>
 </div>
 
     <div class="flex items-center gap-2">
@@ -112,14 +112,14 @@
     </div>
   </div>
 </nav>
-<div id="searchResults"></div><div id="content"><main class="symbolGroup" id="symbol_ValidateIpResult"><article>
+<div id="searchResults"></div><div id="content"><main class="symbolGroup" id="symbol_ClassificationIpv6"><article>
       <div class="symbolTitle">
         <div>
           <div class="text-2xl leading-none break-all">
-            <span class="text-TypeAlias">type alias</span>&nbsp;<span class="font-bold">ValidateIpResult</span>
+            <span class="text-TypeAlias">type alias</span>&nbsp;<span class="font-bold">ClassificationIpv6</span>
           </div></div><a
   class="sourceButton"
-  href="file:&#x2F;&#x2F;&#x2F;home&#x2F;runner&#x2F;work&#x2F;jsr-monorepo&#x2F;jsr-monorepo&#x2F;packages&#x2F;ip&#x2F;validate.ts"><svg
+  href="file:&#x2F;&#x2F;&#x2F;home&#x2F;runner&#x2F;work&#x2F;jsr-monorepo&#x2F;jsr-monorepo&#x2F;packages&#x2F;ip&#x2F;classifyv6.ts"><svg
   width="14"
   height="14"
   viewBox="0 0 14 14"
@@ -142,15 +142,9 @@
   />
 </svg>
 </a>
-</div><div><div class="space-y-7" id=""><div class="markdown"><p>The result of the <a href="../.././validate.ts/~/validateIp.html">validateIp</a> function.</p>
-<p>Discriminated union on <code>kind</code>:</p>
-<ul>
-<li><code>&quot;ipv4&quot;</code> — valid IPv4 address with parsed <code>value</code> as a 32-bit number</li>
-<li><code>&quot;ipv6&quot;</code> — valid IPv6 address with parsed <code>value</code> as a 128-bit bigint</li>
-<li><code>&quot;cidrv4&quot;</code> — valid IPv4 CIDR with parsed <code>value</code> as a <a href="../.././cidrv4.ts/~/Cidrv4.html">Cidrv4</a></li>
-<li><code>&quot;cidrv6&quot;</code> — valid IPv6 CIDR with parsed <code>value</code> as a <a href="../.././cidrv6.ts/~/Cidrv6.html">Cidrv6</a></li>
-<li><code>&quot;invalid&quot;</code> — the string is not a valid IP address or CIDR notation</li>
-</ul>
+</div><div><div class="space-y-7" id=""><div class="markdown"><p>All possible IPv6 address classification labels.</p>
+<p>Returned by <a href="../.././classifyv6.ts/~/classifyIpv6.html">classifyIpv6</a> to identify which well-known range
+an IPv6 address belongs to.</p>
 </div><section class="section"  id="definition"><div>
       <h2 class="anchorable mb-1"><a href="#definition" class="anchor" aria-label="Anchor" tabIndex="-1"><svg
   width="16"
@@ -174,14 +168,14 @@
   </defs>
 </svg>
 </a>
-Definition</h2></div><div class="space-y-8"><div class=" docEntry" id="typealias_validateipresult">
+Definition</h2></div><div class="space-y-8"><div class=" docEntry" id="typealias_classificationipv6">
 
   <div class="docEntryHeader">
-    <div><code><span class="font-medium text-stone-500 dark:text-stone-200"><div class="ml-indent"><span>{ <span class="td-kw">readonly </span>kind<span>: <span class="td-str">"ipv4"</span></span>; <span class="td-kw">readonly </span>value<span>: <span class="td-kw">number</span></span>;  }</span><br /><span><span class="td-op"> | </span>{ <span class="td-kw">readonly </span>kind<span>: <span class="td-str">"ipv6"</span></span>; <span class="td-kw">readonly </span>value<span>: <span class="td-kw">bigint</span></span>;  }</span><br /><span><span class="td-op"> | </span>{ <span class="td-kw">readonly </span>kind<span>: <span class="td-str">"cidrv4"</span></span>; <span class="td-kw">readonly </span>value<span>: <a href="../.././cidrv4.ts/~/Cidrv4.html" class="link td-ref">Cidrv4</a></span>;  }</span><br /><span><span class="td-op"> | </span>{ <span class="td-kw">readonly </span>kind<span>: <span class="td-str">"cidrv6"</span></span>; <span class="td-kw">readonly </span>value<span>: <a href="../.././cidrv6.ts/~/Cidrv6.html" class="link td-ref">Cidrv6</a></span>;  }</span><br /><span><span class="td-op"> | </span>{ <span class="td-kw">readonly </span>kind<span>: <span class="td-str">"invalid"</span></span>;  }</span></div></span>
+    <div><code><span class="font-medium text-stone-500 dark:text-stone-200"><div class="ml-indent"><span><span class="td-str">"loopback"</span></span><br /><span><span class="td-op"> | </span><span class="td-str">"unspecified"</span></span><br /><span><span class="td-op"> | </span><span class="td-str">"ipv4-mapped"</span></span><br /><span><span class="td-op"> | </span><span class="td-str">"ipv4-translated"</span></span><br /><span><span class="td-op"> | </span><span class="td-str">"documentation"</span></span><br /><span><span class="td-op"> | </span><span class="td-str">"benchmarking"</span></span><br /><span><span class="td-op"> | </span><span class="td-str">"orchidv2"</span></span><br /><span><span class="td-op"> | </span><span class="td-str">"teredo"</span></span><br /><span><span class="td-op"> | </span><span class="td-str">"link-local"</span></span><br /><span><span class="td-op"> | </span><span class="td-str">"multicast"</span></span><br /><span><span class="td-op"> | </span><span class="td-str">"unique-local"</span></span><br /><span><span class="td-op"> | </span><span class="td-str">"global-unicast"</span></span><br /><span><span class="td-op"> | </span><span class="td-str">"unassigned"</span></span></div></span>
       </code>
     </div><a
   class="sourceButton"
-  href="file:&#x2F;&#x2F;&#x2F;home&#x2F;runner&#x2F;work&#x2F;jsr-monorepo&#x2F;jsr-monorepo&#x2F;packages&#x2F;ip&#x2F;validate.ts"><svg
+  href="file:&#x2F;&#x2F;&#x2F;home&#x2F;runner&#x2F;work&#x2F;jsr-monorepo&#x2F;jsr-monorepo&#x2F;packages&#x2F;ip&#x2F;classifyv6.ts"><svg
   width="14"
   height="14"
   viewBox="0 0 14 14"
@@ -211,8 +205,8 @@ Definition</h2></div><div class="space-y-8"><div class=" docEntry" id="typealias
     </article></main>
 <div class="toc">
     <div><div class="usageContent">
-    <h3>Usage</h3><div class="markdown"><pre class="highlight"><code class="language-typescript">import { type ValidateIpResult } from &quot;validate.ts&quot;;
-</code><button class="copyButton" data-copy="import { type ValidateIpResult } from &quot;validate.ts&quot;;
+    <h3>Usage</h3><div class="markdown"><pre class="highlight"><code class="language-typescript">import { type ClassificationIpv6 } from &quot;classifyv6.ts&quot;;
+</code><button class="copyButton" data-copy="import { type ClassificationIpv6 } from &quot;classifyv6.ts&quot;;
 "><svg
   class="copy"
   width="15"
