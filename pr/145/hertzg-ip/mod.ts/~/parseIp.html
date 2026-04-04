@@ -169,7 +169,10 @@
       </code><div class="space-y-7" id=""><div class="markdown"><p>Parses an IPv4 or IPv6 address string to its numeric representation.</p>
 <p>Detects the IP version by checking for <code>:</code> in the input — if present,
 the address is parsed as IPv6 (returning <code>bigint</code>), otherwise as IPv4
-(returning <code>number</code>).</p>
+(returning <code>number</code>). IPv4-mapped IPv6 addresses (<code>::ffff:x.x.x.x</code>) are
+automatically unwrapped to their IPv4 number representation.</p>
+<p>To preserve the full IPv6 bigint for mapped addresses, use
+<a href="../.././mod.ts/~/parseIpv6.html">parseIpv6</a> directly instead.</p>
 </div><section class="section"  id="examples"><div>
       <h2 class="anchorable mb-1"><a href="#examples" class="anchor" aria-label="Anchor" tabIndex="-1"><svg
   width="16"
@@ -222,13 +225,13 @@ import { parseIp } from &quot;@hertzg/ip/ip&quot;;
 
 assertEquals(parseIp(&quot;10.0.0.1&quot;), 167772161);
 assertEquals(parseIp(&quot;::1&quot;), 1n);
-assertEquals(parseIp(&quot;::ffff:192.168.1.1&quot;), 0xFFFF_C0A8_0101n);
+assertEquals(parseIp(&quot;::ffff:192.168.1.1&quot;), 3232235777);
 </code><button class="copyButton" data-copy="import { assertEquals } from &quot;@std/assert&quot;;
 import { parseIp } from &quot;@hertzg/ip/ip&quot;;
 
 assertEquals(parseIp(&quot;10.0.0.1&quot;), 167772161);
 assertEquals(parseIp(&quot;::1&quot;), 1n);
-assertEquals(parseIp(&quot;::ffff:192.168.1.1&quot;), 0xFFFF_C0A8_0101n);
+assertEquals(parseIp(&quot;::ffff:192.168.1.1&quot;), 3232235777);
 "><svg
   class="copy"
   width="15"
