@@ -15,8 +15,10 @@ Deno.test("parseIp", async (t) => {
     assertEquals(parseIp("2001:db8::1"), 42540766411282592856903984951653826561n);
   });
 
-  await t.step("parses IPv4-mapped IPv6", () => {
-    assertEquals(parseIp("::ffff:192.168.1.1"), 0xFFFF_C0A8_0101n);
+  await t.step("unwraps IPv4-mapped IPv6 to IPv4", () => {
+    assertEquals(parseIp("::ffff:192.168.1.1"), 3232235777);
+    assertEquals(parseIp("::ffff:10.0.0.1"), 167772161);
+    assertEquals(parseIp("::ffff:0.0.0.0"), 0);
   });
 });
 
