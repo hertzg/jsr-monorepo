@@ -77,7 +77,9 @@ export type Cidrv6 = {
  * ```
  */
 export function cidrv6Mask(prefixLength: number): bigint {
-  if (prefixLength < 0 || prefixLength > 128 || !Number.isInteger(prefixLength)) {
+  if (
+    prefixLength < 0 || prefixLength > 128 || !Number.isInteger(prefixLength)
+  ) {
     throw new RangeError(
       `CIDR prefix length must be 0-128, got ${prefixLength}`,
     );
@@ -308,12 +310,15 @@ export function cidrv6LastAddress(cidr: Cidrv6): bigint {
  */
 export function cidrv6Size(cidr: Cidrv6): bigint;
 export function cidrv6Size(prefixLength: number): bigint;
+export function cidrv6Size(cidrOrPrefixLength: Cidrv6 | number): bigint;
 export function cidrv6Size(cidrOrPrefixLength: Cidrv6 | number): bigint {
   const prefixLength = typeof cidrOrPrefixLength === "number"
     ? cidrOrPrefixLength
     : cidrOrPrefixLength.prefixLength;
 
-  if (prefixLength < 0 || prefixLength > 128 || !Number.isInteger(prefixLength)) {
+  if (
+    prefixLength < 0 || prefixLength > 128 || !Number.isInteger(prefixLength)
+  ) {
     throw new RangeError(
       `CIDR prefix length must be 0-128, got ${prefixLength}`,
     );

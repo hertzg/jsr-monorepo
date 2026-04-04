@@ -341,12 +341,15 @@ export const cidrv4BroadcastAddress = cidrv4LastAddress;
  */
 export function cidrv4Size(cidr: Cidrv4): number;
 export function cidrv4Size(prefixLength: number): number;
+export function cidrv4Size(cidrOrPrefixLength: Cidrv4 | number): number;
 export function cidrv4Size(cidrOrPrefixLength: Cidrv4 | number): number {
   const prefixLength = typeof cidrOrPrefixLength === "number"
     ? cidrOrPrefixLength
     : cidrOrPrefixLength.prefixLength;
 
-  if (prefixLength < 0 || prefixLength > 32 || !Number.isInteger(prefixLength)) {
+  if (
+    prefixLength < 0 || prefixLength > 32 || !Number.isInteger(prefixLength)
+  ) {
     throw new RangeError(
       `CIDR prefix length must be 0-32, got ${prefixLength}`,
     );
