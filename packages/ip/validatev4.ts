@@ -5,7 +5,7 @@
  * and IPv4 CIDR notation strings.
  *
  * For universal validation, see:
- * - [`validate`](https://jsr.io/@hertzg/ip/doc/validate): {@link isValidIp}, {@link validateIp}
+ * - [`validate`](https://jsr.io/@hertzg/ip/doc/validate): {@link isValidIp}, {@link isValidCidr}
  *
  * @example
  * ```ts
