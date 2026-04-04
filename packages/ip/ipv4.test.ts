@@ -1,5 +1,6 @@
 import { assert, assertEquals, assertThrows } from "@std/assert";
-import { isValidIpv4, parseIpv4, stringifyIpv4 } from "./ipv4.ts";
+import { parseIpv4, stringifyIpv4 } from "./ipv4.ts";
+import { isValidIpv4 } from "./validatev4.ts";
 
 Deno.test("parseIpv4", async (t) => {
   await t.step("valid addresses", () => {

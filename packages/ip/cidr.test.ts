@@ -1,5 +1,6 @@
 import { assert, assertEquals } from "@std/assert";
-import { isValidCidr, parseCidr, stringifyCidr } from "./cidr.ts";
+import { parseCidr, stringifyCidr } from "./cidr.ts";
+import { isValidCidr } from "./validate.ts";
 import type { Cidrv4 } from "./cidrv4.ts";
 import type { Cidrv6 } from "./cidrv6.ts";
 

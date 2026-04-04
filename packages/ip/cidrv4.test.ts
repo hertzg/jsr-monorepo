@@ -4,12 +4,12 @@ import {
   cidrv4BroadcastAddress,
   cidrv4Contains,
   cidrv4NetworkAddress,
-  isValidCidrv4,
   cidrv4Mask,
   parseCidrv4,
   stringifyCidrv4,
 } from "./cidrv4.ts";
 import { parseIpv4, stringifyIpv4 } from "./ipv4.ts";
+import { isValidCidrv4 } from "./validatev4.ts";
 
 Deno.test("cidrv4Mask", async (t) => {
   await t.step("common prefix lengths", () => {

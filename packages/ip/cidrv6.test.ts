@@ -4,12 +4,12 @@ import {
   cidrv6Contains,
   cidrv6FirstAddress,
   cidrv6LastAddress,
-  isValidCidrv6,
   cidrv6Mask,
   parseCidrv6,
   stringifyCidrv6,
 } from "./cidrv6.ts";
 import { parseIpv6, stringifyIpv6 } from "./ipv6.ts";
+import { isValidCidrv6 } from "./validatev6.ts";
 
 Deno.test("cidrv6Mask", async (t) => {
   await t.step("common prefix lengths", () => {
