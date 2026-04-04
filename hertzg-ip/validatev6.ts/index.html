@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>cidr.ts - @hertzg&#x2F;ip documentation</title>
+  <title>validatev6.ts - @hertzg&#x2F;ip documentation</title>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="doc-current-file" content="">
@@ -32,7 +32,7 @@
     fill="currentColor"
   />
 </svg>
-</span>cidr.ts</ul>
+</span>validatev6.ts</ul>
 </div>
 
     <div class="flex items-center gap-2">
@@ -98,14 +98,12 @@
 </nav>
 <div id="searchResults"></div><div id="content">
     <main><section>
-  <div class="space-y-2 flex-1"><div class="space-y-7" id="module_doc"><div class="markdown"><p>Universal CIDR notation parsing, stringifying, and validation.</p>
-<p>This module provides <a href=".././cidr.ts/~/parseCidr.html">parseCidr</a>, <a href=".././cidr.ts/~/stringifyCidr.html">stringifyCidr</a>, and
-isValidCidr that auto-detect IPv4 vs IPv6 and delegate to
-the appropriate version-specific function.</p>
-<p>For version-specific functions, see:</p>
+  <div class="space-y-2 flex-1"><div class="space-y-7" id="module_doc"><div class="markdown"><p>IPv6 address and CIDR validation utilities.</p>
+<p>This module provides non-throwing validity checks for IPv6 addresses
+and IPv6 CIDR notation strings.</p>
+<p>For universal validation, see:</p>
 <ul>
-<li><a href="https://jsr.io/@hertzg/ip/doc/cidrv4"><code>cidrv4</code></a>: <a href=".././cidrv4.ts/~/parseCidrv4.html">parseCidrv4</a>, <a href=".././cidrv4.ts/~/stringifyCidrv4.html">stringifyCidrv4</a>, isValidCidrv4</li>
-<li><a href="https://jsr.io/@hertzg/ip/doc/cidrv6"><code>cidrv6</code></a>: <a href=".././cidrv6.ts/~/parseCidrv6.html">parseCidrv6</a>, <a href=".././cidrv6.ts/~/stringifyCidrv6.html">stringifyCidrv6</a>, isValidCidrv6</li>
+<li><a href="https://jsr.io/@hertzg/ip/doc/validate"><code>validate</code></a>: isValidIp, validateIp</li>
 </ul>
 </div><section class="section"  id="examples"><div>
       <h2 class="anchorable mb-1"><a href="#examples" class="anchor" aria-label="Anchor" tabIndex="-1"><svg
@@ -152,32 +150,24 @@ Examples</h2></div><div class="space-y-8"><div class="anchorable"><a href="#exam
   </defs>
 </svg>
 </a>
-<h3 class="example-header"><div class="markdown"><p>Parse and stringify any CIDR block</p>
+<h3 class="example-header"><div class="markdown"><p>Example 1</p>
 </div></h3>
-  <div><div class="markdown"><pre class="highlight"><code class="language-ts">import { assertEquals } from &quot;@std/assert&quot;;
-import { parseCidr, stringifyCidr } from &quot;@hertzg/ip/cidr&quot;;
+  <div><div class="markdown"><pre class="highlight"><code class="language-ts">import { assert, assertEquals } from &quot;@std/assert&quot;;
+import { isValidCidrv6, isValidIpv6 } from &quot;@hertzg/ip&quot;;
 
-// IPv4
-const v4 = parseCidr(&quot;192.168.1.0/24&quot;);
-assertEquals(v4.prefixLength, 24);
-assertEquals(stringifyCidr(v4), &quot;192.168.1.0/24&quot;);
+assert(isValidIpv6(&quot;::1&quot;));
+assertEquals(isValidIpv6(&quot;192.168.1.1&quot;), false);
 
-// IPv6
-const v6 = parseCidr(&quot;2001:db8::/32&quot;);
-assertEquals(v6.prefixLength, 32);
-assertEquals(stringifyCidr(v6), &quot;2001:db8::/32&quot;);
-</code><button class="copyButton" data-copy="import { assertEquals } from &quot;@std/assert&quot;;
-import { parseCidr, stringifyCidr } from &quot;@hertzg/ip/cidr&quot;;
+assert(isValidCidrv6(&quot;2001:db8::/32&quot;));
+assertEquals(isValidCidrv6(&quot;2001:db8::/129&quot;), false);
+</code><button class="copyButton" data-copy="import { assert, assertEquals } from &quot;@std/assert&quot;;
+import { isValidCidrv6, isValidIpv6 } from &quot;@hertzg/ip&quot;;
 
-// IPv4
-const v4 = parseCidr(&quot;192.168.1.0/24&quot;);
-assertEquals(v4.prefixLength, 24);
-assertEquals(stringifyCidr(v4), &quot;192.168.1.0/24&quot;);
+assert(isValidIpv6(&quot;::1&quot;));
+assertEquals(isValidIpv6(&quot;192.168.1.1&quot;), false);
 
-// IPv6
-const v6 = parseCidr(&quot;2001:db8::/32&quot;);
-assertEquals(v6.prefixLength, 32);
-assertEquals(stringifyCidr(v6), &quot;2001:db8::/32&quot;);
+assert(isValidCidrv6(&quot;2001:db8::/32&quot;));
+assertEquals(isValidCidrv6(&quot;2001:db8::/129&quot;), false);
 "><svg
   class="copy"
   width="15"
@@ -212,8 +202,8 @@ assertEquals(stringifyCidr(v6), &quot;2001:db8::/32&quot;);
 </div></div>
 </div>
 </div></section>
-<section class="section"  id="cidr_ts_functions"><div>
-      <h2 class="anchorable mb-1"><a href="#cidr_ts_functions" class="anchor" aria-label="Anchor" tabIndex="-1"><svg
+<section class="section"  id="validatev6_ts_functions"><div>
+      <h2 class="anchorable mb-1"><a href="#validatev6_ts_functions" class="anchor" aria-label="Anchor" tabIndex="-1"><svg
   width="16"
   height="16"
   viewBox="0 0 14 14"
@@ -235,15 +225,15 @@ assertEquals(stringifyCidr(v6), &quot;2001:db8::/32&quot;);
   </defs>
 </svg>
 </a>
-Functions</h2></div><div class="namespaceSection"><div id="namespace_parsecidr" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-Function bg-Function/15 dark:text-FunctionDark dark:bg-FunctionDark/15" title="Function">f</div></div>
+Functions</h2></div><div class="namespaceSection"><div id="namespace_isvalidcidrv6" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-Function bg-Function/15 dark:text-FunctionDark dark:bg-FunctionDark/15" title="Function">f</div></div>
 <div class="namespaceItemContent">
-		    <a href="..&#x2F;.&#x2F;cidr.ts&#x2F;~&#x2F;parseCidr.html" title="parseCidr">
-			    <span>parseCidr</span><span>(<span><span>cidr<span>: <span class="td-kw">string</span></span></span></span>)<span>: <span><span class="td-ref">Cidrv4</span><span class="td-op"> | </span><span class="td-ref">Cidrv6</span></span></span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Parses an IPv4 or IPv6 CIDR notation string.</p>
+		    <a href="..&#x2F;.&#x2F;validatev6.ts&#x2F;~&#x2F;isValidCidrv6.html" title="isValidCidrv6">
+			    <span>isValidCidrv6</span><span>(<span><span>s<span>: <span class="td-kw">string</span></span></span></span>)<span>: <span class="td-kw">boolean</span></span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Checks if a string is valid IPv6 CIDR notation.</p>
 </div></div></div>
-    </div><div id="namespace_stringifycidr" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-Function bg-Function/15 dark:text-FunctionDark dark:bg-FunctionDark/15" title="Function">f</div></div>
+    </div><div id="namespace_isvalidipv6" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-Function bg-Function/15 dark:text-FunctionDark dark:bg-FunctionDark/15" title="Function">f</div></div>
 <div class="namespaceItemContent">
-		    <a href="..&#x2F;.&#x2F;cidr.ts&#x2F;~&#x2F;stringifyCidr.html" title="stringifyCidr">
-			    <span>stringifyCidr</span><span>(<span><span>cidr<span>: <span><span class="td-ref">Cidrv4</span><span class="td-op"> | </span><span class="td-ref">Cidrv6</span></span></span></span></span>)<span>: <span class="td-kw">string</span></span></span><div class="namespaceItemContentTypeInfo">3 overloads</div></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Stringifies a <a href=".././cidrv4.ts/~/Cidrv4.html">Cidrv4</a> or <a href=".././cidrv6.ts/~/Cidrv6.html">Cidrv6</a> to CIDR notation.</p>
+		    <a href="..&#x2F;.&#x2F;validatev6.ts&#x2F;~&#x2F;isValidIpv6.html" title="isValidIpv6">
+			    <span>isValidIpv6</span><span>(<span><span>s<span>: <span class="td-kw">string</span></span></span></span>)<span>: <span class="td-kw">boolean</span></span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Checks if a string is a valid IPv6 address in colon-hexadecimal notation.</p>
 </div></div></div>
     </div></div>
 </section>
@@ -252,8 +242,8 @@ Functions</h2></div><div class="namespaceSection"><div id="namespace_parsecidr" 
 </section>
 </main><div class="toc">
     <div><div class="usageContent">
-    <h3>Usage</h3><div class="markdown"><pre class="highlight"><code class="language-typescript">import * as mod from &quot;cidr.ts&quot;;
-</code><button class="copyButton" data-copy="import * as mod from &quot;cidr.ts&quot;;
+    <h3>Usage</h3><div class="markdown"><pre class="highlight"><code class="language-typescript">import * as mod from &quot;validatev6.ts&quot;;
+</code><button class="copyButton" data-copy="import * as mod from &quot;validatev6.ts&quot;;
 "><svg
   class="copy"
   width="15"
@@ -333,7 +323,7 @@ Functions</h2></div><div class="namespaceSection"><div id="namespace_parsecidr" 
   />
 </svg>
 </a></nav><nav class="documentNavigation">
-          <h3>Document Navigation</h3><ul><li><a href="#examples" title="Examples">Examples</a></li><li><ul><li><a href="#example_0" title="Parse and stringify any CIDR block">Parse and stringify any CIDR block</a></li></ul></li><li><a href="#cidr_ts_functions" title="Functions">Functions</a></li><li><ul><li><a href="#namespace_parsecidr" title="parseCidr">parseCidr</a></li><li><a href="#namespace_stringifycidr" title="stringifyCidr">stringifyCidr</a></li></ul></li></ul></nav></div>
+          <h3>Document Navigation</h3><ul><li><a href="#examples" title="Examples">Examples</a></li><li><ul><li><a href="#example_0" title="Example 1">Example 1</a></li></ul></li><li><a href="#validatev6_ts_functions" title="Functions">Functions</a></li><li><ul><li><a href="#namespace_isvalidcidrv6" title="isValidCidrv6">isValidCidrv6</a></li><li><a href="#namespace_isvalidipv6" title="isValidIpv6">isValidIpv6</a></li></ul></li></ul></nav></div>
   </div></div>
 </div>
 </div>
