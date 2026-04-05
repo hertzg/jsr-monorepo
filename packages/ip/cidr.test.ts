@@ -124,18 +124,20 @@ Deno.test("cidrContainsCidr", async (t) => {
     );
   });
 
-  await t.step("mixed v4/v6 returns false", () => {
-    assertEquals(
-      cidrContainsCidr(parseCidr("10.0.0.0/8"), parseCidr("2001:db8::/32")),
-      false,
+  await t.step("mixed v4/v6 throws TypeError", () => {
+    assertThrows(
+      () =>
+        cidrContainsCidr(parseCidr("10.0.0.0/8"), parseCidr("2001:db8::/32")),
+      TypeError,
     );
-    assertEquals(
-      cidrContainsCidr(parseCidr("2001:db8::/32"), parseCidr("10.0.0.0/8")),
-      false,
+    assertThrows(
+      () =>
+        cidrContainsCidr(parseCidr("2001:db8::/32"), parseCidr("10.0.0.0/8")),
+      TypeError,
     );
-    assertEquals(
-      cidrContainsCidr(parseCidr("0.0.0.0/0"), parseCidr("::/0")),
-      false,
+    assertThrows(
+      () => cidrContainsCidr(parseCidr("0.0.0.0/0"), parseCidr("::/0")),
+      TypeError,
     );
   });
 });
@@ -161,14 +163,14 @@ Deno.test("cidrOverlaps", async (t) => {
     );
   });
 
-  await t.step("mixed v4/v6 returns false", () => {
-    assertEquals(
-      cidrOverlaps(parseCidr("10.0.0.0/8"), parseCidr("2001:db8::/32")),
-      false,
+  await t.step("mixed v4/v6 throws TypeError", () => {
+    assertThrows(
+      () => cidrOverlaps(parseCidr("10.0.0.0/8"), parseCidr("2001:db8::/32")),
+      TypeError,
     );
-    assertEquals(
-      cidrOverlaps(parseCidr("::/0"), parseCidr("0.0.0.0/0")),
-      false,
+    assertThrows(
+      () => cidrOverlaps(parseCidr("::/0"), parseCidr("0.0.0.0/0")),
+      TypeError,
     );
   });
 });
