@@ -244,7 +244,7 @@ Deno.test("cidrMerge", async (t) => {
       parseCidr("10.0.0.128/25"),
     ]);
     assertEquals(
-      result.map((c) => stringifyCidr(c as Cidrv4)),
+      result.map((c) => stringifyCidr(c)),
       ["10.0.0.0/24"],
     );
   });
@@ -255,7 +255,7 @@ Deno.test("cidrMerge", async (t) => {
       parseCidr("2001:db8:8000::/33"),
     ]);
     assertEquals(
-      result.map((c) => stringifyCidr(c as Cidrv6)),
+      result.map((c) => stringifyCidr(c)),
       ["2001:db8::/32"],
     );
   });
