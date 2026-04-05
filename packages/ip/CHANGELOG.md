@@ -1,5 +1,14 @@
 # Changelog
 
+## [3.1.0](https://github.com/hertzg/jsr-monorepo/compare/@hertzg/ip-v3.0.0...@hertzg/ip-v3.1.0) (2026-04-05)
+
+
+### Features
+
+* **@hertzg/ip:** add CIDR containment and overlap checking ([#149](https://github.com/hertzg/jsr-monorepo/issues/149)) ([51f7320](https://github.com/hertzg/jsr-monorepo/commit/51f732024562836b22e50b351a809984bbf17106))
+* **@hertzg/ip:** add CIDR subtract, intersect, and merge ([#150](https://github.com/hertzg/jsr-monorepo/issues/150)) ([8dc95b6](https://github.com/hertzg/jsr-monorepo/commit/8dc95b60fafbd0b7a5327854c2738cc449253b0e))
+* **@hertzg/ip:** re-export ClassificationIpv4/Ipv6 from classify and rewrite mod.ts examples ([e2b76ae](https://github.com/hertzg/jsr-monorepo/commit/e2b76ae70e807995fa3a8bf9c3335400b0f38964))
+
 ## [3.0.0](https://github.com/hertzg/jsr-monorepo/compare/@hertzg/ip-v2.0.0...@hertzg/ip-v3.0.0) (2026-04-04)
 
 
