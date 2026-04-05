@@ -585,6 +585,125 @@ export function cidrv4Overlaps(a: Cidrv4, b: Cidrv4): boolean {
  * }
  * ```
  */
+/**
+ * Splits an IPv4 CIDR block into its two half-sized children at prefix+1.
+ *
+ * @param cidr The CIDR block to split
+ * @returns A tuple of the lower and upper halves
+ */
+function cidrv4SplitHalves(cidr: Cidrv4): [Cidrv4, Cidrv4] {
+  const newPrefix = cidr.prefixLength + 1;
+  const network = cidrv4FirstAddress(cidr);
+  const lower: Cidrv4 = { address: network, prefixLength: newPrefix };
+  const upper: Cidrv4 = {
+    address: (network | (1 << (31 - cidr.prefixLength))) >>> 0,
+    prefixLength: newPrefix,
+  };
+  return [lower, upper];
+}
+
+/**
+ * Returns the intersection of two IPv4 CIDR blocks.
+ *
+ * Since CIDR blocks are power-of-2-aligned, two overlapping blocks always
+ * have a containment relationship -- the intersection is the more specific
+ * (longer prefix) block with its canonical network address.
+ *
+ * @param a The first CIDR block
+ * @param b The second CIDR block
+ * @returns The overlapping CIDR with canonical network address, or null if disjoint
+ *
+ * @example Find overlap between allocations
+ * ```ts
+ * import { assertEquals } from "@std/assert";
+ * import { cidrv4Intersect, parseCidrv4, stringifyCidrv4 } from "@hertzg/ip/cidrv4";
+ *
+ * const result = cidrv4Intersect(
+ *   parseCidrv4("192.168.1.0/24"),
+ *   parseCidrv4("192.168.1.0/28"),
+ * );
+ * assertEquals(result && stringifyCidrv4(result), "192.168.1.0/28");
+ * ```
+ *
+ * @example No overlap returns null
+ * ```ts
+ * import { assertEquals } from "@std/assert";
+ * import { cidrv4Intersect, parseCidrv4 } from "@hertzg/ip/cidrv4";
+ *
+ * assertEquals(cidrv4Intersect(
+ *   parseCidrv4("10.0.0.0/8"),
+ *   parseCidrv4("172.16.0.0/12"),
+ * ), null);
+ * ```
+ */
+export function cidrv4Intersect(a: Cidrv4, b: Cidrv4): Cidrv4 | null {
+  if (!cidrv4Overlaps(a, b)) return null;
+  if (a.prefixLength >= b.prefixLength) {
+    return { address: cidrv4FirstAddress(a), prefixLength: a.prefixLength };
+  }
+  return { address: cidrv4FirstAddress(b), prefixLength: b.prefixLength };
+}
+
+/**
+ * Subtracts one IPv4 CIDR block from another.
+ *
+ * Returns the minimal set of CIDR blocks representing all IP addresses
+ * in `a` but not in `b`. The algorithm recursively splits `a` into two
+ * halves at prefix+1, keeping the non-overlapping half and recursing
+ * into the overlapping half.
+ *
+ * @param a The CIDR block to subtract from
+ * @param b The CIDR block to subtract
+ * @returns Array of CIDR blocks covering a minus b
+ *
+ * @example Carve a /28 from a /24
+ * ```ts
+ * import { assertEquals } from "@std/assert";
+ * import { cidrv4Subtract, parseCidrv4, stringifyCidrv4 } from "@hertzg/ip/cidrv4";
+ *
+ * const result = cidrv4Subtract(
+ *   parseCidrv4("192.168.1.0/24"),
+ *   parseCidrv4("192.168.1.0/28"),
+ * );
+ * assertEquals(result.map(stringifyCidrv4), [
+ *   "192.168.1.128/25",
+ *   "192.168.1.64/26",
+ *   "192.168.1.32/27",
+ *   "192.168.1.16/28",
+ * ]);
+ * ```
+ *
+ * @example No overlap -- original returned unchanged
+ * ```ts
+ * import { assertEquals } from "@std/assert";
+ * import { cidrv4Subtract, parseCidrv4, stringifyCidrv4 } from "@hertzg/ip/cidrv4";
+ *
+ * const result = cidrv4Subtract(
+ *   parseCidrv4("10.0.0.0/24"),
+ *   parseCidrv4("172.16.0.0/24"),
+ * );
+ * assertEquals(result.map(stringifyCidrv4), ["10.0.0.0/24"]);
+ * ```
+ *
+ * @example Full containment -- empty result
+ * ```ts
+ * import { assertEquals } from "@std/assert";
+ * import { cidrv4Subtract, parseCidrv4 } from "@hertzg/ip/cidrv4";
+ *
+ * const result = cidrv4Subtract(
+ *   parseCidrv4("192.168.1.0/28"),
+ *   parseCidrv4("192.168.1.0/24"),
+ * );
+ * assertEquals(result, []);
+ * ```
+ */
+export function cidrv4Subtract(a: Cidrv4, b: Cidrv4): Cidrv4[] {
+  if (!cidrv4Overlaps(a, b)) return [a];
+  if (cidrv4ContainsCidr(b, a)) return [];
+  const [lower, upper] = cidrv4SplitHalves(a);
+  return [...cidrv4Subtract(upper, b), ...cidrv4Subtract(lower, b)];
+}
+
 export function* cidrv4Addresses(
   cidr: Cidrv4,
   options?: {
@@ -607,4 +726,108 @@ export function* cidrv4Addresses(
     currentIp = (currentIp + step) >>> 0;
     i++;
   }
+}
+
+/**
+ * Checks if two IPv4 CIDR blocks are sibling halves of the same parent block.
+ *
+ * @param a The first CIDR block
+ * @param b The second CIDR block
+ * @returns true if a and b are siblings
+ */
+function cidrv4AreSiblings(a: Cidrv4, b: Cidrv4): boolean {
+  if (a.prefixLength !== b.prefixLength || a.prefixLength === 0) return false;
+  const parentMask = cidrv4Mask(a.prefixLength - 1);
+  return ((a.address & parentMask) >>> 0) === ((b.address & parentMask) >>> 0);
+}
+
+/**
+ * Merges IPv4 CIDR blocks into the minimal covering set.
+ *
+ * Takes an array of possibly overlapping, adjacent, or redundant CIDR
+ * blocks and returns the minimal set of non-overlapping CIDR prefix
+ * blocks covering the exact same address space.
+ *
+ * @param cidrs The CIDR blocks to merge
+ * @returns Minimal set of non-overlapping CIDR blocks, sorted by address
+ *
+ * @example Compact a firewall allowlist
+ * ```ts
+ * import { assertEquals } from "@std/assert";
+ * import { cidrv4Merge, parseCidrv4, stringifyCidrv4 } from "@hertzg/ip/cidrv4";
+ *
+ * const rules = [
+ *   parseCidrv4("10.0.1.0/24"),
+ *   parseCidrv4("10.0.0.0/24"),
+ *   parseCidrv4("10.0.0.128/25"),
+ * ];
+ * const compacted = cidrv4Merge(rules);
+ * assertEquals(compacted.map(stringifyCidrv4), ["10.0.0.0/23"]);
+ * ```
+ *
+ * @example Aggregate routes
+ * ```ts
+ * import { assertEquals } from "@std/assert";
+ * import { cidrv4Merge, parseCidrv4, stringifyCidrv4 } from "@hertzg/ip/cidrv4";
+ *
+ * const routes = [
+ *   parseCidrv4("198.51.100.0/25"),
+ *   parseCidrv4("198.51.100.128/26"),
+ *   parseCidrv4("198.51.100.192/26"),
+ *   parseCidrv4("203.0.113.0/24"),
+ * ];
+ * assertEquals(cidrv4Merge(routes).map(stringifyCidrv4), [
+ *   "198.51.100.0/24",
+ *   "203.0.113.0/24",
+ * ]);
+ * ```
+ */
+export function cidrv4Merge(cidrs: readonly Cidrv4[]): Cidrv4[] {
+  if (cidrs.length === 0) return [];
+
+  // Step 1: Normalize - apply mask to get canonical network addresses
+  let list: Cidrv4[] = cidrs.map((cidr) => ({
+    address: cidrv4FirstAddress(cidr),
+    prefixLength: cidr.prefixLength,
+  }));
+
+  // Step 2: Sort by (address ascending, prefixLength ascending)
+  list.sort((a, b) => a.address - b.address || a.prefixLength - b.prefixLength);
+
+  // Step 3: Remove contained blocks
+  const deduped: Cidrv4[] = [];
+  let currentLast = -1;
+  for (const cidr of list) {
+    const last = cidrv4LastAddress(cidr);
+    if (last <= currentLast) continue;
+    deduped.push(cidr);
+    currentLast = last;
+  }
+  list = deduped;
+
+  // Step 4: Merge adjacent siblings iteratively until stable
+  let changed = true;
+  while (changed) {
+    changed = false;
+    const merged: Cidrv4[] = [];
+    let i = 0;
+    while (i < list.length) {
+      if (
+        i + 1 < list.length && cidrv4AreSiblings(list[i], list[i + 1])
+      ) {
+        merged.push({
+          address: list[i].address,
+          prefixLength: list[i].prefixLength - 1,
+        });
+        i += 2;
+        changed = true;
+      } else {
+        merged.push(list[i]);
+        i += 1;
+      }
+    }
+    list = merged;
+  }
+
+  return list;
 }

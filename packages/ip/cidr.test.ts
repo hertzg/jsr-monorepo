@@ -1,7 +1,10 @@
-import { assert, assertEquals } from "@std/assert";
+import { assert, assertEquals, assertThrows } from "@std/assert";
 import {
   cidrContainsCidr,
+  cidrIntersect,
+  cidrMerge,
   cidrOverlaps,
+  cidrSubtract,
   parseCidr,
   stringifyCidr,
 } from "./cidr.ts";
@@ -121,18 +124,20 @@ Deno.test("cidrContainsCidr", async (t) => {
     );
   });
 
-  await t.step("mixed v4/v6 returns false", () => {
-    assertEquals(
-      cidrContainsCidr(parseCidr("10.0.0.0/8"), parseCidr("2001:db8::/32")),
-      false,
+  await t.step("mixed v4/v6 throws TypeError", () => {
+    assertThrows(
+      () =>
+        cidrContainsCidr(parseCidr("10.0.0.0/8"), parseCidr("2001:db8::/32")),
+      TypeError,
     );
-    assertEquals(
-      cidrContainsCidr(parseCidr("2001:db8::/32"), parseCidr("10.0.0.0/8")),
-      false,
+    assertThrows(
+      () =>
+        cidrContainsCidr(parseCidr("2001:db8::/32"), parseCidr("10.0.0.0/8")),
+      TypeError,
     );
-    assertEquals(
-      cidrContainsCidr(parseCidr("0.0.0.0/0"), parseCidr("::/0")),
-      false,
+    assertThrows(
+      () => cidrContainsCidr(parseCidr("0.0.0.0/0"), parseCidr("::/0")),
+      TypeError,
     );
   });
 });
@@ -158,14 +163,106 @@ Deno.test("cidrOverlaps", async (t) => {
     );
   });
 
-  await t.step("mixed v4/v6 returns false", () => {
-    assertEquals(
-      cidrOverlaps(parseCidr("10.0.0.0/8"), parseCidr("2001:db8::/32")),
-      false,
+  await t.step("mixed v4/v6 throws TypeError", () => {
+    assertThrows(
+      () => cidrOverlaps(parseCidr("10.0.0.0/8"), parseCidr("2001:db8::/32")),
+      TypeError,
+    );
+    assertThrows(
+      () => cidrOverlaps(parseCidr("::/0"), parseCidr("0.0.0.0/0")),
+      TypeError,
+    );
+  });
+});
+
+Deno.test("cidrIntersect", async (t) => {
+  await t.step("delegates to IPv4", () => {
+    const result = cidrIntersect(
+      parseCidr("10.0.0.0/8"),
+      parseCidr("10.1.0.0/16"),
+    );
+    assertEquals(result && stringifyCidr(result as Cidrv4), "10.1.0.0/16");
+  });
+
+  await t.step("delegates to IPv6", () => {
+    const result = cidrIntersect(
+      parseCidr("2001:db8::/32"),
+      parseCidr("2001:db8:1::/48"),
+    );
+    assertEquals(result && stringifyCidr(result as Cidrv6), "2001:db8:1::/48");
+  });
+
+  await t.step("mixed v4/v6 throws TypeError", () => {
+    assertThrows(
+      () => cidrIntersect(parseCidr("10.0.0.0/8"), parseCidr("2001:db8::/32")),
+      TypeError,
+    );
+    assertThrows(
+      () => cidrIntersect(parseCidr("2001:db8::/32"), parseCidr("10.0.0.0/8")),
+      TypeError,
+    );
+  });
+});
+
+Deno.test("cidrSubtract", async (t) => {
+  await t.step("delegates to IPv4", () => {
+    const result = cidrSubtract(
+      parseCidr("10.0.0.0/24"),
+      parseCidr("172.16.0.0/24"),
     );
     assertEquals(
-      cidrOverlaps(parseCidr("::/0"), parseCidr("0.0.0.0/0")),
-      false,
+      result.map((c) => stringifyCidr(c as Cidrv4)),
+      ["10.0.0.0/24"],
     );
+  });
+
+  await t.step("delegates to IPv6", () => {
+    const result = cidrSubtract(
+      parseCidr("2001:db8::/32"),
+      parseCidr("2001:db9::/32"),
+    );
+    assertEquals(
+      result.map((c) => stringifyCidr(c as Cidrv6)),
+      ["2001:db8::/32"],
+    );
+  });
+
+  await t.step("mixed v4/v6 throws TypeError", () => {
+    assertThrows(
+      () => cidrSubtract(parseCidr("10.0.0.0/8"), parseCidr("2001:db8::/32")),
+      TypeError,
+    );
+    assertThrows(
+      () => cidrSubtract(parseCidr("2001:db8::/32"), parseCidr("10.0.0.0/8")),
+      TypeError,
+    );
+  });
+});
+
+Deno.test("cidrMerge", async (t) => {
+  await t.step("merges IPv4 array", () => {
+    const result = cidrMerge([
+      parseCidr("10.0.0.0/25"),
+      parseCidr("10.0.0.128/25"),
+    ]);
+    assertEquals(
+      result.map((c) => stringifyCidr(c)),
+      ["10.0.0.0/24"],
+    );
+  });
+
+  await t.step("merges IPv6 array", () => {
+    const result = cidrMerge([
+      parseCidr("2001:db8::/33"),
+      parseCidr("2001:db8:8000::/33"),
+    ]);
+    assertEquals(
+      result.map((c) => stringifyCidr(c)),
+      ["2001:db8::/32"],
+    );
+  });
+
+  await t.step("empty array returns empty", () => {
+    assertEquals(cidrMerge([]), []);
   });
 });
