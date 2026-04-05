@@ -189,6 +189,8 @@
  * - {@link stringifyIp}: Convert number or bigint to IP address string
  * - {@link parseCidr}: Parse any CIDR notation string to Cidrv4 or Cidrv6
  * - {@link stringifyCidr}: Convert Cidrv4 or Cidrv6 to CIDR notation string
+ * - {@link cidrContainsCidr}: Check if one CIDR fully contains another (auto-detect version)
+ * - {@link cidrOverlaps}: Check if two CIDRs share at least one address (auto-detect version)
  * - {@link isValidCidr}: Check if a string is valid CIDR notation (IPv4 or IPv6)
  *
  * ### IPv4
@@ -202,6 +204,8 @@
  * - {@link stringifyCidrv4}: Convert Cidrv4 to CIDR notation string
  * - {@link cidrv4Mask}: Create network mask from prefix length (0-32)
  * - {@link cidrv4Contains}: Check if IP is within CIDR range
+ * - {@link cidrv4ContainsCidr}: Check if one IPv4 CIDR fully contains another
+ * - {@link cidrv4Overlaps}: Check if two IPv4 CIDRs share at least one address
  * - {@link cidrv4FirstAddress}: Get first address in CIDR range
  * - {@link cidrv4LastAddress}: Get last address in CIDR range
  * - {@link cidrv4NetworkAddress}: Alias for cidrv4FirstAddress
@@ -223,6 +227,8 @@
  * - {@link stringifyCidrv6}: Convert Cidrv6 to CIDR notation string
  * - {@link cidrv6Mask}: Create network mask from prefix length (0-128)
  * - {@link cidrv6Contains}: Check if IP is within CIDR range
+ * - {@link cidrv6ContainsCidr}: Check if one IPv6 CIDR fully contains another
+ * - {@link cidrv6Overlaps}: Check if two IPv6 CIDRs share at least one address
  * - {@link cidrv6FirstAddress}: Get first address in CIDR range
  * - {@link cidrv6LastAddress}: Get last address in CIDR range
  * - {@link cidrv6Size}: Get total number of addresses in CIDR range
@@ -295,7 +301,7 @@
 // --- Universal (auto-detect IPv4/IPv6) ---
 
 export { parseIp, stringifyIp } from "./ip.ts";
-export { parseCidr, stringifyCidr } from "./cidr.ts";
+export { cidrContainsCidr, cidrOverlaps, parseCidr, stringifyCidr } from "./cidr.ts";
 export {
   type ClassificationIpv4,
   type ClassificationIpv6,
@@ -316,10 +322,12 @@ export {
   cidrv4Addresses,
   cidrv4BroadcastAddress,
   cidrv4Contains,
+  cidrv4ContainsCidr,
   cidrv4FirstAddress,
   cidrv4LastAddress,
   cidrv4Mask,
   cidrv4NetworkAddress,
+  cidrv4Overlaps,
   cidrv4Size,
   parseCidrv4,
   stringifyCidrv4,
@@ -349,9 +357,11 @@ export {
   type Cidrv6,
   cidrv6Addresses,
   cidrv6Contains,
+  cidrv6ContainsCidr,
   cidrv6FirstAddress,
   cidrv6LastAddress,
   cidrv6Mask,
+  cidrv6Overlaps,
   cidrv6Size,
   parseCidrv6,
   stringifyCidrv6,

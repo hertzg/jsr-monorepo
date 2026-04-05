@@ -1,5 +1,10 @@
 import { assert, assertEquals } from "@std/assert";
-import { parseCidr, stringifyCidr } from "./cidr.ts";
+import {
+  cidrContainsCidr,
+  cidrOverlaps,
+  parseCidr,
+  stringifyCidr,
+} from "./cidr.ts";
 import { isValidCidr } from "./validate.ts";
 import type { Cidrv4 } from "./cidrv4.ts";
 import type { Cidrv6 } from "./cidrv6.ts";
@@ -86,5 +91,81 @@ Deno.test("isValidCidr", async (t) => {
     assertEquals(isValidCidr(""), false);
     assertEquals(isValidCidr("garbage/24"), false);
     assertEquals(isValidCidr("10.0.0.0/33"), false);
+  });
+});
+
+Deno.test("cidrContainsCidr", async (t) => {
+  await t.step("delegates to IPv4", () => {
+    assert(
+      cidrContainsCidr(parseCidr("10.0.0.0/8"), parseCidr("10.1.0.0/16")),
+    );
+    assertEquals(
+      cidrContainsCidr(parseCidr("10.1.0.0/16"), parseCidr("10.0.0.0/8")),
+      false,
+    );
+  });
+
+  await t.step("delegates to IPv6", () => {
+    assert(
+      cidrContainsCidr(
+        parseCidr("2001:db8::/32"),
+        parseCidr("2001:db8:1::/48"),
+      ),
+    );
+    assertEquals(
+      cidrContainsCidr(
+        parseCidr("2001:db8:1::/48"),
+        parseCidr("2001:db8::/32"),
+      ),
+      false,
+    );
+  });
+
+  await t.step("mixed v4/v6 returns false", () => {
+    assertEquals(
+      cidrContainsCidr(parseCidr("10.0.0.0/8"), parseCidr("2001:db8::/32")),
+      false,
+    );
+    assertEquals(
+      cidrContainsCidr(parseCidr("2001:db8::/32"), parseCidr("10.0.0.0/8")),
+      false,
+    );
+    assertEquals(
+      cidrContainsCidr(parseCidr("0.0.0.0/0"), parseCidr("::/0")),
+      false,
+    );
+  });
+});
+
+Deno.test("cidrOverlaps", async (t) => {
+  await t.step("delegates to IPv4", () => {
+    assert(
+      cidrOverlaps(parseCidr("10.0.0.0/8"), parseCidr("10.1.0.0/16")),
+    );
+    assertEquals(
+      cidrOverlaps(parseCidr("10.0.0.0/8"), parseCidr("172.16.0.0/12")),
+      false,
+    );
+  });
+
+  await t.step("delegates to IPv6", () => {
+    assert(
+      cidrOverlaps(parseCidr("2001:db8::/32"), parseCidr("2001:db8:1::/48")),
+    );
+    assertEquals(
+      cidrOverlaps(parseCidr("2001:db8::/32"), parseCidr("2001:db9::/32")),
+      false,
+    );
+  });
+
+  await t.step("mixed v4/v6 returns false", () => {
+    assertEquals(
+      cidrOverlaps(parseCidr("10.0.0.0/8"), parseCidr("2001:db8::/32")),
+      false,
+    );
+    assertEquals(
+      cidrOverlaps(parseCidr("::/0"), parseCidr("0.0.0.0/0")),
+      false,
+    );
   });
 });
