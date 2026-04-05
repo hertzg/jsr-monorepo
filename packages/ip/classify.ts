@@ -42,8 +42,16 @@
  */
 
 import { parseIp } from "./ip.ts";
-import { classifyIpv4, type ClassificationIpv4 } from "./classifyv4.ts";
-import { classifyIpv6, type ClassificationIpv6 } from "./classifyv6.ts";
+import {
+  classifyIpv4,
+  type ClassificationIpv4,
+} from "./classifyv4.ts";
+import {
+  classifyIpv6,
+  type ClassificationIpv6,
+} from "./classifyv6.ts";
+
+export type { ClassificationIpv4, ClassificationIpv6 };
 
 /**
  * Result of classifying an IPv4 address.

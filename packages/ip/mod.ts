@@ -114,214 +114,179 @@
  *
  * ## Features
  *
- * - **IPv4 & IPv6 Parsing & Stringifying**: Convert between standard notation and number/bigint
- * - **CIDR Support**: Parse CIDR notation and perform network calculations
- * - **Range Checking**: Verify if IPs are within CIDR blocks
- * - **Address Generation**: Generate IP ranges with custom offsets and steps
- * - **Arithmetic Operations**: Use number (IPv4) or bigint (IPv6) math for IP address manipulation
- * - **IPv6 Compression**: Expand and compress IPv6 addresses
- * - **IP Classification**: Identify private, loopback, multicast, and other well-known ranges
+ * - **Dual-Stack Support**: Auto-unwrap IPv4-mapped IPv6 addresses from dual-stack sockets
+ * - **IP Classification**: Identify private, loopback, multicast, public, and other well-known ranges
+ * - **CIDR Support**: Parse CIDR notation, check containment, compute network boundaries
+ * - **IPv4 & IPv6 Parsing**: Convert between standard notation and number/bigint for arithmetic
+ * - **Address Generation**: Lazily enumerate addresses in CIDR ranges
+ * - **IPv4-Mapped Conversion**: Convert between IPv4 and IPv4-mapped IPv6 addresses and CIDRs
  * - **Validation**: Non-throwing validity checks for IP addresses and CIDR notation
  *
- * ## Basic IPv4 Operations
+ * ## Dual-Stack Server
  *
- * @example Parse and stringify IPv4 addresses
+ * @example Normalize client addresses from a dual-stack server
  * ```ts
  * import { assertEquals } from "@std/assert";
- * import { parseIpv4, stringifyIpv4 } from "@hertzg/ip";
+ * import { classifyIp, parseIp, stringifyIp } from "@hertzg/ip";
  *
- * // Parse dotted decimal to number
- * const ip = parseIpv4("192.168.1.1");
- * assertEquals(ip, 3232235777);
+ * // Dual-stack servers (Deno, Node) report IPv4 clients as ::ffff:x.x.x.x
+ * // parseIp auto-unwraps mapped addresses to their IPv4 form
+ * const remote1 = parseIp("::ffff:192.168.1.50");
+ * assertEquals(stringifyIp(remote1), "192.168.1.50");
  *
- * // Stringify number back to dotted decimal
- * assertEquals(stringifyIpv4(ip), "192.168.1.1");
+ * // Native IPv6 clients pass through unchanged
+ * const remote2 = parseIp("2001:db8::1");
+ * assertEquals(stringifyIp(remote2), "2001:db8::1");
  *
- * // Arithmetic operations
- * const next = ip + 1;
- * assertEquals(stringifyIpv4(next), "192.168.1.2");
- *
- * const prev = ip - 1;
- * assertEquals(stringifyIpv4(prev), "192.168.1.0");
+ * // Classification works on both
+ * assertEquals(classifyIp(remote1).classification, "private");
+ * assertEquals(classifyIp(remote2).classification, "documentation");
  * ```
  *
- * ## Basic IPv6 Operations
+ * ## Trusted Network Allowlist
  *
- * @example Parse and stringify IPv6 addresses
+ * @example Check if a client IP is in a set of trusted CIDR ranges
+ * ```ts
+ * import { assert, assertEquals } from "@std/assert";
+ * import { cidrv4Contains, parseCidrv4, parseIp } from "@hertzg/ip";
+ *
+ * const trustedRanges = [
+ *   parseCidrv4("10.0.0.0/8"),
+ *   parseCidrv4("172.16.0.0/12"),
+ *   parseCidrv4("192.168.0.0/16"),
+ * ];
+ *
+ * function isTrusted(ip: string): boolean {
+ *   const addr = parseIp(ip);
+ *   if (typeof addr !== "number") return false;
+ *   return trustedRanges.some((cidr) => cidrv4Contains(cidr, addr));
+ * }
+ *
+ * assert(isTrusted("192.168.1.100"));
+ * assert(isTrusted("10.0.0.1"));
+ * assert(isTrusted("::ffff:172.16.5.1"));
+ * assertEquals(isTrusted("8.8.8.8"), false);
+ * assertEquals(isTrusted("2001:db8::1"), false);
+ * ```
+ *
+ * ## IP Classification
+ *
+ * @example Classify addresses for logging, analytics, or input validation
  * ```ts
  * import { assertEquals } from "@std/assert";
- * import { parseIpv6, stringifyIpv6 } from "@hertzg/ip";
+ * import { classifyIp } from "@hertzg/ip";
  *
- * // Parse colon-hexadecimal to bigint
- * const ip = parseIpv6("2001:db8::1");
- * assertEquals(ip, 42540766411282592856903984951653826561n);
+ * // Classify any IP — result includes kind, numeric value, and label
+ * const result = classifyIp("192.168.1.1");
+ * assertEquals(result.kind, "ipv4");
+ * assertEquals(result.classification, "private");
  *
- * // Stringify bigint back to compressed form
- * assertEquals(stringifyIpv6(ip), "2001:db8::1");
+ * assertEquals(classifyIp("127.0.0.1").classification, "loopback");
+ * assertEquals(classifyIp("8.8.8.8").classification, "public");
+ * assertEquals(classifyIp("169.254.1.1").classification, "link-local");
  *
- * // Arithmetic operations
- * const next = ip + 1n;
- * assertEquals(stringifyIpv6(next), "2001:db8::2");
+ * // Works with IPv6 too
+ * assertEquals(classifyIp("::1").classification, "loopback");
+ * assertEquals(classifyIp("fe80::1").classification, "link-local");
+ * assertEquals(classifyIp("fd00::1").classification, "unique-local");
+ *
+ * // Use with Zod as a custom validator that accepts allowed classifications:
+ * //
+ * // import { type ClassificationIpv4, type ClassificationIpv6,
+ * //   classifyIp } from "@hertzg/ip";
+ * //
+ * // function ipClassification(
+ * //   ...allowed: (ClassificationIpv4 | ClassificationIpv6)[]
+ * // ) {
+ * //   const set = new Set(allowed);
+ * //   return z.string().refine(
+ * //     (val) => set.has(classifyIp(val).classification),
+ * //     { message: `IP must be: ${allowed.join(", ")}` },
+ * //   );
+ * // }
+ * //
+ * // const publicIp = ipClassification("public", "global-unicast");
+ * // publicIp.parse("8.8.8.8");       // ok
+ * // publicIp.parse("192.168.1.1");   // throws: private
+ * //
+ * // const internalIp = ipClassification("private", "loopback");
+ * // internalIp.parse("10.0.0.1");    // ok
+ * // internalIp.parse("8.8.8.8");     // throws: public
  * ```
  *
- * ## CIDR Notation
+ * ## Parsing and Stringifying
  *
- * @example Parse and work with CIDR blocks
+ * @example Parse and stringify IPv4 and IPv6 addresses
+ * ```ts
+ * import { assertEquals } from "@std/assert";
+ * import { parseIpv4, parseIpv6, stringifyIpv4, stringifyIpv6 } from "@hertzg/ip";
+ *
+ * // IPv4: string <-> 32-bit number
+ * const v4 = parseIpv4("192.168.1.1");
+ * assertEquals(v4, 3232235777);
+ * assertEquals(stringifyIpv4(v4), "192.168.1.1");
+ * assertEquals(stringifyIpv4(v4 + 1), "192.168.1.2");
+ *
+ * // IPv6: string <-> 128-bit bigint
+ * const v6 = parseIpv6("2001:db8::1");
+ * assertEquals(v6, 42540766411282592856903984951653826561n);
+ * assertEquals(stringifyIpv6(v6), "2001:db8::1");
+ * assertEquals(stringifyIpv6(v6 + 1n), "2001:db8::2");
+ * ```
+ *
+ * ## CIDR Network Boundaries
+ *
+ * @example Compute network and broadcast addresses from CIDR
  * ```ts
  * import { assertEquals } from "@std/assert";
  * import {
  *   cidrv4BroadcastAddress,
  *   cidrv4NetworkAddress,
+ *   cidrv4Size,
  *   parseCidrv4,
- *   stringifyCidrv4,
  *   stringifyIpv4,
  * } from "@hertzg/ip";
  *
- * // Parse CIDR notation
  * const cidr = parseCidrv4("192.168.1.0/24");
- * assertEquals(cidr.prefixLength, 24);
  *
- * // Get network boundaries
- * const network = cidrv4NetworkAddress(cidr);
- * assertEquals(stringifyIpv4(network), "192.168.1.0");
- *
- * const broadcast = cidrv4BroadcastAddress(cidr);
- * assertEquals(stringifyIpv4(broadcast), "192.168.1.255");
- *
- * // Stringify back to CIDR notation
- * assertEquals(stringifyCidrv4(cidr), "192.168.1.0/24");
- * ```
- *
- * @example IPv6 CIDR operations
- * ```ts
- * import { assertEquals } from "@std/assert";
- * import {
- *   cidrv6FirstAddress,
- *   cidrv6LastAddress,
- *   parseCidrv6,
- *   stringifyCidrv6,
- *   stringifyIpv6,
- * } from "@hertzg/ip";
- *
- * // Parse IPv6 CIDR notation
- * const cidr = parseCidrv6("2001:db8::/32");
- * assertEquals(cidr.prefixLength, 32);
- *
- * // Get range boundaries
- * const first = cidrv6FirstAddress(cidr);
- * assertEquals(stringifyIpv6(first), "2001:db8::");
- *
- * // Stringify back to CIDR notation
- * assertEquals(stringifyCidrv6(cidr), "2001:db8::/32");
+ * assertEquals(stringifyIpv4(cidrv4NetworkAddress(cidr)), "192.168.1.0");
+ * assertEquals(stringifyIpv4(cidrv4BroadcastAddress(cidr)), "192.168.1.255");
+ * assertEquals(cidrv4Size(cidr), 256);
  * ```
  *
  * ## Range Checking
  *
- * @example Check if IPs are within CIDR range
+ * @example Check if IPs fall within a CIDR range
  * ```ts
  * import { assert, assertEquals } from "@std/assert";
  * import { cidrv4Contains, parseCidrv4, parseIpv4 } from "@hertzg/ip";
  *
- * const cidr = parseCidrv4("192.168.1.0/24");
+ * const cidr = parseCidrv4("10.0.0.0/8");
  *
- * // IPs within range
- * assert(cidrv4Contains(cidr, parseIpv4("192.168.1.0")));   // network address
- * assert(cidrv4Contains(cidr, parseIpv4("192.168.1.100"))); // middle of range
- * assert(cidrv4Contains(cidr, parseIpv4("192.168.1.255"))); // broadcast address
- *
- * // IPs outside range
- * assertEquals(cidrv4Contains(cidr, parseIpv4("192.168.0.255")), false);
- * assertEquals(cidrv4Contains(cidr, parseIpv4("192.168.2.0")), false);
+ * assert(cidrv4Contains(cidr, parseIpv4("10.0.0.1")));
+ * assert(cidrv4Contains(cidr, parseIpv4("10.255.255.255")));
+ * assertEquals(cidrv4Contains(cidr, parseIpv4("11.0.0.0")), false);
  * ```
  *
- * ## Address Generation
+ * ## Subnet Enumeration
  *
- * @example Generate IP ranges with custom patterns
+ * @example Generate addresses in a CIDR range
  * ```ts
  * import { assertEquals } from "@std/assert";
  * import { cidrv4Addresses, parseCidrv4, stringifyIpv4 } from "@hertzg/ip";
  *
- * const cidr = parseCidrv4("10.0.0.0/29"); // 8 IPs: .0 to .7
+ * const cidr = parseCidrv4("10.0.0.0/29"); // 8 addresses
  *
- * // By default, iterates all IPs (offset=0, step=1, no count limit)
+ * // Iterate all addresses
  * const all = Array.from(cidrv4Addresses(cidr));
  * assertEquals(all.map(stringifyIpv4), [
  *   "10.0.0.0", "10.0.0.1", "10.0.0.2", "10.0.0.3",
  *   "10.0.0.4", "10.0.0.5", "10.0.0.6", "10.0.0.7",
  * ]);
  *
- * // Skip network address with offset=1
- * const usable = Array.from(cidrv4Addresses(cidr, { offset: 1 }));
- * assertEquals(usable.length, 7);
- *
- * // Get even addresses (step=2)
- * const evenIps = Array.from(cidrv4Addresses(cidr, { step: 2 }));
- * assertEquals(evenIps.map(stringifyIpv4), ["10.0.0.0", "10.0.0.2", "10.0.0.4", "10.0.0.6"]);
- *
- * // Reverse iteration from offset (negative step)
- * const backwards = Array.from(cidrv4Addresses(cidr, { offset: 5, step: -1 }));
- * assertEquals(backwards.map(stringifyIpv4), ["10.0.0.5", "10.0.0.4", "10.0.0.3", "10.0.0.2", "10.0.0.1", "10.0.0.0"]);
- * ```
- *
- * ## Real-World Use Cases
- *
- * @example IP address allocation system
- * ```ts
- * import { assert } from "@std/assert";
- * import {
- *   cidrv4Addresses,
- *   cidrv4Contains,
- *   parseCidrv4,
- *   stringifyIpv4,
- * } from "@hertzg/ip";
- *
- * const cidr = parseCidrv4("10.0.0.0/24");
- *
- * // Allocate batch of IPs for servers
- * const serverIps = Array.from(cidrv4Addresses(cidr, { offset: 10, count: 5, step: 1 }));
- *
- * // Verify all allocated IPs are in range
- * for (const ip of serverIps) {
- *   assert(cidrv4Contains(cidr, ip));
- * }
- *
- * // Convert to strings for configuration
- * const serverAddresses = serverIps.map(stringifyIpv4);
- * assert(serverAddresses[0] === "10.0.0.10");
- * ```
- *
- * @example Memory-efficient iteration over large ranges
- * ```ts
- * import { cidrv4Addresses, parseCidrv4, stringifyIpv4 } from "@hertzg/ip";
- *
- * const cidr = parseCidrv4("10.0.0.0/16"); // 65,536 addresses
- *
- * // Process entire CIDR lazily without loading all into memory
- * // No need to specify count - iterates until CIDR boundary
- * for (const ip of cidrv4Addresses(cidr, { offset: 0 })) {
- *   const ipStr = stringifyIpv4(ip);
- *   // Process each IP (e.g., scan, allocate, log)
- *   break; // Just showing the pattern
- * }
- * ```
- *
- * @example WireGuard mesh network with IPv6
- * ```ts
- * import { assertEquals } from "@std/assert";
- * import { cidrv6Addresses, parseCidrv6, stringifyIpv6 } from "@hertzg/ip";
- *
- * // Allocate unique local addresses for mesh peers
- * const meshSubnet = parseCidrv6("fd00:abcd::/120");
- *
- * // Get addresses for mesh nodes
- * const peerAddresses = Array.from(cidrv6Addresses(meshSubnet, { offset: 1, count: 5 }));
- * assertEquals(peerAddresses.map(stringifyIpv6), [
- *   "fd00:abcd::1",
- *   "fd00:abcd::2",
- *   "fd00:abcd::3",
- *   "fd00:abcd::4",
- *   "fd00:abcd::5",
- * ]);
+ * // Skip network address, take first 3 usable
+ * const usable = Array.from(cidrv4Addresses(cidr, { offset: 1, count: 3 }));
+ * assertEquals(usable.map(stringifyIpv4), ["10.0.0.1", "10.0.0.2", "10.0.0.3"]);
  * ```
  *
  * @module
@@ -332,6 +297,8 @@
 export { parseIp, stringifyIp } from "./ip.ts";
 export { parseCidr, stringifyCidr } from "./cidr.ts";
 export {
+  type ClassificationIpv4,
+  type ClassificationIpv6,
   type ClassifiedIp,
   type ClassifiedIpv4,
   type ClassifiedIpv6,
@@ -359,7 +326,6 @@ export {
 } from "./cidrv4.ts";
 
 export {
-  type ClassificationIpv4,
   classifyIpv4,
   isIpv4Benchmarking,
   isIpv4Broadcast,
@@ -392,7 +358,6 @@ export {
 } from "./cidrv6.ts";
 
 export {
-  type ClassificationIpv6,
   classifyIpv6,
   isIpv6Benchmarking,
   isIpv6Documentation,
