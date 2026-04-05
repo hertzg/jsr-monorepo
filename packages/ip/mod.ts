@@ -5,113 +5,6 @@
  * IPv4 addresses are represented as numbers (32-bit), IPv6 as bigints (128-bit), enabling
  * efficient arithmetic operations and range manipulation for network programming tasks.
  *
- * ## API Reference
- *
- * ### Universal (auto-detect IPv4/IPv6)
- * - {@link parseIp}: Parse any IP address string to number (IPv4) or bigint (IPv6)
- * - {@link stringifyIp}: Convert number or bigint to IP address string
- * - {@link parseCidr}: Parse any CIDR notation string to Cidrv4 or Cidrv6
- * - {@link stringifyCidr}: Convert Cidrv4 or Cidrv6 to CIDR notation string
- * - {@link isValidCidr}: Check if a string is valid CIDR notation (IPv4 or IPv6)
- *
- * ### IPv4
- * - {@link parseIpv4}: Parse dotted decimal notation to number
- * - {@link stringifyIpv4}: Convert number to dotted decimal notation
- * - {@link isValidIpv4}: Check if a string is a valid IPv4 address
- *
- * ### IPv4 CIDR
- * - {@link Cidrv4}: Type representing an IPv4 CIDR block
- * - {@link parseCidrv4}: Parse CIDR notation string to Cidrv4
- * - {@link stringifyCidrv4}: Convert Cidrv4 to CIDR notation string
- * - {@link cidrv4Mask}: Create network mask from prefix length (0-32)
- * - {@link cidrv4Contains}: Check if IP is within CIDR range
- * - {@link cidrv4FirstAddress}: Get first address in CIDR range
- * - {@link cidrv4LastAddress}: Get last address in CIDR range
- * - {@link cidrv4NetworkAddress}: Alias for cidrv4FirstAddress
- * - {@link cidrv4BroadcastAddress}: Alias for cidrv4LastAddress
- * - {@link cidrv4Size}: Get total number of addresses in CIDR range
- * - {@link cidrv4Addresses}: Generate IP addresses in CIDR range
- * - {@link isValidCidrv4}: Check if a string is valid IPv4 CIDR notation
- *
- * ### IPv6
- * - {@link parseIpv6}: Parse colon-hexadecimal notation to bigint
- * - {@link stringifyIpv6}: Convert bigint to compressed colon-hexadecimal
- * - {@link expandIpv6}: Expand to full uncompressed form
- * - {@link compressIpv6}: Compress to canonical shortest form
- * - {@link isValidIpv6}: Check if a string is a valid IPv6 address
- *
- * ### IPv6 CIDR
- * - {@link Cidrv6}: Type representing an IPv6 CIDR block
- * - {@link parseCidrv6}: Parse CIDR notation string to Cidrv6
- * - {@link stringifyCidrv6}: Convert Cidrv6 to CIDR notation string
- * - {@link cidrv6Mask}: Create network mask from prefix length (0-128)
- * - {@link cidrv6Contains}: Check if IP is within CIDR range
- * - {@link cidrv6FirstAddress}: Get first address in CIDR range
- * - {@link cidrv6LastAddress}: Get last address in CIDR range
- * - {@link cidrv6Size}: Get total number of addresses in CIDR range
- * - {@link cidrv6Addresses}: Generate IP addresses in CIDR range
- * - {@link isValidCidrv6}: Check if a string is valid IPv6 CIDR notation
- *
- * ### Validation
- * - {@link isValidIp}: Check if a string is a valid plain IP address (IPv4 or IPv6)
- * - {@link isValidCidr}: Check if a string is valid CIDR notation (IPv4 or IPv6)
- *
- * ### IPv4 Classification
- * - {@link ClassificationIpv4}: Type for all IPv4 classification labels
- * - {@link classifyIpv4}: Classify an IPv4 address into its well-known range
- * - {@link isIpv4Private}: Check if address is private (RFC 1918)
- * - {@link isIpv4Loopback}: Check if address is loopback (127.0.0.0/8)
- * - {@link isIpv4LinkLocal}: Check if address is link-local (169.254.0.0/16)
- * - {@link isIpv4Multicast}: Check if address is multicast (224.0.0.0/4)
- * - {@link isIpv4Reserved}: Check if address is reserved (240.0.0.0/4)
- * - {@link isIpv4Broadcast}: Check if address is broadcast (255.255.255.255)
- * - {@link isIpv4ThisNetwork}: Check if address is "this network" (0.0.0.0/8)
- * - {@link isIpv4CgNat}: Check if address is Carrier-Grade NAT (100.64.0.0/10)
- * - {@link isIpv4Benchmarking}: Check if address is benchmarking (198.18.0.0/15)
- * - {@link isIpv4Documentation}: Check if address is documentation (RFC 5737)
- * - {@link isIpv4Public}: Check if address is publicly routable
- *
- * ### IPv6 Classification
- * - {@link ClassificationIpv6}: Type for all IPv6 classification labels
- * - {@link classifyIpv6}: Classify an IPv6 address into its well-known range
- * - {@link isIpv6Loopback}: Check if address is loopback (::1)
- * - {@link isIpv6Unspecified}: Check if address is unspecified (::)
- * - {@link isIpv6LinkLocal}: Check if address is link-local (fe80::/10)
- * - {@link isIpv6Multicast}: Check if address is multicast (ff00::/8)
- * - {@link isIpv6UniqueLocal}: Check if address is unique local (fc00::/7)
- * - {@link isIpv6GlobalUnicast}: Check if address is global unicast (2000::/3)
- * - {@link isIpv6Ipv4Mapped}: Check if address is IPv4-mapped (::ffff:0:0/96)
- * - {@link isIpv6Ipv4Translated}: Check if address is IPv4-translated (64:ff9b::/96)
- * - {@link isIpv6Documentation}: Check if address is documentation (2001:db8::/32)
- * - {@link isIpv6Teredo}: Check if address is Teredo (2001::/32)
- * - {@link isIpv6Benchmarking}: Check if address is benchmarking (2001:2::/48)
- * - {@link isIpv6Orchidv2}: Check if address is ORCHIDv2 (2001:20::/28)
- *
- * ### IPv4-Mapped IPv6 Conversion (4to6)
- * - {@link ipv4To64Mapped}: Convert IPv4 number to IPv4-mapped IPv6 bigint
- * - {@link ipv4From64Mapped}: Extract IPv4 number from IPv4-mapped IPv6 bigint
- * - {@link cidrv4ToCidrv64Mapped}: Convert IPv4 CIDR to IPv4-mapped IPv6 CIDR
- * - {@link cidrv4FromCidrv64Mapped}: Convert IPv4-mapped IPv6 CIDR to IPv4 CIDR
- *
- * ### Combined Classification
- * - {@link ClassifiedIp}: Discriminated union result with kind, value, and classification
- * - {@link ClassifiedIpv4}: Result type for IPv4 classification
- * - {@link ClassifiedIpv6}: Result type for IPv6 classification
- * - {@link classifyIp}: Classify an IPv4 (number) or IPv6 (bigint) address
- *
- * ### Submodules
- * - [`ip`](https://jsr.io/@hertzg/ip/doc/ip): Universal IP parsing via {@link parseIp}, {@link stringifyIp}
- * - [`cidr`](https://jsr.io/@hertzg/ip/doc/cidr): Universal CIDR parsing via {@link parseCidr}, {@link stringifyCidr}
- * - [`ipv4`](https://jsr.io/@hertzg/ip/doc/ipv4): IPv4 parsing and validation
- * - [`cidrv4`](https://jsr.io/@hertzg/ip/doc/cidrv4): IPv4 CIDR utilities and validation
- * - [`ipv6`](https://jsr.io/@hertzg/ip/doc/ipv6): IPv6 parsing and validation
- * - [`cidrv6`](https://jsr.io/@hertzg/ip/doc/cidrv6): IPv6 CIDR utilities and validation
- * - [`classify`](https://jsr.io/@hertzg/ip/doc/classify): Universal classifier via {@link classifyIp}
- * - [`classifyv4`](https://jsr.io/@hertzg/ip/doc/classifyv4): IPv4 classification via {@link classifyIpv4}, {@link isIpv4Private}, etc.
- * - [`classifyv6`](https://jsr.io/@hertzg/ip/doc/classifyv6): IPv6 classification via {@link classifyIpv6}, {@link isIpv6Loopback}, etc.
- * - [`validate`](https://jsr.io/@hertzg/ip/doc/validate): Universal validation via {@link isValidIp}, {@link isValidCidr}
- * - [`4to6`](https://jsr.io/@hertzg/ip/doc/4to6): IPv4-mapped IPv6 conversion via {@link ipv4To64Mapped}, {@link ipv4From64Mapped}, {@link cidrv4ToCidrv64Mapped}, {@link cidrv4FromCidrv64Mapped}
- *
  * ## Features
  *
  * - **Dual-Stack Support**: Auto-unwrap IPv4-mapped IPv6 addresses from dual-stack sockets
@@ -288,6 +181,113 @@
  * const usable = Array.from(cidrv4Addresses(cidr, { offset: 1, count: 3 }));
  * assertEquals(usable.map(stringifyIpv4), ["10.0.0.1", "10.0.0.2", "10.0.0.3"]);
  * ```
+ *
+ * ## API Reference
+ *
+ * ### Universal (auto-detect IPv4/IPv6)
+ * - {@link parseIp}: Parse any IP address string to number (IPv4) or bigint (IPv6)
+ * - {@link stringifyIp}: Convert number or bigint to IP address string
+ * - {@link parseCidr}: Parse any CIDR notation string to Cidrv4 or Cidrv6
+ * - {@link stringifyCidr}: Convert Cidrv4 or Cidrv6 to CIDR notation string
+ * - {@link isValidCidr}: Check if a string is valid CIDR notation (IPv4 or IPv6)
+ *
+ * ### IPv4
+ * - {@link parseIpv4}: Parse dotted decimal notation to number
+ * - {@link stringifyIpv4}: Convert number to dotted decimal notation
+ * - {@link isValidIpv4}: Check if a string is a valid IPv4 address
+ *
+ * ### IPv4 CIDR
+ * - {@link Cidrv4}: Type representing an IPv4 CIDR block
+ * - {@link parseCidrv4}: Parse CIDR notation string to Cidrv4
+ * - {@link stringifyCidrv4}: Convert Cidrv4 to CIDR notation string
+ * - {@link cidrv4Mask}: Create network mask from prefix length (0-32)
+ * - {@link cidrv4Contains}: Check if IP is within CIDR range
+ * - {@link cidrv4FirstAddress}: Get first address in CIDR range
+ * - {@link cidrv4LastAddress}: Get last address in CIDR range
+ * - {@link cidrv4NetworkAddress}: Alias for cidrv4FirstAddress
+ * - {@link cidrv4BroadcastAddress}: Alias for cidrv4LastAddress
+ * - {@link cidrv4Size}: Get total number of addresses in CIDR range
+ * - {@link cidrv4Addresses}: Generate IP addresses in CIDR range
+ * - {@link isValidCidrv4}: Check if a string is valid IPv4 CIDR notation
+ *
+ * ### IPv6
+ * - {@link parseIpv6}: Parse colon-hexadecimal notation to bigint
+ * - {@link stringifyIpv6}: Convert bigint to compressed colon-hexadecimal
+ * - {@link expandIpv6}: Expand to full uncompressed form
+ * - {@link compressIpv6}: Compress to canonical shortest form
+ * - {@link isValidIpv6}: Check if a string is a valid IPv6 address
+ *
+ * ### IPv6 CIDR
+ * - {@link Cidrv6}: Type representing an IPv6 CIDR block
+ * - {@link parseCidrv6}: Parse CIDR notation string to Cidrv6
+ * - {@link stringifyCidrv6}: Convert Cidrv6 to CIDR notation string
+ * - {@link cidrv6Mask}: Create network mask from prefix length (0-128)
+ * - {@link cidrv6Contains}: Check if IP is within CIDR range
+ * - {@link cidrv6FirstAddress}: Get first address in CIDR range
+ * - {@link cidrv6LastAddress}: Get last address in CIDR range
+ * - {@link cidrv6Size}: Get total number of addresses in CIDR range
+ * - {@link cidrv6Addresses}: Generate IP addresses in CIDR range
+ * - {@link isValidCidrv6}: Check if a string is valid IPv6 CIDR notation
+ *
+ * ### Validation
+ * - {@link isValidIp}: Check if a string is a valid plain IP address (IPv4 or IPv6)
+ * - {@link isValidCidr}: Check if a string is valid CIDR notation (IPv4 or IPv6)
+ *
+ * ### IPv4 Classification
+ * - {@link ClassificationIpv4}: Type for all IPv4 classification labels
+ * - {@link classifyIpv4}: Classify an IPv4 address into its well-known range
+ * - {@link isIpv4Private}: Check if address is private (RFC 1918)
+ * - {@link isIpv4Loopback}: Check if address is loopback (127.0.0.0/8)
+ * - {@link isIpv4LinkLocal}: Check if address is link-local (169.254.0.0/16)
+ * - {@link isIpv4Multicast}: Check if address is multicast (224.0.0.0/4)
+ * - {@link isIpv4Reserved}: Check if address is reserved (240.0.0.0/4)
+ * - {@link isIpv4Broadcast}: Check if address is broadcast (255.255.255.255)
+ * - {@link isIpv4ThisNetwork}: Check if address is "this network" (0.0.0.0/8)
+ * - {@link isIpv4CgNat}: Check if address is Carrier-Grade NAT (100.64.0.0/10)
+ * - {@link isIpv4Benchmarking}: Check if address is benchmarking (198.18.0.0/15)
+ * - {@link isIpv4Documentation}: Check if address is documentation (RFC 5737)
+ * - {@link isIpv4Public}: Check if address is publicly routable
+ *
+ * ### IPv6 Classification
+ * - {@link ClassificationIpv6}: Type for all IPv6 classification labels
+ * - {@link classifyIpv6}: Classify an IPv6 address into its well-known range
+ * - {@link isIpv6Loopback}: Check if address is loopback (::1)
+ * - {@link isIpv6Unspecified}: Check if address is unspecified (::)
+ * - {@link isIpv6LinkLocal}: Check if address is link-local (fe80::/10)
+ * - {@link isIpv6Multicast}: Check if address is multicast (ff00::/8)
+ * - {@link isIpv6UniqueLocal}: Check if address is unique local (fc00::/7)
+ * - {@link isIpv6GlobalUnicast}: Check if address is global unicast (2000::/3)
+ * - {@link isIpv6Ipv4Mapped}: Check if address is IPv4-mapped (::ffff:0:0/96)
+ * - {@link isIpv6Ipv4Translated}: Check if address is IPv4-translated (64:ff9b::/96)
+ * - {@link isIpv6Documentation}: Check if address is documentation (2001:db8::/32)
+ * - {@link isIpv6Teredo}: Check if address is Teredo (2001::/32)
+ * - {@link isIpv6Benchmarking}: Check if address is benchmarking (2001:2::/48)
+ * - {@link isIpv6Orchidv2}: Check if address is ORCHIDv2 (2001:20::/28)
+ *
+ * ### IPv4-Mapped IPv6 Conversion (4to6)
+ * - {@link ipv4To64Mapped}: Convert IPv4 number to IPv4-mapped IPv6 bigint
+ * - {@link ipv4From64Mapped}: Extract IPv4 number from IPv4-mapped IPv6 bigint
+ * - {@link cidrv4ToCidrv64Mapped}: Convert IPv4 CIDR to IPv4-mapped IPv6 CIDR
+ * - {@link cidrv4FromCidrv64Mapped}: Convert IPv4-mapped IPv6 CIDR to IPv4 CIDR
+ *
+ * ### Combined Classification
+ * - {@link ClassifiedIp}: Discriminated union result with kind, value, and classification
+ * - {@link ClassifiedIpv4}: Result type for IPv4 classification
+ * - {@link ClassifiedIpv6}: Result type for IPv6 classification
+ * - {@link classifyIp}: Classify an IPv4 (number) or IPv6 (bigint) address
+ *
+ * ### Submodules
+ * - [`ip`](https://jsr.io/@hertzg/ip/doc/ip): Universal IP parsing via {@link parseIp}, {@link stringifyIp}
+ * - [`cidr`](https://jsr.io/@hertzg/ip/doc/cidr): Universal CIDR parsing via {@link parseCidr}, {@link stringifyCidr}
+ * - [`ipv4`](https://jsr.io/@hertzg/ip/doc/ipv4): IPv4 parsing and validation
+ * - [`cidrv4`](https://jsr.io/@hertzg/ip/doc/cidrv4): IPv4 CIDR utilities and validation
+ * - [`ipv6`](https://jsr.io/@hertzg/ip/doc/ipv6): IPv6 parsing and validation
+ * - [`cidrv6`](https://jsr.io/@hertzg/ip/doc/cidrv6): IPv6 CIDR utilities and validation
+ * - [`classify`](https://jsr.io/@hertzg/ip/doc/classify): Universal classifier via {@link classifyIp}
+ * - [`classifyv4`](https://jsr.io/@hertzg/ip/doc/classifyv4): IPv4 classification via {@link classifyIpv4}, {@link isIpv4Private}, etc.
+ * - [`classifyv6`](https://jsr.io/@hertzg/ip/doc/classifyv6): IPv6 classification via {@link classifyIpv6}, {@link isIpv6Loopback}, etc.
+ * - [`validate`](https://jsr.io/@hertzg/ip/doc/validate): Universal validation via {@link isValidIp}, {@link isValidCidr}
+ * - [`4to6`](https://jsr.io/@hertzg/ip/doc/4to6): IPv4-mapped IPv6 conversion via {@link ipv4To64Mapped}, {@link ipv4From64Mapped}, {@link cidrv4ToCidrv64Mapped}, {@link cidrv4FromCidrv64Mapped}
  *
  * @module
  */
