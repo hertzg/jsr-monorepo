@@ -11,7 +11,7 @@
   "packages/bx": "3.0.3",
   "packages/routeros-api": "0.1.2",
   "packages/tplink-api": "1.2.0",
-  "packages/ip": "3.0.0",
+  "packages/ip": "3.1.0",
   "packages/crc": "0.2.0",
   "packages/xhb": "3.2.0"
 }
