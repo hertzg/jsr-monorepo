@@ -796,6 +796,9 @@ Universal (auto-detect IPv4/IPv6)</h3>
 <li>stringifyCidr: Convert Cidrv4 or Cidrv6 to CIDR notation string</li>
 <li>cidrContainsCidr: Check if one CIDR fully contains another (auto-detect version)</li>
 <li>cidrOverlaps: Check if two CIDRs share at least one address (auto-detect version)</li>
+<li>cidrIntersect: Return the overlapping CIDR block, or null (auto-detect version)</li>
+<li>cidrSubtract: Return CIDR blocks in A but not in B (auto-detect version)</li>
+<li>cidrMerge: Merge CIDR blocks into the minimal covering set (auto-detect version)</li>
 <li>isValidCidr: Check if a string is valid CIDR notation (IPv4 or IPv6)</li>
 </ul>
 <h3 id="ipv4">
@@ -815,6 +818,9 @@ IPv4 CIDR</h3>
 <li>cidrv4Contains: Check if IP is within CIDR range</li>
 <li>cidrv4ContainsCidr: Check if one IPv4 CIDR fully contains another</li>
 <li>cidrv4Overlaps: Check if two IPv4 CIDRs share at least one address</li>
+<li>cidrv4Intersect: Return the overlapping IPv4 CIDR block, or null</li>
+<li>cidrv4Subtract: Return IPv4 CIDR blocks in A but not in B</li>
+<li>cidrv4Merge: Merge IPv4 CIDR blocks into the minimal covering set</li>
 <li>cidrv4FirstAddress: Get first address in CIDR range</li>
 <li>cidrv4LastAddress: Get last address in CIDR range</li>
 <li>cidrv4NetworkAddress: Alias for cidrv4FirstAddress</li>
@@ -842,6 +848,9 @@ IPv6 CIDR</h3>
 <li>cidrv6Contains: Check if IP is within CIDR range</li>
 <li>cidrv6ContainsCidr: Check if one IPv6 CIDR fully contains another</li>
 <li>cidrv6Overlaps: Check if two IPv6 CIDRs share at least one address</li>
+<li>cidrv6Intersect: Return the overlapping IPv6 CIDR block, or null</li>
+<li>cidrv6Subtract: Return IPv6 CIDR blocks in A but not in B</li>
+<li>cidrv6Merge: Merge IPv6 CIDR blocks into the minimal covering set</li>
 <li>cidrv6FirstAddress: Get first address in CIDR range</li>
 <li>cidrv6LastAddress: Get last address in CIDR range</li>
 <li>cidrv6Size: Get total number of addresses in CIDR range</li>
@@ -951,16 +960,30 @@ Functions</h2></div><div class="namespaceSection"><div id="namespace_cidrcontain
 		    <a href=".&#x2F;.&#x2F;cidr.ts&#x2F;~&#x2F;cidrContainsCidr.html" title="cidrContainsCidr">
 			    <span>cidrContainsCidr</span><span>(<div class="ml-4"><div><span>outer<span>: <span><span class="td-ref">Cidrv4</span><span class="td-op"> | </span><span class="td-ref">Cidrv6</span></span></span></span>,</div><div><span>inner<span>: <span><span class="td-ref">Cidrv4</span><span class="td-op"> | </span><span class="td-ref">Cidrv6</span></span></span></span></div></div>)<span>: <span class="td-kw">boolean</span></span></span><div class="namespaceItemContentTypeInfo">5 overloads</div></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Checks if one IPv4 CIDR block fully contains another.</p>
 </div></div></div>
+    </div><div id="namespace_cidrintersect" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-Function bg-Function/15 dark:text-FunctionDark dark:bg-FunctionDark/15" title="Function">f</div></div>
+<div class="namespaceItemContent">
+		    <a href=".&#x2F;.&#x2F;cidr.ts&#x2F;~&#x2F;cidrIntersect.html" title="cidrIntersect">
+			    <span>cidrIntersect</span><span>(<div class="ml-4"><div><span>a<span>: <span><span class="td-ref">Cidrv4</span><span class="td-op"> | </span><span class="td-ref">Cidrv6</span></span></span></span>,</div><div><span>b<span>: <span><span class="td-ref">Cidrv4</span><span class="td-op"> | </span><span class="td-ref">Cidrv6</span></span></span></span></div></div>)<span>: <span><span class="td-ref">Cidrv4</span><span class="td-op"> | </span><span class="td-ref">Cidrv6</span><span class="td-op"> | </span><span class="td-kw">null</span></span></span></span><div class="namespaceItemContentTypeInfo">5 overloads</div></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Returns the intersection of two IPv4 CIDR blocks.</p>
+</div></div></div>
+    </div><div id="namespace_cidrmerge" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-Function bg-Function/15 dark:text-FunctionDark dark:bg-FunctionDark/15" title="Function">f</div></div>
+<div class="namespaceItemContent">
+		    <a href=".&#x2F;.&#x2F;cidr.ts&#x2F;~&#x2F;cidrMerge.html" title="cidrMerge">
+			    <span>cidrMerge</span><span>(<span><span>cidrs<span>: <span class="td-kw">readonly</span> (<span><span class="td-ref">Cidrv4</span><span class="td-op"> | </span><span class="td-ref">Cidrv6</span></span>)[]</span></span></span>)<span>: (<span><span class="td-ref">Cidrv4</span><span class="td-op"> | </span><span class="td-ref">Cidrv6</span></span>)[]</span></span><div class="namespaceItemContentTypeInfo">3 overloads</div></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Merges IPv4 CIDR blocks into the minimal covering set.</p>
+</div></div></div>
     </div><div id="namespace_cidroverlaps" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-Function bg-Function/15 dark:text-FunctionDark dark:bg-FunctionDark/15" title="Function">f</div></div>
 <div class="namespaceItemContent">
 		    <a href=".&#x2F;.&#x2F;cidr.ts&#x2F;~&#x2F;cidrOverlaps.html" title="cidrOverlaps">
 			    <span>cidrOverlaps</span><span>(<div class="ml-4"><div><span>a<span>: <span><span class="td-ref">Cidrv4</span><span class="td-op"> | </span><span class="td-ref">Cidrv6</span></span></span></span>,</div><div><span>b<span>: <span><span class="td-ref">Cidrv4</span><span class="td-op"> | </span><span class="td-ref">Cidrv6</span></span></span></span></div></div>)<span>: <span class="td-kw">boolean</span></span></span><div class="namespaceItemContentTypeInfo">5 overloads</div></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Checks if two IPv4 CIDR blocks overlap.</p>
 </div></div></div>
+    </div><div id="namespace_cidrsubtract" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-Function bg-Function/15 dark:text-FunctionDark dark:bg-FunctionDark/15" title="Function">f</div></div>
+<div class="namespaceItemContent">
+		    <a href=".&#x2F;.&#x2F;cidr.ts&#x2F;~&#x2F;cidrSubtract.html" title="cidrSubtract">
+			    <span>cidrSubtract</span><span>(<div class="ml-4"><div><span>a<span>: <span><span class="td-ref">Cidrv4</span><span class="td-op"> | </span><span class="td-ref">Cidrv6</span></span></span></span>,</div><div><span>b<span>: <span><span class="td-ref">Cidrv4</span><span class="td-op"> | </span><span class="td-ref">Cidrv6</span></span></span></span></div></div>)<span>: (<span><span class="td-ref">Cidrv4</span><span class="td-op"> | </span><span class="td-ref">Cidrv6</span></span>)[]</span></span><div class="namespaceItemContentTypeInfo">5 overloads</div></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Subtracts one IPv4 CIDR block from another.</p>
+</div></div></div>
     </div><div id="namespace_cidrv4addresses" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-Function bg-Function/15 dark:text-FunctionDark dark:bg-FunctionDark/15" title="Function">f</div></div>
 <div class="namespaceItemContent">
 		    <a href=".&#x2F;.&#x2F;cidrv4.ts&#x2F;~&#x2F;cidrv4Addresses.html" title="cidrv4Addresses">
-			    <span>cidrv4Addresses</span><span>(<div class="ml-4"><div><span>cidr<span>: <span class="td-ref">Cidrv4</span></span></span>,</div><div><span>options<span class="td-op">?</span><span>: { offset<span class="td-op">?</span><span>: <span class="td-kw">number</span></span>; count<span class="td-op">?</span><span>: <span class="td-kw">number</span></span>; step<span class="td-op">?</span><span>: <span class="td-kw">number</span></span>;  }</span></span></div></div>)<span>: <span class="td-ref">Generator</span>&lt;<span class="td-kw">number</span>&gt;</span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Generates a range of IP addresses from a CIDR block.</p>
-</div></div></div>
+			    <span>cidrv4Addresses</span><span>(<div class="ml-4"><div><span>cidr<span>: <span class="td-ref">Cidrv4</span></span></span>,</div><div><span>options<span class="td-op">?</span><span>: { offset<span class="td-op">?</span><span>: <span class="td-kw">number</span></span>; count<span class="td-op">?</span><span>: <span class="td-kw">number</span></span>; step<span class="td-op">?</span><span>: <span class="td-kw">number</span></span>;  }</span></span></div></div>)<span>: <span class="td-ref">Generator</span>&lt;<span class="td-kw">number</span>&gt;</span></span></a></div>
     </div><div id="namespace_cidrv4contains" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-Function bg-Function/15 dark:text-FunctionDark dark:bg-FunctionDark/15" title="Function">f</div></div>
 <div class="namespaceItemContent">
 		    <a href=".&#x2F;.&#x2F;cidrv4.ts&#x2F;~&#x2F;cidrv4Contains.html" title="cidrv4Contains">
@@ -981,6 +1004,11 @@ Functions</h2></div><div class="namespaceSection"><div id="namespace_cidrcontain
 		    <a href=".&#x2F;.&#x2F;4to6.ts&#x2F;~&#x2F;cidrv4FromCidrv64Mapped.html" title="cidrv4FromCidrv64Mapped">
 			    <span>cidrv4FromCidrv64Mapped</span><span>(<span><span>cidr<span>: <span class="td-ref">Cidrv6</span></span></span></span>)<span>: <span class="td-ref">Cidrv4</span></span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Converts an IPv4-mapped IPv6 CIDR block to its IPv4 CIDR representation.</p>
 </div></div></div>
+    </div><div id="namespace_cidrv4intersect" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-Function bg-Function/15 dark:text-FunctionDark dark:bg-FunctionDark/15" title="Function">f</div></div>
+<div class="namespaceItemContent">
+		    <a href=".&#x2F;.&#x2F;cidrv4.ts&#x2F;~&#x2F;cidrv4Intersect.html" title="cidrv4Intersect">
+			    <span>cidrv4Intersect</span><span>(<div class="ml-4"><div><span>a<span>: <span class="td-ref">Cidrv4</span></span></span>,</div><div><span>b<span>: <span class="td-ref">Cidrv4</span></span></span></div></div>)<span>: <span><span class="td-ref">Cidrv4</span><span class="td-op"> | </span><span class="td-kw">null</span></span></span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Returns the intersection of two IPv4 CIDR blocks.</p>
+</div></div></div>
     </div><div id="namespace_cidrv4lastaddress" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-Function bg-Function/15 dark:text-FunctionDark dark:bg-FunctionDark/15" title="Function">f</div></div>
 <div class="namespaceItemContent">
 		    <a href=".&#x2F;.&#x2F;cidrv4.ts&#x2F;~&#x2F;cidrv4LastAddress.html" title="cidrv4LastAddress">
@@ -990,6 +1018,11 @@ Functions</h2></div><div class="namespaceSection"><div id="namespace_cidrcontain
 <div class="namespaceItemContent">
 		    <a href=".&#x2F;.&#x2F;cidrv4.ts&#x2F;~&#x2F;cidrv4Mask.html" title="cidrv4Mask">
 			    <span>cidrv4Mask</span><span>(<span><span>prefixLength<span>: <span class="td-kw">number</span></span></span></span>)<span>: <span class="td-kw">number</span></span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Creates a network mask from an IPv4 prefix length.</p>
+</div></div></div>
+    </div><div id="namespace_cidrv4merge" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-Function bg-Function/15 dark:text-FunctionDark dark:bg-FunctionDark/15" title="Function">f</div></div>
+<div class="namespaceItemContent">
+		    <a href=".&#x2F;.&#x2F;cidrv4.ts&#x2F;~&#x2F;cidrv4Merge.html" title="cidrv4Merge">
+			    <span>cidrv4Merge</span><span>(<span><span>cidrs<span>: <span class="td-kw">readonly</span> <span class="td-ref">Cidrv4</span>[]</span></span></span>)<span>: <span class="td-ref">Cidrv4</span>[]</span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Merges IPv4 CIDR blocks into the minimal covering set.</p>
 </div></div></div>
     </div><div id="namespace_cidrv4overlaps" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-Function bg-Function/15 dark:text-FunctionDark dark:bg-FunctionDark/15" title="Function">f</div></div>
 <div class="namespaceItemContent">
@@ -1001,6 +1034,11 @@ Functions</h2></div><div class="namespaceSection"><div id="namespace_cidrcontain
 		    <a href=".&#x2F;.&#x2F;cidrv4.ts&#x2F;~&#x2F;cidrv4Size.html" title="cidrv4Size">
 			    <span>cidrv4Size</span><span>(<span><span>cidrOrPrefixLength<span>: <span><span class="td-ref">Cidrv4</span><span class="td-op"> | </span><span class="td-kw">number</span></span></span></span></span>)<span>: <span class="td-kw">number</span></span></span><div class="namespaceItemContentTypeInfo">3 overloads</div></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Returns the total number of IP addresses in a CIDR block or for a given prefix length.</p>
 </div></div></div>
+    </div><div id="namespace_cidrv4subtract" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-Function bg-Function/15 dark:text-FunctionDark dark:bg-FunctionDark/15" title="Function">f</div></div>
+<div class="namespaceItemContent">
+		    <a href=".&#x2F;.&#x2F;cidrv4.ts&#x2F;~&#x2F;cidrv4Subtract.html" title="cidrv4Subtract">
+			    <span>cidrv4Subtract</span><span>(<div class="ml-4"><div><span>a<span>: <span class="td-ref">Cidrv4</span></span></span>,</div><div><span>b<span>: <span class="td-ref">Cidrv4</span></span></span></div></div>)<span>: <span class="td-ref">Cidrv4</span>[]</span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Subtracts one IPv4 CIDR block from another.</p>
+</div></div></div>
     </div><div id="namespace_cidrv4tocidrv64mapped" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-Function bg-Function/15 dark:text-FunctionDark dark:bg-FunctionDark/15" title="Function">f</div></div>
 <div class="namespaceItemContent">
 		    <a href=".&#x2F;.&#x2F;4to6.ts&#x2F;~&#x2F;cidrv4ToCidrv64Mapped.html" title="cidrv4ToCidrv64Mapped">
@@ -1009,8 +1047,7 @@ Functions</h2></div><div class="namespaceSection"><div id="namespace_cidrcontain
     </div><div id="namespace_cidrv6addresses" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-Function bg-Function/15 dark:text-FunctionDark dark:bg-FunctionDark/15" title="Function">f</div></div>
 <div class="namespaceItemContent">
 		    <a href=".&#x2F;.&#x2F;cidrv6.ts&#x2F;~&#x2F;cidrv6Addresses.html" title="cidrv6Addresses">
-			    <span>cidrv6Addresses</span><span>(<div class="ml-4"><div><span>cidr<span>: <span class="td-ref">Cidrv6</span></span></span>,</div><div><span>options<span class="td-op">?</span><span>: { offset<span class="td-op">?</span><span>: <span><span class="td-kw">number</span><span class="td-op"> | </span><span class="td-kw">bigint</span></span></span>; count<span class="td-op">?</span><span>: <span><span class="td-kw">number</span><span class="td-op"> | </span><span class="td-kw">bigint</span></span></span>; step<span class="td-op">?</span><span>: <span><span class="td-kw">number</span><span class="td-op"> | </span><span class="td-kw">bigint</span></span></span>;  }</span></span></div></div>)<span>: <span class="td-ref">Generator</span>&lt;<span class="td-kw">bigint</span>&gt;</span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Generates a range of IP addresses from a CIDR block.</p>
-</div></div></div>
+			    <span>cidrv6Addresses</span><span>(<div class="ml-4"><div><span>cidr<span>: <span class="td-ref">Cidrv6</span></span></span>,</div><div><span>options<span class="td-op">?</span><span>: { offset<span class="td-op">?</span><span>: <span><span class="td-kw">number</span><span class="td-op"> | </span><span class="td-kw">bigint</span></span></span>; count<span class="td-op">?</span><span>: <span><span class="td-kw">number</span><span class="td-op"> | </span><span class="td-kw">bigint</span></span></span>; step<span class="td-op">?</span><span>: <span><span class="td-kw">number</span><span class="td-op"> | </span><span class="td-kw">bigint</span></span></span>;  }</span></span></div></div>)<span>: <span class="td-ref">Generator</span>&lt;<span class="td-kw">bigint</span>&gt;</span></span></a></div>
     </div><div id="namespace_cidrv6contains" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-Function bg-Function/15 dark:text-FunctionDark dark:bg-FunctionDark/15" title="Function">f</div></div>
 <div class="namespaceItemContent">
 		    <a href=".&#x2F;.&#x2F;cidrv6.ts&#x2F;~&#x2F;cidrv6Contains.html" title="cidrv6Contains">
@@ -1026,6 +1063,11 @@ Functions</h2></div><div class="namespaceSection"><div id="namespace_cidrcontain
 		    <a href=".&#x2F;.&#x2F;cidrv6.ts&#x2F;~&#x2F;cidrv6FirstAddress.html" title="cidrv6FirstAddress">
 			    <span>cidrv6FirstAddress</span><span>(<span><span>cidr<span>: <span class="td-ref">Cidrv6</span></span></span></span>)<span>: <span class="td-kw">bigint</span></span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Returns the first address of a CIDR block.</p>
 </div></div></div>
+    </div><div id="namespace_cidrv6intersect" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-Function bg-Function/15 dark:text-FunctionDark dark:bg-FunctionDark/15" title="Function">f</div></div>
+<div class="namespaceItemContent">
+		    <a href=".&#x2F;.&#x2F;cidrv6.ts&#x2F;~&#x2F;cidrv6Intersect.html" title="cidrv6Intersect">
+			    <span>cidrv6Intersect</span><span>(<div class="ml-4"><div><span>a<span>: <span class="td-ref">Cidrv6</span></span></span>,</div><div><span>b<span>: <span class="td-ref">Cidrv6</span></span></span></div></div>)<span>: <span><span class="td-ref">Cidrv6</span><span class="td-op"> | </span><span class="td-kw">null</span></span></span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Returns the intersection of two IPv6 CIDR blocks.</p>
+</div></div></div>
     </div><div id="namespace_cidrv6lastaddress" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-Function bg-Function/15 dark:text-FunctionDark dark:bg-FunctionDark/15" title="Function">f</div></div>
 <div class="namespaceItemContent">
 		    <a href=".&#x2F;.&#x2F;cidrv6.ts&#x2F;~&#x2F;cidrv6LastAddress.html" title="cidrv6LastAddress">
@@ -1036,6 +1078,11 @@ Functions</h2></div><div class="namespaceSection"><div id="namespace_cidrcontain
 		    <a href=".&#x2F;.&#x2F;cidrv6.ts&#x2F;~&#x2F;cidrv6Mask.html" title="cidrv6Mask">
 			    <span>cidrv6Mask</span><span>(<span><span>prefixLength<span>: <span class="td-kw">number</span></span></span></span>)<span>: <span class="td-kw">bigint</span></span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Creates a network mask from an IPv6 prefix length.</p>
 </div></div></div>
+    </div><div id="namespace_cidrv6merge" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-Function bg-Function/15 dark:text-FunctionDark dark:bg-FunctionDark/15" title="Function">f</div></div>
+<div class="namespaceItemContent">
+		    <a href=".&#x2F;.&#x2F;cidrv6.ts&#x2F;~&#x2F;cidrv6Merge.html" title="cidrv6Merge">
+			    <span>cidrv6Merge</span><span>(<span><span>cidrs<span>: <span class="td-kw">readonly</span> <span class="td-ref">Cidrv6</span>[]</span></span></span>)<span>: <span class="td-ref">Cidrv6</span>[]</span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Merges IPv6 CIDR blocks into the minimal covering set.</p>
+</div></div></div>
     </div><div id="namespace_cidrv6overlaps" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-Function bg-Function/15 dark:text-FunctionDark dark:bg-FunctionDark/15" title="Function">f</div></div>
 <div class="namespaceItemContent">
 		    <a href=".&#x2F;.&#x2F;cidrv6.ts&#x2F;~&#x2F;cidrv6Overlaps.html" title="cidrv6Overlaps">
@@ -1045,6 +1092,11 @@ Functions</h2></div><div class="namespaceSection"><div id="namespace_cidrcontain
 <div class="namespaceItemContent">
 		    <a href=".&#x2F;.&#x2F;cidrv6.ts&#x2F;~&#x2F;cidrv6Size.html" title="cidrv6Size">
 			    <span>cidrv6Size</span><span>(<span><span>cidrOrPrefixLength<span>: <span><span class="td-ref">Cidrv6</span><span class="td-op"> | </span><span class="td-kw">number</span></span></span></span></span>)<span>: <span class="td-kw">bigint</span></span></span><div class="namespaceItemContentTypeInfo">3 overloads</div></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Returns the total number of IP addresses in a CIDR block or for a given prefix length.</p>
+</div></div></div>
+    </div><div id="namespace_cidrv6subtract" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-Function bg-Function/15 dark:text-FunctionDark dark:bg-FunctionDark/15" title="Function">f</div></div>
+<div class="namespaceItemContent">
+		    <a href=".&#x2F;.&#x2F;cidrv6.ts&#x2F;~&#x2F;cidrv6Subtract.html" title="cidrv6Subtract">
+			    <span>cidrv6Subtract</span><span>(<div class="ml-4"><div><span>a<span>: <span class="td-ref">Cidrv6</span></span></span>,</div><div><span>b<span>: <span class="td-ref">Cidrv6</span></span></span></div></div>)<span>: <span class="td-ref">Cidrv6</span>[]</span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Subtracts one IPv6 CIDR block from another.</p>
 </div></div></div>
     </div><div id="namespace_classifyip" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-Function bg-Function/15 dark:text-FunctionDark dark:bg-FunctionDark/15" title="Function">f</div></div>
 <div class="namespaceItemContent">
@@ -1948,10 +2000,25 @@ Functions</h2></div><div class="namespaceSection"><div id="namespace_cidrcontain
 		    <a href=".&#x2F;.&#x2F;cidr.ts&#x2F;~&#x2F;cidrContainsCidr.html" title="cidrContainsCidr">
 			    <span>cidrContainsCidr</span><span>(<div class="ml-4"><div><span>outer<span>: <span><span class="td-ref">Cidrv4</span><span class="td-op"> | </span><span class="td-ref">Cidrv6</span></span></span></span>,</div><div><span>inner<span>: <span><span class="td-ref">Cidrv4</span><span class="td-op"> | </span><span class="td-ref">Cidrv6</span></span></span></span></div></div>)<span>: <span class="td-kw">boolean</span></span></span><div class="namespaceItemContentTypeInfo">5 overloads</div></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Checks if one IPv4 CIDR block fully contains another.</p>
 </div></div></div>
+    </div><div id="namespace_cidrintersect-1" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-Function bg-Function/15 dark:text-FunctionDark dark:bg-FunctionDark/15" title="Function">f</div></div>
+<div class="namespaceItemContent">
+		    <a href=".&#x2F;.&#x2F;cidr.ts&#x2F;~&#x2F;cidrIntersect.html" title="cidrIntersect">
+			    <span>cidrIntersect</span><span>(<div class="ml-4"><div><span>a<span>: <span><span class="td-ref">Cidrv4</span><span class="td-op"> | </span><span class="td-ref">Cidrv6</span></span></span></span>,</div><div><span>b<span>: <span><span class="td-ref">Cidrv4</span><span class="td-op"> | </span><span class="td-ref">Cidrv6</span></span></span></span></div></div>)<span>: <span><span class="td-ref">Cidrv4</span><span class="td-op"> | </span><span class="td-ref">Cidrv6</span><span class="td-op"> | </span><span class="td-kw">null</span></span></span></span><div class="namespaceItemContentTypeInfo">5 overloads</div></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Returns the intersection of two IPv4 CIDR blocks.</p>
+</div></div></div>
+    </div><div id="namespace_cidrmerge-1" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-Function bg-Function/15 dark:text-FunctionDark dark:bg-FunctionDark/15" title="Function">f</div></div>
+<div class="namespaceItemContent">
+		    <a href=".&#x2F;.&#x2F;cidr.ts&#x2F;~&#x2F;cidrMerge.html" title="cidrMerge">
+			    <span>cidrMerge</span><span>(<span><span>cidrs<span>: <span class="td-kw">readonly</span> (<span><span class="td-ref">Cidrv4</span><span class="td-op"> | </span><span class="td-ref">Cidrv6</span></span>)[]</span></span></span>)<span>: (<span><span class="td-ref">Cidrv4</span><span class="td-op"> | </span><span class="td-ref">Cidrv6</span></span>)[]</span></span><div class="namespaceItemContentTypeInfo">3 overloads</div></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Merges IPv4 CIDR blocks into the minimal covering set.</p>
+</div></div></div>
     </div><div id="namespace_cidroverlaps-1" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-Function bg-Function/15 dark:text-FunctionDark dark:bg-FunctionDark/15" title="Function">f</div></div>
 <div class="namespaceItemContent">
 		    <a href=".&#x2F;.&#x2F;cidr.ts&#x2F;~&#x2F;cidrOverlaps.html" title="cidrOverlaps">
 			    <span>cidrOverlaps</span><span>(<div class="ml-4"><div><span>a<span>: <span><span class="td-ref">Cidrv4</span><span class="td-op"> | </span><span class="td-ref">Cidrv6</span></span></span></span>,</div><div><span>b<span>: <span><span class="td-ref">Cidrv4</span><span class="td-op"> | </span><span class="td-ref">Cidrv6</span></span></span></span></div></div>)<span>: <span class="td-kw">boolean</span></span></span><div class="namespaceItemContentTypeInfo">5 overloads</div></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Checks if two IPv4 CIDR blocks overlap.</p>
+</div></div></div>
+    </div><div id="namespace_cidrsubtract-1" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-Function bg-Function/15 dark:text-FunctionDark dark:bg-FunctionDark/15" title="Function">f</div></div>
+<div class="namespaceItemContent">
+		    <a href=".&#x2F;.&#x2F;cidr.ts&#x2F;~&#x2F;cidrSubtract.html" title="cidrSubtract">
+			    <span>cidrSubtract</span><span>(<div class="ml-4"><div><span>a<span>: <span><span class="td-ref">Cidrv4</span><span class="td-op"> | </span><span class="td-ref">Cidrv6</span></span></span></span>,</div><div><span>b<span>: <span><span class="td-ref">Cidrv4</span><span class="td-op"> | </span><span class="td-ref">Cidrv6</span></span></span></span></div></div>)<span>: (<span><span class="td-ref">Cidrv4</span><span class="td-op"> | </span><span class="td-ref">Cidrv6</span></span>)[]</span></span><div class="namespaceItemContentTypeInfo">5 overloads</div></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Subtracts one IPv4 CIDR block from another.</p>
 </div></div></div>
     </div><div id="namespace_parsecidr-1" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-Function bg-Function/15 dark:text-FunctionDark dark:bg-FunctionDark/15" title="Function">f</div></div>
 <div class="namespaceItemContent">
@@ -2122,8 +2189,7 @@ assertEquals(cidrv4Contains(cidr, parseIpv4(&quot;192.168.2.1&quot;)), false);
 Functions</h2></div><div class="namespaceSection"><div id="namespace_cidrv4addresses-1" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-Function bg-Function/15 dark:text-FunctionDark dark:bg-FunctionDark/15" title="Function">f</div></div>
 <div class="namespaceItemContent">
 		    <a href=".&#x2F;.&#x2F;cidrv4.ts&#x2F;~&#x2F;cidrv4Addresses.html" title="cidrv4Addresses">
-			    <span>cidrv4Addresses</span><span>(<div class="ml-4"><div><span>cidr<span>: <span class="td-ref">Cidrv4</span></span></span>,</div><div><span>options<span class="td-op">?</span><span>: { offset<span class="td-op">?</span><span>: <span class="td-kw">number</span></span>; count<span class="td-op">?</span><span>: <span class="td-kw">number</span></span>; step<span class="td-op">?</span><span>: <span class="td-kw">number</span></span>;  }</span></span></div></div>)<span>: <span class="td-ref">Generator</span>&lt;<span class="td-kw">number</span>&gt;</span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Generates a range of IP addresses from a CIDR block.</p>
-</div></div></div>
+			    <span>cidrv4Addresses</span><span>(<div class="ml-4"><div><span>cidr<span>: <span class="td-ref">Cidrv4</span></span></span>,</div><div><span>options<span class="td-op">?</span><span>: { offset<span class="td-op">?</span><span>: <span class="td-kw">number</span></span>; count<span class="td-op">?</span><span>: <span class="td-kw">number</span></span>; step<span class="td-op">?</span><span>: <span class="td-kw">number</span></span>;  }</span></span></div></div>)<span>: <span class="td-ref">Generator</span>&lt;<span class="td-kw">number</span>&gt;</span></span></a></div>
     </div><div id="namespace_cidrv4contains-1" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-Function bg-Function/15 dark:text-FunctionDark dark:bg-FunctionDark/15" title="Function">f</div></div>
 <div class="namespaceItemContent">
 		    <a href=".&#x2F;.&#x2F;cidrv4.ts&#x2F;~&#x2F;cidrv4Contains.html" title="cidrv4Contains">
@@ -2139,6 +2205,11 @@ Functions</h2></div><div class="namespaceSection"><div id="namespace_cidrv4addre
 		    <a href=".&#x2F;.&#x2F;cidrv4.ts&#x2F;~&#x2F;cidrv4FirstAddress.html" title="cidrv4FirstAddress">
 			    <span>cidrv4FirstAddress</span><span>(<span><span>cidr<span>: <span class="td-ref">Cidrv4</span></span></span></span>)<span>: <span class="td-kw">number</span></span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Returns the first address of a CIDR block (network address).</p>
 </div></div></div>
+    </div><div id="namespace_cidrv4intersect-1" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-Function bg-Function/15 dark:text-FunctionDark dark:bg-FunctionDark/15" title="Function">f</div></div>
+<div class="namespaceItemContent">
+		    <a href=".&#x2F;.&#x2F;cidrv4.ts&#x2F;~&#x2F;cidrv4Intersect.html" title="cidrv4Intersect">
+			    <span>cidrv4Intersect</span><span>(<div class="ml-4"><div><span>a<span>: <span class="td-ref">Cidrv4</span></span></span>,</div><div><span>b<span>: <span class="td-ref">Cidrv4</span></span></span></div></div>)<span>: <span><span class="td-ref">Cidrv4</span><span class="td-op"> | </span><span class="td-kw">null</span></span></span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Returns the intersection of two IPv4 CIDR blocks.</p>
+</div></div></div>
     </div><div id="namespace_cidrv4lastaddress-1" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-Function bg-Function/15 dark:text-FunctionDark dark:bg-FunctionDark/15" title="Function">f</div></div>
 <div class="namespaceItemContent">
 		    <a href=".&#x2F;.&#x2F;cidrv4.ts&#x2F;~&#x2F;cidrv4LastAddress.html" title="cidrv4LastAddress">
@@ -2149,6 +2220,11 @@ Functions</h2></div><div class="namespaceSection"><div id="namespace_cidrv4addre
 		    <a href=".&#x2F;.&#x2F;cidrv4.ts&#x2F;~&#x2F;cidrv4Mask.html" title="cidrv4Mask">
 			    <span>cidrv4Mask</span><span>(<span><span>prefixLength<span>: <span class="td-kw">number</span></span></span></span>)<span>: <span class="td-kw">number</span></span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Creates a network mask from an IPv4 prefix length.</p>
 </div></div></div>
+    </div><div id="namespace_cidrv4merge-1" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-Function bg-Function/15 dark:text-FunctionDark dark:bg-FunctionDark/15" title="Function">f</div></div>
+<div class="namespaceItemContent">
+		    <a href=".&#x2F;.&#x2F;cidrv4.ts&#x2F;~&#x2F;cidrv4Merge.html" title="cidrv4Merge">
+			    <span>cidrv4Merge</span><span>(<span><span>cidrs<span>: <span class="td-kw">readonly</span> <span class="td-ref">Cidrv4</span>[]</span></span></span>)<span>: <span class="td-ref">Cidrv4</span>[]</span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Merges IPv4 CIDR blocks into the minimal covering set.</p>
+</div></div></div>
     </div><div id="namespace_cidrv4overlaps-1" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-Function bg-Function/15 dark:text-FunctionDark dark:bg-FunctionDark/15" title="Function">f</div></div>
 <div class="namespaceItemContent">
 		    <a href=".&#x2F;.&#x2F;cidrv4.ts&#x2F;~&#x2F;cidrv4Overlaps.html" title="cidrv4Overlaps">
@@ -2158,6 +2234,11 @@ Functions</h2></div><div class="namespaceSection"><div id="namespace_cidrv4addre
 <div class="namespaceItemContent">
 		    <a href=".&#x2F;.&#x2F;cidrv4.ts&#x2F;~&#x2F;cidrv4Size.html" title="cidrv4Size">
 			    <span>cidrv4Size</span><span>(<span><span>cidrOrPrefixLength<span>: <span><span class="td-ref">Cidrv4</span><span class="td-op"> | </span><span class="td-kw">number</span></span></span></span></span>)<span>: <span class="td-kw">number</span></span></span><div class="namespaceItemContentTypeInfo">3 overloads</div></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Returns the total number of IP addresses in a CIDR block or for a given prefix length.</p>
+</div></div></div>
+    </div><div id="namespace_cidrv4subtract-1" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-Function bg-Function/15 dark:text-FunctionDark dark:bg-FunctionDark/15" title="Function">f</div></div>
+<div class="namespaceItemContent">
+		    <a href=".&#x2F;.&#x2F;cidrv4.ts&#x2F;~&#x2F;cidrv4Subtract.html" title="cidrv4Subtract">
+			    <span>cidrv4Subtract</span><span>(<div class="ml-4"><div><span>a<span>: <span class="td-ref">Cidrv4</span></span></span>,</div><div><span>b<span>: <span class="td-ref">Cidrv4</span></span></span></div></div>)<span>: <span class="td-ref">Cidrv4</span>[]</span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Subtracts one IPv4 CIDR block from another.</p>
 </div></div></div>
     </div><div id="namespace_parsecidrv4-1" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-Function bg-Function/15 dark:text-FunctionDark dark:bg-FunctionDark/15" title="Function">f</div></div>
 <div class="namespaceItemContent">
@@ -2655,8 +2736,7 @@ assertEquals(cidrv6Contains(cidr, parseIpv6(&quot;2001:db9::1&quot;)), false);
 Functions</h2></div><div class="namespaceSection"><div id="namespace_cidrv6addresses-1" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-Function bg-Function/15 dark:text-FunctionDark dark:bg-FunctionDark/15" title="Function">f</div></div>
 <div class="namespaceItemContent">
 		    <a href=".&#x2F;.&#x2F;cidrv6.ts&#x2F;~&#x2F;cidrv6Addresses.html" title="cidrv6Addresses">
-			    <span>cidrv6Addresses</span><span>(<div class="ml-4"><div><span>cidr<span>: <span class="td-ref">Cidrv6</span></span></span>,</div><div><span>options<span class="td-op">?</span><span>: { offset<span class="td-op">?</span><span>: <span><span class="td-kw">number</span><span class="td-op"> | </span><span class="td-kw">bigint</span></span></span>; count<span class="td-op">?</span><span>: <span><span class="td-kw">number</span><span class="td-op"> | </span><span class="td-kw">bigint</span></span></span>; step<span class="td-op">?</span><span>: <span><span class="td-kw">number</span><span class="td-op"> | </span><span class="td-kw">bigint</span></span></span>;  }</span></span></div></div>)<span>: <span class="td-ref">Generator</span>&lt;<span class="td-kw">bigint</span>&gt;</span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Generates a range of IP addresses from a CIDR block.</p>
-</div></div></div>
+			    <span>cidrv6Addresses</span><span>(<div class="ml-4"><div><span>cidr<span>: <span class="td-ref">Cidrv6</span></span></span>,</div><div><span>options<span class="td-op">?</span><span>: { offset<span class="td-op">?</span><span>: <span><span class="td-kw">number</span><span class="td-op"> | </span><span class="td-kw">bigint</span></span></span>; count<span class="td-op">?</span><span>: <span><span class="td-kw">number</span><span class="td-op"> | </span><span class="td-kw">bigint</span></span></span>; step<span class="td-op">?</span><span>: <span><span class="td-kw">number</span><span class="td-op"> | </span><span class="td-kw">bigint</span></span></span>;  }</span></span></div></div>)<span>: <span class="td-ref">Generator</span>&lt;<span class="td-kw">bigint</span>&gt;</span></span></a></div>
     </div><div id="namespace_cidrv6contains-1" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-Function bg-Function/15 dark:text-FunctionDark dark:bg-FunctionDark/15" title="Function">f</div></div>
 <div class="namespaceItemContent">
 		    <a href=".&#x2F;.&#x2F;cidrv6.ts&#x2F;~&#x2F;cidrv6Contains.html" title="cidrv6Contains">
@@ -2672,6 +2752,11 @@ Functions</h2></div><div class="namespaceSection"><div id="namespace_cidrv6addre
 		    <a href=".&#x2F;.&#x2F;cidrv6.ts&#x2F;~&#x2F;cidrv6FirstAddress.html" title="cidrv6FirstAddress">
 			    <span>cidrv6FirstAddress</span><span>(<span><span>cidr<span>: <span class="td-ref">Cidrv6</span></span></span></span>)<span>: <span class="td-kw">bigint</span></span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Returns the first address of a CIDR block.</p>
 </div></div></div>
+    </div><div id="namespace_cidrv6intersect-1" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-Function bg-Function/15 dark:text-FunctionDark dark:bg-FunctionDark/15" title="Function">f</div></div>
+<div class="namespaceItemContent">
+		    <a href=".&#x2F;.&#x2F;cidrv6.ts&#x2F;~&#x2F;cidrv6Intersect.html" title="cidrv6Intersect">
+			    <span>cidrv6Intersect</span><span>(<div class="ml-4"><div><span>a<span>: <span class="td-ref">Cidrv6</span></span></span>,</div><div><span>b<span>: <span class="td-ref">Cidrv6</span></span></span></div></div>)<span>: <span><span class="td-ref">Cidrv6</span><span class="td-op"> | </span><span class="td-kw">null</span></span></span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Returns the intersection of two IPv6 CIDR blocks.</p>
+</div></div></div>
     </div><div id="namespace_cidrv6lastaddress-1" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-Function bg-Function/15 dark:text-FunctionDark dark:bg-FunctionDark/15" title="Function">f</div></div>
 <div class="namespaceItemContent">
 		    <a href=".&#x2F;.&#x2F;cidrv6.ts&#x2F;~&#x2F;cidrv6LastAddress.html" title="cidrv6LastAddress">
@@ -2682,6 +2767,11 @@ Functions</h2></div><div class="namespaceSection"><div id="namespace_cidrv6addre
 		    <a href=".&#x2F;.&#x2F;cidrv6.ts&#x2F;~&#x2F;cidrv6Mask.html" title="cidrv6Mask">
 			    <span>cidrv6Mask</span><span>(<span><span>prefixLength<span>: <span class="td-kw">number</span></span></span></span>)<span>: <span class="td-kw">bigint</span></span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Creates a network mask from an IPv6 prefix length.</p>
 </div></div></div>
+    </div><div id="namespace_cidrv6merge-1" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-Function bg-Function/15 dark:text-FunctionDark dark:bg-FunctionDark/15" title="Function">f</div></div>
+<div class="namespaceItemContent">
+		    <a href=".&#x2F;.&#x2F;cidrv6.ts&#x2F;~&#x2F;cidrv6Merge.html" title="cidrv6Merge">
+			    <span>cidrv6Merge</span><span>(<span><span>cidrs<span>: <span class="td-kw">readonly</span> <span class="td-ref">Cidrv6</span>[]</span></span></span>)<span>: <span class="td-ref">Cidrv6</span>[]</span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Merges IPv6 CIDR blocks into the minimal covering set.</p>
+</div></div></div>
     </div><div id="namespace_cidrv6overlaps-1" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-Function bg-Function/15 dark:text-FunctionDark dark:bg-FunctionDark/15" title="Function">f</div></div>
 <div class="namespaceItemContent">
 		    <a href=".&#x2F;.&#x2F;cidrv6.ts&#x2F;~&#x2F;cidrv6Overlaps.html" title="cidrv6Overlaps">
@@ -2691,6 +2781,11 @@ Functions</h2></div><div class="namespaceSection"><div id="namespace_cidrv6addre
 <div class="namespaceItemContent">
 		    <a href=".&#x2F;.&#x2F;cidrv6.ts&#x2F;~&#x2F;cidrv6Size.html" title="cidrv6Size">
 			    <span>cidrv6Size</span><span>(<span><span>cidrOrPrefixLength<span>: <span><span class="td-ref">Cidrv6</span><span class="td-op"> | </span><span class="td-kw">number</span></span></span></span></span>)<span>: <span class="td-kw">bigint</span></span></span><div class="namespaceItemContentTypeInfo">3 overloads</div></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Returns the total number of IP addresses in a CIDR block or for a given prefix length.</p>
+</div></div></div>
+    </div><div id="namespace_cidrv6subtract-1" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-Function bg-Function/15 dark:text-FunctionDark dark:bg-FunctionDark/15" title="Function">f</div></div>
+<div class="namespaceItemContent">
+		    <a href=".&#x2F;.&#x2F;cidrv6.ts&#x2F;~&#x2F;cidrv6Subtract.html" title="cidrv6Subtract">
+			    <span>cidrv6Subtract</span><span>(<div class="ml-4"><div><span>a<span>: <span class="td-ref">Cidrv6</span></span></span>,</div><div><span>b<span>: <span class="td-ref">Cidrv6</span></span></span></div></div>)<span>: <span class="td-ref">Cidrv6</span>[]</span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Subtracts one IPv6 CIDR block from another.</p>
 </div></div></div>
     </div><div id="namespace_parsecidrv6-1" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-Function bg-Function/15 dark:text-FunctionDark dark:bg-FunctionDark/15" title="Function">f</div></div>
 <div class="namespaceItemContent">
