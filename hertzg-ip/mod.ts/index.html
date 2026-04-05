@@ -234,17 +234,16 @@ Submodules</h3>
 <h2 id="features">
 Features</h2>
 <ul>
-<li><strong>IPv4 &amp; IPv6 Parsing &amp; Stringifying</strong>: Convert between standard notation and number/bigint</li>
-<li><strong>CIDR Support</strong>: Parse CIDR notation and perform network calculations</li>
-<li><strong>Range Checking</strong>: Verify if IPs are within CIDR blocks</li>
-<li><strong>Address Generation</strong>: Generate IP ranges with custom offsets and steps</li>
-<li><strong>Arithmetic Operations</strong>: Use number (IPv4) or bigint (IPv6) math for IP address manipulation</li>
-<li><strong>IPv6 Compression</strong>: Expand and compress IPv6 addresses</li>
-<li><strong>IP Classification</strong>: Identify private, loopback, multicast, and other well-known ranges</li>
+<li><strong>Dual-Stack Support</strong>: Auto-unwrap IPv4-mapped IPv6 addresses from dual-stack sockets</li>
+<li><strong>IP Classification</strong>: Identify private, loopback, multicast, public, and other well-known ranges</li>
+<li><strong>CIDR Support</strong>: Parse CIDR notation, check containment, compute network boundaries</li>
+<li><strong>IPv4 &amp; IPv6 Parsing</strong>: Convert between standard notation and number/bigint for arithmetic</li>
+<li><strong>Address Generation</strong>: Lazily enumerate addresses in CIDR ranges</li>
+<li><strong>IPv4-Mapped Conversion</strong>: Convert between IPv4 and IPv4-mapped IPv6 addresses and CIDRs</li>
 <li><strong>Validation</strong>: Non-throwing validity checks for IP addresses and CIDR notation</li>
 </ul>
-<h2 id="basic-ipv4-operations">
-Basic IPv4 Operations</h2>
+<h2 id="dual-stack-server">
+Dual-Stack Server</h2>
 </div><section class="section"  id="examples"><div>
       <h2 class="anchorable mb-1"><a href="#examples" class="anchor" aria-label="Anchor" tabIndex="-1"><svg
   width="16"
@@ -290,40 +289,38 @@ Examples</h2></div><div class="space-y-8"><div class="anchorable"><a href="#exam
   </defs>
 </svg>
 </a>
-<h3 class="example-header"><div class="markdown"><p>Parse and stringify IPv4 addresses</p>
+<h3 class="example-header"><div class="markdown"><p>Normalize client addresses from a dual-stack server</p>
 </div></h3>
   <div><div class="markdown"><pre class="highlight"><code class="language-ts">import { assertEquals } from &quot;@std/assert&quot;;
-import { parseIpv4, stringifyIpv4 } from &quot;@hertzg/ip&quot;;
+import { classifyIp, parseIp, stringifyIp } from &quot;@hertzg/ip&quot;;
 
-// Parse dotted decimal to number
-const ip = parseIpv4(&quot;192.168.1.1&quot;);
-assertEquals(ip, 3232235777);
+// Dual-stack servers (Deno, Node) report IPv4 clients as ::ffff:x.x.x.x
+// parseIp auto-unwraps mapped addresses to their IPv4 form
+const remote1 = parseIp(&quot;::ffff:192.168.1.50&quot;);
+assertEquals(stringifyIp(remote1), &quot;192.168.1.50&quot;);
 
-// Stringify number back to dotted decimal
-assertEquals(stringifyIpv4(ip), &quot;192.168.1.1&quot;);
+// Native IPv6 clients pass through unchanged
+const remote2 = parseIp(&quot;2001:db8::1&quot;);
+assertEquals(stringifyIp(remote2), &quot;2001:db8::1&quot;);
 
-// Arithmetic operations
-const next = ip + 1;
-assertEquals(stringifyIpv4(next), &quot;192.168.1.2&quot;);
-
-const prev = ip - 1;
-assertEquals(stringifyIpv4(prev), &quot;192.168.1.0&quot;);
+// Classification works on both
+assertEquals(classifyIp(remote1).classification, &quot;private&quot;);
+assertEquals(classifyIp(remote2).classification, &quot;documentation&quot;);
 </code><button class="copyButton" data-copy="import { assertEquals } from &quot;@std/assert&quot;;
-import { parseIpv4, stringifyIpv4 } from &quot;@hertzg/ip&quot;;
+import { classifyIp, parseIp, stringifyIp } from &quot;@hertzg/ip&quot;;
 
-// Parse dotted decimal to number
-const ip = parseIpv4(&quot;192.168.1.1&quot;);
-assertEquals(ip, 3232235777);
+// Dual-stack servers (Deno, Node) report IPv4 clients as ::ffff:x.x.x.x
+// parseIp auto-unwraps mapped addresses to their IPv4 form
+const remote1 = parseIp(&quot;::ffff:192.168.1.50&quot;);
+assertEquals(stringifyIp(remote1), &quot;192.168.1.50&quot;);
 
-// Stringify number back to dotted decimal
-assertEquals(stringifyIpv4(ip), &quot;192.168.1.1&quot;);
+// Native IPv6 clients pass through unchanged
+const remote2 = parseIp(&quot;2001:db8::1&quot;);
+assertEquals(stringifyIp(remote2), &quot;2001:db8::1&quot;);
 
-// Arithmetic operations
-const next = ip + 1;
-assertEquals(stringifyIpv4(next), &quot;192.168.1.2&quot;);
-
-const prev = ip - 1;
-assertEquals(stringifyIpv4(prev), &quot;192.168.1.0&quot;);
+// Classification works on both
+assertEquals(classifyIp(remote1).classification, &quot;private&quot;);
+assertEquals(classifyIp(remote2).classification, &quot;documentation&quot;);
 "><svg
   class="copy"
   width="15"
@@ -355,8 +352,8 @@ assertEquals(stringifyIpv4(prev), &quot;192.168.1.0&quot;);
   <path d="M5 12l5 5l10 -10" />
 </svg>
 </button><code></code></pre>
-<h2 id="basic-ipv6-operations">
-Basic IPv6 Operations</h2>
+<h2 id="trusted-network-allowlist">
+Trusted Network Allowlist</h2>
 </div></div>
 </div>
 <div class="border-b border-gray-300 dark:border-gray-700"></div><div class="anchorable"><a href="#example_1" class="anchor" aria-label="Anchor" tabIndex="-1"><svg
@@ -381,34 +378,48 @@ Basic IPv6 Operations</h2>
   </defs>
 </svg>
 </a>
-<h3 class="example-header"><div class="markdown"><p>Parse and stringify IPv6 addresses</p>
+<h3 class="example-header"><div class="markdown"><p>Check if a client IP is in a set of trusted CIDR ranges</p>
 </div></h3>
-  <div><div class="markdown"><pre class="highlight"><code class="language-ts">import { assertEquals } from &quot;@std/assert&quot;;
-import { parseIpv6, stringifyIpv6 } from &quot;@hertzg/ip&quot;;
+  <div><div class="markdown"><pre class="highlight"><code class="language-ts">import { assert, assertEquals } from &quot;@std/assert&quot;;
+import { cidrv4Contains, parseCidrv4, parseIp } from &quot;@hertzg/ip&quot;;
 
-// Parse colon-hexadecimal to bigint
-const ip = parseIpv6(&quot;2001:db8::1&quot;);
-assertEquals(ip, 42540766411282592856903984951653826561n);
+const trustedRanges = [
+  parseCidrv4(&quot;10.0.0.0/8&quot;),
+  parseCidrv4(&quot;172.16.0.0/12&quot;),
+  parseCidrv4(&quot;192.168.0.0/16&quot;),
+];
 
-// Stringify bigint back to compressed form
-assertEquals(stringifyIpv6(ip), &quot;2001:db8::1&quot;);
+function isTrusted(ip: string): boolean {
+  const addr = parseIp(ip);
+  if (typeof addr !== &quot;number&quot;) return false;
+  return trustedRanges.some((cidr) =&gt; cidrv4Contains(cidr, addr));
+}
 
-// Arithmetic operations
-const next = ip + 1n;
-assertEquals(stringifyIpv6(next), &quot;2001:db8::2&quot;);
-</code><button class="copyButton" data-copy="import { assertEquals } from &quot;@std/assert&quot;;
-import { parseIpv6, stringifyIpv6 } from &quot;@hertzg/ip&quot;;
+assert(isTrusted(&quot;192.168.1.100&quot;));
+assert(isTrusted(&quot;10.0.0.1&quot;));
+assert(isTrusted(&quot;::ffff:172.16.5.1&quot;));
+assertEquals(isTrusted(&quot;8.8.8.8&quot;), false);
+assertEquals(isTrusted(&quot;2001:db8::1&quot;), false);
+</code><button class="copyButton" data-copy="import { assert, assertEquals } from &quot;@std/assert&quot;;
+import { cidrv4Contains, parseCidrv4, parseIp } from &quot;@hertzg/ip&quot;;
 
-// Parse colon-hexadecimal to bigint
-const ip = parseIpv6(&quot;2001:db8::1&quot;);
-assertEquals(ip, 42540766411282592856903984951653826561n);
+const trustedRanges = [
+  parseCidrv4(&quot;10.0.0.0/8&quot;),
+  parseCidrv4(&quot;172.16.0.0/12&quot;),
+  parseCidrv4(&quot;192.168.0.0/16&quot;),
+];
 
-// Stringify bigint back to compressed form
-assertEquals(stringifyIpv6(ip), &quot;2001:db8::1&quot;);
+function isTrusted(ip: string): boolean {
+  const addr = parseIp(ip);
+  if (typeof addr !== &quot;number&quot;) return false;
+  return trustedRanges.some((cidr) =&gt; cidrv4Contains(cidr, addr));
+}
 
-// Arithmetic operations
-const next = ip + 1n;
-assertEquals(stringifyIpv6(next), &quot;2001:db8::2&quot;);
+assert(isTrusted(&quot;192.168.1.100&quot;));
+assert(isTrusted(&quot;10.0.0.1&quot;));
+assert(isTrusted(&quot;::ffff:172.16.5.1&quot;));
+assertEquals(isTrusted(&quot;8.8.8.8&quot;), false);
+assertEquals(isTrusted(&quot;2001:db8::1&quot;), false);
 "><svg
   class="copy"
   width="15"
@@ -440,8 +451,8 @@ assertEquals(stringifyIpv6(next), &quot;2001:db8::2&quot;);
   <path d="M5 12l5 5l10 -10" />
 </svg>
 </button><code></code></pre>
-<h2 id="cidr-notation">
-CIDR Notation</h2>
+<h2 id="ip-classification">
+IP Classification</h2>
 </div></div>
 </div>
 <div class="border-b border-gray-300 dark:border-gray-700"></div><div class="anchorable"><a href="#example_2" class="anchor" aria-label="Anchor" tabIndex="-1"><svg
@@ -466,52 +477,86 @@ CIDR Notation</h2>
   </defs>
 </svg>
 </a>
-<h3 class="example-header"><div class="markdown"><p>Parse and work with CIDR blocks</p>
+<h3 class="example-header"><div class="markdown"><p>Classify addresses for logging, analytics, or input validation</p>
 </div></h3>
   <div><div class="markdown"><pre class="highlight"><code class="language-ts">import { assertEquals } from &quot;@std/assert&quot;;
-import {
-  cidrv4BroadcastAddress,
-  cidrv4NetworkAddress,
-  parseCidrv4,
-  stringifyCidrv4,
-  stringifyIpv4,
-} from &quot;@hertzg/ip&quot;;
+import { classifyIp } from &quot;@hertzg/ip&quot;;
 
-// Parse CIDR notation
-const cidr = parseCidrv4(&quot;192.168.1.0/24&quot;);
-assertEquals(cidr.prefixLength, 24);
+// Classify any IP — result includes kind, numeric value, and label
+const result = classifyIp(&quot;192.168.1.1&quot;);
+assertEquals(result.kind, &quot;ipv4&quot;);
+assertEquals(result.classification, &quot;private&quot;);
 
-// Get network boundaries
-const network = cidrv4NetworkAddress(cidr);
-assertEquals(stringifyIpv4(network), &quot;192.168.1.0&quot;);
+assertEquals(classifyIp(&quot;127.0.0.1&quot;).classification, &quot;loopback&quot;);
+assertEquals(classifyIp(&quot;8.8.8.8&quot;).classification, &quot;public&quot;);
+assertEquals(classifyIp(&quot;169.254.1.1&quot;).classification, &quot;link-local&quot;);
 
-const broadcast = cidrv4BroadcastAddress(cidr);
-assertEquals(stringifyIpv4(broadcast), &quot;192.168.1.255&quot;);
+// Works with IPv6 too
+assertEquals(classifyIp(&quot;::1&quot;).classification, &quot;loopback&quot;);
+assertEquals(classifyIp(&quot;fe80::1&quot;).classification, &quot;link-local&quot;);
+assertEquals(classifyIp(&quot;fd00::1&quot;).classification, &quot;unique-local&quot;);
 
-// Stringify back to CIDR notation
-assertEquals(stringifyCidrv4(cidr), &quot;192.168.1.0/24&quot;);
+// Use with Zod as a custom validator that accepts allowed classifications:
+//
+// import { type ClassificationIpv4, type ClassificationIpv6,
+//   classifyIp } from &quot;@hertzg/ip&quot;;
+//
+// function ipClassification(
+//   ...allowed: (ClassificationIpv4 | ClassificationIpv6)[]
+// ) {
+//   const set = new Set(allowed);
+//   return z.string().refine(
+//     (val) =&gt; set.has(classifyIp(val).classification),
+//     { message: `IP must be: ${allowed.join(&quot;, &quot;)}` },
+//   );
+// }
+//
+// const publicIp = ipClassification(&quot;public&quot;, &quot;global-unicast&quot;);
+// publicIp.parse(&quot;8.8.8.8&quot;);       // ok
+// publicIp.parse(&quot;192.168.1.1&quot;);   // throws: private
+//
+// const internalIp = ipClassification(&quot;private&quot;, &quot;loopback&quot;);
+// internalIp.parse(&quot;10.0.0.1&quot;);    // ok
+// internalIp.parse(&quot;8.8.8.8&quot;);     // throws: public
 </code><button class="copyButton" data-copy="import { assertEquals } from &quot;@std/assert&quot;;
-import {
-  cidrv4BroadcastAddress,
-  cidrv4NetworkAddress,
-  parseCidrv4,
-  stringifyCidrv4,
-  stringifyIpv4,
-} from &quot;@hertzg/ip&quot;;
+import { classifyIp } from &quot;@hertzg/ip&quot;;
 
-// Parse CIDR notation
-const cidr = parseCidrv4(&quot;192.168.1.0/24&quot;);
-assertEquals(cidr.prefixLength, 24);
+// Classify any IP — result includes kind, numeric value, and label
+const result = classifyIp(&quot;192.168.1.1&quot;);
+assertEquals(result.kind, &quot;ipv4&quot;);
+assertEquals(result.classification, &quot;private&quot;);
 
-// Get network boundaries
-const network = cidrv4NetworkAddress(cidr);
-assertEquals(stringifyIpv4(network), &quot;192.168.1.0&quot;);
+assertEquals(classifyIp(&quot;127.0.0.1&quot;).classification, &quot;loopback&quot;);
+assertEquals(classifyIp(&quot;8.8.8.8&quot;).classification, &quot;public&quot;);
+assertEquals(classifyIp(&quot;169.254.1.1&quot;).classification, &quot;link-local&quot;);
 
-const broadcast = cidrv4BroadcastAddress(cidr);
-assertEquals(stringifyIpv4(broadcast), &quot;192.168.1.255&quot;);
+// Works with IPv6 too
+assertEquals(classifyIp(&quot;::1&quot;).classification, &quot;loopback&quot;);
+assertEquals(classifyIp(&quot;fe80::1&quot;).classification, &quot;link-local&quot;);
+assertEquals(classifyIp(&quot;fd00::1&quot;).classification, &quot;unique-local&quot;);
 
-// Stringify back to CIDR notation
-assertEquals(stringifyCidrv4(cidr), &quot;192.168.1.0/24&quot;);
+// Use with Zod as a custom validator that accepts allowed classifications:
+//
+// import { type ClassificationIpv4, type ClassificationIpv6,
+//   classifyIp } from &quot;@hertzg/ip&quot;;
+//
+// function ipClassification(
+//   ...allowed: (ClassificationIpv4 | ClassificationIpv6)[]
+// ) {
+//   const set = new Set(allowed);
+//   return z.string().refine(
+//     (val) =&gt; set.has(classifyIp(val).classification),
+//     { message: `IP must be: ${allowed.join(&quot;, &quot;)}` },
+//   );
+// }
+//
+// const publicIp = ipClassification(&quot;public&quot;, &quot;global-unicast&quot;);
+// publicIp.parse(&quot;8.8.8.8&quot;);       // ok
+// publicIp.parse(&quot;192.168.1.1&quot;);   // throws: private
+//
+// const internalIp = ipClassification(&quot;private&quot;, &quot;loopback&quot;);
+// internalIp.parse(&quot;10.0.0.1&quot;);    // ok
+// internalIp.parse(&quot;8.8.8.8&quot;);     // throws: public
 "><svg
   class="copy"
   width="15"
@@ -543,6 +588,8 @@ assertEquals(stringifyCidrv4(cidr), &quot;192.168.1.0/24&quot;);
   <path d="M5 12l5 5l10 -10" />
 </svg>
 </button><code></code></pre>
+<h2 id="parsing-and-stringifying">
+Parsing and Stringifying</h2>
 </div></div>
 </div>
 <div class="border-b border-gray-300 dark:border-gray-700"></div><div class="anchorable"><a href="#example_3" class="anchor" aria-label="Anchor" tabIndex="-1"><svg
@@ -567,46 +614,123 @@ assertEquals(stringifyCidrv4(cidr), &quot;192.168.1.0/24&quot;);
   </defs>
 </svg>
 </a>
-<h3 class="example-header"><div class="markdown"><p>IPv6 CIDR operations</p>
+<h3 class="example-header"><div class="markdown"><p>Parse and stringify IPv4 and IPv6 addresses</p>
+</div></h3>
+  <div><div class="markdown"><pre class="highlight"><code class="language-ts">import { assertEquals } from &quot;@std/assert&quot;;
+import { parseIpv4, parseIpv6, stringifyIpv4, stringifyIpv6 } from &quot;@hertzg/ip&quot;;
+
+// IPv4: string &lt;-&gt; 32-bit number
+const v4 = parseIpv4(&quot;192.168.1.1&quot;);
+assertEquals(v4, 3232235777);
+assertEquals(stringifyIpv4(v4), &quot;192.168.1.1&quot;);
+assertEquals(stringifyIpv4(v4 + 1), &quot;192.168.1.2&quot;);
+
+// IPv6: string &lt;-&gt; 128-bit bigint
+const v6 = parseIpv6(&quot;2001:db8::1&quot;);
+assertEquals(v6, 42540766411282592856903984951653826561n);
+assertEquals(stringifyIpv6(v6), &quot;2001:db8::1&quot;);
+assertEquals(stringifyIpv6(v6 + 1n), &quot;2001:db8::2&quot;);
+</code><button class="copyButton" data-copy="import { assertEquals } from &quot;@std/assert&quot;;
+import { parseIpv4, parseIpv6, stringifyIpv4, stringifyIpv6 } from &quot;@hertzg/ip&quot;;
+
+// IPv4: string &lt;-&gt; 32-bit number
+const v4 = parseIpv4(&quot;192.168.1.1&quot;);
+assertEquals(v4, 3232235777);
+assertEquals(stringifyIpv4(v4), &quot;192.168.1.1&quot;);
+assertEquals(stringifyIpv4(v4 + 1), &quot;192.168.1.2&quot;);
+
+// IPv6: string &lt;-&gt; 128-bit bigint
+const v6 = parseIpv6(&quot;2001:db8::1&quot;);
+assertEquals(v6, 42540766411282592856903984951653826561n);
+assertEquals(stringifyIpv6(v6), &quot;2001:db8::1&quot;);
+assertEquals(stringifyIpv6(v6 + 1n), &quot;2001:db8::2&quot;);
+"><svg
+  class="copy"
+  width="15"
+  height="15"
+  viewBox="0 0 15 15"
+  fill="none"
+  xmlns="http://www.w3.org/2000/svg"
+>
+  <rect x="2" y="2" width="7" height="7" fill="none" />
+  <rect x="6" y="6" width="7" height="7" fill="none" />
+  <path
+    d="M1.55566 2.7C1.55566 2.03726 2.09292 1.5 2.75566 1.5H8.75566C9.41841 1.5 9.95566 2.03726 9.95566 2.7V5.1H12.3557C13.0184 5.1 13.5557 5.63726 13.5557 6.3V12.3C13.5557 12.9627 13.0184 13.5 12.3557 13.5H6.35566C5.69292 13.5 5.15566 12.9627 5.15566 12.3V9.9H2.75566C2.09292 9.9 1.55566 9.36274 1.55566 8.7V2.7ZM6.35566 9.9V12.3H12.3557V6.3H9.95566V8.7C9.95566 9.36274 9.41841 9.9 8.75566 9.9H6.35566ZM8.75566 8.7V2.7H2.75566V8.7H8.75566Z"
+    fill="currentColor"
+  />
+</svg>
+<svg
+  class="check"
+  width="15"
+  height="15"
+  viewBox="0 0 24 24"
+  stroke-width="2"
+  stroke="currentColor"
+  fill="none"
+  stroke-linecap="round"
+  stroke-linejoin="round"
+  xmlns="http://www.w3.org/2000/svg"
+>
+  <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+  <path d="M5 12l5 5l10 -10" />
+</svg>
+</button><code></code></pre>
+<h2 id="cidr-network-boundaries">
+CIDR Network Boundaries</h2>
+</div></div>
+</div>
+<div class="border-b border-gray-300 dark:border-gray-700"></div><div class="anchorable"><a href="#example_4" class="anchor" aria-label="Anchor" tabIndex="-1"><svg
+  width="16"
+  height="16"
+  viewBox="0 0 14 14"
+  fill="none"
+  xmlns="http://www.w3.org/2000/svg"
+>
+  <g clip-path="url(#clip0_1081_1237)">
+    <path
+      fill-rule="evenodd"
+      clip-rule="evenodd"
+      d="M6.80328 2.8656C6.68736 2.99 6.62425 3.15454 6.62725 3.32456C6.63025 3.49457 6.69913 3.65678 6.81936 3.77702C6.9396 3.89725 7.10181 3.96613 7.27182 3.96913C7.44184 3.97213 7.60638 3.90902 7.73078 3.7931L8.82453 2.69935C8.98712 2.53676 9.18015 2.40778 9.39259 2.31978C9.60503 2.23179 9.83272 2.1865 10.0627 2.1865C10.2926 2.1865 10.5203 2.23179 10.7327 2.31978C10.9452 2.40778 11.1382 2.53676 11.3008 2.69935C11.4634 2.86194 11.5923 3.05497 11.6803 3.2674C11.7683 3.47984 11.8136 3.70753 11.8136 3.93747C11.8136 4.16741 11.7683 4.3951 11.6803 4.60754C11.5923 4.81998 11.4634 5.013 11.3008 5.1756L9.11328 7.3631C8.95075 7.52581 8.75775 7.65488 8.5453 7.74295C8.33285 7.83102 8.10513 7.87635 7.87516 7.87635C7.64518 7.87635 7.41746 7.83102 7.20501 7.74295C6.99256 7.65488 6.79956 7.52581 6.63703 7.3631C6.51263 7.24718 6.34809 7.18407 6.17807 7.18707C6.00806 7.19007 5.84585 7.25894 5.72561 7.37918C5.60538 7.49942 5.5365 7.66163 5.5335 7.83164C5.5305 8.00165 5.59361 8.1662 5.70953 8.2906C5.99391 8.57501 6.33154 8.80062 6.70312 8.95455C7.0747 9.10847 7.47296 9.18769 7.87516 9.18769C8.27736 9.18769 8.67562 9.10847 9.0472 8.95455C9.41878 8.80062 9.7564 8.57501 10.0408 8.2906L12.2283 6.1031C12.8026 5.52874 13.1253 4.74974 13.1253 3.93747C13.1253 3.12521 12.8026 2.34621 12.2283 1.77185C11.6539 1.19749 10.8749 0.874817 10.0627 0.874817C9.25039 0.874817 8.47139 1.19749 7.89703 1.77185L6.80328 2.8656ZM2.69953 11.3006C2.53682 11.1381 2.40774 10.9451 2.31968 10.7326C2.23161 10.5202 2.18628 10.2924 2.18628 10.0625C2.18628 9.8325 2.23161 9.60477 2.31968 9.39233C2.40774 9.17988 2.53682 8.98688 2.69953 8.82435L4.88703 6.63685C5.04956 6.47414 5.24256 6.34506 5.45501 6.25699C5.66746 6.16893 5.89518 6.1236 6.12516 6.1236C6.35513 6.1236 6.58285 6.16893 6.7953 6.25699C7.00775 6.34506 7.20075 6.47414 7.36328 6.63685C7.48768 6.75277 7.65223 6.81588 7.82224 6.81288C7.99225 6.80988 8.15446 6.741 8.2747 6.62077C8.39494 6.50053 8.46381 6.33832 8.46681 6.1683C8.46981 5.99829 8.4067 5.83375 8.29078 5.70935C8.0064 5.42494 7.66878 5.19933 7.2972 5.0454C6.92562 4.89148 6.52736 4.81225 6.12516 4.81225C5.72296 4.81225 5.3247 4.89148 4.95312 5.0454C4.58154 5.19933 4.24391 5.42494 3.95953 5.70935L1.77203 7.89685C1.19767 8.47121 0.875 9.25021 0.875 10.0625C0.875 10.8747 1.19767 11.6537 1.77203 12.2281C2.34639 12.8025 3.12539 13.1251 3.93766 13.1251C4.74992 13.1251 5.52892 12.8025 6.10328 12.2281L7.19703 11.1343C7.31295 11.0099 7.37606 10.8454 7.37306 10.6754C7.37006 10.5054 7.30119 10.3432 7.18095 10.2229C7.06071 10.1027 6.8985 10.0338 6.72849 10.0308C6.55848 10.0278 6.39393 10.0909 6.26953 10.2068L5.17578 11.3006C5.01325 11.4633 4.82025 11.5924 4.6078 11.6805C4.39535 11.7685 4.16763 11.8138 3.93766 11.8138C3.70768 11.8138 3.47996 11.7685 3.26751 11.6805C3.05506 11.5924 2.86206 11.4633 2.69953 11.3006Z"
+      fill="currentColor"
+    />
+  </g>
+  <defs>
+    <clipPath id="clip0_1081_1237">
+      <rect width="14" height="14" fill="white" />
+    </clipPath>
+  </defs>
+</svg>
+</a>
+<h3 class="example-header"><div class="markdown"><p>Compute network and broadcast addresses from CIDR</p>
 </div></h3>
   <div><div class="markdown"><pre class="highlight"><code class="language-ts">import { assertEquals } from &quot;@std/assert&quot;;
 import {
-  cidrv6FirstAddress,
-  cidrv6LastAddress,
-  parseCidrv6,
-  stringifyCidrv6,
-  stringifyIpv6,
+  cidrv4BroadcastAddress,
+  cidrv4NetworkAddress,
+  cidrv4Size,
+  parseCidrv4,
+  stringifyIpv4,
 } from &quot;@hertzg/ip&quot;;
 
-// Parse IPv6 CIDR notation
-const cidr = parseCidrv6(&quot;2001:db8::/32&quot;);
-assertEquals(cidr.prefixLength, 32);
+const cidr = parseCidrv4(&quot;192.168.1.0/24&quot;);
 
-// Get range boundaries
-const first = cidrv6FirstAddress(cidr);
-assertEquals(stringifyIpv6(first), &quot;2001:db8::&quot;);
-
-// Stringify back to CIDR notation
-assertEquals(stringifyCidrv6(cidr), &quot;2001:db8::/32&quot;);
+assertEquals(stringifyIpv4(cidrv4NetworkAddress(cidr)), &quot;192.168.1.0&quot;);
+assertEquals(stringifyIpv4(cidrv4BroadcastAddress(cidr)), &quot;192.168.1.255&quot;);
+assertEquals(cidrv4Size(cidr), 256);
 </code><button class="copyButton" data-copy="import { assertEquals } from &quot;@std/assert&quot;;
 import {
-  cidrv6FirstAddress,
-  cidrv6LastAddress,
-  parseCidrv6,
-  stringifyCidrv6,
-  stringifyIpv6,
+  cidrv4BroadcastAddress,
+  cidrv4NetworkAddress,
+  cidrv4Size,
+  parseCidrv4,
+  stringifyIpv4,
 } from &quot;@hertzg/ip&quot;;
 
-// Parse IPv6 CIDR notation
-const cidr = parseCidrv6(&quot;2001:db8::/32&quot;);
-assertEquals(cidr.prefixLength, 32);
+const cidr = parseCidrv4(&quot;192.168.1.0/24&quot;);
 
-// Get range boundaries
-const first = cidrv6FirstAddress(cidr);
-assertEquals(stringifyIpv6(first), &quot;2001:db8::&quot;);
-
-// Stringify back to CIDR notation
-assertEquals(stringifyCidrv6(cidr), &quot;2001:db8::/32&quot;);
+assertEquals(stringifyIpv4(cidrv4NetworkAddress(cidr)), &quot;192.168.1.0&quot;);
+assertEquals(stringifyIpv4(cidrv4BroadcastAddress(cidr)), &quot;192.168.1.255&quot;);
+assertEquals(cidrv4Size(cidr), 256);
 "><svg
   class="copy"
   width="15"
@@ -642,91 +766,6 @@ assertEquals(stringifyCidrv6(cidr), &quot;2001:db8::/32&quot;);
 Range Checking</h2>
 </div></div>
 </div>
-<div class="border-b border-gray-300 dark:border-gray-700"></div><div class="anchorable"><a href="#example_4" class="anchor" aria-label="Anchor" tabIndex="-1"><svg
-  width="16"
-  height="16"
-  viewBox="0 0 14 14"
-  fill="none"
-  xmlns="http://www.w3.org/2000/svg"
->
-  <g clip-path="url(#clip0_1081_1237)">
-    <path
-      fill-rule="evenodd"
-      clip-rule="evenodd"
-      d="M6.80328 2.8656C6.68736 2.99 6.62425 3.15454 6.62725 3.32456C6.63025 3.49457 6.69913 3.65678 6.81936 3.77702C6.9396 3.89725 7.10181 3.96613 7.27182 3.96913C7.44184 3.97213 7.60638 3.90902 7.73078 3.7931L8.82453 2.69935C8.98712 2.53676 9.18015 2.40778 9.39259 2.31978C9.60503 2.23179 9.83272 2.1865 10.0627 2.1865C10.2926 2.1865 10.5203 2.23179 10.7327 2.31978C10.9452 2.40778 11.1382 2.53676 11.3008 2.69935C11.4634 2.86194 11.5923 3.05497 11.6803 3.2674C11.7683 3.47984 11.8136 3.70753 11.8136 3.93747C11.8136 4.16741 11.7683 4.3951 11.6803 4.60754C11.5923 4.81998 11.4634 5.013 11.3008 5.1756L9.11328 7.3631C8.95075 7.52581 8.75775 7.65488 8.5453 7.74295C8.33285 7.83102 8.10513 7.87635 7.87516 7.87635C7.64518 7.87635 7.41746 7.83102 7.20501 7.74295C6.99256 7.65488 6.79956 7.52581 6.63703 7.3631C6.51263 7.24718 6.34809 7.18407 6.17807 7.18707C6.00806 7.19007 5.84585 7.25894 5.72561 7.37918C5.60538 7.49942 5.5365 7.66163 5.5335 7.83164C5.5305 8.00165 5.59361 8.1662 5.70953 8.2906C5.99391 8.57501 6.33154 8.80062 6.70312 8.95455C7.0747 9.10847 7.47296 9.18769 7.87516 9.18769C8.27736 9.18769 8.67562 9.10847 9.0472 8.95455C9.41878 8.80062 9.7564 8.57501 10.0408 8.2906L12.2283 6.1031C12.8026 5.52874 13.1253 4.74974 13.1253 3.93747C13.1253 3.12521 12.8026 2.34621 12.2283 1.77185C11.6539 1.19749 10.8749 0.874817 10.0627 0.874817C9.25039 0.874817 8.47139 1.19749 7.89703 1.77185L6.80328 2.8656ZM2.69953 11.3006C2.53682 11.1381 2.40774 10.9451 2.31968 10.7326C2.23161 10.5202 2.18628 10.2924 2.18628 10.0625C2.18628 9.8325 2.23161 9.60477 2.31968 9.39233C2.40774 9.17988 2.53682 8.98688 2.69953 8.82435L4.88703 6.63685C5.04956 6.47414 5.24256 6.34506 5.45501 6.25699C5.66746 6.16893 5.89518 6.1236 6.12516 6.1236C6.35513 6.1236 6.58285 6.16893 6.7953 6.25699C7.00775 6.34506 7.20075 6.47414 7.36328 6.63685C7.48768 6.75277 7.65223 6.81588 7.82224 6.81288C7.99225 6.80988 8.15446 6.741 8.2747 6.62077C8.39494 6.50053 8.46381 6.33832 8.46681 6.1683C8.46981 5.99829 8.4067 5.83375 8.29078 5.70935C8.0064 5.42494 7.66878 5.19933 7.2972 5.0454C6.92562 4.89148 6.52736 4.81225 6.12516 4.81225C5.72296 4.81225 5.3247 4.89148 4.95312 5.0454C4.58154 5.19933 4.24391 5.42494 3.95953 5.70935L1.77203 7.89685C1.19767 8.47121 0.875 9.25021 0.875 10.0625C0.875 10.8747 1.19767 11.6537 1.77203 12.2281C2.34639 12.8025 3.12539 13.1251 3.93766 13.1251C4.74992 13.1251 5.52892 12.8025 6.10328 12.2281L7.19703 11.1343C7.31295 11.0099 7.37606 10.8454 7.37306 10.6754C7.37006 10.5054 7.30119 10.3432 7.18095 10.2229C7.06071 10.1027 6.8985 10.0338 6.72849 10.0308C6.55848 10.0278 6.39393 10.0909 6.26953 10.2068L5.17578 11.3006C5.01325 11.4633 4.82025 11.5924 4.6078 11.6805C4.39535 11.7685 4.16763 11.8138 3.93766 11.8138C3.70768 11.8138 3.47996 11.7685 3.26751 11.6805C3.05506 11.5924 2.86206 11.4633 2.69953 11.3006Z"
-      fill="currentColor"
-    />
-  </g>
-  <defs>
-    <clipPath id="clip0_1081_1237">
-      <rect width="14" height="14" fill="white" />
-    </clipPath>
-  </defs>
-</svg>
-</a>
-<h3 class="example-header"><div class="markdown"><p>Check if IPs are within CIDR range</p>
-</div></h3>
-  <div><div class="markdown"><pre class="highlight"><code class="language-ts">import { assert, assertEquals } from &quot;@std/assert&quot;;
-import { cidrv4Contains, parseCidrv4, parseIpv4 } from &quot;@hertzg/ip&quot;;
-
-const cidr = parseCidrv4(&quot;192.168.1.0/24&quot;);
-
-// IPs within range
-assert(cidrv4Contains(cidr, parseIpv4(&quot;192.168.1.0&quot;)));   // network address
-assert(cidrv4Contains(cidr, parseIpv4(&quot;192.168.1.100&quot;))); // middle of range
-assert(cidrv4Contains(cidr, parseIpv4(&quot;192.168.1.255&quot;))); // broadcast address
-
-// IPs outside range
-assertEquals(cidrv4Contains(cidr, parseIpv4(&quot;192.168.0.255&quot;)), false);
-assertEquals(cidrv4Contains(cidr, parseIpv4(&quot;192.168.2.0&quot;)), false);
-</code><button class="copyButton" data-copy="import { assert, assertEquals } from &quot;@std/assert&quot;;
-import { cidrv4Contains, parseCidrv4, parseIpv4 } from &quot;@hertzg/ip&quot;;
-
-const cidr = parseCidrv4(&quot;192.168.1.0/24&quot;);
-
-// IPs within range
-assert(cidrv4Contains(cidr, parseIpv4(&quot;192.168.1.0&quot;)));   // network address
-assert(cidrv4Contains(cidr, parseIpv4(&quot;192.168.1.100&quot;))); // middle of range
-assert(cidrv4Contains(cidr, parseIpv4(&quot;192.168.1.255&quot;))); // broadcast address
-
-// IPs outside range
-assertEquals(cidrv4Contains(cidr, parseIpv4(&quot;192.168.0.255&quot;)), false);
-assertEquals(cidrv4Contains(cidr, parseIpv4(&quot;192.168.2.0&quot;)), false);
-"><svg
-  class="copy"
-  width="15"
-  height="15"
-  viewBox="0 0 15 15"
-  fill="none"
-  xmlns="http://www.w3.org/2000/svg"
->
-  <rect x="2" y="2" width="7" height="7" fill="none" />
-  <rect x="6" y="6" width="7" height="7" fill="none" />
-  <path
-    d="M1.55566 2.7C1.55566 2.03726 2.09292 1.5 2.75566 1.5H8.75566C9.41841 1.5 9.95566 2.03726 9.95566 2.7V5.1H12.3557C13.0184 5.1 13.5557 5.63726 13.5557 6.3V12.3C13.5557 12.9627 13.0184 13.5 12.3557 13.5H6.35566C5.69292 13.5 5.15566 12.9627 5.15566 12.3V9.9H2.75566C2.09292 9.9 1.55566 9.36274 1.55566 8.7V2.7ZM6.35566 9.9V12.3H12.3557V6.3H9.95566V8.7C9.95566 9.36274 9.41841 9.9 8.75566 9.9H6.35566ZM8.75566 8.7V2.7H2.75566V8.7H8.75566Z"
-    fill="currentColor"
-  />
-</svg>
-<svg
-  class="check"
-  width="15"
-  height="15"
-  viewBox="0 0 24 24"
-  stroke-width="2"
-  stroke="currentColor"
-  fill="none"
-  stroke-linecap="round"
-  stroke-linejoin="round"
-  xmlns="http://www.w3.org/2000/svg"
->
-  <path stroke="none" d="M0 0h24v24H0z" fill="none" />
-  <path d="M5 12l5 5l10 -10" />
-</svg>
-</button><code></code></pre>
-<h2 id="address-generation">
-Address Generation</h2>
-</div></div>
-</div>
 <div class="border-b border-gray-300 dark:border-gray-700"></div><div class="anchorable"><a href="#example_5" class="anchor" aria-label="Anchor" tabIndex="-1"><svg
   width="16"
   height="16"
@@ -749,54 +788,24 @@ Address Generation</h2>
   </defs>
 </svg>
 </a>
-<h3 class="example-header"><div class="markdown"><p>Generate IP ranges with custom patterns</p>
+<h3 class="example-header"><div class="markdown"><p>Check if IPs fall within a CIDR range</p>
 </div></h3>
-  <div><div class="markdown"><pre class="highlight"><code class="language-ts">import { assertEquals } from &quot;@std/assert&quot;;
-import { cidrv4Addresses, parseCidrv4, stringifyIpv4 } from &quot;@hertzg/ip&quot;;
+  <div><div class="markdown"><pre class="highlight"><code class="language-ts">import { assert, assertEquals } from &quot;@std/assert&quot;;
+import { cidrv4Contains, parseCidrv4, parseIpv4 } from &quot;@hertzg/ip&quot;;
 
-const cidr = parseCidrv4(&quot;10.0.0.0/29&quot;); // 8 IPs: .0 to .7
+const cidr = parseCidrv4(&quot;10.0.0.0/8&quot;);
 
-// By default, iterates all IPs (offset=0, step=1, no count limit)
-const all = Array.from(cidrv4Addresses(cidr));
-assertEquals(all.map(stringifyIpv4), [
-  &quot;10.0.0.0&quot;, &quot;10.0.0.1&quot;, &quot;10.0.0.2&quot;, &quot;10.0.0.3&quot;,
-  &quot;10.0.0.4&quot;, &quot;10.0.0.5&quot;, &quot;10.0.0.6&quot;, &quot;10.0.0.7&quot;,
-]);
+assert(cidrv4Contains(cidr, parseIpv4(&quot;10.0.0.1&quot;)));
+assert(cidrv4Contains(cidr, parseIpv4(&quot;10.255.255.255&quot;)));
+assertEquals(cidrv4Contains(cidr, parseIpv4(&quot;11.0.0.0&quot;)), false);
+</code><button class="copyButton" data-copy="import { assert, assertEquals } from &quot;@std/assert&quot;;
+import { cidrv4Contains, parseCidrv4, parseIpv4 } from &quot;@hertzg/ip&quot;;
 
-// Skip network address with offset=1
-const usable = Array.from(cidrv4Addresses(cidr, { offset: 1 }));
-assertEquals(usable.length, 7);
+const cidr = parseCidrv4(&quot;10.0.0.0/8&quot;);
 
-// Get even addresses (step=2)
-const evenIps = Array.from(cidrv4Addresses(cidr, { step: 2 }));
-assertEquals(evenIps.map(stringifyIpv4), [&quot;10.0.0.0&quot;, &quot;10.0.0.2&quot;, &quot;10.0.0.4&quot;, &quot;10.0.0.6&quot;]);
-
-// Reverse iteration from offset (negative step)
-const backwards = Array.from(cidrv4Addresses(cidr, { offset: 5, step: -1 }));
-assertEquals(backwards.map(stringifyIpv4), [&quot;10.0.0.5&quot;, &quot;10.0.0.4&quot;, &quot;10.0.0.3&quot;, &quot;10.0.0.2&quot;, &quot;10.0.0.1&quot;, &quot;10.0.0.0&quot;]);
-</code><button class="copyButton" data-copy="import { assertEquals } from &quot;@std/assert&quot;;
-import { cidrv4Addresses, parseCidrv4, stringifyIpv4 } from &quot;@hertzg/ip&quot;;
-
-const cidr = parseCidrv4(&quot;10.0.0.0/29&quot;); // 8 IPs: .0 to .7
-
-// By default, iterates all IPs (offset=0, step=1, no count limit)
-const all = Array.from(cidrv4Addresses(cidr));
-assertEquals(all.map(stringifyIpv4), [
-  &quot;10.0.0.0&quot;, &quot;10.0.0.1&quot;, &quot;10.0.0.2&quot;, &quot;10.0.0.3&quot;,
-  &quot;10.0.0.4&quot;, &quot;10.0.0.5&quot;, &quot;10.0.0.6&quot;, &quot;10.0.0.7&quot;,
-]);
-
-// Skip network address with offset=1
-const usable = Array.from(cidrv4Addresses(cidr, { offset: 1 }));
-assertEquals(usable.length, 7);
-
-// Get even addresses (step=2)
-const evenIps = Array.from(cidrv4Addresses(cidr, { step: 2 }));
-assertEquals(evenIps.map(stringifyIpv4), [&quot;10.0.0.0&quot;, &quot;10.0.0.2&quot;, &quot;10.0.0.4&quot;, &quot;10.0.0.6&quot;]);
-
-// Reverse iteration from offset (negative step)
-const backwards = Array.from(cidrv4Addresses(cidr, { offset: 5, step: -1 }));
-assertEquals(backwards.map(stringifyIpv4), [&quot;10.0.0.5&quot;, &quot;10.0.0.4&quot;, &quot;10.0.0.3&quot;, &quot;10.0.0.2&quot;, &quot;10.0.0.1&quot;, &quot;10.0.0.0&quot;]);
+assert(cidrv4Contains(cidr, parseIpv4(&quot;10.0.0.1&quot;)));
+assert(cidrv4Contains(cidr, parseIpv4(&quot;10.255.255.255&quot;)));
+assertEquals(cidrv4Contains(cidr, parseIpv4(&quot;11.0.0.0&quot;)), false);
 "><svg
   class="copy"
   width="15"
@@ -828,8 +837,8 @@ assertEquals(backwards.map(stringifyIpv4), [&quot;10.0.0.5&quot;, &quot;10.0.0.4
   <path d="M5 12l5 5l10 -10" />
 </svg>
 </button><code></code></pre>
-<h2 id="real-world-use-cases">
-Real-World Use Cases</h2>
+<h2 id="subnet-enumeration">
+Subnet Enumeration</h2>
 </div></div>
 </div>
 <div class="border-b border-gray-300 dark:border-gray-700"></div><div class="anchorable"><a href="#example_6" class="anchor" aria-label="Anchor" tabIndex="-1"><svg
@@ -854,216 +863,38 @@ Real-World Use Cases</h2>
   </defs>
 </svg>
 </a>
-<h3 class="example-header"><div class="markdown"><p>IP address allocation system</p>
-</div></h3>
-  <div><div class="markdown"><pre class="highlight"><code class="language-ts">import { assert } from &quot;@std/assert&quot;;
-import {
-  cidrv4Addresses,
-  cidrv4Contains,
-  parseCidrv4,
-  stringifyIpv4,
-} from &quot;@hertzg/ip&quot;;
-
-const cidr = parseCidrv4(&quot;10.0.0.0/24&quot;);
-
-// Allocate batch of IPs for servers
-const serverIps = Array.from(cidrv4Addresses(cidr, { offset: 10, count: 5, step: 1 }));
-
-// Verify all allocated IPs are in range
-for (const ip of serverIps) {
-  assert(cidrv4Contains(cidr, ip));
-}
-
-// Convert to strings for configuration
-const serverAddresses = serverIps.map(stringifyIpv4);
-assert(serverAddresses[0] === &quot;10.0.0.10&quot;);
-</code><button class="copyButton" data-copy="import { assert } from &quot;@std/assert&quot;;
-import {
-  cidrv4Addresses,
-  cidrv4Contains,
-  parseCidrv4,
-  stringifyIpv4,
-} from &quot;@hertzg/ip&quot;;
-
-const cidr = parseCidrv4(&quot;10.0.0.0/24&quot;);
-
-// Allocate batch of IPs for servers
-const serverIps = Array.from(cidrv4Addresses(cidr, { offset: 10, count: 5, step: 1 }));
-
-// Verify all allocated IPs are in range
-for (const ip of serverIps) {
-  assert(cidrv4Contains(cidr, ip));
-}
-
-// Convert to strings for configuration
-const serverAddresses = serverIps.map(stringifyIpv4);
-assert(serverAddresses[0] === &quot;10.0.0.10&quot;);
-"><svg
-  class="copy"
-  width="15"
-  height="15"
-  viewBox="0 0 15 15"
-  fill="none"
-  xmlns="http://www.w3.org/2000/svg"
->
-  <rect x="2" y="2" width="7" height="7" fill="none" />
-  <rect x="6" y="6" width="7" height="7" fill="none" />
-  <path
-    d="M1.55566 2.7C1.55566 2.03726 2.09292 1.5 2.75566 1.5H8.75566C9.41841 1.5 9.95566 2.03726 9.95566 2.7V5.1H12.3557C13.0184 5.1 13.5557 5.63726 13.5557 6.3V12.3C13.5557 12.9627 13.0184 13.5 12.3557 13.5H6.35566C5.69292 13.5 5.15566 12.9627 5.15566 12.3V9.9H2.75566C2.09292 9.9 1.55566 9.36274 1.55566 8.7V2.7ZM6.35566 9.9V12.3H12.3557V6.3H9.95566V8.7C9.95566 9.36274 9.41841 9.9 8.75566 9.9H6.35566ZM8.75566 8.7V2.7H2.75566V8.7H8.75566Z"
-    fill="currentColor"
-  />
-</svg>
-<svg
-  class="check"
-  width="15"
-  height="15"
-  viewBox="0 0 24 24"
-  stroke-width="2"
-  stroke="currentColor"
-  fill="none"
-  stroke-linecap="round"
-  stroke-linejoin="round"
-  xmlns="http://www.w3.org/2000/svg"
->
-  <path stroke="none" d="M0 0h24v24H0z" fill="none" />
-  <path d="M5 12l5 5l10 -10" />
-</svg>
-</button><code></code></pre>
-</div></div>
-</div>
-<div class="border-b border-gray-300 dark:border-gray-700"></div><div class="anchorable"><a href="#example_7" class="anchor" aria-label="Anchor" tabIndex="-1"><svg
-  width="16"
-  height="16"
-  viewBox="0 0 14 14"
-  fill="none"
-  xmlns="http://www.w3.org/2000/svg"
->
-  <g clip-path="url(#clip0_1081_1237)">
-    <path
-      fill-rule="evenodd"
-      clip-rule="evenodd"
-      d="M6.80328 2.8656C6.68736 2.99 6.62425 3.15454 6.62725 3.32456C6.63025 3.49457 6.69913 3.65678 6.81936 3.77702C6.9396 3.89725 7.10181 3.96613 7.27182 3.96913C7.44184 3.97213 7.60638 3.90902 7.73078 3.7931L8.82453 2.69935C8.98712 2.53676 9.18015 2.40778 9.39259 2.31978C9.60503 2.23179 9.83272 2.1865 10.0627 2.1865C10.2926 2.1865 10.5203 2.23179 10.7327 2.31978C10.9452 2.40778 11.1382 2.53676 11.3008 2.69935C11.4634 2.86194 11.5923 3.05497 11.6803 3.2674C11.7683 3.47984 11.8136 3.70753 11.8136 3.93747C11.8136 4.16741 11.7683 4.3951 11.6803 4.60754C11.5923 4.81998 11.4634 5.013 11.3008 5.1756L9.11328 7.3631C8.95075 7.52581 8.75775 7.65488 8.5453 7.74295C8.33285 7.83102 8.10513 7.87635 7.87516 7.87635C7.64518 7.87635 7.41746 7.83102 7.20501 7.74295C6.99256 7.65488 6.79956 7.52581 6.63703 7.3631C6.51263 7.24718 6.34809 7.18407 6.17807 7.18707C6.00806 7.19007 5.84585 7.25894 5.72561 7.37918C5.60538 7.49942 5.5365 7.66163 5.5335 7.83164C5.5305 8.00165 5.59361 8.1662 5.70953 8.2906C5.99391 8.57501 6.33154 8.80062 6.70312 8.95455C7.0747 9.10847 7.47296 9.18769 7.87516 9.18769C8.27736 9.18769 8.67562 9.10847 9.0472 8.95455C9.41878 8.80062 9.7564 8.57501 10.0408 8.2906L12.2283 6.1031C12.8026 5.52874 13.1253 4.74974 13.1253 3.93747C13.1253 3.12521 12.8026 2.34621 12.2283 1.77185C11.6539 1.19749 10.8749 0.874817 10.0627 0.874817C9.25039 0.874817 8.47139 1.19749 7.89703 1.77185L6.80328 2.8656ZM2.69953 11.3006C2.53682 11.1381 2.40774 10.9451 2.31968 10.7326C2.23161 10.5202 2.18628 10.2924 2.18628 10.0625C2.18628 9.8325 2.23161 9.60477 2.31968 9.39233C2.40774 9.17988 2.53682 8.98688 2.69953 8.82435L4.88703 6.63685C5.04956 6.47414 5.24256 6.34506 5.45501 6.25699C5.66746 6.16893 5.89518 6.1236 6.12516 6.1236C6.35513 6.1236 6.58285 6.16893 6.7953 6.25699C7.00775 6.34506 7.20075 6.47414 7.36328 6.63685C7.48768 6.75277 7.65223 6.81588 7.82224 6.81288C7.99225 6.80988 8.15446 6.741 8.2747 6.62077C8.39494 6.50053 8.46381 6.33832 8.46681 6.1683C8.46981 5.99829 8.4067 5.83375 8.29078 5.70935C8.0064 5.42494 7.66878 5.19933 7.2972 5.0454C6.92562 4.89148 6.52736 4.81225 6.12516 4.81225C5.72296 4.81225 5.3247 4.89148 4.95312 5.0454C4.58154 5.19933 4.24391 5.42494 3.95953 5.70935L1.77203 7.89685C1.19767 8.47121 0.875 9.25021 0.875 10.0625C0.875 10.8747 1.19767 11.6537 1.77203 12.2281C2.34639 12.8025 3.12539 13.1251 3.93766 13.1251C4.74992 13.1251 5.52892 12.8025 6.10328 12.2281L7.19703 11.1343C7.31295 11.0099 7.37606 10.8454 7.37306 10.6754C7.37006 10.5054 7.30119 10.3432 7.18095 10.2229C7.06071 10.1027 6.8985 10.0338 6.72849 10.0308C6.55848 10.0278 6.39393 10.0909 6.26953 10.2068L5.17578 11.3006C5.01325 11.4633 4.82025 11.5924 4.6078 11.6805C4.39535 11.7685 4.16763 11.8138 3.93766 11.8138C3.70768 11.8138 3.47996 11.7685 3.26751 11.6805C3.05506 11.5924 2.86206 11.4633 2.69953 11.3006Z"
-      fill="currentColor"
-    />
-  </g>
-  <defs>
-    <clipPath id="clip0_1081_1237">
-      <rect width="14" height="14" fill="white" />
-    </clipPath>
-  </defs>
-</svg>
-</a>
-<h3 class="example-header"><div class="markdown"><p>Memory-efficient iteration over large ranges</p>
-</div></h3>
-  <div><div class="markdown"><pre class="highlight"><code class="language-ts">import { cidrv4Addresses, parseCidrv4, stringifyIpv4 } from &quot;@hertzg/ip&quot;;
-
-const cidr = parseCidrv4(&quot;10.0.0.0/16&quot;); // 65,536 addresses
-
-// Process entire CIDR lazily without loading all into memory
-// No need to specify count - iterates until CIDR boundary
-for (const ip of cidrv4Addresses(cidr, { offset: 0 })) {
-  const ipStr = stringifyIpv4(ip);
-  // Process each IP (e.g., scan, allocate, log)
-  break; // Just showing the pattern
-}
-</code><button class="copyButton" data-copy="import { cidrv4Addresses, parseCidrv4, stringifyIpv4 } from &quot;@hertzg/ip&quot;;
-
-const cidr = parseCidrv4(&quot;10.0.0.0/16&quot;); // 65,536 addresses
-
-// Process entire CIDR lazily without loading all into memory
-// No need to specify count - iterates until CIDR boundary
-for (const ip of cidrv4Addresses(cidr, { offset: 0 })) {
-  const ipStr = stringifyIpv4(ip);
-  // Process each IP (e.g., scan, allocate, log)
-  break; // Just showing the pattern
-}
-"><svg
-  class="copy"
-  width="15"
-  height="15"
-  viewBox="0 0 15 15"
-  fill="none"
-  xmlns="http://www.w3.org/2000/svg"
->
-  <rect x="2" y="2" width="7" height="7" fill="none" />
-  <rect x="6" y="6" width="7" height="7" fill="none" />
-  <path
-    d="M1.55566 2.7C1.55566 2.03726 2.09292 1.5 2.75566 1.5H8.75566C9.41841 1.5 9.95566 2.03726 9.95566 2.7V5.1H12.3557C13.0184 5.1 13.5557 5.63726 13.5557 6.3V12.3C13.5557 12.9627 13.0184 13.5 12.3557 13.5H6.35566C5.69292 13.5 5.15566 12.9627 5.15566 12.3V9.9H2.75566C2.09292 9.9 1.55566 9.36274 1.55566 8.7V2.7ZM6.35566 9.9V12.3H12.3557V6.3H9.95566V8.7C9.95566 9.36274 9.41841 9.9 8.75566 9.9H6.35566ZM8.75566 8.7V2.7H2.75566V8.7H8.75566Z"
-    fill="currentColor"
-  />
-</svg>
-<svg
-  class="check"
-  width="15"
-  height="15"
-  viewBox="0 0 24 24"
-  stroke-width="2"
-  stroke="currentColor"
-  fill="none"
-  stroke-linecap="round"
-  stroke-linejoin="round"
-  xmlns="http://www.w3.org/2000/svg"
->
-  <path stroke="none" d="M0 0h24v24H0z" fill="none" />
-  <path d="M5 12l5 5l10 -10" />
-</svg>
-</button><code></code></pre>
-</div></div>
-</div>
-<div class="border-b border-gray-300 dark:border-gray-700"></div><div class="anchorable"><a href="#example_8" class="anchor" aria-label="Anchor" tabIndex="-1"><svg
-  width="16"
-  height="16"
-  viewBox="0 0 14 14"
-  fill="none"
-  xmlns="http://www.w3.org/2000/svg"
->
-  <g clip-path="url(#clip0_1081_1237)">
-    <path
-      fill-rule="evenodd"
-      clip-rule="evenodd"
-      d="M6.80328 2.8656C6.68736 2.99 6.62425 3.15454 6.62725 3.32456C6.63025 3.49457 6.69913 3.65678 6.81936 3.77702C6.9396 3.89725 7.10181 3.96613 7.27182 3.96913C7.44184 3.97213 7.60638 3.90902 7.73078 3.7931L8.82453 2.69935C8.98712 2.53676 9.18015 2.40778 9.39259 2.31978C9.60503 2.23179 9.83272 2.1865 10.0627 2.1865C10.2926 2.1865 10.5203 2.23179 10.7327 2.31978C10.9452 2.40778 11.1382 2.53676 11.3008 2.69935C11.4634 2.86194 11.5923 3.05497 11.6803 3.2674C11.7683 3.47984 11.8136 3.70753 11.8136 3.93747C11.8136 4.16741 11.7683 4.3951 11.6803 4.60754C11.5923 4.81998 11.4634 5.013 11.3008 5.1756L9.11328 7.3631C8.95075 7.52581 8.75775 7.65488 8.5453 7.74295C8.33285 7.83102 8.10513 7.87635 7.87516 7.87635C7.64518 7.87635 7.41746 7.83102 7.20501 7.74295C6.99256 7.65488 6.79956 7.52581 6.63703 7.3631C6.51263 7.24718 6.34809 7.18407 6.17807 7.18707C6.00806 7.19007 5.84585 7.25894 5.72561 7.37918C5.60538 7.49942 5.5365 7.66163 5.5335 7.83164C5.5305 8.00165 5.59361 8.1662 5.70953 8.2906C5.99391 8.57501 6.33154 8.80062 6.70312 8.95455C7.0747 9.10847 7.47296 9.18769 7.87516 9.18769C8.27736 9.18769 8.67562 9.10847 9.0472 8.95455C9.41878 8.80062 9.7564 8.57501 10.0408 8.2906L12.2283 6.1031C12.8026 5.52874 13.1253 4.74974 13.1253 3.93747C13.1253 3.12521 12.8026 2.34621 12.2283 1.77185C11.6539 1.19749 10.8749 0.874817 10.0627 0.874817C9.25039 0.874817 8.47139 1.19749 7.89703 1.77185L6.80328 2.8656ZM2.69953 11.3006C2.53682 11.1381 2.40774 10.9451 2.31968 10.7326C2.23161 10.5202 2.18628 10.2924 2.18628 10.0625C2.18628 9.8325 2.23161 9.60477 2.31968 9.39233C2.40774 9.17988 2.53682 8.98688 2.69953 8.82435L4.88703 6.63685C5.04956 6.47414 5.24256 6.34506 5.45501 6.25699C5.66746 6.16893 5.89518 6.1236 6.12516 6.1236C6.35513 6.1236 6.58285 6.16893 6.7953 6.25699C7.00775 6.34506 7.20075 6.47414 7.36328 6.63685C7.48768 6.75277 7.65223 6.81588 7.82224 6.81288C7.99225 6.80988 8.15446 6.741 8.2747 6.62077C8.39494 6.50053 8.46381 6.33832 8.46681 6.1683C8.46981 5.99829 8.4067 5.83375 8.29078 5.70935C8.0064 5.42494 7.66878 5.19933 7.2972 5.0454C6.92562 4.89148 6.52736 4.81225 6.12516 4.81225C5.72296 4.81225 5.3247 4.89148 4.95312 5.0454C4.58154 5.19933 4.24391 5.42494 3.95953 5.70935L1.77203 7.89685C1.19767 8.47121 0.875 9.25021 0.875 10.0625C0.875 10.8747 1.19767 11.6537 1.77203 12.2281C2.34639 12.8025 3.12539 13.1251 3.93766 13.1251C4.74992 13.1251 5.52892 12.8025 6.10328 12.2281L7.19703 11.1343C7.31295 11.0099 7.37606 10.8454 7.37306 10.6754C7.37006 10.5054 7.30119 10.3432 7.18095 10.2229C7.06071 10.1027 6.8985 10.0338 6.72849 10.0308C6.55848 10.0278 6.39393 10.0909 6.26953 10.2068L5.17578 11.3006C5.01325 11.4633 4.82025 11.5924 4.6078 11.6805C4.39535 11.7685 4.16763 11.8138 3.93766 11.8138C3.70768 11.8138 3.47996 11.7685 3.26751 11.6805C3.05506 11.5924 2.86206 11.4633 2.69953 11.3006Z"
-      fill="currentColor"
-    />
-  </g>
-  <defs>
-    <clipPath id="clip0_1081_1237">
-      <rect width="14" height="14" fill="white" />
-    </clipPath>
-  </defs>
-</svg>
-</a>
-<h3 class="example-header"><div class="markdown"><p>WireGuard mesh network with IPv6</p>
+<h3 class="example-header"><div class="markdown"><p>Generate addresses in a CIDR range</p>
 </div></h3>
   <div><div class="markdown"><pre class="highlight"><code class="language-ts">import { assertEquals } from &quot;@std/assert&quot;;
-import { cidrv6Addresses, parseCidrv6, stringifyIpv6 } from &quot;@hertzg/ip&quot;;
+import { cidrv4Addresses, parseCidrv4, stringifyIpv4 } from &quot;@hertzg/ip&quot;;
 
-// Allocate unique local addresses for mesh peers
-const meshSubnet = parseCidrv6(&quot;fd00:abcd::/120&quot;);
+const cidr = parseCidrv4(&quot;10.0.0.0/29&quot;); // 8 addresses
 
-// Get addresses for mesh nodes
-const peerAddresses = Array.from(cidrv6Addresses(meshSubnet, { offset: 1, count: 5 }));
-assertEquals(peerAddresses.map(stringifyIpv6), [
-  &quot;fd00:abcd::1&quot;,
-  &quot;fd00:abcd::2&quot;,
-  &quot;fd00:abcd::3&quot;,
-  &quot;fd00:abcd::4&quot;,
-  &quot;fd00:abcd::5&quot;,
+// Iterate all addresses
+const all = Array.from(cidrv4Addresses(cidr));
+assertEquals(all.map(stringifyIpv4), [
+  &quot;10.0.0.0&quot;, &quot;10.0.0.1&quot;, &quot;10.0.0.2&quot;, &quot;10.0.0.3&quot;,
+  &quot;10.0.0.4&quot;, &quot;10.0.0.5&quot;, &quot;10.0.0.6&quot;, &quot;10.0.0.7&quot;,
 ]);
+
+// Skip network address, take first 3 usable
+const usable = Array.from(cidrv4Addresses(cidr, { offset: 1, count: 3 }));
+assertEquals(usable.map(stringifyIpv4), [&quot;10.0.0.1&quot;, &quot;10.0.0.2&quot;, &quot;10.0.0.3&quot;]);
 </code><button class="copyButton" data-copy="import { assertEquals } from &quot;@std/assert&quot;;
-import { cidrv6Addresses, parseCidrv6, stringifyIpv6 } from &quot;@hertzg/ip&quot;;
+import { cidrv4Addresses, parseCidrv4, stringifyIpv4 } from &quot;@hertzg/ip&quot;;
 
-// Allocate unique local addresses for mesh peers
-const meshSubnet = parseCidrv6(&quot;fd00:abcd::/120&quot;);
+const cidr = parseCidrv4(&quot;10.0.0.0/29&quot;); // 8 addresses
 
-// Get addresses for mesh nodes
-const peerAddresses = Array.from(cidrv6Addresses(meshSubnet, { offset: 1, count: 5 }));
-assertEquals(peerAddresses.map(stringifyIpv6), [
-  &quot;fd00:abcd::1&quot;,
-  &quot;fd00:abcd::2&quot;,
-  &quot;fd00:abcd::3&quot;,
-  &quot;fd00:abcd::4&quot;,
-  &quot;fd00:abcd::5&quot;,
+// Iterate all addresses
+const all = Array.from(cidrv4Addresses(cidr));
+assertEquals(all.map(stringifyIpv4), [
+  &quot;10.0.0.0&quot;, &quot;10.0.0.1&quot;, &quot;10.0.0.2&quot;, &quot;10.0.0.3&quot;,
+  &quot;10.0.0.4&quot;, &quot;10.0.0.5&quot;, &quot;10.0.0.6&quot;, &quot;10.0.0.7&quot;,
 ]);
+
+// Skip network address, take first 3 usable
+const usable = Array.from(cidrv4Addresses(cidr, { offset: 1, count: 3 }));
+assertEquals(usable.map(stringifyIpv4), [&quot;10.0.0.1&quot;, &quot;10.0.0.2&quot;, &quot;10.0.0.3&quot;]);
 "><svg
   class="copy"
   width="15"
@@ -1618,13 +1449,13 @@ Variables</h2></div><div class="namespaceSection"><div id="namespace_cidrv4broad
                   </span>
                 </a>
               </li><li>
-                <a href="..&#x2F;.&#x2F;classify.ts&#x2F;~&#x2F;ClassifiedIp.html" title="ClassifiedIp"><div class="docNodeKindIcon"><div class="text-TypeAlias bg-TypeAlias/15 dark:text-TypeAliasDark dark:bg-TypeAliasDark/15" title="Type Alias">T</div></div>
+                <a href="..&#x2F;.&#x2F;classifyv4.ts&#x2F;~&#x2F;ClassificationIpv4.html" title="ClassificationIpv4"><div class="docNodeKindIcon"><div class="text-TypeAlias bg-TypeAlias/15 dark:text-TypeAliasDark dark:bg-TypeAliasDark/15" title="Type Alias">T</div></div>
 <span class="hover:bg-TypeAlias/15 hover:bg-TypeAliasDark/15">
-                    ClassifiedIp
+                    ClassificationIpv4
                   </span>
                 </a>
               </li></ul><a class="flex items-center gap-0.5" href="..&#x2F;.&#x2F;all_symbols.html">
-              <span class="leading-none">view all 142 symbols</span><svg
+              <span class="leading-none">view all 144 symbols</span><svg
   width="16"
   height="16"
   viewBox="0 0 16 16"
@@ -1639,7 +1470,7 @@ Variables</h2></div><div class="namespaceSection"><div id="namespace_cidrv4broad
   />
 </svg>
 </a></nav><nav class="documentNavigation">
-          <h3>Document Navigation</h3><ul><li><a href="#examples" title="Examples">Examples</a></li><li><ul><li><a href="#example_0" title="Parse and stringify IPv4 addresses">Parse and stringify IPv4 addresses</a></li><li><a href="#example_1" title="Parse and stringify IPv6 addresses">Parse and stringify IPv6 addresses</a></li><li><a href="#example_2" title="Parse and work with CIDR blocks">Parse and work with CIDR blocks</a></li><li><a href="#example_3" title="IPv6 CIDR operations">IPv6 CIDR operations</a></li><li><a href="#example_4" title="Check if IPs are within CIDR range">Check if IPs are within CIDR range</a></li><li><a href="#example_5" title="Generate IP ranges with custom patterns">Generate IP ranges with custom patterns</a></li><li><a href="#example_6" title="IP address allocation system">IP address allocation system</a></li><li><a href="#example_7" title="Memory-efficient iteration over large ranges">Memory-efficient iteration over large ranges</a></li><li><a href="#example_8" title="WireGuard mesh network with IPv6">WireGuard mesh network with IPv6</a></li><li><ul><li><a href="#api-reference" title="API Reference">API Reference</a></li><li><ul><li><a href="#universal-(auto-detect-ipv4/ipv6)" title="Universal (auto-detect IPv4/IPv6)">Universal (auto-detect IPv4/IPv6)</a></li><li><a href="#ipv4" title="IPv4">IPv4</a></li><li><a href="#ipv4-cidr" title="IPv4 CIDR">IPv4 CIDR</a></li><li><a href="#ipv6" title="IPv6">IPv6</a></li><li><a href="#ipv6-cidr" title="IPv6 CIDR">IPv6 CIDR</a></li><li><a href="#validation" title="Validation">Validation</a></li><li><a href="#ipv4-classification" title="IPv4 Classification">IPv4 Classification</a></li><li><a href="#ipv6-classification" title="IPv6 Classification">IPv6 Classification</a></li><li><a href="#ipv4-mapped-ipv6-conversion-(4to6)" title="IPv4-Mapped IPv6 Conversion (4to6)">IPv4-Mapped IPv6 Conversion (4to6)</a></li><li><a href="#combined-classification" title="Combined Classification">Combined Classification</a></li><li><a href="#submodules" title="Submodules">Submodules</a></li></ul></li><li><a href="#features" title="Features">Features</a></li><li><a href="#basic-ipv4-operations" title="Basic IPv4 Operations">Basic IPv4 Operations</a></li></ul></li><li><a href="#mod_ts_functions" title="Functions">Functions</a></li><li><ul><li><a href="#namespace_cidrv4addresses" title="cidrv4Addresses">cidrv4Addresses</a></li><li><a href="#namespace_cidrv4contains" title="cidrv4Contains">cidrv4Contains</a></li><li><a href="#namespace_cidrv4firstaddress" title="cidrv4FirstAddress">cidrv4FirstAddress</a></li><li><a href="#namespace_cidrv4fromcidrv64mapped" title="cidrv4FromCidrv64Mapped">cidrv4FromCidrv64Mapped</a></li><li><a href="#namespace_cidrv4lastaddress" title="cidrv4LastAddress">cidrv4LastAddress</a></li><li><a href="#namespace_cidrv4mask" title="cidrv4Mask">cidrv4Mask</a></li><li><a href="#namespace_cidrv4size" title="cidrv4Size">cidrv4Size</a></li><li><a href="#namespace_cidrv4tocidrv64mapped" title="cidrv4ToCidrv64Mapped">cidrv4ToCidrv64Mapped</a></li><li><a href="#namespace_cidrv6addresses" title="cidrv6Addresses">cidrv6Addresses</a></li><li><a href="#namespace_cidrv6contains" title="cidrv6Contains">cidrv6Contains</a></li><li><a href="#namespace_cidrv6firstaddress" title="cidrv6FirstAddress">cidrv6FirstAddress</a></li><li><a href="#namespace_cidrv6lastaddress" title="cidrv6LastAddress">cidrv6LastAddress</a></li><li><a href="#namespace_cidrv6mask" title="cidrv6Mask">cidrv6Mask</a></li><li><a href="#namespace_cidrv6size" title="cidrv6Size">cidrv6Size</a></li><li><a href="#namespace_classifyip" title="classifyIp">classifyIp</a></li><li><a href="#namespace_classifyipv4" title="classifyIpv4">classifyIpv4</a></li><li><a href="#namespace_classifyipv6" title="classifyIpv6">classifyIpv6</a></li><li><a href="#namespace_compressipv6" title="compressIpv6">compressIpv6</a></li><li><a href="#namespace_expandipv6" title="expandIpv6">expandIpv6</a></li><li><a href="#namespace_ipv4from64mapped" title="ipv4From64Mapped">ipv4From64Mapped</a></li><li><a href="#namespace_ipv4to64mapped" title="ipv4To64Mapped">ipv4To64Mapped</a></li><li><a href="#namespace_isipv4benchmarking" title="isIpv4Benchmarking">isIpv4Benchmarking</a></li><li><a href="#namespace_isipv4broadcast" title="isIpv4Broadcast">isIpv4Broadcast</a></li><li><a href="#namespace_isipv4cgnat" title="isIpv4CgNat">isIpv4CgNat</a></li><li><a href="#namespace_isipv4documentation" title="isIpv4Documentation">isIpv4Documentation</a></li><li><a href="#namespace_isipv4linklocal" title="isIpv4LinkLocal">isIpv4LinkLocal</a></li><li><a href="#namespace_isipv4loopback" title="isIpv4Loopback">isIpv4Loopback</a></li><li><a href="#namespace_isipv4multicast" title="isIpv4Multicast">isIpv4Multicast</a></li><li><a href="#namespace_isipv4private" title="isIpv4Private">isIpv4Private</a></li><li><a href="#namespace_isipv4public" title="isIpv4Public">isIpv4Public</a></li><li><a href="#namespace_isipv4reserved" title="isIpv4Reserved">isIpv4Reserved</a></li><li><a href="#namespace_isipv4thisnetwork" title="isIpv4ThisNetwork">isIpv4ThisNetwork</a></li><li><a href="#namespace_isipv6benchmarking" title="isIpv6Benchmarking">isIpv6Benchmarking</a></li><li><a href="#namespace_isipv6documentation" title="isIpv6Documentation">isIpv6Documentation</a></li><li><a href="#namespace_isipv6globalunicast" title="isIpv6GlobalUnicast">isIpv6GlobalUnicast</a></li><li><a href="#namespace_isipv6ipv4mapped" title="isIpv6Ipv4Mapped">isIpv6Ipv4Mapped</a></li><li><a href="#namespace_isipv6ipv4translated" title="isIpv6Ipv4Translated">isIpv6Ipv4Translated</a></li><li><a href="#namespace_isipv6linklocal" title="isIpv6LinkLocal">isIpv6LinkLocal</a></li><li><a href="#namespace_isipv6loopback" title="isIpv6Loopback">isIpv6Loopback</a></li><li><a href="#namespace_isipv6multicast" title="isIpv6Multicast">isIpv6Multicast</a></li><li><a href="#namespace_isipv6orchidv2" title="isIpv6Orchidv2">isIpv6Orchidv2</a></li><li><a href="#namespace_isipv6teredo" title="isIpv6Teredo">isIpv6Teredo</a></li><li><a href="#namespace_isipv6uniquelocal" title="isIpv6UniqueLocal">isIpv6UniqueLocal</a></li><li><a href="#namespace_isipv6unspecified" title="isIpv6Unspecified">isIpv6Unspecified</a></li><li><a href="#namespace_isvalidcidr" title="isValidCidr">isValidCidr</a></li><li><a href="#namespace_isvalidcidrv4" title="isValidCidrv4">isValidCidrv4</a></li><li><a href="#namespace_isvalidcidrv6" title="isValidCidrv6">isValidCidrv6</a></li><li><a href="#namespace_isvalidip" title="isValidIp">isValidIp</a></li><li><a href="#namespace_isvalidipv4" title="isValidIpv4">isValidIpv4</a></li><li><a href="#namespace_isvalidipv6" title="isValidIpv6">isValidIpv6</a></li><li><a href="#namespace_parsecidr" title="parseCidr">parseCidr</a></li><li><a href="#namespace_parsecidrv4" title="parseCidrv4">parseCidrv4</a></li><li><a href="#namespace_parsecidrv6" title="parseCidrv6">parseCidrv6</a></li><li><a href="#namespace_parseip" title="parseIp">parseIp</a></li><li><a href="#namespace_parseipv4" title="parseIpv4">parseIpv4</a></li><li><a href="#namespace_parseipv6" title="parseIpv6">parseIpv6</a></li><li><a href="#namespace_stringifycidr" title="stringifyCidr">stringifyCidr</a></li><li><a href="#namespace_stringifycidrv4" title="stringifyCidrv4">stringifyCidrv4</a></li><li><a href="#namespace_stringifycidrv6" title="stringifyCidrv6">stringifyCidrv6</a></li><li><a href="#namespace_stringifyip" title="stringifyIp">stringifyIp</a></li><li><a href="#namespace_stringifyipv4" title="stringifyIpv4">stringifyIpv4</a></li><li><a href="#namespace_stringifyipv6" title="stringifyIpv6">stringifyIpv6</a></li></ul></li><li><a href="#mod_ts_type-aliases" title="Type Aliases">Type Aliases</a></li><li><ul><li><a href="#namespace_cidrv4" title="Cidrv4">Cidrv4</a></li><li><a href="#namespace_cidrv6" title="Cidrv6">Cidrv6</a></li><li><a href="#namespace_classificationipv4" title="ClassificationIpv4">ClassificationIpv4</a></li><li><a href="#namespace_classificationipv6" title="ClassificationIpv6">ClassificationIpv6</a></li><li><a href="#namespace_classifiedip" title="ClassifiedIp">ClassifiedIp</a></li><li><a href="#namespace_classifiedipv4" title="ClassifiedIpv4">ClassifiedIpv4</a></li><li><a href="#namespace_classifiedipv6" title="ClassifiedIpv6">ClassifiedIpv6</a></li></ul></li><li><a href="#mod_ts_variables" title="Variables">Variables</a></li><li><ul><li><a href="#namespace_cidrv4broadcastaddress" title="cidrv4BroadcastAddress">cidrv4BroadcastAddress</a></li><li><a href="#namespace_cidrv4networkaddress" title="cidrv4NetworkAddress">cidrv4NetworkAddress</a></li></ul></li></ul></li></ul></nav></div>
+          <h3>Document Navigation</h3><ul><li><a href="#examples" title="Examples">Examples</a></li><li><ul><li><a href="#example_0" title="Normalize client addresses from a dual-stack server">Normalize client addresses from a dual-stack server</a></li><li><a href="#example_1" title="Check if a client IP is in a set of trusted CIDR ranges">Check if a client IP is in a set of trusted CIDR ranges</a></li><li><a href="#example_2" title="Classify addresses for logging, analytics, or input validation">Classify addresses for logging, analytics, or input validation</a></li><li><a href="#example_3" title="Parse and stringify IPv4 and IPv6 addresses">Parse and stringify IPv4 and IPv6 addresses</a></li><li><a href="#example_4" title="Compute network and broadcast addresses from CIDR">Compute network and broadcast addresses from CIDR</a></li><li><a href="#example_5" title="Check if IPs fall within a CIDR range">Check if IPs fall within a CIDR range</a></li><li><a href="#example_6" title="Generate addresses in a CIDR range">Generate addresses in a CIDR range</a></li><li><ul><li><a href="#api-reference" title="API Reference">API Reference</a></li><li><ul><li><a href="#universal-(auto-detect-ipv4/ipv6)" title="Universal (auto-detect IPv4/IPv6)">Universal (auto-detect IPv4/IPv6)</a></li><li><a href="#ipv4" title="IPv4">IPv4</a></li><li><a href="#ipv4-cidr" title="IPv4 CIDR">IPv4 CIDR</a></li><li><a href="#ipv6" title="IPv6">IPv6</a></li><li><a href="#ipv6-cidr" title="IPv6 CIDR">IPv6 CIDR</a></li><li><a href="#validation" title="Validation">Validation</a></li><li><a href="#ipv4-classification" title="IPv4 Classification">IPv4 Classification</a></li><li><a href="#ipv6-classification" title="IPv6 Classification">IPv6 Classification</a></li><li><a href="#ipv4-mapped-ipv6-conversion-(4to6)" title="IPv4-Mapped IPv6 Conversion (4to6)">IPv4-Mapped IPv6 Conversion (4to6)</a></li><li><a href="#combined-classification" title="Combined Classification">Combined Classification</a></li><li><a href="#submodules" title="Submodules">Submodules</a></li></ul></li><li><a href="#features" title="Features">Features</a></li><li><a href="#dual-stack-server" title="Dual-Stack Server">Dual-Stack Server</a></li></ul></li><li><a href="#mod_ts_functions" title="Functions">Functions</a></li><li><ul><li><a href="#namespace_cidrv4addresses" title="cidrv4Addresses">cidrv4Addresses</a></li><li><a href="#namespace_cidrv4contains" title="cidrv4Contains">cidrv4Contains</a></li><li><a href="#namespace_cidrv4firstaddress" title="cidrv4FirstAddress">cidrv4FirstAddress</a></li><li><a href="#namespace_cidrv4fromcidrv64mapped" title="cidrv4FromCidrv64Mapped">cidrv4FromCidrv64Mapped</a></li><li><a href="#namespace_cidrv4lastaddress" title="cidrv4LastAddress">cidrv4LastAddress</a></li><li><a href="#namespace_cidrv4mask" title="cidrv4Mask">cidrv4Mask</a></li><li><a href="#namespace_cidrv4size" title="cidrv4Size">cidrv4Size</a></li><li><a href="#namespace_cidrv4tocidrv64mapped" title="cidrv4ToCidrv64Mapped">cidrv4ToCidrv64Mapped</a></li><li><a href="#namespace_cidrv6addresses" title="cidrv6Addresses">cidrv6Addresses</a></li><li><a href="#namespace_cidrv6contains" title="cidrv6Contains">cidrv6Contains</a></li><li><a href="#namespace_cidrv6firstaddress" title="cidrv6FirstAddress">cidrv6FirstAddress</a></li><li><a href="#namespace_cidrv6lastaddress" title="cidrv6LastAddress">cidrv6LastAddress</a></li><li><a href="#namespace_cidrv6mask" title="cidrv6Mask">cidrv6Mask</a></li><li><a href="#namespace_cidrv6size" title="cidrv6Size">cidrv6Size</a></li><li><a href="#namespace_classifyip" title="classifyIp">classifyIp</a></li><li><a href="#namespace_classifyipv4" title="classifyIpv4">classifyIpv4</a></li><li><a href="#namespace_classifyipv6" title="classifyIpv6">classifyIpv6</a></li><li><a href="#namespace_compressipv6" title="compressIpv6">compressIpv6</a></li><li><a href="#namespace_expandipv6" title="expandIpv6">expandIpv6</a></li><li><a href="#namespace_ipv4from64mapped" title="ipv4From64Mapped">ipv4From64Mapped</a></li><li><a href="#namespace_ipv4to64mapped" title="ipv4To64Mapped">ipv4To64Mapped</a></li><li><a href="#namespace_isipv4benchmarking" title="isIpv4Benchmarking">isIpv4Benchmarking</a></li><li><a href="#namespace_isipv4broadcast" title="isIpv4Broadcast">isIpv4Broadcast</a></li><li><a href="#namespace_isipv4cgnat" title="isIpv4CgNat">isIpv4CgNat</a></li><li><a href="#namespace_isipv4documentation" title="isIpv4Documentation">isIpv4Documentation</a></li><li><a href="#namespace_isipv4linklocal" title="isIpv4LinkLocal">isIpv4LinkLocal</a></li><li><a href="#namespace_isipv4loopback" title="isIpv4Loopback">isIpv4Loopback</a></li><li><a href="#namespace_isipv4multicast" title="isIpv4Multicast">isIpv4Multicast</a></li><li><a href="#namespace_isipv4private" title="isIpv4Private">isIpv4Private</a></li><li><a href="#namespace_isipv4public" title="isIpv4Public">isIpv4Public</a></li><li><a href="#namespace_isipv4reserved" title="isIpv4Reserved">isIpv4Reserved</a></li><li><a href="#namespace_isipv4thisnetwork" title="isIpv4ThisNetwork">isIpv4ThisNetwork</a></li><li><a href="#namespace_isipv6benchmarking" title="isIpv6Benchmarking">isIpv6Benchmarking</a></li><li><a href="#namespace_isipv6documentation" title="isIpv6Documentation">isIpv6Documentation</a></li><li><a href="#namespace_isipv6globalunicast" title="isIpv6GlobalUnicast">isIpv6GlobalUnicast</a></li><li><a href="#namespace_isipv6ipv4mapped" title="isIpv6Ipv4Mapped">isIpv6Ipv4Mapped</a></li><li><a href="#namespace_isipv6ipv4translated" title="isIpv6Ipv4Translated">isIpv6Ipv4Translated</a></li><li><a href="#namespace_isipv6linklocal" title="isIpv6LinkLocal">isIpv6LinkLocal</a></li><li><a href="#namespace_isipv6loopback" title="isIpv6Loopback">isIpv6Loopback</a></li><li><a href="#namespace_isipv6multicast" title="isIpv6Multicast">isIpv6Multicast</a></li><li><a href="#namespace_isipv6orchidv2" title="isIpv6Orchidv2">isIpv6Orchidv2</a></li><li><a href="#namespace_isipv6teredo" title="isIpv6Teredo">isIpv6Teredo</a></li><li><a href="#namespace_isipv6uniquelocal" title="isIpv6UniqueLocal">isIpv6UniqueLocal</a></li><li><a href="#namespace_isipv6unspecified" title="isIpv6Unspecified">isIpv6Unspecified</a></li><li><a href="#namespace_isvalidcidr" title="isValidCidr">isValidCidr</a></li><li><a href="#namespace_isvalidcidrv4" title="isValidCidrv4">isValidCidrv4</a></li><li><a href="#namespace_isvalidcidrv6" title="isValidCidrv6">isValidCidrv6</a></li><li><a href="#namespace_isvalidip" title="isValidIp">isValidIp</a></li><li><a href="#namespace_isvalidipv4" title="isValidIpv4">isValidIpv4</a></li><li><a href="#namespace_isvalidipv6" title="isValidIpv6">isValidIpv6</a></li><li><a href="#namespace_parsecidr" title="parseCidr">parseCidr</a></li><li><a href="#namespace_parsecidrv4" title="parseCidrv4">parseCidrv4</a></li><li><a href="#namespace_parsecidrv6" title="parseCidrv6">parseCidrv6</a></li><li><a href="#namespace_parseip" title="parseIp">parseIp</a></li><li><a href="#namespace_parseipv4" title="parseIpv4">parseIpv4</a></li><li><a href="#namespace_parseipv6" title="parseIpv6">parseIpv6</a></li><li><a href="#namespace_stringifycidr" title="stringifyCidr">stringifyCidr</a></li><li><a href="#namespace_stringifycidrv4" title="stringifyCidrv4">stringifyCidrv4</a></li><li><a href="#namespace_stringifycidrv6" title="stringifyCidrv6">stringifyCidrv6</a></li><li><a href="#namespace_stringifyip" title="stringifyIp">stringifyIp</a></li><li><a href="#namespace_stringifyipv4" title="stringifyIpv4">stringifyIpv4</a></li><li><a href="#namespace_stringifyipv6" title="stringifyIpv6">stringifyIpv6</a></li></ul></li><li><a href="#mod_ts_type-aliases" title="Type Aliases">Type Aliases</a></li><li><ul><li><a href="#namespace_cidrv4" title="Cidrv4">Cidrv4</a></li><li><a href="#namespace_cidrv6" title="Cidrv6">Cidrv6</a></li><li><a href="#namespace_classificationipv4" title="ClassificationIpv4">ClassificationIpv4</a></li><li><a href="#namespace_classificationipv6" title="ClassificationIpv6">ClassificationIpv6</a></li><li><a href="#namespace_classifiedip" title="ClassifiedIp">ClassifiedIp</a></li><li><a href="#namespace_classifiedipv4" title="ClassifiedIpv4">ClassifiedIpv4</a></li><li><a href="#namespace_classifiedipv6" title="ClassifiedIpv6">ClassifiedIpv6</a></li></ul></li><li><a href="#mod_ts_variables" title="Variables">Variables</a></li><li><ul><li><a href="#namespace_cidrv4broadcastaddress" title="cidrv4BroadcastAddress">cidrv4BroadcastAddress</a></li><li><a href="#namespace_cidrv4networkaddress" title="cidrv4NetworkAddress">cidrv4NetworkAddress</a></li></ul></li></ul></li></ul></nav></div>
   </div></div>
 </div>
 </div>
