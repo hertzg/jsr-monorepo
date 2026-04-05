@@ -193,6 +193,7 @@
  * - {@link cidrOverlaps}: Check if two CIDRs share at least one address (auto-detect version)
  * - {@link cidrIntersect}: Return the overlapping CIDR block, or null (auto-detect version)
  * - {@link cidrSubtract}: Return CIDR blocks in A but not in B (auto-detect version)
+ * - {@link cidrMerge}: Merge CIDR blocks into the minimal covering set (auto-detect version)
  * - {@link isValidCidr}: Check if a string is valid CIDR notation (IPv4 or IPv6)
  *
  * ### IPv4
@@ -210,6 +211,7 @@
  * - {@link cidrv4Overlaps}: Check if two IPv4 CIDRs share at least one address
  * - {@link cidrv4Intersect}: Return the overlapping IPv4 CIDR block, or null
  * - {@link cidrv4Subtract}: Return IPv4 CIDR blocks in A but not in B
+ * - {@link cidrv4Merge}: Merge IPv4 CIDR blocks into the minimal covering set
  * - {@link cidrv4FirstAddress}: Get first address in CIDR range
  * - {@link cidrv4LastAddress}: Get last address in CIDR range
  * - {@link cidrv4NetworkAddress}: Alias for cidrv4FirstAddress
@@ -235,6 +237,7 @@
  * - {@link cidrv6Overlaps}: Check if two IPv6 CIDRs share at least one address
  * - {@link cidrv6Intersect}: Return the overlapping IPv6 CIDR block, or null
  * - {@link cidrv6Subtract}: Return IPv6 CIDR blocks in A but not in B
+ * - {@link cidrv6Merge}: Merge IPv6 CIDR blocks into the minimal covering set
  * - {@link cidrv6FirstAddress}: Get first address in CIDR range
  * - {@link cidrv6LastAddress}: Get last address in CIDR range
  * - {@link cidrv6Size}: Get total number of addresses in CIDR range
@@ -310,6 +313,7 @@ export { parseIp, stringifyIp } from "./ip.ts";
 export {
   cidrContainsCidr,
   cidrIntersect,
+  cidrMerge,
   cidrOverlaps,
   cidrSubtract,
   parseCidr,
@@ -340,6 +344,7 @@ export {
   cidrv4Intersect,
   cidrv4LastAddress,
   cidrv4Mask,
+  cidrv4Merge,
   cidrv4NetworkAddress,
   cidrv4Overlaps,
   cidrv4Size,
@@ -377,6 +382,7 @@ export {
   cidrv6Intersect,
   cidrv6LastAddress,
   cidrv6Mask,
+  cidrv6Merge,
   cidrv6Overlaps,
   cidrv6Size,
   cidrv6Subtract,

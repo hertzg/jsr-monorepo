@@ -5,6 +5,7 @@ import {
   cidrv4Contains,
   cidrv4ContainsCidr,
   cidrv4Intersect,
+  cidrv4Merge,
   cidrv4NetworkAddress,
   cidrv4Mask,
   cidrv4Overlaps,
@@ -937,5 +938,151 @@ Deno.test("cidrv4Subtract", async (t) => {
       "192.168.1.128/25",
       "192.168.1.0/26",
     ]);
+  });
+});
+
+Deno.test("cidrv4Merge", async (t) => {
+  await t.step("empty input", () => {
+    assertEquals(cidrv4Merge([]), []);
+  });
+
+  await t.step("single CIDR", () => {
+    assertEquals(
+      cidrv4Merge([parseCidrv4("10.0.0.0/24")]).map(stringifyCidrv4),
+      ["10.0.0.0/24"],
+    );
+  });
+
+  await t.step("single non-normalized", () => {
+    assertEquals(
+      cidrv4Merge([parseCidrv4("10.0.0.100/24")]).map(stringifyCidrv4),
+      ["10.0.0.0/24"],
+    );
+  });
+
+  await t.step("non-overlapping sorted", () => {
+    assertEquals(
+      cidrv4Merge([
+        parseCidrv4("192.168.1.0/24"),
+        parseCidrv4("10.0.0.0/24"),
+      ]).map(stringifyCidrv4),
+      ["10.0.0.0/24", "192.168.1.0/24"],
+    );
+  });
+
+  await t.step("exact duplicates", () => {
+    assertEquals(
+      cidrv4Merge([
+        parseCidrv4("10.0.0.0/24"),
+        parseCidrv4("10.0.0.0/24"),
+      ]).map(stringifyCidrv4),
+      ["10.0.0.0/24"],
+    );
+  });
+
+  await t.step("contained removed", () => {
+    assertEquals(
+      cidrv4Merge([
+        parseCidrv4("10.0.0.0/16"),
+        parseCidrv4("10.0.1.0/24"),
+      ]).map(stringifyCidrv4),
+      ["10.0.0.0/16"],
+    );
+  });
+
+  await t.step("contained (smaller first)", () => {
+    assertEquals(
+      cidrv4Merge([
+        parseCidrv4("10.0.1.0/24"),
+        parseCidrv4("10.0.0.0/16"),
+      ]).map(stringifyCidrv4),
+      ["10.0.0.0/16"],
+    );
+  });
+
+  await t.step("adjacent siblings merged", () => {
+    assertEquals(
+      cidrv4Merge([
+        parseCidrv4("10.0.0.0/25"),
+        parseCidrv4("10.0.0.128/25"),
+      ]).map(stringifyCidrv4),
+      ["10.0.0.0/24"],
+    );
+  });
+
+  await t.step("non-adjacent same prefix", () => {
+    assertEquals(
+      cidrv4Merge([
+        parseCidrv4("10.0.0.0/25"),
+        parseCidrv4("10.0.1.128/25"),
+      ]).map(stringifyCidrv4),
+      ["10.0.0.0/25", "10.0.1.128/25"],
+    );
+  });
+
+  await t.step("chain merge (cascade)", () => {
+    assertEquals(
+      cidrv4Merge([
+        parseCidrv4("10.0.0.0/25"),
+        parseCidrv4("10.0.0.128/25"),
+        parseCidrv4("10.0.1.0/25"),
+        parseCidrv4("10.0.1.128/25"),
+      ]).map(stringifyCidrv4),
+      ["10.0.0.0/23"],
+    );
+  });
+
+  await t.step("deep cascade (/32 siblings)", () => {
+    assertEquals(
+      cidrv4Merge([
+        parseCidrv4("10.0.0.0/32"),
+        parseCidrv4("10.0.0.1/32"),
+      ]).map(stringifyCidrv4),
+      ["10.0.0.0/31"],
+    );
+  });
+
+  await t.step("/0 absorbs everything", () => {
+    assertEquals(
+      cidrv4Merge([
+        parseCidrv4("0.0.0.0/0"),
+        parseCidrv4("10.0.0.0/8"),
+        parseCidrv4("192.168.0.0/16"),
+      ]).map(stringifyCidrv4),
+      ["0.0.0.0/0"],
+    );
+  });
+
+  await t.step("two /1 blocks merge to /0", () => {
+    assertEquals(
+      cidrv4Merge([
+        parseCidrv4("0.0.0.0/1"),
+        parseCidrv4("128.0.0.0/1"),
+      ]).map(stringifyCidrv4),
+      ["0.0.0.0/0"],
+    );
+  });
+
+  await t.step("mixed containment + adjacency", () => {
+    assertEquals(
+      cidrv4Merge([
+        parseCidrv4("10.0.0.0/24"),
+        parseCidrv4("10.0.0.0/25"),
+        parseCidrv4("10.0.1.0/24"),
+      ]).map(stringifyCidrv4),
+      ["10.0.0.0/23"],
+    );
+  });
+
+  await t.step("route aggregation (real-world)", () => {
+    assertEquals(
+      cidrv4Merge([
+        parseCidrv4("198.51.100.0/25"),
+        parseCidrv4("198.51.100.128/26"),
+        parseCidrv4("198.51.100.192/26"),
+        parseCidrv4("203.0.113.0/24"),
+      ]).map(stringifyCidrv4),
+      ["198.51.100.0/24", "203.0.113.0/24"],
+    );
   });
 });

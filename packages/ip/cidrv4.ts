@@ -727,3 +727,107 @@ export function* cidrv4Addresses(
     i++;
   }
 }
+
+/**
+ * Checks if two IPv4 CIDR blocks are sibling halves of the same parent block.
+ *
+ * @param a The first CIDR block
+ * @param b The second CIDR block
+ * @returns true if a and b are siblings
+ */
+function cidrv4AreSiblings(a: Cidrv4, b: Cidrv4): boolean {
+  if (a.prefixLength !== b.prefixLength || a.prefixLength === 0) return false;
+  const parentMask = cidrv4Mask(a.prefixLength - 1);
+  return ((a.address & parentMask) >>> 0) === ((b.address & parentMask) >>> 0);
+}
+
+/**
+ * Merges IPv4 CIDR blocks into the minimal covering set.
+ *
+ * Takes an array of possibly overlapping, adjacent, or redundant CIDR
+ * blocks and returns the minimal set of non-overlapping CIDR prefix
+ * blocks covering the exact same address space.
+ *
+ * @param cidrs The CIDR blocks to merge
+ * @returns Minimal set of non-overlapping CIDR blocks, sorted by address
+ *
+ * @example Compact a firewall allowlist
+ * ```ts
+ * import { assertEquals } from "@std/assert";
+ * import { cidrv4Merge, parseCidrv4, stringifyCidrv4 } from "@hertzg/ip/cidrv4";
+ *
+ * const rules = [
+ *   parseCidrv4("10.0.1.0/24"),
+ *   parseCidrv4("10.0.0.0/24"),
+ *   parseCidrv4("10.0.0.128/25"),
+ * ];
+ * const compacted = cidrv4Merge(rules);
+ * assertEquals(compacted.map(stringifyCidrv4), ["10.0.0.0/23"]);
+ * ```
+ *
+ * @example Aggregate routes
+ * ```ts
+ * import { assertEquals } from "@std/assert";
+ * import { cidrv4Merge, parseCidrv4, stringifyCidrv4 } from "@hertzg/ip/cidrv4";
+ *
+ * const routes = [
+ *   parseCidrv4("198.51.100.0/25"),
+ *   parseCidrv4("198.51.100.128/26"),
+ *   parseCidrv4("198.51.100.192/26"),
+ *   parseCidrv4("203.0.113.0/24"),
+ * ];
+ * assertEquals(cidrv4Merge(routes).map(stringifyCidrv4), [
+ *   "198.51.100.0/24",
+ *   "203.0.113.0/24",
+ * ]);
+ * ```
+ */
+export function cidrv4Merge(cidrs: readonly Cidrv4[]): Cidrv4[] {
+  if (cidrs.length === 0) return [];
+
+  // Step 1: Normalize - apply mask to get canonical network addresses
+  let list: Cidrv4[] = cidrs.map((cidr) => ({
+    address: cidrv4FirstAddress(cidr),
+    prefixLength: cidr.prefixLength,
+  }));
+
+  // Step 2: Sort by (address ascending, prefixLength ascending)
+  list.sort((a, b) => a.address - b.address || a.prefixLength - b.prefixLength);
+
+  // Step 3: Remove contained blocks
+  const deduped: Cidrv4[] = [];
+  let currentLast = -1;
+  for (const cidr of list) {
+    const last = cidrv4LastAddress(cidr);
+    if (last <= currentLast) continue;
+    deduped.push(cidr);
+    currentLast = last;
+  }
+  list = deduped;
+
+  // Step 4: Merge adjacent siblings iteratively until stable
+  let changed = true;
+  while (changed) {
+    changed = false;
+    const merged: Cidrv4[] = [];
+    let i = 0;
+    while (i < list.length) {
+      if (
+        i + 1 < list.length && cidrv4AreSiblings(list[i], list[i + 1])
+      ) {
+        merged.push({
+          address: list[i].address,
+          prefixLength: list[i].prefixLength - 1,
+        });
+        i += 2;
+        changed = true;
+      } else {
+        merged.push(list[i]);
+        i += 1;
+      }
+    }
+    list = merged;
+  }
+
+  return list;
+}

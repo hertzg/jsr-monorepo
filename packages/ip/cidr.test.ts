@@ -2,6 +2,7 @@ import { assert, assertEquals, assertThrows } from "@std/assert";
 import {
   cidrContainsCidr,
   cidrIntersect,
+  cidrMerge,
   cidrOverlaps,
   cidrSubtract,
   parseCidr,
@@ -233,5 +234,33 @@ Deno.test("cidrSubtract", async (t) => {
       () => cidrSubtract(parseCidr("2001:db8::/32"), parseCidr("10.0.0.0/8")),
       TypeError,
     );
+  });
+});
+
+Deno.test("cidrMerge", async (t) => {
+  await t.step("merges IPv4 array", () => {
+    const result = cidrMerge([
+      parseCidr("10.0.0.0/25"),
+      parseCidr("10.0.0.128/25"),
+    ]);
+    assertEquals(
+      result.map((c) => stringifyCidr(c as Cidrv4)),
+      ["10.0.0.0/24"],
+    );
+  });
+
+  await t.step("merges IPv6 array", () => {
+    const result = cidrMerge([
+      parseCidr("2001:db8::/33"),
+      parseCidr("2001:db8:8000::/33"),
+    ]);
+    assertEquals(
+      result.map((c) => stringifyCidr(c as Cidrv6)),
+      ["2001:db8::/32"],
+    );
+  });
+
+  await t.step("empty array returns empty", () => {
+    assertEquals(cidrMerge([]), []);
   });
 });

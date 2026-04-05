@@ -665,3 +665,103 @@ export function* cidrv6Addresses(
     i++;
   }
 }
+
+/**
+ * Checks if two IPv6 CIDR blocks are sibling halves of the same parent block.
+ *
+ * @param a The first CIDR block
+ * @param b The second CIDR block
+ * @returns true if a and b are siblings
+ */
+function cidrv6AreSiblings(a: Cidrv6, b: Cidrv6): boolean {
+  if (a.prefixLength !== b.prefixLength || a.prefixLength === 0) return false;
+  const parentMask = cidrv6Mask(a.prefixLength - 1);
+  return (a.address & parentMask) === (b.address & parentMask);
+}
+
+/**
+ * Merges IPv6 CIDR blocks into the minimal covering set.
+ *
+ * Takes an array of possibly overlapping, adjacent, or redundant CIDR
+ * blocks and returns the minimal set of non-overlapping CIDR prefix
+ * blocks covering the exact same address space.
+ *
+ * @param cidrs The CIDR blocks to merge
+ * @returns Minimal set of non-overlapping CIDR blocks, sorted by address
+ *
+ * @example Compact adjacent allocations
+ * ```ts
+ * import { assertEquals } from "@std/assert";
+ * import { cidrv6Merge, parseCidrv6, stringifyCidrv6 } from "@hertzg/ip/cidrv6";
+ *
+ * const blocks = [
+ *   parseCidrv6("2001:db8::/33"),
+ *   parseCidrv6("2001:db8:8000::/33"),
+ * ];
+ * assertEquals(cidrv6Merge(blocks).map(stringifyCidrv6), ["2001:db8::/32"]);
+ * ```
+ *
+ * @example Remove contained and merge siblings
+ * ```ts
+ * import { assertEquals } from "@std/assert";
+ * import { cidrv6Merge, parseCidrv6, stringifyCidrv6 } from "@hertzg/ip/cidrv6";
+ *
+ * const blocks = [
+ *   parseCidrv6("2001:db8::/32"),
+ *   parseCidrv6("2001:db8:1::/48"),
+ * ];
+ * assertEquals(cidrv6Merge(blocks).map(stringifyCidrv6), ["2001:db8::/32"]);
+ * ```
+ */
+export function cidrv6Merge(cidrs: readonly Cidrv6[]): Cidrv6[] {
+  if (cidrs.length === 0) return [];
+
+  // Step 1: Normalize - apply mask to get canonical network addresses
+  let list: Cidrv6[] = cidrs.map((cidr) => ({
+    address: cidrv6FirstAddress(cidr),
+    prefixLength: cidr.prefixLength,
+  }));
+
+  // Step 2: Sort by (address ascending, prefixLength ascending)
+  list.sort((a, b) =>
+    Number(a.address < b.address ? -1n : a.address > b.address ? 1n : 0n) ||
+    a.prefixLength - b.prefixLength
+  );
+
+  // Step 3: Remove contained blocks
+  const deduped: Cidrv6[] = [];
+  let currentLast = -1n;
+  for (const cidr of list) {
+    const last = cidrv6LastAddress(cidr);
+    if (last <= currentLast) continue;
+    deduped.push(cidr);
+    currentLast = last;
+  }
+  list = deduped;
+
+  // Step 4: Merge adjacent siblings iteratively until stable
+  let changed = true;
+  while (changed) {
+    changed = false;
+    const merged: Cidrv6[] = [];
+    let i = 0;
+    while (i < list.length) {
+      if (
+        i + 1 < list.length && cidrv6AreSiblings(list[i], list[i + 1])
+      ) {
+        merged.push({
+          address: list[i].address,
+          prefixLength: list[i].prefixLength - 1,
+        });
+        i += 2;
+        changed = true;
+      } else {
+        merged.push(list[i]);
+        i += 1;
+      }
+    }
+    list = merged;
+  }
+
+  return list;
+}

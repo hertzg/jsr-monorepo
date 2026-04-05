@@ -3,7 +3,7 @@
  *
  * This module provides {@link parseCidr}, {@link stringifyCidr},
  * {@link isValidCidr}, {@link cidrContainsCidr}, {@link cidrOverlaps},
- * {@link cidrIntersect}, and {@link cidrSubtract}
+ * {@link cidrIntersect}, {@link cidrSubtract}, and {@link cidrMerge}
  * that auto-detect IPv4 vs IPv6 and delegate to the appropriate
  * version-specific function.
  *
@@ -34,6 +34,7 @@ import {
   type Cidrv4,
   cidrv4ContainsCidr,
   cidrv4Intersect,
+  cidrv4Merge,
   cidrv4Overlaps,
   cidrv4Subtract,
   parseCidrv4,
@@ -43,6 +44,7 @@ import {
   type Cidrv6,
   cidrv6ContainsCidr,
   cidrv6Intersect,
+  cidrv6Merge,
   cidrv6Overlaps,
   cidrv6Subtract,
   parseCidrv6,
@@ -387,4 +389,59 @@ export function cidrSubtract(
     return cidrv6Subtract(a as Cidrv6, b as Cidrv6);
   }
   return cidrv4Subtract(a as Cidrv4, b as Cidrv4);
+}
+
+/** Merges IPv4 CIDR blocks into the minimal covering set. */
+export function cidrMerge(cidrs: readonly Cidrv4[]): Cidrv4[];
+/** Merges IPv6 CIDR blocks into the minimal covering set. */
+export function cidrMerge(cidrs: readonly Cidrv6[]): Cidrv6[];
+/**
+ * Merges CIDR blocks into the minimal covering set.
+ *
+ * Dispatches to {@link cidrv4Merge} or {@link cidrv6Merge} based on the
+ * address type of the first element. All elements must be the same IP
+ * version.
+ *
+ * @param cidrs The CIDR blocks to merge
+ * @returns Minimal set of non-overlapping CIDR blocks, sorted by address
+ *
+ * @example Merge IPv4 CIDRs
+ * ```ts
+ * import { assertEquals } from "@std/assert";
+ * import { cidrMerge, parseCidr, stringifyCidr } from "@hertzg/ip/cidr";
+ * import type { Cidrv4 } from "@hertzg/ip/cidrv4";
+ *
+ * const result = cidrMerge([parseCidr("10.0.0.0/25"), parseCidr("10.0.0.128/25")]);
+ * assertEquals(result.map((c) => stringifyCidr(c as Cidrv4)), ["10.0.0.0/24"]);
+ * ```
+ *
+ * @example Merge IPv6 CIDRs
+ * ```ts
+ * import { assertEquals } from "@std/assert";
+ * import { cidrMerge, parseCidr, stringifyCidr } from "@hertzg/ip/cidr";
+ * import type { Cidrv6 } from "@hertzg/ip/cidrv6";
+ *
+ * const result = cidrMerge([parseCidr("2001:db8::/33"), parseCidr("2001:db8:8000::/33")]);
+ * assertEquals(result.map((c) => stringifyCidr(c as Cidrv6)), ["2001:db8::/32"]);
+ * ```
+ *
+ * @example Empty array returns empty
+ * ```ts
+ * import { assertEquals } from "@std/assert";
+ * import { cidrMerge } from "@hertzg/ip/cidr";
+ *
+ * assertEquals(cidrMerge([]), []);
+ * ```
+ */
+export function cidrMerge(
+  cidrs: readonly (Cidrv4 | Cidrv6)[],
+): (Cidrv4 | Cidrv6)[];
+export function cidrMerge(
+  cidrs: readonly (Cidrv4 | Cidrv6)[],
+): (Cidrv4 | Cidrv6)[] {
+  if (cidrs.length === 0) return [];
+  if (typeof cidrs[0].address === "bigint") {
+    return cidrv6Merge(cidrs as readonly Cidrv6[]);
+  }
+  return cidrv4Merge(cidrs as readonly Cidrv4[]);
 }
