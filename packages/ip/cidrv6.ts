@@ -526,6 +526,121 @@ export function cidrv6Overlaps(a: Cidrv6, b: Cidrv6): boolean {
  * assertEquals(reverseIps.length, 4); // ::3, ::2, ::1, ::0
  * ```
  */
+/**
+ * Splits an IPv6 CIDR block into its two half-sized children at prefix+1.
+ *
+ * @param cidr The CIDR block to split
+ * @returns A tuple of the lower and upper halves
+ */
+function cidrv6SplitHalves(cidr: Cidrv6): [Cidrv6, Cidrv6] {
+  const newPrefix = cidr.prefixLength + 1;
+  const network = cidrv6FirstAddress(cidr);
+  const lower: Cidrv6 = { address: network, prefixLength: newPrefix };
+  const upper: Cidrv6 = {
+    address: network | (1n << BigInt(127 - cidr.prefixLength)),
+    prefixLength: newPrefix,
+  };
+  return [lower, upper];
+}
+
+/**
+ * Returns the intersection of two IPv6 CIDR blocks.
+ *
+ * Since CIDR blocks are power-of-2-aligned, two overlapping blocks always
+ * have a containment relationship -- the intersection is the more specific
+ * (longer prefix) block with its canonical network address.
+ *
+ * @param a The first CIDR block
+ * @param b The second CIDR block
+ * @returns The overlapping CIDR with canonical network address, or null if disjoint
+ *
+ * @example Find overlap between allocations
+ * ```ts
+ * import { assertEquals } from "@std/assert";
+ * import { cidrv6Intersect, parseCidrv6, stringifyCidrv6 } from "@hertzg/ip/cidrv6";
+ *
+ * const result = cidrv6Intersect(
+ *   parseCidrv6("2001:db8::/32"),
+ *   parseCidrv6("2001:db8::/48"),
+ * );
+ * assertEquals(result && stringifyCidrv6(result), "2001:db8::/48");
+ * ```
+ *
+ * @example No overlap returns null
+ * ```ts
+ * import { assertEquals } from "@std/assert";
+ * import { cidrv6Intersect, parseCidrv6 } from "@hertzg/ip/cidrv6";
+ *
+ * assertEquals(cidrv6Intersect(
+ *   parseCidrv6("2001:db8::/32"),
+ *   parseCidrv6("2001:db9::/32"),
+ * ), null);
+ * ```
+ */
+export function cidrv6Intersect(a: Cidrv6, b: Cidrv6): Cidrv6 | null {
+  if (!cidrv6Overlaps(a, b)) return null;
+  if (a.prefixLength >= b.prefixLength) {
+    return { address: cidrv6FirstAddress(a), prefixLength: a.prefixLength };
+  }
+  return { address: cidrv6FirstAddress(b), prefixLength: b.prefixLength };
+}
+
+/**
+ * Subtracts one IPv6 CIDR block from another.
+ *
+ * Returns the minimal set of CIDR blocks representing all IP addresses
+ * in `a` but not in `b`. The algorithm recursively splits `a` into two
+ * halves at prefix+1, keeping the non-overlapping half and recursing
+ * into the overlapping half.
+ *
+ * @param a The CIDR block to subtract from
+ * @param b The CIDR block to subtract
+ * @returns Array of CIDR blocks covering a minus b
+ *
+ * @example Carve a /48 from a /32
+ * ```ts
+ * import { assertEquals } from "@std/assert";
+ * import { cidrv6Subtract, parseCidrv6, stringifyCidrv6 } from "@hertzg/ip/cidrv6";
+ *
+ * const result = cidrv6Subtract(
+ *   parseCidrv6("2001:db8::/32"),
+ *   parseCidrv6("2001:db8::/48"),
+ * );
+ * assertEquals(result.length, 16);
+ * assertEquals(stringifyCidrv6(result[0]), "2001:db8:8000::/33");
+ * ```
+ *
+ * @example No overlap -- original returned unchanged
+ * ```ts
+ * import { assertEquals } from "@std/assert";
+ * import { cidrv6Subtract, parseCidrv6, stringifyCidrv6 } from "@hertzg/ip/cidrv6";
+ *
+ * const result = cidrv6Subtract(
+ *   parseCidrv6("2001:db8::/32"),
+ *   parseCidrv6("2001:db9::/32"),
+ * );
+ * assertEquals(result.map(stringifyCidrv6), ["2001:db8::/32"]);
+ * ```
+ *
+ * @example Full containment -- empty result
+ * ```ts
+ * import { assertEquals } from "@std/assert";
+ * import { cidrv6Subtract, parseCidrv6 } from "@hertzg/ip/cidrv6";
+ *
+ * const result = cidrv6Subtract(
+ *   parseCidrv6("2001:db8::/48"),
+ *   parseCidrv6("2001:db8::/32"),
+ * );
+ * assertEquals(result, []);
+ * ```
+ */
+export function cidrv6Subtract(a: Cidrv6, b: Cidrv6): Cidrv6[] {
+  if (!cidrv6Overlaps(a, b)) return [a];
+  if (cidrv6ContainsCidr(b, a)) return [];
+  const [lower, upper] = cidrv6SplitHalves(a);
+  return [...cidrv6Subtract(upper, b), ...cidrv6Subtract(lower, b)];
+}
+
 export function* cidrv6Addresses(
   cidr: Cidrv6,
   options?: {

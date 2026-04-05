@@ -585,6 +585,125 @@ export function cidrv4Overlaps(a: Cidrv4, b: Cidrv4): boolean {
  * }
  * ```
  */
+/**
+ * Splits an IPv4 CIDR block into its two half-sized children at prefix+1.
+ *
+ * @param cidr The CIDR block to split
+ * @returns A tuple of the lower and upper halves
+ */
+function cidrv4SplitHalves(cidr: Cidrv4): [Cidrv4, Cidrv4] {
+  const newPrefix = cidr.prefixLength + 1;
+  const network = cidrv4FirstAddress(cidr);
+  const lower: Cidrv4 = { address: network, prefixLength: newPrefix };
+  const upper: Cidrv4 = {
+    address: (network | (1 << (31 - cidr.prefixLength))) >>> 0,
+    prefixLength: newPrefix,
+  };
+  return [lower, upper];
+}
+
+/**
+ * Returns the intersection of two IPv4 CIDR blocks.
+ *
+ * Since CIDR blocks are power-of-2-aligned, two overlapping blocks always
+ * have a containment relationship -- the intersection is the more specific
+ * (longer prefix) block with its canonical network address.
+ *
+ * @param a The first CIDR block
+ * @param b The second CIDR block
+ * @returns The overlapping CIDR with canonical network address, or null if disjoint
+ *
+ * @example Find overlap between allocations
+ * ```ts
+ * import { assertEquals } from "@std/assert";
+ * import { cidrv4Intersect, parseCidrv4, stringifyCidrv4 } from "@hertzg/ip/cidrv4";
+ *
+ * const result = cidrv4Intersect(
+ *   parseCidrv4("192.168.1.0/24"),
+ *   parseCidrv4("192.168.1.0/28"),
+ * );
+ * assertEquals(result && stringifyCidrv4(result), "192.168.1.0/28");
+ * ```
+ *
+ * @example No overlap returns null
+ * ```ts
+ * import { assertEquals } from "@std/assert";
+ * import { cidrv4Intersect, parseCidrv4 } from "@hertzg/ip/cidrv4";
+ *
+ * assertEquals(cidrv4Intersect(
+ *   parseCidrv4("10.0.0.0/8"),
+ *   parseCidrv4("172.16.0.0/12"),
+ * ), null);
+ * ```
+ */
+export function cidrv4Intersect(a: Cidrv4, b: Cidrv4): Cidrv4 | null {
+  if (!cidrv4Overlaps(a, b)) return null;
+  if (a.prefixLength >= b.prefixLength) {
+    return { address: cidrv4FirstAddress(a), prefixLength: a.prefixLength };
+  }
+  return { address: cidrv4FirstAddress(b), prefixLength: b.prefixLength };
+}
+
+/**
+ * Subtracts one IPv4 CIDR block from another.
+ *
+ * Returns the minimal set of CIDR blocks representing all IP addresses
+ * in `a` but not in `b`. The algorithm recursively splits `a` into two
+ * halves at prefix+1, keeping the non-overlapping half and recursing
+ * into the overlapping half.
+ *
+ * @param a The CIDR block to subtract from
+ * @param b The CIDR block to subtract
+ * @returns Array of CIDR blocks covering a minus b
+ *
+ * @example Carve a /28 from a /24
+ * ```ts
+ * import { assertEquals } from "@std/assert";
+ * import { cidrv4Subtract, parseCidrv4, stringifyCidrv4 } from "@hertzg/ip/cidrv4";
+ *
+ * const result = cidrv4Subtract(
+ *   parseCidrv4("192.168.1.0/24"),
+ *   parseCidrv4("192.168.1.0/28"),
+ * );
+ * assertEquals(result.map(stringifyCidrv4), [
+ *   "192.168.1.128/25",
+ *   "192.168.1.64/26",
+ *   "192.168.1.32/27",
+ *   "192.168.1.16/28",
+ * ]);
+ * ```
+ *
+ * @example No overlap -- original returned unchanged
+ * ```ts
+ * import { assertEquals } from "@std/assert";
+ * import { cidrv4Subtract, parseCidrv4, stringifyCidrv4 } from "@hertzg/ip/cidrv4";
+ *
+ * const result = cidrv4Subtract(
+ *   parseCidrv4("10.0.0.0/24"),
+ *   parseCidrv4("172.16.0.0/24"),
+ * );
+ * assertEquals(result.map(stringifyCidrv4), ["10.0.0.0/24"]);
+ * ```
+ *
+ * @example Full containment -- empty result
+ * ```ts
+ * import { assertEquals } from "@std/assert";
+ * import { cidrv4Subtract, parseCidrv4 } from "@hertzg/ip/cidrv4";
+ *
+ * const result = cidrv4Subtract(
+ *   parseCidrv4("192.168.1.0/28"),
+ *   parseCidrv4("192.168.1.0/24"),
+ * );
+ * assertEquals(result, []);
+ * ```
+ */
+export function cidrv4Subtract(a: Cidrv4, b: Cidrv4): Cidrv4[] {
+  if (!cidrv4Overlaps(a, b)) return [a];
+  if (cidrv4ContainsCidr(b, a)) return [];
+  const [lower, upper] = cidrv4SplitHalves(a);
+  return [...cidrv4Subtract(upper, b), ...cidrv4Subtract(lower, b)];
+}
+
 export function* cidrv4Addresses(
   cidr: Cidrv4,
   options?: {

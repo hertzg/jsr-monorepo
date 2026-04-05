@@ -191,6 +191,8 @@
  * - {@link stringifyCidr}: Convert Cidrv4 or Cidrv6 to CIDR notation string
  * - {@link cidrContainsCidr}: Check if one CIDR fully contains another (auto-detect version)
  * - {@link cidrOverlaps}: Check if two CIDRs share at least one address (auto-detect version)
+ * - {@link cidrIntersect}: Return the overlapping CIDR block, or null (auto-detect version)
+ * - {@link cidrSubtract}: Return CIDR blocks in A but not in B (auto-detect version)
  * - {@link isValidCidr}: Check if a string is valid CIDR notation (IPv4 or IPv6)
  *
  * ### IPv4
@@ -206,6 +208,8 @@
  * - {@link cidrv4Contains}: Check if IP is within CIDR range
  * - {@link cidrv4ContainsCidr}: Check if one IPv4 CIDR fully contains another
  * - {@link cidrv4Overlaps}: Check if two IPv4 CIDRs share at least one address
+ * - {@link cidrv4Intersect}: Return the overlapping IPv4 CIDR block, or null
+ * - {@link cidrv4Subtract}: Return IPv4 CIDR blocks in A but not in B
  * - {@link cidrv4FirstAddress}: Get first address in CIDR range
  * - {@link cidrv4LastAddress}: Get last address in CIDR range
  * - {@link cidrv4NetworkAddress}: Alias for cidrv4FirstAddress
@@ -229,6 +233,8 @@
  * - {@link cidrv6Contains}: Check if IP is within CIDR range
  * - {@link cidrv6ContainsCidr}: Check if one IPv6 CIDR fully contains another
  * - {@link cidrv6Overlaps}: Check if two IPv6 CIDRs share at least one address
+ * - {@link cidrv6Intersect}: Return the overlapping IPv6 CIDR block, or null
+ * - {@link cidrv6Subtract}: Return IPv6 CIDR blocks in A but not in B
  * - {@link cidrv6FirstAddress}: Get first address in CIDR range
  * - {@link cidrv6LastAddress}: Get last address in CIDR range
  * - {@link cidrv6Size}: Get total number of addresses in CIDR range
@@ -301,7 +307,14 @@
 // --- Universal (auto-detect IPv4/IPv6) ---
 
 export { parseIp, stringifyIp } from "./ip.ts";
-export { cidrContainsCidr, cidrOverlaps, parseCidr, stringifyCidr } from "./cidr.ts";
+export {
+  cidrContainsCidr,
+  cidrIntersect,
+  cidrOverlaps,
+  cidrSubtract,
+  parseCidr,
+  stringifyCidr,
+} from "./cidr.ts";
 export {
   type ClassificationIpv4,
   type ClassificationIpv6,
@@ -324,11 +337,13 @@ export {
   cidrv4Contains,
   cidrv4ContainsCidr,
   cidrv4FirstAddress,
+  cidrv4Intersect,
   cidrv4LastAddress,
   cidrv4Mask,
   cidrv4NetworkAddress,
   cidrv4Overlaps,
   cidrv4Size,
+  cidrv4Subtract,
   parseCidrv4,
   stringifyCidrv4,
 } from "./cidrv4.ts";
@@ -359,10 +374,12 @@ export {
   cidrv6Contains,
   cidrv6ContainsCidr,
   cidrv6FirstAddress,
+  cidrv6Intersect,
   cidrv6LastAddress,
   cidrv6Mask,
   cidrv6Overlaps,
   cidrv6Size,
+  cidrv6Subtract,
   parseCidrv6,
   stringifyCidrv6,
 } from "./cidrv6.ts";

@@ -4,9 +4,11 @@ import {
   cidrv4BroadcastAddress,
   cidrv4Contains,
   cidrv4ContainsCidr,
+  cidrv4Intersect,
   cidrv4NetworkAddress,
   cidrv4Mask,
   cidrv4Overlaps,
+  cidrv4Subtract,
   parseCidrv4,
   stringifyCidrv4,
 } from "./cidrv4.ts";
@@ -784,5 +786,156 @@ Deno.test("isValidCidrv4", async (t) => {
     assertEquals(isValidCidrv4("192.168.1.0/-1"), false);
     assertEquals(isValidCidrv4("2001:db8::/32"), false);
     assertEquals(isValidCidrv4("abc/24"), false);
+  });
+});
+
+Deno.test("cidrv4Intersect", async (t) => {
+  await t.step("no overlap returns null", () => {
+    assertEquals(
+      cidrv4Intersect(parseCidrv4("10.0.0.0/24"), parseCidrv4("172.16.0.0/24")),
+      null,
+    );
+  });
+
+  await t.step("b inside a", () => {
+    const result = cidrv4Intersect(
+      parseCidrv4("192.168.1.0/24"),
+      parseCidrv4("192.168.1.0/28"),
+    );
+    assertEquals(result && stringifyCidrv4(result), "192.168.1.0/28");
+  });
+
+  await t.step("a inside b", () => {
+    const result = cidrv4Intersect(
+      parseCidrv4("192.168.1.0/28"),
+      parseCidrv4("192.168.1.0/24"),
+    );
+    assertEquals(result && stringifyCidrv4(result), "192.168.1.0/28");
+  });
+
+  await t.step("equal CIDRs", () => {
+    const result = cidrv4Intersect(
+      parseCidrv4("10.0.0.0/24"),
+      parseCidrv4("10.0.0.0/24"),
+    );
+    assertEquals(result && stringifyCidrv4(result), "10.0.0.0/24");
+  });
+
+  await t.step("adjacent non-overlapping returns null", () => {
+    assertEquals(
+      cidrv4Intersect(
+        parseCidrv4("192.168.1.0/25"),
+        parseCidrv4("192.168.1.128/25"),
+      ),
+      null,
+    );
+  });
+
+  await t.step("/0 and specific", () => {
+    const result = cidrv4Intersect(
+      parseCidrv4("0.0.0.0/0"),
+      parseCidrv4("10.0.0.0/8"),
+    );
+    assertEquals(result && stringifyCidrv4(result), "10.0.0.0/8");
+  });
+
+  await t.step("both /32 same", () => {
+    const result = cidrv4Intersect(
+      parseCidrv4("10.0.0.1/32"),
+      parseCidrv4("10.0.0.1/32"),
+    );
+    assertEquals(result && stringifyCidrv4(result), "10.0.0.1/32");
+  });
+
+  await t.step("both /32 different", () => {
+    assertEquals(
+      cidrv4Intersect(parseCidrv4("10.0.0.1/32"), parseCidrv4("10.0.0.2/32")),
+      null,
+    );
+  });
+});
+
+Deno.test("cidrv4Subtract", async (t) => {
+  await t.step("no overlap", () => {
+    const result = cidrv4Subtract(
+      parseCidrv4("10.0.0.0/24"),
+      parseCidrv4("172.16.0.0/24"),
+    );
+    assertEquals(result.map(stringifyCidrv4), ["10.0.0.0/24"]);
+  });
+
+  await t.step("b contains a", () => {
+    const result = cidrv4Subtract(
+      parseCidrv4("192.168.1.0/28"),
+      parseCidrv4("192.168.1.0/24"),
+    );
+    assertEquals(result, []);
+  });
+
+  await t.step("carve /28 from /24", () => {
+    const result = cidrv4Subtract(
+      parseCidrv4("192.168.1.0/24"),
+      parseCidrv4("192.168.1.0/28"),
+    );
+    assertEquals(result.map(stringifyCidrv4), [
+      "192.168.1.128/25",
+      "192.168.1.64/26",
+      "192.168.1.32/27",
+      "192.168.1.16/28",
+    ]);
+  });
+
+  await t.step("equal CIDRs", () => {
+    const result = cidrv4Subtract(
+      parseCidrv4("10.0.0.0/24"),
+      parseCidrv4("10.0.0.0/24"),
+    );
+    assertEquals(result, []);
+  });
+
+  await t.step("/32 from /30", () => {
+    const result = cidrv4Subtract(
+      parseCidrv4("10.0.0.0/30"),
+      parseCidrv4("10.0.0.0/32"),
+    );
+    assertEquals(result.map(stringifyCidrv4), [
+      "10.0.0.2/31",
+      "10.0.0.1/32",
+    ]);
+  });
+
+  await t.step("/32 no overlap", () => {
+    const result = cidrv4Subtract(
+      parseCidrv4("10.0.0.1/32"),
+      parseCidrv4("10.0.0.2/32"),
+    );
+    assertEquals(result.map(stringifyCidrv4), ["10.0.0.1/32"]);
+  });
+
+  await t.step("/32 exact match", () => {
+    const result = cidrv4Subtract(
+      parseCidrv4("10.0.0.1/32"),
+      parseCidrv4("10.0.0.1/32"),
+    );
+    assertEquals(result, []);
+  });
+
+  await t.step("adjacent non-overlapping", () => {
+    const result = cidrv4Subtract(
+      parseCidrv4("192.168.1.0/25"),
+      parseCidrv4("192.168.1.128/25"),
+    );
+    assertEquals(result.map(stringifyCidrv4), ["192.168.1.0/25"]);
+  });
+
+  await t.step("carve middle /26 from /24", () => {
+    const result = cidrv4Subtract(
+      parseCidrv4("192.168.1.0/24"),
+      parseCidrv4("192.168.1.64/26"),
+    );
+    assertEquals(result.map(stringifyCidrv4), [
+      "192.168.1.128/25",
+      "192.168.1.0/26",
+    ]);
   });
 });

@@ -2,7 +2,8 @@
  * Universal CIDR notation parsing, stringifying, and validation.
  *
  * This module provides {@link parseCidr}, {@link stringifyCidr},
- * {@link isValidCidr}, {@link cidrContainsCidr}, and {@link cidrOverlaps}
+ * {@link isValidCidr}, {@link cidrContainsCidr}, {@link cidrOverlaps},
+ * {@link cidrIntersect}, and {@link cidrSubtract}
  * that auto-detect IPv4 vs IPv6 and delegate to the appropriate
  * version-specific function.
  *
@@ -32,14 +33,18 @@
 import {
   type Cidrv4,
   cidrv4ContainsCidr,
+  cidrv4Intersect,
   cidrv4Overlaps,
+  cidrv4Subtract,
   parseCidrv4,
   stringifyCidrv4,
 } from "./cidrv4.ts";
 import {
   type Cidrv6,
   cidrv6ContainsCidr,
+  cidrv6Intersect,
   cidrv6Overlaps,
+  cidrv6Subtract,
   parseCidrv6,
   stringifyCidrv6,
 } from "./cidrv6.ts";
@@ -250,4 +255,136 @@ export function cidrOverlaps(
     return cidrv6Overlaps(a as Cidrv6, b as Cidrv6);
   }
   return cidrv4Overlaps(a as Cidrv4, b as Cidrv4);
+}
+
+/** Returns the intersection of two IPv4 CIDR blocks. */
+export function cidrIntersect(a: Cidrv4, b: Cidrv4): Cidrv4 | null;
+/** Returns the intersection of two IPv6 CIDR blocks. */
+export function cidrIntersect(a: Cidrv6, b: Cidrv6): Cidrv6 | null;
+/**
+ * Returns the intersection of two CIDR blocks.
+ *
+ * Dispatches to {@link cidrv4Intersect} or {@link cidrv6Intersect}
+ * based on the address type. Throws {@link TypeError} when mixing
+ * IPv4 and IPv6 CIDRs.
+ *
+ * @param a The first CIDR block
+ * @param b The second CIDR block
+ * @returns The overlapping CIDR with canonical network address, or null if disjoint
+ * @throws {TypeError} If the two CIDRs are different IP versions
+ *
+ * @example IPv4 intersection
+ * ```ts
+ * import { assertEquals } from "@std/assert";
+ * import { cidrIntersect, parseCidr, stringifyCidr } from "@hertzg/ip/cidr";
+ * import type { Cidrv4 } from "@hertzg/ip/cidrv4";
+ *
+ * const result = cidrIntersect(parseCidr("10.0.0.0/8"), parseCidr("10.1.0.0/16"));
+ * assertEquals(result && stringifyCidr(result as Cidrv4), "10.1.0.0/16");
+ * ```
+ *
+ * @example IPv6 intersection
+ * ```ts
+ * import { assertEquals } from "@std/assert";
+ * import { cidrIntersect, parseCidr, stringifyCidr } from "@hertzg/ip/cidr";
+ * import type { Cidrv6 } from "@hertzg/ip/cidrv6";
+ *
+ * const result = cidrIntersect(parseCidr("2001:db8::/32"), parseCidr("2001:db8:1::/48"));
+ * assertEquals(result && stringifyCidr(result as Cidrv6), "2001:db8:1::/48");
+ * ```
+ *
+ * @example Mixed versions throw TypeError
+ * ```ts
+ * import { assertThrows } from "@std/assert";
+ * import { cidrIntersect, parseCidr } from "@hertzg/ip/cidr";
+ *
+ * assertThrows(
+ *   () => cidrIntersect(parseCidr("10.0.0.0/8"), parseCidr("2001:db8::/32")),
+ *   TypeError,
+ * );
+ * ```
+ */
+export function cidrIntersect(
+  a: Cidrv4 | Cidrv6,
+  b: Cidrv4 | Cidrv6,
+): Cidrv4 | Cidrv6 | null;
+export function cidrIntersect(
+  a: Cidrv4 | Cidrv6,
+  b: Cidrv4 | Cidrv6,
+): Cidrv4 | Cidrv6 | null {
+  const aIsBigint = typeof a.address === "bigint";
+  const bIsBigint = typeof b.address === "bigint";
+  if (aIsBigint !== bIsBigint) {
+    throw new TypeError("Cannot intersect IPv4 and IPv6 CIDR blocks");
+  }
+  if (aIsBigint) {
+    return cidrv6Intersect(a as Cidrv6, b as Cidrv6);
+  }
+  return cidrv4Intersect(a as Cidrv4, b as Cidrv4);
+}
+
+/** Subtracts one IPv4 CIDR block from another. */
+export function cidrSubtract(a: Cidrv4, b: Cidrv4): Cidrv4[];
+/** Subtracts one IPv6 CIDR block from another. */
+export function cidrSubtract(a: Cidrv6, b: Cidrv6): Cidrv6[];
+/**
+ * Subtracts one CIDR block from another.
+ *
+ * Dispatches to {@link cidrv4Subtract} or {@link cidrv6Subtract}
+ * based on the address type. Throws {@link TypeError} when mixing
+ * IPv4 and IPv6 CIDRs.
+ *
+ * @param a The CIDR block to subtract from
+ * @param b The CIDR block to subtract
+ * @returns Array of CIDR blocks covering a minus b
+ * @throws {TypeError} If the two CIDRs are different IP versions
+ *
+ * @example IPv4 subtraction
+ * ```ts
+ * import { assertEquals } from "@std/assert";
+ * import { cidrSubtract, parseCidr, stringifyCidr } from "@hertzg/ip/cidr";
+ * import type { Cidrv4 } from "@hertzg/ip/cidrv4";
+ *
+ * const result = cidrSubtract(parseCidr("10.0.0.0/24"), parseCidr("172.16.0.0/24"));
+ * assertEquals(result.map((c) => stringifyCidr(c as Cidrv4)), ["10.0.0.0/24"]);
+ * ```
+ *
+ * @example IPv6 subtraction
+ * ```ts
+ * import { assertEquals } from "@std/assert";
+ * import { cidrSubtract, parseCidr, stringifyCidr } from "@hertzg/ip/cidr";
+ * import type { Cidrv6 } from "@hertzg/ip/cidrv6";
+ *
+ * const result = cidrSubtract(parseCidr("2001:db8::/32"), parseCidr("2001:db9::/32"));
+ * assertEquals(result.map((c) => stringifyCidr(c as Cidrv6)), ["2001:db8::/32"]);
+ * ```
+ *
+ * @example Mixed versions throw TypeError
+ * ```ts
+ * import { assertThrows } from "@std/assert";
+ * import { cidrSubtract, parseCidr } from "@hertzg/ip/cidr";
+ *
+ * assertThrows(
+ *   () => cidrSubtract(parseCidr("10.0.0.0/8"), parseCidr("2001:db8::/32")),
+ *   TypeError,
+ * );
+ * ```
+ */
+export function cidrSubtract(
+  a: Cidrv4 | Cidrv6,
+  b: Cidrv4 | Cidrv6,
+): (Cidrv4 | Cidrv6)[];
+export function cidrSubtract(
+  a: Cidrv4 | Cidrv6,
+  b: Cidrv4 | Cidrv6,
+): (Cidrv4 | Cidrv6)[] {
+  const aIsBigint = typeof a.address === "bigint";
+  const bIsBigint = typeof b.address === "bigint";
+  if (aIsBigint !== bIsBigint) {
+    throw new TypeError("Cannot subtract IPv4 and IPv6 CIDR blocks");
+  }
+  if (aIsBigint) {
+    return cidrv6Subtract(a as Cidrv6, b as Cidrv6);
+  }
+  return cidrv4Subtract(a as Cidrv4, b as Cidrv4);
 }

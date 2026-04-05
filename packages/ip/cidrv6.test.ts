@@ -4,9 +4,11 @@ import {
   cidrv6Contains,
   cidrv6ContainsCidr,
   cidrv6FirstAddress,
+  cidrv6Intersect,
   cidrv6LastAddress,
   cidrv6Mask,
   cidrv6Overlaps,
+  cidrv6Subtract,
   parseCidrv6,
   stringifyCidrv6,
 } from "./cidrv6.ts";
@@ -678,5 +680,145 @@ Deno.test("isValidCidrv6", async (t) => {
     assertEquals(isValidCidrv6("2001:db8::/129"), false);
     assertEquals(isValidCidrv6("192.168.1.0/24"), false);
     assertEquals(isValidCidrv6("abc/32"), false);
+  });
+});
+
+Deno.test("cidrv6Intersect", async (t) => {
+  await t.step("no overlap returns null", () => {
+    assertEquals(
+      cidrv6Intersect(parseCidrv6("2001:db8::/32"), parseCidrv6("2001:db9::/32")),
+      null,
+    );
+  });
+
+  await t.step("b inside a", () => {
+    const result = cidrv6Intersect(
+      parseCidrv6("2001:db8::/32"),
+      parseCidrv6("2001:db8::/48"),
+    );
+    assertEquals(result && stringifyCidrv6(result), "2001:db8::/48");
+  });
+
+  await t.step("a inside b", () => {
+    const result = cidrv6Intersect(
+      parseCidrv6("2001:db8::/48"),
+      parseCidrv6("2001:db8::/32"),
+    );
+    assertEquals(result && stringifyCidrv6(result), "2001:db8::/48");
+  });
+
+  await t.step("equal CIDRs", () => {
+    const result = cidrv6Intersect(
+      parseCidrv6("2001:db8::/32"),
+      parseCidrv6("2001:db8::/32"),
+    );
+    assertEquals(result && stringifyCidrv6(result), "2001:db8::/32");
+  });
+
+  await t.step("adjacent non-overlapping returns null", () => {
+    assertEquals(
+      cidrv6Intersect(
+        parseCidrv6("2001:db8::/33"),
+        parseCidrv6("2001:db8:8000::/33"),
+      ),
+      null,
+    );
+  });
+
+  await t.step("/0 and specific", () => {
+    const result = cidrv6Intersect(
+      parseCidrv6("::/0"),
+      parseCidrv6("2001:db8::/32"),
+    );
+    assertEquals(result && stringifyCidrv6(result), "2001:db8::/32");
+  });
+
+  await t.step("both /128 same", () => {
+    const result = cidrv6Intersect(
+      parseCidrv6("2001:db8::1/128"),
+      parseCidrv6("2001:db8::1/128"),
+    );
+    assertEquals(result && stringifyCidrv6(result), "2001:db8::1/128");
+  });
+
+  await t.step("both /128 different", () => {
+    assertEquals(
+      cidrv6Intersect(
+        parseCidrv6("2001:db8::1/128"),
+        parseCidrv6("2001:db8::2/128"),
+      ),
+      null,
+    );
+  });
+});
+
+Deno.test("cidrv6Subtract", async (t) => {
+  await t.step("no overlap", () => {
+    const result = cidrv6Subtract(
+      parseCidrv6("2001:db8::/32"),
+      parseCidrv6("2001:db9::/32"),
+    );
+    assertEquals(result.map(stringifyCidrv6), ["2001:db8::/32"]);
+  });
+
+  await t.step("b contains a", () => {
+    const result = cidrv6Subtract(
+      parseCidrv6("2001:db8::/48"),
+      parseCidrv6("2001:db8::/32"),
+    );
+    assertEquals(result, []);
+  });
+
+  await t.step("carve /48 from /32", () => {
+    const result = cidrv6Subtract(
+      parseCidrv6("2001:db8::/32"),
+      parseCidrv6("2001:db8::/48"),
+    );
+    assertEquals(result.length, 16);
+    assertEquals(stringifyCidrv6(result[0]), "2001:db8:8000::/33");
+    assertEquals(stringifyCidrv6(result[result.length - 1]), "2001:db8:1::/48");
+  });
+
+  await t.step("equal CIDRs", () => {
+    const result = cidrv6Subtract(
+      parseCidrv6("2001:db8::/32"),
+      parseCidrv6("2001:db8::/32"),
+    );
+    assertEquals(result, []);
+  });
+
+  await t.step("/128 from /126", () => {
+    const result = cidrv6Subtract(
+      parseCidrv6("2001:db8::/126"),
+      parseCidrv6("2001:db8::/128"),
+    );
+    assertEquals(result.map(stringifyCidrv6), [
+      "2001:db8::2/127",
+      "2001:db8::1/128",
+    ]);
+  });
+
+  await t.step("/128 no overlap", () => {
+    const result = cidrv6Subtract(
+      parseCidrv6("2001:db8::1/128"),
+      parseCidrv6("2001:db8::2/128"),
+    );
+    assertEquals(result.map(stringifyCidrv6), ["2001:db8::1/128"]);
+  });
+
+  await t.step("/128 exact match", () => {
+    const result = cidrv6Subtract(
+      parseCidrv6("2001:db8::1/128"),
+      parseCidrv6("2001:db8::1/128"),
+    );
+    assertEquals(result, []);
+  });
+
+  await t.step("adjacent non-overlapping", () => {
+    const result = cidrv6Subtract(
+      parseCidrv6("2001:db8::/33"),
+      parseCidrv6("2001:db8:8000::/33"),
+    );
+    assertEquals(result.map(stringifyCidrv6), ["2001:db8::/33"]);
   });
 });
