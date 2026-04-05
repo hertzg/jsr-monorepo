@@ -2,9 +2,11 @@ import { assert, assertEquals, assertThrows } from "@std/assert";
 import {
   cidrv6Addresses,
   cidrv6Contains,
+  cidrv6ContainsCidr,
   cidrv6FirstAddress,
   cidrv6LastAddress,
   cidrv6Mask,
+  cidrv6Overlaps,
   parseCidrv6,
   stringifyCidrv6,
 } from "./cidrv6.ts";
@@ -519,6 +521,146 @@ Deno.test("WireGuard IPv6 use cases", async (t) => {
     }
 
     assertEquals(cidrv6Contains(meshCidr, parseIpv6("fd00:abcd::100")), false);
+  });
+});
+
+Deno.test("cidrv6ContainsCidr", async (t) => {
+  await t.step("larger CIDR contains smaller", () => {
+    assert(
+      cidrv6ContainsCidr(
+        parseCidrv6("2001:db8::/32"),
+        parseCidrv6("2001:db8:1::/48"),
+      ),
+    );
+    assert(
+      cidrv6ContainsCidr(
+        parseCidrv6("fd00::/8"),
+        parseCidrv6("fd00::/120"),
+      ),
+    );
+  });
+
+  await t.step("equal CIDRs contain each other", () => {
+    const cidr = parseCidrv6("2001:db8::/64");
+    assert(cidrv6ContainsCidr(cidr, cidr));
+  });
+
+  await t.step("/0 contains everything", () => {
+    const all = parseCidrv6("::/0");
+    assert(cidrv6ContainsCidr(all, parseCidrv6("2001:db8::/32")));
+    assert(cidrv6ContainsCidr(all, parseCidrv6("::1/128")));
+    assert(cidrv6ContainsCidr(all, parseCidrv6("::/0")));
+  });
+
+  await t.step("/128 containment", () => {
+    assert(
+      cidrv6ContainsCidr(
+        parseCidrv6("2001:db8::/120"),
+        parseCidrv6("2001:db8::1/128"),
+      ),
+    );
+    assert(
+      cidrv6ContainsCidr(
+        parseCidrv6("2001:db8::1/128"),
+        parseCidrv6("2001:db8::1/128"),
+      ),
+    );
+  });
+
+  await t.step("reversed containment returns false", () => {
+    assertEquals(
+      cidrv6ContainsCidr(
+        parseCidrv6("2001:db8:1::/48"),
+        parseCidrv6("2001:db8::/32"),
+      ),
+      false,
+    );
+    assertEquals(
+      cidrv6ContainsCidr(
+        parseCidrv6("fd00::/120"),
+        parseCidrv6("fd00::/8"),
+      ),
+      false,
+    );
+  });
+
+  await t.step("disjoint CIDRs return false", () => {
+    assertEquals(
+      cidrv6ContainsCidr(
+        parseCidrv6("2001:db8::/32"),
+        parseCidrv6("2001:db9::/32"),
+      ),
+      false,
+    );
+  });
+
+  await t.step("different /128s return false", () => {
+    assertEquals(
+      cidrv6ContainsCidr(
+        parseCidrv6("2001:db8::1/128"),
+        parseCidrv6("2001:db8::2/128"),
+      ),
+      false,
+    );
+  });
+});
+
+Deno.test("cidrv6Overlaps", async (t) => {
+  await t.step("supernet and subnet overlap", () => {
+    assert(
+      cidrv6Overlaps(parseCidrv6("2001:db8::/32"), parseCidrv6("2001:db8:1::/48")),
+    );
+  });
+
+  await t.step("symmetric", () => {
+    assert(
+      cidrv6Overlaps(parseCidrv6("2001:db8:1::/48"), parseCidrv6("2001:db8::/32")),
+    );
+  });
+
+  await t.step("equal CIDRs overlap", () => {
+    assert(
+      cidrv6Overlaps(
+        parseCidrv6("fd00::/120"),
+        parseCidrv6("fd00::/120"),
+      ),
+    );
+  });
+
+  await t.step("/0 overlaps everything", () => {
+    const all = parseCidrv6("::/0");
+    assert(cidrv6Overlaps(all, parseCidrv6("2001:db8::/32")));
+    assert(cidrv6Overlaps(all, parseCidrv6("::1/128")));
+  });
+
+  await t.step("adjacent CIDRs do not overlap", () => {
+    assertEquals(
+      cidrv6Overlaps(
+        parseCidrv6("2001:db8::/33"),
+        parseCidrv6("2001:db8:8000::/33"),
+      ),
+      false,
+    );
+  });
+
+  await t.step("disjoint CIDRs do not overlap", () => {
+    assertEquals(
+      cidrv6Overlaps(
+        parseCidrv6("2001:db8::/32"),
+        parseCidrv6("2001:db9::/32"),
+      ),
+      false,
+    );
+  });
+
+  await t.step("two halves of /120 do not overlap", () => {
+    assertEquals(
+      cidrv6Overlaps(
+        parseCidrv6("fd00::/121"),
+        parseCidrv6("fd00::80/121"),
+      ),
+      false,
+    );
   });
 });
 

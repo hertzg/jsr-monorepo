@@ -328,6 +328,98 @@ export function cidrv6Size(cidrOrPrefixLength: Cidrv6 | number): bigint {
 }
 
 /**
+ * Checks if one IPv6 CIDR block fully contains another.
+ *
+ * Returns true when every address in `inner` is also in `outer`.
+ * This is the case when `outer` has a shorter-or-equal prefix and
+ * both network addresses agree under the outer mask.
+ *
+ * @param outer The CIDR block that may contain the other
+ * @param inner The CIDR block that may be contained
+ * @returns true if every address in `inner` is within `outer`
+ *
+ * @example Supernet contains subnet
+ * ```ts
+ * import { assert, assertEquals } from "@std/assert";
+ * import { cidrv6ContainsCidr, parseCidrv6 } from "@hertzg/ip/cidrv6";
+ *
+ * assert(cidrv6ContainsCidr(parseCidrv6("2001:db8::/32"), parseCidrv6("2001:db8:1::/48")));
+ * assert(cidrv6ContainsCidr(parseCidrv6("fd00::/8"), parseCidrv6("fd00::/120")));
+ * assertEquals(cidrv6ContainsCidr(parseCidrv6("2001:db8:1::/48"), parseCidrv6("2001:db8::/32")), false);
+ * ```
+ *
+ * @example Equal CIDRs contain each other
+ * ```ts
+ * import { assert } from "@std/assert";
+ * import { cidrv6ContainsCidr, parseCidrv6 } from "@hertzg/ip/cidrv6";
+ *
+ * const cidr = parseCidrv6("2001:db8::/64");
+ * assert(cidrv6ContainsCidr(cidr, cidr));
+ * ```
+ *
+ * @example /0 contains everything
+ * ```ts
+ * import { assert } from "@std/assert";
+ * import { cidrv6ContainsCidr, parseCidrv6 } from "@hertzg/ip/cidrv6";
+ *
+ * const all = parseCidrv6("::/0");
+ * assert(cidrv6ContainsCidr(all, parseCidrv6("2001:db8::/32")));
+ * assert(cidrv6ContainsCidr(all, parseCidrv6("::1/128")));
+ * ```
+ */
+export function cidrv6ContainsCidr(outer: Cidrv6, inner: Cidrv6): boolean {
+  if (outer.prefixLength > inner.prefixLength) return false;
+  const outerMask = cidrv6Mask(outer.prefixLength);
+  return (outer.address & outerMask) === (inner.address & outerMask);
+}
+
+/**
+ * Checks if two IPv6 CIDR blocks overlap (share at least one address).
+ *
+ * Two CIDRs overlap when one contains at least one address of the other.
+ * This is equivalent to checking containment using the shorter prefix.
+ * The check is symmetric: `cidrv6Overlaps(a, b) === cidrv6Overlaps(b, a)`.
+ *
+ * @param a The first CIDR block
+ * @param b The second CIDR block
+ * @returns true if the two CIDR ranges share at least one address
+ *
+ * @example Overlapping CIDRs
+ * ```ts
+ * import { assert, assertEquals } from "@std/assert";
+ * import { cidrv6Overlaps, parseCidrv6 } from "@hertzg/ip/cidrv6";
+ *
+ * assert(cidrv6Overlaps(parseCidrv6("2001:db8::/32"), parseCidrv6("2001:db8:1::/48")));
+ * assert(cidrv6Overlaps(parseCidrv6("2001:db8:1::/48"), parseCidrv6("2001:db8::/32")));
+ * assert(cidrv6Overlaps(parseCidrv6("fd00::/120"), parseCidrv6("fd00::/120")));
+ * assertEquals(cidrv6Overlaps(parseCidrv6("2001:db8::/32"), parseCidrv6("2001:db9::/32")), false);
+ * ```
+ *
+ * @example /0 overlaps everything
+ * ```ts
+ * import { assert } from "@std/assert";
+ * import { cidrv6Overlaps, parseCidrv6 } from "@hertzg/ip/cidrv6";
+ *
+ * const all = parseCidrv6("::/0");
+ * assert(cidrv6Overlaps(all, parseCidrv6("2001:db8::/32")));
+ * assert(cidrv6Overlaps(all, parseCidrv6("::1/128")));
+ * ```
+ *
+ * @example Adjacent but non-overlapping
+ * ```ts
+ * import { assertEquals } from "@std/assert";
+ * import { cidrv6Overlaps, parseCidrv6 } from "@hertzg/ip/cidrv6";
+ *
+ * assertEquals(cidrv6Overlaps(parseCidrv6("2001:db8::/33"), parseCidrv6("2001:db8:8000::/33")), false);
+ * ```
+ */
+export function cidrv6Overlaps(a: Cidrv6, b: Cidrv6): boolean {
+  const minPrefix = Math.min(a.prefixLength, b.prefixLength);
+  const mask = cidrv6Mask(minPrefix);
+  return (a.address & mask) === (b.address & mask);
+}
+
+/**
  * Generates a range of IP addresses from a CIDR block.
  *
  * Yields IP addresses starting at the specified offset from the

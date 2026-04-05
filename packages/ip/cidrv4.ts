@@ -359,6 +359,99 @@ export function cidrv4Size(cidrOrPrefixLength: Cidrv4 | number): number {
 }
 
 /**
+ * Checks if one IPv4 CIDR block fully contains another.
+ *
+ * Returns true when every address in `inner` is also in `outer`.
+ * This is the case when `outer` has a shorter-or-equal prefix and
+ * both network addresses agree under the outer mask.
+ *
+ * @param outer The CIDR block that may contain the other
+ * @param inner The CIDR block that may be contained
+ * @returns true if every address in `inner` is within `outer`
+ *
+ * @example Supernet contains subnet
+ * ```ts
+ * import { assert, assertEquals } from "@std/assert";
+ * import { cidrv4ContainsCidr, parseCidrv4 } from "@hertzg/ip/cidrv4";
+ *
+ * assert(cidrv4ContainsCidr(parseCidrv4("10.0.0.0/8"), parseCidrv4("10.1.0.0/16")));
+ * assert(cidrv4ContainsCidr(parseCidrv4("192.168.0.0/16"), parseCidrv4("192.168.1.0/24")));
+ * assertEquals(cidrv4ContainsCidr(parseCidrv4("192.168.1.0/24"), parseCidrv4("192.168.0.0/16")), false);
+ * ```
+ *
+ * @example Equal CIDRs contain each other
+ * ```ts
+ * import { assert } from "@std/assert";
+ * import { cidrv4ContainsCidr, parseCidrv4 } from "@hertzg/ip/cidrv4";
+ *
+ * const cidr = parseCidrv4("10.0.0.0/24");
+ * assert(cidrv4ContainsCidr(cidr, cidr));
+ * ```
+ *
+ * @example /0 contains everything
+ * ```ts
+ * import { assert } from "@std/assert";
+ * import { cidrv4ContainsCidr, parseCidrv4 } from "@hertzg/ip/cidrv4";
+ *
+ * const all = parseCidrv4("0.0.0.0/0");
+ * assert(cidrv4ContainsCidr(all, parseCidrv4("192.168.1.0/24")));
+ * assert(cidrv4ContainsCidr(all, parseCidrv4("10.0.0.1/32")));
+ * ```
+ */
+export function cidrv4ContainsCidr(outer: Cidrv4, inner: Cidrv4): boolean {
+  if (outer.prefixLength > inner.prefixLength) return false;
+  const outerMask = cidrv4Mask(outer.prefixLength);
+  return ((outer.address & outerMask) >>> 0) ===
+    ((inner.address & outerMask) >>> 0);
+}
+
+/**
+ * Checks if two IPv4 CIDR blocks overlap (share at least one address).
+ *
+ * Two CIDRs overlap when one contains at least one address of the other.
+ * This is equivalent to checking containment using the shorter prefix.
+ * The check is symmetric: `cidrv4Overlaps(a, b) === cidrv4Overlaps(b, a)`.
+ *
+ * @param a The first CIDR block
+ * @param b The second CIDR block
+ * @returns true if the two CIDR ranges share at least one address
+ *
+ * @example Overlapping CIDRs
+ * ```ts
+ * import { assert, assertEquals } from "@std/assert";
+ * import { cidrv4Overlaps, parseCidrv4 } from "@hertzg/ip/cidrv4";
+ *
+ * assert(cidrv4Overlaps(parseCidrv4("10.0.0.0/8"), parseCidrv4("10.1.0.0/16")));
+ * assert(cidrv4Overlaps(parseCidrv4("10.1.0.0/16"), parseCidrv4("10.0.0.0/8")));
+ * assert(cidrv4Overlaps(parseCidrv4("192.168.1.0/24"), parseCidrv4("192.168.1.0/24")));
+ * assertEquals(cidrv4Overlaps(parseCidrv4("10.0.0.0/8"), parseCidrv4("172.16.0.0/12")), false);
+ * ```
+ *
+ * @example /0 overlaps everything
+ * ```ts
+ * import { assert } from "@std/assert";
+ * import { cidrv4Overlaps, parseCidrv4 } from "@hertzg/ip/cidrv4";
+ *
+ * const all = parseCidrv4("0.0.0.0/0");
+ * assert(cidrv4Overlaps(all, parseCidrv4("192.168.1.0/24")));
+ * assert(cidrv4Overlaps(all, parseCidrv4("10.0.0.1/32")));
+ * ```
+ *
+ * @example Adjacent but non-overlapping
+ * ```ts
+ * import { assertEquals } from "@std/assert";
+ * import { cidrv4Overlaps, parseCidrv4 } from "@hertzg/ip/cidrv4";
+ *
+ * assertEquals(cidrv4Overlaps(parseCidrv4("192.168.0.0/24"), parseCidrv4("192.168.1.0/24")), false);
+ * ```
+ */
+export function cidrv4Overlaps(a: Cidrv4, b: Cidrv4): boolean {
+  const minPrefix = Math.min(a.prefixLength, b.prefixLength);
+  const mask = cidrv4Mask(minPrefix);
+  return ((a.address & mask) >>> 0) === ((b.address & mask) >>> 0);
+}
+
+/**
  * Generates a range of IP addresses from a CIDR block.
  *
  * Yields IP addresses starting at the specified offset from the

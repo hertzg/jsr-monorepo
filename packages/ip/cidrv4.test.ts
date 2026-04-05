@@ -3,8 +3,10 @@ import {
   cidrv4Addresses,
   cidrv4BroadcastAddress,
   cidrv4Contains,
+  cidrv4ContainsCidr,
   cidrv4NetworkAddress,
   cidrv4Mask,
+  cidrv4Overlaps,
   parseCidrv4,
   stringifyCidrv4,
 } from "./cidrv4.ts";
@@ -624,6 +626,146 @@ Deno.test("cidrv4Addresses", async (t) => {
     const second = gen.next();
     assertEquals(second.value, parseIpv4("192.168.1.1"));
     assertEquals(second.done, false);
+  });
+});
+
+Deno.test("cidrv4ContainsCidr", async (t) => {
+  await t.step("larger CIDR contains smaller", () => {
+    assert(
+      cidrv4ContainsCidr(
+        parseCidrv4("10.0.0.0/8"),
+        parseCidrv4("10.1.0.0/16"),
+      ),
+    );
+    assert(
+      cidrv4ContainsCidr(
+        parseCidrv4("192.168.0.0/16"),
+        parseCidrv4("192.168.1.0/24"),
+      ),
+    );
+  });
+
+  await t.step("equal CIDRs contain each other", () => {
+    const cidr = parseCidrv4("192.168.1.0/24");
+    assert(cidrv4ContainsCidr(cidr, cidr));
+  });
+
+  await t.step("/0 contains everything", () => {
+    const all = parseCidrv4("0.0.0.0/0");
+    assert(cidrv4ContainsCidr(all, parseCidrv4("192.168.1.0/24")));
+    assert(cidrv4ContainsCidr(all, parseCidrv4("10.0.0.1/32")));
+    assert(cidrv4ContainsCidr(all, parseCidrv4("0.0.0.0/0")));
+  });
+
+  await t.step("/32 containment", () => {
+    assert(
+      cidrv4ContainsCidr(
+        parseCidrv4("192.168.1.0/24"),
+        parseCidrv4("192.168.1.1/32"),
+      ),
+    );
+    assert(
+      cidrv4ContainsCidr(
+        parseCidrv4("192.168.1.1/32"),
+        parseCidrv4("192.168.1.1/32"),
+      ),
+    );
+  });
+
+  await t.step("reversed containment returns false", () => {
+    assertEquals(
+      cidrv4ContainsCidr(
+        parseCidrv4("10.1.0.0/16"),
+        parseCidrv4("10.0.0.0/8"),
+      ),
+      false,
+    );
+    assertEquals(
+      cidrv4ContainsCidr(
+        parseCidrv4("192.168.1.0/24"),
+        parseCidrv4("192.168.0.0/16"),
+      ),
+      false,
+    );
+  });
+
+  await t.step("disjoint CIDRs return false", () => {
+    assertEquals(
+      cidrv4ContainsCidr(
+        parseCidrv4("10.0.0.0/8"),
+        parseCidrv4("172.16.0.0/12"),
+      ),
+      false,
+    );
+  });
+
+  await t.step("different /32s return false", () => {
+    assertEquals(
+      cidrv4ContainsCidr(
+        parseCidrv4("192.168.1.1/32"),
+        parseCidrv4("192.168.1.2/32"),
+      ),
+      false,
+    );
+  });
+});
+
+Deno.test("cidrv4Overlaps", async (t) => {
+  await t.step("supernet and subnet overlap", () => {
+    assert(
+      cidrv4Overlaps(parseCidrv4("10.0.0.0/8"), parseCidrv4("10.1.0.0/16")),
+    );
+  });
+
+  await t.step("symmetric", () => {
+    assert(
+      cidrv4Overlaps(parseCidrv4("10.1.0.0/16"), parseCidrv4("10.0.0.0/8")),
+    );
+  });
+
+  await t.step("equal CIDRs overlap", () => {
+    assert(
+      cidrv4Overlaps(
+        parseCidrv4("192.168.1.0/24"),
+        parseCidrv4("192.168.1.0/24"),
+      ),
+    );
+  });
+
+  await t.step("/0 overlaps everything", () => {
+    const all = parseCidrv4("0.0.0.0/0");
+    assert(cidrv4Overlaps(all, parseCidrv4("192.168.1.0/24")));
+    assert(cidrv4Overlaps(all, parseCidrv4("10.0.0.1/32")));
+  });
+
+  await t.step("adjacent CIDRs do not overlap", () => {
+    assertEquals(
+      cidrv4Overlaps(
+        parseCidrv4("192.168.0.0/24"),
+        parseCidrv4("192.168.1.0/24"),
+      ),
+      false,
+    );
+  });
+
+  await t.step("disjoint CIDRs do not overlap", () => {
+    assertEquals(
+      cidrv4Overlaps(
+        parseCidrv4("10.0.0.0/8"),
+        parseCidrv4("172.16.0.0/12"),
+      ),
+      false,
+    );
+  });
+
+  await t.step("two halves of /24 do not overlap", () => {
+    assertEquals(
+      cidrv4Overlaps(
+        parseCidrv4("192.168.1.0/25"),
+        parseCidrv4("192.168.1.128/25"),
+      ),
+      false,
+    );
   });
 });
 
