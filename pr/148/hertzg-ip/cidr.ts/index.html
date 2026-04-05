@@ -99,9 +99,10 @@
 <div id="searchResults"></div><div id="content">
     <main><section>
   <div class="space-y-2 flex-1"><div class="space-y-7" id="module_doc"><div class="markdown"><p>Universal CIDR notation parsing, stringifying, and validation.</p>
-<p>This module provides <a href=".././cidr.ts/~/parseCidr.html">parseCidr</a>, <a href=".././cidr.ts/~/stringifyCidr.html">stringifyCidr</a>, and
-isValidCidr that auto-detect IPv4 vs IPv6 and delegate to
-the appropriate version-specific function.</p>
+<p>This module provides <a href=".././cidr.ts/~/parseCidr.html">parseCidr</a>, <a href=".././cidr.ts/~/stringifyCidr.html">stringifyCidr</a>,
+isValidCidr, <a href=".././cidr.ts/~/cidrContainsCidr.html">cidrContainsCidr</a>, and <a href=".././cidr.ts/~/cidrOverlaps.html">cidrOverlaps</a>
+that auto-detect IPv4 vs IPv6 and delegate to the appropriate
+version-specific function.</p>
 <p>For version-specific functions, see:</p>
 <ul>
 <li><a href="https://jsr.io/@hertzg/ip/doc/cidrv4"><code>cidrv4</code></a>: <a href=".././cidrv4.ts/~/parseCidrv4.html">parseCidrv4</a>, <a href=".././cidrv4.ts/~/stringifyCidrv4.html">stringifyCidrv4</a>, isValidCidrv4</li>
@@ -235,7 +236,17 @@ assertEquals(stringifyCidr(v6), &quot;2001:db8::/32&quot;);
   </defs>
 </svg>
 </a>
-Functions</h2></div><div class="namespaceSection"><div id="namespace_parsecidr" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-Function bg-Function/15 dark:text-FunctionDark dark:bg-FunctionDark/15" title="Function">f</div></div>
+Functions</h2></div><div class="namespaceSection"><div id="namespace_cidrcontainscidr" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-Function bg-Function/15 dark:text-FunctionDark dark:bg-FunctionDark/15" title="Function">f</div></div>
+<div class="namespaceItemContent">
+		    <a href="..&#x2F;.&#x2F;cidr.ts&#x2F;~&#x2F;cidrContainsCidr.html" title="cidrContainsCidr">
+			    <span>cidrContainsCidr</span><span>(<div class="ml-4"><div><span>outer<span>: <span><span class="td-ref">Cidrv4</span><span class="td-op"> | </span><span class="td-ref">Cidrv6</span></span></span></span>,</div><div><span>inner<span>: <span><span class="td-ref">Cidrv4</span><span class="td-op"> | </span><span class="td-ref">Cidrv6</span></span></span></span></div></div>)<span>: <span class="td-kw">boolean</span></span></span><div class="namespaceItemContentTypeInfo">5 overloads</div></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Checks if one IPv4 CIDR block fully contains another.</p>
+</div></div></div>
+    </div><div id="namespace_cidroverlaps" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-Function bg-Function/15 dark:text-FunctionDark dark:bg-FunctionDark/15" title="Function">f</div></div>
+<div class="namespaceItemContent">
+		    <a href="..&#x2F;.&#x2F;cidr.ts&#x2F;~&#x2F;cidrOverlaps.html" title="cidrOverlaps">
+			    <span>cidrOverlaps</span><span>(<div class="ml-4"><div><span>a<span>: <span><span class="td-ref">Cidrv4</span><span class="td-op"> | </span><span class="td-ref">Cidrv6</span></span></span></span>,</div><div><span>b<span>: <span><span class="td-ref">Cidrv4</span><span class="td-op"> | </span><span class="td-ref">Cidrv6</span></span></span></span></div></div>)<span>: <span class="td-kw">boolean</span></span></span><div class="namespaceItemContentTypeInfo">5 overloads</div></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Checks if two IPv4 CIDR blocks overlap.</p>
+</div></div></div>
+    </div><div id="namespace_parsecidr" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-Function bg-Function/15 dark:text-FunctionDark dark:bg-FunctionDark/15" title="Function">f</div></div>
 <div class="namespaceItemContent">
 		    <a href="..&#x2F;.&#x2F;cidr.ts&#x2F;~&#x2F;parseCidr.html" title="parseCidr">
 			    <span>parseCidr</span><span>(<span><span>cidr<span>: <span class="td-kw">string</span></span></span></span>)<span>: <span><span class="td-ref">Cidrv4</span><span class="td-op"> | </span><span class="td-ref">Cidrv6</span></span></span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Parses an IPv4 or IPv6 CIDR notation string.</p>
@@ -243,7 +254,7 @@ Functions</h2></div><div class="namespaceSection"><div id="namespace_parsecidr" 
     </div><div id="namespace_stringifycidr" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-Function bg-Function/15 dark:text-FunctionDark dark:bg-FunctionDark/15" title="Function">f</div></div>
 <div class="namespaceItemContent">
 		    <a href="..&#x2F;.&#x2F;cidr.ts&#x2F;~&#x2F;stringifyCidr.html" title="stringifyCidr">
-			    <span>stringifyCidr</span><span>(<span><span>cidr<span>: <span><span class="td-ref">Cidrv4</span><span class="td-op"> | </span><span class="td-ref">Cidrv6</span></span></span></span></span>)<span>: <span class="td-kw">string</span></span></span><div class="namespaceItemContentTypeInfo">3 overloads</div></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Stringifies a <a href=".././cidrv4.ts/~/Cidrv4.html">Cidrv4</a> or <a href=".././cidrv6.ts/~/Cidrv6.html">Cidrv6</a> to CIDR notation.</p>
+			    <span>stringifyCidr</span><span>(<span><span>cidr<span>: <span><span class="td-ref">Cidrv4</span><span class="td-op"> | </span><span class="td-ref">Cidrv6</span></span></span></span></span>)<span>: <span class="td-kw">string</span></span></span><div class="namespaceItemContentTypeInfo">3 overloads</div></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Stringifies a <a href=".././cidrv4.ts/~/Cidrv4.html">Cidrv4</a> to IPv4 CIDR notation.</p>
 </div></div></div>
     </div></div>
 </section>
@@ -300,25 +311,25 @@ Functions</h2></div><div class="namespaceSection"><div id="namespace_parsecidr" 
                   </span>
                 </a>
               </li><li>
+                <a href="..&#x2F;.&#x2F;cidr.ts&#x2F;~&#x2F;cidrContainsCidr.html" title="cidrContainsCidr"><div class="docNodeKindIcon"><div class="text-Function bg-Function/15 dark:text-FunctionDark dark:bg-FunctionDark/15" title="Function">f</div></div>
+<span class="hover:bg-Function/15 hover:bg-FunctionDark/15">
+                    cidrContainsCidr
+                  </span>
+                </a>
+              </li><li>
+                <a href="..&#x2F;.&#x2F;cidr.ts&#x2F;~&#x2F;cidrOverlaps.html" title="cidrOverlaps"><div class="docNodeKindIcon"><div class="text-Function bg-Function/15 dark:text-FunctionDark dark:bg-FunctionDark/15" title="Function">f</div></div>
+<span class="hover:bg-Function/15 hover:bg-FunctionDark/15">
+                    cidrOverlaps
+                  </span>
+                </a>
+              </li><li>
                 <a href="..&#x2F;.&#x2F;cidr.ts&#x2F;~&#x2F;parseCidr.html" title="parseCidr"><div class="docNodeKindIcon"><div class="text-Function bg-Function/15 dark:text-FunctionDark dark:bg-FunctionDark/15" title="Function">f</div></div>
 <span class="hover:bg-Function/15 hover:bg-FunctionDark/15">
                     parseCidr
                   </span>
                 </a>
-              </li><li>
-                <a href="..&#x2F;.&#x2F;cidr.ts&#x2F;~&#x2F;stringifyCidr.html" title="stringifyCidr"><div class="docNodeKindIcon"><div class="text-Function bg-Function/15 dark:text-FunctionDark dark:bg-FunctionDark/15" title="Function">f</div></div>
-<span class="hover:bg-Function/15 hover:bg-FunctionDark/15">
-                    stringifyCidr
-                  </span>
-                </a>
-              </li><li>
-                <a href="..&#x2F;.&#x2F;classifyv4.ts&#x2F;~&#x2F;ClassificationIpv4.html" title="ClassificationIpv4"><div class="docNodeKindIcon"><div class="text-TypeAlias bg-TypeAlias/15 dark:text-TypeAliasDark dark:bg-TypeAliasDark/15" title="Type Alias">T</div></div>
-<span class="hover:bg-TypeAlias/15 hover:bg-TypeAliasDark/15">
-                    ClassificationIpv4
-                  </span>
-                </a>
               </li></ul><a class="flex items-center gap-0.5" href="..&#x2F;.&#x2F;all_symbols.html">
-              <span class="leading-none">view all 144 symbols</span><svg
+              <span class="leading-none">view all 156 symbols</span><svg
   width="16"
   height="16"
   viewBox="0 0 16 16"
@@ -333,7 +344,7 @@ Functions</h2></div><div class="namespaceSection"><div id="namespace_parsecidr" 
   />
 </svg>
 </a></nav><nav class="documentNavigation">
-          <h3>Document Navigation</h3><ul><li><a href="#examples" title="Examples">Examples</a></li><li><ul><li><a href="#example_0" title="Parse and stringify any CIDR block">Parse and stringify any CIDR block</a></li></ul></li><li><a href="#cidr_ts_functions" title="Functions">Functions</a></li><li><ul><li><a href="#namespace_parsecidr" title="parseCidr">parseCidr</a></li><li><a href="#namespace_stringifycidr" title="stringifyCidr">stringifyCidr</a></li></ul></li></ul></nav></div>
+          <h3>Document Navigation</h3><ul><li><a href="#examples" title="Examples">Examples</a></li><li><ul><li><a href="#example_0" title="Parse and stringify any CIDR block">Parse and stringify any CIDR block</a></li></ul></li><li><a href="#cidr_ts_functions" title="Functions">Functions</a></li><li><ul><li><a href="#namespace_cidrcontainscidr" title="cidrContainsCidr">cidrContainsCidr</a></li><li><a href="#namespace_cidroverlaps" title="cidrOverlaps">cidrOverlaps</a></li><li><a href="#namespace_parsecidr" title="parseCidr">parseCidr</a></li><li><a href="#namespace_stringifycidr" title="stringifyCidr">stringifyCidr</a></li></ul></li></ul></nav></div>
   </div></div>
 </div>
 </div>
