@@ -112,6 +112,16 @@ export function cidrContainsCidr(
   outer: Cidrv6,
   inner: Cidrv6,
 ): boolean;
+/** Mixed IPv4/IPv6 always returns false. */
+export function cidrContainsCidr(
+  outer: Cidrv4,
+  inner: Cidrv6,
+): false;
+/** Mixed IPv4/IPv6 always returns false. */
+export function cidrContainsCidr(
+  outer: Cidrv6,
+  inner: Cidrv4,
+): false;
 /**
  * Checks if one CIDR block fully contains another.
  *
@@ -177,6 +187,16 @@ export function cidrOverlaps(
   a: Cidrv6,
   b: Cidrv6,
 ): boolean;
+/** Mixed IPv4/IPv6 always returns false. */
+export function cidrOverlaps(
+  a: Cidrv4,
+  b: Cidrv6,
+): false;
+/** Mixed IPv4/IPv6 always returns false. */
+export function cidrOverlaps(
+  a: Cidrv6,
+  b: Cidrv4,
+): false;
 /**
  * Checks if two CIDR blocks overlap (share at least one address).
  *
