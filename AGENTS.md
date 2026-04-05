@@ -300,10 +300,31 @@ Both `deno task lint` and `deno task test` must pass before:
 - Commit messages are used to generate the changelog—write concise, user-facing
   summaries.
 
+#### Breaking Changes
+
+When a commit introduces a breaking change, append `!` after the scope and
+include a `BREAKING CHANGE:` footer in the commit body. Release Please uses this
+to trigger a major version bump and generate the correct changelog entry.
+
+```
+feat(@hertzg/ip)!: auto-unwrap IPv4-mapped IPv6 in parseIp
+
+BREAKING CHANGE: parseIp("::ffff:192.168.1.1") now returns a number instead of bigint.
+```
+
+#### Committing and Pushing
+
+- Commit in reasonable, logical chunks — group related changes, separate
+  unrelated ones.
+- Always flag breaking changes with `!` and `BREAKING CHANGE:` footer so Release
+  Please detects the correct version bump.
+- Push after committing unless told otherwise.
+
 #### Commit Message Examples
 
 - ✅ `feat(@hertzg/binstruct): link submodule docs to jsr pages`
 - ✅ `feat(@binstruct/png): fixed the png idat chunk parsing`
+- ✅ `feat(@hertzg/ip)!: rename parse functions` (breaking change)
 - ❌ `feat(hertzg/binstruct): link submodule docs to jsr pages`
 - ❌ `feat(binstruct): bla bla`
 - ❌ `feat(@nonexistent/pacakgename): bla bla`
