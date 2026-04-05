@@ -785,6 +785,135 @@ assertEquals(usable.map(stringifyIpv4), [&quot;10.0.0.1&quot;, &quot;10.0.0.2&qu
   <path d="M5 12l5 5l10 -10" />
 </svg>
 </button><code></code></pre>
+<h2 id="api-reference">
+API Reference</h2>
+<h3 id="universal-(auto-detect-ipv4/ipv6)">
+Universal (auto-detect IPv4/IPv6)</h3>
+<ul>
+<li>parseIp: Parse any IP address string to number (IPv4) or bigint (IPv6)</li>
+<li>stringifyIp: Convert number or bigint to IP address string</li>
+<li>parseCidr: Parse any CIDR notation string to Cidrv4 or Cidrv6</li>
+<li>stringifyCidr: Convert Cidrv4 or Cidrv6 to CIDR notation string</li>
+<li>isValidCidr: Check if a string is valid CIDR notation (IPv4 or IPv6)</li>
+</ul>
+<h3 id="ipv4">
+IPv4</h3>
+<ul>
+<li>parseIpv4: Parse dotted decimal notation to number</li>
+<li>stringifyIpv4: Convert number to dotted decimal notation</li>
+<li>isValidIpv4: Check if a string is a valid IPv4 address</li>
+</ul>
+<h3 id="ipv4-cidr">
+IPv4 CIDR</h3>
+<ul>
+<li>Cidrv4: Type representing an IPv4 CIDR block</li>
+<li>parseCidrv4: Parse CIDR notation string to Cidrv4</li>
+<li>stringifyCidrv4: Convert Cidrv4 to CIDR notation string</li>
+<li>cidrv4Mask: Create network mask from prefix length (0-32)</li>
+<li>cidrv4Contains: Check if IP is within CIDR range</li>
+<li>cidrv4FirstAddress: Get first address in CIDR range</li>
+<li>cidrv4LastAddress: Get last address in CIDR range</li>
+<li>cidrv4NetworkAddress: Alias for cidrv4FirstAddress</li>
+<li>cidrv4BroadcastAddress: Alias for cidrv4LastAddress</li>
+<li>cidrv4Size: Get total number of addresses in CIDR range</li>
+<li>cidrv4Addresses: Generate IP addresses in CIDR range</li>
+<li>isValidCidrv4: Check if a string is valid IPv4 CIDR notation</li>
+</ul>
+<h3 id="ipv6">
+IPv6</h3>
+<ul>
+<li>parseIpv6: Parse colon-hexadecimal notation to bigint</li>
+<li>stringifyIpv6: Convert bigint to compressed colon-hexadecimal</li>
+<li>expandIpv6: Expand to full uncompressed form</li>
+<li>compressIpv6: Compress to canonical shortest form</li>
+<li>isValidIpv6: Check if a string is a valid IPv6 address</li>
+</ul>
+<h3 id="ipv6-cidr">
+IPv6 CIDR</h3>
+<ul>
+<li>Cidrv6: Type representing an IPv6 CIDR block</li>
+<li>parseCidrv6: Parse CIDR notation string to Cidrv6</li>
+<li>stringifyCidrv6: Convert Cidrv6 to CIDR notation string</li>
+<li>cidrv6Mask: Create network mask from prefix length (0-128)</li>
+<li>cidrv6Contains: Check if IP is within CIDR range</li>
+<li>cidrv6FirstAddress: Get first address in CIDR range</li>
+<li>cidrv6LastAddress: Get last address in CIDR range</li>
+<li>cidrv6Size: Get total number of addresses in CIDR range</li>
+<li>cidrv6Addresses: Generate IP addresses in CIDR range</li>
+<li>isValidCidrv6: Check if a string is valid IPv6 CIDR notation</li>
+</ul>
+<h3 id="validation">
+Validation</h3>
+<ul>
+<li>isValidIp: Check if a string is a valid plain IP address (IPv4 or IPv6)</li>
+<li>isValidCidr: Check if a string is valid CIDR notation (IPv4 or IPv6)</li>
+</ul>
+<h3 id="ipv4-classification">
+IPv4 Classification</h3>
+<ul>
+<li>ClassificationIpv4: Type for all IPv4 classification labels</li>
+<li>classifyIpv4: Classify an IPv4 address into its well-known range</li>
+<li>isIpv4Private: Check if address is private (RFC 1918)</li>
+<li>isIpv4Loopback: Check if address is loopback (127.0.0.0/8)</li>
+<li>isIpv4LinkLocal: Check if address is link-local (169.254.0.0/16)</li>
+<li>isIpv4Multicast: Check if address is multicast (224.0.0.0/4)</li>
+<li>isIpv4Reserved: Check if address is reserved (240.0.0.0/4)</li>
+<li>isIpv4Broadcast: Check if address is broadcast (255.255.255.255)</li>
+<li>isIpv4ThisNetwork: Check if address is &quot;this network&quot; (0.0.0.0/8)</li>
+<li>isIpv4CgNat: Check if address is Carrier-Grade NAT (100.64.0.0/10)</li>
+<li>isIpv4Benchmarking: Check if address is benchmarking (198.18.0.0/15)</li>
+<li>isIpv4Documentation: Check if address is documentation (RFC 5737)</li>
+<li>isIpv4Public: Check if address is publicly routable</li>
+</ul>
+<h3 id="ipv6-classification">
+IPv6 Classification</h3>
+<ul>
+<li>ClassificationIpv6: Type for all IPv6 classification labels</li>
+<li>classifyIpv6: Classify an IPv6 address into its well-known range</li>
+<li>isIpv6Loopback: Check if address is loopback (::1)</li>
+<li>isIpv6Unspecified: Check if address is unspecified (::)</li>
+<li>isIpv6LinkLocal: Check if address is link-local (fe80::/10)</li>
+<li>isIpv6Multicast: Check if address is multicast (ff00::/8)</li>
+<li>isIpv6UniqueLocal: Check if address is unique local (fc00::/7)</li>
+<li>isIpv6GlobalUnicast: Check if address is global unicast (2000::/3)</li>
+<li>isIpv6Ipv4Mapped: Check if address is IPv4-mapped (::ffff:0:0/96)</li>
+<li>isIpv6Ipv4Translated: Check if address is IPv4-translated (64:ff9b::/96)</li>
+<li>isIpv6Documentation: Check if address is documentation (2001:db8::/32)</li>
+<li>isIpv6Teredo: Check if address is Teredo (2001::/32)</li>
+<li>isIpv6Benchmarking: Check if address is benchmarking (2001:2::/48)</li>
+<li>isIpv6Orchidv2: Check if address is ORCHIDv2 (2001:20::/28)</li>
+</ul>
+<h3 id="ipv4-mapped-ipv6-conversion-(4to6)">
+IPv4-Mapped IPv6 Conversion (4to6)</h3>
+<ul>
+<li>ipv4To64Mapped: Convert IPv4 number to IPv4-mapped IPv6 bigint</li>
+<li>ipv4From64Mapped: Extract IPv4 number from IPv4-mapped IPv6 bigint</li>
+<li>cidrv4ToCidrv64Mapped: Convert IPv4 CIDR to IPv4-mapped IPv6 CIDR</li>
+<li>cidrv4FromCidrv64Mapped: Convert IPv4-mapped IPv6 CIDR to IPv4 CIDR</li>
+</ul>
+<h3 id="combined-classification">
+Combined Classification</h3>
+<ul>
+<li>ClassifiedIp: Discriminated union result with kind, value, and classification</li>
+<li>ClassifiedIpv4: Result type for IPv4 classification</li>
+<li>ClassifiedIpv6: Result type for IPv6 classification</li>
+<li>classifyIp: Classify an IPv4 (number) or IPv6 (bigint) address</li>
+</ul>
+<h3 id="submodules">
+Submodules</h3>
+<ul>
+<li><a href="https://jsr.io/@hertzg/ip/doc/ip"><code>ip</code></a>: Universal IP parsing via parseIp, stringifyIp</li>
+<li><a href="https://jsr.io/@hertzg/ip/doc/cidr"><code>cidr</code></a>: Universal CIDR parsing via parseCidr, stringifyCidr</li>
+<li><a href="https://jsr.io/@hertzg/ip/doc/ipv4"><code>ipv4</code></a>: IPv4 parsing and validation</li>
+<li><a href="https://jsr.io/@hertzg/ip/doc/cidrv4"><code>cidrv4</code></a>: IPv4 CIDR utilities and validation</li>
+<li><a href="https://jsr.io/@hertzg/ip/doc/ipv6"><code>ipv6</code></a>: IPv6 parsing and validation</li>
+<li><a href="https://jsr.io/@hertzg/ip/doc/cidrv6"><code>cidrv6</code></a>: IPv6 CIDR utilities and validation</li>
+<li><a href="https://jsr.io/@hertzg/ip/doc/classify"><code>classify</code></a>: Universal classifier via classifyIp</li>
+<li><a href="https://jsr.io/@hertzg/ip/doc/classifyv4"><code>classifyv4</code></a>: IPv4 classification via classifyIpv4, isIpv4Private, etc.</li>
+<li><a href="https://jsr.io/@hertzg/ip/doc/classifyv6"><code>classifyv6</code></a>: IPv6 classification via classifyIpv6, isIpv6Loopback, etc.</li>
+<li><a href="https://jsr.io/@hertzg/ip/doc/validate"><code>validate</code></a>: Universal validation via isValidIp, isValidCidr</li>
+<li><a href="https://jsr.io/@hertzg/ip/doc/4to6"><code>4to6</code></a>: IPv4-mapped IPv6 conversion via ipv4To64Mapped, ipv4From64Mapped, cidrv4ToCidrv64Mapped, cidrv4FromCidrv64Mapped</li>
+</ul>
 </div></div>
 </div>
 </div></section>
