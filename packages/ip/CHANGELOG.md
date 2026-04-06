@@ -1,5 +1,12 @@
 # Changelog
 
+## [3.2.0](https://github.com/hertzg/jsr-monorepo/compare/@hertzg/ip-v3.1.0...@hertzg/ip-v3.2.0) (2026-04-06)
+
+
+### Features
+
+* **@hertzg/ip:** add universal cidrSize and cidrAddresses wrappers ([b35d0a8](https://github.com/hertzg/jsr-monorepo/commit/b35d0a88920d4973e771d45727d1c22727cf7232))
+
 ## [3.1.0](https://github.com/hertzg/jsr-monorepo/compare/@hertzg/ip-v3.0.0...@hertzg/ip-v3.1.0) (2026-04-05)
 
 
