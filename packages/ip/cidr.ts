@@ -5,7 +5,9 @@
  * {@link isValidCidr}, {@link cidrContainsCidr}, {@link cidrOverlaps},
  * {@link cidrIntersect}, {@link cidrSubtract}, {@link cidrMerge},
  * {@link cidrSize}, and {@link cidrAddresses} that auto-detect IPv4 vs IPv6
- * and delegate to the appropriate version-specific function.
+ * and delegate to the appropriate version-specific function. The {@link Cidr}
+ * type alias and {@link isCidrv4}/{@link isCidrv6} type guards are also
+ * exported for working with version-polymorphic CIDR values.
  *
  * For version-specific functions, see:
  * - [`cidrv4`](https://jsr.io/@hertzg/ip/doc/cidrv4): {@link parseCidrv4}, {@link stringifyCidrv4}, {@link isValidCidrv4}
@@ -56,6 +58,51 @@ import {
 } from "./cidrv6.ts";
 
 /**
+ * A CIDR block of either IP version.
+ *
+ * This is a union of {@link Cidrv4} and {@link Cidrv6}, useful for functions
+ * that operate on CIDR blocks regardless of IP version. Use the
+ * {@link isCidrv4} and {@link isCidrv6} type guards to narrow.
+ */
+export type Cidr = Cidrv4 | Cidrv6;
+
+/**
+ * Type guard that checks whether a {@link Cidr} is an IPv4 CIDR block.
+ *
+ * @param cidr The CIDR block to check
+ * @returns `true` if the CIDR is a {@link Cidrv4}
+ *
+ * @example
+ * ```ts
+ * import { assert } from "@std/assert";
+ * import { isCidrv4, parseCidr } from "@hertzg/ip/cidr";
+ *
+ * assert(isCidrv4(parseCidr("10.0.0.0/8")));
+ * ```
+ */
+export function isCidrv4(cidr: Cidr): cidr is Cidrv4 {
+  return typeof cidr.address === "number";
+}
+
+/**
+ * Type guard that checks whether a {@link Cidr} is an IPv6 CIDR block.
+ *
+ * @param cidr The CIDR block to check
+ * @returns `true` if the CIDR is a {@link Cidrv6}
+ *
+ * @example
+ * ```ts
+ * import { assert } from "@std/assert";
+ * import { isCidrv6, parseCidr } from "@hertzg/ip/cidr";
+ *
+ * assert(isCidrv6(parseCidr("2001:db8::/32")));
+ * ```
+ */
+export function isCidrv6(cidr: Cidr): cidr is Cidrv6 {
+  return typeof cidr.address === "bigint";
+}
+
+/**
  * Parses an IPv4 or IPv6 CIDR notation string.
  *
  * Detects the IP version by checking for `:` in the input — if present,
@@ -79,17 +126,13 @@ import {
  * assertEquals(v6.prefixLength, 10);
  * ```
  */
-export function parseCidr(cidr: string): Cidrv4 | Cidrv6 {
+export function parseCidr(cidr: string): Cidr {
   if (cidr.includes(":")) {
     return parseCidrv6(cidr);
   }
   return parseCidrv4(cidr);
 }
 
-/** Stringifies a {@link Cidrv4} to IPv4 CIDR notation. */
-export function stringifyCidr(cidr: Cidrv4): string;
-/** Stringifies a {@link Cidrv6} to IPv6 CIDR notation. */
-export function stringifyCidr(cidr: Cidrv6): string;
 /**
  * Stringifies a {@link Cidrv4} or {@link Cidrv6} to CIDR notation.
  *
@@ -105,34 +148,13 @@ export function stringifyCidr(cidr: Cidrv6): string;
  * assertEquals(stringifyCidr(parseCidr("2001:db8::/32")), "2001:db8::/32");
  * ```
  */
-export function stringifyCidr(cidr: Cidrv4 | Cidrv6): string;
-export function stringifyCidr(cidr: Cidrv4 | Cidrv6): string {
-  if (typeof cidr.address === "bigint") {
-    return stringifyCidrv6(cidr as Cidrv6);
+export function stringifyCidr(cidr: Cidr): string {
+  if (isCidrv6(cidr)) {
+    return stringifyCidrv6(cidr);
   }
-  return stringifyCidrv4(cidr as Cidrv4);
+  return stringifyCidrv4(cidr);
 }
 
-/** Checks if one IPv4 CIDR block fully contains another. */
-export function cidrContainsCidr(
-  outer: Cidrv4,
-  inner: Cidrv4,
-): boolean;
-/** Checks if one IPv6 CIDR block fully contains another. */
-export function cidrContainsCidr(
-  outer: Cidrv6,
-  inner: Cidrv6,
-): boolean;
-/** Mixed IPv4/IPv6 always throws TypeError. */
-export function cidrContainsCidr(
-  outer: Cidrv4,
-  inner: Cidrv6,
-): never;
-/** Mixed IPv4/IPv6 always throws TypeError. */
-export function cidrContainsCidr(
-  outer: Cidrv6,
-  inner: Cidrv4,
-): never;
 /**
  * Checks if one CIDR block fully contains another.
  *
@@ -178,47 +200,22 @@ export function cidrContainsCidr(
  * );
  * ```
  */
-export function cidrContainsCidr(
-  outer: Cidrv4 | Cidrv6,
-  inner: Cidrv4 | Cidrv6,
+export function cidrContainsCidr<T extends Cidr>(
+  outer: T,
+  inner: T,
 ): boolean;
-export function cidrContainsCidr(
-  outer: Cidrv4 | Cidrv6,
-  inner: Cidrv4 | Cidrv6,
-): boolean {
-  const outerIsBigint = typeof outer.address === "bigint";
-  const innerIsBigint = typeof inner.address === "bigint";
-  if (outerIsBigint !== innerIsBigint) {
-    throw new TypeError(
-      "Cannot compare containment of IPv4 and IPv6 CIDR blocks",
-    );
+export function cidrContainsCidr(outer: Cidr, inner: Cidr): boolean {
+  if (isCidrv6(outer) && isCidrv6(inner)) {
+    return cidrv6ContainsCidr(outer, inner);
+  } else if (isCidrv4(outer) && isCidrv4(inner)) {
+    return cidrv4ContainsCidr(outer, inner);
   }
-  if (outerIsBigint) {
-    return cidrv6ContainsCidr(outer as Cidrv6, inner as Cidrv6);
-  }
-  return cidrv4ContainsCidr(outer as Cidrv4, inner as Cidrv4);
+
+  throw new TypeError(
+    "Cannot compare containment of IPv4 and IPv6 CIDR blocks",
+  );
 }
 
-/** Checks if two IPv4 CIDR blocks overlap. */
-export function cidrOverlaps(
-  a: Cidrv4,
-  b: Cidrv4,
-): boolean;
-/** Checks if two IPv6 CIDR blocks overlap. */
-export function cidrOverlaps(
-  a: Cidrv6,
-  b: Cidrv6,
-): boolean;
-/** Mixed IPv4/IPv6 always throws TypeError. */
-export function cidrOverlaps(
-  a: Cidrv4,
-  b: Cidrv6,
-): never;
-/** Mixed IPv4/IPv6 always throws TypeError. */
-export function cidrOverlaps(
-  a: Cidrv6,
-  b: Cidrv4,
-): never;
 /**
  * Checks if two CIDR blocks overlap (share at least one address).
  *
@@ -264,33 +261,20 @@ export function cidrOverlaps(
  * );
  * ```
  */
-export function cidrOverlaps(
-  a: Cidrv4 | Cidrv6,
-  b: Cidrv4 | Cidrv6,
+export function cidrOverlaps<T extends Cidr>(
+  a: T,
+  b: T,
 ): boolean;
-export function cidrOverlaps(
-  a: Cidrv4 | Cidrv6,
-  b: Cidrv4 | Cidrv6,
-): boolean {
-  const aIsBigint = typeof a.address === "bigint";
-  const bIsBigint = typeof b.address === "bigint";
-  if (aIsBigint !== bIsBigint) {
-    throw new TypeError("Cannot check overlap of IPv4 and IPv6 CIDR blocks");
+export function cidrOverlaps(a: Cidr, b: Cidr): boolean {
+  if (isCidrv6(a) && isCidrv6(b)) {
+    return cidrv6Overlaps(a, b);
+  } else if (isCidrv4(a) && isCidrv4(b)) {
+    return cidrv4Overlaps(a, b);
   }
-  if (aIsBigint) {
-    return cidrv6Overlaps(a as Cidrv6, b as Cidrv6);
-  }
-  return cidrv4Overlaps(a as Cidrv4, b as Cidrv4);
+
+  throw new TypeError("Cannot check overlap of IPv4 and IPv6 CIDR blocks");
 }
 
-/** Returns the intersection of two IPv4 CIDR blocks. */
-export function cidrIntersect(a: Cidrv4, b: Cidrv4): Cidrv4 | null;
-/** Returns the intersection of two IPv6 CIDR blocks. */
-export function cidrIntersect(a: Cidrv6, b: Cidrv6): Cidrv6 | null;
-/** Mixed IPv4/IPv6 always throws TypeError. */
-export function cidrIntersect(a: Cidrv4, b: Cidrv6): never;
-/** Mixed IPv4/IPv6 always throws TypeError. */
-export function cidrIntersect(a: Cidrv6, b: Cidrv4): never;
 /**
  * Returns the intersection of two CIDR blocks.
  *
@@ -334,33 +318,19 @@ export function cidrIntersect(a: Cidrv6, b: Cidrv4): never;
  * );
  * ```
  */
-export function cidrIntersect(
-  a: Cidrv4 | Cidrv6,
-  b: Cidrv4 | Cidrv6,
-): Cidrv4 | Cidrv6 | null;
-export function cidrIntersect(
-  a: Cidrv4 | Cidrv6,
-  b: Cidrv4 | Cidrv6,
-): Cidrv4 | Cidrv6 | null {
-  const aIsBigint = typeof a.address === "bigint";
-  const bIsBigint = typeof b.address === "bigint";
-  if (aIsBigint !== bIsBigint) {
-    throw new TypeError("Cannot intersect IPv4 and IPv6 CIDR blocks");
+export function cidrIntersect<T extends Cidr>(
+  a: T,
+  b: T,
+): T | null;
+export function cidrIntersect(a: Cidr, b: Cidr): Cidr | null {
+  if (isCidrv6(a) && isCidrv6(b)) {
+    return cidrv6Intersect(a, b);
+  } else if (isCidrv4(a) && isCidrv4(b)) {
+    return cidrv4Intersect(a, b);
   }
-  if (aIsBigint) {
-    return cidrv6Intersect(a as Cidrv6, b as Cidrv6);
-  }
-  return cidrv4Intersect(a as Cidrv4, b as Cidrv4);
+  throw new TypeError("Cannot intersect IPv4 and IPv6 CIDR blocks");
 }
 
-/** Subtracts one IPv4 CIDR block from another. */
-export function cidrSubtract(a: Cidrv4, b: Cidrv4): Cidrv4[];
-/** Subtracts one IPv6 CIDR block from another. */
-export function cidrSubtract(a: Cidrv6, b: Cidrv6): Cidrv6[];
-/** Mixed IPv4/IPv6 always throws TypeError. */
-export function cidrSubtract(a: Cidrv4, b: Cidrv6): never;
-/** Mixed IPv4/IPv6 always throws TypeError. */
-export function cidrSubtract(a: Cidrv6, b: Cidrv4): never;
 /**
  * Subtracts one CIDR block from another.
  *
@@ -404,29 +374,20 @@ export function cidrSubtract(a: Cidrv6, b: Cidrv4): never;
  * );
  * ```
  */
-export function cidrSubtract(
-  a: Cidrv4 | Cidrv6,
-  b: Cidrv4 | Cidrv6,
-): (Cidrv4 | Cidrv6)[];
-export function cidrSubtract(
-  a: Cidrv4 | Cidrv6,
-  b: Cidrv4 | Cidrv6,
-): (Cidrv4 | Cidrv6)[] {
-  const aIsBigint = typeof a.address === "bigint";
-  const bIsBigint = typeof b.address === "bigint";
-  if (aIsBigint !== bIsBigint) {
-    throw new TypeError("Cannot subtract IPv4 and IPv6 CIDR blocks");
+export function cidrSubtract<T extends Cidr>(
+  a: T,
+  b: T,
+): T[];
+export function cidrSubtract(a: Cidr, b: Cidr): Cidr[] {
+  if (isCidrv6(a) && isCidrv6(b)) {
+    return cidrv6Subtract(a, b);
+  } else if (isCidrv4(a) && isCidrv4(b)) {
+    return cidrv4Subtract(a, b);
   }
-  if (aIsBigint) {
-    return cidrv6Subtract(a as Cidrv6, b as Cidrv6);
-  }
-  return cidrv4Subtract(a as Cidrv4, b as Cidrv4);
+
+  throw new TypeError("Cannot subtract IPv4 and IPv6 CIDR blocks");
 }
 
-/** Merges IPv4 CIDR blocks into the minimal covering set. */
-export function cidrMerge(cidrs: readonly Cidrv4[]): Cidrv4[];
-/** Merges IPv6 CIDR blocks into the minimal covering set. */
-export function cidrMerge(cidrs: readonly Cidrv6[]): Cidrv6[];
 /**
  * Merges CIDR blocks into the minimal covering set.
  *
@@ -465,28 +426,23 @@ export function cidrMerge(cidrs: readonly Cidrv6[]): Cidrv6[];
  * assertEquals(cidrMerge([]), []);
  * ```
  */
-export function cidrMerge(
-  cidrs: readonly (Cidrv4 | Cidrv6)[],
-): (Cidrv4 | Cidrv6)[];
-export function cidrMerge(
-  cidrs: readonly (Cidrv4 | Cidrv6)[],
-): (Cidrv4 | Cidrv6)[] {
-  if (cidrs.length === 0) return [];
-  const [firstCidr] = cidrs;
-  if (!cidrs.every((c) => typeof c.address === typeof firstCidr.address)) {
-    throw new TypeError("All CIDRs must be the same IP version");
+export function cidrMerge<T extends Cidr>(
+  cidrs: readonly T[],
+): T[];
+export function cidrMerge(cidrs: readonly Cidr[]): Cidr[] {
+  if (cidrs.length === 0) {
+    return [];
   }
 
-  if (typeof firstCidr.address === "bigint") {
-    return cidrv6Merge(cidrs as readonly Cidrv6[]);
+  if (cidrs.every(isCidrv6)) {
+    return cidrv6Merge(cidrs);
+  } else if (cidrs.every(isCidrv4)) {
+    return cidrv4Merge(cidrs);
   }
-  return cidrv4Merge(cidrs as readonly Cidrv4[]);
+
+  throw new TypeError("All CIDRs must be the same IP version");
 }
 
-/** Returns the total number of addresses in an IPv4 CIDR block. */
-export function cidrSize(cidr: Cidrv4): number;
-/** Returns the total number of addresses in an IPv6 CIDR block. */
-export function cidrSize(cidr: Cidrv6): bigint;
 /**
  * Returns the total number of addresses in a CIDR block.
  *
@@ -505,12 +461,14 @@ export function cidrSize(cidr: Cidrv6): bigint;
  * assertEquals(cidrSize(parseCidr("fd00::/120")), 256n);
  * ```
  */
-export function cidrSize(cidr: Cidrv4 | Cidrv6): number | bigint;
-export function cidrSize(cidr: Cidrv4 | Cidrv6): number | bigint {
-  if (typeof cidr.address === "bigint") {
-    return cidrv6Size(cidr as Cidrv6);
+export function cidrSize<T extends Cidr>(
+  cidr: T,
+): T extends Cidrv6 ? bigint : number;
+export function cidrSize(cidr: Cidr): number | bigint {
+  if (isCidrv6(cidr)) {
+    return cidrv6Size(cidr);
   }
-  return cidrv4Size(cidr as Cidrv4);
+  return cidrv4Size(cidr);
 }
 
 /** Generates all addresses in an IPv4 CIDR block. */
@@ -550,7 +508,7 @@ export function cidrAddresses(
  * ```
  */
 export function cidrAddresses(
-  cidr: Cidrv4 | Cidrv6,
+  cidr: Cidr,
   options?: {
     offset?: number | bigint;
     count?: number | bigint;
@@ -558,18 +516,18 @@ export function cidrAddresses(
   },
 ): Generator<number | bigint>;
 export function* cidrAddresses(
-  cidr: Cidrv4 | Cidrv6,
+  cidr: Cidr,
   options?: {
     offset?: number | bigint;
     count?: number | bigint;
     step?: number | bigint;
   },
 ): Generator<number | bigint> {
-  if (typeof cidr.address === "bigint") {
-    yield* cidrv6Addresses(cidr as Cidrv6, options);
+  if (isCidrv6(cidr)) {
+    yield* cidrv6Addresses(cidr, options);
   } else {
     yield* cidrv4Addresses(
-      cidr as Cidrv4,
+      cidr,
       options as {
         offset?: number;
         count?: number;
