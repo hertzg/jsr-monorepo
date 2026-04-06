@@ -1,5 +1,19 @@
 # Changelog
 
+## [4.0.0](https://github.com/hertzg/jsr-monorepo/compare/@hertzg/ip-v3.3.0...@hertzg/ip-v4.0.0) (2026-04-06)
+
+
+### ⚠ BREAKING CHANGES
+
+* **@hertzg/ip:** parseCidr("::ffff:192.168.1.0/120") now returns Cidrv4 { address: 3232235776, prefixLength: 24 } instead of Cidrv6. Use parseCidrv6 directly to preserve the IPv6 representation.
+
+### Features
+
+* **@hertzg/ip:** add JSDoc for Cidr type alias and isCidrv4/isCidrv6 type guards ([cf69ee4](https://github.com/hertzg/jsr-monorepo/commit/cf69ee433c9fb6ca036e22716c61f2c56e4ddfd1))
+* **@hertzg/ip:** re-export Cidrv4/Cidrv6 types from universal cidr module ([cac7e1f](https://github.com/hertzg/jsr-monorepo/commit/cac7e1f63483747405d400b4b27ad28dd7c1ec7c))
+* **@hertzg/ip:** remove stale type casts from JSDoc examples ([fa7243b](https://github.com/hertzg/jsr-monorepo/commit/fa7243bb14fe558b42c525e3e593ea79c2e7ba95))
+* **@hertzg/ip:** unwrap IPv4-mapped IPv6 CIDRs in parseCidr ([97ea931](https://github.com/hertzg/jsr-monorepo/commit/97ea9319eb297804969597e554c9025131cd4eb8))
+
 ## [3.3.0](https://github.com/hertzg/jsr-monorepo/compare/@hertzg/ip-v3.2.0...@hertzg/ip-v3.3.0) (2026-04-06)
 
 
