@@ -291,20 +291,18 @@ export function cidrOverlaps(a: Cidr, b: Cidr): boolean {
  * ```ts
  * import { assertEquals } from "@std/assert";
  * import { cidrIntersect, parseCidr, stringifyCidr } from "@hertzg/ip/cidr";
- * import type { Cidrv4 } from "@hertzg/ip/cidrv4";
  *
  * const result = cidrIntersect(parseCidr("10.0.0.0/8"), parseCidr("10.1.0.0/16"));
- * assertEquals(result && stringifyCidr(result as Cidrv4), "10.1.0.0/16");
+ * assertEquals(result && stringifyCidr(result), "10.1.0.0/16");
  * ```
  *
  * @example IPv6 intersection
  * ```ts
  * import { assertEquals } from "@std/assert";
  * import { cidrIntersect, parseCidr, stringifyCidr } from "@hertzg/ip/cidr";
- * import type { Cidrv6 } from "@hertzg/ip/cidrv6";
  *
  * const result = cidrIntersect(parseCidr("2001:db8::/32"), parseCidr("2001:db8:1::/48"));
- * assertEquals(result && stringifyCidr(result as Cidrv6), "2001:db8:1::/48");
+ * assertEquals(result && stringifyCidr(result), "2001:db8:1::/48");
  * ```
  *
  * @example Mixed versions throw TypeError
@@ -347,20 +345,18 @@ export function cidrIntersect(a: Cidr, b: Cidr): Cidr | null {
  * ```ts
  * import { assertEquals } from "@std/assert";
  * import { cidrSubtract, parseCidr, stringifyCidr } from "@hertzg/ip/cidr";
- * import type { Cidrv4 } from "@hertzg/ip/cidrv4";
  *
  * const result = cidrSubtract(parseCidr("10.0.0.0/24"), parseCidr("172.16.0.0/24"));
- * assertEquals(result.map((c) => stringifyCidr(c as Cidrv4)), ["10.0.0.0/24"]);
+ * assertEquals(result.map((c) => stringifyCidr(c)), ["10.0.0.0/24"]);
  * ```
  *
  * @example IPv6 subtraction
  * ```ts
  * import { assertEquals } from "@std/assert";
  * import { cidrSubtract, parseCidr, stringifyCidr } from "@hertzg/ip/cidr";
- * import type { Cidrv6 } from "@hertzg/ip/cidrv6";
  *
  * const result = cidrSubtract(parseCidr("2001:db8::/32"), parseCidr("2001:db9::/32"));
- * assertEquals(result.map((c) => stringifyCidr(c as Cidrv6)), ["2001:db8::/32"]);
+ * assertEquals(result.map((c) => stringifyCidr(c)), ["2001:db8::/32"]);
  * ```
  *
  * @example Mixed versions throw TypeError
@@ -402,20 +398,18 @@ export function cidrSubtract(a: Cidr, b: Cidr): Cidr[] {
  * ```ts
  * import { assertEquals } from "@std/assert";
  * import { cidrMerge, parseCidr, stringifyCidr } from "@hertzg/ip/cidr";
- * import type { Cidrv4 } from "@hertzg/ip/cidrv4";
  *
  * const result = cidrMerge([parseCidr("10.0.0.0/25"), parseCidr("10.0.0.128/25")]);
- * assertEquals(result.map((c) => stringifyCidr(c as Cidrv4)), ["10.0.0.0/24"]);
+ * assertEquals(result.map((c) => stringifyCidr(c)), ["10.0.0.0/24"]);
  * ```
  *
  * @example Merge IPv6 CIDRs
  * ```ts
  * import { assertEquals } from "@std/assert";
  * import { cidrMerge, parseCidr, stringifyCidr } from "@hertzg/ip/cidr";
- * import type { Cidrv6 } from "@hertzg/ip/cidrv6";
  *
  * const result = cidrMerge([parseCidr("2001:db8::/33"), parseCidr("2001:db8:8000::/33")]);
- * assertEquals(result.map((c) => stringifyCidr(c as Cidrv6)), ["2001:db8::/32"]);
+ * assertEquals(result.map((c) => stringifyCidr(c)), ["2001:db8::/32"]);
  * ```
  *
  * @example Empty array returns empty
@@ -499,10 +493,10 @@ export function cidrAddresses(
  * ```ts
  * import { assertEquals } from "@std/assert";
  * import { cidrAddresses, parseCidr } from "@hertzg/ip/cidr";
- * import { stringifyIpv4 } from "@hertzg/ip/ipv4";
+ * import { stringifyIp } from "@hertzg/ip/ip";
  *
  * const first3 = Array.from(cidrAddresses(parseCidr("10.0.0.0/29"), { count: 3 }));
- * assertEquals(first3.map((ip) => stringifyIpv4(ip as number)), [
+ * assertEquals(first3.map(stringifyIp), [
  *   "10.0.0.0", "10.0.0.1", "10.0.0.2",
  * ]);
  * ```
