@@ -1,5 +1,12 @@
 # Changelog
 
+## [3.3.0](https://github.com/hertzg/jsr-monorepo/compare/@hertzg/ip-v3.2.0...@hertzg/ip-v3.3.0) (2026-04-06)
+
+
+### Features
+
+* **@hertzg/ip:** add universal parse and stringify functions ([038bbf4](https://github.com/hertzg/jsr-monorepo/commit/038bbf4874a29ca4cb1310e4297723c268b548d4))
+
 ## [3.2.0](https://github.com/hertzg/jsr-monorepo/compare/@hertzg/ip-v3.1.0...@hertzg/ip-v3.2.0) (2026-04-06)
 
 
