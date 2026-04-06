@@ -169,7 +169,11 @@
       </code><div class="space-y-7" id=""><div class="markdown"><p>Parses an IPv4 or IPv6 CIDR notation string.</p>
 <p>Detects the IP version by checking for <code>:</code> in the input — if present,
 the CIDR is parsed as IPv6 (returning <a href="../.././cidr.ts/~/Cidrv6.html">Cidrv6</a>), otherwise as IPv4
-(returning <a href="../.././cidr.ts/~/Cidrv4.html">Cidrv4</a>).</p>
+(returning <a href="../.././cidr.ts/~/Cidrv4.html">Cidrv4</a>). IPv4-mapped IPv6 CIDRs with prefix length &gt;= 96
+(e.g., <code>::ffff:192.168.1.0/120</code>) are automatically unwrapped to their
+IPv4 CIDR representation.</p>
+<p>To preserve the full IPv6 CIDR for mapped addresses, use
+<a href="../.././cidrv6.ts/~/parseCidrv6.html">parseCidrv6</a> directly instead.</p>
 </div><section class="section"  id="examples"><div>
       <h2 class="anchorable mb-1"><a href="#examples" class="anchor" aria-label="Anchor" tabIndex="-1"><svg
   width="16"
@@ -225,6 +229,9 @@ assertEquals(v4.prefixLength, 8);
 
 const v6 = parseCidr(&quot;fe80::/10&quot;);
 assertEquals(v6.prefixLength, 10);
+
+const mapped = parseCidr(&quot;::ffff:192.168.1.0/120&quot;);
+assertEquals(mapped, { address: 3232235776, prefixLength: 24 });
 </code><button class="copyButton" data-copy="import { assertEquals } from &quot;@std/assert&quot;;
 import { parseCidr } from &quot;@hertzg/ip/cidr&quot;;
 
@@ -233,6 +240,9 @@ assertEquals(v4.prefixLength, 8);
 
 const v6 = parseCidr(&quot;fe80::/10&quot;);
 assertEquals(v6.prefixLength, 10);
+
+const mapped = parseCidr(&quot;::ffff:192.168.1.0/120&quot;);
+assertEquals(mapped, { address: 3232235776, prefixLength: 24 });
 "><svg
   class="copy"
   width="15"
