@@ -589,7 +589,7 @@ Return Type</h2></div><div class="space-y-8"><div class=" docEntry" id="function
   </defs>
 </svg>
 </a>
-<span class="font-bold">cidrAddresses</span><span class="font-medium">(<div class="ml-4"><div><span>cidr<span>: <span><a href="../.././mod.ts/~/Cidrv4.html" class="link td-ref">Cidrv4</a><span class="td-op"> | </span><a href="../.././mod.ts/~/Cidrv6.html" class="link td-ref">Cidrv6</a></span></span></span>,</div><div><span>options<span class="td-op">?</span><span>: { offset<span class="td-op">?</span><span>: <span><span class="td-kw">number</span><span class="td-op"> | </span><span class="td-kw">bigint</span></span></span>; count<span class="td-op">?</span><span>: <span><span class="td-kw">number</span><span class="td-op"> | </span><span class="td-kw">bigint</span></span></span>; step<span class="td-op">?</span><span>: <span><span class="td-kw">number</span><span class="td-op"> | </span><span class="td-kw">bigint</span></span></span>;  }</span></span></div></div>)<span>: <span class="td-ref">Generator</span>&lt;<span><span class="td-kw">number</span><span class="td-op"> | </span><span class="td-kw">bigint</span></span>&gt;</span> </span>
+<span class="font-bold">cidrAddresses</span><span class="font-medium">(<div class="ml-4"><div><span>cidr<span>: <a href="../.././mod.ts/~/Cidr.html" class="link td-ref">Cidr</a></span></span>,</div><div><span>options<span class="td-op">?</span><span>: { offset<span class="td-op">?</span><span>: <span><span class="td-kw">number</span><span class="td-op"> | </span><span class="td-kw">bigint</span></span></span>; count<span class="td-op">?</span><span>: <span><span class="td-kw">number</span><span class="td-op"> | </span><span class="td-kw">bigint</span></span></span>; step<span class="td-op">?</span><span>: <span><span class="td-kw">number</span><span class="td-op"> | </span><span class="td-kw">bigint</span></span></span>;  }</span></span></div></div>)<span>: <span class="td-ref">Generator</span>&lt;<span><span class="td-kw">number</span><span class="td-op"> | </span><span class="td-kw">bigint</span></span>&gt;</span> </span>
       </code><div class="space-y-7" id=""><div class="markdown"><p>Generates IP addresses within a CIDR block.</p>
 <p>Dispatches to <a href="../.././mod.ts/~/cidrv4Addresses.html">cidrv4Addresses</a> or <a href="../.././mod.ts/~/cidrv6Addresses.html">cidrv6Addresses</a> based on
 the address type. Yields addresses lazily for memory-efficient iteration.</p>
@@ -642,18 +642,18 @@ Examples</h2></div><div class="space-y-8"><div class="anchorable"><a href="#exam
 </div></h3>
   <div><div class="markdown"><pre class="highlight"><code class="language-ts">import { assertEquals } from &quot;@std/assert&quot;;
 import { cidrAddresses, parseCidr } from &quot;@hertzg/ip/cidr&quot;;
-import { stringifyIpv4 } from &quot;@hertzg/ip/ipv4&quot;;
+import { stringifyIp } from &quot;@hertzg/ip/ip&quot;;
 
 const first3 = Array.from(cidrAddresses(parseCidr(&quot;10.0.0.0/29&quot;), { count: 3 }));
-assertEquals(first3.map((ip) =&gt; stringifyIpv4(ip as number)), [
+assertEquals(first3.map(stringifyIp), [
   &quot;10.0.0.0&quot;, &quot;10.0.0.1&quot;, &quot;10.0.0.2&quot;,
 ]);
 </code><button class="copyButton" data-copy="import { assertEquals } from &quot;@std/assert&quot;;
 import { cidrAddresses, parseCidr } from &quot;@hertzg/ip/cidr&quot;;
-import { stringifyIpv4 } from &quot;@hertzg/ip/ipv4&quot;;
+import { stringifyIp } from &quot;@hertzg/ip/ip&quot;;
 
 const first3 = Array.from(cidrAddresses(parseCidr(&quot;10.0.0.0/29&quot;), { count: 3 }));
-assertEquals(first3.map((ip) =&gt; stringifyIpv4(ip as number)), [
+assertEquals(first3.map(stringifyIp), [
   &quot;10.0.0.0&quot;, &quot;10.0.0.1&quot;, &quot;10.0.0.2&quot;,
 ]);
 "><svg
@@ -738,7 +738,7 @@ Parameters</h2></div><div class="space-y-8"><div class="anchorable docEntry" id=
   </defs>
 </svg>
 </a>
-<span class="font-bold font-lg">cidr</span><span class="font-medium text-stone-500 dark:text-stone-200"><span>: <span><a href="../.././mod.ts/~/Cidrv4.html" class="link td-ref">Cidrv4</a><span class="td-op"> | </span><a href="../.././mod.ts/~/Cidrv6.html" class="link td-ref">Cidrv6</a></span></span></span>
+<span class="font-bold font-lg">cidr</span><span class="font-medium text-stone-500 dark:text-stone-200"><span>: <a href="../.././mod.ts/~/Cidr.html" class="link td-ref">Cidr</a></span></span>
       </code>
     </div><a
   class="sourceButton"
