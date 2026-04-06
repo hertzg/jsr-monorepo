@@ -189,12 +189,19 @@
  * - {@link stringifyIp}: Convert number or bigint to IP address string
  * - {@link parseCidr}: Parse any CIDR notation string to Cidrv4 or Cidrv6
  * - {@link stringifyCidr}: Convert Cidrv4 or Cidrv6 to CIDR notation string
- * - {@link cidrContainsCidr}: Check if one CIDR fully contains another (auto-detect version)
- * - {@link cidrOverlaps}: Check if two CIDRs share at least one address (auto-detect version)
- * - {@link cidrIntersect}: Return the overlapping CIDR block, or null (auto-detect version)
- * - {@link cidrSubtract}: Return CIDR blocks in A but not in B (auto-detect version)
- * - {@link cidrMerge}: Merge CIDR blocks into the minimal covering set (auto-detect version)
+ * - {@link cidrSize}: Get total number of addresses in a CIDR block
+ * - {@link cidrAddresses}: Generate IP addresses in a CIDR block
+ * - {@link cidrContainsCidr}: Check if one CIDR fully contains another
+ * - {@link cidrOverlaps}: Check if two CIDRs share at least one address
+ * - {@link cidrIntersect}: Return the overlapping CIDR block, or null
+ * - {@link cidrSubtract}: Return CIDR blocks in A but not in B
+ * - {@link cidrMerge}: Merge CIDR blocks into the minimal covering set
+ * - {@link isValidIp}: Check if a string is a valid plain IP address (IPv4 or IPv6)
  * - {@link isValidCidr}: Check if a string is valid CIDR notation (IPv4 or IPv6)
+ * - {@link classifyIp}: Classify an IPv4 (number) or IPv6 (bigint) address
+ * - {@link ClassifiedIp}: Discriminated union result with kind, value, and classification
+ * - {@link ClassifiedIpv4}: Result type for IPv4 classification
+ * - {@link ClassifiedIpv6}: Result type for IPv6 classification
  *
  * ### IPv4
  * - {@link parseIpv4}: Parse dotted decimal notation to number
@@ -244,10 +251,6 @@
  * - {@link cidrv6Addresses}: Generate IP addresses in CIDR range
  * - {@link isValidCidrv6}: Check if a string is valid IPv6 CIDR notation
  *
- * ### Validation
- * - {@link isValidIp}: Check if a string is a valid plain IP address (IPv4 or IPv6)
- * - {@link isValidCidr}: Check if a string is valid CIDR notation (IPv4 or IPv6)
- *
  * ### IPv4 Classification
  * - {@link ClassificationIpv4}: Type for all IPv4 classification labels
  * - {@link classifyIpv4}: Classify an IPv4 address into its well-known range
@@ -285,12 +288,6 @@
  * - {@link cidrv4ToCidrv64Mapped}: Convert IPv4 CIDR to IPv4-mapped IPv6 CIDR
  * - {@link cidrv4FromCidrv64Mapped}: Convert IPv4-mapped IPv6 CIDR to IPv4 CIDR
  *
- * ### Combined Classification
- * - {@link ClassifiedIp}: Discriminated union result with kind, value, and classification
- * - {@link ClassifiedIpv4}: Result type for IPv4 classification
- * - {@link ClassifiedIpv6}: Result type for IPv6 classification
- * - {@link classifyIp}: Classify an IPv4 (number) or IPv6 (bigint) address
- *
  * ### Submodules
  * - [`ip`](https://jsr.io/@hertzg/ip/doc/ip): Universal IP parsing via {@link parseIp}, {@link stringifyIp}
  * - [`cidr`](https://jsr.io/@hertzg/ip/doc/cidr): Universal CIDR parsing via {@link parseCidr}, {@link stringifyCidr}
@@ -311,10 +308,12 @@
 
 export { parseIp, stringifyIp } from "./ip.ts";
 export {
+  cidrAddresses,
   cidrContainsCidr,
   cidrIntersect,
   cidrMerge,
   cidrOverlaps,
+  cidrSize,
   cidrSubtract,
   parseCidr,
   stringifyCidr,
