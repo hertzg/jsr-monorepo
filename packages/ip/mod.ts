@@ -185,6 +185,8 @@
  * ## API Reference
  *
  * ### Universal (auto-detect IPv4/IPv6)
+ * - {@link parse}: Parse any IP address or CIDR string to its typed representation
+ * - {@link stringify}: Convert any IP address or CIDR value to its string notation
  * - {@link parseIp}: Parse any IP address string to number (IPv4) or bigint (IPv6)
  * - {@link stringifyIp}: Convert number or bigint to IP address string
  * - {@link parseCidr}: Parse any CIDR notation string to Cidrv4 or Cidrv6
@@ -306,6 +308,11 @@
 
 // --- Universal (auto-detect IPv4/IPv6) ---
 
+import { parseCidr, stringifyCidr } from "./cidr.ts";
+import { parseIp, stringifyIp } from "./ip.ts";
+import type { Cidrv4 } from "./cidrv4.ts";
+import type { Cidrv6 } from "./cidrv6.ts";
+
 export { parseIp, stringifyIp } from "./ip.ts";
 export {
   cidrAddresses,
@@ -318,6 +325,86 @@ export {
   parseCidr,
   stringifyCidr,
 } from "./cidr.ts";
+
+/**
+ * Parses an IP address or CIDR notation string.
+ *
+ * Detects CIDR notation by checking for `/` in the input. If present,
+ * delegates to {@link parseCidr}; otherwise delegates to {@link parseIp}.
+ * The IP version (IPv4 vs IPv6) is auto-detected within each delegate.
+ *
+ * @param input The IP address or CIDR notation string
+ * @returns The parsed value — `number` (IPv4), `bigint` (IPv6),
+ *   {@link Cidrv4} (IPv4 CIDR), or {@link Cidrv6} (IPv6 CIDR)
+ * @throws {TypeError} If the format is invalid
+ * @throws {RangeError} If values are out of range
+ *
+ * @example Parse IP addresses
+ * ```ts
+ * import { assertEquals } from "@std/assert";
+ * import { parse } from "@hertzg/ip";
+ *
+ * assertEquals(parse("10.0.0.1"), 167772161);
+ * assertEquals(parse("::1"), 1n);
+ * assertEquals(parse("::ffff:192.168.1.1"), 3232235777);
+ * ```
+ *
+ * @example Parse CIDR blocks
+ * ```ts
+ * import { assertEquals } from "@std/assert";
+ * import { parse } from "@hertzg/ip";
+ *
+ * const v4 = parse("10.0.0.0/8");
+ * assertEquals(v4, { address: 167772160, prefixLength: 8 });
+ *
+ * const v6 = parse("fe80::/10");
+ * assertEquals(v6, { address: 0xfe80_0000_0000_0000_0000_0000_0000_0000n, prefixLength: 10 });
+ * ```
+ */
+export function parse(input: string): number | bigint | Cidrv4 | Cidrv6 {
+  if (input.includes("/")) {
+    return parseCidr(input);
+  }
+  return parseIp(input);
+}
+
+/** Stringifies an IPv4 address (`number`) to dotted decimal notation. */
+export function stringify(value: number): string;
+/** Stringifies an IPv6 address (`bigint`) to compressed colon-hexadecimal notation. */
+export function stringify(value: bigint): string;
+/** Stringifies a {@link Cidrv4} to IPv4 CIDR notation. */
+export function stringify(value: Cidrv4): string;
+/** Stringifies a {@link Cidrv6} to IPv6 CIDR notation. */
+export function stringify(value: Cidrv6): string;
+/**
+ * Stringifies an IP address or CIDR block to its standard notation.
+ *
+ * Dispatches based on the value type:
+ * - `number` → {@link stringifyIp} (IPv4 dotted decimal)
+ * - `bigint` → {@link stringifyIp} (IPv6 compressed colon-hexadecimal)
+ * - object with `address` and `prefixLength` → {@link stringifyCidr}
+ *
+ * @param value The IP address or CIDR block to stringify
+ * @returns The string representation
+ *
+ * @example
+ * ```ts
+ * import { assertEquals } from "@std/assert";
+ * import { parse, stringify } from "@hertzg/ip";
+ *
+ * assertEquals(stringify(167772161), "10.0.0.1");
+ * assertEquals(stringify(1n), "::1");
+ * assertEquals(stringify(parse("10.0.0.0/8")), "10.0.0.0/8");
+ * assertEquals(stringify(parse("2001:db8::/32")), "2001:db8::/32");
+ * ```
+ */
+export function stringify(value: number | bigint | Cidrv4 | Cidrv6): string;
+export function stringify(value: number | bigint | Cidrv4 | Cidrv6): string {
+  if (typeof value === "number" || typeof value === "bigint") {
+    return stringifyIp(value);
+  }
+  return stringifyCidr(value);
+}
 export {
   type ClassificationIpv4,
   type ClassificationIpv6,
