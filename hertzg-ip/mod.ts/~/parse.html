@@ -294,6 +294,9 @@ assertEquals(v4, { address: 167772160, prefixLength: 8 });
 
 const v6 = parse(&quot;fe80::/10&quot;);
 assertEquals(v6, { address: 0xfe80_0000_0000_0000_0000_0000_0000_0000n, prefixLength: 10 });
+
+const mapped = parse(&quot;::ffff:192.168.1.0/120&quot;);
+assertEquals(mapped, { address: 3232235776, prefixLength: 24 });
 </code><button class="copyButton" data-copy="import { assertEquals } from &quot;@std/assert&quot;;
 import { parse } from &quot;@hertzg/ip&quot;;
 
@@ -302,6 +305,9 @@ assertEquals(v4, { address: 167772160, prefixLength: 8 });
 
 const v6 = parse(&quot;fe80::/10&quot;);
 assertEquals(v6, { address: 0xfe80_0000_0000_0000_0000_0000_0000_0000n, prefixLength: 10 });
+
+const mapped = parse(&quot;::ffff:192.168.1.0/120&quot;);
+assertEquals(mapped, { address: 3232235776, prefixLength: 24 });
 "><svg
   class="copy"
   width="15"
