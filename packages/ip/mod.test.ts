@@ -53,4 +53,10 @@ Deno.test("mod.ts re-exports", async (t) => {
     });
     assertEquals(stringify(cidr), "2001:db8::/32");
   });
+
+  await t.step("parse unwraps IPv4-mapped CIDR", () => {
+    const cidr = parse("::ffff:192.168.1.0/120");
+    assertEquals(cidr, { address: 3232235776, prefixLength: 24 });
+    assertEquals(stringify(cidr), "192.168.1.0/24");
+  });
 });

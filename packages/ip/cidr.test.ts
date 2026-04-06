@@ -42,6 +42,36 @@ Deno.test("parseCidr", async (t) => {
     const cidr2 = parseCidr("::1/128") as Cidrv6;
     assertEquals(cidr2.prefixLength, 128);
   });
+
+  await t.step("unwraps IPv4-mapped IPv6 CIDR with prefix >= 96", () => {
+    const cidr = parseCidr("::ffff:192.168.1.0/120");
+    assertEquals(typeof cidr.address, "number");
+    assertEquals(cidr, { address: 3232235776, prefixLength: 24 });
+  });
+
+  await t.step("unwraps IPv4-mapped IPv6 CIDR at prefix boundary /96", () => {
+    const cidr = parseCidr("::ffff:0.0.0.0/96");
+    assertEquals(typeof cidr.address, "number");
+    assertEquals(cidr, { address: 0, prefixLength: 0 });
+  });
+
+  await t.step("unwraps hex-form IPv4-mapped IPv6 CIDR", () => {
+    const cidr = parseCidr("::ffff:c0a8:100/120");
+    assertEquals(typeof cidr.address, "number");
+    assertEquals(cidr, { address: 3232235776, prefixLength: 24 });
+  });
+
+  await t.step("preserves IPv4-mapped IPv6 CIDR with prefix < 96", () => {
+    const cidr = parseCidr("::ffff:0:0/64");
+    assertEquals(typeof cidr.address, "bigint");
+    assertEquals(cidr.prefixLength, 64);
+  });
+
+  await t.step("preserves non-mapped IPv6 CIDR", () => {
+    const cidr = parseCidr("2001:db8::/32");
+    assertEquals(typeof cidr.address, "bigint");
+    assertEquals(cidr.prefixLength, 32);
+  });
 });
 
 Deno.test("stringifyCidr", async (t) => {

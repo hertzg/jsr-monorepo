@@ -362,6 +362,9 @@ export {
  *
  * const v6 = parse("fe80::/10");
  * assertEquals(v6, { address: 0xfe80_0000_0000_0000_0000_0000_0000_0000n, prefixLength: 10 });
+ *
+ * const mapped = parse("::ffff:192.168.1.0/120");
+ * assertEquals(mapped, { address: 3232235776, prefixLength: 24 });
  * ```
  */
 export function parse(input: string): number | bigint | Cidrv4 | Cidrv6 {

@@ -32,6 +32,8 @@
  * @module
  */
 
+import { cidrv4FromCidrv64Mapped } from "./4to6.ts";
+import { isIpv6Ipv4Mapped } from "./classifyv6.ts";
 import {
   type Cidrv4,
   cidrv4Addresses,
@@ -110,7 +112,12 @@ export function isCidrv6(cidr: Cidr): cidr is Cidrv6 {
  *
  * Detects the IP version by checking for `:` in the input — if present,
  * the CIDR is parsed as IPv6 (returning {@link Cidrv6}), otherwise as IPv4
- * (returning {@link Cidrv4}).
+ * (returning {@link Cidrv4}). IPv4-mapped IPv6 CIDRs with prefix length >= 96
+ * (e.g., `::ffff:192.168.1.0/120`) are automatically unwrapped to their
+ * IPv4 CIDR representation.
+ *
+ * To preserve the full IPv6 CIDR for mapped addresses, use
+ * {@link parseCidrv6} directly instead.
  *
  * @param cidr The CIDR notation string (e.g., "192.168.1.0/24" or "2001:db8::/32")
  * @returns The parsed CIDR as `Cidrv4` or `Cidrv6`
@@ -127,11 +134,18 @@ export function isCidrv6(cidr: Cidr): cidr is Cidrv6 {
  *
  * const v6 = parseCidr("fe80::/10");
  * assertEquals(v6.prefixLength, 10);
+ *
+ * const mapped = parseCidr("::ffff:192.168.1.0/120");
+ * assertEquals(mapped, { address: 3232235776, prefixLength: 24 });
  * ```
  */
 export function parseCidr(cidr: string): Cidr {
   if (cidr.includes(":")) {
-    return parseCidrv6(cidr);
+    const v6 = parseCidrv6(cidr);
+    if (isIpv6Ipv4Mapped(v6.address) && v6.prefixLength >= 96) {
+      return cidrv4FromCidrv64Mapped(v6);
+    }
+    return v6;
   }
   return parseCidrv4(cidr);
 }
