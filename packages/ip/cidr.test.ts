@@ -1,9 +1,11 @@
 import { assert, assertEquals, assertThrows } from "@std/assert";
 import {
+  cidrAddresses,
   cidrContainsCidr,
   cidrIntersect,
   cidrMerge,
   cidrOverlaps,
+  cidrSize,
   cidrSubtract,
   parseCidr,
   stringifyCidr,
@@ -264,5 +266,50 @@ Deno.test("cidrMerge", async (t) => {
 
   await t.step("empty array returns empty", () => {
     assertEquals(cidrMerge([]), []);
+  });
+});
+
+Deno.test("cidrSize", async (t) => {
+  await t.step("returns number for IPv4", () => {
+    assertEquals(cidrSize(parseCidr("192.168.1.0/24")), 256);
+    assertEquals(cidrSize(parseCidr("10.0.0.0/8")), 16777216);
+    assertEquals(cidrSize(parseCidr("0.0.0.0/0")), 4294967296);
+  });
+
+  await t.step("returns bigint for IPv6", () => {
+    assertEquals(cidrSize(parseCidr("fd00::/120")), 256n);
+    assertEquals(cidrSize(parseCidr("::1/128")), 1n);
+  });
+});
+
+Deno.test("cidrAddresses", async (t) => {
+  await t.step("generates IPv4 addresses", () => {
+    const addrs = Array.from(
+      cidrAddresses(parseCidr("10.0.0.0/30")),
+    );
+    assertEquals(addrs.length, 4);
+    assertEquals(typeof addrs[0], "number");
+  });
+
+  await t.step("generates IPv6 addresses", () => {
+    const addrs = Array.from(
+      cidrAddresses(parseCidr("fd00::/126"), { count: 4 }),
+    );
+    assertEquals(addrs.length, 4);
+    assertEquals(typeof addrs[0], "bigint");
+  });
+
+  await t.step("supports offset and count for IPv4", () => {
+    const addrs = Array.from(
+      cidrAddresses(parseCidr("10.0.0.0/29"), { offset: 1, count: 3 }),
+    );
+    assertEquals(addrs.length, 3);
+  });
+
+  await t.step("supports offset and count for IPv6", () => {
+    const addrs = Array.from(
+      cidrAddresses(parseCidr("fd00::/120"), { offset: 1, count: 3 }),
+    );
+    assertEquals(addrs.length, 3);
   });
 });

@@ -3,9 +3,9 @@
  *
  * This module provides {@link parseCidr}, {@link stringifyCidr},
  * {@link isValidCidr}, {@link cidrContainsCidr}, {@link cidrOverlaps},
- * {@link cidrIntersect}, {@link cidrSubtract}, and {@link cidrMerge}
- * that auto-detect IPv4 vs IPv6 and delegate to the appropriate
- * version-specific function.
+ * {@link cidrIntersect}, {@link cidrSubtract}, {@link cidrMerge},
+ * {@link cidrSize}, and {@link cidrAddresses} that auto-detect IPv4 vs IPv6
+ * and delegate to the appropriate version-specific function.
  *
  * For version-specific functions, see:
  * - [`cidrv4`](https://jsr.io/@hertzg/ip/doc/cidrv4): {@link parseCidrv4}, {@link stringifyCidrv4}, {@link isValidCidrv4}
@@ -32,20 +32,24 @@
 
 import {
   type Cidrv4,
+  cidrv4Addresses,
   cidrv4ContainsCidr,
   cidrv4Intersect,
   cidrv4Merge,
   cidrv4Overlaps,
+  cidrv4Size,
   cidrv4Subtract,
   parseCidrv4,
   stringifyCidrv4,
 } from "./cidrv4.ts";
 import {
   type Cidrv6,
+  cidrv6Addresses,
   cidrv6ContainsCidr,
   cidrv6Intersect,
   cidrv6Merge,
   cidrv6Overlaps,
+  cidrv6Size,
   cidrv6Subtract,
   parseCidrv6,
   stringifyCidrv6,
@@ -477,4 +481,100 @@ export function cidrMerge(
     return cidrv6Merge(cidrs as readonly Cidrv6[]);
   }
   return cidrv4Merge(cidrs as readonly Cidrv4[]);
+}
+
+/** Returns the total number of addresses in an IPv4 CIDR block. */
+export function cidrSize(cidr: Cidrv4): number;
+/** Returns the total number of addresses in an IPv6 CIDR block. */
+export function cidrSize(cidr: Cidrv6): bigint;
+/**
+ * Returns the total number of addresses in a CIDR block.
+ *
+ * Dispatches to {@link cidrv4Size} or {@link cidrv6Size} based on the
+ * address type.
+ *
+ * @param cidr The CIDR block
+ * @returns The total number of addresses (number for IPv4, bigint for IPv6)
+ *
+ * @example
+ * ```ts
+ * import { assertEquals } from "@std/assert";
+ * import { cidrSize, parseCidr } from "@hertzg/ip/cidr";
+ *
+ * assertEquals(cidrSize(parseCidr("192.168.1.0/24")), 256);
+ * assertEquals(cidrSize(parseCidr("fd00::/120")), 256n);
+ * ```
+ */
+export function cidrSize(cidr: Cidrv4 | Cidrv6): number | bigint;
+export function cidrSize(cidr: Cidrv4 | Cidrv6): number | bigint {
+  if (typeof cidr.address === "bigint") {
+    return cidrv6Size(cidr as Cidrv6);
+  }
+  return cidrv4Size(cidr as Cidrv4);
+}
+
+/** Generates all addresses in an IPv4 CIDR block. */
+export function cidrAddresses(
+  cidr: Cidrv4,
+  options?: { offset?: number; count?: number; step?: number },
+): Generator<number>;
+/** Generates all addresses in an IPv6 CIDR block. */
+export function cidrAddresses(
+  cidr: Cidrv6,
+  options?: {
+    offset?: number | bigint;
+    count?: number | bigint;
+    step?: number | bigint;
+  },
+): Generator<bigint>;
+/**
+ * Generates IP addresses within a CIDR block.
+ *
+ * Dispatches to {@link cidrv4Addresses} or {@link cidrv6Addresses} based on
+ * the address type. Yields addresses lazily for memory-efficient iteration.
+ *
+ * @param cidr The CIDR block to enumerate
+ * @param options Optional offset, count, and step parameters
+ * @returns A generator yielding addresses (number for IPv4, bigint for IPv6)
+ *
+ * @example
+ * ```ts
+ * import { assertEquals } from "@std/assert";
+ * import { cidrAddresses, parseCidr } from "@hertzg/ip/cidr";
+ * import { stringifyIpv4 } from "@hertzg/ip/ipv4";
+ *
+ * const first3 = Array.from(cidrAddresses(parseCidr("10.0.0.0/29"), { count: 3 }));
+ * assertEquals(first3.map((ip) => stringifyIpv4(ip as number)), [
+ *   "10.0.0.0", "10.0.0.1", "10.0.0.2",
+ * ]);
+ * ```
+ */
+export function cidrAddresses(
+  cidr: Cidrv4 | Cidrv6,
+  options?: {
+    offset?: number | bigint;
+    count?: number | bigint;
+    step?: number | bigint;
+  },
+): Generator<number | bigint>;
+export function* cidrAddresses(
+  cidr: Cidrv4 | Cidrv6,
+  options?: {
+    offset?: number | bigint;
+    count?: number | bigint;
+    step?: number | bigint;
+  },
+): Generator<number | bigint> {
+  if (typeof cidr.address === "bigint") {
+    yield* cidrv6Addresses(cidr as Cidrv6, options);
+  } else {
+    yield* cidrv4Addresses(
+      cidr as Cidrv4,
+      options as {
+        offset?: number;
+        count?: number;
+        step?: number;
+      },
+    );
+  }
 }
