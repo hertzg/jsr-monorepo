@@ -310,11 +310,12 @@
 
 import { parseCidr, stringifyCidr } from "./cidr.ts";
 import { parseIp, stringifyIp } from "./ip.ts";
-import type { Cidrv4 } from "./cidrv4.ts";
-import type { Cidrv6 } from "./cidrv6.ts";
+import type { Cidrv4 } from "./cidr.ts";
+import type { Cidrv6 } from "./cidr.ts";
 
 export { parseIp, stringifyIp } from "./ip.ts";
 export {
+  type Cidr,
   cidrAddresses,
   cidrContainsCidr,
   cidrIntersect,
@@ -322,6 +323,8 @@ export {
   cidrOverlaps,
   cidrSize,
   cidrSubtract,
+  isCidrv4,
+  isCidrv6,
   parseCidr,
   stringifyCidr,
 } from "./cidr.ts";

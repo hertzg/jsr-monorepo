@@ -57,6 +57,9 @@ import {
   stringifyCidrv6,
 } from "./cidrv6.ts";
 
+export type { Cidrv4 } from "./cidrv4.ts";
+export type { Cidrv6 } from "./cidrv6.ts";
+
 /**
  * A CIDR block of either IP version.
  *
