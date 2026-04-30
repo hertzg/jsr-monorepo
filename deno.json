@@ -50,6 +50,7 @@
     "./packages/binstruct-png",
     "./packages/binstruct-udp",
     "./packages/binstruct-wav",
+    "./packages/binstruct-pcap",
     "./packages/wg-keys",
     "./packages/wg-ini",
     "./packages/wg-conf",

@@ -35,6 +35,7 @@
     "@binstruct/png": "jsr:@binstruct/png@^0.4.0",
     "@binstruct/udp": "jsr:@binstruct/udp@^0.1.0",
     "@binstruct/wav": "jsr:@binstruct/wav@^0.1.2",
+    "@binstruct/pcap": "jsr:@binstruct/pcap@^0.1.0",
     "json5": "npm:json5@^2.2.3",
     "fflate": "npm:fflate@^0.8.2",
     "@noble/ciphers/aes.js": "jsr:@noble/ciphers@^2.1.1/aes.js",
