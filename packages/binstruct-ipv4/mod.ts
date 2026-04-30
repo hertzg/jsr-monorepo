@@ -124,7 +124,11 @@ export type Ipv4Header = {
   options: Uint8Array;
 };
 
-const ipv4Address = refine(u32be(), {
+/**
+ * Coder factory for an IPv4 address — `u32be()` refined to dotted-quad string
+ * via `@hertzg/ip`. Used for both source and destination address fields.
+ */
+export const ipv4AddressCoder: () => Coder<string> = refine(u32be(), {
   refine: (raw: number): string => stringifyIpv4(raw),
   unrefine: (formatted: string): number => parseIpv4(formatted),
 });
@@ -186,7 +190,7 @@ const ipv4Address = refine(u32be(), {
  */
 /** Coder factory for the packed version (4 bits) + IHL (4 bits) byte. */
 export function ipv4VersionIhlCoder(): Coder<Ipv4VersionIhl> {
-  return bitStruct({ version: 4, ihl: 4 }) as Coder<Ipv4VersionIhl>;
+  return bitStruct({ version: 4, ihl: 4 });
 }
 
 /** Coder factory for the packed flags (3 bits) + fragment-offset (13 bits) word. */
@@ -196,15 +200,7 @@ export function ipv4FlagsFragmentOffsetCoder(): Coder<Ipv4FlagsFragmentOffset> {
     dontFragment: 1,
     moreFragments: 1,
     fragmentOffset: 13,
-  }) as Coder<Ipv4FlagsFragmentOffset>;
-}
-
-/**
- * Coder factory for an IPv4 address — `u32be()` refined to dotted-quad string
- * via `@hertzg/ip`. Used for both source and destination address fields.
- */
-export function ipv4AddressCoder(): Coder<string> {
-  return ipv4Address();
+  });
 }
 
 export function ipv4Header(): Coder<Ipv4Header> {
@@ -226,5 +222,5 @@ export function ipv4Header(): Coder<Ipv4Header> {
     sourceAddress: ipv4AddressCoder(),
     destinationAddress: ipv4AddressCoder(),
     options: bytes(optionsLength),
-  }) as Coder<Ipv4Header>;
+  });
 }

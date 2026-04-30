@@ -202,7 +202,7 @@ export function bmp(): Coder<BmpFile> {
       yPixelsPerMeter: s32le(),
       colorsUsed: u32le(),
       importantColors: u32le(),
-    }) as Coder<BitmapInfoHeader>,
+    }),
     pixelData: bytes(
       computedRef(
         [ref(width), ref(height), ref(bpp)],
