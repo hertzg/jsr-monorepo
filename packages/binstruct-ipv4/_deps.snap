@@ -3,7 +3,7 @@
   "deps": {
     ".": [
       "@hertzg/binstruct",
-      "@hertzg/ip"
+      "@hertzg/ip/ipv4"
     ]
   }
 }

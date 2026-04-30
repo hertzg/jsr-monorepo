@@ -74,7 +74,7 @@ import {
   u32be,
   u8be,
 } from "@hertzg/binstruct";
-import { parseIpv4, stringifyIpv4 } from "@hertzg/ip";
+import { parseIpv4, stringifyIpv4 } from "@hertzg/ip/ipv4";
 
 /**
  * Bit-packed version (4 bits) and IHL (4 bits) field, byte 0 of the header.
