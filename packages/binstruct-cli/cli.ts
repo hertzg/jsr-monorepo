@@ -42,18 +42,12 @@ export interface CliOptions {
 /**
  * Parses command line arguments and returns configuration.
  *
+ * Accepts both the flag-based form (`-p <pkg> -c <coder> <command>`) and
+ * the positional form (`<pkg> <coder> <command>`); positional wins only
+ * when neither flag is set and there are at least three arguments.
+ *
  * @param args Command line arguments
  * @returns Parsed CLI options
- *
- * @example
- * ```ts
- * import { assertEquals } from "@std/assert";
- * import { main } from "./cli.ts";
- *
- * // The parseCliArgs function is used internally by main
- * const result = main(["--help"]);
- * assertEquals(result instanceof Promise, true);
- * ```
  */
 function parseCliArgs(args: string[]): CliOptions {
   const parsed = parseArgs(args, {
@@ -145,16 +139,12 @@ function showVersion(): void {
 /**
  * Main CLI entry point.
  *
- * @param args Command line arguments (defaults to Deno.args)
+ * Parses arguments, dispatches to `decode` or `encode`, and exits the
+ * process with status 1 on argument or runtime errors. When invoked
+ * with `--help` or `--version`, writes the requested information to
+ * stdout and returns.
  *
- * @example
- * ```ts
- * import { main } from "./cli.ts";
- *
- * // Called automatically when run as script
- * // Show help information
- * await main(["--help"]);
- * ```
+ * @param args Command line arguments (defaults to `Deno.args`)
  */
 export async function main(args: string[] = Deno.args): Promise<void> {
   const options = parseCliArgs(args);
