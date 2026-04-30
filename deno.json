@@ -41,6 +41,7 @@
   ],
   "workspace": [
     "./packages/binstruct",
+    "./packages/binstruct-bencode",
     "./packages/binstruct-bmp",
     "./packages/binstruct-cli",
     "./packages/binstruct-ethernet",

@@ -1,3 +1,6 @@
+"@binstruct/bencode":
+  - changed-files:
+      - any-glob-to-any-file: packages/binstruct-bencode/**
 "@binstruct/bmp":
   - changed-files:
       - any-glob-to-any-file: packages/binstruct-bmp/**
