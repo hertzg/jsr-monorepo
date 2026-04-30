@@ -65,6 +65,7 @@ All packages are located in the `packages/` directory:
 - `packages/binstruct-bmp` - BMP/DIB image file format support
 - `packages/binstruct-cli` - CLI tools for binary structure operations
 - `packages/binstruct-ethernet` - Ethernet frame parsing
+- `packages/binstruct-icmp` - ICMPv4 packet parsing (RFC 792)
 - `packages/binstruct-png` - PNG file format support
 - `packages/binstruct-wav` - WAV audio file format support
 - `packages/wg-keys` - WireGuard key management
@@ -345,6 +346,7 @@ both tiresome and error-prone.
 - `@binstruct/bmp`
 - `@binstruct/cli`
 - `@binstruct/ethernet`
+- `@binstruct/icmp`
 - `@binstruct/png`
 - `@binstruct/wav`
 - `@hertzg/wg-keys`

@@ -33,6 +33,14 @@
         { "type": "json", "path": "deno.json", "jsonpath": "$.version" }
       ]
     },
+    "packages/binstruct-icmp": {
+      "release-type": "simple",
+      "package-name": "@binstruct/icmp",
+      "component": "@binstruct/icmp",
+      "extra-files": [
+        { "type": "json", "path": "deno.json", "jsonpath": "$.version" }
+      ]
+    },
     "packages/binstruct-png": {
       "release-type": "simple",
       "package-name": "@binstruct/png",

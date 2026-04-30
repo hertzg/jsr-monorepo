@@ -7,6 +7,9 @@
 "@binstruct/ethernet":
   - changed-files:
       - any-glob-to-any-file: packages/binstruct-ethernet/**
+"@binstruct/icmp":
+  - changed-files:
+      - any-glob-to-any-file: packages/binstruct-icmp/**
 "@binstruct/png":
   - changed-files:
       - any-glob-to-any-file: packages/binstruct-png/**
