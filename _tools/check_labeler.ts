@@ -14,7 +14,9 @@ let failed = false;
 
 for (const pkg of packages) {
   const label = labeler[pkg.name];
-  const expectedGlob = `packages/${pkg.dirName}/**`;
+  // Strip leading "./" so the glob matches the form used by .github/labeler.yml.
+  const relPath = pkg.workspacePath.replace(/^\.\//, "");
+  const expectedGlob = `${relPath}/**`;
 
   if (!label) {
     console.warn(`check_labeler: No label found for ${pkg.name}`);

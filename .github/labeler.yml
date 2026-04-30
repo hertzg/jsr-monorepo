@@ -1,66 +1,66 @@
 "@binstruct/arp":
   - changed-files:
-      - any-glob-to-any-file: packages/binstruct-arp/**
+      - any-glob-to-any-file: packages/@binstruct/arp/**
 "@binstruct/bmp":
   - changed-files:
-      - any-glob-to-any-file: packages/binstruct-bmp/**
+      - any-glob-to-any-file: packages/@binstruct/bmp/**
 "@binstruct/cli":
   - changed-files:
-      - any-glob-to-any-file: packages/binstruct-cli/**
+      - any-glob-to-any-file: packages/@binstruct/cli/**
 "@binstruct/ethernet":
   - changed-files:
-      - any-glob-to-any-file: packages/binstruct-ethernet/**
+      - any-glob-to-any-file: packages/@binstruct/ethernet/**
 "@binstruct/icmp":
   - changed-files:
-      - any-glob-to-any-file: packages/binstruct-icmp/**
+      - any-glob-to-any-file: packages/@binstruct/icmp/**
 "@binstruct/ipv4":
   - changed-files:
-      - any-glob-to-any-file: packages/binstruct-ipv4/**
-"@binstruct/png":
-  - changed-files:
-      - any-glob-to-any-file: packages/binstruct-png/**
+      - any-glob-to-any-file: packages/@binstruct/ipv4/**
 "@binstruct/pcap":
   - changed-files:
-      - any-glob-to-any-file: packages/binstruct-pcap/**
+      - any-glob-to-any-file: packages/@binstruct/pcap/**
+"@binstruct/png":
+  - changed-files:
+      - any-glob-to-any-file: packages/@binstruct/png/**
 "@binstruct/udp":
   - changed-files:
-      - any-glob-to-any-file: packages/binstruct-udp/**
+      - any-glob-to-any-file: packages/@binstruct/udp/**
 "@binstruct/wav":
   - changed-files:
-      - any-glob-to-any-file: packages/binstruct-wav/**
+      - any-glob-to-any-file: packages/@binstruct/wav/**
 "@hertzg/binstruct":
   - changed-files:
-      - any-glob-to-any-file: packages/binstruct/**
+      - any-glob-to-any-file: packages/@hertzg/binstruct/**
 "@hertzg/bx":
   - changed-files:
-      - any-glob-to-any-file: packages/bx/**
-"@hertzg/ip":
-  - changed-files:
-      - any-glob-to-any-file: packages/ip/**
-"@hertzg/mac":
-  - changed-files:
-      - any-glob-to-any-file: packages/mac/**
-"@hertzg/mymagti-api":
-  - changed-files:
-      - any-glob-to-any-file: packages/mymagti-api/**
-"@hertzg/routeros-api":
-  - changed-files:
-      - any-glob-to-any-file: packages/routeros-api/**
-"@hertzg/tplink-api":
-  - changed-files:
-      - any-glob-to-any-file: packages/tplink-api/**
-"@hertzg/wg-conf":
-  - changed-files:
-      - any-glob-to-any-file: packages/wg-conf/**
-"@hertzg/wg-ini":
-  - changed-files:
-      - any-glob-to-any-file: packages/wg-ini/**
-"@hertzg/wg-keys":
-  - changed-files:
-      - any-glob-to-any-file: packages/wg-keys/**
+      - any-glob-to-any-file: packages/@hertzg/bx/**
 "@hertzg/crc":
   - changed-files:
-      - any-glob-to-any-file: packages/crc/**
+      - any-glob-to-any-file: packages/@hertzg/crc/**
+"@hertzg/ip":
+  - changed-files:
+      - any-glob-to-any-file: packages/@hertzg/ip/**
+"@hertzg/mac":
+  - changed-files:
+      - any-glob-to-any-file: packages/@hertzg/mac/**
+"@hertzg/mymagti-api":
+  - changed-files:
+      - any-glob-to-any-file: packages/@hertzg/mymagti-api/**
+"@hertzg/routeros-api":
+  - changed-files:
+      - any-glob-to-any-file: packages/@hertzg/routeros-api/**
+"@hertzg/tplink-api":
+  - changed-files:
+      - any-glob-to-any-file: packages/@hertzg/tplink-api/**
+"@hertzg/wg-conf":
+  - changed-files:
+      - any-glob-to-any-file: packages/@hertzg/wg-conf/**
+"@hertzg/wg-ini":
+  - changed-files:
+      - any-glob-to-any-file: packages/@hertzg/wg-ini/**
+"@hertzg/wg-keys":
+  - changed-files:
+      - any-glob-to-any-file: packages/@hertzg/wg-keys/**
 "@hertzg/xhb":
   - changed-files:
-      - any-glob-to-any-file: packages/xhb/**
+      - any-glob-to-any-file: packages/@hertzg/xhb/**

@@ -59,30 +59,36 @@ deno task cov:view         # View HTML coverage report
 
 ### Workspaces
 
-All packages are located in the `packages/` directory:
+Packages live under `packages/<scope>/<name>/` where the directory path
+mirrors the JSR coordinate. Two scopes:
 
-- `packages/binstruct` - Core binary structure encoding/decoding library
-- `packages/binstruct-arp` - ARP packet parsing (RFC 826)
-- `packages/binstruct-bmp` - BMP/DIB image file format support
-- `packages/binstruct-cli` - CLI tools for binary structure operations
-- `packages/binstruct-ethernet` - Ethernet frame parsing
-- `packages/binstruct-icmp` - ICMPv4 packet parsing (RFC 792)
-- `packages/binstruct-ipv4` - IPv4 packet header parsing
-- `packages/binstruct-png` - PNG file format support
-- `packages/binstruct-udp` - UDP datagram parsing (RFC 768)
-- `packages/binstruct-wav` - WAV audio file format support
-- `packages/binstruct-pcap` - libpcap (.pcap) capture file format support
-- `packages/wg-keys` - WireGuard key management
-- `packages/wg-ini` - INI file parsing
-- `packages/wg-conf` - WireGuard configuration handling
-- `packages/routeros-api` - MikroTik RouterOS API client
-- `packages/tplink-api` - TP-Link Router API client
-- `packages/mymagti-api` - MyMagti API client
-- `packages/bx` - Binary hex string utilities
-- `packages/ip` - IPv4/CIDR utilities
-- `packages/mac` - EUI-48 MAC address parse/stringify
-- `packages/crc` - CRC checksum utilities
-- `packages/xhb` - HomeBank XHB file parse/serialize
+`packages/@hertzg/` — utilities and the core library:
+
+- `binstruct` - Core binary structure encoding/decoding library
+- `bx` - Binary hex string utilities
+- `crc` - CRC checksum utilities
+- `ip` - IPv4/IPv6/CIDR utilities
+- `mac` - EUI-48 MAC address parse/stringify
+- `mymagti-api` - MyMagti API client
+- `routeros-api` - MikroTik RouterOS API client
+- `tplink-api` - TP-Link Router API client
+- `wg-conf` - WireGuard configuration handling
+- `wg-ini` - INI file parsing
+- `wg-keys` - WireGuard key management
+- `xhb` - HomeBank XHB file parse/serialize
+
+`packages/@binstruct/` — format-specific binstruct decoders:
+
+- `arp` - ARP packet parsing (RFC 826)
+- `bmp` - BMP/DIB image file format support
+- `cli` - CLI tools for binary structure operations
+- `ethernet` - Ethernet frame parsing
+- `icmp` - ICMPv4 packet parsing (RFC 792)
+- `ipv4` - IPv4 packet header parsing
+- `pcap` - libpcap (.pcap) capture file format support
+- `png` - PNG file format support
+- `udp` - UDP datagram parsing (RFC 768)
+- `wav` - WAV audio file format support
 
 ## Core Architecture
 
@@ -372,10 +378,11 @@ both tiresome and error-prone.
 
 ## Adding New Workspaces
 
-When adding a new workspace to the monorepo, update these files:
+Place the new package at `packages/<scope>/<name>/` matching its JSR
+coordinate (e.g. `packages/@hertzg/foo/` for `@hertzg/foo`). Then update:
 
-1. **CLAUDE.md** (this file):
-   - Add the workspace to the "Workspaces" list
+1. **AGENTS.md** (this file):
+   - Add the package to the per-scope list under "Workspaces"
    - Add the package name to the "Valid Commit Scopes" list
 
 2. **README.md**:
@@ -383,12 +390,18 @@ When adding a new workspace to the monorepo, update these files:
 
 3. **Configuration files** (validated by `deno task lint`):
    - `.github/labeler.yml` - Add label with package name and glob pattern
-   - `.github/workflows/title.yaml` - Add package name to scopes
-   - `.github/release.yml` - Add package name to scopes
+     (`packages/<scope>/<name>/**`)
+   - `release-please-config.json` - Add a `packages/<scope>/<name>` entry
+   - `.release-please-manifest.json` - Add the same key with the starting
+     version
    - `import_map.json` - Add JSR import for the package
 
-The lint tools `lint:labeler`, `lint:title`, `lint:import-map`, and `lint:deps`
-will fail if these files are not updated correctly.
+The root `deno.json` workspace field uses globs (`./packages/@binstruct/*`,
+`./packages/@hertzg/*`), so package directories are picked up automatically
+once they exist on disk — no need to list them.
+
+The lint tools `lint:labeler`, `lint:readme`, `lint:import-map`, and
+`lint:deps` will fail if these files are not updated correctly.
 
 ## Common Patterns
 

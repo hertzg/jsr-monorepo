@@ -8,6 +8,10 @@ libraries, format-specific parsers, router API clients, and various utilities.
 
 ## Packages
 
+Source layout mirrors the JSR scope: `packages/<scope>/<name>/`.
+
+### `@hertzg/*` — utilities and the core library
+
 | Package                                                     | Version                                                                                   |
 | ----------------------------------------------------------- | ----------------------------------------------------------------------------------------- |
 | [@hertzg/binstruct](https://jsr.io/@hertzg/binstruct)       | [![JSR](https://jsr.io/badges/@hertzg/binstruct)](https://jsr.io/@hertzg/binstruct)       |
@@ -22,16 +26,21 @@ libraries, format-specific parsers, router API clients, and various utilities.
 | [@hertzg/wg-ini](https://jsr.io/@hertzg/wg-ini)             | [![JSR](https://jsr.io/badges/@hertzg/wg-ini)](https://jsr.io/@hertzg/wg-ini)             |
 | [@hertzg/wg-keys](https://jsr.io/@hertzg/wg-keys)           | [![JSR](https://jsr.io/badges/@hertzg/wg-keys)](https://jsr.io/@hertzg/wg-keys)           |
 | [@hertzg/xhb](https://jsr.io/@hertzg/xhb)                   | [![JSR](https://jsr.io/badges/@hertzg/xhb)](https://jsr.io/@hertzg/xhb)                   |
-| [@binstruct/arp](https://jsr.io/@binstruct/arp)             | [![JSR](https://jsr.io/badges/@binstruct/arp)](https://jsr.io/@binstruct/arp)             |
-| [@binstruct/bmp](https://jsr.io/@binstruct/bmp)             | [![JSR](https://jsr.io/badges/@binstruct/bmp)](https://jsr.io/@binstruct/bmp)             |
-| [@binstruct/cli](https://jsr.io/@binstruct/cli)             | [![JSR](https://jsr.io/badges/@binstruct/cli)](https://jsr.io/@binstruct/cli)             |
-| [@binstruct/ethernet](https://jsr.io/@binstruct/ethernet)   | [![JSR](https://jsr.io/badges/@binstruct/ethernet)](https://jsr.io/@binstruct/ethernet)   |
-| [@binstruct/icmp](https://jsr.io/@binstruct/icmp)           | [![JSR](https://jsr.io/badges/@binstruct/icmp)](https://jsr.io/@binstruct/icmp)           |
-| [@binstruct/ipv4](https://jsr.io/@binstruct/ipv4)           | [![JSR](https://jsr.io/badges/@binstruct/ipv4)](https://jsr.io/@binstruct/ipv4)           |
-| [@binstruct/pcap](https://jsr.io/@binstruct/pcap)           | [![JSR](https://jsr.io/badges/@binstruct/pcap)](https://jsr.io/@binstruct/pcap)           |
-| [@binstruct/png](https://jsr.io/@binstruct/png)             | [![JSR](https://jsr.io/badges/@binstruct/png)](https://jsr.io/@binstruct/png)             |
-| [@binstruct/udp](https://jsr.io/@binstruct/udp)             | [![JSR](https://jsr.io/badges/@binstruct/udp)](https://jsr.io/@binstruct/udp)             |
-| [@binstruct/wav](https://jsr.io/@binstruct/wav)             | [![JSR](https://jsr.io/badges/@binstruct/wav)](https://jsr.io/@binstruct/wav)             |
+
+### `@binstruct/*` — format-specific binstruct decoders
+
+| Package                                                   | Version                                                                                 |
+| --------------------------------------------------------- | --------------------------------------------------------------------------------------- |
+| [@binstruct/arp](https://jsr.io/@binstruct/arp)           | [![JSR](https://jsr.io/badges/@binstruct/arp)](https://jsr.io/@binstruct/arp)           |
+| [@binstruct/bmp](https://jsr.io/@binstruct/bmp)           | [![JSR](https://jsr.io/badges/@binstruct/bmp)](https://jsr.io/@binstruct/bmp)           |
+| [@binstruct/cli](https://jsr.io/@binstruct/cli)           | [![JSR](https://jsr.io/badges/@binstruct/cli)](https://jsr.io/@binstruct/cli)           |
+| [@binstruct/ethernet](https://jsr.io/@binstruct/ethernet) | [![JSR](https://jsr.io/badges/@binstruct/ethernet)](https://jsr.io/@binstruct/ethernet) |
+| [@binstruct/icmp](https://jsr.io/@binstruct/icmp)         | [![JSR](https://jsr.io/badges/@binstruct/icmp)](https://jsr.io/@binstruct/icmp)         |
+| [@binstruct/ipv4](https://jsr.io/@binstruct/ipv4)         | [![JSR](https://jsr.io/badges/@binstruct/ipv4)](https://jsr.io/@binstruct/ipv4)         |
+| [@binstruct/pcap](https://jsr.io/@binstruct/pcap)         | [![JSR](https://jsr.io/badges/@binstruct/pcap)](https://jsr.io/@binstruct/pcap)         |
+| [@binstruct/png](https://jsr.io/@binstruct/png)           | [![JSR](https://jsr.io/badges/@binstruct/png)](https://jsr.io/@binstruct/png)           |
+| [@binstruct/udp](https://jsr.io/@binstruct/udp)           | [![JSR](https://jsr.io/badges/@binstruct/udp)](https://jsr.io/@binstruct/udp)           |
+| [@binstruct/wav](https://jsr.io/@binstruct/wav)           | [![JSR](https://jsr.io/badges/@binstruct/wav)](https://jsr.io/@binstruct/wav)           |
 
 ## Installation
 

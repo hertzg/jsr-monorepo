@@ -12,7 +12,7 @@
  */
 
 import { join, toFileUrl } from "@std/path";
-import denoJson from "../deno.json" with { type: "json" };
+import { getWorkspacePaths } from "./utils.ts";
 
 interface DenoInfoDependency {
   specifier: string;
@@ -113,7 +113,7 @@ const updateMode = Deno.args.includes("--update");
 let failed = false;
 let updated = 0;
 
-for (const workspacePath of denoJson.workspace) {
+for (const workspacePath of await getWorkspacePaths()) {
   const pkgJsonUrl = toFileUrl(join(rootPath, workspacePath, "deno.json"));
   const pkgJson: PackageJson =
     (await import(pkgJsonUrl.href, { with: { type: "json" } })).default;

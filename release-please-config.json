@@ -1,7 +1,7 @@
 {
   "bootstrap-sha": "2f85f9e8786fa6fad0fe9d64119cd3bdb91441d7",
   "packages": {
-    "packages/binstruct": {
+    "packages/@hertzg/binstruct": {
       "release-type": "simple",
       "package-name": "@hertzg/binstruct",
       "component": "@hertzg/binstruct",
@@ -9,7 +9,7 @@
         { "type": "json", "path": "deno.json", "jsonpath": "$.version" }
       ]
     },
-    "packages/binstruct-arp": {
+    "packages/@binstruct/arp": {
       "release-type": "simple",
       "package-name": "@binstruct/arp",
       "component": "@binstruct/arp",
@@ -17,7 +17,7 @@
         { "type": "json", "path": "deno.json", "jsonpath": "$.version" }
       ]
     },
-    "packages/binstruct-bmp": {
+    "packages/@binstruct/bmp": {
       "release-type": "simple",
       "package-name": "@binstruct/bmp",
       "component": "@binstruct/bmp",
@@ -25,7 +25,7 @@
         { "type": "json", "path": "deno.json", "jsonpath": "$.version" }
       ]
     },
-    "packages/binstruct-cli": {
+    "packages/@binstruct/cli": {
       "release-type": "simple",
       "package-name": "@binstruct/cli",
       "component": "@binstruct/cli",
@@ -33,7 +33,7 @@
         { "type": "json", "path": "deno.json", "jsonpath": "$.version" }
       ]
     },
-    "packages/binstruct-ethernet": {
+    "packages/@binstruct/ethernet": {
       "release-type": "simple",
       "package-name": "@binstruct/ethernet",
       "component": "@binstruct/ethernet",
@@ -41,7 +41,7 @@
         { "type": "json", "path": "deno.json", "jsonpath": "$.version" }
       ]
     },
-    "packages/binstruct-icmp": {
+    "packages/@binstruct/icmp": {
       "release-type": "simple",
       "package-name": "@binstruct/icmp",
       "component": "@binstruct/icmp",
@@ -49,7 +49,7 @@
         { "type": "json", "path": "deno.json", "jsonpath": "$.version" }
       ]
     },
-    "packages/binstruct-ipv4": {
+    "packages/@binstruct/ipv4": {
       "release-type": "simple",
       "package-name": "@binstruct/ipv4",
       "component": "@binstruct/ipv4",
@@ -57,31 +57,7 @@
         { "type": "json", "path": "deno.json", "jsonpath": "$.version" }
       ]
     },
-    "packages/binstruct-png": {
-      "release-type": "simple",
-      "package-name": "@binstruct/png",
-      "component": "@binstruct/png",
-      "extra-files": [
-        { "type": "json", "path": "deno.json", "jsonpath": "$.version" }
-      ]
-    },
-    "packages/binstruct-udp": {
-      "release-type": "simple",
-      "package-name": "@binstruct/udp",
-      "component": "@binstruct/udp",
-      "extra-files": [
-        { "type": "json", "path": "deno.json", "jsonpath": "$.version" }
-      ]
-    },
-    "packages/binstruct-wav": {
-      "release-type": "simple",
-      "package-name": "@binstruct/wav",
-      "component": "@binstruct/wav",
-      "extra-files": [
-        { "type": "json", "path": "deno.json", "jsonpath": "$.version" }
-      ]
-    },
-    "packages/binstruct-pcap": {
+    "packages/@binstruct/pcap": {
       "release-type": "simple",
       "package-name": "@binstruct/pcap",
       "component": "@binstruct/pcap",
@@ -89,39 +65,31 @@
         { "type": "json", "path": "deno.json", "jsonpath": "$.version" }
       ]
     },
-    "packages/wg-keys": {
+    "packages/@binstruct/png": {
       "release-type": "simple",
-      "package-name": "@hertzg/wg-keys",
-      "component": "@hertzg/wg-keys",
+      "package-name": "@binstruct/png",
+      "component": "@binstruct/png",
       "extra-files": [
         { "type": "json", "path": "deno.json", "jsonpath": "$.version" }
       ]
     },
-    "packages/wg-ini": {
+    "packages/@binstruct/udp": {
       "release-type": "simple",
-      "package-name": "@hertzg/wg-ini",
-      "component": "@hertzg/wg-ini",
+      "package-name": "@binstruct/udp",
+      "component": "@binstruct/udp",
       "extra-files": [
         { "type": "json", "path": "deno.json", "jsonpath": "$.version" }
       ]
     },
-    "packages/wg-conf": {
+    "packages/@binstruct/wav": {
       "release-type": "simple",
-      "package-name": "@hertzg/wg-conf",
-      "component": "@hertzg/wg-conf",
+      "package-name": "@binstruct/wav",
+      "component": "@binstruct/wav",
       "extra-files": [
         { "type": "json", "path": "deno.json", "jsonpath": "$.version" }
       ]
     },
-    "packages/mymagti-api": {
-      "release-type": "simple",
-      "package-name": "@hertzg/mymagti-api",
-      "component": "@hertzg/mymagti-api",
-      "extra-files": [
-        { "type": "json", "path": "deno.json", "jsonpath": "$.version" }
-      ]
-    },
-    "packages/bx": {
+    "packages/@hertzg/bx": {
       "release-type": "simple",
       "package-name": "@hertzg/bx",
       "component": "@hertzg/bx",
@@ -129,39 +97,7 @@
         { "type": "json", "path": "deno.json", "jsonpath": "$.version" }
       ]
     },
-    "packages/routeros-api": {
-      "release-type": "simple",
-      "package-name": "@hertzg/routeros-api",
-      "component": "@hertzg/routeros-api",
-      "extra-files": [
-        { "type": "json", "path": "deno.json", "jsonpath": "$.version" }
-      ]
-    },
-    "packages/tplink-api": {
-      "release-type": "simple",
-      "package-name": "@hertzg/tplink-api",
-      "component": "@hertzg/tplink-api",
-      "extra-files": [
-        { "type": "json", "path": "deno.json", "jsonpath": "$.version" }
-      ]
-    },
-    "packages/ip": {
-      "release-type": "simple",
-      "package-name": "@hertzg/ip",
-      "component": "@hertzg/ip",
-      "extra-files": [
-        { "type": "json", "path": "deno.json", "jsonpath": "$.version" }
-      ]
-    },
-    "packages/mac": {
-      "release-type": "simple",
-      "package-name": "@hertzg/mac",
-      "component": "@hertzg/mac",
-      "extra-files": [
-        { "type": "json", "path": "deno.json", "jsonpath": "$.version" }
-      ]
-    },
-    "packages/crc": {
+    "packages/@hertzg/crc": {
       "release-type": "simple",
       "package-name": "@hertzg/crc",
       "component": "@hertzg/crc",
@@ -169,7 +105,71 @@
         { "type": "json", "path": "deno.json", "jsonpath": "$.version" }
       ]
     },
-    "packages/xhb": {
+    "packages/@hertzg/ip": {
+      "release-type": "simple",
+      "package-name": "@hertzg/ip",
+      "component": "@hertzg/ip",
+      "extra-files": [
+        { "type": "json", "path": "deno.json", "jsonpath": "$.version" }
+      ]
+    },
+    "packages/@hertzg/mac": {
+      "release-type": "simple",
+      "package-name": "@hertzg/mac",
+      "component": "@hertzg/mac",
+      "extra-files": [
+        { "type": "json", "path": "deno.json", "jsonpath": "$.version" }
+      ]
+    },
+    "packages/@hertzg/mymagti-api": {
+      "release-type": "simple",
+      "package-name": "@hertzg/mymagti-api",
+      "component": "@hertzg/mymagti-api",
+      "extra-files": [
+        { "type": "json", "path": "deno.json", "jsonpath": "$.version" }
+      ]
+    },
+    "packages/@hertzg/routeros-api": {
+      "release-type": "simple",
+      "package-name": "@hertzg/routeros-api",
+      "component": "@hertzg/routeros-api",
+      "extra-files": [
+        { "type": "json", "path": "deno.json", "jsonpath": "$.version" }
+      ]
+    },
+    "packages/@hertzg/tplink-api": {
+      "release-type": "simple",
+      "package-name": "@hertzg/tplink-api",
+      "component": "@hertzg/tplink-api",
+      "extra-files": [
+        { "type": "json", "path": "deno.json", "jsonpath": "$.version" }
+      ]
+    },
+    "packages/@hertzg/wg-conf": {
+      "release-type": "simple",
+      "package-name": "@hertzg/wg-conf",
+      "component": "@hertzg/wg-conf",
+      "extra-files": [
+        { "type": "json", "path": "deno.json", "jsonpath": "$.version" }
+      ]
+    },
+    "packages/@hertzg/wg-ini": {
+      "release-type": "simple",
+      "package-name": "@hertzg/wg-ini",
+      "component": "@hertzg/wg-ini",
+      "extra-files": [
+        { "type": "json", "path": "deno.json", "jsonpath": "$.version" }
+      ]
+    },
+    "packages/@hertzg/wg-keys": {
+      "release-type": "simple",
+      "package-name": "@hertzg/wg-keys",
+      "component": "@hertzg/wg-keys",
+      "extra-files": [
+        { "type": "json", "path": "deno.json", "jsonpath": "$.version" }
+      ]
+    },
+    "packages/@hertzg/xhb": {
       "release-type": "simple",
       "package-name": "@hertzg/xhb",
       "component": "@hertzg/xhb",
