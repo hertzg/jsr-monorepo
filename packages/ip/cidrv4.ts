@@ -256,7 +256,8 @@ export function cidrv4FirstAddress(cidr: Cidrv4): number {
  * assertEquals(cidrv4NetworkAddress(cidr), parseIpv4("192.168.1.0"));
  * ```
  */
-export const cidrv4NetworkAddress = cidrv4FirstAddress;
+export const cidrv4NetworkAddress: typeof cidrv4FirstAddress =
+  cidrv4FirstAddress;
 
 /**
  * Returns the last address of a CIDR block (broadcast address for IPv4).
@@ -298,7 +299,8 @@ export function cidrv4LastAddress(cidr: Cidrv4): number {
  * assertEquals(cidrv4BroadcastAddress(cidr), parseIpv4("192.168.1.255"));
  * ```
  */
-export const cidrv4BroadcastAddress = cidrv4LastAddress;
+export const cidrv4BroadcastAddress: typeof cidrv4LastAddress =
+  cidrv4LastAddress;
 
 /**
  * Returns the total number of IP addresses in a CIDR block or for a given prefix length.
