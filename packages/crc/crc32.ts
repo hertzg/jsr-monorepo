@@ -23,7 +23,7 @@ export const CRC32_POLYNOMIAL = 0xedb88320;
 /** CRC32C polynomial (iSCSI, SCTP, ext4). Also known as Castagnoli. */
 export const CRC32C_POLYNOMIAL = 0x82f63b78;
 
-/** CRC32K polynomial (Koopman). Better Hamming-distance properties than CRC32 on short messages. */
+/** CRC32K polynomial (Koopman). Designed for improved Hamming-distance coverage. */
 export const CRC32K_POLYNOMIAL = 0xeb31d82e;
 
 /**
