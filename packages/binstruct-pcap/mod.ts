@@ -105,6 +105,130 @@
  * assertEquals(decoded.header.network, LINKTYPE.RAW);
  * ```
  *
+ * ## Composition with the rest of `@binstruct/*`
+ *
+ * Pcap stores raw link-layer payloads. The natural use is to read a capture,
+ * then hand each `record.data` to a sibling coder for the link type advertised
+ * in the global header.
+ *
+ * @example Walk an inet stack: pcap → IPv4 → UDP (LINKTYPE.RAW)
+ * ```ts
+ * import { assertEquals } from "@std/assert";
+ * import { LINKTYPE, PCAP_MAGIC_MICROS, pcapFile } from "@binstruct/pcap";
+ * import { ipv4Header } from "@binstruct/ipv4";
+ * import { udpDatagram } from "@binstruct/udp";
+ *
+ * const ip = ipv4Header();
+ * const udp = udpDatagram();
+ *
+ * // Synth a UDP-over-IPv4 packet to put in the capture.
+ * const datagram = new Uint8Array(12);
+ * udp.encode({
+ *   srcPort: 53,
+ *   dstPort: 49152,
+ *   length: 12,
+ *   checksum: 0,
+ *   payload: new Uint8Array([0xde, 0xad, 0xbe, 0xef]),
+ * }, datagram);
+ *
+ * const packet = new Uint8Array(20 + 12);
+ * ip.encode({
+ *   versionIhl: { version: 4, ihl: 5 },
+ *   typeOfService: 0,
+ *   totalLength: 32,
+ *   identification: 0,
+ *   flagsFragmentOffset: {
+ *     reserved: 0,
+ *     dontFragment: 0,
+ *     moreFragments: 0,
+ *     fragmentOffset: 0,
+ *   },
+ *   timeToLive: 64,
+ *   protocol: 17,
+ *   headerChecksum: 0,
+ *   sourceAddress: "192.0.2.1",
+ *   destinationAddress: "192.0.2.2",
+ *   options: new Uint8Array(0),
+ * }, packet);
+ * packet.set(datagram, 20);
+ *
+ * const cap = pcapFile("le");
+ * const buf = new Uint8Array(24 + 16 + packet.length);
+ * const written = cap.encode({
+ *   header: {
+ *     magic: PCAP_MAGIC_MICROS,
+ *     versionMajor: 2,
+ *     versionMinor: 4,
+ *     thisZone: 0,
+ *     sigFigs: 0,
+ *     snapLen: 65535,
+ *     network: LINKTYPE.RAW,
+ *   },
+ *   records: [{
+ *     tsSec: 0,
+ *     tsUsec: 0,
+ *     inclLen: packet.length,
+ *     origLen: packet.length,
+ *     data: packet,
+ *   }],
+ * }, buf);
+ *
+ * // Walk the stack on read.
+ * const [{ records }] = cap.decode(buf.subarray(0, written));
+ * const [parsedIp] = ip.decode(records[0].data);
+ * const [parsedUdp] = udp.decode(
+ *   records[0].data.subarray(parsedIp.versionIhl.ihl * 4),
+ * );
+ *
+ * assertEquals(parsedIp.sourceAddress, "192.0.2.1");
+ * assertEquals(parsedUdp.srcPort, 53);
+ * assertEquals(parsedUdp.payload, new Uint8Array([0xde, 0xad, 0xbe, 0xef]));
+ * ```
+ *
+ * @example Direct Ethernet frames (LINKTYPE.ETHERNET)
+ * ```ts
+ * import { assertEquals } from "@std/assert";
+ * import { LINKTYPE, PCAP_MAGIC_MICROS, pcapFile } from "@binstruct/pcap";
+ * import { ethernet2Frame } from "@binstruct/ethernet";
+ *
+ * const eth = ethernet2Frame();
+ *
+ * const frame = new Uint8Array(14 + 4);
+ * eth.encode({
+ *   dstMac: new Uint8Array([0x00, 0x11, 0x22, 0x33, 0x44, 0x55]),
+ *   srcMac: new Uint8Array([0x66, 0x77, 0x88, 0x99, 0xaa, 0xbb]),
+ *   etherType: 0x0800,
+ *   payload: new Uint8Array([0xde, 0xad, 0xbe, 0xef]),
+ * }, frame);
+ *
+ * const cap = pcapFile("le");
+ * const buf = new Uint8Array(24 + 16 + frame.length);
+ * const written = cap.encode({
+ *   header: {
+ *     magic: PCAP_MAGIC_MICROS,
+ *     versionMajor: 2,
+ *     versionMinor: 4,
+ *     thisZone: 0,
+ *     sigFigs: 0,
+ *     snapLen: 65535,
+ *     network: LINKTYPE.ETHERNET,
+ *   },
+ *   records: [{
+ *     tsSec: 0,
+ *     tsUsec: 0,
+ *     inclLen: frame.length,
+ *     origLen: frame.length,
+ *     data: frame,
+ *   }],
+ * }, buf);
+ *
+ * const [{ records }] = cap.decode(buf.subarray(0, written));
+ * const [decoded] = eth.decode(records[0].data);
+ *
+ * assertEquals(decoded.etherType, 0x0800);
+ * assertEquals(decoded.payload, new Uint8Array([0xde, 0xad, 0xbe, 0xef]));
+ * ```
+ *
  * @module @binstruct/pcap
  */
 
