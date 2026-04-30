@@ -87,6 +87,49 @@
   <div class="space-y-2 flex-1"><div class="space-y-7" id="module_doc"><div class="markdown"><p>Ethernet II frame encoding and decoding.</p>
 <p>For MAC address parsing/stringification, use the sister package
 <a href="https://jsr.io/@hertzg/mac">@hertzg/mac</a>.</p>
+<h2 id="migration-from-0.x">
+Migration from 0.x</h2>
+<p>The <code>parseMacAddress</code> and <code>stringifyMacAddress</code> exports were removed in
+1.0. Replace with <code>@hertzg/mac</code>:</p>
+<pre class="highlight"><code class="language-ts">// before
+import { parseMacAddress, stringifyMacAddress } from &quot;@binstruct/ethernet&quot;;
+// after
+import { parse as parseMac, stringify as stringifyMac } from &quot;@hertzg/mac&quot;;
+</code><button class="copyButton" data-copy="// before
+import { parseMacAddress, stringifyMacAddress } from &quot;@binstruct/ethernet&quot;;
+// after
+import { parse as parseMac, stringify as stringifyMac } from &quot;@hertzg/mac&quot;;
+"><svg
+  class="copy"
+  width="15"
+  height="15"
+  viewBox="0 0 15 15"
+  fill="none"
+  xmlns="http://www.w3.org/2000/svg"
+>
+  <rect x="2" y="2" width="7" height="7" fill="none" />
+  <rect x="6" y="6" width="7" height="7" fill="none" />
+  <path
+    d="M1.55566 2.7C1.55566 2.03726 2.09292 1.5 2.75566 1.5H8.75566C9.41841 1.5 9.95566 2.03726 9.95566 2.7V5.1H12.3557C13.0184 5.1 13.5557 5.63726 13.5557 6.3V12.3C13.5557 12.9627 13.0184 13.5 12.3557 13.5H6.35566C5.69292 13.5 5.15566 12.9627 5.15566 12.3V9.9H2.75566C2.09292 9.9 1.55566 9.36274 1.55566 8.7V2.7ZM6.35566 9.9V12.3H12.3557V6.3H9.95566V8.7C9.95566 9.36274 9.41841 9.9 8.75566 9.9H6.35566ZM8.75566 8.7V2.7H2.75566V8.7H8.75566Z"
+    fill="currentColor"
+  />
+</svg>
+<svg
+  class="check"
+  width="15"
+  height="15"
+  viewBox="0 0 24 24"
+  stroke-width="2"
+  stroke="currentColor"
+  fill="none"
+  stroke-linecap="round"
+  stroke-linejoin="round"
+  xmlns="http://www.w3.org/2000/svg"
+>
+  <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+  <path d="M5 12l5 5l10 -10" />
+</svg>
+</button><code></code></pre>
 </div><section class="section"  id="examples"><div>
       <h2 class="anchorable mb-1"><a href="#examples" class="anchor" aria-label="Anchor" tabIndex="-1"><svg
   width="16"
@@ -348,7 +391,7 @@ assertEquals(decoded.dstMac, &quot;00:11:22:33:44:55&quot;);
                   </span>
                 </a>
               </li></ul></nav><nav class="documentNavigation">
-          <h3>Document Navigation</h3><ul><li><a href="#examples" title="Examples">Examples</a></li><li><ul><li><a href="#example_0" title="Basic encoding and decoding">Basic encoding and decoding</a></li><li><a href="#example_1" title="Compose with @hertzg/mac for string-form addresses">Compose with @hertzg/mac for string-form addresses</a></li></ul></li></ul></nav></div>
+          <h3>Document Navigation</h3><ul><li><a href="#examples" title="Examples">Examples</a></li><li><ul><li><a href="#example_0" title="Basic encoding and decoding">Basic encoding and decoding</a></li><li><a href="#example_1" title="Compose with @hertzg/mac for string-form addresses">Compose with @hertzg/mac for string-form addresses</a></li><li><ul><li><a href="#migration-from-0.x" title="Migration from 0.x">Migration from 0.x</a></li></ul></li></ul></li></ul></nav></div>
   </div></div>
 </div>
 </div>
