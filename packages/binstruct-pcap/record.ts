@@ -7,14 +7,7 @@
  * responsibility and is out of scope for this package.
  */
 
-import {
-  arrayWhile,
-  bytes,
-  ref,
-  struct,
-  u32be,
-  u32le,
-} from "@hertzg/binstruct";
+import { arrayWhile, bytes, ref, struct, u32 } from "@hertzg/binstruct";
 import type { Coder } from "@hertzg/binstruct";
 import type { PcapEndianness } from "./header.ts";
 
@@ -103,14 +96,16 @@ export interface PcapRecord {
  * ```
  */
 export function pcapRecord(endianness: PcapEndianness): Coder<PcapRecord> {
-  const u32 = endianness === "le" ? u32le : u32be;
-  const inclLen = u32();
+  // inclLen is bound to a const so the bytes() coder can ref() the same
+  // identity we register in the struct — sibling fields call u32(endianness)
+  // inline because their values aren't referenced elsewhere.
+  const inclLen = u32(endianness);
 
   return struct({
-    tsSec: u32(),
-    tsUsec: u32(),
+    tsSec: u32(endianness),
+    tsUsec: u32(endianness),
     inclLen,
-    origLen: u32(),
+    origLen: u32(endianness),
     data: bytes(ref(inclLen)),
   });
 }
@@ -143,6 +138,10 @@ export interface PcapFile<THeader, TRecord> {
  * @param headerCoder Coder for the 24-byte global header.
  * @param recordCoder Coder for each per-packet record.
  * @returns A coder for a {@link PcapFile} carrying the supplied types.
+ * @throws Propagates whatever the supplied coders throw on malformed input.
+ *   In particular, a buffer that ends mid-record (16 or more trailing bytes
+ *   that don't form a complete record) will fail in the record coder, not
+ *   silently truncate.
  *
  * @example Compose a custom file coder
  * ```ts

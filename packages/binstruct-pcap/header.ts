@@ -8,15 +8,7 @@
  * explicitly so callers stay in control of the wire layout.
  */
 
-import {
-  s32be,
-  s32le,
-  struct,
-  u16be,
-  u16le,
-  u32be,
-  u32le,
-} from "@hertzg/binstruct";
+import { s32, struct, u16, u32 } from "@hertzg/binstruct";
 import type { Coder } from "@hertzg/binstruct";
 
 /**
@@ -136,18 +128,14 @@ export interface PcapGlobalHeader {
 export function pcapGlobalHeader(
   endianness: PcapEndianness,
 ): Coder<PcapGlobalHeader> {
-  const u32 = endianness === "le" ? u32le : u32be;
-  const u16 = endianness === "le" ? u16le : u16be;
-  const s32 = endianness === "le" ? s32le : s32be;
-
   return struct({
-    magic: u32(),
-    versionMajor: u16(),
-    versionMinor: u16(),
-    thisZone: s32(),
-    sigFigs: u32(),
-    snapLen: u32(),
-    network: u32(),
+    magic: u32(endianness),
+    versionMajor: u16(endianness),
+    versionMinor: u16(endianness),
+    thisZone: s32(endianness),
+    sigFigs: u32(endianness),
+    snapLen: u32(endianness),
+    network: u32(endianness),
   });
 }
 
