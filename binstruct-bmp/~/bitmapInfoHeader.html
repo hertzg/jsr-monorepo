@@ -165,13 +165,10 @@
   </defs>
 </svg>
 </a>
-<span class="font-bold">bitmapInfoHeader</span><span class="font-medium">()<span>: <a href="../././~/BitmapInfoHeaderCoder.html" class="link td-ref">BitmapInfoHeaderCoder</a></span> </span>
+<span class="font-bold">bitmapInfoHeader</span><span class="font-medium">()<span>: <span class="td-ref">Coder</span>&lt;<a href="../././~/BitmapInfoHeader.html" class="link td-ref">BitmapInfoHeader</a>&gt;</span> </span>
       </code><div class="space-y-7" id=""><div class="markdown"><p>Creates a coder for the 40-byte BITMAPINFOHEADER (the most common DIB header).</p>
 <p>All fields are little-endian. <code>width</code> and <code>height</code> are signed 32-bit; <code>height</code>
 being negative signals a top-down pixel layout.</p>
-<p>The returned coder also exposes its <code>width</code>, <code>height</code>, and <code>bpp</code> sub-coders
-so callers can build <code>ref()</code>-based pixel-data sizing without re-parsing the
-header.</p>
 </div><section class="section"  id="examples"><div>
       <h2 class="anchorable mb-1"><a href="#examples" class="anchor" aria-label="Anchor" tabIndex="-1"><svg
   width="16"
@@ -329,7 +326,7 @@ assertEquals(decoded, dib);
 Return Type</h2></div><div class="space-y-8"><div class=" docEntry" id="function_bitmapinfoheader_0_return">
 
   <div class="docEntryHeader">
-    <div><code><span class="font-medium text-stone-500 dark:text-stone-200"><a href="../././~/BitmapInfoHeaderCoder.html" class="link td-ref">BitmapInfoHeaderCoder</a></span>
+    <div><code><span class="font-medium text-stone-500 dark:text-stone-200"><span class="td-ref">Coder</span>&lt;<a href="../././~/BitmapInfoHeader.html" class="link td-ref">BitmapInfoHeader</a>&gt;</span>
       </code>
     </div><a
   class="sourceButton"
@@ -356,8 +353,7 @@ Return Type</h2></div><div class="space-y-8"><div class=" docEntry" id="function
   />
 </svg>
 </a>
-</div><div class="max-w-[75ch]"><div class="markdown"><p>A <a href="../././~/BitmapInfoHeaderCoder.html">BitmapInfoHeaderCoder</a> — a Coder for <a href="../././~/BitmapInfoHeader.html">BitmapInfoHeader</a>
-with the three pixel-sizing sub-coders attached.</p>
+</div><div class="max-w-[75ch]"><div class="markdown"><p>A coder for <a href="../././~/BitmapInfoHeader.html">BitmapInfoHeader</a>.</p>
 </div></div></div>
 </div></section>
 </div>

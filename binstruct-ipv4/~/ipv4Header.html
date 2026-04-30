@@ -167,10 +167,10 @@
 </a>
 <span class="font-bold">ipv4Header</span><span class="font-medium">()<span>: <span class="td-ref">Coder</span>&lt;<a href="../././~/Ipv4Header.html" class="link td-ref">Ipv4Header</a>&gt;</span> </span>
       </code><div class="space-y-7" id=""><div class="markdown"><p>Creates a coder for IPv4 packet headers (RFC 791).</p>
-<p>The returned coder handles the 20-byte fixed header plus a variable-length
-options trailer whose size is derived from <code>versionIhl.ihl</code>:
-<code>(ihl - 5) * 4</code> bytes. With <code>ihl === 5</code> the options field is empty and the
-encoded header is exactly 20 bytes.</p>
+<p>Handles the 20-byte fixed header plus a variable-length options trailer
+whose size is derived from <code>versionIhl.ihl</code>: <code>(ihl - 5) * 4</code> bytes. With
+<code>ihl === 5</code> the options field is empty and the encoded header is exactly
+20 bytes.</p>
 <p>The header checksum is treated as an opaque field — callers are responsible
 for computing and supplying a valid RFC 1071 sum before encoding.</p>
 </div><section class="section"  id="examples"><div>
