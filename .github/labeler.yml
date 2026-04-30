@@ -10,6 +10,9 @@
 "@binstruct/icmp":
   - changed-files:
       - any-glob-to-any-file: packages/binstruct-icmp/**
+"@binstruct/ipv4":
+  - changed-files:
+      - any-glob-to-any-file: packages/binstruct-ipv4/**
 "@binstruct/png":
   - changed-files:
       - any-glob-to-any-file: packages/binstruct-png/**

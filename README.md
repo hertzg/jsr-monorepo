@@ -25,6 +25,7 @@ libraries, format-specific parsers, router API clients, and various utilities.
 | [@binstruct/cli](https://jsr.io/@binstruct/cli)             | [![JSR](https://jsr.io/badges/@binstruct/cli)](https://jsr.io/@binstruct/cli)             |
 | [@binstruct/ethernet](https://jsr.io/@binstruct/ethernet)   | [![JSR](https://jsr.io/badges/@binstruct/ethernet)](https://jsr.io/@binstruct/ethernet)   |
 | [@binstruct/icmp](https://jsr.io/@binstruct/icmp)           | [![JSR](https://jsr.io/badges/@binstruct/icmp)](https://jsr.io/@binstruct/icmp)           |
+| [@binstruct/ipv4](https://jsr.io/@binstruct/ipv4)           | [![JSR](https://jsr.io/badges/@binstruct/ipv4)](https://jsr.io/@binstruct/ipv4)           |
 | [@binstruct/png](https://jsr.io/@binstruct/png)             | [![JSR](https://jsr.io/badges/@binstruct/png)](https://jsr.io/@binstruct/png)             |
 | [@binstruct/wav](https://jsr.io/@binstruct/wav)             | [![JSR](https://jsr.io/badges/@binstruct/wav)](https://jsr.io/@binstruct/wav)             |
 
