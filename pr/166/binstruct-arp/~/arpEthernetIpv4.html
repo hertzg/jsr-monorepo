@@ -167,77 +167,9 @@
 </a>
 <span class="font-bold">arpEthernetIpv4</span><span class="font-medium">()<span>: <span class="td-ref">Coder</span>&lt;<a href="../././~/ArpEthernetIpv4Packet.html" class="link td-ref">ArpEthernetIpv4Packet</a>&gt;</span> </span>
       </code><div class="space-y-7" id=""><div class="markdown"><p>Creates a coder for the common Ethernet/IPv4 ARP packet (RFC 826).</p>
-<p>The wire layout is fixed at 28 bytes:</p>
-<pre class="highlight"><code class="language-text">  0                   1                   2                   3
-  0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
- +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
- |          Hardware type        |          Protocol type        |
- +---------------+---------------+-------------------------------+
- |  Hlen (=6)    |  Plen (=4)    |          Operation            |
- +---------------+---------------+-------------------------------+
- |                Sender hardware address (sha)                  |
- +                               +-------------------------------+
- |                               |   Sender proto address (spa)  |
- +-------------------------------+                               +
- |                               |   Target hardware address     |
- +-------------------------------+                               +
- |                                                               |
- +-------------------------------+-------------------------------+
- |                Target protocol address (tpa)                  |
- +---------------------------------------------------------------+
-</code><button class="copyButton" data-copy="  0                   1                   2                   3
-  0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
- +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
- |          Hardware type        |          Protocol type        |
- +---------------+---------------+-------------------------------+
- |  Hlen (=6)    |  Plen (=4)    |          Operation            |
- +---------------+---------------+-------------------------------+
- |                Sender hardware address (sha)                  |
- +                               +-------------------------------+
- |                               |   Sender proto address (spa)  |
- +-------------------------------+                               +
- |                               |   Target hardware address     |
- +-------------------------------+                               +
- |                                                               |
- +-------------------------------+-------------------------------+
- |                Target protocol address (tpa)                  |
- +---------------------------------------------------------------+
-"><svg
-  class="copy"
-  width="15"
-  height="15"
-  viewBox="0 0 15 15"
-  fill="none"
-  xmlns="http://www.w3.org/2000/svg"
->
-  <rect x="2" y="2" width="7" height="7" fill="none" />
-  <rect x="6" y="6" width="7" height="7" fill="none" />
-  <path
-    d="M1.55566 2.7C1.55566 2.03726 2.09292 1.5 2.75566 1.5H8.75566C9.41841 1.5 9.95566 2.03726 9.95566 2.7V5.1H12.3557C13.0184 5.1 13.5557 5.63726 13.5557 6.3V12.3C13.5557 12.9627 13.0184 13.5 12.3557 13.5H6.35566C5.69292 13.5 5.15566 12.9627 5.15566 12.3V9.9H2.75566C2.09292 9.9 1.55566 9.36274 1.55566 8.7V2.7ZM6.35566 9.9V12.3H12.3557V6.3H9.95566V8.7C9.95566 9.36274 9.41841 9.9 8.75566 9.9H6.35566ZM8.75566 8.7V2.7H2.75566V8.7H8.75566Z"
-    fill="currentColor"
-  />
-</svg>
-<svg
-  class="check"
-  width="15"
-  height="15"
-  viewBox="0 0 24 24"
-  stroke-width="2"
-  stroke="currentColor"
-  fill="none"
-  stroke-linecap="round"
-  stroke-linejoin="round"
-  xmlns="http://www.w3.org/2000/svg"
->
-  <path stroke="none" d="M0 0h24v24H0z" fill="none" />
-  <path d="M5 12l5 5l10 -10" />
-</svg>
-</button><code></code></pre>
 <p>Hardware addresses are surfaced as raw <a href="https://deno.land/api@v2.7.14?s=Uint8Array"><code>Uint8Array</code></a>s; IPv4
 protocol addresses are surfaced as 32-bit unsigned integers. Use
-<a href="../././~/stringifyMacAddress.html">stringifyMacAddress</a> / <a href="../././~/parseMacAddress.html">parseMacAddress</a> and the helpers
-from <a href="https://jsr.io/@hertzg/ip"><code>@hertzg/ip</code></a> (<code>parseIpv4</code> /
-<code>stringifyIpv4</code>) for human-readable forms.</p>
+<code>@hertzg/mac</code> and <code>@hertzg/ip/ipv4</code> for human-readable conversion.</p>
 </div><section class="section"  id="examples"><div>
       <h2 class="anchorable mb-1"><a href="#examples" class="anchor" aria-label="Anchor" tabIndex="-1"><svg
   width="16"
@@ -286,7 +218,8 @@ Examples</h2></div><div class="space-y-8"><div class="anchorable"><a href="#exam
 <h3 class="example-header"><div class="markdown"><p>Round-trip encode and decode an ARP reply</p>
 </div></h3>
   <div><div class="markdown"><pre class="highlight"><code class="language-ts">import { assertEquals } from &quot;@std/assert&quot;;
-import { parseIpv4 } from &quot;@hertzg/ip&quot;;
+import { parseIpv4 } from &quot;@hertzg/ip/ipv4&quot;;
+import { parse as parseMac } from &quot;@hertzg/mac&quot;;
 import {
   ARP_ETHERNET_IPV4_SIZE,
   ARP_HARDWARE_TYPE,
@@ -295,7 +228,6 @@ import {
   ARP_PROTOCOL_TYPE,
   ARP_PROTO_LEN_IPV4,
   arpEthernetIpv4,
-  parseMacAddress,
 } from &quot;@binstruct/arp&quot;;
 
 const coder = arpEthernetIpv4();
@@ -305,9 +237,9 @@ const reply = {
   hlen: ARP_HW_LEN_ETHERNET,
   plen: ARP_PROTO_LEN_IPV4,
   oper: ARP_OPCODE.REPLY,
-  sha: parseMacAddress(&quot;aa:bb:cc:dd:ee:ff&quot;),
+  sha: parseMac(&quot;aa:bb:cc:dd:ee:ff&quot;),
   spa: parseIpv4(&quot;192.168.1.2&quot;),
-  tha: parseMacAddress(&quot;00:11:22:33:44:55&quot;),
+  tha: parseMac(&quot;00:11:22:33:44:55&quot;),
   tpa: parseIpv4(&quot;192.168.1.1&quot;),
 };
 
@@ -319,7 +251,8 @@ assertEquals(bytesWritten, ARP_ETHERNET_IPV4_SIZE);
 assertEquals(bytesRead, ARP_ETHERNET_IPV4_SIZE);
 assertEquals(decoded, reply);
 </code><button class="copyButton" data-copy="import { assertEquals } from &quot;@std/assert&quot;;
-import { parseIpv4 } from &quot;@hertzg/ip&quot;;
+import { parseIpv4 } from &quot;@hertzg/ip/ipv4&quot;;
+import { parse as parseMac } from &quot;@hertzg/mac&quot;;
 import {
   ARP_ETHERNET_IPV4_SIZE,
   ARP_HARDWARE_TYPE,
@@ -328,7 +261,6 @@ import {
   ARP_PROTOCOL_TYPE,
   ARP_PROTO_LEN_IPV4,
   arpEthernetIpv4,
-  parseMacAddress,
 } from &quot;@binstruct/arp&quot;;
 
 const coder = arpEthernetIpv4();
@@ -338,9 +270,9 @@ const reply = {
   hlen: ARP_HW_LEN_ETHERNET,
   plen: ARP_PROTO_LEN_IPV4,
   oper: ARP_OPCODE.REPLY,
-  sha: parseMacAddress(&quot;aa:bb:cc:dd:ee:ff&quot;),
+  sha: parseMac(&quot;aa:bb:cc:dd:ee:ff&quot;),
   spa: parseIpv4(&quot;192.168.1.2&quot;),
-  tha: parseMacAddress(&quot;00:11:22:33:44:55&quot;),
+  tha: parseMac(&quot;00:11:22:33:44:55&quot;),
   tpa: parseIpv4(&quot;192.168.1.1&quot;),
 };
 
