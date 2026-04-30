@@ -304,3 +304,40 @@ Deno.test("pcapRecord: encoding without enough buffer throws", () => {
   const value = sampleRecord(new Uint8Array(8));
   assertThrows(() => coder.encode(value, new Uint8Array(4)));
 });
+
+Deno.test("real-world fixture: Wireshark dns.cap", async () => {
+  // Public sample capture from https://wiki.wireshark.org/SampleCaptures —
+  // 38 Ethernet-framed DNS query/response packets, microsecond timestamps,
+  // little-endian. Used here as a parity check against an untouched
+  // third-party file, not for re-encode (we'd just be rewriting the file).
+  const fixture = await Deno.readFile(
+    new URL("./_fixtures/dns.cap", import.meta.url),
+  );
+
+  const magic = detectPcapMagic(fixture);
+  assertEquals(magic, { endianness: "le", nanos: false });
+
+  const [file, bytesRead] = pcapFile("le").decode(fixture);
+
+  assertEquals(bytesRead, fixture.byteLength);
+
+  assertEquals(file.header.magic, PCAP_MAGIC_MICROS);
+  assertEquals(file.header.versionMajor, 2);
+  assertEquals(file.header.versionMinor, 4);
+  assertEquals(file.header.snapLen, 65535);
+  assertEquals(file.header.network, LINKTYPE.ETHERNET);
+
+  assertEquals(file.records.length, 38);
+  assertEquals(file.records[0].inclLen, 70);
+  assertEquals(file.records[0].origLen, 70);
+  assertEquals(file.records[0].data.byteLength, 70);
+  assertEquals(file.records[37].inclLen, 83);
+  assertEquals(file.records[37].origLen, 83);
+  assertEquals(file.records[37].data.byteLength, 83);
+
+  // None of the packets in this capture were truncated by the snapshot length.
+  for (const record of file.records) {
+    assertEquals(record.inclLen, record.origLen);
+    assertEquals(record.data.byteLength, record.inclLen);
+  }
+});
