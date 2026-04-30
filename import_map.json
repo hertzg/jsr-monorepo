@@ -32,6 +32,7 @@
     "@binstruct/icmp": "jsr:@binstruct/icmp@^0.1.0",
     "@binstruct/ipv4": "jsr:@binstruct/ipv4@^0.1.0",
     "@binstruct/png": "jsr:@binstruct/png@^0.4.0",
+    "@binstruct/udp": "jsr:@binstruct/udp@^0.1.0",
     "@binstruct/wav": "jsr:@binstruct/wav@^0.1.2",
     "json5": "npm:json5@^2.2.3",
     "fflate": "npm:fflate@^0.8.2",

@@ -69,6 +69,7 @@ All packages are located in the `packages/` directory:
 - `packages/binstruct-icmp` - ICMPv4 packet parsing (RFC 792)
 - `packages/binstruct-ipv4` - IPv4 packet header parsing
 - `packages/binstruct-png` - PNG file format support
+- `packages/binstruct-udp` - UDP datagram parsing (RFC 768)
 - `packages/binstruct-wav` - WAV audio file format support
 - `packages/wg-keys` - WireGuard key management
 - `packages/wg-ini` - INI file parsing
@@ -352,6 +353,7 @@ both tiresome and error-prone.
 - `@binstruct/icmp`
 - `@binstruct/ipv4`
 - `@binstruct/png`
+- `@binstruct/udp`
 - `@binstruct/wav`
 - `@hertzg/wg-keys`
 - `@hertzg/wg-ini`

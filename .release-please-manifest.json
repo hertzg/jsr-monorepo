@@ -7,6 +7,7 @@
   "packages/binstruct-icmp": "0.1.0",
   "packages/binstruct-ipv4": "0.1.0",
   "packages/binstruct-png": "0.4.0",
+  "packages/binstruct-udp": "0.1.0",
   "packages/binstruct-wav": "0.1.2",
   "packages/wg-keys": "2.1.0",
   "packages/wg-ini": "0.2.4",

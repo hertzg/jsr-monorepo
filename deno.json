@@ -48,6 +48,7 @@
     "./packages/binstruct-icmp",
     "./packages/binstruct-ipv4",
     "./packages/binstruct-png",
+    "./packages/binstruct-udp",
     "./packages/binstruct-wav",
     "./packages/wg-keys",
     "./packages/wg-ini",
