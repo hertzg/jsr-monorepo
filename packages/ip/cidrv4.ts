@@ -331,13 +331,19 @@ export function cidrv4Size(cidr: Cidrv4): number;
  *
  * @example Getting CIDR size from prefix length
  * ```ts
- * import { assertEquals, assertThrows } from "@std/assert";
+ * import { assertEquals } from "@std/assert";
  * import { cidrv4Size } from "@hertzg/ip/cidrv4";
  *
  * assertEquals(cidrv4Size(24), 256);
  * assertEquals(cidrv4Size(8), 16777216);
  * assertEquals(cidrv4Size(32), 1);
  * assertEquals(cidrv4Size(0), 4294967296);
+ * ```
+ *
+ * @example Out-of-range prefix length throws
+ * ```ts
+ * import { assertThrows } from "@std/assert";
+ * import { cidrv4Size } from "@hertzg/ip/cidrv4";
  *
  * assertThrows(() => cidrv4Size(-1), RangeError);
  * assertThrows(() => cidrv4Size(33), RangeError);
@@ -345,7 +351,7 @@ export function cidrv4Size(cidr: Cidrv4): number;
  */
 export function cidrv4Size(prefixLength: number): number;
 /**
- * Dispatcher overload for callers holding a `Cidrv4 | number`.
+ * Returns the total number of IP addresses for either a CIDR block or a prefix length.
  *
  * @param cidrOrPrefixLength A Cidrv4 block or a prefix length (0-32)
  * @returns The total number of addresses
