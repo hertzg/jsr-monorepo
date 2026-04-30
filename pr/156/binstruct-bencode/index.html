@@ -154,10 +154,12 @@ trivially while a <code>Map</code> keyed by <code>Uint8Array</code> would fail k
 Coder interface fit</h2>
 <p>Unlike fixed-shape binary structs, bencode is self-describing — the decoder
 dispatches on the first byte rather than following a schema. The
-<a href="././~/bencode.html">bencode</a> factory therefore returns a single
-<code>Coder&lt;BencodeValue&gt;</code> whose decode/encode methods recurse on themselves.
-It composes with the rest of <code>@hertzg/binstruct</code> (<code>refine</code>, <code>struct</code> fields,
-etc.) just like any other coder.</p>
+<a href="././~/bencode.html">bencode</a> factory returns a <code>Coder&lt;BencodeValue&gt;</code> whose decode/encode
+methods recurse on themselves and can be used directly. Note that
+<code>@hertzg/binstruct</code> brands its built-in coders with a private symbol that
+isn't exported, so the bencode coder won't be recognised by <code>isCoder()</code> and
+can't be embedded as a field inside <code>struct(...)</code>. This is a known gap —
+see the package's PR description for the proposed upstream fix.</p>
 <h2 id="no-defensive-checks-on-encode">
 No defensive checks on encode</h2>
 <p>Per the project's &quot;no defensive programming&quot; rule, <a href="././~/bencode.html">bencode</a> does
