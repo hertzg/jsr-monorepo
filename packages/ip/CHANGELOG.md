@@ -1,5 +1,12 @@
 # Changelog
 
+## [4.1.0](https://github.com/hertzg/jsr-monorepo/compare/@hertzg/ip-v4.0.0...@hertzg/ip-v4.1.0) (2026-04-30)
+
+
+### Features
+
+* **@hertzg/ip:** document cidrv4Addresses, cidrv6Addresses, Size overloads, and alias return types ([#159](https://github.com/hertzg/jsr-monorepo/issues/159)) ([7a6b109](https://github.com/hertzg/jsr-monorepo/commit/7a6b1099d00b23c824b564ac571f7e92d607f9a0))
+
 ## [4.0.0](https://github.com/hertzg/jsr-monorepo/compare/@hertzg/ip-v3.3.0...@hertzg/ip-v4.0.0) (2026-04-06)
 
 
