@@ -2,10 +2,16 @@
  * CRC implementation with configurable polynomials.
  *
  * A pure TypeScript CRC library supporting CRC8, CRC16, CRC32, and CRC64.
- * Use the simple `crc*` helpers with default polynomials, or the `createCrc*`
- * factory functions for custom polynomials.
  *
- * @example Simple usage with default polynomials
+ * Each width is exposed at three layers:
+ * - One-shot: `crc8` / `crc16` / `crc32` / `crc64` — convenience helpers that
+ *   use a conventional default polynomial.
+ * - Factory: `createCrc8` / etc. — return a reusable function bound to a
+ *   specific polynomial (each call builds the lookup table).
+ * - Memoized factory: `memoizedCreateCrc8` / etc. — same as the factory, but
+ *   repeated calls with the same polynomial reuse the cached function.
+ *
+ * @example One-shot helpers with default polynomials
  * ```ts
  * import { assertEquals } from "@std/assert";
  * import { crc32, crc64 } from "@hertzg/crc";
@@ -14,7 +20,7 @@
  * assertEquals(crc64(new TextEncoder().encode("123456789")), 0x995dc9bbdf1939fan);
  * ```
  *
- * @example Custom polynomial with factory function
+ * @example Factory with a custom polynomial (CRC32C / Castagnoli)
  * ```ts
  * import { assertEquals } from "@std/assert";
  * import { createCrc32, CRC32C_POLYNOMIAL } from "@hertzg/crc";
