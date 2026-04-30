@@ -14,6 +14,7 @@ libraries, format-specific parsers, router API clients, and various utilities.
 | [@hertzg/bx](https://jsr.io/@hertzg/bx)                     | [![JSR](https://jsr.io/badges/@hertzg/bx)](https://jsr.io/@hertzg/bx)                     |
 | [@hertzg/crc](https://jsr.io/@hertzg/crc)                   | [![JSR](https://jsr.io/badges/@hertzg/crc)](https://jsr.io/@hertzg/crc)                   |
 | [@hertzg/ip](https://jsr.io/@hertzg/ip)                     | [![JSR](https://jsr.io/badges/@hertzg/ip)](https://jsr.io/@hertzg/ip)                     |
+| [@hertzg/mac](https://jsr.io/@hertzg/mac)                   | [![JSR](https://jsr.io/badges/@hertzg/mac)](https://jsr.io/@hertzg/mac)                   |
 | [@hertzg/mymagti-api](https://jsr.io/@hertzg/mymagti-api)   | [![JSR](https://jsr.io/badges/@hertzg/mymagti-api)](https://jsr.io/@hertzg/mymagti-api)   |
 | [@hertzg/routeros-api](https://jsr.io/@hertzg/routeros-api) | [![JSR](https://jsr.io/badges/@hertzg/routeros-api)](https://jsr.io/@hertzg/routeros-api) |
 | [@hertzg/tplink-api](https://jsr.io/@hertzg/tplink-api)     | [![JSR](https://jsr.io/badges/@hertzg/tplink-api)](https://jsr.io/@hertzg/tplink-api)     |

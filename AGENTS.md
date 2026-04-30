@@ -79,6 +79,7 @@ All packages are located in the `packages/` directory:
 - `packages/mymagti-api` - MyMagti API client
 - `packages/bx` - Binary hex string utilities
 - `packages/ip` - IPv4/CIDR utilities
+- `packages/mac` - EUI-48 MAC address parse/stringify
 - `packages/crc` - CRC checksum utilities
 - `packages/xhb` - HomeBank XHB file parse/serialize
 
@@ -361,6 +362,7 @@ both tiresome and error-prone.
 - `@hertzg/mymagti-api`
 - `@hertzg/bx`
 - `@hertzg/ip`
+- `@hertzg/mac`
 - `@hertzg/crc`
 - `@hertzg/routeros-api`
 - `@hertzg/tplink-api`
