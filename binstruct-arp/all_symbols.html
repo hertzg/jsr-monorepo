@@ -102,7 +102,7 @@
       <a href=".&#x2F;" class="link text-xl font-bold">default</a>
 
       <div class="ml-4 mt-2"><section>
-  <div class="space-y-2 flex-1"><div class="space-y-7" id="module_doc"><div class="markdown_summary"><p>ARP (Address Resolution Protocol) packet encoding and decoding utilities.</p>
+  <div class="space-y-2 flex-1"><div class="space-y-7" id="module_doc"><div class="markdown_summary"><p>ARP (Address Resolution Protocol) packet encoding and decoding.</p>
 </div><section class="section"  id="examples"><div>
       <h2 class="anchorable mb-1"><a href="#examples" class="anchor" aria-label="Anchor" tabIndex="-1"><svg
   width="16"
@@ -151,13 +151,13 @@ Examples</h2></div><div class="space-y-8"><div class="anchorable"><a href="#exam
 <h3 class="example-header"><div class="markdown"><p>Decode an Ethernet/IPv4 ARP request</p>
 </div></h3>
   <div><div class="markdown"><pre class="highlight"><code class="language-ts">import { assertEquals } from &quot;@std/assert&quot;;
-import { stringifyIpv4 } from &quot;@hertzg/ip&quot;;
+import { stringifyIpv4 } from &quot;@hertzg/ip/ipv4&quot;;
+import { stringify as stringifyMac } from &quot;@hertzg/mac&quot;;
 import {
   ARP_HARDWARE_TYPE,
   ARP_OPCODE,
   ARP_PROTOCOL_TYPE,
   arpEthernetIpv4,
-  stringifyMacAddress,
 } from &quot;@binstruct/arp&quot;;
 
 // deno-fmt-ignore
@@ -179,17 +179,17 @@ assertEquals(bytesRead, 28);
 assertEquals(packet.htype, ARP_HARDWARE_TYPE.ETHERNET);
 assertEquals(packet.ptype, ARP_PROTOCOL_TYPE.IPV4);
 assertEquals(packet.oper, ARP_OPCODE.REQUEST);
-assertEquals(stringifyMacAddress(packet.sha), &quot;00:11:22:33:44:55&quot;);
+assertEquals(stringifyMac(packet.sha), &quot;00:11:22:33:44:55&quot;);
 assertEquals(stringifyIpv4(packet.spa), &quot;192.168.1.1&quot;);
 assertEquals(stringifyIpv4(packet.tpa), &quot;192.168.1.2&quot;);
 </code><button class="copyButton" data-copy="import { assertEquals } from &quot;@std/assert&quot;;
-import { stringifyIpv4 } from &quot;@hertzg/ip&quot;;
+import { stringifyIpv4 } from &quot;@hertzg/ip/ipv4&quot;;
+import { stringify as stringifyMac } from &quot;@hertzg/mac&quot;;
 import {
   ARP_HARDWARE_TYPE,
   ARP_OPCODE,
   ARP_PROTOCOL_TYPE,
   arpEthernetIpv4,
-  stringifyMacAddress,
 } from &quot;@binstruct/arp&quot;;
 
 // deno-fmt-ignore
@@ -211,7 +211,7 @@ assertEquals(bytesRead, 28);
 assertEquals(packet.htype, ARP_HARDWARE_TYPE.ETHERNET);
 assertEquals(packet.ptype, ARP_PROTOCOL_TYPE.IPV4);
 assertEquals(packet.oper, ARP_OPCODE.REQUEST);
-assertEquals(stringifyMacAddress(packet.sha), &quot;00:11:22:33:44:55&quot;);
+assertEquals(stringifyMac(packet.sha), &quot;00:11:22:33:44:55&quot;);
 assertEquals(stringifyIpv4(packet.spa), &quot;192.168.1.1&quot;);
 assertEquals(stringifyIpv4(packet.tpa), &quot;192.168.1.2&quot;);
 "><svg
@@ -275,16 +275,6 @@ Functions</h2></div><div class="namespaceSection"><div id="namespace_arpethernet
 <div class="namespaceItemContent">
 		    <a href=".&#x2F;.&#x2F;.&#x2F;~&#x2F;arpEthernetIpv4.html" title="arpEthernetIpv4">
 			    <span>arpEthernetIpv4</span><span>()<span>: <span class="td-ref">Coder</span>&lt;<span class="td-ref">ArpEthernetIpv4Packet</span>&gt;</span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Creates a coder for the common Ethernet/IPv4 ARP packet (RFC 826).</p>
-</div></div></div>
-    </div><div id="namespace_parsemacaddress" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-Function bg-Function/15 dark:text-FunctionDark dark:bg-FunctionDark/15" title="Function">f</div></div>
-<div class="namespaceItemContent">
-		    <a href=".&#x2F;.&#x2F;.&#x2F;~&#x2F;parseMacAddress.html" title="parseMacAddress">
-			    <span>parseMacAddress</span><span>(<div class="ml-4"><div><span>mac<span>: <span class="td-kw">string</span></span></span>,</div><div><span>delimiter<span class="td-op">?</span><span>: <span class="td-kw">string</span></span></span></div></div>)<span>: <span class="td-ref">Uint8Array</span></span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Parses a delimited hexadecimal MAC address string into a 6-byte array.</p>
-</div></div></div>
-    </div><div id="namespace_stringifymacaddress" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-Function bg-Function/15 dark:text-FunctionDark dark:bg-FunctionDark/15" title="Function">f</div></div>
-<div class="namespaceItemContent">
-		    <a href=".&#x2F;.&#x2F;.&#x2F;~&#x2F;stringifyMacAddress.html" title="stringifyMacAddress">
-			    <span>stringifyMacAddress</span><span>(<div class="ml-4"><div><span>address<span>: <span class="td-ref">Uint8Array</span></span></span>,</div><div><span>delimiter<span class="td-op">?</span><span>: <span class="td-kw">string</span></span></span></div></div>)<span>: <span class="td-kw">string</span></span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Formats a MAC address byte array as a colon-separated hexadecimal string.</p>
 </div></div></div>
     </div></div>
 </section>
