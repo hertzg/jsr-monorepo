@@ -1,3 +1,6 @@
+"@binstruct/bmp":
+  - changed-files:
+      - any-glob-to-any-file: packages/binstruct-bmp/**
 "@binstruct/cli":
   - changed-files:
       - any-glob-to-any-file: packages/binstruct-cli/**
