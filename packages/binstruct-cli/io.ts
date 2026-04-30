@@ -3,8 +3,8 @@
  *
  * This module provides shared utilities for reading from stdin and writing to stdout,
  * used by both encode and decode commands. It includes support for serializing and
- * deserializing non-native types like Uint8Array and BigInt, and supports JSONC
- * format through @std/jsonc.
+ * deserializing non-native types like Uint8Array and BigInt, and accepts JSON5
+ * (JSON with comments and trailing commas) on input.
  *
  * @module
  */
@@ -44,12 +44,12 @@ export async function readStdin(): Promise<Uint8Array> {
 }
 
 /**
- * Reads JSON or JSONC data from stdin and parses it with support for non-native types.
+ * Reads JSON or JSON5 data from stdin and parses it with support for non-native types.
  *
- * This function can reconstruct Uint8Array and BigInt values from their
- * JSON-serialized representations. Supports JSONC (JSON with comments) format.
+ * Reconstructs Uint8Array and BigInt values from their JSON-serialized
+ * representations. Comments and trailing commas are accepted.
  *
- * @returns Parsed JSON/JSONC data with non-native types reconstructed
+ * @returns Parsed data with non-native types reconstructed
  */
 export async function readStdinJson(): Promise<unknown> {
   const binaryData = await readStdin();
@@ -69,10 +69,11 @@ export async function readStdinJson(): Promise<unknown> {
 }
 
 /**
- * Reads JSONC data from stdin and parses it with support for non-native types.
+ * Reads formatted data from stdin and parses it with support for non-native types.
  *
- * This function can reconstruct Uint8Array and BigInt values from their
- * JSON-serialized representations. Supports JSONC (JSON with comments) format.
+ * Currently the only supported format is `"jsonc"`, which parses JSON5
+ * (JSON with comments and trailing commas) and reconstructs Uint8Array and
+ * BigInt values.
  *
  * @param format The format to parse: "jsonc" (default)
  * @returns Parsed data with non-native types reconstructed
@@ -124,10 +125,11 @@ export async function writeStdoutJson(data: unknown): Promise<void> {
 }
 
 /**
- * Writes JSONC data to stdout with support for non-native types.
+ * Writes formatted data to stdout with support for non-native types.
  *
- * This function handles Uint8Array and BigInt values by converting them to
- * JSON-serializable formats that can be reconstructed later.
+ * Currently the only supported format is `"jsonc"`, which produces JSON5
+ * with hex-formatted byte arrays. Uint8Array and BigInt values are
+ * converted to a form that can be round-tripped back via {@link readStdinFormatted}.
  *
  * @param data Data to serialize and write
  * @param format The format to use: "jsonc" (default)
