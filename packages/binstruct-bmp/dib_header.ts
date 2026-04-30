@@ -63,22 +63,14 @@ export interface BitmapInfoHeader {
   importantColors: number;
 }
 
-/**
- * A BITMAPINFOHEADER coder bundled with the individual sub-coders for the
- * three fields required to size pixel data.
- *
- * Holding on to the component coders lets you build `ref()`-driven pixel
- * layouts: the file-level {@link "./mod.ts".bmp} coder uses `widthCoder`,
- * `heightCoder`, and `bppCoder` to derive the buffer length.
- */
-export interface BitmapInfoHeaderCoder extends Coder<BitmapInfoHeader> {
-  /** The signed 32-bit `width` field coder. */
-  widthCoder: Coder<number>;
-  /** The signed 32-bit `height` field coder (negative ⇒ top-down). */
-  heightCoder: Coder<number>;
-  /** The unsigned 16-bit `bpp` field coder. */
-  bppCoder: Coder<number>;
-}
+/** Coder factory for the BMP `width` field (signed 32-bit little-endian). */
+export const bitmapWidthCoder = (): Coder<number> => s32le();
+
+/** Coder factory for the BMP `height` field (signed 32-bit; negative ⇒ top-down). */
+export const bitmapHeightCoder = (): Coder<number> => s32le();
+
+/** Coder factory for the BMP `bpp` field (bits per pixel, unsigned 16-bit). */
+export const bitmapBppCoder = (): Coder<number> => u16le();
 
 /**
  * Creates a coder for the 40-byte BITMAPINFOHEADER (the most common DIB header).
@@ -86,12 +78,7 @@ export interface BitmapInfoHeaderCoder extends Coder<BitmapInfoHeader> {
  * All fields are little-endian. `width` and `height` are signed 32-bit; `height`
  * being negative signals a top-down pixel layout.
  *
- * The returned coder also exposes its `width`, `height`, and `bpp` sub-coders
- * so callers can build `ref()`-based pixel-data sizing without re-parsing the
- * header.
- *
- * @returns A {@link BitmapInfoHeaderCoder} — a Coder for {@link BitmapInfoHeader}
- *          with the three pixel-sizing sub-coders attached.
+ * @returns A coder for {@link BitmapInfoHeader}.
  *
  * @example Round-trip a BITMAPINFOHEADER
  * ```ts
@@ -122,17 +109,13 @@ export interface BitmapInfoHeaderCoder extends Coder<BitmapInfoHeader> {
  * assertEquals(decoded, dib);
  * ```
  */
-export function bitmapInfoHeader(): BitmapInfoHeaderCoder {
-  const widthCoder = s32le();
-  const heightCoder = s32le();
-  const bppCoder = u16le();
-
-  const coder = struct({
+export function bitmapInfoHeader(): Coder<BitmapInfoHeader> {
+  return struct({
     size: u32le(),
-    width: widthCoder,
-    height: heightCoder,
+    width: bitmapWidthCoder(),
+    height: bitmapHeightCoder(),
     planes: u16le(),
-    bpp: bppCoder,
+    bpp: bitmapBppCoder(),
     compression: u32le(),
     imageSize: u32le(),
     xPixelsPerMeter: s32le(),
@@ -140,8 +123,6 @@ export function bitmapInfoHeader(): BitmapInfoHeaderCoder {
     colorsUsed: u32le(),
     importantColors: u32le(),
   });
-
-  return Object.assign(coder, { widthCoder, heightCoder, bppCoder });
 }
 
 /**
