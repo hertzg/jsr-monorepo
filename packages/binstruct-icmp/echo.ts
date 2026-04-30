@@ -7,14 +7,7 @@
  * @module
  */
 
-import {
-  bytes,
-  type Coder,
-  type LengthOrRef,
-  struct,
-  u16be,
-  u8,
-} from "@hertzg/binstruct";
+import { bytes, type Coder, struct, u16be, u8 } from "@hertzg/binstruct";
 
 /**
  * Echo Request / Echo Reply packet (RFC 792).
@@ -75,15 +68,13 @@ export interface IcmpEcho {
  * assertEquals(decoded.payload, payload);
  * ```
  */
-export function icmpEcho(
-  payloadLength?: LengthOrRef | null,
-): Coder<IcmpEcho> {
+export function icmpEcho(): Coder<IcmpEcho> {
   return struct({
     type: u8(),
     code: u8(),
     checksum: u16be(),
     identifier: u16be(),
     sequence: u16be(),
-    payload: bytes(payloadLength),
+    payload: bytes(),
   });
 }
