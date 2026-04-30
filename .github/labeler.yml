@@ -34,6 +34,9 @@
 "@hertzg/ip":
   - changed-files:
       - any-glob-to-any-file: packages/ip/**
+"@hertzg/mac":
+  - changed-files:
+      - any-glob-to-any-file: packages/mac/**
 "@hertzg/mymagti-api":
   - changed-files:
       - any-glob-to-any-file: packages/mymagti-api/**

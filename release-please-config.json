@@ -145,6 +145,14 @@
         { "type": "json", "path": "deno.json", "jsonpath": "$.version" }
       ]
     },
+    "packages/mac": {
+      "release-type": "simple",
+      "package-name": "@hertzg/mac",
+      "component": "@hertzg/mac",
+      "extra-files": [
+        { "type": "json", "path": "deno.json", "jsonpath": "$.version" }
+      ]
+    },
     "packages/crc": {
       "release-type": "simple",
       "package-name": "@hertzg/crc",
