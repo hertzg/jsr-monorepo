@@ -82,6 +82,19 @@ import { decodeBase64, encodeBase64 } from "@std/encoding/base64";
  *
  * @see {@link https://datatracker.ietf.org/doc/html/rfc7748#section-5}
  * @returns {Uint8Array} 32 bytes of random data
+ *
+ * @example Generate 32 random bytes
+ * ```ts
+ * import { assertEquals, assertNotEquals } from "@std/assert";
+ * import { randomBytes } from "@hertzg/wg-keys";
+ *
+ * const a = randomBytes();
+ * const b = randomBytes();
+ *
+ * assertEquals(a.length, 32);
+ * assertEquals(b.length, 32);
+ * assertNotEquals(a, b);
+ * ```
  */
 export function randomBytes(): Uint8Array {
   const randomBytes = new Uint8Array(32);
@@ -98,6 +111,20 @@ export function randomBytes(): Uint8Array {
  *
  * @see {@link https://datatracker.ietf.org/doc/html/rfc7748#section-5}
  * @returns {Uint8Array} private key bytes
+ *
+ * @example Generate clamped private key bytes
+ * ```ts
+ * import { assertEquals } from "@std/assert";
+ * import { randomPrivateKeyBytes } from "@hertzg/wg-keys";
+ *
+ * const key = randomPrivateKeyBytes();
+ *
+ * assertEquals(key.length, 32);
+ * // Bits 0, 1, 2 of the first byte are cleared.
+ * assertEquals(key[0] & 0b00000111, 0);
+ * // Bit 7 of the last byte is cleared, bit 6 is set.
+ * assertEquals(key[31] & 0b11000000, 0b01000000);
+ * ```
  */
 export function randomPrivateKeyBytes(): Uint8Array {
   const bytes = randomBytes();
@@ -113,6 +140,14 @@ export function randomPrivateKeyBytes(): Uint8Array {
  *
  * @alias randomBytes
  * @returns {Uint8Array} preshared key bytes
+ *
+ * @example Generate preshared key bytes
+ * ```ts
+ * import { assertEquals } from "@std/assert";
+ * import { randomPresharedKeyBytes } from "@hertzg/wg-keys";
+ *
+ * assertEquals(randomPresharedKeyBytes().length, 32);
+ * ```
  */
 export function randomPresharedKeyBytes(): Uint8Array {
   return randomBytes();
