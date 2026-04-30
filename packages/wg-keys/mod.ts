@@ -402,6 +402,19 @@ export async function publicBytesFromPrivateBytes(
  *
  * @see {@link https://git.zx2c4.com/wireguard-tools/tree/src/genkey.c}
  * @returns {string} base64 encoded private key
+ *
+ * @example Generate a base64-encoded private key
+ * ```ts
+ * import { assertEquals } from "@std/assert";
+ * import { decodeBase64 } from "@std/encoding/base64";
+ * import { wgGenKey } from "@hertzg/wg-keys";
+ *
+ * const key = wgGenKey();
+ *
+ * // 32 bytes encoded as base64 — 44 characters with trailing '='.
+ * assertEquals(key.length, 44);
+ * assertEquals(decodeBase64(key).length, 32);
+ * ```
  */
 export function wgGenKey(): string {
   return encodeBase64(randomPrivateKeyBytes());
@@ -414,31 +427,56 @@ export function wgGenKey(): string {
  *
  * @see {@link https://git.zx2c4.com/wireguard-tools/tree/src/genkey.c}
  * @returns {string} base64 encoded preshared key
+ *
+ * @example Generate a base64-encoded preshared key
+ * ```ts
+ * import { assertEquals } from "@std/assert";
+ * import { decodeBase64 } from "@std/encoding/base64";
+ * import { wgGenPsk } from "@hertzg/wg-keys";
+ *
+ * const psk = wgGenPsk();
+ *
+ * assertEquals(psk.length, 44);
+ * assertEquals(decodeBase64(psk).length, 32);
+ * ```
  */
 export function wgGenPsk(): string {
   return encodeBase64(randomPresharedKeyBytes());
 }
 
 /**
- * Derives public key from private key using x25519 curve.
+ * Derives the x25519 public key for a base64-encoded private key.
  *
- * When called with a base64 string, mimics WireGuard's `wg pubkey` command.
- * When called with Uint8Array, works directly with raw bytes.
+ * Mimics WireGuard's `wg pubkey` command — pipe a base64 private key in,
+ * get a base64 public key out.
  *
  * @param privateKeyBase64 Base64 encoded private key
  * @param options Configuration options for key import
- * @returns Base64 encoded public key
+ * @returns Base64 encoded public key (44 characters)
  *
  * @example Derive public key from base64 string
  * ```ts
- * import { assertExists } from "@std/assert";
+ * import { assertEquals } from "@std/assert";
+ * import { decodeBase64 } from "@std/encoding/base64";
  * import { wgGenKey, wgPubKey } from "@hertzg/wg-keys";
  *
  * const privateKey = wgGenKey();
  * const publicKey = await wgPubKey(privateKey);
  *
- * assertExists(publicKey);
+ * assertEquals(publicKey.length, 44);
+ * assertEquals(decodeBase64(publicKey).length, 32);
  * ```
+ */
+export async function wgPubKey(
+  privateKeyBase64: string,
+  options?: ImportPrivateKeyOptions,
+): Promise<string>;
+/**
+ * Derives the x25519 public key for a raw 32-byte private key.
+ *
+ * @param privateKey The 32-byte private key as Uint8Array
+ * @param options Configuration options for key import
+ * @returns The 32-byte public key as Uint8Array
  *
  * @example Derive public key from Uint8Array
  * ```ts
@@ -464,10 +502,6 @@ export function wgGenPsk(): string {
  * assertEquals(publicKeyBytes.length, 32);
  * ```
  */
-export async function wgPubKey(
-  privateKeyBase64: string,
-  options?: ImportPrivateKeyOptions,
-): Promise<string>;
 export async function wgPubKey(
   privateKey: Uint8Array,
   options?: ImportPrivateKeyOptions,
