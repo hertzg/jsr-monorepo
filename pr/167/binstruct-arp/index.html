@@ -91,7 +91,7 @@ addresses are surfaced as raw 6-byte arrays; IPv4 protocol addresses
 are surfaced as 32-bit numbers.</p>
 <p>For human-readable conversion use the sister utility packages:</p>
 <ul>
-<li><a href="https://jsr.io/@hertzg/mac">@hertzg/mac</a> — <code>parseMac</code> / <code>stringifyMac</code></li>
+<li><a href="https://jsr.io/@hertzg/mac">@hertzg/mac</a> — <code>parse</code> / <code>stringify</code></li>
 <li><a href="https://jsr.io/@hertzg/ip">@hertzg/ip</a> — <code>parseIpv4</code> / <code>stringifyIpv4</code></li>
 </ul>
 </div><section class="section"  id="examples"><div>
@@ -143,7 +143,7 @@ Examples</h2></div><div class="space-y-8"><div class="anchorable"><a href="#exam
 </div></h3>
   <div><div class="markdown"><pre class="highlight"><code class="language-ts">import { assertEquals } from &quot;@std/assert&quot;;
 import { stringifyIpv4 } from &quot;@hertzg/ip/ipv4&quot;;
-import { stringifyMac } from &quot;@hertzg/mac&quot;;
+import { stringify as stringifyMac } from &quot;@hertzg/mac&quot;;
 import {
   ARP_HARDWARE_TYPE,
   ARP_OPCODE,
@@ -175,7 +175,7 @@ assertEquals(stringifyIpv4(packet.spa), &quot;192.168.1.1&quot;);
 assertEquals(stringifyIpv4(packet.tpa), &quot;192.168.1.2&quot;);
 </code><button class="copyButton" data-copy="import { assertEquals } from &quot;@std/assert&quot;;
 import { stringifyIpv4 } from &quot;@hertzg/ip/ipv4&quot;;
-import { stringifyMac } from &quot;@hertzg/mac&quot;;
+import { stringify as stringifyMac } from &quot;@hertzg/mac&quot;;
 import {
   ARP_HARDWARE_TYPE,
   ARP_OPCODE,

@@ -250,7 +250,7 @@ assertEquals(decodedFrame.etherType, testFrame.etherType);
   <div><div class="markdown"><pre class="highlight"><code class="language-ts">import { assertEquals } from &quot;@std/assert&quot;;
 import { refine } from &quot;@hertzg/binstruct&quot;;
 import { ethernet2Frame, type Ethernet2Frame } from &quot;@binstruct/ethernet&quot;;
-import { parseMac, stringifyMac } from &quot;@hertzg/mac&quot;;
+import { parse as parseMac, stringify as stringifyMac } from &quot;@hertzg/mac&quot;;
 
 type StringMacFrame = Omit&lt;Ethernet2Frame, &quot;dstMac&quot; | &quot;srcMac&quot;&gt; &amp; {
   dstMac: string;
@@ -282,7 +282,7 @@ assertEquals(decoded.dstMac, &quot;00:11:22:33:44:55&quot;);
 </code><button class="copyButton" data-copy="import { assertEquals } from &quot;@std/assert&quot;;
 import { refine } from &quot;@hertzg/binstruct&quot;;
 import { ethernet2Frame, type Ethernet2Frame } from &quot;@binstruct/ethernet&quot;;
-import { parseMac, stringifyMac } from &quot;@hertzg/mac&quot;;
+import { parse as parseMac, stringify as stringifyMac } from &quot;@hertzg/mac&quot;;
 
 type StringMacFrame = Omit&lt;Ethernet2Frame, &quot;dstMac&quot; | &quot;srcMac&quot;&gt; &amp; {
   dstMac: string;

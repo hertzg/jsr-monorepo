@@ -151,17 +151,17 @@ Examples</h2></div><div class="space-y-8"><div class="anchorable"><a href="#exam
 <h3 class="example-header"><div class="markdown"><p>Round-trip</p>
 </div></h3>
   <div><div class="markdown"><pre class="highlight"><code class="language-ts">import { assertEquals } from &quot;@std/assert&quot;;
-import { parseMac, stringifyMac } from &quot;@hertzg/mac&quot;;
+import { parse, stringify } from &quot;@hertzg/mac&quot;;
 
-const bytes = parseMac(&quot;AA:BB:CC:DD:EE:FF&quot;);
+const bytes = parse(&quot;AA:BB:CC:DD:EE:FF&quot;);
 assertEquals(bytes, new Uint8Array([0xaa, 0xbb, 0xcc, 0xdd, 0xee, 0xff]));
-assertEquals(stringifyMac(bytes), &quot;aa:bb:cc:dd:ee:ff&quot;);
+assertEquals(stringify(bytes), &quot;aa:bb:cc:dd:ee:ff&quot;);
 </code><button class="copyButton" data-copy="import { assertEquals } from &quot;@std/assert&quot;;
-import { parseMac, stringifyMac } from &quot;@hertzg/mac&quot;;
+import { parse, stringify } from &quot;@hertzg/mac&quot;;
 
-const bytes = parseMac(&quot;AA:BB:CC:DD:EE:FF&quot;);
+const bytes = parse(&quot;AA:BB:CC:DD:EE:FF&quot;);
 assertEquals(bytes, new Uint8Array([0xaa, 0xbb, 0xcc, 0xdd, 0xee, 0xff]));
-assertEquals(stringifyMac(bytes), &quot;aa:bb:cc:dd:ee:ff&quot;);
+assertEquals(stringify(bytes), &quot;aa:bb:cc:dd:ee:ff&quot;);
 "><svg
   class="copy"
   width="15"
@@ -219,15 +219,15 @@ assertEquals(stringifyMac(bytes), &quot;aa:bb:cc:dd:ee:ff&quot;);
   </defs>
 </svg>
 </a>
-Functions</h2></div><div class="namespaceSection"><div id="namespace_parsemac" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-Function bg-Function/15 dark:text-FunctionDark dark:bg-FunctionDark/15" title="Function">f</div></div>
+Functions</h2></div><div class="namespaceSection"><div id="namespace_parse" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-Function bg-Function/15 dark:text-FunctionDark dark:bg-FunctionDark/15" title="Function">f</div></div>
 <div class="namespaceItemContent">
-		    <a href=".&#x2F;.&#x2F;.&#x2F;~&#x2F;parseMac.html" title="parseMac">
-			    <span>parseMac</span><span>(<span><span>mac<span>: <span class="td-kw">string</span></span></span></span>)<span>: <span class="td-ref">Uint8Array</span></span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Parses a canonical EUI-48 MAC address string into its 6-byte binary form.</p>
+		    <a href=".&#x2F;.&#x2F;.&#x2F;~&#x2F;parse.html" title="parse">
+			    <span>parse</span><span>(<span><span>mac<span>: <span class="td-kw">string</span></span></span></span>)<span>: <span class="td-ref">Uint8Array</span></span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Parses a canonical EUI-48 MAC address string into its 6-byte binary form.</p>
 </div></div></div>
-    </div><div id="namespace_stringifymac" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-Function bg-Function/15 dark:text-FunctionDark dark:bg-FunctionDark/15" title="Function">f</div></div>
+    </div><div id="namespace_stringify" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-Function bg-Function/15 dark:text-FunctionDark dark:bg-FunctionDark/15" title="Function">f</div></div>
 <div class="namespaceItemContent">
-		    <a href=".&#x2F;.&#x2F;.&#x2F;~&#x2F;stringifyMac.html" title="stringifyMac">
-			    <span>stringifyMac</span><span>(<div class="ml-4"><div><span>bytes<span>: <span class="td-ref">Uint8Array</span></span></span>,</div><div><span>delimiter<span class="td-op">?</span><span>: <span><span class="td-str">":"</span><span class="td-op"> | </span><span class="td-str">"-"</span></span></span></span></div></div>)<span>: <span class="td-kw">string</span></span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Formats a 6-byte EUI-48 MAC address as a lowercase hex string.</p>
+		    <a href=".&#x2F;.&#x2F;.&#x2F;~&#x2F;stringify.html" title="stringify">
+			    <span>stringify</span><span>(<div class="ml-4"><div><span>bytes<span>: <span class="td-ref">Uint8Array</span></span></span>,</div><div><span>delimiter<span class="td-op">?</span><span>: <span><span class="td-str">":"</span><span class="td-op"> | </span><span class="td-str">"-"</span></span></span></span></div></div>)<span>: <span class="td-kw">string</span></span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Formats a 6-byte EUI-48 MAC address as a lowercase hex string.</p>
 </div></div></div>
     </div></div>
 </section>

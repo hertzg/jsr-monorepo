@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>parseMac - default - @hertzg&#x2F;mac documentation</title>
+  <title>parse - default - @hertzg&#x2F;mac documentation</title>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="doc-current-file" content=".">
@@ -48,7 +48,7 @@
 </svg>
 </span>
 
-    <ul><li>parseMac</li></ul></ul>
+    <ul><li>parse</li></ul></ul>
 </div>
 
     <div class="flex items-center gap-2">
@@ -112,11 +112,11 @@
     </div>
   </div>
 </nav>
-<div id="searchResults"></div><div id="content"><main class="symbolGroup" id="symbol_parseMac"><article>
+<div id="searchResults"></div><div id="content"><main class="symbolGroup" id="symbol_parse"><article>
       <div class="symbolTitle">
         <div>
           <div class="text-2xl leading-none break-all">
-            <span class="text-Function">function</span>&nbsp;<span class="font-bold">parseMac</span>
+            <span class="text-Function">function</span>&nbsp;<span class="font-bold">parse</span>
           </div></div><a
   class="sourceButton"
   href="file:&#x2F;&#x2F;&#x2F;home&#x2F;runner&#x2F;work&#x2F;jsr-monorepo&#x2F;jsr-monorepo&#x2F;packages&#x2F;mac&#x2F;mod.ts"><svg
@@ -142,8 +142,8 @@
   />
 </svg>
 </a>
-</div><div><div class="mt-3 space-y-8"><div class="scroll-mt-16" id="function_parsemac_0">
-      <code class="anchorable text-base break-words"><a href="#function_parsemac_0" class="anchor" aria-label="Anchor" tabIndex="-1"><svg
+</div><div><div class="mt-3 space-y-8"><div class="scroll-mt-16" id="function_parse_0">
+      <code class="anchorable text-base break-words"><a href="#function_parse_0" class="anchor" aria-label="Anchor" tabIndex="-1"><svg
   width="16"
   height="16"
   viewBox="0 0 14 14"
@@ -165,7 +165,7 @@
   </defs>
 </svg>
 </a>
-<span class="font-bold">parseMac</span><span class="font-medium">(<span><span>mac<span>: <span class="td-kw">string</span></span></span></span>)<span>: <a href="https://deno.land/api@v2.7.14?s=Uint8Array" class="link td-ref">Uint8Array</a></span> </span>
+<span class="font-bold">parse</span><span class="font-medium">(<span><span>mac<span>: <span class="td-kw">string</span></span></span></span>)<span>: <a href="https://deno.land/api@v2.7.14?s=Uint8Array" class="link td-ref">Uint8Array</a></span> </span>
       </code><div class="space-y-7" id=""><div class="markdown"><p>Parses a canonical EUI-48 MAC address string into its 6-byte binary form.</p>
 <p>Accepts colon (<code>aa:bb:cc:dd:ee:ff</code>) or hyphen (<code>aa-bb-cc-dd-ee-ff</code>)
 delimiters. Hex digits are case-insensitive. Each octet must be exactly two
@@ -218,17 +218,17 @@ Examples</h2></div><div class="space-y-8"><div class="anchorable"><a href="#exam
 <h3 class="example-header"><div class="markdown"><p>Colon-delimited</p>
 </div></h3>
   <div><div class="markdown"><pre class="highlight"><code class="language-ts">import { assertEquals } from &quot;@std/assert&quot;;
-import { parseMac } from &quot;@hertzg/mac&quot;;
+import { parse } from &quot;@hertzg/mac&quot;;
 
 assertEquals(
-  parseMac(&quot;00:11:22:33:44:55&quot;),
+  parse(&quot;00:11:22:33:44:55&quot;),
   new Uint8Array([0x00, 0x11, 0x22, 0x33, 0x44, 0x55]),
 );
 </code><button class="copyButton" data-copy="import { assertEquals } from &quot;@std/assert&quot;;
-import { parseMac } from &quot;@hertzg/mac&quot;;
+import { parse } from &quot;@hertzg/mac&quot;;
 
 assertEquals(
-  parseMac(&quot;00:11:22:33:44:55&quot;),
+  parse(&quot;00:11:22:33:44:55&quot;),
   new Uint8Array([0x00, 0x11, 0x22, 0x33, 0x44, 0x55]),
 );
 "><svg
@@ -289,17 +289,17 @@ assertEquals(
 <h3 class="example-header"><div class="markdown"><p>Hyphen-delimited (IEEE form)</p>
 </div></h3>
   <div><div class="markdown"><pre class="highlight"><code class="language-ts">import { assertEquals } from &quot;@std/assert&quot;;
-import { parseMac } from &quot;@hertzg/mac&quot;;
+import { parse } from &quot;@hertzg/mac&quot;;
 
 assertEquals(
-  parseMac(&quot;AA-BB-CC-DD-EE-FF&quot;),
+  parse(&quot;AA-BB-CC-DD-EE-FF&quot;),
   new Uint8Array([0xaa, 0xbb, 0xcc, 0xdd, 0xee, 0xff]),
 );
 </code><button class="copyButton" data-copy="import { assertEquals } from &quot;@std/assert&quot;;
-import { parseMac } from &quot;@hertzg/mac&quot;;
+import { parse } from &quot;@hertzg/mac&quot;;
 
 assertEquals(
-  parseMac(&quot;AA-BB-CC-DD-EE-FF&quot;),
+  parse(&quot;AA-BB-CC-DD-EE-FF&quot;),
   new Uint8Array([0xaa, 0xbb, 0xcc, 0xdd, 0xee, 0xff]),
 );
 "><svg
@@ -360,21 +360,21 @@ assertEquals(
 <h3 class="example-header"><div class="markdown"><p>Rejects malformed input</p>
 </div></h3>
   <div><div class="markdown"><pre class="highlight"><code class="language-ts">import { assertThrows } from &quot;@std/assert&quot;;
-import { parseMac } from &quot;@hertzg/mac&quot;;
+import { parse } from &quot;@hertzg/mac&quot;;
 
-assertThrows(() =&gt; parseMac(&quot;aa:bb:cc:dd:ee&quot;), TypeError);
-assertThrows(() =&gt; parseMac(&quot;aa:bb:cc:dd:ee:ff:00&quot;), TypeError);
-assertThrows(() =&gt; parseMac(&quot;aa:bb:cc:dd:ee:gg&quot;), TypeError);
-assertThrows(() =&gt; parseMac(&quot;aabbccddeeff&quot;), TypeError);
-assertThrows(() =&gt; parseMac(&quot;a:bb:cc:dd:ee:ff&quot;), TypeError);
+assertThrows(() =&gt; parse(&quot;aa:bb:cc:dd:ee&quot;), TypeError);
+assertThrows(() =&gt; parse(&quot;aa:bb:cc:dd:ee:ff:00&quot;), TypeError);
+assertThrows(() =&gt; parse(&quot;aa:bb:cc:dd:ee:gg&quot;), TypeError);
+assertThrows(() =&gt; parse(&quot;aabbccddeeff&quot;), TypeError);
+assertThrows(() =&gt; parse(&quot;a:bb:cc:dd:ee:ff&quot;), TypeError);
 </code><button class="copyButton" data-copy="import { assertThrows } from &quot;@std/assert&quot;;
-import { parseMac } from &quot;@hertzg/mac&quot;;
+import { parse } from &quot;@hertzg/mac&quot;;
 
-assertThrows(() =&gt; parseMac(&quot;aa:bb:cc:dd:ee&quot;), TypeError);
-assertThrows(() =&gt; parseMac(&quot;aa:bb:cc:dd:ee:ff:00&quot;), TypeError);
-assertThrows(() =&gt; parseMac(&quot;aa:bb:cc:dd:ee:gg&quot;), TypeError);
-assertThrows(() =&gt; parseMac(&quot;aabbccddeeff&quot;), TypeError);
-assertThrows(() =&gt; parseMac(&quot;a:bb:cc:dd:ee:ff&quot;), TypeError);
+assertThrows(() =&gt; parse(&quot;aa:bb:cc:dd:ee&quot;), TypeError);
+assertThrows(() =&gt; parse(&quot;aa:bb:cc:dd:ee:ff:00&quot;), TypeError);
+assertThrows(() =&gt; parse(&quot;aa:bb:cc:dd:ee:gg&quot;), TypeError);
+assertThrows(() =&gt; parse(&quot;aabbccddeeff&quot;), TypeError);
+assertThrows(() =&gt; parse(&quot;a:bb:cc:dd:ee:ff&quot;), TypeError);
 "><svg
   class="copy"
   width="15"
@@ -432,10 +432,10 @@ assertThrows(() =&gt; parseMac(&quot;a:bb:cc:dd:ee:ff&quot;), TypeError);
   </defs>
 </svg>
 </a>
-Parameters</h2></div><div class="space-y-8"><div class="anchorable docEntry" id="function_parsemac_0_parameter_mac">
+Parameters</h2></div><div class="space-y-8"><div class="anchorable docEntry" id="function_parse_0_parameter_mac">
 
   <div class="docEntryHeader">
-    <div><code><a href="#function_parsemac_0_parameter_mac" class="anchor" aria-label="Anchor" tabIndex="-1"><svg
+    <div><code><a href="#function_parse_0_parameter_mac" class="anchor" aria-label="Anchor" tabIndex="-1"><svg
   width="16"
   height="16"
   viewBox="0 0 14 14"
@@ -510,7 +510,7 @@ Parameters</h2></div><div class="space-y-8"><div class="anchorable docEntry" id=
   </defs>
 </svg>
 </a>
-Return Type</h2></div><div class="space-y-8"><div class=" docEntry" id="function_parsemac_0_return">
+Return Type</h2></div><div class="space-y-8"><div class=" docEntry" id="function_parse_0_return">
 
   <div class="docEntryHeader">
     <div><code><span class="font-medium text-stone-500 dark:text-stone-200"><a href="https://deno.land/api@v2.7.14?s=Uint8Array" class="link td-ref">Uint8Array</a></span>
@@ -566,7 +566,7 @@ Return Type</h2></div><div class="space-y-8"><div class=" docEntry" id="function
   </defs>
 </svg>
 </a>
-Throws</h2></div><div class="space-y-8"><div class=" docEntry" id="function_parsemac_0_throws_0">
+Throws</h2></div><div class="space-y-8"><div class=" docEntry" id="function_parse_0_throws_0">
 
   <div class="docEntryHeader">
     <div><code><span class="font-medium text-stone-500 dark:text-stone-200">TypeError</span>
@@ -606,8 +606,8 @@ an octet is not exactly two hex characters, or any character is not hex.</p>
     </article></main>
 <div class="toc">
     <div><div class="usageContent">
-    <h3>Usage</h3><div class="markdown"><pre class="highlight"><code class="language-typescript">import { parseMac } from &quot;.&quot;;
-</code><button class="copyButton" data-copy="import { parseMac } from &quot;.&quot;;
+    <h3>Usage</h3><div class="markdown"><pre class="highlight"><code class="language-typescript">import { parse } from &quot;.&quot;;
+</code><button class="copyButton" data-copy="import { parse } from &quot;.&quot;;
 "><svg
   class="copy"
   width="15"
@@ -640,7 +640,7 @@ an octet is not exactly two hex characters, or any character is not hex.</p>
 </svg>
 </button><code></code></pre>
 </div></div><nav class="documentNavigation">
-          <h3>Document Navigation</h3><ul><li><a href="#examples" title="Examples">Examples</a></li><li><ul><li><a href="#example_0" title="Colon-delimited">Colon-delimited</a></li><li><a href="#example_1" title="Hyphen-delimited (IEEE form)">Hyphen-delimited (IEEE form)</a></li><li><a href="#example_2" title="Rejects malformed input">Rejects malformed input</a></li></ul></li><li><a href="#parameters" title="Parameters">Parameters</a></li><li><ul><li><a href="#function_parsemac_0_parameter_mac" title="mac">mac</a></li></ul></li><li><a href="#return-type" title="Return Type">Return Type</a></li><li><a href="#throws" title="Throws">Throws</a></li></ul></nav></div>
+          <h3>Document Navigation</h3><ul><li><a href="#examples" title="Examples">Examples</a></li><li><ul><li><a href="#example_0" title="Colon-delimited">Colon-delimited</a></li><li><a href="#example_1" title="Hyphen-delimited (IEEE form)">Hyphen-delimited (IEEE form)</a></li><li><a href="#example_2" title="Rejects malformed input">Rejects malformed input</a></li></ul></li><li><a href="#parameters" title="Parameters">Parameters</a></li><li><ul><li><a href="#function_parse_0_parameter_mac" title="mac">mac</a></li></ul></li><li><a href="#return-type" title="Return Type">Return Type</a></li><li><a href="#throws" title="Throws">Throws</a></li></ul></nav></div>
   </div></div>
 </div>
 </div>

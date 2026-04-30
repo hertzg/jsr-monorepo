@@ -88,6 +88,54 @@
 <p>Sister package to <a href="https://jsr.io/@hertzg/ip">@hertzg/ip</a> — same shape,
 single concern: convert between the canonical 17-character text form
 (<code>aa:bb:cc:dd:ee:ff</code> or <code>AA-BB-CC-DD-EE-FF</code>) and the 6-byte binary form.</p>
+<p>The functions are intentionally named <a href="././~/parse.html">parse</a> and <a href="././~/stringify.html">stringify</a>
+(not <code>parseMac</code>/<code>stringifyMac</code>) so callers can pick a name that fits the
+surrounding code:</p>
+<pre class="highlight"><code class="language-ts">// namespace import — short call sites
+import * as mac from &quot;@hertzg/mac&quot;;
+mac.parse(&quot;aa:bb:cc:dd:ee:ff&quot;);
+
+// aliased named import — disambiguates when mixing with @hertzg/ip
+import { parse as parseMac, stringify as stringifyMac } from &quot;@hertzg/mac&quot;;
+parseMac(&quot;aa:bb:cc:dd:ee:ff&quot;);
+</code><button class="copyButton" data-copy="// namespace import — short call sites
+import * as mac from &quot;@hertzg/mac&quot;;
+mac.parse(&quot;aa:bb:cc:dd:ee:ff&quot;);
+
+// aliased named import — disambiguates when mixing with @hertzg/ip
+import { parse as parseMac, stringify as stringifyMac } from &quot;@hertzg/mac&quot;;
+parseMac(&quot;aa:bb:cc:dd:ee:ff&quot;);
+"><svg
+  class="copy"
+  width="15"
+  height="15"
+  viewBox="0 0 15 15"
+  fill="none"
+  xmlns="http://www.w3.org/2000/svg"
+>
+  <rect x="2" y="2" width="7" height="7" fill="none" />
+  <rect x="6" y="6" width="7" height="7" fill="none" />
+  <path
+    d="M1.55566 2.7C1.55566 2.03726 2.09292 1.5 2.75566 1.5H8.75566C9.41841 1.5 9.95566 2.03726 9.95566 2.7V5.1H12.3557C13.0184 5.1 13.5557 5.63726 13.5557 6.3V12.3C13.5557 12.9627 13.0184 13.5 12.3557 13.5H6.35566C5.69292 13.5 5.15566 12.9627 5.15566 12.3V9.9H2.75566C2.09292 9.9 1.55566 9.36274 1.55566 8.7V2.7ZM6.35566 9.9V12.3H12.3557V6.3H9.95566V8.7C9.95566 9.36274 9.41841 9.9 8.75566 9.9H6.35566ZM8.75566 8.7V2.7H2.75566V8.7H8.75566Z"
+    fill="currentColor"
+  />
+</svg>
+<svg
+  class="check"
+  width="15"
+  height="15"
+  viewBox="0 0 24 24"
+  stroke-width="2"
+  stroke="currentColor"
+  fill="none"
+  stroke-linecap="round"
+  stroke-linejoin="round"
+  xmlns="http://www.w3.org/2000/svg"
+>
+  <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+  <path d="M5 12l5 5l10 -10" />
+</svg>
+</button><code></code></pre>
 </div><section class="section"  id="examples"><div>
       <h2 class="anchorable mb-1"><a href="#examples" class="anchor" aria-label="Anchor" tabIndex="-1"><svg
   width="16"
@@ -136,17 +184,17 @@ Examples</h2></div><div class="space-y-8"><div class="anchorable"><a href="#exam
 <h3 class="example-header"><div class="markdown"><p>Round-trip</p>
 </div></h3>
   <div><div class="markdown"><pre class="highlight"><code class="language-ts">import { assertEquals } from &quot;@std/assert&quot;;
-import { parseMac, stringifyMac } from &quot;@hertzg/mac&quot;;
+import { parse, stringify } from &quot;@hertzg/mac&quot;;
 
-const bytes = parseMac(&quot;AA:BB:CC:DD:EE:FF&quot;);
+const bytes = parse(&quot;AA:BB:CC:DD:EE:FF&quot;);
 assertEquals(bytes, new Uint8Array([0xaa, 0xbb, 0xcc, 0xdd, 0xee, 0xff]));
-assertEquals(stringifyMac(bytes), &quot;aa:bb:cc:dd:ee:ff&quot;);
+assertEquals(stringify(bytes), &quot;aa:bb:cc:dd:ee:ff&quot;);
 </code><button class="copyButton" data-copy="import { assertEquals } from &quot;@std/assert&quot;;
-import { parseMac, stringifyMac } from &quot;@hertzg/mac&quot;;
+import { parse, stringify } from &quot;@hertzg/mac&quot;;
 
-const bytes = parseMac(&quot;AA:BB:CC:DD:EE:FF&quot;);
+const bytes = parse(&quot;AA:BB:CC:DD:EE:FF&quot;);
 assertEquals(bytes, new Uint8Array([0xaa, 0xbb, 0xcc, 0xdd, 0xee, 0xff]));
-assertEquals(stringifyMac(bytes), &quot;aa:bb:cc:dd:ee:ff&quot;);
+assertEquals(stringify(bytes), &quot;aa:bb:cc:dd:ee:ff&quot;);
 "><svg
   class="copy"
   width="15"
@@ -194,15 +242,15 @@ assertEquals(stringifyMac(bytes), &quot;aa:bb:cc:dd:ee:ff&quot;);
                   </span>
                 </a>
               </li><li>
-                <a href=".&#x2F;.&#x2F;~&#x2F;parseMac.html" title="parseMac"><div class="docNodeKindIcon"><div class="text-Function bg-Function/15 dark:text-FunctionDark dark:bg-FunctionDark/15" title="Function">f</div></div>
+                <a href=".&#x2F;.&#x2F;~&#x2F;parse.html" title="parse"><div class="docNodeKindIcon"><div class="text-Function bg-Function/15 dark:text-FunctionDark dark:bg-FunctionDark/15" title="Function">f</div></div>
 <span class="hover:bg-Function/15 hover:bg-FunctionDark/15">
-                    parseMac
+                    parse
                   </span>
                 </a>
               </li><li>
-                <a href=".&#x2F;.&#x2F;~&#x2F;stringifyMac.html" title="stringifyMac"><div class="docNodeKindIcon"><div class="text-Function bg-Function/15 dark:text-FunctionDark dark:bg-FunctionDark/15" title="Function">f</div></div>
+                <a href=".&#x2F;.&#x2F;~&#x2F;stringify.html" title="stringify"><div class="docNodeKindIcon"><div class="text-Function bg-Function/15 dark:text-FunctionDark dark:bg-FunctionDark/15" title="Function">f</div></div>
 <span class="hover:bg-Function/15 hover:bg-FunctionDark/15">
-                    stringifyMac
+                    stringify
                   </span>
                 </a>
               </li></ul></nav><nav class="documentNavigation">

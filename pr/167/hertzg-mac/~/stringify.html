@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>stringifyMac - default - @hertzg&#x2F;mac documentation</title>
+  <title>stringify - default - @hertzg&#x2F;mac documentation</title>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="doc-current-file" content=".">
@@ -48,7 +48,7 @@
 </svg>
 </span>
 
-    <ul><li>stringifyMac</li></ul></ul>
+    <ul><li>stringify</li></ul></ul>
 </div>
 
     <div class="flex items-center gap-2">
@@ -112,11 +112,11 @@
     </div>
   </div>
 </nav>
-<div id="searchResults"></div><div id="content"><main class="symbolGroup" id="symbol_stringifyMac"><article>
+<div id="searchResults"></div><div id="content"><main class="symbolGroup" id="symbol_stringify"><article>
       <div class="symbolTitle">
         <div>
           <div class="text-2xl leading-none break-all">
-            <span class="text-Function">function</span>&nbsp;<span class="font-bold">stringifyMac</span>
+            <span class="text-Function">function</span>&nbsp;<span class="font-bold">stringify</span>
           </div></div><a
   class="sourceButton"
   href="file:&#x2F;&#x2F;&#x2F;home&#x2F;runner&#x2F;work&#x2F;jsr-monorepo&#x2F;jsr-monorepo&#x2F;packages&#x2F;mac&#x2F;mod.ts"><svg
@@ -142,8 +142,8 @@
   />
 </svg>
 </a>
-</div><div><div class="mt-3 space-y-8"><div class="scroll-mt-16" id="function_stringifymac_0">
-      <code class="anchorable text-base break-words"><a href="#function_stringifymac_0" class="anchor" aria-label="Anchor" tabIndex="-1"><svg
+</div><div><div class="mt-3 space-y-8"><div class="scroll-mt-16" id="function_stringify_0">
+      <code class="anchorable text-base break-words"><a href="#function_stringify_0" class="anchor" aria-label="Anchor" tabIndex="-1"><svg
   width="16"
   height="16"
   viewBox="0 0 14 14"
@@ -165,7 +165,7 @@
   </defs>
 </svg>
 </a>
-<span class="font-bold">stringifyMac</span><span class="font-medium">(<div class="ml-4"><div><span>bytes<span>: <a href="https://deno.land/api@v2.7.14?s=Uint8Array" class="link td-ref">Uint8Array</a></span></span>,</div><div><span>delimiter<span class="td-op">?</span><span>: <span><span class="td-str">":"</span><span class="td-op"> | </span><span class="td-str">"-"</span></span></span></span></div></div>)<span>: <span class="td-kw">string</span></span> </span>
+<span class="font-bold">stringify</span><span class="font-medium">(<div class="ml-4"><div><span>bytes<span>: <a href="https://deno.land/api@v2.7.14?s=Uint8Array" class="link td-ref">Uint8Array</a></span></span>,</div><div><span>delimiter<span class="td-op">?</span><span>: <span><span class="td-str">":"</span><span class="td-op"> | </span><span class="td-str">"-"</span></span></span></span></div></div>)<span>: <span class="td-kw">string</span></span> </span>
       </code><div class="space-y-7" id=""><div class="markdown"><p>Formats a 6-byte EUI-48 MAC address as a lowercase hex string.</p>
 <p>Produces the canonical colon-delimited form (<code>aa:bb:cc:dd:ee:ff</code>) by
 default. Pass <code>&quot;-&quot;</code> for the hyphenated IEEE form.</p>
@@ -217,17 +217,17 @@ Examples</h2></div><div class="space-y-8"><div class="anchorable"><a href="#exam
 <h3 class="example-header"><div class="markdown"><p>Default (colon)</p>
 </div></h3>
   <div><div class="markdown"><pre class="highlight"><code class="language-ts">import { assertEquals } from &quot;@std/assert&quot;;
-import { stringifyMac } from &quot;@hertzg/mac&quot;;
+import { stringify } from &quot;@hertzg/mac&quot;;
 
 assertEquals(
-  stringifyMac(new Uint8Array([0xaa, 0xbb, 0xcc, 0xdd, 0xee, 0xff])),
+  stringify(new Uint8Array([0xaa, 0xbb, 0xcc, 0xdd, 0xee, 0xff])),
   &quot;aa:bb:cc:dd:ee:ff&quot;,
 );
 </code><button class="copyButton" data-copy="import { assertEquals } from &quot;@std/assert&quot;;
-import { stringifyMac } from &quot;@hertzg/mac&quot;;
+import { stringify } from &quot;@hertzg/mac&quot;;
 
 assertEquals(
-  stringifyMac(new Uint8Array([0xaa, 0xbb, 0xcc, 0xdd, 0xee, 0xff])),
+  stringify(new Uint8Array([0xaa, 0xbb, 0xcc, 0xdd, 0xee, 0xff])),
   &quot;aa:bb:cc:dd:ee:ff&quot;,
 );
 "><svg
@@ -288,17 +288,17 @@ assertEquals(
 <h3 class="example-header"><div class="markdown"><p>Hyphen</p>
 </div></h3>
   <div><div class="markdown"><pre class="highlight"><code class="language-ts">import { assertEquals } from &quot;@std/assert&quot;;
-import { stringifyMac } from &quot;@hertzg/mac&quot;;
+import { stringify } from &quot;@hertzg/mac&quot;;
 
 assertEquals(
-  stringifyMac(new Uint8Array([0x00, 0x11, 0x22, 0x33, 0x44, 0x55]), &quot;-&quot;),
+  stringify(new Uint8Array([0x00, 0x11, 0x22, 0x33, 0x44, 0x55]), &quot;-&quot;),
   &quot;00-11-22-33-44-55&quot;,
 );
 </code><button class="copyButton" data-copy="import { assertEquals } from &quot;@std/assert&quot;;
-import { stringifyMac } from &quot;@hertzg/mac&quot;;
+import { stringify } from &quot;@hertzg/mac&quot;;
 
 assertEquals(
-  stringifyMac(new Uint8Array([0x00, 0x11, 0x22, 0x33, 0x44, 0x55]), &quot;-&quot;),
+  stringify(new Uint8Array([0x00, 0x11, 0x22, 0x33, 0x44, 0x55]), &quot;-&quot;),
   &quot;00-11-22-33-44-55&quot;,
 );
 "><svg
@@ -358,10 +358,10 @@ assertEquals(
   </defs>
 </svg>
 </a>
-Parameters</h2></div><div class="space-y-8"><div class="anchorable docEntry" id="function_stringifymac_0_parameter_bytes">
+Parameters</h2></div><div class="space-y-8"><div class="anchorable docEntry" id="function_stringify_0_parameter_bytes">
 
   <div class="docEntryHeader">
-    <div><code><a href="#function_stringifymac_0_parameter_bytes" class="anchor" aria-label="Anchor" tabIndex="-1"><svg
+    <div><code><a href="#function_stringify_0_parameter_bytes" class="anchor" aria-label="Anchor" tabIndex="-1"><svg
   width="16"
   height="16"
   viewBox="0 0 14 14"
@@ -412,11 +412,11 @@ Parameters</h2></div><div class="space-y-8"><div class="anchorable docEntry" id=
 </a>
 </div><div class="max-w-[75ch]"><div class="markdown"><p>6-byte MAC address.</p>
 </div></div></div>
-<div class="anchorable docEntry" id="function_stringifymac_0_parameter_delimiter">
+<div class="anchorable docEntry" id="function_stringify_0_parameter_delimiter">
 
   <div class="docEntryHeader">
     <div><div class="space-x-1 mb-1"><div class="text-optional border border-optional/50 bg-optional/5 inline-flex items-center gap-0.5 *:flex-none rounded-md leading-none text-sm py-1 px-2">optional</div>
-</div><code><a href="#function_stringifymac_0_parameter_delimiter" class="anchor" aria-label="Anchor" tabIndex="-1"><svg
+</div><code><a href="#function_stringify_0_parameter_delimiter" class="anchor" aria-label="Anchor" tabIndex="-1"><svg
   width="16"
   height="16"
   viewBox="0 0 14 14"
@@ -491,7 +491,7 @@ Parameters</h2></div><div class="space-y-8"><div class="anchorable docEntry" id=
   </defs>
 </svg>
 </a>
-Return Type</h2></div><div class="space-y-8"><div class=" docEntry" id="function_stringifymac_0_return">
+Return Type</h2></div><div class="space-y-8"><div class=" docEntry" id="function_stringify_0_return">
 
   <div class="docEntryHeader">
     <div><code><span class="font-medium text-stone-500 dark:text-stone-200"><span class="td-kw">string</span></span>
@@ -547,7 +547,7 @@ Return Type</h2></div><div class="space-y-8"><div class=" docEntry" id="function
   </defs>
 </svg>
 </a>
-Throws</h2></div><div class="space-y-8"><div class=" docEntry" id="function_stringifymac_0_throws_0">
+Throws</h2></div><div class="space-y-8"><div class=" docEntry" id="function_stringify_0_throws_0">
 
   <div class="docEntryHeader">
     <div><code><span class="font-medium text-stone-500 dark:text-stone-200">TypeError</span>
@@ -586,8 +586,8 @@ Throws</h2></div><div class="space-y-8"><div class=" docEntry" id="function_stri
     </article></main>
 <div class="toc">
     <div><div class="usageContent">
-    <h3>Usage</h3><div class="markdown"><pre class="highlight"><code class="language-typescript">import { stringifyMac } from &quot;.&quot;;
-</code><button class="copyButton" data-copy="import { stringifyMac } from &quot;.&quot;;
+    <h3>Usage</h3><div class="markdown"><pre class="highlight"><code class="language-typescript">import { stringify } from &quot;.&quot;;
+</code><button class="copyButton" data-copy="import { stringify } from &quot;.&quot;;
 "><svg
   class="copy"
   width="15"
@@ -620,7 +620,7 @@ Throws</h2></div><div class="space-y-8"><div class=" docEntry" id="function_stri
 </svg>
 </button><code></code></pre>
 </div></div><nav class="documentNavigation">
-          <h3>Document Navigation</h3><ul><li><a href="#examples" title="Examples">Examples</a></li><li><ul><li><a href="#example_0" title="Default (colon)">Default (colon)</a></li><li><a href="#example_1" title="Hyphen">Hyphen</a></li></ul></li><li><a href="#parameters" title="Parameters">Parameters</a></li><li><ul><li><a href="#function_stringifymac_0_parameter_bytes" title="bytes">bytes</a></li><li><a href="#function_stringifymac_0_parameter_delimiter" title="delimiter">delimiter</a></li></ul></li><li><a href="#return-type" title="Return Type">Return Type</a></li><li><a href="#throws" title="Throws">Throws</a></li></ul></nav></div>
+          <h3>Document Navigation</h3><ul><li><a href="#examples" title="Examples">Examples</a></li><li><ul><li><a href="#example_0" title="Default (colon)">Default (colon)</a></li><li><a href="#example_1" title="Hyphen">Hyphen</a></li></ul></li><li><a href="#parameters" title="Parameters">Parameters</a></li><li><ul><li><a href="#function_stringify_0_parameter_bytes" title="bytes">bytes</a></li><li><a href="#function_stringify_0_parameter_delimiter" title="delimiter">delimiter</a></li></ul></li><li><a href="#return-type" title="Return Type">Return Type</a></li><li><a href="#throws" title="Throws">Throws</a></li></ul></nav></div>
   </div></div>
 </div>
 </div>

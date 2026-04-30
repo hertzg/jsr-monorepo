@@ -219,7 +219,7 @@ Examples</h2></div><div class="space-y-8"><div class="anchorable"><a href="#exam
 </div></h3>
   <div><div class="markdown"><pre class="highlight"><code class="language-ts">import { assertEquals } from &quot;@std/assert&quot;;
 import { parseIpv4 } from &quot;@hertzg/ip/ipv4&quot;;
-import { parseMac } from &quot;@hertzg/mac&quot;;
+import { parse as parseMac } from &quot;@hertzg/mac&quot;;
 import {
   ARP_ETHERNET_IPV4_SIZE,
   ARP_HARDWARE_TYPE,
@@ -252,7 +252,7 @@ assertEquals(bytesRead, ARP_ETHERNET_IPV4_SIZE);
 assertEquals(decoded, reply);
 </code><button class="copyButton" data-copy="import { assertEquals } from &quot;@std/assert&quot;;
 import { parseIpv4 } from &quot;@hertzg/ip/ipv4&quot;;
-import { parseMac } from &quot;@hertzg/mac&quot;;
+import { parse as parseMac } from &quot;@hertzg/mac&quot;;
 import {
   ARP_ETHERNET_IPV4_SIZE,
   ARP_HARDWARE_TYPE,
