@@ -81,6 +81,14 @@
         { "type": "json", "path": "deno.json", "jsonpath": "$.version" }
       ]
     },
+    "packages/binstruct-pcap": {
+      "release-type": "simple",
+      "package-name": "@binstruct/pcap",
+      "component": "@binstruct/pcap",
+      "extra-files": [
+        { "type": "json", "path": "deno.json", "jsonpath": "$.version" }
+      ]
+    },
     "packages/wg-keys": {
       "release-type": "simple",
       "package-name": "@hertzg/wg-keys",

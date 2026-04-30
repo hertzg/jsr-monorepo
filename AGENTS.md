@@ -71,6 +71,7 @@ All packages are located in the `packages/` directory:
 - `packages/binstruct-png` - PNG file format support
 - `packages/binstruct-udp` - UDP datagram parsing (RFC 768)
 - `packages/binstruct-wav` - WAV audio file format support
+- `packages/binstruct-pcap` - libpcap (.pcap) capture file format support
 - `packages/wg-keys` - WireGuard key management
 - `packages/wg-ini` - INI file parsing
 - `packages/wg-conf` - WireGuard configuration handling
@@ -356,6 +357,7 @@ both tiresome and error-prone.
 - `@binstruct/png`
 - `@binstruct/udp`
 - `@binstruct/wav`
+- `@binstruct/pcap`
 - `@hertzg/wg-keys`
 - `@hertzg/wg-ini`
 - `@hertzg/wg-conf`
