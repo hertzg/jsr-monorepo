@@ -136,10 +136,10 @@ export const ipv4AddressCoder: () => Coder<string> = refine(u32be(), {
 /**
  * Creates a coder for IPv4 packet headers (RFC 791).
  *
- * The returned coder handles the 20-byte fixed header plus a variable-length
- * options trailer whose size is derived from `versionIhl.ihl`:
- * `(ihl - 5) * 4` bytes. With `ihl === 5` the options field is empty and the
- * encoded header is exactly 20 bytes.
+ * Handles the 20-byte fixed header plus a variable-length options trailer
+ * whose size is derived from `versionIhl.ihl`: `(ihl - 5) * 4` bytes. With
+ * `ihl === 5` the options field is empty and the encoded header is exactly
+ * 20 bytes.
  *
  * The header checksum is treated as an opaque field — callers are responsible
  * for computing and supplying a valid RFC 1071 sum before encoding.
@@ -188,39 +188,25 @@ export const ipv4AddressCoder: () => Coder<string> = refine(u32be(), {
  * assertEquals(Array.from(decoded.options), Array.from(optionBytes));
  * ```
  */
-/** Coder factory for the packed version (4 bits) + IHL (4 bits) byte. */
-export function ipv4VersionIhlCoder(): Coder<Ipv4VersionIhl> {
-  return bitStruct({ version: 4, ihl: 4 });
-}
-
-/** Coder factory for the packed flags (3 bits) + fragment-offset (13 bits) word. */
-export function ipv4FlagsFragmentOffsetCoder(): Coder<Ipv4FlagsFragmentOffset> {
-  return bitStruct({
-    reserved: 1,
-    dontFragment: 1,
-    moreFragments: 1,
-    fragmentOffset: 13,
-  });
-}
-
 export function ipv4Header(): Coder<Ipv4Header> {
-  const versionIhl = ipv4VersionIhlCoder();
-  const optionsLength = computedRef(
-    [ref(versionIhl)],
-    (vi) => (vi.ihl - 5) * 4,
-  );
+  const versionIhl = bitStruct({ version: 4, ihl: 4 });
 
   return struct({
     versionIhl,
     typeOfService: u8be(),
     totalLength: u16be(),
     identification: u16be(),
-    flagsFragmentOffset: ipv4FlagsFragmentOffsetCoder(),
+    flagsFragmentOffset: bitStruct({
+      reserved: 1,
+      dontFragment: 1,
+      moreFragments: 1,
+      fragmentOffset: 13,
+    }),
     timeToLive: u8be(),
     protocol: u8be(),
     headerChecksum: u16be(),
     sourceAddress: ipv4AddressCoder(),
     destinationAddress: ipv4AddressCoder(),
-    options: bytes(optionsLength),
+    options: bytes(computedRef([ref(versionIhl)], (vi) => (vi.ihl - 5) * 4)),
   });
 }

@@ -78,10 +78,7 @@ import {
   type Coder,
   computedRef,
   ref,
-  s32le,
   struct,
-  u16le,
-  u32le,
 } from "@hertzg/binstruct";
 import {
   type BitmapFileHeader,
@@ -89,21 +86,12 @@ import {
 } from "./file_header.ts";
 import {
   type BitmapInfoHeader,
-  bitmapBppCoder,
-  bitmapHeightCoder,
   bitmapInfoHeader,
-  bitmapWidthCoder,
   pixelDataSize,
 } from "./dib_header.ts";
 
 export type { BitmapFileHeader, BitmapInfoHeader };
-export {
-  bitmapBppCoder,
-  bitmapFileHeader,
-  bitmapHeightCoder,
-  bitmapInfoHeader,
-  bitmapWidthCoder,
-};
+export { bitmapFileHeader, bitmapInfoHeader };
 export { pixelDataSize, rowStride } from "./dib_header.ts";
 
 /**
@@ -181,33 +169,12 @@ export interface BmpFile {
  * ```
  */
 export function bmp(): Coder<BmpFile> {
-  // The dib struct is duplicated here (rather than reusing bitmapInfoHeader())
-  // so the width/height/bpp sub-coders are local refs available for the
-  // pixelData computedRef below.
-  const width = bitmapWidthCoder();
-  const height = bitmapHeightCoder();
-  const bpp = bitmapBppCoder();
-
+  const dib = bitmapInfoHeader();
   return struct({
     file: bitmapFileHeader(),
-    dib: struct({
-      size: u32le(),
-      width,
-      height,
-      planes: u16le(),
-      bpp,
-      compression: u32le(),
-      imageSize: u32le(),
-      xPixelsPerMeter: s32le(),
-      yPixelsPerMeter: s32le(),
-      colorsUsed: u32le(),
-      importantColors: u32le(),
-    }),
+    dib,
     pixelData: bytes(
-      computedRef(
-        [ref(width), ref(height), ref(bpp)],
-        (w, h, b) => pixelDataSize(w, h, b),
-      ),
+      computedRef([ref(dib)], (d) => pixelDataSize(d.width, d.height, d.bpp)),
     ),
   });
 }

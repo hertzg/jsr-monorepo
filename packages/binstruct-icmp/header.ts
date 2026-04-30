@@ -41,13 +41,9 @@ export interface IcmpPacket {
  * Creates a coder for a generic ICMPv4 packet.
  *
  * The coder reads/writes the 4-byte fixed header, the 4-byte type-specific
- * `restOfHeader`, and a payload of the given length. When `payloadLength` is
- * omitted the payload absorbs the rest of the buffer on decode (suitable for
- * tightly-sliced buffers); pass an explicit length or {@link ref} when the
- * boundary is known from an outer header (e.g. IP `totalLength`).
+ * `restOfHeader`, and a payload that absorbs the rest of the buffer on decode.
+ * For tighter framing, build your own struct with `bytes(...)` sized as needed.
  *
- * @param payloadLength Length of the payload in bytes, or a ref to one.
- *   Defaults to "rest of buffer".
  * @returns A coder for {@link IcmpPacket}.
  *
  * @example Round-trip an Echo Request via the generic coder

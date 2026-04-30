@@ -33,8 +33,8 @@ export interface IcmpEcho {
 /**
  * Creates a coder for ICMPv4 Echo Request / Echo Reply messages.
  *
- * @param payloadLength Length of the echo payload, or a ref to one. Defaults
- *   to "rest of buffer".
+ * Payload absorbs the rest of the buffer on decode.
+ *
  * @returns A coder for {@link IcmpEcho}.
  *
  * @example Round-trip an Echo Request
