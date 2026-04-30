@@ -80,7 +80,7 @@
  */
 
 import { bytes, struct, u16be } from "@hertzg/binstruct";
-import type { Coder, LengthOrRef } from "@hertzg/binstruct";
+import type { Coder } from "@hertzg/binstruct";
 
 /**
  * Ethernet II frame.
@@ -97,14 +97,18 @@ export interface Ethernet2Frame {
   payload: Uint8Array;
 }
 
+
 /**
  * Creates a coder for Ethernet II frames.
  *
  * Layout: 6-byte destination MAC, 6-byte source MAC, 2-byte EtherType
- * (big-endian), then variable-length payload. The payload's size on decode is
- * controlled by `lengthOrRefOfPayload`; pass `null`/omit for "rest of buffer".
+ * (big-endian), then variable-length payload (default: "rest of buffer").
  *
- * @param lengthOrRefOfPayload Length or `ref()` value for the payload field.
+ * Pass `parts` to override individual sub-coders — for example, hand in your
+ * own `bytes(N)` to fix the payload size, or your own `u16be()` for `etherType`
+ * so a composer can `ref()` it for protocol dispatch.
+ *
+ * @param parts Optional per-field sub-coder overrides.
  * @returns A `Coder<Ethernet2Frame>`.
  *
  * @example Basic encoding and decoding
@@ -131,13 +135,11 @@ export interface Ethernet2Frame {
  * assertEquals(decodedFrame.etherType, testFrame.etherType);
  * ```
  */
-export function ethernet2Frame(
-  lengthOrRefOfPayload?: LengthOrRef | null,
-): Coder<Ethernet2Frame> {
+export function ethernet2Frame(): Coder<Ethernet2Frame> {
   return struct({
     dstMac: bytes(6),
     srcMac: bytes(6),
     etherType: u16be(),
-    payload: bytes(lengthOrRefOfPayload),
+    payload: bytes(),
   });
 }
