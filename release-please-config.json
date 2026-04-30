@@ -9,6 +9,14 @@
         { "type": "json", "path": "deno.json", "jsonpath": "$.version" }
       ]
     },
+    "packages/binstruct-arp": {
+      "release-type": "simple",
+      "package-name": "@binstruct/arp",
+      "component": "@binstruct/arp",
+      "extra-files": [
+        { "type": "json", "path": "deno.json", "jsonpath": "$.version" }
+      ]
+    },
     "packages/binstruct-bmp": {
       "release-type": "simple",
       "package-name": "@binstruct/bmp",
