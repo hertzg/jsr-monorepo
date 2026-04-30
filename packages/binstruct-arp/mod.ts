@@ -7,14 +7,14 @@
  * are surfaced as 32-bit numbers.
  *
  * For human-readable conversion use the sister utility packages:
- * - {@link https://jsr.io/@hertzg/mac @hertzg/mac} — `parseMac` / `stringifyMac`
+ * - {@link https://jsr.io/@hertzg/mac @hertzg/mac} — `parse` / `stringify`
  * - {@link https://jsr.io/@hertzg/ip @hertzg/ip} — `parseIpv4` / `stringifyIpv4`
  *
  * @example Decode an Ethernet/IPv4 ARP request
  * ```ts
  * import { assertEquals } from "@std/assert";
  * import { stringifyIpv4 } from "@hertzg/ip/ipv4";
- * import { stringifyMac } from "@hertzg/mac";
+ * import { stringify as stringifyMac } from "@hertzg/mac";
  * import {
  *   ARP_HARDWARE_TYPE,
  *   ARP_OPCODE,
@@ -151,7 +151,7 @@ export interface ArpEthernetIpv4Packet {
  * ```ts
  * import { assertEquals } from "@std/assert";
  * import { parseIpv4 } from "@hertzg/ip/ipv4";
- * import { parseMac } from "@hertzg/mac";
+ * import { parse as parseMac } from "@hertzg/mac";
  * import {
  *   ARP_ETHERNET_IPV4_SIZE,
  *   ARP_HARDWARE_TYPE,

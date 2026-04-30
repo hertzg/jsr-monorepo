@@ -1,6 +1,6 @@
 import { assertEquals } from "@std/assert";
 import { refine } from "@hertzg/binstruct";
-import { parseMac, stringifyMac } from "@hertzg/mac";
+import { parse as parseMac, stringify as stringifyMac } from "@hertzg/mac";
 import { ethernet2Frame, type Ethernet2Frame } from "./mod.ts";
 
 const MAC_ADDRESS_LENGTH = 6;

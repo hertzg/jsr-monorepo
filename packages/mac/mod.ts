@@ -5,14 +5,28 @@
  * single concern: convert between the canonical 17-character text form
  * (`aa:bb:cc:dd:ee:ff` or `AA-BB-CC-DD-EE-FF`) and the 6-byte binary form.
  *
+ * The functions are intentionally named {@link parse} and {@link stringify}
+ * (not `parseMac`/`stringifyMac`) so callers can pick a name that fits the
+ * surrounding code:
+ *
+ * ```ts ignore
+ * // namespace import — short call sites
+ * import * as mac from "@hertzg/mac";
+ * mac.parse("aa:bb:cc:dd:ee:ff");
+ *
+ * // aliased named import — disambiguates when mixing with @hertzg/ip
+ * import { parse as parseMac, stringify as stringifyMac } from "@hertzg/mac";
+ * parseMac("aa:bb:cc:dd:ee:ff");
+ * ```
+ *
  * @example Round-trip
  * ```ts
  * import { assertEquals } from "@std/assert";
- * import { parseMac, stringifyMac } from "@hertzg/mac";
+ * import { parse, stringify } from "@hertzg/mac";
  *
- * const bytes = parseMac("AA:BB:CC:DD:EE:FF");
+ * const bytes = parse("AA:BB:CC:DD:EE:FF");
  * assertEquals(bytes, new Uint8Array([0xaa, 0xbb, 0xcc, 0xdd, 0xee, 0xff]));
- * assertEquals(stringifyMac(bytes), "aa:bb:cc:dd:ee:ff");
+ * assertEquals(stringify(bytes), "aa:bb:cc:dd:ee:ff");
  * ```
  *
  * @module @hertzg/mac
@@ -36,10 +50,10 @@ export const MAC_BYTE_LENGTH = 6;
  * @example Colon-delimited
  * ```ts
  * import { assertEquals } from "@std/assert";
- * import { parseMac } from "@hertzg/mac";
+ * import { parse } from "@hertzg/mac";
  *
  * assertEquals(
- *   parseMac("00:11:22:33:44:55"),
+ *   parse("00:11:22:33:44:55"),
  *   new Uint8Array([0x00, 0x11, 0x22, 0x33, 0x44, 0x55]),
  * );
  * ```
@@ -47,10 +61,10 @@ export const MAC_BYTE_LENGTH = 6;
  * @example Hyphen-delimited (IEEE form)
  * ```ts
  * import { assertEquals } from "@std/assert";
- * import { parseMac } from "@hertzg/mac";
+ * import { parse } from "@hertzg/mac";
  *
  * assertEquals(
- *   parseMac("AA-BB-CC-DD-EE-FF"),
+ *   parse("AA-BB-CC-DD-EE-FF"),
  *   new Uint8Array([0xaa, 0xbb, 0xcc, 0xdd, 0xee, 0xff]),
  * );
  * ```
@@ -58,16 +72,16 @@ export const MAC_BYTE_LENGTH = 6;
  * @example Rejects malformed input
  * ```ts
  * import { assertThrows } from "@std/assert";
- * import { parseMac } from "@hertzg/mac";
+ * import { parse } from "@hertzg/mac";
  *
- * assertThrows(() => parseMac("aa:bb:cc:dd:ee"), TypeError);
- * assertThrows(() => parseMac("aa:bb:cc:dd:ee:ff:00"), TypeError);
- * assertThrows(() => parseMac("aa:bb:cc:dd:ee:gg"), TypeError);
- * assertThrows(() => parseMac("aabbccddeeff"), TypeError);
- * assertThrows(() => parseMac("a:bb:cc:dd:ee:ff"), TypeError);
+ * assertThrows(() => parse("aa:bb:cc:dd:ee"), TypeError);
+ * assertThrows(() => parse("aa:bb:cc:dd:ee:ff:00"), TypeError);
+ * assertThrows(() => parse("aa:bb:cc:dd:ee:gg"), TypeError);
+ * assertThrows(() => parse("aabbccddeeff"), TypeError);
+ * assertThrows(() => parse("a:bb:cc:dd:ee:ff"), TypeError);
  * ```
  */
-export function parseMac(mac: string): Uint8Array {
+export function parse(mac: string): Uint8Array {
   const delimiter = mac.includes(":") ? ":" : "-";
   const parts = mac.split(delimiter);
 
@@ -108,10 +122,10 @@ export function parseMac(mac: string): Uint8Array {
  * @example Default (colon)
  * ```ts
  * import { assertEquals } from "@std/assert";
- * import { stringifyMac } from "@hertzg/mac";
+ * import { stringify } from "@hertzg/mac";
  *
  * assertEquals(
- *   stringifyMac(new Uint8Array([0xaa, 0xbb, 0xcc, 0xdd, 0xee, 0xff])),
+ *   stringify(new Uint8Array([0xaa, 0xbb, 0xcc, 0xdd, 0xee, 0xff])),
  *   "aa:bb:cc:dd:ee:ff",
  * );
  * ```
@@ -119,15 +133,15 @@ export function parseMac(mac: string): Uint8Array {
  * @example Hyphen
  * ```ts
  * import { assertEquals } from "@std/assert";
- * import { stringifyMac } from "@hertzg/mac";
+ * import { stringify } from "@hertzg/mac";
  *
  * assertEquals(
- *   stringifyMac(new Uint8Array([0x00, 0x11, 0x22, 0x33, 0x44, 0x55]), "-"),
+ *   stringify(new Uint8Array([0x00, 0x11, 0x22, 0x33, 0x44, 0x55]), "-"),
  *   "00-11-22-33-44-55",
  * );
  * ```
  */
-export function stringifyMac(
+export function stringify(
   bytes: Uint8Array,
   delimiter: ":" | "-" = ":",
 ): string {

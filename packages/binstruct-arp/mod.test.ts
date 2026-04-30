@@ -1,7 +1,7 @@
 import { assertEquals } from "@std/assert";
 import { refine } from "@hertzg/binstruct";
 import { parseIpv4, stringifyIpv4 } from "@hertzg/ip/ipv4";
-import { parseMac, stringifyMac } from "@hertzg/mac";
+import { parse as parseMac, stringify as stringifyMac } from "@hertzg/mac";
 import {
   ARP_ETHERNET_IPV4_SIZE,
   ARP_HARDWARE_TYPE,
