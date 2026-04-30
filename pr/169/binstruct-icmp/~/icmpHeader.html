@@ -168,10 +168,8 @@
 <span class="font-bold">icmpHeader</span><span class="font-medium">()<span>: <span class="td-ref">Coder</span>&lt;<a href="../././~/IcmpPacket.html" class="link td-ref">IcmpPacket</a>&gt;</span> </span>
       </code><div class="space-y-7" id=""><div class="markdown"><p>Creates a coder for a generic ICMPv4 packet.</p>
 <p>The coder reads/writes the 4-byte fixed header, the 4-byte type-specific
-<code>restOfHeader</code>, and a payload of the given length. When <code>payloadLength</code> is
-omitted the payload absorbs the rest of the buffer on decode (suitable for
-tightly-sliced buffers); pass an explicit length or ref when the
-boundary is known from an outer header (e.g. IP <code>totalLength</code>).</p>
+<code>restOfHeader</code>, and a payload that absorbs the rest of the buffer on decode.
+For tighter framing, build your own struct with <code>bytes(...)</code> sized as needed.</p>
 </div><section class="section"  id="examples"><div>
       <h2 class="anchorable mb-1"><a href="#examples" class="anchor" aria-label="Anchor" tabIndex="-1"><svg
   width="16"
