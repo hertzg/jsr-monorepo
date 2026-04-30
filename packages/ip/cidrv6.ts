@@ -268,12 +268,10 @@ export function cidrv6LastAddress(cidr: Cidrv6): bigint {
 }
 
 /**
- * Returns the total number of IP addresses in a CIDR block or for a given prefix length.
+ * Returns the total number of IP addresses in a CIDR block.
  *
  * For a /120 network, this returns 256n. For a /128, this returns 1n.
- *
- * **Warning**: IPv6 subnets can be enormous. A /64 has 2^64 addresses.
- * The result is a bigint to handle these large values.
+ * The result is a bigint because IPv6 subnets can hold up to 2^128 addresses.
  *
  * @param cidr The CIDR block
  * @returns The total number of addresses in the CIDR range as a bigint
@@ -288,28 +286,35 @@ export function cidrv6LastAddress(cidr: Cidrv6): bigint {
  * assertEquals(cidrv6Size(parseCidrv6("::1/128")), 1n);
  * assertEquals(cidrv6Size(parseCidrv6("::/64")), 18446744073709551616n);
  * ```
+ */
+export function cidrv6Size(cidr: Cidrv6): bigint;
+/**
+ * Returns the total number of IP addresses for a given prefix length.
+ *
+ * @param prefixLength The CIDR prefix length (0-128)
+ * @returns The total number of addresses as a bigint
+ * @throws {RangeError} If the prefix length is out of range (not 0-128)
  *
  * @example Getting CIDR size from prefix length
  * ```ts
- * import { assertEquals } from "@std/assert";
+ * import { assertEquals, assertThrows } from "@std/assert";
  * import { cidrv6Size } from "@hertzg/ip/cidrv6";
  *
  * assertEquals(cidrv6Size(120), 256n);
  * assertEquals(cidrv6Size(128), 1n);
  * assertEquals(cidrv6Size(64), 18446744073709551616n);
- * ```
- *
- * @example Error handling for invalid prefix length
- * ```ts
- * import { assertThrows } from "@std/assert";
- * import { cidrv6Size } from "@hertzg/ip/cidrv6";
  *
  * assertThrows(() => cidrv6Size(-1), RangeError);
  * assertThrows(() => cidrv6Size(129), RangeError);
  * ```
  */
-export function cidrv6Size(cidr: Cidrv6): bigint;
 export function cidrv6Size(prefixLength: number): bigint;
+/**
+ * Dispatcher overload for callers holding a `Cidrv6 | number`.
+ *
+ * @param cidrOrPrefixLength A Cidrv6 block or a prefix length (0-128)
+ * @returns The total number of addresses as a bigint
+ */
 export function cidrv6Size(cidrOrPrefixLength: Cidrv6 | number): bigint;
 export function cidrv6Size(cidrOrPrefixLength: Cidrv6 | number): bigint {
   const prefixLength = typeof cidrOrPrefixLength === "number"

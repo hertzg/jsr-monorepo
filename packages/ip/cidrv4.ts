@@ -303,7 +303,7 @@ export const cidrv4BroadcastAddress: typeof cidrv4LastAddress =
   cidrv4LastAddress;
 
 /**
- * Returns the total number of IP addresses in a CIDR block or for a given prefix length.
+ * Returns the total number of IP addresses in a CIDR block.
  *
  * For a /24 network, this returns 256. For a /32, this returns 1.
  *
@@ -320,29 +320,36 @@ export const cidrv4BroadcastAddress: typeof cidrv4LastAddress =
  * assertEquals(cidrv4Size(parseCidrv4("192.168.1.1/32")), 1);
  * assertEquals(cidrv4Size(parseCidrv4("0.0.0.0/0")), 4294967296);
  * ```
+ */
+export function cidrv4Size(cidr: Cidrv4): number;
+/**
+ * Returns the total number of IP addresses for a given prefix length.
+ *
+ * @param prefixLength The CIDR prefix length (0-32)
+ * @returns The total number of addresses
+ * @throws {RangeError} If the prefix length is out of range (not 0-32)
  *
  * @example Getting CIDR size from prefix length
  * ```ts
- * import { assertEquals } from "@std/assert";
+ * import { assertEquals, assertThrows } from "@std/assert";
  * import { cidrv4Size } from "@hertzg/ip/cidrv4";
  *
  * assertEquals(cidrv4Size(24), 256);
  * assertEquals(cidrv4Size(8), 16777216);
  * assertEquals(cidrv4Size(32), 1);
  * assertEquals(cidrv4Size(0), 4294967296);
- * ```
- *
- * @example Error handling for invalid prefix length
- * ```ts
- * import { assertThrows } from "@std/assert";
- * import { cidrv4Size } from "@hertzg/ip/cidrv4";
  *
  * assertThrows(() => cidrv4Size(-1), RangeError);
  * assertThrows(() => cidrv4Size(33), RangeError);
  * ```
  */
-export function cidrv4Size(cidr: Cidrv4): number;
 export function cidrv4Size(prefixLength: number): number;
+/**
+ * Dispatcher overload for callers holding a `Cidrv4 | number`.
+ *
+ * @param cidrOrPrefixLength A Cidrv4 block or a prefix length (0-32)
+ * @returns The total number of addresses
+ */
 export function cidrv4Size(cidrOrPrefixLength: Cidrv4 | number): number;
 export function cidrv4Size(cidrOrPrefixLength: Cidrv4 | number): number {
   const prefixLength = typeof cidrOrPrefixLength === "number"
