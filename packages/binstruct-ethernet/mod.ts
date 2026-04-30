@@ -4,6 +4,18 @@
  * For MAC address parsing/stringification, use the sister package
  * {@link https://jsr.io/@hertzg/mac @hertzg/mac}.
  *
+ * ## Migration from 0.x
+ *
+ * The `parseMacAddress` and `stringifyMacAddress` exports were removed in
+ * 1.0. Replace with `@hertzg/mac`:
+ *
+ * ```ts ignore
+ * // before
+ * import { parseMacAddress, stringifyMacAddress } from "@binstruct/ethernet";
+ * // after
+ * import { parse as parseMac, stringify as stringifyMac } from "@hertzg/mac";
+ * ```
+ *
  * @example Basic encoding and decoding
  * ```ts
  * import { assertEquals } from "@std/assert";
