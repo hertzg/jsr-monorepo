@@ -10,14 +10,7 @@
  * @module
  */
 
-import {
-  bytes,
-  type Coder,
-  type LengthOrRef,
-  struct,
-  u16be,
-  u8,
-} from "@hertzg/binstruct";
+import { bytes, type Coder, struct, u16be, u8 } from "@hertzg/binstruct";
 
 /**
  * Generic ICMPv4 packet structure.
@@ -83,14 +76,12 @@ export interface IcmpPacket {
  * assertEquals(decoded.restOfHeader, packet.restOfHeader);
  * ```
  */
-export function icmpHeader(
-  payloadLength?: LengthOrRef | null,
-): Coder<IcmpPacket> {
+export function icmpHeader(): Coder<IcmpPacket> {
   return struct({
     type: u8(),
     code: u8(),
     checksum: u16be(),
     restOfHeader: bytes(4),
-    payload: bytes(payloadLength),
+    payload: bytes(),
   });
 }

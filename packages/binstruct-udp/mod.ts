@@ -81,6 +81,7 @@ export interface UdpDatagram {
   payload: Uint8Array;
 }
 
+
 /**
  * Creates a coder for UDP datagrams (RFC 768).
  *
@@ -140,14 +141,14 @@ export interface UdpDatagram {
  * ```
  */
 export function udpDatagram(): Coder<UdpDatagram> {
-  const lengthField = u16be();
+  const length = u16be();
   return struct({
     srcPort: u16be(),
     dstPort: u16be(),
-    length: lengthField,
+    length,
     checksum: u16be(),
     payload: bytes(
-      computedRef([ref(lengthField)], (len) => len - UDP_HEADER_SIZE),
+      computedRef([ref(length)], (len) => len - UDP_HEADER_SIZE),
     ),
   });
 }
