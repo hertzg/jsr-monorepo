@@ -1,28 +1,25 @@
 /**
- * ARP (Address Resolution Protocol) packet encoding and decoding utilities.
+ * ARP (Address Resolution Protocol) packet encoding and decoding.
  *
  * Implements the wire format described in RFC 826 for the common
  * Ethernet/IPv4 case (28 bytes, fixed `hlen=6` / `plen=4`). Hardware
- * addresses are exposed as raw 6-byte arrays; IPv4 protocol addresses
- * are exposed as 32-bit numbers, matching the convention used by
- * [`@hertzg/ip`](https://jsr.io/@hertzg/ip) (use {@link stringifyIpv4} /
- * {@link parseIpv4} to convert to/from dotted-decimal notation).
+ * addresses are surfaced as raw 6-byte arrays; IPv4 protocol addresses
+ * are surfaced as 32-bit numbers.
  *
- * The MAC address helpers ({@link parseMacAddress},
- * {@link stringifyMacAddress}) and the {@link ARP_OPCODE} /
- * {@link ARP_HARDWARE_TYPE} / {@link ARP_PROTOCOL_TYPE} constant maps are
- * provided for ergonomic composition with {@link refine}.
+ * For human-readable conversion use the sister utility packages:
+ * - {@link https://jsr.io/@hertzg/mac @hertzg/mac} — `parseMac` / `stringifyMac`
+ * - {@link https://jsr.io/@hertzg/ip @hertzg/ip} — `parseIpv4` / `stringifyIpv4`
  *
  * @example Decode an Ethernet/IPv4 ARP request
  * ```ts
  * import { assertEquals } from "@std/assert";
- * import { stringifyIpv4 } from "@hertzg/ip";
+ * import { stringifyIpv4 } from "@hertzg/ip/ipv4";
+ * import { stringifyMac } from "@hertzg/mac";
  * import {
  *   ARP_HARDWARE_TYPE,
  *   ARP_OPCODE,
  *   ARP_PROTOCOL_TYPE,
  *   arpEthernetIpv4,
- *   stringifyMacAddress,
  * } from "@binstruct/arp";
  *
  * // deno-fmt-ignore
@@ -44,7 +41,7 @@
  * assertEquals(packet.htype, ARP_HARDWARE_TYPE.ETHERNET);
  * assertEquals(packet.ptype, ARP_PROTOCOL_TYPE.IPV4);
  * assertEquals(packet.oper, ARP_OPCODE.REQUEST);
- * assertEquals(stringifyMacAddress(packet.sha), "00:11:22:33:44:55");
+ * assertEquals(stringifyMac(packet.sha), "00:11:22:33:44:55");
  * assertEquals(stringifyIpv4(packet.spa), "192.168.1.1");
  * assertEquals(stringifyIpv4(packet.tpa), "192.168.1.2");
  * ```
@@ -55,19 +52,13 @@
 import { bytes, struct, u16be, u32be, u8 } from "@hertzg/binstruct";
 import type { Coder } from "@hertzg/binstruct";
 
-/**
- * Length of an Ethernet hardware address in bytes.
- */
+/** Length of an Ethernet hardware address in bytes. */
 export const ARP_HW_LEN_ETHERNET = 6;
 
-/**
- * Length of an IPv4 protocol address in bytes.
- */
+/** Length of an IPv4 protocol address in bytes. */
 export const ARP_PROTO_LEN_IPV4 = 4;
 
-/**
- * Total wire size of an Ethernet/IPv4 ARP packet, in bytes.
- */
+/** Total wire size of an Ethernet/IPv4 ARP packet, in bytes. */
 export const ARP_ETHERNET_IPV4_SIZE = 28;
 
 /**
@@ -83,9 +74,7 @@ export const ARP_HARDWARE_TYPE = {
   ETHERNET: 0x0001,
 } as const;
 
-/**
- * Union of the {@link ARP_HARDWARE_TYPE} values.
- */
+/** Union of the {@link ARP_HARDWARE_TYPE} values. */
 export type ArpHardwareType =
   (typeof ARP_HARDWARE_TYPE)[keyof typeof ARP_HARDWARE_TYPE];
 
@@ -100,9 +89,7 @@ export const ARP_PROTOCOL_TYPE = {
   IPV4: 0x0800,
 } as const;
 
-/**
- * Union of the {@link ARP_PROTOCOL_TYPE} values.
- */
+/** Union of the {@link ARP_PROTOCOL_TYPE} values. */
 export type ArpProtocolType =
   (typeof ARP_PROTOCOL_TYPE)[keyof typeof ARP_PROTOCOL_TYPE];
 
@@ -123,9 +110,7 @@ export const ARP_OPCODE = {
   RARP_REPLY: 4,
 } as const;
 
-/**
- * Union of the {@link ARP_OPCODE} values.
- */
+/** Union of the {@link ARP_OPCODE} values. */
 export type ArpOpcode = (typeof ARP_OPCODE)[keyof typeof ARP_OPCODE];
 
 /**
@@ -156,40 +141,17 @@ export interface ArpEthernetIpv4Packet {
 /**
  * Creates a coder for the common Ethernet/IPv4 ARP packet (RFC 826).
  *
- * The wire layout is fixed at 28 bytes:
- *
- * ```text
- *   0                   1                   2                   3
- *   0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
- *  +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
- *  |          Hardware type        |          Protocol type        |
- *  +---------------+---------------+-------------------------------+
- *  |  Hlen (=6)    |  Plen (=4)    |          Operation            |
- *  +---------------+---------------+-------------------------------+
- *  |                Sender hardware address (sha)                  |
- *  +                               +-------------------------------+
- *  |                               |   Sender proto address (spa)  |
- *  +-------------------------------+                               +
- *  |                               |   Target hardware address     |
- *  +-------------------------------+                               +
- *  |                                                               |
- *  +-------------------------------+-------------------------------+
- *  |                Target protocol address (tpa)                  |
- *  +---------------------------------------------------------------+
- * ```
- *
  * Hardware addresses are surfaced as raw {@linkcode Uint8Array}s; IPv4
  * protocol addresses are surfaced as 32-bit unsigned integers. Use
- * {@link stringifyMacAddress} / {@link parseMacAddress} and the helpers
- * from [`@hertzg/ip`](https://jsr.io/@hertzg/ip) (`parseIpv4` /
- * `stringifyIpv4`) for human-readable forms.
+ * `@hertzg/mac` and `@hertzg/ip/ipv4` for human-readable conversion.
  *
  * @returns A coder for {@link ArpEthernetIpv4Packet} values.
  *
  * @example Round-trip encode and decode an ARP reply
  * ```ts
  * import { assertEquals } from "@std/assert";
- * import { parseIpv4 } from "@hertzg/ip";
+ * import { parseIpv4 } from "@hertzg/ip/ipv4";
+ * import { parseMac } from "@hertzg/mac";
  * import {
  *   ARP_ETHERNET_IPV4_SIZE,
  *   ARP_HARDWARE_TYPE,
@@ -198,7 +160,6 @@ export interface ArpEthernetIpv4Packet {
  *   ARP_PROTOCOL_TYPE,
  *   ARP_PROTO_LEN_IPV4,
  *   arpEthernetIpv4,
- *   parseMacAddress,
  * } from "@binstruct/arp";
  *
  * const coder = arpEthernetIpv4();
@@ -208,9 +169,9 @@ export interface ArpEthernetIpv4Packet {
  *   hlen: ARP_HW_LEN_ETHERNET,
  *   plen: ARP_PROTO_LEN_IPV4,
  *   oper: ARP_OPCODE.REPLY,
- *   sha: parseMacAddress("aa:bb:cc:dd:ee:ff"),
+ *   sha: parseMac("aa:bb:cc:dd:ee:ff"),
  *   spa: parseIpv4("192.168.1.2"),
- *   tha: parseMacAddress("00:11:22:33:44:55"),
+ *   tha: parseMac("00:11:22:33:44:55"),
  *   tpa: parseIpv4("192.168.1.1"),
  * };
  *
@@ -235,92 +196,4 @@ export function arpEthernetIpv4(): Coder<ArpEthernetIpv4Packet> {
     tha: bytes(ARP_HW_LEN_ETHERNET),
     tpa: u32be(),
   });
-}
-
-/**
- * Formats a MAC address byte array as a colon-separated hexadecimal string.
- *
- * Reads the first 6 bytes of `address`; bytes beyond index 5 are ignored
- * and missing bytes are filled with zeros.
- *
- * @param address - MAC address bytes; only the first 6 are used.
- * @param delimiter - Separator between bytes (default: `":"`).
- * @returns A lowercase, fixed-width MAC string such as `"00:11:22:33:44:55"`.
- *
- * @example Default colon delimiter
- * ```ts
- * import { assertEquals } from "@std/assert";
- * import { stringifyMacAddress } from "@binstruct/arp";
- *
- * assertEquals(
- *   stringifyMacAddress(new Uint8Array([0xaa, 0xbb, 0xcc, 0xdd, 0xee, 0xff])),
- *   "aa:bb:cc:dd:ee:ff",
- * );
- * ```
- *
- * @example Custom delimiter
- * ```ts
- * import { assertEquals } from "@std/assert";
- * import { stringifyMacAddress } from "@binstruct/arp";
- *
- * assertEquals(
- *   stringifyMacAddress(new Uint8Array([0x00, 0x11, 0x22, 0x33, 0x44, 0x55]), "-"),
- *   "00-11-22-33-44-55",
- * );
- * ```
- */
-export function stringifyMacAddress(
-  address: Uint8Array,
-  delimiter: string = ":",
-): string {
-  const macBytes = new Uint8Array(ARP_HW_LEN_ETHERNET);
-  macBytes.set(address.subarray(0, ARP_HW_LEN_ETHERNET), 0);
-  return Array.from(macBytes, (b) => b.toString(16).padStart(2, "0"))
-    .join(delimiter);
-}
-
-/**
- * Parses a delimited hexadecimal MAC address string into a 6-byte array.
- *
- * Accepts upper, lower, or mixed-case hex digits. The string must contain
- * exactly six parts separated by `delimiter`; each part must parse as a
- * byte in the range `0x00`–`0xff`.
- *
- * @param mac - The MAC address string (e.g. `"00:11:22:33:44:55"`).
- * @param delimiter - Separator between bytes (default: `":"`).
- * @returns A {@linkcode Uint8Array} of length 6.
- * @throws {Error} If the string does not contain exactly 6 parts.
- * @throws {Error} If a part is not a valid byte.
- *
- * @example Round-trip with {@link stringifyMacAddress}
- * ```ts
- * import { assertEquals } from "@std/assert";
- * import { parseMacAddress, stringifyMacAddress } from "@binstruct/arp";
- *
- * const bytes = parseMacAddress("AA:BB:CC:DD:EE:FF");
- * assertEquals(bytes, new Uint8Array([0xaa, 0xbb, 0xcc, 0xdd, 0xee, 0xff]));
- * assertEquals(stringifyMacAddress(bytes), "aa:bb:cc:dd:ee:ff");
- * ```
- */
-export function parseMacAddress(
-  mac: string,
-  delimiter: string = ":",
-): Uint8Array {
-  const parts = mac.split(delimiter);
-  if (parts.length !== ARP_HW_LEN_ETHERNET) {
-    throw new Error(
-      `Invalid MAC address format: expected ${ARP_HW_LEN_ETHERNET} parts separated by "${delimiter}", got ${parts.length}`,
-    );
-  }
-
-  const out = new Uint8Array(ARP_HW_LEN_ETHERNET);
-  for (let i = 0; i < parts.length; i++) {
-    const part = parts[i];
-    const byte = Number.parseInt(part, 16);
-    if (Number.isNaN(byte) || byte < 0 || byte > 0xff) {
-      throw new Error(`Invalid MAC address byte: "${part}"`);
-    }
-    out[i] = byte;
-  }
-  return out;
 }
