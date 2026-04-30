@@ -26,6 +26,10 @@ export const CRC16_IBM_POLYNOMIAL = 0xa001;
 /**
  * Creates a CRC16 function for the given polynomial.
  *
+ * Uses init=0xffff and xor=0xffff. With `CRC16_CCITT_POLYNOMIAL` this matches
+ * CRC-16/X-25; other catalogue variants (CRC-16/ARC, CRC-16/MODBUS) use
+ * different init/xor and need a custom implementation.
+ *
  * @param polynomial The CRC16 polynomial to use
  * @returns A function that calculates CRC16 for given data
  *

@@ -23,11 +23,13 @@ export const CRC32_POLYNOMIAL = 0xedb88320;
 /** CRC32C polynomial (iSCSI, SCTP, ext4). Also known as Castagnoli. */
 export const CRC32C_POLYNOMIAL = 0x82f63b78;
 
-/** CRC32K polynomial (Koopman). */
+/** CRC32K polynomial (Koopman). Designed for improved Hamming-distance coverage. */
 export const CRC32K_POLYNOMIAL = 0xeb31d82e;
 
 /**
  * Creates a CRC32 function for the given polynomial.
+ *
+ * Uses init=0xffffffff and xor=0xffffffff (common for CRC32, CRC32C, and CRC32K).
  *
  * @param polynomial The CRC32 polynomial to use
  * @returns A function that calculates CRC32 for given data
