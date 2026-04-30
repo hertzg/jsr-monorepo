@@ -25,6 +25,7 @@
     "@hertzg/wg-keys": "jsr:@hertzg/wg-keys@^2.1.0",
     "@hertzg/wg-ini": "jsr:@hertzg/wg-ini@^0.2.4",
     "@hertzg/wg-conf": "jsr:@hertzg/wg-conf@^0.2.3",
+    "@binstruct/arp": "jsr:@binstruct/arp@^0.1.0",
     "@binstruct/bmp": "jsr:@binstruct/bmp@^0.1.0",
     "@binstruct/cli": "jsr:@binstruct/cli@^0.1.3",
     "@binstruct/ethernet": "jsr:@binstruct/ethernet@^0.1.2",

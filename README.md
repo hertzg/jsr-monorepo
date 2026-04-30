@@ -21,6 +21,7 @@ libraries, format-specific parsers, router API clients, and various utilities.
 | [@hertzg/wg-ini](https://jsr.io/@hertzg/wg-ini)             | [![JSR](https://jsr.io/badges/@hertzg/wg-ini)](https://jsr.io/@hertzg/wg-ini)             |
 | [@hertzg/wg-keys](https://jsr.io/@hertzg/wg-keys)           | [![JSR](https://jsr.io/badges/@hertzg/wg-keys)](https://jsr.io/@hertzg/wg-keys)           |
 | [@hertzg/xhb](https://jsr.io/@hertzg/xhb)                   | [![JSR](https://jsr.io/badges/@hertzg/xhb)](https://jsr.io/@hertzg/xhb)                   |
+| [@binstruct/arp](https://jsr.io/@binstruct/arp)             | [![JSR](https://jsr.io/badges/@binstruct/arp)](https://jsr.io/@binstruct/arp)             |
 | [@binstruct/bmp](https://jsr.io/@binstruct/bmp)             | [![JSR](https://jsr.io/badges/@binstruct/bmp)](https://jsr.io/@binstruct/bmp)             |
 | [@binstruct/cli](https://jsr.io/@binstruct/cli)             | [![JSR](https://jsr.io/badges/@binstruct/cli)](https://jsr.io/@binstruct/cli)             |
 | [@binstruct/ethernet](https://jsr.io/@binstruct/ethernet)   | [![JSR](https://jsr.io/badges/@binstruct/ethernet)](https://jsr.io/@binstruct/ethernet)   |

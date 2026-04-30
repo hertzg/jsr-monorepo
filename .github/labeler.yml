@@ -1,3 +1,6 @@
+"@binstruct/arp":
+  - changed-files:
+      - any-glob-to-any-file: packages/binstruct-arp/**
 "@binstruct/bmp":
   - changed-files:
       - any-glob-to-any-file: packages/binstruct-bmp/**

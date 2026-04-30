@@ -62,6 +62,7 @@ deno task cov:view         # View HTML coverage report
 All packages are located in the `packages/` directory:
 
 - `packages/binstruct` - Core binary structure encoding/decoding library
+- `packages/binstruct-arp` - ARP packet parsing (RFC 826)
 - `packages/binstruct-bmp` - BMP/DIB image file format support
 - `packages/binstruct-cli` - CLI tools for binary structure operations
 - `packages/binstruct-ethernet` - Ethernet frame parsing
@@ -344,6 +345,7 @@ pipeline fails and the only remedy is rebasing and rewording commits, which is
 both tiresome and error-prone.
 
 - `@hertzg/binstruct`
+- `@binstruct/arp`
 - `@binstruct/bmp`
 - `@binstruct/cli`
 - `@binstruct/ethernet`
