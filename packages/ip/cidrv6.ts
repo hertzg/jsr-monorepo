@@ -268,12 +268,10 @@ export function cidrv6LastAddress(cidr: Cidrv6): bigint {
 }
 
 /**
- * Returns the total number of IP addresses in a CIDR block or for a given prefix length.
+ * Returns the total number of IP addresses in a CIDR block.
  *
  * For a /120 network, this returns 256n. For a /128, this returns 1n.
- *
- * **Warning**: IPv6 subnets can be enormous. A /64 has 2^64 addresses.
- * The result is a bigint to handle these large values.
+ * The result is a bigint because IPv6 subnets can hold up to 2^128 addresses.
  *
  * @param cidr The CIDR block
  * @returns The total number of addresses in the CIDR range as a bigint
@@ -288,6 +286,14 @@ export function cidrv6LastAddress(cidr: Cidrv6): bigint {
  * assertEquals(cidrv6Size(parseCidrv6("::1/128")), 1n);
  * assertEquals(cidrv6Size(parseCidrv6("::/64")), 18446744073709551616n);
  * ```
+ */
+export function cidrv6Size(cidr: Cidrv6): bigint;
+/**
+ * Returns the total number of IP addresses for a given prefix length.
+ *
+ * @param prefixLength The CIDR prefix length (0-128)
+ * @returns The total number of addresses as a bigint
+ * @throws {RangeError} If the prefix length is out of range (not 0-128)
  *
  * @example Getting CIDR size from prefix length
  * ```ts
@@ -299,7 +305,7 @@ export function cidrv6LastAddress(cidr: Cidrv6): bigint {
  * assertEquals(cidrv6Size(64), 18446744073709551616n);
  * ```
  *
- * @example Error handling for invalid prefix length
+ * @example Out-of-range prefix length throws
  * ```ts
  * import { assertThrows } from "@std/assert";
  * import { cidrv6Size } from "@hertzg/ip/cidrv6";
@@ -308,8 +314,13 @@ export function cidrv6LastAddress(cidr: Cidrv6): bigint {
  * assertThrows(() => cidrv6Size(129), RangeError);
  * ```
  */
-export function cidrv6Size(cidr: Cidrv6): bigint;
 export function cidrv6Size(prefixLength: number): bigint;
+/**
+ * Returns the total number of IP addresses for either a CIDR block or a prefix length.
+ *
+ * @param cidrOrPrefixLength A Cidrv6 block or a prefix length (0-128)
+ * @returns The total number of addresses as a bigint
+ */
 export function cidrv6Size(cidrOrPrefixLength: Cidrv6 | number): bigint;
 export function cidrv6Size(cidrOrPrefixLength: Cidrv6 | number): bigint {
   const prefixLength = typeof cidrOrPrefixLength === "number"
@@ -419,113 +430,6 @@ export function cidrv6Overlaps(a: Cidrv6, b: Cidrv6): boolean {
   return (a.address & mask) === (b.address & mask);
 }
 
-/**
- * Generates a range of IP addresses from a CIDR block.
- *
- * Yields IP addresses starting at the specified offset from the
- * network address. The offset is relative to the network address (offset 0 = network address).
- * The step parameter controls the increment (positive or negative) between consecutive addresses.
- * Only addresses within the CIDR range are yielded.
- *
- * By default (when count is not specified), iterates through all addresses in the CIDR range
- * from the offset to the boundary (last address for positive step, network for negative step).
- *
- * **Warning**: IPv6 subnets can be enormous. A /64 has 2^64 addresses. Use count or
- * iterate lazily to avoid memory issues.
- *
- * @param cidr The CIDR block to generate addresses from
- * @param options Optional configuration for address generation
- * @param options.offset The offset from the network address (0-based, defaults to 0 for network address)
- * @param options.count The maximum number of addresses to generate (defaults to undefined = iterate until CIDR boundary)
- * @param options.step The increment between addresses (positive or negative, defaults to 1)
- * @returns A generator yielding IP addresses as bigints (may yield less than count if CIDR boundary is reached)
- *
- * @example Default behavior - iterate from offset 0
- * ```ts
- * import { assertEquals } from "@std/assert";
- * import { cidrv6Addresses, parseCidrv6 } from "@hertzg/ip/cidrv6";
- * import { stringifyIpv6 } from "@hertzg/ip/ipv6";
- *
- * const cidr = parseCidrv6("fd00::/120"); // 256 IPs: ::0 to ::ff
- *
- * // Get first 5 IPs (offset=0 by default, starts at network address)
- * const first5 = Array.from(cidrv6Addresses(cidr, { count: 5 }));
- * assertEquals(first5.map(stringifyIpv6), [
- *   "fd00::", "fd00::1", "fd00::2", "fd00::3", "fd00::4",
- * ]);
- * ```
- *
- * @example Limiting with count parameter
- * ```ts
- * import { assertEquals } from "@std/assert";
- * import { cidrv6Addresses, parseCidrv6 } from "@hertzg/ip/cidrv6";
- * import { parseIpv6 } from "@hertzg/ip/ipv6";
- *
- * const cidr = parseCidrv6("fd00::/120");
- *
- * // Get first 3 IPs starting at network address
- * const first3 = Array.from(cidrv6Addresses(cidr, { offset: 0, count: 3 }));
- * assertEquals(first3, [
- *   parseIpv6("fd00::0"),
- *   parseIpv6("fd00::1"),
- *   parseIpv6("fd00::2"),
- * ]);
- * ```
- *
- * @example Custom step for even IPs
- * ```ts
- * import { assertEquals } from "@std/assert";
- * import { cidrv6Addresses, parseCidrv6 } from "@hertzg/ip/cidrv6";
- * import { parseIpv6 } from "@hertzg/ip/ipv6";
- *
- * const cidr = parseCidrv6("fd00::/120");
- *
- * // Get every other IP (even addresses)
- * const evenIps = Array.from(cidrv6Addresses(cidr, { offset: 0, count: 5, step: 2 }));
- * assertEquals(evenIps, [
- *   parseIpv6("fd00::0"),
- *   parseIpv6("fd00::2"),
- *   parseIpv6("fd00::4"),
- *   parseIpv6("fd00::6"),
- *   parseIpv6("fd00::8"),
- * ]);
- * ```
- *
- * @example Negative step for reverse iteration
- * ```ts
- * import { assertEquals } from "@std/assert";
- * import { cidrv6Addresses, parseCidrv6 } from "@hertzg/ip/cidrv6";
- * import { parseIpv6 } from "@hertzg/ip/ipv6";
- *
- * const cidr = parseCidrv6("fd00::/120");
- *
- * // Get 5 IPs counting backwards from offset 10
- * const backwards = Array.from(cidrv6Addresses(cidr, { offset: 10, count: 5, step: -1 }));
- * assertEquals(backwards, [
- *   parseIpv6("fd00::a"),
- *   parseIpv6("fd00::9"),
- *   parseIpv6("fd00::8"),
- *   parseIpv6("fd00::7"),
- *   parseIpv6("fd00::6"),
- * ]);
- * ```
- *
- * @example CIDR boundary handling
- * ```ts
- * import { assertEquals } from "@std/assert";
- * import { cidrv6Addresses, parseCidrv6 } from "@hertzg/ip/cidrv6";
- *
- * const cidr = parseCidrv6("fd00::/125"); // Only 8 IPs: ::0 to ::7
- *
- * // Requesting more IPs than available stops at CIDR boundary
- * const ips = Array.from(cidrv6Addresses(cidr, { offset: 5, count: 10, step: 1 }));
- * assertEquals(ips.length, 3); // Only ::5, ::6, ::7 are in range
- *
- * // Negative step stops at CIDR start
- * const reverseIps = Array.from(cidrv6Addresses(cidr, { offset: 3, count: 10, step: -1 }));
- * assertEquals(reverseIps.length, 4); // ::3, ::2, ::1, ::0
- * ```
- */
 /**
  * Splits an IPv6 CIDR block into its two half-sized children at prefix+1.
  *
@@ -641,6 +545,113 @@ export function cidrv6Subtract(a: Cidrv6, b: Cidrv6): Cidrv6[] {
   return [...cidrv6Subtract(upper, b), ...cidrv6Subtract(lower, b)];
 }
 
+/**
+ * Generates a range of IP addresses from a CIDR block.
+ *
+ * Yields IP addresses starting at the specified offset from the
+ * network address. The offset is relative to the network address (offset 0 = network address).
+ * The step parameter controls the increment (positive or negative) between consecutive addresses.
+ * Only addresses within the CIDR range are yielded.
+ *
+ * By default (when count is not specified), iterates through all addresses in the CIDR range
+ * from the offset to the boundary (last address for positive step, network for negative step).
+ *
+ * IPv6 subnets can be enormous. A /64 has 2^64 addresses. Use `count` or iterate lazily
+ * to avoid memory issues.
+ *
+ * @param cidr The CIDR block to generate addresses from
+ * @param options Optional configuration for address generation
+ * @param options.offset The offset from the network address (0-based, defaults to 0 for network address)
+ * @param options.count The maximum number of addresses to generate (defaults to undefined = iterate until CIDR boundary)
+ * @param options.step The increment between addresses (positive or negative, defaults to 1)
+ * @returns A generator yielding IP addresses as bigints (may yield less than count if CIDR boundary is reached)
+ *
+ * @example Default behavior - iterate from offset 0
+ * ```ts
+ * import { assertEquals } from "@std/assert";
+ * import { cidrv6Addresses, parseCidrv6 } from "@hertzg/ip/cidrv6";
+ * import { stringifyIpv6 } from "@hertzg/ip/ipv6";
+ *
+ * const cidr = parseCidrv6("fd00::/120"); // 256 IPs: ::0 to ::ff
+ *
+ * // Get first 5 IPs (offset=0 by default, starts at network address)
+ * const first5 = Array.from(cidrv6Addresses(cidr, { count: 5 }));
+ * assertEquals(first5.map(stringifyIpv6), [
+ *   "fd00::", "fd00::1", "fd00::2", "fd00::3", "fd00::4",
+ * ]);
+ * ```
+ *
+ * @example Limiting with count parameter
+ * ```ts
+ * import { assertEquals } from "@std/assert";
+ * import { cidrv6Addresses, parseCidrv6 } from "@hertzg/ip/cidrv6";
+ * import { parseIpv6 } from "@hertzg/ip/ipv6";
+ *
+ * const cidr = parseCidrv6("fd00::/120");
+ *
+ * // Get first 3 IPs starting at network address
+ * const first3 = Array.from(cidrv6Addresses(cidr, { offset: 0, count: 3 }));
+ * assertEquals(first3, [
+ *   parseIpv6("fd00::0"),
+ *   parseIpv6("fd00::1"),
+ *   parseIpv6("fd00::2"),
+ * ]);
+ * ```
+ *
+ * @example Custom step for even IPs
+ * ```ts
+ * import { assertEquals } from "@std/assert";
+ * import { cidrv6Addresses, parseCidrv6 } from "@hertzg/ip/cidrv6";
+ * import { parseIpv6 } from "@hertzg/ip/ipv6";
+ *
+ * const cidr = parseCidrv6("fd00::/120");
+ *
+ * // Get every other IP (even addresses)
+ * const evenIps = Array.from(cidrv6Addresses(cidr, { offset: 0, count: 5, step: 2 }));
+ * assertEquals(evenIps, [
+ *   parseIpv6("fd00::0"),
+ *   parseIpv6("fd00::2"),
+ *   parseIpv6("fd00::4"),
+ *   parseIpv6("fd00::6"),
+ *   parseIpv6("fd00::8"),
+ * ]);
+ * ```
+ *
+ * @example Negative step for reverse iteration
+ * ```ts
+ * import { assertEquals } from "@std/assert";
+ * import { cidrv6Addresses, parseCidrv6 } from "@hertzg/ip/cidrv6";
+ * import { parseIpv6 } from "@hertzg/ip/ipv6";
+ *
+ * const cidr = parseCidrv6("fd00::/120");
+ *
+ * // Get 5 IPs counting backwards from offset 10
+ * const backwards = Array.from(cidrv6Addresses(cidr, { offset: 10, count: 5, step: -1 }));
+ * assertEquals(backwards, [
+ *   parseIpv6("fd00::a"),
+ *   parseIpv6("fd00::9"),
+ *   parseIpv6("fd00::8"),
+ *   parseIpv6("fd00::7"),
+ *   parseIpv6("fd00::6"),
+ * ]);
+ * ```
+ *
+ * @example CIDR boundary handling
+ * ```ts
+ * import { assertEquals } from "@std/assert";
+ * import { cidrv6Addresses, parseCidrv6 } from "@hertzg/ip/cidrv6";
+ *
+ * const cidr = parseCidrv6("fd00::/125"); // Only 8 IPs: ::0 to ::7
+ *
+ * // Requesting more IPs than available stops at CIDR boundary
+ * const ips = Array.from(cidrv6Addresses(cidr, { offset: 5, count: 10, step: 1 }));
+ * assertEquals(ips.length, 3); // Only ::5, ::6, ::7 are in range
+ *
+ * // Negative step stops at CIDR start
+ * const reverseIps = Array.from(cidrv6Addresses(cidr, { offset: 3, count: 10, step: -1 }));
+ * assertEquals(reverseIps.length, 4); // ::3, ::2, ::1, ::0
+ * ```
+ */
 export function* cidrv6Addresses(
   cidr: Cidrv6,
   options?: {
