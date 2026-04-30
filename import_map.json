@@ -28,6 +28,7 @@
     "@binstruct/cli": "jsr:@binstruct/cli@^0.1.3",
     "@binstruct/ethernet": "jsr:@binstruct/ethernet@^0.1.2",
     "@binstruct/png": "jsr:@binstruct/png@^0.4.0",
+    "@binstruct/udp": "jsr:@binstruct/udp@^0.1.0",
     "@binstruct/wav": "jsr:@binstruct/wav@^0.1.2",
     "json5": "npm:json5@^2.2.3",
     "fflate": "npm:fflate@^0.8.2",

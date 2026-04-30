@@ -33,6 +33,14 @@
         { "type": "json", "path": "deno.json", "jsonpath": "$.version" }
       ]
     },
+    "packages/binstruct-udp": {
+      "release-type": "simple",
+      "package-name": "@binstruct/udp",
+      "component": "@binstruct/udp",
+      "extra-files": [
+        { "type": "json", "path": "deno.json", "jsonpath": "$.version" }
+      ]
+    },
     "packages/binstruct-wav": {
       "release-type": "simple",
       "package-name": "@binstruct/wav",

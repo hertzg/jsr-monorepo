@@ -7,6 +7,9 @@
 "@binstruct/png":
   - changed-files:
       - any-glob-to-any-file: packages/binstruct-png/**
+"@binstruct/udp":
+  - changed-files:
+      - any-glob-to-any-file: packages/binstruct-udp/**
 "@binstruct/wav":
   - changed-files:
       - any-glob-to-any-file: packages/binstruct-wav/**
