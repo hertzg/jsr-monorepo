@@ -26,6 +26,8 @@ export const CRC16_IBM_POLYNOMIAL = 0xa001;
 /**
  * Creates a CRC16 function for the given polynomial.
  *
+ * Uses init=0xffff and xor=0xffff (common for CRC16-CCITT and CRC16-IBM).
+ *
  * @param polynomial The CRC16 polynomial to use
  * @returns A function that calculates CRC16 for given data
  *

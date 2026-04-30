@@ -30,7 +30,8 @@ const CRC64_MASK = 0xffffffffffffffffn;
 /**
  * Creates a CRC64 function for the given polynomial.
  *
- * Uses BigInt for 64-bit precision. The polynomial must be a BigInt.
+ * Uses init=0xffffffffffffffff and xor=0xffffffffffffffff (common for CRC64-ECMA
+ * and CRC64-ISO). BigInt is used for 64-bit precision.
  *
  * @param polynomial The CRC64 polynomial to use (must be BigInt)
  * @returns A function that calculates CRC64 for given data
