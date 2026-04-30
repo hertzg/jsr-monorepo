@@ -167,6 +167,7 @@
 </a>
 <span class="font-bold">createCrc32</span><span class="font-medium">(<span><span>polynomial<span>: <span class="td-kw">number</span></span></span></span>)<span>: (<span><span>data<span>: <a href="https://deno.land/api@v2.7.14?s=Uint8Array" class="link td-ref">Uint8Array</a></span></span></span>) =&gt; <span class="td-kw">number</span></span> </span>
       </code><div class="space-y-7" id=""><div class="markdown"><p>Creates a CRC32 function for the given polynomial.</p>
+<p>Uses init=0xffffffff and xor=0xffffffff (common for CRC32, CRC32C, and CRC32K).</p>
 </div><section class="section"  id="examples"><div>
       <h2 class="anchorable mb-1"><a href="#examples" class="anchor" aria-label="Anchor" tabIndex="-1"><svg
   width="16"

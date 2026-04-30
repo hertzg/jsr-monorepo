@@ -99,9 +99,16 @@
 <div id="searchResults"></div><div id="content">
     <main><section>
   <div class="space-y-2 flex-1"><div class="space-y-7" id="module_doc"><div class="markdown"><p>CRC implementation with configurable polynomials.</p>
-<p>A pure TypeScript CRC library supporting CRC8, CRC16, CRC32, and CRC64.
-Use the simple <code>crc*</code> helpers with default polynomials, or the <code>createCrc*</code>
-factory functions for custom polynomials.</p>
+<p>A pure TypeScript CRC library supporting CRC8, CRC16, CRC32, and CRC64.</p>
+<p>Each width is exposed at three layers:</p>
+<ul>
+<li>One-shot: <code>crc8</code> / <code>crc16</code> / <code>crc32</code> / <code>crc64</code> — convenience helpers that
+use a conventional default polynomial.</li>
+<li>Factory: <code>createCrc8</code> / etc. — return a reusable function bound to a
+specific polynomial (each call builds the lookup table).</li>
+<li>Memoized factory: <code>memoizedCreateCrc8</code> / etc. — same as the factory, but
+repeated calls with the same polynomial reuse the cached function.</li>
+</ul>
 </div><section class="section"  id="examples"><div>
       <h2 class="anchorable mb-1"><a href="#examples" class="anchor" aria-label="Anchor" tabIndex="-1"><svg
   width="16"
@@ -147,7 +154,7 @@ Examples</h2></div><div class="space-y-8"><div class="anchorable"><a href="#exam
   </defs>
 </svg>
 </a>
-<h3 class="example-header"><div class="markdown"><p>Simple usage with default polynomials</p>
+<h3 class="example-header"><div class="markdown"><p>One-shot helpers with default polynomials</p>
 </div></h3>
   <div><div class="markdown"><pre class="highlight"><code class="language-ts">import { assertEquals } from &quot;@std/assert&quot;;
 import { crc32, crc64 } from &quot;@hertzg/crc&quot;;
@@ -214,7 +221,7 @@ assertEquals(crc64(new TextEncoder().encode(&quot;123456789&quot;)), 0x995dc9bbd
   </defs>
 </svg>
 </a>
-<h3 class="example-header"><div class="markdown"><p>Custom polynomial with factory function</p>
+<h3 class="example-header"><div class="markdown"><p>Factory with a custom polynomial (CRC32C / Castagnoli)</p>
 </div></h3>
   <div><div class="markdown"><pre class="highlight"><code class="language-ts">import { assertEquals } from &quot;@std/assert&quot;;
 import { createCrc32, CRC32C_POLYNOMIAL } from &quot;@hertzg/crc&quot;;
@@ -393,7 +400,7 @@ Variables</h2></div><div class="namespaceSection"><div id="namespace_crc16_ccitt
     </div><div id="namespace_crc32k_polynomial" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-Variable bg-Variable/15 dark:text-VariableDark dark:bg-VariableDark/15" title="Variable">v</div></div>
 <div class="namespaceItemContent">
 		    <a href="..&#x2F;.&#x2F;crc32.ts&#x2F;~&#x2F;CRC32K_POLYNOMIAL.html" title="CRC32K_POLYNOMIAL">
-			    <span>CRC32K_POLYNOMIAL</span><span>: <span class="td-lit">3945912366</span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>CRC32K polynomial (Koopman).</p>
+			    <span>CRC32K_POLYNOMIAL</span><span>: <span class="td-lit">3945912366</span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>CRC32K polynomial (Koopman). Designed for improved Hamming-distance coverage.</p>
 </div></div></div>
     </div><div id="namespace_crc64_ecma_polynomial" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-Variable bg-Variable/15 dark:text-VariableDark dark:bg-VariableDark/15" title="Variable">v</div></div>
 <div class="namespaceItemContent">
@@ -503,7 +510,7 @@ Variables</h2></div><div class="namespaceSection"><div id="namespace_crc16_ccitt
   />
 </svg>
 </a></nav><nav class="documentNavigation">
-          <h3>Document Navigation</h3><ul><li><a href="#examples" title="Examples">Examples</a></li><li><ul><li><a href="#example_0" title="Simple usage with default polynomials">Simple usage with default polynomials</a></li><li><a href="#example_1" title="Custom polynomial with factory function">Custom polynomial with factory function</a></li></ul></li><li><a href="#mod_ts_functions" title="Functions">Functions</a></li><li><ul><li><a href="#namespace_crc16" title="crc16">crc16</a></li><li><a href="#namespace_crc32" title="crc32">crc32</a></li><li><a href="#namespace_crc64" title="crc64">crc64</a></li><li><a href="#namespace_crc8" title="crc8">crc8</a></li><li><a href="#namespace_createcrc16" title="createCrc16">createCrc16</a></li><li><a href="#namespace_createcrc32" title="createCrc32">createCrc32</a></li><li><a href="#namespace_createcrc64" title="createCrc64">createCrc64</a></li><li><a href="#namespace_createcrc8" title="createCrc8">createCrc8</a></li><li><a href="#namespace_memoizedcreatecrc16" title="memoizedCreateCrc16">memoizedCreateCrc16</a></li><li><a href="#namespace_memoizedcreatecrc32" title="memoizedCreateCrc32">memoizedCreateCrc32</a></li><li><a href="#namespace_memoizedcreatecrc64" title="memoizedCreateCrc64">memoizedCreateCrc64</a></li><li><a href="#namespace_memoizedcreatecrc8" title="memoizedCreateCrc8">memoizedCreateCrc8</a></li></ul></li><li><a href="#mod_ts_variables" title="Variables">Variables</a></li><li><ul><li><a href="#namespace_crc16_ccitt_polynomial" title="CRC16_CCITT_POLYNOMIAL">CRC16_CCITT_POLYNOMIAL</a></li><li><a href="#namespace_crc16_ibm_polynomial" title="CRC16_IBM_POLYNOMIAL">CRC16_IBM_POLYNOMIAL</a></li><li><a href="#namespace_crc32_polynomial" title="CRC32_POLYNOMIAL">CRC32_POLYNOMIAL</a></li><li><a href="#namespace_crc32c_polynomial" title="CRC32C_POLYNOMIAL">CRC32C_POLYNOMIAL</a></li><li><a href="#namespace_crc32k_polynomial" title="CRC32K_POLYNOMIAL">CRC32K_POLYNOMIAL</a></li><li><a href="#namespace_crc64_ecma_polynomial" title="CRC64_ECMA_POLYNOMIAL">CRC64_ECMA_POLYNOMIAL</a></li><li><a href="#namespace_crc64_iso_polynomial" title="CRC64_ISO_POLYNOMIAL">CRC64_ISO_POLYNOMIAL</a></li><li><a href="#namespace_crc8_ccitt_polynomial" title="CRC8_CCITT_POLYNOMIAL">CRC8_CCITT_POLYNOMIAL</a></li><li><a href="#namespace_crc8_maxim_polynomial" title="CRC8_MAXIM_POLYNOMIAL">CRC8_MAXIM_POLYNOMIAL</a></li></ul></li></ul></nav></div>
+          <h3>Document Navigation</h3><ul><li><a href="#examples" title="Examples">Examples</a></li><li><ul><li><a href="#example_0" title="One-shot helpers with default polynomials">One-shot helpers with default polynomials</a></li><li><a href="#example_1" title="Factory with a custom polynomial (CRC32C / Castagnoli)">Factory with a custom polynomial (CRC32C / Castagnoli)</a></li></ul></li><li><a href="#mod_ts_functions" title="Functions">Functions</a></li><li><ul><li><a href="#namespace_crc16" title="crc16">crc16</a></li><li><a href="#namespace_crc32" title="crc32">crc32</a></li><li><a href="#namespace_crc64" title="crc64">crc64</a></li><li><a href="#namespace_crc8" title="crc8">crc8</a></li><li><a href="#namespace_createcrc16" title="createCrc16">createCrc16</a></li><li><a href="#namespace_createcrc32" title="createCrc32">createCrc32</a></li><li><a href="#namespace_createcrc64" title="createCrc64">createCrc64</a></li><li><a href="#namespace_createcrc8" title="createCrc8">createCrc8</a></li><li><a href="#namespace_memoizedcreatecrc16" title="memoizedCreateCrc16">memoizedCreateCrc16</a></li><li><a href="#namespace_memoizedcreatecrc32" title="memoizedCreateCrc32">memoizedCreateCrc32</a></li><li><a href="#namespace_memoizedcreatecrc64" title="memoizedCreateCrc64">memoizedCreateCrc64</a></li><li><a href="#namespace_memoizedcreatecrc8" title="memoizedCreateCrc8">memoizedCreateCrc8</a></li></ul></li><li><a href="#mod_ts_variables" title="Variables">Variables</a></li><li><ul><li><a href="#namespace_crc16_ccitt_polynomial" title="CRC16_CCITT_POLYNOMIAL">CRC16_CCITT_POLYNOMIAL</a></li><li><a href="#namespace_crc16_ibm_polynomial" title="CRC16_IBM_POLYNOMIAL">CRC16_IBM_POLYNOMIAL</a></li><li><a href="#namespace_crc32_polynomial" title="CRC32_POLYNOMIAL">CRC32_POLYNOMIAL</a></li><li><a href="#namespace_crc32c_polynomial" title="CRC32C_POLYNOMIAL">CRC32C_POLYNOMIAL</a></li><li><a href="#namespace_crc32k_polynomial" title="CRC32K_POLYNOMIAL">CRC32K_POLYNOMIAL</a></li><li><a href="#namespace_crc64_ecma_polynomial" title="CRC64_ECMA_POLYNOMIAL">CRC64_ECMA_POLYNOMIAL</a></li><li><a href="#namespace_crc64_iso_polynomial" title="CRC64_ISO_POLYNOMIAL">CRC64_ISO_POLYNOMIAL</a></li><li><a href="#namespace_crc8_ccitt_polynomial" title="CRC8_CCITT_POLYNOMIAL">CRC8_CCITT_POLYNOMIAL</a></li><li><a href="#namespace_crc8_maxim_polynomial" title="CRC8_MAXIM_POLYNOMIAL">CRC8_MAXIM_POLYNOMIAL</a></li></ul></li></ul></nav></div>
   </div></div>
 </div>
 </div>
