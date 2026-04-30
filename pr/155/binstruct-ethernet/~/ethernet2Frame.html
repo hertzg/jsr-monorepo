@@ -167,13 +167,9 @@
 </a>
 <span class="font-bold">ethernet2Frame</span><span class="font-medium">(<span><span>lengthOrRefOfPayload<span class="td-op">?</span><span>: <span><span class="td-ref">LengthOrRef</span><span class="td-op"> | </span><span class="td-kw">null</span></span></span></span></span>)<span>: <span class="td-ref">Coder</span>&lt;<a href="../././~/Ethernet2Frame.html" class="link td-ref">Ethernet2Frame</a>&gt;</span> </span>
       </code><div class="space-y-7" id=""><div class="markdown"><p>Creates a coder for Ethernet II frames.</p>
-<p>Encodes and decodes Ethernet II frame structures with:</p>
-<ul>
-<li>6-byte destination MAC address</li>
-<li>6-byte source MAC address</li>
-<li>2-byte EtherType field (big-endian)</li>
-<li>Variable-length payload</li>
-</ul>
+<p>Layout: 6-byte destination MAC, 6-byte source MAC, 2-byte EtherType
+(big-endian), then variable-length payload. The payload's size on decode is
+controlled by <code>lengthOrRefOfPayload</code>; pass <code>null</code>/omit for &quot;rest of buffer&quot;.</p>
 </div><section class="section"  id="examples"><div>
       <h2 class="anchorable mb-1"><a href="#examples" class="anchor" aria-label="Anchor" tabIndex="-1"><svg
   width="16"
@@ -219,7 +215,7 @@ Examples</h2></div><div class="space-y-8"><div class="anchorable"><a href="#exam
   </defs>
 </svg>
 </a>
-<h3 class="example-header"><div class="markdown"><p>Basic Ethernet frame encoding and decoding</p>
+<h3 class="example-header"><div class="markdown"><p>Basic encoding and decoding</p>
 </div></h3>
   <div><div class="markdown"><pre class="highlight"><code class="language-ts">import { assertEquals } from &quot;@std/assert&quot;;
 import { ethernet2Frame } from &quot;@binstruct/ethernet&quot;;
@@ -228,8 +224,8 @@ const frameCoder = ethernet2Frame();
 const testFrame = {
   dstMac: new Uint8Array([0x00, 0x11, 0x22, 0x33, 0x44, 0x55]),
   srcMac: new Uint8Array([0x66, 0x77, 0x88, 0x99, 0xAA, 0xBB]),
-  etherType: 0x0800, // IPv4
-  payload: new Uint8Array([0x45, 0x00, 0x00, 0x14])
+  etherType: 0x0800,
+  payload: new Uint8Array([0x45, 0x00, 0x00, 0x14]),
 };
 
 const buffer = new Uint8Array(1500);
@@ -248,8 +244,8 @@ const frameCoder = ethernet2Frame();
 const testFrame = {
   dstMac: new Uint8Array([0x00, 0x11, 0x22, 0x33, 0x44, 0x55]),
   srcMac: new Uint8Array([0x66, 0x77, 0x88, 0x99, 0xAA, 0xBB]),
-  etherType: 0x0800, // IPv4
-  payload: new Uint8Array([0x45, 0x00, 0x00, 0x14])
+  etherType: 0x0800,
+  payload: new Uint8Array([0x45, 0x00, 0x00, 0x14]),
 };
 
 const buffer = new Uint8Array(1500);
@@ -371,7 +367,8 @@ Parameters</h2></div><div class="space-y-8"><div class="anchorable docEntry" id=
   />
 </svg>
 </a>
-</div></div>
+</div><div class="max-w-[75ch]"><div class="markdown"><p>Length or <code>ref()</code> value for the payload field.</p>
+</div></div></div>
 </div></section>
 <section class="section"  id="return-type"><div>
       <h2 class="anchorable mb-1"><a href="#return-type" class="anchor" aria-label="Anchor" tabIndex="-1"><svg
@@ -426,7 +423,7 @@ Return Type</h2></div><div class="space-y-8"><div class=" docEntry" id="function
   />
 </svg>
 </a>
-</div><div class="max-w-[75ch]"><div class="markdown"><p>A coder that can encode/decode Ethernet2Frame objects</p>
+</div><div class="max-w-[75ch]"><div class="markdown"><p>A <code>Coder&lt;Ethernet2Frame&gt;</code>.</p>
 </div></div></div>
 </div></section>
 </div>
@@ -469,7 +466,7 @@ Return Type</h2></div><div class="space-y-8"><div class=" docEntry" id="function
 </svg>
 </button><code></code></pre>
 </div></div><nav class="documentNavigation">
-          <h3>Document Navigation</h3><ul><li><a href="#examples" title="Examples">Examples</a></li><li><ul><li><a href="#example_0" title="Basic Ethernet frame encoding and decoding">Basic Ethernet frame encoding and decoding</a></li></ul></li><li><a href="#parameters" title="Parameters">Parameters</a></li><li><ul><li><a href="#function_ethernet2frame_0_parameter_lengthorrefofpayload" title="lengthOrRefOfPayload">lengthOrRefOfPayload</a></li></ul></li><li><a href="#return-type" title="Return Type">Return Type</a></li></ul></nav></div>
+          <h3>Document Navigation</h3><ul><li><a href="#examples" title="Examples">Examples</a></li><li><ul><li><a href="#example_0" title="Basic encoding and decoding">Basic encoding and decoding</a></li></ul></li><li><a href="#parameters" title="Parameters">Parameters</a></li><li><ul><li><a href="#function_ethernet2frame_0_parameter_lengthorrefofpayload" title="lengthOrRefOfPayload">lengthOrRefOfPayload</a></li></ul></li><li><a href="#return-type" title="Return Type">Return Type</a></li></ul></nav></div>
   </div></div>
 </div>
 </div>

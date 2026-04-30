@@ -148,7 +148,7 @@ Examples</h2></div><div class="space-y-8"><div class="anchorable"><a href="#exam
   </defs>
 </svg>
 </a>
-<h3 class="example-header"><div class="markdown"><p>Simple usage with default polynomials</p>
+<h3 class="example-header"><div class="markdown"><p>One-shot helpers with default polynomials</p>
 </div></h3>
   <div><div class="markdown"><pre class="highlight"><code class="language-ts">import { assertEquals } from &quot;@std/assert&quot;;
 import { crc32, crc64 } from &quot;@hertzg/crc&quot;;
@@ -215,7 +215,7 @@ assertEquals(crc64(new TextEncoder().encode(&quot;123456789&quot;)), 0x995dc9bbd
   </defs>
 </svg>
 </a>
-<h3 class="example-header"><div class="markdown"><p>Custom polynomial with factory function</p>
+<h3 class="example-header"><div class="markdown"><p>Factory with a custom polynomial (CRC32C / Castagnoli)</p>
 </div></h3>
   <div><div class="markdown"><pre class="highlight"><code class="language-ts">import { assertEquals } from &quot;@std/assert&quot;;
 import { createCrc32, CRC32C_POLYNOMIAL } from &quot;@hertzg/crc&quot;;
@@ -394,7 +394,7 @@ Variables</h2></div><div class="namespaceSection"><div id="namespace_crc16_ccitt
     </div><div id="namespace_crc32k_polynomial" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-Variable bg-Variable/15 dark:text-VariableDark dark:bg-VariableDark/15" title="Variable">v</div></div>
 <div class="namespaceItemContent">
 		    <a href=".&#x2F;.&#x2F;crc32.ts&#x2F;~&#x2F;CRC32K_POLYNOMIAL.html" title="CRC32K_POLYNOMIAL">
-			    <span>CRC32K_POLYNOMIAL</span><span>: <span class="td-lit">3945912366</span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>CRC32K polynomial (Koopman).</p>
+			    <span>CRC32K_POLYNOMIAL</span><span>: <span class="td-lit">3945912366</span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>CRC32K polynomial (Koopman). Designed for improved Hamming-distance coverage.</p>
 </div></div></div>
     </div><div id="namespace_crc64_ecma_polynomial" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-Variable bg-Variable/15 dark:text-VariableDark dark:bg-VariableDark/15" title="Variable">v</div></div>
 <div class="namespaceItemContent">
@@ -953,7 +953,7 @@ Variables</h2></div><div class="namespaceSection"><div id="namespace_crc32_polyn
     </div><div id="namespace_crc32k_polynomial-1" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-Variable bg-Variable/15 dark:text-VariableDark dark:bg-VariableDark/15" title="Variable">v</div></div>
 <div class="namespaceItemContent">
 		    <a href=".&#x2F;.&#x2F;crc32.ts&#x2F;~&#x2F;CRC32K_POLYNOMIAL.html" title="CRC32K_POLYNOMIAL">
-			    <span>CRC32K_POLYNOMIAL</span><span>: <span class="td-lit">3945912366</span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>CRC32K polynomial (Koopman).</p>
+			    <span>CRC32K_POLYNOMIAL</span><span>: <span class="td-lit">3945912366</span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>CRC32K polynomial (Koopman). Designed for improved Hamming-distance coverage.</p>
 </div></div></div>
     </div></div>
 </section>
