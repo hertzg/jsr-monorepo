@@ -36,10 +36,12 @@
  *
  * Unlike fixed-shape binary structs, bencode is self-describing — the decoder
  * dispatches on the first byte rather than following a schema. The
- * {@link bencode} factory therefore returns a single
- * `Coder<BencodeValue>` whose decode/encode methods recurse on themselves.
- * It composes with the rest of `@hertzg/binstruct` (`refine`, `struct` fields,
- * etc.) just like any other coder.
+ * {@link bencode} factory returns a `Coder<BencodeValue>` whose decode/encode
+ * methods recurse on themselves and can be used directly. Note that
+ * `@hertzg/binstruct` brands its built-in coders with a private symbol that
+ * isn't exported, so the bencode coder won't be recognised by `isCoder()` and
+ * can't be embedded as a field inside `struct(...)`. This is a known gap —
+ * see the package's PR description for the proposed upstream fix.
  *
  * ## No defensive checks on encode
  *
@@ -101,17 +103,7 @@
  * @module @binstruct/bencode
  */
 
-import { bytes, type Coder } from "@hertzg/binstruct";
-
-const kKindBencode = Symbol("bencode");
-// `kCoderKind` is an internal symbol that all binstruct coders carry as a
-// branding key. It is not part of the public API of `@hertzg/binstruct`, so
-// we recover it from a freshly-constructed coder. This keeps `bencode()` a
-// real `Coder<BencodeValue>` (recognised by `isCoder`, composable in
-// `struct(...)`, etc.) without crossing into private internals.
-const kCoderKind = Object.getOwnPropertySymbols(bytes(0)).find(
-  (sym) => sym.description === "kCoderKind",
-)!;
+import type { Coder } from "@hertzg/binstruct";
 
 const TAG_INT = 0x69; // "i"
 const TAG_LIST = 0x6c; // "l"
@@ -470,17 +462,11 @@ function decodeValue(encoded: Uint8Array): [BencodeValue, number] {
  * ```
  */
 export function bencode(): Coder<BencodeValue> {
-  const coder = {
-    [kCoderKind]: kKindBencode,
+  return {
     encode: (value: BencodeValue, target: Uint8Array) =>
       encodeValue(value, target),
     decode: (encoded: Uint8Array) => decodeValue(encoded),
-  };
-  // The `Coder` interface keys on the internal `kCoderKind` symbol that is
-  // not exported from `@hertzg/binstruct`. We recovered it at runtime from
-  // a freshly-constructed coder (see top of file), so the runtime shape is
-  // correct; the cast bridges the unique-symbol type identity.
-  return coder as unknown as Coder<BencodeValue>;
+  } as Coder<BencodeValue>;
 }
 
 /**
