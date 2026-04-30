@@ -452,140 +452,6 @@ export function cidrv4Overlaps(a: Cidrv4, b: Cidrv4): boolean {
 }
 
 /**
- * Generates a range of IP addresses from a CIDR block.
- *
- * Yields IP addresses starting at the specified offset from the
- * network address. The offset is relative to the network address (offset 0 = network address).
- * The step parameter controls the increment (positive or negative) between consecutive addresses.
- * Only addresses within the CIDR range are yielded.
- *
- * By default (when count is not specified), iterates through all addresses in the CIDR range
- * from the offset to the boundary (broadcast for positive step, network for negative step).
- *
- * @param cidr The CIDR block to generate addresses from
- * @param options Optional configuration for address generation
- * @param options.offset The offset from the network address (0-based, defaults to 0 for network address)
- * @param options.count The maximum number of addresses to generate (defaults to undefined = iterate until CIDR boundary)
- * @param options.step The increment between addresses (positive or negative, defaults to 1)
- * @returns A generator yielding IP addresses as 32-bit unsigned integers (may yield less than count if CIDR boundary is reached)
- *
- * @example Default behavior - iterate full CIDR range
- * ```ts
- * import { assertEquals } from "@std/assert";
- * import { cidrv4Addresses, parseCidrv4 } from "@hertzg/ip/cidrv4";
- * import { stringifyIpv4 } from "@hertzg/ip/ipv4";
- *
- * const cidr = parseCidrv4("10.0.0.0/29"); // 8 IPs: .0 to .7
- *
- * // By default, iterates from offset 0 (network address) to CIDR boundary
- * const all = Array.from(cidrv4Addresses(cidr));
- * assertEquals(all.map(stringifyIpv4), [
- *   "10.0.0.0", "10.0.0.1", "10.0.0.2", "10.0.0.3",
- *   "10.0.0.4", "10.0.0.5", "10.0.0.6", "10.0.0.7",
- * ]);
- * assertEquals(all.length, 8); // All 8 IPs in /29
- *
- * // Skip network address by specifying offset 1
- * const usable = Array.from(cidrv4Addresses(cidr, { offset: 1 }));
- * assertEquals(usable.length, 7); // Skip network address
- * ```
- *
- * @example Limiting with count parameter
- * ```ts
- * import { assertEquals } from "@std/assert";
- * import { cidrv4Addresses, parseCidrv4 } from "@hertzg/ip/cidrv4";
- * import { parseIpv4 } from "@hertzg/ip/ipv4";
- *
- * const cidr = parseCidrv4("192.168.1.0/24");
- *
- * // Get first 3 IPs starting at network address
- * const first3 = Array.from(cidrv4Addresses(cidr, { offset: 0, count: 3 }));
- * assertEquals(first3, [
- *   parseIpv4("192.168.1.0"),
- *   parseIpv4("192.168.1.1"),
- *   parseIpv4("192.168.1.2"),
- * ]);
- *
- * // Get 5 IPs starting at offset 10
- * const offset10 = Array.from(cidrv4Addresses(cidr, { offset: 10, count: 5 }));
- * assertEquals(offset10[0], parseIpv4("192.168.1.10"));
- * assertEquals(offset10[4], parseIpv4("192.168.1.14"));
- * ```
- *
- * @example Custom step for even/odd IPs
- * ```ts
- * import { assertEquals } from "@std/assert";
- * import { cidrv4Addresses, parseCidrv4 } from "@hertzg/ip/cidrv4";
- * import { parseIpv4 } from "@hertzg/ip/ipv4";
- *
- * const cidr = parseCidrv4("192.168.1.0/24");
- *
- * // Get every other IP (even addresses)
- * const evenIps = Array.from(cidrv4Addresses(cidr, { offset: 0, count: 5, step: 2 }));
- * assertEquals(evenIps, [
- *   parseIpv4("192.168.1.0"),
- *   parseIpv4("192.168.1.2"),
- *   parseIpv4("192.168.1.4"),
- *   parseIpv4("192.168.1.6"),
- *   parseIpv4("192.168.1.8"),
- * ]);
- *
- * // Get odd addresses
- * const oddIps = Array.from(cidrv4Addresses(cidr, { offset: 1, count: 5, step: 2 }));
- * assertEquals(oddIps[0], parseIpv4("192.168.1.1"));
- * assertEquals(oddIps[1], parseIpv4("192.168.1.3"));
- * ```
- *
- * @example Negative step for reverse iteration
- * ```ts
- * import { assertEquals } from "@std/assert";
- * import { cidrv4Addresses, parseCidrv4 } from "@hertzg/ip/cidrv4";
- * import { parseIpv4 } from "@hertzg/ip/ipv4";
- *
- * const cidr = parseCidrv4("192.168.1.0/24");
- *
- * // Get 5 IPs counting backwards from offset 10
- * const backwards = Array.from(cidrv4Addresses(cidr, { offset: 10, count: 5, step: -1 }));
- * assertEquals(backwards, [
- *   parseIpv4("192.168.1.10"),
- *   parseIpv4("192.168.1.9"),
- *   parseIpv4("192.168.1.8"),
- *   parseIpv4("192.168.1.7"),
- *   parseIpv4("192.168.1.6"),
- * ]);
- * ```
- *
- * @example CIDR boundary handling
- * ```ts
- * import { assert, assertEquals } from "@std/assert";
- * import { cidrv4Addresses, parseCidrv4 } from "@hertzg/ip/cidrv4";
- *
- * const cidr = parseCidrv4("192.168.1.0/29"); // Only 8 IPs: .0 to .7
- *
- * // Requesting more IPs than available stops at CIDR boundary
- * const ips = Array.from(cidrv4Addresses(cidr, { offset: 5, count: 10, step: 1 }));
- * assertEquals(ips.length, 3); // Only .5, .6, .7 are in range
- *
- * // Negative step stops at CIDR start
- * const reverseIps = Array.from(cidrv4Addresses(cidr, { offset: 3, count: 10, step: -1 }));
- * assertEquals(reverseIps.length, 4); // .3, .2, .1, .0
- * ```
- *
- * @example Memory-efficient iteration over large ranges
- * ```ts
- * import { cidrv4Addresses, parseCidrv4 } from "@hertzg/ip/cidrv4";
- * import { stringifyIpv4 } from "@hertzg/ip/ipv4";
- *
- * const cidr = parseCidrv4("10.0.0.0/16"); // 65,536 IPs
- *
- * // Process IPs without loading all into memory
- * for (const ip of cidrv4Addresses(cidr, { offset: 0, count: 65536, step: 1 })) {
- *   const ipStr = stringifyIpv4(ip);
- *   // Process each IP...
- * }
- * ```
- */
-/**
  * Splits an IPv4 CIDR block into its two half-sized children at prefix+1.
  *
  * @param cidr The CIDR block to split
@@ -704,6 +570,126 @@ export function cidrv4Subtract(a: Cidrv4, b: Cidrv4): Cidrv4[] {
   return [...cidrv4Subtract(upper, b), ...cidrv4Subtract(lower, b)];
 }
 
+/**
+ * Generates a range of IP addresses from a CIDR block.
+ *
+ * Yields IP addresses starting at the specified offset from the
+ * network address. The offset is relative to the network address (offset 0 = network address).
+ * The step parameter controls the increment (positive or negative) between consecutive addresses.
+ * Only addresses within the CIDR range are yielded.
+ *
+ * By default (when count is not specified), iterates through all addresses in the CIDR range
+ * from the offset to the boundary (broadcast for positive step, network for negative step).
+ *
+ * @param cidr The CIDR block to generate addresses from
+ * @param options Optional configuration for address generation
+ * @param options.offset The offset from the network address (0-based, defaults to 0 for network address)
+ * @param options.count The maximum number of addresses to generate (defaults to undefined = iterate until CIDR boundary)
+ * @param options.step The increment between addresses (positive or negative, defaults to 1)
+ * @returns A generator yielding IP addresses as 32-bit unsigned integers (may yield less than count if CIDR boundary is reached)
+ *
+ * @example Default behavior - iterate full CIDR range
+ * ```ts
+ * import { assertEquals } from "@std/assert";
+ * import { cidrv4Addresses, parseCidrv4 } from "@hertzg/ip/cidrv4";
+ * import { stringifyIpv4 } from "@hertzg/ip/ipv4";
+ *
+ * const cidr = parseCidrv4("10.0.0.0/29"); // 8 IPs: .0 to .7
+ *
+ * // By default, iterates from offset 0 (network address) to CIDR boundary
+ * const all = Array.from(cidrv4Addresses(cidr));
+ * assertEquals(all.map(stringifyIpv4), [
+ *   "10.0.0.0", "10.0.0.1", "10.0.0.2", "10.0.0.3",
+ *   "10.0.0.4", "10.0.0.5", "10.0.0.6", "10.0.0.7",
+ * ]);
+ * assertEquals(all.length, 8); // All 8 IPs in /29
+ *
+ * // Skip network address by specifying offset 1
+ * const usable = Array.from(cidrv4Addresses(cidr, { offset: 1 }));
+ * assertEquals(usable.length, 7); // Skip network address
+ * ```
+ *
+ * @example Limiting with count parameter
+ * ```ts
+ * import { assertEquals } from "@std/assert";
+ * import { cidrv4Addresses, parseCidrv4 } from "@hertzg/ip/cidrv4";
+ * import { parseIpv4 } from "@hertzg/ip/ipv4";
+ *
+ * const cidr = parseCidrv4("192.168.1.0/24");
+ *
+ * // Get first 3 IPs starting at network address
+ * const first3 = Array.from(cidrv4Addresses(cidr, { offset: 0, count: 3 }));
+ * assertEquals(first3, [
+ *   parseIpv4("192.168.1.0"),
+ *   parseIpv4("192.168.1.1"),
+ *   parseIpv4("192.168.1.2"),
+ * ]);
+ *
+ * // Get 5 IPs starting at offset 10
+ * const offset10 = Array.from(cidrv4Addresses(cidr, { offset: 10, count: 5 }));
+ * assertEquals(offset10[0], parseIpv4("192.168.1.10"));
+ * assertEquals(offset10[4], parseIpv4("192.168.1.14"));
+ * ```
+ *
+ * @example Custom step for even/odd IPs
+ * ```ts
+ * import { assertEquals } from "@std/assert";
+ * import { cidrv4Addresses, parseCidrv4 } from "@hertzg/ip/cidrv4";
+ * import { parseIpv4 } from "@hertzg/ip/ipv4";
+ *
+ * const cidr = parseCidrv4("192.168.1.0/24");
+ *
+ * // Get every other IP (even addresses)
+ * const evenIps = Array.from(cidrv4Addresses(cidr, { offset: 0, count: 5, step: 2 }));
+ * assertEquals(evenIps, [
+ *   parseIpv4("192.168.1.0"),
+ *   parseIpv4("192.168.1.2"),
+ *   parseIpv4("192.168.1.4"),
+ *   parseIpv4("192.168.1.6"),
+ *   parseIpv4("192.168.1.8"),
+ * ]);
+ *
+ * // Get odd addresses
+ * const oddIps = Array.from(cidrv4Addresses(cidr, { offset: 1, count: 5, step: 2 }));
+ * assertEquals(oddIps[0], parseIpv4("192.168.1.1"));
+ * assertEquals(oddIps[1], parseIpv4("192.168.1.3"));
+ * ```
+ *
+ * @example Negative step for reverse iteration
+ * ```ts
+ * import { assertEquals } from "@std/assert";
+ * import { cidrv4Addresses, parseCidrv4 } from "@hertzg/ip/cidrv4";
+ * import { parseIpv4 } from "@hertzg/ip/ipv4";
+ *
+ * const cidr = parseCidrv4("192.168.1.0/24");
+ *
+ * // Get 5 IPs counting backwards from offset 10
+ * const backwards = Array.from(cidrv4Addresses(cidr, { offset: 10, count: 5, step: -1 }));
+ * assertEquals(backwards, [
+ *   parseIpv4("192.168.1.10"),
+ *   parseIpv4("192.168.1.9"),
+ *   parseIpv4("192.168.1.8"),
+ *   parseIpv4("192.168.1.7"),
+ *   parseIpv4("192.168.1.6"),
+ * ]);
+ * ```
+ *
+ * @example CIDR boundary handling
+ * ```ts
+ * import { assertEquals } from "@std/assert";
+ * import { cidrv4Addresses, parseCidrv4 } from "@hertzg/ip/cidrv4";
+ *
+ * const cidr = parseCidrv4("192.168.1.0/29"); // Only 8 IPs: .0 to .7
+ *
+ * // Requesting more IPs than available stops at CIDR boundary
+ * const ips = Array.from(cidrv4Addresses(cidr, { offset: 5, count: 10, step: 1 }));
+ * assertEquals(ips.length, 3); // Only .5, .6, .7 are in range
+ *
+ * // Negative step stops at CIDR start
+ * const reverseIps = Array.from(cidrv4Addresses(cidr, { offset: 3, count: 10, step: -1 }));
+ * assertEquals(reverseIps.length, 4); // .3, .2, .1, .0
+ * ```
+ */
 export function* cidrv4Addresses(
   cidr: Cidrv4,
   options?: {
