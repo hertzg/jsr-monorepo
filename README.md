@@ -23,6 +23,7 @@ libraries, format-specific parsers, router API clients, and various utilities.
 | [@hertzg/xhb](https://jsr.io/@hertzg/xhb)                   | [![JSR](https://jsr.io/badges/@hertzg/xhb)](https://jsr.io/@hertzg/xhb)                   |
 | [@binstruct/cli](https://jsr.io/@binstruct/cli)             | [![JSR](https://jsr.io/badges/@binstruct/cli)](https://jsr.io/@binstruct/cli)             |
 | [@binstruct/ethernet](https://jsr.io/@binstruct/ethernet)   | [![JSR](https://jsr.io/badges/@binstruct/ethernet)](https://jsr.io/@binstruct/ethernet)   |
+| [@binstruct/icmp](https://jsr.io/@binstruct/icmp)           | [![JSR](https://jsr.io/badges/@binstruct/icmp)](https://jsr.io/@binstruct/icmp)           |
 | [@binstruct/png](https://jsr.io/@binstruct/png)             | [![JSR](https://jsr.io/badges/@binstruct/png)](https://jsr.io/@binstruct/png)             |
 | [@binstruct/wav](https://jsr.io/@binstruct/wav)             | [![JSR](https://jsr.io/badges/@binstruct/wav)](https://jsr.io/@binstruct/wav)             |
 

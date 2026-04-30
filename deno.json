@@ -43,6 +43,7 @@
     "./packages/binstruct",
     "./packages/binstruct-cli",
     "./packages/binstruct-ethernet",
+    "./packages/binstruct-icmp",
     "./packages/binstruct-png",
     "./packages/binstruct-wav",
     "./packages/wg-keys",
