@@ -12,31 +12,16 @@ import type { Coder } from "@hertzg/binstruct";
 /**
  * Loads a coder from the specified package.
  *
- * @param packageSpec Package specifier (JSR URL, local path, or npm package)
- * @param coderName Name of the coder to use from the package
- * @returns The loaded coder function
+ * `packageSpec` is forwarded to dynamic `import()`, so any specifier the
+ * runtime accepts works — `jsr:@scope/pkg`, `npm:pkg`, an absolute URL,
+ * or a local path. The package must export `coderName` as a function
+ * returning a coder (an object with `encode` and `decode`).
  *
- * @example Loading a coder from a JSR package
- * ```ts
- * import { assertEquals } from "@std/assert";
- * import { loadCoder } from "./loader.ts";
+ * @param packageSpec Package specifier (JSR URL, npm package, or local path)
+ * @param coderName Name of the coder factory to import
+ * @returns The coder instance
  *
- * const coder = await loadCoder("jsr:@binstruct/png", "pngFile");
- * assertEquals(typeof coder.decode, "function");
- * assertEquals(typeof coder.encode, "function");
- * ```
- *
- * @example Loading a coder from a local package
- * ```ts
- * import { assertEquals } from "@std/assert";
- * import { loadCoder } from "./loader.ts";
- *
- * const coder = await loadCoder("../binstruct-png/mod.ts", "pngFile");
- * assertEquals(typeof coder.decode, "function");
- * assertEquals(typeof coder.encode, "function");
- * ```
- *
- * @example Loading a coder from an npm package
+ * @example Load a coder from a JSR package
  * ```ts
  * import { assertEquals } from "@std/assert";
  * import { loadCoder } from "./loader.ts";
