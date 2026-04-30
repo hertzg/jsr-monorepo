@@ -3,11 +3,11 @@
  *
  * This module provides utilities for serializing and deserializing non-native
  * types like Uint8Array and BigInt that are commonly used in binary structures.
- * This ensures that data decoded from binary can be properly serialized to JSONC
- * and then reconstructed when encoding back to binary.
+ * Data decoded from binary is serialized to JSON5 (JSON with comments and
+ * trailing commas) and reconstructed when encoding back to binary.
  *
- * Uses @std/jsonc for JSONC parsing with custom logic for handling non-native
- * types during serialization.
+ * Uses `json5` for parsing with custom logic for handling non-native types
+ * during serialization.
  *
  * @module
  */
@@ -49,11 +49,11 @@ export function serializeToJson(value: unknown): string {
 /**
  * Deserializes JSON with support for non-native types.
  *
- * This function reconstructs Uint8Array and BigInt values from their
- * JSON-serialized representations. Uses @std/jsonc to support JSONC
- * (JSON with comments) format.
+ * Reconstructs Uint8Array and BigInt values from their JSON-serialized
+ * representations. Parses with `json5`, so comments and trailing commas
+ * are accepted.
  *
- * @param json The JSON or JSONC string to deserialize
+ * @param json The JSON or JSON5 string to deserialize
  * @returns Deserialized value with non-native types reconstructed
  *
  * @example
@@ -70,7 +70,7 @@ export function serializeToJson(value: unknown): string {
  * ```
  */
 export function deserializeFromJson(json: string): unknown {
-  // Use @std/jsonc to parse JSONC (JSON with comments)
+  // Parse with json5 (JSON with comments and trailing commas).
   const parsed = JSON5.parse(json);
 
   // Apply custom reviver for non-native types

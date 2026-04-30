@@ -7,7 +7,8 @@
  *
  * The CLI supports both decoding binary data from stdin to JSON on stdout
  * and encoding JSON data from stdin to binary on stdout, making it easy to
- * integrate with shell pipelines and other tools. JSONC is the default format.
+ * integrate with shell pipelines and other tools. JSON5 (JSON with comments
+ * and trailing commas) is the default on-the-wire format.
  *
  * @example Basic decode usage (with flags) - JSON output
  * ```bash
