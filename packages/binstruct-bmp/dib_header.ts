@@ -64,13 +64,19 @@ export interface BitmapInfoHeader {
 }
 
 /** Coder factory for the BMP `width` field (signed 32-bit little-endian). */
-export const bitmapWidthCoder = (): Coder<number> => s32le();
+export function bitmapWidthCoder(): Coder<number> {
+  return s32le();
+}
 
 /** Coder factory for the BMP `height` field (signed 32-bit; negative ⇒ top-down). */
-export const bitmapHeightCoder = (): Coder<number> => s32le();
+export function bitmapHeightCoder(): Coder<number> {
+  return s32le();
+}
 
 /** Coder factory for the BMP `bpp` field (bits per pixel, unsigned 16-bit). */
-export const bitmapBppCoder = (): Coder<number> => u16le();
+export function bitmapBppCoder(): Coder<number> {
+  return u16le();
+}
 
 /**
  * Creates a coder for the 40-byte BITMAPINFOHEADER (the most common DIB header).
