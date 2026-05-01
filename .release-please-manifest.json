@@ -5,6 +5,7 @@
   "packages/@binstruct/cli": "0.2.0",
   "packages/@binstruct/ethernet": "1.0.0",
   "packages/@binstruct/icmp": "1.0.0",
+  "packages/@binstruct/inet": "0.1.0",
   "packages/@binstruct/ipv4": "0.2.0",
   "packages/@binstruct/pcap": "0.2.0",
   "packages/@binstruct/png": "0.4.0",

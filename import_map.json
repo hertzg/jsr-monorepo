@@ -31,6 +31,7 @@
     "@binstruct/cli": "jsr:@binstruct/cli@^0.2.0",
     "@binstruct/ethernet": "jsr:@binstruct/ethernet@^1.0.0",
     "@binstruct/icmp": "jsr:@binstruct/icmp@^1.0.0",
+    "@binstruct/inet": "jsr:@binstruct/inet@^0.1.0",
     "@binstruct/ipv4": "jsr:@binstruct/ipv4@^0.2.0",
     "@binstruct/png": "jsr:@binstruct/png@^0.4.0",
     "@binstruct/udp": "jsr:@binstruct/udp@^1.0.0",

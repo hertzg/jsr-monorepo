@@ -1,6 +1,27 @@
 /**
  * Ethernet II frame encoding and decoding.
  *
+ * A frame is a 6-byte destination MAC, a 6-byte source MAC, a 2-byte
+ * EtherType, and a variable-length payload:
+ *
+ * ```text
+ *  0      7 8     15 16    23 24    31
+ * +--------+--------+--------+--------+
+ * |      Destination MAC (4 of 6)     |
+ * +--------+--------+--------+--------+
+ * | DstMAC (last 2) | SrcMAC (1st 2)  |
+ * +--------+--------+--------+--------+
+ * |        Source MAC (4 of 6)        |
+ * +--------+--------+--------+--------+
+ * |    EtherType    |                 |
+ * +-----------------+     Payload     |
+ * |             (variable)            |
+ * +-----------------------------------+
+ * ```
+ *
+ * The frame check sequence (FCS) at the end of a wire frame is *not* part
+ * of this coder's layout — kernels and NICs handle it.
+ *
  * For MAC address parsing/stringification, use the sister package
  * {@link https://jsr.io/@hertzg/mac @hertzg/mac}.
  *

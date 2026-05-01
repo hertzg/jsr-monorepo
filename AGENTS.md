@@ -84,6 +84,7 @@ mirrors the JSR coordinate. Two scopes:
 - `cli` - CLI tools for binary structure operations
 - `ethernet` - Ethernet frame parsing
 - `icmp` - ICMPv4 packet parsing (RFC 792)
+- `inet` - Internet stack coder (Ethernet→IPv4→UDP/ICMP/ARP) + RFC 1071 checksum
 - `ipv4` - IPv4 packet header parsing
 - `pcap` - libpcap (.pcap) capture file format support
 - `png` - PNG file format support
@@ -359,6 +360,7 @@ both tiresome and error-prone.
 - `@binstruct/cli`
 - `@binstruct/ethernet`
 - `@binstruct/icmp`
+- `@binstruct/inet`
 - `@binstruct/ipv4`
 - `@binstruct/png`
 - `@binstruct/udp`
