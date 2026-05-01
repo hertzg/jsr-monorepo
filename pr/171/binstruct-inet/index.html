@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>@hertzg&#x2F;inet documentation</title>
+  <title>@binstruct&#x2F;inet documentation</title>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="doc-current-file" content="">
@@ -17,7 +17,7 @@
   <div class="h-full">
     <div class="flex items-center"><ul class="breadcrumbs">
   <li>
-    <a href="" class="contextLink">@hertzg&#x2F;inet</a>
+    <a href="" class="contextLink">@binstruct&#x2F;inet</a>
   </li></ul>
 </div>
 
@@ -84,22 +84,24 @@
 </nav>
 <div id="searchResults"></div><div id="content">
     <main><section>
-  <div class="space-y-2 flex-1"><div class="space-y-7" id="module_doc"><div class="markdown"><p>Internet protocol primitives and stack orchestration shared across the
-<code>@binstruct/*</code> packet coder family.</p>
-<p>Two responsibilities:</p>
+  <div class="space-y-2 flex-1"><div class="space-y-7" id="module_doc"><div class="markdown"><p>Inet stack coder for the <code>@binstruct/*</code> packet family.</p>
+<p><a href="././~/inetCoder.html"><code>inetCoder</code></a> produces a single round-trippable
+<a href="https://jsr.io/@hertzg/binstruct">Coder</a> that walks an Ethernet II
+frame top-down using the family's own coders. Each layer's payload field is
+replaced with a discriminated union of the next layer's decoded form;
+layers we don't have a coder for default to a raw <a href="https://deno.land/api@v2.7.14?s=Uint8Array"><code>Uint8Array</code></a>,
+so this coder is safe to point at arbitrary captured traffic.</p>
+<p>Coverage as of 0.1:</p>
 <ul>
-<li><strong>Primitives</strong>: small, cross-cutting helpers that more than one
-<code>@binstruct/*</code> coder needs. The first one is <a href="././~/internetChecksum.html"><code>internetChecksum</code></a> —
-the RFC 1071 16-bit one's complement sum used by IPv4, ICMPv4, UDP, and TCP.</li>
-<li><strong>Stack orchestration</strong>: <a href="././~/decodeFrame.html"><code>decodeFrame</code></a> walks an Ethernet II frame
-top-down, decoding each layer with the matching <code>@binstruct/*</code> coder so
-callers don't have to thread payloads by hand. Layers we don't have a
-coder for surface as <code>{ kind: &quot;unsupported&quot;, ... }</code> rather than throwing,
-which keeps the function safe to point at arbitrary captured traffic.</li>
+<li>L2 — Ethernet II (<a href="https://jsr.io/@binstruct/ethernet">@binstruct/ethernet</a>)</li>
+<li>L3 — IPv4 (<a href="https://jsr.io/@binstruct/ipv4">@binstruct/ipv4</a>),
+ARP (<a href="https://jsr.io/@binstruct/arp">@binstruct/arp</a>)</li>
+<li>L4 (under IPv4) — UDP (<a href="https://jsr.io/@binstruct/udp">@binstruct/udp</a>),
+ICMPv4 (<a href="https://jsr.io/@binstruct/icmp">@binstruct/icmp</a>)</li>
 </ul>
-<p>The orchestrator deliberately covers only what the family already ships
-coders for: Ethernet → (IPv4 | ARP) → (UDP | ICMP | bytes). Adding TCP, IPv6,
-or other link types is a matter of one more switch arm each.</p>
+<p>Adding TCP, IPv6, or other link types is one more switch arm each.</p>
+<p>Also exports <a href="././~/internetChecksum.html"><code>internetChecksum</code></a> (RFC 1071) — the 16-bit one's
+complement sum used by IPv4, ICMPv4, UDP, and TCP.</p>
 </div><section class="section"  id="examples"><div>
       <h2 class="anchorable mb-1"><a href="#examples" class="anchor" aria-label="Anchor" tabIndex="-1"><svg
   width="16"
@@ -145,104 +147,100 @@ Examples</h2></div><div class="space-y-8"><div class="anchorable"><a href="#exam
   </defs>
 </svg>
 </a>
-<h3 class="example-header"><div class="markdown"><p>Walk a captured Ethernet frame down to its UDP payload</p>
+<h3 class="example-header"><div class="markdown"><p>Round-trip a UDP-over-IPv4-over-Ethernet frame</p>
 </div></h3>
-  <div><div class="markdown"><pre class="highlight"><code class="language-ts">import { assertEquals } from &quot;@std/assert&quot;;
-import { decodeFrame } from &quot;@hertzg/inet&quot;;
-import { ethernet2Frame } from &quot;@binstruct/ethernet&quot;;
-import { ipv4Header } from &quot;@binstruct/ipv4&quot;;
-import { udpDatagram } from &quot;@binstruct/udp&quot;;
+  <div><div class="markdown"><pre class="highlight"><code class="language-ts">import { assert, assertEquals } from &quot;@std/assert&quot;;
+import { inetCoder } from &quot;@binstruct/inet&quot;;
 
-// Build a UDP-over-IPv4-over-Ethernet frame.
-const datagram = new Uint8Array(12);
-udpDatagram().encode({
-  srcPort: 53, dstPort: 49152, length: 12, checksum: 0,
-  payload: new Uint8Array([0xde, 0xad, 0xbe, 0xef]),
-}, datagram);
+const coder = inetCoder();
 
-const packet = new Uint8Array(20 + 12);
-ipv4Header().encode({
-  versionIhl: { version: 4, ihl: 5 },
-  typeOfService: 0,
-  totalLength: 32,
-  identification: 0,
-  flagsFragmentOffset: { reserved: 0, dontFragment: 0, moreFragments: 0, fragmentOffset: 0 },
-  timeToLive: 64,
-  protocol: 17,
-  headerChecksum: 0,
-  sourceAddress: &quot;192.0.2.1&quot;,
-  destinationAddress: &quot;192.0.2.2&quot;,
-  options: new Uint8Array(0),
-}, packet);
-packet.set(datagram, 20);
-
-const frame = new Uint8Array(14 + 32);
-ethernet2Frame().encode({
-  dstMac: new Uint8Array([0x00, 0x11, 0x22, 0x33, 0x44, 0x55]),
-  srcMac: new Uint8Array([0x66, 0x77, 0x88, 0x99, 0xaa, 0xbb]),
+const value = {
+  dstMac: new Uint8Array([0, 0, 0, 0, 0, 1]),
+  srcMac: new Uint8Array([0, 0, 0, 0, 0, 2]),
   etherType: 0x0800,
-  payload: packet,
-}, frame);
+  payload: {
+    kind: &quot;ipv4&quot; as const,
+    ipv4: {
+      versionIhl: { version: 4, ihl: 5 },
+      typeOfService: 0,
+      totalLength: 32,
+      identification: 0,
+      flagsFragmentOffset: { reserved: 0, dontFragment: 0, moreFragments: 0, fragmentOffset: 0 },
+      timeToLive: 64,
+      protocol: 17,
+      headerChecksum: 0,
+      sourceAddress: &quot;192.0.2.1&quot;,
+      destinationAddress: &quot;192.0.2.2&quot;,
+      options: new Uint8Array(0),
+      payload: {
+        kind: &quot;udp&quot; as const,
+        udp: {
+          srcPort: 53,
+          dstPort: 49152,
+          length: 12,
+          checksum: 0,
+          payload: new Uint8Array([0xde, 0xad, 0xbe, 0xef]),
+        },
+      },
+    },
+  },
+};
 
-const parsed = decodeFrame(frame);
+const buffer = new Uint8Array(64);
+const written = coder.encode(value, buffer);
+const [decoded] = coder.decode(buffer.subarray(0, written));
 
-assertEquals(parsed.l3.kind, &quot;ipv4&quot;);
-if (parsed.l3.kind === &quot;ipv4&quot;) {
-  assertEquals(parsed.l3.header.sourceAddress, &quot;192.0.2.1&quot;);
-  assertEquals(parsed.l3.l4.kind, &quot;udp&quot;);
-  if (parsed.l3.l4.kind === &quot;udp&quot;) {
-    assertEquals(parsed.l3.l4.datagram.srcPort, 53);
-    assertEquals(parsed.l3.l4.datagram.payload, new Uint8Array([0xde, 0xad, 0xbe, 0xef]));
-  }
-}
-</code><button class="copyButton" data-copy="import { assertEquals } from &quot;@std/assert&quot;;
-import { decodeFrame } from &quot;@hertzg/inet&quot;;
-import { ethernet2Frame } from &quot;@binstruct/ethernet&quot;;
-import { ipv4Header } from &quot;@binstruct/ipv4&quot;;
-import { udpDatagram } from &quot;@binstruct/udp&quot;;
+assert(!(decoded.payload instanceof Uint8Array));
+assert(decoded.payload.kind === &quot;ipv4&quot;);
+assert(!(decoded.payload.ipv4.payload instanceof Uint8Array));
+assert(decoded.payload.ipv4.payload.kind === &quot;udp&quot;);
+assertEquals(decoded.payload.ipv4.payload.udp.payload, new Uint8Array([0xde, 0xad, 0xbe, 0xef]));
+</code><button class="copyButton" data-copy="import { assert, assertEquals } from &quot;@std/assert&quot;;
+import { inetCoder } from &quot;@binstruct/inet&quot;;
 
-// Build a UDP-over-IPv4-over-Ethernet frame.
-const datagram = new Uint8Array(12);
-udpDatagram().encode({
-  srcPort: 53, dstPort: 49152, length: 12, checksum: 0,
-  payload: new Uint8Array([0xde, 0xad, 0xbe, 0xef]),
-}, datagram);
+const coder = inetCoder();
 
-const packet = new Uint8Array(20 + 12);
-ipv4Header().encode({
-  versionIhl: { version: 4, ihl: 5 },
-  typeOfService: 0,
-  totalLength: 32,
-  identification: 0,
-  flagsFragmentOffset: { reserved: 0, dontFragment: 0, moreFragments: 0, fragmentOffset: 0 },
-  timeToLive: 64,
-  protocol: 17,
-  headerChecksum: 0,
-  sourceAddress: &quot;192.0.2.1&quot;,
-  destinationAddress: &quot;192.0.2.2&quot;,
-  options: new Uint8Array(0),
-}, packet);
-packet.set(datagram, 20);
-
-const frame = new Uint8Array(14 + 32);
-ethernet2Frame().encode({
-  dstMac: new Uint8Array([0x00, 0x11, 0x22, 0x33, 0x44, 0x55]),
-  srcMac: new Uint8Array([0x66, 0x77, 0x88, 0x99, 0xaa, 0xbb]),
+const value = {
+  dstMac: new Uint8Array([0, 0, 0, 0, 0, 1]),
+  srcMac: new Uint8Array([0, 0, 0, 0, 0, 2]),
   etherType: 0x0800,
-  payload: packet,
-}, frame);
+  payload: {
+    kind: &quot;ipv4&quot; as const,
+    ipv4: {
+      versionIhl: { version: 4, ihl: 5 },
+      typeOfService: 0,
+      totalLength: 32,
+      identification: 0,
+      flagsFragmentOffset: { reserved: 0, dontFragment: 0, moreFragments: 0, fragmentOffset: 0 },
+      timeToLive: 64,
+      protocol: 17,
+      headerChecksum: 0,
+      sourceAddress: &quot;192.0.2.1&quot;,
+      destinationAddress: &quot;192.0.2.2&quot;,
+      options: new Uint8Array(0),
+      payload: {
+        kind: &quot;udp&quot; as const,
+        udp: {
+          srcPort: 53,
+          dstPort: 49152,
+          length: 12,
+          checksum: 0,
+          payload: new Uint8Array([0xde, 0xad, 0xbe, 0xef]),
+        },
+      },
+    },
+  },
+};
 
-const parsed = decodeFrame(frame);
+const buffer = new Uint8Array(64);
+const written = coder.encode(value, buffer);
+const [decoded] = coder.decode(buffer.subarray(0, written));
 
-assertEquals(parsed.l3.kind, &quot;ipv4&quot;);
-if (parsed.l3.kind === &quot;ipv4&quot;) {
-  assertEquals(parsed.l3.header.sourceAddress, &quot;192.0.2.1&quot;);
-  assertEquals(parsed.l3.l4.kind, &quot;udp&quot;);
-  if (parsed.l3.l4.kind === &quot;udp&quot;) {
-    assertEquals(parsed.l3.l4.datagram.srcPort, 53);
-    assertEquals(parsed.l3.l4.datagram.payload, new Uint8Array([0xde, 0xad, 0xbe, 0xef]));
-  }
-}
+assert(!(decoded.payload instanceof Uint8Array));
+assert(decoded.payload.kind === &quot;ipv4&quot;);
+assert(!(decoded.payload.ipv4.payload instanceof Uint8Array));
+assert(decoded.payload.ipv4.payload.kind === &quot;udp&quot;);
+assertEquals(decoded.payload.ipv4.payload.udp.payload, new Uint8Array([0xde, 0xad, 0xbe, 0xef]));
 "><svg
   class="copy"
   width="15"
@@ -308,13 +306,13 @@ if (parsed.l3.kind === &quot;ipv4&quot;) {
                   </span>
                 </a>
               </li><li>
-                <a href=".&#x2F;.&#x2F;~&#x2F;L4Layer.html" title="L4Layer"><div class="docNodeKindIcon"><div class="text-TypeAlias bg-TypeAlias/15 dark:text-TypeAliasDark dark:bg-TypeAliasDark/15" title="Type Alias">T</div></div>
+                <a href=".&#x2F;.&#x2F;~&#x2F;L4Payload.html" title="L4Payload"><div class="docNodeKindIcon"><div class="text-TypeAlias bg-TypeAlias/15 dark:text-TypeAliasDark dark:bg-TypeAliasDark/15" title="Type Alias">T</div></div>
 <span class="hover:bg-TypeAlias/15 hover:bg-TypeAliasDark/15">
-                    L4Layer
+                    L4Payload
                   </span>
                 </a>
               </li></ul><a class="flex items-center gap-0.5" href=".&#x2F;all_symbols.html">
-              <span class="leading-none">view all 9 symbols</span><svg
+              <span class="leading-none">view all 10 symbols</span><svg
   width="16"
   height="16"
   viewBox="0 0 16 16"
@@ -329,7 +327,7 @@ if (parsed.l3.kind === &quot;ipv4&quot;) {
   />
 </svg>
 </a></nav><nav class="documentNavigation">
-          <h3>Document Navigation</h3><ul><li><a href="#examples" title="Examples">Examples</a></li><li><ul><li><a href="#example_0" title="Walk a captured Ethernet frame down to its UDP payload">Walk a captured Ethernet frame down to its UDP payload</a></li></ul></li></ul></nav></div>
+          <h3>Document Navigation</h3><ul><li><a href="#examples" title="Examples">Examples</a></li><li><ul><li><a href="#example_0" title="Round-trip a UDP-over-IPv4-over-Ethernet frame">Round-trip a UDP-over-IPv4-over-Ethernet frame</a></li></ul></li></ul></nav></div>
   </div></div>
 </div>
 </div>

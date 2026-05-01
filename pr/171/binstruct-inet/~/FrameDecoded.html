@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>DecodedFrame.l3 - default - @hertzg&#x2F;inet documentation</title>
+  <title>FrameDecoded - default - @binstruct&#x2F;inet documentation</title>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="doc-current-file" content=".">
@@ -17,7 +17,7 @@
   <div class="h-full">
     <div class="flex items-center"><ul class="breadcrumbs">
   <li>
-    <a href="..&#x2F;" class="contextLink">@hertzg&#x2F;inet</a>
+    <a href="..&#x2F;" class="contextLink">@binstruct&#x2F;inet</a>
   </li><span class="text-black dark:text-white"><svg
   width="16"
   height="16"
@@ -48,8 +48,7 @@
 </svg>
 </span>
 
-    <ul><li><span>.</span>
-            <a href="..&#x2F;.&#x2F;.&#x2F;~&#x2F;DecodedFrame.html" class="contextLink">DecodedFrame</a></li><li>l3</li></ul></ul>
+    <ul><li>FrameDecoded</li></ul></ul>
 </div>
 
     <div class="flex items-center gap-2">
@@ -113,14 +112,14 @@
     </div>
   </div>
 </nav>
-<div id="searchResults"></div><div id="content"><main class="symbolGroup" id="symbol_DecodedFrame.l3"><article>
+<div id="searchResults"></div><div id="content"><main class="symbolGroup" id="symbol_FrameDecoded"><article>
       <div class="symbolTitle">
         <div>
           <div class="text-2xl leading-none break-all">
-            <span class="text-Property">property</span>&nbsp;<span class="font-bold">DecodedFrame.l3</span>
+            <span class="text-TypeAlias">type alias</span>&nbsp;<span class="font-bold">FrameDecoded</span>
           </div></div><a
   class="sourceButton"
-  href="file:&#x2F;&#x2F;&#x2F;home&#x2F;runner&#x2F;work&#x2F;jsr-monorepo&#x2F;jsr-monorepo&#x2F;packages&#x2F;@hertzg&#x2F;inet&#x2F;mod.ts"><svg
+  href="file:&#x2F;&#x2F;&#x2F;home&#x2F;runner&#x2F;work&#x2F;jsr-monorepo&#x2F;jsr-monorepo&#x2F;packages&#x2F;@binstruct&#x2F;inet&#x2F;mod.ts"><svg
   width="14"
   height="14"
   viewBox="0 0 14 14"
@@ -143,8 +142,11 @@
   />
 </svg>
 </a>
-</div><div><div class="space-y-7" id=""><section class="section"  id="type"><div>
-      <h2 class="anchorable mb-1"><a href="#type" class="anchor" aria-label="Anchor" tabIndex="-1"><svg
+</div><div><div class="space-y-7" id=""><div class="markdown"><p>Decoded Ethernet II frame: same fields as
+<a href="https://jsr.io/@binstruct/ethernet">Ethernet2Frame</a>, but <code>payload</code> is
+the structured <a href="../././~/EthernetPayload.html"><code>EthernetPayload</code></a> instead of raw bytes.</p>
+</div><section class="section"  id="definition"><div>
+      <h2 class="anchorable mb-1"><a href="#definition" class="anchor" aria-label="Anchor" tabIndex="-1"><svg
   width="16"
   height="16"
   viewBox="0 0 14 14"
@@ -166,14 +168,14 @@
   </defs>
 </svg>
 </a>
-Type</h2></div><div class="space-y-8"><div class=" docEntry" id="variable_decodedframe_l3">
+Definition</h2></div><div class="space-y-8"><div class=" docEntry" id="typealias_framedecoded">
 
   <div class="docEntryHeader">
-    <div><code><span class="font-medium text-stone-500 dark:text-stone-200"><a href="../././~/L3Layer.html" class="link td-ref">L3Layer</a></span>
+    <div><code><span class="font-medium text-stone-500 dark:text-stone-200"><div class="ml-indent"><span><span class="td-ref">Omit</span>&lt;<span class="td-ref">Ethernet2Frame</span><span>, </span><span class="td-str">"payload"</span>&gt;</span><br /><span><span class="td-op"> & </span>{ <span class="td-kw">readonly </span>payload<span>: <a href="../././~/EthernetPayload.html" class="link td-ref">EthernetPayload</a></span>;  }</span></div></span>
       </code>
     </div><a
   class="sourceButton"
-  href="file:&#x2F;&#x2F;&#x2F;home&#x2F;runner&#x2F;work&#x2F;jsr-monorepo&#x2F;jsr-monorepo&#x2F;packages&#x2F;@hertzg&#x2F;inet&#x2F;mod.ts"><svg
+  href="file:&#x2F;&#x2F;&#x2F;home&#x2F;runner&#x2F;work&#x2F;jsr-monorepo&#x2F;jsr-monorepo&#x2F;packages&#x2F;@binstruct&#x2F;inet&#x2F;mod.ts"><svg
   width="14"
   height="14"
   viewBox="0 0 14 14"
@@ -203,8 +205,8 @@ Type</h2></div><div class="space-y-8"><div class=" docEntry" id="variable_decode
     </article></main>
 <div class="toc">
     <div><div class="usageContent">
-    <h3>Usage</h3><div class="markdown"><pre class="highlight"><code class="language-typescript">import { type DecodedFrame } from &quot;.&quot;;
-</code><button class="copyButton" data-copy="import { type DecodedFrame } from &quot;.&quot;;
+    <h3>Usage</h3><div class="markdown"><pre class="highlight"><code class="language-typescript">import { type FrameDecoded } from &quot;.&quot;;
+</code><button class="copyButton" data-copy="import { type FrameDecoded } from &quot;.&quot;;
 "><svg
   class="copy"
   width="15"
@@ -237,7 +239,7 @@ Type</h2></div><div class="space-y-8"><div class=" docEntry" id="variable_decode
 </svg>
 </button><code></code></pre>
 </div></div><nav class="documentNavigation">
-          <h3>Document Navigation</h3><ul><li><a href="#type" title="Type">Type</a></li></ul></nav></div>
+          <h3>Document Navigation</h3><ul><li><a href="#definition" title="Definition">Definition</a></li></ul></nav></div>
   </div></div>
 </div>
 </div>
