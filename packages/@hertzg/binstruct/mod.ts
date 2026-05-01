@@ -414,5 +414,10 @@ export { bytes } from "./bytes/bytes.ts";
 export { type BitSchema, bitStruct } from "./bits/bit-struct.ts";
 export { refine, type Refiner } from "./refine/refine.ts";
 export { type RefinedUnion, refineSwitch } from "./refine/switch.ts";
+export {
+  type DecodedFields,
+  type FieldCoders,
+  refineFields,
+} from "./refine/fields.ts";
 export { decode, encode } from "./helpers.ts";
 export { autoGrowBuffer, type AutogrowOptions } from "./buffer.ts";
