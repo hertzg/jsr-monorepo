@@ -157,7 +157,7 @@ import {
   ARP_HARDWARE_TYPE,
   ARP_OPCODE,
   ARP_PROTOCOL_TYPE,
-  arpEthernetIpv4,
+  arpData,
 } from &quot;@binstruct/arp&quot;;
 
 // deno-fmt-ignore
@@ -173,15 +173,15 @@ const wire = new Uint8Array([
   0xc0, 0xa8, 0x01, 0x02,             // tpa: 192.168.1.2
 ]);
 
-const [packet, bytesRead] = arpEthernetIpv4().decode(wire);
+const [packet, bytesRead] = arpData().decode(wire);
 
 assertEquals(bytesRead, 28);
-assertEquals(packet.htype, ARP_HARDWARE_TYPE.ETHERNET);
-assertEquals(packet.ptype, ARP_PROTOCOL_TYPE.IPV4);
-assertEquals(packet.oper, ARP_OPCODE.REQUEST);
-assertEquals(stringifyMac(packet.sha), &quot;00:11:22:33:44:55&quot;);
-assertEquals(stringifyIpv4(packet.spa), &quot;192.168.1.1&quot;);
-assertEquals(stringifyIpv4(packet.tpa), &quot;192.168.1.2&quot;);
+assertEquals(packet.hardwareType, ARP_HARDWARE_TYPE.ETHERNET);
+assertEquals(packet.protocolType, ARP_PROTOCOL_TYPE.IPV4);
+assertEquals(packet.operation, ARP_OPCODE.REQUEST);
+assertEquals(stringifyMac(packet.senderHardwareAddress), &quot;00:11:22:33:44:55&quot;);
+assertEquals(stringifyIpv4(packet.senderProtocolAddress), &quot;192.168.1.1&quot;);
+assertEquals(stringifyIpv4(packet.targetProtocolAddress), &quot;192.168.1.2&quot;);
 </code><button class="copyButton" data-copy="import { assertEquals } from &quot;@std/assert&quot;;
 import { stringifyIpv4 } from &quot;@hertzg/ip/ipv4&quot;;
 import { stringify as stringifyMac } from &quot;@hertzg/mac&quot;;
@@ -189,7 +189,7 @@ import {
   ARP_HARDWARE_TYPE,
   ARP_OPCODE,
   ARP_PROTOCOL_TYPE,
-  arpEthernetIpv4,
+  arpData,
 } from &quot;@binstruct/arp&quot;;
 
 // deno-fmt-ignore
@@ -205,15 +205,15 @@ const wire = new Uint8Array([
   0xc0, 0xa8, 0x01, 0x02,             // tpa: 192.168.1.2
 ]);
 
-const [packet, bytesRead] = arpEthernetIpv4().decode(wire);
+const [packet, bytesRead] = arpData().decode(wire);
 
 assertEquals(bytesRead, 28);
-assertEquals(packet.htype, ARP_HARDWARE_TYPE.ETHERNET);
-assertEquals(packet.ptype, ARP_PROTOCOL_TYPE.IPV4);
-assertEquals(packet.oper, ARP_OPCODE.REQUEST);
-assertEquals(stringifyMac(packet.sha), &quot;00:11:22:33:44:55&quot;);
-assertEquals(stringifyIpv4(packet.spa), &quot;192.168.1.1&quot;);
-assertEquals(stringifyIpv4(packet.tpa), &quot;192.168.1.2&quot;);
+assertEquals(packet.hardwareType, ARP_HARDWARE_TYPE.ETHERNET);
+assertEquals(packet.protocolType, ARP_PROTOCOL_TYPE.IPV4);
+assertEquals(packet.operation, ARP_OPCODE.REQUEST);
+assertEquals(stringifyMac(packet.senderHardwareAddress), &quot;00:11:22:33:44:55&quot;);
+assertEquals(stringifyIpv4(packet.senderProtocolAddress), &quot;192.168.1.1&quot;);
+assertEquals(stringifyIpv4(packet.targetProtocolAddress), &quot;192.168.1.2&quot;);
 "><svg
   class="copy"
   width="15"
@@ -271,10 +271,10 @@ assertEquals(stringifyIpv4(packet.tpa), &quot;192.168.1.2&quot;);
   </defs>
 </svg>
 </a>
-Functions</h2></div><div class="namespaceSection"><div id="namespace_arpethernetipv4" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-Function bg-Function/15 dark:text-FunctionDark dark:bg-FunctionDark/15" title="Function">f</div></div>
+Functions</h2></div><div class="namespaceSection"><div id="namespace_arpdata" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-Function bg-Function/15 dark:text-FunctionDark dark:bg-FunctionDark/15" title="Function">f</div></div>
 <div class="namespaceItemContent">
-		    <a href=".&#x2F;.&#x2F;.&#x2F;~&#x2F;arpEthernetIpv4.html" title="arpEthernetIpv4">
-			    <span>arpEthernetIpv4</span><span>()<span>: <span class="td-ref">Coder</span>&lt;<span class="td-ref">ArpEthernetIpv4Packet</span>&gt;</span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Creates a coder for the common Ethernet/IPv4 ARP packet (RFC 826).</p>
+		    <a href=".&#x2F;.&#x2F;.&#x2F;~&#x2F;arpData.html" title="arpData">
+			    <span>arpData</span><span>()<span>: <span class="td-ref">Coder</span>&lt;<span class="td-ref">ArpData</span>&gt;</span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Creates a coder for the common Ethernet/IPv4 ARP packet (RFC 826).</p>
 </div></div></div>
     </div></div>
 </section>
@@ -301,29 +301,29 @@ Functions</h2></div><div class="namespaceSection"><div id="namespace_arpethernet
   </defs>
 </svg>
 </a>
-Interfaces</h2></div><div class="namespaceSection"><div id="namespace_arpethernetipv4packet" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-Interface bg-Interface/15 dark:text-InterfaceDark dark:bg-InterfaceDark/15" title="Interface">I</div></div>
+Interfaces</h2></div><div class="namespaceSection"><div id="namespace_arpdata-1" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-Interface bg-Interface/15 dark:text-InterfaceDark dark:bg-InterfaceDark/15" title="Interface">I</div></div>
 <div class="namespaceItemContent">
-		    <a href=".&#x2F;.&#x2F;.&#x2F;~&#x2F;ArpEthernetIpv4Packet.html" title="ArpEthernetIpv4Packet">
-			    <span>ArpEthernetIpv4Packet</span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Decoded representation of an Ethernet/IPv4 ARP packet (RFC 826, 28 bytes).</p>
+		    <a href=".&#x2F;.&#x2F;.&#x2F;~&#x2F;ArpData.html" title="ArpData">
+			    <span>ArpData</span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Decoded Ethernet/IPv4 ARP packet (RFC 826, 28 bytes).</p>
 </div></div><ul class="namespaceItemContentSubItems"><li>
-                <a href=".&#x2F;.&#x2F;.&#x2F;~&#x2F;ArpEthernetIpv4Packet.html#property_hlen">
-                  <span>hlen</span><span>: <span class="td-kw">number</span></span></a></li><li>
-                <a href=".&#x2F;.&#x2F;.&#x2F;~&#x2F;ArpEthernetIpv4Packet.html#property_htype">
-                  <span>htype</span><span>: <span class="td-kw">number</span></span></a></li><li>
-                <a href=".&#x2F;.&#x2F;.&#x2F;~&#x2F;ArpEthernetIpv4Packet.html#property_oper">
-                  <span>oper</span><span>: <span class="td-kw">number</span></span></a></li><li>
-                <a href=".&#x2F;.&#x2F;.&#x2F;~&#x2F;ArpEthernetIpv4Packet.html#property_plen">
-                  <span>plen</span><span>: <span class="td-kw">number</span></span></a></li><li>
-                <a href=".&#x2F;.&#x2F;.&#x2F;~&#x2F;ArpEthernetIpv4Packet.html#property_ptype">
-                  <span>ptype</span><span>: <span class="td-kw">number</span></span></a></li><li>
-                <a href=".&#x2F;.&#x2F;.&#x2F;~&#x2F;ArpEthernetIpv4Packet.html#property_sha">
-                  <span>sha</span><span>: <span class="td-ref">Uint8Array</span></span></a></li><li>
-                <a href=".&#x2F;.&#x2F;.&#x2F;~&#x2F;ArpEthernetIpv4Packet.html#property_spa">
-                  <span>spa</span><span>: <span class="td-kw">number</span></span></a></li><li>
-                <a href=".&#x2F;.&#x2F;.&#x2F;~&#x2F;ArpEthernetIpv4Packet.html#property_tha">
-                  <span>tha</span><span>: <span class="td-ref">Uint8Array</span></span></a></li><li>
-                <a href=".&#x2F;.&#x2F;.&#x2F;~&#x2F;ArpEthernetIpv4Packet.html#property_tpa">
-                  <span>tpa</span><span>: <span class="td-kw">number</span></span></a></li></ul></div>
+                <a href=".&#x2F;.&#x2F;.&#x2F;~&#x2F;ArpData.html#property_hardwareaddresslength">
+                  <span>hardwareAddressLength</span><span>: <span class="td-kw">number</span></span></a></li><li>
+                <a href=".&#x2F;.&#x2F;.&#x2F;~&#x2F;ArpData.html#property_hardwaretype">
+                  <span>hardwareType</span><span>: <span class="td-kw">number</span></span></a></li><li>
+                <a href=".&#x2F;.&#x2F;.&#x2F;~&#x2F;ArpData.html#property_operation">
+                  <span>operation</span><span>: <span class="td-kw">number</span></span></a></li><li>
+                <a href=".&#x2F;.&#x2F;.&#x2F;~&#x2F;ArpData.html#property_protocoladdresslength">
+                  <span>protocolAddressLength</span><span>: <span class="td-kw">number</span></span></a></li><li>
+                <a href=".&#x2F;.&#x2F;.&#x2F;~&#x2F;ArpData.html#property_protocoltype">
+                  <span>protocolType</span><span>: <span class="td-kw">number</span></span></a></li><li>
+                <a href=".&#x2F;.&#x2F;.&#x2F;~&#x2F;ArpData.html#property_senderhardwareaddress">
+                  <span>senderHardwareAddress</span><span>: <span class="td-ref">Uint8Array</span></span></a></li><li>
+                <a href=".&#x2F;.&#x2F;.&#x2F;~&#x2F;ArpData.html#property_senderprotocoladdress">
+                  <span>senderProtocolAddress</span><span>: <span class="td-kw">number</span></span></a></li><li>
+                <a href=".&#x2F;.&#x2F;.&#x2F;~&#x2F;ArpData.html#property_targethardwareaddress">
+                  <span>targetHardwareAddress</span><span>: <span class="td-ref">Uint8Array</span></span></a></li><li>
+                <a href=".&#x2F;.&#x2F;.&#x2F;~&#x2F;ArpData.html#property_targetprotocoladdress">
+                  <span>targetProtocolAddress</span><span>: <span class="td-kw">number</span></span></a></li></ul></div>
     </div></div>
 </section>
 <section class="section"  id="default_type-aliases"><div>
@@ -437,6 +437,12 @@ Variables</h2></div><div class="namespaceSection"><div id="namespace_arp_etherne
                 <a href=".&#x2F;.&#x2F;.&#x2F;~&#x2F;ARP_PROTOCOL_TYPE.html#property_ipv4">
                   <span>IPV4</span><span>: <span class="td-kw">number</span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Internet Protocol version 4.</p>
 </div></div></li></ul></div>
+    </div><div id="namespace_ethertype_arp" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-Variable bg-Variable/15 dark:text-VariableDark dark:bg-VariableDark/15" title="Variable">v</div></div>
+<div class="namespaceItemContent">
+		    <a href=".&#x2F;.&#x2F;.&#x2F;~&#x2F;ETHERTYPE_ARP.html" title="ETHERTYPE_ARP">
+			    <span>ETHERTYPE_ARP</span><span>: <span class="td-lit">2054</span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>EtherType assigned to ARP (<code>0x0806</code>). The value an Ethernet II frame's
+<code>etherType</code> field carries when its payload is an ARP packet.</p>
+</div></div></div>
     </div></div>
 </section>
 </div>
