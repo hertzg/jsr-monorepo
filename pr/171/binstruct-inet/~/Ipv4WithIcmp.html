@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>EthernetPayload - default - @binstruct&#x2F;inet documentation</title>
+  <title>Ipv4WithIcmp - default - @binstruct&#x2F;inet documentation</title>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="doc-current-file" content=".">
@@ -48,7 +48,7 @@
 </svg>
 </span>
 
-    <ul><li>EthernetPayload</li></ul></ul>
+    <ul><li>Ipv4WithIcmp</li></ul></ul>
 </div>
 
     <div class="flex items-center gap-2">
@@ -112,11 +112,11 @@
     </div>
   </div>
 </nav>
-<div id="searchResults"></div><div id="content"><main class="symbolGroup" id="symbol_EthernetPayload"><article>
+<div id="searchResults"></div><div id="content"><main class="symbolGroup" id="symbol_Ipv4WithIcmp"><article>
       <div class="symbolTitle">
         <div>
           <div class="text-2xl leading-none break-all">
-            <span class="text-TypeAlias">type alias</span>&nbsp;<span class="font-bold">EthernetPayload</span>
+            <span class="text-TypeAlias">type alias</span>&nbsp;<span class="font-bold">Ipv4WithIcmp</span>
           </div></div><a
   class="sourceButton"
   href="file:&#x2F;&#x2F;&#x2F;home&#x2F;runner&#x2F;work&#x2F;jsr-monorepo&#x2F;jsr-monorepo&#x2F;packages&#x2F;@binstruct&#x2F;inet&#x2F;mod.ts"><svg
@@ -142,9 +142,7 @@
   />
 </svg>
 </a>
-</div><div><div class="space-y-7" id=""><div class="markdown"><p>Decoded network-layer payload of an Ethernet II frame.</p>
-<p><code>kind</code> discriminates the typed branches; an unknown EtherType surfaces as
-the raw <a href="https://deno.land/api@v2.7.14?s=Uint8Array">Uint8Array</a> payload.</p>
+</div><div><div class="space-y-7" id=""><div class="markdown"><p>Refined IPv4 datagram with an ICMPv4 transport payload.</p>
 </div><section class="section"  id="definition"><div>
       <h2 class="anchorable mb-1"><a href="#definition" class="anchor" aria-label="Anchor" tabIndex="-1"><svg
   width="16"
@@ -168,10 +166,10 @@ the raw <a href="https://deno.land/api@v2.7.14?s=Uint8Array">Uint8Array</a> payl
   </defs>
 </svg>
 </a>
-Definition</h2></div><div class="space-y-8"><div class=" docEntry" id="typealias_ethernetpayload">
+Definition</h2></div><div class="space-y-8"><div class=" docEntry" id="typealias_ipv4withicmp">
 
   <div class="docEntryHeader">
-    <div><code><span class="font-medium text-stone-500 dark:text-stone-200"><div class="ml-indent"><span>{ <span class="td-kw">readonly </span>kind<span>: <span class="td-str">"ipv4"</span></span>; <span class="td-kw">readonly </span>ipv4<span>: <a href="../././~/Ipv4Decoded.html" class="link td-ref">Ipv4Decoded</a></span>;  }</span><br /><span><span class="td-op"> | </span>{ <span class="td-kw">readonly </span>kind<span>: <span class="td-str">"arp"</span></span>; <span class="td-kw">readonly </span>arp<span>: <span class="td-ref">ArpEthernetIpv4Packet</span></span>;  }</span><br /><span><span class="td-op"> | </span><a href="https://deno.land/api@v2.7.14?s=Uint8Array" class="link td-ref">Uint8Array</a></span></div></span>
+    <div><code><span class="font-medium text-stone-500 dark:text-stone-200"><div class="ml-indent"><span><span class="td-ref">Ipv4Header</span></span><br /><span><span class="td-op"> & </span>{ payload<span>: { kind<span>: <span class="td-str">"icmp"</span></span>; icmp<span>: <span class="td-ref">IcmpPacket</span></span>;  }</span>;  }</span></div></span>
       </code>
     </div><a
   class="sourceButton"
@@ -205,8 +203,8 @@ Definition</h2></div><div class="space-y-8"><div class=" docEntry" id="typealias
     </article></main>
 <div class="toc">
     <div><div class="usageContent">
-    <h3>Usage</h3><div class="markdown"><pre class="highlight"><code class="language-typescript">import { type EthernetPayload } from &quot;.&quot;;
-</code><button class="copyButton" data-copy="import { type EthernetPayload } from &quot;.&quot;;
+    <h3>Usage</h3><div class="markdown"><pre class="highlight"><code class="language-typescript">import { type Ipv4WithIcmp } from &quot;.&quot;;
+</code><button class="copyButton" data-copy="import { type Ipv4WithIcmp } from &quot;.&quot;;
 "><svg
   class="copy"
   width="15"

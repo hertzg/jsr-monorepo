@@ -142,9 +142,7 @@
   />
 </svg>
 </a>
-</div><div><div class="space-y-7" id=""><div class="markdown"><p>Decoded Ethernet II frame: same fields as
-<a href="https://jsr.io/@binstruct/ethernet">Ethernet2Frame</a>, but <code>payload</code> is
-the structured <a href="../././~/EthernetPayload.html"><code>EthernetPayload</code></a> instead of raw bytes.</p>
+</div><div><div class="space-y-7" id=""><div class="markdown"><p>Decoded Ethernet II frame — discriminated by <code>payload.kind</code> (or <code>Uint8Array</code>).</p>
 </div><section class="section"  id="definition"><div>
       <h2 class="anchorable mb-1"><a href="#definition" class="anchor" aria-label="Anchor" tabIndex="-1"><svg
   width="16"
@@ -171,7 +169,7 @@ the structured <a href="../././~/EthernetPayload.html"><code>EthernetPayload</co
 Definition</h2></div><div class="space-y-8"><div class=" docEntry" id="typealias_framedecoded">
 
   <div class="docEntryHeader">
-    <div><code><span class="font-medium text-stone-500 dark:text-stone-200"><div class="ml-indent"><span><span class="td-ref">Omit</span>&lt;<span class="td-ref">Ethernet2Frame</span><span>, </span><span class="td-str">"payload"</span>&gt;</span><br /><span><span class="td-op"> & </span>{ <span class="td-kw">readonly </span>payload<span>: <a href="../././~/EthernetPayload.html" class="link td-ref">EthernetPayload</a></span>;  }</span></div></span>
+    <div><code><span class="font-medium text-stone-500 dark:text-stone-200"><span><a href="../././~/FrameWithIpv4.html" class="link td-ref">FrameWithIpv4</a><span class="td-op"> | </span><a href="../././~/FrameWithArp.html" class="link td-ref">FrameWithArp</a><span class="td-op"> | </span><a href="../././~/FrameWithRawL3.html" class="link td-ref">FrameWithRawL3</a></span></span>
       </code>
     </div><a
   class="sourceButton"
