@@ -193,15 +193,24 @@ const ipv4Coder: Coder<Ipv4Decoded> = refineSwitch(
     raw: rawIpv4Refiner,
   },
   {
-    refine: (d: Ipv4Datagram): "udp" | "icmp" | "raw" =>
-      d.protocol === IP_PROTOCOL_UDP
-        ? "udp"
-        : d.protocol === IP_PROTOCOL_ICMP
-        ? "icmp"
-        : "raw",
+    refine: (d: Ipv4Datagram): "udp" | "icmp" | "raw" => {
+      switch (d.protocol) {
+        case IP_PROTOCOL_UDP:
+          return "udp";
+        case IP_PROTOCOL_ICMP:
+          return "icmp";
+        default:
+          return "raw";
+      }
+    },
     unrefine: (r: Ipv4Decoded): "udp" | "icmp" | "raw" => {
       if (r.payload instanceof Uint8Array) return "raw";
-      return r.payload.kind;
+      switch (r.payload.kind) {
+        case "udp":
+          return "udp";
+        case "icmp":
+          return "icmp";
+      }
     },
   },
 );
@@ -335,15 +344,24 @@ export const inetCoder: Coder<FrameDecoded> = refineSwitch(
     raw: rawFrameRefiner,
   },
   {
-    refine: (frame: Ethernet2Frame): "ipv4" | "arp" | "raw" =>
-      frame.etherType === ETHERTYPE_IPV4
-        ? "ipv4"
-        : frame.etherType === ETHERTYPE_ARP
-        ? "arp"
-        : "raw",
+    refine: (frame: Ethernet2Frame): "ipv4" | "arp" | "raw" => {
+      switch (frame.etherType) {
+        case ETHERTYPE_IPV4:
+          return "ipv4";
+        case ETHERTYPE_ARP:
+          return "arp";
+        default:
+          return "raw";
+      }
+    },
     unrefine: (refined: FrameDecoded): "ipv4" | "arp" | "raw" => {
       if (refined.payload instanceof Uint8Array) return "raw";
-      return refined.payload.kind;
+      switch (refined.payload.kind) {
+        case "ipv4":
+          return "ipv4";
+        case "arp":
+          return "arp";
+      }
     },
   },
 );
