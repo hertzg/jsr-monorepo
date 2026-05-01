@@ -185,9 +185,9 @@ const value = {
   },
 };
 
-const buffer = new Uint8Array(64);
-const written = inetCoder.encode(value, buffer);
-const [decoded] = inetCoder.decode(buffer.subarray(0, written));
+const buf = new Uint8Array(64);
+const written = inetCoder.encode(value, buf);
+const [decoded] = inetCoder.decode(buf.subarray(0, written));
 
 assert(!(decoded.payload instanceof Uint8Array));
 assert(decoded.payload.kind === &quot;ipv4&quot;);
@@ -229,9 +229,9 @@ const value = {
   },
 };
 
-const buffer = new Uint8Array(64);
-const written = inetCoder.encode(value, buffer);
-const [decoded] = inetCoder.decode(buffer.subarray(0, written));
+const buf = new Uint8Array(64);
+const written = inetCoder.encode(value, buf);
+const [decoded] = inetCoder.decode(buf.subarray(0, written));
 
 assert(!(decoded.payload instanceof Uint8Array));
 assert(decoded.payload.kind === &quot;ipv4&quot;);
@@ -300,6 +300,11 @@ Functions</h2></div><div class="namespaceSection"><div id="namespace_internetche
 		    <a href=".&#x2F;.&#x2F;.&#x2F;~&#x2F;internetChecksum.html" title="internetChecksum">
 			    <span>internetChecksum</span><span>(<span><span>data<span>: <span class="td-ref">Uint8Array</span></span></span></span>)<span>: <span class="td-kw">number</span></span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Computes the 16-bit Internet checksum (RFC 1071) over a span of bytes.</p>
 </div></div></div>
+    </div><div id="namespace_rawrefiner" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-Function bg-Function/15 dark:text-FunctionDark dark:bg-FunctionDark/15" title="Function">f</div></div>
+<div class="namespaceItemContent">
+		    <a href=".&#x2F;.&#x2F;.&#x2F;~&#x2F;rawRefiner.html" title="rawRefiner">
+			    <span>rawRefiner</span><span><span>&lt;<span><span class="td-tp">THost</span><span><span class="td-kw"> extends </span>{ payload<span>: <span class="td-ref">Uint8Array</span></span>;  }</span></span>&gt;</span>()<span>: <span class="td-ref">Refiner</span>&lt;<span class="td-ref">THost</span><span>, </span><span class="td-ref">THost</span><span>, </span><span>[]</span>&gt;</span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Identity refiner — leaves a host's <code>payload: Uint8Array</code> exactly as-is.</p>
+</div></div></div>
     </div></div>
 </section>
 <section class="section"  id="default_type-aliases"><div>
@@ -338,7 +343,7 @@ Type Aliases</h2></div><div class="namespaceSection"><div id="namespace_framedec
     </div><div id="namespace_framewithipv4" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-TypeAlias bg-TypeAlias/15 dark:text-TypeAliasDark dark:bg-TypeAliasDark/15" title="Type Alias">T</div></div>
 <div class="namespaceItemContent">
 		    <a href=".&#x2F;.&#x2F;.&#x2F;~&#x2F;FrameWithIpv4.html" title="FrameWithIpv4">
-			    <span>FrameWithIpv4</span><span> = <div class="ml-indent"><span><span class="td-ref">Omit</span>&lt;<span class="td-ref">Ethernet2Frame</span><span>, </span><span class="td-str">"payload"</span>&gt;</span><br /><span><span class="td-op"> & </span>{ payload<span>: { kind<span>: <span class="td-str">"ipv4"</span></span>; ipv4<span>: <span class="td-ref">Ipv4Decoded</span></span>;  }</span>;  }</span></div></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Refined frame whose payload is an IPv4 datagram.</p>
+			    <span>FrameWithIpv4</span><span> = <div class="ml-indent"><span><span class="td-ref">Omit</span>&lt;<span class="td-ref">Ethernet2Frame</span><span>, </span><span class="td-str">"payload"</span>&gt;</span><br /><span><span class="td-op"> & </span>{ payload<span>: { kind<span>: <span class="td-str">"ipv4"</span></span>; ipv4<span>: <span class="td-ref">Ipv4Decoded</span></span>;  }</span>;  }</span></div></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Refined frame whose payload is an IPv4 datagram with a typed L4.</p>
 </div></div></div>
     </div><div id="namespace_framewithrawl3" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-TypeAlias bg-TypeAlias/15 dark:text-TypeAliasDark dark:bg-TypeAliasDark/15" title="Type Alias">T</div></div>
 <div class="namespaceItemContent">
@@ -353,17 +358,17 @@ Type Aliases</h2></div><div class="namespaceSection"><div id="namespace_framedec
     </div><div id="namespace_ipv4withicmp" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-TypeAlias bg-TypeAlias/15 dark:text-TypeAliasDark dark:bg-TypeAliasDark/15" title="Type Alias">T</div></div>
 <div class="namespaceItemContent">
 		    <a href=".&#x2F;.&#x2F;.&#x2F;~&#x2F;Ipv4WithIcmp.html" title="Ipv4WithIcmp">
-			    <span>Ipv4WithIcmp</span><span> = <div class="ml-indent"><span><span class="td-ref">Ipv4Header</span></span><br /><span><span class="td-op"> & </span>{ payload<span>: { kind<span>: <span class="td-str">"icmp"</span></span>; icmp<span>: <span class="td-ref">IcmpPacket</span></span>;  }</span>;  }</span></div></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Refined IPv4 datagram with an ICMPv4 transport payload.</p>
+			    <span>Ipv4WithIcmp</span><span> = <div class="ml-indent"><span><span class="td-ref">Omit</span>&lt;<span class="td-ref">Ipv4Datagram</span><span>, </span><span class="td-str">"payload"</span>&gt;</span><br /><span><span class="td-op"> & </span>{ payload<span>: { kind<span>: <span class="td-str">"icmp"</span></span>; icmp<span>: <span class="td-ref">IcmpPacket</span></span>;  }</span>;  }</span></div></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Refined IPv4 datagram with an ICMPv4 transport payload.</p>
 </div></div></div>
     </div><div id="namespace_ipv4withrawl4" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-TypeAlias bg-TypeAlias/15 dark:text-TypeAliasDark dark:bg-TypeAliasDark/15" title="Type Alias">T</div></div>
 <div class="namespaceItemContent">
 		    <a href=".&#x2F;.&#x2F;.&#x2F;~&#x2F;Ipv4WithRawL4.html" title="Ipv4WithRawL4">
-			    <span>Ipv4WithRawL4</span><span> = <span><span class="td-ref">Ipv4Header</span><span class="td-op"> & </span>{ payload<span>: <span class="td-ref">Uint8Array</span></span>;  }</span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Refined IPv4 datagram whose transport protocol has no coder in the family.</p>
+			    <span>Ipv4WithRawL4</span><span> = <span class="td-ref">Ipv4Datagram</span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Refined IPv4 datagram whose transport protocol has no coder in the family.</p>
 </div></div></div>
     </div><div id="namespace_ipv4withudp" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-TypeAlias bg-TypeAlias/15 dark:text-TypeAliasDark dark:bg-TypeAliasDark/15" title="Type Alias">T</div></div>
 <div class="namespaceItemContent">
 		    <a href=".&#x2F;.&#x2F;.&#x2F;~&#x2F;Ipv4WithUdp.html" title="Ipv4WithUdp">
-			    <span>Ipv4WithUdp</span><span> = <div class="ml-indent"><span><span class="td-ref">Ipv4Header</span></span><br /><span><span class="td-op"> & </span>{ payload<span>: { kind<span>: <span class="td-str">"udp"</span></span>; udp<span>: <span class="td-ref">UdpDatagram</span></span>;  }</span>;  }</span></div></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Refined IPv4 datagram with a UDP transport payload.</p>
+			    <span>Ipv4WithUdp</span><span> = <div class="ml-indent"><span><span class="td-ref">Omit</span>&lt;<span class="td-ref">Ipv4Datagram</span><span>, </span><span class="td-str">"payload"</span>&gt;</span><br /><span><span class="td-op"> & </span>{ payload<span>: { kind<span>: <span class="td-str">"udp"</span></span>; udp<span>: <span class="td-ref">UdpDatagram</span></span>;  }</span>;  }</span></div></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Refined IPv4 datagram with a UDP transport payload.</p>
 </div></div></div>
     </div></div>
 </section>
@@ -403,9 +408,9 @@ Variables</h2></div><div class="namespaceSection"><div id="namespace_ethertype_a
     </div><div id="namespace_inetcoder" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-Variable bg-Variable/15 dark:text-VariableDark dark:bg-VariableDark/15" title="Variable">v</div></div>
 <div class="namespaceItemContent">
 		    <a href=".&#x2F;.&#x2F;.&#x2F;~&#x2F;inetCoder.html" title="inetCoder">
-			    <span>inetCoder</span><span>: <span class="td-ref">Coder</span>&lt;<span class="td-ref">FrameDecoded</span>&gt;</span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Composed Ethernet II frame coder that walks the inet stack one layer at a
-time using <code>refineSwitch</code>. Returns <code>Coder&lt;FrameDecoded&gt;</code> directly — no
-factory call needed, the coder is reusable across encode/decode.</p>
+			    <span>inetCoder</span><span>: <span class="td-ref">Coder</span>&lt;<span class="td-ref">FrameDecoded</span>&gt;</span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Composed Ethernet II frame coder built from per-package refiner factories.
+Returns a single <code>Coder&lt;FrameDecoded&gt;</code> that round-trips bytes through the
+full structured representation.</p>
 </div></div></div>
     </div><div id="namespace_ip_protocol_icmp" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-Variable bg-Variable/15 dark:text-VariableDark dark:bg-VariableDark/15" title="Variable">v</div></div>
 <div class="namespaceItemContent">

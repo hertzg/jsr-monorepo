@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>asArp - default - @binstruct&#x2F;arp documentation</title>
+  <title>icmpRefiner - default - @binstruct&#x2F;icmp documentation</title>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="doc-current-file" content=".">
@@ -17,7 +17,7 @@
   <div class="h-full">
     <div class="flex items-center"><ul class="breadcrumbs">
   <li>
-    <a href="..&#x2F;" class="contextLink">@binstruct&#x2F;arp</a>
+    <a href="..&#x2F;" class="contextLink">@binstruct&#x2F;icmp</a>
   </li><span class="text-black dark:text-white"><svg
   width="16"
   height="16"
@@ -48,7 +48,7 @@
 </svg>
 </span>
 
-    <ul><li>asArp</li></ul></ul>
+    <ul><li>icmpRefiner</li></ul></ul>
 </div>
 
     <div class="flex items-center gap-2">
@@ -112,14 +112,14 @@
     </div>
   </div>
 </nav>
-<div id="searchResults"></div><div id="content"><main class="symbolGroup" id="symbol_asArp"><article>
+<div id="searchResults"></div><div id="content"><main class="symbolGroup" id="symbol_icmpRefiner"><article>
       <div class="symbolTitle">
         <div>
           <div class="text-2xl leading-none break-all">
-            <span class="text-Function">function</span>&nbsp;<span class="font-bold">asArp</span>
+            <span class="text-Function">function</span>&nbsp;<span class="font-bold">icmpRefiner</span>
           </div></div><a
   class="sourceButton"
-  href="file:&#x2F;&#x2F;&#x2F;home&#x2F;runner&#x2F;work&#x2F;jsr-monorepo&#x2F;jsr-monorepo&#x2F;packages&#x2F;@binstruct&#x2F;arp&#x2F;mod.ts"><svg
+  href="file:&#x2F;&#x2F;&#x2F;home&#x2F;runner&#x2F;work&#x2F;jsr-monorepo&#x2F;jsr-monorepo&#x2F;packages&#x2F;@binstruct&#x2F;icmp&#x2F;refiners.ts"><svg
   width="14"
   height="14"
   viewBox="0 0 14 14"
@@ -142,8 +142,8 @@
   />
 </svg>
 </a>
-</div><div><div class="mt-3 space-y-8"><div class="scroll-mt-16" id="function_asarp_0">
-      <code class="anchorable text-base break-words"><a href="#function_asarp_0" class="anchor" aria-label="Anchor" tabIndex="-1"><svg
+</div><div><div class="mt-3 space-y-8"><div class="scroll-mt-16" id="function_icmprefiner_0">
+      <code class="anchorable text-base break-words"><a href="#function_icmprefiner_0" class="anchor" aria-label="Anchor" tabIndex="-1"><svg
   width="16"
   height="16"
   viewBox="0 0 14 14"
@@ -165,12 +165,12 @@
   </defs>
 </svg>
 </a>
-<span class="font-bold">asArp</span><span class="font-medium"><span>&lt;<span><span class="td-tp">THost</span><span><span class="td-kw"> extends </span>{ payload<span>: <a href="https://deno.land/api@v2.7.14?s=Uint8Array" class="link td-ref">Uint8Array</a></span>;  }</span></span>&gt;</span>()<span>: <span class="td-ref">Refiner</span>&lt;<div class="ml-indent"><div><span class="td-ref">THost</span>,</div><div><span><span class="td-ref">Omit</span>&lt;<span class="td-ref">THost</span><span>, </span><span class="td-str">"payload"</span>&gt;</span><br /><span><span class="td-op"> & </span>{ payload<span>: { kind<span>: <span class="td-str">"arp"</span></span>; arp<span>: <a href="../././~/ArpEthernetIpv4Packet.html" class="link td-ref">ArpEthernetIpv4Packet</a></span>;  }</span>;  }</span>,</div><div><span>[]</span></div></div>&gt;</span> </span>
-      </code><div class="space-y-7" id=""><div class="markdown"><p>Refiner that swaps a host's <code>payload: Uint8Array</code> for a decoded
-Ethernet/IPv4 ARP packet.</p>
+<span class="font-bold">icmpRefiner</span><span class="font-medium"><span>&lt;<span><span class="td-tp">THost</span><span><span class="td-kw"> extends </span>{ payload<span>: <a href="https://deno.land/api@v2.7.14?s=Uint8Array" class="link td-ref">Uint8Array</a></span>;  }</span></span>&gt;</span>()<span>: <span class="td-ref">Refiner</span>&lt;<div class="ml-indent"><div><span class="td-ref">THost</span>,</div><div><span><span class="td-ref">Omit</span>&lt;<span class="td-ref">THost</span><span>, </span><span class="td-str">"payload"</span>&gt;</span><br /><span><span class="td-op"> & </span>{ payload<span>: { kind<span>: <span class="td-str">"icmp"</span></span>; icmp<span>: <a href="../././~/IcmpPacket.html" class="link td-ref">IcmpPacket</a></span>;  }</span>;  }</span>,</div><div><span>[]</span></div></div>&gt;</span> </span>
+      </code><div class="space-y-7" id=""><div class="markdown"><p>Refiner that swaps a host's <code>payload: Uint8Array</code> for a decoded ICMPv4
+packet.</p>
 <p>Use as a <code>refineSwitch</code> arm when the parent's protocol-discriminator field
-(e.g. Ethernet's <code>etherType</code>) selects ARP. The host type is preserved on
-its non-payload fields, so the same factory works under any L2 carrier.</p>
+(e.g. IPv4's <code>protocol</code>) selects ICMP. The host type is preserved on its
+non-payload fields, so the same factory works under any L3 carrier.</p>
 </div><section class="section"  id="examples"><div>
       <h2 class="anchorable mb-1"><a href="#examples" class="anchor" aria-label="Anchor" tabIndex="-1"><svg
   width="16"
@@ -216,80 +216,88 @@ Examples</h2></div><div class="space-y-8"><div class="anchorable"><a href="#exam
   </defs>
 </svg>
 </a>
-<h3 class="example-header"><div class="markdown"><p>Compose with Ethernet via refineSwitch</p>
+<h3 class="example-header"><div class="markdown"><p>Compose with IPv4 via refineSwitch</p>
 </div></h3>
   <div><div class="markdown"><pre class="highlight"><code class="language-ts">import { assert, assertEquals } from &quot;@std/assert&quot;;
 import { refineSwitch, type Context } from &quot;@hertzg/binstruct&quot;;
-import { ethernet2Frame, type Ethernet2Frame } from &quot;@binstruct/ethernet&quot;;
-import { arpEthernetIpv4, ARP_OPCODE, asArp } from &quot;@binstruct/arp&quot;;
+import { ipv4Datagram, type Ipv4Datagram } from &quot;@binstruct/ipv4&quot;;
+import { icmpRefiner } from &quot;@binstruct/icmp&quot;;
 
 const coder = refineSwitch(
-  ethernet2Frame(),
-  { arp: asArp&lt;Ethernet2Frame&gt;() },
+  ipv4Datagram(),
+  { icmp: icmpRefiner&lt;Ipv4Datagram&gt;() },
   {
-    refine: (frame: Ethernet2Frame, _ctx: Context) =&gt;
-      frame.etherType === 0x0806 ? &quot;arp&quot; : null,
-    unrefine: (_r, _ctx: Context) =&gt; &quot;arp&quot;,
+    refine: (d: Ipv4Datagram, _ctx: Context) =&gt; d.protocol === 1 ? &quot;icmp&quot; : null,
+    unrefine: (_r, _ctx: Context) =&gt; &quot;icmp&quot;,
   },
 );
 
 const buf = new Uint8Array(64);
 coder.encode({
-  dstMac: new Uint8Array([0xff, 0xff, 0xff, 0xff, 0xff, 0xff]),
-  srcMac: new Uint8Array([0, 0, 0, 0, 0, 2]),
-  etherType: 0x0806,
+  versionIhl: { version: 4, ihl: 5 },
+  typeOfService: 0,
+  totalLength: 28,
+  identification: 0,
+  flagsFragmentOffset: { reserved: 0, dontFragment: 0, moreFragments: 0, fragmentOffset: 0 },
+  timeToLive: 64,
+  protocol: 1,
+  headerChecksum: 0,
+  sourceAddress: &quot;10.0.0.1&quot;,
+  destinationAddress: &quot;10.0.0.2&quot;,
+  options: new Uint8Array(0),
   payload: {
-    kind: &quot;arp&quot;,
-    arp: {
-      htype: 1, ptype: 0x0800, hlen: 6, plen: 4,
-      oper: ARP_OPCODE.REQUEST,
-      sha: new Uint8Array([0, 0, 0, 0, 0, 2]),
-      spa: 0xc0000201,
-      tha: new Uint8Array([0, 0, 0, 0, 0, 0]),
-      tpa: 0xc0000202,
+    kind: &quot;icmp&quot;,
+    icmp: {
+      type: 8, code: 0, checksum: 0,
+      restOfHeader: new Uint8Array([0, 1, 0, 1]),
+      payload: new Uint8Array(0),
     },
   },
 }, buf);
 
 const [decoded] = coder.decode(buf);
-assert(!(decoded.payload instanceof Uint8Array) &amp;&amp; decoded.payload.kind === &quot;arp&quot;);
-assertEquals(decoded.payload.arp.oper, ARP_OPCODE.REQUEST);
+assert(!(decoded.payload instanceof Uint8Array) &amp;&amp; decoded.payload.kind === &quot;icmp&quot;);
+assertEquals(decoded.payload.icmp.type, 8);
 </code><button class="copyButton" data-copy="import { assert, assertEquals } from &quot;@std/assert&quot;;
 import { refineSwitch, type Context } from &quot;@hertzg/binstruct&quot;;
-import { ethernet2Frame, type Ethernet2Frame } from &quot;@binstruct/ethernet&quot;;
-import { arpEthernetIpv4, ARP_OPCODE, asArp } from &quot;@binstruct/arp&quot;;
+import { ipv4Datagram, type Ipv4Datagram } from &quot;@binstruct/ipv4&quot;;
+import { icmpRefiner } from &quot;@binstruct/icmp&quot;;
 
 const coder = refineSwitch(
-  ethernet2Frame(),
-  { arp: asArp&lt;Ethernet2Frame&gt;() },
+  ipv4Datagram(),
+  { icmp: icmpRefiner&lt;Ipv4Datagram&gt;() },
   {
-    refine: (frame: Ethernet2Frame, _ctx: Context) =&gt;
-      frame.etherType === 0x0806 ? &quot;arp&quot; : null,
-    unrefine: (_r, _ctx: Context) =&gt; &quot;arp&quot;,
+    refine: (d: Ipv4Datagram, _ctx: Context) =&gt; d.protocol === 1 ? &quot;icmp&quot; : null,
+    unrefine: (_r, _ctx: Context) =&gt; &quot;icmp&quot;,
   },
 );
 
 const buf = new Uint8Array(64);
 coder.encode({
-  dstMac: new Uint8Array([0xff, 0xff, 0xff, 0xff, 0xff, 0xff]),
-  srcMac: new Uint8Array([0, 0, 0, 0, 0, 2]),
-  etherType: 0x0806,
+  versionIhl: { version: 4, ihl: 5 },
+  typeOfService: 0,
+  totalLength: 28,
+  identification: 0,
+  flagsFragmentOffset: { reserved: 0, dontFragment: 0, moreFragments: 0, fragmentOffset: 0 },
+  timeToLive: 64,
+  protocol: 1,
+  headerChecksum: 0,
+  sourceAddress: &quot;10.0.0.1&quot;,
+  destinationAddress: &quot;10.0.0.2&quot;,
+  options: new Uint8Array(0),
   payload: {
-    kind: &quot;arp&quot;,
-    arp: {
-      htype: 1, ptype: 0x0800, hlen: 6, plen: 4,
-      oper: ARP_OPCODE.REQUEST,
-      sha: new Uint8Array([0, 0, 0, 0, 0, 2]),
-      spa: 0xc0000201,
-      tha: new Uint8Array([0, 0, 0, 0, 0, 0]),
-      tpa: 0xc0000202,
+    kind: &quot;icmp&quot;,
+    icmp: {
+      type: 8, code: 0, checksum: 0,
+      restOfHeader: new Uint8Array([0, 1, 0, 1]),
+      payload: new Uint8Array(0),
     },
   },
 }, buf);
 
 const [decoded] = coder.decode(buf);
-assert(!(decoded.payload instanceof Uint8Array) &amp;&amp; decoded.payload.kind === &quot;arp&quot;);
-assertEquals(decoded.payload.arp.oper, ARP_OPCODE.REQUEST);
+assert(!(decoded.payload instanceof Uint8Array) &amp;&amp; decoded.payload.kind === &quot;icmp&quot;);
+assertEquals(decoded.payload.icmp.type, 8);
 "><svg
   class="copy"
   width="15"
@@ -376,7 +384,7 @@ Type Parameters</h2></div><div class="space-y-8"><div class="anchorable docEntry
       </code>
     </div><a
   class="sourceButton"
-  href="file:&#x2F;&#x2F;&#x2F;home&#x2F;runner&#x2F;work&#x2F;jsr-monorepo&#x2F;jsr-monorepo&#x2F;packages&#x2F;@binstruct&#x2F;arp&#x2F;mod.ts"><svg
+  href="file:&#x2F;&#x2F;&#x2F;home&#x2F;runner&#x2F;work&#x2F;jsr-monorepo&#x2F;jsr-monorepo&#x2F;packages&#x2F;@binstruct&#x2F;icmp&#x2F;refiners.ts"><svg
   width="14"
   height="14"
   viewBox="0 0 14 14"
@@ -424,14 +432,14 @@ Type Parameters</h2></div><div class="space-y-8"><div class="anchorable docEntry
   </defs>
 </svg>
 </a>
-Return Type</h2></div><div class="space-y-8"><div class=" docEntry" id="function_asarp_0_return">
+Return Type</h2></div><div class="space-y-8"><div class=" docEntry" id="function_icmprefiner_0_return">
 
   <div class="docEntryHeader">
-    <div><code><span class="font-medium text-stone-500 dark:text-stone-200"><span class="td-ref">Refiner</span>&lt;<div class="ml-indent"><div><a href="#type_param_thost" class="link td-ref">THost</a>,</div><div><span><span class="td-ref">Omit</span>&lt;<a href="#type_param_thost" class="link td-ref">THost</a><span>, </span><span class="td-str">"payload"</span>&gt;</span><br /><span><span class="td-op"> & </span>{ payload<span>: { kind<span>: <span class="td-str">"arp"</span></span>; arp<span>: <a href="../././~/ArpEthernetIpv4Packet.html" class="link td-ref">ArpEthernetIpv4Packet</a></span>;  }</span>;  }</span>,</div><div><span>[]</span></div></div>&gt;</span>
+    <div><code><span class="font-medium text-stone-500 dark:text-stone-200"><span class="td-ref">Refiner</span>&lt;<div class="ml-indent"><div><a href="#type_param_thost" class="link td-ref">THost</a>,</div><div><span><span class="td-ref">Omit</span>&lt;<a href="#type_param_thost" class="link td-ref">THost</a><span>, </span><span class="td-str">"payload"</span>&gt;</span><br /><span><span class="td-op"> & </span>{ payload<span>: { kind<span>: <span class="td-str">"icmp"</span></span>; icmp<span>: <a href="../././~/IcmpPacket.html" class="link td-ref">IcmpPacket</a></span>;  }</span>;  }</span>,</div><div><span>[]</span></div></div>&gt;</span>
       </code>
     </div><a
   class="sourceButton"
-  href="file:&#x2F;&#x2F;&#x2F;home&#x2F;runner&#x2F;work&#x2F;jsr-monorepo&#x2F;jsr-monorepo&#x2F;packages&#x2F;@binstruct&#x2F;arp&#x2F;mod.ts"><svg
+  href="file:&#x2F;&#x2F;&#x2F;home&#x2F;runner&#x2F;work&#x2F;jsr-monorepo&#x2F;jsr-monorepo&#x2F;packages&#x2F;@binstruct&#x2F;icmp&#x2F;refiners.ts"><svg
   width="14"
   height="14"
   viewBox="0 0 14 14"
@@ -463,8 +471,8 @@ Return Type</h2></div><div class="space-y-8"><div class=" docEntry" id="function
     </article></main>
 <div class="toc">
     <div><div class="usageContent">
-    <h3>Usage</h3><div class="markdown"><pre class="highlight"><code class="language-typescript">import { asArp } from &quot;.&quot;;
-</code><button class="copyButton" data-copy="import { asArp } from &quot;.&quot;;
+    <h3>Usage</h3><div class="markdown"><pre class="highlight"><code class="language-typescript">import { icmpRefiner } from &quot;.&quot;;
+</code><button class="copyButton" data-copy="import { icmpRefiner } from &quot;.&quot;;
 "><svg
   class="copy"
   width="15"
@@ -497,7 +505,7 @@ Return Type</h2></div><div class="space-y-8"><div class=" docEntry" id="function
 </svg>
 </button><code></code></pre>
 </div></div><nav class="documentNavigation">
-          <h3>Document Navigation</h3><ul><li><a href="#examples" title="Examples">Examples</a></li><li><ul><li><a href="#example_0" title="Compose with Ethernet via refineSwitch">Compose with Ethernet via refineSwitch</a></li></ul></li><li><a href="#type-parameters" title="Type Parameters">Type Parameters</a></li><li><ul><li><a href="#type_param_thost" title="THost">THost</a></li></ul></li><li><a href="#return-type" title="Return Type">Return Type</a></li></ul></nav></div>
+          <h3>Document Navigation</h3><ul><li><a href="#examples" title="Examples">Examples</a></li><li><ul><li><a href="#example_0" title="Compose with IPv4 via refineSwitch">Compose with IPv4 via refineSwitch</a></li></ul></li><li><a href="#type-parameters" title="Type Parameters">Type Parameters</a></li><li><ul><li><a href="#type_param_thost" title="THost">THost</a></li></ul></li><li><a href="#return-type" title="Return Type">Return Type</a></li></ul></nav></div>
   </div></div>
 </div>
 </div>

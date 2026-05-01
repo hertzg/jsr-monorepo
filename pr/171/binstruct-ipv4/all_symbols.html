@@ -271,12 +271,7 @@ assertEquals(decoded.flagsFragmentOffset.dontFragment, 1);
   </defs>
 </svg>
 </a>
-Functions</h2></div><div class="namespaceSection"><div id="namespace_asipv4" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-Function bg-Function/15 dark:text-FunctionDark dark:bg-FunctionDark/15" title="Function">f</div></div>
-<div class="namespaceItemContent">
-		    <a href=".&#x2F;.&#x2F;.&#x2F;~&#x2F;asIpv4.html" title="asIpv4">
-			    <span>asIpv4</span><span><span>&lt;<div class="ml-indent"><div><span><span class="td-tp">THost</span><span><span class="td-kw"> extends </span>{ payload<span>: <span class="td-ref">Uint8Array</span></span>;  }</span></span>,</div><div><span><span class="td-tp">TIpv4</span><span><span class="td-kw"> extends </span><span class="td-ref">Ipv4Datagram</span></span><span><span> = </span><span class="td-ref">Ipv4Datagram</span></span></span></div></div>&gt;</span>(<span><span>coder<span class="td-op">?</span><span>: <span class="td-ref">Coder</span>&lt;<span class="td-ref">TIpv4</span>&gt;</span></span></span>)<span>: <span class="td-ref">Refiner</span>&lt;<span class="td-ref">THost</span><span>, </span><div class="ml-indent"><span><span class="td-ref">Omit</span>&lt;<span class="td-ref">THost</span><span>, </span><span class="td-str">"payload"</span>&gt;</span><br /><span><span class="td-op"> & </span>{ payload<span>: { kind<span>: <span class="td-str">"ipv4"</span></span>; ipv4<span>: <span class="td-ref">TIpv4</span></span>;  }</span>;  }</span></div><span>, </span><span>[]</span>&gt;</span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Refiner that swaps a host's <code>payload: Uint8Array</code> for a decoded IPv4 value.</p>
-</div></div></div>
-    </div><div id="namespace_ipv4addresscoder" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-Function bg-Function/15 dark:text-FunctionDark dark:bg-FunctionDark/15" title="Function">f</div></div>
+Functions</h2></div><div class="namespaceSection"><div id="namespace_ipv4addresscoder" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-Function bg-Function/15 dark:text-FunctionDark dark:bg-FunctionDark/15" title="Function">f</div></div>
 <div class="namespaceItemContent">
 		    <a href=".&#x2F;.&#x2F;.&#x2F;~&#x2F;ipv4AddressCoder.html" title="ipv4AddressCoder">
 			    <span>ipv4AddressCoder</span><span>()<span>: <span class="td-ref">Coder</span>&lt;<span class="td-kw">string</span>&gt;</span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Coder factory for an IPv4 address — <code>u32be()</code> refined to dotted-quad string
@@ -292,6 +287,11 @@ sized via the <code>totalLength</code> field.</p>
 <div class="namespaceItemContent">
 		    <a href=".&#x2F;.&#x2F;.&#x2F;~&#x2F;ipv4Header.html" title="ipv4Header">
 			    <span>ipv4Header</span><span>()<span>: <span class="td-ref">Coder</span>&lt;<span class="td-ref">Ipv4Header</span>&gt;</span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Creates a coder for IPv4 packet headers (RFC 791).</p>
+</div></div></div>
+    </div><div id="namespace_ipv4refiner" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-Function bg-Function/15 dark:text-FunctionDark dark:bg-FunctionDark/15" title="Function">f</div></div>
+<div class="namespaceItemContent">
+		    <a href=".&#x2F;.&#x2F;.&#x2F;~&#x2F;ipv4Refiner.html" title="ipv4Refiner">
+			    <span>ipv4Refiner</span><span><span>&lt;<div class="ml-indent"><div><span><span class="td-tp">THost</span><span><span class="td-kw"> extends </span>{ payload<span>: <span class="td-ref">Uint8Array</span></span>;  }</span></span>,</div><div><span><span class="td-tp">TIpv4</span><span><span class="td-kw"> extends </span><span class="td-ref">Ipv4Header</span></span><span><span> = </span><span class="td-ref">Ipv4Datagram</span></span></span></div></div>&gt;</span>(<span><span>coder<span class="td-op">?</span><span>: <span class="td-ref">Coder</span>&lt;<span class="td-ref">TIpv4</span>&gt;</span></span></span>)<span>: <span class="td-ref">Refiner</span>&lt;<span class="td-ref">THost</span><span>, </span><div class="ml-indent"><span><span class="td-ref">Omit</span>&lt;<span class="td-ref">THost</span><span>, </span><span class="td-str">"payload"</span>&gt;</span><br /><span><span class="td-op"> & </span>{ payload<span>: { kind<span>: <span class="td-str">"ipv4"</span></span>; ipv4<span>: <span class="td-ref">TIpv4</span></span>;  }</span>;  }</span></div><span>, </span><span>[]</span>&gt;</span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Refiner that swaps a host's <code>payload: Uint8Array</code> for a decoded IPv4 value.</p>
 </div></div></div>
     </div></div>
 </section>
