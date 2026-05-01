@@ -67,8 +67,12 @@ import {
   bytes,
   type Coder,
   computedRef,
+  type Context,
+  decode,
+  encode,
   ref,
   refine,
+  type Refiner,
   struct,
   u16be,
   u32be,
@@ -209,4 +213,176 @@ export function ipv4Header(): Coder<Ipv4Header> {
     destinationAddress: ipv4AddressCoder(),
     options: bytes(computedRef([ref(versionIhl)], (vi) => (vi.ihl - 5) * 4)),
   });
+}
+
+/**
+ * Decoded IPv4 datagram — the {@link Ipv4Header} fields plus the raw
+ * transport-layer payload bytes carried after the header.
+ *
+ * The payload size on decode is `totalLength - (versionIhl.ihl * 4)`. On
+ * encode, callers are responsible for setting `totalLength` so it equals
+ * `(ihl * 4) + payload.length`.
+ */
+export type Ipv4Datagram = Ipv4Header & {
+  payload: Uint8Array;
+};
+
+/**
+ * Creates a coder for a complete IPv4 datagram — header + transport payload
+ * sized via the `totalLength` field.
+ *
+ * Use this when you want both the header and the L4 payload bytes in one
+ * pass; pair it with {@link asIpv4} (or your own `refineSwitch` on the
+ * `protocol` field) to dispatch the payload into a typed L4 value.
+ *
+ * @returns A coder for {@link Ipv4Datagram} values.
+ *
+ * @example Round-trip a UDP-bearing datagram
+ * ```ts
+ * import { assertEquals } from "@std/assert";
+ * import { ipv4Datagram } from "@binstruct/ipv4";
+ *
+ * const coder = ipv4Datagram();
+ * const datagram = {
+ *   versionIhl: { version: 4, ihl: 5 },
+ *   typeOfService: 0,
+ *   totalLength: 24,
+ *   identification: 0,
+ *   flagsFragmentOffset: { reserved: 0, dontFragment: 0, moreFragments: 0, fragmentOffset: 0 },
+ *   timeToLive: 64,
+ *   protocol: 17,
+ *   headerChecksum: 0,
+ *   sourceAddress: "192.0.2.1",
+ *   destinationAddress: "192.0.2.2",
+ *   options: new Uint8Array(0),
+ *   payload: new Uint8Array([0xde, 0xad, 0xbe, 0xef]),
+ * };
+ *
+ * const buffer = new Uint8Array(64);
+ * const written = coder.encode(datagram, buffer);
+ * const [decoded] = coder.decode(buffer.subarray(0, written));
+ *
+ * assertEquals(written, 24);
+ * assertEquals(decoded.totalLength, 24);
+ * assertEquals(decoded.payload.length, 4);
+ * ```
+ */
+export function ipv4Datagram(): Coder<Ipv4Datagram> {
+  const versionIhl = bitStruct({ version: 4, ihl: 4 });
+  const totalLength = u16be();
+
+  return struct({
+    versionIhl,
+    typeOfService: u8be(),
+    totalLength,
+    identification: u16be(),
+    flagsFragmentOffset: bitStruct({
+      reserved: 1,
+      dontFragment: 1,
+      moreFragments: 1,
+      fragmentOffset: 13,
+    }),
+    timeToLive: u8be(),
+    protocol: u8be(),
+    headerChecksum: u16be(),
+    sourceAddress: ipv4AddressCoder(),
+    destinationAddress: ipv4AddressCoder(),
+    options: bytes(computedRef([ref(versionIhl)], (vi) => (vi.ihl - 5) * 4)),
+    payload: bytes(
+      computedRef(
+        [ref(totalLength), ref(versionIhl)],
+        (total, vi) => total - vi.ihl * 4,
+      ),
+    ),
+  });
+}
+
+/**
+ * Refiner that swaps a host's `payload: Uint8Array` for a decoded IPv4 value.
+ *
+ * Use as a `refineSwitch` arm when the parent's protocol-discriminator field
+ * (e.g. Ethernet's `etherType`) selects IPv4. The inner coder defaults to
+ * {@link ipv4Datagram}; pass a refined coder (e.g. another `refineSwitch` on
+ * the IPv4 `protocol` field) to recurse into typed L4 values.
+ *
+ * @template TIpv4 The decoded shape produced by `coder`. Defaults to
+ *   {@link Ipv4Datagram}.
+ * @param coder Coder for the IPv4 datagram. Defaults to {@link ipv4Datagram}.
+ * @returns A refiner factory suitable for `refineSwitch`.
+ *
+ * @example Compose with Ethernet (raw L4 payload)
+ * ```ts
+ * import { assert, assertEquals } from "@std/assert";
+ * import { refineSwitch, type Context } from "@hertzg/binstruct";
+ * import { ethernet2Frame, type Ethernet2Frame } from "@binstruct/ethernet";
+ * import { asIpv4 } from "@binstruct/ipv4";
+ *
+ * const coder = refineSwitch(
+ *   ethernet2Frame(),
+ *   { ipv4: asIpv4() },
+ *   {
+ *     refine: (frame: Ethernet2Frame, _ctx: Context) =>
+ *       frame.etherType === 0x0800 ? "ipv4" : null,
+ *     unrefine: (_refined, _ctx: Context) => "ipv4",
+ *   },
+ * );
+ *
+ * const buf = new Uint8Array(64);
+ * coder.encode({
+ *   dstMac: new Uint8Array([0, 0, 0, 0, 0, 1]),
+ *   srcMac: new Uint8Array([0, 0, 0, 0, 0, 2]),
+ *   etherType: 0x0800,
+ *   payload: {
+ *     kind: "ipv4",
+ *     ipv4: {
+ *       versionIhl: { version: 4, ihl: 5 },
+ *       typeOfService: 0,
+ *       totalLength: 24,
+ *       identification: 0,
+ *       flagsFragmentOffset: { reserved: 0, dontFragment: 0, moreFragments: 0, fragmentOffset: 0 },
+ *       timeToLive: 64,
+ *       protocol: 17,
+ *       headerChecksum: 0,
+ *       sourceAddress: "10.0.0.1",
+ *       destinationAddress: "10.0.0.2",
+ *       options: new Uint8Array(0),
+ *       payload: new Uint8Array([0xde, 0xad, 0xbe, 0xef]),
+ *     },
+ *   },
+ * }, buf);
+ *
+ * const [decoded] = coder.decode(buf);
+ * assert(!(decoded.payload instanceof Uint8Array) && decoded.payload.kind === "ipv4");
+ * assertEquals(decoded.payload.ipv4.protocol, 17);
+ * ```
+ */
+export function asIpv4<
+  THost extends { payload: Uint8Array },
+  TIpv4 extends Ipv4Datagram = Ipv4Datagram,
+>(
+  coder: Coder<TIpv4> = ipv4Datagram() as unknown as Coder<TIpv4>,
+): Refiner<
+  THost,
+  Omit<THost, "payload"> & { payload: { kind: "ipv4"; ipv4: TIpv4 } },
+  []
+> {
+  type Refined =
+    & Omit<THost, "payload">
+    & { payload: { kind: "ipv4"; ipv4: TIpv4 } };
+  return {
+    refine: (host: THost, ctx: Context): Refined => {
+      const { payload, ...rest } = host;
+      return {
+        ...(rest as unknown as Omit<THost, "payload">),
+        payload: { kind: "ipv4", ipv4: decode(coder, payload, ctx) },
+      };
+    },
+    unrefine: (refined: Refined, ctx: Context): THost => {
+      const { payload, ...rest } = refined;
+      return {
+        ...(rest as unknown as Omit<THost, "payload">),
+        payload: encode(coder, payload.ipv4, ctx),
+      } as unknown as THost;
+    },
+  };
 }
