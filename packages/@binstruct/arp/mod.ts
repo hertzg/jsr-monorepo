@@ -41,7 +41,7 @@
  *   ARP_HARDWARE_TYPE,
  *   ARP_OPCODE,
  *   ARP_PROTOCOL_TYPE,
- *   arpEthernetIpv4,
+ *   arp,
  * } from "@binstruct/arp";
  *
  * // deno-fmt-ignore
@@ -57,7 +57,7 @@
  *   0xc0, 0xa8, 0x01, 0x02,             // tpa: 192.168.1.2
  * ]);
  *
- * const [packet, bytesRead] = arpEthernetIpv4().decode(wire);
+ * const [packet, bytesRead] = arp().decode(wire);
  *
  * assertEquals(bytesRead, 28);
  * assertEquals(packet.htype, ARP_HARDWARE_TYPE.ETHERNET);
@@ -96,12 +96,10 @@ export const ETHERTYPE_ARP = 0x0806;
  * only the most common value is exposed here for convenience. Use a raw
  * number for anything not listed.
  */
-export const ARP_HARDWARE_TYPE = Object.freeze(
-  {
-    /** Ethernet (10/100/1000Mb). */
-    ETHERNET: 0x0001,
-  } as const,
-);
+export const ARP_HARDWARE_TYPE = {
+  /** Ethernet (10/100/1000Mb). */
+  ETHERNET: 0x0001,
+} as const;
 
 /** Union of the {@link ARP_HARDWARE_TYPE} values. */
 export type ArpHardwareType =
@@ -113,12 +111,10 @@ export type ArpHardwareType =
  * Encoded as the corresponding EtherType. Use a raw number for anything
  * not listed.
  */
-export const ARP_PROTOCOL_TYPE = Object.freeze(
-  {
-    /** Internet Protocol version 4. */
-    IPV4: 0x0800,
-  } as const,
-);
+export const ARP_PROTOCOL_TYPE = {
+  /** Internet Protocol version 4. */
+  IPV4: 0x0800,
+} as const;
 
 /** Union of the {@link ARP_PROTOCOL_TYPE} values. */
 export type ArpProtocolType =
@@ -130,36 +126,28 @@ export type ArpProtocolType =
  * Includes the original ARP request/reply pair (RFC 826) and the RARP
  * variants (RFC 903) for completeness.
  */
-export const ARP_OPCODE = Object.freeze(
-  {
-    /** ARP request — "who has TPA, tell SPA". */
-    REQUEST: 1,
-    /** ARP reply — sender's MAC for the requested protocol address. */
-    REPLY: 2,
-    /** RARP request — "who am I", given my hardware address (RFC 903). */
-    RARP_REQUEST: 3,
-    /** RARP reply — protocol address for the requested hardware address. */
-    RARP_REPLY: 4,
-  } as const,
-);
+export const ARP_OPCODE = {
+  /** ARP request — "who has TPA, tell SPA". */
+  REQUEST: 1,
+  /** ARP reply — sender's MAC for the requested protocol address. */
+  REPLY: 2,
+  /** RARP request — "who am I", given my hardware address (RFC 903). */
+  RARP_REQUEST: 3,
+  /** RARP reply — protocol address for the requested hardware address. */
+  RARP_REPLY: 4,
+} as const;
 
 /** Union of the {@link ARP_OPCODE} values. */
 export type ArpOpcode = (typeof ARP_OPCODE)[keyof typeof ARP_OPCODE];
 
 /**
- * Decoded representation of an Ethernet/IPv4 ARP packet (RFC 826, 28 bytes).
+ * Decoded Ethernet/IPv4 ARP packet (RFC 826, 28 bytes).
  *
- * @property htype - Hardware type (e.g. {@link ARP_HARDWARE_TYPE.ETHERNET}).
- * @property ptype - Protocol type as an EtherType (e.g. {@link ARP_PROTOCOL_TYPE.IPV4}).
- * @property hlen - Hardware address length in bytes; always `6` for Ethernet.
- * @property plen - Protocol address length in bytes; always `4` for IPv4.
- * @property oper - Operation code (see {@link ARP_OPCODE}).
- * @property sha - Sender hardware address (6 bytes).
- * @property spa - Sender protocol (IPv4) address as a 32-bit unsigned integer.
- * @property tha - Target hardware address (6 bytes); typically zero in requests.
- * @property tpa - Target protocol (IPv4) address as a 32-bit unsigned integer.
+ * Hardware addresses (`sha` / `tha`) are raw 6-byte arrays; IPv4 protocol
+ * addresses (`spa` / `tpa`) are 32-bit unsigned integers. Use `@hertzg/mac`
+ * and `@hertzg/ip/ipv4` for human-readable conversion.
  */
-export interface ArpEthernetIpv4Packet {
+export interface Arp {
   htype: number;
   ptype: number;
   hlen: number;
@@ -174,11 +162,7 @@ export interface ArpEthernetIpv4Packet {
 /**
  * Creates a coder for the common Ethernet/IPv4 ARP packet (RFC 826).
  *
- * Hardware addresses are surfaced as raw {@linkcode Uint8Array}s; IPv4
- * protocol addresses are surfaced as 32-bit unsigned integers. Use
- * `@hertzg/mac` and `@hertzg/ip/ipv4` for human-readable conversion.
- *
- * @returns A coder for {@link ArpEthernetIpv4Packet} values.
+ * @returns A coder for {@link Arp} values.
  *
  * @example Round-trip encode and decode an ARP reply
  * ```ts
@@ -192,10 +176,10 @@ export interface ArpEthernetIpv4Packet {
  *   ARP_OPCODE,
  *   ARP_PROTOCOL_TYPE,
  *   ARP_PROTO_LEN_IPV4,
- *   arpEthernetIpv4,
+ *   arp,
  * } from "@binstruct/arp";
  *
- * const coder = arpEthernetIpv4();
+ * const coder = arp();
  * const reply = {
  *   htype: ARP_HARDWARE_TYPE.ETHERNET,
  *   ptype: ARP_PROTOCOL_TYPE.IPV4,
@@ -217,7 +201,7 @@ export interface ArpEthernetIpv4Packet {
  * assertEquals(decoded, reply);
  * ```
  */
-export function arpEthernetIpv4(): Coder<ArpEthernetIpv4Packet> {
+export function arp(): Coder<Arp> {
   return struct({
     htype: u16be(),
     ptype: u16be(),

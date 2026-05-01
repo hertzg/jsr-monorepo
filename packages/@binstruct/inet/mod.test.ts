@@ -1,6 +1,6 @@
 import { assert, assertEquals } from "@std/assert";
 import { ARP_OPCODE } from "@binstruct/arp";
-import { type FrameDecoded, inetCoder, internetChecksum } from "./mod.ts";
+import { inetCoder, type InetFrameRefined, internetChecksum } from "./mod.ts";
 
 Deno.test("internetChecksum: RFC 1071 §3 worked example", () => {
   // deno-fmt-ignore
@@ -43,7 +43,7 @@ Deno.test("internetChecksum: carry folding wraps multiple times", () => {
 });
 
 Deno.test("inetCoder: round-trips ethernet → ipv4 → udp", () => {
-const value: FrameDecoded = {
+  const value: InetFrameRefined = {
     dstMac: new Uint8Array([0, 0, 0, 0, 0, 1]),
     srcMac: new Uint8Array([0, 0, 0, 0, 0, 2]),
     etherType: 0x0800,
@@ -97,7 +97,7 @@ const value: FrameDecoded = {
 });
 
 Deno.test("inetCoder: round-trips ethernet → ipv4 → icmp", () => {
-const value: FrameDecoded = {
+  const value: InetFrameRefined = {
     dstMac: new Uint8Array([0, 0, 0, 0, 0, 1]),
     srcMac: new Uint8Array([0, 0, 0, 0, 0, 2]),
     etherType: 0x0800,
@@ -146,7 +146,7 @@ const value: FrameDecoded = {
 });
 
 Deno.test("inetCoder: round-trips ethernet → arp", () => {
-const value: FrameDecoded = {
+  const value: InetFrameRefined = {
     dstMac: new Uint8Array([0xff, 0xff, 0xff, 0xff, 0xff, 0xff]),
     srcMac: new Uint8Array([0, 0, 0, 0, 0, 2]),
     etherType: 0x0806,
@@ -177,7 +177,7 @@ const value: FrameDecoded = {
 });
 
 Deno.test("inetCoder: unknown EtherType surfaces as a raw Uint8Array", () => {
-const value: FrameDecoded = {
+  const value: InetFrameRefined = {
     dstMac: new Uint8Array([0, 0, 0, 0, 0, 1]),
     srcMac: new Uint8Array([0, 0, 0, 0, 0, 2]),
     etherType: 0x88cc, // LLDP
@@ -193,8 +193,8 @@ const value: FrameDecoded = {
 });
 
 Deno.test("inetCoder: unknown IPv4 protocol surfaces as a raw Uint8Array", () => {
-const innerBytes = new Uint8Array([0xaa, 0xbb, 0xcc]);
-  const value: FrameDecoded = {
+  const innerBytes = new Uint8Array([0xaa, 0xbb, 0xcc]);
+  const value: InetFrameRefined = {
     dstMac: new Uint8Array([0, 0, 0, 0, 0, 1]),
     srcMac: new Uint8Array([0, 0, 0, 0, 0, 2]),
     etherType: 0x0800,

@@ -9,9 +9,9 @@ import {
   ARP_OPCODE,
   ARP_PROTO_LEN_IPV4,
   ARP_PROTOCOL_TYPE,
-  arpEthernetIpv4,
+  arp,
 } from "./mod.ts";
-import type { ArpEthernetIpv4Packet } from "./mod.ts";
+import type { Arp } from "./mod.ts";
 
 // deno-fmt-ignore
 const REQUEST_WIRE = new Uint8Array([
@@ -39,8 +39,8 @@ const REPLY_WIRE = new Uint8Array([
   0xc0, 0xa8, 0x01, 0x01,             // tpa: 192.168.1.1
 ]);
 
-Deno.test("arpEthernetIpv4 — decode known request bytes", () => {
-  const [packet, bytesRead] = arpEthernetIpv4().decode(REQUEST_WIRE);
+Deno.test("arp — decode known request bytes", () => {
+  const [packet, bytesRead] = arp().decode(REQUEST_WIRE);
 
   assertEquals(bytesRead, ARP_ETHERNET_IPV4_SIZE);
   assertEquals(packet.htype, ARP_HARDWARE_TYPE.ETHERNET);
@@ -54,8 +54,8 @@ Deno.test("arpEthernetIpv4 — decode known request bytes", () => {
   assertEquals(stringifyIpv4(packet.tpa), "192.168.1.2");
 });
 
-Deno.test("arpEthernetIpv4 — decode known reply bytes", () => {
-  const [packet, bytesRead] = arpEthernetIpv4().decode(REPLY_WIRE);
+Deno.test("arp — decode known reply bytes", () => {
+  const [packet, bytesRead] = arp().decode(REPLY_WIRE);
 
   assertEquals(bytesRead, ARP_ETHERNET_IPV4_SIZE);
   assertEquals(packet.oper, ARP_OPCODE.REPLY);
@@ -65,9 +65,9 @@ Deno.test("arpEthernetIpv4 — decode known reply bytes", () => {
   assertEquals(stringifyIpv4(packet.tpa), "192.168.1.1");
 });
 
-Deno.test("arpEthernetIpv4 — encode produces expected wire bytes", () => {
-  const coder = arpEthernetIpv4();
-  const request: ArpEthernetIpv4Packet = {
+Deno.test("arp — encode produces expected wire bytes", () => {
+  const coder = arp();
+  const request: Arp = {
     htype: ARP_HARDWARE_TYPE.ETHERNET,
     ptype: ARP_PROTOCOL_TYPE.IPV4,
     hlen: ARP_HW_LEN_ETHERNET,
@@ -86,9 +86,9 @@ Deno.test("arpEthernetIpv4 — encode produces expected wire bytes", () => {
   assertEquals(buffer, REQUEST_WIRE);
 });
 
-Deno.test("arpEthernetIpv4 — round-trip request and reply", () => {
-  const coder = arpEthernetIpv4();
-  const cases: ArpEthernetIpv4Packet[] = [
+Deno.test("arp — round-trip request and reply", () => {
+  const coder = arp();
+  const cases: Arp[] = [
     {
       htype: ARP_HARDWARE_TYPE.ETHERNET,
       ptype: ARP_PROTOCOL_TYPE.IPV4,
@@ -124,9 +124,9 @@ Deno.test("arpEthernetIpv4 — round-trip request and reply", () => {
   }
 });
 
-Deno.test("arpEthernetIpv4 — composes with refine for human-readable form", () => {
+Deno.test("arp — composes with refine for human-readable form", () => {
   type RefinedArp =
-    & Omit<ArpEthernetIpv4Packet, "sha" | "tha" | "spa" | "tpa">
+    & Omit<Arp, "sha" | "tha" | "spa" | "tpa">
     & {
       sha: string;
       tha: string;
@@ -134,8 +134,8 @@ Deno.test("arpEthernetIpv4 — composes with refine for human-readable form", ()
       tpa: string;
     };
 
-  const refinedArp = refine(arpEthernetIpv4(), {
-    refine: (raw: ArpEthernetIpv4Packet): RefinedArp => ({
+  const refinedArp = refine(arp(), {
+    refine: (raw: Arp): RefinedArp => ({
       htype: raw.htype,
       ptype: raw.ptype,
       hlen: raw.hlen,
@@ -146,7 +146,7 @@ Deno.test("arpEthernetIpv4 — composes with refine for human-readable form", ()
       spa: stringifyIpv4(raw.spa),
       tpa: stringifyIpv4(raw.tpa),
     }),
-    unrefine: (refined: RefinedArp): ArpEthernetIpv4Packet => ({
+    unrefine: (refined: RefinedArp): Arp => ({
       htype: refined.htype,
       ptype: refined.ptype,
       hlen: refined.hlen,
