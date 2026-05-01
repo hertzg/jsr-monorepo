@@ -142,7 +142,8 @@
   />
 </svg>
 </a>
-</div><div><div class="space-y-7" id=""><div class="markdown"><p>Decoded IPv4 datagram — discriminated by <code>payload.kind</code> (or <code>Uint8Array</code>).</p>
+</div><div><div class="space-y-7" id=""><div class="markdown"><p>Decoded IPv4 datagram — <code>payload</code> narrows by shape (UDP / ICMP / raw bytes)
+and the host's <code>protocol</code> field carries the on-wire discriminator.</p>
 </div><section class="section"  id="definition"><div>
       <h2 class="anchorable mb-1"><a href="#definition" class="anchor" aria-label="Anchor" tabIndex="-1"><svg
   width="16"

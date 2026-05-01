@@ -152,36 +152,32 @@ Examples</h2></div><div class="space-y-8"><div class="anchorable"><a href="#exam
 </div></h3>
   <div><div class="markdown"><pre class="highlight"><code class="language-ts">import { assert, assertEquals } from &quot;@std/assert&quot;;
 import { parseIpv4 } from &quot;@hertzg/ip/ipv4&quot;;
+import { ETHERTYPE_IPV4 } from &quot;@binstruct/ipv4&quot;;
+import { IP_PROTOCOL_UDP } from &quot;@binstruct/udp&quot;;
 import { inetFrame } from &quot;@binstruct/inet&quot;;
 
 const value = {
   dstMac: new Uint8Array([0, 0, 0, 0, 0, 1]),
   srcMac: new Uint8Array([0, 0, 0, 0, 0, 2]),
-  etherType: 0x0800,
+  etherType: ETHERTYPE_IPV4,
   payload: {
-    kind: &quot;ipv4&quot; as const,
-    ipv4: {
-      versionIhl: { version: 4, ihl: 5 },
-      typeOfService: 0,
-      totalLength: 32,
-      identification: 0,
-      flagsFragmentOffset: { reserved: 0, dontFragment: 0, moreFragments: 0, fragmentOffset: 0 },
-      timeToLive: 64,
-      protocol: 17,
-      headerChecksum: 0,
-      sourceAddress: parseIpv4(&quot;192.0.2.1&quot;),
-      destinationAddress: parseIpv4(&quot;192.0.2.2&quot;),
-      options: new Uint8Array(0),
-      payload: {
-        kind: &quot;udp&quot; as const,
-        udp: {
-          srcPort: 53,
-          dstPort: 49152,
-          length: 12,
-          checksum: 0,
-          payload: new Uint8Array([0xde, 0xad, 0xbe, 0xef]),
-        },
-      },
+    versionIhl: { version: 4, ihl: 5 },
+    typeOfService: 0,
+    totalLength: 32,
+    identification: 0,
+    flagsFragmentOffset: { reserved: 0, dontFragment: 0, moreFragments: 0, fragmentOffset: 0 },
+    timeToLive: 64,
+    protocol: IP_PROTOCOL_UDP,
+    headerChecksum: 0,
+    sourceAddress: parseIpv4(&quot;192.0.2.1&quot;),
+    destinationAddress: parseIpv4(&quot;192.0.2.2&quot;),
+    options: new Uint8Array(0),
+    payload: {
+      srcPort: 53,
+      dstPort: 49152,
+      length: 12,
+      checksum: 0,
+      payload: new Uint8Array([0xde, 0xad, 0xbe, 0xef]),
     },
   },
 };
@@ -192,42 +188,38 @@ const written = coder.encode(value, buf);
 const [decoded] = coder.decode(buf.subarray(0, written));
 
 assert(!(decoded.payload instanceof Uint8Array));
-assert(decoded.payload.kind === &quot;ipv4&quot;);
-assert(!(decoded.payload.ipv4.payload instanceof Uint8Array));
-assert(decoded.payload.ipv4.payload.kind === &quot;udp&quot;);
-assertEquals(decoded.payload.ipv4.payload.udp.payload, new Uint8Array([0xde, 0xad, 0xbe, 0xef]));
+assert(&quot;protocol&quot; in decoded.payload);
+assert(!(decoded.payload.payload instanceof Uint8Array));
+assert(&quot;srcPort&quot; in decoded.payload.payload);
+assertEquals(decoded.payload.payload.payload, new Uint8Array([0xde, 0xad, 0xbe, 0xef]));
 </code><button class="copyButton" data-copy="import { assert, assertEquals } from &quot;@std/assert&quot;;
 import { parseIpv4 } from &quot;@hertzg/ip/ipv4&quot;;
+import { ETHERTYPE_IPV4 } from &quot;@binstruct/ipv4&quot;;
+import { IP_PROTOCOL_UDP } from &quot;@binstruct/udp&quot;;
 import { inetFrame } from &quot;@binstruct/inet&quot;;
 
 const value = {
   dstMac: new Uint8Array([0, 0, 0, 0, 0, 1]),
   srcMac: new Uint8Array([0, 0, 0, 0, 0, 2]),
-  etherType: 0x0800,
+  etherType: ETHERTYPE_IPV4,
   payload: {
-    kind: &quot;ipv4&quot; as const,
-    ipv4: {
-      versionIhl: { version: 4, ihl: 5 },
-      typeOfService: 0,
-      totalLength: 32,
-      identification: 0,
-      flagsFragmentOffset: { reserved: 0, dontFragment: 0, moreFragments: 0, fragmentOffset: 0 },
-      timeToLive: 64,
-      protocol: 17,
-      headerChecksum: 0,
-      sourceAddress: parseIpv4(&quot;192.0.2.1&quot;),
-      destinationAddress: parseIpv4(&quot;192.0.2.2&quot;),
-      options: new Uint8Array(0),
-      payload: {
-        kind: &quot;udp&quot; as const,
-        udp: {
-          srcPort: 53,
-          dstPort: 49152,
-          length: 12,
-          checksum: 0,
-          payload: new Uint8Array([0xde, 0xad, 0xbe, 0xef]),
-        },
-      },
+    versionIhl: { version: 4, ihl: 5 },
+    typeOfService: 0,
+    totalLength: 32,
+    identification: 0,
+    flagsFragmentOffset: { reserved: 0, dontFragment: 0, moreFragments: 0, fragmentOffset: 0 },
+    timeToLive: 64,
+    protocol: IP_PROTOCOL_UDP,
+    headerChecksum: 0,
+    sourceAddress: parseIpv4(&quot;192.0.2.1&quot;),
+    destinationAddress: parseIpv4(&quot;192.0.2.2&quot;),
+    options: new Uint8Array(0),
+    payload: {
+      srcPort: 53,
+      dstPort: 49152,
+      length: 12,
+      checksum: 0,
+      payload: new Uint8Array([0xde, 0xad, 0xbe, 0xef]),
     },
   },
 };
@@ -238,10 +230,10 @@ const written = coder.encode(value, buf);
 const [decoded] = coder.decode(buf.subarray(0, written));
 
 assert(!(decoded.payload instanceof Uint8Array));
-assert(decoded.payload.kind === &quot;ipv4&quot;);
-assert(!(decoded.payload.ipv4.payload instanceof Uint8Array));
-assert(decoded.payload.ipv4.payload.kind === &quot;udp&quot;);
-assertEquals(decoded.payload.ipv4.payload.udp.payload, new Uint8Array([0xde, 0xad, 0xbe, 0xef]));
+assert(&quot;protocol&quot; in decoded.payload);
+assert(!(decoded.payload.payload instanceof Uint8Array));
+assert(&quot;srcPort&quot; in decoded.payload.payload);
+assertEquals(decoded.payload.payload.payload, new Uint8Array([0xde, 0xad, 0xbe, 0xef]));
 "><svg
   class="copy"
   width="15"
@@ -302,7 +294,7 @@ assertEquals(decoded.payload.ipv4.payload.udp.payload, new Uint8Array([0xde, 0xa
 Functions</h2></div><div class="namespaceSection"><div id="namespace_inetframe" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-Function bg-Function/15 dark:text-FunctionDark dark:bg-FunctionDark/15" title="Function">f</div></div>
 <div class="namespaceItemContent">
 		    <a href=".&#x2F;.&#x2F;.&#x2F;~&#x2F;inetFrame.html" title="inetFrame">
-			    <span>inetFrame</span><span>()<span>: <span class="td-ref">Coder</span>&lt;<span class="td-ref">InetFrameRefined</span>&gt;</span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Creates a composed coder that walks an Ethernet II frame top-down,
+			    <span>inetFrame</span><span>()<span>: <span class="td-ref">Coder</span>&lt;<span class="td-ref">Ethernet2FrameRefined</span>&gt;</span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Creates a composed coder that walks an Ethernet II frame top-down,
 dispatching the payload by <code>etherType</code> (L3) and then by <code>protocol</code> (L4
 under IPv4). Frames with no matching coder surface their payload as a raw
 <code>Uint8Array</code>.</p>
@@ -337,35 +329,37 @@ under IPv4). Frames with no matching coder surface their payload as a raw
   </defs>
 </svg>
 </a>
-Type Aliases</h2></div><div class="namespaceSection"><div id="namespace_framewitharp" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-TypeAlias bg-TypeAlias/15 dark:text-TypeAliasDark dark:bg-TypeAliasDark/15" title="Type Alias">T</div></div>
+Type Aliases</h2></div><div class="namespaceSection"><div id="namespace_ethernet2framerefined" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-TypeAlias bg-TypeAlias/15 dark:text-TypeAliasDark dark:bg-TypeAliasDark/15" title="Type Alias">T</div></div>
+<div class="namespaceItemContent">
+		    <a href=".&#x2F;.&#x2F;.&#x2F;~&#x2F;Ethernet2FrameRefined.html" title="Ethernet2FrameRefined">
+			    <span>Ethernet2FrameRefined</span><span> = <span><span class="td-ref">FrameWithIpv4</span><span class="td-op"> | </span><span class="td-ref">FrameWithArp</span><span class="td-op"> | </span><span class="td-ref">Ethernet2Frame</span></span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Decoded Ethernet II frame — <code>payload</code> narrows by shape (IPv4 / ARP / raw
+bytes) and the host's <code>etherType</code> field carries the on-wire discriminator.</p>
+</div></div></div>
+    </div><div id="namespace_framewitharp" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-TypeAlias bg-TypeAlias/15 dark:text-TypeAliasDark dark:bg-TypeAliasDark/15" title="Type Alias">T</div></div>
 <div class="namespaceItemContent">
 		    <a href=".&#x2F;.&#x2F;.&#x2F;~&#x2F;FrameWithArp.html" title="FrameWithArp">
-			    <span>FrameWithArp</span><span> = <div class="ml-indent"><span><span class="td-ref">Omit</span>&lt;<span class="td-ref">Ethernet2Frame</span><span>, </span><span class="td-str">"payload"</span>&gt;</span><br /><span><span class="td-op"> & </span>{ payload<span>: { kind<span>: <span class="td-str">"arp"</span></span>; arp<span>: <span class="td-ref">Arp</span></span>;  }</span>;  }</span></div></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Refined frame whose payload is an Ethernet/IPv4 ARP packet.</p>
+			    <span>FrameWithArp</span><span> = <span><span class="td-ref">Omit</span>&lt;<span class="td-ref">Ethernet2Frame</span><span>, </span><span class="td-str">"payload"</span>&gt;<span class="td-op"> & </span>{ payload<span>: <span class="td-ref">Arp</span></span>;  }</span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Refined frame whose payload is an Ethernet/IPv4 ARP packet.</p>
 </div></div></div>
     </div><div id="namespace_framewithipv4" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-TypeAlias bg-TypeAlias/15 dark:text-TypeAliasDark dark:bg-TypeAliasDark/15" title="Type Alias">T</div></div>
 <div class="namespaceItemContent">
 		    <a href=".&#x2F;.&#x2F;.&#x2F;~&#x2F;FrameWithIpv4.html" title="FrameWithIpv4">
-			    <span>FrameWithIpv4</span><span> = <div class="ml-indent"><span><span class="td-ref">Omit</span>&lt;<span class="td-ref">Ethernet2Frame</span><span>, </span><span class="td-str">"payload"</span>&gt;</span><br /><span><span class="td-op"> & </span>{ payload<span>: { kind<span>: <span class="td-str">"ipv4"</span></span>; ipv4<span>: <span class="td-ref">Ipv4Refined</span></span>;  }</span>;  }</span></div></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Refined frame whose payload is a typed IPv4 datagram.</p>
-</div></div></div>
-    </div><div id="namespace_inetframerefined" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-TypeAlias bg-TypeAlias/15 dark:text-TypeAliasDark dark:bg-TypeAliasDark/15" title="Type Alias">T</div></div>
-<div class="namespaceItemContent">
-		    <a href=".&#x2F;.&#x2F;.&#x2F;~&#x2F;InetFrameRefined.html" title="InetFrameRefined">
-			    <span>InetFrameRefined</span><span> = <span><span class="td-ref">FrameWithIpv4</span><span class="td-op"> | </span><span class="td-ref">FrameWithArp</span><span class="td-op"> | </span><span class="td-ref">Ethernet2Frame</span></span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Decoded Ethernet II frame — discriminated by <code>payload.kind</code> (or <code>Uint8Array</code>).</p>
+			    <span>FrameWithIpv4</span><span> = <span><span class="td-ref">Omit</span>&lt;<span class="td-ref">Ethernet2Frame</span><span>, </span><span class="td-str">"payload"</span>&gt;<span class="td-op"> & </span>{ payload<span>: <span class="td-ref">Ipv4Refined</span></span>;  }</span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Refined frame whose payload is a typed IPv4 datagram.</p>
 </div></div></div>
     </div><div id="namespace_ipv4refined" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-TypeAlias bg-TypeAlias/15 dark:text-TypeAliasDark dark:bg-TypeAliasDark/15" title="Type Alias">T</div></div>
 <div class="namespaceItemContent">
 		    <a href=".&#x2F;.&#x2F;.&#x2F;~&#x2F;Ipv4Refined.html" title="Ipv4Refined">
-			    <span>Ipv4Refined</span><span> = <span><span class="td-ref">Ipv4WithUdp</span><span class="td-op"> | </span><span class="td-ref">Ipv4WithIcmp</span><span class="td-op"> | </span><span class="td-ref">Ipv4</span></span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Decoded IPv4 datagram — discriminated by <code>payload.kind</code> (or <code>Uint8Array</code>).</p>
+			    <span>Ipv4Refined</span><span> = <span><span class="td-ref">Ipv4WithUdp</span><span class="td-op"> | </span><span class="td-ref">Ipv4WithIcmp</span><span class="td-op"> | </span><span class="td-ref">Ipv4</span></span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Decoded IPv4 datagram — <code>payload</code> narrows by shape (UDP / ICMP / raw bytes)
+and the host's <code>protocol</code> field carries the on-wire discriminator.</p>
 </div></div></div>
     </div><div id="namespace_ipv4withicmp" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-TypeAlias bg-TypeAlias/15 dark:text-TypeAliasDark dark:bg-TypeAliasDark/15" title="Type Alias">T</div></div>
 <div class="namespaceItemContent">
 		    <a href=".&#x2F;.&#x2F;.&#x2F;~&#x2F;Ipv4WithIcmp.html" title="Ipv4WithIcmp">
-			    <span>Ipv4WithIcmp</span><span> = <div class="ml-indent"><span><span class="td-ref">Omit</span>&lt;<span class="td-ref">Ipv4</span><span>, </span><span class="td-str">"payload"</span>&gt;</span><br /><span><span class="td-op"> & </span>{ payload<span>: { kind<span>: <span class="td-str">"icmp"</span></span>; icmp<span>: <span class="td-ref">IcmpPacket</span></span>;  }</span>;  }</span></div></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Refined IPv4 datagram with an ICMPv4 transport payload.</p>
+			    <span>Ipv4WithIcmp</span><span> = <span><span class="td-ref">Omit</span>&lt;<span class="td-ref">Ipv4</span><span>, </span><span class="td-str">"payload"</span>&gt;<span class="td-op"> & </span>{ payload<span>: <span class="td-ref">IcmpPacket</span></span>;  }</span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Refined IPv4 datagram with an ICMPv4 transport payload.</p>
 </div></div></div>
     </div><div id="namespace_ipv4withudp" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-TypeAlias bg-TypeAlias/15 dark:text-TypeAliasDark dark:bg-TypeAliasDark/15" title="Type Alias">T</div></div>
 <div class="namespaceItemContent">
 		    <a href=".&#x2F;.&#x2F;.&#x2F;~&#x2F;Ipv4WithUdp.html" title="Ipv4WithUdp">
-			    <span>Ipv4WithUdp</span><span> = <div class="ml-indent"><span><span class="td-ref">Omit</span>&lt;<span class="td-ref">Ipv4</span><span>, </span><span class="td-str">"payload"</span>&gt;</span><br /><span><span class="td-op"> & </span>{ payload<span>: { kind<span>: <span class="td-str">"udp"</span></span>; udp<span>: <span class="td-ref">UdpDatagram</span></span>;  }</span>;  }</span></div></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Refined IPv4 datagram with a UDP transport payload.</p>
+			    <span>Ipv4WithUdp</span><span> = <span><span class="td-ref">Omit</span>&lt;<span class="td-ref">Ipv4</span><span>, </span><span class="td-str">"payload"</span>&gt;<span class="td-op"> & </span>{ payload<span>: <span class="td-ref">UdpDatagram</span></span>;  }</span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Refined IPv4 datagram with a UDP transport payload.</p>
 </div></div></div>
     </div></div>
 </section>
