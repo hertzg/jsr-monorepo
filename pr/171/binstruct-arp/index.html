@@ -213,7 +213,7 @@ import {
   ARP_HARDWARE_TYPE,
   ARP_OPCODE,
   ARP_PROTOCOL_TYPE,
-  arpEthernetIpv4,
+  arp,
 } from &quot;@binstruct/arp&quot;;
 
 // deno-fmt-ignore
@@ -229,7 +229,7 @@ const wire = new Uint8Array([
   0xc0, 0xa8, 0x01, 0x02,             // tpa: 192.168.1.2
 ]);
 
-const [packet, bytesRead] = arpEthernetIpv4().decode(wire);
+const [packet, bytesRead] = arp().decode(wire);
 
 assertEquals(bytesRead, 28);
 assertEquals(packet.htype, ARP_HARDWARE_TYPE.ETHERNET);
@@ -245,7 +245,7 @@ import {
   ARP_HARDWARE_TYPE,
   ARP_OPCODE,
   ARP_PROTOCOL_TYPE,
-  arpEthernetIpv4,
+  arp,
 } from &quot;@binstruct/arp&quot;;
 
 // deno-fmt-ignore
@@ -261,7 +261,7 @@ const wire = new Uint8Array([
   0xc0, 0xa8, 0x01, 0x02,             // tpa: 192.168.1.2
 ]);
 
-const [packet, bytesRead] = arpEthernetIpv4().decode(wire);
+const [packet, bytesRead] = arp().decode(wire);
 
 assertEquals(bytesRead, 28);
 assertEquals(packet.htype, ARP_HARDWARE_TYPE.ETHERNET);

@@ -157,7 +157,7 @@ import {
   ARP_HARDWARE_TYPE,
   ARP_OPCODE,
   ARP_PROTOCOL_TYPE,
-  arpEthernetIpv4,
+  arp,
 } from &quot;@binstruct/arp&quot;;
 
 // deno-fmt-ignore
@@ -173,7 +173,7 @@ const wire = new Uint8Array([
   0xc0, 0xa8, 0x01, 0x02,             // tpa: 192.168.1.2
 ]);
 
-const [packet, bytesRead] = arpEthernetIpv4().decode(wire);
+const [packet, bytesRead] = arp().decode(wire);
 
 assertEquals(bytesRead, 28);
 assertEquals(packet.htype, ARP_HARDWARE_TYPE.ETHERNET);
@@ -189,7 +189,7 @@ import {
   ARP_HARDWARE_TYPE,
   ARP_OPCODE,
   ARP_PROTOCOL_TYPE,
-  arpEthernetIpv4,
+  arp,
 } from &quot;@binstruct/arp&quot;;
 
 // deno-fmt-ignore
@@ -205,7 +205,7 @@ const wire = new Uint8Array([
   0xc0, 0xa8, 0x01, 0x02,             // tpa: 192.168.1.2
 ]);
 
-const [packet, bytesRead] = arpEthernetIpv4().decode(wire);
+const [packet, bytesRead] = arp().decode(wire);
 
 assertEquals(bytesRead, 28);
 assertEquals(packet.htype, ARP_HARDWARE_TYPE.ETHERNET);
@@ -271,10 +271,10 @@ assertEquals(stringifyIpv4(packet.tpa), &quot;192.168.1.2&quot;);
   </defs>
 </svg>
 </a>
-Functions</h2></div><div class="namespaceSection"><div id="namespace_arpethernetipv4" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-Function bg-Function/15 dark:text-FunctionDark dark:bg-FunctionDark/15" title="Function">f</div></div>
+Functions</h2></div><div class="namespaceSection"><div id="namespace_arp" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-Function bg-Function/15 dark:text-FunctionDark dark:bg-FunctionDark/15" title="Function">f</div></div>
 <div class="namespaceItemContent">
-		    <a href=".&#x2F;.&#x2F;.&#x2F;~&#x2F;arpEthernetIpv4.html" title="arpEthernetIpv4">
-			    <span>arpEthernetIpv4</span><span>()<span>: <span class="td-ref">Coder</span>&lt;<span class="td-ref">ArpEthernetIpv4Packet</span>&gt;</span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Creates a coder for the common Ethernet/IPv4 ARP packet (RFC 826).</p>
+		    <a href=".&#x2F;.&#x2F;.&#x2F;~&#x2F;arp.html" title="arp">
+			    <span>arp</span><span>()<span>: <span class="td-ref">Coder</span>&lt;<span class="td-ref">Arp</span>&gt;</span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Creates a coder for the common Ethernet/IPv4 ARP packet (RFC 826).</p>
 </div></div></div>
     </div></div>
 </section>
@@ -301,28 +301,28 @@ Functions</h2></div><div class="namespaceSection"><div id="namespace_arpethernet
   </defs>
 </svg>
 </a>
-Interfaces</h2></div><div class="namespaceSection"><div id="namespace_arpethernetipv4packet" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-Interface bg-Interface/15 dark:text-InterfaceDark dark:bg-InterfaceDark/15" title="Interface">I</div></div>
+Interfaces</h2></div><div class="namespaceSection"><div id="namespace_arp-1" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-Interface bg-Interface/15 dark:text-InterfaceDark dark:bg-InterfaceDark/15" title="Interface">I</div></div>
 <div class="namespaceItemContent">
-		    <a href=".&#x2F;.&#x2F;.&#x2F;~&#x2F;ArpEthernetIpv4Packet.html" title="ArpEthernetIpv4Packet">
-			    <span>ArpEthernetIpv4Packet</span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Decoded representation of an Ethernet/IPv4 ARP packet (RFC 826, 28 bytes).</p>
+		    <a href=".&#x2F;.&#x2F;.&#x2F;~&#x2F;Arp.html" title="Arp">
+			    <span>Arp</span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Decoded Ethernet/IPv4 ARP packet (RFC 826, 28 bytes).</p>
 </div></div><ul class="namespaceItemContentSubItems"><li>
-                <a href=".&#x2F;.&#x2F;.&#x2F;~&#x2F;ArpEthernetIpv4Packet.html#property_hlen">
+                <a href=".&#x2F;.&#x2F;.&#x2F;~&#x2F;Arp.html#property_hlen">
                   <span>hlen</span><span>: <span class="td-kw">number</span></span></a></li><li>
-                <a href=".&#x2F;.&#x2F;.&#x2F;~&#x2F;ArpEthernetIpv4Packet.html#property_htype">
+                <a href=".&#x2F;.&#x2F;.&#x2F;~&#x2F;Arp.html#property_htype">
                   <span>htype</span><span>: <span class="td-kw">number</span></span></a></li><li>
-                <a href=".&#x2F;.&#x2F;.&#x2F;~&#x2F;ArpEthernetIpv4Packet.html#property_oper">
+                <a href=".&#x2F;.&#x2F;.&#x2F;~&#x2F;Arp.html#property_oper">
                   <span>oper</span><span>: <span class="td-kw">number</span></span></a></li><li>
-                <a href=".&#x2F;.&#x2F;.&#x2F;~&#x2F;ArpEthernetIpv4Packet.html#property_plen">
+                <a href=".&#x2F;.&#x2F;.&#x2F;~&#x2F;Arp.html#property_plen">
                   <span>plen</span><span>: <span class="td-kw">number</span></span></a></li><li>
-                <a href=".&#x2F;.&#x2F;.&#x2F;~&#x2F;ArpEthernetIpv4Packet.html#property_ptype">
+                <a href=".&#x2F;.&#x2F;.&#x2F;~&#x2F;Arp.html#property_ptype">
                   <span>ptype</span><span>: <span class="td-kw">number</span></span></a></li><li>
-                <a href=".&#x2F;.&#x2F;.&#x2F;~&#x2F;ArpEthernetIpv4Packet.html#property_sha">
+                <a href=".&#x2F;.&#x2F;.&#x2F;~&#x2F;Arp.html#property_sha">
                   <span>sha</span><span>: <span class="td-ref">Uint8Array</span></span></a></li><li>
-                <a href=".&#x2F;.&#x2F;.&#x2F;~&#x2F;ArpEthernetIpv4Packet.html#property_spa">
+                <a href=".&#x2F;.&#x2F;.&#x2F;~&#x2F;Arp.html#property_spa">
                   <span>spa</span><span>: <span class="td-kw">number</span></span></a></li><li>
-                <a href=".&#x2F;.&#x2F;.&#x2F;~&#x2F;ArpEthernetIpv4Packet.html#property_tha">
+                <a href=".&#x2F;.&#x2F;.&#x2F;~&#x2F;Arp.html#property_tha">
                   <span>tha</span><span>: <span class="td-ref">Uint8Array</span></span></a></li><li>
-                <a href=".&#x2F;.&#x2F;.&#x2F;~&#x2F;ArpEthernetIpv4Packet.html#property_tpa">
+                <a href=".&#x2F;.&#x2F;.&#x2F;~&#x2F;Arp.html#property_tpa">
                   <span>tpa</span><span>: <span class="td-kw">number</span></span></a></li></ul></div>
     </div></div>
 </section>
@@ -397,8 +397,11 @@ Variables</h2></div><div class="namespaceSection"><div id="namespace_arp_etherne
     </div><div id="namespace_arp_hardware_type" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-Variable bg-Variable/15 dark:text-VariableDark dark:bg-VariableDark/15" title="Variable">v</div></div>
 <div class="namespaceItemContent">
 		    <a href=".&#x2F;.&#x2F;.&#x2F;~&#x2F;ARP_HARDWARE_TYPE.html" title="ARP_HARDWARE_TYPE">
-			    <span>ARP_HARDWARE_TYPE</span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>ARP hardware type values (the <code>htype</code> field) for common link layers.</p>
-</div></div></div>
+			    <span>ARP_HARDWARE_TYPE</span><span>: { ETHERNET<span>: <span class="td-kw">number</span></span>;  }</span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>ARP hardware type values (the <code>htype</code> field) for common link layers.</p>
+</div></div><ul class="namespaceItemContentSubItems"><li>
+                <a href=".&#x2F;.&#x2F;.&#x2F;~&#x2F;ARP_HARDWARE_TYPE.html#property_ethernet">
+                  <span>ETHERNET</span><span>: <span class="td-kw">number</span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Ethernet (10/100/1000Mb).</p>
+</div></div></li></ul></div>
     </div><div id="namespace_arp_hw_len_ethernet" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-Variable bg-Variable/15 dark:text-VariableDark dark:bg-VariableDark/15" title="Variable">v</div></div>
 <div class="namespaceItemContent">
 		    <a href=".&#x2F;.&#x2F;.&#x2F;~&#x2F;ARP_HW_LEN_ETHERNET.html" title="ARP_HW_LEN_ETHERNET">
@@ -407,8 +410,20 @@ Variables</h2></div><div class="namespaceSection"><div id="namespace_arp_etherne
     </div><div id="namespace_arp_opcode" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-Variable bg-Variable/15 dark:text-VariableDark dark:bg-VariableDark/15" title="Variable">v</div></div>
 <div class="namespaceItemContent">
 		    <a href=".&#x2F;.&#x2F;.&#x2F;~&#x2F;ARP_OPCODE.html" title="ARP_OPCODE">
-			    <span>ARP_OPCODE</span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>ARP operation codes (the <code>oper</code> field).</p>
-</div></div></div>
+			    <span>ARP_OPCODE</span><span>: { REQUEST<span>: <span class="td-kw">number</span></span>; REPLY<span>: <span class="td-kw">number</span></span>; RARP_REQUEST<span>: <span class="td-kw">number</span></span>; RARP_REPLY<span>: <span class="td-kw">number</span></span>;  }</span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>ARP operation codes (the <code>oper</code> field).</p>
+</div></div><ul class="namespaceItemContentSubItems"><li>
+                <a href=".&#x2F;.&#x2F;.&#x2F;~&#x2F;ARP_OPCODE.html#property_rarp_reply">
+                  <span>RARP_REPLY</span><span>: <span class="td-kw">number</span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>RARP reply — protocol address for the requested hardware address.</p>
+</div></div></li><li>
+                <a href=".&#x2F;.&#x2F;.&#x2F;~&#x2F;ARP_OPCODE.html#property_rarp_request">
+                  <span>RARP_REQUEST</span><span>: <span class="td-kw">number</span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>RARP request — &quot;who am I&quot;, given my hardware address (RFC 903).</p>
+</div></div></li><li>
+                <a href=".&#x2F;.&#x2F;.&#x2F;~&#x2F;ARP_OPCODE.html#property_reply">
+                  <span>REPLY</span><span>: <span class="td-kw">number</span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>ARP reply — sender's MAC for the requested protocol address.</p>
+</div></div></li><li>
+                <a href=".&#x2F;.&#x2F;.&#x2F;~&#x2F;ARP_OPCODE.html#property_request">
+                  <span>REQUEST</span><span>: <span class="td-kw">number</span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>ARP request — &quot;who has TPA, tell SPA&quot;.</p>
+</div></div></li></ul></div>
     </div><div id="namespace_arp_proto_len_ipv4" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-Variable bg-Variable/15 dark:text-VariableDark dark:bg-VariableDark/15" title="Variable">v</div></div>
 <div class="namespaceItemContent">
 		    <a href=".&#x2F;.&#x2F;.&#x2F;~&#x2F;ARP_PROTO_LEN_IPV4.html" title="ARP_PROTO_LEN_IPV4">
@@ -417,8 +432,11 @@ Variables</h2></div><div class="namespaceSection"><div id="namespace_arp_etherne
     </div><div id="namespace_arp_protocol_type" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-Variable bg-Variable/15 dark:text-VariableDark dark:bg-VariableDark/15" title="Variable">v</div></div>
 <div class="namespaceItemContent">
 		    <a href=".&#x2F;.&#x2F;.&#x2F;~&#x2F;ARP_PROTOCOL_TYPE.html" title="ARP_PROTOCOL_TYPE">
-			    <span>ARP_PROTOCOL_TYPE</span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>ARP protocol type values (the <code>ptype</code> field) for common upper layers.</p>
-</div></div></div>
+			    <span>ARP_PROTOCOL_TYPE</span><span>: { IPV4<span>: <span class="td-kw">number</span></span>;  }</span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>ARP protocol type values (the <code>ptype</code> field) for common upper layers.</p>
+</div></div><ul class="namespaceItemContentSubItems"><li>
+                <a href=".&#x2F;.&#x2F;.&#x2F;~&#x2F;ARP_PROTOCOL_TYPE.html#property_ipv4">
+                  <span>IPV4</span><span>: <span class="td-kw">number</span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Internet Protocol version 4.</p>
+</div></div></li></ul></div>
     </div><div id="namespace_ethertype_arp" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-Variable bg-Variable/15 dark:text-VariableDark dark:bg-VariableDark/15" title="Variable">v</div></div>
 <div class="namespaceItemContent">
 		    <a href=".&#x2F;.&#x2F;.&#x2F;~&#x2F;ETHERTYPE_ARP.html" title="ETHERTYPE_ARP">

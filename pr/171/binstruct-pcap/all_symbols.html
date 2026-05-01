@@ -417,23 +417,23 @@ in the global header.</p>
 </div></h3>
   <div><div class="markdown"><pre class="highlight"><code class="language-ts">import { assertEquals } from &quot;@std/assert&quot;;
 import { LINKTYPE, PCAP_MAGIC_MICROS, pcapFile } from &quot;@binstruct/pcap&quot;;
-import { ipv4Header } from &quot;@binstruct/ipv4&quot;;
+import { ipv4 } from &quot;@binstruct/ipv4&quot;;
 import { udpDatagram } from &quot;@binstruct/udp&quot;;
 
-const ip = ipv4Header();
+const ip = ipv4();
 const udp = udpDatagram();
 
 // Synth a UDP-over-IPv4 packet to put in the capture.
-const datagram = new Uint8Array(12);
+const udpBytes = new Uint8Array(12);
 udp.encode({
   srcPort: 53,
   dstPort: 49152,
   length: 12,
   checksum: 0,
   payload: new Uint8Array([0xde, 0xad, 0xbe, 0xef]),
-}, datagram);
+}, udpBytes);
 
-const packet = new Uint8Array(20 + 12);
+const packet = new Uint8Array(32);
 ip.encode({
   versionIhl: { version: 4, ihl: 5 },
   typeOfService: 0,
@@ -451,8 +451,8 @@ ip.encode({
   sourceAddress: &quot;192.0.2.1&quot;,
   destinationAddress: &quot;192.0.2.2&quot;,
   options: new Uint8Array(0),
+  payload: udpBytes,
 }, packet);
-packet.set(datagram, 20);
 
 const cap = pcapFile(&quot;le&quot;);
 const buf = new Uint8Array(24 + 16 + packet.length);
@@ -478,32 +478,30 @@ const written = cap.encode({
 // Walk the stack on read.
 const [{ records }] = cap.decode(buf.subarray(0, written));
 const [parsedIp] = ip.decode(records[0].data);
-const [parsedUdp] = udp.decode(
-  records[0].data.subarray(parsedIp.versionIhl.ihl * 4),
-);
+const [parsedUdp] = udp.decode(parsedIp.payload);
 
 assertEquals(parsedIp.sourceAddress, &quot;192.0.2.1&quot;);
 assertEquals(parsedUdp.srcPort, 53);
 assertEquals(parsedUdp.payload, new Uint8Array([0xde, 0xad, 0xbe, 0xef]));
 </code><button class="copyButton" data-copy="import { assertEquals } from &quot;@std/assert&quot;;
 import { LINKTYPE, PCAP_MAGIC_MICROS, pcapFile } from &quot;@binstruct/pcap&quot;;
-import { ipv4Header } from &quot;@binstruct/ipv4&quot;;
+import { ipv4 } from &quot;@binstruct/ipv4&quot;;
 import { udpDatagram } from &quot;@binstruct/udp&quot;;
 
-const ip = ipv4Header();
+const ip = ipv4();
 const udp = udpDatagram();
 
 // Synth a UDP-over-IPv4 packet to put in the capture.
-const datagram = new Uint8Array(12);
+const udpBytes = new Uint8Array(12);
 udp.encode({
   srcPort: 53,
   dstPort: 49152,
   length: 12,
   checksum: 0,
   payload: new Uint8Array([0xde, 0xad, 0xbe, 0xef]),
-}, datagram);
+}, udpBytes);
 
-const packet = new Uint8Array(20 + 12);
+const packet = new Uint8Array(32);
 ip.encode({
   versionIhl: { version: 4, ihl: 5 },
   typeOfService: 0,
@@ -521,8 +519,8 @@ ip.encode({
   sourceAddress: &quot;192.0.2.1&quot;,
   destinationAddress: &quot;192.0.2.2&quot;,
   options: new Uint8Array(0),
+  payload: udpBytes,
 }, packet);
-packet.set(datagram, 20);
 
 const cap = pcapFile(&quot;le&quot;);
 const buf = new Uint8Array(24 + 16 + packet.length);
@@ -548,9 +546,7 @@ const written = cap.encode({
 // Walk the stack on read.
 const [{ records }] = cap.decode(buf.subarray(0, written));
 const [parsedIp] = ip.decode(records[0].data);
-const [parsedUdp] = udp.decode(
-  records[0].data.subarray(parsedIp.versionIhl.ihl * 4),
-);
+const [parsedUdp] = udp.decode(parsedIp.payload);
 
 assertEquals(parsedIp.sourceAddress, &quot;192.0.2.1&quot;);
 assertEquals(parsedUdp.srcPort, 53);

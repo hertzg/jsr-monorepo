@@ -1,24 +1,54 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>@binstruct&#x2F;ipv4 documentation</title>
+  <title>ipv4Address - default - @binstruct&#x2F;ipv4 documentation</title>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="doc-current-file" content="">
-  <link rel="stylesheet" href="styles.css">
-  <link rel="stylesheet" href="page.css">
-  <link id="ddocResetStylesheet" rel="stylesheet" href="reset.css"><link href="comrak.css" rel="stylesheet" /><link href="prism.css" rel="stylesheet" /><script src="prism.js"></script><script src="script.js" defer></script>
-  <script src="darkmode_toggle.js"></script><script src="search_index.js" defer></script>
-    <script src="fuse.js" defer></script>
-    <script src="search.js" defer></script></head>
+  <meta name="doc-current-file" content=".">
+  <link rel="stylesheet" href="..&#x2F;styles.css">
+  <link rel="stylesheet" href="..&#x2F;page.css">
+  <link id="ddocResetStylesheet" rel="stylesheet" href="..&#x2F;reset.css"><link href="../comrak.css" rel="stylesheet" /><link href="../prism.css" rel="stylesheet" /><script src="../prism.js"></script><script src="..&#x2F;script.js" defer></script>
+  <script src="..&#x2F;darkmode_toggle.js"></script><script src="..&#x2F;search_index.js" defer></script>
+    <script src="..&#x2F;fuse.js" defer></script>
+    <script src="..&#x2F;search.js" defer></script></head>
 <body>
 <div class="ddoc">
 <div><nav id="topnav">
   <div class="h-full">
     <div class="flex items-center"><ul class="breadcrumbs">
   <li>
-    <a href="" class="contextLink">@binstruct&#x2F;ipv4</a>
-  </li></ul>
+    <a href="..&#x2F;" class="contextLink">@binstruct&#x2F;ipv4</a>
+  </li><span class="text-black dark:text-white"><svg
+  width="16"
+  height="16"
+  viewBox="0 0 16 16"
+  fill="none"
+  xmlns="http://www.w3.org/2000/svg"
+>
+  <path
+    fill-rule="evenodd"
+    clip-rule="evenodd"
+    d="M5.76748 11.8159C5.5378 11.577 5.54525 11.1972 5.78411 10.9675L8.93431 8L5.78411 5.0325C5.54525 4.80282 5.5378 4.423 5.76748 4.18413C5.99715 3.94527 6.37698 3.93782 6.61584 4.1675L10.2158 7.5675C10.3335 7.68062 10.4 7.83679 10.4 8C10.4 8.16321 10.3335 8.31938 10.2158 8.4325L6.61584 11.8325C6.37698 12.0622 5.99715 12.0547 5.76748 11.8159Z"
+    fill="currentColor"
+  />
+</svg>
+</span><a href="..&#x2F;" class="contextLink">default</a><span class="text-black dark:text-white"><svg
+  width="16"
+  height="16"
+  viewBox="0 0 16 16"
+  fill="none"
+  xmlns="http://www.w3.org/2000/svg"
+>
+  <path
+    fill-rule="evenodd"
+    clip-rule="evenodd"
+    d="M5.76748 11.8159C5.5378 11.577 5.54525 11.1972 5.78411 10.9675L8.93431 8L5.78411 5.0325C5.54525 4.80282 5.5378 4.423 5.76748 4.18413C5.99715 3.94527 6.37698 3.93782 6.61584 4.1675L10.2158 7.5675C10.3335 7.68062 10.4 7.83679 10.4 8C10.4 8.16321 10.3335 8.31938 10.2158 8.4325L6.61584 11.8325C6.37698 12.0622 5.99715 12.0547 5.76748 11.8159Z"
+    fill="currentColor"
+  />
+</svg>
+</span>
+
+    <ul><li>ipv4Address</li></ul></ul>
 </div>
 
     <div class="flex items-center gap-2">
@@ -82,97 +112,38 @@
     </div>
   </div>
 </nav>
-<div id="searchResults"></div><div id="content">
-    <main><section>
-  <div class="space-y-2 flex-1"><div class="space-y-7" id="module_doc"><div class="markdown"><p>IPv4 datagram encoding and decoding (RFC 791).</p>
-<p>A datagram is a 20-byte fixed header, a variable-length options trailer
-(0–40 bytes per <code>IHL</code>), and the transport-layer payload:</p>
-<pre class="highlight"><code class="language-text"> 0      7 8     15 16    23 24    31
-+--------+--------+--------+--------+
-|Ver/IHL |  ToS   |   Total Length  |
-+--------+--------+--------+--------+
-| Identification  |Flags + FragOffs |
-+--------+--------+--------+--------+
-|  TTL   |Protocol|  Header Cksum   |
-+--------+--------+--------+--------+
-|          Source Address           |
-+--------+--------+--------+--------+
-|       Destination Address         |
-+--------+--------+--------+--------+
-|       Options (0-40 bytes)        |
-+-----------------------------------+
-|        Payload (variable)         |
-+-----------------------------------+
-</code><button class="copyButton" data-copy=" 0      7 8     15 16    23 24    31
-+--------+--------+--------+--------+
-|Ver/IHL |  ToS   |   Total Length  |
-+--------+--------+--------+--------+
-| Identification  |Flags + FragOffs |
-+--------+--------+--------+--------+
-|  TTL   |Protocol|  Header Cksum   |
-+--------+--------+--------+--------+
-|          Source Address           |
-+--------+--------+--------+--------+
-|       Destination Address         |
-+--------+--------+--------+--------+
-|       Options (0-40 bytes)        |
-+-----------------------------------+
-|        Payload (variable)         |
-+-----------------------------------+
-"><svg
-  class="copy"
-  width="15"
-  height="15"
-  viewBox="0 0 15 15"
+<div id="searchResults"></div><div id="content"><main class="symbolGroup" id="symbol_ipv4Address"><article>
+      <div class="symbolTitle">
+        <div>
+          <div class="text-2xl leading-none break-all">
+            <span class="text-Function">function</span>&nbsp;<span class="font-bold">ipv4Address</span>
+          </div></div><a
+  class="sourceButton"
+  href="file:&#x2F;&#x2F;&#x2F;home&#x2F;runner&#x2F;work&#x2F;jsr-monorepo&#x2F;jsr-monorepo&#x2F;packages&#x2F;@binstruct&#x2F;ipv4&#x2F;mod.ts"><svg
+  width="14"
+  height="14"
+  viewBox="0 0 14 14"
   fill="none"
   xmlns="http://www.w3.org/2000/svg"
 >
-  <rect x="2" y="2" width="7" height="7" fill="none" />
-  <rect x="6" y="6" width="7" height="7" fill="none" />
   <path
-    d="M1.55566 2.7C1.55566 2.03726 2.09292 1.5 2.75566 1.5H8.75566C9.41841 1.5 9.95566 2.03726 9.95566 2.7V5.1H12.3557C13.0184 5.1 13.5557 5.63726 13.5557 6.3V12.3C13.5557 12.9627 13.0184 13.5 12.3557 13.5H6.35566C5.69292 13.5 5.15566 12.9627 5.15566 12.3V9.9H2.75566C2.09292 9.9 1.55566 9.36274 1.55566 8.7V2.7ZM6.35566 9.9V12.3H12.3557V6.3H9.95566V8.7C9.95566 9.36274 9.41841 9.9 8.75566 9.9H6.35566ZM8.75566 8.7V2.7H2.75566V8.7H8.75566Z"
-    fill="currentColor"
+    d="M3.16675 12.6667H11.3334C11.6428 12.6667 11.9396 12.5438 12.1584 12.325C12.3772 12.1062 12.5001 11.8094 12.5001 11.5V4.20834L9.29175 1H4.33342C4.024 1 3.72725 1.12292 3.50846 1.34171C3.28966 1.5605 3.16675 1.85725 3.16675 2.16667V4.5"
+    stroke="currentColor"
+    stroke-width="1.4"
+    stroke-linecap="round"
+    stroke-linejoin="round"
+  />
+  <path
+    d="M6.08334 10.3333L7.83334 8.58334L6.08334 6.83334M3.75 6.83334L2 8.58334L3.75 10.3333M9.00001 1V4.5H12.5L9.00001 1Z"
+    stroke="currentColor"
+    stroke-width="1.4"
+    stroke-linecap="round"
+    stroke-linejoin="round"
   />
 </svg>
-<svg
-  class="check"
-  width="15"
-  height="15"
-  viewBox="0 0 24 24"
-  stroke-width="2"
-  stroke="currentColor"
-  fill="none"
-  stroke-linecap="round"
-  stroke-linejoin="round"
-  xmlns="http://www.w3.org/2000/svg"
->
-  <path stroke="none" d="M0 0h24v24H0z" fill="none" />
-  <path d="M5 12l5 5l10 -10" />
-</svg>
-</button><code></code></pre>
-<p>Provides a single-pass coder for the full datagram — fixed header, optional
-options trailer, and the transport payload sized via <code>totalLength</code>. Bit-packed
-fields (version/IHL, flags/fragment offset) are exposed as nested objects via
-<code>bitStruct</code>, keeping the on-wire layout faithful while preserving named-field
-access.</p>
-<p>IPv4 addresses are surfaced as dotted-quad strings via a refiner backed by
-<code>parseIpv4</code>/<code>stringifyIpv4</code> from
-<a href="https://jsr.io/@hertzg/ip">@hertzg/ip</a>.</p>
-<p>Design notes:</p>
-<ul>
-<li>The header checksum is <strong>not</strong> computed automatically. Callers are expected
-to set the <code>headerChecksum</code> field to a valid RFC 1071 16-bit one's
-complement sum before encoding (or zero when the receiver tolerates it,
-e.g. for testing). This matches the <code>@hertzg/binstruct</code> &quot;no defensive
-programming&quot; stance — the coder describes layout, not semantics.</li>
-<li>Options are encoded as a raw byte slice whose length is derived from
-<code>versionIhl.ihl</code>: <code>(ihl - 5) * 4</code>. For a datagram with no options pass
-<code>ihl = 5</code> and <code>options = new Uint8Array(0)</code>.</li>
-<li>The payload size is derived from <code>totalLength - ihl * 4</code>. Callers are
-responsible for setting <code>totalLength</code> to match <code>ihl * 4 + payload.length</code>.</li>
-</ul>
-</div><section class="section"  id="examples"><div>
-      <h2 class="anchorable mb-1"><a href="#examples" class="anchor" aria-label="Anchor" tabIndex="-1"><svg
+</a>
+</div><div><div class="mt-3 space-y-8"><div class="scroll-mt-16" id="function_ipv4address_0">
+      <code class="anchorable text-base break-words"><a href="#function_ipv4address_0" class="anchor" aria-label="Anchor" tabIndex="-1"><svg
   width="16"
   height="16"
   viewBox="0 0 14 14"
@@ -194,7 +165,11 @@ responsible for setting <code>totalLength</code> to match <code>ihl * 4 + payloa
   </defs>
 </svg>
 </a>
-Examples</h2></div><div class="space-y-8"><div class="anchorable"><a href="#example_0" class="anchor" aria-label="Anchor" tabIndex="-1"><svg
+<span class="font-bold">ipv4Address</span><span class="font-medium">()<span>: <span class="td-ref">Coder</span>&lt;<span class="td-kw">string</span>&gt;</span> </span>
+      </code><div class="space-y-7" id=""><div class="markdown"><p>Coder factory for an IPv4 address — <code>u32be()</code> refined to dotted-quad string
+via <code>@hertzg/ip</code>. Used for both source and destination address fields.</p>
+</div><section class="section"  id="return-type"><div>
+      <h2 class="anchorable mb-1"><a href="#return-type" class="anchor" aria-label="Anchor" tabIndex="-1"><svg
   width="16"
   height="16"
   viewBox="0 0 14 14"
@@ -216,140 +191,79 @@ Examples</h2></div><div class="space-y-8"><div class="anchorable"><a href="#exam
   </defs>
 </svg>
 </a>
-<h3 class="example-header"><div class="markdown"><p>Round-trip a minimal IPv4 datagram (no options, empty payload)</p>
-</div></h3>
-  <div><div class="markdown"><pre class="highlight"><code class="language-ts">import { assertEquals } from &quot;@std/assert&quot;;
-import { ipv4 } from &quot;@binstruct/ipv4&quot;;
+Return Type</h2></div><div class="space-y-8"><div class=" docEntry" id="function_ipv4address_0_return">
 
-const coder = ipv4();
-const datagram = {
-  versionIhl: { version: 4, ihl: 5 },
-  typeOfService: 0,
-  totalLength: 20,
-  identification: 0x1234,
-  flagsFragmentOffset: {
-    reserved: 0,
-    dontFragment: 1,
-    moreFragments: 0,
-    fragmentOffset: 0,
-  },
-  timeToLive: 64,
-  protocol: 6,
-  headerChecksum: 0,
-  sourceAddress: &quot;192.168.1.100&quot;,
-  destinationAddress: &quot;10.0.0.50&quot;,
-  options: new Uint8Array(0),
-  payload: new Uint8Array(0),
-};
-
-const buffer = new Uint8Array(20);
-const bytesWritten = coder.encode(datagram, buffer);
-const [decoded, bytesRead] = coder.decode(buffer);
-
-assertEquals(bytesWritten, 20);
-assertEquals(bytesRead, 20);
-assertEquals(decoded.sourceAddress, &quot;192.168.1.100&quot;);
-assertEquals(decoded.destinationAddress, &quot;10.0.0.50&quot;);
-assertEquals(decoded.flagsFragmentOffset.dontFragment, 1);
-</code><button class="copyButton" data-copy="import { assertEquals } from &quot;@std/assert&quot;;
-import { ipv4 } from &quot;@binstruct/ipv4&quot;;
-
-const coder = ipv4();
-const datagram = {
-  versionIhl: { version: 4, ihl: 5 },
-  typeOfService: 0,
-  totalLength: 20,
-  identification: 0x1234,
-  flagsFragmentOffset: {
-    reserved: 0,
-    dontFragment: 1,
-    moreFragments: 0,
-    fragmentOffset: 0,
-  },
-  timeToLive: 64,
-  protocol: 6,
-  headerChecksum: 0,
-  sourceAddress: &quot;192.168.1.100&quot;,
-  destinationAddress: &quot;10.0.0.50&quot;,
-  options: new Uint8Array(0),
-  payload: new Uint8Array(0),
-};
-
-const buffer = new Uint8Array(20);
-const bytesWritten = coder.encode(datagram, buffer);
-const [decoded, bytesRead] = coder.decode(buffer);
-
-assertEquals(bytesWritten, 20);
-assertEquals(bytesRead, 20);
-assertEquals(decoded.sourceAddress, &quot;192.168.1.100&quot;);
-assertEquals(decoded.destinationAddress, &quot;10.0.0.50&quot;);
-assertEquals(decoded.flagsFragmentOffset.dontFragment, 1);
-"><svg
-  class="copy"
-  width="15"
-  height="15"
-  viewBox="0 0 15 15"
+  <div class="docEntryHeader">
+    <div><code><span class="font-medium text-stone-500 dark:text-stone-200"><span class="td-ref">Coder</span>&lt;<span class="td-kw">string</span>&gt;</span>
+      </code>
+    </div><a
+  class="sourceButton"
+  href="file:&#x2F;&#x2F;&#x2F;home&#x2F;runner&#x2F;work&#x2F;jsr-monorepo&#x2F;jsr-monorepo&#x2F;packages&#x2F;@binstruct&#x2F;ipv4&#x2F;mod.ts"><svg
+  width="14"
+  height="14"
+  viewBox="0 0 14 14"
   fill="none"
   xmlns="http://www.w3.org/2000/svg"
 >
-  <rect x="2" y="2" width="7" height="7" fill="none" />
-  <rect x="6" y="6" width="7" height="7" fill="none" />
   <path
-    d="M1.55566 2.7C1.55566 2.03726 2.09292 1.5 2.75566 1.5H8.75566C9.41841 1.5 9.95566 2.03726 9.95566 2.7V5.1H12.3557C13.0184 5.1 13.5557 5.63726 13.5557 6.3V12.3C13.5557 12.9627 13.0184 13.5 12.3557 13.5H6.35566C5.69292 13.5 5.15566 12.9627 5.15566 12.3V9.9H2.75566C2.09292 9.9 1.55566 9.36274 1.55566 8.7V2.7ZM6.35566 9.9V12.3H12.3557V6.3H9.95566V8.7C9.95566 9.36274 9.41841 9.9 8.75566 9.9H6.35566ZM8.75566 8.7V2.7H2.75566V8.7H8.75566Z"
-    fill="currentColor"
+    d="M3.16675 12.6667H11.3334C11.6428 12.6667 11.9396 12.5438 12.1584 12.325C12.3772 12.1062 12.5001 11.8094 12.5001 11.5V4.20834L9.29175 1H4.33342C4.024 1 3.72725 1.12292 3.50846 1.34171C3.28966 1.5605 3.16675 1.85725 3.16675 2.16667V4.5"
+    stroke="currentColor"
+    stroke-width="1.4"
+    stroke-linecap="round"
+    stroke-linejoin="round"
+  />
+  <path
+    d="M6.08334 10.3333L7.83334 8.58334L6.08334 6.83334M3.75 6.83334L2 8.58334L3.75 10.3333M9.00001 1V4.5H12.5L9.00001 1Z"
+    stroke="currentColor"
+    stroke-width="1.4"
+    stroke-linecap="round"
+    stroke-linejoin="round"
   />
 </svg>
-<svg
-  class="check"
-  width="15"
-  height="15"
-  viewBox="0 0 24 24"
-  stroke-width="2"
-  stroke="currentColor"
-  fill="none"
-  stroke-linecap="round"
-  stroke-linejoin="round"
-  xmlns="http://www.w3.org/2000/svg"
->
-  <path stroke="none" d="M0 0h24v24H0z" fill="none" />
-  <path d="M5 12l5 5l10 -10" />
-</svg>
-</button><code></code></pre>
+</a>
 </div></div>
-</div>
 </div></section>
 </div>
+</div></div>
 </div>
-</section>
-</main><div class="toc">
-    <div><nav class="topSymbols">
-          <h3>Symbols</h3>
-          <ul><li>
-                <a href=".&#x2F;.&#x2F;~&#x2F;ETHERTYPE_IPV4.html" title="ETHERTYPE_IPV4"><div class="docNodeKindIcon"><div class="text-Variable bg-Variable/15 dark:text-VariableDark dark:bg-VariableDark/15" title="Variable">v</div></div>
-<span class="hover:bg-Variable/15 hover:bg-VariableDark/15">
-                    ETHERTYPE_IPV4
-                  </span>
-                </a>
-              </li><li>
-                <a href=".&#x2F;.&#x2F;~&#x2F;Ipv4.html" title="Ipv4"><div class="docNodeKindIcon"><div class="text-Interface bg-Interface/15 dark:text-InterfaceDark dark:bg-InterfaceDark/15" title="Interface">I</div></div>
-<span class="hover:bg-Interface/15 hover:bg-InterfaceDark/15">
-                    Ipv4
-                  </span>
-                </a>
-              </li><li>
-                <a href=".&#x2F;.&#x2F;~&#x2F;ipv4.html" title="ipv4"><div class="docNodeKindIcon"><div class="text-Function bg-Function/15 dark:text-FunctionDark dark:bg-FunctionDark/15" title="Function">f</div></div>
-<span class="hover:bg-Function/15 hover:bg-FunctionDark/15">
-                    ipv4
-                  </span>
-                </a>
-              </li><li>
-                <a href=".&#x2F;.&#x2F;~&#x2F;ipv4Address.html" title="ipv4Address"><div class="docNodeKindIcon"><div class="text-Function bg-Function/15 dark:text-FunctionDark dark:bg-FunctionDark/15" title="Function">f</div></div>
-<span class="hover:bg-Function/15 hover:bg-FunctionDark/15">
-                    ipv4Address
-                  </span>
-                </a>
-              </li></ul></nav><nav class="documentNavigation">
-          <h3>Document Navigation</h3><ul><li><a href="#examples" title="Examples">Examples</a></li><li><ul><li><a href="#example_0" title="Round-trip a minimal IPv4 datagram (no options, empty payload)">Round-trip a minimal IPv4 datagram (no options, empty payload)</a></li></ul></li></ul></nav></div>
+    </article></main>
+<div class="toc">
+    <div><div class="usageContent">
+    <h3>Usage</h3><div class="markdown"><pre class="highlight"><code class="language-typescript">import { ipv4Address } from &quot;.&quot;;
+</code><button class="copyButton" data-copy="import { ipv4Address } from &quot;.&quot;;
+"><svg
+  class="copy"
+  width="15"
+  height="15"
+  viewBox="0 0 15 15"
+  fill="none"
+  xmlns="http://www.w3.org/2000/svg"
+>
+  <rect x="2" y="2" width="7" height="7" fill="none" />
+  <rect x="6" y="6" width="7" height="7" fill="none" />
+  <path
+    d="M1.55566 2.7C1.55566 2.03726 2.09292 1.5 2.75566 1.5H8.75566C9.41841 1.5 9.95566 2.03726 9.95566 2.7V5.1H12.3557C13.0184 5.1 13.5557 5.63726 13.5557 6.3V12.3C13.5557 12.9627 13.0184 13.5 12.3557 13.5H6.35566C5.69292 13.5 5.15566 12.9627 5.15566 12.3V9.9H2.75566C2.09292 9.9 1.55566 9.36274 1.55566 8.7V2.7ZM6.35566 9.9V12.3H12.3557V6.3H9.95566V8.7C9.95566 9.36274 9.41841 9.9 8.75566 9.9H6.35566ZM8.75566 8.7V2.7H2.75566V8.7H8.75566Z"
+    fill="currentColor"
+  />
+</svg>
+<svg
+  class="check"
+  width="15"
+  height="15"
+  viewBox="0 0 24 24"
+  stroke-width="2"
+  stroke="currentColor"
+  fill="none"
+  stroke-linecap="round"
+  stroke-linejoin="round"
+  xmlns="http://www.w3.org/2000/svg"
+>
+  <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+  <path d="M5 12l5 5l10 -10" />
+</svg>
+</button><code></code></pre>
+</div></div><nav class="documentNavigation">
+          <h3>Document Navigation</h3><ul><li><a href="#return-type" title="Return Type">Return Type</a></li></ul></nav></div>
   </div></div>
 </div>
 </div>
