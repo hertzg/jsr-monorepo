@@ -91,10 +91,10 @@
 layer's bytes. This package wires them together via <code>refineSwitch</code> —
 dispatching on <code>etherType</code> at L3 and <code>protocol</code> at L4 — into a single
 round-trippable <a href="././~/inetFrame.html"><code>inetFrame</code></a> coder factory that walks an
-Ethernet II frame top-down. Each layer's <code>payload</code> field is replaced with
-a discriminated union of the next layer's decoded form; layers we don't
-have a coder for default to a raw <a href="https://deno.land/api@v2.7.14?s=Uint8Array"><code>Uint8Array</code></a>, so the coder is
-safe to point at arbitrary captured traffic.</p>
+Ethernet II frame top-down. Each layer's <code>payload</code> field surfaces as the
+typed value of the next layer (no <code>kind</code> wrapper); layers we don't have a
+coder for default to a raw <a href="https://deno.land/api@v2.7.14?s=Uint8Array"><code>Uint8Array</code></a>, so the coder is safe
+to point at arbitrary captured traffic.</p>
 <p>Coverage:</p>
 <ul>
 <li>L2 — Ethernet II (<code>@binstruct/ethernet</code>)</li>
@@ -282,33 +282,33 @@ assertEquals(decoded.payload.payload.payload, new Uint8Array([0xde, 0xad, 0xbe, 
     <div><nav class="topSymbols">
           <h3>Symbols</h3>
           <ul><li>
-                <a href=".&#x2F;.&#x2F;~&#x2F;Ipv4WithUdp.html" title="Ipv4WithUdp"><div class="docNodeKindIcon"><div class="text-TypeAlias bg-TypeAlias/15 dark:text-TypeAliasDark dark:bg-TypeAliasDark/15" title="Type Alias">T</div></div>
+                <a href=".&#x2F;.&#x2F;~&#x2F;Ipv4UdpFrame.html" title="Ipv4UdpFrame"><div class="docNodeKindIcon"><div class="text-TypeAlias bg-TypeAlias/15 dark:text-TypeAliasDark dark:bg-TypeAliasDark/15" title="Type Alias">T</div></div>
 <span class="hover:bg-TypeAlias/15 hover:bg-TypeAliasDark/15">
-                    Ipv4WithUdp
+                    Ipv4UdpFrame
                   </span>
                 </a>
               </li><li>
-                <a href=".&#x2F;.&#x2F;~&#x2F;Ipv4WithIcmp.html" title="Ipv4WithIcmp"><div class="docNodeKindIcon"><div class="text-TypeAlias bg-TypeAlias/15 dark:text-TypeAliasDark dark:bg-TypeAliasDark/15" title="Type Alias">T</div></div>
+                <a href=".&#x2F;.&#x2F;~&#x2F;Ipv4IcmpFrame.html" title="Ipv4IcmpFrame"><div class="docNodeKindIcon"><div class="text-TypeAlias bg-TypeAlias/15 dark:text-TypeAliasDark dark:bg-TypeAliasDark/15" title="Type Alias">T</div></div>
 <span class="hover:bg-TypeAlias/15 hover:bg-TypeAliasDark/15">
-                    Ipv4WithIcmp
+                    Ipv4IcmpFrame
                   </span>
                 </a>
               </li><li>
-                <a href=".&#x2F;.&#x2F;~&#x2F;Ipv4Refined.html" title="Ipv4Refined"><div class="docNodeKindIcon"><div class="text-TypeAlias bg-TypeAlias/15 dark:text-TypeAliasDark dark:bg-TypeAliasDark/15" title="Type Alias">T</div></div>
+                <a href=".&#x2F;.&#x2F;~&#x2F;Ipv4FramePacket.html" title="Ipv4FramePacket"><div class="docNodeKindIcon"><div class="text-TypeAlias bg-TypeAlias/15 dark:text-TypeAliasDark dark:bg-TypeAliasDark/15" title="Type Alias">T</div></div>
 <span class="hover:bg-TypeAlias/15 hover:bg-TypeAliasDark/15">
-                    Ipv4Refined
+                    Ipv4FramePacket
                   </span>
                 </a>
               </li><li>
-                <a href=".&#x2F;.&#x2F;~&#x2F;FrameWithIpv4.html" title="FrameWithIpv4"><div class="docNodeKindIcon"><div class="text-TypeAlias bg-TypeAlias/15 dark:text-TypeAliasDark dark:bg-TypeAliasDark/15" title="Type Alias">T</div></div>
+                <a href=".&#x2F;.&#x2F;~&#x2F;Ipv4Frame.html" title="Ipv4Frame"><div class="docNodeKindIcon"><div class="text-TypeAlias bg-TypeAlias/15 dark:text-TypeAliasDark dark:bg-TypeAliasDark/15" title="Type Alias">T</div></div>
 <span class="hover:bg-TypeAlias/15 hover:bg-TypeAliasDark/15">
-                    FrameWithIpv4
+                    Ipv4Frame
                   </span>
                 </a>
               </li><li>
-                <a href=".&#x2F;.&#x2F;~&#x2F;FrameWithArp.html" title="FrameWithArp"><div class="docNodeKindIcon"><div class="text-TypeAlias bg-TypeAlias/15 dark:text-TypeAliasDark dark:bg-TypeAliasDark/15" title="Type Alias">T</div></div>
+                <a href=".&#x2F;.&#x2F;~&#x2F;ArpFrame.html" title="ArpFrame"><div class="docNodeKindIcon"><div class="text-TypeAlias bg-TypeAlias/15 dark:text-TypeAliasDark dark:bg-TypeAliasDark/15" title="Type Alias">T</div></div>
 <span class="hover:bg-TypeAlias/15 hover:bg-TypeAliasDark/15">
-                    FrameWithArp
+                    ArpFrame
                   </span>
                 </a>
               </li></ul><a class="flex items-center gap-0.5" href=".&#x2F;all_symbols.html">

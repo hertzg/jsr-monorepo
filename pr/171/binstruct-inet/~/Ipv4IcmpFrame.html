@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>FrameWithIpv4 - default - @binstruct&#x2F;inet documentation</title>
+  <title>Ipv4IcmpFrame - default - @binstruct&#x2F;inet documentation</title>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="doc-current-file" content=".">
@@ -48,7 +48,7 @@
 </svg>
 </span>
 
-    <ul><li>FrameWithIpv4</li></ul></ul>
+    <ul><li>Ipv4IcmpFrame</li></ul></ul>
 </div>
 
     <div class="flex items-center gap-2">
@@ -112,11 +112,11 @@
     </div>
   </div>
 </nav>
-<div id="searchResults"></div><div id="content"><main class="symbolGroup" id="symbol_FrameWithIpv4"><article>
+<div id="searchResults"></div><div id="content"><main class="symbolGroup" id="symbol_Ipv4IcmpFrame"><article>
       <div class="symbolTitle">
         <div>
           <div class="text-2xl leading-none break-all">
-            <span class="text-TypeAlias">type alias</span>&nbsp;<span class="font-bold">FrameWithIpv4</span>
+            <span class="text-TypeAlias">type alias</span>&nbsp;<span class="font-bold">Ipv4IcmpFrame</span>
           </div></div><a
   class="sourceButton"
   href="file:&#x2F;&#x2F;&#x2F;home&#x2F;runner&#x2F;work&#x2F;jsr-monorepo&#x2F;jsr-monorepo&#x2F;packages&#x2F;@binstruct&#x2F;inet&#x2F;mod.ts"><svg
@@ -142,7 +142,7 @@
   />
 </svg>
 </a>
-</div><div><div class="space-y-7" id=""><div class="markdown"><p>Refined frame whose payload is a typed IPv4 datagram.</p>
+</div><div><div class="space-y-7" id=""><div class="markdown"><p>Refined IPv4 datagram with an ICMPv4 transport payload.</p>
 </div><section class="section"  id="definition"><div>
       <h2 class="anchorable mb-1"><a href="#definition" class="anchor" aria-label="Anchor" tabIndex="-1"><svg
   width="16"
@@ -166,10 +166,10 @@
   </defs>
 </svg>
 </a>
-Definition</h2></div><div class="space-y-8"><div class=" docEntry" id="typealias_framewithipv4">
+Definition</h2></div><div class="space-y-8"><div class=" docEntry" id="typealias_ipv4icmpframe">
 
   <div class="docEntryHeader">
-    <div><code><span class="font-medium text-stone-500 dark:text-stone-200"><span><span class="td-ref">Omit</span>&lt;<span class="td-ref">Ethernet2Frame</span><span>, </span><span class="td-str">"payload"</span>&gt;<span class="td-op"> & </span>{ payload<span>: <a href="../././~/Ipv4Refined.html" class="link td-ref">Ipv4Refined</a></span>;  }</span></span>
+    <div><code><span class="font-medium text-stone-500 dark:text-stone-200"><div class="ml-indent"><span><span class="td-ref">Omit</span>&lt;<span class="td-ref">Ipv4FramePayload</span><span>, </span><span class="td-str">"payload"</span>&gt;</span><br /><span><span class="td-op"> & </span>{ payload<span>: <span class="td-ref">IcmpPacket</span></span>;  }</span></div></span>
       </code>
     </div><a
   class="sourceButton"
@@ -203,8 +203,8 @@ Definition</h2></div><div class="space-y-8"><div class=" docEntry" id="typealias
     </article></main>
 <div class="toc">
     <div><div class="usageContent">
-    <h3>Usage</h3><div class="markdown"><pre class="highlight"><code class="language-typescript">import { type FrameWithIpv4 } from &quot;.&quot;;
-</code><button class="copyButton" data-copy="import { type FrameWithIpv4 } from &quot;.&quot;;
+    <h3>Usage</h3><div class="markdown"><pre class="highlight"><code class="language-typescript">import { type Ipv4IcmpFrame } from &quot;.&quot;;
+</code><button class="copyButton" data-copy="import { type Ipv4IcmpFrame } from &quot;.&quot;;
 "><svg
   class="copy"
   width="15"

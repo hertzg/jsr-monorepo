@@ -221,9 +221,9 @@ Examples</h2></div><div class="space-y-8"><div class="anchorable"><a href="#exam
 </div></h3>
   <div><div class="markdown"><pre class="highlight"><code class="language-ts">import { assertEquals } from &quot;@std/assert&quot;;
 import { parseIpv4 } from &quot;@hertzg/ip/ipv4&quot;;
-import { ipv4 } from &quot;@binstruct/ipv4&quot;;
+import { ipv4FramePayload } from &quot;@binstruct/ipv4&quot;;
 
-const coder = ipv4();
+const coder = ipv4FramePayload();
 const datagram = {
   versionIhl: { version: 4, ihl: 5 },
   typeOfService: 0,
@@ -255,9 +255,9 @@ assertEquals(decoded.destinationAddress, parseIpv4(&quot;10.0.0.50&quot;));
 assertEquals(decoded.flagsFragmentOffset.dontFragment, 1);
 </code><button class="copyButton" data-copy="import { assertEquals } from &quot;@std/assert&quot;;
 import { parseIpv4 } from &quot;@hertzg/ip/ipv4&quot;;
-import { ipv4 } from &quot;@binstruct/ipv4&quot;;
+import { ipv4FramePayload } from &quot;@binstruct/ipv4&quot;;
 
-const coder = ipv4();
+const coder = ipv4FramePayload();
 const datagram = {
   versionIhl: { version: 4, ihl: 5 },
   typeOfService: 0,
@@ -334,15 +334,15 @@ assertEquals(decoded.flagsFragmentOffset.dontFragment, 1);
                   </span>
                 </a>
               </li><li>
-                <a href=".&#x2F;.&#x2F;~&#x2F;Ipv4.html" title="Ipv4"><div class="docNodeKindIcon"><div class="text-Interface bg-Interface/15 dark:text-InterfaceDark dark:bg-InterfaceDark/15" title="Interface">I</div></div>
+                <a href=".&#x2F;.&#x2F;~&#x2F;Ipv4FramePayload.html" title="Ipv4FramePayload"><div class="docNodeKindIcon"><div class="text-Interface bg-Interface/15 dark:text-InterfaceDark dark:bg-InterfaceDark/15" title="Interface">I</div></div>
 <span class="hover:bg-Interface/15 hover:bg-InterfaceDark/15">
-                    Ipv4
+                    Ipv4FramePayload
                   </span>
                 </a>
               </li><li>
-                <a href=".&#x2F;.&#x2F;~&#x2F;ipv4.html" title="ipv4"><div class="docNodeKindIcon"><div class="text-Function bg-Function/15 dark:text-FunctionDark dark:bg-FunctionDark/15" title="Function">f</div></div>
+                <a href=".&#x2F;.&#x2F;~&#x2F;ipv4FramePayload.html" title="ipv4FramePayload"><div class="docNodeKindIcon"><div class="text-Function bg-Function/15 dark:text-FunctionDark dark:bg-FunctionDark/15" title="Function">f</div></div>
 <span class="hover:bg-Function/15 hover:bg-FunctionDark/15">
-                    ipv4
+                    ipv4FramePayload
                   </span>
                 </a>
               </li></ul></nav><nav class="documentNavigation">

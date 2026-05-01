@@ -418,11 +418,11 @@ in the global header.</p>
 </div></h3>
   <div><div class="markdown"><pre class="highlight"><code class="language-ts">import { assertEquals } from &quot;@std/assert&quot;;
 import { LINKTYPE, PCAP_MAGIC_MICROS, pcapFile } from &quot;@binstruct/pcap&quot;;
-import { ipv4 } from &quot;@binstruct/ipv4&quot;;
+import { ipv4FramePayload } from &quot;@binstruct/ipv4&quot;;
 import { udpDatagram } from &quot;@binstruct/udp&quot;;
 import { parseIpv4 } from &quot;@hertzg/ip/ipv4&quot;;
 
-const ip = ipv4();
+const ip = ipv4FramePayload();
 const udp = udpDatagram();
 
 // Synth a UDP-over-IPv4 packet to put in the capture.
@@ -487,11 +487,11 @@ assertEquals(parsedUdp.srcPort, 53);
 assertEquals(parsedUdp.payload, new Uint8Array([0xde, 0xad, 0xbe, 0xef]));
 </code><button class="copyButton" data-copy="import { assertEquals } from &quot;@std/assert&quot;;
 import { LINKTYPE, PCAP_MAGIC_MICROS, pcapFile } from &quot;@binstruct/pcap&quot;;
-import { ipv4 } from &quot;@binstruct/ipv4&quot;;
+import { ipv4FramePayload } from &quot;@binstruct/ipv4&quot;;
 import { udpDatagram } from &quot;@binstruct/udp&quot;;
 import { parseIpv4 } from &quot;@hertzg/ip/ipv4&quot;;
 
-const ip = ipv4();
+const ip = ipv4FramePayload();
 const udp = udpDatagram();
 
 // Synth a UDP-over-IPv4 packet to put in the capture.
