@@ -381,38 +381,16 @@
  * @module
  */
 
-export {
-  type Coder,
-  type Context,
-  createContext,
-  type Decoder,
-  type Encoder,
-  isCoder,
-  type ValueWithBytes,
-} from "./core.ts";
-export { computedRef, isRef, ref, type RefValue } from "./ref/ref.ts";
-export { isValidLength, type LengthOrRef } from "./length.ts";
-export { array, arrayWhile, type ArrayWhileCondition } from "./array/array.ts";
-
-// deno-fmt-ignore
-export {
-  u8, u8be, u8le,
-  u16, u16be, u16le,
-  u32, u32be, u32le,
-  u64, u64be, u64le,
-  s8, s8be, s8le,
-  s16, s16be, s16le,
-  s32, s32be, s32le,
-  s64, s64be, s64le,
-  f16, f16be, f16le,
-  f32, f32be, f32le,
-  f64, f64be, f64le,
-} from "./numeric/numeric.ts";
-export { string } from "./string/string.ts";
-export { struct } from "./struct/struct.ts";
-export { bytes } from "./bytes/bytes.ts";
-export { type BitSchema, bitStruct } from "./bits/bit-struct.ts";
-export { refine, type Refiner } from "./refine/refine.ts";
-export { type RefinedUnion, refineSwitch } from "./refine/switch.ts";
-export { decode, encode } from "./helpers.ts";
-export { autoGrowBuffer, type AutogrowOptions } from "./buffer.ts";
+export * from "./core.ts";
+export * from "./ref/ref.ts";
+export * from "./length.ts";
+export * from "./array/array.ts";
+export * from "./numeric/numeric.ts";
+export * from "./string/string.ts";
+export * from "./struct/struct.ts";
+export * from "./bytes/bytes.ts";
+export * from "./bits/bit-struct.ts";
+export * from "./refine/refine.ts";
+export * from "./refine/switch.ts";
+export * from "./helpers.ts";
+export * from "./buffer.ts";

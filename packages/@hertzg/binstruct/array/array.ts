@@ -98,4 +98,6 @@ export function array<TDecoded>(
     : arrayWhile(elementType, lengthCoderOrLengthTypeOrCondition);
 }
 
-export { arrayFL, arrayLP, arrayWhile, type ArrayWhileCondition };
+export * from "./conditional-while.ts";
+export * from "./fixed-length.ts";
+export * from "./length-prefixed.ts";

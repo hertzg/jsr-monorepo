@@ -58,8 +58,11 @@ export type Decoder<TDecoded> = (
  * @template TDecoded - The type of the value to encode/decode
  */
 export type Coder<TDecoded> = {
+  /** Symbol tag identifying the kind of coder; used to distinguish coder variants without string comparisons. */
   [kCoderKind]: symbol;
+  /** Encodes a value into a byte buffer and returns the number of bytes written. */
   encode: Encoder<TDecoded>;
+  /** Decodes a value from a byte buffer and returns the value with the number of bytes consumed. */
   decode: Decoder<TDecoded>;
 };
 

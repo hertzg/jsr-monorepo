@@ -148,7 +148,9 @@ export function withRefsInContext(ctx: Context): Context {
  * @template TDecoded - The type of the decoded value
  */
 export type RefValue<TDecoded> = {
+  /** Resolves the reference against a context and returns the stored value. */
   (ctx: Context): TDecoded;
+  /** Brand marker identifying the function as a reference value. */
   [kIsRefValue]: true;
 };
 

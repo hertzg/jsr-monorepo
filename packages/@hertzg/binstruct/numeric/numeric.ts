@@ -96,11 +96,6 @@
  */
 export type Endianness = "be" | "le";
 
-// deno-fmt-ignore
-export { u8, u16, u32, u64, u8be, u16be, u32be, u64be, u8le, u16le, u32le, u64le } from "./unsigned.ts";
-
-// deno-fmt-ignore
-export { s8, s16, s32, s64, s8be, s16be, s32be, s64be, s8le, s16le, s32le, s64le } from "./signed.ts";
-
-// deno-fmt-ignore
-export { f16, f32, f64, f16be, f32be, f64be, f16le, f32le, f64le } from "./floats.ts";
+export * from "./unsigned.ts";
+export * from "./signed.ts";
+export * from "./floats.ts";

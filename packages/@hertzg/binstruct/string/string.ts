@@ -101,4 +101,6 @@ export function string(
     : stringFL(lengthOrLengthType, decoderEncoding, decoderOptions);
 }
 
-export { stringFL, stringLP, stringNT };
+export * from "./fixed-length.ts";
+export * from "./length-prefixed.ts";
+export * from "./null-terminated.ts";
