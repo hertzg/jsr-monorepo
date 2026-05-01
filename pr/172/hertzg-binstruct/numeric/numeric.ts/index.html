@@ -1,0 +1,685 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>numeric&#x2F;numeric.ts - @hertzg&#x2F;binstruct documentation</title>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="doc-current-file" content="">
+  <link rel="stylesheet" href="..&#x2F;..&#x2F;styles.css">
+  <link rel="stylesheet" href="..&#x2F;..&#x2F;page.css">
+  <link id="ddocResetStylesheet" rel="stylesheet" href="..&#x2F;..&#x2F;reset.css"><link href="../../comrak.css" rel="stylesheet" /><link href="../../prism.css" rel="stylesheet" /><script src="../../prism.js"></script><script src="..&#x2F;..&#x2F;script.js" defer></script>
+  <script src="..&#x2F;..&#x2F;darkmode_toggle.js"></script><script src="..&#x2F;..&#x2F;search_index.js" defer></script>
+    <script src="..&#x2F;..&#x2F;fuse.js" defer></script>
+    <script src="..&#x2F;..&#x2F;search.js" defer></script></head>
+<body>
+<div class="ddoc">
+<div><nav id="topnav">
+  <div class="h-full">
+    <div class="flex items-center"><ul class="breadcrumbs">
+  <li>
+    <a href="..&#x2F;..&#x2F;" class="contextLink">@hertzg&#x2F;binstruct</a>
+  </li><span class="text-black dark:text-white"><svg
+  width="16"
+  height="16"
+  viewBox="0 0 16 16"
+  fill="none"
+  xmlns="http://www.w3.org/2000/svg"
+>
+  <path
+    fill-rule="evenodd"
+    clip-rule="evenodd"
+    d="M5.76748 11.8159C5.5378 11.577 5.54525 11.1972 5.78411 10.9675L8.93431 8L5.78411 5.0325C5.54525 4.80282 5.5378 4.423 5.76748 4.18413C5.99715 3.94527 6.37698 3.93782 6.61584 4.1675L10.2158 7.5675C10.3335 7.68062 10.4 7.83679 10.4 8C10.4 8.16321 10.3335 8.31938 10.2158 8.4325L6.61584 11.8325C6.37698 12.0622 5.99715 12.0547 5.76748 11.8159Z"
+    fill="currentColor"
+  />
+</svg>
+</span>numeric&#x2F;numeric.ts</ul>
+</div>
+
+    <div class="flex items-center gap-2">
+      <button id="theme-toggle" type="button" aria-label="Toggle dark mode" style="display: none;"><svg
+  xmlns="http://www.w3.org/2000/svg"
+  width="14"
+  height="14"
+  viewBox="0 0 24 24"
+  fill="currentColor"
+>
+  <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+  <path
+    d="M12 1.992a10 10 0 1 0 9.236 13.838c.341 -.82 -.476 -1.644 -1.298 -1.31a6.5 6.5 0 0 1 -6.864 -10.787l.077 -.08c.551 -.63 .113 -1.653 -.758 -1.653h-.266l-.068 -.006l-.06 -.002z"
+  />
+</svg>
+<svg
+  xmlns="http://www.w3.org/2000/svg"
+  width="14"
+  height="14"
+  viewBox="0 0 24 24"
+  fill="currentColor"
+  class="hidden"
+>
+  <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+  <path
+    d="M12 19a1 1 0 0 1 .993 .883l.007 .117v1a1 1 0 0 1 -1.993 .117l-.007 -.117v-1a1 1 0 0 1 1 -1z"
+  />
+  <path
+    d="M18.313 16.91l.094 .083l.7 .7a1 1 0 0 1 -1.32 1.497l-.094 -.083l-.7 -.7a1 1 0 0 1 1.218 -1.567l.102 .07z"
+  />
+  <path
+    d="M7.007 16.993a1 1 0 0 1 .083 1.32l-.083 .094l-.7 .7a1 1 0 0 1 -1.497 -1.32l.083 -.094l.7 -.7a1 1 0 0 1 1.414 0z"
+  />
+  <path
+    d="M4 11a1 1 0 0 1 .117 1.993l-.117 .007h-1a1 1 0 0 1 -.117 -1.993l.117 -.007h1z"
+  />
+  <path
+    d="M21 11a1 1 0 0 1 .117 1.993l-.117 .007h-1a1 1 0 0 1 -.117 -1.993l.117 -.007h1z"
+  />
+  <path
+    d="M6.213 4.81l.094 .083l.7 .7a1 1 0 0 1 -1.32 1.497l-.094 -.083l-.7 -.7a1 1 0 0 1 1.217 -1.567l.102 .07z"
+  />
+  <path
+    d="M19.107 4.893a1 1 0 0 1 .083 1.32l-.083 .094l-.7 .7a1 1 0 0 1 -1.497 -1.32l.083 -.094l.7 -.7a1 1 0 0 1 1.414 0z"
+  />
+  <path
+    d="M12 2a1 1 0 0 1 .993 .883l.007 .117v1a1 1 0 0 1 -1.993 .117l-.007 -.117v-1a1 1 0 0 1 1 -1z"
+  />
+  <path
+    d="M12 7a5 5 0 1 1 -4.995 5.217l-.005 -.217l.005 -.217a5 5 0 0 1 4.995 -4.783z"
+  />
+</svg>
+</button>
+
+        <input
+          type="text"
+          id="searchbar"
+          style="display: none;"
+          class="py-2 px-2.5 mx-1 rounded text-sm border border-gray-300 bg-transparent dark:bg-gray-800 dark:border-gray-700"
+          />
+    </div>
+  </div>
+</nav>
+<div id="searchResults"></div><div id="content">
+    <main><section>
+  <div class="space-y-2 flex-1"><div class="space-y-7" id="module_doc"><div class="markdown"><p>Numeric data encoding and decoding utilities for binary structures.</p>
+<p>This module provides comprehensive support for encoding and decoding numeric values
+in binary format with configurable endianness. It includes:</p>
+<ul>
+<li><strong>Integer Types</strong>: 8, 16, 32, and 64-bit signed and unsigned integers</li>
+<li><strong>Floating Point</strong>: 16, 32, and 64-bit floating point numbers</li>
+<li><strong>Endianness Support</strong>: Both big-endian (network byte order) and little-endian</li>
+<li><strong>Type Safety</strong>: Full TypeScript support with proper type inference</li>
+<li><strong>Performance</strong>: Optimized using native DataView methods</li>
+</ul>
+<p>All numeric coders follow the same interface pattern and can be used interchangeably
+in struct definitions, arrays, and other binary structures.</p>
+<p>It's the user's responsibility to provide a buffer big enough to fit the whole data.</p>
+</div><section class="section"  id="examples"><div>
+      <h2 class="anchorable mb-1"><a href="#examples" class="anchor" aria-label="Anchor" tabIndex="-1"><svg
+  width="16"
+  height="16"
+  viewBox="0 0 14 14"
+  fill="none"
+  xmlns="http://www.w3.org/2000/svg"
+>
+  <g clip-path="url(#clip0_1081_1237)">
+    <path
+      fill-rule="evenodd"
+      clip-rule="evenodd"
+      d="M6.80328 2.8656C6.68736 2.99 6.62425 3.15454 6.62725 3.32456C6.63025 3.49457 6.69913 3.65678 6.81936 3.77702C6.9396 3.89725 7.10181 3.96613 7.27182 3.96913C7.44184 3.97213 7.60638 3.90902 7.73078 3.7931L8.82453 2.69935C8.98712 2.53676 9.18015 2.40778 9.39259 2.31978C9.60503 2.23179 9.83272 2.1865 10.0627 2.1865C10.2926 2.1865 10.5203 2.23179 10.7327 2.31978C10.9452 2.40778 11.1382 2.53676 11.3008 2.69935C11.4634 2.86194 11.5923 3.05497 11.6803 3.2674C11.7683 3.47984 11.8136 3.70753 11.8136 3.93747C11.8136 4.16741 11.7683 4.3951 11.6803 4.60754C11.5923 4.81998 11.4634 5.013 11.3008 5.1756L9.11328 7.3631C8.95075 7.52581 8.75775 7.65488 8.5453 7.74295C8.33285 7.83102 8.10513 7.87635 7.87516 7.87635C7.64518 7.87635 7.41746 7.83102 7.20501 7.74295C6.99256 7.65488 6.79956 7.52581 6.63703 7.3631C6.51263 7.24718 6.34809 7.18407 6.17807 7.18707C6.00806 7.19007 5.84585 7.25894 5.72561 7.37918C5.60538 7.49942 5.5365 7.66163 5.5335 7.83164C5.5305 8.00165 5.59361 8.1662 5.70953 8.2906C5.99391 8.57501 6.33154 8.80062 6.70312 8.95455C7.0747 9.10847 7.47296 9.18769 7.87516 9.18769C8.27736 9.18769 8.67562 9.10847 9.0472 8.95455C9.41878 8.80062 9.7564 8.57501 10.0408 8.2906L12.2283 6.1031C12.8026 5.52874 13.1253 4.74974 13.1253 3.93747C13.1253 3.12521 12.8026 2.34621 12.2283 1.77185C11.6539 1.19749 10.8749 0.874817 10.0627 0.874817C9.25039 0.874817 8.47139 1.19749 7.89703 1.77185L6.80328 2.8656ZM2.69953 11.3006C2.53682 11.1381 2.40774 10.9451 2.31968 10.7326C2.23161 10.5202 2.18628 10.2924 2.18628 10.0625C2.18628 9.8325 2.23161 9.60477 2.31968 9.39233C2.40774 9.17988 2.53682 8.98688 2.69953 8.82435L4.88703 6.63685C5.04956 6.47414 5.24256 6.34506 5.45501 6.25699C5.66746 6.16893 5.89518 6.1236 6.12516 6.1236C6.35513 6.1236 6.58285 6.16893 6.7953 6.25699C7.00775 6.34506 7.20075 6.47414 7.36328 6.63685C7.48768 6.75277 7.65223 6.81588 7.82224 6.81288C7.99225 6.80988 8.15446 6.741 8.2747 6.62077C8.39494 6.50053 8.46381 6.33832 8.46681 6.1683C8.46981 5.99829 8.4067 5.83375 8.29078 5.70935C8.0064 5.42494 7.66878 5.19933 7.2972 5.0454C6.92562 4.89148 6.52736 4.81225 6.12516 4.81225C5.72296 4.81225 5.3247 4.89148 4.95312 5.0454C4.58154 5.19933 4.24391 5.42494 3.95953 5.70935L1.77203 7.89685C1.19767 8.47121 0.875 9.25021 0.875 10.0625C0.875 10.8747 1.19767 11.6537 1.77203 12.2281C2.34639 12.8025 3.12539 13.1251 3.93766 13.1251C4.74992 13.1251 5.52892 12.8025 6.10328 12.2281L7.19703 11.1343C7.31295 11.0099 7.37606 10.8454 7.37306 10.6754C7.37006 10.5054 7.30119 10.3432 7.18095 10.2229C7.06071 10.1027 6.8985 10.0338 6.72849 10.0308C6.55848 10.0278 6.39393 10.0909 6.26953 10.2068L5.17578 11.3006C5.01325 11.4633 4.82025 11.5924 4.6078 11.6805C4.39535 11.7685 4.16763 11.8138 3.93766 11.8138C3.70768 11.8138 3.47996 11.7685 3.26751 11.6805C3.05506 11.5924 2.86206 11.4633 2.69953 11.3006Z"
+      fill="currentColor"
+    />
+  </g>
+  <defs>
+    <clipPath id="clip0_1081_1237">
+      <rect width="14" height="14" fill="white" />
+    </clipPath>
+  </defs>
+</svg>
+</a>
+Examples</h2></div><div class="space-y-8"><div class="anchorable"><a href="#example_0" class="anchor" aria-label="Anchor" tabIndex="-1"><svg
+  width="16"
+  height="16"
+  viewBox="0 0 14 14"
+  fill="none"
+  xmlns="http://www.w3.org/2000/svg"
+>
+  <g clip-path="url(#clip0_1081_1237)">
+    <path
+      fill-rule="evenodd"
+      clip-rule="evenodd"
+      d="M6.80328 2.8656C6.68736 2.99 6.62425 3.15454 6.62725 3.32456C6.63025 3.49457 6.69913 3.65678 6.81936 3.77702C6.9396 3.89725 7.10181 3.96613 7.27182 3.96913C7.44184 3.97213 7.60638 3.90902 7.73078 3.7931L8.82453 2.69935C8.98712 2.53676 9.18015 2.40778 9.39259 2.31978C9.60503 2.23179 9.83272 2.1865 10.0627 2.1865C10.2926 2.1865 10.5203 2.23179 10.7327 2.31978C10.9452 2.40778 11.1382 2.53676 11.3008 2.69935C11.4634 2.86194 11.5923 3.05497 11.6803 3.2674C11.7683 3.47984 11.8136 3.70753 11.8136 3.93747C11.8136 4.16741 11.7683 4.3951 11.6803 4.60754C11.5923 4.81998 11.4634 5.013 11.3008 5.1756L9.11328 7.3631C8.95075 7.52581 8.75775 7.65488 8.5453 7.74295C8.33285 7.83102 8.10513 7.87635 7.87516 7.87635C7.64518 7.87635 7.41746 7.83102 7.20501 7.74295C6.99256 7.65488 6.79956 7.52581 6.63703 7.3631C6.51263 7.24718 6.34809 7.18407 6.17807 7.18707C6.00806 7.19007 5.84585 7.25894 5.72561 7.37918C5.60538 7.49942 5.5365 7.66163 5.5335 7.83164C5.5305 8.00165 5.59361 8.1662 5.70953 8.2906C5.99391 8.57501 6.33154 8.80062 6.70312 8.95455C7.0747 9.10847 7.47296 9.18769 7.87516 9.18769C8.27736 9.18769 8.67562 9.10847 9.0472 8.95455C9.41878 8.80062 9.7564 8.57501 10.0408 8.2906L12.2283 6.1031C12.8026 5.52874 13.1253 4.74974 13.1253 3.93747C13.1253 3.12521 12.8026 2.34621 12.2283 1.77185C11.6539 1.19749 10.8749 0.874817 10.0627 0.874817C9.25039 0.874817 8.47139 1.19749 7.89703 1.77185L6.80328 2.8656ZM2.69953 11.3006C2.53682 11.1381 2.40774 10.9451 2.31968 10.7326C2.23161 10.5202 2.18628 10.2924 2.18628 10.0625C2.18628 9.8325 2.23161 9.60477 2.31968 9.39233C2.40774 9.17988 2.53682 8.98688 2.69953 8.82435L4.88703 6.63685C5.04956 6.47414 5.24256 6.34506 5.45501 6.25699C5.66746 6.16893 5.89518 6.1236 6.12516 6.1236C6.35513 6.1236 6.58285 6.16893 6.7953 6.25699C7.00775 6.34506 7.20075 6.47414 7.36328 6.63685C7.48768 6.75277 7.65223 6.81588 7.82224 6.81288C7.99225 6.80988 8.15446 6.741 8.2747 6.62077C8.39494 6.50053 8.46381 6.33832 8.46681 6.1683C8.46981 5.99829 8.4067 5.83375 8.29078 5.70935C8.0064 5.42494 7.66878 5.19933 7.2972 5.0454C6.92562 4.89148 6.52736 4.81225 6.12516 4.81225C5.72296 4.81225 5.3247 4.89148 4.95312 5.0454C4.58154 5.19933 4.24391 5.42494 3.95953 5.70935L1.77203 7.89685C1.19767 8.47121 0.875 9.25021 0.875 10.0625C0.875 10.8747 1.19767 11.6537 1.77203 12.2281C2.34639 12.8025 3.12539 13.1251 3.93766 13.1251C4.74992 13.1251 5.52892 12.8025 6.10328 12.2281L7.19703 11.1343C7.31295 11.0099 7.37606 10.8454 7.37306 10.6754C7.37006 10.5054 7.30119 10.3432 7.18095 10.2229C7.06071 10.1027 6.8985 10.0338 6.72849 10.0308C6.55848 10.0278 6.39393 10.0909 6.26953 10.2068L5.17578 11.3006C5.01325 11.4633 4.82025 11.5924 4.6078 11.6805C4.39535 11.7685 4.16763 11.8138 3.93766 11.8138C3.70768 11.8138 3.47996 11.7685 3.26751 11.6805C3.05506 11.5924 2.86206 11.4633 2.69953 11.3006Z"
+      fill="currentColor"
+    />
+  </g>
+  <defs>
+    <clipPath id="clip0_1081_1237">
+      <rect width="14" height="14" fill="white" />
+    </clipPath>
+  </defs>
+</svg>
+</a>
+<h3 class="example-header"><div class="markdown"><p>Basic numeric encoding and decoding:</p>
+</div></h3>
+  <div><div class="markdown"><pre class="highlight"><code class="language-ts">import { assertEquals } from &quot;@std/assert&quot;;
+import { u16le, s32be, f64le } from &quot;@hertzg/binstruct/numeric&quot;;
+import { struct } from &quot;@hertzg/binstruct/struct&quot;;
+
+// Create a simple numeric structure
+const numericStruct = struct({
+  smallNumber: u16le(),      // 16-bit unsigned, little-endian
+  signedNumber: s32be(),     // 32-bit signed, big-endian
+  floatNumber: f64le(),      // 64-bit float, little-endian
+});
+
+// Test data
+const testData = {
+  smallNumber: 12345,        // Fits in 16-bit unsigned (0-65535)
+  signedNumber: -1000000,    // 32-bit signed range
+  floatNumber: 3.14159,      // Pi approximation
+};
+
+// Encode to binary
+const buffer = new Uint8Array(100);
+const bytesWritten = numericStruct.encode(testData, buffer);
+
+// Decode from binary
+const [decoded, bytesRead] = numericStruct.decode(buffer);
+
+// Verify the results
+assertEquals(decoded.smallNumber, testData.smallNumber);
+assertEquals(decoded.signedNumber, testData.signedNumber);
+assertEquals(decoded.floatNumber, testData.floatNumber);
+assertEquals(bytesWritten, bytesRead);
+</code><button class="copyButton" data-copy="import { assertEquals } from &quot;@std/assert&quot;;
+import { u16le, s32be, f64le } from &quot;@hertzg/binstruct/numeric&quot;;
+import { struct } from &quot;@hertzg/binstruct/struct&quot;;
+
+// Create a simple numeric structure
+const numericStruct = struct({
+  smallNumber: u16le(),      // 16-bit unsigned, little-endian
+  signedNumber: s32be(),     // 32-bit signed, big-endian
+  floatNumber: f64le(),      // 64-bit float, little-endian
+});
+
+// Test data
+const testData = {
+  smallNumber: 12345,        // Fits in 16-bit unsigned (0-65535)
+  signedNumber: -1000000,    // 32-bit signed range
+  floatNumber: 3.14159,      // Pi approximation
+};
+
+// Encode to binary
+const buffer = new Uint8Array(100);
+const bytesWritten = numericStruct.encode(testData, buffer);
+
+// Decode from binary
+const [decoded, bytesRead] = numericStruct.decode(buffer);
+
+// Verify the results
+assertEquals(decoded.smallNumber, testData.smallNumber);
+assertEquals(decoded.signedNumber, testData.signedNumber);
+assertEquals(decoded.floatNumber, testData.floatNumber);
+assertEquals(bytesWritten, bytesRead);
+"><svg
+  class="copy"
+  width="15"
+  height="15"
+  viewBox="0 0 15 15"
+  fill="none"
+  xmlns="http://www.w3.org/2000/svg"
+>
+  <rect x="2" y="2" width="7" height="7" fill="none" />
+  <rect x="6" y="6" width="7" height="7" fill="none" />
+  <path
+    d="M1.55566 2.7C1.55566 2.03726 2.09292 1.5 2.75566 1.5H8.75566C9.41841 1.5 9.95566 2.03726 9.95566 2.7V5.1H12.3557C13.0184 5.1 13.5557 5.63726 13.5557 6.3V12.3C13.5557 12.9627 13.0184 13.5 12.3557 13.5H6.35566C5.69292 13.5 5.15566 12.9627 5.15566 12.3V9.9H2.75566C2.09292 9.9 1.55566 9.36274 1.55566 8.7V2.7ZM6.35566 9.9V12.3H12.3557V6.3H9.95566V8.7C9.95566 9.36274 9.41841 9.9 8.75566 9.9H6.35566ZM8.75566 8.7V2.7H2.75566V8.7H8.75566Z"
+    fill="currentColor"
+  />
+</svg>
+<svg
+  class="check"
+  width="15"
+  height="15"
+  viewBox="0 0 24 24"
+  stroke-width="2"
+  stroke="currentColor"
+  fill="none"
+  stroke-linecap="round"
+  stroke-linejoin="round"
+  xmlns="http://www.w3.org/2000/svg"
+>
+  <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+  <path d="M5 12l5 5l10 -10" />
+</svg>
+</button><code></code></pre>
+</div></div>
+</div>
+<div class="border-b border-gray-300 dark:border-gray-700"></div><div class="anchorable"><a href="#example_1" class="anchor" aria-label="Anchor" tabIndex="-1"><svg
+  width="16"
+  height="16"
+  viewBox="0 0 14 14"
+  fill="none"
+  xmlns="http://www.w3.org/2000/svg"
+>
+  <g clip-path="url(#clip0_1081_1237)">
+    <path
+      fill-rule="evenodd"
+      clip-rule="evenodd"
+      d="M6.80328 2.8656C6.68736 2.99 6.62425 3.15454 6.62725 3.32456C6.63025 3.49457 6.69913 3.65678 6.81936 3.77702C6.9396 3.89725 7.10181 3.96613 7.27182 3.96913C7.44184 3.97213 7.60638 3.90902 7.73078 3.7931L8.82453 2.69935C8.98712 2.53676 9.18015 2.40778 9.39259 2.31978C9.60503 2.23179 9.83272 2.1865 10.0627 2.1865C10.2926 2.1865 10.5203 2.23179 10.7327 2.31978C10.9452 2.40778 11.1382 2.53676 11.3008 2.69935C11.4634 2.86194 11.5923 3.05497 11.6803 3.2674C11.7683 3.47984 11.8136 3.70753 11.8136 3.93747C11.8136 4.16741 11.7683 4.3951 11.6803 4.60754C11.5923 4.81998 11.4634 5.013 11.3008 5.1756L9.11328 7.3631C8.95075 7.52581 8.75775 7.65488 8.5453 7.74295C8.33285 7.83102 8.10513 7.87635 7.87516 7.87635C7.64518 7.87635 7.41746 7.83102 7.20501 7.74295C6.99256 7.65488 6.79956 7.52581 6.63703 7.3631C6.51263 7.24718 6.34809 7.18407 6.17807 7.18707C6.00806 7.19007 5.84585 7.25894 5.72561 7.37918C5.60538 7.49942 5.5365 7.66163 5.5335 7.83164C5.5305 8.00165 5.59361 8.1662 5.70953 8.2906C5.99391 8.57501 6.33154 8.80062 6.70312 8.95455C7.0747 9.10847 7.47296 9.18769 7.87516 9.18769C8.27736 9.18769 8.67562 9.10847 9.0472 8.95455C9.41878 8.80062 9.7564 8.57501 10.0408 8.2906L12.2283 6.1031C12.8026 5.52874 13.1253 4.74974 13.1253 3.93747C13.1253 3.12521 12.8026 2.34621 12.2283 1.77185C11.6539 1.19749 10.8749 0.874817 10.0627 0.874817C9.25039 0.874817 8.47139 1.19749 7.89703 1.77185L6.80328 2.8656ZM2.69953 11.3006C2.53682 11.1381 2.40774 10.9451 2.31968 10.7326C2.23161 10.5202 2.18628 10.2924 2.18628 10.0625C2.18628 9.8325 2.23161 9.60477 2.31968 9.39233C2.40774 9.17988 2.53682 8.98688 2.69953 8.82435L4.88703 6.63685C5.04956 6.47414 5.24256 6.34506 5.45501 6.25699C5.66746 6.16893 5.89518 6.1236 6.12516 6.1236C6.35513 6.1236 6.58285 6.16893 6.7953 6.25699C7.00775 6.34506 7.20075 6.47414 7.36328 6.63685C7.48768 6.75277 7.65223 6.81588 7.82224 6.81288C7.99225 6.80988 8.15446 6.741 8.2747 6.62077C8.39494 6.50053 8.46381 6.33832 8.46681 6.1683C8.46981 5.99829 8.4067 5.83375 8.29078 5.70935C8.0064 5.42494 7.66878 5.19933 7.2972 5.0454C6.92562 4.89148 6.52736 4.81225 6.12516 4.81225C5.72296 4.81225 5.3247 4.89148 4.95312 5.0454C4.58154 5.19933 4.24391 5.42494 3.95953 5.70935L1.77203 7.89685C1.19767 8.47121 0.875 9.25021 0.875 10.0625C0.875 10.8747 1.19767 11.6537 1.77203 12.2281C2.34639 12.8025 3.12539 13.1251 3.93766 13.1251C4.74992 13.1251 5.52892 12.8025 6.10328 12.2281L7.19703 11.1343C7.31295 11.0099 7.37606 10.8454 7.37306 10.6754C7.37006 10.5054 7.30119 10.3432 7.18095 10.2229C7.06071 10.1027 6.8985 10.0338 6.72849 10.0308C6.55848 10.0278 6.39393 10.0909 6.26953 10.2068L5.17578 11.3006C5.01325 11.4633 4.82025 11.5924 4.6078 11.6805C4.39535 11.7685 4.16763 11.8138 3.93766 11.8138C3.70768 11.8138 3.47996 11.7685 3.26751 11.6805C3.05506 11.5924 2.86206 11.4633 2.69953 11.3006Z"
+      fill="currentColor"
+    />
+  </g>
+  <defs>
+    <clipPath id="clip0_1081_1237">
+      <rect width="14" height="14" fill="white" />
+    </clipPath>
+  </defs>
+</svg>
+</a>
+<h3 class="example-header"><div class="markdown"><p>Network protocol with mixed endianness:</p>
+</div></h3>
+  <div><div class="markdown"><pre class="highlight"><code class="language-ts">import { assertEquals } from &quot;@std/assert&quot;;
+import { u16be, u32le, u64be } from &quot;@hertzg/binstruct/numeric&quot;;
+import { struct } from &quot;@hertzg/binstruct/struct&quot;;
+
+// Network packet header with mixed endianness
+const packetHeader = struct({
+  magic: u32le(),            // Magic number (little-endian)
+  version: u16be(),          // Protocol version (big-endian, network order)
+  flags: u16be(),            // Control flags (big-endian)
+  timestamp: u64be(),        // Timestamp (big-endian)
+  payloadSize: u32le(),      // Payload size (little-endian)
+});
+
+const testPacket = {
+  magic: 0x12345678,
+  version: 1,
+  flags: 0x8000,
+  timestamp: 1234567890n,
+  payloadSize: 1024,
+};
+
+const buffer = new Uint8Array(100);
+const bytesWritten = packetHeader.encode(testPacket, buffer);
+const [decoded, bytesRead] = packetHeader.decode(buffer);
+
+assertEquals(decoded.magic, testPacket.magic);
+assertEquals(decoded.version, testPacket.version);
+assertEquals(decoded.flags, testPacket.flags);
+assertEquals(decoded.timestamp, testPacket.timestamp);
+assertEquals(decoded.payloadSize, testPacket.payloadSize);
+assertEquals(bytesWritten, bytesRead);
+</code><button class="copyButton" data-copy="import { assertEquals } from &quot;@std/assert&quot;;
+import { u16be, u32le, u64be } from &quot;@hertzg/binstruct/numeric&quot;;
+import { struct } from &quot;@hertzg/binstruct/struct&quot;;
+
+// Network packet header with mixed endianness
+const packetHeader = struct({
+  magic: u32le(),            // Magic number (little-endian)
+  version: u16be(),          // Protocol version (big-endian, network order)
+  flags: u16be(),            // Control flags (big-endian)
+  timestamp: u64be(),        // Timestamp (big-endian)
+  payloadSize: u32le(),      // Payload size (little-endian)
+});
+
+const testPacket = {
+  magic: 0x12345678,
+  version: 1,
+  flags: 0x8000,
+  timestamp: 1234567890n,
+  payloadSize: 1024,
+};
+
+const buffer = new Uint8Array(100);
+const bytesWritten = packetHeader.encode(testPacket, buffer);
+const [decoded, bytesRead] = packetHeader.decode(buffer);
+
+assertEquals(decoded.magic, testPacket.magic);
+assertEquals(decoded.version, testPacket.version);
+assertEquals(decoded.flags, testPacket.flags);
+assertEquals(decoded.timestamp, testPacket.timestamp);
+assertEquals(decoded.payloadSize, testPacket.payloadSize);
+assertEquals(bytesWritten, bytesRead);
+"><svg
+  class="copy"
+  width="15"
+  height="15"
+  viewBox="0 0 15 15"
+  fill="none"
+  xmlns="http://www.w3.org/2000/svg"
+>
+  <rect x="2" y="2" width="7" height="7" fill="none" />
+  <rect x="6" y="6" width="7" height="7" fill="none" />
+  <path
+    d="M1.55566 2.7C1.55566 2.03726 2.09292 1.5 2.75566 1.5H8.75566C9.41841 1.5 9.95566 2.03726 9.95566 2.7V5.1H12.3557C13.0184 5.1 13.5557 5.63726 13.5557 6.3V12.3C13.5557 12.9627 13.0184 13.5 12.3557 13.5H6.35566C5.69292 13.5 5.15566 12.9627 5.15566 12.3V9.9H2.75566C2.09292 9.9 1.55566 9.36274 1.55566 8.7V2.7ZM6.35566 9.9V12.3H12.3557V6.3H9.95566V8.7C9.95566 9.36274 9.41841 9.9 8.75566 9.9H6.35566ZM8.75566 8.7V2.7H2.75566V8.7H8.75566Z"
+    fill="currentColor"
+  />
+</svg>
+<svg
+  class="check"
+  width="15"
+  height="15"
+  viewBox="0 0 24 24"
+  stroke-width="2"
+  stroke="currentColor"
+  fill="none"
+  stroke-linecap="round"
+  stroke-linejoin="round"
+  xmlns="http://www.w3.org/2000/svg"
+>
+  <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+  <path d="M5 12l5 5l10 -10" />
+</svg>
+</button><code></code></pre>
+</div></div>
+</div>
+</div></section>
+<section class="section"  id="numeric&#x2F;numeric_ts_functions"><div>
+      <h2 class="anchorable mb-1"><a href="#numeric&#x2F;numeric_ts_functions" class="anchor" aria-label="Anchor" tabIndex="-1"><svg
+  width="16"
+  height="16"
+  viewBox="0 0 14 14"
+  fill="none"
+  xmlns="http://www.w3.org/2000/svg"
+>
+  <g clip-path="url(#clip0_1081_1237)">
+    <path
+      fill-rule="evenodd"
+      clip-rule="evenodd"
+      d="M6.80328 2.8656C6.68736 2.99 6.62425 3.15454 6.62725 3.32456C6.63025 3.49457 6.69913 3.65678 6.81936 3.77702C6.9396 3.89725 7.10181 3.96613 7.27182 3.96913C7.44184 3.97213 7.60638 3.90902 7.73078 3.7931L8.82453 2.69935C8.98712 2.53676 9.18015 2.40778 9.39259 2.31978C9.60503 2.23179 9.83272 2.1865 10.0627 2.1865C10.2926 2.1865 10.5203 2.23179 10.7327 2.31978C10.9452 2.40778 11.1382 2.53676 11.3008 2.69935C11.4634 2.86194 11.5923 3.05497 11.6803 3.2674C11.7683 3.47984 11.8136 3.70753 11.8136 3.93747C11.8136 4.16741 11.7683 4.3951 11.6803 4.60754C11.5923 4.81998 11.4634 5.013 11.3008 5.1756L9.11328 7.3631C8.95075 7.52581 8.75775 7.65488 8.5453 7.74295C8.33285 7.83102 8.10513 7.87635 7.87516 7.87635C7.64518 7.87635 7.41746 7.83102 7.20501 7.74295C6.99256 7.65488 6.79956 7.52581 6.63703 7.3631C6.51263 7.24718 6.34809 7.18407 6.17807 7.18707C6.00806 7.19007 5.84585 7.25894 5.72561 7.37918C5.60538 7.49942 5.5365 7.66163 5.5335 7.83164C5.5305 8.00165 5.59361 8.1662 5.70953 8.2906C5.99391 8.57501 6.33154 8.80062 6.70312 8.95455C7.0747 9.10847 7.47296 9.18769 7.87516 9.18769C8.27736 9.18769 8.67562 9.10847 9.0472 8.95455C9.41878 8.80062 9.7564 8.57501 10.0408 8.2906L12.2283 6.1031C12.8026 5.52874 13.1253 4.74974 13.1253 3.93747C13.1253 3.12521 12.8026 2.34621 12.2283 1.77185C11.6539 1.19749 10.8749 0.874817 10.0627 0.874817C9.25039 0.874817 8.47139 1.19749 7.89703 1.77185L6.80328 2.8656ZM2.69953 11.3006C2.53682 11.1381 2.40774 10.9451 2.31968 10.7326C2.23161 10.5202 2.18628 10.2924 2.18628 10.0625C2.18628 9.8325 2.23161 9.60477 2.31968 9.39233C2.40774 9.17988 2.53682 8.98688 2.69953 8.82435L4.88703 6.63685C5.04956 6.47414 5.24256 6.34506 5.45501 6.25699C5.66746 6.16893 5.89518 6.1236 6.12516 6.1236C6.35513 6.1236 6.58285 6.16893 6.7953 6.25699C7.00775 6.34506 7.20075 6.47414 7.36328 6.63685C7.48768 6.75277 7.65223 6.81588 7.82224 6.81288C7.99225 6.80988 8.15446 6.741 8.2747 6.62077C8.39494 6.50053 8.46381 6.33832 8.46681 6.1683C8.46981 5.99829 8.4067 5.83375 8.29078 5.70935C8.0064 5.42494 7.66878 5.19933 7.2972 5.0454C6.92562 4.89148 6.52736 4.81225 6.12516 4.81225C5.72296 4.81225 5.3247 4.89148 4.95312 5.0454C4.58154 5.19933 4.24391 5.42494 3.95953 5.70935L1.77203 7.89685C1.19767 8.47121 0.875 9.25021 0.875 10.0625C0.875 10.8747 1.19767 11.6537 1.77203 12.2281C2.34639 12.8025 3.12539 13.1251 3.93766 13.1251C4.74992 13.1251 5.52892 12.8025 6.10328 12.2281L7.19703 11.1343C7.31295 11.0099 7.37606 10.8454 7.37306 10.6754C7.37006 10.5054 7.30119 10.3432 7.18095 10.2229C7.06071 10.1027 6.8985 10.0338 6.72849 10.0308C6.55848 10.0278 6.39393 10.0909 6.26953 10.2068L5.17578 11.3006C5.01325 11.4633 4.82025 11.5924 4.6078 11.6805C4.39535 11.7685 4.16763 11.8138 3.93766 11.8138C3.70768 11.8138 3.47996 11.7685 3.26751 11.6805C3.05506 11.5924 2.86206 11.4633 2.69953 11.3006Z"
+      fill="currentColor"
+    />
+  </g>
+  <defs>
+    <clipPath id="clip0_1081_1237">
+      <rect width="14" height="14" fill="white" />
+    </clipPath>
+  </defs>
+</svg>
+</a>
+Functions</h2></div><div class="namespaceSection"><div id="namespace_f16" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-Function bg-Function/15 dark:text-FunctionDark dark:bg-FunctionDark/15" title="Function">f</div></div>
+<div class="namespaceItemContent">
+		    <a href="..&#x2F;..&#x2F;.&#x2F;numeric&#x2F;numeric.ts&#x2F;~&#x2F;f16.html" title="f16">
+			    <span>f16</span><span>(<span><span>endianness<span class="td-op">?</span><span>: <span><span class="td-str">"be"</span><span class="td-op"> | </span><span class="td-str">"le"</span></span></span></span></span>)<span>: <span class="td-ref">Coder</span>&lt;<span class="td-kw">number</span>&gt;</span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Creates a coder for 16-bit floating-point numbers.</p>
+</div></div></div>
+    </div><div id="namespace_f16be" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-Function bg-Function/15 dark:text-FunctionDark dark:bg-FunctionDark/15" title="Function">f</div></div>
+<div class="namespaceItemContent">
+		    <a href="..&#x2F;..&#x2F;.&#x2F;numeric&#x2F;numeric.ts&#x2F;~&#x2F;f16be.html" title="f16be">
+			    <span>f16be</span><span>()<span>: <span class="td-ref">Coder</span>&lt;<span class="td-kw">number</span>&gt;</span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Convenience function for 16-bit floating point with big-endian byte order.</p>
+</div></div></div>
+    </div><div id="namespace_f16le" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-Function bg-Function/15 dark:text-FunctionDark dark:bg-FunctionDark/15" title="Function">f</div></div>
+<div class="namespaceItemContent">
+		    <a href="..&#x2F;..&#x2F;.&#x2F;numeric&#x2F;numeric.ts&#x2F;~&#x2F;f16le.html" title="f16le">
+			    <span>f16le</span><span>()<span>: <span class="td-ref">Coder</span>&lt;<span class="td-kw">number</span>&gt;</span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Convenience function for 16-bit floating point with little-endian byte order.</p>
+</div></div></div>
+    </div><div id="namespace_f32" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-Function bg-Function/15 dark:text-FunctionDark dark:bg-FunctionDark/15" title="Function">f</div></div>
+<div class="namespaceItemContent">
+		    <a href="..&#x2F;..&#x2F;.&#x2F;numeric&#x2F;numeric.ts&#x2F;~&#x2F;f32.html" title="f32">
+			    <span>f32</span><span>(<span><span>endianness<span class="td-op">?</span><span>: <span><span class="td-str">"be"</span><span class="td-op"> | </span><span class="td-str">"le"</span></span></span></span></span>)<span>: <span class="td-ref">Coder</span>&lt;<span class="td-kw">number</span>&gt;</span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Creates a coder for 32-bit floating-point numbers.</p>
+</div></div></div>
+    </div><div id="namespace_f32be" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-Function bg-Function/15 dark:text-FunctionDark dark:bg-FunctionDark/15" title="Function">f</div></div>
+<div class="namespaceItemContent">
+		    <a href="..&#x2F;..&#x2F;.&#x2F;numeric&#x2F;numeric.ts&#x2F;~&#x2F;f32be.html" title="f32be">
+			    <span>f32be</span><span>()<span>: <span class="td-ref">Coder</span>&lt;<span class="td-kw">number</span>&gt;</span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Convenience function for 32-bit floating point with big-endian byte order.</p>
+</div></div></div>
+    </div><div id="namespace_f32le" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-Function bg-Function/15 dark:text-FunctionDark dark:bg-FunctionDark/15" title="Function">f</div></div>
+<div class="namespaceItemContent">
+		    <a href="..&#x2F;..&#x2F;.&#x2F;numeric&#x2F;numeric.ts&#x2F;~&#x2F;f32le.html" title="f32le">
+			    <span>f32le</span><span>()<span>: <span class="td-ref">Coder</span>&lt;<span class="td-kw">number</span>&gt;</span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Convenience function for 32-bit floating point with little-endian byte order.</p>
+</div></div></div>
+    </div><div id="namespace_f64" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-Function bg-Function/15 dark:text-FunctionDark dark:bg-FunctionDark/15" title="Function">f</div></div>
+<div class="namespaceItemContent">
+		    <a href="..&#x2F;..&#x2F;.&#x2F;numeric&#x2F;numeric.ts&#x2F;~&#x2F;f64.html" title="f64">
+			    <span>f64</span><span>(<span><span>endianness<span class="td-op">?</span><span>: <span><span class="td-str">"be"</span><span class="td-op"> | </span><span class="td-str">"le"</span></span></span></span></span>)<span>: <span class="td-ref">Coder</span>&lt;<span class="td-kw">number</span>&gt;</span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Creates a coder for 64-bit floating-point numbers.</p>
+</div></div></div>
+    </div><div id="namespace_f64be" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-Function bg-Function/15 dark:text-FunctionDark dark:bg-FunctionDark/15" title="Function">f</div></div>
+<div class="namespaceItemContent">
+		    <a href="..&#x2F;..&#x2F;.&#x2F;numeric&#x2F;numeric.ts&#x2F;~&#x2F;f64be.html" title="f64be">
+			    <span>f64be</span><span>()<span>: <span class="td-ref">Coder</span>&lt;<span class="td-kw">number</span>&gt;</span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Convenience function for 64-bit floating point with big-endian byte order.</p>
+</div></div></div>
+    </div><div id="namespace_f64le" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-Function bg-Function/15 dark:text-FunctionDark dark:bg-FunctionDark/15" title="Function">f</div></div>
+<div class="namespaceItemContent">
+		    <a href="..&#x2F;..&#x2F;.&#x2F;numeric&#x2F;numeric.ts&#x2F;~&#x2F;f64le.html" title="f64le">
+			    <span>f64le</span><span>()<span>: <span class="td-ref">Coder</span>&lt;<span class="td-kw">number</span>&gt;</span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Convenience function for 64-bit floating point with little-endian byte order.</p>
+</div></div></div>
+    </div><div id="namespace_s16" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-Function bg-Function/15 dark:text-FunctionDark dark:bg-FunctionDark/15" title="Function">f</div></div>
+<div class="namespaceItemContent">
+		    <a href="..&#x2F;..&#x2F;.&#x2F;numeric&#x2F;numeric.ts&#x2F;~&#x2F;s16.html" title="s16">
+			    <span>s16</span><span>(<span><span>endianness<span class="td-op">?</span><span>: <span><span class="td-str">"be"</span><span class="td-op"> | </span><span class="td-str">"le"</span></span></span></span></span>)<span>: <span class="td-ref">Coder</span>&lt;<span class="td-kw">number</span>&gt;</span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Creates a coder for 16-bit signed integers.</p>
+</div></div></div>
+    </div><div id="namespace_s16be" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-Function bg-Function/15 dark:text-FunctionDark dark:bg-FunctionDark/15" title="Function">f</div></div>
+<div class="namespaceItemContent">
+		    <a href="..&#x2F;..&#x2F;.&#x2F;numeric&#x2F;numeric.ts&#x2F;~&#x2F;s16be.html" title="s16be">
+			    <span>s16be</span><span>()<span>: <span class="td-ref">Coder</span>&lt;<span class="td-kw">number</span>&gt;</span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Convenience function for 16-bit signed integer with big-endian byte order.</p>
+</div></div></div>
+    </div><div id="namespace_s16le" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-Function bg-Function/15 dark:text-FunctionDark dark:bg-FunctionDark/15" title="Function">f</div></div>
+<div class="namespaceItemContent">
+		    <a href="..&#x2F;..&#x2F;.&#x2F;numeric&#x2F;numeric.ts&#x2F;~&#x2F;s16le.html" title="s16le">
+			    <span>s16le</span><span>()<span>: <span class="td-ref">Coder</span>&lt;<span class="td-kw">number</span>&gt;</span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Convenience function for 16-bit signed integer with little-endian byte order.</p>
+</div></div></div>
+    </div><div id="namespace_s32" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-Function bg-Function/15 dark:text-FunctionDark dark:bg-FunctionDark/15" title="Function">f</div></div>
+<div class="namespaceItemContent">
+		    <a href="..&#x2F;..&#x2F;.&#x2F;numeric&#x2F;numeric.ts&#x2F;~&#x2F;s32.html" title="s32">
+			    <span>s32</span><span>(<span><span>endianness<span class="td-op">?</span><span>: <span><span class="td-str">"be"</span><span class="td-op"> | </span><span class="td-str">"le"</span></span></span></span></span>)<span>: <span class="td-ref">Coder</span>&lt;<span class="td-kw">number</span>&gt;</span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Creates a coder for 32-bit signed integers.</p>
+</div></div></div>
+    </div><div id="namespace_s32be" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-Function bg-Function/15 dark:text-FunctionDark dark:bg-FunctionDark/15" title="Function">f</div></div>
+<div class="namespaceItemContent">
+		    <a href="..&#x2F;..&#x2F;.&#x2F;numeric&#x2F;numeric.ts&#x2F;~&#x2F;s32be.html" title="s32be">
+			    <span>s32be</span><span>()<span>: <span class="td-ref">Coder</span>&lt;<span class="td-kw">number</span>&gt;</span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Convenience function for 32-bit signed integer with big-endian byte order.</p>
+</div></div></div>
+    </div><div id="namespace_s32le" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-Function bg-Function/15 dark:text-FunctionDark dark:bg-FunctionDark/15" title="Function">f</div></div>
+<div class="namespaceItemContent">
+		    <a href="..&#x2F;..&#x2F;.&#x2F;numeric&#x2F;numeric.ts&#x2F;~&#x2F;s32le.html" title="s32le">
+			    <span>s32le</span><span>()<span>: <span class="td-ref">Coder</span>&lt;<span class="td-kw">number</span>&gt;</span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Convenience function for 32-bit signed integer with little-endian byte order.</p>
+</div></div></div>
+    </div><div id="namespace_s64" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-Function bg-Function/15 dark:text-FunctionDark dark:bg-FunctionDark/15" title="Function">f</div></div>
+<div class="namespaceItemContent">
+		    <a href="..&#x2F;..&#x2F;.&#x2F;numeric&#x2F;numeric.ts&#x2F;~&#x2F;s64.html" title="s64">
+			    <span>s64</span><span>(<span><span>endianness<span class="td-op">?</span><span>: <span><span class="td-str">"be"</span><span class="td-op"> | </span><span class="td-str">"le"</span></span></span></span></span>)<span>: <span class="td-ref">Coder</span>&lt;<span class="td-kw">bigint</span>&gt;</span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Creates a coder for 64-bit signed integers.</p>
+</div></div></div>
+    </div><div id="namespace_s64be" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-Function bg-Function/15 dark:text-FunctionDark dark:bg-FunctionDark/15" title="Function">f</div></div>
+<div class="namespaceItemContent">
+		    <a href="..&#x2F;..&#x2F;.&#x2F;numeric&#x2F;numeric.ts&#x2F;~&#x2F;s64be.html" title="s64be">
+			    <span>s64be</span><span>()<span>: <span class="td-ref">Coder</span>&lt;<span class="td-kw">bigint</span>&gt;</span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Convenience function for 64-bit signed integer with big-endian byte order.</p>
+</div></div></div>
+    </div><div id="namespace_s64le" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-Function bg-Function/15 dark:text-FunctionDark dark:bg-FunctionDark/15" title="Function">f</div></div>
+<div class="namespaceItemContent">
+		    <a href="..&#x2F;..&#x2F;.&#x2F;numeric&#x2F;numeric.ts&#x2F;~&#x2F;s64le.html" title="s64le">
+			    <span>s64le</span><span>()<span>: <span class="td-ref">Coder</span>&lt;<span class="td-kw">bigint</span>&gt;</span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Convenience function for 64-bit signed integer with little-endian byte order.</p>
+</div></div></div>
+    </div><div id="namespace_s8" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-Function bg-Function/15 dark:text-FunctionDark dark:bg-FunctionDark/15" title="Function">f</div></div>
+<div class="namespaceItemContent">
+		    <a href="..&#x2F;..&#x2F;.&#x2F;numeric&#x2F;numeric.ts&#x2F;~&#x2F;s8.html" title="s8">
+			    <span>s8</span><span>(<span><span>endianness<span class="td-op">?</span><span>: <span><span class="td-str">"be"</span><span class="td-op"> | </span><span class="td-str">"le"</span></span></span></span></span>)<span>: <span class="td-ref">Coder</span>&lt;<span class="td-kw">number</span>&gt;</span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Creates a coder for 8-bit signed integers.</p>
+</div></div></div>
+    </div><div id="namespace_s8be" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-Function bg-Function/15 dark:text-FunctionDark dark:bg-FunctionDark/15" title="Function">f</div></div>
+<div class="namespaceItemContent">
+		    <a href="..&#x2F;..&#x2F;.&#x2F;numeric&#x2F;numeric.ts&#x2F;~&#x2F;s8be.html" title="s8be">
+			    <span>s8be</span><span>()<span>: <span class="td-ref">Coder</span>&lt;<span class="td-kw">number</span>&gt;</span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Convenience function for 8-bit signed integer with big-endian byte order.</p>
+</div></div></div>
+    </div><div id="namespace_s8le" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-Function bg-Function/15 dark:text-FunctionDark dark:bg-FunctionDark/15" title="Function">f</div></div>
+<div class="namespaceItemContent">
+		    <a href="..&#x2F;..&#x2F;.&#x2F;numeric&#x2F;numeric.ts&#x2F;~&#x2F;s8le.html" title="s8le">
+			    <span>s8le</span><span>()<span>: <span class="td-ref">Coder</span>&lt;<span class="td-kw">number</span>&gt;</span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Convenience function for 8-bit signed integer with little-endian byte order.</p>
+</div></div></div>
+    </div><div id="namespace_u16" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-Function bg-Function/15 dark:text-FunctionDark dark:bg-FunctionDark/15" title="Function">f</div></div>
+<div class="namespaceItemContent">
+		    <a href="..&#x2F;..&#x2F;.&#x2F;numeric&#x2F;numeric.ts&#x2F;~&#x2F;u16.html" title="u16">
+			    <span>u16</span><span>(<span><span>endianness<span class="td-op">?</span><span>: <span><span class="td-str">"be"</span><span class="td-op"> | </span><span class="td-str">"le"</span></span></span></span></span>)<span>: <span class="td-ref">Coder</span>&lt;<span class="td-kw">number</span>&gt;</span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Creates a coder for 16-bit unsigned integers.</p>
+</div></div></div>
+    </div><div id="namespace_u16be" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-Function bg-Function/15 dark:text-FunctionDark dark:bg-FunctionDark/15" title="Function">f</div></div>
+<div class="namespaceItemContent">
+		    <a href="..&#x2F;..&#x2F;.&#x2F;numeric&#x2F;numeric.ts&#x2F;~&#x2F;u16be.html" title="u16be">
+			    <span>u16be</span><span>()<span>: <span class="td-ref">Coder</span>&lt;<span class="td-kw">number</span>&gt;</span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Convenience function for 16-bit unsigned integer with big-endian byte order.</p>
+</div></div></div>
+    </div><div id="namespace_u16le" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-Function bg-Function/15 dark:text-FunctionDark dark:bg-FunctionDark/15" title="Function">f</div></div>
+<div class="namespaceItemContent">
+		    <a href="..&#x2F;..&#x2F;.&#x2F;numeric&#x2F;numeric.ts&#x2F;~&#x2F;u16le.html" title="u16le">
+			    <span>u16le</span><span>()<span>: <span class="td-ref">Coder</span>&lt;<span class="td-kw">number</span>&gt;</span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Convenience function for 16-bit unsigned integer with little-endian byte order.</p>
+</div></div></div>
+    </div><div id="namespace_u32" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-Function bg-Function/15 dark:text-FunctionDark dark:bg-FunctionDark/15" title="Function">f</div></div>
+<div class="namespaceItemContent">
+		    <a href="..&#x2F;..&#x2F;.&#x2F;numeric&#x2F;numeric.ts&#x2F;~&#x2F;u32.html" title="u32">
+			    <span>u32</span><span>(<span><span>endianness<span class="td-op">?</span><span>: <span><span class="td-str">"be"</span><span class="td-op"> | </span><span class="td-str">"le"</span></span></span></span></span>)<span>: <span class="td-ref">Coder</span>&lt;<span class="td-kw">number</span>&gt;</span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Creates a coder for 32-bit unsigned integers.</p>
+</div></div></div>
+    </div><div id="namespace_u32be" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-Function bg-Function/15 dark:text-FunctionDark dark:bg-FunctionDark/15" title="Function">f</div></div>
+<div class="namespaceItemContent">
+		    <a href="..&#x2F;..&#x2F;.&#x2F;numeric&#x2F;numeric.ts&#x2F;~&#x2F;u32be.html" title="u32be">
+			    <span>u32be</span><span>()<span>: <span class="td-ref">Coder</span>&lt;<span class="td-kw">number</span>&gt;</span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Convenience function for 32-bit unsigned integer with big-endian byte order.</p>
+</div></div></div>
+    </div><div id="namespace_u32le" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-Function bg-Function/15 dark:text-FunctionDark dark:bg-FunctionDark/15" title="Function">f</div></div>
+<div class="namespaceItemContent">
+		    <a href="..&#x2F;..&#x2F;.&#x2F;numeric&#x2F;numeric.ts&#x2F;~&#x2F;u32le.html" title="u32le">
+			    <span>u32le</span><span>()<span>: <span class="td-ref">Coder</span>&lt;<span class="td-kw">number</span>&gt;</span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Convenience function for 32-bit unsigned integer with little-endian byte order.</p>
+</div></div></div>
+    </div><div id="namespace_u64" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-Function bg-Function/15 dark:text-FunctionDark dark:bg-FunctionDark/15" title="Function">f</div></div>
+<div class="namespaceItemContent">
+		    <a href="..&#x2F;..&#x2F;.&#x2F;numeric&#x2F;numeric.ts&#x2F;~&#x2F;u64.html" title="u64">
+			    <span>u64</span><span>(<span><span>endianness<span class="td-op">?</span><span>: <span><span class="td-str">"be"</span><span class="td-op"> | </span><span class="td-str">"le"</span></span></span></span></span>)<span>: <span class="td-ref">Coder</span>&lt;<span class="td-kw">bigint</span>&gt;</span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Creates a coder for 64-bit unsigned integers.</p>
+</div></div></div>
+    </div><div id="namespace_u64be" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-Function bg-Function/15 dark:text-FunctionDark dark:bg-FunctionDark/15" title="Function">f</div></div>
+<div class="namespaceItemContent">
+		    <a href="..&#x2F;..&#x2F;.&#x2F;numeric&#x2F;numeric.ts&#x2F;~&#x2F;u64be.html" title="u64be">
+			    <span>u64be</span><span>()<span>: <span class="td-ref">Coder</span>&lt;<span class="td-kw">bigint</span>&gt;</span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Convenience function for 64-bit unsigned integer with big-endian byte order.</p>
+</div></div></div>
+    </div><div id="namespace_u64le" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-Function bg-Function/15 dark:text-FunctionDark dark:bg-FunctionDark/15" title="Function">f</div></div>
+<div class="namespaceItemContent">
+		    <a href="..&#x2F;..&#x2F;.&#x2F;numeric&#x2F;numeric.ts&#x2F;~&#x2F;u64le.html" title="u64le">
+			    <span>u64le</span><span>()<span>: <span class="td-ref">Coder</span>&lt;<span class="td-kw">bigint</span>&gt;</span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Convenience function for 64-bit unsigned integer with little-endian byte order.</p>
+</div></div></div>
+    </div><div id="namespace_u8" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-Function bg-Function/15 dark:text-FunctionDark dark:bg-FunctionDark/15" title="Function">f</div></div>
+<div class="namespaceItemContent">
+		    <a href="..&#x2F;..&#x2F;.&#x2F;numeric&#x2F;numeric.ts&#x2F;~&#x2F;u8.html" title="u8">
+			    <span>u8</span><span>(<span><span>endianness<span class="td-op">?</span><span>: <span><span class="td-str">"be"</span><span class="td-op"> | </span><span class="td-str">"le"</span></span></span></span></span>)<span>: <span class="td-ref">Coder</span>&lt;<span class="td-kw">number</span>&gt;</span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Creates a coder for 8-bit unsigned integers.</p>
+</div></div></div>
+    </div><div id="namespace_u8be" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-Function bg-Function/15 dark:text-FunctionDark dark:bg-FunctionDark/15" title="Function">f</div></div>
+<div class="namespaceItemContent">
+		    <a href="..&#x2F;..&#x2F;.&#x2F;numeric&#x2F;numeric.ts&#x2F;~&#x2F;u8be.html" title="u8be">
+			    <span>u8be</span><span>()<span>: <span class="td-ref">Coder</span>&lt;<span class="td-kw">number</span>&gt;</span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Convenience function for 8-bit unsigned integer with big-endian byte order.</p>
+</div></div></div>
+    </div><div id="namespace_u8le" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-Function bg-Function/15 dark:text-FunctionDark dark:bg-FunctionDark/15" title="Function">f</div></div>
+<div class="namespaceItemContent">
+		    <a href="..&#x2F;..&#x2F;.&#x2F;numeric&#x2F;numeric.ts&#x2F;~&#x2F;u8le.html" title="u8le">
+			    <span>u8le</span><span>()<span>: <span class="td-ref">Coder</span>&lt;<span class="td-kw">number</span>&gt;</span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Convenience function for 8-bit unsigned integer with little-endian byte order.</p>
+</div></div></div>
+    </div></div>
+</section>
+<section class="section"  id="numeric&#x2F;numeric_ts_type-aliases"><div>
+      <h2 class="anchorable mb-1"><a href="#numeric&#x2F;numeric_ts_type-aliases" class="anchor" aria-label="Anchor" tabIndex="-1"><svg
+  width="16"
+  height="16"
+  viewBox="0 0 14 14"
+  fill="none"
+  xmlns="http://www.w3.org/2000/svg"
+>
+  <g clip-path="url(#clip0_1081_1237)">
+    <path
+      fill-rule="evenodd"
+      clip-rule="evenodd"
+      d="M6.80328 2.8656C6.68736 2.99 6.62425 3.15454 6.62725 3.32456C6.63025 3.49457 6.69913 3.65678 6.81936 3.77702C6.9396 3.89725 7.10181 3.96613 7.27182 3.96913C7.44184 3.97213 7.60638 3.90902 7.73078 3.7931L8.82453 2.69935C8.98712 2.53676 9.18015 2.40778 9.39259 2.31978C9.60503 2.23179 9.83272 2.1865 10.0627 2.1865C10.2926 2.1865 10.5203 2.23179 10.7327 2.31978C10.9452 2.40778 11.1382 2.53676 11.3008 2.69935C11.4634 2.86194 11.5923 3.05497 11.6803 3.2674C11.7683 3.47984 11.8136 3.70753 11.8136 3.93747C11.8136 4.16741 11.7683 4.3951 11.6803 4.60754C11.5923 4.81998 11.4634 5.013 11.3008 5.1756L9.11328 7.3631C8.95075 7.52581 8.75775 7.65488 8.5453 7.74295C8.33285 7.83102 8.10513 7.87635 7.87516 7.87635C7.64518 7.87635 7.41746 7.83102 7.20501 7.74295C6.99256 7.65488 6.79956 7.52581 6.63703 7.3631C6.51263 7.24718 6.34809 7.18407 6.17807 7.18707C6.00806 7.19007 5.84585 7.25894 5.72561 7.37918C5.60538 7.49942 5.5365 7.66163 5.5335 7.83164C5.5305 8.00165 5.59361 8.1662 5.70953 8.2906C5.99391 8.57501 6.33154 8.80062 6.70312 8.95455C7.0747 9.10847 7.47296 9.18769 7.87516 9.18769C8.27736 9.18769 8.67562 9.10847 9.0472 8.95455C9.41878 8.80062 9.7564 8.57501 10.0408 8.2906L12.2283 6.1031C12.8026 5.52874 13.1253 4.74974 13.1253 3.93747C13.1253 3.12521 12.8026 2.34621 12.2283 1.77185C11.6539 1.19749 10.8749 0.874817 10.0627 0.874817C9.25039 0.874817 8.47139 1.19749 7.89703 1.77185L6.80328 2.8656ZM2.69953 11.3006C2.53682 11.1381 2.40774 10.9451 2.31968 10.7326C2.23161 10.5202 2.18628 10.2924 2.18628 10.0625C2.18628 9.8325 2.23161 9.60477 2.31968 9.39233C2.40774 9.17988 2.53682 8.98688 2.69953 8.82435L4.88703 6.63685C5.04956 6.47414 5.24256 6.34506 5.45501 6.25699C5.66746 6.16893 5.89518 6.1236 6.12516 6.1236C6.35513 6.1236 6.58285 6.16893 6.7953 6.25699C7.00775 6.34506 7.20075 6.47414 7.36328 6.63685C7.48768 6.75277 7.65223 6.81588 7.82224 6.81288C7.99225 6.80988 8.15446 6.741 8.2747 6.62077C8.39494 6.50053 8.46381 6.33832 8.46681 6.1683C8.46981 5.99829 8.4067 5.83375 8.29078 5.70935C8.0064 5.42494 7.66878 5.19933 7.2972 5.0454C6.92562 4.89148 6.52736 4.81225 6.12516 4.81225C5.72296 4.81225 5.3247 4.89148 4.95312 5.0454C4.58154 5.19933 4.24391 5.42494 3.95953 5.70935L1.77203 7.89685C1.19767 8.47121 0.875 9.25021 0.875 10.0625C0.875 10.8747 1.19767 11.6537 1.77203 12.2281C2.34639 12.8025 3.12539 13.1251 3.93766 13.1251C4.74992 13.1251 5.52892 12.8025 6.10328 12.2281L7.19703 11.1343C7.31295 11.0099 7.37606 10.8454 7.37306 10.6754C7.37006 10.5054 7.30119 10.3432 7.18095 10.2229C7.06071 10.1027 6.8985 10.0338 6.72849 10.0308C6.55848 10.0278 6.39393 10.0909 6.26953 10.2068L5.17578 11.3006C5.01325 11.4633 4.82025 11.5924 4.6078 11.6805C4.39535 11.7685 4.16763 11.8138 3.93766 11.8138C3.70768 11.8138 3.47996 11.7685 3.26751 11.6805C3.05506 11.5924 2.86206 11.4633 2.69953 11.3006Z"
+      fill="currentColor"
+    />
+  </g>
+  <defs>
+    <clipPath id="clip0_1081_1237">
+      <rect width="14" height="14" fill="white" />
+    </clipPath>
+  </defs>
+</svg>
+</a>
+Type Aliases</h2></div><div class="namespaceSection"><div id="namespace_endianness" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-TypeAlias bg-TypeAlias/15 dark:text-TypeAliasDark dark:bg-TypeAliasDark/15" title="Type Alias">T</div></div>
+<div class="namespaceItemContent">
+		    <a href="..&#x2F;..&#x2F;.&#x2F;numeric&#x2F;numeric.ts&#x2F;~&#x2F;Endianness.html" title="Endianness">
+			    <span>Endianness</span><span> = <span><span class="td-str">"be"</span><span class="td-op"> | </span><span class="td-str">"le"</span></span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Endianness type for numeric data encoding and decoding.</p>
+</div></div></div>
+    </div></div>
+</section>
+</div>
+</div>
+</section>
+</main><div class="toc">
+    <div><div class="usageContent">
+    <h3>Usage</h3><div class="markdown"><pre class="highlight"><code class="language-typescript">import * as mod from &quot;numeric/numeric.ts&quot;;
+</code><button class="copyButton" data-copy="import * as mod from &quot;numeric/numeric.ts&quot;;
+"><svg
+  class="copy"
+  width="15"
+  height="15"
+  viewBox="0 0 15 15"
+  fill="none"
+  xmlns="http://www.w3.org/2000/svg"
+>
+  <rect x="2" y="2" width="7" height="7" fill="none" />
+  <rect x="6" y="6" width="7" height="7" fill="none" />
+  <path
+    d="M1.55566 2.7C1.55566 2.03726 2.09292 1.5 2.75566 1.5H8.75566C9.41841 1.5 9.95566 2.03726 9.95566 2.7V5.1H12.3557C13.0184 5.1 13.5557 5.63726 13.5557 6.3V12.3C13.5557 12.9627 13.0184 13.5 12.3557 13.5H6.35566C5.69292 13.5 5.15566 12.9627 5.15566 12.3V9.9H2.75566C2.09292 9.9 1.55566 9.36274 1.55566 8.7V2.7ZM6.35566 9.9V12.3H12.3557V6.3H9.95566V8.7C9.95566 9.36274 9.41841 9.9 8.75566 9.9H6.35566ZM8.75566 8.7V2.7H2.75566V8.7H8.75566Z"
+    fill="currentColor"
+  />
+</svg>
+<svg
+  class="check"
+  width="15"
+  height="15"
+  viewBox="0 0 24 24"
+  stroke-width="2"
+  stroke="currentColor"
+  fill="none"
+  stroke-linecap="round"
+  stroke-linejoin="round"
+  xmlns="http://www.w3.org/2000/svg"
+>
+  <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+  <path d="M5 12l5 5l10 -10" />
+</svg>
+</button><code></code></pre>
+</div></div><nav class="topSymbols">
+          <h3>Symbols</h3>
+          <ul><li>
+                <a href="..&#x2F;..&#x2F;.&#x2F;mod.ts&#x2F;~&#x2F;kCoderKind.html" title="kCoderKind"><div class="docNodeKindIcon"><div class="text-Variable bg-Variable/15 dark:text-VariableDark dark:bg-VariableDark/15" title="Variable">v</div></div>
+<span class="hover:bg-Variable/15 hover:bg-VariableDark/15">
+                    kCoderKind
+                  </span>
+                </a>
+              </li><li>
+                <a href="..&#x2F;..&#x2F;.&#x2F;mod.ts&#x2F;~&#x2F;kCtxRefs.html" title="kCtxRefs"><div class="docNodeKindIcon"><div class="text-Variable bg-Variable/15 dark:text-VariableDark dark:bg-VariableDark/15" title="Variable">v</div></div>
+<span class="hover:bg-Variable/15 hover:bg-VariableDark/15">
+                    kCtxRefs
+                  </span>
+                </a>
+              </li><li>
+                <a href="..&#x2F;..&#x2F;.&#x2F;mod.ts&#x2F;~&#x2F;ValueWithBytes.html" title="ValueWithBytes"><div class="docNodeKindIcon"><div class="text-TypeAlias bg-TypeAlias/15 dark:text-TypeAliasDark dark:bg-TypeAliasDark/15" title="Type Alias">T</div></div>
+<span class="hover:bg-TypeAlias/15 hover:bg-TypeAliasDark/15">
+                    ValueWithBytes
+                  </span>
+                </a>
+              </li><li>
+                <a href="..&#x2F;..&#x2F;.&#x2F;mod.ts&#x2F;~&#x2F;Context.html" title="Context"><div class="docNodeKindIcon"><div class="text-Interface bg-Interface/15 dark:text-InterfaceDark dark:bg-InterfaceDark/15" title="Interface">I</div></div>
+<span class="hover:bg-Interface/15 hover:bg-InterfaceDark/15">
+                    Context
+                  </span>
+                </a>
+              </li><li>
+                <a href="..&#x2F;..&#x2F;.&#x2F;mod.ts&#x2F;~&#x2F;createContext.html" title="createContext"><div class="docNodeKindIcon"><div class="text-Function bg-Function/15 dark:text-FunctionDark dark:bg-FunctionDark/15" title="Function">f</div></div>
+<span class="hover:bg-Function/15 hover:bg-FunctionDark/15">
+                    createContext
+                  </span>
+                </a>
+              </li></ul><a class="flex items-center gap-0.5" href="..&#x2F;..&#x2F;.&#x2F;all_symbols.html">
+              <span class="leading-none">view all 156 symbols</span><svg
+  width="16"
+  height="16"
+  viewBox="0 0 16 16"
+  fill="none"
+  xmlns="http://www.w3.org/2000/svg"
+>
+  <path
+    fill-rule="evenodd"
+    clip-rule="evenodd"
+    d="M5.76748 11.8159C5.5378 11.577 5.54525 11.1972 5.78411 10.9675L8.93431 8L5.78411 5.0325C5.54525 4.80282 5.5378 4.423 5.76748 4.18413C5.99715 3.94527 6.37698 3.93782 6.61584 4.1675L10.2158 7.5675C10.3335 7.68062 10.4 7.83679 10.4 8C10.4 8.16321 10.3335 8.31938 10.2158 8.4325L6.61584 11.8325C6.37698 12.0622 5.99715 12.0547 5.76748 11.8159Z"
+    fill="currentColor"
+  />
+</svg>
+</a></nav><nav class="documentNavigation">
+          <h3>Document Navigation</h3><ul><li><a href="#examples" title="Examples">Examples</a></li><li><ul><li><a href="#example_0" title="Basic numeric encoding and decoding:">Basic numeric encoding and decoding:</a></li><li><a href="#example_1" title="Network protocol with mixed endianness:">Network protocol with mixed endianness:</a></li></ul></li><li><a href="#numeric/numeric_ts_functions" title="Functions">Functions</a></li><li><ul><li><a href="#namespace_f16" title="f16">f16</a></li><li><a href="#namespace_f16be" title="f16be">f16be</a></li><li><a href="#namespace_f16le" title="f16le">f16le</a></li><li><a href="#namespace_f32" title="f32">f32</a></li><li><a href="#namespace_f32be" title="f32be">f32be</a></li><li><a href="#namespace_f32le" title="f32le">f32le</a></li><li><a href="#namespace_f64" title="f64">f64</a></li><li><a href="#namespace_f64be" title="f64be">f64be</a></li><li><a href="#namespace_f64le" title="f64le">f64le</a></li><li><a href="#namespace_s16" title="s16">s16</a></li><li><a href="#namespace_s16be" title="s16be">s16be</a></li><li><a href="#namespace_s16le" title="s16le">s16le</a></li><li><a href="#namespace_s32" title="s32">s32</a></li><li><a href="#namespace_s32be" title="s32be">s32be</a></li><li><a href="#namespace_s32le" title="s32le">s32le</a></li><li><a href="#namespace_s64" title="s64">s64</a></li><li><a href="#namespace_s64be" title="s64be">s64be</a></li><li><a href="#namespace_s64le" title="s64le">s64le</a></li><li><a href="#namespace_s8" title="s8">s8</a></li><li><a href="#namespace_s8be" title="s8be">s8be</a></li><li><a href="#namespace_s8le" title="s8le">s8le</a></li><li><a href="#namespace_u16" title="u16">u16</a></li><li><a href="#namespace_u16be" title="u16be">u16be</a></li><li><a href="#namespace_u16le" title="u16le">u16le</a></li><li><a href="#namespace_u32" title="u32">u32</a></li><li><a href="#namespace_u32be" title="u32be">u32be</a></li><li><a href="#namespace_u32le" title="u32le">u32le</a></li><li><a href="#namespace_u64" title="u64">u64</a></li><li><a href="#namespace_u64be" title="u64be">u64be</a></li><li><a href="#namespace_u64le" title="u64le">u64le</a></li><li><a href="#namespace_u8" title="u8">u8</a></li><li><a href="#namespace_u8be" title="u8be">u8be</a></li><li><a href="#namespace_u8le" title="u8le">u8le</a></li></ul></li><li><a href="#numeric/numeric_ts_type-aliases" title="Type Aliases">Type Aliases</a></li><li><ul><li><a href="#namespace_endianness" title="Endianness">Endianness</a></li></ul></li></ul></nav></div>
+  </div></div>
+</div>
+</div>
+</body>
+</html>
