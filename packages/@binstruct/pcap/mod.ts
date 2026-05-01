@@ -117,6 +117,7 @@
  * import { LINKTYPE, PCAP_MAGIC_MICROS, pcapFile } from "@binstruct/pcap";
  * import { ipv4 } from "@binstruct/ipv4";
  * import { udpDatagram } from "@binstruct/udp";
+ * import { parseIpv4 } from "@hertzg/ip/ipv4";
  *
  * const ip = ipv4();
  * const udp = udpDatagram();
@@ -146,8 +147,8 @@
  *   timeToLive: 64,
  *   protocol: 17,
  *   headerChecksum: 0,
- *   sourceAddress: "192.0.2.1",
- *   destinationAddress: "192.0.2.2",
+ *   sourceAddress: parseIpv4("192.0.2.1"),
+ *   destinationAddress: parseIpv4("192.0.2.2"),
  *   options: new Uint8Array(0),
  *   payload: udpBytes,
  * }, packet);
@@ -178,7 +179,7 @@
  * const [parsedIp] = ip.decode(records[0].data);
  * const [parsedUdp] = udp.decode(parsedIp.payload);
  *
- * assertEquals(parsedIp.sourceAddress, "192.0.2.1");
+ * assertEquals(parsedIp.sourceAddress, parseIpv4("192.0.2.1"));
  * assertEquals(parsedUdp.srcPort, 53);
  * assertEquals(parsedUdp.payload, new Uint8Array([0xde, 0xad, 0xbe, 0xef]));
  * ```

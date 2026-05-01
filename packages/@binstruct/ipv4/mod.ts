@@ -29,9 +29,10 @@
  * `bitStruct`, keeping the on-wire layout faithful while preserving named-field
  * access.
  *
- * IPv4 addresses are surfaced as dotted-quad strings via a refiner backed by
- * `parseIpv4`/`stringifyIpv4` from
- * {@link https://jsr.io/@hertzg/ip @hertzg/ip}.
+ * IPv4 addresses are surfaced as raw 32-bit unsigned integers, mirroring how
+ * ARP exposes the same field. Use
+ * {@link https://jsr.io/@hertzg/ip @hertzg/ip}'s `parseIpv4` / `stringifyIpv4`
+ * for human-readable conversion.
  *
  * Design notes:
  *
@@ -49,6 +50,7 @@
  * @example Round-trip a minimal IPv4 datagram (no options, empty payload)
  * ```ts
  * import { assertEquals } from "@std/assert";
+ * import { parseIpv4 } from "@hertzg/ip/ipv4";
  * import { ipv4 } from "@binstruct/ipv4";
  *
  * const coder = ipv4();
@@ -66,8 +68,8 @@
  *   timeToLive: 64,
  *   protocol: 6,
  *   headerChecksum: 0,
- *   sourceAddress: "192.168.1.100",
- *   destinationAddress: "10.0.0.50",
+ *   sourceAddress: parseIpv4("192.168.1.100"),
+ *   destinationAddress: parseIpv4("10.0.0.50"),
  *   options: new Uint8Array(0),
  *   payload: new Uint8Array(0),
  * };
@@ -78,8 +80,8 @@
  *
  * assertEquals(bytesWritten, 20);
  * assertEquals(bytesRead, 20);
- * assertEquals(decoded.sourceAddress, "192.168.1.100");
- * assertEquals(decoded.destinationAddress, "10.0.0.50");
+ * assertEquals(decoded.sourceAddress, parseIpv4("192.168.1.100"));
+ * assertEquals(decoded.destinationAddress, parseIpv4("10.0.0.50"));
  * assertEquals(decoded.flagsFragmentOffset.dontFragment, 1);
  * ```
  *
@@ -92,13 +94,11 @@ import {
   type Coder,
   computedRef,
   ref,
-  refine,
   struct,
   u16be,
   u32be,
   u8be,
 } from "@hertzg/binstruct";
-import { parseIpv4, stringifyIpv4 } from "@hertzg/ip/ipv4";
 
 /**
  * EtherType assigned to IPv4 (`0x0800`). The value an Ethernet II frame's
@@ -110,7 +110,11 @@ export const ETHERTYPE_IPV4 = 0x0800;
  * Decoded IPv4 datagram (RFC 791) — header fields, options trailer, and the
  * raw transport-layer payload.
  *
- * IPv4 addresses are surfaced as dotted-quad strings (e.g. `"192.168.1.1"`).
+ * IPv4 addresses (`sourceAddress` / `destinationAddress`) are surfaced as
+ * 32-bit unsigned integers, the same on-wire form ARP uses. Use
+ * `@hertzg/ip/ipv4`'s `parseIpv4` / `stringifyIpv4` for human-readable
+ * conversion.
+ *
  * The `options` length is derived from `versionIhl.ihl` (`(ihl - 5) * 4`); the
  * `payload` length is derived from `totalLength - versionIhl.ihl * 4`.
  */
@@ -131,8 +135,8 @@ export interface Ipv4 {
   timeToLive: number;
   protocol: number;
   headerChecksum: number;
-  sourceAddress: string;
-  destinationAddress: string;
+  sourceAddress: number;
+  destinationAddress: number;
   options: Uint8Array;
   payload: Uint8Array;
 }
@@ -149,6 +153,7 @@ export interface Ipv4 {
  * @example Round-trip a UDP-bearing datagram
  * ```ts
  * import { assertEquals } from "@std/assert";
+ * import { parseIpv4 } from "@hertzg/ip/ipv4";
  * import { ipv4 } from "@binstruct/ipv4";
  *
  * const coder = ipv4();
@@ -161,8 +166,8 @@ export interface Ipv4 {
  *   timeToLive: 64,
  *   protocol: 17,
  *   headerChecksum: 0,
- *   sourceAddress: "192.0.2.1",
- *   destinationAddress: "192.0.2.2",
+ *   sourceAddress: parseIpv4("192.0.2.1"),
+ *   destinationAddress: parseIpv4("192.0.2.2"),
  *   options: new Uint8Array(0),
  *   payload: new Uint8Array([0xde, 0xad, 0xbe, 0xef]),
  * };
@@ -198,8 +203,8 @@ export function ipv4(): Coder<Ipv4> {
     timeToLive: u8be(),
     protocol: u8be(),
     headerChecksum: u16be(),
-    sourceAddress: ipv4Address(),
-    destinationAddress: ipv4Address(),
+    sourceAddress: u32be(),
+    destinationAddress: u32be(),
     options: bytes(computedRef([ref(versionIhl)], (vi) => (vi.ihl - 5) * 4)),
     payload: bytes(
       computedRef(
@@ -209,12 +214,3 @@ export function ipv4(): Coder<Ipv4> {
     ),
   });
 }
-
-/**
- * Coder factory for an IPv4 address — `u32be()` refined to dotted-quad string
- * via `@hertzg/ip`. Used for both source and destination address fields.
- */
-export const ipv4Address: () => Coder<string> = refine(u32be(), {
-  refine: (raw: number): string => stringifyIpv4(raw),
-  unrefine: (formatted: string): number => parseIpv4(formatted),
-});

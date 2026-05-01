@@ -60,12 +60,12 @@
  * const [packet, bytesRead] = arp().decode(wire);
  *
  * assertEquals(bytesRead, 28);
- * assertEquals(packet.htype, ARP_HARDWARE_TYPE.ETHERNET);
- * assertEquals(packet.ptype, ARP_PROTOCOL_TYPE.IPV4);
- * assertEquals(packet.oper, ARP_OPCODE.REQUEST);
- * assertEquals(stringifyMac(packet.sha), "00:11:22:33:44:55");
- * assertEquals(stringifyIpv4(packet.spa), "192.168.1.1");
- * assertEquals(stringifyIpv4(packet.tpa), "192.168.1.2");
+ * assertEquals(packet.hardwareType, ARP_HARDWARE_TYPE.ETHERNET);
+ * assertEquals(packet.protocolType, ARP_PROTOCOL_TYPE.IPV4);
+ * assertEquals(packet.operation, ARP_OPCODE.REQUEST);
+ * assertEquals(stringifyMac(packet.senderHardwareAddress), "00:11:22:33:44:55");
+ * assertEquals(stringifyIpv4(packet.senderProtocolAddress), "192.168.1.1");
+ * assertEquals(stringifyIpv4(packet.targetProtocolAddress), "192.168.1.2");
  * ```
  *
  * @module @binstruct/arp
@@ -143,20 +143,21 @@ export type ArpOpcode = (typeof ARP_OPCODE)[keyof typeof ARP_OPCODE];
 /**
  * Decoded Ethernet/IPv4 ARP packet (RFC 826, 28 bytes).
  *
- * Hardware addresses (`sha` / `tha`) are raw 6-byte arrays; IPv4 protocol
- * addresses (`spa` / `tpa`) are 32-bit unsigned integers. Use `@hertzg/mac`
+ * Hardware addresses (`senderHardwareAddress` / `targetHardwareAddress`) are
+ * raw 6-byte arrays; IPv4 protocol addresses (`senderProtocolAddress` /
+ * `targetProtocolAddress`) are 32-bit unsigned integers. Use `@hertzg/mac`
  * and `@hertzg/ip/ipv4` for human-readable conversion.
  */
 export interface Arp {
-  htype: number;
-  ptype: number;
-  hlen: number;
-  plen: number;
-  oper: number;
-  sha: Uint8Array;
-  spa: number;
-  tha: Uint8Array;
-  tpa: number;
+  hardwareType: number;
+  protocolType: number;
+  hardwareAddressLength: number;
+  protocolAddressLength: number;
+  operation: number;
+  senderHardwareAddress: Uint8Array;
+  senderProtocolAddress: number;
+  targetHardwareAddress: Uint8Array;
+  targetProtocolAddress: number;
 }
 
 /**
@@ -181,15 +182,15 @@ export interface Arp {
  *
  * const coder = arp();
  * const reply = {
- *   htype: ARP_HARDWARE_TYPE.ETHERNET,
- *   ptype: ARP_PROTOCOL_TYPE.IPV4,
- *   hlen: ARP_HW_LEN_ETHERNET,
- *   plen: ARP_PROTO_LEN_IPV4,
- *   oper: ARP_OPCODE.REPLY,
- *   sha: parseMac("aa:bb:cc:dd:ee:ff"),
- *   spa: parseIpv4("192.168.1.2"),
- *   tha: parseMac("00:11:22:33:44:55"),
- *   tpa: parseIpv4("192.168.1.1"),
+ *   hardwareType: ARP_HARDWARE_TYPE.ETHERNET,
+ *   protocolType: ARP_PROTOCOL_TYPE.IPV4,
+ *   hardwareAddressLength: ARP_HW_LEN_ETHERNET,
+ *   protocolAddressLength: ARP_PROTO_LEN_IPV4,
+ *   operation: ARP_OPCODE.REPLY,
+ *   senderHardwareAddress: parseMac("aa:bb:cc:dd:ee:ff"),
+ *   senderProtocolAddress: parseIpv4("192.168.1.2"),
+ *   targetHardwareAddress: parseMac("00:11:22:33:44:55"),
+ *   targetProtocolAddress: parseIpv4("192.168.1.1"),
  * };
  *
  * const buffer = new Uint8Array(ARP_ETHERNET_IPV4_SIZE);
@@ -203,14 +204,14 @@ export interface Arp {
  */
 export function arp(): Coder<Arp> {
   return struct({
-    htype: u16be(),
-    ptype: u16be(),
-    hlen: u8(),
-    plen: u8(),
-    oper: u16be(),
-    sha: bytes(ARP_HW_LEN_ETHERNET),
-    spa: u32be(),
-    tha: bytes(ARP_HW_LEN_ETHERNET),
-    tpa: u32be(),
+    hardwareType: u16be(),
+    protocolType: u16be(),
+    hardwareAddressLength: u8(),
+    protocolAddressLength: u8(),
+    operation: u16be(),
+    senderHardwareAddress: bytes(ARP_HW_LEN_ETHERNET),
+    senderProtocolAddress: u32be(),
+    targetHardwareAddress: bytes(ARP_HW_LEN_ETHERNET),
+    targetProtocolAddress: u32be(),
   });
 }

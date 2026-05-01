@@ -15,68 +15,68 @@ import type { Arp } from "./mod.ts";
 
 // deno-fmt-ignore
 const REQUEST_WIRE = new Uint8Array([
-  0x00, 0x01,                         // htype: Ethernet
-  0x08, 0x00,                         // ptype: IPv4
-  0x06,                               // hlen
-  0x04,                               // plen
-  0x00, 0x01,                         // oper: request
-  0x00, 0x11, 0x22, 0x33, 0x44, 0x55, // sha
-  0xc0, 0xa8, 0x01, 0x01,             // spa: 192.168.1.1
-  0x00, 0x00, 0x00, 0x00, 0x00, 0x00, // tha (unknown)
-  0xc0, 0xa8, 0x01, 0x02,             // tpa: 192.168.1.2
+  0x00, 0x01,                         // hardwareType: Ethernet
+  0x08, 0x00,                         // protocolType: IPv4
+  0x06,                               // hardwareAddressLength
+  0x04,                               // protocolAddressLength
+  0x00, 0x01,                         // operation: request
+  0x00, 0x11, 0x22, 0x33, 0x44, 0x55, // senderHardwareAddress
+  0xc0, 0xa8, 0x01, 0x01,             // senderProtocolAddress: 192.168.1.1
+  0x00, 0x00, 0x00, 0x00, 0x00, 0x00, // targetHardwareAddress (unknown)
+  0xc0, 0xa8, 0x01, 0x02,             // targetProtocolAddress: 192.168.1.2
 ]);
 
 // deno-fmt-ignore
 const REPLY_WIRE = new Uint8Array([
-  0x00, 0x01,                         // htype
-  0x08, 0x00,                         // ptype
-  0x06,                               // hlen
-  0x04,                               // plen
-  0x00, 0x02,                         // oper: reply
-  0xaa, 0xbb, 0xcc, 0xdd, 0xee, 0xff, // sha
-  0xc0, 0xa8, 0x01, 0x02,             // spa: 192.168.1.2
-  0x00, 0x11, 0x22, 0x33, 0x44, 0x55, // tha
-  0xc0, 0xa8, 0x01, 0x01,             // tpa: 192.168.1.1
+  0x00, 0x01,                         // hardwareType
+  0x08, 0x00,                         // protocolType
+  0x06,                               // hardwareAddressLength
+  0x04,                               // protocolAddressLength
+  0x00, 0x02,                         // operation: reply
+  0xaa, 0xbb, 0xcc, 0xdd, 0xee, 0xff, // senderHardwareAddress
+  0xc0, 0xa8, 0x01, 0x02,             // senderProtocolAddress: 192.168.1.2
+  0x00, 0x11, 0x22, 0x33, 0x44, 0x55, // targetHardwareAddress
+  0xc0, 0xa8, 0x01, 0x01,             // targetProtocolAddress: 192.168.1.1
 ]);
 
 Deno.test("arp — decode known request bytes", () => {
   const [packet, bytesRead] = arp().decode(REQUEST_WIRE);
 
   assertEquals(bytesRead, ARP_ETHERNET_IPV4_SIZE);
-  assertEquals(packet.htype, ARP_HARDWARE_TYPE.ETHERNET);
-  assertEquals(packet.ptype, ARP_PROTOCOL_TYPE.IPV4);
-  assertEquals(packet.hlen, ARP_HW_LEN_ETHERNET);
-  assertEquals(packet.plen, ARP_PROTO_LEN_IPV4);
-  assertEquals(packet.oper, ARP_OPCODE.REQUEST);
-  assertEquals(stringifyMac(packet.sha), "00:11:22:33:44:55");
-  assertEquals(stringifyMac(packet.tha), "00:00:00:00:00:00");
-  assertEquals(stringifyIpv4(packet.spa), "192.168.1.1");
-  assertEquals(stringifyIpv4(packet.tpa), "192.168.1.2");
+  assertEquals(packet.hardwareType, ARP_HARDWARE_TYPE.ETHERNET);
+  assertEquals(packet.protocolType, ARP_PROTOCOL_TYPE.IPV4);
+  assertEquals(packet.hardwareAddressLength, ARP_HW_LEN_ETHERNET);
+  assertEquals(packet.protocolAddressLength, ARP_PROTO_LEN_IPV4);
+  assertEquals(packet.operation, ARP_OPCODE.REQUEST);
+  assertEquals(stringifyMac(packet.senderHardwareAddress), "00:11:22:33:44:55");
+  assertEquals(stringifyMac(packet.targetHardwareAddress), "00:00:00:00:00:00");
+  assertEquals(stringifyIpv4(packet.senderProtocolAddress), "192.168.1.1");
+  assertEquals(stringifyIpv4(packet.targetProtocolAddress), "192.168.1.2");
 });
 
 Deno.test("arp — decode known reply bytes", () => {
   const [packet, bytesRead] = arp().decode(REPLY_WIRE);
 
   assertEquals(bytesRead, ARP_ETHERNET_IPV4_SIZE);
-  assertEquals(packet.oper, ARP_OPCODE.REPLY);
-  assertEquals(stringifyMac(packet.sha), "aa:bb:cc:dd:ee:ff");
-  assertEquals(stringifyMac(packet.tha), "00:11:22:33:44:55");
-  assertEquals(stringifyIpv4(packet.spa), "192.168.1.2");
-  assertEquals(stringifyIpv4(packet.tpa), "192.168.1.1");
+  assertEquals(packet.operation, ARP_OPCODE.REPLY);
+  assertEquals(stringifyMac(packet.senderHardwareAddress), "aa:bb:cc:dd:ee:ff");
+  assertEquals(stringifyMac(packet.targetHardwareAddress), "00:11:22:33:44:55");
+  assertEquals(stringifyIpv4(packet.senderProtocolAddress), "192.168.1.2");
+  assertEquals(stringifyIpv4(packet.targetProtocolAddress), "192.168.1.1");
 });
 
 Deno.test("arp — encode produces expected wire bytes", () => {
   const coder = arp();
   const request: Arp = {
-    htype: ARP_HARDWARE_TYPE.ETHERNET,
-    ptype: ARP_PROTOCOL_TYPE.IPV4,
-    hlen: ARP_HW_LEN_ETHERNET,
-    plen: ARP_PROTO_LEN_IPV4,
-    oper: ARP_OPCODE.REQUEST,
-    sha: parseMac("00:11:22:33:44:55"),
-    spa: parseIpv4("192.168.1.1"),
-    tha: new Uint8Array(ARP_HW_LEN_ETHERNET),
-    tpa: parseIpv4("192.168.1.2"),
+    hardwareType: ARP_HARDWARE_TYPE.ETHERNET,
+    protocolType: ARP_PROTOCOL_TYPE.IPV4,
+    hardwareAddressLength: ARP_HW_LEN_ETHERNET,
+    protocolAddressLength: ARP_PROTO_LEN_IPV4,
+    operation: ARP_OPCODE.REQUEST,
+    senderHardwareAddress: parseMac("00:11:22:33:44:55"),
+    senderProtocolAddress: parseIpv4("192.168.1.1"),
+    targetHardwareAddress: new Uint8Array(ARP_HW_LEN_ETHERNET),
+    targetProtocolAddress: parseIpv4("192.168.1.2"),
   };
 
   const buffer = new Uint8Array(ARP_ETHERNET_IPV4_SIZE);
@@ -90,26 +90,26 @@ Deno.test("arp — round-trip request and reply", () => {
   const coder = arp();
   const cases: Arp[] = [
     {
-      htype: ARP_HARDWARE_TYPE.ETHERNET,
-      ptype: ARP_PROTOCOL_TYPE.IPV4,
-      hlen: ARP_HW_LEN_ETHERNET,
-      plen: ARP_PROTO_LEN_IPV4,
-      oper: ARP_OPCODE.REQUEST,
-      sha: parseMac("00:11:22:33:44:55"),
-      spa: parseIpv4("10.0.0.1"),
-      tha: new Uint8Array(ARP_HW_LEN_ETHERNET),
-      tpa: parseIpv4("10.0.0.42"),
+      hardwareType: ARP_HARDWARE_TYPE.ETHERNET,
+      protocolType: ARP_PROTOCOL_TYPE.IPV4,
+      hardwareAddressLength: ARP_HW_LEN_ETHERNET,
+      protocolAddressLength: ARP_PROTO_LEN_IPV4,
+      operation: ARP_OPCODE.REQUEST,
+      senderHardwareAddress: parseMac("00:11:22:33:44:55"),
+      senderProtocolAddress: parseIpv4("10.0.0.1"),
+      targetHardwareAddress: new Uint8Array(ARP_HW_LEN_ETHERNET),
+      targetProtocolAddress: parseIpv4("10.0.0.42"),
     },
     {
-      htype: ARP_HARDWARE_TYPE.ETHERNET,
-      ptype: ARP_PROTOCOL_TYPE.IPV4,
-      hlen: ARP_HW_LEN_ETHERNET,
-      plen: ARP_PROTO_LEN_IPV4,
-      oper: ARP_OPCODE.REPLY,
-      sha: parseMac("aa:bb:cc:dd:ee:ff"),
-      spa: parseIpv4("10.0.0.42"),
-      tha: parseMac("00:11:22:33:44:55"),
-      tpa: parseIpv4("10.0.0.1"),
+      hardwareType: ARP_HARDWARE_TYPE.ETHERNET,
+      protocolType: ARP_PROTOCOL_TYPE.IPV4,
+      hardwareAddressLength: ARP_HW_LEN_ETHERNET,
+      protocolAddressLength: ARP_PROTO_LEN_IPV4,
+      operation: ARP_OPCODE.REPLY,
+      senderHardwareAddress: parseMac("aa:bb:cc:dd:ee:ff"),
+      senderProtocolAddress: parseIpv4("10.0.0.42"),
+      targetHardwareAddress: parseMac("00:11:22:33:44:55"),
+      targetProtocolAddress: parseIpv4("10.0.0.1"),
     },
   ];
 
@@ -126,50 +126,56 @@ Deno.test("arp — round-trip request and reply", () => {
 
 Deno.test("arp — composes with refine for human-readable form", () => {
   type RefinedArp =
-    & Omit<Arp, "sha" | "tha" | "spa" | "tpa">
+    & Omit<
+      Arp,
+      | "senderHardwareAddress"
+      | "targetHardwareAddress"
+      | "senderProtocolAddress"
+      | "targetProtocolAddress"
+    >
     & {
-      sha: string;
-      tha: string;
-      spa: string;
-      tpa: string;
+      senderHardwareAddress: string;
+      targetHardwareAddress: string;
+      senderProtocolAddress: string;
+      targetProtocolAddress: string;
     };
 
   const refinedArp = refine(arp(), {
     refine: (raw: Arp): RefinedArp => ({
-      htype: raw.htype,
-      ptype: raw.ptype,
-      hlen: raw.hlen,
-      plen: raw.plen,
-      oper: raw.oper,
-      sha: stringifyMac(raw.sha),
-      tha: stringifyMac(raw.tha),
-      spa: stringifyIpv4(raw.spa),
-      tpa: stringifyIpv4(raw.tpa),
+      hardwareType: raw.hardwareType,
+      protocolType: raw.protocolType,
+      hardwareAddressLength: raw.hardwareAddressLength,
+      protocolAddressLength: raw.protocolAddressLength,
+      operation: raw.operation,
+      senderHardwareAddress: stringifyMac(raw.senderHardwareAddress),
+      targetHardwareAddress: stringifyMac(raw.targetHardwareAddress),
+      senderProtocolAddress: stringifyIpv4(raw.senderProtocolAddress),
+      targetProtocolAddress: stringifyIpv4(raw.targetProtocolAddress),
     }),
     unrefine: (refined: RefinedArp): Arp => ({
-      htype: refined.htype,
-      ptype: refined.ptype,
-      hlen: refined.hlen,
-      plen: refined.plen,
-      oper: refined.oper,
-      sha: parseMac(refined.sha),
-      tha: parseMac(refined.tha),
-      spa: parseIpv4(refined.spa),
-      tpa: parseIpv4(refined.tpa),
+      hardwareType: refined.hardwareType,
+      protocolType: refined.protocolType,
+      hardwareAddressLength: refined.hardwareAddressLength,
+      protocolAddressLength: refined.protocolAddressLength,
+      operation: refined.operation,
+      senderHardwareAddress: parseMac(refined.senderHardwareAddress),
+      targetHardwareAddress: parseMac(refined.targetHardwareAddress),
+      senderProtocolAddress: parseIpv4(refined.senderProtocolAddress),
+      targetProtocolAddress: parseIpv4(refined.targetProtocolAddress),
     }),
   });
 
   const coder = refinedArp();
   const original: RefinedArp = {
-    htype: ARP_HARDWARE_TYPE.ETHERNET,
-    ptype: ARP_PROTOCOL_TYPE.IPV4,
-    hlen: ARP_HW_LEN_ETHERNET,
-    plen: ARP_PROTO_LEN_IPV4,
-    oper: ARP_OPCODE.REPLY,
-    sha: "aa:bb:cc:dd:ee:ff",
-    tha: "00:11:22:33:44:55",
-    spa: "192.168.1.2",
-    tpa: "192.168.1.1",
+    hardwareType: ARP_HARDWARE_TYPE.ETHERNET,
+    protocolType: ARP_PROTOCOL_TYPE.IPV4,
+    hardwareAddressLength: ARP_HW_LEN_ETHERNET,
+    protocolAddressLength: ARP_PROTO_LEN_IPV4,
+    operation: ARP_OPCODE.REPLY,
+    senderHardwareAddress: "aa:bb:cc:dd:ee:ff",
+    targetHardwareAddress: "00:11:22:33:44:55",
+    senderProtocolAddress: "192.168.1.2",
+    targetProtocolAddress: "192.168.1.1",
   };
 
   const buffer = new Uint8Array(ARP_ETHERNET_IPV4_SIZE);
