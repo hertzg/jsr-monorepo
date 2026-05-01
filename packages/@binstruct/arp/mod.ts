@@ -49,19 +49,7 @@
  * @module @binstruct/arp
  */
 
-import {
-  bytes,
-  type Coder,
-  type Context,
-  decode,
-  encode,
-  type Refiner,
-  struct,
-  u16be,
-  u32be,
-  u8,
-} from "@hertzg/binstruct";
-import type { Ethernet2Frame } from "@binstruct/ethernet";
+import { bytes, type Coder, struct, u16be, u32be, u8 } from "@hertzg/binstruct";
 
 /** Length of an Ethernet hardware address in bytes. */
 export const ARP_HW_LEN_ETHERNET = 6;
@@ -209,70 +197,3 @@ export function arpEthernetIpv4(): Coder<ArpEthernetIpv4Packet> {
   });
 }
 
-/**
- * Refiner that swaps a host's `payload: Uint8Array` for a decoded
- * Ethernet/IPv4 ARP packet.
- *
- * Use as a `refineSwitch` arm when the parent's protocol-discriminator field
- * (e.g. Ethernet's `etherType`) selects ARP. The host type is preserved on
- * its non-payload fields, so the same factory works under any L2 carrier.
- *
- * @returns A `Refiner` suitable for `refineSwitch`.
- *
- * @example Compose with Ethernet via refineSwitch
- * ```ts
- * import { assert, assertEquals } from "@std/assert";
- * import { refineSwitch, type Context } from "@hertzg/binstruct";
- * import { ethernet2Frame, type Ethernet2Frame } from "@binstruct/ethernet";
- * import { arpEthernetIpv4, ARP_OPCODE, arpRefiner } from "@binstruct/arp";
- *
- * const coder = refineSwitch(
- *   ethernet2Frame(),
- *   { arp: arpRefiner() },
- *   {
- *     refine: (frame: Ethernet2Frame, _ctx: Context) =>
- *       frame.etherType === 0x0806 ? "arp" : null,
- *     unrefine: (_r, _ctx: Context) => "arp",
- *   },
- * );
- *
- * const buf = new Uint8Array(64);
- * coder.encode({
- *   dstMac: new Uint8Array([0xff, 0xff, 0xff, 0xff, 0xff, 0xff]),
- *   srcMac: new Uint8Array([0, 0, 0, 0, 0, 2]),
- *   etherType: 0x0806,
- *   payload: {
- *     kind: "arp",
- *     arp: {
- *       htype: 1, ptype: 0x0800, hlen: 6, plen: 4,
- *       oper: ARP_OPCODE.REQUEST,
- *       sha: new Uint8Array([0, 0, 0, 0, 0, 2]),
- *       spa: 0xc0000201,
- *       tha: new Uint8Array([0, 0, 0, 0, 0, 0]),
- *       tpa: 0xc0000202,
- *     },
- *   },
- * }, buf);
- *
- * const [decoded] = coder.decode(buf);
- * assert(!(decoded.payload instanceof Uint8Array) && decoded.payload.kind === "arp");
- * assertEquals(decoded.payload.arp.oper, ARP_OPCODE.REQUEST);
- * ```
- */
-/** Refined Ethernet frame whose payload is a typed ARP packet. */
-export type FrameWithArp = Omit<Ethernet2Frame, "payload"> & {
-  payload: { kind: "arp"; arp: ArpEthernetIpv4Packet };
-};
-
-export function arpRefiner(): Refiner<Ethernet2Frame, FrameWithArp, []> {
-  return {
-    refine: (frame: Ethernet2Frame, ctx: Context): FrameWithArp => ({
-      ...frame,
-      payload: { kind: "arp", arp: decode(arpEthernetIpv4(), frame.payload, ctx) },
-    }),
-    unrefine: (refined: FrameWithArp, ctx: Context): Ethernet2Frame => ({
-      ...refined,
-      payload: encode(arpEthernetIpv4(), refined.payload.arp, ctx),
-    }),
-  };
-}

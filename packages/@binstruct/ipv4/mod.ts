@@ -67,20 +67,13 @@ import {
   bytes,
   type Coder,
   computedRef,
-  type Context,
-  decode,
-  encode,
   ref,
   refine,
-  type Refiner,
   struct,
   u16be,
   u32be,
   u8be,
 } from "@hertzg/binstruct";
-import type {
-  Ethernet2Frame,
-} from "@binstruct/ethernet";
 import { parseIpv4, stringifyIpv4 } from "@hertzg/ip/ipv4";
 
 /**
@@ -300,84 +293,3 @@ export function ipv4Datagram(): Coder<Ipv4Datagram> {
   });
 }
 
-/**
- * Refiner that swaps a host's `payload: Uint8Array` for a decoded IPv4 value.
- *
- * Use as a `refineSwitch` arm when the parent's protocol-discriminator field
- * (e.g. Ethernet's `etherType`) selects IPv4. The inner coder defaults to
- * {@link ipv4Datagram}; pass a refined coder (e.g. another `refineSwitch` on
- * the IPv4 `protocol` field) to recurse into typed L4 values.
- *
- * @template TIpv4 The decoded shape produced by `coder`. Defaults to
- *   {@link Ipv4Datagram}.
- * @param coder Coder for the IPv4 datagram. Defaults to {@link ipv4Datagram}.
- * @returns A refiner factory suitable for `refineSwitch`.
- *
- * @example Compose with Ethernet (raw L4 payload)
- * ```ts
- * import { assert, assertEquals } from "@std/assert";
- * import { refineSwitch, type Context } from "@hertzg/binstruct";
- * import { ethernet2Frame, type Ethernet2Frame } from "@binstruct/ethernet";
- * import { ipv4Datagram, ipv4Refiner } from "@binstruct/ipv4";
- *
- * const coder = refineSwitch(
- *   ethernet2Frame(),
- *   { ipv4: ipv4Refiner(ipv4Datagram()) },
- *   {
- *     refine: (frame: Ethernet2Frame, _ctx: Context) =>
- *       frame.etherType === 0x0800 ? "ipv4" : null,
- *     unrefine: (_refined, _ctx: Context) => "ipv4",
- *   },
- * );
- *
- * const buf = new Uint8Array(64);
- * coder.encode({
- *   dstMac: new Uint8Array([0, 0, 0, 0, 0, 1]),
- *   srcMac: new Uint8Array([0, 0, 0, 0, 0, 2]),
- *   etherType: 0x0800,
- *   payload: {
- *     kind: "ipv4",
- *     ipv4: {
- *       versionIhl: { version: 4, ihl: 5 },
- *       typeOfService: 0,
- *       totalLength: 24,
- *       identification: 0,
- *       flagsFragmentOffset: { reserved: 0, dontFragment: 0, moreFragments: 0, fragmentOffset: 0 },
- *       timeToLive: 64,
- *       protocol: 17,
- *       headerChecksum: 0,
- *       sourceAddress: "10.0.0.1",
- *       destinationAddress: "10.0.0.2",
- *       options: new Uint8Array(0),
- *       payload: new Uint8Array([0xde, 0xad, 0xbe, 0xef]),
- *     },
- *   },
- * }, buf);
- *
- * const [decoded] = coder.decode(buf);
- * assert(!(decoded.payload instanceof Uint8Array) && decoded.payload.kind === "ipv4");
- * assertEquals(decoded.payload.ipv4.protocol, 17);
- * ```
- */
-/** Refined Ethernet frame whose payload is a decoded IPv4 datagram. */
-export type FrameWithIpv4<TIpv4 extends Ipv4Header = Ipv4Datagram> =
-  & Omit<Ethernet2Frame, "payload">
-  & { payload: { kind: "ipv4"; ipv4: TIpv4 } };
-
-export function ipv4Refiner<TIpv4 extends Ipv4Header>(
-  coder: Coder<TIpv4>,
-): Refiner<Ethernet2Frame, FrameWithIpv4<TIpv4>, []> {
-  return {
-    refine: (frame: Ethernet2Frame, ctx: Context): FrameWithIpv4<TIpv4> => ({
-      ...frame,
-      payload: { kind: "ipv4", ipv4: decode(coder, frame.payload, ctx) },
-    }),
-    unrefine: (
-      refined: FrameWithIpv4<TIpv4>,
-      ctx: Context,
-    ): Ethernet2Frame => ({
-      ...refined,
-      payload: encode(coder, refined.payload.ipv4, ctx),
-    }),
-  };
-}

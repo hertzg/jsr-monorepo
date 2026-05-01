@@ -79,4 +79,3 @@ export { internetChecksum } from "./checksum.ts";
 export { icmpHeader, type IcmpPacket } from "./header.ts";
 export { type IcmpEcho, icmpEcho } from "./echo.ts";
 export { ICMP_TYPE, type IcmpType } from "./types.ts";
-export { icmpRefiner } from "./refiners.ts";

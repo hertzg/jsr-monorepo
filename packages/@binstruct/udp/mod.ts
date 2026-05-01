@@ -59,15 +59,10 @@ import {
   bytes,
   type Coder,
   computedRef,
-  type Context,
-  decode,
-  encode,
   ref,
-  type Refiner,
   struct,
   u16be,
 } from "@hertzg/binstruct";
-import type { Ipv4Datagram } from "@binstruct/ipv4";
 
 /**
  * Number of octets in a UDP header (source port, destination port, length,
@@ -164,73 +159,3 @@ export function udpDatagram(): Coder<UdpDatagram> {
   });
 }
 
-/**
- * Refiner that swaps a host's `payload: Uint8Array` for a decoded UDP
- * datagram.
- *
- * Use as a `refineSwitch` arm when the parent's protocol-discriminator field
- * (e.g. IPv4's `protocol`) selects UDP. The host type is preserved on its
- * non-payload fields, so the same factory works under any L3 carrier.
- *
- * @returns A `Refiner` suitable for `refineSwitch`.
- *
- * @example Compose with IPv4 via refineSwitch
- * ```ts
- * import { assert, assertEquals } from "@std/assert";
- * import { refineSwitch, type Context } from "@hertzg/binstruct";
- * import { ipv4Datagram, type Ipv4Datagram } from "@binstruct/ipv4";
- * import { udpRefiner } from "@binstruct/udp";
- *
- * const coder = refineSwitch(
- *   ipv4Datagram(),
- *   { udp: udpRefiner() },
- *   {
- *     refine: (d: Ipv4Datagram, _ctx: Context) => d.protocol === 17 ? "udp" : null,
- *     unrefine: (_r, _ctx: Context) => "udp",
- *   },
- * );
- *
- * const buf = new Uint8Array(64);
- * coder.encode({
- *   versionIhl: { version: 4, ihl: 5 },
- *   typeOfService: 0,
- *   totalLength: 32,
- *   identification: 0,
- *   flagsFragmentOffset: { reserved: 0, dontFragment: 0, moreFragments: 0, fragmentOffset: 0 },
- *   timeToLive: 64,
- *   protocol: 17,
- *   headerChecksum: 0,
- *   sourceAddress: "10.0.0.1",
- *   destinationAddress: "10.0.0.2",
- *   options: new Uint8Array(0),
- *   payload: {
- *     kind: "udp",
- *     udp: {
- *       srcPort: 53, dstPort: 49152, length: 12, checksum: 0,
- *       payload: new Uint8Array([0xde, 0xad, 0xbe, 0xef]),
- *     },
- *   },
- * }, buf);
- *
- * const [decoded] = coder.decode(buf);
- * assert(!(decoded.payload instanceof Uint8Array) && decoded.payload.kind === "udp");
- * assertEquals(decoded.payload.udp.srcPort, 53);
- * ```
- */
-/** Refined IPv4 datagram whose payload is a typed UDP datagram. */
-export type Ipv4WithUdp = Omit<Ipv4Datagram, "payload"> & {
-  payload: { kind: "udp"; udp: UdpDatagram };
-};
-
-export function udpRefiner(): Refiner<Ipv4Datagram, Ipv4WithUdp, []> {
-  return {
-    refine: (host: Ipv4Datagram, ctx: Context): Ipv4WithUdp => ({
-      ...host,
-      payload: { kind: "udp", udp: decode(udpDatagram(), host.payload, ctx) },
-    }),
-    unrefine: (refined: Ipv4WithUdp, ctx: Context): Ipv4Datagram => ({
-      ...refined,
-      payload: encode(udpDatagram(), refined.payload.udp, ctx),
-    }),
-  };
-}
