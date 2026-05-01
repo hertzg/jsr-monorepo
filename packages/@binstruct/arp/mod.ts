@@ -41,7 +41,7 @@
  *   ARP_HARDWARE_TYPE,
  *   ARP_OPCODE,
  *   ARP_PROTOCOL_TYPE,
- *   arp,
+ *   arpData,
  * } from "@binstruct/arp";
  *
  * // deno-fmt-ignore
@@ -57,7 +57,7 @@
  *   0xc0, 0xa8, 0x01, 0x02,             // tpa: 192.168.1.2
  * ]);
  *
- * const [packet, bytesRead] = arp().decode(wire);
+ * const [packet, bytesRead] = arpData().decode(wire);
  *
  * assertEquals(bytesRead, 28);
  * assertEquals(packet.hardwareType, ARP_HARDWARE_TYPE.ETHERNET);
@@ -148,7 +148,7 @@ export type ArpOpcode = (typeof ARP_OPCODE)[keyof typeof ARP_OPCODE];
  * `targetProtocolAddress`) are 32-bit unsigned integers. Use `@hertzg/mac`
  * and `@hertzg/ip/ipv4` for human-readable conversion.
  */
-export interface Arp {
+export interface ArpData {
   hardwareType: number;
   protocolType: number;
   hardwareAddressLength: number;
@@ -163,7 +163,7 @@ export interface Arp {
 /**
  * Creates a coder for the common Ethernet/IPv4 ARP packet (RFC 826).
  *
- * @returns A coder for {@link Arp} values.
+ * @returns A coder for {@link ArpData} values.
  *
  * @example Round-trip encode and decode an ARP reply
  * ```ts
@@ -177,10 +177,10 @@ export interface Arp {
  *   ARP_OPCODE,
  *   ARP_PROTOCOL_TYPE,
  *   ARP_PROTO_LEN_IPV4,
- *   arp,
+ *   arpData,
  * } from "@binstruct/arp";
  *
- * const coder = arp();
+ * const coder = arpData();
  * const reply = {
  *   hardwareType: ARP_HARDWARE_TYPE.ETHERNET,
  *   protocolType: ARP_PROTOCOL_TYPE.IPV4,
@@ -202,7 +202,7 @@ export interface Arp {
  * assertEquals(decoded, reply);
  * ```
  */
-export function arp(): Coder<Arp> {
+export function arpData(): Coder<ArpData> {
   return struct({
     hardwareType: u16be(),
     protocolType: u16be(),

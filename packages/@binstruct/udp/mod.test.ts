@@ -1,11 +1,11 @@
 import { assertEquals } from "@std/assert";
-import { UDP_HEADER_SIZE, udpDatagram } from "./mod.ts";
-import type { UdpDatagram } from "./mod.ts";
+import { UDP_HEADER_SIZE, udpPacket } from "./mod.ts";
+import type { UdpPacket } from "./mod.ts";
 
 function makeDatagram(
   payload: Uint8Array,
-  overrides: Partial<UdpDatagram> = {},
-): UdpDatagram {
+  overrides: Partial<UdpPacket> = {},
+): UdpPacket {
   return {
     srcPort: 0,
     dstPort: 0,
@@ -16,9 +16,9 @@ function makeDatagram(
   };
 }
 
-Deno.test("udpDatagram", async (t) => {
+Deno.test("udpPacket", async (t) => {
   await t.step("round-trip with non-empty payload", () => {
-    const coder = udpDatagram();
+    const coder = udpPacket();
     const payload = new Uint8Array([0xde, 0xad, 0xbe, 0xef]);
     const datagram = makeDatagram(payload, {
       srcPort: 53,
@@ -40,7 +40,7 @@ Deno.test("udpDatagram", async (t) => {
   });
 
   await t.step("zero-length payload (header-only)", () => {
-    const coder = udpDatagram();
+    const coder = udpPacket();
     const datagram = makeDatagram(new Uint8Array(0), {
       srcPort: 1234,
       dstPort: 5678,
@@ -57,7 +57,7 @@ Deno.test("udpDatagram", async (t) => {
   });
 
   await t.step("checksum=0 (IPv4 'not computed')", () => {
-    const coder = udpDatagram();
+    const coder = udpPacket();
     const payload = new Uint8Array([0x10, 0x20, 0x30]);
     const datagram = makeDatagram(payload, {
       srcPort: 9999,
@@ -74,7 +74,7 @@ Deno.test("udpDatagram", async (t) => {
   });
 
   await t.step("port boundary values", () => {
-    const coder = udpDatagram();
+    const coder = udpPacket();
     const payload = new Uint8Array([0xff]);
     const cases: Array<[number, number]> = [
       [0, 0],
@@ -96,7 +96,7 @@ Deno.test("udpDatagram", async (t) => {
   });
 
   await t.step("encodes header bytes in network order", () => {
-    const coder = udpDatagram();
+    const coder = udpPacket();
     const payload = new Uint8Array([0xaa]);
     const datagram = makeDatagram(payload, {
       srcPort: 0x1234,
@@ -121,7 +121,7 @@ Deno.test("udpDatagram", async (t) => {
   await t.step(
     "decode honours length field even when buffer is larger",
     () => {
-      const coder = udpDatagram();
+      const coder = udpPacket();
       // deno-fmt-ignore
       const wire = new Uint8Array([
         0x00, 0x35, // srcPort
@@ -140,7 +140,7 @@ Deno.test("udpDatagram", async (t) => {
   );
 
   await t.step("payload longer than length is truncated on encode", () => {
-    const coder = udpDatagram();
+    const coder = udpPacket();
     const buffer = new Uint8Array(16);
     const written = coder.encode({
       srcPort: 1,

@@ -29,9 +29,9 @@
  * @example Encode and decode a UDP datagram
  * ```ts
  * import { assertEquals } from "@std/assert";
- * import { udpDatagram } from "@binstruct/udp";
+ * import { udpPacket } from "@binstruct/udp";
  *
- * const coder = udpDatagram();
+ * const coder = udpPacket();
  * const datagram = {
  *   srcPort: 53,
  *   dstPort: 49152,
@@ -85,14 +85,13 @@ export const IP_PROTOCOL_UDP = 17;
  * @property checksum - 16-bit one's-complement checksum, or 0 to indicate "not computed" (IPv4 only).
  * @property payload  - Datagram payload; its length is always `length - 8` after decoding.
  */
-export interface UdpDatagram {
+export interface UdpPacket {
   srcPort: number;
   dstPort: number;
   length: number;
   checksum: number;
   payload: Uint8Array;
 }
-
 
 /**
  * Creates a coder for UDP datagrams (RFC 768).
@@ -106,14 +105,14 @@ export interface UdpDatagram {
  * the UDP checksum is defined over an IPv4 or IPv6 pseudo-header that this
  * coder cannot see, and recomputing `length` would hide truncation bugs.
  *
- * @returns A coder for {@link UdpDatagram} values
+ * @returns A coder for {@link UdpPacket} values
  *
  * @example Round-trip a small datagram
  * ```ts
  * import { assertEquals } from "@std/assert";
- * import { udpDatagram, UDP_HEADER_SIZE } from "@binstruct/udp";
+ * import { udpPacket, UDP_HEADER_SIZE } from "@binstruct/udp";
  *
- * const coder = udpDatagram();
+ * const coder = udpPacket();
  * const payload = new Uint8Array([0x01, 0x02, 0x03]);
  * const datagram = {
  *   srcPort: 1234,
@@ -135,9 +134,9 @@ export interface UdpDatagram {
  * @example Empty payload (8-byte datagram)
  * ```ts
  * import { assertEquals } from "@std/assert";
- * import { udpDatagram, UDP_HEADER_SIZE } from "@binstruct/udp";
+ * import { udpPacket, UDP_HEADER_SIZE } from "@binstruct/udp";
  *
- * const coder = udpDatagram();
+ * const coder = udpPacket();
  * const buffer = new Uint8Array(UDP_HEADER_SIZE);
  * const written = coder.encode({
  *   srcPort: 0,
@@ -152,7 +151,7 @@ export interface UdpDatagram {
  * assertEquals(decoded.payload.length, 0);
  * ```
  */
-export function udpDatagram(): Coder<UdpDatagram> {
+export function udpPacket(): Coder<UdpPacket> {
   const length = u16be();
   return struct({
     srcPort: u16be(),
@@ -164,4 +163,3 @@ export function udpDatagram(): Coder<UdpDatagram> {
     ),
   });
 }
-

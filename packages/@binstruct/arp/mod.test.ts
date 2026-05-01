@@ -9,9 +9,9 @@ import {
   ARP_OPCODE,
   ARP_PROTO_LEN_IPV4,
   ARP_PROTOCOL_TYPE,
-  arp,
+  arpData,
 } from "./mod.ts";
-import type { Arp } from "./mod.ts";
+import type { ArpData } from "./mod.ts";
 
 // deno-fmt-ignore
 const REQUEST_WIRE = new Uint8Array([
@@ -40,7 +40,7 @@ const REPLY_WIRE = new Uint8Array([
 ]);
 
 Deno.test("arp — decode known request bytes", () => {
-  const [packet, bytesRead] = arp().decode(REQUEST_WIRE);
+  const [packet, bytesRead] = arpData().decode(REQUEST_WIRE);
 
   assertEquals(bytesRead, ARP_ETHERNET_IPV4_SIZE);
   assertEquals(packet.hardwareType, ARP_HARDWARE_TYPE.ETHERNET);
@@ -55,7 +55,7 @@ Deno.test("arp — decode known request bytes", () => {
 });
 
 Deno.test("arp — decode known reply bytes", () => {
-  const [packet, bytesRead] = arp().decode(REPLY_WIRE);
+  const [packet, bytesRead] = arpData().decode(REPLY_WIRE);
 
   assertEquals(bytesRead, ARP_ETHERNET_IPV4_SIZE);
   assertEquals(packet.operation, ARP_OPCODE.REPLY);
@@ -66,8 +66,8 @@ Deno.test("arp — decode known reply bytes", () => {
 });
 
 Deno.test("arp — encode produces expected wire bytes", () => {
-  const coder = arp();
-  const request: Arp = {
+  const coder = arpData();
+  const request: ArpData = {
     hardwareType: ARP_HARDWARE_TYPE.ETHERNET,
     protocolType: ARP_PROTOCOL_TYPE.IPV4,
     hardwareAddressLength: ARP_HW_LEN_ETHERNET,
@@ -87,8 +87,8 @@ Deno.test("arp — encode produces expected wire bytes", () => {
 });
 
 Deno.test("arp — round-trip request and reply", () => {
-  const coder = arp();
-  const cases: Arp[] = [
+  const coder = arpData();
+  const cases: ArpData[] = [
     {
       hardwareType: ARP_HARDWARE_TYPE.ETHERNET,
       protocolType: ARP_PROTOCOL_TYPE.IPV4,
@@ -127,7 +127,7 @@ Deno.test("arp — round-trip request and reply", () => {
 Deno.test("arp — composes with refine for human-readable form", () => {
   type RefinedArp =
     & Omit<
-      Arp,
+      ArpData,
       | "senderHardwareAddress"
       | "targetHardwareAddress"
       | "senderProtocolAddress"
@@ -140,8 +140,8 @@ Deno.test("arp — composes with refine for human-readable form", () => {
       targetProtocolAddress: string;
     };
 
-  const refinedArp = refine(arp(), {
-    refine: (raw: Arp): RefinedArp => ({
+  const refinedArp = refine(arpData(), {
+    refine: (raw: ArpData): RefinedArp => ({
       hardwareType: raw.hardwareType,
       protocolType: raw.protocolType,
       hardwareAddressLength: raw.hardwareAddressLength,
@@ -152,7 +152,7 @@ Deno.test("arp — composes with refine for human-readable form", () => {
       senderProtocolAddress: stringifyIpv4(raw.senderProtocolAddress),
       targetProtocolAddress: stringifyIpv4(raw.targetProtocolAddress),
     }),
-    unrefine: (refined: RefinedArp): Arp => ({
+    unrefine: (refined: RefinedArp): ArpData => ({
       hardwareType: refined.hardwareType,
       protocolType: refined.protocolType,
       hardwareAddressLength: refined.hardwareAddressLength,

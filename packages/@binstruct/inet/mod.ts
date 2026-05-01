@@ -4,11 +4,11 @@
  * `@binstruct/inet` is a thin orchestration layer: each protocol package
  * (`@binstruct/ethernet`, `@binstruct/ipv4`, `@binstruct/arp`,
  * `@binstruct/udp`, `@binstruct/icmp`) only knows how to decode its own
- * layer's bytes. This package wires them together via `refineSwitch` —
- * dispatching on `etherType` at L3 and `protocol` at L4 — into a single
- * round-trippable {@linkcode inetFrame} coder factory that walks an
- * Ethernet II frame top-down. Each layer's `payload` field surfaces as the
- * typed value of the next layer (no `kind` wrapper); layers we don't have a
+ * layer's bytes. This package wires them together via `refineSwitch` and
+ * `refineFields` — dispatching on `etherType` at L3 and `protocol` at L4 —
+ * into a single round-trippable {@linkcode inetFrame} coder factory that
+ * walks an Ethernet II frame top-down. Each layer's `payload` field is
+ * surfaced as the typed value of the next layer; layers we don't have a
  * coder for default to a raw {@linkcode Uint8Array}, so the coder is safe
  * to point at arbitrary captured traffic.
  *
@@ -18,8 +18,8 @@
  * - L3 — IPv4 (`@binstruct/ipv4`), ARP (`@binstruct/arp`)
  * - L4 (under IPv4) — UDP (`@binstruct/udp`), ICMPv4 (`@binstruct/icmp`)
  *
- * Adding a layer is one new refiner here plus one entry in the relevant
- * `refineSwitch` arm.
+ * Adding a layer is one new `refineFields` arm in the relevant
+ * `refineSwitch` plus an entry in its selector.
  *
  * Also exports {@linkcode internetChecksum} (RFC 1071) for callers that need
  * to fill in IPv4/UDP/ICMP/TCP checksum fields.
@@ -79,86 +79,46 @@
  * @module
  */
 
-import {
-  type Coder,
-  type Context,
-  decode,
-  encode,
-  type Refiner,
-  refineSwitch,
-} from "@hertzg/binstruct";
+import { type Coder, refineFields, refineSwitch } from "@hertzg/binstruct";
 import {
   type Ethernet2Frame as Frame,
   ethernet2Frame,
 } from "@binstruct/ethernet";
-import { type Arp, arp, ETHERTYPE_ARP } from "@binstruct/arp";
+import { type ArpData, arpData, ETHERTYPE_ARP } from "@binstruct/arp";
 import {
   ETHERTYPE_IPV4,
-  type Ipv4FramePayload,
-  ipv4FramePayload,
+  type Ipv4Packet,
+  ipv4Packet,
 } from "@binstruct/ipv4";
 import { type IcmpPacket, icmpPacket, IP_PROTOCOL_ICMP } from "@binstruct/icmp";
-import { IP_PROTOCOL_UDP, type UdpDatagram, udpDatagram } from "@binstruct/udp";
+import { IP_PROTOCOL_UDP, type UdpPacket, udpPacket } from "@binstruct/udp";
 
-/** Refined IPv4 datagram with a UDP transport payload. */
-export type Ipv4UdpFrame = Omit<Ipv4FramePayload, "payload"> & {
-  payload: UdpDatagram;
+/** IPv4 datagram with a typed UDP transport payload. */
+export type Ipv4UdpPacket = Omit<Ipv4Packet, "payload"> & {
+  payload: UdpPacket;
 };
 
-/** Refined IPv4 datagram with an ICMPv4 transport payload. */
-export type Ipv4IcmpFrame = Omit<Ipv4FramePayload, "payload"> & {
+/** IPv4 datagram with a typed ICMPv4 transport payload. */
+export type Ipv4IcmpPacket = Omit<Ipv4Packet, "payload"> & {
   payload: IcmpPacket;
 };
 
 /**
- * Decoded IPv4 datagram — `payload` narrows by shape (UDP / ICMP / raw bytes)
- * and the host's `protocol` field carries the on-wire discriminator.
+ * Refined IPv4 datagram — `payload` narrows by shape (UDP / ICMP / raw bytes)
+ * and the host's `protocol` field is the on-wire discriminator.
  */
-export type Ipv4FramePacket = Ipv4UdpFrame | Ipv4IcmpFrame | Ipv4FramePayload;
+export type Ipv4Refined = Ipv4UdpPacket | Ipv4IcmpPacket | Ipv4Packet;
 
-function udpRefiner(): Refiner<Ipv4FramePayload, Ipv4UdpFrame, []> {
-  return {
-    refine: (host: Ipv4FramePayload, ctx: Context): Ipv4UdpFrame => ({
-      ...host,
-      payload: decode(udpDatagram(), host.payload, ctx),
-    }),
-    unrefine: (refined: Ipv4UdpFrame, ctx: Context): Ipv4FramePayload => ({
-      ...refined,
-      payload: encode(udpDatagram(), refined.payload, ctx),
-    }),
-  };
-}
-
-function icmpRefiner(): Refiner<Ipv4FramePayload, Ipv4IcmpFrame, []> {
-  return {
-    refine: (unrefined: Ipv4FramePayload, ctx: Context): Ipv4IcmpFrame => ({
-      ...unrefined,
-      payload: decode(icmpPacket(), unrefined.payload, ctx),
-    }),
-    unrefine: (refined: Ipv4IcmpFrame, ctx: Context): Ipv4FramePayload => ({
-      ...refined,
-      payload: encode(icmpPacket(), refined.payload, ctx),
-    }),
-  };
-}
-
-function ipv4Frame(): Coder<Ipv4FramePacket> {
-  function identityRefiner(): Refiner<Ipv4FramePayload, Ipv4FramePayload, []> {
-    return {
-      refine: (host: Ipv4FramePayload): Ipv4FramePayload => host,
-      unrefine: (refined: Ipv4FramePayload): Ipv4FramePayload => refined,
-    };
-  }
-
+function ipv4Frame(): Coder<Ipv4Refined> {
   return refineSwitch(
-    ipv4FramePayload(),
+    ipv4Packet(),
     {
-      udp: udpRefiner(),
-      icmp: icmpRefiner(),
-      raw: identityRefiner(),
+      udp: refineFields({ payload: udpPacket() }),
+      icmp: refineFields({ payload: icmpPacket() }),
+      raw: refineFields({}),
     },
     {
-      refine: (d: Ipv4FramePayload): "udp" | "icmp" | "raw" => {
+      refine: (d): "udp" | "icmp" | "raw" => {
         switch (d.protocol) {
           case IP_PROTOCOL_UDP:
             return "udp";
@@ -168,7 +128,7 @@ function ipv4Frame(): Coder<Ipv4FramePacket> {
             return "raw";
         }
       },
-      unrefine: (r: Ipv4FramePacket): "udp" | "icmp" | "raw" => {
+      unrefine: (r): "udp" | "icmp" | "raw" => {
         switch (r.protocol) {
           case IP_PROTOCOL_UDP:
             return "udp";
@@ -182,78 +142,35 @@ function ipv4Frame(): Coder<Ipv4FramePacket> {
   );
 }
 
-// ---------------------------------------------------------------------------
-// L3 — Ethernet payload (IPv4, ARP, or raw bytes)
-// ---------------------------------------------------------------------------
+/** Ethernet frame whose payload is a typed IPv4 datagram. */
+export type Ipv4Frame = Omit<Frame, "payload"> & { payload: Ipv4Refined };
 
-/** Refined frame whose payload is a typed IPv4 datagram. */
-export type Ipv4Frame = Omit<Frame, "payload"> & {
-  payload: Ipv4FramePacket;
-};
-
-/** Refined frame whose payload is an Ethernet/IPv4 ARP packet. */
-export type ArpFrame = Omit<Frame, "payload"> & {
-  payload: Arp;
-};
+/** Ethernet frame whose payload is an Ethernet/IPv4 ARP packet. */
+export type ArpFrame = Omit<Frame, "payload"> & { payload: ArpData };
 
 /**
- * Decoded Ethernet II frame — `payload` narrows by shape (IPv4 / ARP / raw
- * bytes) and the host's `etherType` field carries the on-wire discriminator.
+ * Decoded Ethernet II frame as produced by {@link inetFrame}.
+ *
+ * The shape depends on `etherType` and (for IPv4) the inner `protocol`
+ * field; narrow the union with property-existence checks (`"protocol" in
+ * payload`, `"srcPort" in payload`, …) when reading. Frames whose tag has no
+ * matching coder surface their `payload` as a raw `Uint8Array`.
  */
-export type FrameRefined =
-  | Ipv4Frame
-  | ArpFrame
-  | Frame;
-
-function ipv4FrameRefiner(): Refiner<Frame, Ipv4Frame, []> {
-  const inner = ipv4Frame();
-  return {
-    refine: (frame: Frame, ctx: Context): Ipv4Frame => ({
-      ...frame,
-      payload: decode(inner, frame.payload, ctx),
-    }),
-    unrefine: (refined: Ipv4Frame, ctx: Context): Frame => ({
-      ...refined,
-      payload: encode(inner, refined.payload, ctx),
-    }),
-  };
-}
-
-function arpFrameRefiner(): Refiner<Frame, ArpFrame, []> {
-  return {
-    refine: (frame: Frame, ctx: Context): ArpFrame => ({
-      ...frame,
-      payload: decode(arp(), frame.payload, ctx),
-    }),
-    unrefine: (refined: ArpFrame, ctx: Context): Frame => ({
-      ...refined,
-      payload: encode(arp(), refined.payload, ctx),
-    }),
-  };
-}
+export type FrameRefined = Ipv4Frame | ArpFrame | Frame;
 
 /**
  * Creates a composed coder that walks an Ethernet II frame top-down,
- * dispatching the payload by `etherType` (L3) and then by `protocol` (L4
- * under IPv4). Frames with no matching coder surface their payload as a raw
- * `Uint8Array`.
- *
- * @returns A coder for {@link FrameRefined} values.
+ * dispatching the L3 payload by `etherType` and the L4 payload by IPv4's
+ * `protocol`. Frames whose tag has no matching coder surface their payload
+ * as a raw `Uint8Array`.
  */
 export function inetFrame(): Coder<FrameRefined> {
-  function identityRefiner(): Refiner<Frame, Frame, []> {
-    return {
-      refine: (host: Frame): Frame => host,
-      unrefine: (refined: Frame): Frame => refined,
-    };
-  }
-
   return refineSwitch(
     ethernet2Frame(),
     {
-      ipv4: ipv4FrameRefiner(),
-      arp: arpFrameRefiner(),
-      raw: identityRefiner(),
+      ipv4: refineFields({ payload: ipv4Frame() }),
+      arp: refineFields({ payload: arpData() }),
+      raw: refineFields({}),
     },
     {
       refine: (frame: Frame): "ipv4" | "arp" | "raw" => {
@@ -266,7 +183,7 @@ export function inetFrame(): Coder<FrameRefined> {
             return "raw";
         }
       },
-      unrefine: (refined: FrameRefined): "ipv4" | "arp" | "raw" => {
+      unrefine: (refined): "ipv4" | "arp" | "raw" => {
         if (refined.payload instanceof Uint8Array) return "raw";
         switch (refined.etherType) {
           case ETHERTYPE_IPV4:

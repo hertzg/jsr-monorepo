@@ -115,12 +115,12 @@
  * ```ts
  * import { assertEquals } from "@std/assert";
  * import { LINKTYPE, PCAP_MAGIC_MICROS, pcapFile } from "@binstruct/pcap";
- * import { ipv4FramePayload } from "@binstruct/ipv4";
- * import { udpDatagram } from "@binstruct/udp";
+ * import { ipv4Packet } from "@binstruct/ipv4";
+ * import { udpPacket } from "@binstruct/udp";
  * import { parseIpv4 } from "@hertzg/ip/ipv4";
  *
- * const ip = ipv4FramePayload();
- * const udp = udpDatagram();
+ * const ip = ipv4Packet();
+ * const udp = udpPacket();
  *
  * // Synth a UDP-over-IPv4 packet to put in the capture.
  * const udpBytes = new Uint8Array(12);
@@ -184,20 +184,43 @@
  * assertEquals(parsedUdp.payload, new Uint8Array([0xde, 0xad, 0xbe, 0xef]));
  * ```
  *
- * @example Direct Ethernet frames (LINKTYPE.ETHERNET)
+ * @example Walk the full inet stack (LINKTYPE.ETHERNET via `@binstruct/inet`)
  * ```ts
- * import { assertEquals } from "@std/assert";
+ * import { assert, assertEquals } from "@std/assert";
  * import { LINKTYPE, PCAP_MAGIC_MICROS, pcapFile } from "@binstruct/pcap";
- * import { ethernet2Frame } from "@binstruct/ethernet";
+ * import { inetFrame } from "@binstruct/inet";
+ * import { ETHERTYPE_IPV4 } from "@binstruct/ipv4";
+ * import { IP_PROTOCOL_UDP } from "@binstruct/udp";
+ * import { parseIpv4 } from "@hertzg/ip/ipv4";
  *
- * const eth = ethernet2Frame();
+ * const inet = inetFrame();
  *
- * const frame = new Uint8Array(14 + 4);
- * eth.encode({
+ * // Build an Ethernet → IPv4 → UDP frame in one pass.
+ * const frame = new Uint8Array(14 + 32);
+ * inet.encode({
  *   dstMac: new Uint8Array([0x00, 0x11, 0x22, 0x33, 0x44, 0x55]),
  *   srcMac: new Uint8Array([0x66, 0x77, 0x88, 0x99, 0xaa, 0xbb]),
- *   etherType: 0x0800,
- *   payload: new Uint8Array([0xde, 0xad, 0xbe, 0xef]),
+ *   etherType: ETHERTYPE_IPV4,
+ *   payload: {
+ *     versionIhl: { version: 4, ihl: 5 },
+ *     typeOfService: 0,
+ *     totalLength: 32,
+ *     identification: 0,
+ *     flagsFragmentOffset: { reserved: 0, dontFragment: 0, moreFragments: 0, fragmentOffset: 0 },
+ *     timeToLive: 64,
+ *     protocol: IP_PROTOCOL_UDP,
+ *     headerChecksum: 0,
+ *     sourceAddress: parseIpv4("192.0.2.1"),
+ *     destinationAddress: parseIpv4("192.0.2.2"),
+ *     options: new Uint8Array(0),
+ *     payload: {
+ *       srcPort: 53,
+ *       dstPort: 49152,
+ *       length: 12,
+ *       checksum: 0,
+ *       payload: new Uint8Array([0xde, 0xad, 0xbe, 0xef]),
+ *     },
+ *   },
  * }, frame);
  *
  * const cap = pcapFile("le");
@@ -221,11 +244,17 @@
  *   }],
  * }, buf);
  *
+ * // Read back and walk the stack in one shot.
  * const [{ records }] = cap.decode(buf.subarray(0, written));
- * const [decoded] = eth.decode(records[0].data);
+ * const [decoded] = inet.decode(records[0].data);
  *
- * assertEquals(decoded.etherType, 0x0800);
- * assertEquals(decoded.payload, new Uint8Array([0xde, 0xad, 0xbe, 0xef]));
+ * assert(!(decoded.payload instanceof Uint8Array));
+ * assert("protocol" in decoded.payload);
+ * assertEquals(decoded.payload.sourceAddress, parseIpv4("192.0.2.1"));
+ * assert(!(decoded.payload.payload instanceof Uint8Array));
+ * assert("srcPort" in decoded.payload.payload);
+ * assertEquals(decoded.payload.payload.srcPort, 53);
+ * assertEquals(decoded.payload.payload.payload, new Uint8Array([0xde, 0xad, 0xbe, 0xef]));
  * ```
  *
  * @module @binstruct/pcap

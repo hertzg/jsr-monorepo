@@ -51,9 +51,9 @@
  * ```ts
  * import { assertEquals } from "@std/assert";
  * import { parseIpv4 } from "@hertzg/ip/ipv4";
- * import { ipv4FramePayload } from "@binstruct/ipv4";
+ * import { ipv4Packet } from "@binstruct/ipv4";
  *
- * const coder = ipv4FramePayload();
+ * const coder = ipv4Packet();
  * const datagram = {
  *   versionIhl: { version: 4, ihl: 5 },
  *   typeOfService: 0,
@@ -118,7 +118,7 @@ export const ETHERTYPE_IPV4 = 0x0800;
  * The `options` length is derived from `versionIhl.ihl` (`(ihl - 5) * 4`); the
  * `payload` length is derived from `totalLength - versionIhl.ihl * 4`.
  */
-export interface Ipv4FramePayload {
+export interface Ipv4Packet {
   versionIhl: {
     version: number;
     ihl: number;
@@ -148,15 +148,15 @@ export interface Ipv4FramePayload {
  * Pair this with `refineSwitch` on the `protocol` field (see `@binstruct/inet`)
  * to dispatch the payload into a typed L4 value.
  *
- * @returns A coder for {@link Ipv4FramePayload} values.
+ * @returns A coder for {@link Ipv4Packet} values.
  *
  * @example Round-trip a UDP-bearing datagram
  * ```ts
  * import { assertEquals } from "@std/assert";
  * import { parseIpv4 } from "@hertzg/ip/ipv4";
- * import { ipv4FramePayload } from "@binstruct/ipv4";
+ * import { ipv4Packet } from "@binstruct/ipv4";
  *
- * const coder = ipv4FramePayload();
+ * const coder = ipv4Packet();
  * const datagram = {
  *   versionIhl: { version: 4, ihl: 5 },
  *   typeOfService: 0,
@@ -181,7 +181,7 @@ export interface Ipv4FramePayload {
  * assertEquals(decoded.payload.length, 4);
  * ```
  */
-export function ipv4FramePayload(): Coder<Ipv4FramePayload> {
+export function ipv4Packet(): Coder<Ipv4Packet> {
   const versionIhl = bitStruct({
     version: 4,
     ihl: 4,

@@ -1,13 +1,13 @@
 import { assertEquals } from "@std/assert";
 import { parseIpv4 } from "@hertzg/ip/ipv4";
-import { ipv4FramePayload } from "./mod.ts";
-import type { Ipv4FramePayload } from "./mod.ts";
+import { ipv4Packet } from "./mod.ts";
+import type { Ipv4Packet } from "./mod.ts";
 
 const IPV4_HEADER_MIN_LENGTH = 20;
 
-Deno.test("ipv4FramePayload: round-trips a minimal datagram (no options, empty payload)", () => {
-  const coder = ipv4FramePayload();
-  const datagram: Ipv4FramePayload = {
+Deno.test("ipv4Packet: round-trips a minimal datagram (no options, empty payload)", () => {
+  const coder = ipv4Packet();
+  const datagram: Ipv4Packet = {
     versionIhl: { version: 4, ihl: 5 },
     typeOfService: 0,
     totalLength: 20,
@@ -42,9 +42,9 @@ Deno.test("ipv4FramePayload: round-trips a minimal datagram (no options, empty p
   assertEquals(decoded.payload.length, 0);
 });
 
-Deno.test("ipv4FramePayload: encodes version and IHL into byte 0", () => {
-  const coder = ipv4FramePayload();
-  const datagram: Ipv4FramePayload = {
+Deno.test("ipv4Packet: encodes version and IHL into byte 0", () => {
+  const coder = ipv4Packet();
+  const datagram: Ipv4Packet = {
     versionIhl: { version: 4, ihl: 5 },
     typeOfService: 0,
     totalLength: 20,
@@ -70,10 +70,10 @@ Deno.test("ipv4FramePayload: encodes version and IHL into byte 0", () => {
   assertEquals(buffer[0], 0x45); // version=4 (0b0100), ihl=5 (0b0101)
 });
 
-Deno.test("ipv4FramePayload: round-trips fragmented packet flags", () => {
-  const coder = ipv4FramePayload();
+Deno.test("ipv4Packet: round-trips fragmented packet flags", () => {
+  const coder = ipv4Packet();
   // deno-fmt-ignore
-  const flagCases: Array<Ipv4FramePayload["flagsFragmentOffset"]> = [
+  const flagCases: Array<Ipv4Packet["flagsFragmentOffset"]> = [
     { reserved: 0, dontFragment: 0, moreFragments: 0, fragmentOffset: 0 },
     { reserved: 0, dontFragment: 1, moreFragments: 0, fragmentOffset: 0 },
     { reserved: 0, dontFragment: 0, moreFragments: 1, fragmentOffset: 185 },
@@ -81,7 +81,7 @@ Deno.test("ipv4FramePayload: round-trips fragmented packet flags", () => {
   ];
 
   for (const flagsFragmentOffset of flagCases) {
-    const datagram: Ipv4FramePayload = {
+    const datagram: Ipv4Packet = {
       versionIhl: { version: 4, ihl: 5 },
       typeOfService: 0,
       totalLength: 20,
@@ -104,15 +104,15 @@ Deno.test("ipv4FramePayload: round-trips fragmented packet flags", () => {
   }
 });
 
-Deno.test("ipv4FramePayload: options length tracks IHL", () => {
-  const coder = ipv4FramePayload();
+Deno.test("ipv4Packet: options length tracks IHL", () => {
+  const coder = ipv4Packet();
   // deno-fmt-ignore
   const options = new Uint8Array([
     0x83, 0x07, 0x04, 0x0a, 0x00, 0x00, 0x01, 0x00, // Loose Source Routing
     0x00, 0x00, 0x00, 0x00,
   ]);
 
-  const datagram: Ipv4FramePayload = {
+  const datagram: Ipv4Packet = {
     versionIhl: { version: 4, ihl: 8 }, // 32-byte header
     typeOfService: 0,
     totalLength: 32,
@@ -142,7 +142,7 @@ Deno.test("ipv4FramePayload: options length tracks IHL", () => {
   assertEquals(Array.from(decoded.options), Array.from(options));
 });
 
-Deno.test("ipv4FramePayload: decodes a real captured ICMP echo request", () => {
+Deno.test("ipv4Packet: decodes a real captured ICMP echo request", () => {
   // Captured IPv4 datagram preceding an ICMP echo request. The 20 header
   // bytes match the original capture; we set totalLength to 20 and append
   // no payload so the datagram is self-sized.
@@ -153,7 +153,7 @@ Deno.test("ipv4FramePayload: decodes a real captured ICMP echo request", () => {
     0xc0, 0xa8, 0x01, 0x01,
   ]);
 
-  const coder = ipv4FramePayload();
+  const coder = ipv4Packet();
   const [decoded, bytesRead] = coder.decode(captured);
 
   assertEquals(bytesRead, IPV4_HEADER_MIN_LENGTH);
@@ -182,8 +182,8 @@ Deno.test("ipv4FramePayload: decodes a real captured ICMP echo request", () => {
   assertEquals(Array.from(buffer), Array.from(captured));
 });
 
-Deno.test("ipv4FramePayload: round-trips edge-case addresses", () => {
-  const coder = ipv4FramePayload();
+Deno.test("ipv4Packet: round-trips edge-case addresses", () => {
+  const coder = ipv4Packet();
   const addresses: Array<[string, string]> = [
     ["0.0.0.0", "255.255.255.255"],
     ["127.0.0.1", "127.0.0.1"],
@@ -191,7 +191,7 @@ Deno.test("ipv4FramePayload: round-trips edge-case addresses", () => {
   ];
 
   for (const [src, dst] of addresses) {
-    const datagram: Ipv4FramePayload = {
+    const datagram: Ipv4Packet = {
       versionIhl: { version: 4, ihl: 5 },
       typeOfService: 0,
       totalLength: 20,
@@ -220,10 +220,10 @@ Deno.test("ipv4FramePayload: round-trips edge-case addresses", () => {
   }
 });
 
-Deno.test("ipv4FramePayload: round-trips a datagram with payload bytes", () => {
-  const coder = ipv4FramePayload();
+Deno.test("ipv4Packet: round-trips a datagram with payload bytes", () => {
+  const coder = ipv4Packet();
   const payload = new Uint8Array([0xde, 0xad, 0xbe, 0xef]);
-  const datagram: Ipv4FramePayload = {
+  const datagram: Ipv4Packet = {
     versionIhl: { version: 4, ihl: 5 },
     typeOfService: 0,
     totalLength: 24,
