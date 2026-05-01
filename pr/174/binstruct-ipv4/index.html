@@ -84,14 +84,81 @@
 </nav>
 <div id="searchResults"></div><div id="content">
     <main><section>
-  <div class="space-y-2 flex-1"><div class="space-y-7" id="module_doc"><div class="markdown"><p>IPv4 packet header encoding and decoding utilities (RFC 791).</p>
-<p>Provides a single-pass coder for the 20-byte fixed portion of an IPv4 header
-plus its variable-length options trailer. Bit-packed fields (version/IHL,
-flags/fragment offset) are exposed as nested objects via bitStruct,
-keeping the on-wire layout faithful while preserving named-field access.</p>
-<p>IPv4 addresses are surfaced as dotted-quad strings via a refiner backed by
-<code>parseIpv4</code>/<code>stringifyIpv4</code> from
-<a href="https://jsr.io/@hertzg/ip">@hertzg/ip</a>.</p>
+  <div class="space-y-2 flex-1"><div class="space-y-7" id="module_doc"><div class="markdown"><p>IPv4 datagram encoding and decoding (RFC 791).</p>
+<p>A datagram is a 20-byte fixed header, a variable-length options trailer
+(0–40 bytes per <code>IHL</code>), and the transport-layer payload:</p>
+<pre class="highlight"><code class="language-text"> 0      7 8     15 16    23 24    31
++--------+--------+--------+--------+
+|Ver/IHL |  ToS   |   Total Length  |
++--------+--------+--------+--------+
+| Identification  |Flags + FragOffs |
++--------+--------+--------+--------+
+|  TTL   |Protocol|  Header Cksum   |
++--------+--------+--------+--------+
+|          Source Address           |
++--------+--------+--------+--------+
+|       Destination Address         |
++--------+--------+--------+--------+
+|       Options (0-40 bytes)        |
++-----------------------------------+
+|        Payload (variable)         |
++-----------------------------------+
+</code><button class="copyButton" data-copy=" 0      7 8     15 16    23 24    31
++--------+--------+--------+--------+
+|Ver/IHL |  ToS   |   Total Length  |
++--------+--------+--------+--------+
+| Identification  |Flags + FragOffs |
++--------+--------+--------+--------+
+|  TTL   |Protocol|  Header Cksum   |
++--------+--------+--------+--------+
+|          Source Address           |
++--------+--------+--------+--------+
+|       Destination Address         |
++--------+--------+--------+--------+
+|       Options (0-40 bytes)        |
++-----------------------------------+
+|        Payload (variable)         |
++-----------------------------------+
+"><svg
+  class="copy"
+  width="15"
+  height="15"
+  viewBox="0 0 15 15"
+  fill="none"
+  xmlns="http://www.w3.org/2000/svg"
+>
+  <rect x="2" y="2" width="7" height="7" fill="none" />
+  <rect x="6" y="6" width="7" height="7" fill="none" />
+  <path
+    d="M1.55566 2.7C1.55566 2.03726 2.09292 1.5 2.75566 1.5H8.75566C9.41841 1.5 9.95566 2.03726 9.95566 2.7V5.1H12.3557C13.0184 5.1 13.5557 5.63726 13.5557 6.3V12.3C13.5557 12.9627 13.0184 13.5 12.3557 13.5H6.35566C5.69292 13.5 5.15566 12.9627 5.15566 12.3V9.9H2.75566C2.09292 9.9 1.55566 9.36274 1.55566 8.7V2.7ZM6.35566 9.9V12.3H12.3557V6.3H9.95566V8.7C9.95566 9.36274 9.41841 9.9 8.75566 9.9H6.35566ZM8.75566 8.7V2.7H2.75566V8.7H8.75566Z"
+    fill="currentColor"
+  />
+</svg>
+<svg
+  class="check"
+  width="15"
+  height="15"
+  viewBox="0 0 24 24"
+  stroke-width="2"
+  stroke="currentColor"
+  fill="none"
+  stroke-linecap="round"
+  stroke-linejoin="round"
+  xmlns="http://www.w3.org/2000/svg"
+>
+  <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+  <path d="M5 12l5 5l10 -10" />
+</svg>
+</button><code></code></pre>
+<p>Provides a single-pass coder for the full datagram — fixed header, optional
+options trailer, and the transport payload sized via <code>totalLength</code>. Bit-packed
+fields (version/IHL, flags/fragment offset) are exposed as nested objects via
+<code>bitStruct</code>, keeping the on-wire layout faithful while preserving named-field
+access.</p>
+<p>IPv4 addresses are surfaced as raw 32-bit unsigned integers, mirroring how
+ARP exposes the same field. Use
+<a href="https://jsr.io/@hertzg/ip">@hertzg/ip</a>'s <code>parseIpv4</code> / <code>stringifyIpv4</code>
+for human-readable conversion.</p>
 <p>Design notes:</p>
 <ul>
 <li>The header checksum is <strong>not</strong> computed automatically. Callers are expected
@@ -100,10 +167,10 @@ complement sum before encoding (or zero when the receiver tolerates it,
 e.g. for testing). This matches the <code>@hertzg/binstruct</code> &quot;no defensive
 programming&quot; stance — the coder describes layout, not semantics.</li>
 <li>Options are encoded as a raw byte slice whose length is derived from
-<code>versionIhl.ihl</code> via computedRef: <code>(ihl - 5) * 4</code>. For a header
-with no options pass <code>ihl = 5</code> and <code>options = new Uint8Array(0)</code>.</li>
-<li>Padding to a 4-byte boundary inside the options field is the caller's
-responsibility, again matching the layout-not-semantics philosophy.</li>
+<code>versionIhl.ihl</code>: <code>(ihl - 5) * 4</code>. For a datagram with no options pass
+<code>ihl = 5</code> and <code>options = new Uint8Array(0)</code>.</li>
+<li>The payload size is derived from <code>totalLength - ihl * 4</code>. Callers are
+responsible for setting <code>totalLength</code> to match <code>ihl * 4 + payload.length</code>.</li>
 </ul>
 </div><section class="section"  id="examples"><div>
       <h2 class="anchorable mb-1"><a href="#examples" class="anchor" aria-label="Anchor" tabIndex="-1"><svg
@@ -150,16 +217,17 @@ Examples</h2></div><div class="space-y-8"><div class="anchorable"><a href="#exam
   </defs>
 </svg>
 </a>
-<h3 class="example-header"><div class="markdown"><p>Round-trip a minimal IPv4 header (no options)</p>
+<h3 class="example-header"><div class="markdown"><p>Round-trip a minimal IPv4 datagram (no options, empty payload)</p>
 </div></h3>
   <div><div class="markdown"><pre class="highlight"><code class="language-ts">import { assertEquals } from &quot;@std/assert&quot;;
-import { ipv4Header } from &quot;@binstruct/ipv4&quot;;
+import { parseIpv4 } from &quot;@hertzg/ip/ipv4&quot;;
+import { ipv4Packet } from &quot;@binstruct/ipv4&quot;;
 
-const coder = ipv4Header();
-const header = {
+const coder = ipv4Packet();
+const datagram = {
   versionIhl: { version: 4, ihl: 5 },
   typeOfService: 0,
-  totalLength: 40,
+  totalLength: 20,
   identification: 0x1234,
   flagsFragmentOffset: {
     reserved: 0,
@@ -170,28 +238,30 @@ const header = {
   timeToLive: 64,
   protocol: 6,
   headerChecksum: 0,
-  sourceAddress: &quot;192.168.1.100&quot;,
-  destinationAddress: &quot;10.0.0.50&quot;,
+  sourceAddress: parseIpv4(&quot;192.168.1.100&quot;),
+  destinationAddress: parseIpv4(&quot;10.0.0.50&quot;),
   options: new Uint8Array(0),
+  payload: new Uint8Array(0),
 };
 
 const buffer = new Uint8Array(20);
-const bytesWritten = coder.encode(header, buffer);
+const bytesWritten = coder.encode(datagram, buffer);
 const [decoded, bytesRead] = coder.decode(buffer);
 
 assertEquals(bytesWritten, 20);
 assertEquals(bytesRead, 20);
-assertEquals(decoded.sourceAddress, &quot;192.168.1.100&quot;);
-assertEquals(decoded.destinationAddress, &quot;10.0.0.50&quot;);
+assertEquals(decoded.sourceAddress, parseIpv4(&quot;192.168.1.100&quot;));
+assertEquals(decoded.destinationAddress, parseIpv4(&quot;10.0.0.50&quot;));
 assertEquals(decoded.flagsFragmentOffset.dontFragment, 1);
 </code><button class="copyButton" data-copy="import { assertEquals } from &quot;@std/assert&quot;;
-import { ipv4Header } from &quot;@binstruct/ipv4&quot;;
+import { parseIpv4 } from &quot;@hertzg/ip/ipv4&quot;;
+import { ipv4Packet } from &quot;@binstruct/ipv4&quot;;
 
-const coder = ipv4Header();
-const header = {
+const coder = ipv4Packet();
+const datagram = {
   versionIhl: { version: 4, ihl: 5 },
   typeOfService: 0,
-  totalLength: 40,
+  totalLength: 20,
   identification: 0x1234,
   flagsFragmentOffset: {
     reserved: 0,
@@ -202,19 +272,20 @@ const header = {
   timeToLive: 64,
   protocol: 6,
   headerChecksum: 0,
-  sourceAddress: &quot;192.168.1.100&quot;,
-  destinationAddress: &quot;10.0.0.50&quot;,
+  sourceAddress: parseIpv4(&quot;192.168.1.100&quot;),
+  destinationAddress: parseIpv4(&quot;10.0.0.50&quot;),
   options: new Uint8Array(0),
+  payload: new Uint8Array(0),
 };
 
 const buffer = new Uint8Array(20);
-const bytesWritten = coder.encode(header, buffer);
+const bytesWritten = coder.encode(datagram, buffer);
 const [decoded, bytesRead] = coder.decode(buffer);
 
 assertEquals(bytesWritten, 20);
 assertEquals(bytesRead, 20);
-assertEquals(decoded.sourceAddress, &quot;192.168.1.100&quot;);
-assertEquals(decoded.destinationAddress, &quot;10.0.0.50&quot;);
+assertEquals(decoded.sourceAddress, parseIpv4(&quot;192.168.1.100&quot;));
+assertEquals(decoded.destinationAddress, parseIpv4(&quot;10.0.0.50&quot;));
 assertEquals(decoded.flagsFragmentOffset.dontFragment, 1);
 "><svg
   class="copy"
@@ -257,37 +328,25 @@ assertEquals(decoded.flagsFragmentOffset.dontFragment, 1);
     <div><nav class="topSymbols">
           <h3>Symbols</h3>
           <ul><li>
-                <a href=".&#x2F;.&#x2F;~&#x2F;Ipv4VersionIhl.html" title="Ipv4VersionIhl"><div class="docNodeKindIcon"><div class="text-TypeAlias bg-TypeAlias/15 dark:text-TypeAliasDark dark:bg-TypeAliasDark/15" title="Type Alias">T</div></div>
-<span class="hover:bg-TypeAlias/15 hover:bg-TypeAliasDark/15">
-                    Ipv4VersionIhl
+                <a href=".&#x2F;.&#x2F;~&#x2F;ETHERTYPE_IPV4.html" title="ETHERTYPE_IPV4"><div class="docNodeKindIcon"><div class="text-Variable bg-Variable/15 dark:text-VariableDark dark:bg-VariableDark/15" title="Variable">v</div></div>
+<span class="hover:bg-Variable/15 hover:bg-VariableDark/15">
+                    ETHERTYPE_IPV4
                   </span>
                 </a>
               </li><li>
-                <a href=".&#x2F;.&#x2F;~&#x2F;Ipv4FlagsFragmentOffset.html" title="Ipv4FlagsFragmentOffset"><div class="docNodeKindIcon"><div class="text-TypeAlias bg-TypeAlias/15 dark:text-TypeAliasDark dark:bg-TypeAliasDark/15" title="Type Alias">T</div></div>
-<span class="hover:bg-TypeAlias/15 hover:bg-TypeAliasDark/15">
-                    Ipv4FlagsFragmentOffset
+                <a href=".&#x2F;.&#x2F;~&#x2F;Ipv4Packet.html" title="Ipv4Packet"><div class="docNodeKindIcon"><div class="text-Interface bg-Interface/15 dark:text-InterfaceDark dark:bg-InterfaceDark/15" title="Interface">I</div></div>
+<span class="hover:bg-Interface/15 hover:bg-InterfaceDark/15">
+                    Ipv4Packet
                   </span>
                 </a>
               </li><li>
-                <a href=".&#x2F;.&#x2F;~&#x2F;Ipv4Header.html" title="Ipv4Header"><div class="docNodeKindIcon"><div class="text-TypeAlias bg-TypeAlias/15 dark:text-TypeAliasDark dark:bg-TypeAliasDark/15" title="Type Alias">T</div></div>
-<span class="hover:bg-TypeAlias/15 hover:bg-TypeAliasDark/15">
-                    Ipv4Header
-                  </span>
-                </a>
-              </li><li>
-                <a href=".&#x2F;.&#x2F;~&#x2F;ipv4AddressCoder.html" title="ipv4AddressCoder"><div class="docNodeKindIcon"><div class="text-Function bg-Function/15 dark:text-FunctionDark dark:bg-FunctionDark/15" title="Function">f</div></div>
+                <a href=".&#x2F;.&#x2F;~&#x2F;ipv4Packet.html" title="ipv4Packet"><div class="docNodeKindIcon"><div class="text-Function bg-Function/15 dark:text-FunctionDark dark:bg-FunctionDark/15" title="Function">f</div></div>
 <span class="hover:bg-Function/15 hover:bg-FunctionDark/15">
-                    ipv4AddressCoder
-                  </span>
-                </a>
-              </li><li>
-                <a href=".&#x2F;.&#x2F;~&#x2F;ipv4Header.html" title="ipv4Header"><div class="docNodeKindIcon"><div class="text-Function bg-Function/15 dark:text-FunctionDark dark:bg-FunctionDark/15" title="Function">f</div></div>
-<span class="hover:bg-Function/15 hover:bg-FunctionDark/15">
-                    ipv4Header
+                    ipv4Packet
                   </span>
                 </a>
               </li></ul></nav><nav class="documentNavigation">
-          <h3>Document Navigation</h3><ul><li><a href="#examples" title="Examples">Examples</a></li><li><ul><li><a href="#example_0" title="Round-trip a minimal IPv4 header (no options)">Round-trip a minimal IPv4 header (no options)</a></li></ul></li></ul></nav></div>
+          <h3>Document Navigation</h3><ul><li><a href="#examples" title="Examples">Examples</a></li><li><ul><li><a href="#example_0" title="Round-trip a minimal IPv4 datagram (no options, empty payload)">Round-trip a minimal IPv4 datagram (no options, empty payload)</a></li></ul></li></ul></nav></div>
   </div></div>
 </div>
 </div>
