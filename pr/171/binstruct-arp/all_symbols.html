@@ -176,12 +176,12 @@ const wire = new Uint8Array([
 const [packet, bytesRead] = arp().decode(wire);
 
 assertEquals(bytesRead, 28);
-assertEquals(packet.htype, ARP_HARDWARE_TYPE.ETHERNET);
-assertEquals(packet.ptype, ARP_PROTOCOL_TYPE.IPV4);
-assertEquals(packet.oper, ARP_OPCODE.REQUEST);
-assertEquals(stringifyMac(packet.sha), &quot;00:11:22:33:44:55&quot;);
-assertEquals(stringifyIpv4(packet.spa), &quot;192.168.1.1&quot;);
-assertEquals(stringifyIpv4(packet.tpa), &quot;192.168.1.2&quot;);
+assertEquals(packet.hardwareType, ARP_HARDWARE_TYPE.ETHERNET);
+assertEquals(packet.protocolType, ARP_PROTOCOL_TYPE.IPV4);
+assertEquals(packet.operation, ARP_OPCODE.REQUEST);
+assertEquals(stringifyMac(packet.senderHardwareAddress), &quot;00:11:22:33:44:55&quot;);
+assertEquals(stringifyIpv4(packet.senderProtocolAddress), &quot;192.168.1.1&quot;);
+assertEquals(stringifyIpv4(packet.targetProtocolAddress), &quot;192.168.1.2&quot;);
 </code><button class="copyButton" data-copy="import { assertEquals } from &quot;@std/assert&quot;;
 import { stringifyIpv4 } from &quot;@hertzg/ip/ipv4&quot;;
 import { stringify as stringifyMac } from &quot;@hertzg/mac&quot;;
@@ -208,12 +208,12 @@ const wire = new Uint8Array([
 const [packet, bytesRead] = arp().decode(wire);
 
 assertEquals(bytesRead, 28);
-assertEquals(packet.htype, ARP_HARDWARE_TYPE.ETHERNET);
-assertEquals(packet.ptype, ARP_PROTOCOL_TYPE.IPV4);
-assertEquals(packet.oper, ARP_OPCODE.REQUEST);
-assertEquals(stringifyMac(packet.sha), &quot;00:11:22:33:44:55&quot;);
-assertEquals(stringifyIpv4(packet.spa), &quot;192.168.1.1&quot;);
-assertEquals(stringifyIpv4(packet.tpa), &quot;192.168.1.2&quot;);
+assertEquals(packet.hardwareType, ARP_HARDWARE_TYPE.ETHERNET);
+assertEquals(packet.protocolType, ARP_PROTOCOL_TYPE.IPV4);
+assertEquals(packet.operation, ARP_OPCODE.REQUEST);
+assertEquals(stringifyMac(packet.senderHardwareAddress), &quot;00:11:22:33:44:55&quot;);
+assertEquals(stringifyIpv4(packet.senderProtocolAddress), &quot;192.168.1.1&quot;);
+assertEquals(stringifyIpv4(packet.targetProtocolAddress), &quot;192.168.1.2&quot;);
 "><svg
   class="copy"
   width="15"
@@ -306,24 +306,24 @@ Interfaces</h2></div><div class="namespaceSection"><div id="namespace_arp-1" cla
 		    <a href=".&#x2F;.&#x2F;.&#x2F;~&#x2F;Arp.html" title="Arp">
 			    <span>Arp</span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Decoded Ethernet/IPv4 ARP packet (RFC 826, 28 bytes).</p>
 </div></div><ul class="namespaceItemContentSubItems"><li>
-                <a href=".&#x2F;.&#x2F;.&#x2F;~&#x2F;Arp.html#property_hlen">
-                  <span>hlen</span><span>: <span class="td-kw">number</span></span></a></li><li>
-                <a href=".&#x2F;.&#x2F;.&#x2F;~&#x2F;Arp.html#property_htype">
-                  <span>htype</span><span>: <span class="td-kw">number</span></span></a></li><li>
-                <a href=".&#x2F;.&#x2F;.&#x2F;~&#x2F;Arp.html#property_oper">
-                  <span>oper</span><span>: <span class="td-kw">number</span></span></a></li><li>
-                <a href=".&#x2F;.&#x2F;.&#x2F;~&#x2F;Arp.html#property_plen">
-                  <span>plen</span><span>: <span class="td-kw">number</span></span></a></li><li>
-                <a href=".&#x2F;.&#x2F;.&#x2F;~&#x2F;Arp.html#property_ptype">
-                  <span>ptype</span><span>: <span class="td-kw">number</span></span></a></li><li>
-                <a href=".&#x2F;.&#x2F;.&#x2F;~&#x2F;Arp.html#property_sha">
-                  <span>sha</span><span>: <span class="td-ref">Uint8Array</span></span></a></li><li>
-                <a href=".&#x2F;.&#x2F;.&#x2F;~&#x2F;Arp.html#property_spa">
-                  <span>spa</span><span>: <span class="td-kw">number</span></span></a></li><li>
-                <a href=".&#x2F;.&#x2F;.&#x2F;~&#x2F;Arp.html#property_tha">
-                  <span>tha</span><span>: <span class="td-ref">Uint8Array</span></span></a></li><li>
-                <a href=".&#x2F;.&#x2F;.&#x2F;~&#x2F;Arp.html#property_tpa">
-                  <span>tpa</span><span>: <span class="td-kw">number</span></span></a></li></ul></div>
+                <a href=".&#x2F;.&#x2F;.&#x2F;~&#x2F;Arp.html#property_hardwareaddresslength">
+                  <span>hardwareAddressLength</span><span>: <span class="td-kw">number</span></span></a></li><li>
+                <a href=".&#x2F;.&#x2F;.&#x2F;~&#x2F;Arp.html#property_hardwaretype">
+                  <span>hardwareType</span><span>: <span class="td-kw">number</span></span></a></li><li>
+                <a href=".&#x2F;.&#x2F;.&#x2F;~&#x2F;Arp.html#property_operation">
+                  <span>operation</span><span>: <span class="td-kw">number</span></span></a></li><li>
+                <a href=".&#x2F;.&#x2F;.&#x2F;~&#x2F;Arp.html#property_protocoladdresslength">
+                  <span>protocolAddressLength</span><span>: <span class="td-kw">number</span></span></a></li><li>
+                <a href=".&#x2F;.&#x2F;.&#x2F;~&#x2F;Arp.html#property_protocoltype">
+                  <span>protocolType</span><span>: <span class="td-kw">number</span></span></a></li><li>
+                <a href=".&#x2F;.&#x2F;.&#x2F;~&#x2F;Arp.html#property_senderhardwareaddress">
+                  <span>senderHardwareAddress</span><span>: <span class="td-ref">Uint8Array</span></span></a></li><li>
+                <a href=".&#x2F;.&#x2F;.&#x2F;~&#x2F;Arp.html#property_senderprotocoladdress">
+                  <span>senderProtocolAddress</span><span>: <span class="td-kw">number</span></span></a></li><li>
+                <a href=".&#x2F;.&#x2F;.&#x2F;~&#x2F;Arp.html#property_targethardwareaddress">
+                  <span>targetHardwareAddress</span><span>: <span class="td-ref">Uint8Array</span></span></a></li><li>
+                <a href=".&#x2F;.&#x2F;.&#x2F;~&#x2F;Arp.html#property_targetprotocoladdress">
+                  <span>targetProtocolAddress</span><span>: <span class="td-kw">number</span></span></a></li></ul></div>
     </div></div>
 </section>
 <section class="section"  id="default_type-aliases"><div>

@@ -218,6 +218,7 @@ Examples</h2></div><div class="space-y-8"><div class="anchorable"><a href="#exam
 <h3 class="example-header"><div class="markdown"><p>Round-trip a UDP-bearing datagram</p>
 </div></h3>
   <div><div class="markdown"><pre class="highlight"><code class="language-ts">import { assertEquals } from &quot;@std/assert&quot;;
+import { parseIpv4 } from &quot;@hertzg/ip/ipv4&quot;;
 import { ipv4 } from &quot;@binstruct/ipv4&quot;;
 
 const coder = ipv4();
@@ -230,8 +231,8 @@ const datagram = {
   timeToLive: 64,
   protocol: 17,
   headerChecksum: 0,
-  sourceAddress: &quot;192.0.2.1&quot;,
-  destinationAddress: &quot;192.0.2.2&quot;,
+  sourceAddress: parseIpv4(&quot;192.0.2.1&quot;),
+  destinationAddress: parseIpv4(&quot;192.0.2.2&quot;),
   options: new Uint8Array(0),
   payload: new Uint8Array([0xde, 0xad, 0xbe, 0xef]),
 };
@@ -244,6 +245,7 @@ assertEquals(written, 24);
 assertEquals(decoded.totalLength, 24);
 assertEquals(decoded.payload.length, 4);
 </code><button class="copyButton" data-copy="import { assertEquals } from &quot;@std/assert&quot;;
+import { parseIpv4 } from &quot;@hertzg/ip/ipv4&quot;;
 import { ipv4 } from &quot;@binstruct/ipv4&quot;;
 
 const coder = ipv4();
@@ -256,8 +258,8 @@ const datagram = {
   timeToLive: 64,
   protocol: 17,
   headerChecksum: 0,
-  sourceAddress: &quot;192.0.2.1&quot;,
-  destinationAddress: &quot;192.0.2.2&quot;,
+  sourceAddress: parseIpv4(&quot;192.0.2.1&quot;),
+  destinationAddress: parseIpv4(&quot;192.0.2.2&quot;),
   options: new Uint8Array(0),
   payload: new Uint8Array([0xde, 0xad, 0xbe, 0xef]),
 };

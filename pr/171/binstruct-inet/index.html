@@ -90,11 +90,11 @@
 <code>@binstruct/udp</code>, <code>@binstruct/icmp</code>) only knows how to decode its own
 layer's bytes. This package wires them together via <code>refineSwitch</code> —
 dispatching on <code>etherType</code> at L3 and <code>protocol</code> at L4 — into a single
-round-trippable <a href="././~/inetCoder.html"><code>inetCoder</code></a> that walks an Ethernet II frame
-top-down. Each layer's <code>payload</code> field is replaced with a discriminated
-union of the next layer's decoded form; layers we don't have a coder for
-default to a raw <a href="https://deno.land/api@v2.7.14?s=Uint8Array"><code>Uint8Array</code></a>, so the coder is safe to point at
-arbitrary captured traffic.</p>
+round-trippable <a href="././~/inetFrame.html"><code>inetFrame</code></a> coder factory that walks an
+Ethernet II frame top-down. Each layer's <code>payload</code> field is replaced with
+a discriminated union of the next layer's decoded form; layers we don't
+have a coder for default to a raw <a href="https://deno.land/api@v2.7.14?s=Uint8Array"><code>Uint8Array</code></a>, so the coder is
+safe to point at arbitrary captured traffic.</p>
 <p>Coverage:</p>
 <ul>
 <li>L2 — Ethernet II (<code>@binstruct/ethernet</code>)</li>
@@ -153,7 +153,8 @@ Examples</h2></div><div class="space-y-8"><div class="anchorable"><a href="#exam
 <h3 class="example-header"><div class="markdown"><p>Round-trip a UDP-over-IPv4-over-Ethernet frame</p>
 </div></h3>
   <div><div class="markdown"><pre class="highlight"><code class="language-ts">import { assert, assertEquals } from &quot;@std/assert&quot;;
-import { inetCoder } from &quot;@binstruct/inet&quot;;
+import { parseIpv4 } from &quot;@hertzg/ip/ipv4&quot;;
+import { inetFrame } from &quot;@binstruct/inet&quot;;
 
 const value = {
   dstMac: new Uint8Array([0, 0, 0, 0, 0, 1]),
@@ -170,8 +171,8 @@ const value = {
       timeToLive: 64,
       protocol: 17,
       headerChecksum: 0,
-      sourceAddress: &quot;192.0.2.1&quot;,
-      destinationAddress: &quot;192.0.2.2&quot;,
+      sourceAddress: parseIpv4(&quot;192.0.2.1&quot;),
+      destinationAddress: parseIpv4(&quot;192.0.2.2&quot;),
       options: new Uint8Array(0),
       payload: {
         kind: &quot;udp&quot; as const,
@@ -187,9 +188,10 @@ const value = {
   },
 };
 
+const coder = inetFrame();
 const buf = new Uint8Array(64);
-const written = inetCoder.encode(value, buf);
-const [decoded] = inetCoder.decode(buf.subarray(0, written));
+const written = coder.encode(value, buf);
+const [decoded] = coder.decode(buf.subarray(0, written));
 
 assert(!(decoded.payload instanceof Uint8Array));
 assert(decoded.payload.kind === &quot;ipv4&quot;);
@@ -197,7 +199,8 @@ assert(!(decoded.payload.ipv4.payload instanceof Uint8Array));
 assert(decoded.payload.ipv4.payload.kind === &quot;udp&quot;);
 assertEquals(decoded.payload.ipv4.payload.udp.payload, new Uint8Array([0xde, 0xad, 0xbe, 0xef]));
 </code><button class="copyButton" data-copy="import { assert, assertEquals } from &quot;@std/assert&quot;;
-import { inetCoder } from &quot;@binstruct/inet&quot;;
+import { parseIpv4 } from &quot;@hertzg/ip/ipv4&quot;;
+import { inetFrame } from &quot;@binstruct/inet&quot;;
 
 const value = {
   dstMac: new Uint8Array([0, 0, 0, 0, 0, 1]),
@@ -214,8 +217,8 @@ const value = {
       timeToLive: 64,
       protocol: 17,
       headerChecksum: 0,
-      sourceAddress: &quot;192.0.2.1&quot;,
-      destinationAddress: &quot;192.0.2.2&quot;,
+      sourceAddress: parseIpv4(&quot;192.0.2.1&quot;),
+      destinationAddress: parseIpv4(&quot;192.0.2.2&quot;),
       options: new Uint8Array(0),
       payload: {
         kind: &quot;udp&quot; as const,
@@ -231,9 +234,10 @@ const value = {
   },
 };
 
+const coder = inetFrame();
 const buf = new Uint8Array(64);
-const written = inetCoder.encode(value, buf);
-const [decoded] = inetCoder.decode(buf.subarray(0, written));
+const written = coder.encode(value, buf);
+const [decoded] = coder.decode(buf.subarray(0, written));
 
 assert(!(decoded.payload instanceof Uint8Array));
 assert(decoded.payload.kind === &quot;ipv4&quot;);

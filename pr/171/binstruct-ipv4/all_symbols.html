@@ -151,6 +151,7 @@ Examples</h2></div><div class="space-y-8"><div class="anchorable"><a href="#exam
 <h3 class="example-header"><div class="markdown"><p>Round-trip a minimal IPv4 datagram (no options, empty payload)</p>
 </div></h3>
   <div><div class="markdown"><pre class="highlight"><code class="language-ts">import { assertEquals } from &quot;@std/assert&quot;;
+import { parseIpv4 } from &quot;@hertzg/ip/ipv4&quot;;
 import { ipv4 } from &quot;@binstruct/ipv4&quot;;
 
 const coder = ipv4();
@@ -168,8 +169,8 @@ const datagram = {
   timeToLive: 64,
   protocol: 6,
   headerChecksum: 0,
-  sourceAddress: &quot;192.168.1.100&quot;,
-  destinationAddress: &quot;10.0.0.50&quot;,
+  sourceAddress: parseIpv4(&quot;192.168.1.100&quot;),
+  destinationAddress: parseIpv4(&quot;10.0.0.50&quot;),
   options: new Uint8Array(0),
   payload: new Uint8Array(0),
 };
@@ -180,10 +181,11 @@ const [decoded, bytesRead] = coder.decode(buffer);
 
 assertEquals(bytesWritten, 20);
 assertEquals(bytesRead, 20);
-assertEquals(decoded.sourceAddress, &quot;192.168.1.100&quot;);
-assertEquals(decoded.destinationAddress, &quot;10.0.0.50&quot;);
+assertEquals(decoded.sourceAddress, parseIpv4(&quot;192.168.1.100&quot;));
+assertEquals(decoded.destinationAddress, parseIpv4(&quot;10.0.0.50&quot;));
 assertEquals(decoded.flagsFragmentOffset.dontFragment, 1);
 </code><button class="copyButton" data-copy="import { assertEquals } from &quot;@std/assert&quot;;
+import { parseIpv4 } from &quot;@hertzg/ip/ipv4&quot;;
 import { ipv4 } from &quot;@binstruct/ipv4&quot;;
 
 const coder = ipv4();
@@ -201,8 +203,8 @@ const datagram = {
   timeToLive: 64,
   protocol: 6,
   headerChecksum: 0,
-  sourceAddress: &quot;192.168.1.100&quot;,
-  destinationAddress: &quot;10.0.0.50&quot;,
+  sourceAddress: parseIpv4(&quot;192.168.1.100&quot;),
+  destinationAddress: parseIpv4(&quot;10.0.0.50&quot;),
   options: new Uint8Array(0),
   payload: new Uint8Array(0),
 };
@@ -213,8 +215,8 @@ const [decoded, bytesRead] = coder.decode(buffer);
 
 assertEquals(bytesWritten, 20);
 assertEquals(bytesRead, 20);
-assertEquals(decoded.sourceAddress, &quot;192.168.1.100&quot;);
-assertEquals(decoded.destinationAddress, &quot;10.0.0.50&quot;);
+assertEquals(decoded.sourceAddress, parseIpv4(&quot;192.168.1.100&quot;));
+assertEquals(decoded.destinationAddress, parseIpv4(&quot;10.0.0.50&quot;));
 assertEquals(decoded.flagsFragmentOffset.dontFragment, 1);
 "><svg
   class="copy"
@@ -279,12 +281,6 @@ Functions</h2></div><div class="namespaceSection"><div id="namespace_ipv4" class
 			    <span>ipv4</span><span>()<span>: <span class="td-ref">Coder</span>&lt;<span class="td-ref">Ipv4</span>&gt;</span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Creates a coder for a complete IPv4 datagram — header, options, and the
 transport-layer payload sized via the <code>totalLength</code> field.</p>
 </div></div></div>
-    </div><div id="namespace_ipv4address" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-Function bg-Function/15 dark:text-FunctionDark dark:bg-FunctionDark/15" title="Function">f</div></div>
-<div class="namespaceItemContent">
-		    <a href=".&#x2F;.&#x2F;.&#x2F;~&#x2F;ipv4Address.html" title="ipv4Address">
-			    <span>ipv4Address</span><span>()<span>: <span class="td-ref">Coder</span>&lt;<span class="td-kw">string</span>&gt;</span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Coder factory for an IPv4 address — <code>u32be()</code> refined to dotted-quad string
-via <code>@hertzg/ip</code>. Used for both source and destination address fields.</p>
-</div></div></div>
     </div></div>
 </section>
 <section class="section"  id="default_interfaces"><div>
@@ -317,7 +313,7 @@ Interfaces</h2></div><div class="namespaceSection"><div id="namespace_ipv4-1" cl
 raw transport-layer payload.</p>
 </div></div><ul class="namespaceItemContentSubItems"><li>
                 <a href=".&#x2F;.&#x2F;.&#x2F;~&#x2F;Ipv4.html#property_destinationaddress">
-                  <span>destinationAddress</span><span>: <span class="td-kw">string</span></span></a></li><li>
+                  <span>destinationAddress</span><span>: <span class="td-kw">number</span></span></a></li><li>
                 <a href=".&#x2F;.&#x2F;.&#x2F;~&#x2F;Ipv4.html#property_flagsfragmentoffset">
                   <span>flagsFragmentOffset</span><span>: { reserved<span>: <span class="td-kw">number</span></span>; dontFragment<span>: <span class="td-kw">number</span></span>; moreFragments<span>: <span class="td-kw">number</span></span>; fragmentOffset<span>: <span class="td-kw">number</span></span>;  }</span></a></li><li>
                 <a href=".&#x2F;.&#x2F;.&#x2F;~&#x2F;Ipv4.html#property_headerchecksum">
@@ -331,7 +327,7 @@ raw transport-layer payload.</p>
                 <a href=".&#x2F;.&#x2F;.&#x2F;~&#x2F;Ipv4.html#property_protocol">
                   <span>protocol</span><span>: <span class="td-kw">number</span></span></a></li><li>
                 <a href=".&#x2F;.&#x2F;.&#x2F;~&#x2F;Ipv4.html#property_sourceaddress">
-                  <span>sourceAddress</span><span>: <span class="td-kw">string</span></span></a></li><li>
+                  <span>sourceAddress</span><span>: <span class="td-kw">number</span></span></a></li><li>
                 <a href=".&#x2F;.&#x2F;.&#x2F;~&#x2F;Ipv4.html#property_timetolive">
                   <span>timeToLive</span><span>: <span class="td-kw">number</span></span></a></li><li>
                 <a href=".&#x2F;.&#x2F;.&#x2F;~&#x2F;Ipv4.html#property_totallength">

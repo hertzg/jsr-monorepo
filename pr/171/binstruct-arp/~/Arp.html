@@ -143,8 +143,9 @@
 </svg>
 </a>
 </div><div><div class="space-y-7" id=""><div class="markdown"><p>Decoded Ethernet/IPv4 ARP packet (RFC 826, 28 bytes).</p>
-<p>Hardware addresses (<code>sha</code> / <code>tha</code>) are raw 6-byte arrays; IPv4 protocol
-addresses (<code>spa</code> / <code>tpa</code>) are 32-bit unsigned integers. Use <code>@hertzg/mac</code>
+<p>Hardware addresses (<code>senderHardwareAddress</code> / <code>targetHardwareAddress</code>) are
+raw 6-byte arrays; IPv4 protocol addresses (<code>senderProtocolAddress</code> /
+<code>targetProtocolAddress</code>) are 32-bit unsigned integers. Use <code>@hertzg/mac</code>
 and <code>@hertzg/ip/ipv4</code> for human-readable conversion.</p>
 </div><section class="section"  id="properties"><div>
       <h2 class="anchorable mb-1"><a href="#properties" class="anchor" aria-label="Anchor" tabIndex="-1"><svg
@@ -169,10 +170,10 @@ and <code>@hertzg/ip/ipv4</code> for human-readable conversion.</p>
   </defs>
 </svg>
 </a>
-Properties</h2></div><div class="space-y-8"><div class="anchorable docEntry" id="property_htype">
+Properties</h2></div><div class="space-y-8"><div class="anchorable docEntry" id="property_hardwaretype">
 
   <div class="docEntryHeader">
-    <div><code><a href="#property_htype" class="anchor" aria-label="Anchor" tabIndex="-1"><svg
+    <div><code><a href="#property_hardwaretype" class="anchor" aria-label="Anchor" tabIndex="-1"><svg
   width="16"
   height="16"
   viewBox="0 0 14 14"
@@ -194,7 +195,7 @@ Properties</h2></div><div class="space-y-8"><div class="anchorable docEntry" id=
   </defs>
 </svg>
 </a>
-<a class="font-bold font-lg link" href="..&#x2F;.&#x2F;.&#x2F;~&#x2F;Arp.htype.html">htype</a><span class="font-medium text-stone-500 dark:text-stone-200"><span>: <span class="td-kw">number</span></span></span>
+<a class="font-bold font-lg link" href="..&#x2F;.&#x2F;.&#x2F;~&#x2F;Arp.hardwareType.html">hardwareType</a><span class="font-medium text-stone-500 dark:text-stone-200"><span>: <span class="td-kw">number</span></span></span>
       </code>
     </div><a
   class="sourceButton"
@@ -222,10 +223,10 @@ Properties</h2></div><div class="space-y-8"><div class="anchorable docEntry" id=
 </svg>
 </a>
 </div></div>
-<div class="anchorable docEntry" id="property_ptype">
+<div class="anchorable docEntry" id="property_protocoltype">
 
   <div class="docEntryHeader">
-    <div><code><a href="#property_ptype" class="anchor" aria-label="Anchor" tabIndex="-1"><svg
+    <div><code><a href="#property_protocoltype" class="anchor" aria-label="Anchor" tabIndex="-1"><svg
   width="16"
   height="16"
   viewBox="0 0 14 14"
@@ -247,7 +248,7 @@ Properties</h2></div><div class="space-y-8"><div class="anchorable docEntry" id=
   </defs>
 </svg>
 </a>
-<a class="font-bold font-lg link" href="..&#x2F;.&#x2F;.&#x2F;~&#x2F;Arp.ptype.html">ptype</a><span class="font-medium text-stone-500 dark:text-stone-200"><span>: <span class="td-kw">number</span></span></span>
+<a class="font-bold font-lg link" href="..&#x2F;.&#x2F;.&#x2F;~&#x2F;Arp.protocolType.html">protocolType</a><span class="font-medium text-stone-500 dark:text-stone-200"><span>: <span class="td-kw">number</span></span></span>
       </code>
     </div><a
   class="sourceButton"
@@ -275,10 +276,10 @@ Properties</h2></div><div class="space-y-8"><div class="anchorable docEntry" id=
 </svg>
 </a>
 </div></div>
-<div class="anchorable docEntry" id="property_hlen">
+<div class="anchorable docEntry" id="property_hardwareaddresslength">
 
   <div class="docEntryHeader">
-    <div><code><a href="#property_hlen" class="anchor" aria-label="Anchor" tabIndex="-1"><svg
+    <div><code><a href="#property_hardwareaddresslength" class="anchor" aria-label="Anchor" tabIndex="-1"><svg
   width="16"
   height="16"
   viewBox="0 0 14 14"
@@ -300,7 +301,7 @@ Properties</h2></div><div class="space-y-8"><div class="anchorable docEntry" id=
   </defs>
 </svg>
 </a>
-<a class="font-bold font-lg link" href="..&#x2F;.&#x2F;.&#x2F;~&#x2F;Arp.hlen.html">hlen</a><span class="font-medium text-stone-500 dark:text-stone-200"><span>: <span class="td-kw">number</span></span></span>
+<a class="font-bold font-lg link" href="..&#x2F;.&#x2F;.&#x2F;~&#x2F;Arp.hardwareAddressLength.html">hardwareAddressLength</a><span class="font-medium text-stone-500 dark:text-stone-200"><span>: <span class="td-kw">number</span></span></span>
       </code>
     </div><a
   class="sourceButton"
@@ -328,10 +329,10 @@ Properties</h2></div><div class="space-y-8"><div class="anchorable docEntry" id=
 </svg>
 </a>
 </div></div>
-<div class="anchorable docEntry" id="property_plen">
+<div class="anchorable docEntry" id="property_protocoladdresslength">
 
   <div class="docEntryHeader">
-    <div><code><a href="#property_plen" class="anchor" aria-label="Anchor" tabIndex="-1"><svg
+    <div><code><a href="#property_protocoladdresslength" class="anchor" aria-label="Anchor" tabIndex="-1"><svg
   width="16"
   height="16"
   viewBox="0 0 14 14"
@@ -353,7 +354,7 @@ Properties</h2></div><div class="space-y-8"><div class="anchorable docEntry" id=
   </defs>
 </svg>
 </a>
-<a class="font-bold font-lg link" href="..&#x2F;.&#x2F;.&#x2F;~&#x2F;Arp.plen.html">plen</a><span class="font-medium text-stone-500 dark:text-stone-200"><span>: <span class="td-kw">number</span></span></span>
+<a class="font-bold font-lg link" href="..&#x2F;.&#x2F;.&#x2F;~&#x2F;Arp.protocolAddressLength.html">protocolAddressLength</a><span class="font-medium text-stone-500 dark:text-stone-200"><span>: <span class="td-kw">number</span></span></span>
       </code>
     </div><a
   class="sourceButton"
@@ -381,10 +382,10 @@ Properties</h2></div><div class="space-y-8"><div class="anchorable docEntry" id=
 </svg>
 </a>
 </div></div>
-<div class="anchorable docEntry" id="property_oper">
+<div class="anchorable docEntry" id="property_operation">
 
   <div class="docEntryHeader">
-    <div><code><a href="#property_oper" class="anchor" aria-label="Anchor" tabIndex="-1"><svg
+    <div><code><a href="#property_operation" class="anchor" aria-label="Anchor" tabIndex="-1"><svg
   width="16"
   height="16"
   viewBox="0 0 14 14"
@@ -406,7 +407,7 @@ Properties</h2></div><div class="space-y-8"><div class="anchorable docEntry" id=
   </defs>
 </svg>
 </a>
-<a class="font-bold font-lg link" href="..&#x2F;.&#x2F;.&#x2F;~&#x2F;Arp.oper.html">oper</a><span class="font-medium text-stone-500 dark:text-stone-200"><span>: <span class="td-kw">number</span></span></span>
+<a class="font-bold font-lg link" href="..&#x2F;.&#x2F;.&#x2F;~&#x2F;Arp.operation.html">operation</a><span class="font-medium text-stone-500 dark:text-stone-200"><span>: <span class="td-kw">number</span></span></span>
       </code>
     </div><a
   class="sourceButton"
@@ -434,10 +435,10 @@ Properties</h2></div><div class="space-y-8"><div class="anchorable docEntry" id=
 </svg>
 </a>
 </div></div>
-<div class="anchorable docEntry" id="property_sha">
+<div class="anchorable docEntry" id="property_senderhardwareaddress">
 
   <div class="docEntryHeader">
-    <div><code><a href="#property_sha" class="anchor" aria-label="Anchor" tabIndex="-1"><svg
+    <div><code><a href="#property_senderhardwareaddress" class="anchor" aria-label="Anchor" tabIndex="-1"><svg
   width="16"
   height="16"
   viewBox="0 0 14 14"
@@ -459,7 +460,7 @@ Properties</h2></div><div class="space-y-8"><div class="anchorable docEntry" id=
   </defs>
 </svg>
 </a>
-<a class="font-bold font-lg link" href="..&#x2F;.&#x2F;.&#x2F;~&#x2F;Arp.sha.html">sha</a><span class="font-medium text-stone-500 dark:text-stone-200"><span>: <a href="https://deno.land/api@v2.7.14?s=Uint8Array" class="link td-ref">Uint8Array</a></span></span>
+<a class="font-bold font-lg link" href="..&#x2F;.&#x2F;.&#x2F;~&#x2F;Arp.senderHardwareAddress.html">senderHardwareAddress</a><span class="font-medium text-stone-500 dark:text-stone-200"><span>: <a href="https://deno.land/api@v2.7.14?s=Uint8Array" class="link td-ref">Uint8Array</a></span></span>
       </code>
     </div><a
   class="sourceButton"
@@ -487,10 +488,10 @@ Properties</h2></div><div class="space-y-8"><div class="anchorable docEntry" id=
 </svg>
 </a>
 </div></div>
-<div class="anchorable docEntry" id="property_spa">
+<div class="anchorable docEntry" id="property_senderprotocoladdress">
 
   <div class="docEntryHeader">
-    <div><code><a href="#property_spa" class="anchor" aria-label="Anchor" tabIndex="-1"><svg
+    <div><code><a href="#property_senderprotocoladdress" class="anchor" aria-label="Anchor" tabIndex="-1"><svg
   width="16"
   height="16"
   viewBox="0 0 14 14"
@@ -512,7 +513,7 @@ Properties</h2></div><div class="space-y-8"><div class="anchorable docEntry" id=
   </defs>
 </svg>
 </a>
-<a class="font-bold font-lg link" href="..&#x2F;.&#x2F;.&#x2F;~&#x2F;Arp.spa.html">spa</a><span class="font-medium text-stone-500 dark:text-stone-200"><span>: <span class="td-kw">number</span></span></span>
+<a class="font-bold font-lg link" href="..&#x2F;.&#x2F;.&#x2F;~&#x2F;Arp.senderProtocolAddress.html">senderProtocolAddress</a><span class="font-medium text-stone-500 dark:text-stone-200"><span>: <span class="td-kw">number</span></span></span>
       </code>
     </div><a
   class="sourceButton"
@@ -540,10 +541,10 @@ Properties</h2></div><div class="space-y-8"><div class="anchorable docEntry" id=
 </svg>
 </a>
 </div></div>
-<div class="anchorable docEntry" id="property_tha">
+<div class="anchorable docEntry" id="property_targethardwareaddress">
 
   <div class="docEntryHeader">
-    <div><code><a href="#property_tha" class="anchor" aria-label="Anchor" tabIndex="-1"><svg
+    <div><code><a href="#property_targethardwareaddress" class="anchor" aria-label="Anchor" tabIndex="-1"><svg
   width="16"
   height="16"
   viewBox="0 0 14 14"
@@ -565,7 +566,7 @@ Properties</h2></div><div class="space-y-8"><div class="anchorable docEntry" id=
   </defs>
 </svg>
 </a>
-<a class="font-bold font-lg link" href="..&#x2F;.&#x2F;.&#x2F;~&#x2F;Arp.tha.html">tha</a><span class="font-medium text-stone-500 dark:text-stone-200"><span>: <a href="https://deno.land/api@v2.7.14?s=Uint8Array" class="link td-ref">Uint8Array</a></span></span>
+<a class="font-bold font-lg link" href="..&#x2F;.&#x2F;.&#x2F;~&#x2F;Arp.targetHardwareAddress.html">targetHardwareAddress</a><span class="font-medium text-stone-500 dark:text-stone-200"><span>: <a href="https://deno.land/api@v2.7.14?s=Uint8Array" class="link td-ref">Uint8Array</a></span></span>
       </code>
     </div><a
   class="sourceButton"
@@ -593,10 +594,10 @@ Properties</h2></div><div class="space-y-8"><div class="anchorable docEntry" id=
 </svg>
 </a>
 </div></div>
-<div class="anchorable docEntry" id="property_tpa">
+<div class="anchorable docEntry" id="property_targetprotocoladdress">
 
   <div class="docEntryHeader">
-    <div><code><a href="#property_tpa" class="anchor" aria-label="Anchor" tabIndex="-1"><svg
+    <div><code><a href="#property_targetprotocoladdress" class="anchor" aria-label="Anchor" tabIndex="-1"><svg
   width="16"
   height="16"
   viewBox="0 0 14 14"
@@ -618,7 +619,7 @@ Properties</h2></div><div class="space-y-8"><div class="anchorable docEntry" id=
   </defs>
 </svg>
 </a>
-<a class="font-bold font-lg link" href="..&#x2F;.&#x2F;.&#x2F;~&#x2F;Arp.tpa.html">tpa</a><span class="font-medium text-stone-500 dark:text-stone-200"><span>: <span class="td-kw">number</span></span></span>
+<a class="font-bold font-lg link" href="..&#x2F;.&#x2F;.&#x2F;~&#x2F;Arp.targetProtocolAddress.html">targetProtocolAddress</a><span class="font-medium text-stone-500 dark:text-stone-200"><span>: <span class="td-kw">number</span></span></span>
       </code>
     </div><a
   class="sourceButton"
@@ -686,7 +687,7 @@ Properties</h2></div><div class="space-y-8"><div class="anchorable docEntry" id=
 </svg>
 </button><code></code></pre>
 </div></div><nav class="documentNavigation">
-          <h3>Document Navigation</h3><ul><li><a href="#properties" title="Properties">Properties</a></li><li><ul><li><a href="#property_htype" title="htype">htype</a></li><li><a href="#property_ptype" title="ptype">ptype</a></li><li><a href="#property_hlen" title="hlen">hlen</a></li><li><a href="#property_plen" title="plen">plen</a></li><li><a href="#property_oper" title="oper">oper</a></li><li><a href="#property_sha" title="sha">sha</a></li><li><a href="#property_spa" title="spa">spa</a></li><li><a href="#property_tha" title="tha">tha</a></li><li><a href="#property_tpa" title="tpa">tpa</a></li></ul></li></ul></nav></div>
+          <h3>Document Navigation</h3><ul><li><a href="#properties" title="Properties">Properties</a></li><li><ul><li><a href="#property_hardwaretype" title="hardwareType">hardwareType</a></li><li><a href="#property_protocoltype" title="protocolType">protocolType</a></li><li><a href="#property_hardwareaddresslength" title="hardwareAddressLength">hardwareAddressLength</a></li><li><a href="#property_protocoladdresslength" title="protocolAddressLength">protocolAddressLength</a></li><li><a href="#property_operation" title="operation">operation</a></li><li><a href="#property_senderhardwareaddress" title="senderHardwareAddress">senderHardwareAddress</a></li><li><a href="#property_senderprotocoladdress" title="senderProtocolAddress">senderProtocolAddress</a></li><li><a href="#property_targethardwareaddress" title="targetHardwareAddress">targetHardwareAddress</a></li><li><a href="#property_targetprotocoladdress" title="targetProtocolAddress">targetProtocolAddress</a></li></ul></li></ul></nav></div>
   </div></div>
 </div>
 </div>

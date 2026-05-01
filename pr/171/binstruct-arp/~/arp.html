@@ -229,15 +229,15 @@ import {
 
 const coder = arp();
 const reply = {
-  htype: ARP_HARDWARE_TYPE.ETHERNET,
-  ptype: ARP_PROTOCOL_TYPE.IPV4,
-  hlen: ARP_HW_LEN_ETHERNET,
-  plen: ARP_PROTO_LEN_IPV4,
-  oper: ARP_OPCODE.REPLY,
-  sha: parseMac(&quot;aa:bb:cc:dd:ee:ff&quot;),
-  spa: parseIpv4(&quot;192.168.1.2&quot;),
-  tha: parseMac(&quot;00:11:22:33:44:55&quot;),
-  tpa: parseIpv4(&quot;192.168.1.1&quot;),
+  hardwareType: ARP_HARDWARE_TYPE.ETHERNET,
+  protocolType: ARP_PROTOCOL_TYPE.IPV4,
+  hardwareAddressLength: ARP_HW_LEN_ETHERNET,
+  protocolAddressLength: ARP_PROTO_LEN_IPV4,
+  operation: ARP_OPCODE.REPLY,
+  senderHardwareAddress: parseMac(&quot;aa:bb:cc:dd:ee:ff&quot;),
+  senderProtocolAddress: parseIpv4(&quot;192.168.1.2&quot;),
+  targetHardwareAddress: parseMac(&quot;00:11:22:33:44:55&quot;),
+  targetProtocolAddress: parseIpv4(&quot;192.168.1.1&quot;),
 };
 
 const buffer = new Uint8Array(ARP_ETHERNET_IPV4_SIZE);
@@ -262,15 +262,15 @@ import {
 
 const coder = arp();
 const reply = {
-  htype: ARP_HARDWARE_TYPE.ETHERNET,
-  ptype: ARP_PROTOCOL_TYPE.IPV4,
-  hlen: ARP_HW_LEN_ETHERNET,
-  plen: ARP_PROTO_LEN_IPV4,
-  oper: ARP_OPCODE.REPLY,
-  sha: parseMac(&quot;aa:bb:cc:dd:ee:ff&quot;),
-  spa: parseIpv4(&quot;192.168.1.2&quot;),
-  tha: parseMac(&quot;00:11:22:33:44:55&quot;),
-  tpa: parseIpv4(&quot;192.168.1.1&quot;),
+  hardwareType: ARP_HARDWARE_TYPE.ETHERNET,
+  protocolType: ARP_PROTOCOL_TYPE.IPV4,
+  hardwareAddressLength: ARP_HW_LEN_ETHERNET,
+  protocolAddressLength: ARP_PROTO_LEN_IPV4,
+  operation: ARP_OPCODE.REPLY,
+  senderHardwareAddress: parseMac(&quot;aa:bb:cc:dd:ee:ff&quot;),
+  senderProtocolAddress: parseIpv4(&quot;192.168.1.2&quot;),
+  targetHardwareAddress: parseMac(&quot;00:11:22:33:44:55&quot;),
+  targetProtocolAddress: parseIpv4(&quot;192.168.1.1&quot;),
 };
 
 const buffer = new Uint8Array(ARP_ETHERNET_IPV4_SIZE);

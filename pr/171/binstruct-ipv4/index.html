@@ -155,9 +155,10 @@ options trailer, and the transport payload sized via <code>totalLength</code>. B
 fields (version/IHL, flags/fragment offset) are exposed as nested objects via
 <code>bitStruct</code>, keeping the on-wire layout faithful while preserving named-field
 access.</p>
-<p>IPv4 addresses are surfaced as dotted-quad strings via a refiner backed by
-<code>parseIpv4</code>/<code>stringifyIpv4</code> from
-<a href="https://jsr.io/@hertzg/ip">@hertzg/ip</a>.</p>
+<p>IPv4 addresses are surfaced as raw 32-bit unsigned integers, mirroring how
+ARP exposes the same field. Use
+<a href="https://jsr.io/@hertzg/ip">@hertzg/ip</a>'s <code>parseIpv4</code> / <code>stringifyIpv4</code>
+for human-readable conversion.</p>
 <p>Design notes:</p>
 <ul>
 <li>The header checksum is <strong>not</strong> computed automatically. Callers are expected
@@ -219,6 +220,7 @@ Examples</h2></div><div class="space-y-8"><div class="anchorable"><a href="#exam
 <h3 class="example-header"><div class="markdown"><p>Round-trip a minimal IPv4 datagram (no options, empty payload)</p>
 </div></h3>
   <div><div class="markdown"><pre class="highlight"><code class="language-ts">import { assertEquals } from &quot;@std/assert&quot;;
+import { parseIpv4 } from &quot;@hertzg/ip/ipv4&quot;;
 import { ipv4 } from &quot;@binstruct/ipv4&quot;;
 
 const coder = ipv4();
@@ -236,8 +238,8 @@ const datagram = {
   timeToLive: 64,
   protocol: 6,
   headerChecksum: 0,
-  sourceAddress: &quot;192.168.1.100&quot;,
-  destinationAddress: &quot;10.0.0.50&quot;,
+  sourceAddress: parseIpv4(&quot;192.168.1.100&quot;),
+  destinationAddress: parseIpv4(&quot;10.0.0.50&quot;),
   options: new Uint8Array(0),
   payload: new Uint8Array(0),
 };
@@ -248,10 +250,11 @@ const [decoded, bytesRead] = coder.decode(buffer);
 
 assertEquals(bytesWritten, 20);
 assertEquals(bytesRead, 20);
-assertEquals(decoded.sourceAddress, &quot;192.168.1.100&quot;);
-assertEquals(decoded.destinationAddress, &quot;10.0.0.50&quot;);
+assertEquals(decoded.sourceAddress, parseIpv4(&quot;192.168.1.100&quot;));
+assertEquals(decoded.destinationAddress, parseIpv4(&quot;10.0.0.50&quot;));
 assertEquals(decoded.flagsFragmentOffset.dontFragment, 1);
 </code><button class="copyButton" data-copy="import { assertEquals } from &quot;@std/assert&quot;;
+import { parseIpv4 } from &quot;@hertzg/ip/ipv4&quot;;
 import { ipv4 } from &quot;@binstruct/ipv4&quot;;
 
 const coder = ipv4();
@@ -269,8 +272,8 @@ const datagram = {
   timeToLive: 64,
   protocol: 6,
   headerChecksum: 0,
-  sourceAddress: &quot;192.168.1.100&quot;,
-  destinationAddress: &quot;10.0.0.50&quot;,
+  sourceAddress: parseIpv4(&quot;192.168.1.100&quot;),
+  destinationAddress: parseIpv4(&quot;10.0.0.50&quot;),
   options: new Uint8Array(0),
   payload: new Uint8Array(0),
 };
@@ -281,8 +284,8 @@ const [decoded, bytesRead] = coder.decode(buffer);
 
 assertEquals(bytesWritten, 20);
 assertEquals(bytesRead, 20);
-assertEquals(decoded.sourceAddress, &quot;192.168.1.100&quot;);
-assertEquals(decoded.destinationAddress, &quot;10.0.0.50&quot;);
+assertEquals(decoded.sourceAddress, parseIpv4(&quot;192.168.1.100&quot;));
+assertEquals(decoded.destinationAddress, parseIpv4(&quot;10.0.0.50&quot;));
 assertEquals(decoded.flagsFragmentOffset.dontFragment, 1);
 "><svg
   class="copy"
@@ -340,12 +343,6 @@ assertEquals(decoded.flagsFragmentOffset.dontFragment, 1);
                 <a href=".&#x2F;.&#x2F;~&#x2F;ipv4.html" title="ipv4"><div class="docNodeKindIcon"><div class="text-Function bg-Function/15 dark:text-FunctionDark dark:bg-FunctionDark/15" title="Function">f</div></div>
 <span class="hover:bg-Function/15 hover:bg-FunctionDark/15">
                     ipv4
-                  </span>
-                </a>
-              </li><li>
-                <a href=".&#x2F;.&#x2F;~&#x2F;ipv4Address.html" title="ipv4Address"><div class="docNodeKindIcon"><div class="text-Function bg-Function/15 dark:text-FunctionDark dark:bg-FunctionDark/15" title="Function">f</div></div>
-<span class="hover:bg-Function/15 hover:bg-FunctionDark/15">
-                    ipv4Address
                   </span>
                 </a>
               </li></ul></nav><nav class="documentNavigation">

@@ -144,8 +144,11 @@
 </a>
 </div><div><div class="space-y-7" id=""><div class="markdown"><p>Decoded IPv4 datagram (RFC 791) — header fields, options trailer, and the
 raw transport-layer payload.</p>
-<p>IPv4 addresses are surfaced as dotted-quad strings (e.g. <code>&quot;192.168.1.1&quot;</code>).
-The <code>options</code> length is derived from <code>versionIhl.ihl</code> (<code>(ihl - 5) * 4</code>); the
+<p>IPv4 addresses (<code>sourceAddress</code> / <code>destinationAddress</code>) are surfaced as
+32-bit unsigned integers, the same on-wire form ARP uses. Use
+<code>@hertzg/ip/ipv4</code>'s <code>parseIpv4</code> / <code>stringifyIpv4</code> for human-readable
+conversion.</p>
+<p>The <code>options</code> length is derived from <code>versionIhl.ihl</code> (<code>(ihl - 5) * 4</code>); the
 <code>payload</code> length is derived from <code>totalLength - versionIhl.ihl * 4</code>.</p>
 </div><section class="section"  id="properties"><div>
       <h2 class="anchorable mb-1"><a href="#properties" class="anchor" aria-label="Anchor" tabIndex="-1"><svg
@@ -619,7 +622,7 @@ Properties</h2></div><div class="space-y-8"><div class="anchorable docEntry" id=
   </defs>
 </svg>
 </a>
-<a class="font-bold font-lg link" href="..&#x2F;.&#x2F;.&#x2F;~&#x2F;Ipv4.sourceAddress.html">sourceAddress</a><span class="font-medium text-stone-500 dark:text-stone-200"><span>: <span class="td-kw">string</span></span></span>
+<a class="font-bold font-lg link" href="..&#x2F;.&#x2F;.&#x2F;~&#x2F;Ipv4.sourceAddress.html">sourceAddress</a><span class="font-medium text-stone-500 dark:text-stone-200"><span>: <span class="td-kw">number</span></span></span>
       </code>
     </div><a
   class="sourceButton"
@@ -672,7 +675,7 @@ Properties</h2></div><div class="space-y-8"><div class="anchorable docEntry" id=
   </defs>
 </svg>
 </a>
-<a class="font-bold font-lg link" href="..&#x2F;.&#x2F;.&#x2F;~&#x2F;Ipv4.destinationAddress.html">destinationAddress</a><span class="font-medium text-stone-500 dark:text-stone-200"><span>: <span class="td-kw">string</span></span></span>
+<a class="font-bold font-lg link" href="..&#x2F;.&#x2F;.&#x2F;~&#x2F;Ipv4.destinationAddress.html">destinationAddress</a><span class="font-medium text-stone-500 dark:text-stone-200"><span>: <span class="td-kw">number</span></span></span>
       </code>
     </div><a
   class="sourceButton"
