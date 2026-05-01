@@ -90,26 +90,24 @@ import {
 import {
   type ArpEthernetIpv4Packet,
   arpEthernetIpv4,
+  ETHERTYPE_ARP,
 } from "@binstruct/arp";
 import {
+  ETHERTYPE_IPV4,
   type Ipv4Datagram,
   ipv4Datagram,
   type Ipv4Header,
 } from "@binstruct/ipv4";
-import { icmpHeader, type IcmpPacket } from "@binstruct/icmp";
-import { type UdpDatagram, udpDatagram } from "@binstruct/udp";
-
-/** EtherType for IPv4. */
-export const ETHERTYPE_IPV4 = 0x0800;
-
-/** EtherType for ARP. */
-export const ETHERTYPE_ARP = 0x0806;
-
-/** IPv4 protocol number for ICMP. */
-export const IP_PROTOCOL_ICMP = 1;
-
-/** IPv4 protocol number for UDP. */
-export const IP_PROTOCOL_UDP = 17;
+import {
+  icmpHeader,
+  type IcmpPacket,
+  IP_PROTOCOL_ICMP,
+} from "@binstruct/icmp";
+import {
+  IP_PROTOCOL_UDP,
+  type UdpDatagram,
+  udpDatagram,
+} from "@binstruct/udp";
 
 /**
  * Identity refiner for an Ethernet II frame whose EtherType has no decoder

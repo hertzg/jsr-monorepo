@@ -79,3 +79,9 @@ export { internetChecksum } from "./checksum.ts";
 export { icmpHeader, type IcmpPacket } from "./header.ts";
 export { type IcmpEcho, icmpEcho } from "./echo.ts";
 export { ICMP_TYPE, type IcmpType } from "./types.ts";
+
+/**
+ * IP protocol number assigned to ICMPv4 (`1`). The value an IPv4 header's
+ * `protocol` field carries when its payload is an ICMPv4 packet.
+ */
+export const IP_PROTOCOL_ICMP = 1;

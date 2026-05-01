@@ -71,6 +71,12 @@ import {
 export const UDP_HEADER_SIZE = 8;
 
 /**
+ * IP protocol number assigned to UDP (`17`). The value an IPv4/IPv6 header's
+ * `protocol` / `nextHeader` field carries when its payload is a UDP datagram.
+ */
+export const IP_PROTOCOL_UDP = 17;
+
+/**
  * Decoded representation of a UDP datagram (RFC 768).
  *
  * @property srcPort  - Source port (0–65535). Conventionally 0 means "no reply expected".

@@ -134,6 +134,12 @@ export const ipv4AddressCoder: () => Coder<string> = refine(u32be(), {
 });
 
 /**
+ * EtherType assigned to IPv4 (`0x0800`). The value an Ethernet II frame's
+ * `etherType` field carries when its payload is an IPv4 datagram.
+ */
+export const ETHERTYPE_IPV4 = 0x0800;
+
+/**
  * Creates a coder for IPv4 packet headers (RFC 791).
  *
  * Handles the 20-byte fixed header plus a variable-length options trailer

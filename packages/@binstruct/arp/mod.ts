@@ -61,6 +61,12 @@ export const ARP_PROTO_LEN_IPV4 = 4;
 export const ARP_ETHERNET_IPV4_SIZE = 28;
 
 /**
+ * EtherType assigned to ARP (`0x0806`). The value an Ethernet II frame's
+ * `etherType` field carries when its payload is an ARP packet.
+ */
+export const ETHERTYPE_ARP = 0x0806;
+
+/**
  * ARP hardware type values (the `htype` field) for common link layers.
  *
  * The full IANA registry is at
