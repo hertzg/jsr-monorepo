@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.1.0](https://github.com/hertzg/jsr-monorepo/compare/@binstruct/ethernet-v1.0.0...@binstruct/ethernet-v1.1.0) (2026-05-01)
+
+
+### Features
+
+* **@binstruct/inet:** inet stack coder (Ethernet→IPv4→UDP/ICMP/ARP) + RFC 1071 checksum, plus protocol-package cleanup ([#171](https://github.com/hertzg/jsr-monorepo/issues/171)) ([34ffc58](https://github.com/hertzg/jsr-monorepo/commit/34ffc587c0c4d04b5cf2605d05476413acec4e13))
+
 ## [1.0.0](https://github.com/hertzg/jsr-monorepo/compare/@binstruct/ethernet-v0.1.2...@binstruct/ethernet-v1.0.0) (2026-04-30)
 
 
