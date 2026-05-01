@@ -49,6 +49,14 @@
         { "type": "json", "path": "deno.json", "jsonpath": "$.version" }
       ]
     },
+    "packages/@binstruct/inet": {
+      "release-type": "simple",
+      "package-name": "@binstruct/inet",
+      "component": "@binstruct/inet",
+      "extra-files": [
+        { "type": "json", "path": "deno.json", "jsonpath": "$.version" }
+      ]
+    },
     "packages/@binstruct/ipv4": {
       "release-type": "simple",
       "package-name": "@binstruct/ipv4",
@@ -101,14 +109,6 @@
       "release-type": "simple",
       "package-name": "@hertzg/crc",
       "component": "@hertzg/crc",
-      "extra-files": [
-        { "type": "json", "path": "deno.json", "jsonpath": "$.version" }
-      ]
-    },
-    "packages/@hertzg/inet": {
-      "release-type": "simple",
-      "package-name": "@hertzg/inet",
-      "component": "@hertzg/inet",
       "extra-files": [
         { "type": "json", "path": "deno.json", "jsonpath": "$.version" }
       ]

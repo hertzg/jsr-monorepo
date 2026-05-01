@@ -13,6 +13,9 @@
 "@binstruct/icmp":
   - changed-files:
       - any-glob-to-any-file: packages/@binstruct/icmp/**
+"@binstruct/inet":
+  - changed-files:
+      - any-glob-to-any-file: packages/@binstruct/inet/**
 "@binstruct/ipv4":
   - changed-files:
       - any-glob-to-any-file: packages/@binstruct/ipv4/**
@@ -37,9 +40,6 @@
 "@hertzg/crc":
   - changed-files:
       - any-glob-to-any-file: packages/@hertzg/crc/**
-"@hertzg/inet":
-  - changed-files:
-      - any-glob-to-any-file: packages/@hertzg/inet/**
 "@hertzg/ip":
   - changed-files:
       - any-glob-to-any-file: packages/@hertzg/ip/**

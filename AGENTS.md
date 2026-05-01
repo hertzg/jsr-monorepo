@@ -67,7 +67,6 @@ mirrors the JSR coordinate. Two scopes:
 - `binstruct` - Core binary structure encoding/decoding library
 - `bx` - Binary hex string utilities
 - `crc` - CRC checksum utilities
-- `inet` - Internet stack orchestration (RFC 1071 checksum + Ethernet→IPv4→UDP/ICMP/ARP walker)
 - `ip` - IPv4/IPv6/CIDR utilities
 - `mac` - EUI-48 MAC address parse/stringify
 - `mymagti-api` - MyMagti API client
@@ -85,6 +84,7 @@ mirrors the JSR coordinate. Two scopes:
 - `cli` - CLI tools for binary structure operations
 - `ethernet` - Ethernet frame parsing
 - `icmp` - ICMPv4 packet parsing (RFC 792)
+- `inet` - Internet stack coder (Ethernet→IPv4→UDP/ICMP/ARP) + RFC 1071 checksum
 - `ipv4` - IPv4 packet header parsing
 - `pcap` - libpcap (.pcap) capture file format support
 - `png` - PNG file format support
@@ -360,6 +360,7 @@ both tiresome and error-prone.
 - `@binstruct/cli`
 - `@binstruct/ethernet`
 - `@binstruct/icmp`
+- `@binstruct/inet`
 - `@binstruct/ipv4`
 - `@binstruct/png`
 - `@binstruct/udp`
@@ -370,7 +371,6 @@ both tiresome and error-prone.
 - `@hertzg/wg-conf`
 - `@hertzg/mymagti-api`
 - `@hertzg/bx`
-- `@hertzg/inet`
 - `@hertzg/ip`
 - `@hertzg/mac`
 - `@hertzg/crc`

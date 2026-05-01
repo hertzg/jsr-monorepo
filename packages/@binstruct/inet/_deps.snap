@@ -6,7 +6,8 @@
       "@binstruct/ethernet",
       "@binstruct/icmp",
       "@binstruct/ipv4",
-      "@binstruct/udp"
+      "@binstruct/udp",
+      "@hertzg/binstruct"
     ]
   }
 }
