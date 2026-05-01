@@ -86,10 +86,58 @@
     <main><section>
   <div class="space-y-2 flex-1"><div class="space-y-7" id="module_doc"><div class="markdown"><p>ICMPv4 (RFC 792) packet encoding and decoding utilities built on
 <code>@hertzg/binstruct</code>.</p>
-<p>The wire layout of an ICMP message is a 4-byte fixed header (type, code,
-checksum) followed by 4 bytes whose meaning is determined by the type
-(the &quot;rest of header&quot; field), then a variable payload. This package ships
-two coders that cover the overwhelming majority of practical use cases:</p>
+<p>An ICMP message is a 4-byte fixed header (type, code, checksum), 4 bytes
+whose meaning is determined by the type (the &quot;rest of header&quot; field), and
+a variable-length payload:</p>
+<pre class="highlight"><code class="language-text"> 0      7 8     15 16    23 24    31
++--------+--------+--------+--------+
+|  Type  |  Code  |    Checksum     |
++--------+--------+--------+--------+
+|          Rest of Header           |
++--------+--------+--------+--------+
+|        Payload (variable)         |
++-----------------------------------+
+</code><button class="copyButton" data-copy=" 0      7 8     15 16    23 24    31
++--------+--------+--------+--------+
+|  Type  |  Code  |    Checksum     |
++--------+--------+--------+--------+
+|          Rest of Header           |
++--------+--------+--------+--------+
+|        Payload (variable)         |
++-----------------------------------+
+"><svg
+  class="copy"
+  width="15"
+  height="15"
+  viewBox="0 0 15 15"
+  fill="none"
+  xmlns="http://www.w3.org/2000/svg"
+>
+  <rect x="2" y="2" width="7" height="7" fill="none" />
+  <rect x="6" y="6" width="7" height="7" fill="none" />
+  <path
+    d="M1.55566 2.7C1.55566 2.03726 2.09292 1.5 2.75566 1.5H8.75566C9.41841 1.5 9.95566 2.03726 9.95566 2.7V5.1H12.3557C13.0184 5.1 13.5557 5.63726 13.5557 6.3V12.3C13.5557 12.9627 13.0184 13.5 12.3557 13.5H6.35566C5.69292 13.5 5.15566 12.9627 5.15566 12.3V9.9H2.75566C2.09292 9.9 1.55566 9.36274 1.55566 8.7V2.7ZM6.35566 9.9V12.3H12.3557V6.3H9.95566V8.7C9.95566 9.36274 9.41841 9.9 8.75566 9.9H6.35566ZM8.75566 8.7V2.7H2.75566V8.7H8.75566Z"
+    fill="currentColor"
+  />
+</svg>
+<svg
+  class="check"
+  width="15"
+  height="15"
+  viewBox="0 0 24 24"
+  stroke-width="2"
+  stroke="currentColor"
+  fill="none"
+  stroke-linecap="round"
+  stroke-linejoin="round"
+  xmlns="http://www.w3.org/2000/svg"
+>
+  <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+  <path d="M5 12l5 5l10 -10" />
+</svg>
+</button><code></code></pre>
+<p>This package ships two coders that cover the overwhelming majority of
+practical use cases:</p>
 <ul>
 <li><a href="././~/icmpHeader.html">icmpHeader</a> — generic, faithful to the wire. Exposes <code>type</code>,
 <code>code</code>, <code>checksum</code>, the raw 4-byte <code>restOfHeader</code>, and a <code>payload</code>. Use
