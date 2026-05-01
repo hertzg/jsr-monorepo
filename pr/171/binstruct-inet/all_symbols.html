@@ -300,6 +300,15 @@ Functions</h2></div><div class="namespaceSection"><div id="namespace_internetche
 		    <a href=".&#x2F;.&#x2F;.&#x2F;~&#x2F;internetChecksum.html" title="internetChecksum">
 			    <span>internetChecksum</span><span>(<span><span>data<span>: <span class="td-ref">Uint8Array</span></span></span></span>)<span>: <span class="td-kw">number</span></span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Computes the 16-bit Internet checksum (RFC 1071) over a span of bytes.</p>
 </div></div></div>
+    </div><div id="namespace_ipv4refiner" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-Function bg-Function/15 dark:text-FunctionDark dark:bg-FunctionDark/15" title="Function">f</div></div>
+<div class="namespaceItemContent">
+		    <a href=".&#x2F;.&#x2F;.&#x2F;~&#x2F;ipv4Refiner.html" title="ipv4Refiner">
+			    <span>ipv4Refiner</span><span><span>&lt;<span><span class="td-tp">TIpv4</span><span><span class="td-kw"> extends </span><span class="td-ref">Ipv4Header</span></span></span>&gt;</span>(<span><span>coder<span>: <span class="td-ref">Coder</span>&lt;<span class="td-ref">TIpv4</span>&gt;</span></span></span>)<span>: <span class="td-ref">Refiner</span>&lt;<span class="td-ref">Ethernet2Frame</span><span>, </span><span class="td-ref">FrameWithIpv4</span>&lt;<span class="td-ref">TIpv4</span>&gt;<span>, </span><span>[]</span>&gt;</span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Refiner factory that swaps an Ethernet frame's raw payload for a typed IPv4
+datagram. Used as a <code>refineSwitch</code> arm when the Ethernet <code>etherType</code> selects
+IPv4. The inner <code>coder</code> is the IPv4 coder to use — pass <code>ipv4Datagram()</code> for
+raw L4 payload, or <code>ipv4Coder</code> (this module's local coder) for
+the fully refined L4 dispatch.</p>
+</div></div></div>
     </div></div>
 </section>
 <section class="section"  id="default_type-aliases"><div>
@@ -338,7 +347,7 @@ Type Aliases</h2></div><div class="namespaceSection"><div id="namespace_framedec
     </div><div id="namespace_framewithipv4" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-TypeAlias bg-TypeAlias/15 dark:text-TypeAliasDark dark:bg-TypeAliasDark/15" title="Type Alias">T</div></div>
 <div class="namespaceItemContent">
 		    <a href=".&#x2F;.&#x2F;.&#x2F;~&#x2F;FrameWithIpv4.html" title="FrameWithIpv4">
-			    <span>FrameWithIpv4</span><span> = <div class="ml-indent"><span><span class="td-ref">Omit</span>&lt;<span class="td-ref">Ethernet2Frame</span><span>, </span><span class="td-str">"payload"</span>&gt;</span><br /><span><span class="td-op"> & </span>{ payload<span>: { kind<span>: <span class="td-str">"ipv4"</span></span>; ipv4<span>: <span class="td-ref">Ipv4Decoded</span></span>;  }</span>;  }</span></div></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Refined frame whose payload is an IPv4 datagram with a typed L4.</p>
+			    <span>FrameWithIpv4</span><span><span>&lt;<span><span class="td-tp">TIpv4</span><span><span class="td-kw"> extends </span><span class="td-ref">Ipv4Header</span></span><span><span> = </span><span class="td-ref">Ipv4Decoded</span></span></span>&gt;</span> = <div class="ml-indent"><span><span class="td-ref">Omit</span>&lt;<span class="td-ref">Ethernet2Frame</span><span>, </span><span class="td-str">"payload"</span>&gt;</span><br /><span><span class="td-op"> & </span>{ payload<span>: { kind<span>: <span class="td-str">"ipv4"</span></span>; ipv4<span>: <span class="td-ref">TIpv4</span></span>;  }</span>;  }</span></div></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Refined frame whose payload is an IPv4 datagram with a typed L4.</p>
 </div></div></div>
     </div><div id="namespace_framewithrawl3" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-TypeAlias bg-TypeAlias/15 dark:text-TypeAliasDark dark:bg-TypeAliasDark/15" title="Type Alias">T</div></div>
 <div class="namespaceItemContent">
@@ -390,7 +399,14 @@ Type Aliases</h2></div><div class="namespaceSection"><div id="namespace_framedec
   </defs>
 </svg>
 </a>
-Variables</h2></div><div class="namespaceSection"><div id="namespace_ethertype_arp" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-Variable bg-Variable/15 dark:text-VariableDark dark:bg-VariableDark/15" title="Variable">v</div></div>
+Variables</h2></div><div class="namespaceSection"><div id="namespace_arprefiner" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-Variable bg-Variable/15 dark:text-VariableDark dark:bg-VariableDark/15" title="Variable">v</div></div>
+<div class="namespaceItemContent">
+		    <a href=".&#x2F;.&#x2F;.&#x2F;~&#x2F;arpRefiner.html" title="arpRefiner">
+			    <span>arpRefiner</span><span>: <span class="td-ref">Refiner</span>&lt;<span class="td-ref">Ethernet2Frame</span><span>, </span><span class="td-ref">FrameWithArp</span><span>, </span><span>[]</span>&gt;</span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Refiner that swaps an Ethernet frame's raw payload for a typed
+Ethernet/IPv4 ARP packet. Used as a <code>refineSwitch</code> arm when the Ethernet
+<code>etherType</code> selects ARP.</p>
+</div></div></div>
+    </div><div id="namespace_ethertype_arp" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-Variable bg-Variable/15 dark:text-VariableDark dark:bg-VariableDark/15" title="Variable">v</div></div>
 <div class="namespaceItemContent">
 		    <a href=".&#x2F;.&#x2F;.&#x2F;~&#x2F;ETHERTYPE_ARP.html" title="ETHERTYPE_ARP">
 			    <span>ETHERTYPE_ARP</span><span>: <span class="td-lit">2054</span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>EtherType for ARP.</p>
@@ -399,6 +415,12 @@ Variables</h2></div><div class="namespaceSection"><div id="namespace_ethertype_a
 <div class="namespaceItemContent">
 		    <a href=".&#x2F;.&#x2F;.&#x2F;~&#x2F;ETHERTYPE_IPV4.html" title="ETHERTYPE_IPV4">
 			    <span>ETHERTYPE_IPV4</span><span>: <span class="td-lit">2048</span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>EtherType for IPv4.</p>
+</div></div></div>
+    </div><div id="namespace_icmprefiner" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-Variable bg-Variable/15 dark:text-VariableDark dark:bg-VariableDark/15" title="Variable">v</div></div>
+<div class="namespaceItemContent">
+		    <a href=".&#x2F;.&#x2F;.&#x2F;~&#x2F;icmpRefiner.html" title="icmpRefiner">
+			    <span>icmpRefiner</span><span>: <span class="td-ref">Refiner</span>&lt;<span class="td-ref">Ipv4Datagram</span><span>, </span><span class="td-ref">Ipv4WithIcmp</span><span>, </span><span>[]</span>&gt;</span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Refiner that swaps an IPv4 datagram's raw payload for a typed ICMPv4 packet.
+Used as a <code>refineSwitch</code> arm when the IPv4 <code>protocol</code> field selects ICMP.</p>
 </div></div></div>
     </div><div id="namespace_inetcoder" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-Variable bg-Variable/15 dark:text-VariableDark dark:bg-VariableDark/15" title="Variable">v</div></div>
 <div class="namespaceItemContent">
@@ -429,6 +451,12 @@ surface to the caller.</p>
 		    <a href=".&#x2F;.&#x2F;.&#x2F;~&#x2F;rawIpv4Refiner.html" title="rawIpv4Refiner">
 			    <span>rawIpv4Refiner</span><span>: <span class="td-ref">Refiner</span>&lt;<span class="td-ref">Ipv4Datagram</span><span>, </span><span class="td-ref">Ipv4Datagram</span><span>, </span><span>[]</span>&gt;</span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Identity refiner for an IPv4 datagram whose <code>protocol</code> field has no
 transport-layer decoder in the family. Round-trips the datagram unchanged.</p>
+</div></div></div>
+    </div><div id="namespace_udprefiner" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-Variable bg-Variable/15 dark:text-VariableDark dark:bg-VariableDark/15" title="Variable">v</div></div>
+<div class="namespaceItemContent">
+		    <a href=".&#x2F;.&#x2F;.&#x2F;~&#x2F;udpRefiner.html" title="udpRefiner">
+			    <span>udpRefiner</span><span>: <span class="td-ref">Refiner</span>&lt;<span class="td-ref">Ipv4Datagram</span><span>, </span><span class="td-ref">Ipv4WithUdp</span><span>, </span><span>[]</span>&gt;</span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Refiner that swaps an IPv4 datagram's raw payload for a typed UDP datagram.
+Used as a <code>refineSwitch</code> arm when the IPv4 <code>protocol</code> field selects UDP.</p>
 </div></div></div>
     </div></div>
 </section>

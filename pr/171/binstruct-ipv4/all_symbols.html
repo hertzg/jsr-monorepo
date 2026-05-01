@@ -288,10 +288,6 @@ sized via the <code>totalLength</code> field.</p>
 		    <a href=".&#x2F;.&#x2F;.&#x2F;~&#x2F;ipv4Header.html" title="ipv4Header">
 			    <span>ipv4Header</span><span>()<span>: <span class="td-ref">Coder</span>&lt;<span class="td-ref">Ipv4Header</span>&gt;</span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Creates a coder for IPv4 packet headers (RFC 791).</p>
 </div></div></div>
-    </div><div id="namespace_ipv4refiner" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-Function bg-Function/15 dark:text-FunctionDark dark:bg-FunctionDark/15" title="Function">f</div></div>
-<div class="namespaceItemContent">
-		    <a href=".&#x2F;.&#x2F;.&#x2F;~&#x2F;ipv4Refiner.html" title="ipv4Refiner">
-			    <span>ipv4Refiner</span><span><span>&lt;<span><span class="td-tp">TIpv4</span><span><span class="td-kw"> extends </span><span class="td-ref">Ipv4Header</span></span></span>&gt;</span>(<span><span>coder<span>: <span class="td-ref">Coder</span>&lt;<span class="td-ref">TIpv4</span>&gt;</span></span></span>)<span>: <span class="td-ref">Refiner</span>&lt;<span class="td-ref">Ethernet2Frame</span><span>, </span><span class="td-ref">FrameWithIpv4</span>&lt;<span class="td-ref">TIpv4</span>&gt;<span>, </span><span>[]</span>&gt;</span></span></a></div>
     </div></div>
 </section>
 <section class="section"  id="default_type-aliases"><div>
@@ -317,12 +313,7 @@ sized via the <code>totalLength</code> field.</p>
   </defs>
 </svg>
 </a>
-Type Aliases</h2></div><div class="namespaceSection"><div id="namespace_framewithipv4" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-TypeAlias bg-TypeAlias/15 dark:text-TypeAliasDark dark:bg-TypeAliasDark/15" title="Type Alias">T</div></div>
-<div class="namespaceItemContent">
-		    <a href=".&#x2F;.&#x2F;.&#x2F;~&#x2F;FrameWithIpv4.html" title="FrameWithIpv4">
-			    <span>FrameWithIpv4</span><span><span>&lt;<span><span class="td-tp">TIpv4</span><span><span class="td-kw"> extends </span><span class="td-ref">Ipv4Header</span></span><span><span> = </span><span class="td-ref">Ipv4Datagram</span></span></span>&gt;</span> = <div class="ml-indent"><span><span class="td-ref">Omit</span>&lt;<span class="td-ref">Ethernet2Frame</span><span>, </span><span class="td-str">"payload"</span>&gt;</span><br /><span><span class="td-op"> & </span>{ payload<span>: { kind<span>: <span class="td-str">"ipv4"</span></span>; ipv4<span>: <span class="td-ref">TIpv4</span></span>;  }</span>;  }</span></div></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Refined Ethernet frame whose payload is a decoded IPv4 datagram.</p>
-</div></div></div>
-    </div><div id="namespace_ipv4datagram-1" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-TypeAlias bg-TypeAlias/15 dark:text-TypeAliasDark dark:bg-TypeAliasDark/15" title="Type Alias">T</div></div>
+Type Aliases</h2></div><div class="namespaceSection"><div id="namespace_ipv4datagram-1" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-TypeAlias bg-TypeAlias/15 dark:text-TypeAliasDark dark:bg-TypeAliasDark/15" title="Type Alias">T</div></div>
 <div class="namespaceItemContent">
 		    <a href=".&#x2F;.&#x2F;.&#x2F;~&#x2F;Ipv4Datagram.html" title="Ipv4Datagram">
 			    <span>Ipv4Datagram</span><span> = <span><span class="td-ref">Ipv4Header</span><span class="td-op"> & </span>{ payload<span>: <span class="td-ref">Uint8Array</span></span>;  }</span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Decoded IPv4 datagram — the Ipv4Header fields plus the raw
