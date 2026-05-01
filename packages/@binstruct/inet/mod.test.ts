@@ -1,7 +1,14 @@
 import { assert, assertEquals } from "@std/assert";
 import { parseIpv4 } from "@hertzg/ip/ipv4";
-import { ARP_OPCODE } from "@binstruct/arp";
-import { inetFrame, type InetFrameRefined, internetChecksum } from "./mod.ts";
+import { ARP_OPCODE, ETHERTYPE_ARP } from "@binstruct/arp";
+import { ETHERTYPE_IPV4 } from "@binstruct/ipv4";
+import { IP_PROTOCOL_ICMP } from "@binstruct/icmp";
+import { IP_PROTOCOL_UDP } from "@binstruct/udp";
+import {
+  type Ethernet2FrameRefined,
+  inetFrame,
+  internetChecksum,
+} from "./mod.ts";
 
 Deno.test("internetChecksum: RFC 1071 §3 worked example", () => {
   // deno-fmt-ignore
@@ -45,39 +52,33 @@ Deno.test("internetChecksum: carry folding wraps multiple times", () => {
 
 Deno.test("inetFrame: round-trips ethernet → ipv4 → udp", () => {
   const coder = inetFrame();
-  const value: InetFrameRefined = {
+  const value: Ethernet2FrameRefined = {
     dstMac: new Uint8Array([0, 0, 0, 0, 0, 1]),
     srcMac: new Uint8Array([0, 0, 0, 0, 0, 2]),
-    etherType: 0x0800,
+    etherType: ETHERTYPE_IPV4,
     payload: {
-      kind: "ipv4",
-      ipv4: {
-        versionIhl: { version: 4, ihl: 5 },
-        typeOfService: 0,
-        totalLength: 32,
-        identification: 0,
-        flagsFragmentOffset: {
-          reserved: 0,
-          dontFragment: 0,
-          moreFragments: 0,
-          fragmentOffset: 0,
-        },
-        timeToLive: 64,
-        protocol: 17,
-        headerChecksum: 0,
-        sourceAddress: parseIpv4("192.0.2.1"),
-        destinationAddress: parseIpv4("192.0.2.2"),
-        options: new Uint8Array(0),
-        payload: {
-          kind: "udp",
-          udp: {
-            srcPort: 53,
-            dstPort: 49152,
-            length: 12,
-            checksum: 0,
-            payload: new Uint8Array([0xde, 0xad, 0xbe, 0xef]),
-          },
-        },
+      versionIhl: { version: 4, ihl: 5 },
+      typeOfService: 0,
+      totalLength: 32,
+      identification: 0,
+      flagsFragmentOffset: {
+        reserved: 0,
+        dontFragment: 0,
+        moreFragments: 0,
+        fragmentOffset: 0,
+      },
+      timeToLive: 64,
+      protocol: IP_PROTOCOL_UDP,
+      headerChecksum: 0,
+      sourceAddress: parseIpv4("192.0.2.1"),
+      destinationAddress: parseIpv4("192.0.2.2"),
+      options: new Uint8Array(0),
+      payload: {
+        srcPort: 53,
+        dstPort: 49152,
+        length: 12,
+        checksum: 0,
+        payload: new Uint8Array([0xde, 0xad, 0xbe, 0xef]),
       },
     },
   };
@@ -86,53 +87,49 @@ Deno.test("inetFrame: round-trips ethernet → ipv4 → udp", () => {
   const written = coder.encode(value, buf);
   const [decoded] = coder.decode(buf.subarray(0, written));
 
+  assertEquals(decoded.etherType, ETHERTYPE_IPV4);
   assert(!(decoded.payload instanceof Uint8Array));
-  assert(decoded.payload.kind === "ipv4");
-  assertEquals(decoded.payload.ipv4.sourceAddress, parseIpv4("192.0.2.1"));
-  assert(!(decoded.payload.ipv4.payload instanceof Uint8Array));
-  assert(decoded.payload.ipv4.payload.kind === "udp");
-  assertEquals(decoded.payload.ipv4.payload.udp.srcPort, 53);
+  assert("protocol" in decoded.payload);
+  assertEquals(decoded.payload.sourceAddress, parseIpv4("192.0.2.1"));
+  assertEquals(decoded.payload.protocol, IP_PROTOCOL_UDP);
+  assert(!(decoded.payload.payload instanceof Uint8Array));
+  assert("srcPort" in decoded.payload.payload);
+  assertEquals(decoded.payload.payload.srcPort, 53);
   assertEquals(
-    decoded.payload.ipv4.payload.udp.payload,
+    decoded.payload.payload.payload,
     new Uint8Array([0xde, 0xad, 0xbe, 0xef]),
   );
 });
 
 Deno.test("inetFrame: round-trips ethernet → ipv4 → icmp", () => {
   const coder = inetFrame();
-  const value: InetFrameRefined = {
+  const value: Ethernet2FrameRefined = {
     dstMac: new Uint8Array([0, 0, 0, 0, 0, 1]),
     srcMac: new Uint8Array([0, 0, 0, 0, 0, 2]),
-    etherType: 0x0800,
+    etherType: ETHERTYPE_IPV4,
     payload: {
-      kind: "ipv4",
-      ipv4: {
-        versionIhl: { version: 4, ihl: 5 },
-        typeOfService: 0,
-        totalLength: 28,
-        identification: 0,
-        flagsFragmentOffset: {
-          reserved: 0,
-          dontFragment: 0,
-          moreFragments: 0,
-          fragmentOffset: 0,
-        },
-        timeToLive: 64,
-        protocol: 1,
-        headerChecksum: 0,
-        sourceAddress: parseIpv4("10.0.0.1"),
-        destinationAddress: parseIpv4("10.0.0.2"),
-        options: new Uint8Array(0),
-        payload: {
-          kind: "icmp",
-          icmp: {
-            type: 8,
-            code: 0,
-            checksum: 0,
-            restOfHeader: new Uint8Array([0, 1, 0, 1]),
-            payload: new Uint8Array(0),
-          },
-        },
+      versionIhl: { version: 4, ihl: 5 },
+      typeOfService: 0,
+      totalLength: 28,
+      identification: 0,
+      flagsFragmentOffset: {
+        reserved: 0,
+        dontFragment: 0,
+        moreFragments: 0,
+        fragmentOffset: 0,
+      },
+      timeToLive: 64,
+      protocol: IP_PROTOCOL_ICMP,
+      headerChecksum: 0,
+      sourceAddress: parseIpv4("10.0.0.1"),
+      destinationAddress: parseIpv4("10.0.0.2"),
+      options: new Uint8Array(0),
+      payload: {
+        type: 8,
+        code: 0,
+        checksum: 0,
+        restOfHeader: new Uint8Array([0, 1, 0, 1]),
+        payload: new Uint8Array(0),
       },
     },
   };
@@ -141,32 +138,31 @@ Deno.test("inetFrame: round-trips ethernet → ipv4 → icmp", () => {
   const written = coder.encode(value, buf);
   const [decoded] = coder.decode(buf.subarray(0, written));
 
+  assertEquals(decoded.etherType, ETHERTYPE_IPV4);
   assert(!(decoded.payload instanceof Uint8Array));
-  assert(decoded.payload.kind === "ipv4");
-  assert(!(decoded.payload.ipv4.payload instanceof Uint8Array));
-  assert(decoded.payload.ipv4.payload.kind === "icmp");
-  assertEquals(decoded.payload.ipv4.payload.icmp.type, 8);
+  assert("protocol" in decoded.payload);
+  assertEquals(decoded.payload.protocol, IP_PROTOCOL_ICMP);
+  assert(!(decoded.payload.payload instanceof Uint8Array));
+  assert("type" in decoded.payload.payload);
+  assertEquals(decoded.payload.payload.type, 8);
 });
 
 Deno.test("inetFrame: round-trips ethernet → arp", () => {
   const coder = inetFrame();
-  const value: InetFrameRefined = {
+  const value: Ethernet2FrameRefined = {
     dstMac: new Uint8Array([0xff, 0xff, 0xff, 0xff, 0xff, 0xff]),
     srcMac: new Uint8Array([0, 0, 0, 0, 0, 2]),
-    etherType: 0x0806,
+    etherType: ETHERTYPE_ARP,
     payload: {
-      kind: "arp",
-      arp: {
-        hardwareType: 1,
-        protocolType: 0x0800,
-        hardwareAddressLength: 6,
-        protocolAddressLength: 4,
-        operation: ARP_OPCODE.REQUEST,
-        senderHardwareAddress: new Uint8Array([0, 0, 0, 0, 0, 2]),
-        senderProtocolAddress: 0xc0000201,
-        targetHardwareAddress: new Uint8Array([0, 0, 0, 0, 0, 0]),
-        targetProtocolAddress: 0xc0000202,
-      },
+      hardwareType: 1,
+      protocolType: 0x0800,
+      hardwareAddressLength: 6,
+      protocolAddressLength: 4,
+      operation: ARP_OPCODE.REQUEST,
+      senderHardwareAddress: new Uint8Array([0, 0, 0, 0, 0, 2]),
+      senderProtocolAddress: 0xc0000201,
+      targetHardwareAddress: new Uint8Array([0, 0, 0, 0, 0, 0]),
+      targetProtocolAddress: 0xc0000202,
     },
   };
 
@@ -174,15 +170,16 @@ Deno.test("inetFrame: round-trips ethernet → arp", () => {
   const written = coder.encode(value, buf);
   const [decoded] = coder.decode(buf.subarray(0, written));
 
+  assertEquals(decoded.etherType, ETHERTYPE_ARP);
   assert(!(decoded.payload instanceof Uint8Array));
-  assert(decoded.payload.kind === "arp");
-  assertEquals(decoded.payload.arp.operation, ARP_OPCODE.REQUEST);
-  assertEquals(decoded.payload.arp.senderProtocolAddress, 0xc0000201);
+  assert("operation" in decoded.payload);
+  assertEquals(decoded.payload.operation, ARP_OPCODE.REQUEST);
+  assertEquals(decoded.payload.senderProtocolAddress, 0xc0000201);
 });
 
 Deno.test("inetFrame: unknown EtherType surfaces as a raw Uint8Array", () => {
   const coder = inetFrame();
-  const value: InetFrameRefined = {
+  const value: Ethernet2FrameRefined = {
     dstMac: new Uint8Array([0, 0, 0, 0, 0, 1]),
     srcMac: new Uint8Array([0, 0, 0, 0, 0, 2]),
     etherType: 0x88cc, // LLDP
@@ -200,31 +197,28 @@ Deno.test("inetFrame: unknown EtherType surfaces as a raw Uint8Array", () => {
 Deno.test("inetFrame: unknown IPv4 protocol surfaces as a raw Uint8Array", () => {
   const coder = inetFrame();
   const innerBytes = new Uint8Array([0xaa, 0xbb, 0xcc]);
-  const value: InetFrameRefined = {
+  const value: Ethernet2FrameRefined = {
     dstMac: new Uint8Array([0, 0, 0, 0, 0, 1]),
     srcMac: new Uint8Array([0, 0, 0, 0, 0, 2]),
-    etherType: 0x0800,
+    etherType: ETHERTYPE_IPV4,
     payload: {
-      kind: "ipv4",
-      ipv4: {
-        versionIhl: { version: 4, ihl: 5 },
-        typeOfService: 0,
-        totalLength: 23,
-        identification: 0,
-        flagsFragmentOffset: {
-          reserved: 0,
-          dontFragment: 0,
-          moreFragments: 0,
-          fragmentOffset: 0,
-        },
-        timeToLive: 64,
-        protocol: 6, // TCP — no coder for it in the family yet.
-        headerChecksum: 0,
-        sourceAddress: parseIpv4("10.0.0.1"),
-        destinationAddress: parseIpv4("10.0.0.2"),
-        options: new Uint8Array(0),
-        payload: innerBytes,
+      versionIhl: { version: 4, ihl: 5 },
+      typeOfService: 0,
+      totalLength: 23,
+      identification: 0,
+      flagsFragmentOffset: {
+        reserved: 0,
+        dontFragment: 0,
+        moreFragments: 0,
+        fragmentOffset: 0,
       },
+      timeToLive: 64,
+      protocol: 6, // TCP — no coder for it in the family yet.
+      headerChecksum: 0,
+      sourceAddress: parseIpv4("10.0.0.1"),
+      destinationAddress: parseIpv4("10.0.0.2"),
+      options: new Uint8Array(0),
+      payload: innerBytes,
     },
   };
 
@@ -232,8 +226,9 @@ Deno.test("inetFrame: unknown IPv4 protocol surfaces as a raw Uint8Array", () =>
   const written = coder.encode(value, buf);
   const [decoded] = coder.decode(buf.subarray(0, written));
 
+  assertEquals(decoded.etherType, ETHERTYPE_IPV4);
   assert(!(decoded.payload instanceof Uint8Array));
-  assert(decoded.payload.kind === "ipv4");
-  assert(decoded.payload.ipv4.payload instanceof Uint8Array);
-  assertEquals(decoded.payload.ipv4.payload, innerBytes);
+  assert("protocol" in decoded.payload);
+  assert(decoded.payload.payload instanceof Uint8Array);
+  assertEquals(decoded.payload.payload, innerBytes);
 });
