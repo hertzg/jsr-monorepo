@@ -40,27 +40,7 @@
     "**/_deps.snap"
   ],
   "workspace": [
-    "./packages/binstruct",
-    "./packages/binstruct-arp",
-    "./packages/binstruct-bmp",
-    "./packages/binstruct-cli",
-    "./packages/binstruct-ethernet",
-    "./packages/binstruct-icmp",
-    "./packages/binstruct-ipv4",
-    "./packages/binstruct-png",
-    "./packages/binstruct-udp",
-    "./packages/binstruct-wav",
-    "./packages/binstruct-pcap",
-    "./packages/wg-keys",
-    "./packages/wg-ini",
-    "./packages/wg-conf",
-    "./packages/mymagti-api",
-    "./packages/bx",
-    "./packages/routeros-api",
-    "./packages/tplink-api",
-    "./packages/ip",
-    "./packages/mac",
-    "./packages/crc",
-    "./packages/xhb"
+    "./packages/@binstruct/*",
+    "./packages/@hertzg/*"
   ]
 }
