@@ -101,7 +101,7 @@ ICMPv4 (<code>@binstruct/icmp</code> via <code>icmpRefiner</code>)</li>
 </ul>
 <p>Adding a layer is one new <code>as&lt;Protocol&gt;</code> factory in the protocol's package
 plus one entry in this file's <code>refineSwitch</code> arms.</p>
-<p>Also exports <a href="././~/rawRefiner.html"><code>rawRefiner</code></a> — the identity refiner used for the
+<p>Also exports <code>rawRefiner</code> — the identity refiner used for the
 &quot;unknown protocol&quot; fallback at every level — and re-exports
 <a href="././~/internetChecksum.html"><code>internetChecksum</code></a> (RFC 1071) for callers that need to fill in
 IPv4/UDP/ICMP/TCP checksum fields.</p>
@@ -305,13 +305,13 @@ assertEquals(decoded.payload.ipv4.payload.udp.payload, new Uint8Array([0xde, 0xa
                   </span>
                 </a>
               </li><li>
-                <a href=".&#x2F;.&#x2F;~&#x2F;rawRefiner.html" title="rawRefiner"><div class="docNodeKindIcon"><div class="text-Function bg-Function/15 dark:text-FunctionDark dark:bg-FunctionDark/15" title="Function">f</div></div>
-<span class="hover:bg-Function/15 hover:bg-FunctionDark/15">
-                    rawRefiner
+                <a href=".&#x2F;.&#x2F;~&#x2F;rawFrameRefiner.html" title="rawFrameRefiner"><div class="docNodeKindIcon"><div class="text-Variable bg-Variable/15 dark:text-VariableDark dark:bg-VariableDark/15" title="Variable">v</div></div>
+<span class="hover:bg-Variable/15 hover:bg-VariableDark/15">
+                    rawFrameRefiner
                   </span>
                 </a>
               </li></ul><a class="flex items-center gap-0.5" href=".&#x2F;all_symbols.html">
-              <span class="leading-none">view all 15 symbols</span><svg
+              <span class="leading-none">view all 16 symbols</span><svg
   width="16"
   height="16"
   viewBox="0 0 16 16"

@@ -300,11 +300,6 @@ Functions</h2></div><div class="namespaceSection"><div id="namespace_internetche
 		    <a href=".&#x2F;.&#x2F;.&#x2F;~&#x2F;internetChecksum.html" title="internetChecksum">
 			    <span>internetChecksum</span><span>(<span><span>data<span>: <span class="td-ref">Uint8Array</span></span></span></span>)<span>: <span class="td-kw">number</span></span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Computes the 16-bit Internet checksum (RFC 1071) over a span of bytes.</p>
 </div></div></div>
-    </div><div id="namespace_rawrefiner" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-Function bg-Function/15 dark:text-FunctionDark dark:bg-FunctionDark/15" title="Function">f</div></div>
-<div class="namespaceItemContent">
-		    <a href=".&#x2F;.&#x2F;.&#x2F;~&#x2F;rawRefiner.html" title="rawRefiner">
-			    <span>rawRefiner</span><span><span>&lt;<span><span class="td-tp">THost</span><span><span class="td-kw"> extends </span>{ payload<span>: <span class="td-ref">Uint8Array</span></span>;  }</span></span>&gt;</span>()<span>: <span class="td-ref">Refiner</span>&lt;<span class="td-ref">THost</span><span>, </span><span class="td-ref">THost</span><span>, </span><span>[]</span>&gt;</span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Identity refiner — leaves a host's <code>payload: Uint8Array</code> exactly as-is.</p>
-</div></div></div>
     </div></div>
 </section>
 <section class="section"  id="default_type-aliases"><div>
@@ -421,6 +416,19 @@ full structured representation.</p>
 <div class="namespaceItemContent">
 		    <a href=".&#x2F;.&#x2F;.&#x2F;~&#x2F;IP_PROTOCOL_UDP.html" title="IP_PROTOCOL_UDP">
 			    <span>IP_PROTOCOL_UDP</span><span>: <span class="td-lit">17</span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>IPv4 protocol number for UDP.</p>
+</div></div></div>
+    </div><div id="namespace_rawframerefiner" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-Variable bg-Variable/15 dark:text-VariableDark dark:bg-VariableDark/15" title="Variable">v</div></div>
+<div class="namespaceItemContent">
+		    <a href=".&#x2F;.&#x2F;.&#x2F;~&#x2F;rawFrameRefiner.html" title="rawFrameRefiner">
+			    <span>rawFrameRefiner</span><span>: <span class="td-ref">Refiner</span>&lt;<span class="td-ref">Ethernet2Frame</span><span>, </span><span class="td-ref">Ethernet2Frame</span><span>, </span><span>[]</span>&gt;</span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Identity refiner for an Ethernet II frame whose EtherType has no decoder
+in the family. Round-trips the frame unchanged so the raw payload bytes
+surface to the caller.</p>
+</div></div></div>
+    </div><div id="namespace_rawipv4refiner" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-Variable bg-Variable/15 dark:text-VariableDark dark:bg-VariableDark/15" title="Variable">v</div></div>
+<div class="namespaceItemContent">
+		    <a href=".&#x2F;.&#x2F;.&#x2F;~&#x2F;rawIpv4Refiner.html" title="rawIpv4Refiner">
+			    <span>rawIpv4Refiner</span><span>: <span class="td-ref">Refiner</span>&lt;<span class="td-ref">Ipv4Datagram</span><span>, </span><span class="td-ref">Ipv4Datagram</span><span>, </span><span>[]</span>&gt;</span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Identity refiner for an IPv4 datagram whose <code>protocol</code> field has no
+transport-layer decoder in the family. Round-trips the datagram unchanged.</p>
 </div></div></div>
     </div></div>
 </section>
