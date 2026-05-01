@@ -223,11 +223,11 @@ export function arpEthernetIpv4(): Coder<ArpEthernetIpv4Packet> {
  * import { assert, assertEquals } from "@std/assert";
  * import { refineSwitch, type Context } from "@hertzg/binstruct";
  * import { ethernet2Frame, type Ethernet2Frame } from "@binstruct/ethernet";
- * import { arpEthernetIpv4, ARP_OPCODE, asArp } from "@binstruct/arp";
+ * import { arpEthernetIpv4, ARP_OPCODE, arpRefiner } from "@binstruct/arp";
  *
  * const coder = refineSwitch(
  *   ethernet2Frame(),
- *   { arp: asArp<Ethernet2Frame>() },
+ *   { arp: arpRefiner<Ethernet2Frame>() },
  *   {
  *     refine: (frame: Ethernet2Frame, _ctx: Context) =>
  *       frame.etherType === 0x0806 ? "arp" : null,
@@ -258,7 +258,7 @@ export function arpEthernetIpv4(): Coder<ArpEthernetIpv4Packet> {
  * assertEquals(decoded.payload.arp.oper, ARP_OPCODE.REQUEST);
  * ```
  */
-export function asArp<THost extends { payload: Uint8Array }>(): Refiner<
+export function arpRefiner<THost extends { payload: Uint8Array }>(): Refiner<
   THost,
   & Omit<THost, "payload">
   & { payload: { kind: "arp"; arp: ArpEthernetIpv4Packet } },

@@ -27,11 +27,11 @@ import { type IcmpPacket, icmpHeader } from "./header.ts";
  * import { assert, assertEquals } from "@std/assert";
  * import { refineSwitch, type Context } from "@hertzg/binstruct";
  * import { ipv4Datagram, type Ipv4Datagram } from "@binstruct/ipv4";
- * import { asIcmp } from "@binstruct/icmp";
+ * import { icmpRefiner } from "@binstruct/icmp";
  *
  * const coder = refineSwitch(
  *   ipv4Datagram(),
- *   { icmp: asIcmp<Ipv4Datagram>() },
+ *   { icmp: icmpRefiner<Ipv4Datagram>() },
  *   {
  *     refine: (d: Ipv4Datagram, _ctx: Context) => d.protocol === 1 ? "icmp" : null,
  *     unrefine: (_r, _ctx: Context) => "icmp",
@@ -66,7 +66,7 @@ import { type IcmpPacket, icmpHeader } from "./header.ts";
  * assertEquals(decoded.payload.icmp.type, 8);
  * ```
  */
-export function asIcmp<THost extends { payload: Uint8Array }>(): Refiner<
+export function icmpRefiner<THost extends { payload: Uint8Array }>(): Refiner<
   THost,
   Omit<THost, "payload"> & { payload: { kind: "icmp"; icmp: IcmpPacket } },
   []

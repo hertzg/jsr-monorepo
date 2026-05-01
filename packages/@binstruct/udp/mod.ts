@@ -178,11 +178,11 @@ export function udpDatagram(): Coder<UdpDatagram> {
  * import { assert, assertEquals } from "@std/assert";
  * import { refineSwitch, type Context } from "@hertzg/binstruct";
  * import { ipv4Datagram, type Ipv4Datagram } from "@binstruct/ipv4";
- * import { asUdp } from "@binstruct/udp";
+ * import { udpRefiner } from "@binstruct/udp";
  *
  * const coder = refineSwitch(
  *   ipv4Datagram(),
- *   { udp: asUdp<Ipv4Datagram>() },
+ *   { udp: udpRefiner<Ipv4Datagram>() },
  *   {
  *     refine: (d: Ipv4Datagram, _ctx: Context) => d.protocol === 17 ? "udp" : null,
  *     unrefine: (_r, _ctx: Context) => "udp",
@@ -216,7 +216,7 @@ export function udpDatagram(): Coder<UdpDatagram> {
  * assertEquals(decoded.payload.udp.srcPort, 53);
  * ```
  */
-export function asUdp<THost extends { payload: Uint8Array }>(): Refiner<
+export function udpRefiner<THost extends { payload: Uint8Array }>(): Refiner<
   THost,
   Omit<THost, "payload"> & { payload: { kind: "udp"; udp: UdpDatagram } },
   []

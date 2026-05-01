@@ -232,7 +232,7 @@ export type Ipv4Datagram = Ipv4Header & {
  * sized via the `totalLength` field.
  *
  * Use this when you want both the header and the L4 payload bytes in one
- * pass; pair it with {@link asIpv4} (or your own `refineSwitch` on the
+ * pass; pair it with {@link ipv4Refiner} (or your own `refineSwitch` on the
  * `protocol` field) to dispatch the payload into a typed L4 value.
  *
  * @returns A coder for {@link Ipv4Datagram} values.
@@ -315,11 +315,11 @@ export function ipv4Datagram(): Coder<Ipv4Datagram> {
  * import { assert, assertEquals } from "@std/assert";
  * import { refineSwitch, type Context } from "@hertzg/binstruct";
  * import { ethernet2Frame, type Ethernet2Frame } from "@binstruct/ethernet";
- * import { asIpv4 } from "@binstruct/ipv4";
+ * import { ipv4Refiner } from "@binstruct/ipv4";
  *
  * const coder = refineSwitch(
  *   ethernet2Frame(),
- *   { ipv4: asIpv4() },
+ *   { ipv4: ipv4Refiner() },
  *   {
  *     refine: (frame: Ethernet2Frame, _ctx: Context) =>
  *       frame.etherType === 0x0800 ? "ipv4" : null,
@@ -356,9 +356,9 @@ export function ipv4Datagram(): Coder<Ipv4Datagram> {
  * assertEquals(decoded.payload.ipv4.protocol, 17);
  * ```
  */
-export function asIpv4<
+export function ipv4Refiner<
   THost extends { payload: Uint8Array },
-  TIpv4 extends Ipv4Datagram = Ipv4Datagram,
+  TIpv4 extends Ipv4Header = Ipv4Datagram,
 >(
   coder: Coder<TIpv4> = ipv4Datagram() as unknown as Coder<TIpv4>,
 ): Refiner<
