@@ -5,7 +5,7 @@ import { ETHERTYPE_IPV4 } from "@binstruct/ipv4";
 import { IP_PROTOCOL_ICMP } from "@binstruct/icmp";
 import { IP_PROTOCOL_UDP } from "@binstruct/udp";
 import {
-  type Ethernet2FrameRefined,
+  type FrameRefined,
   inetFrame,
   internetChecksum,
 } from "./mod.ts";
@@ -52,7 +52,7 @@ Deno.test("internetChecksum: carry folding wraps multiple times", () => {
 
 Deno.test("inetFrame: round-trips ethernet → ipv4 → udp", () => {
   const coder = inetFrame();
-  const value: Ethernet2FrameRefined = {
+  const value: FrameRefined = {
     dstMac: new Uint8Array([0, 0, 0, 0, 0, 1]),
     srcMac: new Uint8Array([0, 0, 0, 0, 0, 2]),
     etherType: ETHERTYPE_IPV4,
@@ -103,7 +103,7 @@ Deno.test("inetFrame: round-trips ethernet → ipv4 → udp", () => {
 
 Deno.test("inetFrame: round-trips ethernet → ipv4 → icmp", () => {
   const coder = inetFrame();
-  const value: Ethernet2FrameRefined = {
+  const value: FrameRefined = {
     dstMac: new Uint8Array([0, 0, 0, 0, 0, 1]),
     srcMac: new Uint8Array([0, 0, 0, 0, 0, 2]),
     etherType: ETHERTYPE_IPV4,
@@ -128,8 +128,8 @@ Deno.test("inetFrame: round-trips ethernet → ipv4 → icmp", () => {
         type: 8,
         code: 0,
         checksum: 0,
-        restOfHeader: new Uint8Array([0, 1, 0, 1]),
-        payload: new Uint8Array(0),
+        // First 4 payload bytes are the Echo identifier/sequence.
+        payload: new Uint8Array([0, 1, 0, 1]),
       },
     },
   };
@@ -149,7 +149,7 @@ Deno.test("inetFrame: round-trips ethernet → ipv4 → icmp", () => {
 
 Deno.test("inetFrame: round-trips ethernet → arp", () => {
   const coder = inetFrame();
-  const value: Ethernet2FrameRefined = {
+  const value: FrameRefined = {
     dstMac: new Uint8Array([0xff, 0xff, 0xff, 0xff, 0xff, 0xff]),
     srcMac: new Uint8Array([0, 0, 0, 0, 0, 2]),
     etherType: ETHERTYPE_ARP,
@@ -179,7 +179,7 @@ Deno.test("inetFrame: round-trips ethernet → arp", () => {
 
 Deno.test("inetFrame: unknown EtherType surfaces as a raw Uint8Array", () => {
   const coder = inetFrame();
-  const value: Ethernet2FrameRefined = {
+  const value: FrameRefined = {
     dstMac: new Uint8Array([0, 0, 0, 0, 0, 1]),
     srcMac: new Uint8Array([0, 0, 0, 0, 0, 2]),
     etherType: 0x88cc, // LLDP
@@ -197,7 +197,7 @@ Deno.test("inetFrame: unknown EtherType surfaces as a raw Uint8Array", () => {
 Deno.test("inetFrame: unknown IPv4 protocol surfaces as a raw Uint8Array", () => {
   const coder = inetFrame();
   const innerBytes = new Uint8Array([0xaa, 0xbb, 0xcc]);
-  const value: Ethernet2FrameRefined = {
+  const value: FrameRefined = {
     dstMac: new Uint8Array([0, 0, 0, 0, 0, 1]),
     srcMac: new Uint8Array([0, 0, 0, 0, 0, 2]),
     etherType: ETHERTYPE_IPV4,

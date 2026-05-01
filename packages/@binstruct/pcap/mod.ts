@@ -115,11 +115,11 @@
  * ```ts
  * import { assertEquals } from "@std/assert";
  * import { LINKTYPE, PCAP_MAGIC_MICROS, pcapFile } from "@binstruct/pcap";
- * import { ipv4 } from "@binstruct/ipv4";
+ * import { ipv4FramePayload } from "@binstruct/ipv4";
  * import { udpDatagram } from "@binstruct/udp";
  * import { parseIpv4 } from "@hertzg/ip/ipv4";
  *
- * const ip = ipv4();
+ * const ip = ipv4FramePayload();
  * const udp = udpDatagram();
  *
  * // Synth a UDP-over-IPv4 packet to put in the capture.
