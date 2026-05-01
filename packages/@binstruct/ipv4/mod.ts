@@ -1,6 +1,28 @@
 /**
  * IPv4 packet header encoding and decoding utilities (RFC 791).
  *
+ * A datagram is a 20-byte fixed header, a variable-length options trailer
+ * (0–40 bytes per `IHL`), and the transport-layer payload:
+ *
+ * ```text
+ *  0      7 8     15 16    23 24    31
+ * +--------+--------+--------+--------+
+ * |Ver/IHL |  ToS   |   Total Length  |
+ * +--------+--------+--------+--------+
+ * | Identification  |Flags + FragOffs |
+ * +--------+--------+--------+--------+
+ * |  TTL   |Protocol|  Header Cksum   |
+ * +--------+--------+--------+--------+
+ * |          Source Address           |
+ * +--------+--------+--------+--------+
+ * |       Destination Address         |
+ * +--------+--------+--------+--------+
+ * |       Options (0-40 bytes)        |
+ * +-----------------------------------+
+ * |        Payload (variable)         |
+ * +-----------------------------------+
+ * ```
+ *
  * Provides a single-pass coder for the 20-byte fixed portion of an IPv4 header
  * plus its variable-length options trailer. Bit-packed fields (version/IHL,
  * flags/fragment offset) are exposed as nested objects via {@link bitStruct},

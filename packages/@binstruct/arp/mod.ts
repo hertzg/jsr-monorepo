@@ -1,6 +1,28 @@
 /**
  * ARP (Address Resolution Protocol) packet encoding and decoding.
  *
+ * An Ethernet/IPv4 ARP packet is a fixed 28 bytes of header fields and
+ * sender/target addresses (no payload):
+ *
+ * ```text
+ *  0      7 8     15 16    23 24    31
+ * +--------+--------+--------+--------+
+ * | Hardware Type   |  Protocol Type  |
+ * +--------+--------+--------+--------+
+ * |  hlen  |  plen  |    Operation    |
+ * +--------+--------+--------+--------+
+ * |       Sender Hardware Addr        |
+ * +--------+--------+--------+--------+
+ * |   SHA (cont)    |   Sender Proto  |
+ * +-----------------+-----------------+
+ * |   SPA (cont)    |  Target Hw Addr |
+ * +-----------------+-----------------+
+ * |        Target Hardware Addr       |
+ * +--------+--------+--------+--------+
+ * |        Target Protocol Addr       |
+ * +-----------------------------------+
+ * ```
+ *
  * Implements the wire format described in RFC 826 for the common
  * Ethernet/IPv4 case (28 bytes, fixed `hlen=6` / `plen=4`). Hardware
  * addresses are surfaced as raw 6-byte arrays; IPv4 protocol addresses
@@ -74,10 +96,12 @@ export const ETHERTYPE_ARP = 0x0806;
  * only the most common value is exposed here for convenience. Use a raw
  * number for anything not listed.
  */
-export const ARP_HARDWARE_TYPE = {
-  /** Ethernet (10/100/1000Mb). */
-  ETHERNET: 0x0001,
-} as const;
+export const ARP_HARDWARE_TYPE = Object.freeze(
+  {
+    /** Ethernet (10/100/1000Mb). */
+    ETHERNET: 0x0001,
+  } as const,
+);
 
 /** Union of the {@link ARP_HARDWARE_TYPE} values. */
 export type ArpHardwareType =
@@ -89,10 +113,12 @@ export type ArpHardwareType =
  * Encoded as the corresponding EtherType. Use a raw number for anything
  * not listed.
  */
-export const ARP_PROTOCOL_TYPE = {
-  /** Internet Protocol version 4. */
-  IPV4: 0x0800,
-} as const;
+export const ARP_PROTOCOL_TYPE = Object.freeze(
+  {
+    /** Internet Protocol version 4. */
+    IPV4: 0x0800,
+  } as const,
+);
 
 /** Union of the {@link ARP_PROTOCOL_TYPE} values. */
 export type ArpProtocolType =
@@ -104,16 +130,18 @@ export type ArpProtocolType =
  * Includes the original ARP request/reply pair (RFC 826) and the RARP
  * variants (RFC 903) for completeness.
  */
-export const ARP_OPCODE = {
-  /** ARP request — "who has TPA, tell SPA". */
-  REQUEST: 1,
-  /** ARP reply — sender's MAC for the requested protocol address. */
-  REPLY: 2,
-  /** RARP request — "who am I", given my hardware address (RFC 903). */
-  RARP_REQUEST: 3,
-  /** RARP reply — protocol address for the requested hardware address. */
-  RARP_REPLY: 4,
-} as const;
+export const ARP_OPCODE = Object.freeze(
+  {
+    /** ARP request — "who has TPA, tell SPA". */
+    REQUEST: 1,
+    /** ARP reply — sender's MAC for the requested protocol address. */
+    REPLY: 2,
+    /** RARP request — "who am I", given my hardware address (RFC 903). */
+    RARP_REQUEST: 3,
+    /** RARP reply — protocol address for the requested hardware address. */
+    RARP_REPLY: 4,
+  } as const,
+);
 
 /** Union of the {@link ARP_OPCODE} values. */
 export type ArpOpcode = (typeof ARP_OPCODE)[keyof typeof ARP_OPCODE];
@@ -202,4 +230,3 @@ export function arpEthernetIpv4(): Coder<ArpEthernetIpv4Packet> {
     tpa: u32be(),
   });
 }
-

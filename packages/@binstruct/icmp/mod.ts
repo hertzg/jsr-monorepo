@@ -2,10 +2,23 @@
  * ICMPv4 (RFC 792) packet encoding and decoding utilities built on
  * `@hertzg/binstruct`.
  *
- * The wire layout of an ICMP message is a 4-byte fixed header (type, code,
- * checksum) followed by 4 bytes whose meaning is determined by the type
- * (the "rest of header" field), then a variable payload. This package ships
- * two coders that cover the overwhelming majority of practical use cases:
+ * An ICMP message is a 4-byte fixed header (type, code, checksum), 4 bytes
+ * whose meaning is determined by the type (the "rest of header" field), and
+ * a variable-length payload:
+ *
+ * ```text
+ *  0      7 8     15 16    23 24    31
+ * +--------+--------+--------+--------+
+ * |  Type  |  Code  |    Checksum     |
+ * +--------+--------+--------+--------+
+ * |          Rest of Header           |
+ * +--------+--------+--------+--------+
+ * |        Payload (variable)         |
+ * +-----------------------------------+
+ * ```
+ *
+ * This package ships two coders that cover the overwhelming majority of
+ * practical use cases:
  *
  * - {@link icmpHeader} — generic, faithful to the wire. Exposes `type`,
  *   `code`, `checksum`, the raw 4-byte `restOfHeader`, and a `payload`. Use
