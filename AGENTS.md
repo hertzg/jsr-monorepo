@@ -67,6 +67,7 @@ mirrors the JSR coordinate. Two scopes:
 - `binstruct` - Core binary structure encoding/decoding library
 - `bx` - Binary hex string utilities
 - `crc` - CRC checksum utilities
+- `inet` - Internet stack orchestration (RFC 1071 checksum + Ethernet→IPv4→UDP/ICMP/ARP walker)
 - `ip` - IPv4/IPv6/CIDR utilities
 - `mac` - EUI-48 MAC address parse/stringify
 - `mymagti-api` - MyMagti API client
@@ -369,6 +370,7 @@ both tiresome and error-prone.
 - `@hertzg/wg-conf`
 - `@hertzg/mymagti-api`
 - `@hertzg/bx`
+- `@hertzg/inet`
 - `@hertzg/ip`
 - `@hertzg/mac`
 - `@hertzg/crc`

@@ -17,6 +17,7 @@ Source layout mirrors the JSR scope: `packages/<scope>/<name>/`.
 | [@hertzg/binstruct](https://jsr.io/@hertzg/binstruct)       | [![JSR](https://jsr.io/badges/@hertzg/binstruct)](https://jsr.io/@hertzg/binstruct)       |
 | [@hertzg/bx](https://jsr.io/@hertzg/bx)                     | [![JSR](https://jsr.io/badges/@hertzg/bx)](https://jsr.io/@hertzg/bx)                     |
 | [@hertzg/crc](https://jsr.io/@hertzg/crc)                   | [![JSR](https://jsr.io/badges/@hertzg/crc)](https://jsr.io/@hertzg/crc)                   |
+| [@hertzg/inet](https://jsr.io/@hertzg/inet)                 | [![JSR](https://jsr.io/badges/@hertzg/inet)](https://jsr.io/@hertzg/inet)                 |
 | [@hertzg/ip](https://jsr.io/@hertzg/ip)                     | [![JSR](https://jsr.io/badges/@hertzg/ip)](https://jsr.io/@hertzg/ip)                     |
 | [@hertzg/mac](https://jsr.io/@hertzg/mac)                   | [![JSR](https://jsr.io/badges/@hertzg/mac)](https://jsr.io/@hertzg/mac)                   |
 | [@hertzg/mymagti-api](https://jsr.io/@hertzg/mymagti-api)   | [![JSR](https://jsr.io/badges/@hertzg/mymagti-api)](https://jsr.io/@hertzg/mymagti-api)   |

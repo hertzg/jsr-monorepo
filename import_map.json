@@ -17,6 +17,7 @@
     "@std/path": "jsr:@std/path@^1.1.4",
     "@hertzg/binstruct": "jsr:@hertzg/binstruct@^3.0.6",
     "@hertzg/bx": "jsr:@hertzg/bx@^3.0.3",
+    "@hertzg/inet": "jsr:@hertzg/inet@^0.1.0",
     "@hertzg/ip": "jsr:@hertzg/ip@^4.1.0",
     "@hertzg/mac": "jsr:@hertzg/mac@^0.2.0",
     "@hertzg/crc": "jsr:@hertzg/crc@^0.3.0",

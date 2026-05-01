@@ -105,6 +105,14 @@
         { "type": "json", "path": "deno.json", "jsonpath": "$.version" }
       ]
     },
+    "packages/@hertzg/inet": {
+      "release-type": "simple",
+      "package-name": "@hertzg/inet",
+      "component": "@hertzg/inet",
+      "extra-files": [
+        { "type": "json", "path": "deno.json", "jsonpath": "$.version" }
+      ]
+    },
     "packages/@hertzg/ip": {
       "release-type": "simple",
       "package-name": "@hertzg/ip",
