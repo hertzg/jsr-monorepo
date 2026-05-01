@@ -43,8 +43,7 @@ Deno.test("internetChecksum: carry folding wraps multiple times", () => {
 });
 
 Deno.test("inetCoder: round-trips ethernet → ipv4 → udp", () => {
-  const coder = inetCoder();
-  const value: FrameDecoded = {
+const value: FrameDecoded = {
     dstMac: new Uint8Array([0, 0, 0, 0, 0, 1]),
     srcMac: new Uint8Array([0, 0, 0, 0, 0, 2]),
     etherType: 0x0800,
@@ -82,8 +81,8 @@ Deno.test("inetCoder: round-trips ethernet → ipv4 → udp", () => {
   };
 
   const buf = new Uint8Array(64);
-  const written = coder.encode(value, buf);
-  const [decoded] = coder.decode(buf.subarray(0, written));
+  const written = inetCoder.encode(value, buf);
+  const [decoded] = inetCoder.decode(buf.subarray(0, written));
 
   assert(!(decoded.payload instanceof Uint8Array));
   assert(decoded.payload.kind === "ipv4");
@@ -98,8 +97,7 @@ Deno.test("inetCoder: round-trips ethernet → ipv4 → udp", () => {
 });
 
 Deno.test("inetCoder: round-trips ethernet → ipv4 → icmp", () => {
-  const coder = inetCoder();
-  const value: FrameDecoded = {
+const value: FrameDecoded = {
     dstMac: new Uint8Array([0, 0, 0, 0, 0, 1]),
     srcMac: new Uint8Array([0, 0, 0, 0, 0, 2]),
     etherType: 0x0800,
@@ -137,8 +135,8 @@ Deno.test("inetCoder: round-trips ethernet → ipv4 → icmp", () => {
   };
 
   const buf = new Uint8Array(64);
-  const written = coder.encode(value, buf);
-  const [decoded] = coder.decode(buf.subarray(0, written));
+  const written = inetCoder.encode(value, buf);
+  const [decoded] = inetCoder.decode(buf.subarray(0, written));
 
   assert(!(decoded.payload instanceof Uint8Array));
   assert(decoded.payload.kind === "ipv4");
@@ -148,8 +146,7 @@ Deno.test("inetCoder: round-trips ethernet → ipv4 → icmp", () => {
 });
 
 Deno.test("inetCoder: round-trips ethernet → arp", () => {
-  const coder = inetCoder();
-  const value: FrameDecoded = {
+const value: FrameDecoded = {
     dstMac: new Uint8Array([0xff, 0xff, 0xff, 0xff, 0xff, 0xff]),
     srcMac: new Uint8Array([0, 0, 0, 0, 0, 2]),
     etherType: 0x0806,
@@ -170,8 +167,8 @@ Deno.test("inetCoder: round-trips ethernet → arp", () => {
   };
 
   const buf = new Uint8Array(64);
-  const written = coder.encode(value, buf);
-  const [decoded] = coder.decode(buf.subarray(0, written));
+  const written = inetCoder.encode(value, buf);
+  const [decoded] = inetCoder.decode(buf.subarray(0, written));
 
   assert(!(decoded.payload instanceof Uint8Array));
   assert(decoded.payload.kind === "arp");
@@ -180,8 +177,7 @@ Deno.test("inetCoder: round-trips ethernet → arp", () => {
 });
 
 Deno.test("inetCoder: unknown EtherType surfaces as a raw Uint8Array", () => {
-  const coder = inetCoder();
-  const value: FrameDecoded = {
+const value: FrameDecoded = {
     dstMac: new Uint8Array([0, 0, 0, 0, 0, 1]),
     srcMac: new Uint8Array([0, 0, 0, 0, 0, 2]),
     etherType: 0x88cc, // LLDP
@@ -189,16 +185,15 @@ Deno.test("inetCoder: unknown EtherType surfaces as a raw Uint8Array", () => {
   };
 
   const buf = new Uint8Array(32);
-  const written = coder.encode(value, buf);
-  const [decoded] = coder.decode(buf.subarray(0, written));
+  const written = inetCoder.encode(value, buf);
+  const [decoded] = inetCoder.decode(buf.subarray(0, written));
 
   assert(decoded.payload instanceof Uint8Array);
   assertEquals(decoded.payload, new Uint8Array([0x01, 0x02, 0x03, 0x04]));
 });
 
 Deno.test("inetCoder: unknown IPv4 protocol surfaces as a raw Uint8Array", () => {
-  const coder = inetCoder();
-  const innerBytes = new Uint8Array([0xaa, 0xbb, 0xcc]);
+const innerBytes = new Uint8Array([0xaa, 0xbb, 0xcc]);
   const value: FrameDecoded = {
     dstMac: new Uint8Array([0, 0, 0, 0, 0, 1]),
     srcMac: new Uint8Array([0, 0, 0, 0, 0, 2]),
@@ -228,8 +223,8 @@ Deno.test("inetCoder: unknown IPv4 protocol surfaces as a raw Uint8Array", () =>
   };
 
   const buf = new Uint8Array(64);
-  const written = coder.encode(value, buf);
-  const [decoded] = coder.decode(buf.subarray(0, written));
+  const written = inetCoder.encode(value, buf);
+  const [decoded] = inetCoder.decode(buf.subarray(0, written));
 
   assert(!(decoded.payload instanceof Uint8Array));
   assert(decoded.payload.kind === "ipv4");
