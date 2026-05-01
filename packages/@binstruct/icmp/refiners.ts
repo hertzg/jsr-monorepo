@@ -10,15 +10,20 @@ import {
   encode,
   type Refiner,
 } from "@hertzg/binstruct";
+import type { Ipv4Datagram } from "@binstruct/ipv4";
 import { type IcmpPacket, icmpHeader } from "./header.ts";
 
+/** Refined IPv4 datagram whose payload is a typed ICMPv4 packet. */
+export type Ipv4WithIcmp = Omit<Ipv4Datagram, "payload"> & {
+  payload: { kind: "icmp"; icmp: IcmpPacket };
+};
+
 /**
- * Refiner that swaps a host's `payload: Uint8Array` for a decoded ICMPv4
+ * Refiner that swaps an IPv4 datagram's raw payload for a decoded ICMPv4
  * packet.
  *
- * Use as a `refineSwitch` arm when the parent's protocol-discriminator field
- * (e.g. IPv4's `protocol`) selects ICMP. The host type is preserved on its
- * non-payload fields, so the same factory works under any L3 carrier.
+ * Use as a `refineSwitch` arm when an IPv4 datagram's `protocol` field
+ * selects ICMP (`1`).
  *
  * @returns A `Refiner` suitable for `refineSwitch`.
  *
@@ -31,7 +36,7 @@ import { type IcmpPacket, icmpHeader } from "./header.ts";
  *
  * const coder = refineSwitch(
  *   ipv4Datagram(),
- *   { icmp: icmpRefiner<Ipv4Datagram>() },
+ *   { icmp: icmpRefiner() },
  *   {
  *     refine: (d: Ipv4Datagram, _ctx: Context) => d.protocol === 1 ? "icmp" : null,
  *     unrefine: (_r, _ctx: Context) => "icmp",
@@ -66,28 +71,18 @@ import { type IcmpPacket, icmpHeader } from "./header.ts";
  * assertEquals(decoded.payload.icmp.type, 8);
  * ```
  */
-export function icmpRefiner<THost extends { payload: Uint8Array }>(): Refiner<
-  THost,
-  Omit<THost, "payload"> & { payload: { kind: "icmp"; icmp: IcmpPacket } },
-  []
-> {
-  type Refined =
-    & Omit<THost, "payload">
-    & { payload: { kind: "icmp"; icmp: IcmpPacket } };
+export function icmpRefiner(): Refiner<Ipv4Datagram, Ipv4WithIcmp, []> {
   return {
-    refine: (host: THost, ctx: Context): Refined => {
-      const { payload, ...rest } = host;
-      return {
-        ...(rest as unknown as Omit<THost, "payload">),
-        payload: { kind: "icmp", icmp: decode(icmpHeader(), payload, ctx) },
-      };
-    },
-    unrefine: (refined: Refined, ctx: Context): THost => {
-      const { payload, ...rest } = refined;
-      return {
-        ...(rest as unknown as Omit<THost, "payload">),
-        payload: encode(icmpHeader(), payload.icmp, ctx),
-      } as unknown as THost;
-    },
+    refine: (host: Ipv4Datagram, ctx: Context): Ipv4WithIcmp => ({
+      ...host,
+      payload: {
+        kind: "icmp",
+        icmp: decode(icmpHeader(), host.payload, ctx),
+      },
+    }),
+    unrefine: (refined: Ipv4WithIcmp, ctx: Context): Ipv4Datagram => ({
+      ...refined,
+      payload: encode(icmpHeader(), refined.payload.icmp, ctx),
+    }),
   };
 }

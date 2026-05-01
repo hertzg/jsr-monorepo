@@ -67,6 +67,7 @@ import {
   struct,
   u16be,
 } from "@hertzg/binstruct";
+import type { Ipv4Datagram } from "@binstruct/ipv4";
 
 /**
  * Number of octets in a UDP header (source port, destination port, length,
@@ -182,7 +183,7 @@ export function udpDatagram(): Coder<UdpDatagram> {
  *
  * const coder = refineSwitch(
  *   ipv4Datagram(),
- *   { udp: udpRefiner<Ipv4Datagram>() },
+ *   { udp: udpRefiner() },
  *   {
  *     refine: (d: Ipv4Datagram, _ctx: Context) => d.protocol === 17 ? "udp" : null,
  *     unrefine: (_r, _ctx: Context) => "udp",
@@ -216,28 +217,20 @@ export function udpDatagram(): Coder<UdpDatagram> {
  * assertEquals(decoded.payload.udp.srcPort, 53);
  * ```
  */
-export function udpRefiner<THost extends { payload: Uint8Array }>(): Refiner<
-  THost,
-  Omit<THost, "payload"> & { payload: { kind: "udp"; udp: UdpDatagram } },
-  []
-> {
-  type Refined =
-    & Omit<THost, "payload">
-    & { payload: { kind: "udp"; udp: UdpDatagram } };
+/** Refined IPv4 datagram whose payload is a typed UDP datagram. */
+export type Ipv4WithUdp = Omit<Ipv4Datagram, "payload"> & {
+  payload: { kind: "udp"; udp: UdpDatagram };
+};
+
+export function udpRefiner(): Refiner<Ipv4Datagram, Ipv4WithUdp, []> {
   return {
-    refine: (host: THost, ctx: Context): Refined => {
-      const { payload, ...rest } = host;
-      return {
-        ...(rest as unknown as Omit<THost, "payload">),
-        payload: { kind: "udp", udp: decode(udpDatagram(), payload, ctx) },
-      };
-    },
-    unrefine: (refined: Refined, ctx: Context): THost => {
-      const { payload, ...rest } = refined;
-      return {
-        ...(rest as unknown as Omit<THost, "payload">),
-        payload: encode(udpDatagram(), payload.udp, ctx),
-      } as unknown as THost;
-    },
+    refine: (host: Ipv4Datagram, ctx: Context): Ipv4WithUdp => ({
+      ...host,
+      payload: { kind: "udp", udp: decode(udpDatagram(), host.payload, ctx) },
+    }),
+    unrefine: (refined: Ipv4WithUdp, ctx: Context): Ipv4Datagram => ({
+      ...refined,
+      payload: encode(udpDatagram(), refined.payload.udp, ctx),
+    }),
   };
 }

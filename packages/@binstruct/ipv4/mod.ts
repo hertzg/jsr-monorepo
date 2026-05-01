@@ -78,6 +78,9 @@ import {
   u32be,
   u8be,
 } from "@hertzg/binstruct";
+import type {
+  Ethernet2Frame,
+} from "@binstruct/ethernet";
 import { parseIpv4, stringifyIpv4 } from "@hertzg/ip/ipv4";
 
 /**
@@ -315,11 +318,11 @@ export function ipv4Datagram(): Coder<Ipv4Datagram> {
  * import { assert, assertEquals } from "@std/assert";
  * import { refineSwitch, type Context } from "@hertzg/binstruct";
  * import { ethernet2Frame, type Ethernet2Frame } from "@binstruct/ethernet";
- * import { ipv4Refiner } from "@binstruct/ipv4";
+ * import { ipv4Datagram, ipv4Refiner } from "@binstruct/ipv4";
  *
  * const coder = refineSwitch(
  *   ethernet2Frame(),
- *   { ipv4: ipv4Refiner() },
+ *   { ipv4: ipv4Refiner(ipv4Datagram()) },
  *   {
  *     refine: (frame: Ethernet2Frame, _ctx: Context) =>
  *       frame.etherType === 0x0800 ? "ipv4" : null,
@@ -356,33 +359,25 @@ export function ipv4Datagram(): Coder<Ipv4Datagram> {
  * assertEquals(decoded.payload.ipv4.protocol, 17);
  * ```
  */
-export function ipv4Refiner<
-  THost extends { payload: Uint8Array },
-  TIpv4 extends Ipv4Header = Ipv4Datagram,
->(
-  coder: Coder<TIpv4> = ipv4Datagram() as unknown as Coder<TIpv4>,
-): Refiner<
-  THost,
-  Omit<THost, "payload"> & { payload: { kind: "ipv4"; ipv4: TIpv4 } },
-  []
-> {
-  type Refined =
-    & Omit<THost, "payload">
-    & { payload: { kind: "ipv4"; ipv4: TIpv4 } };
+/** Refined Ethernet frame whose payload is a decoded IPv4 datagram. */
+export type FrameWithIpv4<TIpv4 extends Ipv4Header = Ipv4Datagram> =
+  & Omit<Ethernet2Frame, "payload">
+  & { payload: { kind: "ipv4"; ipv4: TIpv4 } };
+
+export function ipv4Refiner<TIpv4 extends Ipv4Header>(
+  coder: Coder<TIpv4>,
+): Refiner<Ethernet2Frame, FrameWithIpv4<TIpv4>, []> {
   return {
-    refine: (host: THost, ctx: Context): Refined => {
-      const { payload, ...rest } = host;
-      return {
-        ...(rest as unknown as Omit<THost, "payload">),
-        payload: { kind: "ipv4", ipv4: decode(coder, payload, ctx) },
-      };
-    },
-    unrefine: (refined: Refined, ctx: Context): THost => {
-      const { payload, ...rest } = refined;
-      return {
-        ...(rest as unknown as Omit<THost, "payload">),
-        payload: encode(coder, payload.ipv4, ctx),
-      } as unknown as THost;
-    },
+    refine: (frame: Ethernet2Frame, ctx: Context): FrameWithIpv4<TIpv4> => ({
+      ...frame,
+      payload: { kind: "ipv4", ipv4: decode(coder, frame.payload, ctx) },
+    }),
+    unrefine: (
+      refined: FrameWithIpv4<TIpv4>,
+      ctx: Context,
+    ): Ethernet2Frame => ({
+      ...refined,
+      payload: encode(coder, refined.payload.ipv4, ctx),
+    }),
   };
 }

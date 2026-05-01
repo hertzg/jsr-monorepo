@@ -61,6 +61,7 @@ import {
   u32be,
   u8,
 } from "@hertzg/binstruct";
+import type { Ethernet2Frame } from "@binstruct/ethernet";
 
 /** Length of an Ethernet hardware address in bytes. */
 export const ARP_HW_LEN_ETHERNET = 6;
@@ -227,7 +228,7 @@ export function arpEthernetIpv4(): Coder<ArpEthernetIpv4Packet> {
  *
  * const coder = refineSwitch(
  *   ethernet2Frame(),
- *   { arp: arpRefiner<Ethernet2Frame>() },
+ *   { arp: arpRefiner() },
  *   {
  *     refine: (frame: Ethernet2Frame, _ctx: Context) =>
  *       frame.etherType === 0x0806 ? "arp" : null,
@@ -258,32 +259,20 @@ export function arpEthernetIpv4(): Coder<ArpEthernetIpv4Packet> {
  * assertEquals(decoded.payload.arp.oper, ARP_OPCODE.REQUEST);
  * ```
  */
-export function arpRefiner<THost extends { payload: Uint8Array }>(): Refiner<
-  THost,
-  & Omit<THost, "payload">
-  & { payload: { kind: "arp"; arp: ArpEthernetIpv4Packet } },
-  []
-> {
-  type Refined =
-    & Omit<THost, "payload">
-    & { payload: { kind: "arp"; arp: ArpEthernetIpv4Packet } };
+/** Refined Ethernet frame whose payload is a typed ARP packet. */
+export type FrameWithArp = Omit<Ethernet2Frame, "payload"> & {
+  payload: { kind: "arp"; arp: ArpEthernetIpv4Packet };
+};
+
+export function arpRefiner(): Refiner<Ethernet2Frame, FrameWithArp, []> {
   return {
-    refine: (host: THost, ctx: Context): Refined => {
-      const { payload, ...rest } = host;
-      return {
-        ...(rest as unknown as Omit<THost, "payload">),
-        payload: {
-          kind: "arp",
-          arp: decode(arpEthernetIpv4(), payload, ctx),
-        },
-      };
-    },
-    unrefine: (refined: Refined, ctx: Context): THost => {
-      const { payload, ...rest } = refined;
-      return {
-        ...(rest as unknown as Omit<THost, "payload">),
-        payload: encode(arpEthernetIpv4(), payload.arp, ctx),
-      } as unknown as THost;
-    },
+    refine: (frame: Ethernet2Frame, ctx: Context): FrameWithArp => ({
+      ...frame,
+      payload: { kind: "arp", arp: decode(arpEthernetIpv4(), frame.payload, ctx) },
+    }),
+    unrefine: (refined: FrameWithArp, ctx: Context): Ethernet2Frame => ({
+      ...refined,
+      payload: encode(arpEthernetIpv4(), refined.payload.arp, ctx),
+    }),
   };
 }

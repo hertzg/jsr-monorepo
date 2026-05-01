@@ -110,55 +110,23 @@ export const IP_PROTOCOL_ICMP = 1;
 export const IP_PROTOCOL_UDP = 17;
 
 /**
- * Identity refiner — leaves a host's `payload: Uint8Array` exactly as-is.
- *
- * Used as the "unknown protocol" fallback arm in `refineSwitch` calls so
- * unrecognized EtherType / IPv4 protocol values don't throw — they surface
- * the raw payload bytes for the caller to dispatch further.
- *
- * @returns A `Refiner` that round-trips its host unchanged.
- *
- * @example Use as the fallback arm in a refineSwitch
- * ```ts
- * import { assert } from "@std/assert";
- * import { refineSwitch, type Context } from "@hertzg/binstruct";
- * import { ethernet2Frame, type Ethernet2Frame } from "@binstruct/ethernet";
- * import { arpRefiner } from "@binstruct/arp";
- * import { rawRefiner } from "@binstruct/inet";
- *
- * const coder = refineSwitch(
- *   ethernet2Frame(),
- *   { arp: arpRefiner<Ethernet2Frame>(), raw: rawRefiner<Ethernet2Frame>() },
- *   {
- *     refine: (frame: Ethernet2Frame, _ctx: Context) =>
- *       frame.etherType === 0x0806 ? "arp" : "raw",
- *     unrefine: (refined, _ctx: Context) =>
- *       refined.payload instanceof Uint8Array ? "raw" : "arp",
- *   },
- * );
- *
- * const buf = new Uint8Array(32);
- * coder.encode({
- *   dstMac: new Uint8Array([0, 0, 0, 0, 0, 1]),
- *   srcMac: new Uint8Array([0, 0, 0, 0, 0, 2]),
- *   etherType: 0x88cc,
- *   payload: new Uint8Array([0x01, 0x02, 0x03, 0x04]),
- * }, buf);
- *
- * const [decoded] = coder.decode(buf);
- * assert(decoded.payload instanceof Uint8Array);
- * ```
+ * Identity refiner for an Ethernet II frame whose EtherType has no decoder
+ * in the family. Round-trips the frame unchanged so the raw payload bytes
+ * surface to the caller.
  */
-export function rawRefiner<THost extends { payload: Uint8Array }>(): Refiner<
-  THost,
-  THost,
-  []
-> {
-  return {
-    refine: (host: THost, _ctx: Context): THost => host,
-    unrefine: (refined: THost, _ctx: Context): THost => refined,
-  };
-}
+export const rawFrameRefiner: Refiner<Ethernet2Frame, Ethernet2Frame, []> = {
+  refine: (frame: Ethernet2Frame, _ctx: Context): Ethernet2Frame => frame,
+  unrefine: (refined: Ethernet2Frame, _ctx: Context): Ethernet2Frame => refined,
+};
+
+/**
+ * Identity refiner for an IPv4 datagram whose `protocol` field has no
+ * transport-layer decoder in the family. Round-trips the datagram unchanged.
+ */
+export const rawIpv4Refiner: Refiner<Ipv4Datagram, Ipv4Datagram, []> = {
+  refine: (datagram: Ipv4Datagram, _ctx: Context): Ipv4Datagram => datagram,
+  unrefine: (refined: Ipv4Datagram, _ctx: Context): Ipv4Datagram => refined,
+};
 
 // ---------------------------------------------------------------------------
 // L4 — IPv4 transport layer
@@ -188,9 +156,9 @@ export type Ipv4Decoded = Ipv4WithUdp | Ipv4WithIcmp | Ipv4WithRawL4;
 const ipv4Coder: Coder<Ipv4Decoded> = refineSwitch(
   ipv4Datagram(),
   {
-    udp: udpRefiner<Ipv4Datagram>(),
-    icmp: icmpRefiner<Ipv4Datagram>(),
-    raw: rawRefiner<Ipv4Datagram>(),
+    udp: udpRefiner(),
+    icmp: icmpRefiner(),
+    raw: rawIpv4Refiner,
   },
   {
     refine: (d: Ipv4Datagram): "udp" | "icmp" | "raw" =>
@@ -286,9 +254,9 @@ export type FrameDecoded = FrameWithIpv4 | FrameWithArp | FrameWithRawL3;
 export const inetCoder: Coder<FrameDecoded> = refineSwitch(
   ethernet2Frame(),
   {
-    ipv4: ipv4Refiner<Ethernet2Frame, Ipv4Decoded>(ipv4Coder),
-    arp: arpRefiner<Ethernet2Frame>(),
-    raw: rawRefiner<Ethernet2Frame>(),
+    ipv4: ipv4Refiner(ipv4Coder),
+    arp: arpRefiner(),
+    raw: rawFrameRefiner,
   },
   {
     refine: (frame: Ethernet2Frame): "ipv4" | "arp" | "raw" =>
