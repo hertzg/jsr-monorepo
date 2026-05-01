@@ -151,9 +151,9 @@ Examples</h2></div><div class="space-y-8"><div class="anchorable"><a href="#exam
 <h3 class="example-header"><div class="markdown"><p>Encode and decode a UDP datagram</p>
 </div></h3>
   <div><div class="markdown"><pre class="highlight"><code class="language-ts">import { assertEquals } from &quot;@std/assert&quot;;
-import { udpDatagram } from &quot;@binstruct/udp&quot;;
+import { udpPacket } from &quot;@binstruct/udp&quot;;
 
-const coder = udpDatagram();
+const coder = udpPacket();
 const datagram = {
   srcPort: 53,
   dstPort: 49152,
@@ -173,9 +173,9 @@ assertEquals(decoded.length, datagram.length);
 assertEquals(decoded.checksum, datagram.checksum);
 assertEquals(decoded.payload, datagram.payload);
 </code><button class="copyButton" data-copy="import { assertEquals } from &quot;@std/assert&quot;;
-import { udpDatagram } from &quot;@binstruct/udp&quot;;
+import { udpPacket } from &quot;@binstruct/udp&quot;;
 
-const coder = udpDatagram();
+const coder = udpPacket();
 const datagram = {
   srcPort: 53,
   dstPort: 49152,
@@ -251,10 +251,10 @@ assertEquals(decoded.payload, datagram.payload);
   </defs>
 </svg>
 </a>
-Functions</h2></div><div class="namespaceSection"><div id="namespace_udpdatagram" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-Function bg-Function/15 dark:text-FunctionDark dark:bg-FunctionDark/15" title="Function">f</div></div>
+Functions</h2></div><div class="namespaceSection"><div id="namespace_udppacket" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-Function bg-Function/15 dark:text-FunctionDark dark:bg-FunctionDark/15" title="Function">f</div></div>
 <div class="namespaceItemContent">
-		    <a href=".&#x2F;.&#x2F;.&#x2F;~&#x2F;udpDatagram.html" title="udpDatagram">
-			    <span>udpDatagram</span><span>()<span>: <span class="td-ref">Coder</span>&lt;<span class="td-ref">UdpDatagram</span>&gt;</span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Creates a coder for UDP datagrams (RFC 768).</p>
+		    <a href=".&#x2F;.&#x2F;.&#x2F;~&#x2F;udpPacket.html" title="udpPacket">
+			    <span>udpPacket</span><span>()<span>: <span class="td-ref">Coder</span>&lt;<span class="td-ref">UdpPacket</span>&gt;</span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Creates a coder for UDP datagrams (RFC 768).</p>
 </div></div></div>
     </div></div>
 </section>
@@ -281,20 +281,20 @@ Functions</h2></div><div class="namespaceSection"><div id="namespace_udpdatagram
   </defs>
 </svg>
 </a>
-Interfaces</h2></div><div class="namespaceSection"><div id="namespace_udpdatagram-1" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-Interface bg-Interface/15 dark:text-InterfaceDark dark:bg-InterfaceDark/15" title="Interface">I</div></div>
+Interfaces</h2></div><div class="namespaceSection"><div id="namespace_udppacket-1" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-Interface bg-Interface/15 dark:text-InterfaceDark dark:bg-InterfaceDark/15" title="Interface">I</div></div>
 <div class="namespaceItemContent">
-		    <a href=".&#x2F;.&#x2F;.&#x2F;~&#x2F;UdpDatagram.html" title="UdpDatagram">
-			    <span>UdpDatagram</span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Decoded representation of a UDP datagram (RFC 768).</p>
+		    <a href=".&#x2F;.&#x2F;.&#x2F;~&#x2F;UdpPacket.html" title="UdpPacket">
+			    <span>UdpPacket</span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Decoded representation of a UDP datagram (RFC 768).</p>
 </div></div><ul class="namespaceItemContentSubItems"><li>
-                <a href=".&#x2F;.&#x2F;.&#x2F;~&#x2F;UdpDatagram.html#property_checksum">
+                <a href=".&#x2F;.&#x2F;.&#x2F;~&#x2F;UdpPacket.html#property_checksum">
                   <span>checksum</span><span>: <span class="td-kw">number</span></span></a></li><li>
-                <a href=".&#x2F;.&#x2F;.&#x2F;~&#x2F;UdpDatagram.html#property_dstport">
+                <a href=".&#x2F;.&#x2F;.&#x2F;~&#x2F;UdpPacket.html#property_dstport">
                   <span>dstPort</span><span>: <span class="td-kw">number</span></span></a></li><li>
-                <a href=".&#x2F;.&#x2F;.&#x2F;~&#x2F;UdpDatagram.html#property_length">
+                <a href=".&#x2F;.&#x2F;.&#x2F;~&#x2F;UdpPacket.html#property_length">
                   <span>length</span><span>: <span class="td-kw">number</span></span></a></li><li>
-                <a href=".&#x2F;.&#x2F;.&#x2F;~&#x2F;UdpDatagram.html#property_payload">
+                <a href=".&#x2F;.&#x2F;.&#x2F;~&#x2F;UdpPacket.html#property_payload">
                   <span>payload</span><span>: <span class="td-ref">Uint8Array</span></span></a></li><li>
-                <a href=".&#x2F;.&#x2F;.&#x2F;~&#x2F;UdpDatagram.html#property_srcport">
+                <a href=".&#x2F;.&#x2F;.&#x2F;~&#x2F;UdpPacket.html#property_srcport">
                   <span>srcPort</span><span>: <span class="td-kw">number</span></span></a></li></ul></div>
     </div></div>
 </section>

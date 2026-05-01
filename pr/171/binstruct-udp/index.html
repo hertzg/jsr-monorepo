@@ -195,9 +195,9 @@ Examples</h2></div><div class="space-y-8"><div class="anchorable"><a href="#exam
 <h3 class="example-header"><div class="markdown"><p>Encode and decode a UDP datagram</p>
 </div></h3>
   <div><div class="markdown"><pre class="highlight"><code class="language-ts">import { assertEquals } from &quot;@std/assert&quot;;
-import { udpDatagram } from &quot;@binstruct/udp&quot;;
+import { udpPacket } from &quot;@binstruct/udp&quot;;
 
-const coder = udpDatagram();
+const coder = udpPacket();
 const datagram = {
   srcPort: 53,
   dstPort: 49152,
@@ -217,9 +217,9 @@ assertEquals(decoded.length, datagram.length);
 assertEquals(decoded.checksum, datagram.checksum);
 assertEquals(decoded.payload, datagram.payload);
 </code><button class="copyButton" data-copy="import { assertEquals } from &quot;@std/assert&quot;;
-import { udpDatagram } from &quot;@binstruct/udp&quot;;
+import { udpPacket } from &quot;@binstruct/udp&quot;;
 
-const coder = udpDatagram();
+const coder = udpPacket();
 const datagram = {
   srcPort: 53,
   dstPort: 49152,
@@ -291,15 +291,15 @@ assertEquals(decoded.payload, datagram.payload);
                   </span>
                 </a>
               </li><li>
-                <a href=".&#x2F;.&#x2F;~&#x2F;UdpDatagram.html" title="UdpDatagram"><div class="docNodeKindIcon"><div class="text-Interface bg-Interface/15 dark:text-InterfaceDark dark:bg-InterfaceDark/15" title="Interface">I</div></div>
+                <a href=".&#x2F;.&#x2F;~&#x2F;UdpPacket.html" title="UdpPacket"><div class="docNodeKindIcon"><div class="text-Interface bg-Interface/15 dark:text-InterfaceDark dark:bg-InterfaceDark/15" title="Interface">I</div></div>
 <span class="hover:bg-Interface/15 hover:bg-InterfaceDark/15">
-                    UdpDatagram
+                    UdpPacket
                   </span>
                 </a>
               </li><li>
-                <a href=".&#x2F;.&#x2F;~&#x2F;udpDatagram.html" title="udpDatagram"><div class="docNodeKindIcon"><div class="text-Function bg-Function/15 dark:text-FunctionDark dark:bg-FunctionDark/15" title="Function">f</div></div>
+                <a href=".&#x2F;.&#x2F;~&#x2F;udpPacket.html" title="udpPacket"><div class="docNodeKindIcon"><div class="text-Function bg-Function/15 dark:text-FunctionDark dark:bg-FunctionDark/15" title="Function">f</div></div>
 <span class="hover:bg-Function/15 hover:bg-FunctionDark/15">
-                    udpDatagram
+                    udpPacket
                   </span>
                 </a>
               </li></ul></nav><nav class="documentNavigation">

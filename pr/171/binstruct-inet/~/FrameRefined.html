@@ -142,8 +142,10 @@
   />
 </svg>
 </a>
-</div><div><div class="space-y-7" id=""><div class="markdown"><p>Decoded Ethernet II frame — <code>payload</code> narrows by shape (IPv4 / ARP / raw
-bytes) and the host's <code>etherType</code> field carries the on-wire discriminator.</p>
+</div><div><div class="space-y-7" id=""><div class="markdown"><p>Decoded Ethernet II frame as produced by <a href="../././~/inetFrame.html">inetFrame</a>.</p>
+<p>The shape depends on <code>etherType</code> and (for IPv4) the inner <code>protocol</code>
+field; narrow the union with property-existence checks (<code>&quot;protocol&quot; in payload</code>, <code>&quot;srcPort&quot; in payload</code>, …) when reading. Frames whose tag has no
+matching coder surface their <code>payload</code> as a raw <code>Uint8Array</code>.</p>
 </div><section class="section"  id="definition"><div>
       <h2 class="anchorable mb-1"><a href="#definition" class="anchor" aria-label="Anchor" tabIndex="-1"><svg
   width="16"

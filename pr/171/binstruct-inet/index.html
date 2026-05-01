@@ -88,11 +88,11 @@
 <p><code>@binstruct/inet</code> is a thin orchestration layer: each protocol package
 (<code>@binstruct/ethernet</code>, <code>@binstruct/ipv4</code>, <code>@binstruct/arp</code>,
 <code>@binstruct/udp</code>, <code>@binstruct/icmp</code>) only knows how to decode its own
-layer's bytes. This package wires them together via <code>refineSwitch</code> —
-dispatching on <code>etherType</code> at L3 and <code>protocol</code> at L4 — into a single
-round-trippable <a href="././~/inetFrame.html"><code>inetFrame</code></a> coder factory that walks an
-Ethernet II frame top-down. Each layer's <code>payload</code> field surfaces as the
-typed value of the next layer (no <code>kind</code> wrapper); layers we don't have a
+layer's bytes. This package wires them together via <code>refineSwitch</code> and
+<code>refineFields</code> — dispatching on <code>etherType</code> at L3 and <code>protocol</code> at L4 —
+into a single round-trippable <a href="././~/inetFrame.html"><code>inetFrame</code></a> coder factory that
+walks an Ethernet II frame top-down. Each layer's <code>payload</code> field is
+surfaced as the typed value of the next layer; layers we don't have a
 coder for default to a raw <a href="https://deno.land/api@v2.7.14?s=Uint8Array"><code>Uint8Array</code></a>, so the coder is safe
 to point at arbitrary captured traffic.</p>
 <p>Coverage:</p>
@@ -101,8 +101,8 @@ to point at arbitrary captured traffic.</p>
 <li>L3 — IPv4 (<code>@binstruct/ipv4</code>), ARP (<code>@binstruct/arp</code>)</li>
 <li>L4 (under IPv4) — UDP (<code>@binstruct/udp</code>), ICMPv4 (<code>@binstruct/icmp</code>)</li>
 </ul>
-<p>Adding a layer is one new refiner here plus one entry in the relevant
-<code>refineSwitch</code> arm.</p>
+<p>Adding a layer is one new <code>refineFields</code> arm in the relevant
+<code>refineSwitch</code> plus an entry in its selector.</p>
 <p>Also exports <a href="././~/internetChecksum.html"><code>internetChecksum</code></a> (RFC 1071) for callers that need
 to fill in IPv4/UDP/ICMP/TCP checksum fields.</p>
 <p>Each refined <code>payload</code> is the typed value directly — no <code>{ kind, ... }</code>
@@ -282,21 +282,21 @@ assertEquals(decoded.payload.payload.payload, new Uint8Array([0xde, 0xad, 0xbe, 
     <div><nav class="topSymbols">
           <h3>Symbols</h3>
           <ul><li>
-                <a href=".&#x2F;.&#x2F;~&#x2F;Ipv4UdpFrame.html" title="Ipv4UdpFrame"><div class="docNodeKindIcon"><div class="text-TypeAlias bg-TypeAlias/15 dark:text-TypeAliasDark dark:bg-TypeAliasDark/15" title="Type Alias">T</div></div>
+                <a href=".&#x2F;.&#x2F;~&#x2F;Ipv4UdpPacket.html" title="Ipv4UdpPacket"><div class="docNodeKindIcon"><div class="text-TypeAlias bg-TypeAlias/15 dark:text-TypeAliasDark dark:bg-TypeAliasDark/15" title="Type Alias">T</div></div>
 <span class="hover:bg-TypeAlias/15 hover:bg-TypeAliasDark/15">
-                    Ipv4UdpFrame
+                    Ipv4UdpPacket
                   </span>
                 </a>
               </li><li>
-                <a href=".&#x2F;.&#x2F;~&#x2F;Ipv4IcmpFrame.html" title="Ipv4IcmpFrame"><div class="docNodeKindIcon"><div class="text-TypeAlias bg-TypeAlias/15 dark:text-TypeAliasDark dark:bg-TypeAliasDark/15" title="Type Alias">T</div></div>
+                <a href=".&#x2F;.&#x2F;~&#x2F;Ipv4IcmpPacket.html" title="Ipv4IcmpPacket"><div class="docNodeKindIcon"><div class="text-TypeAlias bg-TypeAlias/15 dark:text-TypeAliasDark dark:bg-TypeAliasDark/15" title="Type Alias">T</div></div>
 <span class="hover:bg-TypeAlias/15 hover:bg-TypeAliasDark/15">
-                    Ipv4IcmpFrame
+                    Ipv4IcmpPacket
                   </span>
                 </a>
               </li><li>
-                <a href=".&#x2F;.&#x2F;~&#x2F;Ipv4FramePacket.html" title="Ipv4FramePacket"><div class="docNodeKindIcon"><div class="text-TypeAlias bg-TypeAlias/15 dark:text-TypeAliasDark dark:bg-TypeAliasDark/15" title="Type Alias">T</div></div>
+                <a href=".&#x2F;.&#x2F;~&#x2F;Ipv4Refined.html" title="Ipv4Refined"><div class="docNodeKindIcon"><div class="text-TypeAlias bg-TypeAlias/15 dark:text-TypeAliasDark dark:bg-TypeAliasDark/15" title="Type Alias">T</div></div>
 <span class="hover:bg-TypeAlias/15 hover:bg-TypeAliasDark/15">
-                    Ipv4FramePacket
+                    Ipv4Refined
                   </span>
                 </a>
               </li><li>

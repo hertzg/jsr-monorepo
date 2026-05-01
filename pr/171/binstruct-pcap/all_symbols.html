@@ -417,12 +417,12 @@ in the global header.</p>
 </div></h3>
   <div><div class="markdown"><pre class="highlight"><code class="language-ts">import { assertEquals } from &quot;@std/assert&quot;;
 import { LINKTYPE, PCAP_MAGIC_MICROS, pcapFile } from &quot;@binstruct/pcap&quot;;
-import { ipv4FramePayload } from &quot;@binstruct/ipv4&quot;;
-import { udpDatagram } from &quot;@binstruct/udp&quot;;
+import { ipv4Packet } from &quot;@binstruct/ipv4&quot;;
+import { udpPacket } from &quot;@binstruct/udp&quot;;
 import { parseIpv4 } from &quot;@hertzg/ip/ipv4&quot;;
 
-const ip = ipv4FramePayload();
-const udp = udpDatagram();
+const ip = ipv4Packet();
+const udp = udpPacket();
 
 // Synth a UDP-over-IPv4 packet to put in the capture.
 const udpBytes = new Uint8Array(12);
@@ -486,12 +486,12 @@ assertEquals(parsedUdp.srcPort, 53);
 assertEquals(parsedUdp.payload, new Uint8Array([0xde, 0xad, 0xbe, 0xef]));
 </code><button class="copyButton" data-copy="import { assertEquals } from &quot;@std/assert&quot;;
 import { LINKTYPE, PCAP_MAGIC_MICROS, pcapFile } from &quot;@binstruct/pcap&quot;;
-import { ipv4FramePayload } from &quot;@binstruct/ipv4&quot;;
-import { udpDatagram } from &quot;@binstruct/udp&quot;;
+import { ipv4Packet } from &quot;@binstruct/ipv4&quot;;
+import { udpPacket } from &quot;@binstruct/udp&quot;;
 import { parseIpv4 } from &quot;@hertzg/ip/ipv4&quot;;
 
-const ip = ipv4FramePayload();
-const udp = udpDatagram();
+const ip = ipv4Packet();
+const udp = udpPacket();
 
 // Synth a UDP-over-IPv4 packet to put in the capture.
 const udpBytes = new Uint8Array(12);
@@ -608,20 +608,43 @@ assertEquals(parsedUdp.payload, new Uint8Array([0xde, 0xad, 0xbe, 0xef]));
   </defs>
 </svg>
 </a>
-<h3 class="example-header"><div class="markdown"><p>Direct Ethernet frames (LINKTYPE.ETHERNET)</p>
+<h3 class="example-header"><div class="markdown"><p>Walk the full inet stack (LINKTYPE.ETHERNET via <code>@binstruct/inet</code>)</p>
 </div></h3>
-  <div><div class="markdown"><pre class="highlight"><code class="language-ts">import { assertEquals } from &quot;@std/assert&quot;;
+  <div><div class="markdown"><pre class="highlight"><code class="language-ts">import { assert, assertEquals } from &quot;@std/assert&quot;;
 import { LINKTYPE, PCAP_MAGIC_MICROS, pcapFile } from &quot;@binstruct/pcap&quot;;
-import { ethernet2Frame } from &quot;@binstruct/ethernet&quot;;
+import { inetFrame } from &quot;@binstruct/inet&quot;;
+import { ETHERTYPE_IPV4 } from &quot;@binstruct/ipv4&quot;;
+import { IP_PROTOCOL_UDP } from &quot;@binstruct/udp&quot;;
+import { parseIpv4 } from &quot;@hertzg/ip/ipv4&quot;;
 
-const eth = ethernet2Frame();
+const inet = inetFrame();
 
-const frame = new Uint8Array(14 + 4);
-eth.encode({
+// Build an Ethernet → IPv4 → UDP frame in one pass.
+const frame = new Uint8Array(14 + 32);
+inet.encode({
   dstMac: new Uint8Array([0x00, 0x11, 0x22, 0x33, 0x44, 0x55]),
   srcMac: new Uint8Array([0x66, 0x77, 0x88, 0x99, 0xaa, 0xbb]),
-  etherType: 0x0800,
-  payload: new Uint8Array([0xde, 0xad, 0xbe, 0xef]),
+  etherType: ETHERTYPE_IPV4,
+  payload: {
+    versionIhl: { version: 4, ihl: 5 },
+    typeOfService: 0,
+    totalLength: 32,
+    identification: 0,
+    flagsFragmentOffset: { reserved: 0, dontFragment: 0, moreFragments: 0, fragmentOffset: 0 },
+    timeToLive: 64,
+    protocol: IP_PROTOCOL_UDP,
+    headerChecksum: 0,
+    sourceAddress: parseIpv4(&quot;192.0.2.1&quot;),
+    destinationAddress: parseIpv4(&quot;192.0.2.2&quot;),
+    options: new Uint8Array(0),
+    payload: {
+      srcPort: 53,
+      dstPort: 49152,
+      length: 12,
+      checksum: 0,
+      payload: new Uint8Array([0xde, 0xad, 0xbe, 0xef]),
+    },
+  },
 }, frame);
 
 const cap = pcapFile(&quot;le&quot;);
@@ -645,23 +668,52 @@ const written = cap.encode({
   }],
 }, buf);
 
+// Read back and walk the stack in one shot.
 const [{ records }] = cap.decode(buf.subarray(0, written));
-const [decoded] = eth.decode(records[0].data);
+const [decoded] = inet.decode(records[0].data);
 
-assertEquals(decoded.etherType, 0x0800);
-assertEquals(decoded.payload, new Uint8Array([0xde, 0xad, 0xbe, 0xef]));
-</code><button class="copyButton" data-copy="import { assertEquals } from &quot;@std/assert&quot;;
+assert(!(decoded.payload instanceof Uint8Array));
+assert(&quot;protocol&quot; in decoded.payload);
+assertEquals(decoded.payload.sourceAddress, parseIpv4(&quot;192.0.2.1&quot;));
+assert(!(decoded.payload.payload instanceof Uint8Array));
+assert(&quot;srcPort&quot; in decoded.payload.payload);
+assertEquals(decoded.payload.payload.srcPort, 53);
+assertEquals(decoded.payload.payload.payload, new Uint8Array([0xde, 0xad, 0xbe, 0xef]));
+</code><button class="copyButton" data-copy="import { assert, assertEquals } from &quot;@std/assert&quot;;
 import { LINKTYPE, PCAP_MAGIC_MICROS, pcapFile } from &quot;@binstruct/pcap&quot;;
-import { ethernet2Frame } from &quot;@binstruct/ethernet&quot;;
+import { inetFrame } from &quot;@binstruct/inet&quot;;
+import { ETHERTYPE_IPV4 } from &quot;@binstruct/ipv4&quot;;
+import { IP_PROTOCOL_UDP } from &quot;@binstruct/udp&quot;;
+import { parseIpv4 } from &quot;@hertzg/ip/ipv4&quot;;
 
-const eth = ethernet2Frame();
+const inet = inetFrame();
 
-const frame = new Uint8Array(14 + 4);
-eth.encode({
+// Build an Ethernet → IPv4 → UDP frame in one pass.
+const frame = new Uint8Array(14 + 32);
+inet.encode({
   dstMac: new Uint8Array([0x00, 0x11, 0x22, 0x33, 0x44, 0x55]),
   srcMac: new Uint8Array([0x66, 0x77, 0x88, 0x99, 0xaa, 0xbb]),
-  etherType: 0x0800,
-  payload: new Uint8Array([0xde, 0xad, 0xbe, 0xef]),
+  etherType: ETHERTYPE_IPV4,
+  payload: {
+    versionIhl: { version: 4, ihl: 5 },
+    typeOfService: 0,
+    totalLength: 32,
+    identification: 0,
+    flagsFragmentOffset: { reserved: 0, dontFragment: 0, moreFragments: 0, fragmentOffset: 0 },
+    timeToLive: 64,
+    protocol: IP_PROTOCOL_UDP,
+    headerChecksum: 0,
+    sourceAddress: parseIpv4(&quot;192.0.2.1&quot;),
+    destinationAddress: parseIpv4(&quot;192.0.2.2&quot;),
+    options: new Uint8Array(0),
+    payload: {
+      srcPort: 53,
+      dstPort: 49152,
+      length: 12,
+      checksum: 0,
+      payload: new Uint8Array([0xde, 0xad, 0xbe, 0xef]),
+    },
+  },
 }, frame);
 
 const cap = pcapFile(&quot;le&quot;);
@@ -685,11 +737,17 @@ const written = cap.encode({
   }],
 }, buf);
 
+// Read back and walk the stack in one shot.
 const [{ records }] = cap.decode(buf.subarray(0, written));
-const [decoded] = eth.decode(records[0].data);
+const [decoded] = inet.decode(records[0].data);
 
-assertEquals(decoded.etherType, 0x0800);
-assertEquals(decoded.payload, new Uint8Array([0xde, 0xad, 0xbe, 0xef]));
+assert(!(decoded.payload instanceof Uint8Array));
+assert(&quot;protocol&quot; in decoded.payload);
+assertEquals(decoded.payload.sourceAddress, parseIpv4(&quot;192.0.2.1&quot;));
+assert(!(decoded.payload.payload instanceof Uint8Array));
+assert(&quot;srcPort&quot; in decoded.payload.payload);
+assertEquals(decoded.payload.payload.srcPort, 53);
+assertEquals(decoded.payload.payload.payload, new Uint8Array([0xde, 0xad, 0xbe, 0xef]));
 "><svg
   class="copy"
   width="15"

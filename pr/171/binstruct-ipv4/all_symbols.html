@@ -152,9 +152,9 @@ Examples</h2></div><div class="space-y-8"><div class="anchorable"><a href="#exam
 </div></h3>
   <div><div class="markdown"><pre class="highlight"><code class="language-ts">import { assertEquals } from &quot;@std/assert&quot;;
 import { parseIpv4 } from &quot;@hertzg/ip/ipv4&quot;;
-import { ipv4FramePayload } from &quot;@binstruct/ipv4&quot;;
+import { ipv4Packet } from &quot;@binstruct/ipv4&quot;;
 
-const coder = ipv4FramePayload();
+const coder = ipv4Packet();
 const datagram = {
   versionIhl: { version: 4, ihl: 5 },
   typeOfService: 0,
@@ -186,9 +186,9 @@ assertEquals(decoded.destinationAddress, parseIpv4(&quot;10.0.0.50&quot;));
 assertEquals(decoded.flagsFragmentOffset.dontFragment, 1);
 </code><button class="copyButton" data-copy="import { assertEquals } from &quot;@std/assert&quot;;
 import { parseIpv4 } from &quot;@hertzg/ip/ipv4&quot;;
-import { ipv4FramePayload } from &quot;@binstruct/ipv4&quot;;
+import { ipv4Packet } from &quot;@binstruct/ipv4&quot;;
 
-const coder = ipv4FramePayload();
+const coder = ipv4Packet();
 const datagram = {
   versionIhl: { version: 4, ihl: 5 },
   typeOfService: 0,
@@ -275,10 +275,10 @@ assertEquals(decoded.flagsFragmentOffset.dontFragment, 1);
   </defs>
 </svg>
 </a>
-Functions</h2></div><div class="namespaceSection"><div id="namespace_ipv4framepayload" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-Function bg-Function/15 dark:text-FunctionDark dark:bg-FunctionDark/15" title="Function">f</div></div>
+Functions</h2></div><div class="namespaceSection"><div id="namespace_ipv4packet" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-Function bg-Function/15 dark:text-FunctionDark dark:bg-FunctionDark/15" title="Function">f</div></div>
 <div class="namespaceItemContent">
-		    <a href=".&#x2F;.&#x2F;.&#x2F;~&#x2F;ipv4FramePayload.html" title="ipv4FramePayload">
-			    <span>ipv4FramePayload</span><span>()<span>: <span class="td-ref">Coder</span>&lt;<span class="td-ref">Ipv4FramePayload</span>&gt;</span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Creates a coder for a complete IPv4 datagram — header, options, and the
+		    <a href=".&#x2F;.&#x2F;.&#x2F;~&#x2F;ipv4Packet.html" title="ipv4Packet">
+			    <span>ipv4Packet</span><span>()<span>: <span class="td-ref">Coder</span>&lt;<span class="td-ref">Ipv4Packet</span>&gt;</span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Creates a coder for a complete IPv4 datagram — header, options, and the
 transport-layer payload sized via the <code>totalLength</code> field.</p>
 </div></div></div>
     </div></div>
@@ -306,35 +306,35 @@ transport-layer payload sized via the <code>totalLength</code> field.</p>
   </defs>
 </svg>
 </a>
-Interfaces</h2></div><div class="namespaceSection"><div id="namespace_ipv4framepayload-1" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-Interface bg-Interface/15 dark:text-InterfaceDark dark:bg-InterfaceDark/15" title="Interface">I</div></div>
+Interfaces</h2></div><div class="namespaceSection"><div id="namespace_ipv4packet-1" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-Interface bg-Interface/15 dark:text-InterfaceDark dark:bg-InterfaceDark/15" title="Interface">I</div></div>
 <div class="namespaceItemContent">
-		    <a href=".&#x2F;.&#x2F;.&#x2F;~&#x2F;Ipv4FramePayload.html" title="Ipv4FramePayload">
-			    <span>Ipv4FramePayload</span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Decoded IPv4 datagram (RFC 791) — header fields, options trailer, and the
+		    <a href=".&#x2F;.&#x2F;.&#x2F;~&#x2F;Ipv4Packet.html" title="Ipv4Packet">
+			    <span>Ipv4Packet</span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Decoded IPv4 datagram (RFC 791) — header fields, options trailer, and the
 raw transport-layer payload.</p>
 </div></div><ul class="namespaceItemContentSubItems"><li>
-                <a href=".&#x2F;.&#x2F;.&#x2F;~&#x2F;Ipv4FramePayload.html#property_destinationaddress">
+                <a href=".&#x2F;.&#x2F;.&#x2F;~&#x2F;Ipv4Packet.html#property_destinationaddress">
                   <span>destinationAddress</span><span>: <span class="td-kw">number</span></span></a></li><li>
-                <a href=".&#x2F;.&#x2F;.&#x2F;~&#x2F;Ipv4FramePayload.html#property_flagsfragmentoffset">
+                <a href=".&#x2F;.&#x2F;.&#x2F;~&#x2F;Ipv4Packet.html#property_flagsfragmentoffset">
                   <span>flagsFragmentOffset</span><span>: { reserved<span>: <span class="td-kw">number</span></span>; dontFragment<span>: <span class="td-kw">number</span></span>; moreFragments<span>: <span class="td-kw">number</span></span>; fragmentOffset<span>: <span class="td-kw">number</span></span>;  }</span></a></li><li>
-                <a href=".&#x2F;.&#x2F;.&#x2F;~&#x2F;Ipv4FramePayload.html#property_headerchecksum">
+                <a href=".&#x2F;.&#x2F;.&#x2F;~&#x2F;Ipv4Packet.html#property_headerchecksum">
                   <span>headerChecksum</span><span>: <span class="td-kw">number</span></span></a></li><li>
-                <a href=".&#x2F;.&#x2F;.&#x2F;~&#x2F;Ipv4FramePayload.html#property_identification">
+                <a href=".&#x2F;.&#x2F;.&#x2F;~&#x2F;Ipv4Packet.html#property_identification">
                   <span>identification</span><span>: <span class="td-kw">number</span></span></a></li><li>
-                <a href=".&#x2F;.&#x2F;.&#x2F;~&#x2F;Ipv4FramePayload.html#property_options">
+                <a href=".&#x2F;.&#x2F;.&#x2F;~&#x2F;Ipv4Packet.html#property_options">
                   <span>options</span><span>: <span class="td-ref">Uint8Array</span></span></a></li><li>
-                <a href=".&#x2F;.&#x2F;.&#x2F;~&#x2F;Ipv4FramePayload.html#property_payload">
+                <a href=".&#x2F;.&#x2F;.&#x2F;~&#x2F;Ipv4Packet.html#property_payload">
                   <span>payload</span><span>: <span class="td-ref">Uint8Array</span></span></a></li><li>
-                <a href=".&#x2F;.&#x2F;.&#x2F;~&#x2F;Ipv4FramePayload.html#property_protocol">
+                <a href=".&#x2F;.&#x2F;.&#x2F;~&#x2F;Ipv4Packet.html#property_protocol">
                   <span>protocol</span><span>: <span class="td-kw">number</span></span></a></li><li>
-                <a href=".&#x2F;.&#x2F;.&#x2F;~&#x2F;Ipv4FramePayload.html#property_sourceaddress">
+                <a href=".&#x2F;.&#x2F;.&#x2F;~&#x2F;Ipv4Packet.html#property_sourceaddress">
                   <span>sourceAddress</span><span>: <span class="td-kw">number</span></span></a></li><li>
-                <a href=".&#x2F;.&#x2F;.&#x2F;~&#x2F;Ipv4FramePayload.html#property_timetolive">
+                <a href=".&#x2F;.&#x2F;.&#x2F;~&#x2F;Ipv4Packet.html#property_timetolive">
                   <span>timeToLive</span><span>: <span class="td-kw">number</span></span></a></li><li>
-                <a href=".&#x2F;.&#x2F;.&#x2F;~&#x2F;Ipv4FramePayload.html#property_totallength">
+                <a href=".&#x2F;.&#x2F;.&#x2F;~&#x2F;Ipv4Packet.html#property_totallength">
                   <span>totalLength</span><span>: <span class="td-kw">number</span></span></a></li><li>
-                <a href=".&#x2F;.&#x2F;.&#x2F;~&#x2F;Ipv4FramePayload.html#property_typeofservice">
+                <a href=".&#x2F;.&#x2F;.&#x2F;~&#x2F;Ipv4Packet.html#property_typeofservice">
                   <span>typeOfService</span><span>: <span class="td-kw">number</span></span></a></li><li>
-                <a href=".&#x2F;.&#x2F;.&#x2F;~&#x2F;Ipv4FramePayload.html#property_versionihl">
+                <a href=".&#x2F;.&#x2F;.&#x2F;~&#x2F;Ipv4Packet.html#property_versionihl">
                   <span>versionIhl</span><span>: { version<span>: <span class="td-kw">number</span></span>; ihl<span>: <span class="td-kw">number</span></span>;  }</span></a></li></ul></div>
     </div></div>
 </section>

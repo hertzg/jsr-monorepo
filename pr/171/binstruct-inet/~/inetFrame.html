@@ -167,9 +167,9 @@
 </a>
 <span class="font-bold">inetFrame</span><span class="font-medium">()<span>: <span class="td-ref">Coder</span>&lt;<a href="../././~/FrameRefined.html" class="link td-ref">FrameRefined</a>&gt;</span> </span>
       </code><div class="space-y-7" id=""><div class="markdown"><p>Creates a composed coder that walks an Ethernet II frame top-down,
-dispatching the payload by <code>etherType</code> (L3) and then by <code>protocol</code> (L4
-under IPv4). Frames with no matching coder surface their payload as a raw
-<code>Uint8Array</code>.</p>
+dispatching the L3 payload by <code>etherType</code> and the L4 payload by IPv4's
+<code>protocol</code>. Frames whose tag has no matching coder surface their payload
+as a raw <code>Uint8Array</code>.</p>
 </div><section class="section"  id="return-type"><div>
       <h2 class="anchorable mb-1"><a href="#return-type" class="anchor" aria-label="Anchor" tabIndex="-1"><svg
   width="16"
@@ -223,8 +223,7 @@ Return Type</h2></div><div class="space-y-8"><div class=" docEntry" id="function
   />
 </svg>
 </a>
-</div><div class="max-w-[75ch]"><div class="markdown"><p>A coder for <a href="../././~/FrameRefined.html">FrameRefined</a> values.</p>
-</div></div></div>
+</div></div>
 </div></section>
 </div>
 </div></div>
