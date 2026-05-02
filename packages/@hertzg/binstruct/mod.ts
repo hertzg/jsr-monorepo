@@ -391,6 +391,5 @@ export * from "./struct/struct.ts";
 export * from "./bytes/bytes.ts";
 export * from "./bits/bit-struct.ts";
 export * from "./refine/refine.ts";
-export * from "./refine/switch.ts";
 export * from "./helpers.ts";
 export * from "./buffer.ts";

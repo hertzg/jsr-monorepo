@@ -1,0 +1,7 @@
+{
+  "name": "@binstruct/inet",
+  "version": "0.2.0",
+  "exports": {
+    ".": "./mod.ts"
+  }
+}

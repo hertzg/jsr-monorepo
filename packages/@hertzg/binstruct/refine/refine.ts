@@ -56,6 +56,9 @@
  * @module
  */
 
+export * from "./switch.ts";
+export * from "./fields.ts";
+
 import {
   type Coder,
   type Context,
