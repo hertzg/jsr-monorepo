@@ -191,8 +191,4 @@
  * @module
  */
 
-export {
-  type BitSchema,
-  bitStruct,
-  type BitStructDecoded,
-} from "./bit-struct.ts";
+export * from "./bit-struct.ts";
