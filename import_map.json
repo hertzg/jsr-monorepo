@@ -34,6 +34,7 @@
     "@binstruct/inet": "jsr:@binstruct/inet@^0.2.0",
     "@binstruct/ipv4": "jsr:@binstruct/ipv4@^0.3.0",
     "@binstruct/png": "jsr:@binstruct/png@^0.4.0",
+    "@binstruct/tcp": "jsr:@binstruct/tcp@^0.1.0",
     "@binstruct/udp": "jsr:@binstruct/udp@^1.1.0",
     "@binstruct/wav": "jsr:@binstruct/wav@^0.1.2",
     "@binstruct/pcap": "jsr:@binstruct/pcap@^0.3.0",

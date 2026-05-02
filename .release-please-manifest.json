@@ -9,6 +9,7 @@
   "packages/@binstruct/ipv4": "0.3.0",
   "packages/@binstruct/pcap": "0.3.0",
   "packages/@binstruct/png": "0.4.0",
+  "packages/@binstruct/tcp": "0.1.0",
   "packages/@binstruct/udp": "1.1.0",
   "packages/@binstruct/wav": "0.1.2",
   "packages/@hertzg/wg-keys": "2.2.0",
