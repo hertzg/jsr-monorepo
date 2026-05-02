@@ -3,6 +3,7 @@ import { parseIpv4 } from "@hertzg/ip/ipv4";
 import { ARP_OPCODE, ETHERTYPE_ARP } from "@binstruct/arp";
 import { ETHERTYPE_IPV4 } from "@binstruct/ipv4";
 import { IP_PROTOCOL_ICMP } from "@binstruct/icmp";
+import { IP_PROTOCOL_TCP } from "@binstruct/tcp";
 import { IP_PROTOCOL_UDP } from "@binstruct/udp";
 import {
   type FrameRefined,
@@ -99,6 +100,78 @@ Deno.test("inetFrame: round-trips ethernet → ipv4 → udp", () => {
     decoded.payload.payload.payload,
     new Uint8Array([0xde, 0xad, 0xbe, 0xef]),
   );
+});
+
+Deno.test("inetFrame: round-trips ethernet → ipv4 → tcp", () => {
+  const coder = inetFrame();
+  const tcpPayload = new Uint8Array([0x68, 0x69]);
+  const value: FrameRefined = {
+    dstMac: new Uint8Array([0, 0, 0, 0, 0, 1]),
+    srcMac: new Uint8Array([0, 0, 0, 0, 0, 2]),
+    etherType: ETHERTYPE_IPV4,
+    payload: {
+      versionIhl: { version: 4, ihl: 5 },
+      typeOfService: 0,
+      totalLength: 20 + 20 + tcpPayload.length,
+      identification: 0,
+      flagsFragmentOffset: {
+        reserved: 0,
+        dontFragment: 0,
+        moreFragments: 0,
+        fragmentOffset: 0,
+      },
+      timeToLive: 64,
+      protocol: IP_PROTOCOL_TCP,
+      headerChecksum: 0,
+      sourceAddress: parseIpv4("192.0.2.1"),
+      destinationAddress: parseIpv4("192.0.2.2"),
+      options: new Uint8Array(0),
+      payload: {
+        sourcePort: 49152,
+        destinationPort: 80,
+        sequenceNumber: 0xdeadbeef,
+        acknowledgmentNumber: 0,
+        dataOffsetReserved: { dataOffset: 5, reserved: 0 },
+        flags: {
+          cwr: 0,
+          ece: 0,
+          urg: 0,
+          ack: 0,
+          psh: 0,
+          rst: 0,
+          syn: 1,
+          fin: 0,
+        },
+        window: 65535,
+        checksum: 0,
+        urgentPointer: 0,
+        options: new Uint8Array(0),
+        payload: tcpPayload,
+      },
+    },
+  };
+
+  const buf = new Uint8Array(64);
+  const written = coder.encode(value, buf);
+  const [decoded, read] = coder.decode(buf.subarray(0, written));
+
+  assertEquals(read, written);
+  assert(!(decoded.payload instanceof Uint8Array));
+  assert("protocol" in decoded.payload);
+  assertEquals(decoded.payload.protocol, IP_PROTOCOL_TCP);
+  assert(!(decoded.payload.payload instanceof Uint8Array));
+  assert("sequenceNumber" in decoded.payload.payload);
+  assertEquals(decoded.payload.payload.sourcePort, 49152);
+  assertEquals(decoded.payload.payload.destinationPort, 80);
+  assertEquals(decoded.payload.payload.sequenceNumber, 0xdeadbeef);
+  assertEquals(decoded.payload.payload.flags.syn, 1);
+  assertEquals(decoded.payload.payload.payload, tcpPayload);
+
+  // Round-trip back to bytes
+  const buf2 = new Uint8Array(written);
+  const written2 = coder.encode(decoded, buf2);
+  assertEquals(written2, written);
+  assertEquals(buf2, buf.subarray(0, written));
 });
 
 Deno.test("inetFrame: round-trips ethernet → ipv4 → icmp", () => {
@@ -213,7 +286,7 @@ Deno.test("inetFrame: unknown IPv4 protocol surfaces as a raw Uint8Array", () =>
         fragmentOffset: 0,
       },
       timeToLive: 64,
-      protocol: 6, // TCP — no coder for it in the family yet.
+      protocol: 50, // ESP — no coder for it in the family yet.
       headerChecksum: 0,
       sourceAddress: parseIpv4("10.0.0.1"),
       destinationAddress: parseIpv4("10.0.0.2"),

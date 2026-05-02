@@ -40,6 +40,7 @@ Source layout mirrors the JSR scope: `packages/<scope>/<name>/`.
 | [@binstruct/ipv4](https://jsr.io/@binstruct/ipv4)         | [![JSR](https://jsr.io/badges/@binstruct/ipv4)](https://jsr.io/@binstruct/ipv4)         |
 | [@binstruct/pcap](https://jsr.io/@binstruct/pcap)         | [![JSR](https://jsr.io/badges/@binstruct/pcap)](https://jsr.io/@binstruct/pcap)         |
 | [@binstruct/png](https://jsr.io/@binstruct/png)           | [![JSR](https://jsr.io/badges/@binstruct/png)](https://jsr.io/@binstruct/png)           |
+| [@binstruct/tcp](https://jsr.io/@binstruct/tcp)           | [![JSR](https://jsr.io/badges/@binstruct/tcp)](https://jsr.io/@binstruct/tcp)           |
 | [@binstruct/udp](https://jsr.io/@binstruct/udp)           | [![JSR](https://jsr.io/badges/@binstruct/udp)](https://jsr.io/@binstruct/udp)           |
 | [@binstruct/wav](https://jsr.io/@binstruct/wav)           | [![JSR](https://jsr.io/badges/@binstruct/wav)](https://jsr.io/@binstruct/wav)           |
 

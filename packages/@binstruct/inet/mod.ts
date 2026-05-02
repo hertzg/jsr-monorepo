@@ -16,7 +16,8 @@
  *
  * - L2 — Ethernet II (`@binstruct/ethernet`)
  * - L3 — IPv4 (`@binstruct/ipv4`), ARP (`@binstruct/arp`)
- * - L4 (under IPv4) — UDP (`@binstruct/udp`), ICMPv4 (`@binstruct/icmp`)
+ * - L4 (under IPv4) — TCP (`@binstruct/tcp`), UDP (`@binstruct/udp`),
+ *   ICMPv4 (`@binstruct/icmp`)
  *
  * Adding a layer is one new `refineFields` arm in the relevant
  * `refineSwitch` plus an entry in its selector.
@@ -91,7 +92,13 @@ import {
   ipv4Packet,
 } from "@binstruct/ipv4";
 import { type IcmpPacket, icmpPacket, IP_PROTOCOL_ICMP } from "@binstruct/icmp";
+import { IP_PROTOCOL_TCP, type TcpPacket, tcpPacket } from "@binstruct/tcp";
 import { IP_PROTOCOL_UDP, type UdpPacket, udpPacket } from "@binstruct/udp";
+
+/** IPv4 datagram with a typed TCP transport payload. */
+export type Ipv4TcpPacket = Omit<Ipv4Packet, "payload"> & {
+  payload: TcpPacket;
+};
 
 /** IPv4 datagram with a typed UDP transport payload. */
 export type Ipv4UdpPacket = Omit<Ipv4Packet, "payload"> & {
@@ -104,22 +111,29 @@ export type Ipv4IcmpPacket = Omit<Ipv4Packet, "payload"> & {
 };
 
 /**
- * Refined IPv4 datagram — `payload` narrows by shape (UDP / ICMP / raw bytes)
- * and the host's `protocol` field is the on-wire discriminator.
+ * Refined IPv4 datagram — `payload` narrows by shape (TCP / UDP / ICMP / raw
+ * bytes) and the host's `protocol` field is the on-wire discriminator.
  */
-export type Ipv4Refined = Ipv4UdpPacket | Ipv4IcmpPacket | Ipv4Packet;
+export type Ipv4Refined =
+  | Ipv4TcpPacket
+  | Ipv4UdpPacket
+  | Ipv4IcmpPacket
+  | Ipv4Packet;
 
 function ipv4Frame(): Coder<Ipv4Refined> {
   return refineSwitch(
     ipv4Packet(),
     {
+      tcp: refineFields({ payload: tcpPacket() }),
       udp: refineFields({ payload: udpPacket() }),
       icmp: refineFields({ payload: icmpPacket() }),
       raw: refineFields({}),
     },
     {
-      refine: (d): "udp" | "icmp" | "raw" => {
+      refine: (d): "tcp" | "udp" | "icmp" | "raw" => {
         switch (d.protocol) {
+          case IP_PROTOCOL_TCP:
+            return "tcp";
           case IP_PROTOCOL_UDP:
             return "udp";
           case IP_PROTOCOL_ICMP:
@@ -128,8 +142,10 @@ function ipv4Frame(): Coder<Ipv4Refined> {
             return "raw";
         }
       },
-      unrefine: (r): "udp" | "icmp" | "raw" => {
+      unrefine: (r): "tcp" | "udp" | "icmp" | "raw" => {
         switch (r.protocol) {
+          case IP_PROTOCOL_TCP:
+            return "tcp";
           case IP_PROTOCOL_UDP:
             return "udp";
           case IP_PROTOCOL_ICMP:
