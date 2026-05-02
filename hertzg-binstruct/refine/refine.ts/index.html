@@ -351,6 +351,19 @@ Functions</h2></div><div class="namespaceSection"><div id="namespace_refine" cla
 		    <a href="..&#x2F;..&#x2F;.&#x2F;refine&#x2F;refine.ts&#x2F;~&#x2F;refine.html" title="refine">
 			    <span>refine</span><span><span>&lt;<span><span class="td-tp">TUnrefined</span></span><span>, </span><span><span class="td-tp">TRefined</span></span><span>, </span><span><span class="td-tp">TArgs</span><span><span class="td-kw"> extends </span><span class="td-kw">unknown</span>[]</span><span><span> = </span><span>[]</span></span></span>&gt;</span>(<div class="ml-4"><div><span>coder<span>: <span class="td-ref">Coder</span>&lt;<span class="td-ref">TUnrefined</span>&gt;</span></span>,</div><div><span>refiner<span>: <span class="td-ref">Refiner</span>&lt;<span class="td-ref">TUnrefined</span><span>, </span><span class="td-ref">TRefined</span><span>, </span><span class="td-ref">TArgs</span>&gt;</span></span></div></div>)<span>: (<span><span><span>...args</span><span>: <span class="td-ref">TArgs</span></span></span></span>) =&gt; <span class="td-ref">Coder</span>&lt;<span class="td-ref">TRefined</span>&gt;</span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Creates a refined coder that applies transformations during encoding and decoding.</p>
 </div></div></div>
+    </div><div id="namespace_refinefields" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-Function bg-Function/15 dark:text-FunctionDark dark:bg-FunctionDark/15" title="Function">f</div></div>
+<div class="namespaceItemContent">
+		    <a href="..&#x2F;..&#x2F;.&#x2F;refine&#x2F;refine.ts&#x2F;~&#x2F;refineFields.html" title="refineFields">
+			    <span>refineFields</span><span><span>&lt;<div class="ml-indent"><div><span><span class="td-tp">TCoders</span><span><span class="td-kw"> extends </span><span class="td-ref">FieldCoders</span></span></span>,</div><div><span><span class="td-tp">THost</span><span><span class="td-kw"> extends </span>[<span><span class="td-tp">K</span><span><span class="td-kw"> in </span><span class="td-kw">keyof</span> <span class="td-ref">TCoders</span></span></span>]<span>: <span class="td-ref">Uint8Array</span></span></span></span></div></div>&gt;</span>(<span><span>coders<span>: <span class="td-ref">TCoders</span></span></span></span>)<span>: <span class="td-ref">Refiner</span>&lt;<span class="td-ref">THost</span><span>, </span><span><span class="td-ref">Omit</span>&lt;<span class="td-ref">THost</span><span>, </span><span class="td-kw">keyof</span> <span class="td-ref">TCoders</span>&gt;<span class="td-op"> & </span><span class="td-ref">DecodedFields</span>&lt;<span class="td-ref">TCoders</span>&gt;</span><span>, </span><span>[]</span>&gt;</span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Creates a <a href="../.././refine/refine.ts/~/Refiner.html"><code>Refiner</code></a> that swaps named <code>Uint8Array</code> fields of a
+host record for the typed values produced by their sub-coders. Fields not
+in <code>coders</code> are passed through unchanged.</p>
+</div></div></div>
+    </div><div id="namespace_refineswitch" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-Function bg-Function/15 dark:text-FunctionDark dark:bg-FunctionDark/15" title="Function">f</div></div>
+<div class="namespaceItemContent">
+		    <a href="..&#x2F;..&#x2F;.&#x2F;refine&#x2F;refine.ts&#x2F;~&#x2F;refineSwitch.html" title="refineSwitch">
+			    <span>refineSwitch</span><span><span>&lt;<div class="ml-indent"><div><span><span class="td-tp">TBase</span></span>,</div><div><span><span class="td-tp">TRefiners</span><span><span class="td-kw"> extends </span><span class="td-ref">Record</span>&lt;<span class="td-kw">string</span><span>, </span><span class="td-ref">Refiner</span>&lt;<span class="td-ref">TBase</span><span>, </span><span class="td-kw">any</span><span>, </span><span>[]</span>&gt;&gt;</span></span></div></div>&gt;</span>(<div class="ml-4"><div><span>baseCoder<span>: <span class="td-ref">Coder</span>&lt;<span class="td-ref">TBase</span>&gt;</span></span>,</div><div><span>refiners<span>: <span class="td-ref">TRefiners</span></span></span>,</div><div><span>selector<span>: { refine<span>: (<div class="ml-4"><div><span>base<span>: <span class="td-ref">TBase</span></span></span>,</div><div><span>context<span>: <span class="td-ref">Context</span></span></span></div></div>) =&gt; <span><span class="td-kw">keyof</span> <span class="td-ref">TRefiners</span><span class="td-op"> | </span><span class="td-kw">null</span></span></span>; unrefine<span>: (<div class="ml-4"><div><span>refined<span>: <span class="td-ref">RefinedUnion</span>&lt;<span class="td-ref">TRefiners</span>&gt;</span></span>,</div><div><span>context<span>: <span class="td-ref">Context</span></span></span></div></div>) =&gt; <span><span class="td-kw">keyof</span> <span class="td-ref">TRefiners</span><span class="td-op"> | </span><span class="td-kw">null</span></span></span>;  }</span></span></div></div>)<span>: <span class="td-ref">Coder</span>&lt;<span class="td-ref">RefinedUnion</span>&lt;<span class="td-ref">TRefiners</span>&gt;&gt;</span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Creates a coder that conditionally applies refiners based on selector functions,
+using switch-like semantics for bidirectional encoding and decoding.</p>
+</div></div></div>
     </div></div>
 </section>
 <section class="section"  id="refine&#x2F;refine_ts_type-aliases"><div>
@@ -376,7 +389,25 @@ Functions</h2></div><div class="namespaceSection"><div id="namespace_refine" cla
   </defs>
 </svg>
 </a>
-Type Aliases</h2></div><div class="namespaceSection"><div id="namespace_refiner" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-TypeAlias bg-TypeAlias/15 dark:text-TypeAliasDark dark:bg-TypeAliasDark/15" title="Type Alias">T</div></div>
+Type Aliases</h2></div><div class="namespaceSection"><div id="namespace_decodedfields" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-TypeAlias bg-TypeAlias/15 dark:text-TypeAliasDark dark:bg-TypeAliasDark/15" title="Type Alias">T</div></div>
+<div class="namespaceItemContent">
+		    <a href="..&#x2F;..&#x2F;.&#x2F;refine&#x2F;refine.ts&#x2F;~&#x2F;DecodedFields.html" title="DecodedFields">
+			    <span>DecodedFields</span><span><span>&lt;<span><span class="td-tp">TCoders</span><span><span class="td-kw"> extends </span><span class="td-ref">FieldCoders</span></span></span>&gt;</span> = [<span><span class="td-tp">K</span><span><span class="td-kw"> in </span><span class="td-kw">keyof</span> <span class="td-ref">TCoders</span></span></span>]<span>: <span class="td-ref">TCoders</span>[<span class="td-ref">K</span>] <span class="td-kw">extends</span> <span class="td-ref">Coder</span>&lt;<span class="td-kw">infer </span><span><span class="td-tp">T</span></span>&gt; <span class="td-op">?</span> <span class="td-ref">T</span> <span class="td-op">:</span> <span class="td-kw">never</span></span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Mapped type extracting the decoded value type for each entry in a
+<a href="../.././refine/refine.ts/~/FieldCoders.html"><code>FieldCoders</code></a> map. Given <code>{ payload: Coder&lt;Ipv4&gt; }</code> it yields
+<code>{ payload: Ipv4 }</code>.</p>
+</div></div></div>
+    </div><div id="namespace_fieldcoders" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-TypeAlias bg-TypeAlias/15 dark:text-TypeAliasDark dark:bg-TypeAliasDark/15" title="Type Alias">T</div></div>
+<div class="namespaceItemContent">
+		    <a href="..&#x2F;..&#x2F;.&#x2F;refine&#x2F;refine.ts&#x2F;~&#x2F;FieldCoders.html" title="FieldCoders">
+			    <span>FieldCoders</span><span> = <span class="td-ref">Record</span>&lt;<span class="td-kw">string</span><span>, </span><span class="td-ref">Coder</span>&lt;<span class="td-kw">any</span>&gt;&gt;</span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Map of host field names to the sub-coder that decodes/encodes that field's
+bytes. Used as the input to <a href="../.././refine/refine.ts/~/refineFields.html"><code>refineFields</code></a>.</p>
+</div></div></div>
+    </div><div id="namespace_refinedunion" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-TypeAlias bg-TypeAlias/15 dark:text-TypeAliasDark dark:bg-TypeAliasDark/15" title="Type Alias">T</div></div>
+<div class="namespaceItemContent">
+		    <a href="..&#x2F;..&#x2F;.&#x2F;refine&#x2F;refine.ts&#x2F;~&#x2F;RefinedUnion.html" title="RefinedUnion">
+			    <span>RefinedUnion</span><span><span>&lt;<span><span class="td-tp">T</span><span><span class="td-kw"> extends </span><span class="td-ref">Record</span>&lt;<span class="td-kw">string</span><span>, </span><span class="td-ref">Refiner</span>&lt;<span class="td-kw">any</span><span>, </span><span class="td-kw">any</span><span>, </span><span class="td-kw">any</span>&gt;&gt;</span></span>&gt;</span> = [<span><span class="td-tp">K</span><span><span class="td-kw"> in </span><span class="td-kw">keyof</span> <span class="td-ref">T</span></span></span>]<span>: <span class="td-ref">T</span>[<span class="td-ref">K</span>] <span class="td-kw">extends</span> <span class="td-ref">Refiner</span>&lt;<span class="td-kw">any</span><span>, </span><span class="td-kw">infer </span><span><span class="td-tp">R</span></span><span>, </span><span class="td-kw">any</span>&gt; <span class="td-op">?</span> <span class="td-ref">R</span> <span class="td-op">:</span> <span class="td-kw">never</span></span>[<span class="td-kw">keyof</span> <span class="td-ref">T</span>]</span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Extracts the union of all refined types from a record of refiners.</p>
+</div></div></div>
+    </div><div id="namespace_refiner" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-TypeAlias bg-TypeAlias/15 dark:text-TypeAliasDark dark:bg-TypeAliasDark/15" title="Type Alias">T</div></div>
 <div class="namespaceItemContent">
 		    <a href="..&#x2F;..&#x2F;.&#x2F;refine&#x2F;refine.ts&#x2F;~&#x2F;Refiner.html" title="Refiner">
 			    <span>Refiner</span><span><span>&lt;<span><span class="td-tp">TUnrefined</span></span><span>, </span><span><span class="td-tp">TRefined</span></span><span>, </span><span><span class="td-tp">TArgs</span><span><span class="td-kw"> extends </span><span class="td-kw">unknown</span>[]</span><span><span> = </span><span>[]</span></span></span>&gt;</span> = { refine<span>: (<div class="ml-4"><div><span>unrefined<span>: <span class="td-ref">TUnrefined</span></span></span>,</div><div><span>context<span>: <span class="td-ref">Context</span></span></span>,</div><div><span><span>...args</span><span>: <span class="td-ref">TArgs</span></span></span></div></div>) =&gt; <span class="td-ref">TRefined</span></span>; unrefine<span>: (<div class="ml-4"><div><span>refined<span>: <span class="td-ref">TRefined</span></span></span>,</div><div><span>context<span>: <span class="td-ref">Context</span></span></span>,</div><div><span><span>...args</span><span>: <span class="td-ref">TArgs</span></span></span></div></div>) =&gt; <span class="td-ref">TUnrefined</span></span>;  }</span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>A refiner that transforms decoded values into refined types and vice versa.</p>
@@ -430,9 +461,21 @@ Type Aliases</h2></div><div class="namespaceSection"><div id="namespace_refiner"
 </div></div><nav class="topSymbols">
           <h3>Symbols</h3>
           <ul><li>
-                <a href="..&#x2F;..&#x2F;.&#x2F;mod.ts&#x2F;~&#x2F;Coder.html" title="Coder"><div class="docNodeKindIcon"><div class="text-TypeAlias bg-TypeAlias/15 dark:text-TypeAliasDark dark:bg-TypeAliasDark/15" title="Type Alias">T</div></div>
+                <a href="..&#x2F;..&#x2F;.&#x2F;mod.ts&#x2F;~&#x2F;kCoderKind.html" title="kCoderKind"><div class="docNodeKindIcon"><div class="text-Variable bg-Variable/15 dark:text-VariableDark dark:bg-VariableDark/15" title="Variable">v</div></div>
+<span class="hover:bg-Variable/15 hover:bg-VariableDark/15">
+                    kCoderKind
+                  </span>
+                </a>
+              </li><li>
+                <a href="..&#x2F;..&#x2F;.&#x2F;mod.ts&#x2F;~&#x2F;kCtxRefs.html" title="kCtxRefs"><div class="docNodeKindIcon"><div class="text-Variable bg-Variable/15 dark:text-VariableDark dark:bg-VariableDark/15" title="Variable">v</div></div>
+<span class="hover:bg-Variable/15 hover:bg-VariableDark/15">
+                    kCtxRefs
+                  </span>
+                </a>
+              </li><li>
+                <a href="..&#x2F;..&#x2F;.&#x2F;mod.ts&#x2F;~&#x2F;ValueWithBytes.html" title="ValueWithBytes"><div class="docNodeKindIcon"><div class="text-TypeAlias bg-TypeAlias/15 dark:text-TypeAliasDark dark:bg-TypeAliasDark/15" title="Type Alias">T</div></div>
 <span class="hover:bg-TypeAlias/15 hover:bg-TypeAliasDark/15">
-                    Coder
+                    ValueWithBytes
                   </span>
                 </a>
               </li><li>
@@ -447,20 +490,8 @@ Type Aliases</h2></div><div class="namespaceSection"><div id="namespace_refiner"
                     createContext
                   </span>
                 </a>
-              </li><li>
-                <a href="..&#x2F;..&#x2F;.&#x2F;mod.ts&#x2F;~&#x2F;Decoder.html" title="Decoder"><div class="docNodeKindIcon"><div class="text-TypeAlias bg-TypeAlias/15 dark:text-TypeAliasDark dark:bg-TypeAliasDark/15" title="Type Alias">T</div></div>
-<span class="hover:bg-TypeAlias/15 hover:bg-TypeAliasDark/15">
-                    Decoder
-                  </span>
-                </a>
-              </li><li>
-                <a href="..&#x2F;..&#x2F;.&#x2F;mod.ts&#x2F;~&#x2F;Encoder.html" title="Encoder"><div class="docNodeKindIcon"><div class="text-TypeAlias bg-TypeAlias/15 dark:text-TypeAliasDark dark:bg-TypeAliasDark/15" title="Type Alias">T</div></div>
-<span class="hover:bg-TypeAlias/15 hover:bg-TypeAliasDark/15">
-                    Encoder
-                  </span>
-                </a>
               </li></ul><a class="flex items-center gap-0.5" href="..&#x2F;..&#x2F;.&#x2F;all_symbols.html">
-              <span class="leading-none">view all 129 symbols</span><svg
+              <span class="leading-none">view all 164 symbols</span><svg
   width="16"
   height="16"
   viewBox="0 0 16 16"
@@ -475,7 +506,7 @@ Type Aliases</h2></div><div class="namespaceSection"><div id="namespace_refiner"
   />
 </svg>
 </a></nav><nav class="documentNavigation">
-          <h3>Document Navigation</h3><ul><li><a href="#examples" title="Examples">Examples</a></li><li><ul><li><a href="#example_0" title="Example 1">Example 1</a></li><li><a href="#example_1" title="Example 2">Example 2</a></li></ul></li><li><a href="#refine/refine_ts_functions" title="Functions">Functions</a></li><li><ul><li><a href="#namespace_refine" title="refine">refine</a></li></ul></li><li><a href="#refine/refine_ts_type-aliases" title="Type Aliases">Type Aliases</a></li><li><ul><li><a href="#namespace_refiner" title="Refiner">Refiner</a></li></ul></li></ul></nav></div>
+          <h3>Document Navigation</h3><ul><li><a href="#examples" title="Examples">Examples</a></li><li><ul><li><a href="#example_0" title="Example 1">Example 1</a></li><li><a href="#example_1" title="Example 2">Example 2</a></li></ul></li><li><a href="#refine/refine_ts_functions" title="Functions">Functions</a></li><li><ul><li><a href="#namespace_refine" title="refine">refine</a></li><li><a href="#namespace_refinefields" title="refineFields">refineFields</a></li><li><a href="#namespace_refineswitch" title="refineSwitch">refineSwitch</a></li></ul></li><li><a href="#refine/refine_ts_type-aliases" title="Type Aliases">Type Aliases</a></li><li><ul><li><a href="#namespace_decodedfields" title="DecodedFields">DecodedFields</a></li><li><a href="#namespace_fieldcoders" title="FieldCoders">FieldCoders</a></li><li><a href="#namespace_refinedunion" title="RefinedUnion">RefinedUnion</a></li><li><a href="#namespace_refiner" title="Refiner">Refiner</a></li></ul></li></ul></nav></div>
   </div></div>
 </div>
 </div>

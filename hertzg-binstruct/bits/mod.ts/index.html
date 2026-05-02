@@ -809,7 +809,7 @@ assertEquals(decoded.vid, 100);
 </a>
 Functions</h2></div><div class="namespaceSection"><div id="namespace_bitstruct" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-Function bg-Function/15 dark:text-FunctionDark dark:bg-FunctionDark/15" title="Function">f</div></div>
 <div class="namespaceItemContent">
-		    <a href="..&#x2F;..&#x2F;.&#x2F;mod.ts&#x2F;~&#x2F;bitStruct.html" title="bitStruct">
+		    <a href="..&#x2F;..&#x2F;.&#x2F;bits&#x2F;mod.ts&#x2F;~&#x2F;bitStruct.html" title="bitStruct">
 			    <span>bitStruct</span><span><span>&lt;<span><span class="td-tp">T</span><span><span class="td-kw"> extends </span><span class="td-ref">BitSchema</span></span></span>&gt;</span>(<span><span>schema<span>: <span class="td-ref">T</span></span></span></span>)<span>: <span class="td-ref">Coder</span>&lt;<span class="td-ref">BitStructDecoded</span>&lt;<span class="td-ref">T</span>&gt;&gt;</span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Creates a Coder for bit-packed structures with MSB-first ordering.</p>
 </div></div></div>
     </div></div>
@@ -839,7 +839,7 @@ Functions</h2></div><div class="namespaceSection"><div id="namespace_bitstruct" 
 </a>
 Type Aliases</h2></div><div class="namespaceSection"><div id="namespace_bitschema" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-TypeAlias bg-TypeAlias/15 dark:text-TypeAliasDark dark:bg-TypeAliasDark/15" title="Type Alias">T</div></div>
 <div class="namespaceItemContent">
-		    <a href="..&#x2F;..&#x2F;.&#x2F;mod.ts&#x2F;~&#x2F;BitSchema.html" title="BitSchema">
+		    <a href="..&#x2F;..&#x2F;.&#x2F;bits&#x2F;mod.ts&#x2F;~&#x2F;BitSchema.html" title="BitSchema">
 			    <span>BitSchema</span><span> = <span class="td-ref">Record</span>&lt;<span class="td-kw">string</span><span>, </span><span class="td-kw">number</span>&gt;</span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Schema type for bitStruct, mapping field names to bit counts.</p>
 </div></div></div>
     </div><div id="namespace_bitstructdecoded" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-TypeAlias bg-TypeAlias/15 dark:text-TypeAliasDark dark:bg-TypeAliasDark/15" title="Type Alias">T</div></div>
@@ -891,9 +891,21 @@ All fields are decoded as numbers.</p>
 </div></div><nav class="topSymbols">
           <h3>Symbols</h3>
           <ul><li>
-                <a href="..&#x2F;..&#x2F;.&#x2F;mod.ts&#x2F;~&#x2F;Coder.html" title="Coder"><div class="docNodeKindIcon"><div class="text-TypeAlias bg-TypeAlias/15 dark:text-TypeAliasDark dark:bg-TypeAliasDark/15" title="Type Alias">T</div></div>
+                <a href="..&#x2F;..&#x2F;.&#x2F;mod.ts&#x2F;~&#x2F;kCoderKind.html" title="kCoderKind"><div class="docNodeKindIcon"><div class="text-Variable bg-Variable/15 dark:text-VariableDark dark:bg-VariableDark/15" title="Variable">v</div></div>
+<span class="hover:bg-Variable/15 hover:bg-VariableDark/15">
+                    kCoderKind
+                  </span>
+                </a>
+              </li><li>
+                <a href="..&#x2F;..&#x2F;.&#x2F;mod.ts&#x2F;~&#x2F;kCtxRefs.html" title="kCtxRefs"><div class="docNodeKindIcon"><div class="text-Variable bg-Variable/15 dark:text-VariableDark dark:bg-VariableDark/15" title="Variable">v</div></div>
+<span class="hover:bg-Variable/15 hover:bg-VariableDark/15">
+                    kCtxRefs
+                  </span>
+                </a>
+              </li><li>
+                <a href="..&#x2F;..&#x2F;.&#x2F;mod.ts&#x2F;~&#x2F;ValueWithBytes.html" title="ValueWithBytes"><div class="docNodeKindIcon"><div class="text-TypeAlias bg-TypeAlias/15 dark:text-TypeAliasDark dark:bg-TypeAliasDark/15" title="Type Alias">T</div></div>
 <span class="hover:bg-TypeAlias/15 hover:bg-TypeAliasDark/15">
-                    Coder
+                    ValueWithBytes
                   </span>
                 </a>
               </li><li>
@@ -908,20 +920,8 @@ All fields are decoded as numbers.</p>
                     createContext
                   </span>
                 </a>
-              </li><li>
-                <a href="..&#x2F;..&#x2F;.&#x2F;mod.ts&#x2F;~&#x2F;Decoder.html" title="Decoder"><div class="docNodeKindIcon"><div class="text-TypeAlias bg-TypeAlias/15 dark:text-TypeAliasDark dark:bg-TypeAliasDark/15" title="Type Alias">T</div></div>
-<span class="hover:bg-TypeAlias/15 hover:bg-TypeAliasDark/15">
-                    Decoder
-                  </span>
-                </a>
-              </li><li>
-                <a href="..&#x2F;..&#x2F;.&#x2F;mod.ts&#x2F;~&#x2F;Encoder.html" title="Encoder"><div class="docNodeKindIcon"><div class="text-TypeAlias bg-TypeAlias/15 dark:text-TypeAliasDark dark:bg-TypeAliasDark/15" title="Type Alias">T</div></div>
-<span class="hover:bg-TypeAlias/15 hover:bg-TypeAliasDark/15">
-                    Encoder
-                  </span>
-                </a>
               </li></ul><a class="flex items-center gap-0.5" href="..&#x2F;..&#x2F;.&#x2F;all_symbols.html">
-              <span class="leading-none">view all 129 symbols</span><svg
+              <span class="leading-none">view all 164 symbols</span><svg
   width="16"
   height="16"
   viewBox="0 0 16 16"
