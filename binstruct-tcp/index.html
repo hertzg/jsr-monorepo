@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>@binstruct&#x2F;inet documentation</title>
+  <title>@binstruct&#x2F;tcp documentation</title>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="doc-current-file" content="">
@@ -17,7 +17,7 @@
   <div class="h-full">
     <div class="flex items-center"><ul class="breadcrumbs">
   <li>
-    <a href="" class="contextLink">@binstruct&#x2F;inet</a>
+    <a href="" class="contextLink">@binstruct&#x2F;tcp</a>
   </li></ul>
 </div>
 
@@ -84,33 +84,87 @@
 </nav>
 <div id="searchResults"></div><div id="content">
     <main><section>
-  <div class="space-y-2 flex-1"><div class="space-y-7" id="module_doc"><div class="markdown"><p>Inet stack coder for the <code>@binstruct/*</code> packet family.</p>
-<p><code>@binstruct/inet</code> is a thin orchestration layer: each protocol package
-(<code>@binstruct/ethernet</code>, <code>@binstruct/ipv4</code>, <code>@binstruct/arp</code>,
-<code>@binstruct/udp</code>, <code>@binstruct/icmp</code>) only knows how to decode its own
-layer's bytes. This package wires them together via <code>refineSwitch</code> and
-<code>refineFields</code> — dispatching on <code>etherType</code> at L3 and <code>protocol</code> at L4 —
-into a single round-trippable <a href="././~/inetFrame.html"><code>inetFrame</code></a> coder factory that
-walks an Ethernet II frame top-down. Each layer's <code>payload</code> field is
-surfaced as the typed value of the next layer; layers we don't have a
-coder for default to a raw <a href="https://deno.land/api@v2.7.14?s=Uint8Array"><code>Uint8Array</code></a>, so the coder is safe
-to point at arbitrary captured traffic.</p>
-<p>Coverage:</p>
-<ul>
-<li>L2 — Ethernet II (<code>@binstruct/ethernet</code>)</li>
-<li>L3 — IPv4 (<code>@binstruct/ipv4</code>), ARP (<code>@binstruct/arp</code>)</li>
-<li>L4 (under IPv4) — TCP (<code>@binstruct/tcp</code>), UDP (<code>@binstruct/udp</code>),
-ICMPv4 (<code>@binstruct/icmp</code>)</li>
-</ul>
-<p>Adding a layer is one new <code>refineFields</code> arm in the relevant
-<code>refineSwitch</code> plus an entry in its selector.</p>
-<p>Also exports <a href="././~/internetChecksum.html"><code>internetChecksum</code></a> (RFC 1071) for callers that need
-to fill in IPv4/UDP/ICMP/TCP checksum fields.</p>
-<p>Each refined <code>payload</code> is the typed value directly — no <code>{ kind, ... }</code>
-wrapper. The on-wire tag (<code>etherType</code> at L3, <code>protocol</code> at L4) on the host
-record is the discriminator; narrow the union with property-existence
-checks (<code>&quot;protocol&quot; in payload</code>, <code>&quot;srcPort&quot; in payload</code>, …) when reading
-decoded values.</p>
+  <div class="space-y-2 flex-1"><div class="space-y-7" id="module_doc"><div class="markdown"><p>TCP segment encoding and decoding utilities (RFC 9293).</p>
+<p>A TCP segment is a 20-byte fixed header, an optional 0–40 byte options
+trailer (sized by the <code>dataOffset</code> field), and a variable-length payload:</p>
+<pre class="highlight"><code class="language-text"> 0      7 8     15 16    23 24    31
++--------+--------+--------+--------+
+|     Source      |   Destination   |
+|      Port       |      Port       |
++--------+--------+--------+--------+
+|          Sequence Number          |
++--------+--------+--------+--------+
+|       Acknowledgment Number       |
++--------+--------+--------+--------+
+| DOff |Rsrvd|C E U A P R S F| Window|
+| 4b   | 4b  |W C R C S S Y I| 16 bit|
+|      |     |R E G K H T N N|       |
++--------+--------+--------+--------+
+|    Checksum     | Urgent Pointer  |
++--------+--------+--------+--------+
+|        Options (0-40 bytes)       |
++-----------------------------------+
+|        Payload (variable)         |
++-----------------------------------+
+</code><button class="copyButton" data-copy=" 0      7 8     15 16    23 24    31
++--------+--------+--------+--------+
+|     Source      |   Destination   |
+|      Port       |      Port       |
++--------+--------+--------+--------+
+|          Sequence Number          |
++--------+--------+--------+--------+
+|       Acknowledgment Number       |
++--------+--------+--------+--------+
+| DOff |Rsrvd|C E U A P R S F| Window|
+| 4b   | 4b  |W C R C S S Y I| 16 bit|
+|      |     |R E G K H T N N|       |
++--------+--------+--------+--------+
+|    Checksum     | Urgent Pointer  |
++--------+--------+--------+--------+
+|        Options (0-40 bytes)       |
++-----------------------------------+
+|        Payload (variable)         |
++-----------------------------------+
+"><svg
+  class="copy"
+  width="15"
+  height="15"
+  viewBox="0 0 15 15"
+  fill="none"
+  xmlns="http://www.w3.org/2000/svg"
+>
+  <rect x="2" y="2" width="7" height="7" fill="none" />
+  <rect x="6" y="6" width="7" height="7" fill="none" />
+  <path
+    d="M1.55566 2.7C1.55566 2.03726 2.09292 1.5 2.75566 1.5H8.75566C9.41841 1.5 9.95566 2.03726 9.95566 2.7V5.1H12.3557C13.0184 5.1 13.5557 5.63726 13.5557 6.3V12.3C13.5557 12.9627 13.0184 13.5 12.3557 13.5H6.35566C5.69292 13.5 5.15566 12.9627 5.15566 12.3V9.9H2.75566C2.09292 9.9 1.55566 9.36274 1.55566 8.7V2.7ZM6.35566 9.9V12.3H12.3557V6.3H9.95566V8.7C9.95566 9.36274 9.41841 9.9 8.75566 9.9H6.35566ZM8.75566 8.7V2.7H2.75566V8.7H8.75566Z"
+    fill="currentColor"
+  />
+</svg>
+<svg
+  class="check"
+  width="15"
+  height="15"
+  viewBox="0 0 24 24"
+  stroke-width="2"
+  stroke="currentColor"
+  fill="none"
+  stroke-linecap="round"
+  stroke-linejoin="round"
+  xmlns="http://www.w3.org/2000/svg"
+>
+  <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+  <path d="M5 12l5 5l10 -10" />
+</svg>
+</button><code></code></pre>
+<p>Unlike UDP, TCP carries no segment-length field — the payload size must come
+from the carrier (typically <code>IPv4.totalLength - IPv4.ihl * 4</code>). The coder
+therefore absorbs the rest of the buffer it is given as the payload, so it
+is round-trip-safe only when handed a buffer slice already trimmed to the
+segment length. <code>@binstruct/inet</code>'s <code>inetFrame()</code> does this trimming; stand-
+alone callers should slice before decoding.</p>
+<p>The <code>checksum</code> field is computed over a TCP pseudo-header followed by the
+segment; assembling the pseudo-header is the caller's job. Use
+<code>internetChecksum</code> from <code>@binstruct/inet</code> once the bytes are concatenated.</p>
 </div><section class="section"  id="examples"><div>
       <h2 class="anchorable mb-1"><a href="#examples" class="anchor" aria-label="Anchor" tabIndex="-1"><svg
   width="16"
@@ -156,92 +210,60 @@ Examples</h2></div><div class="space-y-8"><div class="anchorable"><a href="#exam
   </defs>
 </svg>
 </a>
-<h3 class="example-header"><div class="markdown"><p>Round-trip a UDP-over-IPv4-over-Ethernet frame</p>
+<h3 class="example-header"><div class="markdown"><p>Round-trip a SYN segment with no options or payload</p>
 </div></h3>
-  <div><div class="markdown"><pre class="highlight"><code class="language-ts">import { assert, assertEquals } from &quot;@std/assert&quot;;
-import { parseIpv4 } from &quot;@hertzg/ip/ipv4&quot;;
-import { ETHERTYPE_IPV4 } from &quot;@binstruct/ipv4&quot;;
-import { IP_PROTOCOL_UDP } from &quot;@binstruct/udp&quot;;
-import { inetFrame } from &quot;@binstruct/inet&quot;;
+  <div><div class="markdown"><pre class="highlight"><code class="language-ts">import { assertEquals } from &quot;@std/assert&quot;;
+import { TCP_HEADER_MIN_SIZE, tcpPacket } from &quot;@binstruct/tcp&quot;;
 
-const value = {
-  dstMac: new Uint8Array([0, 0, 0, 0, 0, 1]),
-  srcMac: new Uint8Array([0, 0, 0, 0, 0, 2]),
-  etherType: ETHERTYPE_IPV4,
-  payload: {
-    versionIhl: { version: 4, ihl: 5 },
-    typeOfService: 0,
-    totalLength: 32,
-    identification: 0,
-    flagsFragmentOffset: { reserved: 0, dontFragment: 0, moreFragments: 0, fragmentOffset: 0 },
-    timeToLive: 64,
-    protocol: IP_PROTOCOL_UDP,
-    headerChecksum: 0,
-    sourceAddress: parseIpv4(&quot;192.0.2.1&quot;),
-    destinationAddress: parseIpv4(&quot;192.0.2.2&quot;),
-    options: new Uint8Array(0),
-    payload: {
-      srcPort: 53,
-      dstPort: 49152,
-      length: 12,
-      checksum: 0,
-      payload: new Uint8Array([0xde, 0xad, 0xbe, 0xef]),
-    },
-  },
+const coder = tcpPacket();
+const segment = {
+  sourcePort: 49152,
+  destinationPort: 80,
+  sequenceNumber: 0xdeadbeef,
+  acknowledgmentNumber: 0,
+  dataOffsetReserved: { dataOffset: 5, reserved: 0 },
+  flags: { cwr: 0, ece: 0, urg: 0, ack: 0, psh: 0, rst: 0, syn: 1, fin: 0 },
+  window: 65535,
+  checksum: 0,
+  urgentPointer: 0,
+  options: new Uint8Array(0),
+  payload: new Uint8Array(0),
 };
 
-const coder = inetFrame();
-const buf = new Uint8Array(64);
-const written = coder.encode(value, buf);
-const [decoded] = coder.decode(buf.subarray(0, written));
+const buffer = new Uint8Array(TCP_HEADER_MIN_SIZE);
+const written = coder.encode(segment, buffer);
+const [decoded, read] = coder.decode(buffer);
 
-assert(!(decoded.payload instanceof Uint8Array));
-assert(&quot;protocol&quot; in decoded.payload);
-assert(!(decoded.payload.payload instanceof Uint8Array));
-assert(&quot;srcPort&quot; in decoded.payload.payload);
-assertEquals(decoded.payload.payload.payload, new Uint8Array([0xde, 0xad, 0xbe, 0xef]));
-</code><button class="copyButton" data-copy="import { assert, assertEquals } from &quot;@std/assert&quot;;
-import { parseIpv4 } from &quot;@hertzg/ip/ipv4&quot;;
-import { ETHERTYPE_IPV4 } from &quot;@binstruct/ipv4&quot;;
-import { IP_PROTOCOL_UDP } from &quot;@binstruct/udp&quot;;
-import { inetFrame } from &quot;@binstruct/inet&quot;;
+assertEquals(written, TCP_HEADER_MIN_SIZE);
+assertEquals(read, TCP_HEADER_MIN_SIZE);
+assertEquals(decoded.flags.syn, 1);
+assertEquals(decoded.sequenceNumber, 0xdeadbeef);
+</code><button class="copyButton" data-copy="import { assertEquals } from &quot;@std/assert&quot;;
+import { TCP_HEADER_MIN_SIZE, tcpPacket } from &quot;@binstruct/tcp&quot;;
 
-const value = {
-  dstMac: new Uint8Array([0, 0, 0, 0, 0, 1]),
-  srcMac: new Uint8Array([0, 0, 0, 0, 0, 2]),
-  etherType: ETHERTYPE_IPV4,
-  payload: {
-    versionIhl: { version: 4, ihl: 5 },
-    typeOfService: 0,
-    totalLength: 32,
-    identification: 0,
-    flagsFragmentOffset: { reserved: 0, dontFragment: 0, moreFragments: 0, fragmentOffset: 0 },
-    timeToLive: 64,
-    protocol: IP_PROTOCOL_UDP,
-    headerChecksum: 0,
-    sourceAddress: parseIpv4(&quot;192.0.2.1&quot;),
-    destinationAddress: parseIpv4(&quot;192.0.2.2&quot;),
-    options: new Uint8Array(0),
-    payload: {
-      srcPort: 53,
-      dstPort: 49152,
-      length: 12,
-      checksum: 0,
-      payload: new Uint8Array([0xde, 0xad, 0xbe, 0xef]),
-    },
-  },
+const coder = tcpPacket();
+const segment = {
+  sourcePort: 49152,
+  destinationPort: 80,
+  sequenceNumber: 0xdeadbeef,
+  acknowledgmentNumber: 0,
+  dataOffsetReserved: { dataOffset: 5, reserved: 0 },
+  flags: { cwr: 0, ece: 0, urg: 0, ack: 0, psh: 0, rst: 0, syn: 1, fin: 0 },
+  window: 65535,
+  checksum: 0,
+  urgentPointer: 0,
+  options: new Uint8Array(0),
+  payload: new Uint8Array(0),
 };
 
-const coder = inetFrame();
-const buf = new Uint8Array(64);
-const written = coder.encode(value, buf);
-const [decoded] = coder.decode(buf.subarray(0, written));
+const buffer = new Uint8Array(TCP_HEADER_MIN_SIZE);
+const written = coder.encode(segment, buffer);
+const [decoded, read] = coder.decode(buffer);
 
-assert(!(decoded.payload instanceof Uint8Array));
-assert(&quot;protocol&quot; in decoded.payload);
-assert(!(decoded.payload.payload instanceof Uint8Array));
-assert(&quot;srcPort&quot; in decoded.payload.payload);
-assertEquals(decoded.payload.payload.payload, new Uint8Array([0xde, 0xad, 0xbe, 0xef]));
+assertEquals(written, TCP_HEADER_MIN_SIZE);
+assertEquals(read, TCP_HEADER_MIN_SIZE);
+assertEquals(decoded.flags.syn, 1);
+assertEquals(decoded.sequenceNumber, 0xdeadbeef);
 "><svg
   class="copy"
   width="15"
@@ -283,52 +305,31 @@ assertEquals(decoded.payload.payload.payload, new Uint8Array([0xde, 0xad, 0xbe, 
     <div><nav class="topSymbols">
           <h3>Symbols</h3>
           <ul><li>
-                <a href=".&#x2F;.&#x2F;~&#x2F;Ipv4TcpPacket.html" title="Ipv4TcpPacket"><div class="docNodeKindIcon"><div class="text-TypeAlias bg-TypeAlias/15 dark:text-TypeAliasDark dark:bg-TypeAliasDark/15" title="Type Alias">T</div></div>
-<span class="hover:bg-TypeAlias/15 hover:bg-TypeAliasDark/15">
-                    Ipv4TcpPacket
+                <a href=".&#x2F;.&#x2F;~&#x2F;TCP_HEADER_MIN_SIZE.html" title="TCP_HEADER_MIN_SIZE"><div class="docNodeKindIcon"><div class="text-Variable bg-Variable/15 dark:text-VariableDark dark:bg-VariableDark/15" title="Variable">v</div></div>
+<span class="hover:bg-Variable/15 hover:bg-VariableDark/15">
+                    TCP_HEADER_MIN_SIZE
                   </span>
                 </a>
               </li><li>
-                <a href=".&#x2F;.&#x2F;~&#x2F;Ipv4UdpPacket.html" title="Ipv4UdpPacket"><div class="docNodeKindIcon"><div class="text-TypeAlias bg-TypeAlias/15 dark:text-TypeAliasDark dark:bg-TypeAliasDark/15" title="Type Alias">T</div></div>
-<span class="hover:bg-TypeAlias/15 hover:bg-TypeAliasDark/15">
-                    Ipv4UdpPacket
+                <a href=".&#x2F;.&#x2F;~&#x2F;IP_PROTOCOL_TCP.html" title="IP_PROTOCOL_TCP"><div class="docNodeKindIcon"><div class="text-Variable bg-Variable/15 dark:text-VariableDark dark:bg-VariableDark/15" title="Variable">v</div></div>
+<span class="hover:bg-Variable/15 hover:bg-VariableDark/15">
+                    IP_PROTOCOL_TCP
                   </span>
                 </a>
               </li><li>
-                <a href=".&#x2F;.&#x2F;~&#x2F;Ipv4IcmpPacket.html" title="Ipv4IcmpPacket"><div class="docNodeKindIcon"><div class="text-TypeAlias bg-TypeAlias/15 dark:text-TypeAliasDark dark:bg-TypeAliasDark/15" title="Type Alias">T</div></div>
-<span class="hover:bg-TypeAlias/15 hover:bg-TypeAliasDark/15">
-                    Ipv4IcmpPacket
+                <a href=".&#x2F;.&#x2F;~&#x2F;TcpPacket.html" title="TcpPacket"><div class="docNodeKindIcon"><div class="text-Interface bg-Interface/15 dark:text-InterfaceDark dark:bg-InterfaceDark/15" title="Interface">I</div></div>
+<span class="hover:bg-Interface/15 hover:bg-InterfaceDark/15">
+                    TcpPacket
                   </span>
                 </a>
               </li><li>
-                <a href=".&#x2F;.&#x2F;~&#x2F;Ipv4Refined.html" title="Ipv4Refined"><div class="docNodeKindIcon"><div class="text-TypeAlias bg-TypeAlias/15 dark:text-TypeAliasDark dark:bg-TypeAliasDark/15" title="Type Alias">T</div></div>
-<span class="hover:bg-TypeAlias/15 hover:bg-TypeAliasDark/15">
-                    Ipv4Refined
+                <a href=".&#x2F;.&#x2F;~&#x2F;tcpPacket.html" title="tcpPacket"><div class="docNodeKindIcon"><div class="text-Function bg-Function/15 dark:text-FunctionDark dark:bg-FunctionDark/15" title="Function">f</div></div>
+<span class="hover:bg-Function/15 hover:bg-FunctionDark/15">
+                    tcpPacket
                   </span>
                 </a>
-              </li><li>
-                <a href=".&#x2F;.&#x2F;~&#x2F;Ipv4Frame.html" title="Ipv4Frame"><div class="docNodeKindIcon"><div class="text-TypeAlias bg-TypeAlias/15 dark:text-TypeAliasDark dark:bg-TypeAliasDark/15" title="Type Alias">T</div></div>
-<span class="hover:bg-TypeAlias/15 hover:bg-TypeAliasDark/15">
-                    Ipv4Frame
-                  </span>
-                </a>
-              </li></ul><a class="flex items-center gap-0.5" href=".&#x2F;all_symbols.html">
-              <span class="leading-none">view all 9 symbols</span><svg
-  width="16"
-  height="16"
-  viewBox="0 0 16 16"
-  fill="none"
-  xmlns="http://www.w3.org/2000/svg"
->
-  <path
-    fill-rule="evenodd"
-    clip-rule="evenodd"
-    d="M5.76748 11.8159C5.5378 11.577 5.54525 11.1972 5.78411 10.9675L8.93431 8L5.78411 5.0325C5.54525 4.80282 5.5378 4.423 5.76748 4.18413C5.99715 3.94527 6.37698 3.93782 6.61584 4.1675L10.2158 7.5675C10.3335 7.68062 10.4 7.83679 10.4 8C10.4 8.16321 10.3335 8.31938 10.2158 8.4325L6.61584 11.8325C6.37698 12.0622 5.99715 12.0547 5.76748 11.8159Z"
-    fill="currentColor"
-  />
-</svg>
-</a></nav><nav class="documentNavigation">
-          <h3>Document Navigation</h3><ul><li><a href="#examples" title="Examples">Examples</a></li><li><ul><li><a href="#example_0" title="Round-trip a UDP-over-IPv4-over-Ethernet frame">Round-trip a UDP-over-IPv4-over-Ethernet frame</a></li></ul></li></ul></nav></div>
+              </li></ul></nav><nav class="documentNavigation">
+          <h3>Document Navigation</h3><ul><li><a href="#examples" title="Examples">Examples</a></li><li><ul><li><a href="#example_0" title="Round-trip a SYN segment with no options or payload">Round-trip a SYN segment with no options or payload</a></li></ul></li></ul></nav></div>
   </div></div>
 </div>
 </div>
