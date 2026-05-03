@@ -1,6 +1,7 @@
 deno.lock
 cov/
-docs/
+docs/*
+!docs/agents/
 
 # coverage
 coverage/

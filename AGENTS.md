@@ -475,3 +475,21 @@ const fileWithPadding = struct({
   )),
 });
 ```
+
+## Agent skills
+
+### Issue tracker
+
+GitHub Issues via `gh`, on `hertzg/jsr-monorepo`. See `docs/agents/issue-tracker.md`.
+
+### Triage labels
+
+Five canonical labels, no overrides: `needs-triage`, `needs-info`,
+`ready-for-agent`, `ready-for-human`, `wontfix`. See
+`docs/agents/triage-labels.md`.
+
+### Domain docs
+
+Multi-context: root-level decisions in `adr/`, per-package decisions in
+`packages/<scope>/<name>/adr/`. `CONTEXT-MAP.md` at the root, per-package
+`CONTEXT.md` files created lazily. See `docs/agents/domain.md`.
