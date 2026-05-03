@@ -21,7 +21,7 @@ application's first interaction with the library.
 
 Two top-level helpers wrap the raw API:
 
-```ts
+```ts ignore
 function encode<T>(
   coder: Coder<T>,
   data: T,
@@ -55,7 +55,7 @@ streaming-style cursoring across multiple values in one buffer).
 ## Consequences
 
 - **Application code reads cleaner:**
-  ```ts
+  ```ts ignore
   const bytes = encode(packet, value);          // helper
   // vs
   const buf = new Uint8Array(N);                 // raw

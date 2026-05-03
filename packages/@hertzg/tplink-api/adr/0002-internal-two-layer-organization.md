@@ -48,8 +48,11 @@ re-exported and *not* listed as sub-entrypoints in `deno.json`.
   the layer is ready to be promoted to a public sub-entrypoint
   per repo ADR 0010 — without rewriting code.
 - **Per-step testing is straightforward.** Each `client/*` file
-  is a small, independently-callable unit; `mod.test.ts` and
-  the per-file tests cover them.
+  is a small, independently-callable unit. Coverage is partial
+  today — only `client/fetchPublicKey.test.ts` and
+  `client/cipher/cipher.test.ts` exist alongside `payload.test.ts`
+  at the package root; the building blocks are testable, and
+  filling in the gaps is straightforward when the need arises.
 - **The package looks smaller from the outside than it is.**
   That's intentional — the public surface should reflect what
   the package commits to, not what's in the directory tree.

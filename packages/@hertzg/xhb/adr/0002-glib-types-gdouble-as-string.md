@@ -26,7 +26,7 @@ losing the original precision the user typed in HomeBank.
 
 Each GLib C type has a TS alias in `_g_types.ts`:
 
-```ts
+```ts ignore
 export type gShort   = number;   // signed 16-bit
 export type gUShort  = number;   // unsigned 16-bit
 export type gInt     = number;   // signed 32-bit

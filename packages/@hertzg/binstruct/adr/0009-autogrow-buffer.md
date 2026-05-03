@@ -25,7 +25,7 @@ coder protocol (ADR 0001 — primitives never own buffers).
 
 `autoGrowBuffer(tryEncodeFn, opts?)` is a separate utility:
 
-```ts
+```ts ignore
 function autoGrowBuffer<T>(
   tryEncodeFn: (buffer: Uint8Array) => T,
   opts?: AutogrowOptions,

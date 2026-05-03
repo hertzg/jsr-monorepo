@@ -39,7 +39,7 @@ dropped or errored.
 **Refined shape.** Each refined chunk type follows the same
 recipe:
 
-```ts
+```ts ignore
 interface IhdrChunk extends Omit<PngChunkUnknown, "type" | "data"> {
   type: "IHDR";
   data: { width: number; height: number; /* … */ };

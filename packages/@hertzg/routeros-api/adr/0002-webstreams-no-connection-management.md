@@ -21,7 +21,7 @@ duplex byte stream — including in-memory mocks for testing.
 The client takes a single options object whose only fields are the
 streams:
 
-```ts
+```ts ignore
 type ClientOptions = {
   readable: ReadableStream<Uint8Array>;
   writable: WritableStream<Uint8Array>;

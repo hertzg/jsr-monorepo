@@ -44,7 +44,7 @@ The chunk coder treats `crc` as opaque:
 The package exposes **`chunkCrc()`** as the helper for both
 purposes:
 
-```ts
+```ts ignore
 chunkCrc(bytes: Uint8Array): number;
 chunkCrc(chunk: { type: Uint8Array; data: Uint8Array }): number;
 ```

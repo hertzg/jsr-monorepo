@@ -43,7 +43,7 @@ Reference identity is per-coder-instance. `u32le()` called twice produces
 two distinct coders with two distinct WeakMap keys. The convention for
 shared lengths is: name the coder once, reuse it.
 
-```ts
+```ts ignore
 const length = u32le();        // shared coder
 const data = struct({
   length,                       // populates the WeakMap entry for `length`

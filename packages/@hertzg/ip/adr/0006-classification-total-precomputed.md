@@ -34,7 +34,7 @@ RFC ranges thousands of times.
 - **RFC range CIDRs are precomputed at module load** using
   `parseCidrv4` / `parseCidrv6` constants:
 
-  ```ts
+  ```ts ignore
   const CIDR_PRIVATE_10: Cidrv4 = parseCidrv4("10.0.0.0/8");
   const CIDR_LOOPBACK: Cidrv4 = parseCidrv4("127.0.0.0/8");
   // …
@@ -56,7 +56,7 @@ RFC ranges thousands of times.
   classification volume; it makes per-call classification an
   arithmetic operation.
 - **Adding a new classification label is a breaking change to the
-  union type** (per ADR 0004 / `BREAKING CHANGE:` marker). The
+  union type** (per repo ADR 0004 / `BREAKING CHANGE:` marker). The
   precomputed constant is a strictly additive change at the source
   level.
 - **Order changes are not breaking type-wise but can change

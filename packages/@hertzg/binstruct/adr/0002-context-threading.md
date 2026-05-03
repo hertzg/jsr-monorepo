@@ -24,7 +24,7 @@ Every `encode`/`decode` accepts an optional `Context`. Top-level calls
 create it via `createContext(direction)`; nested coders forward the same
 context they received. The context carries:
 
-```ts
+```ts ignore
 interface Context {
   direction: "encode" | "decode";
   [kCtxRefs]?: WeakMap<Coder<unknown>, unknown>;

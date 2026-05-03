@@ -11,7 +11,7 @@ Ethernet frames have an etherType; ICMP packets have a type+code pair.
 
 The naive shape would wrap the refined payload:
 
-```ts
+```ts ignore
 // NOT how this library does it
 type PngChunk =
   | { kind: "IHDR"; payload: { width, height } }
@@ -31,7 +31,7 @@ Wrapping forces:
 `refineSwitch(baseCoder, refiners, selector)` produces refined values
 that **preserve the discriminator field on the host**:
 
-```ts
+```ts ignore
 const pngChunkCoder = refineSwitch(
   pngChunkUnknown,                                 // base: { length, type: bytes(4), data, crc }
   { IHDR: ihdrRefiner(), IDAT: idatRefiner() },    // arms keyed by selector keys

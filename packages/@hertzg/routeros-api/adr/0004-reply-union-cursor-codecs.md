@@ -28,7 +28,7 @@ TCP reads naturally.
 
 **Replies** are a discriminated union over a `type` literal:
 
-```ts
+```ts ignore
 type Reply = DoneReply | DataReply | TrapReply | FatalReply;
 // type: "done" | "re" | "trap" | "fatal"
 ```
@@ -40,7 +40,7 @@ narrow `Reply` for callers who prefer guards over `switch (type)`.
 **Codecs** are pure functions returning `{ value-field, bytesRead }`
 plus an optional `offset` argument:
 
-```ts
+```ts ignore
 decodeLength(bytes, { offset })   → { length, bytesRead }
 decodeWord(bytes, { offset })     → { word, bytesRead }
 decodeSentence(bytes, { offset }) → { words, bytesRead }

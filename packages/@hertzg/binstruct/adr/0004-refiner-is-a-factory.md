@@ -23,7 +23,7 @@ None of these compose well.
 
 `refine(base, refiner)` returns a **factory function**:
 
-```ts
+```ts ignore
 function refine<TUnrefined, TRefined, const TArgs extends unknown[] = []>(
   coder: Coder<TUnrefined>,
   refiner: Refiner<TUnrefined, TRefined, TArgs>,
@@ -35,7 +35,7 @@ Args flow through to both `refiner.refine(unrefined, ctx, ...args)` and
 primitive coders (`u16le()`, `string(4)`) — every coder is constructed
 via a function call.
 
-```ts
+```ts ignore
 const u8Mapped = refine(u8(), {
   refine: (n, _ctx, min: number, max: number) =>
     (min + (max - min) * n / 0xff) >>> 0,

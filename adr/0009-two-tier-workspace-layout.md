@@ -49,7 +49,7 @@ every workspace (see ADR 0001).
   it in the root `deno.json` `workspace` array, and adding the bare
   specifier to `import_map.json`.
 - Operational config files also need updates when adding/removing a
-  workspace: `.github/labeler.yml`, `.github/release.yml`, the README
+  workspace: `.github/labeler.yml`, `release-please-config.json`, the README
   table. Lint tasks (`lint:labeler`, `lint:import-map`, `lint:deps`)
   enforce these.
 

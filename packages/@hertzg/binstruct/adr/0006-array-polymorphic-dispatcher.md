@@ -37,7 +37,7 @@ Three TypeScript overloads keep the return type tight. The runtime
 discriminator is `isLengthOrRef(x) || isCoder<number>(x)`; if neither, it
 must be a function and is treated as the while-condition.
 
-```ts
+```ts ignore
 array(u8(), u32le())                  // length-prefixed: u32 count + bytes
 array(u8(), 16)                       // fixed: 16 bytes
 array(u8(), ref(lengthCoder))         // fixed, length from earlier field

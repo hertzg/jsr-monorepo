@@ -20,7 +20,7 @@ fast only at genuine boundaries. That rules out shapes where the coder
 
 A `Coder<T>` is a plain object:
 
-```ts
+```ts ignore
 type Coder<T> = {
   encode: (value: T, target: Uint8Array, ctx?: Context) => number;
   decode: (buffer: Uint8Array, ctx?: Context) => [T, number];

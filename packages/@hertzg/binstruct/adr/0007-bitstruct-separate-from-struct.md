@@ -26,7 +26,7 @@ Bit-packed structures use a **separate coder**, `bitStruct`, with its
 own machinery (`BitDataView` for sub-byte cursoring, MSB-first bit
 ordering).
 
-```ts
+```ts ignore
 const flags = bitStruct({
   ready: 1,         // 1 bit
   error: 1,         // 1 bit
@@ -47,7 +47,7 @@ const flags = bitStruct({
 It slots into a `struct` field when you need a packed header inside a
 larger byte-aligned record:
 
-```ts
+```ts ignore
 const packet = struct({
   flags: flags,           // bitStruct here
   length: u16be(),        // back to byte-aligned

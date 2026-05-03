@@ -22,7 +22,7 @@ encoded in the type system.
 
 `Cidrv4` and `Cidrv6` are plain readonly objects:
 
-```ts
+```ts ignore
 type Cidrv4 = { readonly address: number; readonly prefixLength: number };
 type Cidrv6 = { readonly address: bigint; readonly prefixLength: number };
 type Cidr   = Cidrv4 | Cidrv6;
@@ -30,7 +30,7 @@ type Cidr   = Cidrv4 | Cidrv6;
 
 Type guards discriminate by `typeof address`:
 
-```ts
+```ts ignore
 function isCidrv4(cidr: Cidr): cidr is Cidrv4 {
   return typeof cidr.address === "number";
 }
