@@ -1,0 +1,1589 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>mod.ts - @hertzg&#x2F;binstruct documentation</title>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="doc-current-file" content="">
+  <link rel="stylesheet" href="..&#x2F;styles.css">
+  <link rel="stylesheet" href="..&#x2F;page.css">
+  <link id="ddocResetStylesheet" rel="stylesheet" href="..&#x2F;reset.css"><link href="../comrak.css" rel="stylesheet" /><link href="../prism.css" rel="stylesheet" /><script src="../prism.js"></script><script src="..&#x2F;script.js" defer></script>
+  <script src="..&#x2F;darkmode_toggle.js"></script><script src="..&#x2F;search_index.js" defer></script>
+    <script src="..&#x2F;fuse.js" defer></script>
+    <script src="..&#x2F;search.js" defer></script></head>
+<body>
+<div class="ddoc">
+<div><nav id="topnav">
+  <div class="h-full">
+    <div class="flex items-center"><ul class="breadcrumbs">
+  <li>
+    <a href="..&#x2F;" class="contextLink">@hertzg&#x2F;binstruct</a>
+  </li><span class="text-black dark:text-white"><svg
+  width="16"
+  height="16"
+  viewBox="0 0 16 16"
+  fill="none"
+  xmlns="http://www.w3.org/2000/svg"
+>
+  <path
+    fill-rule="evenodd"
+    clip-rule="evenodd"
+    d="M5.76748 11.8159C5.5378 11.577 5.54525 11.1972 5.78411 10.9675L8.93431 8L5.78411 5.0325C5.54525 4.80282 5.5378 4.423 5.76748 4.18413C5.99715 3.94527 6.37698 3.93782 6.61584 4.1675L10.2158 7.5675C10.3335 7.68062 10.4 7.83679 10.4 8C10.4 8.16321 10.3335 8.31938 10.2158 8.4325L6.61584 11.8325C6.37698 12.0622 5.99715 12.0547 5.76748 11.8159Z"
+    fill="currentColor"
+  />
+</svg>
+</span>mod.ts</ul>
+</div>
+
+    <div class="flex items-center gap-2">
+      <button id="theme-toggle" type="button" aria-label="Toggle dark mode" style="display: none;"><svg
+  xmlns="http://www.w3.org/2000/svg"
+  width="14"
+  height="14"
+  viewBox="0 0 24 24"
+  fill="currentColor"
+>
+  <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+  <path
+    d="M12 1.992a10 10 0 1 0 9.236 13.838c.341 -.82 -.476 -1.644 -1.298 -1.31a6.5 6.5 0 0 1 -6.864 -10.787l.077 -.08c.551 -.63 .113 -1.653 -.758 -1.653h-.266l-.068 -.006l-.06 -.002z"
+  />
+</svg>
+<svg
+  xmlns="http://www.w3.org/2000/svg"
+  width="14"
+  height="14"
+  viewBox="0 0 24 24"
+  fill="currentColor"
+  class="hidden"
+>
+  <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+  <path
+    d="M12 19a1 1 0 0 1 .993 .883l.007 .117v1a1 1 0 0 1 -1.993 .117l-.007 -.117v-1a1 1 0 0 1 1 -1z"
+  />
+  <path
+    d="M18.313 16.91l.094 .083l.7 .7a1 1 0 0 1 -1.32 1.497l-.094 -.083l-.7 -.7a1 1 0 0 1 1.218 -1.567l.102 .07z"
+  />
+  <path
+    d="M7.007 16.993a1 1 0 0 1 .083 1.32l-.083 .094l-.7 .7a1 1 0 0 1 -1.497 -1.32l.083 -.094l.7 -.7a1 1 0 0 1 1.414 0z"
+  />
+  <path
+    d="M4 11a1 1 0 0 1 .117 1.993l-.117 .007h-1a1 1 0 0 1 -.117 -1.993l.117 -.007h1z"
+  />
+  <path
+    d="M21 11a1 1 0 0 1 .117 1.993l-.117 .007h-1a1 1 0 0 1 -.117 -1.993l.117 -.007h1z"
+  />
+  <path
+    d="M6.213 4.81l.094 .083l.7 .7a1 1 0 0 1 -1.32 1.497l-.094 -.083l-.7 -.7a1 1 0 0 1 1.217 -1.567l.102 .07z"
+  />
+  <path
+    d="M19.107 4.893a1 1 0 0 1 .083 1.32l-.083 .094l-.7 .7a1 1 0 0 1 -1.497 -1.32l.083 -.094l.7 -.7a1 1 0 0 1 1.414 0z"
+  />
+  <path
+    d="M12 2a1 1 0 0 1 .993 .883l.007 .117v1a1 1 0 0 1 -1.993 .117l-.007 -.117v-1a1 1 0 0 1 1 -1z"
+  />
+  <path
+    d="M12 7a5 5 0 1 1 -4.995 5.217l-.005 -.217l.005 -.217a5 5 0 0 1 4.995 -4.783z"
+  />
+</svg>
+</button>
+
+        <input
+          type="text"
+          id="searchbar"
+          style="display: none;"
+          class="py-2 px-2.5 mx-1 rounded text-sm border border-gray-300 bg-transparent dark:bg-gray-800 dark:border-gray-700"
+          />
+    </div>
+  </div>
+</nav>
+<div id="searchResults"></div><div id="content">
+    <main><section>
+  <div class="space-y-2 flex-1"><div class="space-y-7" id="module_doc"><div class="markdown"><p>A comprehensive module providing type-safe binary structure encoding and decoding utilities for TypeScript.</p>
+<p>This library offers a complete toolkit for working with binary data formats, supporting:</p>
+<h2 id="core-data-types">
+Core Data Types</h2>
+<h3 id="numeric-types">
+Numeric Types</h3>
+<ul>
+<li><strong>Unsigned integers</strong>: 8, 16, 32, 64 bits (big-endian and little-endian)</li>
+<li><strong>Signed integers</strong>: 8, 16, 32, 64 bits (big-endian and little-endian)</li>
+<li><strong>Floating point numbers</strong>: 16, 32, 64 bits (big-endian and little-endian)</li>
+</ul>
+<h3 id="string-types">
+String Types</h3>
+<ul>
+<li><strong>Length-prefixed strings</strong>: Variable-length strings with size prefix</li>
+<li><strong>Null-terminated strings</strong>: Strings ending with null byte (0x00)</li>
+<li><strong>Fixed-length strings</strong>: Strings of exact byte length</li>
+</ul>
+<h3 id="array-types">
+Array Types</h3>
+<ul>
+<li><strong>Length-prefixed arrays</strong>: Variable-length arrays with size prefix</li>
+<li><strong>Fixed-length arrays</strong>: Arrays of exact element count</li>
+</ul>
+<h3 id="complex-types">
+Complex Types</h3>
+<ul>
+<li><strong>Structs</strong>: Complex nested data structures with type safety</li>
+<li><strong>References</strong>: Self-referential and circular data structures</li>
+<li><strong>Bytes</strong>: Raw byte slices with fixed or variable length</li>
+</ul>
+<h2 id="main-functions">
+Main Functions</h2>
+<h3 id="structure-creation">
+Structure Creation</h3>
+<ul>
+<li><a href=".././mod.ts/~/struct.html">struct</a>: Create coders for structured data (objects)</li>
+<li><a href=".././mod.ts/~/bitStruct.html">bitStruct</a>: Create coders for bit-packed structures (sub-byte fields)</li>
+</ul>
+<h3 id="array-handling">
+Array Handling</h3>
+<ul>
+<li><a href=".././mod.ts/~/array.html">array</a>: Universal array coder with automatic type selection</li>
+<li><a href=".././mod.ts/~/arrayWhile.html">arrayWhile</a>: Create arrays with custom termination conditions</li>
+</ul>
+<h3 id="string-handling">
+String Handling</h3>
+<ul>
+<li><a href=".././mod.ts/~/string.html">string</a>: Universal string coder with automatic type selection</li>
+</ul>
+<h3 id="reference-system">
+Reference System</h3>
+<ul>
+<li><a href=".././mod.ts/~/ref.html">ref</a>: Create reference values for context-aware encoding/decoding</li>
+<li><a href=".././mod.ts/~/computedRef.html">computedRef</a>: Create computed references from multiple values</li>
+<li><a href=".././mod.ts/~/isRef.html">isRef</a>: Type guard to check if a value is a reference</li>
+</ul>
+<h3 id="data-refinement">
+Data Refinement</h3>
+<ul>
+<li><a href=".././mod.ts/~/refine.html">refine</a>: Transform decoded values into refined types and vice versa</li>
+<li><a href=".././mod.ts/~/refineSwitch.html">refineSwitch</a>: Conditionally apply refiners based on selector functions</li>
+</ul>
+<h3 id="raw-data">
+Raw Data</h3>
+<ul>
+<li><a href=".././mod.ts/~/bytes.html">bytes</a>: Handle raw byte slices with length control</li>
+</ul>
+<h3 id="buffer-management">
+Buffer Management</h3>
+<ul>
+<li><a href=".././mod.ts/~/autoGrowBuffer.html">autoGrowBuffer</a>: Automatically grow buffers during encoding operations</li>
+</ul>
+<h3 id="helper-functions">
+Helper Functions</h3>
+<ul>
+<li><a href=".././mod.ts/~/encode.html">encode</a>: Simplified encoding with automatic buffer allocation</li>
+<li><a href=".././mod.ts/~/decode.html">decode</a>: Simplified decoding that returns only the decoded value</li>
+<li><a href=".././mod.ts/~/createContext.html">createContext</a>: Create encoding/decoding contexts</li>
+<li><a href=".././mod.ts/~/isCoder.html">isCoder</a>: Type guard to check if a value is a Coder</li>
+<li><a href=".././mod.ts/~/isValidLength.html">isValidLength</a>: Validate if a length value is valid for binary encoding</li>
+</ul>
+<h3 id="submodules">
+Submodules</h3>
+<ul>
+<li><a href="https://jsr.io/@hertzg/binstruct/doc/array"><code>array</code></a>: Array coders including <a href=".././mod.ts/~/arrayWhile.html">arrayWhile</a></li>
+<li><a href="https://jsr.io/@hertzg/binstruct/doc/bits"><code>bits</code></a>: Bit-level packed field encoding/decoding via <a href=".././mod.ts/~/bitStruct.html">bitStruct</a></li>
+<li><a href="https://jsr.io/@hertzg/binstruct/doc/buffer"><code>buffer</code></a>: Buffer helpers like <a href=".././mod.ts/~/autoGrowBuffer.html">autoGrowBuffer</a></li>
+<li><a href="https://jsr.io/@hertzg/binstruct/doc/bytes"><code>bytes</code></a>: Raw byte slice coders via <a href=".././mod.ts/~/bytes.html">bytes</a></li>
+<li><a href="https://jsr.io/@hertzg/binstruct/doc/helpers"><code>helpers</code></a>: High-level <a href=".././mod.ts/~/encode.html">encode</a> / <a href=".././mod.ts/~/decode.html">decode</a></li>
+<li><a href="https://jsr.io/@hertzg/binstruct/doc/numeric"><code>numeric</code></a>: Numeric coder factories such as <a href=".././mod.ts/~/u32le.html">u32le</a></li>
+<li><a href="https://jsr.io/@hertzg/binstruct/doc/ref"><code>ref</code></a>: Reference primitives (<a href=".././mod.ts/~/ref.html">ref</a>, <a href=".././mod.ts/~/computedRef.html">computedRef</a>, <a href=".././mod.ts/~/isRef.html">isRef</a>)</li>
+<li><a href="https://jsr.io/@hertzg/binstruct/doc/refine"><code>refine</code></a>: Refinement utilities (<a href=".././mod.ts/~/refine.html">refine</a>, <a href=".././mod.ts/~/refineSwitch.html">refineSwitch</a>)</li>
+<li><a href="https://jsr.io/@hertzg/binstruct/doc/string"><code>string</code></a>: String coder constructors from <a href=".././mod.ts/~/string.html">string</a></li>
+<li><a href="https://jsr.io/@hertzg/binstruct/doc/struct"><code>struct</code></a>: Struct composition helpers from <a href=".././mod.ts/~/struct.html">struct</a></li>
+</ul>
+<h3 id="numeric-coders">
+Numeric Coders</h3>
+<p><strong>Unsigned Integers:</strong></p>
+<ul>
+<li><a href=".././mod.ts/~/u8.html">u8</a>, <a href=".././mod.ts/~/u8le.html">u8le</a>, <a href=".././mod.ts/~/u8be.html">u8be</a>: 8-bit unsigned integer</li>
+<li><a href=".././mod.ts/~/u16.html">u16</a>, <a href=".././mod.ts/~/u16le.html">u16le</a>, <a href=".././mod.ts/~/u16be.html">u16be</a>: 16-bit unsigned integer</li>
+<li><a href=".././mod.ts/~/u32.html">u32</a>, <a href=".././mod.ts/~/u32le.html">u32le</a>, <a href=".././mod.ts/~/u32be.html">u32be</a>: 32-bit unsigned integer</li>
+<li><a href=".././mod.ts/~/u64.html">u64</a>, <a href=".././mod.ts/~/u64le.html">u64le</a>, <a href=".././mod.ts/~/u64be.html">u64be</a>: 64-bit unsigned integer (bigint)</li>
+</ul>
+<p><strong>Signed Integers:</strong></p>
+<ul>
+<li><a href=".././mod.ts/~/s8.html">s8</a>, <a href=".././mod.ts/~/s8le.html">s8le</a>, <a href=".././mod.ts/~/s8be.html">s8be</a>: 8-bit signed integer</li>
+<li><a href=".././mod.ts/~/s16.html">s16</a>, <a href=".././mod.ts/~/s16le.html">s16le</a>, <a href=".././mod.ts/~/s16be.html">s16be</a>: 16-bit signed integer</li>
+<li><a href=".././mod.ts/~/s32.html">s32</a>, <a href=".././mod.ts/~/s32le.html">s32le</a>, <a href=".././mod.ts/~/s32be.html">s32be</a>: 32-bit signed integer</li>
+<li><a href=".././mod.ts/~/s64.html">s64</a>, <a href=".././mod.ts/~/s64le.html">s64le</a>, <a href=".././mod.ts/~/s64be.html">s64be</a>: 64-bit signed integer (bigint)</li>
+</ul>
+<p><strong>Floating Point:</strong></p>
+<ul>
+<li><a href=".././mod.ts/~/f16.html">f16</a>, <a href=".././mod.ts/~/f16le.html">f16le</a>, <a href=".././mod.ts/~/f16be.html">f16be</a>: 16-bit floating point number</li>
+<li><a href=".././mod.ts/~/f32.html">f32</a>, <a href=".././mod.ts/~/f32le.html">f32le</a>, <a href=".././mod.ts/~/f32be.html">f32be</a>: 32-bit floating point number</li>
+<li><a href=".././mod.ts/~/f64.html">f64</a>, <a href=".././mod.ts/~/f64le.html">f64le</a>, <a href=".././mod.ts/~/f64be.html">f64be</a>: 64-bit floating point number</li>
+</ul>
+<h2 id="key-features">
+Key Features</h2>
+<ul>
+<li><strong>Type Safety</strong>: Full TypeScript support with proper type inference</li>
+<li><strong>Endianness Control</strong>: Explicit big-endian and little-endian support</li>
+<li><strong>Reference System</strong>: Handle self-referential and circular structures</li>
+<li><strong>Context Management</strong>: Advanced context handling for complex scenarios</li>
+<li><strong>Buffer Management</strong>: Efficient buffer handling with offset support</li>
+<li><strong>Error Handling</strong>: Comprehensive error handling for malformed data</li>
+<li><strong>Performance</strong>: Optimized for high-performance binary operations</li>
+</ul>
+<h2 id="common-use-cases">
+Common Use Cases</h2>
+<ul>
+<li><strong>File Format Parsing</strong>: WAV, PNG, ZIP, and other binary formats</li>
+<li><strong>Network Protocols</strong>: TCP/IP, HTTP, custom protocols</li>
+<li><strong>Data Serialization</strong>: Efficient binary data storage</li>
+<li><strong>Embedded Systems</strong>: Device communication protocols</li>
+<li><strong>Game Development</strong>: Save files, network packets</li>
+<li><strong>Scientific Computing</strong>: Binary data analysis</li>
+<li><strong>Network Protocols</strong>: MAC addresses, IP addresses, custom protocol transformations</li>
+</ul>
+</div><section class="section"  id="examples"><div>
+      <h2 class="anchorable mb-1"><a href="#examples" class="anchor" aria-label="Anchor" tabIndex="-1"><svg
+  width="16"
+  height="16"
+  viewBox="0 0 14 14"
+  fill="none"
+  xmlns="http://www.w3.org/2000/svg"
+>
+  <g clip-path="url(#clip0_1081_1237)">
+    <path
+      fill-rule="evenodd"
+      clip-rule="evenodd"
+      d="M6.80328 2.8656C6.68736 2.99 6.62425 3.15454 6.62725 3.32456C6.63025 3.49457 6.69913 3.65678 6.81936 3.77702C6.9396 3.89725 7.10181 3.96613 7.27182 3.96913C7.44184 3.97213 7.60638 3.90902 7.73078 3.7931L8.82453 2.69935C8.98712 2.53676 9.18015 2.40778 9.39259 2.31978C9.60503 2.23179 9.83272 2.1865 10.0627 2.1865C10.2926 2.1865 10.5203 2.23179 10.7327 2.31978C10.9452 2.40778 11.1382 2.53676 11.3008 2.69935C11.4634 2.86194 11.5923 3.05497 11.6803 3.2674C11.7683 3.47984 11.8136 3.70753 11.8136 3.93747C11.8136 4.16741 11.7683 4.3951 11.6803 4.60754C11.5923 4.81998 11.4634 5.013 11.3008 5.1756L9.11328 7.3631C8.95075 7.52581 8.75775 7.65488 8.5453 7.74295C8.33285 7.83102 8.10513 7.87635 7.87516 7.87635C7.64518 7.87635 7.41746 7.83102 7.20501 7.74295C6.99256 7.65488 6.79956 7.52581 6.63703 7.3631C6.51263 7.24718 6.34809 7.18407 6.17807 7.18707C6.00806 7.19007 5.84585 7.25894 5.72561 7.37918C5.60538 7.49942 5.5365 7.66163 5.5335 7.83164C5.5305 8.00165 5.59361 8.1662 5.70953 8.2906C5.99391 8.57501 6.33154 8.80062 6.70312 8.95455C7.0747 9.10847 7.47296 9.18769 7.87516 9.18769C8.27736 9.18769 8.67562 9.10847 9.0472 8.95455C9.41878 8.80062 9.7564 8.57501 10.0408 8.2906L12.2283 6.1031C12.8026 5.52874 13.1253 4.74974 13.1253 3.93747C13.1253 3.12521 12.8026 2.34621 12.2283 1.77185C11.6539 1.19749 10.8749 0.874817 10.0627 0.874817C9.25039 0.874817 8.47139 1.19749 7.89703 1.77185L6.80328 2.8656ZM2.69953 11.3006C2.53682 11.1381 2.40774 10.9451 2.31968 10.7326C2.23161 10.5202 2.18628 10.2924 2.18628 10.0625C2.18628 9.8325 2.23161 9.60477 2.31968 9.39233C2.40774 9.17988 2.53682 8.98688 2.69953 8.82435L4.88703 6.63685C5.04956 6.47414 5.24256 6.34506 5.45501 6.25699C5.66746 6.16893 5.89518 6.1236 6.12516 6.1236C6.35513 6.1236 6.58285 6.16893 6.7953 6.25699C7.00775 6.34506 7.20075 6.47414 7.36328 6.63685C7.48768 6.75277 7.65223 6.81588 7.82224 6.81288C7.99225 6.80988 8.15446 6.741 8.2747 6.62077C8.39494 6.50053 8.46381 6.33832 8.46681 6.1683C8.46981 5.99829 8.4067 5.83375 8.29078 5.70935C8.0064 5.42494 7.66878 5.19933 7.2972 5.0454C6.92562 4.89148 6.52736 4.81225 6.12516 4.81225C5.72296 4.81225 5.3247 4.89148 4.95312 5.0454C4.58154 5.19933 4.24391 5.42494 3.95953 5.70935L1.77203 7.89685C1.19767 8.47121 0.875 9.25021 0.875 10.0625C0.875 10.8747 1.19767 11.6537 1.77203 12.2281C2.34639 12.8025 3.12539 13.1251 3.93766 13.1251C4.74992 13.1251 5.52892 12.8025 6.10328 12.2281L7.19703 11.1343C7.31295 11.0099 7.37606 10.8454 7.37306 10.6754C7.37006 10.5054 7.30119 10.3432 7.18095 10.2229C7.06071 10.1027 6.8985 10.0338 6.72849 10.0308C6.55848 10.0278 6.39393 10.0909 6.26953 10.2068L5.17578 11.3006C5.01325 11.4633 4.82025 11.5924 4.6078 11.6805C4.39535 11.7685 4.16763 11.8138 3.93766 11.8138C3.70768 11.8138 3.47996 11.7685 3.26751 11.6805C3.05506 11.5924 2.86206 11.4633 2.69953 11.3006Z"
+      fill="currentColor"
+    />
+  </g>
+  <defs>
+    <clipPath id="clip0_1081_1237">
+      <rect width="14" height="14" fill="white" />
+    </clipPath>
+  </defs>
+</svg>
+</a>
+Examples</h2></div><div class="space-y-8"><div class="anchorable"><a href="#example_0" class="anchor" aria-label="Anchor" tabIndex="-1"><svg
+  width="16"
+  height="16"
+  viewBox="0 0 14 14"
+  fill="none"
+  xmlns="http://www.w3.org/2000/svg"
+>
+  <g clip-path="url(#clip0_1081_1237)">
+    <path
+      fill-rule="evenodd"
+      clip-rule="evenodd"
+      d="M6.80328 2.8656C6.68736 2.99 6.62425 3.15454 6.62725 3.32456C6.63025 3.49457 6.69913 3.65678 6.81936 3.77702C6.9396 3.89725 7.10181 3.96613 7.27182 3.96913C7.44184 3.97213 7.60638 3.90902 7.73078 3.7931L8.82453 2.69935C8.98712 2.53676 9.18015 2.40778 9.39259 2.31978C9.60503 2.23179 9.83272 2.1865 10.0627 2.1865C10.2926 2.1865 10.5203 2.23179 10.7327 2.31978C10.9452 2.40778 11.1382 2.53676 11.3008 2.69935C11.4634 2.86194 11.5923 3.05497 11.6803 3.2674C11.7683 3.47984 11.8136 3.70753 11.8136 3.93747C11.8136 4.16741 11.7683 4.3951 11.6803 4.60754C11.5923 4.81998 11.4634 5.013 11.3008 5.1756L9.11328 7.3631C8.95075 7.52581 8.75775 7.65488 8.5453 7.74295C8.33285 7.83102 8.10513 7.87635 7.87516 7.87635C7.64518 7.87635 7.41746 7.83102 7.20501 7.74295C6.99256 7.65488 6.79956 7.52581 6.63703 7.3631C6.51263 7.24718 6.34809 7.18407 6.17807 7.18707C6.00806 7.19007 5.84585 7.25894 5.72561 7.37918C5.60538 7.49942 5.5365 7.66163 5.5335 7.83164C5.5305 8.00165 5.59361 8.1662 5.70953 8.2906C5.99391 8.57501 6.33154 8.80062 6.70312 8.95455C7.0747 9.10847 7.47296 9.18769 7.87516 9.18769C8.27736 9.18769 8.67562 9.10847 9.0472 8.95455C9.41878 8.80062 9.7564 8.57501 10.0408 8.2906L12.2283 6.1031C12.8026 5.52874 13.1253 4.74974 13.1253 3.93747C13.1253 3.12521 12.8026 2.34621 12.2283 1.77185C11.6539 1.19749 10.8749 0.874817 10.0627 0.874817C9.25039 0.874817 8.47139 1.19749 7.89703 1.77185L6.80328 2.8656ZM2.69953 11.3006C2.53682 11.1381 2.40774 10.9451 2.31968 10.7326C2.23161 10.5202 2.18628 10.2924 2.18628 10.0625C2.18628 9.8325 2.23161 9.60477 2.31968 9.39233C2.40774 9.17988 2.53682 8.98688 2.69953 8.82435L4.88703 6.63685C5.04956 6.47414 5.24256 6.34506 5.45501 6.25699C5.66746 6.16893 5.89518 6.1236 6.12516 6.1236C6.35513 6.1236 6.58285 6.16893 6.7953 6.25699C7.00775 6.34506 7.20075 6.47414 7.36328 6.63685C7.48768 6.75277 7.65223 6.81588 7.82224 6.81288C7.99225 6.80988 8.15446 6.741 8.2747 6.62077C8.39494 6.50053 8.46381 6.33832 8.46681 6.1683C8.46981 5.99829 8.4067 5.83375 8.29078 5.70935C8.0064 5.42494 7.66878 5.19933 7.2972 5.0454C6.92562 4.89148 6.52736 4.81225 6.12516 4.81225C5.72296 4.81225 5.3247 4.89148 4.95312 5.0454C4.58154 5.19933 4.24391 5.42494 3.95953 5.70935L1.77203 7.89685C1.19767 8.47121 0.875 9.25021 0.875 10.0625C0.875 10.8747 1.19767 11.6537 1.77203 12.2281C2.34639 12.8025 3.12539 13.1251 3.93766 13.1251C4.74992 13.1251 5.52892 12.8025 6.10328 12.2281L7.19703 11.1343C7.31295 11.0099 7.37606 10.8454 7.37306 10.6754C7.37006 10.5054 7.30119 10.3432 7.18095 10.2229C7.06071 10.1027 6.8985 10.0338 6.72849 10.0308C6.55848 10.0278 6.39393 10.0909 6.26953 10.2068L5.17578 11.3006C5.01325 11.4633 4.82025 11.5924 4.6078 11.6805C4.39535 11.7685 4.16763 11.8138 3.93766 11.8138C3.70768 11.8138 3.47996 11.7685 3.26751 11.6805C3.05506 11.5924 2.86206 11.4633 2.69953 11.3006Z"
+      fill="currentColor"
+    />
+  </g>
+  <defs>
+    <clipPath id="clip0_1081_1237">
+      <rect width="14" height="14" fill="white" />
+    </clipPath>
+  </defs>
+</svg>
+</a>
+<h3 class="example-header"><div class="markdown"><p>Reading and writing WAV (RIFF) file format:</p>
+</div></h3>
+  <div><div class="markdown"><pre class="highlight"><code class="language-ts">import { assertEquals } from &quot;@std/assert&quot;;
+import { struct, array, string } from &quot;@hertzg/binstruct&quot;;
+import { u16le, u32le, u8le } from &quot;@hertzg/binstruct/numeric&quot;;
+
+// Define WAV file structure following RIFF format specification
+const riffChunkCoder = struct({
+  chunkID: string(4),           // &quot;RIFF&quot; (fixed 4-byte string)
+  chunkSize: u32le(),           // File size - 8 bytes
+  format: string(4),            // &quot;WAVE&quot; (fixed 4-byte string)
+});
+
+const fmtChunkCoder = struct({
+  chunkID: string(4),           // &quot;fmt &quot; (fixed 4-byte string)
+  chunkSize: u32le(),           // Size of fmt chunk (16 for PCM)
+  audioFormat: u16le(),         // Audio format (1 = PCM)
+  numChannels: u16le(),         // Number of channels (1 = mono, 2 = stereo)
+  sampleRate: u32le(),          // Sample rate (e.g., 44100 Hz)
+  byteRate: u32le(),            // Byte rate (sampleRate * numChannels * bitsPerSample / 8)
+  blockAlign: u16le(),          // Block align (numChannels * bitsPerSample / 8)
+  bitsPerSample: u16le(),       // Bits per sample (8, 16, 24, 32)
+});
+
+const dataChunkCoder = struct({
+  chunkID: string(4),           // &quot;data&quot; (fixed 4-byte string)
+  chunkSize: u32le(),           // Size of audio data
+  audioData: array(u8le(), u32le()), // Audio samples as length-prefixed array
+});
+
+// Complete WAV file structure
+const wavFileCoder = struct({
+  riff: riffChunkCoder,
+  fmt: fmtChunkCoder,
+  data: dataChunkCoder,
+});
+
+// Create sample WAV data (8kHz, 8-bit, mono, 0.1 second - small example)
+const sampleRate = 8000;
+const numChannels = 1;
+const bitsPerSample = 8;
+const durationSeconds = 0.1;
+const numSamples = Math.floor(sampleRate * durationSeconds);
+
+// Generate a simple sine wave (440 Hz) with 8-bit samples
+const audioData = new Array(numSamples);
+for (let i = 0; i &lt; numSamples; i++) {
+  const t = i / sampleRate;
+  audioData[i] = Math.floor(Math.sin(2 * Math.PI * 440 * t) * 127) + 128; // 8-bit amplitude (0-255)
+}
+
+const wavData = {
+  riff: {
+    chunkID: &quot;RIFF&quot;,
+    chunkSize: 0, // Will be calculated
+    format: &quot;WAVE&quot;,
+  },
+  fmt: {
+    chunkID: &quot;fmt &quot;,
+    chunkSize: 16,
+    audioFormat: 1, // PCM
+    numChannels,
+    sampleRate,
+    byteRate: sampleRate * numChannels * bitsPerSample / 8,
+    blockAlign: numChannels * bitsPerSample / 8,
+    bitsPerSample,
+  },
+  data: {
+    chunkID: &quot;data&quot;,
+    chunkSize: 0, // Will be calculated
+    audioData,
+  },
+};
+
+// Calculate chunk sizes
+const dataSize = audioData.length * (bitsPerSample / 8);
+wavData.data.chunkSize = dataSize;
+wavData.riff.chunkSize = 36 + dataSize; // 36 = 12 (RIFF) + 24 (fmt) + data size
+
+// Encode WAV data to binary
+const buffer = new Uint8Array(1024);
+const bytesWritten = wavFileCoder.encode(wavData, buffer);
+
+// Decode WAV data from binary
+const [decoded, bytesRead] = wavFileCoder.decode(buffer);
+
+// Verify the data matches using assertions
+assertEquals(decoded.riff.chunkID, &quot;RIFF&quot;, 'RIFF chunk ID should be &quot;RIFF&quot;');
+assertEquals(decoded.riff.format, &quot;WAVE&quot;, 'RIFF format should be &quot;WAVE&quot;');
+assertEquals(decoded.fmt.chunkID, &quot;fmt &quot;, 'fmt chunk ID should be &quot;fmt &quot;');
+assertEquals(decoded.fmt.audioFormat, 1, 'Audio format should be PCM (1)');
+assertEquals(decoded.fmt.numChannels, numChannels, 'Number of channels should match');
+assertEquals(decoded.fmt.sampleRate, sampleRate, 'Sample rate should match');
+assertEquals(decoded.fmt.bitsPerSample, bitsPerSample, 'Bits per sample should match');
+assertEquals(decoded.data.chunkID, &quot;data&quot;, 'Data chunk ID should be &quot;data&quot;');
+assertEquals(decoded.data.audioData.length, audioData.length, 'Audio data length should match');
+assertEquals(bytesWritten, bytesRead, 'Bytes written should equal bytes read');
+assertEquals(decoded.riff.chunkSize, wavData.riff.chunkSize, 'RIFF chunk size should match');
+assertEquals(decoded.data.chunkSize, wavData.data.chunkSize, 'Data chunk size should match');
+
+// Verify audio data integrity
+for (let i = 0; i &lt; Math.min(100, audioData.length); i++) {
+  assertEquals(decoded.data.audioData[i], audioData[i], `Audio sample at index ${i} should match`);
+}
+</code><button class="copyButton" data-copy="import { assertEquals } from &quot;@std/assert&quot;;
+import { struct, array, string } from &quot;@hertzg/binstruct&quot;;
+import { u16le, u32le, u8le } from &quot;@hertzg/binstruct/numeric&quot;;
+
+// Define WAV file structure following RIFF format specification
+const riffChunkCoder = struct({
+  chunkID: string(4),           // &quot;RIFF&quot; (fixed 4-byte string)
+  chunkSize: u32le(),           // File size - 8 bytes
+  format: string(4),            // &quot;WAVE&quot; (fixed 4-byte string)
+});
+
+const fmtChunkCoder = struct({
+  chunkID: string(4),           // &quot;fmt &quot; (fixed 4-byte string)
+  chunkSize: u32le(),           // Size of fmt chunk (16 for PCM)
+  audioFormat: u16le(),         // Audio format (1 = PCM)
+  numChannels: u16le(),         // Number of channels (1 = mono, 2 = stereo)
+  sampleRate: u32le(),          // Sample rate (e.g., 44100 Hz)
+  byteRate: u32le(),            // Byte rate (sampleRate * numChannels * bitsPerSample / 8)
+  blockAlign: u16le(),          // Block align (numChannels * bitsPerSample / 8)
+  bitsPerSample: u16le(),       // Bits per sample (8, 16, 24, 32)
+});
+
+const dataChunkCoder = struct({
+  chunkID: string(4),           // &quot;data&quot; (fixed 4-byte string)
+  chunkSize: u32le(),           // Size of audio data
+  audioData: array(u8le(), u32le()), // Audio samples as length-prefixed array
+});
+
+// Complete WAV file structure
+const wavFileCoder = struct({
+  riff: riffChunkCoder,
+  fmt: fmtChunkCoder,
+  data: dataChunkCoder,
+});
+
+// Create sample WAV data (8kHz, 8-bit, mono, 0.1 second - small example)
+const sampleRate = 8000;
+const numChannels = 1;
+const bitsPerSample = 8;
+const durationSeconds = 0.1;
+const numSamples = Math.floor(sampleRate * durationSeconds);
+
+// Generate a simple sine wave (440 Hz) with 8-bit samples
+const audioData = new Array(numSamples);
+for (let i = 0; i &lt; numSamples; i++) {
+  const t = i / sampleRate;
+  audioData[i] = Math.floor(Math.sin(2 * Math.PI * 440 * t) * 127) + 128; // 8-bit amplitude (0-255)
+}
+
+const wavData = {
+  riff: {
+    chunkID: &quot;RIFF&quot;,
+    chunkSize: 0, // Will be calculated
+    format: &quot;WAVE&quot;,
+  },
+  fmt: {
+    chunkID: &quot;fmt &quot;,
+    chunkSize: 16,
+    audioFormat: 1, // PCM
+    numChannels,
+    sampleRate,
+    byteRate: sampleRate * numChannels * bitsPerSample / 8,
+    blockAlign: numChannels * bitsPerSample / 8,
+    bitsPerSample,
+  },
+  data: {
+    chunkID: &quot;data&quot;,
+    chunkSize: 0, // Will be calculated
+    audioData,
+  },
+};
+
+// Calculate chunk sizes
+const dataSize = audioData.length * (bitsPerSample / 8);
+wavData.data.chunkSize = dataSize;
+wavData.riff.chunkSize = 36 + dataSize; // 36 = 12 (RIFF) + 24 (fmt) + data size
+
+// Encode WAV data to binary
+const buffer = new Uint8Array(1024);
+const bytesWritten = wavFileCoder.encode(wavData, buffer);
+
+// Decode WAV data from binary
+const [decoded, bytesRead] = wavFileCoder.decode(buffer);
+
+// Verify the data matches using assertions
+assertEquals(decoded.riff.chunkID, &quot;RIFF&quot;, 'RIFF chunk ID should be &quot;RIFF&quot;');
+assertEquals(decoded.riff.format, &quot;WAVE&quot;, 'RIFF format should be &quot;WAVE&quot;');
+assertEquals(decoded.fmt.chunkID, &quot;fmt &quot;, 'fmt chunk ID should be &quot;fmt &quot;');
+assertEquals(decoded.fmt.audioFormat, 1, 'Audio format should be PCM (1)');
+assertEquals(decoded.fmt.numChannels, numChannels, 'Number of channels should match');
+assertEquals(decoded.fmt.sampleRate, sampleRate, 'Sample rate should match');
+assertEquals(decoded.fmt.bitsPerSample, bitsPerSample, 'Bits per sample should match');
+assertEquals(decoded.data.chunkID, &quot;data&quot;, 'Data chunk ID should be &quot;data&quot;');
+assertEquals(decoded.data.audioData.length, audioData.length, 'Audio data length should match');
+assertEquals(bytesWritten, bytesRead, 'Bytes written should equal bytes read');
+assertEquals(decoded.riff.chunkSize, wavData.riff.chunkSize, 'RIFF chunk size should match');
+assertEquals(decoded.data.chunkSize, wavData.data.chunkSize, 'Data chunk size should match');
+
+// Verify audio data integrity
+for (let i = 0; i &lt; Math.min(100, audioData.length); i++) {
+  assertEquals(decoded.data.audioData[i], audioData[i], `Audio sample at index ${i} should match`);
+}
+"><svg
+  class="copy"
+  width="15"
+  height="15"
+  viewBox="0 0 15 15"
+  fill="none"
+  xmlns="http://www.w3.org/2000/svg"
+>
+  <rect x="2" y="2" width="7" height="7" fill="none" />
+  <rect x="6" y="6" width="7" height="7" fill="none" />
+  <path
+    d="M1.55566 2.7C1.55566 2.03726 2.09292 1.5 2.75566 1.5H8.75566C9.41841 1.5 9.95566 2.03726 9.95566 2.7V5.1H12.3557C13.0184 5.1 13.5557 5.63726 13.5557 6.3V12.3C13.5557 12.9627 13.0184 13.5 12.3557 13.5H6.35566C5.69292 13.5 5.15566 12.9627 5.15566 12.3V9.9H2.75566C2.09292 9.9 1.55566 9.36274 1.55566 8.7V2.7ZM6.35566 9.9V12.3H12.3557V6.3H9.95566V8.7C9.95566 9.36274 9.41841 9.9 8.75566 9.9H6.35566ZM8.75566 8.7V2.7H2.75566V8.7H8.75566Z"
+    fill="currentColor"
+  />
+</svg>
+<svg
+  class="check"
+  width="15"
+  height="15"
+  viewBox="0 0 24 24"
+  stroke-width="2"
+  stroke="currentColor"
+  fill="none"
+  stroke-linecap="round"
+  stroke-linejoin="round"
+  xmlns="http://www.w3.org/2000/svg"
+>
+  <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+  <path d="M5 12l5 5l10 -10" />
+</svg>
+</button><code></code></pre>
+</div></div>
+</div>
+<div class="border-b border-gray-300 dark:border-gray-700"></div><div class="anchorable"><a href="#example_1" class="anchor" aria-label="Anchor" tabIndex="-1"><svg
+  width="16"
+  height="16"
+  viewBox="0 0 14 14"
+  fill="none"
+  xmlns="http://www.w3.org/2000/svg"
+>
+  <g clip-path="url(#clip0_1081_1237)">
+    <path
+      fill-rule="evenodd"
+      clip-rule="evenodd"
+      d="M6.80328 2.8656C6.68736 2.99 6.62425 3.15454 6.62725 3.32456C6.63025 3.49457 6.69913 3.65678 6.81936 3.77702C6.9396 3.89725 7.10181 3.96613 7.27182 3.96913C7.44184 3.97213 7.60638 3.90902 7.73078 3.7931L8.82453 2.69935C8.98712 2.53676 9.18015 2.40778 9.39259 2.31978C9.60503 2.23179 9.83272 2.1865 10.0627 2.1865C10.2926 2.1865 10.5203 2.23179 10.7327 2.31978C10.9452 2.40778 11.1382 2.53676 11.3008 2.69935C11.4634 2.86194 11.5923 3.05497 11.6803 3.2674C11.7683 3.47984 11.8136 3.70753 11.8136 3.93747C11.8136 4.16741 11.7683 4.3951 11.6803 4.60754C11.5923 4.81998 11.4634 5.013 11.3008 5.1756L9.11328 7.3631C8.95075 7.52581 8.75775 7.65488 8.5453 7.74295C8.33285 7.83102 8.10513 7.87635 7.87516 7.87635C7.64518 7.87635 7.41746 7.83102 7.20501 7.74295C6.99256 7.65488 6.79956 7.52581 6.63703 7.3631C6.51263 7.24718 6.34809 7.18407 6.17807 7.18707C6.00806 7.19007 5.84585 7.25894 5.72561 7.37918C5.60538 7.49942 5.5365 7.66163 5.5335 7.83164C5.5305 8.00165 5.59361 8.1662 5.70953 8.2906C5.99391 8.57501 6.33154 8.80062 6.70312 8.95455C7.0747 9.10847 7.47296 9.18769 7.87516 9.18769C8.27736 9.18769 8.67562 9.10847 9.0472 8.95455C9.41878 8.80062 9.7564 8.57501 10.0408 8.2906L12.2283 6.1031C12.8026 5.52874 13.1253 4.74974 13.1253 3.93747C13.1253 3.12521 12.8026 2.34621 12.2283 1.77185C11.6539 1.19749 10.8749 0.874817 10.0627 0.874817C9.25039 0.874817 8.47139 1.19749 7.89703 1.77185L6.80328 2.8656ZM2.69953 11.3006C2.53682 11.1381 2.40774 10.9451 2.31968 10.7326C2.23161 10.5202 2.18628 10.2924 2.18628 10.0625C2.18628 9.8325 2.23161 9.60477 2.31968 9.39233C2.40774 9.17988 2.53682 8.98688 2.69953 8.82435L4.88703 6.63685C5.04956 6.47414 5.24256 6.34506 5.45501 6.25699C5.66746 6.16893 5.89518 6.1236 6.12516 6.1236C6.35513 6.1236 6.58285 6.16893 6.7953 6.25699C7.00775 6.34506 7.20075 6.47414 7.36328 6.63685C7.48768 6.75277 7.65223 6.81588 7.82224 6.81288C7.99225 6.80988 8.15446 6.741 8.2747 6.62077C8.39494 6.50053 8.46381 6.33832 8.46681 6.1683C8.46981 5.99829 8.4067 5.83375 8.29078 5.70935C8.0064 5.42494 7.66878 5.19933 7.2972 5.0454C6.92562 4.89148 6.52736 4.81225 6.12516 4.81225C5.72296 4.81225 5.3247 4.89148 4.95312 5.0454C4.58154 5.19933 4.24391 5.42494 3.95953 5.70935L1.77203 7.89685C1.19767 8.47121 0.875 9.25021 0.875 10.0625C0.875 10.8747 1.19767 11.6537 1.77203 12.2281C2.34639 12.8025 3.12539 13.1251 3.93766 13.1251C4.74992 13.1251 5.52892 12.8025 6.10328 12.2281L7.19703 11.1343C7.31295 11.0099 7.37606 10.8454 7.37306 10.6754C7.37006 10.5054 7.30119 10.3432 7.18095 10.2229C7.06071 10.1027 6.8985 10.0338 6.72849 10.0308C6.55848 10.0278 6.39393 10.0909 6.26953 10.2068L5.17578 11.3006C5.01325 11.4633 4.82025 11.5924 4.6078 11.6805C4.39535 11.7685 4.16763 11.8138 3.93766 11.8138C3.70768 11.8138 3.47996 11.7685 3.26751 11.6805C3.05506 11.5924 2.86206 11.4633 2.69953 11.3006Z"
+      fill="currentColor"
+    />
+  </g>
+  <defs>
+    <clipPath id="clip0_1081_1237">
+      <rect width="14" height="14" fill="white" />
+    </clipPath>
+  </defs>
+</svg>
+</a>
+<h3 class="example-header"><div class="markdown"><p>Parsing complete network stack (Ethernet + IP + TCP):</p>
+</div></h3>
+  <div><div class="markdown"><pre class="highlight"><code class="language-ts">import { assertEquals } from &quot;@std/assert&quot;;
+import { struct, array, string, refine } from &quot;@hertzg/binstruct&quot;;
+import { u16be, u32be, u8be } from &quot;@hertzg/binstruct/numeric&quot;;
+
+const macAddr = refine(array(u8be(), 6), {
+  refine: (arr: number[]) =&gt; arr.map(b =&gt; b.toString(16).padStart(2, '0').toUpperCase()).join(':'),
+  unrefine: (mac: string) =&gt; mac.split(':').map(hex =&gt; parseInt(hex, 16)),
+});
+
+const ipAddr = refine(array(u8be(), 4), {
+  refine: (arr: number[]) =&gt; arr.join('.'),
+  unrefine: (ip: string) =&gt; ip.split('.').map(octet =&gt; parseInt(octet, 10)),
+});
+
+// Define Ethernet frame structure (IEEE 802.3)
+const ethernetFrameCoder = struct({
+  destinationMAC: macAddr(),            // MAC address as colon-separated hex string
+  sourceMAC: macAddr(),                 // MAC address as colon-separated hex string
+  etherType: u16be(),                   // EtherType (0x0800 for IPv4)
+});
+
+// Define IPv4 header structure (RFC 791)
+const ipv4HeaderCoder = struct({
+  version: u8be(),                      // Version (4) and IHL (5 words = 20 bytes)
+  tos: u8be(),                          // Type of Service
+  totalLength: u16be(),                 // Total packet length
+  identification: u16be(),              // Packet identification
+  flags: u16be(),                       // Flags and fragment offset
+  ttl: u8be(),                          // Time to Live
+  protocol: u8be(),                     // Protocol (6 for TCP)
+  checksum: u16be(),                    // Header checksum
+  sourceIP: ipAddr(),                   // IP address as dot-separated decimal string
+  destIP: ipAddr(),                     // IP address as dot-separated decimal string
+  options: array(u8be(), 0),            // IP options (empty for this example)
+});
+
+// Define TCP header structure (RFC 793)
+const tcpHeaderCoder = struct({
+  sourcePort: u16be(),                   // Source port
+  destPort: u16be(),                     // Destination port
+  sequenceNumber: u32be(),               // Sequence number
+  ackNumber: u32be(),                    // Acknowledgment number
+  dataOffset: u8be(),                    // Data offset and flags
+  flags: u8be(),                         // Control flags
+  windowSize: u16be(),                   // Window size
+  checksum: u16be(),                     // TCP checksum
+  urgentPointer: u16be(),                // Urgent pointer
+  options: array(u8be(), 0),             // TCP options (empty for this example)
+});
+
+// Define complete network packet structure
+const networkPacketCoder = struct({
+  ethernet: ethernetFrameCoder,
+  ip: ipv4HeaderCoder,
+  tcp: tcpHeaderCoder,
+  payload: array(u8be(), u16be()),       // Length-prefixed payload
+});
+
+// Create sample network packet data
+const networkPacket = {
+  ethernet: {
+    destinationMAC: &quot;00:1B:21:BB:0F:3B&quot;,                    // Router MAC as string
+    sourceMAC: &quot;00:0C:29:2E:84:5A&quot;,                         // Host MAC as string
+    etherType: 0x0800,                                      // IPv4
+  },
+  ip: {
+    version: 0x45,                       // IPv4, 5 words header
+    tos: 0x00,                          // Normal precedence
+    totalLength: 0,                      // Will be calculated
+    identification: 0x1234,              // Packet ID
+    flags: 0x4000,                       // Don't fragment
+    ttl: 64,                            // Time to live
+    protocol: 6,                         // TCP
+    checksum: 0,                         // Will be calculated
+    sourceIP: &quot;192.168.1.100&quot;,           // Source IP as string
+    destIP: &quot;10.0.0.50&quot;,                 // Destination IP as string
+    options: [],                         // No IP options
+  },
+  tcp: {
+    sourcePort: 49152,                   // Dynamic port
+    destPort: 80,                        // HTTP port
+    sequenceNumber: 0x12345678,          // Initial sequence
+    ackNumber: 0,                        // No acknowledgment
+    dataOffset: 0x50,                    // 5 words header
+    flags: 0x02,                         // SYN flag
+    windowSize: 65535,                   // Maximum window
+    checksum: 0,                         // Will be calculated
+    urgentPointer: 0,                    // No urgent data
+    options: [],                         // No TCP options
+  },
+  payload: [0x48, 0x65, 0x6c, 0x6c, 0x6f], // &quot;Hello&quot; payload
+};
+
+// Calculate packet lengths
+const tcpHeaderLength = 20;              // Standard TCP header
+const payloadLength = networkPacket.payload.length;
+const payloadLengthPrefix = 2;           // u16 length prefix for array
+const totalTcpLength = tcpHeaderLength + payloadLength + payloadLengthPrefix;
+const ipHeaderLength = 20;               // Standard IP header
+const totalPacketLength = ipHeaderLength + totalTcpLength;
+const ethernetHeaderLength = 14;         // Ethernet header (6+6+2 bytes)
+const totalFrameLength = ethernetHeaderLength + totalPacketLength;
+
+// Update length fields
+networkPacket.ip.totalLength = totalPacketLength;
+networkPacket.tcp.dataOffset = 0x50;     // 5 words header
+
+// Encode complete network packet
+const buffer = new Uint8Array(2048);
+const bytesWritten = networkPacketCoder.encode(networkPacket, buffer);
+
+// Decode complete network packet
+const [decoded, bytesRead] = networkPacketCoder.decode(buffer);
+
+// Verify Ethernet frame using assertions
+assertEquals(decoded.ethernet.destinationMAC, &quot;00:1B:21:BB:0F:3B&quot;, 'Destination MAC should match router');
+assertEquals(decoded.ethernet.sourceMAC, &quot;00:0C:29:2E:84:5A&quot;, 'Source MAC should match host');
+assertEquals(decoded.ethernet.etherType, 0x0800, 'EtherType should be IPv4 (0x0800)');
+
+// Verify IP header using assertions
+assertEquals(decoded.ip.version, 0x45, 'IP version should be IPv4 with 5 words header');
+assertEquals(decoded.ip.protocol, 6, 'Protocol should be TCP (6)');
+assertEquals(decoded.ip.ttl, 64, 'TTL should be 64');
+assertEquals(decoded.ip.sourceIP, &quot;192.168.1.100&quot;, 'Source IP should match');
+assertEquals(decoded.ip.destIP, &quot;10.0.0.50&quot;, 'Destination IP should match');
+assertEquals(decoded.ip.totalLength, totalPacketLength, 'IP total length should match calculated value');
+assertEquals(decoded.ip.identification, 0x1234, 'Packet ID should match');
+assertEquals(decoded.ip.flags, 0x4000, 'Flags should indicate no fragmentation');
+
+// Verify TCP header using assertions
+assertEquals(decoded.tcp.sourcePort, 49152, 'Source port should be 49152');
+assertEquals(decoded.tcp.destPort, 80, 'Destination port should be 80 (HTTP)');
+assertEquals(decoded.tcp.sequenceNumber, 0x12345678, 'Sequence number should match');
+assertEquals(decoded.tcp.ackNumber, 0, 'Acknowledgment number should be 0');
+assertEquals(decoded.tcp.dataOffset, 0x50, 'Data offset should be 5 words');
+assertEquals(decoded.tcp.flags, 0x02, 'SYN flag should be set');
+assertEquals(decoded.tcp.windowSize, 65535, 'Window size should be maximum');
+assertEquals(decoded.tcp.urgentPointer, 0, 'Urgent pointer should be 0');
+
+// Verify payload using assertions
+assertEquals(decoded.payload.length, 5, 'Payload should have 5 bytes');
+assertEquals(decoded.payload, [0x48, 0x65, 0x6c, 0x6c, 0x6f], 'Payload should be &quot;Hello&quot;');
+assertEquals(String.fromCharCode(...decoded.payload), &quot;Hello&quot;, 'Payload should decode to &quot;Hello&quot;');
+
+// Verify complete packet integrity using assertions
+assertEquals(bytesWritten, bytesRead, 'Bytes written should equal bytes read');
+assertEquals(decoded.ip.totalLength, totalPacketLength, 'IP total length should match calculated value');
+assertEquals(decoded.tcp.dataOffset &amp; 0xf0, 0x50, 'TCP data offset should be 5 words');
+
+// Verify frame size calculations
+const calculatedFrameSize = ethernetHeaderLength + ipHeaderLength + tcpHeaderLength + payloadLength + payloadLengthPrefix;
+assertEquals(bytesWritten, calculatedFrameSize, 'Total frame size should match calculated value');
+assertEquals(calculatedFrameSize, 61, 'Frame size should be 61 bytes (14+20+20+2+5)');
+
+// Verify protocol stack hierarchy
+assertEquals(decoded.ethernet.etherType, 0x0800, 'Ethernet should carry IPv4');
+assertEquals(decoded.ip.protocol, 6, 'IPv4 should carry TCP');
+assertEquals(decoded.tcp.destPort, 80, 'TCP should be destined for HTTP');
+</code><button class="copyButton" data-copy="import { assertEquals } from &quot;@std/assert&quot;;
+import { struct, array, string, refine } from &quot;@hertzg/binstruct&quot;;
+import { u16be, u32be, u8be } from &quot;@hertzg/binstruct/numeric&quot;;
+
+const macAddr = refine(array(u8be(), 6), {
+  refine: (arr: number[]) =&gt; arr.map(b =&gt; b.toString(16).padStart(2, '0').toUpperCase()).join(':'),
+  unrefine: (mac: string) =&gt; mac.split(':').map(hex =&gt; parseInt(hex, 16)),
+});
+
+const ipAddr = refine(array(u8be(), 4), {
+  refine: (arr: number[]) =&gt; arr.join('.'),
+  unrefine: (ip: string) =&gt; ip.split('.').map(octet =&gt; parseInt(octet, 10)),
+});
+
+// Define Ethernet frame structure (IEEE 802.3)
+const ethernetFrameCoder = struct({
+  destinationMAC: macAddr(),            // MAC address as colon-separated hex string
+  sourceMAC: macAddr(),                 // MAC address as colon-separated hex string
+  etherType: u16be(),                   // EtherType (0x0800 for IPv4)
+});
+
+// Define IPv4 header structure (RFC 791)
+const ipv4HeaderCoder = struct({
+  version: u8be(),                      // Version (4) and IHL (5 words = 20 bytes)
+  tos: u8be(),                          // Type of Service
+  totalLength: u16be(),                 // Total packet length
+  identification: u16be(),              // Packet identification
+  flags: u16be(),                       // Flags and fragment offset
+  ttl: u8be(),                          // Time to Live
+  protocol: u8be(),                     // Protocol (6 for TCP)
+  checksum: u16be(),                    // Header checksum
+  sourceIP: ipAddr(),                   // IP address as dot-separated decimal string
+  destIP: ipAddr(),                     // IP address as dot-separated decimal string
+  options: array(u8be(), 0),            // IP options (empty for this example)
+});
+
+// Define TCP header structure (RFC 793)
+const tcpHeaderCoder = struct({
+  sourcePort: u16be(),                   // Source port
+  destPort: u16be(),                     // Destination port
+  sequenceNumber: u32be(),               // Sequence number
+  ackNumber: u32be(),                    // Acknowledgment number
+  dataOffset: u8be(),                    // Data offset and flags
+  flags: u8be(),                         // Control flags
+  windowSize: u16be(),                   // Window size
+  checksum: u16be(),                     // TCP checksum
+  urgentPointer: u16be(),                // Urgent pointer
+  options: array(u8be(), 0),             // TCP options (empty for this example)
+});
+
+// Define complete network packet structure
+const networkPacketCoder = struct({
+  ethernet: ethernetFrameCoder,
+  ip: ipv4HeaderCoder,
+  tcp: tcpHeaderCoder,
+  payload: array(u8be(), u16be()),       // Length-prefixed payload
+});
+
+// Create sample network packet data
+const networkPacket = {
+  ethernet: {
+    destinationMAC: &quot;00:1B:21:BB:0F:3B&quot;,                    // Router MAC as string
+    sourceMAC: &quot;00:0C:29:2E:84:5A&quot;,                         // Host MAC as string
+    etherType: 0x0800,                                      // IPv4
+  },
+  ip: {
+    version: 0x45,                       // IPv4, 5 words header
+    tos: 0x00,                          // Normal precedence
+    totalLength: 0,                      // Will be calculated
+    identification: 0x1234,              // Packet ID
+    flags: 0x4000,                       // Don't fragment
+    ttl: 64,                            // Time to live
+    protocol: 6,                         // TCP
+    checksum: 0,                         // Will be calculated
+    sourceIP: &quot;192.168.1.100&quot;,           // Source IP as string
+    destIP: &quot;10.0.0.50&quot;,                 // Destination IP as string
+    options: [],                         // No IP options
+  },
+  tcp: {
+    sourcePort: 49152,                   // Dynamic port
+    destPort: 80,                        // HTTP port
+    sequenceNumber: 0x12345678,          // Initial sequence
+    ackNumber: 0,                        // No acknowledgment
+    dataOffset: 0x50,                    // 5 words header
+    flags: 0x02,                         // SYN flag
+    windowSize: 65535,                   // Maximum window
+    checksum: 0,                         // Will be calculated
+    urgentPointer: 0,                    // No urgent data
+    options: [],                         // No TCP options
+  },
+  payload: [0x48, 0x65, 0x6c, 0x6c, 0x6f], // &quot;Hello&quot; payload
+};
+
+// Calculate packet lengths
+const tcpHeaderLength = 20;              // Standard TCP header
+const payloadLength = networkPacket.payload.length;
+const payloadLengthPrefix = 2;           // u16 length prefix for array
+const totalTcpLength = tcpHeaderLength + payloadLength + payloadLengthPrefix;
+const ipHeaderLength = 20;               // Standard IP header
+const totalPacketLength = ipHeaderLength + totalTcpLength;
+const ethernetHeaderLength = 14;         // Ethernet header (6+6+2 bytes)
+const totalFrameLength = ethernetHeaderLength + totalPacketLength;
+
+// Update length fields
+networkPacket.ip.totalLength = totalPacketLength;
+networkPacket.tcp.dataOffset = 0x50;     // 5 words header
+
+// Encode complete network packet
+const buffer = new Uint8Array(2048);
+const bytesWritten = networkPacketCoder.encode(networkPacket, buffer);
+
+// Decode complete network packet
+const [decoded, bytesRead] = networkPacketCoder.decode(buffer);
+
+// Verify Ethernet frame using assertions
+assertEquals(decoded.ethernet.destinationMAC, &quot;00:1B:21:BB:0F:3B&quot;, 'Destination MAC should match router');
+assertEquals(decoded.ethernet.sourceMAC, &quot;00:0C:29:2E:84:5A&quot;, 'Source MAC should match host');
+assertEquals(decoded.ethernet.etherType, 0x0800, 'EtherType should be IPv4 (0x0800)');
+
+// Verify IP header using assertions
+assertEquals(decoded.ip.version, 0x45, 'IP version should be IPv4 with 5 words header');
+assertEquals(decoded.ip.protocol, 6, 'Protocol should be TCP (6)');
+assertEquals(decoded.ip.ttl, 64, 'TTL should be 64');
+assertEquals(decoded.ip.sourceIP, &quot;192.168.1.100&quot;, 'Source IP should match');
+assertEquals(decoded.ip.destIP, &quot;10.0.0.50&quot;, 'Destination IP should match');
+assertEquals(decoded.ip.totalLength, totalPacketLength, 'IP total length should match calculated value');
+assertEquals(decoded.ip.identification, 0x1234, 'Packet ID should match');
+assertEquals(decoded.ip.flags, 0x4000, 'Flags should indicate no fragmentation');
+
+// Verify TCP header using assertions
+assertEquals(decoded.tcp.sourcePort, 49152, 'Source port should be 49152');
+assertEquals(decoded.tcp.destPort, 80, 'Destination port should be 80 (HTTP)');
+assertEquals(decoded.tcp.sequenceNumber, 0x12345678, 'Sequence number should match');
+assertEquals(decoded.tcp.ackNumber, 0, 'Acknowledgment number should be 0');
+assertEquals(decoded.tcp.dataOffset, 0x50, 'Data offset should be 5 words');
+assertEquals(decoded.tcp.flags, 0x02, 'SYN flag should be set');
+assertEquals(decoded.tcp.windowSize, 65535, 'Window size should be maximum');
+assertEquals(decoded.tcp.urgentPointer, 0, 'Urgent pointer should be 0');
+
+// Verify payload using assertions
+assertEquals(decoded.payload.length, 5, 'Payload should have 5 bytes');
+assertEquals(decoded.payload, [0x48, 0x65, 0x6c, 0x6c, 0x6f], 'Payload should be &quot;Hello&quot;');
+assertEquals(String.fromCharCode(...decoded.payload), &quot;Hello&quot;, 'Payload should decode to &quot;Hello&quot;');
+
+// Verify complete packet integrity using assertions
+assertEquals(bytesWritten, bytesRead, 'Bytes written should equal bytes read');
+assertEquals(decoded.ip.totalLength, totalPacketLength, 'IP total length should match calculated value');
+assertEquals(decoded.tcp.dataOffset &amp; 0xf0, 0x50, 'TCP data offset should be 5 words');
+
+// Verify frame size calculations
+const calculatedFrameSize = ethernetHeaderLength + ipHeaderLength + tcpHeaderLength + payloadLength + payloadLengthPrefix;
+assertEquals(bytesWritten, calculatedFrameSize, 'Total frame size should match calculated value');
+assertEquals(calculatedFrameSize, 61, 'Frame size should be 61 bytes (14+20+20+2+5)');
+
+// Verify protocol stack hierarchy
+assertEquals(decoded.ethernet.etherType, 0x0800, 'Ethernet should carry IPv4');
+assertEquals(decoded.ip.protocol, 6, 'IPv4 should carry TCP');
+assertEquals(decoded.tcp.destPort, 80, 'TCP should be destined for HTTP');
+"><svg
+  class="copy"
+  width="15"
+  height="15"
+  viewBox="0 0 15 15"
+  fill="none"
+  xmlns="http://www.w3.org/2000/svg"
+>
+  <rect x="2" y="2" width="7" height="7" fill="none" />
+  <rect x="6" y="6" width="7" height="7" fill="none" />
+  <path
+    d="M1.55566 2.7C1.55566 2.03726 2.09292 1.5 2.75566 1.5H8.75566C9.41841 1.5 9.95566 2.03726 9.95566 2.7V5.1H12.3557C13.0184 5.1 13.5557 5.63726 13.5557 6.3V12.3C13.5557 12.9627 13.0184 13.5 12.3557 13.5H6.35566C5.69292 13.5 5.15566 12.9627 5.15566 12.3V9.9H2.75566C2.09292 9.9 1.55566 9.36274 1.55566 8.7V2.7ZM6.35566 9.9V12.3H12.3557V6.3H9.95566V8.7C9.95566 9.36274 9.41841 9.9 8.75566 9.9H6.35566ZM8.75566 8.7V2.7H2.75566V8.7H8.75566Z"
+    fill="currentColor"
+  />
+</svg>
+<svg
+  class="check"
+  width="15"
+  height="15"
+  viewBox="0 0 24 24"
+  stroke-width="2"
+  stroke="currentColor"
+  fill="none"
+  stroke-linecap="round"
+  stroke-linejoin="round"
+  xmlns="http://www.w3.org/2000/svg"
+>
+  <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+  <path d="M5 12l5 5l10 -10" />
+</svg>
+</button><code></code></pre>
+</div></div>
+</div>
+</div></section>
+<section class="section"  id="mod_ts_functions"><div>
+      <h2 class="anchorable mb-1"><a href="#mod_ts_functions" class="anchor" aria-label="Anchor" tabIndex="-1"><svg
+  width="16"
+  height="16"
+  viewBox="0 0 14 14"
+  fill="none"
+  xmlns="http://www.w3.org/2000/svg"
+>
+  <g clip-path="url(#clip0_1081_1237)">
+    <path
+      fill-rule="evenodd"
+      clip-rule="evenodd"
+      d="M6.80328 2.8656C6.68736 2.99 6.62425 3.15454 6.62725 3.32456C6.63025 3.49457 6.69913 3.65678 6.81936 3.77702C6.9396 3.89725 7.10181 3.96613 7.27182 3.96913C7.44184 3.97213 7.60638 3.90902 7.73078 3.7931L8.82453 2.69935C8.98712 2.53676 9.18015 2.40778 9.39259 2.31978C9.60503 2.23179 9.83272 2.1865 10.0627 2.1865C10.2926 2.1865 10.5203 2.23179 10.7327 2.31978C10.9452 2.40778 11.1382 2.53676 11.3008 2.69935C11.4634 2.86194 11.5923 3.05497 11.6803 3.2674C11.7683 3.47984 11.8136 3.70753 11.8136 3.93747C11.8136 4.16741 11.7683 4.3951 11.6803 4.60754C11.5923 4.81998 11.4634 5.013 11.3008 5.1756L9.11328 7.3631C8.95075 7.52581 8.75775 7.65488 8.5453 7.74295C8.33285 7.83102 8.10513 7.87635 7.87516 7.87635C7.64518 7.87635 7.41746 7.83102 7.20501 7.74295C6.99256 7.65488 6.79956 7.52581 6.63703 7.3631C6.51263 7.24718 6.34809 7.18407 6.17807 7.18707C6.00806 7.19007 5.84585 7.25894 5.72561 7.37918C5.60538 7.49942 5.5365 7.66163 5.5335 7.83164C5.5305 8.00165 5.59361 8.1662 5.70953 8.2906C5.99391 8.57501 6.33154 8.80062 6.70312 8.95455C7.0747 9.10847 7.47296 9.18769 7.87516 9.18769C8.27736 9.18769 8.67562 9.10847 9.0472 8.95455C9.41878 8.80062 9.7564 8.57501 10.0408 8.2906L12.2283 6.1031C12.8026 5.52874 13.1253 4.74974 13.1253 3.93747C13.1253 3.12521 12.8026 2.34621 12.2283 1.77185C11.6539 1.19749 10.8749 0.874817 10.0627 0.874817C9.25039 0.874817 8.47139 1.19749 7.89703 1.77185L6.80328 2.8656ZM2.69953 11.3006C2.53682 11.1381 2.40774 10.9451 2.31968 10.7326C2.23161 10.5202 2.18628 10.2924 2.18628 10.0625C2.18628 9.8325 2.23161 9.60477 2.31968 9.39233C2.40774 9.17988 2.53682 8.98688 2.69953 8.82435L4.88703 6.63685C5.04956 6.47414 5.24256 6.34506 5.45501 6.25699C5.66746 6.16893 5.89518 6.1236 6.12516 6.1236C6.35513 6.1236 6.58285 6.16893 6.7953 6.25699C7.00775 6.34506 7.20075 6.47414 7.36328 6.63685C7.48768 6.75277 7.65223 6.81588 7.82224 6.81288C7.99225 6.80988 8.15446 6.741 8.2747 6.62077C8.39494 6.50053 8.46381 6.33832 8.46681 6.1683C8.46981 5.99829 8.4067 5.83375 8.29078 5.70935C8.0064 5.42494 7.66878 5.19933 7.2972 5.0454C6.92562 4.89148 6.52736 4.81225 6.12516 4.81225C5.72296 4.81225 5.3247 4.89148 4.95312 5.0454C4.58154 5.19933 4.24391 5.42494 3.95953 5.70935L1.77203 7.89685C1.19767 8.47121 0.875 9.25021 0.875 10.0625C0.875 10.8747 1.19767 11.6537 1.77203 12.2281C2.34639 12.8025 3.12539 13.1251 3.93766 13.1251C4.74992 13.1251 5.52892 12.8025 6.10328 12.2281L7.19703 11.1343C7.31295 11.0099 7.37606 10.8454 7.37306 10.6754C7.37006 10.5054 7.30119 10.3432 7.18095 10.2229C7.06071 10.1027 6.8985 10.0338 6.72849 10.0308C6.55848 10.0278 6.39393 10.0909 6.26953 10.2068L5.17578 11.3006C5.01325 11.4633 4.82025 11.5924 4.6078 11.6805C4.39535 11.7685 4.16763 11.8138 3.93766 11.8138C3.70768 11.8138 3.47996 11.7685 3.26751 11.6805C3.05506 11.5924 2.86206 11.4633 2.69953 11.3006Z"
+      fill="currentColor"
+    />
+  </g>
+  <defs>
+    <clipPath id="clip0_1081_1237">
+      <rect width="14" height="14" fill="white" />
+    </clipPath>
+  </defs>
+</svg>
+</a>
+Functions</h2></div><div class="namespaceSection"><div id="namespace_array" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-Function bg-Function/15 dark:text-FunctionDark dark:bg-FunctionDark/15" title="Function">f</div></div>
+<div class="namespaceItemContent">
+		    <a href="..&#x2F;.&#x2F;mod.ts&#x2F;~&#x2F;array.html" title="array">
+			    <span>array</span><span><span>&lt;<span><span class="td-tp">TDecoded</span></span>&gt;</span>(<div class="ml-4"><div><span>elementType<span>: <span class="td-ref">Coder</span>&lt;<span class="td-ref">TDecoded</span>&gt;</span></span>,</div><div><span>lengthCoderOrLengthTypeOrCondition<span>: <span><span class="td-ref">Coder</span>&lt;<span class="td-kw">number</span>&gt;<span class="td-op"> | </span><span class="td-ref">LengthOrRef</span><span class="td-op"> | </span><span class="td-ref">ArrayWhileCondition</span>&lt;<span class="td-ref">TDecoded</span>&gt;</span></span></span></div></div>)<span>: <span class="td-ref">Coder</span>&lt;<span class="td-ref">TDecoded</span>[]&gt;</span></span><div class="namespaceItemContentTypeInfo">2 overloads</div></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Creates a Coder for arrays that automatically chooses between length-prefixed and fixed-length
+based on the arguments provided.</p>
+</div></div></div>
+    </div><div id="namespace_arrayfl" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-Function bg-Function/15 dark:text-FunctionDark dark:bg-FunctionDark/15" title="Function">f</div></div>
+<div class="namespaceItemContent">
+		    <a href="..&#x2F;.&#x2F;mod.ts&#x2F;~&#x2F;arrayFL.html" title="arrayFL">
+			    <span>arrayFL</span><span><span>&lt;<span><span class="td-tp">TDecoded</span></span>&gt;</span>(<div class="ml-4"><div><span>elementType<span>: <span class="td-ref">Coder</span>&lt;<span class="td-ref">TDecoded</span>&gt;</span></span>,</div><div><span>lengthOrRef<span>: <span class="td-ref">LengthOrRef</span></span></span></div></div>)<span>: <span class="td-ref">Coder</span>&lt;<span class="td-ref">TDecoded</span>[]&gt;</span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Creates a Coder for fixed-length arrays of a given element type.</p>
+</div></div></div>
+    </div><div id="namespace_arraylp" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-Function bg-Function/15 dark:text-FunctionDark dark:bg-FunctionDark/15" title="Function">f</div></div>
+<div class="namespaceItemContent">
+		    <a href="..&#x2F;.&#x2F;mod.ts&#x2F;~&#x2F;arrayLP.html" title="arrayLP">
+			    <span>arrayLP</span><span><span>&lt;<span><span class="td-tp">TDecoded</span></span>&gt;</span>(<div class="ml-4"><div><span>elementType<span>: <span class="td-ref">Coder</span>&lt;<span class="td-ref">TDecoded</span>&gt;</span></span>,</div><div><span>lengthType<span>: <span class="td-ref">Coder</span>&lt;<span class="td-kw">number</span>&gt;</span></span></div></div>)<span>: <span class="td-ref">Coder</span>&lt;<span class="td-ref">TDecoded</span>[]&gt;</span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Creates a Coder for length-prefixed arrays of a given element type.</p>
+</div></div></div>
+    </div><div id="namespace_arraywhile" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-Function bg-Function/15 dark:text-FunctionDark dark:bg-FunctionDark/15" title="Function">f</div></div>
+<div class="namespaceItemContent">
+		    <a href="..&#x2F;.&#x2F;mod.ts&#x2F;~&#x2F;arrayWhile.html" title="arrayWhile">
+			    <span>arrayWhile</span><span><span>&lt;<span><span class="td-tp">TDecoded</span></span>&gt;</span>(<div class="ml-4"><div><span>elementType<span>: <span class="td-ref">Coder</span>&lt;<span class="td-ref">TDecoded</span>&gt;</span></span>,</div><div><span>condition<span>: <span class="td-ref">ArrayWhileCondition</span>&lt;<span class="td-ref">TDecoded</span>&gt;</span></span></div></div>)<span>: <span class="td-ref">Coder</span>&lt;<span class="td-ref">TDecoded</span>[]&gt;</span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Creates a Coder for arrays using a custom condition function to determine when to stop.</p>
+</div></div></div>
+    </div><div id="namespace_autogrowbuffer" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-Function bg-Function/15 dark:text-FunctionDark dark:bg-FunctionDark/15" title="Function">f</div></div>
+<div class="namespaceItemContent">
+		    <a href="..&#x2F;.&#x2F;mod.ts&#x2F;~&#x2F;autoGrowBuffer.html" title="autoGrowBuffer">
+			    <span>autoGrowBuffer</span><span><span>&lt;<span><span class="td-tp">T</span></span>&gt;</span>(<div class="ml-4"><div><span>tryEncodeFn<span>: (<span><span>buffer<span>: <span class="td-ref">Uint8Array</span></span></span></span>) =&gt; <span class="td-ref">T</span></span></span>,</div><div><span>autogrowOptions<span class="td-op">?</span><span>: <span class="td-ref">AutogrowOptions</span></span></span></div></div>)<span>: <span class="td-ref">T</span></span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Automatically grows a buffer until the encoding function succeeds.</p>
+</div></div></div>
+    </div><div id="namespace_bitstruct" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-Function bg-Function/15 dark:text-FunctionDark dark:bg-FunctionDark/15" title="Function">f</div></div>
+<div class="namespaceItemContent">
+		    <a href="..&#x2F;.&#x2F;mod.ts&#x2F;~&#x2F;bitStruct.html" title="bitStruct">
+			    <span>bitStruct</span><span><span>&lt;<span><span class="td-tp">T</span><span><span class="td-kw"> extends </span><span class="td-ref">BitSchema</span></span></span>&gt;</span>(<span><span>schema<span>: <span class="td-ref">T</span></span></span></span>)<span>: <span class="td-ref">Coder</span>&lt;<span class="td-ref">BitStructDecoded</span>&lt;<span class="td-ref">T</span>&gt;&gt;</span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Creates a Coder for bit-packed structures with MSB-first ordering.</p>
+</div></div></div>
+    </div><div id="namespace_bytes" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-Function bg-Function/15 dark:text-FunctionDark dark:bg-FunctionDark/15" title="Function">f</div></div>
+<div class="namespaceItemContent">
+		    <a href="..&#x2F;.&#x2F;mod.ts&#x2F;~&#x2F;bytes.html" title="bytes">
+			    <span>bytes</span><span>(<span><span>lengthOrRef<span class="td-op">?</span><span>: <span><span class="td-ref">LengthOrRef</span><span class="td-op"> | </span><span class="td-kw">null</span></span></span></span></span>)<span>: <span class="td-ref">Coder</span>&lt;<span class="td-ref">Uint8Array</span>&gt;</span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Creates a Coder for byte slices.</p>
+</div></div></div>
+    </div><div id="namespace_computedref" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-Function bg-Function/15 dark:text-FunctionDark dark:bg-FunctionDark/15" title="Function">f</div></div>
+<div class="namespaceItemContent">
+		    <a href="..&#x2F;.&#x2F;mod.ts&#x2F;~&#x2F;computedRef.html" title="computedRef">
+			    <span>computedRef</span><span><span>&lt;<span><span class="td-tp">TArgs</span><span><span class="td-kw"> extends </span><span class="td-kw">readonly</span> <span class="td-ref">RefValue</span>&lt;<span class="td-kw">unknown</span>&gt;[]</span></span><span>, </span><span><span class="td-tp">TDecoded</span></span>&gt;</span>(<div class="ml-4"><div><span>refs<span>: <span>[...<span class="td-ref">TArgs</span>]</span></span></span>,</div><div><span>computation<span>: (<span><span><span>...args</span><span>: <span>[...<span class="td-ref">UnwrapRefTuple</span>&lt;<span class="td-ref">TArgs</span>&gt;]</span></span></span></span>) =&gt; <span class="td-ref">TDecoded</span></span></span></div></div>)<span>: <span class="td-ref">RefValue</span>&lt;<span class="td-ref">TDecoded</span>&gt;</span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Creates a computed reference that depends on multiple other references.</p>
+</div></div></div>
+    </div><div id="namespace_createcontext" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-Function bg-Function/15 dark:text-FunctionDark dark:bg-FunctionDark/15" title="Function">f</div></div>
+<div class="namespaceItemContent">
+		    <a href="..&#x2F;.&#x2F;mod.ts&#x2F;~&#x2F;createContext.html" title="createContext">
+			    <span>createContext</span><span>(<span><span>direction<span>: <span><span class="td-str">"encode"</span><span class="td-op"> | </span><span class="td-str">"decode"</span></span></span></span></span>)<span>: <span class="td-ref">Context</span></span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Creates a default context for encoding or decoding operations.</p>
+</div></div></div>
+    </div><div id="namespace_decode" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-Function bg-Function/15 dark:text-FunctionDark dark:bg-FunctionDark/15" title="Function">f</div></div>
+<div class="namespaceItemContent">
+		    <a href="..&#x2F;.&#x2F;mod.ts&#x2F;~&#x2F;decode.html" title="decode">
+			    <span>decode</span><span><span>&lt;<span><span class="td-tp">T</span></span>&gt;</span>(<div class="ml-4"><div><span>coder<span>: <span class="td-ref">Coder</span>&lt;<span class="td-ref">T</span>&gt;</span></span>,</div><div><span>buffer<span>: <span class="td-ref">Uint8Array</span></span></span>,</div><div><span>context<span class="td-op">?</span><span>: <span><span class="td-ref">Context</span><span class="td-op"> | </span><span class="td-kw">undefined</span></span></span></span></div></div>)<span>: <span class="td-ref">T</span></span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Decodes data using the provided coder, returning the decoded value.</p>
+</div></div></div>
+    </div><div id="namespace_encode" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-Function bg-Function/15 dark:text-FunctionDark dark:bg-FunctionDark/15" title="Function">f</div></div>
+<div class="namespaceItemContent">
+		    <a href="..&#x2F;.&#x2F;mod.ts&#x2F;~&#x2F;encode.html" title="encode">
+			    <span>encode</span><span><span>&lt;<span><span class="td-tp">T</span></span>&gt;</span>(<div class="ml-4"><div><span>coder<span>: <span class="td-ref">Coder</span>&lt;<span class="td-ref">T</span>&gt;</span></span>,</div><div><span>data<span>: <span class="td-ref">T</span></span></span>,</div><div><span>context<span class="td-op">?</span><span>: <span class="td-ref">Context</span></span></span>,</div><div><span>target<span class="td-op">?</span><span>: <span class="td-ref">Uint8Array</span></span></span>,</div><div><span>autogrowOptions<span class="td-op">?</span><span>: <span class="td-ref">AutogrowOptions</span></span></span></div></div>)<span>: <span class="td-ref">Uint8Array</span></span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Encodes data using the provided coder, handling buffer allocation automatically.</p>
+</div></div></div>
+    </div><div id="namespace_f16" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-Function bg-Function/15 dark:text-FunctionDark dark:bg-FunctionDark/15" title="Function">f</div></div>
+<div class="namespaceItemContent">
+		    <a href="..&#x2F;.&#x2F;mod.ts&#x2F;~&#x2F;f16.html" title="f16">
+			    <span>f16</span><span>(<span><span>endianness<span class="td-op">?</span><span>: <span><span class="td-str">"be"</span><span class="td-op"> | </span><span class="td-str">"le"</span></span></span></span></span>)<span>: <span class="td-ref">Coder</span>&lt;<span class="td-kw">number</span>&gt;</span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Creates a coder for 16-bit floating-point numbers.</p>
+</div></div></div>
+    </div><div id="namespace_f16be" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-Function bg-Function/15 dark:text-FunctionDark dark:bg-FunctionDark/15" title="Function">f</div></div>
+<div class="namespaceItemContent">
+		    <a href="..&#x2F;.&#x2F;mod.ts&#x2F;~&#x2F;f16be.html" title="f16be">
+			    <span>f16be</span><span>()<span>: <span class="td-ref">Coder</span>&lt;<span class="td-kw">number</span>&gt;</span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Convenience function for 16-bit floating point with big-endian byte order.</p>
+</div></div></div>
+    </div><div id="namespace_f16le" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-Function bg-Function/15 dark:text-FunctionDark dark:bg-FunctionDark/15" title="Function">f</div></div>
+<div class="namespaceItemContent">
+		    <a href="..&#x2F;.&#x2F;mod.ts&#x2F;~&#x2F;f16le.html" title="f16le">
+			    <span>f16le</span><span>()<span>: <span class="td-ref">Coder</span>&lt;<span class="td-kw">number</span>&gt;</span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Convenience function for 16-bit floating point with little-endian byte order.</p>
+</div></div></div>
+    </div><div id="namespace_f32" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-Function bg-Function/15 dark:text-FunctionDark dark:bg-FunctionDark/15" title="Function">f</div></div>
+<div class="namespaceItemContent">
+		    <a href="..&#x2F;.&#x2F;mod.ts&#x2F;~&#x2F;f32.html" title="f32">
+			    <span>f32</span><span>(<span><span>endianness<span class="td-op">?</span><span>: <span><span class="td-str">"be"</span><span class="td-op"> | </span><span class="td-str">"le"</span></span></span></span></span>)<span>: <span class="td-ref">Coder</span>&lt;<span class="td-kw">number</span>&gt;</span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Creates a coder for 32-bit floating-point numbers.</p>
+</div></div></div>
+    </div><div id="namespace_f32be" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-Function bg-Function/15 dark:text-FunctionDark dark:bg-FunctionDark/15" title="Function">f</div></div>
+<div class="namespaceItemContent">
+		    <a href="..&#x2F;.&#x2F;mod.ts&#x2F;~&#x2F;f32be.html" title="f32be">
+			    <span>f32be</span><span>()<span>: <span class="td-ref">Coder</span>&lt;<span class="td-kw">number</span>&gt;</span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Convenience function for 32-bit floating point with big-endian byte order.</p>
+</div></div></div>
+    </div><div id="namespace_f32le" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-Function bg-Function/15 dark:text-FunctionDark dark:bg-FunctionDark/15" title="Function">f</div></div>
+<div class="namespaceItemContent">
+		    <a href="..&#x2F;.&#x2F;mod.ts&#x2F;~&#x2F;f32le.html" title="f32le">
+			    <span>f32le</span><span>()<span>: <span class="td-ref">Coder</span>&lt;<span class="td-kw">number</span>&gt;</span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Convenience function for 32-bit floating point with little-endian byte order.</p>
+</div></div></div>
+    </div><div id="namespace_f64" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-Function bg-Function/15 dark:text-FunctionDark dark:bg-FunctionDark/15" title="Function">f</div></div>
+<div class="namespaceItemContent">
+		    <a href="..&#x2F;.&#x2F;mod.ts&#x2F;~&#x2F;f64.html" title="f64">
+			    <span>f64</span><span>(<span><span>endianness<span class="td-op">?</span><span>: <span><span class="td-str">"be"</span><span class="td-op"> | </span><span class="td-str">"le"</span></span></span></span></span>)<span>: <span class="td-ref">Coder</span>&lt;<span class="td-kw">number</span>&gt;</span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Creates a coder for 64-bit floating-point numbers.</p>
+</div></div></div>
+    </div><div id="namespace_f64be" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-Function bg-Function/15 dark:text-FunctionDark dark:bg-FunctionDark/15" title="Function">f</div></div>
+<div class="namespaceItemContent">
+		    <a href="..&#x2F;.&#x2F;mod.ts&#x2F;~&#x2F;f64be.html" title="f64be">
+			    <span>f64be</span><span>()<span>: <span class="td-ref">Coder</span>&lt;<span class="td-kw">number</span>&gt;</span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Convenience function for 64-bit floating point with big-endian byte order.</p>
+</div></div></div>
+    </div><div id="namespace_f64le" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-Function bg-Function/15 dark:text-FunctionDark dark:bg-FunctionDark/15" title="Function">f</div></div>
+<div class="namespaceItemContent">
+		    <a href="..&#x2F;.&#x2F;mod.ts&#x2F;~&#x2F;f64le.html" title="f64le">
+			    <span>f64le</span><span>()<span>: <span class="td-ref">Coder</span>&lt;<span class="td-kw">number</span>&gt;</span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Convenience function for 64-bit floating point with little-endian byte order.</p>
+</div></div></div>
+    </div><div id="namespace_iscoder" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-Function bg-Function/15 dark:text-FunctionDark dark:bg-FunctionDark/15" title="Function">f</div></div>
+<div class="namespaceItemContent">
+		    <a href="..&#x2F;.&#x2F;mod.ts&#x2F;~&#x2F;isCoder.html" title="isCoder">
+			    <span>isCoder</span><span><span>&lt;<span><span class="td-tp">TDecoded</span></span>&gt;</span>(<span><span>value<span>: <span class="td-kw">unknown</span></span></span></span>)<span>: value <span class="td-kw">is</span> <span class="td-ref">Coder</span>&lt;<span class="td-ref">TDecoded</span>&gt;</span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Type guard to check if a value is a Coder.</p>
+</div></div></div>
+    </div><div id="namespace_islengthorref" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-Function bg-Function/15 dark:text-FunctionDark dark:bg-FunctionDark/15" title="Function">f</div></div>
+<div class="namespaceItemContent">
+		    <a href="..&#x2F;.&#x2F;mod.ts&#x2F;~&#x2F;isLengthOrRef.html" title="isLengthOrRef">
+			    <span>isLengthOrRef</span><span>(<span><span>value<span>: <span class="td-kw">unknown</span></span></span></span>)<span>: value <span class="td-kw">is</span> <span class="td-ref">LengthOrRef</span></span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Type guard to check if a value is a valid length or a reference to a length.</p>
+</div></div></div>
+    </div><div id="namespace_isref" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-Function bg-Function/15 dark:text-FunctionDark dark:bg-FunctionDark/15" title="Function">f</div></div>
+<div class="namespaceItemContent">
+		    <a href="..&#x2F;.&#x2F;mod.ts&#x2F;~&#x2F;isRef.html" title="isRef">
+			    <span>isRef</span><span><span>&lt;<span><span class="td-tp">T</span></span>&gt;</span>(<span><span>value<span>: <span class="td-kw">unknown</span></span></span></span>)<span>: value <span class="td-kw">is</span> <span class="td-ref">RefValue</span>&lt;<span class="td-ref">T</span>&gt;</span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Checks if a value is a reference created by the ref function.</p>
+</div></div></div>
+    </div><div id="namespace_isvalidlength" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-Function bg-Function/15 dark:text-FunctionDark dark:bg-FunctionDark/15" title="Function">f</div></div>
+<div class="namespaceItemContent">
+		    <a href="..&#x2F;.&#x2F;mod.ts&#x2F;~&#x2F;isValidLength.html" title="isValidLength">
+			    <span>isValidLength</span><span>(<span><span>length<span>: <span class="td-kw">number</span></span></span></span>)<span>: <span class="td-kw">boolean</span></span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Validates if a length value is valid for binary encoding.</p>
+</div></div></div>
+    </div><div id="namespace_lengthrefget" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-Function bg-Function/15 dark:text-FunctionDark dark:bg-FunctionDark/15" title="Function">f</div></div>
+<div class="namespaceItemContent">
+		    <a href="..&#x2F;.&#x2F;mod.ts&#x2F;~&#x2F;lengthRefGet.html" title="lengthRefGet">
+			    <span>lengthRefGet</span><span>(<div class="ml-4"><div><span>ctx<span>: <span><span class="td-ref">Context</span><span class="td-op"> | </span><span class="td-kw">undefined</span><span class="td-op"> | </span><span class="td-kw">null</span></span></span></span>,</div><div><span>lengthOrRef<span>: <span class="td-ref">LengthOrRef</span></span></span></div></div>)<span>: <span><span class="td-kw">number</span><span class="td-op"> | </span><span class="td-kw">undefined</span></span></span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Attempts to resolve a length value from a reference or literal.</p>
+</div></div></div>
+    </div><div id="namespace_lengthrefset" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-Function bg-Function/15 dark:text-FunctionDark dark:bg-FunctionDark/15" title="Function">f</div></div>
+<div class="namespaceItemContent">
+		    <a href="..&#x2F;.&#x2F;mod.ts&#x2F;~&#x2F;lengthRefSet.html" title="lengthRefSet">
+			    <span>lengthRefSet</span><span>(<div class="ml-4"><div><span>ctx<span>: <span><span class="td-ref">Context</span><span class="td-op"> | </span><span class="td-kw">null</span><span class="td-op"> | </span><span class="td-kw">undefined</span></span></span></span>,</div><div><span>coder<span>: <span class="td-ref">Coder</span>&lt;<span class="td-kw">number</span>&gt;</span></span>,</div><div><span>length<span>: <span class="td-kw">number</span></span></span></div></div>)<span>: <span class="td-kw">void</span></span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Sets a length value in the context for the given coder.</p>
+</div></div></div>
+    </div><div id="namespace_ref" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-Function bg-Function/15 dark:text-FunctionDark dark:bg-FunctionDark/15" title="Function">f</div></div>
+<div class="namespaceItemContent">
+		    <a href="..&#x2F;.&#x2F;mod.ts&#x2F;~&#x2F;ref.html" title="ref">
+			    <span>ref</span><span><span>&lt;<span><span class="td-tp">TDecoded</span></span>&gt;</span>(<span><span>coder<span>: <span class="td-ref">Coder</span>&lt;<span class="td-ref">TDecoded</span>&gt;</span></span></span>)<span>: <span class="td-ref">RefValue</span>&lt;<span class="td-ref">TDecoded</span>&gt;</span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Creates a reference value that can be resolved during encoding/decoding.</p>
+</div></div></div>
+    </div><div id="namespace_refgetvalue" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-Function bg-Function/15 dark:text-FunctionDark dark:bg-FunctionDark/15" title="Function">f</div></div>
+<div class="namespaceItemContent">
+		    <a href="..&#x2F;.&#x2F;mod.ts&#x2F;~&#x2F;refGetValue.html" title="refGetValue">
+			    <span>refGetValue</span><span><span>&lt;<span><span class="td-tp">T</span></span>&gt;</span>(<div class="ml-4"><div><span>ctx<span>: <span><span class="td-ref">Context</span><span class="td-op"> | </span><span class="td-kw">null</span><span class="td-op"> | </span><span class="td-kw">undefined</span></span></span></span>,</div><div><span>refOrValue<span>: <span><span class="td-ref">RefValue</span>&lt;<span class="td-ref">T</span>&gt;<span class="td-op"> | </span><span class="td-ref">NoInfer</span>&lt;<span class="td-ref">T</span>&gt;</span></span></span></div></div>)<span>: <span><span class="td-ref">NoInfer</span>&lt;<span class="td-ref">T</span>&gt;<span class="td-op"> | </span><span class="td-kw">undefined</span></span></span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Retrieves the value from a reference or returns the value directly if it's not a reference.</p>
+</div></div></div>
+    </div><div id="namespace_refine" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-Function bg-Function/15 dark:text-FunctionDark dark:bg-FunctionDark/15" title="Function">f</div></div>
+<div class="namespaceItemContent">
+		    <a href="..&#x2F;.&#x2F;mod.ts&#x2F;~&#x2F;refine.html" title="refine">
+			    <span>refine</span><span><span>&lt;<span><span class="td-tp">TUnrefined</span></span><span>, </span><span><span class="td-tp">TRefined</span></span><span>, </span><span><span class="td-tp">TArgs</span><span><span class="td-kw"> extends </span><span class="td-kw">unknown</span>[]</span><span><span> = </span><span>[]</span></span></span>&gt;</span>(<div class="ml-4"><div><span>coder<span>: <span class="td-ref">Coder</span>&lt;<span class="td-ref">TUnrefined</span>&gt;</span></span>,</div><div><span>refiner<span>: <span class="td-ref">Refiner</span>&lt;<span class="td-ref">TUnrefined</span><span>, </span><span class="td-ref">TRefined</span><span>, </span><span class="td-ref">TArgs</span>&gt;</span></span></div></div>)<span>: (<span><span><span>...args</span><span>: <span class="td-ref">TArgs</span></span></span></span>) =&gt; <span class="td-ref">Coder</span>&lt;<span class="td-ref">TRefined</span>&gt;</span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Creates a refined coder that applies transformations during encoding and decoding.</p>
+</div></div></div>
+    </div><div id="namespace_refinefields" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-Function bg-Function/15 dark:text-FunctionDark dark:bg-FunctionDark/15" title="Function">f</div></div>
+<div class="namespaceItemContent">
+		    <a href="..&#x2F;.&#x2F;mod.ts&#x2F;~&#x2F;refineFields.html" title="refineFields">
+			    <span>refineFields</span><span><span>&lt;<div class="ml-indent"><div><span><span class="td-tp">TCoders</span><span><span class="td-kw"> extends </span><span class="td-ref">FieldCoders</span></span></span>,</div><div><span><span class="td-tp">THost</span><span><span class="td-kw"> extends </span>[<span><span class="td-tp">K</span><span><span class="td-kw"> in </span><span class="td-kw">keyof</span> <span class="td-ref">TCoders</span></span></span>]<span>: <span class="td-ref">Uint8Array</span></span></span></span></div></div>&gt;</span>(<span><span>coders<span>: <span class="td-ref">TCoders</span></span></span></span>)<span>: <span class="td-ref">Refiner</span>&lt;<span class="td-ref">THost</span><span>, </span><span><span class="td-ref">Omit</span>&lt;<span class="td-ref">THost</span><span>, </span><span class="td-kw">keyof</span> <span class="td-ref">TCoders</span>&gt;<span class="td-op"> & </span><span class="td-ref">DecodedFields</span>&lt;<span class="td-ref">TCoders</span>&gt;</span><span>, </span><span>[]</span>&gt;</span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Creates a <a href=".././mod.ts/~/Refiner.html"><code>Refiner</code></a> that swaps named <code>Uint8Array</code> fields of a
+host record for the typed values produced by their sub-coders. Fields not
+in <code>coders</code> are passed through unchanged.</p>
+</div></div></div>
+    </div><div id="namespace_refineswitch" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-Function bg-Function/15 dark:text-FunctionDark dark:bg-FunctionDark/15" title="Function">f</div></div>
+<div class="namespaceItemContent">
+		    <a href="..&#x2F;.&#x2F;mod.ts&#x2F;~&#x2F;refineSwitch.html" title="refineSwitch">
+			    <span>refineSwitch</span><span><span>&lt;<div class="ml-indent"><div><span><span class="td-tp">TBase</span></span>,</div><div><span><span class="td-tp">TRefiners</span><span><span class="td-kw"> extends </span><span class="td-ref">Record</span>&lt;<span class="td-kw">string</span><span>, </span><span class="td-ref">Refiner</span>&lt;<span class="td-ref">TBase</span><span>, </span><span class="td-kw">any</span><span>, </span><span>[]</span>&gt;&gt;</span></span></div></div>&gt;</span>(<div class="ml-4"><div><span>baseCoder<span>: <span class="td-ref">Coder</span>&lt;<span class="td-ref">TBase</span>&gt;</span></span>,</div><div><span>refiners<span>: <span class="td-ref">TRefiners</span></span></span>,</div><div><span>selector<span>: { refine<span>: (<div class="ml-4"><div><span>base<span>: <span class="td-ref">TBase</span></span></span>,</div><div><span>context<span>: <span class="td-ref">Context</span></span></span></div></div>) =&gt; <span><span class="td-kw">keyof</span> <span class="td-ref">TRefiners</span><span class="td-op"> | </span><span class="td-kw">null</span></span></span>; unrefine<span>: (<div class="ml-4"><div><span>refined<span>: <span class="td-ref">RefinedUnion</span>&lt;<span class="td-ref">TRefiners</span>&gt;</span></span>,</div><div><span>context<span>: <span class="td-ref">Context</span></span></span></div></div>) =&gt; <span><span class="td-kw">keyof</span> <span class="td-ref">TRefiners</span><span class="td-op"> | </span><span class="td-kw">null</span></span></span>;  }</span></span></div></div>)<span>: <span class="td-ref">Coder</span>&lt;<span class="td-ref">RefinedUnion</span>&lt;<span class="td-ref">TRefiners</span>&gt;&gt;</span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Creates a coder that conditionally applies refiners based on selector functions,
+using switch-like semantics for bidirectional encoding and decoding.</p>
+</div></div></div>
+    </div><div id="namespace_refsetvalue" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-Function bg-Function/15 dark:text-FunctionDark dark:bg-FunctionDark/15" title="Function">f</div></div>
+<div class="namespaceItemContent">
+		    <a href="..&#x2F;.&#x2F;mod.ts&#x2F;~&#x2F;refSetValue.html" title="refSetValue">
+			    <span>refSetValue</span><span><span>&lt;<span><span class="td-tp">T</span></span>&gt;</span>(<div class="ml-4"><div><span>ctx<span>: <span><span class="td-ref">Context</span><span class="td-op"> | </span><span class="td-kw">null</span><span class="td-op"> | </span><span class="td-kw">undefined</span></span></span></span>,</div><div><span>coder<span>: <span class="td-ref">Coder</span>&lt;<span class="td-ref">T</span>&gt;</span></span>,</div><div><span>value<span>: <span class="td-ref">T</span></span></span></div></div>)<span>: <span class="td-kw">void</span></span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Sets a value in the context for a specific coder reference.</p>
+</div></div></div>
+    </div><div id="namespace_s16" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-Function bg-Function/15 dark:text-FunctionDark dark:bg-FunctionDark/15" title="Function">f</div></div>
+<div class="namespaceItemContent">
+		    <a href="..&#x2F;.&#x2F;mod.ts&#x2F;~&#x2F;s16.html" title="s16">
+			    <span>s16</span><span>(<span><span>endianness<span class="td-op">?</span><span>: <span><span class="td-str">"be"</span><span class="td-op"> | </span><span class="td-str">"le"</span></span></span></span></span>)<span>: <span class="td-ref">Coder</span>&lt;<span class="td-kw">number</span>&gt;</span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Creates a coder for 16-bit signed integers.</p>
+</div></div></div>
+    </div><div id="namespace_s16be" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-Function bg-Function/15 dark:text-FunctionDark dark:bg-FunctionDark/15" title="Function">f</div></div>
+<div class="namespaceItemContent">
+		    <a href="..&#x2F;.&#x2F;mod.ts&#x2F;~&#x2F;s16be.html" title="s16be">
+			    <span>s16be</span><span>()<span>: <span class="td-ref">Coder</span>&lt;<span class="td-kw">number</span>&gt;</span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Convenience function for 16-bit signed integer with big-endian byte order.</p>
+</div></div></div>
+    </div><div id="namespace_s16le" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-Function bg-Function/15 dark:text-FunctionDark dark:bg-FunctionDark/15" title="Function">f</div></div>
+<div class="namespaceItemContent">
+		    <a href="..&#x2F;.&#x2F;mod.ts&#x2F;~&#x2F;s16le.html" title="s16le">
+			    <span>s16le</span><span>()<span>: <span class="td-ref">Coder</span>&lt;<span class="td-kw">number</span>&gt;</span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Convenience function for 16-bit signed integer with little-endian byte order.</p>
+</div></div></div>
+    </div><div id="namespace_s32" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-Function bg-Function/15 dark:text-FunctionDark dark:bg-FunctionDark/15" title="Function">f</div></div>
+<div class="namespaceItemContent">
+		    <a href="..&#x2F;.&#x2F;mod.ts&#x2F;~&#x2F;s32.html" title="s32">
+			    <span>s32</span><span>(<span><span>endianness<span class="td-op">?</span><span>: <span><span class="td-str">"be"</span><span class="td-op"> | </span><span class="td-str">"le"</span></span></span></span></span>)<span>: <span class="td-ref">Coder</span>&lt;<span class="td-kw">number</span>&gt;</span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Creates a coder for 32-bit signed integers.</p>
+</div></div></div>
+    </div><div id="namespace_s32be" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-Function bg-Function/15 dark:text-FunctionDark dark:bg-FunctionDark/15" title="Function">f</div></div>
+<div class="namespaceItemContent">
+		    <a href="..&#x2F;.&#x2F;mod.ts&#x2F;~&#x2F;s32be.html" title="s32be">
+			    <span>s32be</span><span>()<span>: <span class="td-ref">Coder</span>&lt;<span class="td-kw">number</span>&gt;</span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Convenience function for 32-bit signed integer with big-endian byte order.</p>
+</div></div></div>
+    </div><div id="namespace_s32le" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-Function bg-Function/15 dark:text-FunctionDark dark:bg-FunctionDark/15" title="Function">f</div></div>
+<div class="namespaceItemContent">
+		    <a href="..&#x2F;.&#x2F;mod.ts&#x2F;~&#x2F;s32le.html" title="s32le">
+			    <span>s32le</span><span>()<span>: <span class="td-ref">Coder</span>&lt;<span class="td-kw">number</span>&gt;</span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Convenience function for 32-bit signed integer with little-endian byte order.</p>
+</div></div></div>
+    </div><div id="namespace_s64" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-Function bg-Function/15 dark:text-FunctionDark dark:bg-FunctionDark/15" title="Function">f</div></div>
+<div class="namespaceItemContent">
+		    <a href="..&#x2F;.&#x2F;mod.ts&#x2F;~&#x2F;s64.html" title="s64">
+			    <span>s64</span><span>(<span><span>endianness<span class="td-op">?</span><span>: <span><span class="td-str">"be"</span><span class="td-op"> | </span><span class="td-str">"le"</span></span></span></span></span>)<span>: <span class="td-ref">Coder</span>&lt;<span class="td-kw">bigint</span>&gt;</span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Creates a coder for 64-bit signed integers.</p>
+</div></div></div>
+    </div><div id="namespace_s64be" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-Function bg-Function/15 dark:text-FunctionDark dark:bg-FunctionDark/15" title="Function">f</div></div>
+<div class="namespaceItemContent">
+		    <a href="..&#x2F;.&#x2F;mod.ts&#x2F;~&#x2F;s64be.html" title="s64be">
+			    <span>s64be</span><span>()<span>: <span class="td-ref">Coder</span>&lt;<span class="td-kw">bigint</span>&gt;</span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Convenience function for 64-bit signed integer with big-endian byte order.</p>
+</div></div></div>
+    </div><div id="namespace_s64le" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-Function bg-Function/15 dark:text-FunctionDark dark:bg-FunctionDark/15" title="Function">f</div></div>
+<div class="namespaceItemContent">
+		    <a href="..&#x2F;.&#x2F;mod.ts&#x2F;~&#x2F;s64le.html" title="s64le">
+			    <span>s64le</span><span>()<span>: <span class="td-ref">Coder</span>&lt;<span class="td-kw">bigint</span>&gt;</span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Convenience function for 64-bit signed integer with little-endian byte order.</p>
+</div></div></div>
+    </div><div id="namespace_s8" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-Function bg-Function/15 dark:text-FunctionDark dark:bg-FunctionDark/15" title="Function">f</div></div>
+<div class="namespaceItemContent">
+		    <a href="..&#x2F;.&#x2F;mod.ts&#x2F;~&#x2F;s8.html" title="s8">
+			    <span>s8</span><span>(<span><span>endianness<span class="td-op">?</span><span>: <span><span class="td-str">"be"</span><span class="td-op"> | </span><span class="td-str">"le"</span></span></span></span></span>)<span>: <span class="td-ref">Coder</span>&lt;<span class="td-kw">number</span>&gt;</span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Creates a coder for 8-bit signed integers.</p>
+</div></div></div>
+    </div><div id="namespace_s8be" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-Function bg-Function/15 dark:text-FunctionDark dark:bg-FunctionDark/15" title="Function">f</div></div>
+<div class="namespaceItemContent">
+		    <a href="..&#x2F;.&#x2F;mod.ts&#x2F;~&#x2F;s8be.html" title="s8be">
+			    <span>s8be</span><span>()<span>: <span class="td-ref">Coder</span>&lt;<span class="td-kw">number</span>&gt;</span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Convenience function for 8-bit signed integer with big-endian byte order.</p>
+</div></div></div>
+    </div><div id="namespace_s8le" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-Function bg-Function/15 dark:text-FunctionDark dark:bg-FunctionDark/15" title="Function">f</div></div>
+<div class="namespaceItemContent">
+		    <a href="..&#x2F;.&#x2F;mod.ts&#x2F;~&#x2F;s8le.html" title="s8le">
+			    <span>s8le</span><span>()<span>: <span class="td-ref">Coder</span>&lt;<span class="td-kw">number</span>&gt;</span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Convenience function for 8-bit signed integer with little-endian byte order.</p>
+</div></div></div>
+    </div><div id="namespace_string" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-Function bg-Function/15 dark:text-FunctionDark dark:bg-FunctionDark/15" title="Function">f</div></div>
+<div class="namespaceItemContent">
+		    <a href="..&#x2F;.&#x2F;mod.ts&#x2F;~&#x2F;string.html" title="string">
+			    <span>string</span><span>(<div class="ml-4"><div><span>lengthOrLengthType<span class="td-op">?</span><span>: <span><span class="td-ref">Coder</span>&lt;<span class="td-kw">number</span>&gt;<span class="td-op"> | </span><span class="td-ref">LengthOrRef</span><span class="td-op"> | </span><span class="td-kw">null</span></span></span></span>,</div><div><span>decoderEncoding<span class="td-op">?</span><span>: <span class="td-kw">string</span></span></span>,</div><div><span>decoderOptions<span class="td-op">?</span><span>: <span class="td-ref">TextDecoderOptions</span></span></span></div></div>)<span>: <span class="td-ref">Coder</span>&lt;<span class="td-kw">string</span>&gt;</span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Creates a Coder for strings that automatically chooses between length-prefixed,
+null-terminated, and fixed-length based on the arguments provided.</p>
+</div></div></div>
+    </div><div id="namespace_stringfl" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-Function bg-Function/15 dark:text-FunctionDark dark:bg-FunctionDark/15" title="Function">f</div></div>
+<div class="namespaceItemContent">
+		    <a href="..&#x2F;.&#x2F;mod.ts&#x2F;~&#x2F;stringFL.html" title="stringFL">
+			    <span>stringFL</span><span>(<div class="ml-4"><div><span>byteLength<span class="td-op">?</span><span>: <span class="td-ref">LengthOrRef</span></span></span>,</div><div><span>decoderEncoding<span class="td-op">?</span><span>: <span class="td-kw">string</span></span></span>,</div><div><span>decoderOptions<span class="td-op">?</span><span>: <span class="td-ref">TextDecoderOptions</span></span></span></div></div>)<span>: <span class="td-ref">Coder</span>&lt;<span class="td-kw">string</span>&gt;</span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Creates a Coder for fixed-length strings.</p>
+</div></div></div>
+    </div><div id="namespace_stringlp" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-Function bg-Function/15 dark:text-FunctionDark dark:bg-FunctionDark/15" title="Function">f</div></div>
+<div class="namespaceItemContent">
+		    <a href="..&#x2F;.&#x2F;mod.ts&#x2F;~&#x2F;stringLP.html" title="stringLP">
+			    <span>stringLP</span><span>(<span><span>lengthType<span>: <span class="td-ref">Coder</span>&lt;<span class="td-kw">number</span>&gt;</span></span></span>)<span>: <span class="td-ref">Coder</span>&lt;<span class="td-kw">string</span>&gt;</span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Creates a Coder for length-prefixed strings.</p>
+</div></div></div>
+    </div><div id="namespace_stringnt" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-Function bg-Function/15 dark:text-FunctionDark dark:bg-FunctionDark/15" title="Function">f</div></div>
+<div class="namespaceItemContent">
+		    <a href="..&#x2F;.&#x2F;mod.ts&#x2F;~&#x2F;stringNT.html" title="stringNT">
+			    <span>stringNT</span><span>()<span>: <span class="td-ref">Coder</span>&lt;<span class="td-kw">string</span>&gt;</span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Creates a Coder for null-terminated strings.</p>
+</div></div></div>
+    </div><div id="namespace_struct" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-Function bg-Function/15 dark:text-FunctionDark dark:bg-FunctionDark/15" title="Function">f</div></div>
+<div class="namespaceItemContent">
+		    <a href="..&#x2F;.&#x2F;mod.ts&#x2F;~&#x2F;struct.html" title="struct">
+			    <span>struct</span><span><span>&lt;<span><span class="td-tp">T</span><span><span class="td-kw"> extends </span><span class="td-ref">Record</span>&lt;<span class="td-kw">string</span><span>, </span><span class="td-ref">Coder</span>&lt;<span class="td-kw">any</span>&gt;&gt;</span></span>&gt;</span>(<span><span>schema<span>: <span class="td-ref">T</span></span></span></span>)<span>: <span class="td-ref">Coder</span>&lt;[<span><span class="td-tp">K</span><span><span class="td-kw"> in </span><span class="td-kw">keyof</span> <span class="td-ref">T</span></span></span>]<span>: <span class="td-ref">T</span>[<span class="td-ref">K</span>] <span class="td-kw">extends</span> <span class="td-ref">Coder</span>&lt;<span class="td-kw">infer </span><span><span class="td-tp">U</span></span>&gt; <span class="td-op">?</span> <span class="td-ref">U</span> <span class="td-op">:</span> <span class="td-kw">never</span></span>&gt;</span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Creates a Coder for structured data from an object of property names to coders.</p>
+</div></div></div>
+    </div><div id="namespace_u16" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-Function bg-Function/15 dark:text-FunctionDark dark:bg-FunctionDark/15" title="Function">f</div></div>
+<div class="namespaceItemContent">
+		    <a href="..&#x2F;.&#x2F;mod.ts&#x2F;~&#x2F;u16.html" title="u16">
+			    <span>u16</span><span>(<span><span>endianness<span class="td-op">?</span><span>: <span><span class="td-str">"be"</span><span class="td-op"> | </span><span class="td-str">"le"</span></span></span></span></span>)<span>: <span class="td-ref">Coder</span>&lt;<span class="td-kw">number</span>&gt;</span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Creates a coder for 16-bit unsigned integers.</p>
+</div></div></div>
+    </div><div id="namespace_u16be" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-Function bg-Function/15 dark:text-FunctionDark dark:bg-FunctionDark/15" title="Function">f</div></div>
+<div class="namespaceItemContent">
+		    <a href="..&#x2F;.&#x2F;mod.ts&#x2F;~&#x2F;u16be.html" title="u16be">
+			    <span>u16be</span><span>()<span>: <span class="td-ref">Coder</span>&lt;<span class="td-kw">number</span>&gt;</span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Convenience function for 16-bit unsigned integer with big-endian byte order.</p>
+</div></div></div>
+    </div><div id="namespace_u16le" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-Function bg-Function/15 dark:text-FunctionDark dark:bg-FunctionDark/15" title="Function">f</div></div>
+<div class="namespaceItemContent">
+		    <a href="..&#x2F;.&#x2F;mod.ts&#x2F;~&#x2F;u16le.html" title="u16le">
+			    <span>u16le</span><span>()<span>: <span class="td-ref">Coder</span>&lt;<span class="td-kw">number</span>&gt;</span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Convenience function for 16-bit unsigned integer with little-endian byte order.</p>
+</div></div></div>
+    </div><div id="namespace_u32" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-Function bg-Function/15 dark:text-FunctionDark dark:bg-FunctionDark/15" title="Function">f</div></div>
+<div class="namespaceItemContent">
+		    <a href="..&#x2F;.&#x2F;mod.ts&#x2F;~&#x2F;u32.html" title="u32">
+			    <span>u32</span><span>(<span><span>endianness<span class="td-op">?</span><span>: <span><span class="td-str">"be"</span><span class="td-op"> | </span><span class="td-str">"le"</span></span></span></span></span>)<span>: <span class="td-ref">Coder</span>&lt;<span class="td-kw">number</span>&gt;</span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Creates a coder for 32-bit unsigned integers.</p>
+</div></div></div>
+    </div><div id="namespace_u32be" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-Function bg-Function/15 dark:text-FunctionDark dark:bg-FunctionDark/15" title="Function">f</div></div>
+<div class="namespaceItemContent">
+		    <a href="..&#x2F;.&#x2F;mod.ts&#x2F;~&#x2F;u32be.html" title="u32be">
+			    <span>u32be</span><span>()<span>: <span class="td-ref">Coder</span>&lt;<span class="td-kw">number</span>&gt;</span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Convenience function for 32-bit unsigned integer with big-endian byte order.</p>
+</div></div></div>
+    </div><div id="namespace_u32le" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-Function bg-Function/15 dark:text-FunctionDark dark:bg-FunctionDark/15" title="Function">f</div></div>
+<div class="namespaceItemContent">
+		    <a href="..&#x2F;.&#x2F;mod.ts&#x2F;~&#x2F;u32le.html" title="u32le">
+			    <span>u32le</span><span>()<span>: <span class="td-ref">Coder</span>&lt;<span class="td-kw">number</span>&gt;</span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Convenience function for 32-bit unsigned integer with little-endian byte order.</p>
+</div></div></div>
+    </div><div id="namespace_u64" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-Function bg-Function/15 dark:text-FunctionDark dark:bg-FunctionDark/15" title="Function">f</div></div>
+<div class="namespaceItemContent">
+		    <a href="..&#x2F;.&#x2F;mod.ts&#x2F;~&#x2F;u64.html" title="u64">
+			    <span>u64</span><span>(<span><span>endianness<span class="td-op">?</span><span>: <span><span class="td-str">"be"</span><span class="td-op"> | </span><span class="td-str">"le"</span></span></span></span></span>)<span>: <span class="td-ref">Coder</span>&lt;<span class="td-kw">bigint</span>&gt;</span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Creates a coder for 64-bit unsigned integers.</p>
+</div></div></div>
+    </div><div id="namespace_u64be" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-Function bg-Function/15 dark:text-FunctionDark dark:bg-FunctionDark/15" title="Function">f</div></div>
+<div class="namespaceItemContent">
+		    <a href="..&#x2F;.&#x2F;mod.ts&#x2F;~&#x2F;u64be.html" title="u64be">
+			    <span>u64be</span><span>()<span>: <span class="td-ref">Coder</span>&lt;<span class="td-kw">bigint</span>&gt;</span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Convenience function for 64-bit unsigned integer with big-endian byte order.</p>
+</div></div></div>
+    </div><div id="namespace_u64le" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-Function bg-Function/15 dark:text-FunctionDark dark:bg-FunctionDark/15" title="Function">f</div></div>
+<div class="namespaceItemContent">
+		    <a href="..&#x2F;.&#x2F;mod.ts&#x2F;~&#x2F;u64le.html" title="u64le">
+			    <span>u64le</span><span>()<span>: <span class="td-ref">Coder</span>&lt;<span class="td-kw">bigint</span>&gt;</span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Convenience function for 64-bit unsigned integer with little-endian byte order.</p>
+</div></div></div>
+    </div><div id="namespace_u8" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-Function bg-Function/15 dark:text-FunctionDark dark:bg-FunctionDark/15" title="Function">f</div></div>
+<div class="namespaceItemContent">
+		    <a href="..&#x2F;.&#x2F;mod.ts&#x2F;~&#x2F;u8.html" title="u8">
+			    <span>u8</span><span>(<span><span>endianness<span class="td-op">?</span><span>: <span><span class="td-str">"be"</span><span class="td-op"> | </span><span class="td-str">"le"</span></span></span></span></span>)<span>: <span class="td-ref">Coder</span>&lt;<span class="td-kw">number</span>&gt;</span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Creates a coder for 8-bit unsigned integers.</p>
+</div></div></div>
+    </div><div id="namespace_u8be" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-Function bg-Function/15 dark:text-FunctionDark dark:bg-FunctionDark/15" title="Function">f</div></div>
+<div class="namespaceItemContent">
+		    <a href="..&#x2F;.&#x2F;mod.ts&#x2F;~&#x2F;u8be.html" title="u8be">
+			    <span>u8be</span><span>()<span>: <span class="td-ref">Coder</span>&lt;<span class="td-kw">number</span>&gt;</span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Convenience function for 8-bit unsigned integer with big-endian byte order.</p>
+</div></div></div>
+    </div><div id="namespace_u8le" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-Function bg-Function/15 dark:text-FunctionDark dark:bg-FunctionDark/15" title="Function">f</div></div>
+<div class="namespaceItemContent">
+		    <a href="..&#x2F;.&#x2F;mod.ts&#x2F;~&#x2F;u8le.html" title="u8le">
+			    <span>u8le</span><span>()<span>: <span class="td-ref">Coder</span>&lt;<span class="td-kw">number</span>&gt;</span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Convenience function for 8-bit unsigned integer with little-endian byte order.</p>
+</div></div></div>
+    </div><div id="namespace_withrefsincontext" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-Function bg-Function/15 dark:text-FunctionDark dark:bg-FunctionDark/15" title="Function">f</div></div>
+<div class="namespaceItemContent">
+		    <a href="..&#x2F;.&#x2F;mod.ts&#x2F;~&#x2F;withRefsInContext.html" title="withRefsInContext">
+			    <span>withRefsInContext</span><span>(<span><span>ctx<span>: <span class="td-ref">Context</span></span></span></span>)<span>: <span class="td-ref">Context</span></span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Ensures that a context has the necessary reference storage initialized.</p>
+</div></div></div>
+    </div></div>
+</section>
+<section class="section"  id="mod_ts_interfaces"><div>
+      <h2 class="anchorable mb-1"><a href="#mod_ts_interfaces" class="anchor" aria-label="Anchor" tabIndex="-1"><svg
+  width="16"
+  height="16"
+  viewBox="0 0 14 14"
+  fill="none"
+  xmlns="http://www.w3.org/2000/svg"
+>
+  <g clip-path="url(#clip0_1081_1237)">
+    <path
+      fill-rule="evenodd"
+      clip-rule="evenodd"
+      d="M6.80328 2.8656C6.68736 2.99 6.62425 3.15454 6.62725 3.32456C6.63025 3.49457 6.69913 3.65678 6.81936 3.77702C6.9396 3.89725 7.10181 3.96613 7.27182 3.96913C7.44184 3.97213 7.60638 3.90902 7.73078 3.7931L8.82453 2.69935C8.98712 2.53676 9.18015 2.40778 9.39259 2.31978C9.60503 2.23179 9.83272 2.1865 10.0627 2.1865C10.2926 2.1865 10.5203 2.23179 10.7327 2.31978C10.9452 2.40778 11.1382 2.53676 11.3008 2.69935C11.4634 2.86194 11.5923 3.05497 11.6803 3.2674C11.7683 3.47984 11.8136 3.70753 11.8136 3.93747C11.8136 4.16741 11.7683 4.3951 11.6803 4.60754C11.5923 4.81998 11.4634 5.013 11.3008 5.1756L9.11328 7.3631C8.95075 7.52581 8.75775 7.65488 8.5453 7.74295C8.33285 7.83102 8.10513 7.87635 7.87516 7.87635C7.64518 7.87635 7.41746 7.83102 7.20501 7.74295C6.99256 7.65488 6.79956 7.52581 6.63703 7.3631C6.51263 7.24718 6.34809 7.18407 6.17807 7.18707C6.00806 7.19007 5.84585 7.25894 5.72561 7.37918C5.60538 7.49942 5.5365 7.66163 5.5335 7.83164C5.5305 8.00165 5.59361 8.1662 5.70953 8.2906C5.99391 8.57501 6.33154 8.80062 6.70312 8.95455C7.0747 9.10847 7.47296 9.18769 7.87516 9.18769C8.27736 9.18769 8.67562 9.10847 9.0472 8.95455C9.41878 8.80062 9.7564 8.57501 10.0408 8.2906L12.2283 6.1031C12.8026 5.52874 13.1253 4.74974 13.1253 3.93747C13.1253 3.12521 12.8026 2.34621 12.2283 1.77185C11.6539 1.19749 10.8749 0.874817 10.0627 0.874817C9.25039 0.874817 8.47139 1.19749 7.89703 1.77185L6.80328 2.8656ZM2.69953 11.3006C2.53682 11.1381 2.40774 10.9451 2.31968 10.7326C2.23161 10.5202 2.18628 10.2924 2.18628 10.0625C2.18628 9.8325 2.23161 9.60477 2.31968 9.39233C2.40774 9.17988 2.53682 8.98688 2.69953 8.82435L4.88703 6.63685C5.04956 6.47414 5.24256 6.34506 5.45501 6.25699C5.66746 6.16893 5.89518 6.1236 6.12516 6.1236C6.35513 6.1236 6.58285 6.16893 6.7953 6.25699C7.00775 6.34506 7.20075 6.47414 7.36328 6.63685C7.48768 6.75277 7.65223 6.81588 7.82224 6.81288C7.99225 6.80988 8.15446 6.741 8.2747 6.62077C8.39494 6.50053 8.46381 6.33832 8.46681 6.1683C8.46981 5.99829 8.4067 5.83375 8.29078 5.70935C8.0064 5.42494 7.66878 5.19933 7.2972 5.0454C6.92562 4.89148 6.52736 4.81225 6.12516 4.81225C5.72296 4.81225 5.3247 4.89148 4.95312 5.0454C4.58154 5.19933 4.24391 5.42494 3.95953 5.70935L1.77203 7.89685C1.19767 8.47121 0.875 9.25021 0.875 10.0625C0.875 10.8747 1.19767 11.6537 1.77203 12.2281C2.34639 12.8025 3.12539 13.1251 3.93766 13.1251C4.74992 13.1251 5.52892 12.8025 6.10328 12.2281L7.19703 11.1343C7.31295 11.0099 7.37606 10.8454 7.37306 10.6754C7.37006 10.5054 7.30119 10.3432 7.18095 10.2229C7.06071 10.1027 6.8985 10.0338 6.72849 10.0308C6.55848 10.0278 6.39393 10.0909 6.26953 10.2068L5.17578 11.3006C5.01325 11.4633 4.82025 11.5924 4.6078 11.6805C4.39535 11.7685 4.16763 11.8138 3.93766 11.8138C3.70768 11.8138 3.47996 11.7685 3.26751 11.6805C3.05506 11.5924 2.86206 11.4633 2.69953 11.3006Z"
+      fill="currentColor"
+    />
+  </g>
+  <defs>
+    <clipPath id="clip0_1081_1237">
+      <rect width="14" height="14" fill="white" />
+    </clipPath>
+  </defs>
+</svg>
+</a>
+Interfaces</h2></div><div class="namespaceSection"><div id="namespace_autogrowoptions" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-Interface bg-Interface/15 dark:text-InterfaceDark dark:bg-InterfaceDark/15" title="Interface">I</div></div>
+<div class="namespaceItemContent">
+		    <a href="..&#x2F;.&#x2F;mod.ts&#x2F;~&#x2F;AutogrowOptions.html" title="AutogrowOptions">
+			    <span>AutogrowOptions</span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Configuration options for automatic buffer growth.</p>
+</div></div><ul class="namespaceItemContentSubItems"><li>
+                <a href="..&#x2F;.&#x2F;mod.ts&#x2F;~&#x2F;AutogrowOptions.html#property_growthfactor">
+                  <span>growthFactor</span><span>: <span class="td-kw">number</span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Growth factor multiplier for buffer resizing. Must be greater than 1.
+Each resize multiplies the current size by this factor. Defaults to 2 (doubling).</p>
+</div></div></li><li>
+                <a href="..&#x2F;.&#x2F;mod.ts&#x2F;~&#x2F;AutogrowOptions.html#property_initialsize">
+                  <span>initialSize</span><span>: <span class="td-kw">number</span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Initial buffer size in bytes. Must be greater than 0 and less than or equal to maxByteLength.
+Defaults to 4096 bytes (4KB).</p>
+</div></div></li><li>
+                <a href="..&#x2F;.&#x2F;mod.ts&#x2F;~&#x2F;AutogrowOptions.html#property_maxbytelength">
+                  <span>maxByteLength</span><span>: <span class="td-kw">number</span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Maximum buffer size in bytes. The buffer will not grow beyond this limit.
+When reached, a RangeError will be thrown. Defaults to 400MB.</p>
+</div></div></li></ul></div>
+    </div><div id="namespace_context" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-Interface bg-Interface/15 dark:text-InterfaceDark dark:bg-InterfaceDark/15" title="Interface">I</div></div>
+<div class="namespaceItemContent">
+		    <a href="..&#x2F;.&#x2F;mod.ts&#x2F;~&#x2F;Context.html" title="Context">
+			    <span>Context</span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Context for encoding/decoding operations.</p>
+</div></div><ul class="namespaceItemContentSubItems"><li>
+                <a href="..&#x2F;.&#x2F;mod.ts&#x2F;~&#x2F;Context.html#property_direction">
+                  <span>direction</span><span>: <span><span class="td-str">"encode"</span><span class="td-op"> | </span><span class="td-str">"decode"</span></span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>The direction of the operation</p>
+</div></div></li><li>
+                <a href="..&#x2F;.&#x2F;mod.ts&#x2F;~&#x2F;Context.html#property_kctxrefs">
+                  <span>kCtxRefs</span><span>: <span class="td-ref">RefsWeakMap</span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Optional references storage</p>
+</div></div></li></ul></div>
+    </div><div id="namespace_refsweakmap" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-Interface bg-Interface/15 dark:text-InterfaceDark dark:bg-InterfaceDark/15" title="Interface">I</div></div>
+<div class="namespaceItemContent">
+		    <a href="..&#x2F;.&#x2F;mod.ts&#x2F;~&#x2F;RefsWeakMap.html" title="RefsWeakMap">
+			    <span>RefsWeakMap</span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>A weak map interface for storing references in the encoding/decoding context.</p>
+</div></div><ul class="namespaceItemContentSubItems"><li>
+                <a href="..&#x2F;.&#x2F;mod.ts&#x2F;~&#x2F;RefsWeakMap.html#method_get_0">
+                  <span>get</span><span><span>&lt;<span><span class="td-tp">T</span></span>&gt;</span>(<span><span>coder<span>: <span class="td-ref">Coder</span>&lt;<span class="td-ref">T</span>&gt;</span></span></span>)<span>: <span><span class="td-ref">T</span><span class="td-op"> | </span><span class="td-kw">undefined</span></span></span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Gets a reference value for the given coder.</p>
+</div></div></li><li>
+                <a href="..&#x2F;.&#x2F;mod.ts&#x2F;~&#x2F;RefsWeakMap.html#method_has_0">
+                  <span>has</span><span><span>&lt;<span><span class="td-tp">T</span></span>&gt;</span>(<span><span>coder<span>: <span class="td-ref">Coder</span>&lt;<span class="td-ref">T</span>&gt;</span></span></span>)<span>: <span class="td-kw">boolean</span></span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Checks if a reference value exists for the given coder.</p>
+</div></div></li><li>
+                <a href="..&#x2F;.&#x2F;mod.ts&#x2F;~&#x2F;RefsWeakMap.html#method_set_0">
+                  <span>set</span><span><span>&lt;<span><span class="td-tp">T</span></span>&gt;</span>(<div class="ml-4"><div><span>coder<span>: <span class="td-ref">Coder</span>&lt;<span class="td-ref">T</span>&gt;</span></span>,</div><div><span>value<span>: <span class="td-ref">T</span></span></span></div></div>)<span>: <span class="td-kw">this</span></span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Sets a reference value for the given coder.</p>
+</div></div></li></ul></div>
+    </div></div>
+</section>
+<section class="section"  id="mod_ts_type-aliases"><div>
+      <h2 class="anchorable mb-1"><a href="#mod_ts_type-aliases" class="anchor" aria-label="Anchor" tabIndex="-1"><svg
+  width="16"
+  height="16"
+  viewBox="0 0 14 14"
+  fill="none"
+  xmlns="http://www.w3.org/2000/svg"
+>
+  <g clip-path="url(#clip0_1081_1237)">
+    <path
+      fill-rule="evenodd"
+      clip-rule="evenodd"
+      d="M6.80328 2.8656C6.68736 2.99 6.62425 3.15454 6.62725 3.32456C6.63025 3.49457 6.69913 3.65678 6.81936 3.77702C6.9396 3.89725 7.10181 3.96613 7.27182 3.96913C7.44184 3.97213 7.60638 3.90902 7.73078 3.7931L8.82453 2.69935C8.98712 2.53676 9.18015 2.40778 9.39259 2.31978C9.60503 2.23179 9.83272 2.1865 10.0627 2.1865C10.2926 2.1865 10.5203 2.23179 10.7327 2.31978C10.9452 2.40778 11.1382 2.53676 11.3008 2.69935C11.4634 2.86194 11.5923 3.05497 11.6803 3.2674C11.7683 3.47984 11.8136 3.70753 11.8136 3.93747C11.8136 4.16741 11.7683 4.3951 11.6803 4.60754C11.5923 4.81998 11.4634 5.013 11.3008 5.1756L9.11328 7.3631C8.95075 7.52581 8.75775 7.65488 8.5453 7.74295C8.33285 7.83102 8.10513 7.87635 7.87516 7.87635C7.64518 7.87635 7.41746 7.83102 7.20501 7.74295C6.99256 7.65488 6.79956 7.52581 6.63703 7.3631C6.51263 7.24718 6.34809 7.18407 6.17807 7.18707C6.00806 7.19007 5.84585 7.25894 5.72561 7.37918C5.60538 7.49942 5.5365 7.66163 5.5335 7.83164C5.5305 8.00165 5.59361 8.1662 5.70953 8.2906C5.99391 8.57501 6.33154 8.80062 6.70312 8.95455C7.0747 9.10847 7.47296 9.18769 7.87516 9.18769C8.27736 9.18769 8.67562 9.10847 9.0472 8.95455C9.41878 8.80062 9.7564 8.57501 10.0408 8.2906L12.2283 6.1031C12.8026 5.52874 13.1253 4.74974 13.1253 3.93747C13.1253 3.12521 12.8026 2.34621 12.2283 1.77185C11.6539 1.19749 10.8749 0.874817 10.0627 0.874817C9.25039 0.874817 8.47139 1.19749 7.89703 1.77185L6.80328 2.8656ZM2.69953 11.3006C2.53682 11.1381 2.40774 10.9451 2.31968 10.7326C2.23161 10.5202 2.18628 10.2924 2.18628 10.0625C2.18628 9.8325 2.23161 9.60477 2.31968 9.39233C2.40774 9.17988 2.53682 8.98688 2.69953 8.82435L4.88703 6.63685C5.04956 6.47414 5.24256 6.34506 5.45501 6.25699C5.66746 6.16893 5.89518 6.1236 6.12516 6.1236C6.35513 6.1236 6.58285 6.16893 6.7953 6.25699C7.00775 6.34506 7.20075 6.47414 7.36328 6.63685C7.48768 6.75277 7.65223 6.81588 7.82224 6.81288C7.99225 6.80988 8.15446 6.741 8.2747 6.62077C8.39494 6.50053 8.46381 6.33832 8.46681 6.1683C8.46981 5.99829 8.4067 5.83375 8.29078 5.70935C8.0064 5.42494 7.66878 5.19933 7.2972 5.0454C6.92562 4.89148 6.52736 4.81225 6.12516 4.81225C5.72296 4.81225 5.3247 4.89148 4.95312 5.0454C4.58154 5.19933 4.24391 5.42494 3.95953 5.70935L1.77203 7.89685C1.19767 8.47121 0.875 9.25021 0.875 10.0625C0.875 10.8747 1.19767 11.6537 1.77203 12.2281C2.34639 12.8025 3.12539 13.1251 3.93766 13.1251C4.74992 13.1251 5.52892 12.8025 6.10328 12.2281L7.19703 11.1343C7.31295 11.0099 7.37606 10.8454 7.37306 10.6754C7.37006 10.5054 7.30119 10.3432 7.18095 10.2229C7.06071 10.1027 6.8985 10.0338 6.72849 10.0308C6.55848 10.0278 6.39393 10.0909 6.26953 10.2068L5.17578 11.3006C5.01325 11.4633 4.82025 11.5924 4.6078 11.6805C4.39535 11.7685 4.16763 11.8138 3.93766 11.8138C3.70768 11.8138 3.47996 11.7685 3.26751 11.6805C3.05506 11.5924 2.86206 11.4633 2.69953 11.3006Z"
+      fill="currentColor"
+    />
+  </g>
+  <defs>
+    <clipPath id="clip0_1081_1237">
+      <rect width="14" height="14" fill="white" />
+    </clipPath>
+  </defs>
+</svg>
+</a>
+Type Aliases</h2></div><div class="namespaceSection"><div id="namespace_arraywhilecondition" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-TypeAlias bg-TypeAlias/15 dark:text-TypeAliasDark dark:bg-TypeAliasDark/15" title="Type Alias">T</div></div>
+<div class="namespaceItemContent">
+		    <a href="..&#x2F;.&#x2F;mod.ts&#x2F;~&#x2F;ArrayWhileCondition.html" title="ArrayWhileCondition">
+			    <span>ArrayWhileCondition</span><span><span>&lt;<span><span class="td-tp">TDecoded</span></span>&gt;</span> = (<span><span>params<span>: { index<span>: <span class="td-kw">number</span></span>; array<span>: <span class="td-ref">TDecoded</span>[]</span>; buffer<span>: <span class="td-ref">Uint8Array</span></span>; context<span>: <span class="td-ref">Context</span></span>;  }</span></span></span>) =&gt; <span class="td-kw">boolean</span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Condition function type for arrayWhile that determines when to continue processing array elements.</p>
+</div></div></div>
+    </div><div id="namespace_bitschema" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-TypeAlias bg-TypeAlias/15 dark:text-TypeAliasDark dark:bg-TypeAliasDark/15" title="Type Alias">T</div></div>
+<div class="namespaceItemContent">
+		    <a href="..&#x2F;.&#x2F;mod.ts&#x2F;~&#x2F;BitSchema.html" title="BitSchema">
+			    <span>BitSchema</span><span> = <span class="td-ref">Record</span>&lt;<span class="td-kw">string</span><span>, </span><span class="td-kw">number</span>&gt;</span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Schema type for bitStruct, mapping field names to bit counts.</p>
+</div></div></div>
+    </div><div id="namespace_bitstructdecoded" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-TypeAlias bg-TypeAlias/15 dark:text-TypeAliasDark dark:bg-TypeAliasDark/15" title="Type Alias">T</div></div>
+<div class="namespaceItemContent">
+		    <a href="..&#x2F;.&#x2F;mod.ts&#x2F;~&#x2F;BitStructDecoded.html" title="BitStructDecoded">
+			    <span>BitStructDecoded</span><span><span>&lt;<span><span class="td-tp">T</span><span><span class="td-kw"> extends </span><span class="td-ref">BitSchema</span></span></span>&gt;</span> = [<span><span class="td-tp">K</span><span><span class="td-kw"> in </span><span class="td-kw">keyof</span> <span class="td-ref">T</span></span></span>]<span>: <span class="td-kw">number</span></span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Type of the decoded value from a bitStruct.
+All fields are decoded as numbers.</p>
+</div></div></div>
+    </div><div id="namespace_coder" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-TypeAlias bg-TypeAlias/15 dark:text-TypeAliasDark dark:bg-TypeAliasDark/15" title="Type Alias">T</div></div>
+<div class="namespaceItemContent">
+		    <a href="..&#x2F;.&#x2F;mod.ts&#x2F;~&#x2F;Coder.html" title="Coder">
+			    <span>Coder</span><span><span>&lt;<span><span class="td-tp">TDecoded</span></span>&gt;</span> = { [kCoderKind]<span>: <span class="td-kw">symbol</span></span>; encode<span>: <span class="td-ref">Encoder</span>&lt;<span class="td-ref">TDecoded</span>&gt;</span>; decode<span>: <span class="td-ref">Decoder</span>&lt;<span class="td-ref">TDecoded</span>&gt;</span>;  }</span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Interface for coders that can encode and decode values.</p>
+</div></div><ul class="namespaceItemContentSubItems"><li>
+                <a href="..&#x2F;.&#x2F;mod.ts&#x2F;~&#x2F;Coder.html#property_decode">
+                  <span>decode</span><span>: <span class="td-ref">Decoder</span>&lt;<span class="td-ref">TDecoded</span>&gt;</span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Decodes a value from a byte buffer and returns the value with the number of bytes consumed.</p>
+</div></div></li><li>
+                <a href="..&#x2F;.&#x2F;mod.ts&#x2F;~&#x2F;Coder.html#property_encode">
+                  <span>encode</span><span>: <span class="td-ref">Encoder</span>&lt;<span class="td-ref">TDecoded</span>&gt;</span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Encodes a value into a byte buffer and returns the number of bytes written.</p>
+</div></div></li><li>
+                <a href="..&#x2F;.&#x2F;mod.ts&#x2F;~&#x2F;Coder.html#property_kcoderkind">
+                  <span>kCoderKind</span><span>: <span class="td-kw">symbol</span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Symbol tag identifying the kind of coder; used to distinguish coder variants without string comparisons.</p>
+</div></div></li></ul></div>
+    </div><div id="namespace_decodedfields" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-TypeAlias bg-TypeAlias/15 dark:text-TypeAliasDark dark:bg-TypeAliasDark/15" title="Type Alias">T</div></div>
+<div class="namespaceItemContent">
+		    <a href="..&#x2F;.&#x2F;mod.ts&#x2F;~&#x2F;DecodedFields.html" title="DecodedFields">
+			    <span>DecodedFields</span><span><span>&lt;<span><span class="td-tp">TCoders</span><span><span class="td-kw"> extends </span><span class="td-ref">FieldCoders</span></span></span>&gt;</span> = [<span><span class="td-tp">K</span><span><span class="td-kw"> in </span><span class="td-kw">keyof</span> <span class="td-ref">TCoders</span></span></span>]<span>: <span class="td-ref">TCoders</span>[<span class="td-ref">K</span>] <span class="td-kw">extends</span> <span class="td-ref">Coder</span>&lt;<span class="td-kw">infer </span><span><span class="td-tp">T</span></span>&gt; <span class="td-op">?</span> <span class="td-ref">T</span> <span class="td-op">:</span> <span class="td-kw">never</span></span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Mapped type extracting the decoded value type for each entry in a
+<a href=".././mod.ts/~/FieldCoders.html"><code>FieldCoders</code></a> map. Given <code>{ payload: Coder&lt;Ipv4&gt; }</code> it yields
+<code>{ payload: Ipv4 }</code>.</p>
+</div></div></div>
+    </div><div id="namespace_decoder" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-TypeAlias bg-TypeAlias/15 dark:text-TypeAliasDark dark:bg-TypeAliasDark/15" title="Type Alias">T</div></div>
+<div class="namespaceItemContent">
+		    <a href="..&#x2F;.&#x2F;mod.ts&#x2F;~&#x2F;Decoder.html" title="Decoder">
+			    <span>Decoder</span><span><span>&lt;<span><span class="td-tp">TDecoded</span></span>&gt;</span> = (<div class="ml-4"><div><span>encoded<span>: <span class="td-ref">Uint8Array</span></span></span>,</div><div><span>context<span class="td-op">?</span><span>: <span class="td-ref">Context</span></span></span></div></div>) =&gt; <span class="td-ref">ValueWithBytes</span>&lt;<span class="td-ref">TDecoded</span>&gt;</span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Function type for decoding values.</p>
+</div></div></div>
+    </div><div id="namespace_encoder" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-TypeAlias bg-TypeAlias/15 dark:text-TypeAliasDark dark:bg-TypeAliasDark/15" title="Type Alias">T</div></div>
+<div class="namespaceItemContent">
+		    <a href="..&#x2F;.&#x2F;mod.ts&#x2F;~&#x2F;Encoder.html" title="Encoder">
+			    <span>Encoder</span><span><span>&lt;<span><span class="td-tp">TDecoded</span></span>&gt;</span> = (<div class="ml-4"><div><span>decoded<span>: <span class="td-ref">TDecoded</span></span></span>,</div><div><span>target<span>: <span class="td-ref">Uint8Array</span></span></span>,</div><div><span>context<span class="td-op">?</span><span>: <span class="td-ref">Context</span></span></span></div></div>) =&gt; <span class="td-kw">number</span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Function type for encoding values.</p>
+</div></div></div>
+    </div><div id="namespace_endianness" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-TypeAlias bg-TypeAlias/15 dark:text-TypeAliasDark dark:bg-TypeAliasDark/15" title="Type Alias">T</div></div>
+<div class="namespaceItemContent">
+		    <a href="..&#x2F;.&#x2F;mod.ts&#x2F;~&#x2F;Endianness.html" title="Endianness">
+			    <span>Endianness</span><span> = <span><span class="td-str">"be"</span><span class="td-op"> | </span><span class="td-str">"le"</span></span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Endianness type for numeric data encoding and decoding.</p>
+</div></div></div>
+    </div><div id="namespace_fieldcoders" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-TypeAlias bg-TypeAlias/15 dark:text-TypeAliasDark dark:bg-TypeAliasDark/15" title="Type Alias">T</div></div>
+<div class="namespaceItemContent">
+		    <a href="..&#x2F;.&#x2F;mod.ts&#x2F;~&#x2F;FieldCoders.html" title="FieldCoders">
+			    <span>FieldCoders</span><span> = <span class="td-ref">Record</span>&lt;<span class="td-kw">string</span><span>, </span><span class="td-ref">Coder</span>&lt;<span class="td-kw">any</span>&gt;&gt;</span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Map of host field names to the sub-coder that decodes/encodes that field's
+bytes. Used as the input to <a href=".././mod.ts/~/refineFields.html"><code>refineFields</code></a>.</p>
+</div></div></div>
+    </div><div id="namespace_lengthorref" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-TypeAlias bg-TypeAlias/15 dark:text-TypeAliasDark dark:bg-TypeAliasDark/15" title="Type Alias">T</div></div>
+<div class="namespaceItemContent">
+		    <a href="..&#x2F;.&#x2F;mod.ts&#x2F;~&#x2F;LengthOrRef.html" title="LengthOrRef">
+			    <span>LengthOrRef</span><span> = <span><span class="td-kw">number</span><span class="td-op"> | </span><span class="td-ref">RefValue</span>&lt;<span class="td-kw">number</span>&gt;</span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>A type representing a length value that can be either a number or a reference to a number.</p>
+</div></div></div>
+    </div><div id="namespace_refinedunion" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-TypeAlias bg-TypeAlias/15 dark:text-TypeAliasDark dark:bg-TypeAliasDark/15" title="Type Alias">T</div></div>
+<div class="namespaceItemContent">
+		    <a href="..&#x2F;.&#x2F;mod.ts&#x2F;~&#x2F;RefinedUnion.html" title="RefinedUnion">
+			    <span>RefinedUnion</span><span><span>&lt;<span><span class="td-tp">T</span><span><span class="td-kw"> extends </span><span class="td-ref">Record</span>&lt;<span class="td-kw">string</span><span>, </span><span class="td-ref">Refiner</span>&lt;<span class="td-kw">any</span><span>, </span><span class="td-kw">any</span><span>, </span><span class="td-kw">any</span>&gt;&gt;</span></span>&gt;</span> = [<span><span class="td-tp">K</span><span><span class="td-kw"> in </span><span class="td-kw">keyof</span> <span class="td-ref">T</span></span></span>]<span>: <span class="td-ref">T</span>[<span class="td-ref">K</span>] <span class="td-kw">extends</span> <span class="td-ref">Refiner</span>&lt;<span class="td-kw">any</span><span>, </span><span class="td-kw">infer </span><span><span class="td-tp">R</span></span><span>, </span><span class="td-kw">any</span>&gt; <span class="td-op">?</span> <span class="td-ref">R</span> <span class="td-op">:</span> <span class="td-kw">never</span></span>[<span class="td-kw">keyof</span> <span class="td-ref">T</span>]</span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Extracts the union of all refined types from a record of refiners.</p>
+</div></div></div>
+    </div><div id="namespace_refiner" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-TypeAlias bg-TypeAlias/15 dark:text-TypeAliasDark dark:bg-TypeAliasDark/15" title="Type Alias">T</div></div>
+<div class="namespaceItemContent">
+		    <a href="..&#x2F;.&#x2F;mod.ts&#x2F;~&#x2F;Refiner.html" title="Refiner">
+			    <span>Refiner</span><span><span>&lt;<span><span class="td-tp">TUnrefined</span></span><span>, </span><span><span class="td-tp">TRefined</span></span><span>, </span><span><span class="td-tp">TArgs</span><span><span class="td-kw"> extends </span><span class="td-kw">unknown</span>[]</span><span><span> = </span><span>[]</span></span></span>&gt;</span> = { refine<span>: (<div class="ml-4"><div><span>unrefined<span>: <span class="td-ref">TUnrefined</span></span></span>,</div><div><span>context<span>: <span class="td-ref">Context</span></span></span>,</div><div><span><span>...args</span><span>: <span class="td-ref">TArgs</span></span></span></div></div>) =&gt; <span class="td-ref">TRefined</span></span>; unrefine<span>: (<div class="ml-4"><div><span>refined<span>: <span class="td-ref">TRefined</span></span></span>,</div><div><span>context<span>: <span class="td-ref">Context</span></span></span>,</div><div><span><span>...args</span><span>: <span class="td-ref">TArgs</span></span></span></div></div>) =&gt; <span class="td-ref">TUnrefined</span></span>;  }</span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>A refiner that transforms decoded values into refined types and vice versa.</p>
+</div></div><ul class="namespaceItemContentSubItems"><li>
+                <a href="..&#x2F;.&#x2F;mod.ts&#x2F;~&#x2F;Refiner.html#property_refine">
+                  <span>refine</span><span>: (<div class="ml-4"><div><span>unrefined<span>: <span class="td-ref">TUnrefined</span></span></span>,</div><div><span>context<span>: <span class="td-ref">Context</span></span></span>,</div><div><span><span>...args</span><span>: <span class="td-ref">TArgs</span></span></span></div></div>) =&gt; <span class="td-ref">TRefined</span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Transforms a decoded value into a refined value.</p>
+</div></div></li><li>
+                <a href="..&#x2F;.&#x2F;mod.ts&#x2F;~&#x2F;Refiner.html#property_unrefine">
+                  <span>unrefine</span><span>: (<div class="ml-4"><div><span>refined<span>: <span class="td-ref">TRefined</span></span></span>,</div><div><span>context<span>: <span class="td-ref">Context</span></span></span>,</div><div><span><span>...args</span><span>: <span class="td-ref">TArgs</span></span></span></div></div>) =&gt; <span class="td-ref">TUnrefined</span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Transforms a refined value back to the original decoded format.</p>
+</div></div></li></ul></div>
+    </div><div id="namespace_refvalue" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-TypeAlias bg-TypeAlias/15 dark:text-TypeAliasDark dark:bg-TypeAliasDark/15" title="Type Alias">T</div></div>
+<div class="namespaceItemContent">
+		    <a href="..&#x2F;.&#x2F;mod.ts&#x2F;~&#x2F;RefValue.html" title="RefValue">
+			    <span>RefValue</span><span><span>&lt;<span><span class="td-tp">TDecoded</span></span>&gt;</span> = { (<span><span>ctx<span>: <span class="td-ref">Context</span></span></span></span>)<span>: <span class="td-ref">TDecoded</span></span>; [kIsRefValue]<span>: <span class="td-lit">true</span></span>;  }</span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>A type representing a reference value that can be resolved during encoding/decoding.</p>
+</div></div><ul class="namespaceItemContentSubItems"><li>
+                <a href="..&#x2F;.&#x2F;mod.ts&#x2F;~&#x2F;RefValue.html#property_kisrefvalue">
+                  <span>kIsRefValue</span><span>: <span class="td-lit">true</span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Brand marker identifying the function as a reference value.</p>
+</div></div></li></ul></div>
+    </div><div id="namespace_unwrapreftuple" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-TypeAlias bg-TypeAlias/15 dark:text-TypeAliasDark dark:bg-TypeAliasDark/15" title="Type Alias">T</div></div>
+<div class="namespaceItemContent">
+		    <a href="..&#x2F;.&#x2F;mod.ts&#x2F;~&#x2F;UnwrapRefTuple.html" title="UnwrapRefTuple">
+			    <span>UnwrapRefTuple</span><span><span>&lt;<span><span class="td-tp">TTuple</span><span><span class="td-kw"> extends </span><span class="td-kw">readonly</span> <span class="td-ref">RefValue</span>&lt;<span class="td-kw">unknown</span>&gt;[]</span></span>&gt;</span> = [<span><span class="td-tp">K</span><span><span class="td-kw"> in </span><span class="td-kw">keyof</span> <span class="td-ref">TTuple</span></span></span>]<span>: <span class="td-ref">TTuple</span>[<span class="td-ref">K</span>] <span class="td-kw">extends</span> <span class="td-ref">RefValue</span>&lt;<span class="td-kw">infer </span><span><span class="td-tp">TDecoded</span></span>&gt; <span class="td-op">?</span> <span class="td-ref">TDecoded</span> <span class="td-op">:</span> <span class="td-kw">never</span></span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Type utility to unwrap reference types from a tuple of references.</p>
+</div></div></div>
+    </div><div id="namespace_valuewithbytes" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-TypeAlias bg-TypeAlias/15 dark:text-TypeAliasDark dark:bg-TypeAliasDark/15" title="Type Alias">T</div></div>
+<div class="namespaceItemContent">
+		    <a href="..&#x2F;.&#x2F;mod.ts&#x2F;~&#x2F;ValueWithBytes.html" title="ValueWithBytes">
+			    <span>ValueWithBytes</span><span><span>&lt;<span><span class="td-tp">T</span></span>&gt;</span> = <span>[<span class="td-ref">T</span>, <span class="td-kw">number</span>]</span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Type representing a value with its byte count.</p>
+</div></div></div>
+    </div></div>
+</section>
+<section class="section"  id="mod_ts_variables"><div>
+      <h2 class="anchorable mb-1"><a href="#mod_ts_variables" class="anchor" aria-label="Anchor" tabIndex="-1"><svg
+  width="16"
+  height="16"
+  viewBox="0 0 14 14"
+  fill="none"
+  xmlns="http://www.w3.org/2000/svg"
+>
+  <g clip-path="url(#clip0_1081_1237)">
+    <path
+      fill-rule="evenodd"
+      clip-rule="evenodd"
+      d="M6.80328 2.8656C6.68736 2.99 6.62425 3.15454 6.62725 3.32456C6.63025 3.49457 6.69913 3.65678 6.81936 3.77702C6.9396 3.89725 7.10181 3.96613 7.27182 3.96913C7.44184 3.97213 7.60638 3.90902 7.73078 3.7931L8.82453 2.69935C8.98712 2.53676 9.18015 2.40778 9.39259 2.31978C9.60503 2.23179 9.83272 2.1865 10.0627 2.1865C10.2926 2.1865 10.5203 2.23179 10.7327 2.31978C10.9452 2.40778 11.1382 2.53676 11.3008 2.69935C11.4634 2.86194 11.5923 3.05497 11.6803 3.2674C11.7683 3.47984 11.8136 3.70753 11.8136 3.93747C11.8136 4.16741 11.7683 4.3951 11.6803 4.60754C11.5923 4.81998 11.4634 5.013 11.3008 5.1756L9.11328 7.3631C8.95075 7.52581 8.75775 7.65488 8.5453 7.74295C8.33285 7.83102 8.10513 7.87635 7.87516 7.87635C7.64518 7.87635 7.41746 7.83102 7.20501 7.74295C6.99256 7.65488 6.79956 7.52581 6.63703 7.3631C6.51263 7.24718 6.34809 7.18407 6.17807 7.18707C6.00806 7.19007 5.84585 7.25894 5.72561 7.37918C5.60538 7.49942 5.5365 7.66163 5.5335 7.83164C5.5305 8.00165 5.59361 8.1662 5.70953 8.2906C5.99391 8.57501 6.33154 8.80062 6.70312 8.95455C7.0747 9.10847 7.47296 9.18769 7.87516 9.18769C8.27736 9.18769 8.67562 9.10847 9.0472 8.95455C9.41878 8.80062 9.7564 8.57501 10.0408 8.2906L12.2283 6.1031C12.8026 5.52874 13.1253 4.74974 13.1253 3.93747C13.1253 3.12521 12.8026 2.34621 12.2283 1.77185C11.6539 1.19749 10.8749 0.874817 10.0627 0.874817C9.25039 0.874817 8.47139 1.19749 7.89703 1.77185L6.80328 2.8656ZM2.69953 11.3006C2.53682 11.1381 2.40774 10.9451 2.31968 10.7326C2.23161 10.5202 2.18628 10.2924 2.18628 10.0625C2.18628 9.8325 2.23161 9.60477 2.31968 9.39233C2.40774 9.17988 2.53682 8.98688 2.69953 8.82435L4.88703 6.63685C5.04956 6.47414 5.24256 6.34506 5.45501 6.25699C5.66746 6.16893 5.89518 6.1236 6.12516 6.1236C6.35513 6.1236 6.58285 6.16893 6.7953 6.25699C7.00775 6.34506 7.20075 6.47414 7.36328 6.63685C7.48768 6.75277 7.65223 6.81588 7.82224 6.81288C7.99225 6.80988 8.15446 6.741 8.2747 6.62077C8.39494 6.50053 8.46381 6.33832 8.46681 6.1683C8.46981 5.99829 8.4067 5.83375 8.29078 5.70935C8.0064 5.42494 7.66878 5.19933 7.2972 5.0454C6.92562 4.89148 6.52736 4.81225 6.12516 4.81225C5.72296 4.81225 5.3247 4.89148 4.95312 5.0454C4.58154 5.19933 4.24391 5.42494 3.95953 5.70935L1.77203 7.89685C1.19767 8.47121 0.875 9.25021 0.875 10.0625C0.875 10.8747 1.19767 11.6537 1.77203 12.2281C2.34639 12.8025 3.12539 13.1251 3.93766 13.1251C4.74992 13.1251 5.52892 12.8025 6.10328 12.2281L7.19703 11.1343C7.31295 11.0099 7.37606 10.8454 7.37306 10.6754C7.37006 10.5054 7.30119 10.3432 7.18095 10.2229C7.06071 10.1027 6.8985 10.0338 6.72849 10.0308C6.55848 10.0278 6.39393 10.0909 6.26953 10.2068L5.17578 11.3006C5.01325 11.4633 4.82025 11.5924 4.6078 11.6805C4.39535 11.7685 4.16763 11.8138 3.93766 11.8138C3.70768 11.8138 3.47996 11.7685 3.26751 11.6805C3.05506 11.5924 2.86206 11.4633 2.69953 11.3006Z"
+      fill="currentColor"
+    />
+  </g>
+  <defs>
+    <clipPath id="clip0_1081_1237">
+      <rect width="14" height="14" fill="white" />
+    </clipPath>
+  </defs>
+</svg>
+</a>
+Variables</h2></div><div class="namespaceSection"><div id="namespace_kcoderkind" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-Variable bg-Variable/15 dark:text-VariableDark dark:bg-VariableDark/15" title="Variable">v</div></div>
+<div class="namespaceItemContent">
+		    <a href="..&#x2F;.&#x2F;mod.ts&#x2F;~&#x2F;kCoderKind.html" title="kCoderKind">
+			    <span>kCoderKind</span><span>: <span class="td-kw">symbol</span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Symbol identifier for coder kind.</p>
+</div></div></div>
+    </div><div id="namespace_kctxrefs" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-Variable bg-Variable/15 dark:text-VariableDark dark:bg-VariableDark/15" title="Variable">v</div></div>
+<div class="namespaceItemContent">
+		    <a href="..&#x2F;.&#x2F;mod.ts&#x2F;~&#x2F;kCtxRefs.html" title="kCtxRefs">
+			    <span>kCtxRefs</span><span>: <span class="td-kw">symbol</span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Symbol identifier for context references.</p>
+</div></div></div>
+    </div><div id="namespace_kisrefvalue" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-Variable bg-Variable/15 dark:text-VariableDark dark:bg-VariableDark/15" title="Variable">v</div></div>
+<div class="namespaceItemContent">
+		    <a href="..&#x2F;.&#x2F;mod.ts&#x2F;~&#x2F;kIsRefValue.html" title="kIsRefValue">
+			    <span>kIsRefValue</span><span>: <span class="td-kw">symbol</span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Symbol identifier for reference values.</p>
+</div></div></div>
+    </div><div id="namespace_kkindarrayfl" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-Variable bg-Variable/15 dark:text-VariableDark dark:bg-VariableDark/15" title="Variable">v</div></div>
+<div class="namespaceItemContent">
+		    <a href="..&#x2F;.&#x2F;mod.ts&#x2F;~&#x2F;kKindArrayFL.html" title="kKindArrayFL">
+			    <span>kKindArrayFL</span><span>: <span class="td-kw">symbol</span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Symbol identifier for fixed-length array coders.</p>
+</div></div></div>
+    </div><div id="namespace_kkindarraylp" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-Variable bg-Variable/15 dark:text-VariableDark dark:bg-VariableDark/15" title="Variable">v</div></div>
+<div class="namespaceItemContent">
+		    <a href="..&#x2F;.&#x2F;mod.ts&#x2F;~&#x2F;kKindArrayLP.html" title="kKindArrayLP">
+			    <span>kKindArrayLP</span><span>: <span class="td-kw">symbol</span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Symbol identifier for length-prefixed array coders.</p>
+</div></div></div>
+    </div><div id="namespace_kkindarraywhile" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-Variable bg-Variable/15 dark:text-VariableDark dark:bg-VariableDark/15" title="Variable">v</div></div>
+<div class="namespaceItemContent">
+		    <a href="..&#x2F;.&#x2F;mod.ts&#x2F;~&#x2F;kKindArrayWhile.html" title="kKindArrayWhile">
+			    <span>kKindArrayWhile</span><span>: <span class="td-kw">symbol</span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Symbol identifier for conditional while-loop array coders.</p>
+</div></div></div>
+    </div><div id="namespace_kkindstringfl" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-Variable bg-Variable/15 dark:text-VariableDark dark:bg-VariableDark/15" title="Variable">v</div></div>
+<div class="namespaceItemContent">
+		    <a href="..&#x2F;.&#x2F;mod.ts&#x2F;~&#x2F;kKindStringFL.html" title="kKindStringFL">
+			    <span>kKindStringFL</span><span>: <span class="td-kw">symbol</span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Symbol identifier for fixed-length string coders.</p>
+</div></div></div>
+    </div><div id="namespace_kkindstringlp" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-Variable bg-Variable/15 dark:text-VariableDark dark:bg-VariableDark/15" title="Variable">v</div></div>
+<div class="namespaceItemContent">
+		    <a href="..&#x2F;.&#x2F;mod.ts&#x2F;~&#x2F;kKindStringLP.html" title="kKindStringLP">
+			    <span>kKindStringLP</span><span>: <span class="td-kw">symbol</span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Symbol identifier for length-prefixed string coders.</p>
+</div></div></div>
+    </div><div id="namespace_kkindstringnt" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-Variable bg-Variable/15 dark:text-VariableDark dark:bg-VariableDark/15" title="Variable">v</div></div>
+<div class="namespaceItemContent">
+		    <a href="..&#x2F;.&#x2F;mod.ts&#x2F;~&#x2F;kKindStringNT.html" title="kKindStringNT">
+			    <span>kKindStringNT</span><span>: <span class="td-kw">symbol</span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Symbol identifier for null-terminated string coders.</p>
+</div></div></div>
+    </div></div>
+</section>
+</div>
+</div>
+</section>
+</main><div class="toc">
+    <div><div class="usageContent">
+    <h3>Usage</h3><div class="markdown"><pre class="highlight"><code class="language-typescript">import * as mod from &quot;mod.ts&quot;;
+</code><button class="copyButton" data-copy="import * as mod from &quot;mod.ts&quot;;
+"><svg
+  class="copy"
+  width="15"
+  height="15"
+  viewBox="0 0 15 15"
+  fill="none"
+  xmlns="http://www.w3.org/2000/svg"
+>
+  <rect x="2" y="2" width="7" height="7" fill="none" />
+  <rect x="6" y="6" width="7" height="7" fill="none" />
+  <path
+    d="M1.55566 2.7C1.55566 2.03726 2.09292 1.5 2.75566 1.5H8.75566C9.41841 1.5 9.95566 2.03726 9.95566 2.7V5.1H12.3557C13.0184 5.1 13.5557 5.63726 13.5557 6.3V12.3C13.5557 12.9627 13.0184 13.5 12.3557 13.5H6.35566C5.69292 13.5 5.15566 12.9627 5.15566 12.3V9.9H2.75566C2.09292 9.9 1.55566 9.36274 1.55566 8.7V2.7ZM6.35566 9.9V12.3H12.3557V6.3H9.95566V8.7C9.95566 9.36274 9.41841 9.9 8.75566 9.9H6.35566ZM8.75566 8.7V2.7H2.75566V8.7H8.75566Z"
+    fill="currentColor"
+  />
+</svg>
+<svg
+  class="check"
+  width="15"
+  height="15"
+  viewBox="0 0 24 24"
+  stroke-width="2"
+  stroke="currentColor"
+  fill="none"
+  stroke-linecap="round"
+  stroke-linejoin="round"
+  xmlns="http://www.w3.org/2000/svg"
+>
+  <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+  <path d="M5 12l5 5l10 -10" />
+</svg>
+</button><code></code></pre>
+</div></div><nav class="topSymbols">
+          <h3>Symbols</h3>
+          <ul><li>
+                <a href="..&#x2F;.&#x2F;mod.ts&#x2F;~&#x2F;kCoderKind.html" title="kCoderKind"><div class="docNodeKindIcon"><div class="text-Variable bg-Variable/15 dark:text-VariableDark dark:bg-VariableDark/15" title="Variable">v</div></div>
+<span class="hover:bg-Variable/15 hover:bg-VariableDark/15">
+                    kCoderKind
+                  </span>
+                </a>
+              </li><li>
+                <a href="..&#x2F;.&#x2F;mod.ts&#x2F;~&#x2F;kCtxRefs.html" title="kCtxRefs"><div class="docNodeKindIcon"><div class="text-Variable bg-Variable/15 dark:text-VariableDark dark:bg-VariableDark/15" title="Variable">v</div></div>
+<span class="hover:bg-Variable/15 hover:bg-VariableDark/15">
+                    kCtxRefs
+                  </span>
+                </a>
+              </li><li>
+                <a href="..&#x2F;.&#x2F;mod.ts&#x2F;~&#x2F;ValueWithBytes.html" title="ValueWithBytes"><div class="docNodeKindIcon"><div class="text-TypeAlias bg-TypeAlias/15 dark:text-TypeAliasDark dark:bg-TypeAliasDark/15" title="Type Alias">T</div></div>
+<span class="hover:bg-TypeAlias/15 hover:bg-TypeAliasDark/15">
+                    ValueWithBytes
+                  </span>
+                </a>
+              </li><li>
+                <a href="..&#x2F;.&#x2F;mod.ts&#x2F;~&#x2F;Context.html" title="Context"><div class="docNodeKindIcon"><div class="text-Interface bg-Interface/15 dark:text-InterfaceDark dark:bg-InterfaceDark/15" title="Interface">I</div></div>
+<span class="hover:bg-Interface/15 hover:bg-InterfaceDark/15">
+                    Context
+                  </span>
+                </a>
+              </li><li>
+                <a href="..&#x2F;.&#x2F;mod.ts&#x2F;~&#x2F;createContext.html" title="createContext"><div class="docNodeKindIcon"><div class="text-Function bg-Function/15 dark:text-FunctionDark dark:bg-FunctionDark/15" title="Function">f</div></div>
+<span class="hover:bg-Function/15 hover:bg-FunctionDark/15">
+                    createContext
+                  </span>
+                </a>
+              </li></ul><a class="flex items-center gap-0.5" href="..&#x2F;.&#x2F;all_symbols.html">
+              <span class="leading-none">view all 164 symbols</span><svg
+  width="16"
+  height="16"
+  viewBox="0 0 16 16"
+  fill="none"
+  xmlns="http://www.w3.org/2000/svg"
+>
+  <path
+    fill-rule="evenodd"
+    clip-rule="evenodd"
+    d="M5.76748 11.8159C5.5378 11.577 5.54525 11.1972 5.78411 10.9675L8.93431 8L5.78411 5.0325C5.54525 4.80282 5.5378 4.423 5.76748 4.18413C5.99715 3.94527 6.37698 3.93782 6.61584 4.1675L10.2158 7.5675C10.3335 7.68062 10.4 7.83679 10.4 8C10.4 8.16321 10.3335 8.31938 10.2158 8.4325L6.61584 11.8325C6.37698 12.0622 5.99715 12.0547 5.76748 11.8159Z"
+    fill="currentColor"
+  />
+</svg>
+</a></nav><nav class="documentNavigation">
+          <h3>Document Navigation</h3><ul><li><a href="#examples" title="Examples">Examples</a></li><li><ul><li><a href="#example_0" title="Reading and writing WAV (RIFF) file format:">Reading and writing WAV (RIFF) file format:</a></li><li><a href="#example_1" title="Parsing complete network stack (Ethernet + IP + TCP):">Parsing complete network stack (Ethernet + IP + TCP):</a></li><li><ul><li><a href="#core-data-types" title="Core Data Types">Core Data Types</a></li><li><ul><li><a href="#numeric-types" title="Numeric Types">Numeric Types</a></li><li><a href="#string-types" title="String Types">String Types</a></li><li><a href="#array-types" title="Array Types">Array Types</a></li><li><a href="#complex-types" title="Complex Types">Complex Types</a></li></ul></li><li><a href="#main-functions" title="Main Functions">Main Functions</a></li><li><ul><li><a href="#structure-creation" title="Structure Creation">Structure Creation</a></li><li><a href="#array-handling" title="Array Handling">Array Handling</a></li><li><a href="#string-handling" title="String Handling">String Handling</a></li><li><a href="#reference-system" title="Reference System">Reference System</a></li><li><a href="#data-refinement" title="Data Refinement">Data Refinement</a></li><li><a href="#raw-data" title="Raw Data">Raw Data</a></li><li><a href="#buffer-management" title="Buffer Management">Buffer Management</a></li><li><a href="#helper-functions" title="Helper Functions">Helper Functions</a></li><li><a href="#submodules" title="Submodules">Submodules</a></li><li><a href="#numeric-coders" title="Numeric Coders">Numeric Coders</a></li></ul></li><li><a href="#key-features" title="Key Features">Key Features</a></li><li><a href="#common-use-cases" title="Common Use Cases">Common Use Cases</a></li></ul></li><li><a href="#mod_ts_functions" title="Functions">Functions</a></li><li><ul><li><a href="#namespace_array" title="array">array</a></li><li><a href="#namespace_arrayfl" title="arrayFL">arrayFL</a></li><li><a href="#namespace_arraylp" title="arrayLP">arrayLP</a></li><li><a href="#namespace_arraywhile" title="arrayWhile">arrayWhile</a></li><li><a href="#namespace_autogrowbuffer" title="autoGrowBuffer">autoGrowBuffer</a></li><li><a href="#namespace_bitstruct" title="bitStruct">bitStruct</a></li><li><a href="#namespace_bytes" title="bytes">bytes</a></li><li><a href="#namespace_computedref" title="computedRef">computedRef</a></li><li><a href="#namespace_createcontext" title="createContext">createContext</a></li><li><a href="#namespace_decode" title="decode">decode</a></li><li><a href="#namespace_encode" title="encode">encode</a></li><li><a href="#namespace_f16" title="f16">f16</a></li><li><a href="#namespace_f16be" title="f16be">f16be</a></li><li><a href="#namespace_f16le" title="f16le">f16le</a></li><li><a href="#namespace_f32" title="f32">f32</a></li><li><a href="#namespace_f32be" title="f32be">f32be</a></li><li><a href="#namespace_f32le" title="f32le">f32le</a></li><li><a href="#namespace_f64" title="f64">f64</a></li><li><a href="#namespace_f64be" title="f64be">f64be</a></li><li><a href="#namespace_f64le" title="f64le">f64le</a></li><li><a href="#namespace_iscoder" title="isCoder">isCoder</a></li><li><a href="#namespace_islengthorref" title="isLengthOrRef">isLengthOrRef</a></li><li><a href="#namespace_isref" title="isRef">isRef</a></li><li><a href="#namespace_isvalidlength" title="isValidLength">isValidLength</a></li><li><a href="#namespace_lengthrefget" title="lengthRefGet">lengthRefGet</a></li><li><a href="#namespace_lengthrefset" title="lengthRefSet">lengthRefSet</a></li><li><a href="#namespace_ref" title="ref">ref</a></li><li><a href="#namespace_refgetvalue" title="refGetValue">refGetValue</a></li><li><a href="#namespace_refine" title="refine">refine</a></li><li><a href="#namespace_refinefields" title="refineFields">refineFields</a></li><li><a href="#namespace_refineswitch" title="refineSwitch">refineSwitch</a></li><li><a href="#namespace_refsetvalue" title="refSetValue">refSetValue</a></li><li><a href="#namespace_s16" title="s16">s16</a></li><li><a href="#namespace_s16be" title="s16be">s16be</a></li><li><a href="#namespace_s16le" title="s16le">s16le</a></li><li><a href="#namespace_s32" title="s32">s32</a></li><li><a href="#namespace_s32be" title="s32be">s32be</a></li><li><a href="#namespace_s32le" title="s32le">s32le</a></li><li><a href="#namespace_s64" title="s64">s64</a></li><li><a href="#namespace_s64be" title="s64be">s64be</a></li><li><a href="#namespace_s64le" title="s64le">s64le</a></li><li><a href="#namespace_s8" title="s8">s8</a></li><li><a href="#namespace_s8be" title="s8be">s8be</a></li><li><a href="#namespace_s8le" title="s8le">s8le</a></li><li><a href="#namespace_string" title="string">string</a></li><li><a href="#namespace_stringfl" title="stringFL">stringFL</a></li><li><a href="#namespace_stringlp" title="stringLP">stringLP</a></li><li><a href="#namespace_stringnt" title="stringNT">stringNT</a></li><li><a href="#namespace_struct" title="struct">struct</a></li><li><a href="#namespace_u16" title="u16">u16</a></li><li><a href="#namespace_u16be" title="u16be">u16be</a></li><li><a href="#namespace_u16le" title="u16le">u16le</a></li><li><a href="#namespace_u32" title="u32">u32</a></li><li><a href="#namespace_u32be" title="u32be">u32be</a></li><li><a href="#namespace_u32le" title="u32le">u32le</a></li><li><a href="#namespace_u64" title="u64">u64</a></li><li><a href="#namespace_u64be" title="u64be">u64be</a></li><li><a href="#namespace_u64le" title="u64le">u64le</a></li><li><a href="#namespace_u8" title="u8">u8</a></li><li><a href="#namespace_u8be" title="u8be">u8be</a></li><li><a href="#namespace_u8le" title="u8le">u8le</a></li><li><a href="#namespace_withrefsincontext" title="withRefsInContext">withRefsInContext</a></li></ul></li><li><a href="#mod_ts_interfaces" title="Interfaces">Interfaces</a></li><li><ul><li><a href="#namespace_autogrowoptions" title="AutogrowOptions">AutogrowOptions</a></li><li><a href="#namespace_context" title="Context">Context</a></li><li><a href="#namespace_refsweakmap" title="RefsWeakMap">RefsWeakMap</a></li></ul></li><li><a href="#mod_ts_type-aliases" title="Type Aliases">Type Aliases</a></li><li><ul><li><a href="#namespace_arraywhilecondition" title="ArrayWhileCondition">ArrayWhileCondition</a></li><li><a href="#namespace_bitschema" title="BitSchema">BitSchema</a></li><li><a href="#namespace_bitstructdecoded" title="BitStructDecoded">BitStructDecoded</a></li><li><a href="#namespace_coder" title="Coder">Coder</a></li><li><a href="#namespace_decodedfields" title="DecodedFields">DecodedFields</a></li><li><a href="#namespace_decoder" title="Decoder">Decoder</a></li><li><a href="#namespace_encoder" title="Encoder">Encoder</a></li><li><a href="#namespace_endianness" title="Endianness">Endianness</a></li><li><a href="#namespace_fieldcoders" title="FieldCoders">FieldCoders</a></li><li><a href="#namespace_lengthorref" title="LengthOrRef">LengthOrRef</a></li><li><a href="#namespace_refinedunion" title="RefinedUnion">RefinedUnion</a></li><li><a href="#namespace_refiner" title="Refiner">Refiner</a></li><li><a href="#namespace_refvalue" title="RefValue">RefValue</a></li><li><a href="#namespace_unwrapreftuple" title="UnwrapRefTuple">UnwrapRefTuple</a></li><li><a href="#namespace_valuewithbytes" title="ValueWithBytes">ValueWithBytes</a></li></ul></li><li><a href="#mod_ts_variables" title="Variables">Variables</a></li><li><ul><li><a href="#namespace_kcoderkind" title="kCoderKind">kCoderKind</a></li><li><a href="#namespace_kctxrefs" title="kCtxRefs">kCtxRefs</a></li><li><a href="#namespace_kisrefvalue" title="kIsRefValue">kIsRefValue</a></li><li><a href="#namespace_kkindarrayfl" title="kKindArrayFL">kKindArrayFL</a></li><li><a href="#namespace_kkindarraylp" title="kKindArrayLP">kKindArrayLP</a></li><li><a href="#namespace_kkindarraywhile" title="kKindArrayWhile">kKindArrayWhile</a></li><li><a href="#namespace_kkindstringfl" title="kKindStringFL">kKindStringFL</a></li><li><a href="#namespace_kkindstringlp" title="kKindStringLP">kKindStringLP</a></li><li><a href="#namespace_kkindstringnt" title="kKindStringNT">kKindStringNT</a></li></ul></li></ul></li></ul></nav></div>
+  </div></div>
+</div>
+</div>
+</body>
+</html>
