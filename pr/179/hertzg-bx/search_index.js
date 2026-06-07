@@ -1,0 +1,3 @@
+(function () {
+  window.DENO_DOC_SEARCH_INDEX = {"kind":"search","nodes":[{"id":"namespace_bx","kind":[{"char":"f","kind":"Function","title":"Function"}],"name":"bx","file":".","doc":"A method that accepts a string containing hex encoded buffer. The string will be stripped of any non-hexadecimal symbols (eg: [^0-9-a-f]) and if the resulting string has even length then it's used as new Uint8Array(value).buffer or otherwise throws a TypeError.","url":"././~/bx.html","deprecated":false},{"id":"namespace_bxx","kind":[{"char":"f","kind":"Function","title":"Function"}],"name":"bxx","file":".","doc":"Returns NodeJS Buffer for the given hex string otherwise exactly the same as bx. For examples see bx documentation.","url":"././~/bxx.html","deprecated":false}]};
+})()
