@@ -93,7 +93,7 @@ layer's bytes. This package wires them together via <code>refineSwitch</code> an
 into a single round-trippable <a href="././~/inetFrame.html"><code>inetFrame</code></a> coder factory that
 walks an Ethernet II frame top-down. Each layer's <code>payload</code> field is
 surfaced as the typed value of the next layer; layers we don't have a
-coder for default to a raw <a href="https://deno.land/api@v2.7.14?s=Uint8Array"><code>Uint8Array</code></a>, so the coder is safe
+coder for default to a raw <a href="https://deno.land/api@v2.8.3?s=Uint8Array"><code>Uint8Array</code></a>, so the coder is safe
 to point at arbitrary captured traffic.</p>
 <p>Coverage:</p>
 <ul>
