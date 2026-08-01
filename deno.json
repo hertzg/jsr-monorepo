@@ -1,6 +1,6 @@
 {
   "importMap": "./import_map.json",
-  "minimumDependencyAge": "P1D",
+  "minimumDependencyAge": "PT12H",
   "tasks": {
     "test": {
       "dependencies": [
