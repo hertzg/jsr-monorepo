@@ -36,8 +36,8 @@ Two knobs govern the same window from opposite ends:
 If the second is shorter than the first, Renovate generates guaranteed-red PRs.
 If it is much longer, updates simply arrive later than they need to. Leaving
 Deno's side implicit makes the relationship invisible: a reader of
-`renovate.json` has no way to know what "3 days" is answering to, and a change
-to Deno's default would silently desynchronize the pair.
+`renovate.json` has no way to know what "1 day" is answering to, and a change to
+Deno's default would silently desynchronize the pair.
 
 ## Decision
 
@@ -45,17 +45,20 @@ Declare the window explicitly on both sides, with the same value:
 
 ```jsonc
 // deno.json
-"minimumDependencyAge": "P3D"
+"minimumDependencyAge": "P1D"
 ```
 
 ```jsonc
 // renovate.json
-"minimumReleaseAge": "3 days"
+"minimumReleaseAge": "1 day"
 ```
 
-Three days rather than Deno's 24-hour default: it is a more useful supply-chain
-window, and it leaves margin for a Renovate PR that sits in the queue before CI
-runs.
+One day, which coincides with Deno's current default. The value is still
+declared rather than inherited — see the consequences below — but the choice is
+now about latency, not about hardening: a longer window mostly means waiting
+longer to find out whether an upgrade is fine. This started at three days and
+was cut to one after the first upgrade it gated (`@std/xml` `^0.2.0`, PR #182)
+spent two days red for no reason other than the window itself.
 
 `minimumReleaseAge` must always be **greater than or equal to**
 `minimumDependencyAge`. Renovate's `internalChecksFilter` defaults to
@@ -63,8 +66,8 @@ runs.
 raised as a pending branch — no PR is created until the version is installable.
 
 The values are written in different notations because the two tools accept
-different ones. Deno takes an ISO-8601 duration (`P3D`), an RFC3339 datetime, or
-a plain number of minutes — it rejects `"3 days"` and `"72h"` alike. Renovate
+different ones. Deno takes an ISO-8601 duration (`P1D`), an RFC3339 datetime, or
+a plain number of minutes — it rejects `"1 day"` and `"24h"` alike. Renovate
 takes a humanized duration. They must be changed together.
 
 ## Consequences
@@ -73,8 +76,8 @@ takes a humanized duration. They must be changed together.
   cause of a red dependency PR.
 - **The policy is greppable.** `minimumDependencyAge` in `deno.json` is the
   single declaration of intent; `renovate.json` mirrors it.
-- **Upgrades are visible three days late.** Acceptable for this repo — no
-  dependency here is on a release cadence where that matters.
+- **Upgrades are visible a day late.** Acceptable for this repo — no dependency
+  here is on a release cadence where that matters.
 - **The pair can still drift**, because nothing mechanically enforces the
   relationship between two files in two different notations. This ADR is the
   enforcement. If it drifts, the symptom is the CI failure described above.

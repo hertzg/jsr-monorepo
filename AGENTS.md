@@ -170,7 +170,7 @@ Dropping it means the bump can never ship to JSR consumers, silently. See
 ADR 0005.
 
 New dependencies must also satisfy the age policy in ADR 0011: a version
-published less than three days ago will not resolve.
+published less than a day ago will not resolve.
 
 ### Correct Import Patterns
 
