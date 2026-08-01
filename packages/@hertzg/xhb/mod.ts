@@ -13,8 +13,8 @@
  * - **Serialize** an {@linkcode XHB} object back to XML
  * - All HomeBank entity types: accounts, archives, assigns, categories,
  *   currencies, operations, payees, properties, tags
- * - Hooks for custom entity processing via {@linkcode ParseOptions.onEntity}
- *   and {@linkcode SerializeOptions.onEntity}
+ * - A hook for post-processing serialized entities via
+ *   {@linkcode SerializeOptions.onEntity}
  *
  * @example Parse an XHB string and inspect its contents
  * ```ts
@@ -97,7 +97,7 @@
  * @module
  */
 
-import { isElement, parse as parseXml, type XmlElement } from "@std/xml";
+import { isElement, parse as parseXml } from "@std/xml";
 import {
   parseProperties,
   type Properties,
@@ -178,30 +178,16 @@ const NODE_NAME_CURRENCY = "cur";
 const NODE_NAME_TAG = "tag";
 const NODE_NAME_OPERATION = "ope";
 
-/** Options for {@linkcode parse}. */
-export interface ParseOptions {
-  /** Called for each parsed entity, allowing transformation before storage. */
-  onEntity?: <T>(entity: T, node: XmlElement) => T;
-  /** Called when an unrecognized XML node is encountered. */
-  onUnknownNode?: (node: XmlElement) => void;
-}
-
-const defaultParseOnEntity = <T>(entity: T): T => entity;
-const defaultParseOnUnknownNode = (): void => undefined;
-
 /**
  * Parses an XHB XML string into a typed {@linkcode XHB} object.
  *
+ * Nodes that are not recognized HomeBank entities are ignored.
+ *
  * @param xml - The raw XHB XML string.
- * @param options - Optional parse hooks.
  * @returns The parsed XHB object.
  */
-export function parse(xml: string, options: ParseOptions = {}): XHB {
-  const doc = parseXml(xml, { ignoreWhitespace: true }),
-    opts: Required<ParseOptions> = {
-      onEntity: options.onEntity || defaultParseOnEntity,
-      onUnknownNode: options.onUnknownNode || defaultParseOnUnknownNode,
-    };
+export function parse(xml: string): XHB {
+  const doc = parseXml(xml, { ignoreWhitespace: true });
 
   const xhb: XHB = {
     versions: parseVersions(doc.root),
@@ -216,37 +202,35 @@ export function parse(xml: string, options: ParseOptions = {}): XHB {
     tags: [],
   };
 
-  doc.root.children.filter(isElement).forEach((node: XmlElement) => {
+  doc.root.children.filter(isElement).forEach((node) => {
     switch (node.name.local) {
       case NODE_NAME_ACCOUNT:
-        xhb.accounts.push(opts.onEntity(parseAccount(node), node));
+        xhb.accounts.push(parseAccount(node));
         break;
       case NODE_NAME_ARCHIVE:
-        xhb.archives.push(opts.onEntity(parseArchive(node), node));
+        xhb.archives.push(parseArchive(node));
         break;
       case NODE_NAME_ASSIGN:
-        xhb.assigns.push(opts.onEntity(parseAssign(node, xhb), node));
+        xhb.assigns.push(parseAssign(node, xhb));
         break;
       case NODE_NAME_PAYEE:
-        xhb.payees.push(opts.onEntity(parsePayee(node), node));
+        xhb.payees.push(parsePayee(node));
         break;
       case NODE_NAME_PROPERTIES:
-        xhb.properties = opts.onEntity(parseProperties(node), node);
+        xhb.properties = parseProperties(node);
         break;
       case NODE_NAME_CATEGORY:
-        xhb.categories.push(opts.onEntity(parseCategory(node), node));
+        xhb.categories.push(parseCategory(node));
         break;
       case NODE_NAME_CURRENCY:
-        xhb.currencies.push(opts.onEntity(parseCurrency(node), node));
+        xhb.currencies.push(parseCurrency(node));
         break;
       case NODE_NAME_TAG:
-        xhb.tags.push(opts.onEntity(parseTag(node), node));
+        xhb.tags.push(parseTag(node));
         break;
       case NODE_NAME_OPERATION:
-        xhb.operations.push(opts.onEntity(parseOperation(node), node));
+        xhb.operations.push(parseOperation(node));
         break;
-      default:
-        opts.onUnknownNode(node);
     }
   });
 
