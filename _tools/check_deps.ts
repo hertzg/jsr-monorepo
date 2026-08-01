@@ -23,6 +23,7 @@ interface DenoInfoDependency {
 interface DenoInfoModule {
   specifier: string;
   dependencies?: DenoInfoDependency[];
+  error?: string;
 }
 
 interface DenoInfoOutput {
@@ -49,8 +50,30 @@ async function getDenoInfo(modulePath: string): Promise<DenoInfoOutput> {
     stderr: "piped",
   });
 
-  const { stdout } = await command.output();
-  return JSON.parse(new TextDecoder().decode(stdout));
+  const { success, stdout, stderr } = await command.output();
+  if (!success) {
+    throw new Error(
+      `deno info failed for ${modulePath}:\n${
+        new TextDecoder().decode(stderr)
+      }`,
+    );
+  }
+
+  const info: DenoInfoOutput = JSON.parse(new TextDecoder().decode(stdout));
+
+  // `deno info` still exits 0 when a module fails to resolve, reporting the
+  // reason per module instead. Snapshotting a partial graph would silently
+  // record the wrong dependency set, so treat any of these as fatal.
+  const unresolved = info.modules.filter((m) => m.error !== undefined);
+  if (unresolved.length > 0) {
+    throw new Error(
+      `deno info could not resolve ${unresolved.length} module(s) reachable ` +
+        `from ${modulePath}:\n` +
+        unresolved.map((m) => `  ${m.specifier}: ${m.error}`).join("\n"),
+    );
+  }
+
+  return info;
 }
 
 async function getDepsForPackage(
