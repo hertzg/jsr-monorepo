@@ -1,0 +1,60 @@
+# Regenerates `_deps.snap` on Renovate branches that change `import_map.json`.
+#
+# Renovate edits only the import map, which belongs to no package. The
+# snapshots are what place a dependency bump inside `packages/<scope>/<name>/`,
+# which is how Release Please attributes it — so without them the bump both
+# fails `lint:deps` and can never be released (ADR 0005).
+#
+# Renovate cannot do this itself: `postUpgradeTasks` on the Mend-hosted app
+# only permits an allowlist that cannot run arbitrary commands.
+name: renovate-snapshots
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - import_map.json
+
+permissions:
+  contents: read
+
+concurrency:
+  group: renovate-snapshots-${{ github.head_ref }}
+  cancel-in-progress: true
+
+jobs:
+  update:
+    if: >-
+      startsWith(github.head_ref, 'renovate/') &&
+      github.event.pull_request.head.repo.full_name == github.repository
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      # A GitHub App token, not GITHUB_TOKEN: pushes made with the default
+      # token do not trigger further workflow runs, which would leave the
+      # PR's checks red against the pre-fix commit.
+      - uses: actions/create-github-app-token@v3
+        id: app-token
+        with:
+          app-id: ${{ secrets.RELEASE_APP_ID }}
+          private-key: ${{ secrets.RELEASE_APP_PRIVATE_KEY }}
+
+      - uses: actions/checkout@v7
+        with:
+          ref: ${{ github.head_ref }}
+          token: ${{ steps.app-token.outputs.token }}
+
+      - uses: denoland/setup-deno@v2
+
+      - run: deno run -A _tools/check_deps.ts --update
+
+      # Nothing to commit on a re-run, which is what terminates the loop:
+      # this workflow triggers on its own push, finds no diff, and stops.
+      - run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A -- '*_deps.snap'
+          git diff --staged --quiet || {
+            git commit -m "chore: update dependency snapshots"
+            git push
+          }
