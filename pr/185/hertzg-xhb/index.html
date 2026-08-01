@@ -97,8 +97,8 @@ Features</h2>
 <li><strong>Serialize</strong> an <a href="././~/XHB.html"><code>XHB</code></a> object back to XML</li>
 <li>All HomeBank entity types: accounts, archives, assigns, categories,
 currencies, operations, payees, properties, tags</li>
-<li>Hooks for custom entity processing via <a href="././~/ParseOptions.onEntity.html"><code>ParseOptions.onEntity</code></a>
-and <a href="././~/SerializeOptions.onEntity.html"><code>SerializeOptions.onEntity</code></a></li>
+<li>A hook for post-processing serialized entities via
+<a href="././~/SerializeOptions.onEntity.html"><code>SerializeOptions.onEntity</code></a></li>
 </ul>
 </div><section class="section"  id="examples"><div>
       <h2 class="anchorable mb-1"><a href="#examples" class="anchor" aria-label="Anchor" tabIndex="-1"><svg
@@ -446,12 +446,6 @@ assertEquals(xhb.payees.length, 2);
                   </span>
                 </a>
               </li><li>
-                <a href=".&#x2F;.&#x2F;~&#x2F;ParseOptions.html" title="ParseOptions"><div class="docNodeKindIcon"><div class="text-Interface bg-Interface/15 dark:text-InterfaceDark dark:bg-InterfaceDark/15" title="Interface">I</div></div>
-<span class="hover:bg-Interface/15 hover:bg-InterfaceDark/15">
-                    ParseOptions
-                  </span>
-                </a>
-              </li><li>
                 <a href=".&#x2F;.&#x2F;~&#x2F;parse.html" title="parse"><div class="docNodeKindIcon"><div class="text-Function bg-Function/15 dark:text-FunctionDark dark:bg-FunctionDark/15" title="Function">f</div></div>
 <span class="hover:bg-Function/15 hover:bg-FunctionDark/15">
                     parse
@@ -463,8 +457,14 @@ assertEquals(xhb.payees.length, 2);
                     SerializeOptions
                   </span>
                 </a>
+              </li><li>
+                <a href=".&#x2F;.&#x2F;~&#x2F;serialize.html" title="serialize"><div class="docNodeKindIcon"><div class="text-Function bg-Function/15 dark:text-FunctionDark dark:bg-FunctionDark/15" title="Function">f</div></div>
+<span class="hover:bg-Function/15 hover:bg-FunctionDark/15">
+                    serialize
+                  </span>
+                </a>
               </li></ul><a class="flex items-center gap-0.5" href=".&#x2F;all_symbols.html">
-              <span class="leading-none">view all 98 symbols</span><svg
+              <span class="leading-none">view all 97 symbols</span><svg
   width="16"
   height="16"
   viewBox="0 0 16 16"
