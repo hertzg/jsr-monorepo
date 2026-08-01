@@ -161,6 +161,17 @@ deno run -A _tools/check_deps.ts --update
 
 This updates the `_deps.snap` files to reflect the new dependency versions.
 
+**Always commit the regenerated snapshots together with the `import_map.json`
+change.** They are not bookkeeping — Release Please attributes a commit to a
+package by the file paths it touches, and `import_map.json` belongs to no
+package. The snapshot diff is what places a dependency bump inside
+`packages/<scope>/<name>/`, and therefore what makes that package releasable.
+Dropping it means the bump can never ship to JSR consumers, silently. See
+ADR 0005.
+
+New dependencies must also satisfy the age policy in ADR 0011: a version
+published less than three days ago will not resolve.
+
 ### Correct Import Patterns
 
 ```typescript ignore
