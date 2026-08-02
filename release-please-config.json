@@ -137,6 +137,14 @@
         { "type": "json", "path": "deno.json", "jsonpath": "$.version" }
       ]
     },
+    "packages/@binstruct/mp3": {
+      "release-type": "simple",
+      "package-name": "@binstruct/mp3",
+      "component": "@binstruct/mp3",
+      "extra-files": [
+        { "type": "json", "path": "deno.json", "jsonpath": "$.version" }
+      ]
+    },
     "packages/@binstruct/ntp": {
       "release-type": "simple",
       "package-name": "@binstruct/ntp",
