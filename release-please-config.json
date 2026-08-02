@@ -129,6 +129,14 @@
         { "type": "json", "path": "deno.json", "jsonpath": "$.version" }
       ]
     },
+    "packages/@binstruct/pppoe": {
+      "release-type": "simple",
+      "package-name": "@binstruct/pppoe",
+      "component": "@binstruct/pppoe",
+      "extra-files": [
+        { "type": "json", "path": "deno.json", "jsonpath": "$.version" }
+      ]
+    },
     "packages/@binstruct/sll": {
       "release-type": "simple",
       "package-name": "@binstruct/sll",

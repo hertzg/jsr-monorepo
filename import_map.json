@@ -48,6 +48,7 @@
     "@binstruct/vxlan": "jsr:@binstruct/vxlan@^0.0.1",
     "@binstruct/wav": "jsr:@binstruct/wav@^0.1.2",
     "@binstruct/pcap": "jsr:@binstruct/pcap@^0.3.0",
+    "@binstruct/pppoe": "jsr:@binstruct/pppoe@^0.0.1",
     "json5": "npm:json5@^2.2.3",
     "fflate": "npm:fflate@^0.8.2",
     "@noble/ciphers/aes.js": "jsr:@noble/ciphers@^2.1.1/aes.js",
