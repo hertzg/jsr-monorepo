@@ -236,18 +236,25 @@ type ClassificationCase = {
 /**
  * The classification space, enumerated.
  *
- * The rule this table pins down runs **towards** the registry coordinate rather
- * than away from it. A JSR or npm coordinate is exactly one of `name`,
+ * The rules this table pins down run **towards** the two closed sets and let
+ * everything else be a path. A scheme is one of the seven Deno resolves a
+ * module under. A JSR or npm coordinate is exactly one of `name`,
  * `name@version`, `@scope/name`, `@scope/name@version` or
  * `@scope/name/sub-entrypoint`; every one either starts with `@` or holds no
  * `/`; therefore a non-scheme input that holds a `/` outside a scope is a path.
  *
- * The rule used to run the other way — list the path spellings, call the rest a
- * registry name — and that list leaked five times, because the set of ways to
- * spell a path is open-ended and the set of ways to spell a coordinate is not.
- * The last leak was `arp/`, which shell tab-completion produces for a directory
- * and which expanded to `jsr:@binstruct/arp/`, decoding against the published
- * package while a local `arp/` sat in the working directory (ADR 0004).
+ * The coordinate rule used to run the other way — list the path spellings, call
+ * the rest a registry name — and that list leaked five times, because the set of
+ * ways to spell a path is open-ended and the set of ways to spell a coordinate
+ * is not. The last leak was `arp/`, which shell tab-completion produces for a
+ * directory and which expanded to `jsr:@binstruct/arp/`, decoding against the
+ * published package while a local `arp/` sat in the working directory
+ * (ADR 0004).
+ *
+ * The scheme rule leaked next, for the same reason: it was a pattern over an
+ * unbounded space of spellings, so `my:dir/mod.ts` was a scheme and passed
+ * through unanchored while `deno doc` resolved it as a relative path. It is a
+ * set now, and the rows below are what a set buys.
  *
  * So the space is written out. Every shape of coordinate, every shape of path,
  * each of those with a trailing slash, and the degenerate inputs that are
@@ -261,22 +268,31 @@ const classifications: readonly ClassificationCase[] = [
   { input: "npm:foo", form: "scheme", why: "npm bare name" },
   { input: "npm:foo/", form: "scheme", why: "trailing slash" },
   { input: "npm:@scope/foo@1.2.3", form: "scheme", why: "npm coordinate" },
+  { input: "http://example.com/mod.ts", form: "scheme", why: "remote url" },
   { input: "https://example.com/mod.ts", form: "scheme", why: "remote url" },
   { input: "file:///abs/mod.ts", form: "scheme", why: "local file url" },
   { input: "file:///abs/pkg", form: "scheme", why: "local directory url" },
   { input: "file:///abs/pkg/", form: "scheme", why: "trailing slash" },
-  { input: "ab:x", form: "scheme", why: "two characters is the minimum" },
+  { input: "node:fs", form: "scheme", why: "a built-in module" },
+  { input: "data:text/plain,x", form: "scheme", why: "inline source" },
 
-  // ── scheme-like, one leading character ──────────────────────────────────
-  // A single character before the colon is not a scheme, so that a Windows
-  // drive prefix is never mistaken for one. What is left of the input is then
-  // classified on its own terms: `c:` holds no slash and is read as a name,
-  // while `c:/tmp/pkg` holds one and is a path.
-  { input: "c:", form: "bare", why: "one character is not a scheme" },
+  // ── a colon that is not one of those seven ──────────────────────────────
+  // The scheme rule is a closed set, not a pattern. `^[a-z][a-z0-9+.-]+:`
+  // matched any word before a colon, so `my:dir/mod.ts` — an ordinary relative
+  // path whose first segment holds one — was called a scheme, passed through
+  // unanchored and never stat'ed, while `deno doc` read it as the path it is.
+  // What is left of such an input is classified on its own terms: it holds a
+  // slash, so it is a path; it holds none, so it is a name.
+  { input: "my:dir/mod.ts", form: "path", why: "no such scheme, and a slash" },
+  { input: "gopher:x", form: "bare", why: "no such scheme, and no slash" },
+  { input: "ab:x", form: "bare", why: "two characters is not a scheme" },
+  { input: "jsrx:@binstruct/png", form: "path", why: "not jsr:" },
+  { input: "c:", form: "bare", why: "a drive prefix is not a scheme" },
   { input: "C:", form: "bare", why: "uppercase drive prefix, no slash" },
   { input: "c:/tmp/pkg", form: "path", why: "drive path holds a slash" },
   { input: "C:/tmp/mod.ts", form: "path", why: "drive path with a module" },
-  { input: "JSR:@binstruct/png", form: "path", why: "uppercase is no scheme" },
+  { input: "JSR:@binstruct/png", form: "path", why: "membership is cased" },
+  { input: "FILE:///abs/pkg", form: "path", why: "membership is cased" },
 
   // ── starts with `@`: a registry coordinate, in every one of its shapes ───
   { input: "@hertzg/xhb", form: "scoped", why: "@scope/name" },
@@ -451,7 +467,71 @@ Deno.test("resolveSpecifier does not decide file or directory from the spelling"
   });
 });
 
-Deno.test("resolveSpecifier requires two lowercase characters for a scheme", async (t) => {
+Deno.test("resolveSpecifier admits only the schemes deno resolves", async (t) => {
+  await t.step("each of the seven passes through unchanged", () => {
+    for (
+      const input of [
+        "jsr:@binstruct/png",
+        "npm:foo",
+        "http://example.com/mod.ts",
+        "https://example.com/mod.ts",
+        "file:///abs/mod.ts",
+        "node:fs",
+        "data:text/plain,x",
+      ]
+    ) {
+      const resolved = resolveSpecifier(input);
+      assertEquals(resolved.form, "scheme", input);
+      assertEquals(resolved.specifier, input);
+    }
+  });
+
+  await t.step("a colon that is not one of them is part of a path", () => {
+    // The leak: `^[a-z][a-z0-9+.-]+:` matched `my:`, so a relative path whose
+    // first segment held a colon was classified `scheme`, went to `deno doc`
+    // and to `import()` unanchored, and reached neither `Deno.cwd()` nor
+    // `inspectLocalTarget` — while `deno doc` resolved it against the working
+    // directory as the path it plainly is.
+    const resolved = resolveSpecifier("my:dir/mod.ts");
+
+    assertEquals(resolved.form, "path");
+    assertEquals(resolved.short, "my:dir/mod.ts");
+    assertEquals(resolved.specifier, underCwd("my:dir/mod.ts"));
+  });
+
+  await t.step("an unknown scheme with no slash is a bare name", () => {
+    assertEquals(resolveSpecifier("gopher:x").form, "bare");
+    assertEquals(resolveSpecifier("ab:x").form, "bare");
+  });
+
+  await t.step("membership is case-sensitive", () => {
+    assertEquals(resolveSpecifier("FILE:///abs/pkg").form, "path");
+    assertEquals(resolveSpecifier("JSR:@binstruct/png").form, "path");
+  });
+
+  await t.step("the closure does not disturb the other rows", () => {
+    // Every shape that was already classified stays classified the same way;
+    // closing the scheme rule is meant to move exactly one class of input.
+    const unchanged: readonly [string, SpecifierForm][] = [
+      ["png", "bare"],
+      ["wav@0.2.0", "bare"],
+      ["@hertzg/xhb", "scoped"],
+      ["jsr:@binstruct/png", "scheme"],
+      ["npm:foo", "scheme"],
+      ["https://example.com/mod.ts", "scheme"],
+      ["./x", "path"],
+      ["arp/", "path"],
+      ["nested/inner", "path"],
+      ["mod.ts", "path"],
+    ];
+
+    for (const [input, form] of unchanged) {
+      assertEquals(resolveSpecifier(input).form, form, input);
+    }
+  });
+});
+
+Deno.test("resolveSpecifier does not read a drive prefix as a scheme", async (t) => {
   await t.step("a single-letter drive prefix is not a scheme", () => {
     const resolved = resolveSpecifier("C:");
     assertEquals(resolved.form, "bare");
@@ -483,10 +563,6 @@ Deno.test("resolveSpecifier requires two lowercase characters for a scheme", asy
     // It is not a scheme, and the slash then makes it a path rather than a
     // name — `jsr:@binstruct/JSR:@binstruct/png` was never a useful answer.
     assertEquals(resolveSpecifier("JSR:@binstruct/png").form, "path");
-  });
-
-  await t.step("two characters are enough", () => {
-    assertEquals(resolveSpecifier("ab:x").form, "scheme");
   });
 });
 

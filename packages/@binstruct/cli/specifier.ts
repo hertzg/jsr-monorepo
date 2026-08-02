@@ -8,19 +8,20 @@
  *
  * | input                                       | rule         | resolves to             |
  * | ------------------------------------------- | ------------ | ----------------------- |
- * | `jsr:@binstruct/png`, `npm:x`, `https://…`  | has a scheme | unchanged               |
+ * | `jsr:@binstruct/png`, `npm:x`, `https://…`  | known scheme | unchanged               |
  * | `@hertzg/xhb`, `@binstruct/png/sub`         | starts `@`   | `jsr:@hertzg/xhb`       |
  * | `./x`, `/abs/x`, `pkg/`, `a/b`, `mod.ts`    | is a path    | `file://` URL under cwd |
  * | `png`, `wav@0.2.0`                          | bare         | `jsr:@binstruct/png`    |
  *
- * The order enumerates what a **registry coordinate** looks like and treats
- * what is left over as a path, rather than the other way round. A JSR or npm
- * coordinate is exactly one of `name`, `name@version`, `@scope/name`,
- * `@scope/name@version` or `@scope/name/sub-entrypoint`, and every one of those
- * either starts with `@` or contains no `/` at all — so **a non-scheme input
- * that contains `/` and does not start with `@` cannot be a coordinate, and is
- * a path.** The set of path spellings is open-ended and the set of coordinate
- * spellings is not, so the closed one is what gets enumerated (ADR 0004).
+ * Both explicit rules are **closed sets**, and everything left over is a path.
+ * A scheme is one of {@linkcode MODULE_SCHEMES}, the seven Deno resolves a
+ * module under. A JSR or npm coordinate is exactly one of `name`,
+ * `name@version`, `@scope/name`, `@scope/name@version` or
+ * `@scope/name/sub-entrypoint`, and every one of those either starts with `@`
+ * or contains no `/` at all — so **a non-scheme input that contains `/` and
+ * does not start with `@` cannot be a coordinate, and is a path.** The set of
+ * path spellings is open-ended and neither of the other two is, so the closed
+ * ones are what get enumerated (ADR 0004).
  *
  * Whether a path names a file or a directory is deliberately *not* decided
  * here: that is a fact about the target, not about how the argument was typed,
@@ -46,11 +47,40 @@
 import { resolve, toFileUrl } from "@std/path";
 
 /**
- * Matches a URL scheme prefix, requiring at least two lowercase characters
- * before the colon so that a bare package name — or a single-letter Windows
- * drive prefix — can never be mistaken for one.
+ * Every scheme Deno resolves a module specifier under.
+ *
+ * A **closed set**, not a pattern. `^[a-z][a-z0-9+.-]+:` accepted any word
+ * before a colon, so `my:dir/mod.ts` — a perfectly ordinary relative path whose
+ * first segment holds one — was called a scheme, passed through unanchored and
+ * never stat'ed, while `deno doc` resolved it against the working directory as
+ * the path it is. That is the discovery-versus-execution divergence again, in
+ * one more spelling, and it is the same open-predicate mistake the coordinate
+ * rule made: the set of things that are *not* schemes is unbounded, the set of
+ * schemes is seven long. Anything else carrying a colon falls through to the
+ * `/` rule and becomes a path, which is what `deno doc` already thinks it is.
+ *
+ * Membership is case-sensitive, so `JSR:@binstruct/png` is not one — it holds a
+ * slash outside a scope and is therefore a path, exactly as `c:/tmp/pkg` is.
  */
-const SCHEME_PATTERN = /^[a-z][a-z0-9+.-]+:/;
+const MODULE_SCHEMES: readonly string[] = [
+  "jsr:",
+  "npm:",
+  "http:",
+  "https:",
+  "file:",
+  "node:",
+  "data:",
+];
+
+/**
+ * Reports whether an input opens with a scheme Deno resolves modules under.
+ *
+ * @param input Package argument as typed.
+ * @returns Whether it carries one of {@linkcode MODULE_SCHEMES}.
+ */
+function hasScheme(input: string): boolean {
+  return MODULE_SCHEMES.some((scheme) => input.startsWith(scheme));
+}
 
 /**
  * File extensions that make an input look like a module path.
@@ -105,8 +135,9 @@ const IMPLIED_SCOPE = "@binstruct/";
 /**
  * Which resolution rule matched an input.
  *
- * - `"scheme"` — the input carried its own scheme (`jsr:`, `npm:`, `https:`,
- *   `file:`).
+ * - `"scheme"` — the input opened with one of {@linkcode MODULE_SCHEMES}
+ *   (`jsr:`, `npm:`, `http:`, `https:`, `file:`, `node:`, `data:`). A colon
+ *   that is not one of those is just a character in a path.
  * - `"scoped"` — the input named a scope and package, without a scheme.
  * - `"path"` — the input pointed somewhere on disk: it held a `/` without being
  *   scoped, or began with `.`, or ended in a module extension. A file and a
@@ -158,15 +189,21 @@ export interface ResolvedSpecifier {
  * published package while a local `arp/` sat in the working directory. See
  * `./specifier.test.ts` for the enumerated classification space.
  *
+ * The scheme rule runs first and is closed the same way, by
+ * {@linkcode MODULE_SCHEMES}: it has to run first, since `https://example.com/`
+ * holds a `/`, and while it was a pattern it took `my:dir/mod.ts` out of the
+ * path rule's reach.
+ *
  * The leading `.` and the module extension survive as rules because they can
  * only ever move an input *towards* `"path"`. The leak class is the fallthrough
- * — a path landing on `"bare"` — and neither rule can produce one.
+ * — a path landing on `"bare"` or on `"scheme"` — and neither rule can produce
+ * one.
  *
  * @param input Package argument as typed.
  * @returns The matching rule.
  */
 function classify(input: string): SpecifierForm {
-  if (SCHEME_PATTERN.test(input)) {
+  if (hasScheme(input)) {
     return "scheme";
   }
   if (input.startsWith("@")) {
@@ -279,6 +316,17 @@ function expand(input: string, form: SpecifierForm): string {
  *   resolveSpecifier("local/").specifier,
  *   resolveSpecifier("./local").specifier,
  * );
+ * ```
+ *
+ * @example Only a known scheme is a scheme; any other colon is part of a path
+ * ```ts
+ * import { assertEquals } from "@std/assert";
+ * import { resolveSpecifier } from "./specifier.ts";
+ *
+ * assertEquals(resolveSpecifier("node:fs").form, "scheme");
+ * assertEquals(resolveSpecifier("data:text/plain,x").form, "scheme");
+ * assertEquals(resolveSpecifier("my:dir/mod.ts").form, "path");
+ * assertEquals(resolveSpecifier("gopher:x").form, "bare");
  * ```
  *
  * @example A version suffix rides along

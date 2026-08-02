@@ -12,7 +12,7 @@
  * invocation (ADR 0001):
  *
  * ```
- * binstruct [<package> [<coder> [<command>]]] [options]
+ * binstruct [--] [<package> [<coder> [<command>]]] [options]
  * ```
  *
  * A prefix that stops short prints guidance for the missing word — what it
@@ -39,6 +39,11 @@
  * @example A local package is named by its module file, never by its directory
  * ```bash
  * binstruct ./my-package/mod.ts decode < input.bin > output.json5
+ * ```
+ *
+ * @example `--` ends the flags, for a package word that starts with one
+ * ```bash
+ * binstruct -- -dash/mod.ts decode < input.bin > output.json5
  * ```
  *
  * @module
@@ -78,7 +83,7 @@ const COMMANDS = [
 /** Recap of the calling convention, appended to every `--help` screen. */
 const USAGE_FOOTER: readonly string[] = [
   "USAGE",
-  `  ${PROGRAM} [<package> [<coder> [<command>]]] [options]`,
+  `  ${PROGRAM} [--] [<package> [<coder> [<command>]]] [options]`,
   "",
   "OPTIONS",
   "  -p, --package <package>  same as the first positional",
@@ -86,10 +91,12 @@ const USAGE_FOOTER: readonly string[] = [
   "      --docs               print `deno doc` for the chosen coder",
   "  -h, --help               print this guidance on stdout and exit 0",
   "  -v, --version            print the version",
+  "      --                   ends the flags; every later word is a positional",
   "",
   "NOTES",
   `  a bare <package> means jsr:@binstruct/<package>`,
   `  a local <package> names a module file, not a directory: ./${SAMPLE_PACKAGE}/mod.ts`,
+  `  a <package> starting with '-' needs the separator: ${PROGRAM} -- -pkg/mod.ts`,
   "  the payload is JSON5, not JSON: quoted keys, 0x byte literals, comments",
   "  without --help, guidance goes to stderr and exits 1, so a half-typed",
   "  redirect stays empty",
@@ -120,6 +127,14 @@ export interface CliOptions {
   readonly version: boolean;
   /** Print `deno doc` output for the chosen coder instead of running it. */
   readonly docs: boolean;
+  /**
+   * Flags the parser was given and does not know, as typed.
+   *
+   * Not an aside: an unrecognised flag consumes a word, so the positionals
+   * behind it shift and a different word becomes the package. Nothing runs
+   * while this is non-empty.
+   */
+  readonly unknownFlags: readonly string[];
 }
 
 /**
@@ -244,6 +259,20 @@ function firstLine(text: string): string | undefined {
  * `binstruct png "" decode` asks which coder rather than importing the package
  * to discover that the word said nothing.
  *
+ * **A word starting with `-` is a flag, and `--` is how you say it is not.**
+ * Everything after the separator fills a slot whatever it starts with, so
+ * `binstruct -- -dash/mod.ts decode` names a module the shell tab-completed
+ * from a directory called `-dash`. Without it, `-dash/` was read as the flag
+ * cluster `-d -a -s -h`, whose `h` set `--help` — and the CLI answered a decode
+ * with the whole help screen **on stdout, at exit 0**, which is precisely the
+ * redirect corruption ADR 0001 exists to prevent.
+ *
+ * **A flag that is not recognised is refused, never ignored.** Only the five
+ * declared here exist; anything else consumes a word and shifts every
+ * positional behind it, so `binstruct --format json png` would have answered
+ * confidently about `json`. They are collected rather than thrown, since
+ * reporting them is {@linkcode planCli}'s job.
+ *
  * @param args Command line arguments
  * @returns The parsed slots and flags, with absent and blank values left `undefined`
  *
@@ -259,6 +288,7 @@ function firstLine(text: string): string | undefined {
  *   help: false,
  *   version: false,
  *   docs: false,
+ *   unknownFlags: [],
  * });
  *
  * const flagged = parseCliArgs(["-p", "png", "-c", "pngFile", "decode"]);
@@ -279,12 +309,39 @@ function firstLine(text: string): string | undefined {
  * assertEquals(options.coder, undefined);
  * assertEquals(options.command, "decode");
  * ```
+ *
+ * @example `--` makes a leading dash ordinary, and a stray flag is reported
+ * ```ts
+ * import { assertEquals } from "@std/assert";
+ * import { parseCliArgs } from "./cli.ts";
+ *
+ * const separated = parseCliArgs(["--", "-dash/mod.ts", "decode"]);
+ *
+ * assertEquals(separated.package, "-dash/mod.ts");
+ * assertEquals(separated.command, "decode");
+ * assertEquals(separated.help, false);
+ *
+ * assertEquals(parseCliArgs(["--format", "json", "png"]).unknownFlags, [
+ *   "--format",
+ * ]);
+ * ```
  */
 export function parseCliArgs(args: string[]): CliOptions {
+  const unknownFlags: string[] = [];
+
   const parsed = parseArgs(args, {
     string: ["_", "package", "coder"],
     boolean: ["help", "version", "docs"],
     alias: { package: "p", coder: "c", help: "h", version: "v" },
+    unknown: (arg: string, key?: string) => {
+      // Called for positionals too, with no key; those are not flags. A short
+      // cluster reports the same `arg` once per unknown letter, so `-dash/`
+      // reads back as itself rather than as four inventions.
+      if (key !== undefined && !unknownFlags.includes(arg)) {
+        unknownFlags.push(arg);
+      }
+      return true;
+    },
   });
 
   const positionals = (parsed._ as string[]).filter(spoken);
@@ -301,6 +358,7 @@ export function parseCliArgs(args: string[]): CliOptions {
     help: parsed.help,
     version: parsed.version,
     docs: parsed.docs,
+    unknownFlags,
   };
 }
 
@@ -329,6 +387,35 @@ function packageGuide(
 }
 
 /**
+ * Builds the guide for flags the parser does not know.
+ *
+ * An unrecognised flag is not a harmless extra word. `parseArgs` accepted it,
+ * consumed whatever followed it as its value, and handed back a positional list
+ * one word short — so `binstruct --format json png` reported on `json`, with
+ * `png` never having been the package. The answer is the level 0 screen,
+ * because a parse that shifted is a parse nothing downstream may be built on:
+ * which word was meant to be the package is exactly what is no longer known.
+ *
+ * The footer is the `--help` recap verbatim, so the list of flags that *do*
+ * exist is the same list `--help` prints and cannot drift from it.
+ *
+ * @param flags The unrecognised flags, as typed
+ * @returns The guide
+ */
+function unknownFlagGuide(flags: readonly string[]): Guide {
+  return {
+    ...packageGuide({
+      diagnostic: true,
+      notes: [
+        `unknown option${flags.length === 1 ? "" : "s"}: ${flags.join(", ")}`,
+        "an unknown flag shifts which word is the package, so nothing was run",
+      ],
+    }),
+    footer: USAGE_FOOTER,
+  };
+}
+
+/**
  * Pluralizes an argument count.
  *
  * @param count How many arguments
@@ -336,6 +423,29 @@ function packageGuide(
  */
 function argumentCount(count: number): string {
   return `${count} argument${count === 1 ? "" : "s"}`;
+}
+
+/**
+ * Renders the package word of a `TRY` line so that pasting it back runs.
+ *
+ * {@linkcode shellWord} settles what the *shell* will do with the word; this
+ * settles what *this CLI* will do with it, and the two are different questions.
+ * A module file may perfectly well be called `-dash.ts`, and a directory holding
+ * one is what the refusal of ADR 0004 lists and offers — so the suggestion came
+ * back through `parseCliArgs` as a flag cluster, set `--help` from its `h`, and
+ * printed the help screen at exit 0 instead of decoding. A `TRY` line is a
+ * promise that the command works when pasted, so the separator is part of the
+ * line whenever the package word needs it.
+ *
+ * Only the package word takes one: it is the first positional, so `--` in front
+ * of it covers every word after it too, and a coder or command name reached
+ * through discovery cannot start with `-` — it is an identifier.
+ *
+ * @param word The package word, as it will be typed
+ * @returns The word, shell-quoted, behind `--` when it would read as a flag
+ */
+function packageWord(word: string): string {
+  return word.startsWith("-") ? `-- ${shellWord(word)}` : shellWord(word);
 }
 
 /**
@@ -424,9 +534,9 @@ function coderGuide(
       items: coders.map(coderOption),
       empty: "none — this package exposes no coder factories",
     },
-    try: callable === undefined
-      ? []
-      : [`${PROGRAM} ${shellWord(resolved.short)} ${shellWord(callable.name)}`],
+    try: callable === undefined ? [] : [
+      `${PROGRAM} ${packageWord(resolved.short)} ${shellWord(callable.name)}`,
+    ],
   };
 }
 
@@ -446,8 +556,8 @@ function commandGuide(
   notes?: readonly string[],
 ): Guide {
   const words = coder === undefined
-    ? shellWord(resolved.short)
-    : `${shellWord(resolved.short)} ${shellWord(coder)}`;
+    ? packageWord(resolved.short)
+    : `${packageWord(resolved.short)} ${shellWord(coder)}`;
   return {
     header,
     notes,
@@ -558,7 +668,7 @@ function directoryGuide(
     },
     try: modules.length === 0
       ? []
-      : [`${PROGRAM} ${shellWord(moduleInside(resolved.short, modules[0]))}`],
+      : [`${PROGRAM} ${packageWord(moduleInside(resolved.short, modules[0]))}`],
   };
 }
 
@@ -661,7 +771,7 @@ function unknownCoderGuide(
 
   return suggestion === undefined ? guide : {
     ...guide,
-    try: [`${PROGRAM} ${shellWord(resolved.short)} ${shellWord(suggestion)}`],
+    try: [`${PROGRAM} ${packageWord(resolved.short)} ${shellWord(suggestion)}`],
   };
 }
 
@@ -786,7 +896,7 @@ function toolFailureGuide(
     },
     try: [
       `${PROGRAM} ${
-        shellWord(resolved.short)
+        packageWord(resolved.short)
       } <coder> decode < input.bin > output.json5`,
     ],
     footer: [
@@ -1039,6 +1149,12 @@ function withoutSharedPreamble(first: string, second: string): string {
  * exit 1, or on stdout with exit 0 under `--help`. Guidance that reports a
  * failure rather than a missing word stays on stderr either way.
  *
+ * An unrecognised flag is refused before anything else is read, `--help` and
+ * `--version` included. It consumed a word on its way through the parser, so
+ * the positionals behind it shifted and the package slot no longer holds what
+ * was typed — and answering confidently about a package nobody named is the
+ * defect class this whole module is built to avoid.
+ *
  * A local package argument is inspected before any of that, and a directory is
  * refused — see {@linkcode directoryGuide}. Everything downstream may therefore
  * assume the specifier names one module, which is what lets discovery and
@@ -1111,9 +1227,29 @@ function withoutSharedPreamble(first: string, second: string): string {
  *   assertStringIncludes(plan.text, "mod.ts");
  * }
  * ```
+ *
+ * @example An unknown flag is named, on stderr, and no package is guessed at
+ * ```ts
+ * import { assertEquals, assertStringIncludes } from "@std/assert";
+ * import { planCli } from "./cli.ts";
+ *
+ * const plan = await planCli(["--format", "json", "png"]);
+ *
+ * assertEquals(plan.kind, "print");
+ * if (plan.kind === "print") {
+ *   assertEquals(plan.stream, "stderr");
+ *   assertEquals(plan.code, 1);
+ *   assertStringIncludes(plan.text, "unknown option: --format");
+ *   assertEquals(plan.text.includes("jsr:@binstruct/png"), false);
+ * }
+ * ```
  */
 export async function planCli(args: string[]): Promise<CliPlan> {
   const options = parseCliArgs(args);
+
+  if (options.unknownFlags.length > 0) {
+    return present(unknownFlagGuide(options.unknownFlags), options.help);
+  }
 
   if (options.version) {
     return { kind: "print", text: VERSION_LINE, stream: "stdout", code: 0 };

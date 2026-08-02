@@ -29,7 +29,7 @@ The argument list is a **prefix chain**, and every prefix of it is a valid
 invocation:
 
 ```
-binstruct [<package> [<coder> [<command>]]] [options]
+binstruct [--] [<package> [<coder> [<command>]]] [options]
 ```
 
 When the next positional is missing, the CLI prints three blocks and stops:
@@ -55,6 +55,28 @@ invocation, not for a TTY check.
 Discovery output never goes to stdout. Stdout carries the payload and nothing
 else.
 
+**Help on stdout at exit 0 is the answer to `--help` and to nothing else.** Two
+routes reached it without one being asked for, and both are closed here.
+
+**`--` ends the flags.** Everything after it fills a positional slot, whatever
+it starts with. Without the separator, `binstruct -dash/ decode` — a directory
+called `-dash`, which is a legal name and which shell tab-completion will type
+for you — parsed as the flag cluster `-d -a -s -h`, whose `h` is `--help`; the
+CLI printed the whole help screen **on stdout, at exit 0**, having decoded
+nothing, and `binstruct -dash/ decode > out.json5` filled the redirect with it.
+The `TRY` lines follow the same rule: a suggestion whose package word starts
+with `-` is written with the separator, so pasting it back runs the command it
+promises (`packageWord` in `cli.ts`, ADR 0004).
+
+**An unrecognised flag is refused, not ignored.** Only `-p/--package`,
+`-c/--coder`, `--docs`, `-h/--help` and `-v/--version` exist. Anything else
+consumes a word — its value — and every positional behind it shifts, so
+`binstruct --format png decode` read `decode` as the package and answered
+confidently about `jsr:@binstruct/decode`. The refusal names the flag, goes to
+stderr, exits 1 and leaves stdout untouched, like every other diagnostic; it is
+checked before `--help` and `--version`, since a version banner for a command
+line the parser did not understand reports success for one that failed.
+
 ## Consequences
 
 - **A half-typed command cannot corrupt a redirect.** `binstruct png > out.json`
@@ -73,10 +95,19 @@ else.
 - **Exit 1 on bare `binstruct` will surprise someone.** It is the price of the
   no-exceptions rule, and it is what makes the redirect guarantee above
   unconditional.
+- **A package name starting with `-` costs one separator**, and the tool teaches
+  it: `--help` lists it and every affected `TRY` line carries it. The
+  alternative — guessing that a word which parses as flags was meant as a path —
+  is the kind of opinion only this CLI would hold, and ADR 0004 records where
+  that leads.
+- **A mistyped flag now fails instead of nearly working.** It used to run
+  something; it now names the flag and stops. This is louder, and it is the only
+  way the word in the package slot is the word that was typed.
 
 ## References
 
-- `cli.ts` — `parseCliArgs`, `planCli`, `present`
+- `cli.ts` — `parseCliArgs`, `planCli`, `present`, `unknownFlagGuide`,
+  `packageWord`
 - `guide.ts` — `renderGuide`, the one renderer all three levels share
 - `@binstruct/cli` ADR 0002 — coder discovery via `deno doc --json`
 - `@binstruct/cli` ADR 0003 — the bundled package registry

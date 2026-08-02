@@ -425,6 +425,34 @@ Deno.test("readDocSurface has no version for a non-JSR entrypoint", () => {
   assertEquals(readDocSurface(BINSTRUCT_DOC).version, undefined);
 });
 
+Deno.test("readDocSurface answers an empty document instead of throwing", () => {
+  // `Object.entries(doc.nodes)[0]` was destructured unguarded, so a document
+  // with no nodes — which `deno doc` emits, at exit 0 — came back as an
+  // uncaught TypeError with a stack trace through the CLI's own frames.
+  assertEquals(readDocSurface({ nodes: {} }), { coders: [] });
+});
+
+Deno.test("deno doc exits 0 with no nodes at all for a directory of no modules", async () => {
+  // Where the empty document comes from, so the guard above is pinned to the
+  // tool's real behaviour rather than to a hand-written fixture. Callers refuse
+  // a directory first, but discovery is exported and answers about whatever it
+  // is handed; "nothing to report" is an answer, not a crash.
+  const directory = await Deno.realPath(await Deno.makeTempDir());
+  try {
+    await Deno.writeTextFile(`${directory}/README.md`, "not a module\n");
+    await Deno.mkdir(`${directory}/empty`);
+
+    const outcome = await discoverCoders(toFileUrl(`${directory}/empty`).href);
+
+    assert(outcome.ok, "an empty directory is a successful, empty discovery");
+    assertEquals(outcome.coders, []);
+    assertEquals(outcome.version, undefined);
+    assertEquals(outcome.summary, undefined);
+  } finally {
+    await Deno.remove(directory, { recursive: true });
+  }
+});
+
 Deno.test("deno doc documents every module under a directory, not an entrypoint", async () => {
   // The reason directories are refused before discovery runs. Asked about a
   // directory, `deno doc` answers with one node per module file it finds

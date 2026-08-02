@@ -21,7 +21,7 @@ The specifier is resolved by first match:
 
 | input                                      | rule         | resolves to             |
 | ------------------------------------------ | ------------ | ----------------------- |
-| `jsr:@binstruct/png`, `npm:x`, `https://…` | has a scheme | unchanged               |
+| `jsr:@binstruct/png`, `npm:x`, `https://…` | known scheme | unchanged               |
 | `@hertzg/xhb`, `@binstruct/png/sub`        | starts `@`   | `jsr:@hertzg/xhb`       |
 | `./x`, `/abs/x`, `pkg/`, `a/b`, `mod.ts`   | is a path    | `file://` URL under cwd |
 | `png`, `wav@0.2.0`                         | bare         | `jsr:@binstruct/png`    |
@@ -30,9 +30,35 @@ Resolution is a pure function of the input string and the working directory.
 What is at the far end of a `file:` URL is a separate question, asked afterwards
 and answered by the filesystem, not by the table.
 
-A scheme requires **at least two lowercase characters** before the colon
-(`^[a-z][a-z0-9+.-]+:`), so a bare name — or a single-letter Windows drive
-prefix — can never be mistaken for one.
+**Both explicit rules are closed sets, and everything left over is a path.**
+
+**A scheme is one of seven**, the schemes Deno resolves a module specifier
+under: `jsr:`, `npm:`, `http:`, `https:`, `file:`, `node:`, `data:`. Membership,
+not a pattern, and case-sensitive.
+
+The rule was `^[a-z][a-z0-9+.-]+:` — any word of two or more lowercase
+characters before a colon — and it leaked in exactly the way the coordinate rule
+below had leaked. `my:dir/mod.ts` is an ordinary relative path whose first
+segment holds a colon, and it matched: classified `scheme`, it was passed
+through **unanchored** to the working directory and **never stat'ed**, while
+`deno doc` resolved it against the working directory as the path it plainly is.
+Discovery listed the local module and `import()` then looked for `my:dir/mod.ts`
+next to the CLI's own sources. That is the discovery-versus-execution divergence
+this ADR spent four revisions closing, in one more spelling, and it came from
+the same mistake: an open predicate over an unbounded space of spellings leaks,
+an explicit set does not.
+
+The order cannot be fixed by reordering — `https://example.com/mod.ts` contains
+a `/`, so the scheme test has to run first. Closing it is the only move.
+Anything else carrying a colon now falls through to the `/` rule and becomes a
+path, which is what `deno doc` already thought it was; a colon with no slash
+(`gopher:x`, `ab:x`, `c:`) falls all the way through to a bare name, as `c:`
+always did.
+
+`node:` and `data:` are in the set because `import()` resolves them, which is
+what a specifier is for. `deno doc` happens to read a _positional_ `node:fs` as
+a relative file path and fail; the result either way is a refusal naming the
+specifier, never output from a package nobody asked about.
 
 **The table enumerates the registry coordinate, and calls what is left a path.**
 A JSR or npm coordinate is exactly one of:
@@ -77,10 +103,11 @@ falling through to `bare`:
   as candidates, so a gap in it hides a real module from the listing.
 
 The classification space is written out as a table of explicit rows in
-`specifier.test.ts`: every coordinate shape, every path shape, each with a
-trailing slash, plus the empty string, `/`, `.`, `..`, `@` and a scheme-like
-input with one leading character. A future gap should show up as a missing row
-in an obvious table rather than as a bug in the field.
+`specifier.test.ts`: every scheme in the set, every coordinate shape, every path
+shape, each with a trailing slash, plus the empty string, `/`, `.`, `..`, `@`, a
+drive prefix, an uppercase scheme and an unknown one with and without a slash. A
+future gap should show up as a missing row in an obvious table rather than as a
+bug in the field.
 
 Two classifications change as a consequence, both towards the grammar.
 `@binstruct/png/mod.ts` is a coordinate with a sub-entrypoint rather than a
@@ -191,6 +218,17 @@ words carrying user data are quoted — the redirections and the `<coder>`
 metavariable are shell syntax and prose, and quoting either would break the
 paste this protects.
 
+Surviving the shell is half of it: the line then has to survive **this CLI's own
+argument parsing**, which `shellWord` knows nothing about. A module file may be
+called `-dash.ts`, and the refusal above offers whatever names are in the
+directory — so `TRY binstruct -dash/mod.ts` pasted back as the flag cluster
+`-d -a -s -h`, whose `h` is `--help`, and printed the help screen at exit 0
+instead of decoding. Any `TRY` line whose package word starts with `-` is
+therefore written with the `--` separator in front of it (`packageWord` in
+`cli.ts`, ADR 0001). Only the package word needs it, because it is the first
+positional and the separator covers everything after it, and because a coder or
+command name comes from discovery and is an identifier.
+
 Nothing is substituted for the resolved specifier anywhere. Discovery, `--docs`
 and `import()` are handed the same string, which now names one module by
 construction. In particular `jsr:`, `npm:` and `http(s):` specifiers go to
@@ -243,11 +281,12 @@ teaches it.
   before the extension does. This is the same ambiguity as the bare name above
   and takes the same fix. It is inherent to the shorthand: a leading `@` cannot
   mean both things.
-- **Classification is now closed, and enumerated.** The rules follow from the
-  grammar of a registry coordinate rather than from a list of path spellings, so
-  a novel path spelling cannot fall through to the registry; and the space is
-  written out row by row in `specifier.test.ts`, so a gap shows up as a missing
-  row rather than as silent output from the wrong package.
+- **Classification is now closed, and enumerated.** Both explicit rules are
+  finite sets — seven schemes, five coordinate shapes — rather than patterns
+  over the ways a path can be spelled, so a novel path spelling can fall through
+  to neither the registry nor the pass-through; and the space is written out row
+  by row in `specifier.test.ts`, so a gap shows up as a missing row rather than
+  as silent output from the wrong package.
 - **`binstruct ./pkg` never works, whatever is in `./pkg`**, and neither does
   any other spelling of the same directory. The cost is one extra word for
   everyone with a conventional layout; the price of the alternative was
@@ -267,23 +306,29 @@ teaches it.
   the short form would hide the expansion the shorthand depends on.
 - **Cross-scope discovery is deliberately absent.** `binstruct xhb` will not
   find `@hertzg/xhb` for you, per ADR 0003.
-- **Scheme detection is a heuristic.** Two lowercase characters is enough for
-  every scheme that matters here while leaving single-letter Windows drive
-  prefixes out of scope. What follows such a prefix is then classified on its
-  own terms, so `c:` is a name and `c:/tmp/pkg` is a path.
-- **A `TRY` line may carry quotes.** A path holding a space is rendered
-  single-quoted, which is slightly noisier to read and is the only form that
-  survives being pasted.
+- **A scheme outside the set is not a scheme.** Anything else with a colon is
+  classified on its own terms, so `c:` and `gopher:x` are names, `c:/tmp/pkg`
+  and `my:dir/mod.ts` are paths, and `JSR:@binstruct/png` — membership is
+  case-sensitive — is one too. Adding a scheme the runtime learns to resolve is
+  a one-line change plus a row in the table; the cost of missing one is a
+  refusal naming the specifier, not a wrong-package decode.
+- **A `TRY` line may carry quotes, and may carry `--`.** A path holding a space
+  is rendered single-quoted; a package word starting with `-` is preceded by the
+  end-of-flags separator, since a module file may be called `-dash.ts` and the
+  refusal above is what offers its name. Both are noisier to read and both are
+  the only forms that survive being pasted (ADR 0001).
 - **The directory listing costs one `stat` per candidate.** Paid only on the
   refusal path, and it is what makes the offered names names that load.
 
 ## References
 
-- `specifier.ts` — `resolveSpecifier`, `classify`, `isModulePath`
+- `specifier.ts` — `resolveSpecifier`, `classify`, `MODULE_SCHEMES`,
+  `isModulePath`
 - `specifier.test.ts` — the enumerated classification space
 - `target.ts` — `inspectLocalTarget`, the stat that decides; `modulesInside`
-- `guide.ts` — `shellWord`, which makes a `TRY` line pasteable
-- `cli.ts` — `directoryGuide`, `missingPathGuide`, where refusal is rendered
+- `guide.ts` — `shellWord`, which makes a `TRY` line survive the shell
+- `cli.ts` — `packageWord`, which makes it survive this CLI's own parser;
+  `directoryGuide`, `missingPathGuide`, where refusal is rendered
 - `loader.ts` — `loadCoder`, which receives the specifier to import
 - `@binstruct/cli` ADR 0002 — why discovery needs a single-module specifier
 - `@binstruct/cli` ADR 0003 — why the implied scope is `@binstruct`

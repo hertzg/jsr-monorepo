@@ -190,6 +190,7 @@ Deno.test("parseCliArgs fills the three positionals in order", () => {
     help: false,
     version: false,
     docs: false,
+    unknownFlags: [],
   });
 });
 
@@ -231,6 +232,7 @@ Deno.test("parseCliArgs leaves absent positionals undefined", () => {
     help: false,
     version: false,
     docs: false,
+    unknownFlags: [],
   });
 
   assertEquals(parseCliArgs(["png"]).coder, undefined);
@@ -254,6 +256,51 @@ Deno.test("parseCliArgs reads the first positional as the package, always", () =
 
   assertEquals(options.package, "decode");
   assertEquals(options.command, undefined);
+});
+
+Deno.test("parseCliArgs ends the flags at --", () => {
+  // `-dash/` is the flag cluster -d -a -s -h to any getopt-shaped parser, and
+  // the `h` is `--help`: the CLI answered a decode with the whole help screen
+  // on stdout, at exit 0, which is the redirect corruption ADR 0001 forbids.
+  const separated = parseCliArgs(["--", "-dash/mod.ts", "decode"]);
+
+  assertEquals(separated.package, "-dash/mod.ts");
+  assertEquals(separated.coder, undefined);
+  assertEquals(separated.command, "decode");
+  assertEquals(separated.help, false);
+  assertEquals(separated.unknownFlags, []);
+
+  // Everything after the separator is a positional, whatever it starts with —
+  // a second `--` included.
+  const literal = parseCliArgs(["--", "-x", "--", "y"]);
+
+  assertEquals(literal.package, "-x");
+  assertEquals(literal.coder, "--");
+  assertEquals(literal.command, "y");
+  assertEquals(literal.unknownFlags, []);
+});
+
+Deno.test("parseCliArgs reports a flag it does not know", () => {
+  // The damage an accepted unknown flag does is the shift: `--format` swallowed
+  // `png` as its value, the package slot got `decode`, and the CLI reported
+  // confidently on jsr:@binstruct/decode.
+  const shifted = parseCliArgs(["--format", "png", "decode"]);
+
+  assertEquals(shifted.unknownFlags, ["--format"]);
+  assertEquals(shifted.package, "decode");
+
+  // A cluster reports the word as typed, once, rather than four inventions.
+  assertEquals(parseCliArgs(["-dash/", "decode"]).unknownFlags, ["-dash/"]);
+
+  // Every declared flag, and every positional, is known.
+  assertEquals(
+    parseCliArgs(["-p", "png", "-c", "pngFile", "--docs", "-h", "-v"])
+      .unknownFlags,
+    [],
+  );
+  assertEquals(parseCliArgs(["png", "pngFile", "decode"]).unknownFlags, []);
+  assertEquals(parseCliArgs(["--", "--format"]).unknownFlags, []);
+  assertEquals(parseCliArgs(["--", "--format"]).package, "--format");
 });
 
 Deno.test("parseCliArgs reads the flags", () => {
@@ -562,6 +609,7 @@ Deno.test("parseCliArgs keeps a numeric-looking word as typed", () => {
     help: false,
     version: false,
     docs: false,
+    unknownFlags: [],
   });
 });
 
@@ -1170,6 +1218,164 @@ Deno.test("the header does not repeat itself when nothing was expanded", async (
 
   assertEquals(plan.text.split("\n")[0], `package: ${PNG}`);
   assertEquals(plan.text.includes("→ file://"), false);
+});
+
+Deno.test("an unknown flag is refused, and no package is guessed at", async () => {
+  const plan = printed(await planCli(["--format", "png", "decode"]));
+
+  assertEquals(plan.stream, "stderr");
+  assertEquals(plan.code, 1);
+  assertStringIncludes(plan.text, "unknown option: --format");
+  assertStringIncludes(plan.text, "shifts which word is the package");
+  // The word the flag pushed into the package slot is never resolved.
+  assertEquals(plan.text.includes("jsr:@binstruct/decode"), false);
+  assertEquals(plan.text.includes("cannot read"), false);
+  // The screen still says which flags do exist.
+  assertStringIncludes(plan.text, "OPTIONS");
+  assertStringIncludes(plan.text, "-p, --package");
+});
+
+Deno.test("--help does not excuse an unknown flag either", async () => {
+  const plan = printed(await planCli(["--format", "json", "png", "--help"]));
+
+  assertEquals(plan.stream, "stderr");
+  assertEquals(plan.code, 1);
+  assertStringIncludes(plan.text, "unknown option: --format");
+});
+
+Deno.test("an unknown flag beats --version to the answer", async () => {
+  // --version reads no positionals, but reporting a version for a command line
+  // the parser did not understand says the invocation was fine. It was not.
+  const plan = printed(await planCli(["--version", "--format"]));
+
+  assertEquals(plan.stream, "stderr");
+  assertEquals(plan.code, 1);
+  assertStringIncludes(plan.text, "unknown option: --format");
+});
+
+Deno.test("an unknown flag writes nothing to stdout", async () => {
+  const run = await runCli(["--format", "json", "png"]);
+
+  assertEquals(run.code, 1);
+  assertEquals(run.stdout, "");
+  assertStringIncludes(run.stderr, "unknown option: --format");
+});
+
+Deno.test("a package word that reads as flags never prints help on stdout", async () => {
+  // `-dash/` parsed as -d -a -s -h, the `h` set --help, and the CLI wrote the
+  // whole help screen to stdout at exit 0 with no decode having happened —
+  // `binstruct -dash/ decode > out.json5` filled the redirect with a help
+  // screen, which is exactly what ADR 0001 exists to make impossible.
+  const directory = await writeAmbiguousPackage("-dash");
+  try {
+    const run = await runCli(
+      ["-dash/", "decode"],
+      ["-A"],
+      directory,
+      new Uint8Array([1]),
+    );
+
+    assertEquals(run.code, 1);
+    assertEquals(run.stdout, "");
+    assertStringIncludes(run.stderr, "unknown option: -dash/");
+  } finally {
+    await Deno.remove(directory, { recursive: true });
+  }
+});
+
+Deno.test("-- makes a dash-leading package word an ordinary one", async () => {
+  const directory = await writeAmbiguousPackage("-dash");
+  try {
+    const run = await runCli(
+      ["--", "-dash/mod.ts", "decode"],
+      ["-A"],
+      directory,
+      new Uint8Array([1, 2]),
+    );
+
+    assertEquals(run.code, 0);
+    assertStringIncludes(run.stdout, "'a'");
+    assertStringIncludes(run.stdout, "'b'");
+    assertStringIncludes(run.stderr, "using coder: pair");
+  } finally {
+    await Deno.remove(directory, { recursive: true });
+  }
+});
+
+Deno.test("a TRY line for a dash-leading module pastes back and runs", async () => {
+  // The refusal of ADR 0004 lists what is in a directory and offers the first
+  // name, and a module file may perfectly well start with a `-`. `shellWord`
+  // quotes for the shell and has no notion of one, so the suggestion pasted
+  // back as a flag cluster and printed help at exit 0 — a TRY line naming a
+  // command that does not run.
+  const directory = await writeAmbiguousPackage("-dash");
+  try {
+    const refusal = await runCli(["--", "-dash/", "decode"], ["-A"], directory);
+
+    assertEquals(refusal.code, 1);
+    assertEquals(refusal.stdout, "");
+    assertStringIncludes(refusal.stderr, "names a directory");
+
+    const suggestion = refusal.stderr
+      .split("TRY\n  binstruct ")[1]
+      .split("\n")[0];
+
+    assertEquals(suggestion, "-- -dash/aaa_other.ts");
+
+    const shell = new Deno.Command("sh", {
+      args: [
+        "-c",
+        `printf '\\1' | "$0" run -A "$1" ${suggestion} decode`,
+        Deno.execPath(),
+        CLI,
+      ],
+      cwd: directory,
+      stdout: "piped",
+      stderr: "piped",
+    });
+    const output = await shell.output();
+
+    assertEquals(output.code, 0);
+    assertStringIncludes(new TextDecoder().decode(output.stdout), "'z'");
+  } finally {
+    await Deno.remove(directory, { recursive: true });
+  }
+});
+
+Deno.test("a colon inside a path segment is a path, not a scheme", async () => {
+  // `^[a-z][a-z0-9+.-]+:` matched `my:`, so this was classified `scheme`: not
+  // anchored to the working directory and not stat'ed, while `deno doc`
+  // resolved it against the working directory as the path it is. Discovery
+  // listed the local module and import() then looked for `my:dir/mod.ts` next
+  // to the CLI's own sources — the divergence, one more spelling.
+  const directory = await writeAmbiguousPackage("my:dir");
+  try {
+    const run = await runCli(
+      ["my:dir/mod.ts", "decode"],
+      ["-A"],
+      directory,
+      new Uint8Array([1, 2]),
+    );
+
+    assertEquals(run.code, 0);
+    assertStringIncludes(run.stdout, "'a'");
+    assertStringIncludes(run.stdout, "'b'");
+    assertStringIncludes(run.stderr, "package: my:dir/mod.ts → file://");
+
+    // And the directory spelling reaches the refusal, as any other path does.
+    const refused = await runCli(
+      ["my:dir/", "decode"],
+      ["-A"],
+      directory,
+      new Uint8Array([1, 2]),
+    );
+
+    assertEquals(refused.code, 1);
+    assertEquals(refused.stdout, "");
+    assertStringIncludes(refused.stderr, "names a directory");
+  } finally {
+    await Deno.remove(directory, { recursive: true });
+  }
 });
 
 Deno.test("an environmental failure is not blamed on the package name", async () => {

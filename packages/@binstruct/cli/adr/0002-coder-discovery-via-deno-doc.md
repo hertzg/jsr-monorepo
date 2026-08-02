@@ -59,6 +59,15 @@ one-byte internal one), `binstruct ./pkg decode` announced
 structure, and exited 0. Silent wrong output, from the one mechanism this ADR
 exists to prevent.
 
+**Zero nodes is an answer, not an impossibility.** `deno doc` exits 0 with an
+empty `nodes` map — for a directory holding no module files, say — and reading
+`Object.entries(doc.nodes)[0]` destructured `undefined`, so the answer to "what
+does this expose?" was an uncaught `TypeError` with a stack trace through the
+CLI's own frames. An empty document is a package with no coders, which is a
+screen this CLI already knows how to print, so that is where it goes. The
+precondition above says discovery is asked about one module; it does not say the
+tool always finds one, and the difference is the guard.
+
 **`deno info` is not run on the happy path.** It is run only when discovery
 finds no coders, where its dependency graph distinguishes "this package does not
 depend on `@hertzg/binstruct`, it is probably not a binstruct package" from "it

@@ -302,6 +302,14 @@ function resolvedVersion(
  * because the specifier named one module: a directory, whose output holds one
  * node per file under it, never reaches here (`./target.ts`, ADR 0004).
  *
+ * Zero nodes is a successful discovery of nothing, not an impossibility.
+ * `deno doc` exits 0 with an empty `nodes` map for a directory holding no
+ * module files, and this destructured `Object.entries(doc.nodes)[0]` unguarded,
+ * so the answer to "what does this expose?" was an uncaught `TypeError` with a
+ * stack trace through the CLI's own frames. An empty surface is what the caller
+ * already knows how to answer — the "exposes no coders" screen — so that is
+ * what it returns.
+ *
  * @param doc Parsed output of `deno doc --json --quiet <specifier>`
  * @returns The module summary, resolved version and coder list
  *
@@ -342,9 +350,19 @@ function resolvedVersion(
  *   requiredParams: 0,
  * }]);
  * ```
+ *
+ * @example A document with no nodes exposes no coders
+ * ```ts
+ * import { assertEquals } from "@std/assert";
+ * import { readDocSurface } from "./discover.ts";
+ *
+ * assertEquals(readDocSurface({ nodes: {} }), { coders: [] });
+ * ```
  */
 export function readDocSurface(doc: DenoDocJson): PackageSurface {
-  const [key, node] = Object.entries(doc.nodes)[0];
+  const entry = Object.entries(doc.nodes)[0];
+  if (entry === undefined) return { coders: [] };
+  const [key, node] = entry;
 
   const nullary: DiscoveredCoder[] = [];
   const parameterized: DiscoveredCoder[] = [];
