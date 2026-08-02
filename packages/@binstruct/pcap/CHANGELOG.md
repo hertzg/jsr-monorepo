@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.4.0](https://github.com/hertzg/jsr-monorepo/compare/@binstruct/pcap-v0.3.0...@binstruct/pcap-v0.4.0) (2026-08-02)
+
+
+### Features
+
+* **@binstruct/pcap:** add zero-argument coder factories with endianness auto-detection ([#222](https://github.com/hertzg/jsr-monorepo/issues/222)) ([6f9922f](https://github.com/hertzg/jsr-monorepo/commit/6f9922f8a33ea6d99131fe49be18b39fca6128bd))
+
 ## [0.3.0](https://github.com/hertzg/jsr-monorepo/compare/@binstruct/pcap-v0.2.0...@binstruct/pcap-v0.3.0) (2026-05-01)
 
 
