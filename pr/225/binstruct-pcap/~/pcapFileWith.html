@@ -171,6 +171,12 @@ and record coders.</p>
 <p>Records are decoded greedily until fewer than 16 bytes (the record-header
 size) remain in the buffer; this matches how typical pcap readers consume a
 file to its end without needing an explicit count.</p>
+<p>This is the builder tier of the package's coder API: it deliberately keeps
+both coders required, because there is no single obvious pair to default to
+once the caller has opted into custom header or record handling. Callers who
+just want to read or write an ordinary capture use <a href="../././~/pcapFile.html">pcapFile</a>, the
+zero-argument sibling that supplies the standard pair and picks the byte
+order for you.</p>
 </div><section class="section"  id="examples"><div>
       <h2 class="anchorable mb-1"><a href="#examples" class="anchor" aria-label="Anchor" tabIndex="-1"><svg
   width="16"
