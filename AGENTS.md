@@ -85,6 +85,7 @@ mirrors the JSR coordinate. Two scopes:
 - `bmp` - BMP/DIB image file format support
 - `cli` - CLI tools for binary structure operations
 - `dos-mz` - DOS MZ executable header
+- `esp` - IPsec ESP header parsing (RFC 4303)
 - `ethernet` - Ethernet frame parsing
 - `icmp` - ICMPv4 packet parsing (RFC 792)
 - `icmpv6` - ICMPv6 message parsing (RFC 4443)
@@ -385,6 +386,7 @@ both tiresome and error-prone.
 - `@binstruct/bmp`
 - `@binstruct/cli`
 - `@binstruct/dos-mz`
+- `@binstruct/esp`
 - `@binstruct/ethernet`
 - `@binstruct/icmp`
 - `@binstruct/icmpv6`

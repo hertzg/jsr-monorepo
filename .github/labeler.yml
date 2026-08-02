@@ -16,6 +16,9 @@
 "@binstruct/dos-mz":
   - changed-files:
       - any-glob-to-any-file: packages/@binstruct/dos-mz/**
+"@binstruct/esp":
+  - changed-files:
+      - any-glob-to-any-file: packages/@binstruct/esp/**
 "@binstruct/ethernet":
   - changed-files:
       - any-glob-to-any-file: packages/@binstruct/ethernet/**

@@ -57,6 +57,14 @@
         { "type": "json", "path": "deno.json", "jsonpath": "$.version" }
       ]
     },
+    "packages/@binstruct/esp": {
+      "release-type": "simple",
+      "package-name": "@binstruct/esp",
+      "component": "@binstruct/esp",
+      "extra-files": [
+        { "type": "json", "path": "deno.json", "jsonpath": "$.version" }
+      ]
+    },
     "packages/@binstruct/ethernet": {
       "release-type": "simple",
       "package-name": "@binstruct/ethernet",
