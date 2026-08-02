@@ -46,9 +46,6 @@ export interface AuthResult {
   dialect: Dialect;
 }
 
-const encoder = new TextEncoder();
-const decoder = new TextDecoder();
-
 /**
  * Authenticates with a TP-Link router and returns session context.
  *
@@ -130,6 +127,9 @@ export async function authenticate(
   if (isLoggedIn && !forceLogin) {
     return null;
   }
+
+  const encoder = new TextEncoder();
+  const decoder = new TextDecoder();
 
   const envelope = encryption.encrypt(
     encoder.encode(dialect.encodeLogin({ username, password })),

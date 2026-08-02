@@ -52,8 +52,6 @@ export interface ExecuteResult {
   actions: ActionResult[];
 }
 
-const encoder = new TextEncoder();
-
 /**
  * Executes one or more actions on the router.
  *
@@ -124,6 +122,7 @@ export async function execute(
   const results: ActionResult[] = actions.map((req) => ({ req, res: null }));
   let error: number | null = null;
 
+  const encoder = new TextEncoder();
   for (const batch of dialect.encodeCommands(actions)) {
     const envelope = encryption.encrypt(
       encoder.encode(batch.payload),

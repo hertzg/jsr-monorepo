@@ -1,7 +1,8 @@
 import { assertEquals } from "@std/assert";
+import { assertSpyCalls, resolvesNext, spy } from "@std/testing/mock";
 import { createEncryption, type Encryption } from "./client/encryption.ts";
 import { execute } from "./execute.ts";
-import { ACT, type Action, gdprJson, gdprText } from "./dialect/mod.ts";
+import { ACT, type Action, gdprJson } from "./dialect/mod.ts";
 
 const BASE_URL = "http://192.168.1.1";
 const SEQUENCE = 742334261;
@@ -16,51 +17,43 @@ const MODULUS = Uint8Array.fromHex(
 );
 const EXPONENT = Uint8Array.fromHex("010001");
 
-const encoder = new TextEncoder();
-
 function newEncryption(): Encryption {
   return createEncryption({
     modulus: MODULUS,
     exponent: EXPONENT,
+    username: "admin",
     password: "hunter2",
   });
 }
 
 /** Encrypts a plaintext fixture the way the router would, for the same instance. */
 function cannedResponse(encryption: Encryption, plaintext: string): Response {
+  const encoder = new TextEncoder();
   return new Response(
     encryption.encrypt(encoder.encode(plaintext), SEQUENCE).data,
   );
 }
 
-function recordingFetch(responses: readonly Response[]): {
-  fetch: typeof globalThis.fetch;
-  requests: Request[];
-} {
-  const requests: Request[] = [];
-  let index = 0;
-
-  return {
-    requests,
-    fetch: (input) => {
-      requests.push(input as Request);
-      return Promise.resolve(responses[index++]);
-    },
-  };
+/** The request handed to the Nth `fetch` call. */
+function requestAt(
+  fetch: { calls: { args: unknown[] }[] },
+  index: number,
+): Request {
+  return fetch.calls[index].args[0] as Request;
 }
 
-Deno.test("execute sends one gdprText request and aligns results", async () => {
+Deno.test("execute batches gdprText actions into one request and aligns results", async () => {
   const encryption = newEncryption();
   const actions: Action[] = [
     [ACT.GET, "IGD_DEV_INFO"],
     [ACT.GET, "LTE_BANDINFO"],
   ];
-  const { fetch, requests } = recordingFetch([
+  const fetch = spy(resolvesNext([
     cannedResponse(
       encryption,
       "[IGD_DEV_INFO]0\nmodelName=MR600\n[LTE_BANDINFO]1\nband=3\n",
     ),
-  ]);
+  ]));
 
   const result = await execute(BASE_URL, actions, {
     encryption,
@@ -70,25 +63,9 @@ Deno.test("execute sends one gdprText request and aligns results", async () => {
     fetch,
   });
 
-  assertEquals(requests.length, 1);
-  assertEquals(requests[0].url, "http://192.168.1.1/cgi_gdpr");
-  assertEquals(
-    requests[0].headers.get("cookie"),
-    "loginErrorShow=1; JSESSIONID=1B3A7C2E9F4D",
-  );
-  assertEquals(requests[0].headers.get("tokenid"), "d41d8cd98f");
-
-  const envelope = encryption.encrypt(
-    encoder.encode(gdprText.encodeCommands(actions)[0].payload),
-    SEQUENCE,
-  );
-  assertEquals(
-    await requests[0].text(),
-    `sign=${envelope.sign}\r\ndata=${envelope.data}\r\n`,
-  );
-  // A command signature is `h&s` only: one 512-bit RSA block, half the length
-  // of the `key&iv&h&s` login signature asserted in authenticate.test.ts.
-  assertEquals(envelope.sign.length, 128);
+  // Two actions, one round trip — the batching contract. The request's URL,
+  // headers and body framing are pinned in dialect/gdprText.test.ts.
+  assertSpyCalls(fetch, 1);
 
   assertEquals(result, {
     error: null,
@@ -106,9 +83,9 @@ Deno.test("execute pads unanswered actions with null", async () => {
     [ACT.GET, "LTE_BANDINFO"],
     [ACT.GET, "WAN_STATUS"],
   ];
-  const { fetch } = recordingFetch([
+  const fetch = spy(resolvesNext([
     cannedResponse(encryption, "[IGD_DEV_INFO]0\nmodelName=MR600\n"),
-  ]);
+  ]));
 
   const result = await execute(BASE_URL, actions, {
     encryption,
@@ -129,7 +106,7 @@ Deno.test("execute pads unanswered actions with null", async () => {
 
 Deno.test("execute surfaces the router error code", async () => {
   const encryption = newEncryption();
-  const { fetch } = recordingFetch([cannedResponse(encryption, "[error]5")]);
+  const fetch = spy(resolvesNext([cannedResponse(encryption, "[error]5")]));
 
   const result = await execute(BASE_URL, [[ACT.GET, "IGD_DEV_INFO"]], {
     encryption,
@@ -145,7 +122,7 @@ Deno.test("execute surfaces the router error code", async () => {
 
 Deno.test("execute short-circuits on a transport failure", async () => {
   const encryption = newEncryption();
-  const { fetch } = recordingFetch([new Response("nope", { status: 401 })]);
+  const fetch = spy(resolvesNext([new Response("nope", { status: 401 })]));
 
   const result = await execute(BASE_URL, [[ACT.GET, "IGD_DEV_INFO"]], {
     encryption,
@@ -160,9 +137,9 @@ Deno.test("execute short-circuits on a transport failure", async () => {
 
 Deno.test("execute honours an explicit authTimes", async () => {
   const encryption = newEncryption();
-  const { fetch, requests } = recordingFetch([
+  const fetch = spy(resolvesNext([
     cannedResponse(encryption, "[IGD_DEV_INFO]0\nmodelName=MR600\n"),
-  ]);
+  ]));
 
   await execute(BASE_URL, [[ACT.GET, "IGD_DEV_INFO"]], {
     encryption,
@@ -173,8 +150,9 @@ Deno.test("execute honours an explicit authTimes", async () => {
     fetch,
   });
 
+  // authTimes has to reach the dialect; the cookie is where that shows up.
   assertEquals(
-    requests[0].headers.get("cookie"),
+    requestAt(fetch, 0).headers.get("cookie"),
     "loginErrorShow=4; JSESSIONID=sid",
   );
 });
@@ -185,10 +163,10 @@ Deno.test("execute sends one gdprJson request per action", async () => {
     [ACT.GET, "DEV2_DEV_INFO"],
     [ACT.GL, "DEV2_LTE_SERVING_CELL_INFO"],
   ];
-  const { fetch, requests } = recordingFetch([
+  const fetch = spy(resolvesNext([
     cannedResponse(encryption, '{"success":true,"data":{"modelName":"NE200"}}'),
     cannedResponse(encryption, '{"success":true,"data":[{"band":"n78"}]}'),
-  ]);
+  ]));
 
   const result = await execute(BASE_URL, actions, {
     encryption,
@@ -199,12 +177,9 @@ Deno.test("execute sends one gdprJson request per action", async () => {
     fetch,
   });
 
-  assertEquals(requests.length, 2);
-  assertEquals(requests.map((request) => request.url), [
-    "http://192.168.1.1/cgi_gdpr?9",
-    "http://192.168.1.1/cgi_gdpr?9",
-  ]);
-  assertEquals(requests[0].headers.get("cookie"), "JSESSIONID=1B3A7C2E9F4D");
+  // Two actions, two round trips — the contrast with gdprText's batching.
+  // The URL and headers of each are pinned in dialect/gdprJson.test.ts.
+  assertSpyCalls(fetch, 2);
 
   assertEquals(result, {
     error: null,
@@ -218,7 +193,7 @@ Deno.test("execute sends one gdprJson request per action", async () => {
 Deno.test("execute decodes the plain-text reply of a gdprJson cgi action", async () => {
   const encryption = newEncryption();
   const actions: Action[] = [[ACT.CGI, "/cgi/logout"]];
-  const { fetch } = recordingFetch([cannedResponse(encryption, "$.ret=0")]);
+  const fetch = spy(resolvesNext([cannedResponse(encryption, "$.ret=0")]));
 
   const result = await execute(BASE_URL, actions, {
     encryption,
@@ -241,10 +216,10 @@ Deno.test("execute keeps the first error reported across gdprJson round trips", 
     [ACT.GET, "DEV2_DEV_INFO"],
     [ACT.GET, "DEV2_MEM_STATUS"],
   ];
-  const { fetch } = recordingFetch([
+  const fetch = spy(resolvesNext([
     cannedResponse(encryption, '{"success":false,"errorcode":71011}'),
     cannedResponse(encryption, '{"success":true,"data":{"total":"1024"}}'),
-  ]);
+  ]));
 
   const result = await execute(BASE_URL, actions, {
     encryption,

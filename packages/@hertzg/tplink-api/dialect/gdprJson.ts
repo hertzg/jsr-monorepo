@@ -290,18 +290,17 @@ export const gdprJson: Dialect = {
       headers: { Referer: rootHref(baseUrl) },
     }),
 
+  /**
+   * Login is not a separate endpoint in this dialect — it is an ordinary `cgi`
+   * command addressed to the `/cgi/login` oid, so it goes through
+   * {@linkcode encodeAction} rather than repeating the envelope shape.
+   */
   encodeLogin: ({ username, password }: Credentials): string =>
-    JSON.stringify({
-      data: {
-        UserName: base64(username),
-        Passwd: base64(password),
-        Action: "1",
-        stack: STACK_DEFAULTS.cgi,
-        pstack: DEFAULT_PSTACK,
-      },
-      operation: "cgi",
-      oid: "/cgi/login",
-    }),
+    encodeAction([ACT.CGI, "/cgi/login", {
+      UserName: base64(username),
+      Passwd: base64(password),
+      Action: "1",
+    }]),
 
   loginRequest: (baseUrl: string, envelope: Envelope): Request =>
     new Request(new URL("cgi_gdpr?9", baseUrl), {

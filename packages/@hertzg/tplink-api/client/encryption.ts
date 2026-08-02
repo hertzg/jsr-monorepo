@@ -8,7 +8,12 @@ import { createCipher } from "./cipher/cipher.ts";
 export interface EncryptionOptions {
   modulus: Uint8Array;
   exponent: Uint8Array;
-  username?: string;
+  /**
+   * Account the credential hash is bound to. Required: the per-firmware
+   * default lives on the dialect's `defaultUsername`, so defaulting it here
+   * too would let a caller silently hash against the wrong account.
+   */
+  username: string;
   password: string;
 }
 
@@ -30,7 +35,7 @@ export interface Encryption {
 
 /** Create an encryption instance for TP-Link router communication */
 export function createEncryption(options: EncryptionOptions): Encryption {
-  const { modulus, exponent, username = "admin", password } = options;
+  const { modulus, exponent, username, password } = options;
   const cipher = createCipher({ modulus, exponent });
   const hash = md5(new TextEncoder().encode(`${username}${password}`)).toHex();
 
