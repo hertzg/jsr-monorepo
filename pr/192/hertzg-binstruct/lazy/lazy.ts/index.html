@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>struct&#x2F;struct.ts - @hertzg&#x2F;binstruct documentation</title>
+  <title>lazy&#x2F;lazy.ts - @hertzg&#x2F;binstruct documentation</title>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="doc-current-file" content="">
@@ -32,7 +32,7 @@
     fill="currentColor"
   />
 </svg>
-</span>struct&#x2F;struct.ts</ul>
+</span>lazy&#x2F;lazy.ts</ul>
 </div>
 
     <div class="flex items-center gap-2">
@@ -98,12 +98,18 @@
 </nav>
 <div id="searchResults"></div><div id="content">
     <main><section>
-  <div class="space-y-2 flex-1"><div class="space-y-7" id="module_doc"><div class="markdown"><p>Struct coder for binary structures.</p>
-<p>Creates a coder from an object schema of property-name to import(&quot;./mod.ts&quot;).Coder.
-Encodes fields in order and decodes them into an object of the same shape.</p>
-<p>Values are added to the shared context during encode/decode, enabling
-import(&quot;./ref.ts&quot;).ref based length references.</p>
-<p>It's the user's responsibility to provide a buffer big enough to fit the whole data.</p>
+  <div class="space-y-2 flex-1"><div class="space-y-7" id="module_doc"><div class="markdown"><p>Lazily-built coder for mutually-recursive coder graphs.</p>
+<p><code>lazy()</code> defers calling its <code>factory</code> until the first <code>encode</code>/<code>decode</code>,
+then caches the result forever. This breaks the build-time recursion that
+happens when two or more coders reference each other (<code>a</code> needs <code>b</code>, <code>b</code>
+needs <code>a</code>): without <code>lazy()</code>, building either one eagerly walks into the
+other before it has a value to return, and JavaScript's temporal dead zone
+turns that into a <code>ReferenceError</code> (or, if the cycle is expressed through
+a factory function instead of a <code>const</code>, an unbounded <code>RangeError: Maximum call stack size exceeded</code>).</p>
+<p><code>lazy()</code> does not bound <em>runtime</em> recursion. Decoding a self-referential
+structure still recurses once per level actually present in the input;
+termination is the protocol's job (a discriminator that stops matching, or
+the buffer running out), not <code>lazy()</code>'s.</p>
 </div><section class="section"  id="examples"><div>
       <h2 class="anchorable mb-1"><a href="#examples" class="anchor" aria-label="Anchor" tabIndex="-1"><svg
   width="16"
@@ -149,29 +155,77 @@ Examples</h2></div><div class="space-y-8"><div class="anchorable"><a href="#exam
   </defs>
 </svg>
 </a>
-<h3 class="example-header"><div class="markdown"><p>Minimal usage</p>
+<h3 class="example-header"><div class="markdown"><p>Breaking a build-time cycle between two struct coders</p>
 </div></h3>
   <div><div class="markdown"><pre class="highlight"><code class="language-ts">import { assertEquals } from &quot;@std/assert&quot;;
-import { struct } from &quot;@hertzg/binstruct/struct&quot;;
-import { u16le, u8le } from &quot;@hertzg/binstruct/numeric&quot;;
+import { struct, lazy, type Coder } from &quot;@hertzg/binstruct&quot;;
+import { u8 } from &quot;@hertzg/binstruct/numeric&quot;;
 
-const coder = struct({ id: u16le(), flag: u8le() });
-const value = { id: 513, flag: 7 };
-const buf = new Uint8Array(32);
-const written = coder.encode(value, buf);
-const [decoded, read] = coder.decode(buf);
+interface Ping {
+  kind: 0;
+  next: Pong;
+}
+interface Pong {
+  kind: 1;
+  ttl: number;
+}
+
+// `pingCoder` needs `pongCoder` while building its own `next` field, but
+// `pongCoder` is declared afterwards and does not exist yet at that point.
+// Without `lazy()` this is a ReferenceError (reading `pongCoder` inside
+// its own temporal dead zone) once the graph grows past two coders and
+// closes an actual cycle, as it does for tunneling protocols.
+const pingCoder: Coder&lt;Ping&gt; = struct({
+  kind: u8() as unknown as Coder&lt;0&gt;,
+  next: lazy(() =&gt; pongCoder),
+});
+
+const pongCoder: Coder&lt;Pong&gt; = struct({
+  kind: u8() as unknown as Coder&lt;1&gt;,
+  ttl: u8(),
+});
+
+const buffer = new Uint8Array(8);
+const value: Ping = { kind: 0, next: { kind: 1, ttl: 64 } };
+
+const written = pingCoder.encode(value, buffer);
+const [decoded, read] = pingCoder.decode(buffer);
 
 assertEquals(decoded, value);
 assertEquals(written, read);
 </code><button class="copyButton" data-copy="import { assertEquals } from &quot;@std/assert&quot;;
-import { struct } from &quot;@hertzg/binstruct/struct&quot;;
-import { u16le, u8le } from &quot;@hertzg/binstruct/numeric&quot;;
+import { struct, lazy, type Coder } from &quot;@hertzg/binstruct&quot;;
+import { u8 } from &quot;@hertzg/binstruct/numeric&quot;;
 
-const coder = struct({ id: u16le(), flag: u8le() });
-const value = { id: 513, flag: 7 };
-const buf = new Uint8Array(32);
-const written = coder.encode(value, buf);
-const [decoded, read] = coder.decode(buf);
+interface Ping {
+  kind: 0;
+  next: Pong;
+}
+interface Pong {
+  kind: 1;
+  ttl: number;
+}
+
+// `pingCoder` needs `pongCoder` while building its own `next` field, but
+// `pongCoder` is declared afterwards and does not exist yet at that point.
+// Without `lazy()` this is a ReferenceError (reading `pongCoder` inside
+// its own temporal dead zone) once the graph grows past two coders and
+// closes an actual cycle, as it does for tunneling protocols.
+const pingCoder: Coder&lt;Ping&gt; = struct({
+  kind: u8() as unknown as Coder&lt;0&gt;,
+  next: lazy(() =&gt; pongCoder),
+});
+
+const pongCoder: Coder&lt;Pong&gt; = struct({
+  kind: u8() as unknown as Coder&lt;1&gt;,
+  ttl: u8(),
+});
+
+const buffer = new Uint8Array(8);
+const value: Ping = { kind: 0, next: { kind: 1, ttl: 64 } };
+
+const written = pingCoder.encode(value, buffer);
+const [decoded, read] = pingCoder.decode(buffer);
 
 assertEquals(decoded, value);
 assertEquals(written, read);
@@ -209,8 +263,8 @@ assertEquals(written, read);
 </div></div>
 </div>
 </div></section>
-<section class="section"  id="struct&#x2F;struct_ts_functions"><div>
-      <h2 class="anchorable mb-1"><a href="#struct&#x2F;struct_ts_functions" class="anchor" aria-label="Anchor" tabIndex="-1"><svg
+<section class="section"  id="lazy&#x2F;lazy_ts_functions"><div>
+      <h2 class="anchorable mb-1"><a href="#lazy&#x2F;lazy_ts_functions" class="anchor" aria-label="Anchor" tabIndex="-1"><svg
   width="16"
   height="16"
   viewBox="0 0 14 14"
@@ -232,10 +286,11 @@ assertEquals(written, read);
   </defs>
 </svg>
 </a>
-Functions</h2></div><div class="namespaceSection"><div id="namespace_struct" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-Function bg-Function/15 dark:text-FunctionDark dark:bg-FunctionDark/15" title="Function">f</div></div>
+Functions</h2></div><div class="namespaceSection"><div id="namespace_lazy" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-Function bg-Function/15 dark:text-FunctionDark dark:bg-FunctionDark/15" title="Function">f</div></div>
 <div class="namespaceItemContent">
-		    <a href="..&#x2F;..&#x2F;.&#x2F;struct&#x2F;struct.ts&#x2F;~&#x2F;struct.html" title="struct">
-			    <span>struct</span><span><span>&lt;<span><span class="td-tp">T</span><span><span class="td-kw"> extends </span><span class="td-ref">Record</span>&lt;<span class="td-kw">string</span><span>, </span><span class="td-ref">Coder</span>&lt;<span class="td-kw">any</span>&gt;&gt;</span></span>&gt;</span>(<span><span>schema<span>: <span class="td-ref">T</span></span></span></span>)<span>: <span class="td-ref">Coder</span>&lt;[<span><span class="td-tp">K</span><span><span class="td-kw"> in </span><span class="td-kw">keyof</span> <span class="td-ref">T</span></span></span>]<span>: <span class="td-ref">T</span>[<span class="td-ref">K</span>] <span class="td-kw">extends</span> <span class="td-ref">Coder</span>&lt;<span class="td-kw">infer </span><span><span class="td-tp">U</span></span>&gt; <span class="td-op">?</span> <span class="td-ref">U</span> <span class="td-op">:</span> <span class="td-kw">never</span></span>&gt;</span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Creates a Coder for structured data from an object of property names to coders.</p>
+		    <a href="..&#x2F;..&#x2F;.&#x2F;lazy&#x2F;lazy.ts&#x2F;~&#x2F;lazy.html" title="lazy">
+			    <span>lazy</span><span><span>&lt;<span><span class="td-tp">TDecoded</span></span>&gt;</span>(<span><span>factory<span>: () =&gt; <span class="td-ref">Coder</span>&lt;<span class="td-ref">TDecoded</span>&gt;</span></span></span>)<span>: <span class="td-ref">Coder</span>&lt;<span class="td-ref">TDecoded</span>&gt;</span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Wraps a coder factory so the coder it produces is built on first use
+instead of when <code>lazy()</code> is called, and only ever built once.</p>
 </div></div></div>
     </div></div>
 </section>
@@ -244,8 +299,8 @@ Functions</h2></div><div class="namespaceSection"><div id="namespace_struct" cla
 </section>
 </main><div class="toc">
     <div><div class="usageContent">
-    <h3>Usage</h3><div class="markdown"><pre class="highlight"><code class="language-typescript">import * as mod from &quot;struct/struct.ts&quot;;
-</code><button class="copyButton" data-copy="import * as mod from &quot;struct/struct.ts&quot;;
+    <h3>Usage</h3><div class="markdown"><pre class="highlight"><code class="language-typescript">import * as mod from &quot;lazy/lazy.ts&quot;;
+</code><button class="copyButton" data-copy="import * as mod from &quot;lazy/lazy.ts&quot;;
 "><svg
   class="copy"
   width="15"
@@ -325,7 +380,7 @@ Functions</h2></div><div class="namespaceSection"><div id="namespace_struct" cla
   />
 </svg>
 </a></nav><nav class="documentNavigation">
-          <h3>Document Navigation</h3><ul><li><a href="#examples" title="Examples">Examples</a></li><li><ul><li><a href="#example_0" title="Minimal usage">Minimal usage</a></li></ul></li><li><a href="#struct/struct_ts_functions" title="Functions">Functions</a></li><li><ul><li><a href="#namespace_struct" title="struct">struct</a></li></ul></li></ul></nav></div>
+          <h3>Document Navigation</h3><ul><li><a href="#examples" title="Examples">Examples</a></li><li><ul><li><a href="#example_0" title="Breaking a build-time cycle between two struct coders">Breaking a build-time cycle between two struct coders</a></li></ul></li><li><a href="#lazy/lazy_ts_functions" title="Functions">Functions</a></li><li><ul><li><a href="#namespace_lazy" title="lazy">lazy</a></li></ul></li></ul></nav></div>
   </div></div>
 </div>
 </div>
