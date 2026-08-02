@@ -314,13 +314,6 @@ header (<code>@binstruct/sll</code>) top-down, dispatching the payload by <code>
 Ethernet's <code>etherType</code>, reused here via <code>l3Refiners</code>. Payloads
 whose tag has no matching coder surface as a raw <code>Uint8Array</code>.</p>
 </div></div></div>
-    </div><div id="namespace_vlanframe" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-Function bg-Function/15 dark:text-FunctionDark dark:bg-FunctionDark/15" title="Function">f</div></div>
-<div class="namespaceItemContent">
-		    <a href=".&#x2F;.&#x2F;.&#x2F;~&#x2F;vlanFrame.html" title="vlanFrame">
-			    <span>vlanFrame</span><span>(<span><span>depth<span>: <span><span class="td-lit">0</span><span class="td-op"> | </span><span class="td-lit">1</span></span></span></span></span>)<span>: <span><span class="td-ref">Coder</span>&lt;<span class="td-ref">VlanRefinedShallow</span>&gt;<span class="td-op"> | </span><span class="td-ref">Coder</span>&lt;<span class="td-ref">VlanRefined</span>&gt;</span></span></span><div class="namespaceItemContentTypeInfo">2 overloads</div></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Creates a coder for an IEEE 802.1Q VLAN tag (<code>@binstruct/vlan</code>) whose
-encapsulated payload is dispatched by EtherType, with QinQ (double
-tagging) support bounded by <code>depth</code>.</p>
-</div></div></div>
     </div></div>
 </section>
 <section class="section"  id="default_interfaces"><div>
@@ -548,7 +541,7 @@ since UDP carries no in-band type tag. See <code>udpFrame</code>.</p>
 		    <a href=".&#x2F;.&#x2F;.&#x2F;~&#x2F;VlanArpFrame.html" title="VlanArpFrame">
 			    <span>VlanArpFrame</span><span> = <span><span class="td-ref">Omit</span>&lt;<span class="td-ref">VlanTag</span><span>, </span><span class="td-str">"payload"</span>&gt;<span class="td-op"> & </span>{ payload<span>: <span class="td-ref">ArpData</span></span>;  }</span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>VLAN tag with a typed ARP payload.</p>
 </div></div></div>
-    </div><div id="namespace_vlanframe-1" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-TypeAlias bg-TypeAlias/15 dark:text-TypeAliasDark dark:bg-TypeAliasDark/15" title="Type Alias">T</div></div>
+    </div><div id="namespace_vlanframe" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-TypeAlias bg-TypeAlias/15 dark:text-TypeAliasDark dark:bg-TypeAliasDark/15" title="Type Alias">T</div></div>
 <div class="namespaceItemContent">
 		    <a href=".&#x2F;.&#x2F;.&#x2F;~&#x2F;VlanFrame.html" title="VlanFrame">
 			    <span>VlanFrame</span><span> = <span><span class="td-ref">Omit</span>&lt;<span class="td-ref">Frame</span><span>, </span><span class="td-str">"payload"</span>&gt;<span class="td-op"> & </span>{ payload<span>: <span class="td-ref">VlanRefined</span></span>;  }</span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Ethernet frame whose payload is a typed VLAN tag.</p>
