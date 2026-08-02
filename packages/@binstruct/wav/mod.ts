@@ -5,8 +5,11 @@
  * - RIFF chunk with WAVE format identification
  * - Format chunk supporting multiple audio formats (PCM, IEEE float, A-law, μ-law, extensible)
  * - Data chunk with raw audio samples
- * - Optional chunks (fact, LIST, INFO)
- * - Complete WAV file structure with automatic chunk size calculation
+ * - Optional chunks (fact, LIST)
+ * - Complete WAV file structure (RIFF, fmt, data)
+ *
+ * Chunk sizes are taken from the structure as given; they are never recomputed,
+ * and payload lengths are driven by the `chunkSize` field of their chunk.
  *
  * @example Basic WAV file encoding and decoding
  * ```ts
@@ -17,12 +20,12 @@
  * const testWav = {
  *   riff: {
  *     chunkId: "RIFF" as const,
- *     chunkSize: 44,
+ *     chunkSize: 1038, // total file size minus the 8-byte RIFF header
  *     format: "WAVE" as const
  *   },
  *   fmt: {
  *     chunkId: "fmt " as const,
- *     chunkSize: 16,
+ *     chunkSize: 18, // 16 PCM fields plus the 2-byte cbSize
  *     audioFormat: 1, // PCM
  *     numChannels: 1, // Mono
  *     sampleRate: 44100,
@@ -43,6 +46,7 @@
  * const [decodedWav, bytesRead] = wavCoder.decode(buffer);
  *
  * assertEquals(bytesRead, bytesWritten);
+ * assertEquals(bytesWritten, 1046); // 12 (RIFF) + 26 (fmt) + 1008 (data)
  * assertEquals(decodedWav.riff.chunkId, "RIFF");
  * assertEquals(decodedWav.riff.format, "WAVE");
  * assertEquals(decodedWav.fmt.audioFormat, 1);
@@ -51,7 +55,7 @@
  * assertEquals(decodedWav.data.audioData.length, 1000);
  * ```
  *
- * @example IEEE float format with fact chunk
+ * @example IEEE float format
  * ```ts
  * import { assertEquals } from "@std/assert";
  * import { wavFile } from "@binstruct/wav";
@@ -60,7 +64,7 @@
  * const floatWav = {
  *   riff: {
  *     chunkId: "RIFF",
- *     chunkSize: 58,
+ *     chunkSize: 838, // total file size minus the 8-byte RIFF header
  *     format: "WAVE"
  *   },
  *   fmt: {
@@ -86,7 +90,7 @@
  * const [decoded, bytesRead] = floatWavCoder.decode(buffer);
  *
  * assertEquals(bytesRead, bytesWritten);
- * assertEquals(bytesWritten, 850); // 12 (RIFF) + 24 (fmt) + 12 (fact) + 812 (data with length prefix)
+ * assertEquals(bytesWritten, 846); // 12 (RIFF) + 26 (fmt) + 808 (data)
  * assertEquals(decoded.fmt.audioFormat, 3);
  * assertEquals(decoded.fmt.numChannels, 2);
  * assertEquals(decoded.data.audioData.length, 800);
@@ -95,7 +99,16 @@
  * @module @binstruct/wav
  */
 
-import { array, string, struct, u16le, u32le, u8le } from "@hertzg/binstruct";
+import {
+  array,
+  computedRef,
+  ref,
+  string,
+  struct,
+  u16le,
+  u32le,
+  u8le,
+} from "@hertzg/binstruct";
 import type { Coder } from "@hertzg/binstruct";
 
 /**
@@ -141,7 +154,7 @@ export interface FmtChunk {
  *
  * @property chunkId - Always "data" (4 bytes)
  * @property chunkSize - Size of audio data in bytes
- * @property audioData - Raw audio samples as array of bytes
+ * @property audioData - Raw audio samples as array of bytes, exactly `chunkSize` long
  */
 export interface DataChunk {
   chunkId: string;
@@ -166,9 +179,9 @@ export interface FactChunk {
  * Represents an optional LIST chunk structure.
  *
  * @property chunkId - Always "LIST" (4 bytes)
- * @property chunkSize - Size of list data
+ * @property chunkSize - Size of the list type plus the list data
  * @property listType - Type of list (e.g., "INFO")
- * @property data - List data as array of bytes
+ * @property data - List data as array of bytes, exactly `chunkSize - 4` long
  */
 export interface ListChunk {
   chunkId: string;
@@ -235,9 +248,12 @@ export function riffChunk(): Coder<RiffChunk> {
  * Creates a coder for format chunks.
  *
  * Encodes and decodes format chunk structures supporting:
- * - Standard PCM format (16 bytes)
  * - Extended formats with cbSize field (18+ bytes)
  * - Multiple audio format codes (PCM, IEEE float, A-law, μ-law, extensible)
+ *
+ * The `cbSize` field is always encoded and decoded, so the chunk payload is
+ * always 18 bytes and `chunkSize` should be 18. The canonical 16-byte PCM
+ * `fmt ` chunk, which omits `cbSize`, is not supported.
  *
  * @returns A coder that can encode/decode FmtChunk objects
  *
@@ -249,7 +265,7 @@ export function riffChunk(): Coder<RiffChunk> {
  * const fmtCoder = fmtChunk();
  * const testFmt = {
  *   chunkId: "fmt ",
- *   chunkSize: 16,
+ *   chunkSize: 18, // 16 PCM fields plus the 2-byte cbSize
  *   audioFormat: 1, // PCM
  *   numChannels: 2, // Stereo
  *   sampleRate: 44100,
@@ -292,9 +308,11 @@ export function fmtChunk(): Coder<FmtChunk> {
  * Encodes and decodes data chunk structures with:
  * - 4-byte chunk ID ("data")
  * - 4-byte chunk size (little-endian)
- * - Variable-length audio data
+ * - Exactly `chunkSize` bytes of audio data
  *
- * @param lengthOrRef - Optional length specification for audio data
+ * The audio data length is driven by the `chunkSize` field, as required by RIFF:
+ * a `data` chunk carries no length of its own beyond `chunkSize`.
+ *
  * @returns A coder that can encode/decode DataChunk objects
  *
  * @example Basic data chunk encoding and decoding
@@ -313,18 +331,19 @@ export function fmtChunk(): Coder<FmtChunk> {
  * const bytesWritten = dataCoder.encode(testData, buffer);
  * const [decoded, bytesRead] = dataCoder.decode(buffer);
  *
- * assertEquals(bytesRead, 1012);
- * assertEquals(bytesWritten, 1012); // 4 (chunkId) + 4 (chunkSize) + 4 (length) + 1000 (audioData)
+ * assertEquals(bytesRead, 1008);
+ * assertEquals(bytesWritten, 1008); // 4 (chunkId) + 4 (chunkSize) + 1000 (audioData)
  * assertEquals(decoded.chunkId, "data");
  * assertEquals(decoded.chunkSize, 1000);
  * assertEquals(decoded.audioData.length, 1000); // Uses chunkSize reference
  * ```
  */
 export function dataChunk(): Coder<DataChunk> {
+  const chunkSize = u32le();
   return struct({
     chunkId: string(4),
-    chunkSize: u32le(),
-    audioData: array(u8le(), u32le()),
+    chunkSize,
+    audioData: array(u8le(), ref(chunkSize)),
   });
 }
 
@@ -376,9 +395,11 @@ export function factChunk(): Coder<FactChunk> {
  * - 4-byte chunk ID ("LIST")
  * - 4-byte chunk size
  * - 4-byte list type
- * - Variable-length list data
+ * - Exactly `chunkSize - 4` bytes of list data
  *
- * @param lengthOrRef - Optional length specification for list data
+ * A RIFF `LIST` chunk counts its list type towards `chunkSize`, so the payload
+ * that follows the list type is four bytes shorter than `chunkSize`.
+ *
  * @returns A coder that can encode/decode ListChunk objects
  *
  * @example Basic LIST chunk encoding and decoding
@@ -391,7 +412,7 @@ export function factChunk(): Coder<FactChunk> {
  *   chunkId: "LIST",
  *   chunkSize: 20,
  *   listType: "INFO",
- *   data: new Array(12).fill(0)
+ *   data: new Array(16).fill(0)
  * };
  *
  * const buffer = new Uint8Array(100);
@@ -399,33 +420,34 @@ export function factChunk(): Coder<FactChunk> {
  * const [decoded, bytesRead] = listCoder.decode(buffer);
  *
  * assertEquals(bytesRead, 28);
- * assertEquals(bytesWritten, 28); // 4 (chunkId) + 4 (chunkSize) + 4 (listType) + 4 (length) + 12 (data)
+ * assertEquals(bytesWritten, 28); // 4 (chunkId) + 4 (chunkSize) + 4 (listType) + 16 (data)
  * assertEquals(decoded.chunkId, "LIST");
  * assertEquals(decoded.chunkSize, 20);
  * assertEquals(decoded.listType, "INFO");
- * assertEquals(decoded.data.length, 12); // Uses chunkSize reference
+ * assertEquals(decoded.data.length, 16); // chunkSize - 4 (listType)
  * ```
  */
 export function listChunk(): Coder<ListChunk> {
+  const chunkSize = u32le();
   return struct({
     chunkId: string(4),
-    chunkSize: u32le(),
+    chunkSize,
     listType: string(4),
-    data: array(u8le(), u32le()),
+    data: array(u8le(), computedRef([ref(chunkSize)], (size) => size - 4)),
   });
 }
 
 /**
  * Creates a coder for complete WAV files.
  *
- * Encodes and decodes complete WAV file structures including:
+ * Encodes and decodes WAV files laid out as exactly three chunks in this order:
  * - RIFF header chunk
  * - Format chunk
- * - Optional fact chunk (for non-PCM formats)
- * - Optional LIST chunk (for metadata)
  * - Data chunk with audio samples
  *
- * The coder handles variable chunk ordering and optional chunks automatically.
+ * Files carrying additional chunks (`fact`, `LIST`) or a different chunk order
+ * are not handled; compose {@link factChunk} and {@link listChunk} manually for
+ * those.
  *
  * @returns A coder that can encode/decode WavFile objects
  *
@@ -438,12 +460,12 @@ export function listChunk(): Coder<ListChunk> {
  * const testWav = {
  *   riff: {
  *     chunkId: "RIFF" as const,
- *     chunkSize: 44,
+ *     chunkSize: 1038, // total file size minus the 8-byte RIFF header
  *     format: "WAVE" as const
  *   },
  *   fmt: {
  *     chunkId: "fmt " as const,
- *     chunkSize: 16,
+ *     chunkSize: 18, // 16 PCM fields plus the 2-byte cbSize
  *     audioFormat: 1, // PCM
  *     numChannels: 1, // Mono
  *     sampleRate: 44100,
@@ -464,7 +486,7 @@ export function listChunk(): Coder<ListChunk> {
  * const [decoded, bytesRead] = wavCoder.decode(buffer);
  *
  * assertEquals(bytesRead, bytesWritten);
- * assertEquals(bytesWritten, 1050); // 12 (RIFF) + 24 (fmt) + 1012 (data with length prefix)
+ * assertEquals(bytesWritten, 1046); // 12 (RIFF) + 26 (fmt) + 1008 (data)
  * assertEquals(decoded.riff.chunkId, "RIFF");
  * assertEquals(decoded.riff.format, "WAVE");
  * assertEquals(decoded.fmt.audioFormat, 1);
