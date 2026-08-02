@@ -74,12 +74,11 @@ deno task cov
 
 ## Releasing
 
-Releases are automated via
-[Release Please](https://github.com/googleapis/release-please). Commits
-following [Conventional Commits](https://www.conventionalcommits.org/) are
-analyzed automatically, and a release PR is maintained with version bumps and
-changelogs. Merging the release PR creates GitHub Releases and publishes all
-packages to JSR.
+Releases are automated via [Release Please](https://github.com/googleapis/release-please).
+Commits following [Conventional Commits](https://www.conventionalcommits.org/)
+are analyzed automatically, and a release PR is maintained with version bumps
+and changelogs. Merging the release PR creates GitHub Releases and publishes
+all packages to JSR.
 
 ## License
 
