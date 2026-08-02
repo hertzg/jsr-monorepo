@@ -43,6 +43,9 @@
 "@binstruct/vlan":
   - changed-files:
       - any-glob-to-any-file: packages/@binstruct/vlan/**
+"@binstruct/vxlan":
+  - changed-files:
+      - any-glob-to-any-file: packages/@binstruct/vxlan/**
 "@binstruct/wav":
   - changed-files:
       - any-glob-to-any-file: packages/@binstruct/wav/**

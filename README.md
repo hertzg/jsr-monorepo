@@ -46,6 +46,7 @@ Source layout mirrors the JSR scope: `packages/<scope>/<name>/`.
 | [@binstruct/tcp](https://jsr.io/@binstruct/tcp)           | [![JSR](https://jsr.io/badges/@binstruct/tcp)](https://jsr.io/@binstruct/tcp)           |
 | [@binstruct/udp](https://jsr.io/@binstruct/udp)           | [![JSR](https://jsr.io/badges/@binstruct/udp)](https://jsr.io/@binstruct/udp)           |
 | [@binstruct/vlan](https://jsr.io/@binstruct/vlan)         | [![JSR](https://jsr.io/badges/@binstruct/vlan)](https://jsr.io/@binstruct/vlan)         |
+| [@binstruct/vxlan](https://jsr.io/@binstruct/vxlan)       | [![JSR](https://jsr.io/badges/@binstruct/vxlan)](https://jsr.io/@binstruct/vxlan)       |
 | [@binstruct/wav](https://jsr.io/@binstruct/wav)           | [![JSR](https://jsr.io/badges/@binstruct/wav)](https://jsr.io/@binstruct/wav)           |
 
 ## Installation

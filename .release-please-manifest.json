@@ -15,6 +15,7 @@
   "packages/@binstruct/tcp": "0.2.0",
   "packages/@binstruct/udp": "1.1.0",
   "packages/@binstruct/vlan": "0.0.1",
+  "packages/@binstruct/vxlan": "0.0.1",
   "packages/@binstruct/wav": "0.1.2",
   "packages/@hertzg/wg-keys": "2.2.0",
   "packages/@hertzg/wg-ini": "0.2.4",
