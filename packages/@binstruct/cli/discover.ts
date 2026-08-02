@@ -20,6 +20,10 @@
  * emits one node per module file it finds underneath — no entrypoint among
  * them — and reading any one of those is a guess about which module was meant.
  *
+ * Every subprocess here runs under a deadline ({@linkcode TOOL_TIMEOUT}) and is
+ * killed when it passes. `deno doc` may fetch, fetching may stall, and a stall
+ * with no deadline is a CLI that prints nothing and never returns.
+ *
  * `deno info` is deliberately **not** part of the happy path. It is run only
  * by {@linkcode diagnoseEmptyDiscovery}, to tell "this is not a binstruct
  * package at all" apart from "it is one, but ships no type declarations".
@@ -41,7 +45,25 @@ const CODER_TYPE_REPR = "Coder";
  */
 const NON_REQUIRED_PARAM_KINDS = new Set(["assign", "rest"]);
 
-const decoder = new TextDecoder();
+/**
+ * How long a `deno` subprocess is given before it is killed, in milliseconds.
+ *
+ * Discovery is the one part of the CLI that hands a specifier to something that
+ * may go to the network, and `deno doc` has no deadline of its own. Behind a
+ * black-hole proxy `binstruct <package>` sat for **145 seconds with nothing on
+ * the screen** and only stopped when the terminal was killed, with the child
+ * still running — the level 0 listing, bounded at three seconds, degrades in
+ * three (`./scope.ts`).
+ *
+ * Thirty seconds is roughly eighteen times the slowest cold lookup measured
+ * (1.0–1.7 s for an uncached JSR package), which leaves room for a cold module
+ * graph over a slow link — the legitimate case this must not cut short — while
+ * turning an unbounded hang into a
+ * {@linkcode ToolFailureReason | timed-out} failure that still prints the
+ * escape hatch. It is deliberately far looser than the listing's budget:
+ * that is one HTTP GET, this builds a module graph.
+ */
+const TOOL_TIMEOUT = 30_000;
 
 /**
  * A parameter of a declaration in `deno doc --json` output.
@@ -159,13 +181,17 @@ export type PackageSurface = {
  * - `graph-incomplete` — the tool succeeded, but the module graph it printed
  *   carries an error, so it was never walked. `deno info` exits 0 in this
  *   case, which would otherwise read as a graph that simply contains nothing.
+ * - `timed-out` — the tool said nothing for {@linkcode TOOL_TIMEOUT} and was
+ *   killed. A stalled fetch inside `deno doc` has no deadline of its own, so
+ *   without this the CLI waits forever with a blank screen.
  */
 export type ToolFailureReason =
   | "permission-denied"
   | "not-spawned"
   | "minimum-dependency-age"
   | "exited-non-zero"
-  | "graph-incomplete";
+  | "graph-incomplete"
+  | "timed-out";
 
 /**
  * A `deno` subprocess that did not produce usable output.
@@ -401,28 +427,42 @@ export function readDocSurface(doc: DenoDocJson): PackageSurface {
 }
 
 /**
- * Runs `deno` with the given arguments and captures its output.
+ * Runs `deno` with the given arguments and captures its output, under a clock.
+ *
+ * The subprocess is spawned rather than run to completion in one call, because
+ * a deadline needs a handle to kill: `deno doc` inherits no timeout from
+ * anything and a stalled fetch inside it stalls the CLI with it. When the
+ * deadline passes the child is killed and the run is reported as
+ * `timed-out`, which is a {@linkcode ToolFailure} like any other and reaches
+ * the same guidance — so the "name the coder yourself" escape hatch still
+ * prints.
  *
  * @param args Arguments to pass to `deno`
  * @param specifier The specifier under inspection, echoed into failures
- * @param env Environment overrides for the subprocess
+ * @param options Environment overrides and a deadline for the subprocess
  * @returns The captured stdout, or the reason the tool produced none
  */
 async function runDeno(
   args: string[],
   specifier: string,
-  env: Record<string, string> = {},
+  options: {
+    /** Environment overrides for the subprocess. */
+    readonly env?: Record<string, string>;
+    /** Milliseconds to wait before killing it; defaults to `TOOL_TIMEOUT`. */
+    readonly timeout?: number;
+  } = {},
 ): Promise<{ ok: true; stdout: string } | ToolFailure> {
   const command = ["deno", ...args];
+  const timeout = options.timeout ?? TOOL_TIMEOUT;
 
-  let output: Deno.CommandOutput;
+  let child: Deno.ChildProcess;
   try {
-    output = await new Deno.Command("deno", {
+    child = new Deno.Command("deno", {
       args,
-      env,
+      env: options.env ?? {},
       stdout: "piped",
       stderr: "piped",
-    }).output();
+    }).spawn();
   } catch (error) {
     return {
       ok: false,
@@ -435,7 +475,39 @@ async function runDeno(
     };
   }
 
+  let expired = false;
+  const alarm = setTimeout(() => {
+    expired = true;
+    try {
+      child.kill("SIGKILL");
+    } catch {
+      // It finished between the deadline and the kill; the output stands.
+    }
+  }, timeout);
+
+  let output: Deno.CommandOutput;
+  try {
+    output = await child.output();
+  } finally {
+    clearTimeout(alarm);
+  }
+
+  const decoder = new TextDecoder();
   const stderr = decoder.decode(output.stderr);
+
+  if (expired) {
+    return {
+      ok: false,
+      reason: "timed-out",
+      specifier,
+      command,
+      code: output.code,
+      stderr: stderr === ""
+        ? `no answer within ${timeout / 1000}s`
+        : stderr.trimEnd(),
+    };
+  }
+
   if (!output.success) {
     return {
       ok: false,
@@ -462,12 +534,16 @@ async function runDeno(
  * explicit coder name.
  *
  * A cold lookup pays for building the module graph — on the order of a second
- * for a JSR package — while a warm one is near-instant.
+ * for a JSR package — while a warm one is near-instant. One that answers
+ * nothing at all is killed after {@linkcode TOOL_TIMEOUT} and comes back as a
+ * `timed-out` {@linkcode ToolFailure}, so the CLI cannot be left waiting on a
+ * subprocess that never speaks.
  *
  * The specifier must name a single module; callers refuse a directory first
  * (`./target.ts`).
  *
  * @param specifier A resolved specifier, e.g. `jsr:@binstruct/arp` or a module path
+ * @param timeout Milliseconds before the subprocess is killed; defaults to `TOOL_TIMEOUT`
  * @returns The discovered surface, or why `deno doc` produced none
  *
  * @example Discover the single coder of a local package
@@ -486,8 +562,13 @@ async function runDeno(
  */
 export async function discoverCoders(
   specifier: string,
+  timeout?: number,
 ): Promise<DiscoveryOutcome> {
-  const run = await runDeno(["doc", "--json", "--quiet", specifier], specifier);
+  const run = await runDeno(
+    ["doc", "--json", "--quiet", specifier],
+    specifier,
+    { timeout },
+  );
   if (!run.ok) return run;
 
   return {
@@ -517,6 +598,7 @@ export async function discoverCoders(
  *
  * @param specifier A resolved specifier, e.g. `jsr:@binstruct/arp` or a path
  * @param symbol The exported name to document, e.g. `arpData`
+ * @param timeout Milliseconds before the subprocess is killed; defaults to `TOOL_TIMEOUT`
  * @returns The formatted documentation, or why `deno doc` produced none
  *
  * @example Render the docs of one coder
@@ -536,11 +618,15 @@ export async function discoverCoders(
 export async function readSymbolDocs(
   specifier: string,
   symbol: string,
+  timeout?: number,
 ): Promise<SymbolDocsOutcome> {
   const run = await runDeno(
     ["doc", "--filter", symbol, specifier],
     specifier,
-    Deno.stdout.isTerminal() ? {} : { NO_COLOR: "1" },
+    {
+      env: Deno.stdout.isTerminal() ? {} : { NO_COLOR: "1" },
+      timeout,
+    },
   );
   if (!run.ok) return run;
 
@@ -563,6 +649,7 @@ export async function readSymbolDocs(
  * the module list alone, and the confident verdict is the wrong one.
  *
  * @param specifier A resolved specifier, e.g. `jsr:@hertzg/mac` or a path
+ * @param timeout Milliseconds before the subprocess is killed; defaults to `TOOL_TIMEOUT`
  * @returns Whether the graph depends on binstruct, or why `deno info` failed
  *
  * @example A package with no coders that is not binstruct-based
@@ -580,9 +667,10 @@ export async function readSymbolDocs(
  */
 export async function diagnoseEmptyDiscovery(
   specifier: string,
+  timeout?: number,
 ): Promise<EmptyDiscoveryDiagnosis> {
   const args = ["info", "--json", "--quiet", specifier];
-  const run = await runDeno(args, specifier);
+  const run = await runDeno(args, specifier, { timeout });
   if (!run.ok) return run;
 
   const graph = JSON.parse(run.stdout) as {

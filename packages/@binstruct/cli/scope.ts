@@ -4,8 +4,9 @@
  * Level 0 of ADR 0001 — bare `binstruct` — has to name the packages worth
  * trying, and the only source that is right on the day it is read is JSR
  * itself: `GET https://jsr.io/api/scopes/binstruct/packages`. The listing is
- * fetched, cached under the OS cache directory, and the CLI package itself is
- * dropped from it. See `@binstruct/cli` ADR 0006.
+ * fetched, cached under the OS cache directory, and two kinds of entry are
+ * dropped from it: the CLI package itself, and any name with no published
+ * version behind it. See `@binstruct/cli` ADR 0006.
  *
  * **The listing is a hint, never a gate.** Every failure — no `--allow-net`,
  * no network, a non-200 answer, a body that is not a listing — resolves to an
@@ -61,13 +62,20 @@ const CACHE_TTL = 24 * 60 * 60 * 1000;
 const REQUEST_TIMEOUT = 3_000;
 
 /**
- * One package of the scope, as JSR describes it.
+ * One **published** package of the scope, as JSR describes it.
  */
 export type ScopePackage = {
   /** Short name, e.g. `png`; prefix `@binstruct/` for the JSR coordinate. */
   readonly name: string;
   /** JSR's one-paragraph description, empty when the package has none. */
   readonly description: string;
+  /**
+   * The version a bare `jsr:@binstruct/<name>` resolves to today.
+   *
+   * Never absent: an entry without one is a reserved name rather than a
+   * package, and is dropped by {@linkcode readScopeListing}.
+   */
+  readonly latestVersion: string;
 };
 
 /**
@@ -88,7 +96,12 @@ export type ListingSource = "network" | "cache" | "stale-cache" | "none";
  * refresh failed, on `none` it says why there is no list at all.
  */
 export type ScopeListing = {
-  /** The scope's packages, sorted by name, without `@binstruct/cli`. */
+  /**
+   * The scope's published packages, sorted by name, without `@binstruct/cli`.
+   *
+   * Every entry names something `jsr:@binstruct/<name>` resolves to; reserved
+   * names with no version behind them are not members.
+   */
   readonly packages: readonly ScopePackage[];
   /** Where they came from. */
   readonly source: ListingSource;
@@ -115,14 +128,23 @@ export type ScopeListingOptions = {
  * Reads a package listing out of a parsed JSR scope-packages response.
  *
  * This is the whole of the response-shape knowledge, kept pure so the network
- * path and the cache file can share it and so it can be tested without
- * either. Every field but `name` is optional to us: an entry without a usable
- * name is dropped, a missing description becomes the empty string, and the
- * CLI's own package is never a member. The result is sorted by name, because
- * the order the API returns is not part of its contract.
+ * path and the cache file can share it and so it can be tested without either.
+ * An entry without a usable name is dropped, a missing description becomes the
+ * empty string, and the CLI's own package is never a member. The result is
+ * sorted by name, because the order the API returns is not part of its
+ * contract.
+ *
+ * **An entry with no `latestVersion` is dropped**, because it is a *reserved
+ * name* and not a package: JSR answers the scope listing with every name that
+ * has been claimed, published or not. `@binstruct/bencode` is the standing
+ * example — `latestVersion: null`, `versionCount: 0`,
+ * `https://jsr.io/@binstruct/bencode/meta.json` 404 — and offering it at
+ * level 0 would put a name on the screen that `binstruct bencode` cannot load,
+ * which is the one thing a suggestion list must not do.
  *
  * The cache file is written in this same shape, so a hand-edited or truncated
- * cache is rejected by the same rules as a bad response.
+ * cache is rejected by the same rules as a bad response, and a cached listing
+ * carries the versions that got its entries past this filter.
  *
  * @param body The parsed JSON body
  * @returns The packages, or `undefined` when the body is not a listing at all
@@ -134,16 +156,32 @@ export type ScopeListingOptions = {
  *
  * const packages = readScopeListing({
  *   items: [
- *     { scope: "binstruct", name: "png", description: "PNG image format." },
- *     { scope: "binstruct", name: "cli", description: "The CLI." },
- *     { scope: "binstruct", name: "arp" },
+ *     { name: "png", description: "PNG image format.", latestVersion: "0.4.0" },
+ *     { name: "cli", description: "The CLI.", latestVersion: "0.2.0" },
+ *     { name: "arp", latestVersion: "0.3.0" },
  *   ],
  * });
  *
  * assertEquals(packages, [
- *   { name: "arp", description: "" },
- *   { name: "png", description: "PNG image format." },
+ *   { name: "arp", description: "", latestVersion: "0.3.0" },
+ *   { name: "png", description: "PNG image format.", latestVersion: "0.4.0" },
  * ]);
+ * ```
+ *
+ * @example A reserved name with nothing published behind it is not offered
+ * ```ts
+ * import { assertEquals } from "@std/assert";
+ * import { readScopeListing } from "./scope.ts";
+ *
+ * assertEquals(
+ *   readScopeListing({
+ *     items: [
+ *       { name: "bencode", description: "Bencode.", latestVersion: null },
+ *       { name: "tar", description: "Tar.", latestVersion: "0.1.0" },
+ *     ],
+ *   }),
+ *   [{ name: "tar", description: "Tar.", latestVersion: "0.1.0" }],
+ * );
  * ```
  *
  * @example A body that is not a listing is rejected rather than read as empty
@@ -162,14 +200,17 @@ export function readScopeListing(body: unknown): ScopePackage[] | undefined {
 
   const packages: ScopePackage[] = [];
   for (const item of items) {
-    const { name, description } = (item ?? {}) as {
+    const { name, description, latestVersion } = (item ?? {}) as {
       name?: unknown;
       description?: unknown;
+      latestVersion?: unknown;
     };
     if (typeof name !== "string" || name === "" || name === EXCLUDED) continue;
+    if (typeof latestVersion !== "string" || latestVersion === "") continue;
     packages.push({
       name,
       description: typeof description === "string" ? description : "",
+      latestVersion,
     });
   }
 
@@ -381,14 +422,18 @@ async function fetchListing(): Promise<
  *   "fetch",
  *   () =>
  *     Promise.resolve(
- *       Response.json({ items: [{ name: "png", description: "PNG." }] }),
+ *       Response.json({
+ *         items: [{ name: "png", description: "PNG.", latestVersion: "0.4.0" }],
+ *       }),
  *     ),
  * );
  *
  * const listing = await listScopePackages({ cacheDir: null });
  *
  * assertEquals(listing.source, "network");
- * assertEquals(listing.packages, [{ name: "png", description: "PNG." }]);
+ * assertEquals(listing.packages, [
+ *   { name: "png", description: "PNG.", latestVersion: "0.4.0" },
+ * ]);
  * ```
  *
  * @example A failure is a reason and an empty list, never a throw

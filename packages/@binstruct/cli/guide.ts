@@ -21,8 +21,18 @@
  * @module
  */
 
-/** Width the options block wraps at, chosen to fit an 80-column terminal. */
+/** Width every options block wraps at, chosen to fit an 80-column terminal. */
 const LINE_WIDTH = 76;
+
+/**
+ * Fewest columns the summary column may be squeezed to before the budget gives.
+ *
+ * The name and detail columns are sized by their contents and cannot be
+ * shortened without lying about a name, so a wide pair can leave less than this
+ * for prose. When it does, the summary is wrapped at this width and the row
+ * overflows {@linkcode LINE_WIDTH} — a long row beats a three-word ribbon.
+ */
+const MIN_SUMMARY_WIDTH = 32;
 
 /** Indent applied to every line inside a block. */
 const INDENT = "  ";
@@ -117,23 +127,71 @@ function flowNames(names: readonly string[]): string[] {
 }
 
 /**
+ * Breaks prose into lines no wider than a budget, at whitespace.
+ *
+ * A word longer than the budget is left whole on a line of its own rather than
+ * cut: the words here are identifiers and type names, and half of one is not a
+ * shorter version of it.
+ *
+ * @param text The prose to break
+ * @param width Widest line to produce
+ * @returns One string per line, none empty
+ */
+function wrapWords(text: string, width: number): string[] {
+  const lines: string[] = [];
+  let line = "";
+
+  for (const word of text.split(/\s+/)) {
+    if (word === "") continue;
+    if (line === "") {
+      line = word;
+    } else if (line.length + 1 + word.length <= width) {
+      line += ` ${word}`;
+    } else {
+      lines.push(line);
+      line = word;
+    }
+  }
+  if (line !== "") lines.push(line);
+
+  return lines;
+}
+
+/**
  * Lays out described options as aligned name, detail and summary columns.
  *
+ * The summary is the one column made of prose, so it is the one that wraps:
+ * every other column is sized by a name it may not shorten. Concatenating the
+ * three unbounded is what produced 121-column rows for `png` and `bmp` — the
+ * terminal soft-wrapped them mid-sentence, back to column zero, so the wrapped
+ * remainder read as another option. A continuation line is indented to the
+ * summary column instead, which says what it is.
+ *
  * @param items The options to lay out
- * @returns One string per option
+ * @returns One string per rendered row, one option spanning several
  */
 function describeOptions(items: readonly GuideOption[]): string[] {
   const nameWidth = Math.max(...items.map((item) => item.name.length));
   const detailWidth = Math.max(
     ...items.map((item) => (item.detail ?? "").length),
   );
+  const prefixWidth = INDENT.length + nameWidth +
+    (detailWidth === 0 ? 0 : GUTTER.length + detailWidth) + GUTTER.length;
+  const summaryWidth = Math.max(MIN_SUMMARY_WIDTH, LINE_WIDTH - prefixWidth);
 
-  return items.map((item) => {
+  return items.flatMap((item) => {
     const detail = detailWidth === 0
       ? ""
       : GUTTER + (item.detail ?? "").padEnd(detailWidth);
-    const summary = item.summary === undefined ? "" : GUTTER + item.summary;
-    return (INDENT + item.name.padEnd(nameWidth) + detail + summary).trimEnd();
+    const head = INDENT + item.name.padEnd(nameWidth) + detail;
+
+    const [first, ...rest] = wrapWords(item.summary ?? "", summaryWidth);
+    if (first === undefined) return [head.trimEnd()];
+
+    return [
+      (head + GUTTER + first).trimEnd(),
+      ...rest.map((line) => " ".repeat(prefixWidth) + line),
+    ];
   });
 }
 
@@ -341,6 +399,14 @@ function editDistance(a: string, b: string): number {
  * typed word in edits — otherwise nothing is suggested rather than something
  * misleading. Ties go to the earliest candidate.
  *
+ * **A word that is already among the candidates is not a misspelling of
+ * anything**, and gets no suggestion. It reads as one otherwise: a listed
+ * package that would not load answered
+ * `cannot read jsr:@binstruct/bencode … did you mean bencode?`, correcting the
+ * user's spelling to the spelling they had used. The guard is exact-match on
+ * the word as typed rather than a zero-distance one, because a distance of
+ * zero is also what makes `pngfile` find `pngFile`, which is worth keeping.
+ *
  * @param input The word as typed
  * @param candidates The names that would have been accepted
  * @returns The nearest candidate, or `undefined` when none is close enough
@@ -356,6 +422,14 @@ function editDistance(a: string, b: string): number {
  * assertEquals(nearestName("pngFiles", coders), "pngFile");
  * assertEquals(nearestName("totallyUnrelated", coders), undefined);
  * ```
+ *
+ * @example A name that is already a candidate suggests nothing
+ * ```ts
+ * import { assertEquals } from "@std/assert";
+ * import { nearestName } from "./guide.ts";
+ *
+ * assertEquals(nearestName("pngFile", ["pngFile", "pngFileChunks"]), undefined);
+ * ```
  */
 export function nearestName(
   input: string,
@@ -368,6 +442,8 @@ export function nearestName(
   let bestDistance = Infinity;
 
   for (const candidate of candidates) {
+    if (candidate === input) return undefined;
+
     const distance = editDistance(needle, candidate.toLowerCase());
     if (distance < bestDistance) {
       best = candidate;

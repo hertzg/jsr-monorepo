@@ -103,6 +103,57 @@ Deno.test("renderGuide aligns the name, detail and summary columns", () => {
   );
 });
 
+Deno.test("renderGuide keeps a described option inside the line budget", () => {
+  // Only `flowNames` consulted LINE_WIDTH, so CODERS and COMMANDS blocks
+  // concatenated name, detail and summary unbounded: the real `png` block ran
+  // to 121 columns and the terminal soft-wrapped it back to column zero,
+  // mid-sentence, where the remainder read as another option.
+  const text = renderGuide({
+    next: { word: "<coder>", meaning: "which structure to work with" },
+    options: {
+      heading: "CODERS in png",
+      items: [
+        {
+          name: "pngChunkUnknown",
+          detail: "→ PngChunkUnknown",
+          summary: "Creates a coder for unknown/generic PNG chunks.",
+        },
+        {
+          name: "pngFile",
+          detail: "→ PngFile",
+          summary:
+            "Creates a coder for complete PNG files with automatic chunk refinement.",
+        },
+      ],
+    },
+  });
+
+  const rows = text.split("\n\n")[1].split("\n");
+
+  for (const row of rows) assertEquals(row.length <= 76, true, row);
+
+  // A continuation is indented to the summary column, so it cannot be read as
+  // another option, and the option's own row still starts with its name.
+  assertEquals(rows[3].startsWith("  pngFile "), true);
+  assertEquals(rows[4].trimStart(), "with automatic chunk refinement.");
+  assertEquals(rows[4].length - rows[4].trimStart().length, 38);
+});
+
+Deno.test("renderGuide leaves a summary alone when it already fits", () => {
+  const text = renderGuide({
+    next: { word: "<command>", meaning: "which direction to run the coder in" },
+    options: {
+      heading: "COMMANDS",
+      items: [{ name: "decode", summary: "binary on stdin → JSON5 on stdout" }],
+    },
+  });
+
+  assertEquals(
+    text.split("\n\n")[1],
+    "COMMANDS\n  decode  binary on stdin → JSON5 on stdout",
+  );
+});
+
 Deno.test("renderGuide explains an empty options block", () => {
   const text = renderGuide({
     next: { word: "<coder>", meaning: "which structure to work with" },
@@ -140,4 +191,19 @@ Deno.test("nearestName suggests nothing when nothing is close", () => {
 
 Deno.test("nearestName breaks ties towards the earlier candidate", () => {
   assertEquals(nearestName("ab", ["ax", "ay"]), "ax");
+});
+
+Deno.test("nearestName never suggests the word that was typed", () => {
+  // A listed name that would not load answered `cannot read
+  // jsr:@binstruct/bencode … did you mean bencode?` — the minimum distance was
+  // zero and nothing stopped an exact match from being offered as a
+  // correction of itself.
+  assertEquals(nearestName("bencode", ["arp", "bencode", "png"]), undefined);
+  assertEquals(nearestName("arpData", ["arpData", "arpDatum"]), undefined);
+
+  // The candidate order does not matter: an exact match anywhere silences it.
+  assertEquals(nearestName("arpData", ["arpDatum", "arpData"]), undefined);
+
+  // And case-insensitive matching, which needs distance zero, still works.
+  assertEquals(nearestName("arpdata", ["arpData"]), "arpData");
 });

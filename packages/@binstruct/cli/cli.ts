@@ -693,12 +693,46 @@ function coderOption(coder: DiscoveredCoder) {
 }
 
 /**
+ * Keeps a command word a `TRY` line may carry, and drops one it may not.
+ *
+ * A `TRY` line is a promise that the command runs when pasted, so a word the
+ * CLI would itself refuse has no business in one. The coder slot takes anything
+ * that is not a reserved command name, which means the command slot can still
+ * hold a non-command when the coder came from `-c`: `binstruct -c pngFile png
+ * frobnicate` puts `frobnicate` there.
+ *
+ * @param command The command word as typed, when there was one
+ * @returns The word when it names a command, otherwise nothing
+ */
+function carriedCommand(command: string | undefined): string | undefined {
+  return command !== undefined && isCommandName(command) ? command : undefined;
+}
+
+/**
+ * Joins the words of a `TRY` line, dropping the ones that are not there.
+ *
+ * @param words The words after the program name, absent ones included
+ * @returns The command line, program name first
+ */
+function tryLine(...words: (string | undefined)[]): string {
+  return [PROGRAM, ...words.filter((word) => word !== undefined)].join(" ");
+}
+
+/**
  * Builds the level 1 guide: which coder within a package.
+ *
+ * A `<command>` the user has already typed is carried into the `TRY` line.
+ * Built from the missing word alone, the line was a step sideways rather than
+ * one further along: `binstruct png decode` — which asks for a coder, since
+ * `png` has several — answered `TRY binstruct png pngFile`, silently dropping
+ * the `decode` that was already on the command line and offering a command
+ * that stops one level short of the one being typed.
  *
  * @param resolved The package as typed and as resolved
  * @param header The header block, specifier and description
  * @param coders Everything discovery found
  * @param notes Lines to show above the `NEXT` block
+ * @param command The command word already supplied, to keep in the `TRY` line
  * @returns The guide
  */
 function coderGuide(
@@ -706,6 +740,7 @@ function coderGuide(
   header: string | undefined,
   coders: readonly DiscoveredCoder[],
   notes?: readonly string[],
+  command?: string,
 ): Guide {
   const callable = coders.find((coder) => coder.requiredParams === 0);
   return {
@@ -721,7 +756,11 @@ function coderGuide(
       empty: "none — this package exposes no coder factories",
     },
     try: callable === undefined ? [] : [
-      `${PROGRAM} ${packageWord(resolved.short)} ${shellWord(callable.name)}`,
+      tryLine(
+        packageWord(resolved.short),
+        shellWord(callable.name),
+        carriedCommand(command),
+      ),
     ],
   };
 }
@@ -842,6 +881,41 @@ function moduleInside(directory: string, name: string): string {
   return `${trimmed}/${name}`;
 }
 
+/** Module names a package conventionally uses as its entrypoint, best first. */
+const ENTRYPOINT_NAMES: readonly string[] = [
+  "mod.ts",
+  "mod.tsx",
+  "mod.js",
+  "index.ts",
+  "index.tsx",
+  "index.js",
+];
+
+/** Matches a module file named as a test: `foo.test.ts`, `foo_test.ts`, `test.ts`. */
+const TEST_MODULE_PATTERN = /(?:^|[._])test\.[cm]?[jt]sx?$/;
+
+/**
+ * Picks the module inside a directory that a `TRY` line should name.
+ *
+ * The list is alphabetical, and the first entry of a normal package is
+ * `foo.test.ts`: the suggestion cost another `deno doc` and arrived nowhere,
+ * with `mod.ts` sitting two rows below it. Preference runs conventional
+ * entrypoint, then any module that is not a test, then whatever is first.
+ *
+ * Nothing here is a guess about a file that might exist — every candidate came
+ * off the filesystem, so `mod.ts` is offered only when it is genuinely there,
+ * which is what ADR 0004 asked for. Ordering the listing by convention is not
+ * resolution; picking one for the user would be.
+ *
+ * @param modules Module file names inside the directory, sorted
+ * @returns The module to suggest, or `undefined` when there are none
+ */
+function suggestedModule(modules: readonly string[]): string | undefined {
+  return ENTRYPOINT_NAMES.find((name) => modules.includes(name)) ??
+    modules.find((name) => !TEST_MODULE_PATTERN.test(name)) ??
+    modules[0];
+}
+
 /**
  * Builds the guide for a package argument that names a directory.
  *
@@ -854,9 +928,9 @@ function moduleInside(directory: string, name: string): string {
  * So the directory is refused, and what is in it is listed the way the coder
  * level lists coders — listing is guidance, picking would be resolution.
  *
- * The `TRY` line names the first module listed, because it is a module that
- * demonstrably exists rather than a convention: suggesting `mod.ts` unasked
- * would be the same guess in prose.
+ * The `TRY` line names a module that is demonstrably there — never a name the
+ * CLI hopes exists — chosen by {@linkcode suggestedModule}, which prefers a
+ * conventional entrypoint and then anything that is not a test file.
  *
  * @param resolved The package as typed and as resolved
  * @param header The header block, specifier and all
@@ -868,6 +942,7 @@ function directoryGuide(
   header: string,
   modules: readonly string[],
 ): Guide {
+  const suggestion = suggestedModule(modules);
   return {
     header,
     diagnostic: true,
@@ -884,9 +959,9 @@ function directoryGuide(
       items: modules.map((name) => ({ name })),
       empty: "none — this directory holds no module files",
     },
-    try: modules.length === 0
+    try: suggestion === undefined
       ? []
-      : [`${PROGRAM} ${packageWord(moduleInside(resolved.short, modules[0]))}`],
+      : [`${PROGRAM} ${packageWord(moduleInside(resolved.short, suggestion))}`],
   };
 }
 
@@ -970,6 +1045,7 @@ async function localTargetGuide(
  * @param header The header block, absent when the caller announced the specifier already
  * @param coders Everything discovery found
  * @param typed The name as typed
+ * @param command The command word already supplied, to keep in the `TRY` line
  * @returns The guide, with the nearest match in its `TRY` line when there is one
  */
 function unknownCoderGuide(
@@ -977,19 +1053,26 @@ function unknownCoderGuide(
   header: string | undefined,
   coders: readonly DiscoveredCoder[],
   typed: string,
+  command?: string,
 ): Guide {
   const suggestion = nearestName(typed, coders.map((coder) => coder.name));
   const guide: Guide = {
     ...coderGuide(resolved, header, coders, [
       `no coder named '${typed}' in ${resolved.short}`,
       ...(suggestion === undefined ? [] : [`did you mean '${suggestion}'?`]),
-    ]),
+    ], command),
     diagnostic: true,
   };
 
   return suggestion === undefined ? guide : {
     ...guide,
-    try: [`${PROGRAM} ${packageWord(resolved.short)} ${shellWord(suggestion)}`],
+    try: [
+      tryLine(
+        packageWord(resolved.short),
+        shellWord(suggestion),
+        carriedCommand(command),
+      ),
+    ],
   };
 }
 
@@ -1007,6 +1090,7 @@ function unknownCoderGuide(
  * @param header The header block, absent when the caller announced the specifier already
  * @param coders Everything discovery found
  * @param chosen The coder that was named
+ * @param command The command word already supplied, to keep in the `TRY` line
  * @returns The guide
  */
 async function parameterizedCoderGuide(
@@ -1014,6 +1098,7 @@ async function parameterizedCoderGuide(
   header: string | undefined,
   coders: readonly DiscoveredCoder[],
   chosen: DiscoveredCoder,
+  command?: string,
 ): Promise<Guide> {
   if (!coders.some((coder) => coder.requiredParams === 0)) {
     return await deadEndGuide(resolved, header, coders);
@@ -1024,7 +1109,7 @@ async function parameterizedCoderGuide(
       `${chosen.name} takes ${
         argumentCount(chosen.requiredParams)
       }, which the CLI cannot supply`,
-    ]),
+    ], command),
     diagnostic: true,
   };
 }
@@ -1046,6 +1131,8 @@ function failureNote(failure: ToolFailure): string {
     case "graph-incomplete":
       return firstLine(failure.stderr) ??
         "the module graph carries an error, so it was never walked";
+    case "timed-out":
+      return "deno answered nothing in time and was stopped, so nothing was listed";
     case "exited-non-zero":
       return firstLine(failure.stderr) ?? `deno exited ${failure.code}`;
   }
@@ -1219,12 +1306,14 @@ function chose(
  * @param resolved The package as typed and as resolved
  * @param header The resolved specifier line
  * @param named The coder name as typed, when there was one
+ * @param command The command word as typed, kept in the `TRY` lines that follow
  * @returns The chosen coder, or the guidance that replaces the run
  */
 async function chooseCoder(
   resolved: ResolvedSpecifier,
   header: string,
   named: string | undefined,
+  command: string | undefined,
 ): Promise<CoderChoice> {
   const discovery = await discoverCoders(resolved.specifier);
 
@@ -1254,7 +1343,13 @@ async function chooseCoder(
     if (chosen === undefined) {
       return {
         ok: false,
-        guide: unknownCoderGuide(resolved, described, discovery.coders, named),
+        guide: unknownCoderGuide(
+          resolved,
+          described,
+          discovery.coders,
+          named,
+          command,
+        ),
       };
     }
     if (chosen.requiredParams > 0) {
@@ -1265,6 +1360,7 @@ async function chooseCoder(
           described,
           discovery.coders,
           chosen,
+          command,
         ),
       };
     }
@@ -1287,9 +1383,35 @@ async function chooseCoder(
   return {
     ok: false,
     guide: coderGuide(resolved, described, discovery.coders, [
-      `${resolved.short} exposes ${callable.length} coders, so the coder word is required`,
-    ]),
+      coderCountNote(resolved.short, discovery.coders.length, callable.length),
+    ], command),
   };
+}
+
+/**
+ * Says how many coders a package exposes, in the same terms as the block below.
+ *
+ * The sentence and the `CODERS` listing under it are read as one thing, so they
+ * have to be counting the same thing. They were not: the line counted the
+ * *callable* coders while the block rendered every discovered one, so
+ * `png exposes 3 coders, so the coder word is required` sat directly above four
+ * rows. The listed total leads, and the callable subset — which is the actual
+ * reason the word is required — is named only when it differs.
+ *
+ * @param short The package as the user spelled it
+ * @param listed How many coders the block shows
+ * @param callable How many of those take no required arguments
+ * @returns The note
+ */
+function coderCountNote(
+  short: string,
+  listed: number,
+  callable: number,
+): string {
+  const counted = listed === callable
+    ? `${short} exposes ${listed} coders`
+    : `${short} exposes ${listed} coders, ${callable} of them callable`;
+  return `${counted}, so the coder word is required`;
 }
 
 /**
@@ -1516,7 +1638,7 @@ export async function planCli(args: string[]): Promise<CliPlan> {
     return present(refusal, options.help);
   }
 
-  const choice = await chooseCoder(resolved, header, coder);
+  const choice = await chooseCoder(resolved, header, coder, command);
   if (!choice.ok) {
     return present(choice.guide, options.help);
   }

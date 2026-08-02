@@ -96,6 +96,22 @@ declaration-level count correctly does not — so the subprocess is the price of
 the guarantee. A named coder is still taken on trust when discovery is
 _unavailable_, which is what keeps the escape hatch below honest.
 
+**Every subprocess runs under a deadline of 30 seconds and is killed when it
+passes.** `deno doc` fetches, a fetch can stall, and `deno doc` carries no
+timeout of its own: behind a black-hole proxy, `binstruct <package>` ran for 145
+seconds with a blank screen, stopped only by killing the terminal, and left the
+child alive behind it. Level 0 was bounded at three seconds and degraded in
+three (ADR 0006); level 1 was unbounded, and "unavailable" cannot be a state the
+tool never reaches.
+
+Thirty seconds is chosen against the measured cold path — 1.0–1.7 s for an
+uncached JSR package — with roughly eighteen times the headroom, so a cold
+module graph over a slow link is not cut short. It is deliberately far looser
+than level 0's three seconds, which buys one HTTP GET rather than a module
+graph. An expired deadline is an ordinary tool failure carrying
+`reason: "timed-out"`, so it reaches the same screen as a denied
+`--allow-run=deno` and prints the same escape hatch.
+
 ## Consequences
 
 - **Exploration never executes third-party code.** Only a complete invocation
@@ -116,6 +132,10 @@ _unavailable_, which is what keeps the escape hatch below honest.
   the coder directly" escape hatch.
 - **Packages without type declarations show zero coders**, however well they
   work at runtime. Untyped `npm:` packages are the likely case.
+- **A pathologically slow but legitimate cold lookup now fails at 30 seconds**
+  rather than eventually succeeding. The failure still names the coder word and
+  still runs when the name is supplied, so the cost is one wasted invocation
+  against an unbounded wait.
 - **The dependency age policy applies to discovery.** A package version
   published inside the window of repo ADR 0011 makes `deno doc` fail outright,
   with a message about minimum dependency age rather than anything the user did

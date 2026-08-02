@@ -1,5 +1,6 @@
 import { assert, assertEquals, assertStringIncludes } from "@std/assert";
 import { toFileUrl } from "@std/path";
+import { FakeTime } from "@std/testing/time";
 import {
   type DenoDocJson,
   diagnoseEmptyDiscovery,
@@ -510,6 +511,46 @@ Deno.test("discoverCoders reports a failing deno doc as an outcome", async () =>
   assertEquals(outcome.command[0], "deno");
   assert(outcome.code !== 0, "a failing subprocess reports a non-zero status");
   assert(outcome.stderr.length > 0, "the tool's stderr is captured");
+});
+
+Deno.test("a deno subprocess that never answers is killed, not waited on", async () => {
+  // `deno doc` fetches, a fetch can stall, and neither had a deadline: behind
+  // a black-hole proxy `binstruct <package>` ran 145 seconds with nothing on
+  // the screen, stopped only by killing the terminal, and left the child
+  // alive. The clock is faked, so this proves the shipped deadline fires
+  // without spending it — and the resource sanitizer proves the child was
+  // reaped rather than abandoned.
+  using time = new FakeTime();
+
+  // The subprocess and the timer are both live by the time this returns: both
+  // are set up before `runDeno` first awaits.
+  const running = discoverCoders(ARP_ENTRYPOINT);
+  await time.tickAsync(120_000);
+  const outcome = await running;
+
+  assert(!outcome.ok, "a killed subprocess produces no surface");
+  assertEquals(outcome.reason, "timed-out");
+  assertEquals(outcome.specifier, ARP_ENTRYPOINT);
+  assertEquals(outcome.command[0], "deno");
+});
+
+Deno.test("a deadline that has already passed reports the tool, not a crash", async () => {
+  // The same path with the deadline injected rather than the clock moved: no
+  // subprocess starts and finishes inside a millisecond, so the kill always
+  // wins, and what comes back has to be an ordinary ToolFailure.
+  const outcome = await discoverCoders(ARP_ENTRYPOINT, 1);
+
+  assert(!outcome.ok, "a killed subprocess produces no surface");
+  assertEquals(outcome.reason, "timed-out");
+  assertEquals(outcome.command.slice(0, 2), ["deno", "doc"]);
+  assert(outcome.stderr.length > 0, "the failure says something about itself");
+});
+
+Deno.test("a deadline that is not reached changes nothing", async () => {
+  const outcome = await discoverCoders(ARP_ENTRYPOINT, 120_000);
+
+  assert(outcome.ok, "a subprocess inside its deadline is an ordinary run");
+  assertEquals(outcome.coders.map((coder) => coder.name), ["arpData"]);
 });
 
 Deno.test("readSymbolDocs returns deno doc's formatted output", async () => {
