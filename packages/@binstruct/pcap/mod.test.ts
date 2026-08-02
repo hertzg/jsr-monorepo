@@ -2,6 +2,7 @@ import { assertEquals, assertThrows } from "@std/assert";
 import {
   detectPcapMagic,
   LINKTYPE,
+  PCAP_DEFAULT_ENDIANNESS,
   PCAP_MAGIC_MICROS,
   PCAP_MAGIC_NANOS,
   pcapFile,
@@ -11,6 +12,7 @@ import {
 } from "./mod.ts";
 import type { PcapGlobalHeader, PcapRecord } from "./mod.ts";
 import { refine } from "@hertzg/binstruct/refine";
+import { createContext } from "@hertzg/binstruct";
 
 const GLOBAL_HEADER_SIZE = 24;
 const RECORD_HEADER_SIZE = 16;
@@ -340,4 +342,140 @@ Deno.test("real-world fixture: Wireshark dns.cap", async () => {
     assertEquals(record.inclLen, record.origLen);
     assertEquals(record.data.byteLength, record.inclLen);
   }
+});
+
+Deno.test("PCAP_DEFAULT_ENDIANNESS: is little-endian", () => {
+  assertEquals(PCAP_DEFAULT_ENDIANNESS, "le");
+});
+
+Deno.test("pcapGlobalHeader: omitted endianness matches the default", () => {
+  const value = sampleHeader();
+
+  const implicit = new Uint8Array(GLOBAL_HEADER_SIZE);
+  const explicit = new Uint8Array(GLOBAL_HEADER_SIZE);
+  const written = pcapGlobalHeader().encode(value, implicit);
+  pcapGlobalHeader(PCAP_DEFAULT_ENDIANNESS).encode(value, explicit);
+
+  const [decoded, read] = pcapGlobalHeader().decode(implicit);
+
+  assertEquals(implicit, explicit);
+  assertEquals(written, GLOBAL_HEADER_SIZE);
+  assertEquals(read, GLOBAL_HEADER_SIZE);
+  assertEquals(decoded, value);
+});
+
+Deno.test("pcapRecord: omitted endianness matches the default", () => {
+  const value = sampleRecord(new Uint8Array([0xde, 0xad, 0xbe, 0xef]));
+
+  const implicit = new Uint8Array(64);
+  const explicit = new Uint8Array(64);
+  const written = pcapRecord().encode(value, implicit);
+  pcapRecord(PCAP_DEFAULT_ENDIANNESS).encode(value, explicit);
+
+  const [decoded, read] = pcapRecord().decode(implicit);
+
+  assertEquals(implicit, explicit);
+  assertEquals(written, RECORD_HEADER_SIZE + 4);
+  assertEquals(read, RECORD_HEADER_SIZE + 4);
+  assertEquals(decoded, value);
+});
+
+Deno.test("pcapFile: zero-argument encode uses the default endianness", () => {
+  const value = {
+    header: sampleHeader(),
+    records: [sampleRecord(new Uint8Array([0x01, 0x02, 0x03]))],
+  };
+
+  const implicit = new Uint8Array(128);
+  const explicit = new Uint8Array(128);
+  const written = pcapFile().encode(value, implicit);
+  const expected = pcapFile(PCAP_DEFAULT_ENDIANNESS).encode(value, explicit);
+
+  assertEquals(written, expected);
+  assertEquals(implicit, explicit);
+  assertEquals(detectPcapMagic(implicit), {
+    endianness: PCAP_DEFAULT_ENDIANNESS,
+    nanos: false,
+  });
+});
+
+Deno.test("pcapFile: zero-argument decode detects endianness from the magic", () => {
+  const value = {
+    header: sampleHeader(),
+    records: [
+      sampleRecord(new Uint8Array([0xde, 0xad, 0xbe, 0xef])),
+      sampleRecord(new Uint8Array([0x11, 0x22]), 1500),
+    ],
+  };
+
+  const auto = pcapFile();
+
+  for (const endianness of ["le", "be"] as const) {
+    const buffer = new Uint8Array(128);
+    const written = pcapFile(endianness).encode(value, buffer);
+    const encoded = buffer.subarray(0, written);
+
+    assertEquals(detectPcapMagic(encoded)?.endianness, endianness);
+
+    const [decoded, read] = auto.decode(encoded);
+
+    assertEquals(read, written);
+    assertEquals(decoded, value);
+  }
+});
+
+Deno.test("pcapFile: zero-argument decode reads a nanosecond big-endian capture", () => {
+  const value = {
+    header: { ...sampleHeader(), magic: PCAP_MAGIC_NANOS },
+    records: [sampleRecord(new Uint8Array([0xff]))],
+  };
+
+  const buffer = new Uint8Array(128);
+  const written = pcapFile("be").encode(value, buffer);
+
+  const [decoded] = pcapFile().decode(buffer.subarray(0, written));
+
+  assertEquals(decoded, value);
+  assertEquals(detectPcapMagic(buffer), { endianness: "be", nanos: true });
+});
+
+Deno.test("pcapFile: zero-argument decode falls back to the default on unknown magic", () => {
+  const value = { header: { ...sampleHeader(), magic: 0 }, records: [] };
+
+  const buffer = new Uint8Array(GLOBAL_HEADER_SIZE);
+  const written = pcapFile(PCAP_DEFAULT_ENDIANNESS).encode(value, buffer);
+
+  assertEquals(detectPcapMagic(buffer), null);
+
+  const [decoded] = pcapFile().decode(buffer.subarray(0, written));
+
+  assertEquals(decoded, value);
+});
+
+Deno.test("pcapFile: zero-argument coder reads the dns.cap fixture", async () => {
+  const fixture = await Deno.readFile(
+    new URL("./_fixtures/dns.cap", import.meta.url),
+  );
+
+  const [auto, autoRead] = pcapFile().decode(fixture);
+  const [explicit, explicitRead] = pcapFile("le").decode(fixture);
+
+  assertEquals(autoRead, explicitRead);
+  assertEquals(auto, explicit);
+  assertEquals(auto.records.length, 38);
+});
+
+Deno.test("pcapFile: zero-argument coder is usable as a struct field", () => {
+  const value = { header: sampleHeader(), records: [] };
+
+  const buffer = new Uint8Array(GLOBAL_HEADER_SIZE);
+  const written = pcapFile().encode(value, buffer, createContext("encode"));
+  const [decoded, read] = pcapFile().decode(
+    buffer.subarray(0, written),
+    createContext("decode"),
+  );
+
+  assertEquals(written, GLOBAL_HEADER_SIZE);
+  assertEquals(read, GLOBAL_HEADER_SIZE);
+  assertEquals(decoded, value);
 });

@@ -13,9 +13,16 @@
  * ## Endianness
  *
  * Pcap stores numbers in either little- or big-endian, signalled by the magic
- * value at offset zero. Callers pick the byte order explicitly via the
- * `endianness` argument (`"le"` or `"be"`); use {@link detectPcapMagic} to
- * probe an unknown buffer first when needed.
+ * value at offset zero. Callers may pick the byte order explicitly via the
+ * `endianness` argument (`"le"` or `"be"`).
+ *
+ * Omitting it is the easy path: {@link pcapFile} then reads that magic and
+ * decodes the whole capture in whichever order the file itself declares, so a
+ * single `pcapFile()` handles little- and big-endian captures alike. Encoding
+ * has no file to inspect and writes {@link PCAP_DEFAULT_ENDIANNESS}. The
+ * building blocks {@link pcapGlobalHeader} and {@link pcapRecord} are fixed to
+ * one byte order and default to that same constant — {@link detectPcapMagic}
+ * probes a buffer when you drive them yourself.
  *
  * ## Timestamp resolution
  *
@@ -260,8 +267,15 @@
  * @module @binstruct/pcap
  */
 
-import type { Coder } from "@hertzg/binstruct";
 import {
+  type Coder,
+  createContext,
+  kCoderKind,
+  refSetValue,
+} from "@hertzg/binstruct";
+import {
+  detectPcapMagic,
+  PCAP_DEFAULT_ENDIANNESS,
   type PcapEndianness,
   type PcapGlobalHeader,
   pcapGlobalHeader,
@@ -275,6 +289,7 @@ import {
 
 export {
   detectPcapMagic,
+  PCAP_DEFAULT_ENDIANNESS,
   PCAP_MAGIC_MICROS,
   PCAP_MAGIC_NANOS,
   pcapGlobalHeader,
@@ -289,8 +304,14 @@ export type { PcapFile, PcapRecord } from "./record.ts";
 export { LINKTYPE } from "./linktypes.ts";
 export type { LinkType } from "./linktypes.ts";
 
+/** Decoded shape produced by the standard {@link pcapFile} coder. */
+type PcapFileValue = PcapFile<PcapGlobalHeader, PcapRecord>;
+
+/** Distinguishes the endianness-sniffing file coder from a plain struct coder. */
+const kKindPcapFileAuto = Symbol("pcapFileAuto");
+
 /**
- * Creates a coder for a complete pcap capture file in the requested byte order.
+ * Creates a coder for a complete pcap capture file.
  *
  * The returned coder pairs {@link pcapGlobalHeader} with {@link pcapRecord} via
  * {@link pcapFileWith}. Records are read greedily until the buffer no longer
@@ -298,7 +319,26 @@ export type { LinkType } from "./linktypes.ts";
  * example, refining the payload into a parsed link-layer frame — use
  * {@link pcapFileWith} directly with your own coders.
  *
- * @param endianness Byte order matching the file's magic.
+ * ## Byte order
+ *
+ * Called **with** an endianness, the coder is fixed to that byte order for both
+ * directions — identical to every earlier release.
+ *
+ * Called **without** one, the coder resolves the byte order per operation:
+ *
+ * - On **decode** it reads the file's own magic number via
+ *   {@link detectPcapMagic} and decodes the header *and* every record in the
+ *   byte order that magic implies. Little- and big-endian captures therefore
+ *   both round-trip through the same coder, with no configuration. A buffer
+ *   whose first four bytes are not a recognised pcap magic is decoded as
+ *   {@link PCAP_DEFAULT_ENDIANNESS}.
+ * - On **encode** there is no file to inspect, so the coder writes
+ *   {@link PCAP_DEFAULT_ENDIANNESS}. Note that the `magic` field is a logical
+ *   value: writing {@link PCAP_MAGIC_MICROS} produces the correct on-disk byte
+ *   sequence for whichever order is in effect.
+ *
+ * @param endianness Byte order matching the file's magic. Omit it to sniff the
+ *   magic on decode and use {@link PCAP_DEFAULT_ENDIANNESS} on encode.
  * @returns A coder for a {@link PcapFile} of {@link PcapGlobalHeader} and
  *   {@link PcapRecord}.
  *
@@ -328,9 +368,121 @@ export type { LinkType } from "./linktypes.ts";
  *
  * assertEquals(written, 24);
  * ```
+ *
+ * @example One zero-argument coder reads captures of either byte order
+ * ```ts
+ * import { assertEquals } from "@std/assert";
+ * import {
+ *   LINKTYPE,
+ *   PCAP_MAGIC_MICROS,
+ *   pcapFile,
+ * } from "@binstruct/pcap";
+ *
+ * const capture = {
+ *   header: {
+ *     magic: PCAP_MAGIC_MICROS,
+ *     versionMajor: 2,
+ *     versionMinor: 4,
+ *     thisZone: 0,
+ *     sigFigs: 0,
+ *     snapLen: 65535,
+ *     network: LINKTYPE.ETHERNET,
+ *   },
+ *   records: [{
+ *     tsSec: 1_700_000_000,
+ *     tsUsec: 250_000,
+ *     inclLen: 4,
+ *     origLen: 1500,
+ *     data: new Uint8Array([0xde, 0xad, 0xbe, 0xef]),
+ *   }],
+ * };
+ *
+ * const little = new Uint8Array(64);
+ * const big = new Uint8Array(64);
+ * const leWritten = pcapFile("le").encode(capture, little);
+ * const beWritten = pcapFile("be").encode(capture, big);
+ *
+ * const auto = pcapFile();
+ * const [fromLe] = auto.decode(little.subarray(0, leWritten));
+ * const [fromBe] = auto.decode(big.subarray(0, beWritten));
+ *
+ * assertEquals(fromLe, capture);
+ * assertEquals(fromBe, capture);
+ * ```
+ *
+ * @example Zero-argument round trip writes the default byte order
+ * ```ts
+ * import { assertEquals } from "@std/assert";
+ * import {
+ *   detectPcapMagic,
+ *   LINKTYPE,
+ *   PCAP_DEFAULT_ENDIANNESS,
+ *   PCAP_MAGIC_NANOS,
+ *   pcapFile,
+ * } from "@binstruct/pcap";
+ *
+ * const coder = pcapFile();
+ * const capture = {
+ *   header: {
+ *     magic: PCAP_MAGIC_NANOS,
+ *     versionMajor: 2,
+ *     versionMinor: 4,
+ *     thisZone: 0,
+ *     sigFigs: 0,
+ *     snapLen: 1500,
+ *     network: LINKTYPE.RAW,
+ *   },
+ *   records: [],
+ * };
+ *
+ * const buffer = new Uint8Array(24);
+ * const written = coder.encode(capture, buffer);
+ * const [decoded, read] = coder.decode(buffer.subarray(0, written));
+ *
+ * assertEquals(written, 24);
+ * assertEquals(read, 24);
+ * assertEquals(decoded, capture);
+ * assertEquals(detectPcapMagic(buffer), {
+ *   endianness: PCAP_DEFAULT_ENDIANNESS,
+ *   nanos: true,
+ * });
+ * ```
  */
 export function pcapFile(
-  endianness: PcapEndianness,
+  endianness?: PcapEndianness,
 ): Coder<PcapFile<PcapGlobalHeader, PcapRecord>> {
-  return pcapFileWith(pcapGlobalHeader(endianness), pcapRecord(endianness));
+  const fixed = (order: PcapEndianness) =>
+    pcapFileWith(pcapGlobalHeader(order), pcapRecord(order));
+
+  if (endianness !== undefined) {
+    return fixed(endianness);
+  }
+
+  const byOrder: Record<PcapEndianness, Coder<PcapFileValue>> = {
+    le: fixed("le"),
+    be: fixed("be"),
+  };
+
+  let self: Coder<PcapFileValue>;
+  return self = {
+    [kCoderKind]: kKindPcapFileAuto,
+    encode: (decoded, target, context) => {
+      const ctx = context ?? createContext("encode");
+      const bytesWritten = byOrder[PCAP_DEFAULT_ENDIANNESS].encode(
+        decoded,
+        target,
+        ctx,
+      );
+      refSetValue(ctx, self, decoded);
+      return bytesWritten;
+    },
+    decode: (encoded, context) => {
+      const ctx = context ?? createContext("decode");
+      const order = detectPcapMagic(encoded)?.endianness ??
+        PCAP_DEFAULT_ENDIANNESS;
+      const [decoded, bytesRead] = byOrder[order].decode(encoded, ctx);
+      refSetValue(ctx, self, decoded);
+      return [decoded, bytesRead];
+    },
+  };
 }

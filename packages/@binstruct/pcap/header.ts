@@ -5,7 +5,8 @@
  * file and describes the byte order, version, and link-layer type of the
  * records that follow. The byte layout is fixed but two stored byte orders are
  * permitted; this module exposes a factory that takes the desired endianness
- * explicitly so callers stay in control of the wire layout.
+ * explicitly so callers stay in control of the wire layout, and defaults it to
+ * {@link PCAP_DEFAULT_ENDIANNESS} when omitted.
  */
 
 import { s32, struct, u16, u32 } from "@hertzg/binstruct";
@@ -19,6 +20,42 @@ import type { Coder } from "@hertzg/binstruct";
  * and every record header that follows it.
  */
 export type PcapEndianness = "le" | "be";
+
+/**
+ * Byte order assumed by the pcap coder factories when none is supplied.
+ *
+ * Little-endian is the byte order written by libpcap on every mainstream
+ * capture host (x86 and ARM alike), so it is what an arbitrary `.pcap` file is
+ * overwhelmingly likely to use. Decoding can do better than a guess — see
+ * {@link pcapFile}, which sniffs the magic — but encoding has no data to
+ * inspect, so it commits to this value.
+ *
+ * @example The default matches the explicit little-endian layout
+ * ```ts
+ * import { assertEquals } from "@std/assert";
+ * import { PCAP_DEFAULT_ENDIANNESS, pcapGlobalHeader } from "@binstruct/pcap";
+ *
+ * assertEquals(PCAP_DEFAULT_ENDIANNESS, "le");
+ *
+ * const value = {
+ *   magic: 0xa1b2c3d4,
+ *   versionMajor: 2,
+ *   versionMinor: 4,
+ *   thisZone: 0,
+ *   sigFigs: 0,
+ *   snapLen: 65535,
+ *   network: 1,
+ * };
+ *
+ * const implicit = new Uint8Array(24);
+ * const explicit = new Uint8Array(24);
+ * pcapGlobalHeader().encode(value, implicit);
+ * pcapGlobalHeader(PCAP_DEFAULT_ENDIANNESS).encode(value, explicit);
+ *
+ * assertEquals(implicit, explicit);
+ * ```
+ */
+export const PCAP_DEFAULT_ENDIANNESS: PcapEndianness = "le";
 
 /**
  * Logical magic number for microsecond-resolution captures.
@@ -68,7 +105,11 @@ export interface PcapGlobalHeader {
  * Creates a coder for the pcap global header in the requested byte order.
  *
  * @param endianness Byte order used for the multi-byte fields. Pass `"le"` or
- *   `"be"` to match the file you are reading or producing.
+ *   `"be"` to match the file you are reading or producing. Defaults to
+ *   {@link PCAP_DEFAULT_ENDIANNESS}. This coder is fixed to one byte order —
+ *   to decode a header of unknown endianness, probe it with
+ *   {@link detectPcapMagic} first, or use {@link pcapFile}, which does that
+ *   for you.
  * @returns A coder that encodes/decodes a {@link PcapGlobalHeader}.
  *
  * @example Encode and decode a little-endian global header
@@ -124,18 +165,51 @@ export interface PcapGlobalHeader {
  * assertEquals(decoded.magic, PCAP_MAGIC_MICROS);
  * assertEquals(decoded.snapLen, 1500);
  * ```
+ *
+ * @example Omitting the argument round-trips using the default byte order
+ * ```ts
+ * import { assertEquals } from "@std/assert";
+ * import {
+ *   detectPcapMagic,
+ *   LINKTYPE,
+ *   PCAP_MAGIC_MICROS,
+ *   pcapGlobalHeader,
+ * } from "@binstruct/pcap";
+ *
+ * const header = pcapGlobalHeader();
+ * const value = {
+ *   magic: PCAP_MAGIC_MICROS,
+ *   versionMajor: 2,
+ *   versionMinor: 4,
+ *   thisZone: 0,
+ *   sigFigs: 0,
+ *   snapLen: 65535,
+ *   network: LINKTYPE.ETHERNET,
+ * };
+ *
+ * const buffer = new Uint8Array(24);
+ * const written = header.encode(value, buffer);
+ * const [decoded, read] = header.decode(buffer);
+ *
+ * assertEquals(written, 24);
+ * assertEquals(read, 24);
+ * assertEquals(decoded, value);
+ * assertEquals(detectPcapMagic(buffer), { endianness: "le", nanos: false });
+ * ```
  */
 export function pcapGlobalHeader(
-  endianness: PcapEndianness,
+  endianness?: PcapEndianness,
 ): Coder<PcapGlobalHeader> {
+  const order = endianness ?? PCAP_DEFAULT_ENDIANNESS;
+
   return struct({
-    magic: u32(endianness),
-    versionMajor: u16(endianness),
-    versionMinor: u16(endianness),
-    thisZone: s32(endianness),
-    sigFigs: u32(endianness),
-    snapLen: u32(endianness),
-    network: u32(endianness),
+    magic: u32(order),
+    versionMajor: u16(order),
+    versionMinor: u16(order),
+    thisZone: s32(order),
+    sigFigs: u32(order),
+    snapLen: u32(order),
+    network: u32(order),
   });
 }
 

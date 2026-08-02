@@ -9,7 +9,7 @@
 
 import { arrayWhile, bytes, ref, struct, u32 } from "@hertzg/binstruct";
 import type { Coder } from "@hertzg/binstruct";
-import type { PcapEndianness } from "./header.ts";
+import { PCAP_DEFAULT_ENDIANNESS, type PcapEndianness } from "./header.ts";
 
 /**
  * Decoded representation of a single pcap record.
@@ -44,7 +44,14 @@ export interface PcapRecord {
  * The payload length is taken from the `inclLen` field via a forward
  * reference, so records of any captured size round-trip correctly.
  *
- * @param endianness Byte order matching the surrounding pcap file.
+ * A record carries no magic of its own, so its byte order cannot be recovered
+ * from the record bytes — it is dictated entirely by the global header that
+ * precedes it. When the argument is omitted the coder assumes
+ * {@link PCAP_DEFAULT_ENDIANNESS}; pass the endianness explicitly whenever the
+ * surrounding file might be big-endian.
+ *
+ * @param endianness Byte order matching the surrounding pcap file. Defaults to
+ *   {@link PCAP_DEFAULT_ENDIANNESS}.
  * @returns A coder that encodes/decodes a {@link PcapRecord}.
  *
  * @example Round-trip a single record
@@ -94,18 +101,48 @@ export interface PcapRecord {
  * assertEquals(decoded.origLen, 1500);
  * assertEquals(decoded.data.length, 2);
  * ```
+ *
+ * @example Omitting the argument round-trips using the default byte order
+ * ```ts
+ * import { assertEquals } from "@std/assert";
+ * import { PCAP_DEFAULT_ENDIANNESS, pcapRecord } from "@binstruct/pcap";
+ *
+ * const value = {
+ *   tsSec: 1_700_000_000,
+ *   tsUsec: 123_456,
+ *   inclLen: 3,
+ *   origLen: 3,
+ *   data: new Uint8Array([0x01, 0x02, 0x03]),
+ * };
+ *
+ * const implicit = new Uint8Array(32);
+ * const explicit = new Uint8Array(32);
+ * const written = pcapRecord().encode(value, implicit);
+ * pcapRecord(PCAP_DEFAULT_ENDIANNESS).encode(value, explicit);
+ *
+ * const [decoded, read] = pcapRecord().decode(implicit);
+ *
+ * assertEquals(implicit, explicit);
+ * assertEquals(written, 19);
+ * assertEquals(read, 19);
+ * assertEquals(decoded, value);
+ * ```
  */
-export function pcapRecord(endianness: PcapEndianness): Coder<PcapRecord> {
+export function pcapRecord(
+  endianness?: PcapEndianness,
+): Coder<PcapRecord> {
+  const order = endianness ?? PCAP_DEFAULT_ENDIANNESS;
+
   // inclLen is bound to a const so the bytes() coder can ref() the same
-  // identity we register in the struct — sibling fields call u32(endianness)
+  // identity we register in the struct — sibling fields call u32(order)
   // inline because their values aren't referenced elsewhere.
-  const inclLen = u32(endianness);
+  const inclLen = u32(order);
 
   return struct({
-    tsSec: u32(endianness),
-    tsUsec: u32(endianness),
+    tsSec: u32(order),
+    tsUsec: u32(order),
     inclLen,
-    origLen: u32(endianness),
+    origLen: u32(order),
     data: bytes(ref(inclLen)),
   });
 }
@@ -132,6 +169,13 @@ export interface PcapFile<THeader, TRecord> {
  * Records are decoded greedily until fewer than 16 bytes (the record-header
  * size) remain in the buffer; this matches how typical pcap readers consume a
  * file to its end without needing an explicit count.
+ *
+ * This is the builder tier of the package's coder API: it deliberately keeps
+ * both coders required, because there is no single obvious pair to default to
+ * once the caller has opted into custom header or record handling. Callers who
+ * just want to read or write an ordinary capture use {@link pcapFile}, the
+ * zero-argument sibling that supplies the standard pair and picks the byte
+ * order for you.
  *
  * @template THeader Decoded shape produced by the header coder.
  * @template TRecord Decoded shape produced by the record coder.
