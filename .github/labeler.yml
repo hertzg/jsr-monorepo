@@ -25,6 +25,9 @@
 "@binstruct/ipv4":
   - changed-files:
       - any-glob-to-any-file: packages/@binstruct/ipv4/**
+"@binstruct/ipv6":
+  - changed-files:
+      - any-glob-to-any-file: packages/@binstruct/ipv6/**
 "@binstruct/pcap":
   - changed-files:
       - any-glob-to-any-file: packages/@binstruct/pcap/**

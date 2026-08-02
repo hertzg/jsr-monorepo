@@ -35,6 +35,7 @@
     "@binstruct/icmpv6": "jsr:@binstruct/icmpv6@^0.0.1",
     "@binstruct/inet": "jsr:@binstruct/inet@^0.3.0",
     "@binstruct/ipv4": "jsr:@binstruct/ipv4@^0.3.0",
+    "@binstruct/ipv6": "jsr:@binstruct/ipv6@^0.0.1",
     "@binstruct/png": "jsr:@binstruct/png@^0.4.0",
     "@binstruct/sll": "jsr:@binstruct/sll@^0.0.1",
     "@binstruct/tcp": "jsr:@binstruct/tcp@^0.2.0",
