@@ -1,4 +1,5 @@
-import { assertEquals } from "@std/assert";
+import { assertEquals, assertStringIncludes } from "@std/assert";
+import { join, resolve, toFileUrl } from "@std/path";
 import {
   resolveSpecifier,
   shortenSpecifier,
@@ -11,6 +12,16 @@ type ResolutionCase = {
   readonly form: SpecifierForm;
   readonly short: string;
 };
+
+/**
+ * The `file://` URL a path input is expected to anchor to.
+ *
+ * @param input The path as typed
+ * @returns Its absolute URL under the working directory
+ */
+function underCwd(input: string): string {
+  return toFileUrl(resolve(input)).href;
+}
 
 const cases: readonly ResolutionCase[] = [
   // Row 1 of the ADR 0004 table: anything with a scheme passes through.
@@ -52,24 +63,61 @@ const cases: readonly ResolutionCase[] = [
     short: "file:///abs/mod.ts",
   },
 
-  // Row 2: paths, by leading marker or by module extension.
-  { input: "./local", specifier: "./local", form: "path", short: "./local" },
-  { input: "../up", specifier: "../up", form: "path", short: "../up" },
+  // Row 2: paths, by leading marker or by module extension. A path is anchored
+  // to the working directory, because `deno doc` and `import()` disagree about
+  // what a relative one is relative to; the typed form survives as `short`.
+  {
+    input: "./local",
+    specifier: underCwd("./local"),
+    form: "path",
+    short: "./local",
+  },
+  {
+    input: "../up",
+    specifier: underCwd("../up"),
+    form: "path",
+    short: "../up",
+  },
   {
     input: "/abs/path",
-    specifier: "/abs/path",
+    specifier: "file:///abs/path",
     form: "path",
     short: "/abs/path",
   },
-  { input: ".", specifier: ".", form: "path", short: "." },
-  { input: "mod.ts", specifier: "mod.ts", form: "path", short: "mod.ts" },
-  { input: "mod.tsx", specifier: "mod.tsx", form: "path", short: "mod.tsx" },
-  { input: "mod.js", specifier: "mod.js", form: "path", short: "mod.js" },
-  { input: "mod.mjs", specifier: "mod.mjs", form: "path", short: "mod.mjs" },
-  { input: "mod.cjs", specifier: "mod.cjs", form: "path", short: "mod.cjs" },
+  { input: ".", specifier: underCwd("."), form: "path", short: "." },
+  {
+    input: "mod.ts",
+    specifier: underCwd("mod.ts"),
+    form: "path",
+    short: "mod.ts",
+  },
+  {
+    input: "mod.tsx",
+    specifier: underCwd("mod.tsx"),
+    form: "path",
+    short: "mod.tsx",
+  },
+  {
+    input: "mod.js",
+    specifier: underCwd("mod.js"),
+    form: "path",
+    short: "mod.js",
+  },
+  {
+    input: "mod.mjs",
+    specifier: underCwd("mod.mjs"),
+    form: "path",
+    short: "mod.mjs",
+  },
+  {
+    input: "mod.cjs",
+    specifier: underCwd("mod.cjs"),
+    form: "path",
+    short: "mod.cjs",
+  },
   {
     input: "pkg/mod.ts",
-    specifier: "pkg/mod.ts",
+    specifier: underCwd("pkg/mod.ts"),
     form: "path",
     short: "pkg/mod.ts",
   },
@@ -127,6 +175,30 @@ Deno.test("resolveSpecifier resolves by first match", async (t) => {
   }
 });
 
+Deno.test("resolveSpecifier anchors a path to the working directory", () => {
+  // `deno doc` reads a relative specifier against the process's working
+  // directory and `import()` reads it against this module, so leaving one
+  // relative had discovery and execution looking at two different files —
+  // silently importing whatever sat next to specifier.ts under that name.
+  const relative = resolveSpecifier("./pkg/mod.ts");
+
+  assertEquals(
+    relative.specifier,
+    toFileUrl(join(Deno.cwd(), "pkg/mod.ts")).href,
+  );
+  assertEquals(relative.specifier.startsWith(import.meta.url), false);
+  assertEquals(relative.short, "./pkg/mod.ts");
+  assertEquals(relative.input, "./pkg/mod.ts");
+});
+
+Deno.test("resolveSpecifier leaves an explicit file URL alone", () => {
+  const url = import.meta.resolve("./specifier.ts");
+  const resolved = resolveSpecifier(url);
+
+  assertEquals(resolved.form, "scheme");
+  assertEquals(resolved.specifier, url);
+});
+
 Deno.test("resolveSpecifier flags shorthand but not explicit forms", () => {
   assertEquals(resolveSpecifier("png").shorthand, true);
   assertEquals(resolveSpecifier("@hertzg/xhb").shorthand, true);
@@ -153,7 +225,8 @@ Deno.test("resolveSpecifier requires two lowercase characters for a scheme", asy
   await t.step("a drive path with a module extension is a path", () => {
     const resolved = resolveSpecifier("C:/tmp/mod.ts");
     assertEquals(resolved.form, "path");
-    assertEquals(resolved.specifier, "C:/tmp/mod.ts");
+    assertEquals(resolved.short, "C:/tmp/mod.ts");
+    assertStringIncludes(resolved.specifier, "file://");
   });
 
   await t.step("an uppercase scheme is not matched", () => {

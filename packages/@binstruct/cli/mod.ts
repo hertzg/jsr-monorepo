@@ -34,9 +34,9 @@
  * deno run -A @binstruct/cli arp decode < arp.bin > arp.json
  * ```
  *
- * @example A local package works the same way
+ * @example A local module works the same way, relative to the working directory
  * ```bash
- * deno run -A @binstruct/cli ./my-package myStruct decode < input.bin > output.json
+ * deno run -A @binstruct/cli ./my-package/mod.ts myStruct decode < input.bin > output.json
  * ```
  *
  * @example Programmatic usage: plan an invocation without performing it
@@ -65,9 +65,18 @@ export {
   readSymbolDocs,
 } from "./discover.ts";
 export type {
+  DenoDocDeclaration,
+  DenoDocJson,
+  DenoDocNode,
+  DenoDocParam,
+  DenoDocSymbol,
+  DenoDocType,
   DiscoveredCoder,
   DiscoveryOutcome,
+  DiscoverySuccess,
+  EmptyDiscoveryDiagnosis,
   PackageSurface,
+  SymbolDocsOutcome,
   ToolFailure,
   ToolFailureReason,
 } from "./discover.ts";

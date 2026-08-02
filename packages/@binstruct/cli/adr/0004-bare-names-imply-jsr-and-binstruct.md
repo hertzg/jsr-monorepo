@@ -19,16 +19,31 @@ layered on without shadowing those forms.
 
 The specifier is resolved by first match:
 
-| input                                      | rule              | resolves to          |
-| ------------------------------------------ | ----------------- | -------------------- |
-| `jsr:@binstruct/png`, `npm:x`, `https://…` | has a scheme      | unchanged            |
-| `./x`, `../x`, `/abs/x`, `mod.ts`          | looks like a path | unchanged            |
-| `@hertzg/xhb`                              | starts with `@`   | `jsr:@hertzg/xhb`    |
-| `png`, `wav@0.2.0`                         | bare              | `jsr:@binstruct/png` |
+| input                                      | rule              | resolves to             |
+| ------------------------------------------ | ----------------- | ----------------------- |
+| `jsr:@binstruct/png`, `npm:x`, `https://…` | has a scheme      | unchanged               |
+| `./x`, `../x`, `/abs/x`, `mod.ts`          | looks like a path | `file://` URL under cwd |
+| `@hertzg/xhb`                              | starts with `@`   | `jsr:@hertzg/xhb`       |
+| `png`, `wav@0.2.0`                         | bare              | `jsr:@binstruct/png`    |
 
 A scheme requires **at least two lowercase characters** before the colon
 (`^[a-z][a-z0-9+.-]+:`), so a bare name can never be mistaken for one. A path is
 anything beginning with `.` or `/`, or ending in a JS/TS extension.
+
+A path is **anchored to the working directory** and handed on as a `file://`
+URL. This row originally read "unchanged", which was wrong: the two consumers of
+a specifier disagree about what a relative one is relative to. `deno doc`
+resolves it against the process's working directory; dynamic `import()` resolves
+it against the importing module, which is `loader.ts` inside the CLI package.
+`binstruct ./pkg` therefore listed the user's coders and then imported — or
+failed to import — a `./pkg` next to the CLI's own sources, and a user file
+whose coder name collided with one of the CLI's exports would have been run
+instead of theirs. Published from JSR the mismatch is total: every relative path
+becomes `https://jsr.io/@binstruct/cli/<version>/pkg`.
+
+`ResolvedSpecifier.input` and `.short` keep the typed form, so headers, listings
+and `TRY` lines still say `./pkg`. Reading `Deno.cwd()` is the one thing
+resolution takes from outside its argument, and only for this form.
 
 Version suffixes ride along: `wav@0.2.0` becomes `jsr:@binstruct/wav@0.2.0`,
 which `deno doc` resolves (verified against `jsr:@binstruct/png@0.3.2`).
@@ -47,9 +62,11 @@ shorthand only helps if the tool teaches it.
 
 - **The common command loses 20 characters**, and every generated `TRY` line
   becomes short enough to read at a glance.
-- **Resolution is a pure function of the input string.** It does not consult the
-  registry, the network or the filesystem, so it cannot behave differently on a
-  stale registry or offline.
+- **Resolution consults nothing but the input string and the working
+  directory.** It does not touch the registry, the network or the filesystem, so
+  it cannot behave differently on a stale registry or offline. The `Deno.cwd()`
+  read means a path form now needs `--allow-read`, which every documented
+  invocation already has.
 - **A local directory named like a package is shadowed.** `png/` resolves to the
   JSR package, not the directory; `./png` disambiguates. Documented in `--help`,
   not defended against.

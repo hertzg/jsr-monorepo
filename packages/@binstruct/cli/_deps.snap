@@ -4,11 +4,13 @@
     ".": [
       "@hertzg/binstruct",
       "jsr:@std/cli@^1.0.25",
+      "jsr:@std/path@^1.1.4",
       "npm:json5@^2.2.3"
     ],
     "./cli": [
       "@hertzg/binstruct",
       "jsr:@std/cli@^1.0.25",
+      "jsr:@std/path@^1.1.4",
       "npm:json5@^2.2.3"
     ]
   }

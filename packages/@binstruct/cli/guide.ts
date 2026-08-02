@@ -72,6 +72,16 @@ export type GuideNext = {
 export type Guide = {
   /** First line, echoing the resolved specifier so shorthand is never invisible. */
   readonly header?: string;
+  /**
+   * Whether the screen reports a failure rather than disclosing the next word.
+   *
+   * A pure disclosure level is guidance: `--help` may relocate it to stdout and
+   * exit 0. A diagnostic — an unreadable package, a misspelled coder, a listing
+   * that could not be produced — is a failure that happens to be explained
+   * well, and stays on stderr with a non-zero exit whatever the flags say, so
+   * that `binstruct nosuchpkg --help > out.txt` cannot report success.
+   */
+  readonly diagnostic?: boolean;
   /** Lines shown before `NEXT`: what went wrong, or what was inferred. */
   readonly notes?: readonly string[];
   /** The missing word. */

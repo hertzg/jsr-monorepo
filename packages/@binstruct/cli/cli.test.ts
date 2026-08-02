@@ -53,9 +53,11 @@ function printed(plan: Awaited<ReturnType<typeof planCli>>) {
 async function runCli(
   args: string[],
   permissions: string[] = ["-A"],
+  cwd?: string,
 ): Promise<{ code: number; stdout: string; stderr: string }> {
   const command = new Deno.Command(Deno.execPath(), {
     args: ["run", ...permissions, CLI, ...args],
+    cwd,
     stdin: "null",
     stdout: "piped",
     stderr: "piped",
@@ -276,7 +278,8 @@ Deno.test("an unknown package is answered with the package list", async () => {
   const plan = printed(await planCli(["./no-such-package.ts"]));
 
   assertEquals(plan.code, 1);
-  assertStringIncludes(plan.text, "cannot read ./no-such-package.ts");
+  assertStringIncludes(plan.text, "cannot read file://");
+  assertStringIncludes(plan.text, "no-such-package.ts");
   assertStringIncludes(plan.text, "Module not found");
   assertStringIncludes(plan.text, "NEXT  <package>");
   assertEquals(plan.text.includes("["), false);
@@ -360,8 +363,25 @@ Deno.test("explainFailure falls back to the raw error", async () => {
 Deno.test("explainFailure answers an unreadable package with the package list", async () => {
   const text = await explainFailure("./no-such-package.ts", "whatever", "boom");
 
-  assertStringIncludes(text, "cannot read ./no-such-package.ts: boom");
+  assertStringIncludes(text, "cannot read file://");
+  assertStringIncludes(text, "no-such-package.ts: boom");
   assertStringIncludes(text, "NEXT  <package>");
+});
+
+Deno.test("explainFailure leaves the header to its caller", async () => {
+  // main() announces the specifier before the run starts, so a guide that
+  // carried one too opened every post-import failure with the same line twice.
+  const text = await explainFailure(PNG, "pngFil", new Error("not found"));
+
+  assertEquals(text.includes("package: "), false);
+  assertStringIncludes(text, "no coder named 'pngFil'");
+});
+
+Deno.test("explainFailure explains a coder that takes arguments", async () => {
+  const text = await explainFailure(PCAP, "pcapFile", new Error("boom"));
+
+  assertStringIncludes(text, "takes arguments, which the CLI cannot supply");
+  assertEquals(text.includes("Error: boom"), false);
 });
 
 Deno.test("an incomplete invocation writes nothing to stdout and exits 1", async () => {
@@ -400,4 +420,197 @@ Deno.test("discovery denied still points at naming the coder directly", async ()
   assertStringIncludes(denied.stderr, "--allow-run=deno");
   assertStringIncludes(denied.stderr, "naming the coder yourself");
   assertNotEquals(denied.stderr.indexOf("NEXT  <coder>"), -1);
+});
+
+Deno.test("parseCliArgs keeps a numeric-looking word as typed", () => {
+  // @std/cli coerces `_` entries, so `007` used to reach the resolver as `7`
+  // and every message quoted a package the user never typed.
+  assertEquals(parseCliArgs(["007"]).package, "007");
+  assertEquals(parseCliArgs(["1.20", "2e3", "decode"]), {
+    package: "1.20",
+    coder: "2e3",
+    command: "decode",
+    help: false,
+    version: false,
+    docs: false,
+  });
+});
+
+Deno.test("parseCliArgs treats a blank word as a missing one", () => {
+  assertEquals(parseCliArgs(["png", "", "decode"]).coder, undefined);
+  assertEquals(parseCliArgs(["png", "", "decode"]).command, "decode");
+  assertEquals(parseCliArgs(["-p", "png", "-c", "   "]).coder, undefined);
+  assertEquals(parseCliArgs([""]).package, undefined);
+  assertEquals(parseCliArgs(["-p", ""]).package, undefined);
+});
+
+Deno.test("a blank coder word asks which coder instead of importing", async () => {
+  const plan = printed(await planCli([PNG, "", "decode"]));
+
+  assertEquals(plan.code, 1);
+  assertStringIncludes(plan.text, "NEXT  <coder>");
+  assertEquals(plan.text.includes("no coder named ''"), false);
+});
+
+Deno.test("level 1 shows the package's own description", async () => {
+  // ADR 0003 defers descriptions from level 0 to level 1; discovery read the
+  // module doc all along and the screen threw it away.
+  const plan = printed(await planCli([PNG]));
+
+  assertStringIncludes(
+    plan.text,
+    "PNG (Portable Network Graphics) file format",
+  );
+});
+
+Deno.test("the level 2 collapse keeps the description too", async () => {
+  const plan = printed(await planCli([ARP]));
+
+  assertStringIncludes(plan.text, "NEXT  <command>");
+  assertStringIncludes(plan.text, "ARP (Address Resolution Protocol) packet");
+});
+
+Deno.test("a named coder that takes arguments is refused, not called", async () => {
+  // pcapFile(endianness) called bare defaults to big-endian and decodes a
+  // little-endian capture into plausible, wrong numbers with exit 0.
+  const plan = printed(await planCli([PCAP, "pcapFile", "decode"]));
+
+  assertEquals(plan.stream, "stderr");
+  assertEquals(plan.code, 1);
+  assertStringIncludes(
+    plan.text,
+    "takes arguments, which the CLI cannot supply",
+  );
+});
+
+Deno.test("a named coder that takes arguments still lists the callable ones", async () => {
+  const plan = printed(await planCli([PNG, "pngFileChunks", "decode"]));
+
+  assertEquals(plan.code, 1);
+  assertStringIncludes(plan.text, "pngFileChunks takes 1 argument");
+  assertStringIncludes(plan.text, "NEXT  <coder>");
+  assertStringIncludes(plan.text, `TRY\n  binstruct ${PNG} pngChunkUnknown`);
+});
+
+Deno.test("--docs announces the specifier and the inferred coder", async () => {
+  const plan = printed(await planCli([ARP, "--docs"]));
+
+  assertEquals(plan.stream, "stdout");
+  assertEquals(plan.notices, [
+    `package: ${ARP}`,
+    `using coder: arpData (only coder in ${ARP})`,
+  ]);
+});
+
+Deno.test("--docs documents the decoded type as well as the coder", async () => {
+  const plan = printed(await planCli([ARP, "--docs"]));
+
+  assertStringIncludes(plan.text, "function arpData");
+  assertStringIncludes(plan.text, "interface ArpData");
+  // The module doc is a `--filter` preamble on both runs; it is shown once.
+  assertEquals(
+    plan.text.split("An Ethernet/IPv4 ARP packet is a fixed 28 bytes").length,
+    2,
+  );
+});
+
+Deno.test("--docs writes plain text when stdout is not a terminal", async () => {
+  const plan = printed(await planCli([ARP, "--docs"]));
+
+  assertEquals(plan.text.includes(String.fromCharCode(27) + "["), false);
+});
+
+Deno.test("--help does not turn a diagnostic into a success", async () => {
+  // Relocating guidance for a missing word is what --help is for; converting
+  // an unreadable package into stdout and exit 0 is not.
+  const plan = printed(await planCli(["definitely-not-a-package", "--help"]));
+
+  assertEquals(plan.stream, "stderr");
+  assertEquals(plan.code, 1);
+  assertStringIncludes(plan.text, "cannot read jsr:@binstruct/");
+});
+
+Deno.test("--help does not excuse an unknown coder or a bad command", async () => {
+  const coder = printed(await planCli([PNG, "pngfile", "--help"]));
+
+  assertEquals(coder.stream, "stderr");
+  assertEquals(coder.code, 1);
+
+  const command = printed(await planCli([PNG, "pngFile", "frobnicate", "-h"]));
+
+  assertEquals(command.stream, "stderr");
+  assertEquals(command.code, 1);
+});
+
+Deno.test("--help still relocates a pure disclosure level", async () => {
+  const level1 = printed(await planCli([PNG, "--help"]));
+
+  assertEquals(level1.stream, "stdout");
+  assertEquals(level1.code, 0);
+  assertStringIncludes(level1.text, "NEXT  <coder>");
+
+  const level2 = printed(await planCli([PNG, "pngFile", "--help"]));
+
+  assertEquals(level2.stream, "stdout");
+  assertEquals(level2.code, 0);
+  assertStringIncludes(level2.text, "NEXT  <command>");
+});
+
+Deno.test("a run announces the specifier exactly once", async () => {
+  const run = await runCli([PNG, "pngfile", "decode"]);
+
+  assertEquals(run.code, 1);
+  assertEquals(run.stderr.split(`package: ${PNG}`).length, 2);
+});
+
+Deno.test("a relative package is read from the working directory", async () => {
+  // Discovery resolved a relative specifier against the cwd while import()
+  // resolved it against cli.ts, so a local module was listed from one place
+  // and loaded — or not — from another.
+  const directory = await Deno.makeTempDir();
+  try {
+    const binstruct = import.meta.resolve("../../@hertzg/binstruct/mod.ts");
+    await Deno.writeTextFile(
+      `${directory}/local.ts`,
+      [
+        `import { type Coder, struct, u8 } from "${binstruct}";`,
+        "",
+        "/** A one-byte structure that exists only in this directory. */",
+        "export function localOnly(): Coder<{ a: number }> {",
+        "  return struct({ a: u8() });",
+        "}",
+        "",
+      ].join("\n"),
+    );
+
+    const listed = await runCli(["./local.ts"], ["-A"], directory);
+
+    assertEquals(listed.code, 1);
+    assertStringIncludes(listed.stderr, "localOnly");
+    assertStringIncludes(listed.stderr, `package: file://`);
+    assertEquals(listed.stderr.includes("@binstruct/cli/local.ts"), false);
+  } finally {
+    await Deno.remove(directory, { recursive: true });
+  }
+});
+
+Deno.test("an environmental failure is not blamed on the package name", async () => {
+  // A malformed deno.json in the working directory used to be reported as
+  // "cannot read jsr:@binstruct/png", with png right there in the listing.
+  const directory = await Deno.makeTempDir();
+  try {
+    await Deno.writeTextFile(
+      `${directory}/deno.json`,
+      '{ "imports": { "a": } }\n',
+    );
+
+    const broken = await runCli(["png"], ["-A"], directory);
+
+    assertEquals(broken.code, 1);
+    assertStringIncludes(broken.stderr, "cannot list the coders in png");
+    assertStringIncludes(broken.stderr, "naming the coder yourself");
+    assertEquals(broken.stderr.includes("a bare name always means"), false);
+  } finally {
+    await Deno.remove(directory, { recursive: true });
+  }
 });

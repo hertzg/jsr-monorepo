@@ -66,8 +66,12 @@ The default applies only at exactly one candidate. Two or more — `png`, `bmp`,
 - **It rests on discovery.** Unlike specifier resolution (ADR 0004), the
   shortcut cannot work when `deno doc` is unavailable, so the failure path must
   fall back to demanding an explicit coder name.
-- **`pcap` is unreachable regardless.** Its only coder, `pcapFile(endianness)`,
-  takes a required argument, and the CLI has no way to supply one.
+- **`pcap` is unreachable regardless.** Its coders all take required arguments,
+  and the CLI has no way to supply one. Naming one explicitly is refused for the
+  same reason: `binstruct pcap pcapFile decode` would otherwise call
+  `pcapFile()` and let `endianness` default, turning a little-endian capture
+  into plausible, wrong numbers with exit 0. Refusal is what ADR 0002's
+  always-on discovery is for.
 
 ## References
 

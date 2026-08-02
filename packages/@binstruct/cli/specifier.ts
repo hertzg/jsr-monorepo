@@ -6,18 +6,29 @@
  * bare name implies the `jsr:` scheme and the `@binstruct` scope. Resolution is
  * a pure function of the input string, by first match:
  *
- * | input                                      | rule              | resolves to          |
- * | ------------------------------------------ | ----------------- | -------------------- |
- * | `jsr:@binstruct/png`, `npm:x`, `https://…` | has a scheme      | unchanged            |
- * | `./x`, `../x`, `/abs/x`, `mod.ts`          | looks like a path | unchanged            |
- * | `@hertzg/xhb`                              | starts with `@`   | `jsr:@hertzg/xhb`    |
- * | `png`, `wav@0.2.0`                         | bare              | `jsr:@binstruct/png` |
+ * | input                                      | rule              | resolves to             |
+ * | ------------------------------------------ | ----------------- | ----------------------- |
+ * | `jsr:@binstruct/png`, `npm:x`, `https://…` | has a scheme      | unchanged               |
+ * | `./x`, `../x`, `/abs/x`, `mod.ts`          | looks like a path | `file://` URL under cwd |
+ * | `@hertzg/xhb`                              | starts with `@`   | `jsr:@hertzg/xhb`       |
+ * | `png`, `wav@0.2.0`                         | bare              | `jsr:@binstruct/png`    |
  *
- * Nothing here consults the registry, the network or the filesystem, so an
- * unknown bare name resolves happily and fails later, at load time.
+ * A path is made absolute against the working directory rather than passed
+ * through, because the two consumers of a specifier disagree about what a
+ * relative one means: `deno doc` resolves it against the process's working
+ * directory, while `import()` resolves it against the importing module — this
+ * file — so `./pkg` would be discovered in one place and loaded from another.
+ * Anchoring it once, here, is what keeps the two looking at the same module.
+ * {@linkcode ResolvedSpecifier.short} keeps the typed form, so listings and
+ * `TRY` lines still say `./pkg`.
+ *
+ * Nothing here consults the registry or the network, and nothing is read off
+ * disk, so an unknown bare name resolves happily and fails later, at load time.
  *
  * @module
  */
+
+import { resolve, toFileUrl } from "@std/path";
 
 /**
  * Matches a URL scheme prefix, requiring at least two lowercase characters
@@ -58,7 +69,9 @@ export interface ResolvedSpecifier {
   readonly specifier: string;
   /**
    * The shortest form that resolves back to {@linkcode ResolvedSpecifier.specifier},
-   * for listings and `TRY` lines. Equal to `shortenSpecifier(specifier)`.
+   * for listings and `TRY` lines. Equal to `shortenSpecifier(specifier)`, except
+   * for a path, where it is the input itself — a path is anchored to the working
+   * directory the CLI was started in, and only the typed form still says so.
    */
   readonly short: string;
   /** The resolution rule that matched. */
@@ -87,11 +100,17 @@ function classify(input: string): SpecifierForm {
 }
 
 /**
- * Applies the expansion a classification calls for.
+ * Applies the scheme-and-scope expansion a classification calls for.
+ *
+ * Deliberately pure, including for a path, which {@linkcode resolveSpecifier}
+ * anchors to the working directory afterwards. That keeps
+ * {@linkcode shortenSpecifier}, whose round trip runs through here, free of
+ * both the `Deno.cwd()` read and the question of where the caller happens to
+ * be standing.
  *
  * @param input Package argument as typed.
  * @param form The rule that matched.
- * @returns The module specifier.
+ * @returns The module specifier, with a path left relative.
  */
 function expand(input: string, form: SpecifierForm): string {
   switch (form) {
@@ -114,6 +133,12 @@ function expand(input: string, form: SpecifierForm): string {
  * `jsr:@binstruct/xhb` and fails at load time rather than finding
  * `@hertzg/xhb`.
  *
+ * A path is anchored to the working directory and returned as a `file://` URL,
+ * so that discovery and `import()` — which disagree about what a relative
+ * specifier is relative to — resolve it to the same module. Reading
+ * `Deno.cwd()` is the one thing this function needs from outside its argument,
+ * and only for that form.
+ *
  * @param input Package argument as typed on the command line.
  * @returns The input, its resolved specifier, its short form and how it was classified.
  *
@@ -133,11 +158,16 @@ function expand(input: string, form: SpecifierForm): string {
  * @example A scope, a scheme and a path
  * ```ts
  * import { assertEquals } from "@std/assert";
+ * import { toFileUrl } from "@std/path";
  * import { resolveSpecifier } from "./specifier.ts";
  *
  * assertEquals(resolveSpecifier("@hertzg/xhb").specifier, "jsr:@hertzg/xhb");
  * assertEquals(resolveSpecifier("npm:foo").specifier, "npm:foo");
- * assertEquals(resolveSpecifier("./local").specifier, "./local");
+ *
+ * const local = resolveSpecifier("./local");
+ *
+ * assertEquals(local.specifier, toFileUrl(`${Deno.cwd()}/local`).href);
+ * assertEquals(local.short, "./local");
  * ```
  *
  * @example A version suffix rides along
@@ -153,6 +183,17 @@ function expand(input: string, form: SpecifierForm): string {
  */
 export function resolveSpecifier(input: string): ResolvedSpecifier {
   const form = classify(input);
+
+  if (form === "path") {
+    return {
+      input,
+      specifier: toFileUrl(resolve(input)).href,
+      short: input,
+      form,
+      shorthand: false,
+    };
+  }
+
   const specifier = expand(input, form);
   return {
     input,
@@ -185,9 +226,9 @@ function* shortCandidates(specifier: string): Generator<string> {
  *
  * The CLI echoes the resolved specifier once, as a header, and uses this short
  * form everywhere else — in listings and in the paste-ready `TRY` lines — since
- * the shorthand only helps if the tool teaches it. Candidates are tested with
- * {@linkcode resolveSpecifier}, so a shortening that would be read back as
- * something else (a path, say) is never proposed.
+ * the shorthand only helps if the tool teaches it. Each candidate is classified
+ * and expanded again before it is offered, so a shortening that would be read
+ * back as something else (a path, say) is never proposed.
  *
  * @param specifier A resolved module specifier.
  * @returns The shortest equivalent input, or the specifier itself when it cannot be shortened.

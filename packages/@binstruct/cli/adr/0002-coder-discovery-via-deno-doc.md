@@ -48,11 +48,26 @@ but ships no type declarations".
 
 Formatted documentation is delegated rather than reimplemented. A `--docs` flag
 shells out to `deno doc --filter <symbol> <specifier>` for the coder and its
-decoded type. Two constraints found by measurement: the positional form
+decoded type. Three constraints found by measurement: the positional form
 `deno doc <spec> <Symbol>` that `deno doc --help` advertises **does not work**
 with a `jsr:` specifier — it resolves the symbol as a file path and errors — so
-`--filter` is mandatory; and `--filter` still prints the whole module doc as a
-preamble.
+`--filter` is mandatory; `--filter` still prints the whole module doc as a
+preamble, so the second block is shown only from the line where it stops
+agreeing with the first; and the subprocess colours its output unconditionally,
+so the colour decision is taken from the CLI's own stdout and passed down as
+`NO_COLOR`.
+
+**Discovery runs on every invocation, complete ones included.** An earlier
+version skipped it whenever all three words were present, on the grounds that
+nothing was being explored. That made the coder name unverified, and an
+unverified name is not merely a worse error message: `pcapFile(endianness)`
+called with no argument silently defaults to big-endian, so
+`binstruct pcap pcapFile decode` printed a whole capture of byte-swapped numbers
+and exited 0. No cheaper check distinguishes that from a correct run — a
+factory's runtime `.length` counts TypeScript's optional parameters, which the
+declaration-level count correctly does not — so the subprocess is the price of
+the guarantee. A named coder is still taken on trust when discovery is
+_unavailable_, which is what keeps the escape hatch below honest.
 
 ## Consequences
 
@@ -65,7 +80,9 @@ preamble.
   the CLI could not previously answer at all.
 - **Cold discovery costs ~1.0–1.7s per package; warm is ~45ms.** Deno caches the
   module graph, so the first lookup of the day pauses visibly with no spinner
-  and every later one is instant. Level 0 and complete invocations never pay it.
+  and every later one is instant. Only level 0 escapes it — a complete
+  invocation pays the warm cost on every run, which is what buys the arity check
+  above.
 - **Discovery needs `--allow-run=deno`.** The published usage already says `-A`,
   but a tightened permission set breaks levels 1–2 while decode and encode keep
   working. Discovery failure must therefore always print the "you can still name

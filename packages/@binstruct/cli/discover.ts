@@ -147,12 +147,16 @@ export type PackageSurface = {
  *   resolve. Nothing about the invocation was wrong.
  * - `exited-non-zero` — anything else the tool rejected: unknown package,
  *   network failure, syntax error in a local entrypoint.
+ * - `graph-incomplete` — the tool succeeded, but the module graph it printed
+ *   carries an error, so it was never walked. `deno info` exits 0 in this
+ *   case, which would otherwise read as a graph that simply contains nothing.
  */
 export type ToolFailureReason =
   | "permission-denied"
   | "not-spawned"
   | "minimum-dependency-age"
-  | "exited-non-zero";
+  | "exited-non-zero"
+  | "graph-incomplete";
 
 /**
  * A `deno` subprocess that did not produce usable output.
@@ -370,11 +374,13 @@ export function readDocSurface(doc: DenoDocJson): PackageSurface {
  *
  * @param args Arguments to pass to `deno`
  * @param specifier The specifier under inspection, echoed into failures
+ * @param env Environment overrides for the subprocess
  * @returns The captured stdout, or the reason the tool produced none
  */
 async function runDeno(
   args: string[],
   specifier: string,
+  env: Record<string, string> = {},
 ): Promise<{ ok: true; stdout: string } | ToolFailure> {
   const command = ["deno", ...args];
 
@@ -382,6 +388,7 @@ async function runDeno(
   try {
     output = await new Deno.Command("deno", {
       args,
+      env,
       stdout: "piped",
       stderr: "piped",
     }).output();
@@ -468,6 +475,12 @@ export async function discoverCoders(
  * the symbol as a file path and fails for `jsr:` specifiers, so `--filter` is
  * the only working spelling.
  *
+ * The subprocess colours its output whether or not it is talking to a
+ * terminal, and it is talking to a pipe here by construction. The colour
+ * decision is therefore taken from *this* process's stdout, so
+ * `--docs > notes.txt` writes plain text while `--docs` on a terminal stays
+ * readable.
+ *
  * @param specifier A resolved specifier, e.g. `jsr:@binstruct/arp` or a path
  * @param symbol The exported name to document, e.g. `arpData`
  * @returns The formatted documentation, or why `deno doc` produced none
@@ -490,7 +503,11 @@ export async function readSymbolDocs(
   specifier: string,
   symbol: string,
 ): Promise<SymbolDocsOutcome> {
-  const run = await runDeno(["doc", "--filter", symbol, specifier], specifier);
+  const run = await runDeno(
+    ["doc", "--filter", symbol, specifier],
+    specifier,
+    Deno.stdout.isTerminal() ? {} : { NO_COLOR: "1" },
+  );
   if (!run.ok) return run;
 
   return { ok: true, text: run.stdout };
@@ -504,6 +521,12 @@ export async function readSymbolDocs(
  * of the happy path: call it only after {@linkcode discoverCoders} succeeded
  * with an empty `coders` list, since it rebuilds the graph a second time and
  * answers nothing a non-empty discovery has not already answered.
+ *
+ * `deno info` exits 0 even when it could not resolve the root, reporting the
+ * problem as an `error` on the offending module instead. A graph carrying one
+ * was never walked, so it is a `graph-incomplete` failure rather than evidence
+ * that the package is not binstruct-based — the two are indistinguishable from
+ * the module list alone, and the confident verdict is the wrong one.
  *
  * @param specifier A resolved specifier, e.g. `jsr:@hertzg/mac` or a path
  * @returns Whether the graph depends on binstruct, or why `deno info` failed
@@ -524,15 +547,26 @@ export async function readSymbolDocs(
 export async function diagnoseEmptyDiscovery(
   specifier: string,
 ): Promise<EmptyDiscoveryDiagnosis> {
-  const run = await runDeno(
-    ["info", "--json", "--quiet", specifier],
-    specifier,
-  );
+  const args = ["info", "--json", "--quiet", specifier];
+  const run = await runDeno(args, specifier);
   if (!run.ok) return run;
 
   const graph = JSON.parse(run.stdout) as {
-    modules: { specifier: string }[];
+    modules: { specifier: string; error?: string }[];
   };
+
+  for (const module of graph.modules) {
+    if (module.error !== undefined) {
+      return {
+        ok: false,
+        reason: "graph-incomplete",
+        specifier,
+        command: ["deno", ...args],
+        code: 0,
+        stderr: module.error,
+      };
+    }
+  }
 
   return {
     ok: true,

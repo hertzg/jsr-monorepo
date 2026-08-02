@@ -1,4 +1,5 @@
 import { assert, assertEquals, assertStringIncludes } from "@std/assert";
+import { toFileUrl } from "@std/path";
 import {
   type DenoDocJson,
   diagnoseEmptyDiscovery,
@@ -454,6 +455,30 @@ Deno.test("readSymbolDocs returns deno doc's formatted output", async () => {
 
   assert(docs.ok, "documentation should be available for a local entrypoint");
   assertStringIncludes(docs.text, "arpData");
+});
+
+Deno.test("readSymbolDocs leaves out colour when stdout is not a terminal", async () => {
+  // The subprocess colours its output whether or not anyone can see it, so
+  // `--docs > notes.txt` used to write escape sequences into the file.
+  const docs = await readSymbolDocs(ARP_ENTRYPOINT, "arpData");
+
+  assert(docs.ok, "documentation should be available for a local entrypoint");
+  assertEquals(docs.text.includes(String.fromCharCode(27) + "["), false);
+});
+
+Deno.test("diagnoseEmptyDiscovery reports a graph it could not walk", async () => {
+  // `deno info` exits 0 for an unresolvable root and reports the problem as an
+  // `error` on the module, which read as "this graph contains no binstruct".
+  const directory = await Deno.makeTempDir();
+  try {
+    const diagnosis = await diagnoseEmptyDiscovery(toFileUrl(directory).href);
+
+    assert(!diagnosis.ok, "a directory import is not a readable graph");
+    assertEquals(diagnosis.reason, "graph-incomplete");
+    assertStringIncludes(diagnosis.stderr, "Directory import");
+  } finally {
+    await Deno.remove(directory, { recursive: true });
+  }
 });
 
 Deno.test("diagnoseEmptyDiscovery detects a binstruct dependency", async () => {
