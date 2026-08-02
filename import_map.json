@@ -36,6 +36,7 @@
     "@binstruct/ethernet": "jsr:@binstruct/ethernet@^1.1.0",
     "@binstruct/icmp": "jsr:@binstruct/icmp@^1.1.0",
     "@binstruct/icmpv6": "jsr:@binstruct/icmpv6@^0.0.1",
+    "@binstruct/ico": "jsr:@binstruct/ico@^0.0.1",
     "@binstruct/igmp": "jsr:@binstruct/igmp@^0.0.1",
     "@binstruct/inet": "jsr:@binstruct/inet@^0.3.0",
     "@binstruct/ipv4": "jsr:@binstruct/ipv4@^0.3.0",
