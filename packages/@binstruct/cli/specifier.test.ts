@@ -1,0 +1,216 @@
+import { assertEquals } from "@std/assert";
+import {
+  resolveSpecifier,
+  shortenSpecifier,
+  type SpecifierForm,
+} from "./specifier.ts";
+
+type ResolutionCase = {
+  readonly input: string;
+  readonly specifier: string;
+  readonly form: SpecifierForm;
+  readonly short: string;
+};
+
+const cases: readonly ResolutionCase[] = [
+  // Row 1 of the ADR 0004 table: anything with a scheme passes through.
+  {
+    input: "jsr:@binstruct/png",
+    specifier: "jsr:@binstruct/png",
+    form: "scheme",
+    short: "png",
+  },
+  {
+    input: "jsr:@hertzg/xhb",
+    specifier: "jsr:@hertzg/xhb",
+    form: "scheme",
+    short: "@hertzg/xhb",
+  },
+  {
+    input: "jsr:@binstruct/wav@0.2.0",
+    specifier: "jsr:@binstruct/wav@0.2.0",
+    form: "scheme",
+    short: "wav@0.2.0",
+  },
+  { input: "npm:foo", specifier: "npm:foo", form: "scheme", short: "npm:foo" },
+  {
+    input: "npm:@scope/foo@1.2.3",
+    specifier: "npm:@scope/foo@1.2.3",
+    form: "scheme",
+    short: "npm:@scope/foo@1.2.3",
+  },
+  {
+    input: "https://example.com/mod.ts",
+    specifier: "https://example.com/mod.ts",
+    form: "scheme",
+    short: "https://example.com/mod.ts",
+  },
+  {
+    input: "file:///abs/mod.ts",
+    specifier: "file:///abs/mod.ts",
+    form: "scheme",
+    short: "file:///abs/mod.ts",
+  },
+
+  // Row 2: paths, by leading marker or by module extension.
+  { input: "./local", specifier: "./local", form: "path", short: "./local" },
+  { input: "../up", specifier: "../up", form: "path", short: "../up" },
+  {
+    input: "/abs/path",
+    specifier: "/abs/path",
+    form: "path",
+    short: "/abs/path",
+  },
+  { input: ".", specifier: ".", form: "path", short: "." },
+  { input: "mod.ts", specifier: "mod.ts", form: "path", short: "mod.ts" },
+  { input: "mod.tsx", specifier: "mod.tsx", form: "path", short: "mod.tsx" },
+  { input: "mod.js", specifier: "mod.js", form: "path", short: "mod.js" },
+  { input: "mod.mjs", specifier: "mod.mjs", form: "path", short: "mod.mjs" },
+  { input: "mod.cjs", specifier: "mod.cjs", form: "path", short: "mod.cjs" },
+  {
+    input: "pkg/mod.ts",
+    specifier: "pkg/mod.ts",
+    form: "path",
+    short: "pkg/mod.ts",
+  },
+
+  // Row 3: a scope, but no scheme.
+  {
+    input: "@hertzg/xhb",
+    specifier: "jsr:@hertzg/xhb",
+    form: "scoped",
+    short: "@hertzg/xhb",
+  },
+  {
+    input: "@binstruct/png",
+    specifier: "jsr:@binstruct/png",
+    form: "scoped",
+    short: "png",
+  },
+  {
+    input: "@binstruct/wav@0.2.0",
+    specifier: "jsr:@binstruct/wav@0.2.0",
+    form: "scoped",
+    short: "wav@0.2.0",
+  },
+
+  // Row 4: bare names imply jsr: and @binstruct.
+  { input: "png", specifier: "jsr:@binstruct/png", form: "bare", short: "png" },
+  {
+    input: "wav@0.2.0",
+    specifier: "jsr:@binstruct/wav@0.2.0",
+    form: "bare",
+    short: "wav@0.2.0",
+  },
+  {
+    input: "tls-record",
+    specifier: "jsr:@binstruct/tls-record",
+    form: "bare",
+    short: "tls-record",
+  },
+  // Unconditional: no registry lookup, so a package of another scope resolves
+  // into @binstruct and fails later at load time.
+  { input: "xhb", specifier: "jsr:@binstruct/xhb", form: "bare", short: "xhb" },
+];
+
+Deno.test("resolveSpecifier resolves by first match", async (t) => {
+  for (const { input, specifier, form, short } of cases) {
+    await t.step(`${input === "" ? "<empty>" : input} -> ${specifier}`, () => {
+      assertEquals(resolveSpecifier(input), {
+        input,
+        specifier,
+        short,
+        form,
+        shorthand: form === "scoped" || form === "bare",
+      });
+    });
+  }
+});
+
+Deno.test("resolveSpecifier flags shorthand but not explicit forms", () => {
+  assertEquals(resolveSpecifier("png").shorthand, true);
+  assertEquals(resolveSpecifier("@hertzg/xhb").shorthand, true);
+  assertEquals(resolveSpecifier("jsr:@binstruct/png").shorthand, false);
+  assertEquals(resolveSpecifier("./local").shorthand, false);
+});
+
+Deno.test("resolveSpecifier requires two lowercase characters for a scheme", async (t) => {
+  await t.step("a single-letter drive prefix is not a scheme", () => {
+    const resolved = resolveSpecifier("C:");
+    assertEquals(resolved.form, "bare");
+    assertEquals(resolved.specifier, "jsr:@binstruct/C:");
+  });
+
+  await t.step(
+    "a lowercase single-letter prefix is not a scheme either",
+    () => {
+      const resolved = resolveSpecifier("c:/tmp/pkg");
+      assertEquals(resolved.form, "bare");
+      assertEquals(resolved.specifier, "jsr:@binstruct/c:/tmp/pkg");
+    },
+  );
+
+  await t.step("a drive path with a module extension is a path", () => {
+    const resolved = resolveSpecifier("C:/tmp/mod.ts");
+    assertEquals(resolved.form, "path");
+    assertEquals(resolved.specifier, "C:/tmp/mod.ts");
+  });
+
+  await t.step("an uppercase scheme is not matched", () => {
+    assertEquals(resolveSpecifier("JSR:@binstruct/png").form, "bare");
+  });
+
+  await t.step("two characters are enough", () => {
+    assertEquals(resolveSpecifier("ab:x").form, "scheme");
+  });
+});
+
+Deno.test("resolveSpecifier treats the empty string as a bare name", () => {
+  assertEquals(resolveSpecifier(""), {
+    input: "",
+    specifier: "jsr:@binstruct/",
+    short: "",
+    form: "bare",
+    shorthand: true,
+  });
+});
+
+Deno.test("resolveSpecifier consults nothing outside its argument", () => {
+  const nonexistent = resolveSpecifier("definitely-not-a-package");
+  assertEquals(
+    nonexistent.specifier,
+    "jsr:@binstruct/definitely-not-a-package",
+  );
+  assertEquals(nonexistent.form, "bare");
+});
+
+Deno.test("shortenSpecifier drops the implied scheme and scope", () => {
+  assertEquals(shortenSpecifier("jsr:@binstruct/png"), "png");
+  assertEquals(shortenSpecifier("jsr:@binstruct/wav@0.2.0"), "wav@0.2.0");
+  assertEquals(shortenSpecifier("jsr:@hertzg/xhb"), "@hertzg/xhb");
+  assertEquals(shortenSpecifier("npm:foo"), "npm:foo");
+  assertEquals(shortenSpecifier("./local"), "./local");
+  assertEquals(shortenSpecifier("mod.ts"), "mod.ts");
+});
+
+Deno.test("shortenSpecifier never proposes a form that reads back differently", () => {
+  // Both candidate shortenings ("mod.ts" and "@binstruct/mod.ts") would be
+  // read back as paths, so nothing is shortened at all.
+  assertEquals(
+    shortenSpecifier("jsr:@binstruct/mod.ts"),
+    "jsr:@binstruct/mod.ts",
+  );
+  // Here the scoped candidate survives even though the bare one does not.
+  assertEquals(shortenSpecifier("jsr:@binstruct/./png"), "@binstruct/./png");
+});
+
+Deno.test("shortenSpecifier round-trips through resolveSpecifier", async (t) => {
+  for (const { specifier } of cases) {
+    await t.step(specifier, () => {
+      assertEquals(
+        resolveSpecifier(shortenSpecifier(specifier)).specifier,
+        specifier,
+      );
+    });
+  }
+});
