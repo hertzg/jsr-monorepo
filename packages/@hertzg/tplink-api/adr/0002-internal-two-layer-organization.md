@@ -1,6 +1,6 @@
 # ADR 0002 — Internal two-layer organization; single public entrypoint
 
-**Status:** Accepted
+**Status:** Accepted (amended by ADR 0004 — see Amendment below)
 
 ## Context
 
@@ -56,6 +56,34 @@ re-exported and *not* listed as sub-entrypoints in `deno.json`.
 - **The package looks smaller from the outside than it is.**
   That's intentional — the public surface should reflect what
   the package commits to, not what's in the directory tree.
+
+## Amendment (ADR 0004)
+
+ADR 0004 introduced firmware dialects and reshaped both layers.
+The two-layer decision above still holds; these specifics no
+longer do:
+
+- **`client/*` no longer performs I/O.** The per-step fetchers
+  named in Context (`fetchInfo`, `fetchPublicKey`, `fetchBusy`,
+  `fetchSessionId`, `fetchTokenId`, `fetchCgiGdpr`) are gone.
+  What remains under `client/` is pure: parsers (`info.ts`,
+  `publicKey.ts`, `busy.ts`, `session.ts`, `token.ts`), shared
+  request helpers (`request.ts`), and the untouched
+  `encryption.ts` / `cipher/`. Request building moved to
+  `dialect/*`; the only `fetch` call sites are the two
+  orchestrators.
+- **The building-block layer is now split three ways** — pure
+  parsers and helpers in `client/`, per-firmware request builders
+  and codecs in `dialect/`, and crypto in `client/cipher/`.
+- **`deno.json` now declares a sub-entrypoint.** `./dialect` is
+  public, exactly the promotion this ADR anticipated. `mod.ts`
+  re-exports the dialect surface alongside `authenticate` /
+  `execute` / `ACT` / `Action`. `client/*` remains internal and
+  unexported.
+- **The coverage note is obsolete.**
+  `client/fetchPublicKey.test.ts` and the root `payload.test.ts`
+  no longer exist; their assertions live in
+  `client/publicKey.test.ts` and `dialect/gdprText.test.ts`.
 
 ## References
 

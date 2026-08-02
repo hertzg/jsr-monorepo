@@ -2,7 +2,8 @@
   "name": "@hertzg/tplink-api",
   "version": "1.2.0",
   "exports": {
-    ".": "./mod.ts"
+    ".": "./mod.ts",
+    "./dialect": "./dialect/mod.ts"
   },
   "publish": {
     "include": [

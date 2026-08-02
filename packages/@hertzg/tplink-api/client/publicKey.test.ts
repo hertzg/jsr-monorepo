@@ -1,5 +1,5 @@
 import { assertEquals } from "@std/assert";
-import { _extractVariables } from "./fetchPublicKey.ts";
+import { _extractVariables, parsePublicKeyText } from "./publicKey.ts";
 
 Deno.test("cgi/getParm samples where all 3 required fields are present", () => {
   const nnLine = `var nn="${"A".repeat(128)}";`;
@@ -30,4 +30,14 @@ Deno.test("cgi/getParm samples where all 3 required fields are present", () => {
   for (const sample of samples) {
     assertEquals(_extractVariables(sample.join("\n")), expected);
   }
+});
+
+Deno.test("parsePublicKeyText decodes hex parameters", () => {
+  const key = parsePublicKeyText(
+    ['var ee="010001";', 'var nn="00ff10";', 'var seq="742334261";'].join("\n"),
+  );
+
+  assertEquals(key.exponent, Uint8Array.from([0x01, 0x00, 0x01]));
+  assertEquals(key.modulus, Uint8Array.from([0x00, 0xff, 0x10]));
+  assertEquals(key.sequence, 742334261);
 });

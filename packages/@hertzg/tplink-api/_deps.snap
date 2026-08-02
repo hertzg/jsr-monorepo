@@ -4,6 +4,7 @@
     ".": [
       "jsr:@noble/ciphers@^2.1.1/aes.js",
       "jsr:@noble/hashes@^2.0.1/legacy.js"
-    ]
+    ],
+    "./dialect": []
   }
 }
