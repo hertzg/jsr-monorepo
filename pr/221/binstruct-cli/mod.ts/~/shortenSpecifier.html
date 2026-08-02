@@ -291,17 +291,19 @@ assertEquals(shortenSpecifier(&quot;npm:foo&quot;), &quot;npm:foo&quot;);
   <div><div class="markdown"><pre class="highlight"><code class="language-ts">import { assertEquals } from &quot;@std/assert&quot;;
 import { resolveSpecifier, shortenSpecifier } from &quot;./specifier.ts&quot;;
 
-const short = shortenSpecifier(&quot;jsr:@binstruct/mod.ts&quot;);
+const short = shortenSpecifier(&quot;jsr:@binstruct/png/sub&quot;);
 
-assertEquals(short, &quot;jsr:@binstruct/mod.ts&quot;);
-assertEquals(resolveSpecifier(short).specifier, &quot;jsr:@binstruct/mod.ts&quot;);
+assertEquals(short, &quot;@binstruct/png/sub&quot;);
+assertEquals(resolveSpecifier(short).specifier, &quot;jsr:@binstruct/png/sub&quot;);
+assertEquals(resolveSpecifier(&quot;png/sub&quot;).form, &quot;path&quot;);
 </code><button class="copyButton" data-copy="import { assertEquals } from &quot;@std/assert&quot;;
 import { resolveSpecifier, shortenSpecifier } from &quot;./specifier.ts&quot;;
 
-const short = shortenSpecifier(&quot;jsr:@binstruct/mod.ts&quot;);
+const short = shortenSpecifier(&quot;jsr:@binstruct/png/sub&quot;);
 
-assertEquals(short, &quot;jsr:@binstruct/mod.ts&quot;);
-assertEquals(resolveSpecifier(short).specifier, &quot;jsr:@binstruct/mod.ts&quot;);
+assertEquals(short, &quot;@binstruct/png/sub&quot;);
+assertEquals(resolveSpecifier(short).specifier, &quot;jsr:@binstruct/png/sub&quot;);
+assertEquals(resolveSpecifier(&quot;png/sub&quot;).form, &quot;path&quot;);
 "><svg
   class="copy"
   width="15"

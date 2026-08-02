@@ -151,9 +151,10 @@ nothing to stat and the runtime resolves it.</li>
 the candidates to name instead.</li>
 <li><code>&quot;missing&quot;</code> — nothing is there at all, which is a different mistake from
 naming a directory and gets a different message.</li>
-<li><code>&quot;unreadable&quot;</code> — the target could not be inspected, e.g. read permission
-was denied. Refused rather than assumed to be a module: assuming is how
-the directory case produced confident wrong output.</li>
+<li><code>&quot;unreadable&quot;</code> — the target could not be inspected: read permission was
+denied, or the <code>file:</code> specifier does not parse as a URL and so names no
+path to inspect at all. Refused rather than assumed to be a module:
+assuming is how the directory case produced confident wrong output.</li>
 </ul>
 </div><section class="section"  id="definition"><div>
       <h2 class="anchorable mb-1"><a href="#definition" class="anchor" aria-label="Anchor" tabIndex="-1"><svg
