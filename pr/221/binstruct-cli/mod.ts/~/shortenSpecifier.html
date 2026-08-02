@@ -169,9 +169,9 @@
       </code><div class="space-y-7" id=""><div class="markdown"><p>Renders the shortest form of a specifier that still resolves back to it.</p>
 <p>The CLI echoes the resolved specifier once, as a header, and uses this short
 form everywhere else — in listings and in the paste-ready <code>TRY</code> lines — since
-the shorthand only helps if the tool teaches it. Candidates are tested with
-<a href="../.././mod.ts/~/resolveSpecifier.html"><code>resolveSpecifier</code></a>, so a shortening that would be read back as
-something else (a path, say) is never proposed.</p>
+the shorthand only helps if the tool teaches it. Each candidate is classified
+and expanded again before it is offered, so a shortening that would be read
+back as something else (a path, say) is never proposed.</p>
 </div><section class="section"  id="examples"><div>
       <h2 class="anchorable mb-1"><a href="#examples" class="anchor" aria-label="Anchor" tabIndex="-1"><svg
   width="16"

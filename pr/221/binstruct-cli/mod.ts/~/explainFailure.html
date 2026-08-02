@@ -167,11 +167,16 @@
 </a>
 <span class="font-bold">explainFailure</span><span class="font-medium">(<div class="ml-4"><div><span>packageInput<span>: <span class="td-kw">string</span></span></span>,</div><div><span>coderName<span>: <span class="td-kw">string</span></span></span>,</div><div><span>error<span>: <span class="td-kw">unknown</span></span></span></div></div>)<span>: <span class="td-ref">Promise</span>&lt;<span class="td-kw">string</span>&gt;</span> </span>
       </code><div class="space-y-7" id=""><div class="markdown"><p>Explains a failure that only surfaced once the package was imported.</p>
-<p>Discovery is deliberately skipped on a complete invocation, so a wrong
-package or coder name is not caught until <code>import()</code> rejects. This runs the
-listing after the fact and answers with the same guidance an incomplete
-invocation would have given, falling back to the raw error when neither the
-package nor the coder is at fault — a malformed input, say.</p>
+<p>A run reaches <code>import()</code> only when discovery vouched for the coder, or when
+discovery was unavailable and the name was taken on trust; either way the
+package can still turn out to be unloadable, or the export can still fail to
+behave. This runs the listing after the fact and answers with the same
+guidance an incomplete invocation would have given, falling back to the raw
+error when neither the package nor the coder is at fault — a malformed
+input, say.</p>
+<p>The guides it renders carry no header: the caller announced the specifier
+before the run started, and repeating it makes every failure open with the
+same line twice.</p>
 </div><section class="section"  id="examples"><div>
       <h2 class="anchorable mb-1"><a href="#examples" class="anchor" aria-label="Anchor" tabIndex="-1"><svg
   width="16"

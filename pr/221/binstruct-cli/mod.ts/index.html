@@ -365,10 +365,10 @@ Examples</h2></div><div class="space-y-8"><div class="anchorable"><a href="#exam
   </defs>
 </svg>
 </a>
-<h3 class="example-header"><div class="markdown"><p>A local package works the same way</p>
+<h3 class="example-header"><div class="markdown"><p>A local module works the same way, relative to the working directory</p>
 </div></h3>
-  <div><div class="markdown"><pre class="highlight"><code class="language-bash">deno run -A @binstruct/cli ./my-package myStruct decode &lt; input.bin &gt; output.json
-</code><button class="copyButton" data-copy="deno run -A @binstruct/cli ./my-package myStruct decode &lt; input.bin &gt; output.json
+  <div><div class="markdown"><pre class="highlight"><code class="language-bash">deno run -A @binstruct/cli ./my-package/mod.ts myStruct decode &lt; input.bin &gt; output.json
+</code><button class="copyButton" data-copy="deno run -A @binstruct/cli ./my-package/mod.ts myStruct decode &lt; input.bin &gt; output.json
 "><svg
   class="copy"
   width="15"
@@ -618,7 +618,9 @@ Interfaces</h2></div><div class="namespaceSection"><div id="namespace_clioptions
 </div></div></li><li>
                 <a href="..&#x2F;.&#x2F;mod.ts&#x2F;~&#x2F;ResolvedSpecifier.html#property_short">
                   <span>short</span><span>: <span class="td-kw">string</span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>The shortest form that resolves back to <a href=".././mod.ts/~/ResolvedSpecifier.specifier.html"><code>ResolvedSpecifier.specifier</code></a>,
-for listings and <code>TRY</code> lines. Equal to <code>shortenSpecifier(specifier)</code>.</p>
+for listings and <code>TRY</code> lines. Equal to <code>shortenSpecifier(specifier)</code>, except
+for a path, where it is the input itself — a path is anchored to the working
+directory the CLI was started in, and only the typed form still says so.</p>
 </div></div></li><li>
                 <a href="..&#x2F;.&#x2F;mod.ts&#x2F;~&#x2F;ResolvedSpecifier.html#property_shorthand">
                   <span>shorthand</span><span>: <span class="td-kw">boolean</span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Whether the input was shorthand, and therefore expanded.</p>
@@ -654,13 +656,82 @@ for listings and <code>TRY</code> lines. Equal to <code>shortenSpecifier(specifi
 Type Aliases</h2></div><div class="namespaceSection"><div id="namespace_cliplan" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-TypeAlias bg-TypeAlias/15 dark:text-TypeAliasDark dark:bg-TypeAliasDark/15" title="Type Alias">T</div></div>
 <div class="namespaceItemContent">
 		    <a href="..&#x2F;.&#x2F;cli.ts&#x2F;~&#x2F;CliPlan.html" title="CliPlan">
-			    <span>CliPlan</span><span> = <div class="ml-indent"><span>{ <span class="td-kw">readonly </span>kind<span>: <span class="td-str">"print"</span></span>; <span class="td-kw">readonly </span>text<span>: <span class="td-kw">string</span></span>; <span class="td-kw">readonly </span>stream<span>: <span><span class="td-str">"stdout"</span><span class="td-op"> | </span><span class="td-str">"stderr"</span></span></span>; <span class="td-kw">readonly </span>code<span>: <span class="td-kw">number</span></span>;  }</span><br /><span><span class="td-op"> | </span>{ <span class="td-kw">readonly </span>kind<span>: <span class="td-str">"run"</span></span>; <span class="td-kw">readonly </span>specifier<span>: <span class="td-kw">string</span></span>; <span class="td-kw">readonly </span>coder<span>: <span class="td-kw">string</span></span>; <span class="td-kw">readonly </span>command<span>: <span class="td-ref">CommandName</span></span>; <span class="td-kw">readonly </span>notices<span>: <span class="td-kw">readonly</span> <span class="td-kw">string</span>[]</span>;  }</span></div></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>What an invocation amounts to, once its arguments are understood.</p>
+			    <span>CliPlan</span><span> = <div class="ml-indent"><span>{ <span class="td-kw">readonly </span>kind<span>: <span class="td-str">"print"</span></span>; <span class="td-kw">readonly </span>text<span>: <span class="td-kw">string</span></span>; <span class="td-kw">readonly </span>stream<span>: <span><span class="td-str">"stdout"</span><span class="td-op"> | </span><span class="td-str">"stderr"</span></span></span>; <span class="td-kw">readonly </span>code<span>: <span class="td-kw">number</span></span>; <span class="td-kw">readonly </span>notices<span class="td-op">?</span><span>: <span class="td-kw">readonly</span> <span class="td-kw">string</span>[]</span>;  }</span><br /><span><span class="td-op"> | </span>{ <span class="td-kw">readonly </span>kind<span>: <span class="td-str">"run"</span></span>; <span class="td-kw">readonly </span>specifier<span>: <span class="td-kw">string</span></span>; <span class="td-kw">readonly </span>coder<span>: <span class="td-kw">string</span></span>; <span class="td-kw">readonly </span>command<span>: <span class="td-ref">CommandName</span></span>; <span class="td-kw">readonly </span>notices<span>: <span class="td-kw">readonly</span> <span class="td-kw">string</span>[]</span>;  }</span></div></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>What an invocation amounts to, once its arguments are understood.</p>
 </div></div></div>
     </div><div id="namespace_commandname" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-TypeAlias bg-TypeAlias/15 dark:text-TypeAliasDark dark:bg-TypeAliasDark/15" title="Type Alias">T</div></div>
 <div class="namespaceItemContent">
 		    <a href="..&#x2F;.&#x2F;cli.ts&#x2F;~&#x2F;CommandName.html" title="CommandName">
 			    <span>CommandName</span><span> = (<span class="td-ref">COMMANDS</span>)[<span class="td-kw">number</span>][<span class="td-str">"name"</span>]</span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>A command the CLI can carry out.</p>
 </div></div></div>
+    </div><div id="namespace_denodocdeclaration" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-TypeAlias bg-TypeAlias/15 dark:text-TypeAliasDark dark:bg-TypeAliasDark/15" title="Type Alias">T</div></div>
+<div class="namespaceItemContent">
+		    <a href="..&#x2F;.&#x2F;mod.ts&#x2F;~&#x2F;DenoDocDeclaration.html" title="DenoDocDeclaration">
+			    <span>DenoDocDeclaration</span><span> = { kind<span>: <span class="td-kw">string</span></span>; location<span>: { filename<span>: <span class="td-kw">string</span></span>;  }</span>; jsDoc<span class="td-op">?</span><span>: { doc<span class="td-op">?</span><span>: <span class="td-kw">string</span></span>;  }</span>; def<span>: { params<span class="td-op">?</span><span>: <span class="td-ref">DenoDocParam</span>[]</span>; returnType<span class="td-op">?</span><span>: <span class="td-ref">DenoDocType</span></span>;  }</span>;  }</span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>A single declaration of an exported symbol in <code>deno doc --json</code> output.</p>
+</div></div><ul class="namespaceItemContentSubItems"><li>
+                <a href="..&#x2F;.&#x2F;mod.ts&#x2F;~&#x2F;DenoDocDeclaration.html#property_def">
+                  <span>def</span><span>: { params<span class="td-op">?</span><span>: <span class="td-ref">DenoDocParam</span>[]</span>; returnType<span class="td-op">?</span><span>: <span class="td-ref">DenoDocType</span></span>;  }</span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Kind-specific detail; for functions, the signature.</p>
+</div></div></li><li>
+                <a href="..&#x2F;.&#x2F;mod.ts&#x2F;~&#x2F;DenoDocDeclaration.html#property_jsdoc">
+                  <span>jsDoc</span><span>: { doc<span class="td-op">?</span><span>: <span class="td-kw">string</span></span>;  }</span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>The declaration's JSDoc, when it has one.</p>
+</div></div></li><li>
+                <a href="..&#x2F;.&#x2F;mod.ts&#x2F;~&#x2F;DenoDocDeclaration.html#property_kind">
+                  <span>kind</span><span>: <span class="td-kw">string</span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Declaration kind, e.g. <code>function</code>, <code>variable</code>, <code>interface</code>.</p>
+</div></div></li><li>
+                <a href="..&#x2F;.&#x2F;mod.ts&#x2F;~&#x2F;DenoDocDeclaration.html#property_location">
+                  <span>location</span><span>: { filename<span>: <span class="td-kw">string</span></span>;  }</span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Where the declaration lives; the version rides along for JSR specifiers.</p>
+</div></div></li></ul></div>
+    </div><div id="namespace_denodocjson" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-TypeAlias bg-TypeAlias/15 dark:text-TypeAliasDark dark:bg-TypeAliasDark/15" title="Type Alias">T</div></div>
+<div class="namespaceItemContent">
+		    <a href="..&#x2F;.&#x2F;mod.ts&#x2F;~&#x2F;DenoDocJson.html" title="DenoDocJson">
+			    <span>DenoDocJson</span><span> = { nodes<span>: <span class="td-ref">Record</span>&lt;<span class="td-kw">string</span><span>, </span><span class="td-ref">DenoDocNode</span>&gt;</span>;  }</span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>The <code>deno doc --json</code> document, narrowed to the parts discovery reads.</p>
+</div></div><ul class="namespaceItemContentSubItems"><li>
+                <a href="..&#x2F;.&#x2F;mod.ts&#x2F;~&#x2F;DenoDocJson.html#property_nodes">
+                  <span>nodes</span><span>: <span class="td-ref">Record</span>&lt;<span class="td-kw">string</span><span>, </span><span class="td-ref">DenoDocNode</span>&gt;</span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>One entry per entrypoint, keyed by specifier.</p>
+</div></div></li></ul></div>
+    </div><div id="namespace_denodocnode" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-TypeAlias bg-TypeAlias/15 dark:text-TypeAliasDark dark:bg-TypeAliasDark/15" title="Type Alias">T</div></div>
+<div class="namespaceItemContent">
+		    <a href="..&#x2F;.&#x2F;mod.ts&#x2F;~&#x2F;DenoDocNode.html" title="DenoDocNode">
+			    <span>DenoDocNode</span><span> = { module_doc<span class="td-op">?</span><span>: { doc<span class="td-op">?</span><span>: <span class="td-kw">string</span></span>;  }</span>; symbols<span>: <span class="td-ref">DenoDocSymbol</span>[]</span>;  }</span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>A module entry in <code>deno doc --json</code> output.</p>
+</div></div><ul class="namespaceItemContentSubItems"><li>
+                <a href="..&#x2F;.&#x2F;mod.ts&#x2F;~&#x2F;DenoDocNode.html#property_module_doc">
+                  <span>module_doc</span><span>: { doc<span class="td-op">?</span><span>: <span class="td-kw">string</span></span>;  }</span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>The <code>@module</code> JSDoc of the entrypoint.</p>
+</div></div></li><li>
+                <a href="..&#x2F;.&#x2F;mod.ts&#x2F;~&#x2F;DenoDocNode.html#property_symbols">
+                  <span>symbols</span><span>: <span class="td-ref">DenoDocSymbol</span>[]</span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Every exported symbol, in declaration order.</p>
+</div></div></li></ul></div>
+    </div><div id="namespace_denodocparam" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-TypeAlias bg-TypeAlias/15 dark:text-TypeAliasDark dark:bg-TypeAliasDark/15" title="Type Alias">T</div></div>
+<div class="namespaceItemContent">
+		    <a href="..&#x2F;.&#x2F;mod.ts&#x2F;~&#x2F;DenoDocParam.html" title="DenoDocParam">
+			    <span>DenoDocParam</span><span> = { kind<span>: <span class="td-kw">string</span></span>; optional<span class="td-op">?</span><span>: <span class="td-kw">boolean</span></span>;  }</span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>A parameter of a declaration in <code>deno doc --json</code> output.</p>
+</div></div><ul class="namespaceItemContentSubItems"><li>
+                <a href="..&#x2F;.&#x2F;mod.ts&#x2F;~&#x2F;DenoDocParam.html#property_kind">
+                  <span>kind</span><span>: <span class="td-kw">string</span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Binding form: <code>identifier</code>, <code>assign</code>, <code>rest</code>, <code>object</code> or <code>array</code>.</p>
+</div></div></li><li>
+                <a href="..&#x2F;.&#x2F;mod.ts&#x2F;~&#x2F;DenoDocParam.html#property_optional">
+                  <span>optional</span><span>: <span class="td-kw">boolean</span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Whether the parameter was declared with a trailing <code>?</code>.</p>
+</div></div></li></ul></div>
+    </div><div id="namespace_denodocsymbol" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-TypeAlias bg-TypeAlias/15 dark:text-TypeAliasDark dark:bg-TypeAliasDark/15" title="Type Alias">T</div></div>
+<div class="namespaceItemContent">
+		    <a href="..&#x2F;.&#x2F;mod.ts&#x2F;~&#x2F;DenoDocSymbol.html" title="DenoDocSymbol">
+			    <span>DenoDocSymbol</span><span> = { name<span>: <span class="td-kw">string</span></span>; declarations<span>: <span class="td-ref">DenoDocDeclaration</span>[]</span>;  }</span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>An exported symbol in <code>deno doc --json</code> output.</p>
+</div></div><ul class="namespaceItemContentSubItems"><li>
+                <a href="..&#x2F;.&#x2F;mod.ts&#x2F;~&#x2F;DenoDocSymbol.html#property_declarations">
+                  <span>declarations</span><span>: <span class="td-ref">DenoDocDeclaration</span>[]</span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>One entry per declaration, e.g. one per overload.</p>
+</div></div></li><li>
+                <a href="..&#x2F;.&#x2F;mod.ts&#x2F;~&#x2F;DenoDocSymbol.html#property_name">
+                  <span>name</span><span>: <span class="td-kw">string</span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>The exported name.</p>
+</div></div></li></ul></div>
+    </div><div id="namespace_denodoctype" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-TypeAlias bg-TypeAlias/15 dark:text-TypeAliasDark dark:bg-TypeAliasDark/15" title="Type Alias">T</div></div>
+<div class="namespaceItemContent">
+		    <a href="..&#x2F;.&#x2F;mod.ts&#x2F;~&#x2F;DenoDocType.html" title="DenoDocType">
+			    <span>DenoDocType</span><span> = { repr<span class="td-op">?</span><span>: <span class="td-kw">string</span></span>; value<span class="td-op">?</span><span>: { typeParams<span class="td-op">?</span><span>: <span class="td-ref">DenoDocType</span>[]</span>;  }</span>;  }</span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>A type reference in <code>deno doc --json</code> output.</p>
+</div></div><ul class="namespaceItemContentSubItems"><li>
+                <a href="..&#x2F;.&#x2F;mod.ts&#x2F;~&#x2F;DenoDocType.html#property_repr">
+                  <span>repr</span><span>: <span class="td-kw">string</span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Rendered type name, e.g. <code>Coder</code>. Absent for anonymous forms like unions.</p>
+</div></div></li><li>
+                <a href="..&#x2F;.&#x2F;mod.ts&#x2F;~&#x2F;DenoDocType.html#property_value">
+                  <span>value</span><span>: { typeParams<span class="td-op">?</span><span>: <span class="td-ref">DenoDocType</span>[]</span>;  }</span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Resolved details, including the type arguments of a generic reference.</p>
+</div></div></li></ul></div>
     </div><div id="namespace_discoveredcoder" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-TypeAlias bg-TypeAlias/15 dark:text-TypeAliasDark dark:bg-TypeAliasDark/15" title="Type Alias">T</div></div>
 <div class="namespaceItemContent">
 		    <a href="..&#x2F;.&#x2F;mod.ts&#x2F;~&#x2F;DiscoveredCoder.html" title="DiscoveredCoder">
@@ -683,11 +754,24 @@ Type Aliases</h2></div><div class="namespaceSection"><div id="namespace_cliplan"
 		    <a href="..&#x2F;.&#x2F;mod.ts&#x2F;~&#x2F;DiscoveryOutcome.html" title="DiscoveryOutcome">
 			    <span>DiscoveryOutcome</span><span> = <span><span class="td-ref">DiscoverySuccess</span><span class="td-op"> | </span><span class="td-ref">ToolFailure</span></span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>The result of <a href=".././mod.ts/~/discoverCoders.html"><code>discoverCoders</code></a>.</p>
 </div></div></div>
+    </div><div id="namespace_discoverysuccess" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-TypeAlias bg-TypeAlias/15 dark:text-TypeAliasDark dark:bg-TypeAliasDark/15" title="Type Alias">T</div></div>
+<div class="namespaceItemContent">
+		    <a href="..&#x2F;.&#x2F;mod.ts&#x2F;~&#x2F;DiscoverySuccess.html" title="DiscoverySuccess">
+			    <span>DiscoverySuccess</span><span> = <span><span class="td-ref">PackageSurface</span><span class="td-op"> & </span>{ ok<span>: <span class="td-lit">true</span></span>; specifier<span>: <span class="td-kw">string</span></span>;  }</span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>A package whose type declarations were read successfully.</p>
+</div></div></div>
+    </div><div id="namespace_emptydiscoverydiagnosis" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-TypeAlias bg-TypeAlias/15 dark:text-TypeAliasDark dark:bg-TypeAliasDark/15" title="Type Alias">T</div></div>
+<div class="namespaceItemContent">
+		    <a href="..&#x2F;.&#x2F;mod.ts&#x2F;~&#x2F;EmptyDiscoveryDiagnosis.html" title="EmptyDiscoveryDiagnosis">
+			    <span>EmptyDiscoveryDiagnosis</span><span> = <div class="ml-indent"><span>{ ok<span>: <span class="td-lit">true</span></span>; specifier<span>: <span class="td-kw">string</span></span>; dependsOnBinstruct<span>: <span class="td-kw">boolean</span></span>;  }</span><br /><span><span class="td-op"> | </span><span class="td-ref">ToolFailure</span></span></div></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>The result of <a href=".././mod.ts/~/diagnoseEmptyDiscovery.html"><code>diagnoseEmptyDiscovery</code></a>.</p>
+</div></div></div>
     </div><div id="namespace_guide" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-TypeAlias bg-TypeAlias/15 dark:text-TypeAliasDark dark:bg-TypeAliasDark/15" title="Type Alias">T</div></div>
 <div class="namespaceItemContent">
 		    <a href="..&#x2F;.&#x2F;mod.ts&#x2F;~&#x2F;Guide.html" title="Guide">
-			    <span>Guide</span><span> = { <span class="td-kw">readonly </span>header<span class="td-op">?</span><span>: <span class="td-kw">string</span></span>; <span class="td-kw">readonly </span>notes<span class="td-op">?</span><span>: <span class="td-kw">readonly</span> <span class="td-kw">string</span>[]</span>; <span class="td-kw">readonly </span>next<span>: <span class="td-ref">GuideNext</span></span>; <span class="td-kw">readonly </span>options<span>: <span class="td-ref">GuideOptions</span></span>; <span class="td-kw">readonly </span>try<span class="td-op">?</span><span>: <span class="td-kw">readonly</span> <span class="td-kw">string</span>[]</span>; <span class="td-kw">readonly </span>footer<span class="td-op">?</span><span>: <span class="td-kw">readonly</span> <span class="td-kw">string</span>[]</span>;  }</span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Everything one guidance screen says.</p>
+			    <span>Guide</span><span> = { <span class="td-kw">readonly </span>header<span class="td-op">?</span><span>: <span class="td-kw">string</span></span>; <span class="td-kw">readonly </span>diagnostic<span class="td-op">?</span><span>: <span class="td-kw">boolean</span></span>; <span class="td-kw">readonly </span>notes<span class="td-op">?</span><span>: <span class="td-kw">readonly</span> <span class="td-kw">string</span>[]</span>; <span class="td-kw">readonly </span>next<span>: <span class="td-ref">GuideNext</span></span>; <span class="td-kw">readonly </span>options<span>: <span class="td-ref">GuideOptions</span></span>; <span class="td-kw">readonly </span>try<span class="td-op">?</span><span>: <span class="td-kw">readonly</span> <span class="td-kw">string</span>[]</span>; <span class="td-kw">readonly </span>footer<span class="td-op">?</span><span>: <span class="td-kw">readonly</span> <span class="td-kw">string</span>[]</span>;  }</span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Everything one guidance screen says.</p>
 </div></div><ul class="namespaceItemContentSubItems"><li>
+                <a href="..&#x2F;.&#x2F;mod.ts&#x2F;~&#x2F;Guide.html#property_diagnostic">
+                  <span>diagnostic</span><span>: <span class="td-kw">boolean</span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Whether the screen reports a failure rather than disclosing the next word.</p>
+</div></div></li><li>
                 <a href="..&#x2F;.&#x2F;mod.ts&#x2F;~&#x2F;Guide.html#property_footer">
                   <span>footer</span><span>: <span class="td-kw">readonly</span> <span class="td-kw">string</span>[]</span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Trailing lines, e.g. the usage recap <code>--help</code> adds.</p>
 </div></div></li><li>
@@ -764,6 +848,11 @@ Type Aliases</h2></div><div class="namespaceSection"><div id="namespace_cliplan"
 		    <a href="..&#x2F;.&#x2F;mod.ts&#x2F;~&#x2F;SpecifierForm.html" title="SpecifierForm">
 			    <span>SpecifierForm</span><span> = <span><span class="td-str">"scheme"</span><span class="td-op"> | </span><span class="td-str">"path"</span><span class="td-op"> | </span><span class="td-str">"scoped"</span><span class="td-op"> | </span><span class="td-str">"bare"</span></span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Which resolution rule matched an input.</p>
 </div></div></div>
+    </div><div id="namespace_symboldocsoutcome" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-TypeAlias bg-TypeAlias/15 dark:text-TypeAliasDark dark:bg-TypeAliasDark/15" title="Type Alias">T</div></div>
+<div class="namespaceItemContent">
+		    <a href="..&#x2F;.&#x2F;mod.ts&#x2F;~&#x2F;SymbolDocsOutcome.html" title="SymbolDocsOutcome">
+			    <span>SymbolDocsOutcome</span><span> = <span>{ ok<span>: <span class="td-lit">true</span></span>; text<span>: <span class="td-kw">string</span></span>;  }<span class="td-op"> | </span><span class="td-ref">ToolFailure</span></span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>The result of <a href=".././mod.ts/~/readSymbolDocs.html"><code>readSymbolDocs</code></a>.</p>
+</div></div></div>
     </div><div id="namespace_toolfailure" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-TypeAlias bg-TypeAlias/15 dark:text-TypeAliasDark dark:bg-TypeAliasDark/15" title="Type Alias">T</div></div>
 <div class="namespaceItemContent">
 		    <a href="..&#x2F;.&#x2F;mod.ts&#x2F;~&#x2F;ToolFailure.html" title="ToolFailure">
@@ -790,7 +879,7 @@ Type Aliases</h2></div><div class="namespaceSection"><div id="namespace_cliplan"
     </div><div id="namespace_toolfailurereason" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-TypeAlias bg-TypeAlias/15 dark:text-TypeAliasDark dark:bg-TypeAliasDark/15" title="Type Alias">T</div></div>
 <div class="namespaceItemContent">
 		    <a href="..&#x2F;.&#x2F;mod.ts&#x2F;~&#x2F;ToolFailureReason.html" title="ToolFailureReason">
-			    <span>ToolFailureReason</span><span> = <div class="ml-indent"><span><span class="td-str">"permission-denied"</span></span><br /><span><span class="td-op"> | </span><span class="td-str">"not-spawned"</span></span><br /><span><span class="td-op"> | </span><span class="td-str">"minimum-dependency-age"</span></span><br /><span><span class="td-op"> | </span><span class="td-str">"exited-non-zero"</span></span></div></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Why a <code>deno</code> subprocess spawned by discovery produced no usable output.</p>
+			    <span>ToolFailureReason</span><span> = <div class="ml-indent"><span><span class="td-str">"permission-denied"</span></span><br /><span><span class="td-op"> | </span><span class="td-str">"not-spawned"</span></span><br /><span><span class="td-op"> | </span><span class="td-str">"minimum-dependency-age"</span></span><br /><span><span class="td-op"> | </span><span class="td-str">"exited-non-zero"</span></span><br /><span><span class="td-op"> | </span><span class="td-str">"graph-incomplete"</span></span></div></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Why a <code>deno</code> subprocess spawned by discovery produced no usable output.</p>
 </div></div></div>
     </div></div>
 </section>
@@ -896,7 +985,7 @@ alphabetically.</p>
                   </span>
                 </a>
               </li></ul><a class="flex items-center gap-0.5" href="..&#x2F;.&#x2F;all_symbols.html">
-              <span class="leading-none">view all 34 symbols</span><svg
+              <span class="leading-none">view all 43 symbols</span><svg
   width="16"
   height="16"
   viewBox="0 0 16 16"
@@ -911,7 +1000,7 @@ alphabetically.</p>
   />
 </svg>
 </a></nav><nav class="documentNavigation">
-          <h3>Document Navigation</h3><ul><li><a href="#examples" title="Examples">Examples</a></li><li><ul><li><a href="#example_0" title="Decode with the full three-word form">Decode with the full three-word form</a></li><li><a href="#example_1" title="Encode it back">Encode it back</a></li><li><a href="#example_2" title="Omit the coder when the package has only one">Omit the coder when the package has only one</a></li><li><a href="#example_3" title="A local package works the same way">A local package works the same way</a></li><li><a href="#example_4" title="Programmatic usage: plan an invocation without performing it">Programmatic usage: plan an invocation without performing it</a></li></ul></li><li><a href="#mod_ts_functions" title="Functions">Functions</a></li><li><ul><li><a href="#namespace_diagnoseemptydiscovery" title="diagnoseEmptyDiscovery">diagnoseEmptyDiscovery</a></li><li><a href="#namespace_discovercoders" title="discoverCoders">discoverCoders</a></li><li><a href="#namespace_explainfailure" title="explainFailure">explainFailure</a></li><li><a href="#namespace_main" title="main">main</a></li><li><a href="#namespace_nearestname" title="nearestName">nearestName</a></li><li><a href="#namespace_parsecliargs" title="parseCliArgs">parseCliArgs</a></li><li><a href="#namespace_plancli" title="planCli">planCli</a></li><li><a href="#namespace_readdocsurface" title="readDocSurface">readDocSurface</a></li><li><a href="#namespace_readsymboldocs" title="readSymbolDocs">readSymbolDocs</a></li><li><a href="#namespace_renderguide" title="renderGuide">renderGuide</a></li><li><a href="#namespace_resolvespecifier" title="resolveSpecifier">resolveSpecifier</a></li><li><a href="#namespace_shortenspecifier" title="shortenSpecifier">shortenSpecifier</a></li></ul></li><li><a href="#mod_ts_interfaces" title="Interfaces">Interfaces</a></li><li><ul><li><a href="#namespace_clioptions" title="CliOptions">CliOptions</a></li><li><a href="#namespace_resolvedspecifier" title="ResolvedSpecifier">ResolvedSpecifier</a></li></ul></li><li><a href="#mod_ts_type-aliases" title="Type Aliases">Type Aliases</a></li><li><ul><li><a href="#namespace_cliplan" title="CliPlan">CliPlan</a></li><li><a href="#namespace_commandname" title="CommandName">CommandName</a></li><li><a href="#namespace_discoveredcoder" title="DiscoveredCoder">DiscoveredCoder</a></li><li><a href="#namespace_discoveryoutcome" title="DiscoveryOutcome">DiscoveryOutcome</a></li><li><a href="#namespace_guide" title="Guide">Guide</a></li><li><a href="#namespace_guidenext" title="GuideNext">GuideNext</a></li><li><a href="#namespace_guideoption" title="GuideOption">GuideOption</a></li><li><a href="#namespace_guideoptions" title="GuideOptions">GuideOptions</a></li><li><a href="#namespace_packagesurface" title="PackageSurface">PackageSurface</a></li><li><a href="#namespace_specifierform" title="SpecifierForm">SpecifierForm</a></li><li><a href="#namespace_toolfailure" title="ToolFailure">ToolFailure</a></li><li><a href="#namespace_toolfailurereason" title="ToolFailureReason">ToolFailureReason</a></li></ul></li><li><a href="#mod_ts_variables" title="Variables">Variables</a></li><li><ul><li><a href="#namespace_known_packages" title="KNOWN_PACKAGES">KNOWN_PACKAGES</a></li></ul></li></ul></nav></div>
+          <h3>Document Navigation</h3><ul><li><a href="#examples" title="Examples">Examples</a></li><li><ul><li><a href="#example_0" title="Decode with the full three-word form">Decode with the full three-word form</a></li><li><a href="#example_1" title="Encode it back">Encode it back</a></li><li><a href="#example_2" title="Omit the coder when the package has only one">Omit the coder when the package has only one</a></li><li><a href="#example_3" title="A local module works the same way, relative to the working directory">A local module works the same way, relative to the working directory</a></li><li><a href="#example_4" title="Programmatic usage: plan an invocation without performing it">Programmatic usage: plan an invocation without performing it</a></li></ul></li><li><a href="#mod_ts_functions" title="Functions">Functions</a></li><li><ul><li><a href="#namespace_diagnoseemptydiscovery" title="diagnoseEmptyDiscovery">diagnoseEmptyDiscovery</a></li><li><a href="#namespace_discovercoders" title="discoverCoders">discoverCoders</a></li><li><a href="#namespace_explainfailure" title="explainFailure">explainFailure</a></li><li><a href="#namespace_main" title="main">main</a></li><li><a href="#namespace_nearestname" title="nearestName">nearestName</a></li><li><a href="#namespace_parsecliargs" title="parseCliArgs">parseCliArgs</a></li><li><a href="#namespace_plancli" title="planCli">planCli</a></li><li><a href="#namespace_readdocsurface" title="readDocSurface">readDocSurface</a></li><li><a href="#namespace_readsymboldocs" title="readSymbolDocs">readSymbolDocs</a></li><li><a href="#namespace_renderguide" title="renderGuide">renderGuide</a></li><li><a href="#namespace_resolvespecifier" title="resolveSpecifier">resolveSpecifier</a></li><li><a href="#namespace_shortenspecifier" title="shortenSpecifier">shortenSpecifier</a></li></ul></li><li><a href="#mod_ts_interfaces" title="Interfaces">Interfaces</a></li><li><ul><li><a href="#namespace_clioptions" title="CliOptions">CliOptions</a></li><li><a href="#namespace_resolvedspecifier" title="ResolvedSpecifier">ResolvedSpecifier</a></li></ul></li><li><a href="#mod_ts_type-aliases" title="Type Aliases">Type Aliases</a></li><li><ul><li><a href="#namespace_cliplan" title="CliPlan">CliPlan</a></li><li><a href="#namespace_commandname" title="CommandName">CommandName</a></li><li><a href="#namespace_denodocdeclaration" title="DenoDocDeclaration">DenoDocDeclaration</a></li><li><a href="#namespace_denodocjson" title="DenoDocJson">DenoDocJson</a></li><li><a href="#namespace_denodocnode" title="DenoDocNode">DenoDocNode</a></li><li><a href="#namespace_denodocparam" title="DenoDocParam">DenoDocParam</a></li><li><a href="#namespace_denodocsymbol" title="DenoDocSymbol">DenoDocSymbol</a></li><li><a href="#namespace_denodoctype" title="DenoDocType">DenoDocType</a></li><li><a href="#namespace_discoveredcoder" title="DiscoveredCoder">DiscoveredCoder</a></li><li><a href="#namespace_discoveryoutcome" title="DiscoveryOutcome">DiscoveryOutcome</a></li><li><a href="#namespace_discoverysuccess" title="DiscoverySuccess">DiscoverySuccess</a></li><li><a href="#namespace_emptydiscoverydiagnosis" title="EmptyDiscoveryDiagnosis">EmptyDiscoveryDiagnosis</a></li><li><a href="#namespace_guide" title="Guide">Guide</a></li><li><a href="#namespace_guidenext" title="GuideNext">GuideNext</a></li><li><a href="#namespace_guideoption" title="GuideOption">GuideOption</a></li><li><a href="#namespace_guideoptions" title="GuideOptions">GuideOptions</a></li><li><a href="#namespace_packagesurface" title="PackageSurface">PackageSurface</a></li><li><a href="#namespace_specifierform" title="SpecifierForm">SpecifierForm</a></li><li><a href="#namespace_symboldocsoutcome" title="SymbolDocsOutcome">SymbolDocsOutcome</a></li><li><a href="#namespace_toolfailure" title="ToolFailure">ToolFailure</a></li><li><a href="#namespace_toolfailurereason" title="ToolFailureReason">ToolFailureReason</a></li></ul></li><li><a href="#mod_ts_variables" title="Variables">Variables</a></li><li><ul><li><a href="#namespace_known_packages" title="KNOWN_PACKAGES">KNOWN_PACKAGES</a></li></ul></li></ul></nav></div>
   </div></div>
 </div>
 </div>

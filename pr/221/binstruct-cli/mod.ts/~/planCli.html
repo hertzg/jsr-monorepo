@@ -167,10 +167,12 @@
 </a>
 <span class="font-bold">planCli</span><span class="font-medium">(<span><span>args<span>: <span class="td-kw">string</span>[]</span></span></span>)<span>: <span class="td-ref">Promise</span>&lt;<a href="../.././mod.ts/~/CliPlan.html" class="link td-ref">CliPlan</a>&gt;</span> </span>
       </code><div class="space-y-7" id=""><div class="markdown"><p>Works out what an invocation amounts to, without performing it.</p>
-<p>A complete invocation becomes a <code>run</code> plan and never pays for discovery.
-Anything short of one becomes a <code>print</code> plan carrying the guidance for the
-missing word — on stderr with exit 1, or on stdout with exit 0 under
-<code>--help</code>.</p>
+<p>A complete invocation becomes a <code>run</code> plan; anything short of one becomes a
+<code>print</code> plan carrying the guidance for the missing word — on stderr with
+exit 1, or on stdout with exit 0 under <code>--help</code>. Guidance that reports a
+failure rather than a missing word stays on stderr either way.</p>
+<p>Every path validates the coder through discovery first, including a complete
+one: see <code>chooseCoder</code> for why the shortcut had to go.</p>
 </div><section class="section"  id="examples"><div>
       <h2 class="anchorable mb-1"><a href="#examples" class="anchor" aria-label="Anchor" tabIndex="-1"><svg
   width="16"

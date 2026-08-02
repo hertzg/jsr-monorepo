@@ -172,6 +172,11 @@ slot a flag already filled — so <code>-p png -c pngFile decode</code> and
 <code>png pngFile decode</code> mean the same thing. <code>decode</code> and <code>encode</code> are reserved
 in the coder slot: a second word that names a command <em>is</em> the command, and
 the coder is left to be inferred (ADR 0005).</p>
+<p>Every slot is text: positionals are read as strings, so <code>007</code> stays <code>007</code>
+rather than becoming the number <code>7</code> on its way to the specifier resolver. A
+slot that is blank or nothing but whitespace is <em>missing</em>, not empty, so
+<code>binstruct png &quot;&quot; decode</code> asks which coder rather than importing the package
+to discover that the word said nothing.</p>
 </div><section class="section"  id="examples"><div>
       <h2 class="anchorable mb-1"><a href="#examples" class="anchor" aria-label="Anchor" tabIndex="-1"><svg
   width="16"
@@ -491,7 +496,7 @@ Return Type</h2></div><div class="space-y-8"><div class=" docEntry" id="function
   />
 </svg>
 </a>
-</div><div class="max-w-[75ch]"><div class="markdown"><p>The parsed slots and flags, with absent values left <code>undefined</code></p>
+</div><div class="max-w-[75ch]"><div class="markdown"><p>The parsed slots and flags, with absent and blank values left <code>undefined</code></p>
 </div></div></div>
 </div></section>
 </div>

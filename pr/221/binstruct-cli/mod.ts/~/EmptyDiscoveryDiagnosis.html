@@ -1,10 +1,10 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>CliPlan - cli.ts - @binstruct&#x2F;cli documentation</title>
+  <title>EmptyDiscoveryDiagnosis - mod.ts - @binstruct&#x2F;cli documentation</title>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="doc-current-file" content="cli.ts">
+  <meta name="doc-current-file" content="mod.ts">
   <link rel="stylesheet" href="..&#x2F;..&#x2F;styles.css">
   <link rel="stylesheet" href="..&#x2F;..&#x2F;page.css">
   <link id="ddocResetStylesheet" rel="stylesheet" href="..&#x2F;..&#x2F;reset.css"><link href="../../comrak.css" rel="stylesheet" /><link href="../../prism.css" rel="stylesheet" /><script src="../../prism.js"></script><script src="..&#x2F;..&#x2F;script.js" defer></script>
@@ -32,7 +32,7 @@
     fill="currentColor"
   />
 </svg>
-</span><a href="..&#x2F;..&#x2F;.&#x2F;cli.ts&#x2F;index.html" class="contextLink">cli.ts</a><span class="text-black dark:text-white"><svg
+</span><a href="..&#x2F;..&#x2F;.&#x2F;mod.ts&#x2F;index.html" class="contextLink">mod.ts</a><span class="text-black dark:text-white"><svg
   width="16"
   height="16"
   viewBox="0 0 16 16"
@@ -48,7 +48,7 @@
 </svg>
 </span>
 
-    <ul><li>CliPlan</li></ul></ul>
+    <ul><li>EmptyDiscoveryDiagnosis</li></ul></ul>
 </div>
 
     <div class="flex items-center gap-2">
@@ -112,14 +112,14 @@
     </div>
   </div>
 </nav>
-<div id="searchResults"></div><div id="content"><main class="symbolGroup" id="symbol_CliPlan"><article>
+<div id="searchResults"></div><div id="content"><main class="symbolGroup" id="symbol_EmptyDiscoveryDiagnosis"><article>
       <div class="symbolTitle">
         <div>
           <div class="text-2xl leading-none break-all">
-            <span class="text-TypeAlias">type alias</span>&nbsp;<span class="font-bold">CliPlan</span>
+            <span class="text-TypeAlias">type alias</span>&nbsp;<span class="font-bold">EmptyDiscoveryDiagnosis</span>
           </div></div><a
   class="sourceButton"
-  href="file:&#x2F;&#x2F;&#x2F;home&#x2F;runner&#x2F;work&#x2F;jsr-monorepo&#x2F;jsr-monorepo&#x2F;packages&#x2F;@binstruct&#x2F;cli&#x2F;cli.ts"><svg
+  href="file:&#x2F;&#x2F;&#x2F;home&#x2F;runner&#x2F;work&#x2F;jsr-monorepo&#x2F;jsr-monorepo&#x2F;packages&#x2F;@binstruct&#x2F;cli&#x2F;discover.ts"><svg
   width="14"
   height="14"
   viewBox="0 0 14 14"
@@ -142,10 +142,7 @@
   />
 </svg>
 </a>
-</div><div><div class="space-y-7" id=""><div class="markdown"><p>What an invocation amounts to, once its arguments are understood.</p>
-<p>Splitting the decision from its effects is what makes the guidance testable:
-every disclosure level, every error path and <code>--help</code> produce a <code>print</code> plan
-whose text, stream and exit code can be asserted without a process.</p>
+</div><div><div class="space-y-7" id=""><div class="markdown"><p>The result of <a href="../.././mod.ts/~/diagnoseEmptyDiscovery.html"><code>diagnoseEmptyDiscovery</code></a>.</p>
 </div><section class="section"  id="definition"><div>
       <h2 class="anchorable mb-1"><a href="#definition" class="anchor" aria-label="Anchor" tabIndex="-1"><svg
   width="16"
@@ -169,14 +166,14 @@ whose text, stream and exit code can be asserted without a process.</p>
   </defs>
 </svg>
 </a>
-Definition</h2></div><div class="space-y-8"><div class=" docEntry" id="typealias_cliplan">
+Definition</h2></div><div class="space-y-8"><div class=" docEntry" id="typealias_emptydiscoverydiagnosis">
 
   <div class="docEntryHeader">
-    <div><code><span class="font-medium text-stone-500 dark:text-stone-200"><div class="ml-indent"><span>{ <span class="td-kw">readonly </span>kind<span>: <span class="td-str">"print"</span></span>; <span class="td-kw">readonly </span>text<span>: <span class="td-kw">string</span></span>; <span class="td-kw">readonly </span>stream<span>: <span><span class="td-str">"stdout"</span><span class="td-op"> | </span><span class="td-str">"stderr"</span></span></span>; <span class="td-kw">readonly </span>code<span>: <span class="td-kw">number</span></span>; <span class="td-kw">readonly </span>notices<span class="td-op">?</span><span>: <span class="td-kw">readonly</span> <span class="td-kw">string</span>[]</span>;  }</span><br /><span><span class="td-op"> | </span>{ <span class="td-kw">readonly </span>kind<span>: <span class="td-str">"run"</span></span>; <span class="td-kw">readonly </span>specifier<span>: <span class="td-kw">string</span></span>; <span class="td-kw">readonly </span>coder<span>: <span class="td-kw">string</span></span>; <span class="td-kw">readonly </span>command<span>: <a href="../.././cli.ts/~/CommandName.html" class="link td-ref">CommandName</a></span>; <span class="td-kw">readonly </span>notices<span>: <span class="td-kw">readonly</span> <span class="td-kw">string</span>[]</span>;  }</span></div></span>
+    <div><code><span class="font-medium text-stone-500 dark:text-stone-200"><div class="ml-indent"><span>{ ok<span>: <span class="td-lit">true</span></span>; specifier<span>: <span class="td-kw">string</span></span>; dependsOnBinstruct<span>: <span class="td-kw">boolean</span></span>;  }</span><br /><span><span class="td-op"> | </span><a href="../.././mod.ts/~/ToolFailure.html" class="link td-ref">ToolFailure</a></span></div></span>
       </code>
     </div><a
   class="sourceButton"
-  href="file:&#x2F;&#x2F;&#x2F;home&#x2F;runner&#x2F;work&#x2F;jsr-monorepo&#x2F;jsr-monorepo&#x2F;packages&#x2F;@binstruct&#x2F;cli&#x2F;cli.ts"><svg
+  href="file:&#x2F;&#x2F;&#x2F;home&#x2F;runner&#x2F;work&#x2F;jsr-monorepo&#x2F;jsr-monorepo&#x2F;packages&#x2F;@binstruct&#x2F;cli&#x2F;discover.ts"><svg
   width="14"
   height="14"
   viewBox="0 0 14 14"
@@ -206,8 +203,8 @@ Definition</h2></div><div class="space-y-8"><div class=" docEntry" id="typealias
     </article></main>
 <div class="toc">
     <div><div class="usageContent">
-    <h3>Usage</h3><div class="markdown"><pre class="highlight"><code class="language-typescript">import { type CliPlan } from &quot;cli.ts&quot;;
-</code><button class="copyButton" data-copy="import { type CliPlan } from &quot;cli.ts&quot;;
+    <h3>Usage</h3><div class="markdown"><pre class="highlight"><code class="language-typescript">import { type EmptyDiscoveryDiagnosis } from &quot;mod.ts&quot;;
+</code><button class="copyButton" data-copy="import { type EmptyDiscoveryDiagnosis } from &quot;mod.ts&quot;;
 "><svg
   class="copy"
   width="15"

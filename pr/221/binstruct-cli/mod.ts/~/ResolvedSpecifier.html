@@ -330,7 +330,9 @@ Properties</h2></div><div class="space-y-8"><div class="anchorable docEntry" id=
 </svg>
 </a>
 </div><div class="max-w-[75ch]"><div class="markdown"><p>The shortest form that resolves back to <a href="../.././mod.ts/~/ResolvedSpecifier.specifier.html"><code>ResolvedSpecifier.specifier</code></a>,
-for listings and <code>TRY</code> lines. Equal to <code>shortenSpecifier(specifier)</code>.</p>
+for listings and <code>TRY</code> lines. Equal to <code>shortenSpecifier(specifier)</code>, except
+for a path, where it is the input itself — a path is anchored to the working
+directory the CLI was started in, and only the typed form still says so.</p>
 </div></div></div>
 <div class="anchorable docEntry" id="property_form">
 

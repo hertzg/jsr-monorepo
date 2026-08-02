@@ -167,9 +167,9 @@
 </a>
 <span class="font-bold">main</span><span class="font-medium">(<span><span>args<span class="td-op">?</span><span>: <span class="td-kw">string</span>[]</span></span></span>)<span>: <span class="td-ref">Promise</span>&lt;<span class="td-kw">void</span>&gt;</span> </span>
       </code><div class="space-y-7" id=""><div class="markdown"><p>Main CLI entry point.</p>
-<p>Plans the invocation with <a href="../.././mod.ts/~/planCli.html"><code>planCli</code></a>, then carries it out: writes
-the planned text to its stream and exits with its code, or announces the
-resolved specifier and any inferred coder on stderr and runs the command.
+<p>Plans the invocation with <a href="../.././mod.ts/~/planCli.html"><code>planCli</code></a>, then carries it out: announces
+the resolved specifier and any inferred coder on stderr, then either writes
+the planned text to its stream and exits with its code, or runs the command.
 A run that throws is explained through <a href="../.././mod.ts/~/explainFailure.html"><code>explainFailure</code></a> and exits
 1.</p>
 </div><section class="section"  id="examples"><div>

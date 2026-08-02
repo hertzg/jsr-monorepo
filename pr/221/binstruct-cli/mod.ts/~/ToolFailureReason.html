@@ -153,6 +153,9 @@ consuming project's <code>minimumDependencyAge</code>, so the graph refused to
 resolve. Nothing about the invocation was wrong.</li>
 <li><code>exited-non-zero</code> — anything else the tool rejected: unknown package,
 network failure, syntax error in a local entrypoint.</li>
+<li><code>graph-incomplete</code> — the tool succeeded, but the module graph it printed
+carries an error, so it was never walked. <code>deno info</code> exits 0 in this
+case, which would otherwise read as a graph that simply contains nothing.</li>
 </ul>
 </div><section class="section"  id="definition"><div>
       <h2 class="anchorable mb-1"><a href="#definition" class="anchor" aria-label="Anchor" tabIndex="-1"><svg
@@ -180,7 +183,7 @@ network failure, syntax error in a local entrypoint.</li>
 Definition</h2></div><div class="space-y-8"><div class=" docEntry" id="typealias_toolfailurereason">
 
   <div class="docEntryHeader">
-    <div><code><span class="font-medium text-stone-500 dark:text-stone-200"><div class="ml-indent"><span><span class="td-str">"permission-denied"</span></span><br /><span><span class="td-op"> | </span><span class="td-str">"not-spawned"</span></span><br /><span><span class="td-op"> | </span><span class="td-str">"minimum-dependency-age"</span></span><br /><span><span class="td-op"> | </span><span class="td-str">"exited-non-zero"</span></span></div></span>
+    <div><code><span class="font-medium text-stone-500 dark:text-stone-200"><div class="ml-indent"><span><span class="td-str">"permission-denied"</span></span><br /><span><span class="td-op"> | </span><span class="td-str">"not-spawned"</span></span><br /><span><span class="td-op"> | </span><span class="td-str">"minimum-dependency-age"</span></span><br /><span><span class="td-op"> | </span><span class="td-str">"exited-non-zero"</span></span><br /><span><span class="td-op"> | </span><span class="td-str">"graph-incomplete"</span></span></div></span>
       </code>
     </div><a
   class="sourceButton"

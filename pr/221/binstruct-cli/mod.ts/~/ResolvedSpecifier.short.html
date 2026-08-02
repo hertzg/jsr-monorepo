@@ -144,7 +144,9 @@
 </svg>
 </a>
 </div><div><div class="space-y-7" id=""><div class="markdown"><p>The shortest form that resolves back to <a href="../.././mod.ts/~/ResolvedSpecifier.specifier.html"><code>ResolvedSpecifier.specifier</code></a>,
-for listings and <code>TRY</code> lines. Equal to <code>shortenSpecifier(specifier)</code>.</p>
+for listings and <code>TRY</code> lines. Equal to <code>shortenSpecifier(specifier)</code>, except
+for a path, where it is the input itself — a path is anchored to the working
+directory the CLI was started in, and only the typed form still says so.</p>
 </div><section class="section"  id="type"><div>
       <h2 class="anchorable mb-1"><a href="#type" class="anchor" aria-label="Anchor" tabIndex="-1"><svg
   width="16"

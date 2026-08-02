@@ -172,6 +172,11 @@
 no registry lookup and no fallback to another scope, so <code>xhb</code> resolves to
 <code>jsr:@binstruct/xhb</code> and fails at load time rather than finding
 <code>@hertzg/xhb</code>.</p>
+<p>A path is anchored to the working directory and returned as a <code>file://</code> URL,
+so that discovery and <code>import()</code> — which disagree about what a relative
+specifier is relative to — resolve it to the same module. Reading
+<code>Deno.cwd()</code> is the one thing this function needs from outside its argument,
+and only for that form.</p>
 </div><section class="section"  id="examples"><div>
       <h2 class="anchorable mb-1"><a href="#examples" class="anchor" aria-label="Anchor" tabIndex="-1"><svg
   width="16"
@@ -295,17 +300,27 @@ assertEquals(resolved.shorthand, true);
 <h3 class="example-header"><div class="markdown"><p>A scope, a scheme and a path</p>
 </div></h3>
   <div><div class="markdown"><pre class="highlight"><code class="language-ts">import { assertEquals } from &quot;@std/assert&quot;;
+import { toFileUrl } from &quot;@std/path&quot;;
 import { resolveSpecifier } from &quot;./specifier.ts&quot;;
 
 assertEquals(resolveSpecifier(&quot;@hertzg/xhb&quot;).specifier, &quot;jsr:@hertzg/xhb&quot;);
 assertEquals(resolveSpecifier(&quot;npm:foo&quot;).specifier, &quot;npm:foo&quot;);
-assertEquals(resolveSpecifier(&quot;./local&quot;).specifier, &quot;./local&quot;);
+
+const local = resolveSpecifier(&quot;./local&quot;);
+
+assertEquals(local.specifier, toFileUrl(`${Deno.cwd()}/local`).href);
+assertEquals(local.short, &quot;./local&quot;);
 </code><button class="copyButton" data-copy="import { assertEquals } from &quot;@std/assert&quot;;
+import { toFileUrl } from &quot;@std/path&quot;;
 import { resolveSpecifier } from &quot;./specifier.ts&quot;;
 
 assertEquals(resolveSpecifier(&quot;@hertzg/xhb&quot;).specifier, &quot;jsr:@hertzg/xhb&quot;);
 assertEquals(resolveSpecifier(&quot;npm:foo&quot;).specifier, &quot;npm:foo&quot;);
-assertEquals(resolveSpecifier(&quot;./local&quot;).specifier, &quot;./local&quot;);
+
+const local = resolveSpecifier(&quot;./local&quot;);
+
+assertEquals(local.specifier, toFileUrl(`${Deno.cwd()}/local`).href);
+assertEquals(local.short, &quot;./local&quot;);
 "><svg
   class="copy"
   width="15"
