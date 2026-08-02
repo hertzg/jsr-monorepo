@@ -31,6 +31,9 @@
 "@binstruct/png":
   - changed-files:
       - any-glob-to-any-file: packages/@binstruct/png/**
+"@binstruct/sll":
+  - changed-files:
+      - any-glob-to-any-file: packages/@binstruct/sll/**
 "@binstruct/tcp":
   - changed-files:
       - any-glob-to-any-file: packages/@binstruct/tcp/**
