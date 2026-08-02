@@ -174,6 +174,10 @@ behave. This runs the listing after the fact and answers with the same
 guidance an incomplete invocation would have given, falling back to the raw
 error when neither the package nor the coder is at fault — a malformed
 input, say.</p>
+<p>An <code>UnverifiedArityError</code> is answered without running the listing.
+It is raised only on the trusted path, where discovery has already failed
+once, and asking again buys nothing but a second wait — up to another thirty
+seconds of it when the first attempt timed out.</p>
 <p>The guides it renders carry no header: the caller announced the specifier
 before the run started, and repeating it makes every failure open with the
 same line twice.</p>
