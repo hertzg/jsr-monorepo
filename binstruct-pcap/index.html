@@ -95,9 +95,15 @@ dependencies and stays focused on the file envelope.</p>
 <h2 id="endianness">
 Endianness</h2>
 <p>Pcap stores numbers in either little- or big-endian, signalled by the magic
-value at offset zero. Callers pick the byte order explicitly via the
-<code>endianness</code> argument (<code>&quot;le&quot;</code> or <code>&quot;be&quot;</code>); use <a href="././~/detectPcapMagic.html">detectPcapMagic</a> to
-probe an unknown buffer first when needed.</p>
+value at offset zero. Callers may pick the byte order explicitly via the
+<code>endianness</code> argument (<code>&quot;le&quot;</code> or <code>&quot;be&quot;</code>).</p>
+<p>Omitting it is the easy path: <a href="././~/pcapFile.html">pcapFile</a> then reads that magic and
+decodes the whole capture in whichever order the file itself declares, so a
+single <code>pcapFile()</code> handles little- and big-endian captures alike. Encoding
+has no file to inspect and writes <a href="././~/PCAP_DEFAULT_ENDIANNESS.html">PCAP_DEFAULT_ENDIANNESS</a>. The
+building blocks <a href="././~/pcapGlobalHeader.html">pcapGlobalHeader</a> and <a href="././~/pcapRecord.html">pcapRecord</a> are fixed to
+one byte order and default to that same constant — <a href="././~/detectPcapMagic.html">detectPcapMagic</a>
+probes a buffer when you drive them yourself.</p>
 <h2 id="timestamp-resolution">
 Timestamp resolution</h2>
 <p>Two magic values exist: one for microsecond timestamps
@@ -796,6 +802,12 @@ assertEquals(decoded.payload.payload.payload, new Uint8Array([0xde, 0xad, 0xbe, 
                   </span>
                 </a>
               </li><li>
+                <a href=".&#x2F;.&#x2F;~&#x2F;PCAP_DEFAULT_ENDIANNESS.html" title="PCAP_DEFAULT_ENDIANNESS"><div class="docNodeKindIcon"><div class="text-Variable bg-Variable/15 dark:text-VariableDark dark:bg-VariableDark/15" title="Variable">v</div></div>
+<span class="hover:bg-Variable/15 hover:bg-VariableDark/15">
+                    PCAP_DEFAULT_ENDIANNESS
+                  </span>
+                </a>
+              </li><li>
                 <a href=".&#x2F;.&#x2F;~&#x2F;PCAP_MAGIC_MICROS.html" title="PCAP_MAGIC_MICROS"><div class="docNodeKindIcon"><div class="text-Variable bg-Variable/15 dark:text-VariableDark dark:bg-VariableDark/15" title="Variable">v</div></div>
 <span class="hover:bg-Variable/15 hover:bg-VariableDark/15">
                     PCAP_MAGIC_MICROS
@@ -813,14 +825,8 @@ assertEquals(decoded.payload.payload.payload, new Uint8Array([0xde, 0xad, 0xbe, 
                     pcapGlobalHeader
                   </span>
                 </a>
-              </li><li>
-                <a href=".&#x2F;.&#x2F;~&#x2F;PcapEndianness.html" title="PcapEndianness"><div class="docNodeKindIcon"><div class="text-TypeAlias bg-TypeAlias/15 dark:text-TypeAliasDark dark:bg-TypeAliasDark/15" title="Type Alias">T</div></div>
-<span class="hover:bg-TypeAlias/15 hover:bg-TypeAliasDark/15">
-                    PcapEndianness
-                  </span>
-                </a>
               </li></ul><a class="flex items-center gap-0.5" href=".&#x2F;all_symbols.html">
-              <span class="leading-none">view all 14 symbols</span><svg
+              <span class="leading-none">view all 15 symbols</span><svg
   width="16"
   height="16"
   viewBox="0 0 16 16"

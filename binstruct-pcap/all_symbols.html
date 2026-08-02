@@ -813,7 +813,7 @@ Functions</h2></div><div class="namespaceSection"><div id="namespace_detectpcapm
     </div><div id="namespace_pcapfile" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-Function bg-Function/15 dark:text-FunctionDark dark:bg-FunctionDark/15" title="Function">f</div></div>
 <div class="namespaceItemContent">
 		    <a href=".&#x2F;.&#x2F;.&#x2F;~&#x2F;pcapFile.html" title="pcapFile">
-			    <span>pcapFile</span><span>(<span><span>endianness<span>: <span class="td-ref">PcapEndianness</span></span></span></span>)<span>: <span class="td-ref">Coder</span>&lt;<span class="td-ref">PcapFile</span>&lt;<span class="td-ref">PcapGlobalHeader</span><span>, </span><span class="td-ref">PcapRecord</span>&gt;&gt;</span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Creates a coder for a complete pcap capture file in the requested byte order.</p>
+			    <span>pcapFile</span><span>(<span><span>endianness<span class="td-op">?</span><span>: <span class="td-ref">PcapEndianness</span></span></span></span>)<span>: <span class="td-ref">Coder</span>&lt;<span class="td-ref">PcapFile</span>&lt;<span class="td-ref">PcapGlobalHeader</span><span>, </span><span class="td-ref">PcapRecord</span>&gt;&gt;</span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Creates a coder for a complete pcap capture file.</p>
 </div></div></div>
     </div><div id="namespace_pcapfilewith" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-Function bg-Function/15 dark:text-FunctionDark dark:bg-FunctionDark/15" title="Function">f</div></div>
 <div class="namespaceItemContent">
@@ -824,12 +824,12 @@ and record coders.</p>
     </div><div id="namespace_pcapglobalheader" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-Function bg-Function/15 dark:text-FunctionDark dark:bg-FunctionDark/15" title="Function">f</div></div>
 <div class="namespaceItemContent">
 		    <a href=".&#x2F;.&#x2F;.&#x2F;~&#x2F;pcapGlobalHeader.html" title="pcapGlobalHeader">
-			    <span>pcapGlobalHeader</span><span>(<span><span>endianness<span>: <span class="td-ref">PcapEndianness</span></span></span></span>)<span>: <span class="td-ref">Coder</span>&lt;<span class="td-ref">PcapGlobalHeader</span>&gt;</span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Creates a coder for the pcap global header in the requested byte order.</p>
+			    <span>pcapGlobalHeader</span><span>(<span><span>endianness<span class="td-op">?</span><span>: <span class="td-ref">PcapEndianness</span></span></span></span>)<span>: <span class="td-ref">Coder</span>&lt;<span class="td-ref">PcapGlobalHeader</span>&gt;</span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Creates a coder for the pcap global header in the requested byte order.</p>
 </div></div></div>
     </div><div id="namespace_pcaprecord" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-Function bg-Function/15 dark:text-FunctionDark dark:bg-FunctionDark/15" title="Function">f</div></div>
 <div class="namespaceItemContent">
 		    <a href=".&#x2F;.&#x2F;.&#x2F;~&#x2F;pcapRecord.html" title="pcapRecord">
-			    <span>pcapRecord</span><span>(<span><span>endianness<span>: <span class="td-ref">PcapEndianness</span></span></span></span>)<span>: <span class="td-ref">Coder</span>&lt;<span class="td-ref">PcapRecord</span>&gt;</span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Creates a coder for a single pcap record (16-byte header plus payload).</p>
+			    <span>pcapRecord</span><span>(<span><span>endianness<span class="td-op">?</span><span>: <span class="td-ref">PcapEndianness</span></span></span></span>)<span>: <span class="td-ref">Coder</span>&lt;<span class="td-ref">PcapRecord</span>&gt;</span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Creates a coder for a single pcap record (16-byte header plus payload).</p>
 </div></div></div>
     </div></div>
 </section>
@@ -1037,6 +1037,11 @@ Variables</h2></div><div class="namespaceSection"><div id="namespace_linktype-1"
                 <a href=".&#x2F;.&#x2F;.&#x2F;~&#x2F;LINKTYPE.html#property_usb_linux">
                   <span>USB_LINUX</span><span>: <span class="td-kw">number</span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>USB packets, beginning with a Linux USB header.</p>
 </div></div></li></ul></div>
+    </div><div id="namespace_pcap_default_endianness" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-Variable bg-Variable/15 dark:text-VariableDark dark:bg-VariableDark/15" title="Variable">v</div></div>
+<div class="namespaceItemContent">
+		    <a href=".&#x2F;.&#x2F;.&#x2F;~&#x2F;PCAP_DEFAULT_ENDIANNESS.html" title="PCAP_DEFAULT_ENDIANNESS">
+			    <span>PCAP_DEFAULT_ENDIANNESS</span><span>: <span class="td-ref">PcapEndianness</span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Byte order assumed by the pcap coder factories when none is supplied.</p>
+</div></div></div>
     </div><div id="namespace_pcap_magic_micros" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-Variable bg-Variable/15 dark:text-VariableDark dark:bg-VariableDark/15" title="Variable">v</div></div>
 <div class="namespaceItemContent">
 		    <a href=".&#x2F;.&#x2F;.&#x2F;~&#x2F;PCAP_MAGIC_MICROS.html" title="PCAP_MAGIC_MICROS">
