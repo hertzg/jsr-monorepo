@@ -11,6 +11,7 @@
     "./bytes": [],
     "./refine": [],
     "./ref": [],
+    "./lazy": [],
     "./helpers": []
   }
 }

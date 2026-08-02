@@ -52,6 +52,9 @@
  * ### Buffer Management
  * - {@link autoGrowBuffer}: Automatically grow buffers during encoding operations
  *
+ * ### Lazy Construction
+ * - {@link lazy}: Defer building a coder until first use, for mutually-recursive coder graphs
+ *
  * ### Helper Functions
  * - {@link encode}: Simplified encoding with automatic buffer allocation
  * - {@link decode}: Simplified decoding that returns only the decoded value
@@ -65,6 +68,7 @@
  * - [`buffer`](https://jsr.io/@hertzg/binstruct/doc/buffer): Buffer helpers like {@link autoGrowBuffer}
  * - [`bytes`](https://jsr.io/@hertzg/binstruct/doc/bytes): Raw byte slice coders via {@link bytes}
  * - [`helpers`](https://jsr.io/@hertzg/binstruct/doc/helpers): High-level {@link encode} / {@link decode}
+ * - [`lazy`](https://jsr.io/@hertzg/binstruct/doc/lazy): Deferred coder construction via {@link lazy}
  * - [`numeric`](https://jsr.io/@hertzg/binstruct/doc/numeric): Numeric coder factories such as {@link u32le}
  * - [`ref`](https://jsr.io/@hertzg/binstruct/doc/ref): Reference primitives ({@link ref}, {@link computedRef}, {@link isRef})
  * - [`refine`](https://jsr.io/@hertzg/binstruct/doc/refine): Refinement utilities ({@link refine}, {@link refineSwitch})
@@ -393,3 +397,4 @@ export * from "./bits/bit-struct.ts";
 export * from "./refine/refine.ts";
 export * from "./helpers.ts";
 export * from "./buffer.ts";
+export * from "./lazy/lazy.ts";
