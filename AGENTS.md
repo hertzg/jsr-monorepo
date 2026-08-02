@@ -59,8 +59,8 @@ deno task cov:view         # View HTML coverage report
 
 ### Workspaces
 
-Packages live under `packages/<scope>/<name>/` where the directory path
-mirrors the JSR coordinate. Two scopes:
+Packages live under `packages/<scope>/<name>/` where the directory path mirrors
+the JSR coordinate. Two scopes:
 
 `packages/@hertzg/` — utilities and the core library:
 
@@ -83,6 +83,7 @@ mirrors the JSR coordinate. Two scopes:
 - `au` - Sun/NeXT `.au` audio file header
 - `bmp` - BMP/DIB image file format support
 - `cli` - CLI tools for binary structure operations
+- `dos-mz` - DOS MZ executable header
 - `ethernet` - Ethernet frame parsing
 - `icmp` - ICMPv4 packet parsing (RFC 792)
 - `inet` - Internet stack coder (Ethernet→IPv4→UDP/ICMP/ARP) + RFC 1071 checksum
@@ -372,6 +373,7 @@ both tiresome and error-prone.
 - `@binstruct/au`
 - `@binstruct/bmp`
 - `@binstruct/cli`
+- `@binstruct/dos-mz`
 - `@binstruct/ethernet`
 - `@binstruct/icmp`
 - `@binstruct/inet`
@@ -395,8 +397,8 @@ both tiresome and error-prone.
 
 ## Adding New Workspaces
 
-Place the new package at `packages/<scope>/<name>/` matching its JSR
-coordinate (e.g. `packages/@hertzg/foo/` for `@hertzg/foo`). Then update:
+Place the new package at `packages/<scope>/<name>/` matching its JSR coordinate
+(e.g. `packages/@hertzg/foo/` for `@hertzg/foo`). Then update:
 
 1. **AGENTS.md** (this file):
    - Add the package to the per-scope list under "Workspaces"
@@ -414,11 +416,11 @@ coordinate (e.g. `packages/@hertzg/foo/` for `@hertzg/foo`). Then update:
    - `import_map.json` - Add JSR import for the package
 
 The root `deno.json` workspace field uses globs (`./packages/@binstruct/*`,
-`./packages/@hertzg/*`), so package directories are picked up automatically
-once they exist on disk — no need to list them.
+`./packages/@hertzg/*`), so package directories are picked up automatically once
+they exist on disk — no need to list them.
 
-The lint tools `lint:labeler`, `lint:readme`, `lint:import-map`, and
-`lint:deps` will fail if these files are not updated correctly.
+The lint tools `lint:labeler`, `lint:readme`, `lint:import-map`, and `lint:deps`
+will fail if these files are not updated correctly.
 
 ## Common Patterns
 
@@ -493,7 +495,8 @@ const fileWithPadding = struct({
 
 ### Issue tracker
 
-GitHub Issues via `gh`, on `hertzg/jsr-monorepo`. See `docs/agents/issue-tracker.md`.
+GitHub Issues via `gh`, on `hertzg/jsr-monorepo`. See
+`docs/agents/issue-tracker.md`.
 
 ### Triage labels
 

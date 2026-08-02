@@ -35,6 +35,7 @@ Source layout mirrors the JSR scope: `packages/<scope>/<name>/`.
 | [@binstruct/au](https://jsr.io/@binstruct/au)             | [![JSR](https://jsr.io/badges/@binstruct/au)](https://jsr.io/@binstruct/au)             |
 | [@binstruct/bmp](https://jsr.io/@binstruct/bmp)           | [![JSR](https://jsr.io/badges/@binstruct/bmp)](https://jsr.io/@binstruct/bmp)           |
 | [@binstruct/cli](https://jsr.io/@binstruct/cli)           | [![JSR](https://jsr.io/badges/@binstruct/cli)](https://jsr.io/@binstruct/cli)           |
+| [@binstruct/dos-mz](https://jsr.io/@binstruct/dos-mz)     | [![JSR](https://jsr.io/badges/@binstruct/dos-mz)](https://jsr.io/@binstruct/dos-mz)     |
 | [@binstruct/ethernet](https://jsr.io/@binstruct/ethernet) | [![JSR](https://jsr.io/badges/@binstruct/ethernet)](https://jsr.io/@binstruct/ethernet) |
 | [@binstruct/icmp](https://jsr.io/@binstruct/icmp)         | [![JSR](https://jsr.io/badges/@binstruct/icmp)](https://jsr.io/@binstruct/icmp)         |
 | [@binstruct/inet](https://jsr.io/@binstruct/inet)         | [![JSR](https://jsr.io/badges/@binstruct/inet)](https://jsr.io/@binstruct/inet)         |
@@ -70,11 +71,12 @@ deno task cov
 
 ## Releasing
 
-Releases are automated via [Release Please](https://github.com/googleapis/release-please).
-Commits following [Conventional Commits](https://www.conventionalcommits.org/)
-are analyzed automatically, and a release PR is maintained with version bumps
-and changelogs. Merging the release PR creates GitHub Releases and publishes
-all packages to JSR.
+Releases are automated via
+[Release Please](https://github.com/googleapis/release-please). Commits
+following [Conventional Commits](https://www.conventionalcommits.org/) are
+analyzed automatically, and a release PR is maintained with version bumps and
+changelogs. Merging the release PR creates GitHub Releases and publishes all
+packages to JSR.
 
 ## License
 
