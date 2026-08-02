@@ -1,10 +1,10 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>SpecifierForm - mod.ts - @binstruct&#x2F;cli documentation</title>
+  <title>CliOptions.blankSlots - cli.ts - @binstruct&#x2F;cli documentation</title>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="doc-current-file" content="mod.ts">
+  <meta name="doc-current-file" content="cli.ts">
   <link rel="stylesheet" href="..&#x2F;..&#x2F;styles.css">
   <link rel="stylesheet" href="..&#x2F;..&#x2F;page.css">
   <link id="ddocResetStylesheet" rel="stylesheet" href="..&#x2F;..&#x2F;reset.css"><link href="../../comrak.css" rel="stylesheet" /><link href="../../prism.css" rel="stylesheet" /><script src="../../prism.js"></script><script src="..&#x2F;..&#x2F;script.js" defer></script>
@@ -32,7 +32,7 @@
     fill="currentColor"
   />
 </svg>
-</span><a href="..&#x2F;..&#x2F;.&#x2F;mod.ts&#x2F;index.html" class="contextLink">mod.ts</a><span class="text-black dark:text-white"><svg
+</span><a href="..&#x2F;..&#x2F;.&#x2F;cli.ts&#x2F;index.html" class="contextLink">cli.ts</a><span class="text-black dark:text-white"><svg
   width="16"
   height="16"
   viewBox="0 0 16 16"
@@ -48,7 +48,8 @@
 </svg>
 </span>
 
-    <ul><li>SpecifierForm</li></ul></ul>
+    <ul><li><span>.</span>
+            <a href="..&#x2F;..&#x2F;.&#x2F;cli.ts&#x2F;~&#x2F;CliOptions.html" class="contextLink">CliOptions</a></li><li>blankSlots</li></ul></ul>
 </div>
 
     <div class="flex items-center gap-2">
@@ -112,14 +113,14 @@
     </div>
   </div>
 </nav>
-<div id="searchResults"></div><div id="content"><main class="symbolGroup" id="symbol_SpecifierForm"><article>
+<div id="searchResults"></div><div id="content"><main class="symbolGroup" id="symbol_CliOptions.blankSlots"><article>
       <div class="symbolTitle">
         <div>
           <div class="text-2xl leading-none break-all">
-            <span class="text-TypeAlias">type alias</span>&nbsp;<span class="font-bold">SpecifierForm</span>
+            <span class="text-Property">property</span>&nbsp;<span class="font-bold">CliOptions.blankSlots</span>
           </div></div><a
   class="sourceButton"
-  href="file:&#x2F;&#x2F;&#x2F;home&#x2F;runner&#x2F;work&#x2F;jsr-monorepo&#x2F;jsr-monorepo&#x2F;packages&#x2F;@binstruct&#x2F;cli&#x2F;specifier.ts"><svg
+  href="file:&#x2F;&#x2F;&#x2F;home&#x2F;runner&#x2F;work&#x2F;jsr-monorepo&#x2F;jsr-monorepo&#x2F;packages&#x2F;@binstruct&#x2F;cli&#x2F;cli.ts"><svg
   width="14"
   height="14"
   viewBox="0 0 14 14"
@@ -142,23 +143,13 @@
   />
 </svg>
 </a>
-</div><div><div class="space-y-7" id=""><div class="markdown"><p>Which resolution rule matched an input.</p>
-<ul>
-<li><code>&quot;scheme&quot;</code> — the input opened with one of <code>MODULE_SCHEMES</code>
-(<code>jsr:</code>, <code>npm:</code>, <code>http:</code>, <code>https:</code>, <code>file:</code>). A colon that is not one of
-those is just a character in a name or a path.</li>
-<li><code>&quot;scoped&quot;</code> — the input named a scope and package, without a scheme.</li>
-<li><code>&quot;path&quot;</code> — the input pointed somewhere on disk: it held a <code>/</code> without being
-scoped, or began with <code>.</code>, or ended in a module extension. A file and a
-directory are the same form: which one it is cannot be read off the
-spelling, and nothing here goes looking. Nor is the form the place to ask —
-<code>file:///abs/pkg</code> is a <code>&quot;scheme&quot;</code> and names a directory all the same.</li>
-<li><code>&quot;bare&quot;</code> — the input named a package only.</li>
-</ul>
-<p><code>&quot;scheme&quot;</code> and <code>&quot;path&quot;</code> are explicit forms and pass through untouched;
-<code>&quot;scoped&quot;</code> and <code>&quot;bare&quot;</code> are shorthand and get expanded.</p>
-</div><section class="section"  id="definition"><div>
-      <h2 class="anchorable mb-1"><a href="#definition" class="anchor" aria-label="Anchor" tabIndex="-1"><svg
+</div><div><div class="space-y-7" id=""><div class="markdown"><p>Slots filled with a word that says nothing, named as <code>&lt;package&gt;</code> and so on.</p>
+<p>A blank argument is still an argument. Dropping it made the words after it
+mean something else — <code>binstruct &quot;&quot; decode</code> read <code>decode</code> as the package —
+which is the shift an unknown flag causes, by another route. Nothing runs
+while this is non-empty.</p>
+</div><section class="section"  id="type"><div>
+      <h2 class="anchorable mb-1"><a href="#type" class="anchor" aria-label="Anchor" tabIndex="-1"><svg
   width="16"
   height="16"
   viewBox="0 0 14 14"
@@ -180,14 +171,14 @@ spelling, and nothing here goes looking. Nor is the form the place to ask —
   </defs>
 </svg>
 </a>
-Definition</h2></div><div class="space-y-8"><div class=" docEntry" id="typealias_specifierform">
+Type</h2></div><div class="space-y-8"><div class=" docEntry" id="variable_clioptions_blankslots">
 
   <div class="docEntryHeader">
-    <div><code><span class="font-medium text-stone-500 dark:text-stone-200"><span><span class="td-str">"scheme"</span><span class="td-op"> | </span><span class="td-str">"path"</span><span class="td-op"> | </span><span class="td-str">"scoped"</span><span class="td-op"> | </span><span class="td-str">"bare"</span></span></span>
+    <div><code><span class="font-medium text-stone-500 dark:text-stone-200"><span class="td-kw">readonly</span> <span class="td-kw">string</span>[]</span>
       </code>
     </div><a
   class="sourceButton"
-  href="file:&#x2F;&#x2F;&#x2F;home&#x2F;runner&#x2F;work&#x2F;jsr-monorepo&#x2F;jsr-monorepo&#x2F;packages&#x2F;@binstruct&#x2F;cli&#x2F;specifier.ts"><svg
+  href="file:&#x2F;&#x2F;&#x2F;home&#x2F;runner&#x2F;work&#x2F;jsr-monorepo&#x2F;jsr-monorepo&#x2F;packages&#x2F;@binstruct&#x2F;cli&#x2F;cli.ts"><svg
   width="14"
   height="14"
   viewBox="0 0 14 14"
@@ -217,8 +208,8 @@ Definition</h2></div><div class="space-y-8"><div class=" docEntry" id="typealias
     </article></main>
 <div class="toc">
     <div><div class="usageContent">
-    <h3>Usage</h3><div class="markdown"><pre class="highlight"><code class="language-typescript">import { type SpecifierForm } from &quot;mod.ts&quot;;
-</code><button class="copyButton" data-copy="import { type SpecifierForm } from &quot;mod.ts&quot;;
+    <h3>Usage</h3><div class="markdown"><pre class="highlight"><code class="language-typescript">import { type CliOptions } from &quot;cli.ts&quot;;
+</code><button class="copyButton" data-copy="import { type CliOptions } from &quot;cli.ts&quot;;
 "><svg
   class="copy"
   width="15"
@@ -251,7 +242,7 @@ Definition</h2></div><div class="space-y-8"><div class=" docEntry" id="typealias
 </svg>
 </button><code></code></pre>
 </div></div><nav class="documentNavigation">
-          <h3>Document Navigation</h3><ul><li><a href="#definition" title="Definition">Definition</a></li></ul></nav></div>
+          <h3>Document Navigation</h3><ul><li><a href="#type" title="Type">Type</a></li></ul></nav></div>
   </div></div>
 </div>
 </div>

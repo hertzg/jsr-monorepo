@@ -529,20 +529,22 @@ assertEquals(
   </defs>
 </svg>
 </a>
-<h3 class="example-header"><div class="markdown"><p>Only a known scheme is a scheme; any other colon is part of a path</p>
+<h3 class="example-header"><div class="markdown"><p>Only a package-hosting scheme is a scheme; any other colon is ordinary</p>
 </div></h3>
   <div><div class="markdown"><pre class="highlight"><code class="language-ts">import { assertEquals } from &quot;@std/assert&quot;;
 import { resolveSpecifier } from &quot;./specifier.ts&quot;;
 
-assertEquals(resolveSpecifier(&quot;node:fs&quot;).form, &quot;scheme&quot;);
-assertEquals(resolveSpecifier(&quot;data:text/plain,x&quot;).form, &quot;scheme&quot;);
+assertEquals(resolveSpecifier(&quot;node:fs&quot;).form, &quot;bare&quot;);
+assertEquals(resolveSpecifier(&quot;node:evil.ts&quot;).form, &quot;path&quot;);
+assertEquals(resolveSpecifier(&quot;data:text/plain,x&quot;).form, &quot;path&quot;);
 assertEquals(resolveSpecifier(&quot;my:dir/mod.ts&quot;).form, &quot;path&quot;);
 assertEquals(resolveSpecifier(&quot;gopher:x&quot;).form, &quot;bare&quot;);
 </code><button class="copyButton" data-copy="import { assertEquals } from &quot;@std/assert&quot;;
 import { resolveSpecifier } from &quot;./specifier.ts&quot;;
 
-assertEquals(resolveSpecifier(&quot;node:fs&quot;).form, &quot;scheme&quot;);
-assertEquals(resolveSpecifier(&quot;data:text/plain,x&quot;).form, &quot;scheme&quot;);
+assertEquals(resolveSpecifier(&quot;node:fs&quot;).form, &quot;bare&quot;);
+assertEquals(resolveSpecifier(&quot;node:evil.ts&quot;).form, &quot;path&quot;);
+assertEquals(resolveSpecifier(&quot;data:text/plain,x&quot;).form, &quot;path&quot;);
 assertEquals(resolveSpecifier(&quot;my:dir/mod.ts&quot;).form, &quot;path&quot;);
 assertEquals(resolveSpecifier(&quot;gopher:x&quot;).form, &quot;bare&quot;);
 "><svg
@@ -824,7 +826,7 @@ Return Type</h2></div><div class="space-y-8"><div class=" docEntry" id="function
 </svg>
 </button><code></code></pre>
 </div></div><nav class="documentNavigation">
-          <h3>Document Navigation</h3><ul><li><a href="#examples" title="Examples">Examples</a></li><li><ul><li><a href="#example_0" title="A bare name implies jsr: and the @binstruct scope">A bare name implies jsr: and the @binstruct scope</a></li><li><a href="#example_1" title="A scope, a scheme and a path">A scope, a scheme and a path</a></li><li><a href="#example_2" title="A directory and the module inside it are the same form">A directory and the module inside it are the same form</a></li><li><a href="#example_3" title="A slash outside a scope is a path, whatever it is spelled like">A slash outside a scope is a path, whatever it is spelled like</a></li><li><a href="#example_4" title="Only a known scheme is a scheme; any other colon is part of a path">Only a known scheme is a scheme; any other colon is part of a path</a></li><li><a href="#example_5" title="A version suffix rides along">A version suffix rides along</a></li></ul></li><li><a href="#parameters" title="Parameters">Parameters</a></li><li><ul><li><a href="#function_resolvespecifier_0_parameter_input" title="input">input</a></li></ul></li><li><a href="#return-type" title="Return Type">Return Type</a></li></ul></nav></div>
+          <h3>Document Navigation</h3><ul><li><a href="#examples" title="Examples">Examples</a></li><li><ul><li><a href="#example_0" title="A bare name implies jsr: and the @binstruct scope">A bare name implies jsr: and the @binstruct scope</a></li><li><a href="#example_1" title="A scope, a scheme and a path">A scope, a scheme and a path</a></li><li><a href="#example_2" title="A directory and the module inside it are the same form">A directory and the module inside it are the same form</a></li><li><a href="#example_3" title="A slash outside a scope is a path, whatever it is spelled like">A slash outside a scope is a path, whatever it is spelled like</a></li><li><a href="#example_4" title="Only a package-hosting scheme is a scheme; any other colon is ordinary">Only a package-hosting scheme is a scheme; any other colon is ordinary</a></li><li><a href="#example_5" title="A version suffix rides along">A version suffix rides along</a></li></ul></li><li><a href="#parameters" title="Parameters">Parameters</a></li><li><ul><li><a href="#function_resolvespecifier_0_parameter_input" title="input">input</a></li></ul></li><li><a href="#return-type" title="Return Type">Return Type</a></li></ul></nav></div>
   </div></div>
 </div>
 </div>

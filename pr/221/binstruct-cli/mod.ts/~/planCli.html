@@ -171,11 +171,13 @@
 <code>print</code> plan carrying the guidance for the missing word — on stderr with
 exit 1, or on stdout with exit 0 under <code>--help</code>. Guidance that reports a
 failure rather than a missing word stays on stderr either way.</p>
-<p>An unrecognised flag is refused before anything else is read, <code>--help</code> and
-<code>--version</code> included. It consumed a word on its way through the parser, so
-the positionals behind it shifted and the package slot no longer holds what
-was typed — and answering confidently about a package nobody named is the
-defect class this whole module is built to avoid.</p>
+<p>An argument the parser could not use is refused before anything else is read,
+<code>--help</code> and <code>--version</code> included: an unrecognised flag, a blank word, a word
+past the third slot. The first two shift what the package is — the flag by
+swallowing the next word, the blank by having been dropped — and the third
+used to disappear without a word. Answering confidently about a package
+nobody named, or about bytes that never arrived, is the defect class this
+whole module is built to avoid.</p>
 <p>A local package argument is inspected before any of that, and a directory is
 refused — see <code>directoryGuide</code>. Everything downstream may therefore
 assume the specifier names one module, which is what lets discovery and
