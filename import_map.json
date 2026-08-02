@@ -38,7 +38,7 @@
     "@binstruct/icmpv6": "jsr:@binstruct/icmpv6@^0.1.0",
     "@binstruct/ico": "jsr:@binstruct/ico@^0.1.0",
     "@binstruct/igmp": "jsr:@binstruct/igmp@^0.1.0",
-    "@binstruct/inet": "jsr:@binstruct/inet@^0.3.0",
+    "@binstruct/inet": "jsr:@binstruct/inet@^1.0.0",
     "@binstruct/ipv4": "jsr:@binstruct/ipv4@^0.3.0",
     "@binstruct/ipv6": "jsr:@binstruct/ipv6@^0.1.0",
     "@binstruct/mbr": "jsr:@binstruct/mbr@^0.1.0",
