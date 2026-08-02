@@ -103,6 +103,108 @@
 TP-Link routers (EU/GDPR versions) via direct API calls. The library handles
 the router's proprietary encryption protocol (AES + RSA) and provides a
 type-safe interface for executing commands.</p>
+<h2 id="how-the-protocol-works">
+How the protocol works</h2>
+<p>There is no specification for any of this. It was read out of the routers'
+own web UI, which any of these devices will serve you without logging in.</p>
+<p>A TP-Link router is a <strong>settings database with a web page in front of it</strong>.
+The web UI has no real pages — every screen reads and writes rows in that
+database, and this library talks to the same interface. So every request
+says four things:</p>
+<ul>
+<li><strong>what to do</strong> — read, write, add, delete, list (<a href=".././mod.ts/~/ACT.html">ACT</a>)</li>
+<li><strong>which group of settings</strong> — the <code>oid</code></li>
+<li><strong>which one of them</strong> — the <code>stack</code></li>
+<li><strong>what values</strong> — the attributes</li>
+</ul>
+<h3 id="oid--a-group-of-settings">
+<code>oid</code> — a group of settings</h3>
+<p>Despite the name this is <em>not</em> an SNMP or ASN.1 OID; there are no dotted
+numbers. It is the name of an object in the device's data model, which
+descends from the Broadband Forum's CWMP/TR-069 standards for remotely
+managing home routers. Two generations are in the field, and the prefix
+tells you which one a device speaks:</p>
+<table>
+<thead>
+<tr>
+<th>Prefix</th>
+<th>Data model</th>
+<th>Specification</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>IGD_*</code></td>
+<td><code>InternetGatewayDevice:1</code></td>
+<td>TR-098 (older)</td>
+</tr>
+<tr>
+<td><code>DEV2_*</code></td>
+<td><code>Device:2</code></td>
+<td>TR-181 (newer)</td>
+</tr>
+</tbody>
+</table>
+<p>So <code>DEV2_DEV_INFO</code> is <code>Device.DeviceInfo</code>. Names containing <code>X_TP_</code> are
+TP-Link vendor extensions — <code>X_&lt;VENDOR&gt;_</code> is the TR-069 convention for
+anything outside the standard model.</p>
+<p>For <code>ACT.OP</code> the same slot holds an operation name instead (<code>ACT_REBOOT</code>,
+<code>ACT_WLAN_SCAN</code>, …), and for <code>ACT.CGI</code> it holds a CGI path (<code>/cgi/login</code>).</p>
+<h3 id="stack--which-instance">
+<code>stack</code> — which instance</h3>
+<p>A router can have several WAN connections and several wireless networks, so
+naming the settings group is not enough. <code>stack</code> is six comma-separated
+numbers selecting <em>which instance</em>, one slot per level of nesting:</p>
+<pre class="highlight"><code class="language-text">0,0,0,0,0,0   unspecified — the object itself, or every instance for a list
+1,0,0,0,0,0   the first instance
+2,3,0,0,0,0   the third instance nested under the second
+</code><button class="copyButton" data-copy="0,0,0,0,0,0   unspecified — the object itself, or every instance for a list
+1,0,0,0,0,0   the first instance
+2,3,0,0,0,0   the third instance nested under the second
+"><svg
+  class="copy"
+  width="15"
+  height="15"
+  viewBox="0 0 15 15"
+  fill="none"
+  xmlns="http://www.w3.org/2000/svg"
+>
+  <rect x="2" y="2" width="7" height="7" fill="none" />
+  <rect x="6" y="6" width="7" height="7" fill="none" />
+  <path
+    d="M1.55566 2.7C1.55566 2.03726 2.09292 1.5 2.75566 1.5H8.75566C9.41841 1.5 9.95566 2.03726 9.95566 2.7V5.1H12.3557C13.0184 5.1 13.5557 5.63726 13.5557 6.3V12.3C13.5557 12.9627 13.0184 13.5 12.3557 13.5H6.35566C5.69292 13.5 5.15566 12.9627 5.15566 12.3V9.9H2.75566C2.09292 9.9 1.55566 9.36274 1.55566 8.7V2.7ZM6.35566 9.9V12.3H12.3557V6.3H9.95566V8.7C9.95566 9.36274 9.41841 9.9 8.75566 9.9H6.35566ZM8.75566 8.7V2.7H2.75566V8.7H8.75566Z"
+    fill="currentColor"
+  />
+</svg>
+<svg
+  class="check"
+  width="15"
+  height="15"
+  viewBox="0 0 24 24"
+  stroke-width="2"
+  stroke="currentColor"
+  fill="none"
+  stroke-linecap="round"
+  stroke-linejoin="round"
+  xmlns="http://www.w3.org/2000/svg"
+>
+  <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+  <path d="M5 12l5 5l10 -10" />
+</svg>
+</button><code></code></pre>
+<p>Trailing zeros mean &quot;unset&quot;. <code>pStack</code> is the same path for the <em>parent</em>
+object; it exists for <a href=".././mod.ts/~/ACT.html">ACT</a>.ADD, where the instance being created has
+no path of its own yet.</p>
+<blockquote>
+<p><code>stack</code> here is unrelated to TR-181's <code>Device.InterfaceStack</code>, which is
+about network-interface layering. Same word, different concept.</p>
+</blockquote>
+<h3 id=""gdpr"-names-the-encryption,-not-the-format">
+&quot;GDPR&quot; names the encryption, not the format</h3>
+<p><code>cgi_gdpr</code>, <code>getGDPRParm</code> and the firmware's own <code>gdprProxy.js</code> all refer to
+the encryption layer TP-Link retrofitted for EU compliance. <strong>Both</strong> dialects
+below are &quot;GDPR&quot; firmware — the word does not distinguish them. What
+distinguishes them is the data model generation above.</p>
 <h2 id="supported-models">
 Supported Models</h2>
 <ul>
@@ -117,10 +219,15 @@ needs to be selected for them.</p>
 <h2 id="experimental:-unconfirmed-on-hardware">
 Experimental: unconfirmed on hardware</h2>
 <p>The <a href=".././mod.ts/~/gdprJson.html">gdprJson</a> dialect describes a second protocol shape seen on newer
-5G modems: a JSON payload posted to <code>/cgi_gdpr?9</code>. It was reconstructed from a
-partially-redacted HAR capture and a reporter's reverse-engineered example in
-<a href="https://github.com/hertzg/jsr-monorepo/issues/82">issue #82</a>, and <strong>has never
-been run against a device</strong>. Its tests assert the wire format only.</p>
+5G modems: a JSON payload posted to <code>/cgi_gdpr?9</code>. It is built from that
+firmware's own JavaScript, recovered from the capture attached to
+<a href="https://github.com/hertzg/jsr-monorepo/issues/82">issue #82</a> — so the
+endpoint, the operation vocabulary and the payload shape come from the
+vendor's source rather than from guesswork.</p>
+<p>It nonetheless <strong>has never been run against a device</strong>, and its tests assert
+the wire format only. The two dialects carry opposite kinds of confidence:
+<a href=".././mod.ts/~/gdprText.html">gdprText</a> has no recovered source but years of use against real
+hardware, while <a href=".././mod.ts/~/gdprJson.html">gdprJson</a> has the source and no hardware.</p>
 <p>It is believed to cover:</p>
 <ul>
 <li>TP-LINK NE200 5G</li>
@@ -195,7 +302,7 @@ Action Format</h2>
 <tr>
 <th>Parameter</th>
 <th>Required</th>
-<th>Default (<code>gdprText</code>)</th>
+<th>Default</th>
 <th>Description</th>
 </tr>
 </thead>
@@ -207,62 +314,101 @@ Action Format</h2>
 <td>Operation type from <a href=".././mod.ts/~/ACT.html">ACT</a></td>
 </tr>
 <tr>
-<td>operationId</td>
+<td>oid</td>
 <td>Yes</td>
 <td>—</td>
-<td>Operation identifier (e.g., &quot;LTE_BANDINFO&quot;)</td>
+<td>Settings group (<code>IGD_*</code> / <code>DEV2_*</code>); an operation name for <code>ACT.OP</code>; a CGI path for <code>ACT.CGI</code></td>
 </tr>
 <tr>
 <td>attributes</td>
 <td>No</td>
 <td><code>[]</code></td>
-<td>Array for reads, object for writes</td>
+<td>Names to read, or an object of values to write</td>
 </tr>
 <tr>
 <td>stack</td>
 <td>No</td>
 <td><code>&quot;0,0,0,0,0,0&quot;</code></td>
-<td>Stack context (device-specific)</td>
+<td>Which instance to address</td>
 </tr>
 <tr>
 <td>pStack</td>
 <td>No</td>
 <td><code>&quot;0,0,0,0,0,0&quot;</code></td>
-<td>Parent stack (rarely modified)</td>
+<td>Parent object's instance. Needed by <code>ACT.ADD</code></td>
 </tr>
 </tbody>
 </table>
-<p>What an omitted <code>stack</code> or <code>pStack</code> becomes on the wire is a dialect concern,
-so the Default column above is <a href=".././mod.ts/~/gdprText.html">gdprText</a>'s. <a href=".././mod.ts/~/gdprJson.html">gdprJson</a> defaults
-<code>stack</code> to <code>&quot;1,0,0,0,0,0&quot;</code> for <code>go</code> reads and <code>&quot;0,0,0,0,0,0&quot;</code> otherwise; see
-each dialect's own documentation.</p>
+<p>On the wire, reading and writing are the same syntax — an attribute is sent
+bare to read it and as <code>name=value</code> to write it. The array form produces the
+former and the object form the latter, which is why they look like two
+different shapes in this API.</p>
 <h2 id="discovering-actions">
 Discovering Actions</h2>
-<p>To find available actions and their parameters, you can hook into the
-router's web UI encryption methods. Open your browser's developer console
-while logged into the router and paste the following snippet:</p>
+<h3 id="read-the-firmware--no-login-required">
+Read the firmware — no login required</h3>
+<p>The fastest route is usually the router's own JavaScript, which it serves
+unauthenticated:</p>
+<table>
+<thead>
+<tr>
+<th>Path</th>
+<th>What it tells you</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>/js/gdprProxy.js</code></td>
+<td>the <code>ACT_*</code> constants, the payload codec, the endpoint</td>
+</tr>
+<tr>
+<td><code>/js/oid_str.js</code></td>
+<td>every <code>oid</code> the firmware knows</td>
+</tr>
+<tr>
+<td><code>/js/lib.js</code></td>
+<td>real call sites — how <code>stack</code> values are actually used</td>
+</tr>
+<tr>
+<td><code>/locale/errCode.js</code></td>
+<td>every error code, by name</td>
+</tr>
+<tr>
+<td><code>/</code></td>
+<td>model name, <code>adminType</code>, lockout state (see below)</td>
+</tr>
+</tbody>
+</table>
+<p>In <code>gdprProxy.js</code>, look for the <code>ACT_*</code> block at the top, <code>act:</code> / <code>exe:</code>
+for the older text codec, and any <code>$.dm.Proxy.setup({ ajax: { url: … } })</code>
+block — its <code>url</code> <em>is</em> the command endpoint, and the operation table right
+after it is the complete vocabulary that firmware accepts.</p>
+<h3 id="watch-live-traffic">
+Watch live traffic</h3>
+<p>To see decrypted payloads as you click around, hook the encryptor from the
+browser console while logged in:</p>
 <pre class="highlight"><code class="language-js">$.Iencryptor.AESDecrypt_backup = $.Iencryptor.AESDecrypt;
 $.Iencryptor.AESEncrypt_backup = $.Iencryptor.AESEncrypt;
-$.Iencryptor.AESDecrypt = function(data) {
-    let decrypted = $.Iencryptor.AESDecrypt_backup(data);
+$.Iencryptor.AESDecrypt = function (data) {
+    const decrypted = $.Iencryptor.AESDecrypt_backup(data);
     console.log(&quot;RECV:\n&quot; + decrypted);
     return decrypted;
-}
-$.Iencryptor.AESEncrypt = function(data) {
+};
+$.Iencryptor.AESEncrypt = function (data, isLogin) {
     console.log(&quot;SEND:\n&quot; + data);
-    return $.Iencryptor.AESEncrypt_backup(data);
-}
+    return $.Iencryptor.AESEncrypt_backup(data, isLogin);
+};
 </code><button class="copyButton" data-copy="$.Iencryptor.AESDecrypt_backup = $.Iencryptor.AESDecrypt;
 $.Iencryptor.AESEncrypt_backup = $.Iencryptor.AESEncrypt;
-$.Iencryptor.AESDecrypt = function(data) {
-    let decrypted = $.Iencryptor.AESDecrypt_backup(data);
+$.Iencryptor.AESDecrypt = function (data) {
+    const decrypted = $.Iencryptor.AESDecrypt_backup(data);
     console.log(&quot;RECV:\n&quot; + decrypted);
     return decrypted;
-}
-$.Iencryptor.AESEncrypt = function(data) {
+};
+$.Iencryptor.AESEncrypt = function (data, isLogin) {
     console.log(&quot;SEND:\n&quot; + data);
-    return $.Iencryptor.AESEncrypt_backup(data);
-}
+    return $.Iencryptor.AESEncrypt_backup(data, isLogin);
+};
 "><svg
   class="copy"
   width="15"
@@ -294,23 +440,31 @@ $.Iencryptor.AESEncrypt = function(data) {
   <path d="M5 12l5 5l10 -10" />
 </svg>
 </button><code></code></pre>
-<p>This logs <code>RECV:</code> and <code>SEND:</code> messages before encrypting/decrypting payloads.
-Navigate through the router's UI and observe the console to discover the
-<code>actionType</code>, <code>operationId</code>, <code>attributes</code>, <code>stack</code>, and <code>pStack</code> values
-for each operation.</p>
+<p>Note the second argument: <code>AESEncrypt</code> takes <code>isLogin</code>, and dropping it
+breaks the login request, because login is the one call that must carry the
+AES key and IV inside its signature. That flag — not any signature length —
+is the real distinction between a login and everything else.</p>
+<p>Navigate the UI and read the console to discover the <code>actionType</code>, <code>oid</code>,
+<code>attributes</code>, <code>stack</code> and <code>pStack</code> for each operation.</p>
 <h2 id="action-type-constants">
 Action Type Constants</h2>
 <p>The <a href=".././mod.ts/~/ACT.html">ACT</a> object provides action type constants:</p>
 <ul>
-<li><a href=".././mod.ts/~/ACT.html">ACT</a>.GET (1) - Retrieve data</li>
-<li><a href=".././mod.ts/~/ACT.html">ACT</a>.SET (2) - Modify data</li>
-<li><a href=".././mod.ts/~/ACT.html">ACT</a>.ADD (3) - Add new entry</li>
-<li><a href=".././mod.ts/~/ACT.html">ACT</a>.DEL (4) - Delete entry</li>
-<li><a href=".././mod.ts/~/ACT.html">ACT</a>.GL (5) - Get list</li>
-<li><a href=".././mod.ts/~/ACT.html">ACT</a>.GS (6) - Get/Set combined operation</li>
-<li><a href=".././mod.ts/~/ACT.html">ACT</a>.OP (7) - Execute operation</li>
-<li><a href=".././mod.ts/~/ACT.html">ACT</a>.CGI (8) - CGI script execution</li>
+<li><a href=".././mod.ts/~/ACT.html">ACT</a>.GET (1) - Read one object</li>
+<li><a href=".././mod.ts/~/ACT.html">ACT</a>.SET (2) - Write attributes</li>
+<li><a href=".././mod.ts/~/ACT.html">ACT</a>.ADD (3) - Create an instance</li>
+<li><a href=".././mod.ts/~/ACT.html">ACT</a>.DEL (4) - Delete an instance</li>
+<li><a href=".././mod.ts/~/ACT.html">ACT</a>.GL (5) - Get list — every instance</li>
+<li><a href=".././mod.ts/~/ACT.html">ACT</a>.GS (6) - Get sub-list — instances beneath a parent</li>
+<li><a href=".././mod.ts/~/ACT.html">ACT</a>.OP (7) - Invoke an operation</li>
+<li><a href=".././mod.ts/~/ACT.html">ACT</a>.CGI (8) - Call a CGI endpoint</li>
 </ul>
+<p>A ninth value, <code>ACT_SIG = 9</code>, exists in the firmware but is not an action you
+can request — it is why the newer firmware's endpoint is spelled
+<code>/cgi_gdpr?9</code>. In the pre-encryption protocol the query string carried the
+list of action types in the request (<code>/cgi?1&amp;2&amp;5</code>); encryption moved that
+list into the payload, and the newer JSON transport kept the old spelling
+with a single fixed type.</p>
 <h2 id="response-structure">
 Response Structure</h2>
 <p>The <a href=".././mod.ts/~/execute.html">execute</a> function returns an <a href=".././mod.ts/~/ExecuteResult.html">ExecuteResult</a>:</p>
@@ -318,6 +472,93 @@ Response Structure</h2>
 <li><code>error</code>: Error code from router (0 = success), or null</li>
 <li><code>actions</code>: Array of <a href=".././mod.ts/~/ActionResult.html">ActionResult</a> mapping requests to responses</li>
 </ul>
+<p><code>error</code> is a raw firmware code. The full table lives in the router's own
+<code>/locale/errCode.js</code>; the ones you are most likely to see:</p>
+<table>
+<thead>
+<tr>
+<th>Code</th>
+<th>Firmware name</th>
+<th>Meaning</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>9000</code></td>
+<td><code>CMM_METHOD_NOT_SUPPORTED</code></td>
+<td>that action is not allowed here</td>
+</tr>
+<tr>
+<td><code>9001</code></td>
+<td><code>CMM_REQUEST_DENIED</code></td>
+<td>refused, often not authenticated</td>
+</tr>
+<tr>
+<td><code>9003</code></td>
+<td><code>CMM_INVALID_ARGUMENTS</code></td>
+<td>malformed attributes</td>
+</tr>
+<tr>
+<td><code>9005</code></td>
+<td><code>CMM_INVALID_PARAM_NAME</code></td>
+<td>unknown attribute name</td>
+</tr>
+<tr>
+<td><code>9007</code></td>
+<td><code>CMM_INVALID_PARAM_VALUE</code></td>
+<td>value rejected</td>
+</tr>
+<tr>
+<td><code>9804</code></td>
+<td><code>CMM_OBJECT_NOT_FOUND</code></td>
+<td>no such <code>oid</code></td>
+</tr>
+<tr>
+<td><code>9805</code></td>
+<td><code>CMM_INSTANCE_NOT_FOUND</code></td>
+<td>no such <code>stack</code> instance</td>
+</tr>
+<tr>
+<td><code>9812</code></td>
+<td><code>CMM_REACH_MAX_INSTANCE_NUM</code></td>
+<td>cannot add another</td>
+</tr>
+<tr>
+<td><code>71012</code></td>
+<td><code>ERR_HTTP_ERR_GET</code></td>
+<td>read failed</td>
+</tr>
+<tr>
+<td><code>71013</code></td>
+<td><code>ERR_HTTP_ERR_SET</code></td>
+<td>write failed</td>
+</tr>
+<tr>
+<td><code>71233</code></td>
+<td><code>ERR_HTTP_ERR_USER_PWD_NOT_CORRECT</code></td>
+<td>bad credentials</td>
+</tr>
+</tbody>
+</table>
+<p>A <code>-1</code> means the request never completed — a non-200 response, not a
+firmware code.</p>
+<h2 id="why-a-failed-login-tells-you-so-little">
+Why a failed login tells you so little</h2>
+<p><a href=".././mod.ts/~/authenticate.html">authenticate</a> returns <code>null</code> when it does not get a session, and it
+cannot tell you why. That is the router's design, not an omission here: the
+device answers a wrong password and a correct one the same way, and its own
+web UI simply reloads the login page and reads the counters off it.</p>
+<p>Those counters are on <a href=".././mod.ts/~/AuthResult.html">AuthResult</a><code>.info</code> when a login succeeds, and
+they are the only signal available:</p>
+<ul>
+<li><code>authTimes</code> — the number of <strong>failed</strong> attempts so far</li>
+<li><code>forbidFlag</code> / <code>forbidTime</code> — whether the device has locked you out, and
+for how long</li>
+</ul>
+<p>Routers in this family lock out after 3–5 failed attempts. If you are
+automating retries, read those values rather than looping — and note that a
+lockout looks identical to a wrong password from <code>authenticate</code>'s return
+value alone.</p>
 </div><section class="section"  id="examples"><div>
       <h2 class="anchorable mb-1"><a href="#examples" class="anchor" aria-label="Anchor" tabIndex="-1"><svg
   width="16"
@@ -1043,7 +1284,7 @@ Variables</h2></div><div class="namespaceSection"><div id="namespace_act" class=
   />
 </svg>
 </a></nav><nav class="documentNavigation">
-          <h3>Document Navigation</h3><ul><li><ul><li><a href="#supported-models" title="Supported Models">Supported Models</a></li><li><a href="#experimental:-unconfirmed-on-hardware" title="Experimental: unconfirmed on hardware">Experimental: unconfirmed on hardware</a></li><li><a href="#main-functions" title="Main Functions">Main Functions</a></li><li><a href="#firmware-dialects" title="Firmware Dialects">Firmware Dialects</a></li><li><a href="#action-format" title="Action Format">Action Format</a></li><li><a href="#discovering-actions" title="Discovering Actions">Discovering Actions</a></li><li><a href="#action-type-constants" title="Action Type Constants">Action Type Constants</a></li><li><a href="#response-structure" title="Response Structure">Response Structure</a></li></ul></li><li><a href="#examples" title="Examples">Examples</a></li><li><ul><li><a href="#example_0" title="Basic authentication and command execution">Basic authentication and command execution</a></li><li><a href="#example_1" title="Get unread SMS count with specific attributes">Get unread SMS count with specific attributes</a></li><li><a href="#example_2" title="Retrieve SMS messages with pagination">Retrieve SMS messages with pagination</a></li></ul></li><li><a href="#mod_ts_functions" title="Functions">Functions</a></li><li><ul><li><a href="#namespace_authenticate" title="authenticate">authenticate</a></li><li><a href="#namespace_execute" title="execute">execute</a></li></ul></li><li><a href="#mod_ts_interfaces" title="Interfaces">Interfaces</a></li><li><ul><li><a href="#namespace_actionresult" title="ActionResult">ActionResult</a></li><li><a href="#namespace_authoptions" title="AuthOptions">AuthOptions</a></li><li><a href="#namespace_authresult" title="AuthResult">AuthResult</a></li><li><a href="#namespace_busystatus" title="BusyStatus">BusyStatus</a></li><li><a href="#namespace_commandbatch" title="CommandBatch">CommandBatch</a></li><li><a href="#namespace_credentials" title="Credentials">Credentials</a></li><li><a href="#namespace_decodedbatch" title="DecodedBatch">DecodedBatch</a></li><li><a href="#namespace_dialect" title="Dialect">Dialect</a></li><li><a href="#namespace_envelope" title="Envelope">Envelope</a></li><li><a href="#namespace_executeoptions" title="ExecuteOptions">ExecuteOptions</a></li><li><a href="#namespace_executeresult" title="ExecuteResult">ExecuteResult</a></li><li><a href="#namespace_publickeyinfo" title="PublicKeyInfo">PublicKeyInfo</a></li><li><a href="#namespace_routerinfo" title="RouterInfo">RouterInfo</a></li><li><a href="#namespace_sessioncontext" title="SessionContext">SessionContext</a></li></ul></li><li><a href="#mod_ts_type-aliases" title="Type Aliases">Type Aliases</a></li><li><ul><li><a href="#namespace_action" title="Action">Action</a></li><li><a href="#namespace_actiontype" title="ActionType">ActionType</a></li></ul></li><li><a href="#mod_ts_variables" title="Variables">Variables</a></li><li><ul><li><a href="#namespace_act" title="ACT">ACT</a></li><li><a href="#namespace_gdprjson" title="gdprJson">gdprJson</a></li><li><a href="#namespace_gdprtext" title="gdprText">gdprText</a></li></ul></li></ul></nav></div>
+          <h3>Document Navigation</h3><ul><li><ul><li><a href="#how-the-protocol-works" title="How the protocol works">How the protocol works</a></li><li><ul><li><a href="#oid--a-group-of-settings" title="oid — a group of settings">oid — a group of settings</a></li><li><a href="#stack--which-instance" title="stack — which instance">stack — which instance</a></li><li><a href="#"gdpr"-names-the-encryption,-not-the-format" title="&quot;GDPR&quot; names the encryption, not the format">"GDPR" names the encryption, not the format</a></li></ul></li><li><a href="#supported-models" title="Supported Models">Supported Models</a></li><li><a href="#experimental:-unconfirmed-on-hardware" title="Experimental: unconfirmed on hardware">Experimental: unconfirmed on hardware</a></li><li><a href="#main-functions" title="Main Functions">Main Functions</a></li><li><a href="#firmware-dialects" title="Firmware Dialects">Firmware Dialects</a></li><li><a href="#action-format" title="Action Format">Action Format</a></li><li><a href="#discovering-actions" title="Discovering Actions">Discovering Actions</a></li><li><ul><li><a href="#read-the-firmware--no-login-required" title="Read the firmware — no login required">Read the firmware — no login required</a></li><li><a href="#watch-live-traffic" title="Watch live traffic">Watch live traffic</a></li></ul></li><li><a href="#action-type-constants" title="Action Type Constants">Action Type Constants</a></li><li><a href="#response-structure" title="Response Structure">Response Structure</a></li><li><a href="#why-a-failed-login-tells-you-so-little" title="Why a failed login tells you so little">Why a failed login tells you so little</a></li></ul></li><li><a href="#examples" title="Examples">Examples</a></li><li><ul><li><a href="#example_0" title="Basic authentication and command execution">Basic authentication and command execution</a></li><li><a href="#example_1" title="Get unread SMS count with specific attributes">Get unread SMS count with specific attributes</a></li><li><a href="#example_2" title="Retrieve SMS messages with pagination">Retrieve SMS messages with pagination</a></li></ul></li><li><a href="#mod_ts_functions" title="Functions">Functions</a></li><li><ul><li><a href="#namespace_authenticate" title="authenticate">authenticate</a></li><li><a href="#namespace_execute" title="execute">execute</a></li></ul></li><li><a href="#mod_ts_interfaces" title="Interfaces">Interfaces</a></li><li><ul><li><a href="#namespace_actionresult" title="ActionResult">ActionResult</a></li><li><a href="#namespace_authoptions" title="AuthOptions">AuthOptions</a></li><li><a href="#namespace_authresult" title="AuthResult">AuthResult</a></li><li><a href="#namespace_busystatus" title="BusyStatus">BusyStatus</a></li><li><a href="#namespace_commandbatch" title="CommandBatch">CommandBatch</a></li><li><a href="#namespace_credentials" title="Credentials">Credentials</a></li><li><a href="#namespace_decodedbatch" title="DecodedBatch">DecodedBatch</a></li><li><a href="#namespace_dialect" title="Dialect">Dialect</a></li><li><a href="#namespace_envelope" title="Envelope">Envelope</a></li><li><a href="#namespace_executeoptions" title="ExecuteOptions">ExecuteOptions</a></li><li><a href="#namespace_executeresult" title="ExecuteResult">ExecuteResult</a></li><li><a href="#namespace_publickeyinfo" title="PublicKeyInfo">PublicKeyInfo</a></li><li><a href="#namespace_routerinfo" title="RouterInfo">RouterInfo</a></li><li><a href="#namespace_sessioncontext" title="SessionContext">SessionContext</a></li></ul></li><li><a href="#mod_ts_type-aliases" title="Type Aliases">Type Aliases</a></li><li><ul><li><a href="#namespace_action" title="Action">Action</a></li><li><a href="#namespace_actiontype" title="ActionType">ActionType</a></li></ul></li><li><a href="#mod_ts_variables" title="Variables">Variables</a></li><li><ul><li><a href="#namespace_act" title="ACT">ACT</a></li><li><a href="#namespace_gdprjson" title="gdprJson">gdprJson</a></li><li><a href="#namespace_gdprtext" title="gdprText">gdprText</a></li></ul></li></ul></nav></div>
   </div></div>
 </div>
 </div>
