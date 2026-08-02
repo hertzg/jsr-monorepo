@@ -1,5 +1,16 @@
 # Changelog
 
+## [4.0.0](https://github.com/hertzg/jsr-monorepo/compare/@hertzg/xhb-v3.2.0...@hertzg/xhb-v4.0.0) (2026-08-02)
+
+
+### ⚠ BREAKING CHANGES
+
+* **@hertzg/xhb:** remove parse hooks ([#183](https://github.com/hertzg/jsr-monorepo/issues/183))
+
+### Features
+
+* **@hertzg/xhb:** remove parse hooks ([#183](https://github.com/hertzg/jsr-monorepo/issues/183)) ([30594fc](https://github.com/hertzg/jsr-monorepo/commit/30594fc203296c3c030c688e510c1dd9dc6f8253))
+
 ## [3.2.0](https://github.com/hertzg/jsr-monorepo/compare/@hertzg/xhb-v3.1.0...@hertzg/xhb-v3.2.0) (2026-04-03)
 
 

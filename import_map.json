@@ -42,7 +42,7 @@
     "fflate": "npm:fflate@^0.8.2",
     "@noble/ciphers/aes.js": "jsr:@noble/ciphers@^2.1.1/aes.js",
     "@noble/hashes/legacy.js": "jsr:@noble/hashes@^2.0.1/legacy.js",
-    "@hertzg/xhb": "jsr:@hertzg/xhb@^3.2.0",
+    "@hertzg/xhb": "jsr:@hertzg/xhb@^4.0.0",
     "@std/xml": "jsr:@std/xml@^0.2.0"
   }
 }
