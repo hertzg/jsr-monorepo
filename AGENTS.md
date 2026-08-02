@@ -90,6 +90,7 @@ mirrors the JSR coordinate. Two scopes:
 - `pcap` - libpcap (.pcap) capture file format support
 - `png` - PNG file format support
 - `tcp` - TCP segment parsing (RFC 9293)
+- `tls-record` - TLS record layer header parsing (RFC 8446 section 5.1)
 - `udp` - UDP datagram parsing (RFC 768)
 - `wav` - WAV audio file format support
 
@@ -378,6 +379,7 @@ both tiresome and error-prone.
 - `@binstruct/ipv4`
 - `@binstruct/png`
 - `@binstruct/tcp`
+- `@binstruct/tls-record`
 - `@binstruct/udp`
 - `@binstruct/wav`
 - `@binstruct/pcap`
