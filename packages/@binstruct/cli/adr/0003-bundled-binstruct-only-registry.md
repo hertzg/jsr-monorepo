@@ -1,6 +1,18 @@
 # ADR 0003 — The package list is a generated, `@binstruct`-only registry bundled in the CLI
 
-**Status:** Accepted
+**Status:** Superseded by [ADR 0006](./0006-live-jsr-scope-listing.md)
+
+> The bundling decision below is no longer in force. The registry shipped
+> without `@binstruct/bencode` — a published package the generator could not
+> see, because it generated from workspace directories rather than from the
+> registry the CLI points people at — and "staleness self-corrects" turned out
+> to be false for exactly the packages the list is for. ADR 0006 replaces the
+> bundled file with the live scope listing.
+>
+> Two parts of this ADR survive it, and are restated there: the scope is
+> `@binstruct` and not `@hertzg`, and level 0 shows names without descriptions.
+> The rest — the generated file, the lint check, the offline guarantee it bought
+> — is superseded.
 
 ## Context
 

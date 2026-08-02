@@ -332,7 +332,8 @@ teaches it.
   specifier disagreed with every other line on the screen; one that carried only
   the short form would hide the expansion the shorthand depends on.
 - **Cross-scope discovery is deliberately absent.** `binstruct xhb` will not
-  find `@hertzg/xhb` for you, per ADR 0003.
+  find `@hertzg/xhb` for you, per ADR 0003 (superseded by ADR 0006, which keeps
+  the scope rule).
 - **A scheme the runtime resolves but no package lives at is refused, not
   followed.** `binstruct node:fs` is a registry miss and `binstruct data:…` is a
   path that is not there. Both used to be passed through to `import()` on the
@@ -366,5 +367,6 @@ teaches it.
   `directoryGuide`, `missingPathGuide`, where refusal is rendered
 - `loader.ts` — `loadCoder`, which receives the specifier to import
 - `@binstruct/cli` ADR 0002 — why discovery needs a single-module specifier
-- `@binstruct/cli` ADR 0003 — why the implied scope is `@binstruct`
+- `@binstruct/cli` ADR 0003 — why the implied scope is `@binstruct` (superseded
+  by ADR 0006, which restates it)
 - `@binstruct/cli` ADR 0001 — where resolved and short forms are displayed

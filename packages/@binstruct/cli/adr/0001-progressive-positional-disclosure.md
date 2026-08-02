@@ -36,14 +36,14 @@ When the next positional is missing, the CLI prints three blocks and stops:
 
 - **`NEXT`** — the name of the missing word and one line on what it means.
 - **an options block** — the legal values, discovered from what was already
-  typed (ADRs 0002 and 0003), each with its one-line doc.
+  typed (ADRs 0002 and 0006), each with its one-line doc.
 - **`TRY`** — a complete, paste-ready command line one step further along.
 
 The three levels are:
 
 | typed                   | missing     | options from           |
 | ----------------------- | ----------- | ---------------------- |
-| `binstruct`             | `<package>` | bundled registry       |
+| `binstruct`             | `<package>` | JSR scope listing      |
 | `binstruct png`         | `<coder>`   | `deno doc --json`      |
 | `binstruct png pngFile` | `<command>` | static: decode, encode |
 
@@ -143,6 +143,9 @@ other diagnostic.
   the three refusals built on it, `packageWord`
 - `guide.ts` — `renderGuide`, the one renderer all three levels share
 - `@binstruct/cli` ADR 0002 — coder discovery via `deno doc --json`
-- `@binstruct/cli` ADR 0003 — the bundled package registry
+- `@binstruct/cli` ADR 0003 — the bundled package registry, superseded by ADR
+  0006
+- `@binstruct/cli` ADR 0006 — the live JSR scope listing that replaced it, and
+  what level 0 shows when it cannot be fetched
 - `@binstruct/cli` ADR 0004 — bare names imply `jsr:` and `@binstruct`
 - `@binstruct/cli` ADR 0005 — a lone zero-arg coder is the default

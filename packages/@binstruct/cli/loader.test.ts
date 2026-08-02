@@ -31,7 +31,11 @@ Deno.test("loadCoder rejects a name the package does not export", async () => {
 
 Deno.test("loadCoder rejects an export that is not a factory", async () => {
   await assertRejects(
-    () => loadCoder(import.meta.resolve("./registry.ts"), "KNOWN_PACKAGES"),
+    () =>
+      loadCoder(
+        "data:text/javascript,export const notAFactory = 42;",
+        "notAFactory",
+      ),
     Error,
     "is not a function",
   );

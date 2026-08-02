@@ -19,6 +19,12 @@
  * package name means the `@binstruct` scope on JSR, and a package exposing
  * exactly one zero-argument coder may omit the `<coder>` word.
  *
+ * The package list shown for the missing `<package>` word is fetched from
+ * JSR's scope API and cached for a day, so it names what is published today
+ * rather than what was published when the CLI was released. That costs
+ * `--allow-net=jsr.io`; without it — or without a network — the list is
+ * omitted and everything else still works.
+ *
  * @example Decode with the full three-word form
  * ```bash
  * deno run -A @binstruct/cli png pngFile decode < input.png > struct.json5
@@ -88,7 +94,13 @@ export {
 export type { ResolvedSpecifier, SpecifierForm } from "./specifier.ts";
 export { inspectLocalTarget } from "./target.ts";
 export type { LocalTarget } from "./target.ts";
-export { KNOWN_PACKAGES } from "./registry.ts";
+export { listScopePackages, readScopeListing } from "./scope.ts";
+export type {
+  ListingSource,
+  ScopeListing,
+  ScopeListingOptions,
+  ScopePackage,
+} from "./scope.ts";
 
 if (import.meta.main) {
   await main(Deno.args);

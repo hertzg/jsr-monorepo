@@ -6,6 +6,10 @@
  * network. `arp` has exactly one zero-argument coder, `png` has three plus one
  * that takes an argument, `pcap` has none that the CLI can call, and
  * `@hertzg/mac` is not a binstruct package at all.
+ *
+ * The package listing is stubbed for the whole file, and the permissions its
+ * cache needs are refused, so level 0 answers from {@linkcode LISTED} without
+ * reaching jsr.io or touching the cache directory of whoever runs the suite.
  */
 
 import {
@@ -14,7 +18,66 @@ import {
   assertStringIncludes,
 } from "@std/assert";
 import { toFileUrl } from "@std/path";
+import { stub } from "@std/testing/mock";
 import { explainFailure, parseCliArgs, planCli } from "./cli.ts";
+
+/** The scope listing every level 0 screen in this file is built from. */
+const LISTED = [
+  { scope: "binstruct", name: "arp", description: "ARP packets, RFC 826." },
+  {
+    scope: "binstruct",
+    name: "bencode",
+    description: "Bencode, as BitTorrent uses it.",
+  },
+  { scope: "binstruct", name: "cli", description: "This tool." },
+  { scope: "binstruct", name: "png", description: "PNG image file format." },
+  { scope: "binstruct", name: "tar", description: "POSIX ustar archives." },
+  {
+    scope: "binstruct",
+    name: "tls-record",
+    description: "TLS record layer, RFC 8446.",
+  },
+];
+
+/** What the stubbed `fetch` answers with. */
+let answer: () => Promise<Response> = () =>
+  Promise.resolve(Response.json({ items: LISTED }));
+
+stub(globalThis, "fetch", () => answer());
+
+/**
+ * Swaps the answer the stubbed `fetch` gives, for the duration of a block.
+ *
+ * `fetch` is stubbed once for the file — a second stub over the same property
+ * is refused — so the failure paths are reached by changing what the one stub
+ * says rather than by replacing it.
+ *
+ * @param next The answer to give while the returned value is alive
+ * @returns A disposable that puts the previous answer back
+ */
+function answering(next: () => Promise<Response>): Disposable {
+  const previous = answer;
+  answer = next;
+  return { [Symbol.dispose]: () => void (answer = previous) };
+}
+
+stub(
+  Deno.permissions,
+  "query",
+  (descriptor: Deno.PermissionDescriptor) =>
+    Promise.resolve(
+      {
+        state: descriptor.name === "read" || descriptor.name === "write"
+          ? "denied"
+          : "granted",
+        onchange: null,
+        partial: false,
+        addEventListener() {},
+        removeEventListener() {},
+        dispatchEvent: () => true,
+      } as unknown as Deno.PermissionStatus,
+    ),
+);
 
 /** A package with exactly one zero-argument coder, `arpData`. */
 const ARP = import.meta.resolve("../arp/mod.ts");
@@ -30,6 +93,15 @@ const MAC = import.meta.resolve("../../@hertzg/mac/mod.ts");
 
 /** This CLI, for the subprocess tests. */
 const CLI = import.meta.resolve("./cli.ts");
+
+/**
+ * Everything except the network, for the subprocess cases that reach level 0.
+ *
+ * The package listing is the only thing the CLI fetches, and a test suite has
+ * no business asking jsr.io for it. Refused, the screen these cases assert on
+ * is the same one minus the `PACKAGES` names.
+ */
+const OFFLINE = ["-A", "--deny-net"];
 
 /**
  * Asserts that a plan writes text, and hands back the plan for further checks.
@@ -330,6 +402,83 @@ Deno.test("level 0 asks for a package, on stderr, with exit 1", async () => {
   assertStringIncludes(plan.text, "TRY\n  binstruct png");
 });
 
+Deno.test("level 0 lists what JSR answers, not what shipped with the CLI", async () => {
+  // `bencode` is published in the @binstruct scope and has no directory in
+  // this workspace, so a list generated from the workspace could never hold
+  // it. Whatever the listing says is what level 0 shows.
+  const plan = printed(await planCli([]));
+
+  assertStringIncludes(plan.text, "bencode");
+  assertEquals(plan.text.includes("cli"), false);
+});
+
+Deno.test("a listing that cannot be fetched is not a dead end", async () => {
+  using _offline = answering(() =>
+    Promise.reject(new TypeError("error sending request"))
+  );
+
+  const plan = printed(await planCli([]));
+
+  assertEquals(plan.code, 1);
+  assertStringIncludes(
+    plan.text,
+    "cannot list the @binstruct scope: error sending request",
+  );
+  assertStringIncludes(plan.text, "a bare name means jsr:@binstruct/<name>");
+  assertStringIncludes(plan.text, "./local/mod.ts specifiers all work");
+  assertStringIncludes(plan.text, "NEXT  <package>");
+  assertStringIncludes(plan.text, "none — the listing could not be fetched");
+  assertStringIncludes(plan.text, "TRY\n  binstruct png");
+  assertEquals(plan.text.includes("tls-record"), false);
+});
+
+Deno.test("a listing that answers 404 degrades the same way", async () => {
+  using _refused = answering(() =>
+    Promise.resolve(new Response("nope", { status: 404 }))
+  );
+
+  const plan = printed(await planCli([]));
+
+  assertStringIncludes(plan.text, "cannot list the @binstruct scope");
+  assertStringIncludes(plan.text, "NEXT  <package>");
+});
+
+Deno.test("a listing with a body that is not a listing degrades too", async () => {
+  using _garbage = answering(() =>
+    Promise.resolve(Response.json({ message: "nope" }))
+  );
+
+  const plan = printed(await planCli([]));
+
+  assertStringIncludes(plan.text, "cannot list the @binstruct scope");
+  assertStringIncludes(plan.text, "TRY\n  binstruct png");
+});
+
+Deno.test("a misspelled bare name is matched against the live listing", async () => {
+  const plan = printed(await planCli(["pnj"]));
+
+  assertEquals(plan.code, 1);
+  assertStringIncludes(plan.text, "did you mean png? — PNG image file format.");
+  assertStringIncludes(
+    plan.text,
+    "a bare name always means the @binstruct scope",
+  );
+});
+
+Deno.test("with no permissions at all the guidance still prints", async () => {
+  // No --allow-net, so no listing; no --allow-read or --allow-env, so no
+  // cache either. --no-prompt turns a permission the CLI forgot to check into
+  // a failure rather than a hung terminal.
+  const { code, stdout, stderr } = await runCli(["--help"], ["--no-prompt"]);
+
+  assertEquals(code, 0);
+  assertEquals(stderr, "");
+  assertStringIncludes(stdout, "NEXT  <package>");
+  assertStringIncludes(stdout, "cannot list the @binstruct scope");
+  assertStringIncludes(stdout, "--allow-net=jsr.io");
+  assertStringIncludes(stdout, "TRY\n  binstruct png");
+});
+
 Deno.test("--help prints the same material on stdout, with exit 0", async () => {
   const guidance = printed(await planCli([]));
   const help = printed(await planCli(["--help"]));
@@ -565,13 +714,13 @@ Deno.test("explainFailure explains a coder that takes arguments", async () => {
 });
 
 Deno.test("an incomplete invocation writes nothing to stdout and exits 1", async () => {
-  const bare = await runCli([]);
+  const bare = await runCli([], OFFLINE);
 
   assertEquals(bare.code, 1);
   assertEquals(bare.stdout, "");
   assertStringIncludes(bare.stderr, "NEXT  <package>");
 
-  const halfTyped = await runCli([PNG]);
+  const halfTyped = await runCli([PNG], OFFLINE);
 
   assertEquals(halfTyped.code, 1);
   assertEquals(halfTyped.stdout, "");
@@ -579,7 +728,7 @@ Deno.test("an incomplete invocation writes nothing to stdout and exits 1", async
 });
 
 Deno.test("--help writes nothing to stderr and exits 0", async () => {
-  const help = await runCli(["--help"]);
+  const help = await runCli(["--help"], OFFLINE);
 
   assertEquals(help.code, 0);
   assertEquals(help.stderr, "");
@@ -745,7 +894,7 @@ Deno.test("extra positionals are only guessed at when there is one", async () =>
 });
 
 Deno.test("an extra positional writes nothing to stdout", async () => {
-  const run = await runCli([ARP, "arpData", "decode", "input.bin"]);
+  const run = await runCli([ARP, "arpData", "decode", "input.bin"], OFFLINE);
 
   assertEquals(run.code, 1);
   assertEquals(run.stdout, "");
@@ -1500,7 +1649,7 @@ Deno.test("an unknown flag beats --version to the answer", async () => {
 });
 
 Deno.test("an unknown flag writes nothing to stdout", async () => {
-  const run = await runCli(["--format", "json", "png"]);
+  const run = await runCli(["--format", "json", "png"], OFFLINE);
 
   assertEquals(run.code, 1);
   assertEquals(run.stdout, "");
@@ -1516,7 +1665,7 @@ Deno.test("a package word that reads as flags never prints help on stdout", asyn
   try {
     const run = await runCli(
       ["-dash/", "decode"],
-      ["-A"],
+      OFFLINE,
       directory,
       new Uint8Array([1]),
     );

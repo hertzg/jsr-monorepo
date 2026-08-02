@@ -26,6 +26,14 @@
  * package exposing exactly one zero-argument coder may omit the `<coder>` word
  * (ADR 0005).
  *
+ * The `PACKAGES` block is JSR's own scope listing, fetched and cached for a day
+ * (`./scope.ts`, ADR 0006), so it names what is published rather than what was
+ * published when this CLI was released. That costs `--allow-net=jsr.io`; the
+ * listing is a hint, so without the permission, without a network, or against a
+ * JSR that will not answer, the block is omitted and the screen still says how
+ * to name a package. Listing the *coders* of a package costs
+ * `--allow-run=deno` in the same way (ADR 0002).
+ *
  * @example Decode a PNG file
  * ```bash
  * binstruct png pngFile decode < input.png > struct.json5
@@ -67,7 +75,11 @@ import {
   renderGuide,
   shellWord,
 } from "./guide.ts";
-import { KNOWN_PACKAGES } from "./registry.ts";
+import {
+  listScopePackages,
+  type ScopeListing,
+  type ScopePackage,
+} from "./scope.ts";
 import { type ResolvedSpecifier, resolveSpecifier } from "./specifier.ts";
 import { inspectLocalTarget, type LocalTarget } from "./target.ts";
 
@@ -106,6 +118,11 @@ const USAGE_FOOTER: readonly string[] = [
   "  the payload is JSON5, not JSON: quoted keys, 0x byte literals, comments",
   "  without --help, guidance goes to stderr and exits 1, so a half-typed",
   "  redirect stays empty",
+  "",
+  "PERMISSIONS",
+  "  --allow-net=jsr.io  lists the @binstruct packages, live and cached for a",
+  "                      day; without it the list is omitted, nothing else",
+  "  --allow-run=deno    lists the coders of a package, via deno doc",
 ];
 
 /**
@@ -414,16 +431,50 @@ export function parseCliArgs(args: string[]): CliOptions {
 }
 
 /**
+ * Says what to do when the package list could not be produced.
+ *
+ * The list is a hint, so its absence must not be a dead end: the two lines
+ * name what failed and then say, in full, how to write a package the CLI will
+ * accept — which is everything the listing would have taught anyway. Offline,
+ * on a locked-down `--allow-net`, or against a JSR having a bad day, level 0
+ * still ends with a command that can be typed.
+ *
+ * @param listing The listing that came back empty
+ * @returns The notes to append, or nothing when there is a list to show
+ */
+function listingNotes(listing: ScopeListing): string[] {
+  if (listing.packages.length > 0) return [];
+  return [
+    `cannot list the @binstruct scope: ${listing.reason ?? "no listing"}`,
+    "name a package anyway — a bare name means jsr:@binstruct/<name>, and " +
+    "jsr:, npm:, https:// and ./local/mod.ts specifiers all work",
+  ];
+}
+
+/**
  * Builds the level 0 guide: which package describes your bytes.
  *
+ * The options are JSR's own answer to "what is in the `@binstruct` scope"
+ * (`./scope.ts`, ADR 0006), so a package published after this release is
+ * listed and one that never shipped is not. Names only: the descriptions the
+ * listing carries are a paragraph each, and thirty of them would push the
+ * `TRY` line off the screen at the one moment the user has typed nothing and
+ * needs it most. A description belongs to the package that has been chosen,
+ * which is level 1's job.
+ *
  * @param extra Header and notes to show above the `NEXT` block
+ * @param listing A listing the caller already fetched, to save a second lookup
  * @returns The guide
  */
-function packageGuide(
+async function packageGuide(
   extra: Pick<Guide, "header" | "notes" | "diagnostic"> = {},
-): Guide {
+  listing?: ScopeListing,
+): Promise<Guide> {
+  const packages = listing ?? await listScopePackages();
+
   return {
     ...extra,
+    notes: [...(extra.notes ?? []), ...listingNotes(packages)],
     next: {
       word: "<package>",
       meaning:
@@ -431,7 +482,8 @@ function packageGuide(
     },
     options: {
       heading: "PACKAGES",
-      items: KNOWN_PACKAGES.map((name) => ({ name })),
+      items: packages.packages.map(({ name }) => ({ name })),
+      empty: "none — the listing could not be fetched",
     },
     try: [`${PROGRAM} ${SAMPLE_PACKAGE}`],
   };
@@ -452,11 +504,11 @@ function packageGuide(
  * @param attempt A paste-ready correction, when the CLI can name one
  * @returns The guide
  */
-function unusableArgumentGuide(
+async function unusableArgumentGuide(
   notes: readonly string[],
   attempt?: string,
-): Guide {
-  const guide = packageGuide({ diagnostic: true, notes });
+): Promise<Guide> {
+  const guide = await packageGuide({ diagnostic: true, notes });
   return {
     ...guide,
     try: attempt === undefined ? guide.try : [attempt],
@@ -475,8 +527,8 @@ function unusableArgumentGuide(
  * @param flags The unrecognised flags, as typed
  * @returns The guide
  */
-function unknownFlagGuide(flags: readonly string[]): Guide {
-  return unusableArgumentGuide([
+async function unknownFlagGuide(flags: readonly string[]): Promise<Guide> {
+  return await unusableArgumentGuide([
     `unknown option${flags.length === 1 ? "" : "s"}: ${flags.join(", ")}`,
     "an unknown flag shifts which word is the package, so nothing was run",
   ]);
@@ -496,8 +548,8 @@ function unknownFlagGuide(flags: readonly string[]): Guide {
  * @param slots The slots that were given a blank word, e.g. `<coder>`
  * @returns The guide
  */
-function blankArgumentGuide(slots: readonly string[]): Guide {
-  return unusableArgumentGuide([
+async function blankArgumentGuide(slots: readonly string[]): Promise<Guide> {
+  return await unusableArgumentGuide([
     `${slots.join(" and ")} ${
       slots.length === 1 ? "is" : "are"
     } blank, and a blank word names nothing`,
@@ -522,7 +574,7 @@ function blankArgumentGuide(slots: readonly string[]): Guide {
  * @param options The parsed command line, for the slots that were understood
  * @returns The guide
  */
-function extraArgumentGuide(options: CliOptions): Guide {
+async function extraArgumentGuide(options: CliOptions): Promise<Guide> {
   const extra = options.extraArgs;
   const { package: packageInput, coder, command } = options;
   const complete = packageInput !== undefined && spoken(packageInput) &&
@@ -535,7 +587,7 @@ function extraArgumentGuide(options: CliOptions): Guide {
     command,
   ].filter((word) => word !== undefined).join(" ");
 
-  return unusableArgumentGuide(
+  return await unusableArgumentGuide(
     [
       `unexpected argument${extra.length === 1 ? "" : "s"}: ${
         extra.map(shellWord).join(", ")
@@ -718,16 +770,24 @@ function commandGuide(
  * @param reason What the runtime or `deno doc` said
  * @returns The guide
  */
-function unknownPackageGuide(
+async function unknownPackageGuide(
   resolved: ResolvedSpecifier,
   header: string | undefined,
   reason: string,
-): Guide {
-  return packageGuide({
+): Promise<Guide> {
+  const listing = await listScopePackages();
+  const suggestion = resolved.form === "bare"
+    ? nearestPackage(resolved.input, listing.packages)
+    : undefined;
+
+  return await packageGuide({
     header,
     diagnostic: true,
     notes: [
       `cannot read ${resolved.specifier}: ${reason}`,
+      ...(suggestion === undefined ? [] : [
+        `did you mean ${suggestion.name}? — ${suggestion.description}`,
+      ]),
       ...(resolved.form === "bare"
         ? [
           `a bare name always means the @binstruct scope — write ${PROGRAM} ${
@@ -738,7 +798,31 @@ function unknownPackageGuide(
         ]
         : []),
     ],
-  });
+  }, listing);
+}
+
+/**
+ * Picks the listed package a misspelled bare name was probably reaching for.
+ *
+ * This is where the descriptions the listing carries are spent. Level 0 shows
+ * names only, but at the moment a name has failed to resolve there is exactly
+ * one candidate on the screen, and one line saying what it decodes is what
+ * separates `did you mean tar?` from an answer.
+ *
+ * A package with no description on JSR is no suggestion at all here — the
+ * bare "did you mean" it would produce is already covered by the listing.
+ *
+ * @param typed The bare name as typed
+ * @param packages The scope listing
+ * @returns The nearest described package, or nothing when none is close
+ */
+function nearestPackage(
+  typed: string,
+  packages: readonly ScopePackage[],
+): ScopePackage | undefined {
+  const described = packages.filter(({ description }) => description !== "");
+  const nearest = nearestName(typed, described.map(({ name }) => name));
+  return described.find(({ name }) => name === nearest);
 }
 
 /**
@@ -818,11 +902,11 @@ function directoryGuide(
  * @param header The header block, specifier and all
  * @returns The guide
  */
-function missingPathGuide(
+async function missingPathGuide(
   resolved: ResolvedSpecifier,
   header: string,
-): Guide {
-  return packageGuide({
+): Promise<Guide> {
+  return await packageGuide({
     header,
     diagnostic: true,
     notes: [`no such path: ${resolved.short}`],
@@ -841,12 +925,12 @@ function missingPathGuide(
  * @param reason What the filesystem said
  * @returns The guide
  */
-function unreadableTargetGuide(
+async function unreadableTargetGuide(
   resolved: ResolvedSpecifier,
   header: string,
   reason: string,
-): Guide {
-  return packageGuide({
+): Promise<Guide> {
+  return await packageGuide({
     header,
     diagnostic: true,
     notes: [`cannot inspect ${resolved.short}: ${reason}`],
@@ -861,11 +945,11 @@ function unreadableTargetGuide(
  * @param target What was found at the resolved specifier
  * @returns The guide, or `undefined` when the target is something to go on with
  */
-function localTargetGuide(
+async function localTargetGuide(
   resolved: ResolvedSpecifier,
   header: string,
   target: LocalTarget,
-): Guide | undefined {
+): Promise<Guide | undefined> {
   switch (target.kind) {
     case "elsewhere":
     case "module":
@@ -873,9 +957,9 @@ function localTargetGuide(
     case "directory":
       return directoryGuide(resolved, header, target.modules);
     case "missing":
-      return missingPathGuide(resolved, header);
+      return await missingPathGuide(resolved, header);
     case "unreadable":
-      return unreadableTargetGuide(resolved, header, target.reason);
+      return await unreadableTargetGuide(resolved, header, target.reason);
   }
 }
 
@@ -1064,7 +1148,7 @@ async function deadEndGuide(
   coders: readonly DiscoveredCoder[],
 ): Promise<Guide> {
   if (coders.length > 0) {
-    return packageGuide({
+    return await packageGuide({
       header,
       diagnostic: true,
       notes: [
@@ -1083,7 +1167,7 @@ async function deadEndGuide(
     ? "it is built on @hertzg/binstruct, but ships no declaration whose type renders as Coder<…>"
     : "its module graph never reaches @hertzg/binstruct, so it is probably not a binstruct package";
 
-  return packageGuide({
+  return await packageGuide({
     header,
     diagnostic: true,
     notes: [`${resolved.short} exposes no coders — ${explanation}`],
@@ -1151,7 +1235,11 @@ async function chooseCoder(
     ) {
       return {
         ok: false,
-        guide: unknownPackageGuide(resolved, header, failureNote(discovery)),
+        guide: await unknownPackageGuide(
+          resolved,
+          header,
+          failureNote(discovery),
+        ),
       };
     }
     return named === undefined
@@ -1307,10 +1395,17 @@ function withoutSharedPreamble(first: string, second: string): string {
  * @param args Command line arguments
  * @returns What to do
  *
- * @example An empty command line asks for a package, on stderr, with exit 1
+ * @example An empty command line asks for a package, listing or no listing
  * ```ts
  * import { assertEquals, assertStringIncludes } from "@std/assert";
+ * import { stub } from "@std/testing/mock";
  * import { planCli } from "./cli.ts";
+ *
+ * using _offline = stub(
+ *   globalThis,
+ *   "fetch",
+ *   () => Promise.reject(new TypeError("offline")),
+ * );
  *
  * const plan = await planCli([]);
  *
@@ -1389,15 +1484,15 @@ export async function planCli(args: string[]): Promise<CliPlan> {
   const options = parseCliArgs(args);
 
   if (options.unknownFlags.length > 0) {
-    return present(unknownFlagGuide(options.unknownFlags), options.help);
+    return present(await unknownFlagGuide(options.unknownFlags), options.help);
   }
 
   if (options.blankSlots.length > 0) {
-    return present(blankArgumentGuide(options.blankSlots), options.help);
+    return present(await blankArgumentGuide(options.blankSlots), options.help);
   }
 
   if (options.extraArgs.length > 0) {
-    return present(extraArgumentGuide(options), options.help);
+    return present(await extraArgumentGuide(options), options.help);
   }
 
   if (options.version) {
@@ -1405,14 +1500,14 @@ export async function planCli(args: string[]): Promise<CliPlan> {
   }
 
   if (options.package === undefined) {
-    return present(packageGuide(), options.help);
+    return present(await packageGuide(), options.help);
   }
 
   const resolved = resolveSpecifier(options.package);
   const header = specifierHeader(resolved);
   const { coder, command } = options;
 
-  const refusal = localTargetGuide(
+  const refusal = await localTargetGuide(
     resolved,
     header,
     await inspectLocalTarget(resolved.specifier),
@@ -1526,7 +1621,7 @@ export async function explainFailure(
   const discovery = await discoverCoders(resolved.specifier);
   if (!discovery.ok) {
     return discovery.reason === "exited-non-zero"
-      ? renderGuide(unknownPackageGuide(resolved, undefined, message))
+      ? renderGuide(await unknownPackageGuide(resolved, undefined, message))
       : `Error: ${message}`;
   }
 
