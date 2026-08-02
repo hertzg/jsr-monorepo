@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>FrameRefined - default - @binstruct&#x2F;inet documentation</title>
+  <title>PppoeIpv4Frame - default - @binstruct&#x2F;inet documentation</title>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="doc-current-file" content=".">
@@ -48,7 +48,7 @@
 </svg>
 </span>
 
-    <ul><li>FrameRefined</li></ul></ul>
+    <ul><li>PppoeIpv4Frame</li></ul></ul>
 </div>
 
     <div class="flex items-center gap-2">
@@ -112,11 +112,11 @@
     </div>
   </div>
 </nav>
-<div id="searchResults"></div><div id="content"><main class="symbolGroup" id="symbol_FrameRefined"><article>
+<div id="searchResults"></div><div id="content"><main class="symbolGroup" id="symbol_PppoeIpv4Frame"><article>
       <div class="symbolTitle">
         <div>
           <div class="text-2xl leading-none break-all">
-            <span class="text-TypeAlias">type alias</span>&nbsp;<span class="font-bold">FrameRefined</span>
+            <span class="text-TypeAlias">type alias</span>&nbsp;<span class="font-bold">PppoeIpv4Frame</span>
           </div></div><a
   class="sourceButton"
   href="file:&#x2F;&#x2F;&#x2F;home&#x2F;runner&#x2F;work&#x2F;jsr-monorepo&#x2F;jsr-monorepo&#x2F;packages&#x2F;@binstruct&#x2F;inet&#x2F;mod.ts"><svg
@@ -142,11 +142,7 @@
   />
 </svg>
 </a>
-</div><div><div class="space-y-7" id=""><div class="markdown"><p>Decoded Ethernet II frame as produced by <a href="../././~/inetFrame.html">inetFrame</a>.</p>
-<p>The shape depends on <code>etherType</code> and, for the layers it selects, further
-discriminator fields deeper in the stack; narrow the union with
-property-existence checks (<code>&quot;protocol&quot; in payload</code>, <code>&quot;srcPort&quot; in payload</code>, …) when reading. Frames whose tag has no matching coder surface
-their <code>payload</code> as a raw <code>Uint8Array</code>.</p>
+</div><div><div class="space-y-7" id=""><div class="markdown"><p>PPP frame with a typed IPv4 payload.</p>
 </div><section class="section"  id="definition"><div>
       <h2 class="anchorable mb-1"><a href="#definition" class="anchor" aria-label="Anchor" tabIndex="-1"><svg
   width="16"
@@ -170,10 +166,10 @@ their <code>payload</code> as a raw <code>Uint8Array</code>.</p>
   </defs>
 </svg>
 </a>
-Definition</h2></div><div class="space-y-8"><div class=" docEntry" id="typealias_framerefined">
+Definition</h2></div><div class="space-y-8"><div class=" docEntry" id="typealias_pppoeipv4frame">
 
   <div class="docEntryHeader">
-    <div><code><span class="font-medium text-stone-500 dark:text-stone-200"><div class="ml-indent"><span><a href="../././~/Ipv4Frame.html" class="link td-ref">Ipv4Frame</a></span><br /><span><span class="td-op"> | </span><a href="../././~/Ipv6Frame.html" class="link td-ref">Ipv6Frame</a></span><br /><span><span class="td-op"> | </span><a href="../././~/ArpFrame.html" class="link td-ref">ArpFrame</a></span><br /><span><span class="td-op"> | </span><a href="../././~/PppoeDiscoveryFrame.html" class="link td-ref">PppoeDiscoveryFrame</a></span><br /><span><span class="td-op"> | </span><a href="../././~/PppoeSessionFrame.html" class="link td-ref">PppoeSessionFrame</a></span><br /><span><span class="td-op"> | </span><a href="../././~/VlanFrame.html" class="link td-ref">VlanFrame</a></span><br /><span><span class="td-op"> | </span><span class="td-ref">Frame</span></span></div></span>
+    <div><code><span class="font-medium text-stone-500 dark:text-stone-200"><span><span class="td-ref">Omit</span>&lt;<a href="../././~/PppHost.html" class="link td-ref">PppHost</a><span>, </span><span class="td-str">"payload"</span>&gt;<span class="td-op"> & </span>{ payload<span>: <a href="../././~/Ipv4Refined.html" class="link td-ref">Ipv4Refined</a></span>;  }</span></span>
       </code>
     </div><a
   class="sourceButton"
@@ -207,8 +203,8 @@ Definition</h2></div><div class="space-y-8"><div class=" docEntry" id="typealias
     </article></main>
 <div class="toc">
     <div><div class="usageContent">
-    <h3>Usage</h3><div class="markdown"><pre class="highlight"><code class="language-typescript">import { type FrameRefined } from &quot;.&quot;;
-</code><button class="copyButton" data-copy="import { type FrameRefined } from &quot;.&quot;;
+    <h3>Usage</h3><div class="markdown"><pre class="highlight"><code class="language-typescript">import { type PppoeIpv4Frame } from &quot;.&quot;;
+</code><button class="copyButton" data-copy="import { type PppoeIpv4Frame } from &quot;.&quot;;
 "><svg
   class="copy"
   width="15"

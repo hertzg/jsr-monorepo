@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>FrameRefined - default - @binstruct&#x2F;inet documentation</title>
+  <title>PppHost.pppProtocol - default - @binstruct&#x2F;inet documentation</title>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="doc-current-file" content=".">
@@ -48,7 +48,8 @@
 </svg>
 </span>
 
-    <ul><li>FrameRefined</li></ul></ul>
+    <ul><li><span>.</span>
+            <a href="..&#x2F;.&#x2F;.&#x2F;~&#x2F;PppHost.html" class="contextLink">PppHost</a></li><li>pppProtocol</li></ul></ul>
 </div>
 
     <div class="flex items-center gap-2">
@@ -112,12 +113,13 @@
     </div>
   </div>
 </nav>
-<div id="searchResults"></div><div id="content"><main class="symbolGroup" id="symbol_FrameRefined"><article>
+<div id="searchResults"></div><div id="content"><main class="symbolGroup" id="symbol_PppHost.pppProtocol"><article>
       <div class="symbolTitle">
         <div>
           <div class="text-2xl leading-none break-all">
-            <span class="text-TypeAlias">type alias</span>&nbsp;<span class="font-bold">FrameRefined</span>
-          </div></div><a
+            <span class="text-Property">property</span>&nbsp;<span class="font-bold">PppHost.pppProtocol</span>
+          </div><div class="space-x-2 !mt-2"><div class="text-private border border-private/50 bg-private/5 inline-flex items-center gap-0.5 *:flex-none rounded-md leading-none font-bold py-2 px-3">Private</div>
+</div></div><a
   class="sourceButton"
   href="file:&#x2F;&#x2F;&#x2F;home&#x2F;runner&#x2F;work&#x2F;jsr-monorepo&#x2F;jsr-monorepo&#x2F;packages&#x2F;@binstruct&#x2F;inet&#x2F;mod.ts"><svg
   width="14"
@@ -142,13 +144,8 @@
   />
 </svg>
 </a>
-</div><div><div class="space-y-7" id=""><div class="markdown"><p>Decoded Ethernet II frame as produced by <a href="../././~/inetFrame.html">inetFrame</a>.</p>
-<p>The shape depends on <code>etherType</code> and, for the layers it selects, further
-discriminator fields deeper in the stack; narrow the union with
-property-existence checks (<code>&quot;protocol&quot; in payload</code>, <code>&quot;srcPort&quot; in payload</code>, …) when reading. Frames whose tag has no matching coder surface
-their <code>payload</code> as a raw <code>Uint8Array</code>.</p>
-</div><section class="section"  id="definition"><div>
-      <h2 class="anchorable mb-1"><a href="#definition" class="anchor" aria-label="Anchor" tabIndex="-1"><svg
+</div><div><div class="space-y-7" id=""><section class="section"  id="type"><div>
+      <h2 class="anchorable mb-1"><a href="#type" class="anchor" aria-label="Anchor" tabIndex="-1"><svg
   width="16"
   height="16"
   viewBox="0 0 14 14"
@@ -170,10 +167,10 @@ their <code>payload</code> as a raw <code>Uint8Array</code>.</p>
   </defs>
 </svg>
 </a>
-Definition</h2></div><div class="space-y-8"><div class=" docEntry" id="typealias_framerefined">
+Type</h2></div><div class="space-y-8"><div class=" docEntry" id="variable_ppphost_pppprotocol">
 
   <div class="docEntryHeader">
-    <div><code><span class="font-medium text-stone-500 dark:text-stone-200"><div class="ml-indent"><span><a href="../././~/Ipv4Frame.html" class="link td-ref">Ipv4Frame</a></span><br /><span><span class="td-op"> | </span><a href="../././~/Ipv6Frame.html" class="link td-ref">Ipv6Frame</a></span><br /><span><span class="td-op"> | </span><a href="../././~/ArpFrame.html" class="link td-ref">ArpFrame</a></span><br /><span><span class="td-op"> | </span><a href="../././~/PppoeDiscoveryFrame.html" class="link td-ref">PppoeDiscoveryFrame</a></span><br /><span><span class="td-op"> | </span><a href="../././~/PppoeSessionFrame.html" class="link td-ref">PppoeSessionFrame</a></span><br /><span><span class="td-op"> | </span><a href="../././~/VlanFrame.html" class="link td-ref">VlanFrame</a></span><br /><span><span class="td-op"> | </span><span class="td-ref">Frame</span></span></div></span>
+    <div><code><span class="font-medium text-stone-500 dark:text-stone-200"><span class="td-kw">number</span></span>
       </code>
     </div><a
   class="sourceButton"
@@ -207,8 +204,8 @@ Definition</h2></div><div class="space-y-8"><div class=" docEntry" id="typealias
     </article></main>
 <div class="toc">
     <div><div class="usageContent">
-    <h3>Usage</h3><div class="markdown"><pre class="highlight"><code class="language-typescript">import { type FrameRefined } from &quot;.&quot;;
-</code><button class="copyButton" data-copy="import { type FrameRefined } from &quot;.&quot;;
+    <h3>Usage</h3><div class="markdown"><pre class="highlight"><code class="language-typescript">import { type PppHost } from &quot;.&quot;;
+</code><button class="copyButton" data-copy="import { type PppHost } from &quot;.&quot;;
 "><svg
   class="copy"
   width="15"
@@ -241,7 +238,7 @@ Definition</h2></div><div class="space-y-8"><div class=" docEntry" id="typealias
 </svg>
 </button><code></code></pre>
 </div></div><nav class="documentNavigation">
-          <h3>Document Navigation</h3><ul><li><a href="#definition" title="Definition">Definition</a></li></ul></nav></div>
+          <h3>Document Navigation</h3><ul><li><a href="#type" title="Type">Type</a></li></ul></nav></div>
   </div></div>
 </div>
 </div>
