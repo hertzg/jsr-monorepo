@@ -80,6 +80,7 @@ mirrors the JSR coordinate. Two scopes:
 `packages/@binstruct/` — format-specific binstruct decoders:
 
 - `arp` - ARP packet parsing (RFC 826)
+- `au` - Sun/NeXT `.au` audio file header
 - `bmp` - BMP/DIB image file format support
 - `cli` - CLI tools for binary structure operations
 - `ethernet` - Ethernet frame parsing
@@ -368,6 +369,7 @@ both tiresome and error-prone.
 
 - `@hertzg/binstruct`
 - `@binstruct/arp`
+- `@binstruct/au`
 - `@binstruct/bmp`
 - `@binstruct/cli`
 - `@binstruct/ethernet`
