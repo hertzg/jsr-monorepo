@@ -6,6 +6,7 @@
   "packages/@binstruct/bmp": "1.0.0",
   "packages/@binstruct/cli": "0.2.0",
   "packages/@binstruct/dos-mz": "0.0.1",
+  "packages/@binstruct/esp": "0.0.1",
   "packages/@binstruct/ethernet": "1.1.0",
   "packages/@binstruct/icmp": "1.1.0",
   "packages/@binstruct/icmpv6": "0.0.1",

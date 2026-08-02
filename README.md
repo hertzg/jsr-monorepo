@@ -37,6 +37,7 @@ Source layout mirrors the JSR scope: `packages/<scope>/<name>/`.
 | [@binstruct/bmp](https://jsr.io/@binstruct/bmp)           | [![JSR](https://jsr.io/badges/@binstruct/bmp)](https://jsr.io/@binstruct/bmp)           |
 | [@binstruct/cli](https://jsr.io/@binstruct/cli)           | [![JSR](https://jsr.io/badges/@binstruct/cli)](https://jsr.io/@binstruct/cli)           |
 | [@binstruct/dos-mz](https://jsr.io/@binstruct/dos-mz)     | [![JSR](https://jsr.io/badges/@binstruct/dos-mz)](https://jsr.io/@binstruct/dos-mz)     |
+| [@binstruct/esp](https://jsr.io/@binstruct/esp)           | [![JSR](https://jsr.io/badges/@binstruct/esp)](https://jsr.io/@binstruct/esp)           |
 | [@binstruct/ethernet](https://jsr.io/@binstruct/ethernet) | [![JSR](https://jsr.io/badges/@binstruct/ethernet)](https://jsr.io/@binstruct/ethernet) |
 | [@binstruct/icmp](https://jsr.io/@binstruct/icmp)         | [![JSR](https://jsr.io/badges/@binstruct/icmp)](https://jsr.io/@binstruct/icmp)         |
 | [@binstruct/icmpv6](https://jsr.io/@binstruct/icmpv6)     | [![JSR](https://jsr.io/badges/@binstruct/icmpv6)](https://jsr.io/@binstruct/icmpv6)     |
