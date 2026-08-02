@@ -3,11 +3,21 @@
   "deps": {
     ".": [
       "@binstruct/arp",
+      "@binstruct/bfd",
+      "@binstruct/esp",
       "@binstruct/ethernet",
       "@binstruct/icmp",
+      "@binstruct/icmpv6",
+      "@binstruct/igmp",
       "@binstruct/ipv4",
+      "@binstruct/ipv6",
+      "@binstruct/ntp",
+      "@binstruct/pppoe",
+      "@binstruct/sll",
       "@binstruct/tcp",
       "@binstruct/udp",
+      "@binstruct/vlan",
+      "@binstruct/vxlan",
       "@hertzg/binstruct"
     ]
   }
