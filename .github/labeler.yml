@@ -67,6 +67,9 @@
 "@binstruct/sll":
   - changed-files:
       - any-glob-to-any-file: packages/@binstruct/sll/**
+"@binstruct/sqlite":
+  - changed-files:
+      - any-glob-to-any-file: packages/@binstruct/sqlite/**
 "@binstruct/tcp":
   - changed-files:
       - any-glob-to-any-file: packages/@binstruct/tcp/**
