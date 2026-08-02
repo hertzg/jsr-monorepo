@@ -97,6 +97,7 @@ mirrors the JSR coordinate. Two scopes:
 - `pcap` - libpcap (.pcap) capture file format support
 - `png` - PNG file format support
 - `pppoe` - PPPoE header parsing (RFC 2516)
+- `rtp` - RTP fixed header parsing (RFC 3550)
 - `sll` - Linux cooked capture (DLT_LINUX_SLL) header parsing
 - `tcp` - TCP segment parsing (RFC 9293)
 - `tls-record` - TLS record layer header parsing (RFC 8446 section 5.1)
@@ -397,6 +398,7 @@ both tiresome and error-prone.
 - `@binstruct/ntp`
 - `@binstruct/png`
 - `@binstruct/pppoe`
+- `@binstruct/rtp`
 - `@binstruct/sll`
 - `@binstruct/tcp`
 - `@binstruct/tls-record`

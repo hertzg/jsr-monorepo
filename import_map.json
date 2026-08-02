@@ -42,6 +42,7 @@
     "@binstruct/ipv6": "jsr:@binstruct/ipv6@^0.0.1",
     "@binstruct/ntp": "jsr:@binstruct/ntp@^0.0.1",
     "@binstruct/png": "jsr:@binstruct/png@^0.4.0",
+    "@binstruct/rtp": "jsr:@binstruct/rtp@^0.0.1",
     "@binstruct/sll": "jsr:@binstruct/sll@^0.0.1",
     "@binstruct/tcp": "jsr:@binstruct/tcp@^0.2.0",
     "@binstruct/tls-record": "jsr:@binstruct/tls-record@^0.0.1",

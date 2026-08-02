@@ -18,6 +18,7 @@
   "packages/@binstruct/pcap": "0.3.0",
   "packages/@binstruct/png": "0.4.0",
   "packages/@binstruct/pppoe": "0.0.1",
+  "packages/@binstruct/rtp": "0.0.1",
   "packages/@binstruct/sll": "0.0.1",
   "packages/@binstruct/tcp": "0.2.0",
   "packages/@binstruct/tls-record": "0.0.1",
