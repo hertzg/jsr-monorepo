@@ -93,6 +93,7 @@ mirrors the JSR coordinate. Two scopes:
 - `inet` - Internet stack coder (Ethernet→IPv4→UDP/ICMP/ARP) + RFC 1071 checksum
 - `ipv4` - IPv4 packet header parsing
 - `ipv6` - IPv6 fixed header parsing (RFC 8200)
+- `mbr` - Master Boot Record (MBR) partition table parsing
 - `ntp` - NTPv4 packet header parsing (RFC 5905)
 - `pcap` - libpcap (.pcap) capture file format support
 - `png` - PNG file format support
@@ -395,6 +396,7 @@ both tiresome and error-prone.
 - `@binstruct/inet`
 - `@binstruct/ipv4`
 - `@binstruct/ipv6`
+- `@binstruct/mbr`
 - `@binstruct/ntp`
 - `@binstruct/png`
 - `@binstruct/pppoe`
