@@ -112,6 +112,7 @@ export function stringifyIp(ip: number): string;
 export function stringifyIp(ip: bigint): string;
 /** Stringifies an IPv4 or IPv6 address to its standard notation. */
 export function stringifyIp(ip: number | bigint): string;
+/** Stringifies an IPv4 or IPv6 address to its standard notation. */
 export function stringifyIp(ip: number | bigint): string {
   if (typeof ip === "bigint") {
     return stringifyIpv6(ip);

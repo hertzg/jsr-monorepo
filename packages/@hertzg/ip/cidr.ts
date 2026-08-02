@@ -59,8 +59,14 @@ import {
   stringifyCidrv6,
 } from "./cidrv6.ts";
 
-export type { Cidrv4 } from "./cidrv4.ts";
-export type { Cidrv6 } from "./cidrv6.ts";
+export type {
+  /** Type representing an IPv4 CIDR block. */
+  Cidrv4,
+} from "./cidrv4.ts";
+export type {
+  /** Type representing an IPv6 CIDR block. */
+  Cidrv6,
+} from "./cidrv6.ts";
 
 /**
  * A CIDR block of either IP version.
@@ -221,6 +227,7 @@ export function cidrContainsCidr<T extends Cidr>(
   outer: T,
   inner: T,
 ): boolean;
+/** Checks if one CIDR block fully contains another. */
 export function cidrContainsCidr(outer: Cidr, inner: Cidr): boolean {
   if (isCidrv6(outer) && isCidrv6(inner)) {
     return cidrv6ContainsCidr(outer, inner);
@@ -282,6 +289,7 @@ export function cidrOverlaps<T extends Cidr>(
   a: T,
   b: T,
 ): boolean;
+/** Checks if two CIDR blocks overlap (share at least one address). */
 export function cidrOverlaps(a: Cidr, b: Cidr): boolean {
   if (isCidrv6(a) && isCidrv6(b)) {
     return cidrv6Overlaps(a, b);
@@ -337,6 +345,7 @@ export function cidrIntersect<T extends Cidr>(
   a: T,
   b: T,
 ): T | null;
+/** Returns the intersection of two CIDR blocks. */
 export function cidrIntersect(a: Cidr, b: Cidr): Cidr | null {
   if (isCidrv6(a) && isCidrv6(b)) {
     return cidrv6Intersect(a, b);
@@ -391,6 +400,7 @@ export function cidrSubtract<T extends Cidr>(
   a: T,
   b: T,
 ): T[];
+/** Subtracts one CIDR block from another. */
 export function cidrSubtract(a: Cidr, b: Cidr): Cidr[] {
   if (isCidrv6(a) && isCidrv6(b)) {
     return cidrv6Subtract(a, b);
@@ -440,6 +450,7 @@ export function cidrSubtract(a: Cidr, b: Cidr): Cidr[] {
 export function cidrMerge<T extends Cidr>(
   cidrs: readonly T[],
 ): T[];
+/** Merges CIDR blocks into the minimal covering set. */
 export function cidrMerge(cidrs: readonly Cidr[]): Cidr[] {
   if (cidrs.length === 0) {
     return [];
@@ -475,6 +486,7 @@ export function cidrMerge(cidrs: readonly Cidr[]): Cidr[] {
 export function cidrSize<T extends Cidr>(
   cidr: T,
 ): T extends Cidrv6 ? bigint : number;
+/** Returns the total number of addresses in a CIDR block. */
 export function cidrSize(cidr: Cidr): number | bigint {
   if (isCidrv6(cidr)) {
     return cidrv6Size(cidr);
@@ -526,6 +538,7 @@ export function cidrAddresses(
     step?: number | bigint;
   },
 ): Generator<number | bigint>;
+/** Generates IP addresses within a CIDR block. */
 export function* cidrAddresses(
   cidr: Cidr,
   options?: {

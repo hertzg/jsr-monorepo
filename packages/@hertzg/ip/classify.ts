@@ -42,16 +42,15 @@
  */
 
 import { parseIp } from "./ip.ts";
-import {
-  classifyIpv4,
-  type ClassificationIpv4,
-} from "./classifyv4.ts";
-import {
-  classifyIpv6,
-  type ClassificationIpv6,
-} from "./classifyv6.ts";
+import { type ClassificationIpv4, classifyIpv4 } from "./classifyv4.ts";
+import { type ClassificationIpv6, classifyIpv6 } from "./classifyv6.ts";
 
-export type { ClassificationIpv4, ClassificationIpv6 };
+export type {
+  /** Type for all IPv4 classification labels. */
+  ClassificationIpv4,
+  /** Type for all IPv6 classification labels. */
+  ClassificationIpv6,
+};
 
 /**
  * Result of classifying an IPv4 address.
@@ -209,6 +208,7 @@ export function classifyIp(ip: string): ClassifiedIp;
  * ```
  */
 export function classifyIp(ip: number | bigint): ClassifiedIp;
+/** Classifies an IPv4 or IPv6 address, or parses and classifies an IP address string. */
 export function classifyIp(ip: number | bigint | string): ClassifiedIp {
   if (typeof ip === "string") {
     return classifyIp(parseIp(ip));

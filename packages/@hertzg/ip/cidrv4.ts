@@ -357,6 +357,7 @@ export function cidrv4Size(prefixLength: number): number;
  * @returns The total number of addresses
  */
 export function cidrv4Size(cidrOrPrefixLength: Cidrv4 | number): number;
+/** Returns the total number of IP addresses for either a CIDR block or a prefix length. */
 export function cidrv4Size(cidrOrPrefixLength: Cidrv4 | number): number {
   const prefixLength = typeof cidrOrPrefixLength === "number"
     ? cidrOrPrefixLength
