@@ -1,30 +1,44 @@
 /**
  * Tests for the loader utilities.
+ *
+ * `loadCoder` forwards its argument to dynamic `import()`, which resolves
+ * nothing through a mock and everything through the module graph — so these
+ * point at real modules in this repository, and need no network.
  */
 
-import { assertEquals } from "@std/assert";
+import { assertEquals, assertRejects } from "@std/assert";
 import { loadCoder } from "./loader.ts";
 
-Deno.test("loadCoder with valid JSR package", async () => {
-  // Mock the import to return a valid coder
-  const originalImport = (globalThis as Record<string, unknown>).import;
-  (globalThis as Record<string, unknown>).import = (specifier: string) => {
-    if (specifier === "jsr:@binstruct/png") {
-      return Promise.resolve({
-        pngFile: () => ({
-          decode: (data: Uint8Array) => [data, data.length],
-          encode: (_value: unknown, _buffer: Uint8Array) => 0,
-        }),
-      });
-    }
-    return Promise.reject(new Error("Module not found"));
-  };
+/** A package exporting exactly one coder factory, `arpData`. */
+const ARP = import.meta.resolve("../arp/mod.ts");
 
-  try {
-    const coder = await loadCoder("jsr:@binstruct/png", "pngFile");
-    assertEquals(typeof coder.decode, "function");
-    assertEquals(typeof coder.encode, "function");
-  } finally {
-    (globalThis as Record<string, unknown>).import = originalImport;
-  }
+Deno.test("loadCoder calls the factory and returns its coder", async () => {
+  const coder = await loadCoder(ARP, "arpData");
+
+  assertEquals(typeof coder.decode, "function");
+  assertEquals(typeof coder.encode, "function");
+});
+
+Deno.test("loadCoder rejects a name the package does not export", async () => {
+  const error = await assertRejects(
+    () => loadCoder(ARP, "arpDatum"),
+    Error,
+    "not found in package",
+  );
+
+  assertEquals(error.message.includes("arpData"), true);
+});
+
+Deno.test("loadCoder rejects an export that is not a factory", async () => {
+  await assertRejects(
+    () => loadCoder(import.meta.resolve("./registry.ts"), "KNOWN_PACKAGES"),
+    Error,
+    "is not a function",
+  );
+});
+
+Deno.test("loadCoder rejects a package that cannot be resolved", async () => {
+  await assertRejects(() =>
+    loadCoder(import.meta.resolve("./no-such-module.ts"), "anything")
+  );
 });
