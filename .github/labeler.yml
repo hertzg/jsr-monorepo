@@ -40,6 +40,9 @@
 "@binstruct/udp":
   - changed-files:
       - any-glob-to-any-file: packages/@binstruct/udp/**
+"@binstruct/vlan":
+  - changed-files:
+      - any-glob-to-any-file: packages/@binstruct/vlan/**
 "@binstruct/wav":
   - changed-files:
       - any-glob-to-any-file: packages/@binstruct/wav/**
