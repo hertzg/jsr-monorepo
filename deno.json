@@ -17,7 +17,8 @@
         "lint:import-map",
         "lint:labeler",
         "lint:readme",
-        "lint:deps"
+        "lint:deps",
+        "lint:cli-registry"
       ]
     },
     "lint:deno": "deno lint",
@@ -26,6 +27,7 @@
     "lint:labeler": "deno run -A _tools/check_labeler.ts",
     "lint:readme": "deno run -A _tools/check_readme.ts",
     "lint:deps": "deno run -A _tools/check_deps.ts",
+    "lint:cli-registry": "deno run -A _tools/check_cli_registry.ts",
     "cov": "deno coverage --ignore=\"**/*.generated.mjs,**/_test_utils.ts,.github\"",
     "cov:gen": "deno task cov --lcov --output=cov.lcov",
     "cov:view": "deno task cov --html",
