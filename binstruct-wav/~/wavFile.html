@@ -167,15 +167,15 @@
 </a>
 <span class="font-bold">wavFile</span><span class="font-medium">()<span>: <span class="td-ref">Coder</span>&lt;<a href="../././~/WavFile.html" class="link td-ref">WavFile</a>&gt;</span> </span>
       </code><div class="space-y-7" id=""><div class="markdown"><p>Creates a coder for complete WAV files.</p>
-<p>Encodes and decodes complete WAV file structures including:</p>
+<p>Encodes and decodes WAV files laid out as exactly three chunks in this order:</p>
 <ul>
 <li>RIFF header chunk</li>
 <li>Format chunk</li>
-<li>Optional fact chunk (for non-PCM formats)</li>
-<li>Optional LIST chunk (for metadata)</li>
 <li>Data chunk with audio samples</li>
 </ul>
-<p>The coder handles variable chunk ordering and optional chunks automatically.</p>
+<p>Files carrying additional chunks (<code>fact</code>, <code>LIST</code>) or a different chunk order
+are not handled; compose <a href="../././~/factChunk.html">factChunk</a> and <a href="../././~/listChunk.html">listChunk</a> manually for
+those.</p>
 </div><section class="section"  id="examples"><div>
       <h2 class="anchorable mb-1"><a href="#examples" class="anchor" aria-label="Anchor" tabIndex="-1"><svg
   width="16"
@@ -230,12 +230,12 @@ const wavCoder = wavFile();
 const testWav = {
   riff: {
     chunkId: &quot;RIFF&quot; as const,
-    chunkSize: 44,
+    chunkSize: 1038, // total file size minus the 8-byte RIFF header
     format: &quot;WAVE&quot; as const
   },
   fmt: {
     chunkId: &quot;fmt &quot; as const,
-    chunkSize: 16,
+    chunkSize: 18, // 16 PCM fields plus the 2-byte cbSize
     audioFormat: 1, // PCM
     numChannels: 1, // Mono
     sampleRate: 44100,
@@ -256,7 +256,7 @@ const bytesWritten = wavCoder.encode(testWav, buffer);
 const [decoded, bytesRead] = wavCoder.decode(buffer);
 
 assertEquals(bytesRead, bytesWritten);
-assertEquals(bytesWritten, 1050); // 12 (RIFF) + 24 (fmt) + 1012 (data with length prefix)
+assertEquals(bytesWritten, 1046); // 12 (RIFF) + 26 (fmt) + 1008 (data)
 assertEquals(decoded.riff.chunkId, &quot;RIFF&quot;);
 assertEquals(decoded.riff.format, &quot;WAVE&quot;);
 assertEquals(decoded.fmt.audioFormat, 1);
@@ -270,12 +270,12 @@ const wavCoder = wavFile();
 const testWav = {
   riff: {
     chunkId: &quot;RIFF&quot; as const,
-    chunkSize: 44,
+    chunkSize: 1038, // total file size minus the 8-byte RIFF header
     format: &quot;WAVE&quot; as const
   },
   fmt: {
     chunkId: &quot;fmt &quot; as const,
-    chunkSize: 16,
+    chunkSize: 18, // 16 PCM fields plus the 2-byte cbSize
     audioFormat: 1, // PCM
     numChannels: 1, // Mono
     sampleRate: 44100,
@@ -296,7 +296,7 @@ const bytesWritten = wavCoder.encode(testWav, buffer);
 const [decoded, bytesRead] = wavCoder.decode(buffer);
 
 assertEquals(bytesRead, bytesWritten);
-assertEquals(bytesWritten, 1050); // 12 (RIFF) + 24 (fmt) + 1012 (data with length prefix)
+assertEquals(bytesWritten, 1046); // 12 (RIFF) + 26 (fmt) + 1008 (data)
 assertEquals(decoded.riff.chunkId, &quot;RIFF&quot;);
 assertEquals(decoded.riff.format, &quot;WAVE&quot;);
 assertEquals(decoded.fmt.audioFormat, 1);

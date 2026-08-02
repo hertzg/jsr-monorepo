@@ -157,12 +157,12 @@ const wavCoder = wavFile();
 const testWav = {
   riff: {
     chunkId: &quot;RIFF&quot; as const,
-    chunkSize: 44,
+    chunkSize: 1038, // total file size minus the 8-byte RIFF header
     format: &quot;WAVE&quot; as const
   },
   fmt: {
     chunkId: &quot;fmt &quot; as const,
-    chunkSize: 16,
+    chunkSize: 18, // 16 PCM fields plus the 2-byte cbSize
     audioFormat: 1, // PCM
     numChannels: 1, // Mono
     sampleRate: 44100,
@@ -183,6 +183,7 @@ const bytesWritten = wavCoder.encode(testWav, buffer);
 const [decodedWav, bytesRead] = wavCoder.decode(buffer);
 
 assertEquals(bytesRead, bytesWritten);
+assertEquals(bytesWritten, 1046); // 12 (RIFF) + 26 (fmt) + 1008 (data)
 assertEquals(decodedWav.riff.chunkId, &quot;RIFF&quot;);
 assertEquals(decodedWav.riff.format, &quot;WAVE&quot;);
 assertEquals(decodedWav.fmt.audioFormat, 1);
@@ -196,12 +197,12 @@ const wavCoder = wavFile();
 const testWav = {
   riff: {
     chunkId: &quot;RIFF&quot; as const,
-    chunkSize: 44,
+    chunkSize: 1038, // total file size minus the 8-byte RIFF header
     format: &quot;WAVE&quot; as const
   },
   fmt: {
     chunkId: &quot;fmt &quot; as const,
-    chunkSize: 16,
+    chunkSize: 18, // 16 PCM fields plus the 2-byte cbSize
     audioFormat: 1, // PCM
     numChannels: 1, // Mono
     sampleRate: 44100,
@@ -222,6 +223,7 @@ const bytesWritten = wavCoder.encode(testWav, buffer);
 const [decodedWav, bytesRead] = wavCoder.decode(buffer);
 
 assertEquals(bytesRead, bytesWritten);
+assertEquals(bytesWritten, 1046); // 12 (RIFF) + 26 (fmt) + 1008 (data)
 assertEquals(decodedWav.riff.chunkId, &quot;RIFF&quot;);
 assertEquals(decodedWav.riff.format, &quot;WAVE&quot;);
 assertEquals(decodedWav.fmt.audioFormat, 1);
@@ -283,7 +285,7 @@ assertEquals(decodedWav.data.audioData.length, 1000);
   </defs>
 </svg>
 </a>
-<h3 class="example-header"><div class="markdown"><p>IEEE float format with fact chunk</p>
+<h3 class="example-header"><div class="markdown"><p>IEEE float format</p>
 </div></h3>
   <div><div class="markdown"><pre class="highlight"><code class="language-ts">import { assertEquals } from &quot;@std/assert&quot;;
 import { wavFile } from &quot;@binstruct/wav&quot;;
@@ -292,7 +294,7 @@ const floatWavCoder = wavFile();
 const floatWav = {
   riff: {
     chunkId: &quot;RIFF&quot;,
-    chunkSize: 58,
+    chunkSize: 838, // total file size minus the 8-byte RIFF header
     format: &quot;WAVE&quot;
   },
   fmt: {
@@ -318,7 +320,7 @@ const bytesWritten = floatWavCoder.encode(floatWav, buffer);
 const [decoded, bytesRead] = floatWavCoder.decode(buffer);
 
 assertEquals(bytesRead, bytesWritten);
-assertEquals(bytesWritten, 850); // 12 (RIFF) + 24 (fmt) + 12 (fact) + 812 (data with length prefix)
+assertEquals(bytesWritten, 846); // 12 (RIFF) + 26 (fmt) + 808 (data)
 assertEquals(decoded.fmt.audioFormat, 3);
 assertEquals(decoded.fmt.numChannels, 2);
 assertEquals(decoded.data.audioData.length, 800);
@@ -329,7 +331,7 @@ const floatWavCoder = wavFile();
 const floatWav = {
   riff: {
     chunkId: &quot;RIFF&quot;,
-    chunkSize: 58,
+    chunkSize: 838, // total file size minus the 8-byte RIFF header
     format: &quot;WAVE&quot;
   },
   fmt: {
@@ -355,7 +357,7 @@ const bytesWritten = floatWavCoder.encode(floatWav, buffer);
 const [decoded, bytesRead] = floatWavCoder.decode(buffer);
 
 assertEquals(bytesRead, bytesWritten);
-assertEquals(bytesWritten, 850); // 12 (RIFF) + 24 (fmt) + 12 (fact) + 812 (data with length prefix)
+assertEquals(bytesWritten, 846); // 12 (RIFF) + 26 (fmt) + 808 (data)
 assertEquals(decoded.fmt.audioFormat, 3);
 assertEquals(decoded.fmt.numChannels, 2);
 assertEquals(decoded.data.audioData.length, 800);
