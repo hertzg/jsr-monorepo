@@ -153,6 +153,14 @@
         { "type": "json", "path": "deno.json", "jsonpath": "$.version" }
       ]
     },
+    "packages/@binstruct/rtp": {
+      "release-type": "simple",
+      "package-name": "@binstruct/rtp",
+      "component": "@binstruct/rtp",
+      "extra-files": [
+        { "type": "json", "path": "deno.json", "jsonpath": "$.version" }
+      ]
+    },
     "packages/@binstruct/sll": {
       "release-type": "simple",
       "package-name": "@binstruct/sll",
