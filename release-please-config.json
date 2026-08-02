@@ -129,6 +129,14 @@
         { "type": "json", "path": "deno.json", "jsonpath": "$.version" }
       ]
     },
+    "packages/@binstruct/tls-record": {
+      "release-type": "simple",
+      "package-name": "@binstruct/tls-record",
+      "component": "@binstruct/tls-record",
+      "extra-files": [
+        { "type": "json", "path": "deno.json", "jsonpath": "$.version" }
+      ]
+    },
     "packages/@binstruct/udp": {
       "release-type": "simple",
       "package-name": "@binstruct/udp",

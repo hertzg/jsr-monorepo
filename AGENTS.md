@@ -94,6 +94,7 @@ mirrors the JSR coordinate. Two scopes:
 - `png` - PNG file format support
 - `sll` - Linux cooked capture (DLT_LINUX_SLL) header parsing
 - `tcp` - TCP segment parsing (RFC 9293)
+- `tls-record` - TLS record layer header parsing (RFC 8446 section 5.1)
 - `udp` - UDP datagram parsing (RFC 768)
 - `vlan` - IEEE 802.1Q VLAN tag encoding/decoding
 - `vxlan` - VXLAN header encoding/decoding (RFC 7348)
@@ -388,6 +389,7 @@ both tiresome and error-prone.
 - `@binstruct/png`
 - `@binstruct/sll`
 - `@binstruct/tcp`
+- `@binstruct/tls-record`
 - `@binstruct/udp`
 - `@binstruct/vlan`
 - `@binstruct/vxlan`
