@@ -1,0 +1,455 @@
+/**
+ * Guidance rendering for the Binary Structure CLI.
+ *
+ * Every prefix of `binstruct [<package> [<coder> [<command>]]]` is a valid
+ * invocation, and an incomplete one answers with the same three blocks
+ * (ADR 0001):
+ *
+ * - **`NEXT`** — the missing word and one line on what it means.
+ * - **an options block** — the legal values, each with its one-line doc.
+ * - **`TRY`** — a paste-ready command one step further along, built by the
+ *   caller from words this module can make shell-safe ({@linkcode shellWord},
+ *   and {@linkcode metavariable} for the ones the user has to fill in).
+ *
+ * This module owns the shape of those blocks and nothing else. It performs no
+ * I/O, spawns nothing and reads no arguments: {@linkcode renderGuide} turns a
+ * {@linkcode Guide} into a string, and the caller decides whether that string
+ * goes to stderr with exit 1 (an incomplete invocation) or to stdout with
+ * exit 0 (`--help`). One renderer for all three levels is what keeps the two
+ * from drifting.
+ *
+ * @module
+ */
+
+/** Width every options block wraps at, chosen to fit an 80-column terminal. */
+const LINE_WIDTH = 76;
+
+/**
+ * Fewest columns the summary column may be squeezed to before the budget gives.
+ *
+ * The name and detail columns are sized by their contents and cannot be
+ * shortened without lying about a name, so a wide pair can leave less than this
+ * for prose. When it does, the summary is wrapped at this width and the row
+ * overflows {@linkcode LINE_WIDTH} — a long row beats a three-word ribbon.
+ */
+const MIN_SUMMARY_WIDTH = 32;
+
+/** Indent applied to every line inside a block. */
+const INDENT = "  ";
+
+/** Blank columns between the name, detail and summary columns of an option. */
+const GUTTER = "  ";
+
+/**
+ * One legal value of the missing word.
+ *
+ * A listing of bare names — the package list of level 0 — sets neither
+ * {@linkcode GuideOption.detail} nor {@linkcode GuideOption.summary}, and is
+ * flowed into columns instead of one row per name.
+ */
+export type GuideOption = {
+  /** The word to type, e.g. `png`, `pngFile` or `decode`. */
+  readonly name: string;
+  /** Short annotation shown in its own column, e.g. `→ PngFile`. */
+  readonly detail?: string;
+  /** One-line description, e.g. the first line of the coder's JSDoc. */
+  readonly summary?: string;
+};
+
+/**
+ * The options block: every value the missing word may take.
+ */
+export type GuideOptions = {
+  /** Block heading, e.g. `PACKAGES` or `CODERS in png`. */
+  readonly heading: string;
+  /** The legal values, in the order they should be shown. */
+  readonly items: readonly GuideOption[];
+  /** Line shown in place of an empty list, e.g. why discovery found nothing. */
+  readonly empty?: string;
+};
+
+/**
+ * The missing word and what it means.
+ */
+export type GuideNext = {
+  /** The word, written as it appears in the usage line, e.g. `<coder>`. */
+  readonly word: string;
+  /** One line on what the word selects. */
+  readonly meaning: string;
+};
+
+/**
+ * Everything one guidance screen says.
+ */
+export type Guide = {
+  /** First line, echoing the resolved specifier so shorthand is never invisible. */
+  readonly header?: string;
+  /**
+   * Whether the screen reports a failure rather than disclosing the next word.
+   *
+   * A pure disclosure level is guidance: `--help` may relocate it to stdout and
+   * exit 0. A diagnostic — an unreadable package, a misspelled coder, a listing
+   * that could not be produced — is a failure that happens to be explained
+   * well, and stays on stderr with a non-zero exit whatever the flags say, so
+   * that `binstruct nosuchpkg --help > out.txt` cannot report success.
+   */
+  readonly diagnostic?: boolean;
+  /** Lines shown before `NEXT`: what went wrong, or what was inferred. */
+  readonly notes?: readonly string[];
+  /** The missing word. */
+  readonly next: GuideNext;
+  /** The values that word may take. */
+  readonly options: GuideOptions;
+  /** Paste-ready commands one step further along. */
+  readonly try?: readonly string[];
+  /** Trailing lines, e.g. the usage recap `--help` adds. */
+  readonly footer?: readonly string[];
+};
+
+/**
+ * Flows bare names into columns that fit {@linkcode LINE_WIDTH}.
+ *
+ * @param names The names to lay out
+ * @returns One string per rendered row
+ */
+function flowNames(names: readonly string[]): string[] {
+  const cell = Math.max(...names.map((name) => name.length)) + GUTTER.length;
+  const perRow = Math.max(1, Math.floor((LINE_WIDTH - INDENT.length) / cell));
+
+  const rows: string[] = [];
+  for (let start = 0; start < names.length; start += perRow) {
+    const row = names.slice(start, start + perRow)
+      .map((name) => name.padEnd(cell))
+      .join("");
+    rows.push((INDENT + row).trimEnd());
+  }
+  return rows;
+}
+
+/**
+ * Breaks prose into lines no wider than a budget, at whitespace.
+ *
+ * A word longer than the budget is left whole on a line of its own rather than
+ * cut: the words here are identifiers and type names, and half of one is not a
+ * shorter version of it.
+ *
+ * @param text The prose to break
+ * @param width Widest line to produce
+ * @returns One string per line, none empty
+ */
+function wrapWords(text: string, width: number): string[] {
+  const lines: string[] = [];
+  let line = "";
+
+  for (const word of text.split(/\s+/)) {
+    if (word === "") continue;
+    if (line === "") {
+      line = word;
+    } else if (line.length + 1 + word.length <= width) {
+      line += ` ${word}`;
+    } else {
+      lines.push(line);
+      line = word;
+    }
+  }
+  if (line !== "") lines.push(line);
+
+  return lines;
+}
+
+/**
+ * Lays out described options as aligned name, detail and summary columns.
+ *
+ * The summary is the one column made of prose, so it is the one that wraps:
+ * every other column is sized by a name it may not shorten. Concatenating the
+ * three unbounded is what produced 121-column rows for `png` and `bmp` — the
+ * terminal soft-wrapped them mid-sentence, back to column zero, so the wrapped
+ * remainder read as another option. A continuation line is indented to the
+ * summary column instead, which says what it is.
+ *
+ * @param items The options to lay out
+ * @returns One string per rendered row, one option spanning several
+ */
+function describeOptions(items: readonly GuideOption[]): string[] {
+  const nameWidth = Math.max(...items.map((item) => item.name.length));
+  const detailWidth = Math.max(
+    ...items.map((item) => (item.detail ?? "").length),
+  );
+  const prefixWidth = INDENT.length + nameWidth +
+    (detailWidth === 0 ? 0 : GUTTER.length + detailWidth) + GUTTER.length;
+  const summaryWidth = Math.max(MIN_SUMMARY_WIDTH, LINE_WIDTH - prefixWidth);
+
+  return items.flatMap((item) => {
+    const detail = detailWidth === 0
+      ? ""
+      : GUTTER + (item.detail ?? "").padEnd(detailWidth);
+    const head = INDENT + item.name.padEnd(nameWidth) + detail;
+
+    const [first, ...rest] = wrapWords(item.summary ?? "", summaryWidth);
+    if (first === undefined) return [head.trimEnd()];
+
+    return [
+      (head + GUTTER + first).trimEnd(),
+      ...rest.map((line) => " ".repeat(prefixWidth) + line),
+    ];
+  });
+}
+
+/**
+ * Renders the body of the options block.
+ *
+ * @param options The block to render
+ * @returns One string per rendered row
+ */
+function renderOptions(options: GuideOptions): string[] {
+  if (options.items.length === 0) {
+    return [INDENT + (options.empty ?? "(none)")];
+  }
+
+  const bare = options.items.every((item) =>
+    item.detail === undefined && item.summary === undefined
+  );
+  return bare
+    ? flowNames(options.items.map((item) => item.name))
+    : describeOptions(options.items);
+}
+
+/**
+ * Renders a guidance screen.
+ *
+ * Blocks are separated by a blank line and the result carries no trailing
+ * newline, so the caller can hand it straight to `console.error` or
+ * `console.log`. The function is pure — the same {@linkcode Guide} always
+ * renders the same string — which is what lets the disclosure levels, the
+ * error paths and `--help` be tested without a process.
+ *
+ * @param guide The screen to render
+ * @returns The rendered text, without a trailing newline
+ *
+ * @example The three blocks of an incomplete invocation
+ * ```ts
+ * import { assertEquals } from "@std/assert";
+ * import { renderGuide } from "./guide.ts";
+ *
+ * const text = renderGuide({
+ *   next: { word: "<command>", meaning: "what to do with the bytes" },
+ *   options: {
+ *     heading: "COMMANDS",
+ *     items: [
+ *       { name: "decode", summary: "binary on stdin to JSON5 on stdout" },
+ *       { name: "encode", summary: "JSON5 on stdin to binary on stdout" },
+ *     ],
+ *   },
+ *   try: ["binstruct arp decode < arp.bin > arp.json5"],
+ * });
+ *
+ * assertEquals(text.split("\n\n"), [
+ *   "NEXT  <command>\n  what to do with the bytes",
+ *   "COMMANDS\n  decode  binary on stdin to JSON5 on stdout\n" +
+ *   "  encode  JSON5 on stdin to binary on stdout",
+ *   "TRY\n  binstruct arp decode < arp.bin > arp.json5",
+ * ]);
+ * ```
+ *
+ * @example Bare names are flowed into columns, and an empty list explains itself
+ * ```ts
+ * import { assertEquals, assertStringIncludes } from "@std/assert";
+ * import { renderGuide } from "./guide.ts";
+ *
+ * const flowed = renderGuide({
+ *   next: { word: "<package>", meaning: "the format package" },
+ *   options: { heading: "PACKAGES", items: [{ name: "arp" }, { name: "png" }] },
+ * });
+ *
+ * assertStringIncludes(flowed, "\n  arp  png");
+ *
+ * const empty = renderGuide({
+ *   header: "package: jsr:@binstruct/pcap",
+ *   next: { word: "<coder>", meaning: "the coder to run" },
+ *   options: { heading: "CODERS", items: [], empty: "discovery is unavailable" },
+ * });
+ *
+ * assertEquals(empty.split("\n")[0], "package: jsr:@binstruct/pcap");
+ * assertStringIncludes(empty, "\n  discovery is unavailable");
+ * ```
+ */
+export function renderGuide(guide: Guide): string {
+  const blocks: string[][] = [];
+
+  if (guide.header !== undefined) blocks.push([guide.header]);
+  if (guide.notes !== undefined && guide.notes.length > 0) {
+    blocks.push([...guide.notes]);
+  }
+
+  blocks.push([`NEXT  ${guide.next.word}`, INDENT + guide.next.meaning]);
+  blocks.push([guide.options.heading, ...renderOptions(guide.options)]);
+
+  if (guide.try !== undefined && guide.try.length > 0) {
+    blocks.push(["TRY", ...guide.try.map((line) => INDENT + line)]);
+  }
+  if (guide.footer !== undefined && guide.footer.length > 0) {
+    blocks.push([...guide.footer]);
+  }
+
+  return blocks.map((block) => block.join("\n")).join("\n\n");
+}
+
+/**
+ * Characters a shell word may hold without needing quotes.
+ *
+ * Deliberately narrow: everything a package name, a coder name, a path or a
+ * `file:` URL is normally made of, and nothing whose meaning to the shell is
+ * worth arguing about. A word outside this set is quoted rather than escaped
+ * character by character, so nothing here has to be exhaustive.
+ */
+const SHELL_SAFE_PATTERN = /^[A-Za-z0-9_@%+:,./-]+$/;
+
+/**
+ * Renders one word of a `TRY` line so a shell reads it as a single argument.
+ *
+ * A `TRY` line is a promise that the command works when pasted, and the words
+ * it is built from come from the filesystem and the command line, where spaces
+ * are ordinary: `binstruct "./spaced dir"` answered
+ * `TRY binstruct ./spaced dir/aaa_other.ts`, which pastes as two arguments and
+ * fails with `no such path: ./spaced`. The **redirections** are the only part
+ * of a line that is shell syntax and the only part that stays bare; every other
+ * word goes through this, {@linkcode metavariable} included.
+ *
+ * @param word One argument of a command line
+ * @returns The word as typed when it is already safe, else single-quoted
+ *
+ * @example An ordinary word is left alone and a spaced one is quoted
+ * ```ts
+ * import { assertEquals } from "@std/assert";
+ * import { shellWord } from "./guide.ts";
+ *
+ * assertEquals(shellWord("./pkg/mod.ts"), "./pkg/mod.ts");
+ * assertEquals(shellWord("jsr:@binstruct/wav@0.2.0"), "jsr:@binstruct/wav@0.2.0");
+ * assertEquals(shellWord("./spaced dir/mod.ts"), "'./spaced dir/mod.ts'");
+ * assertEquals(shellWord("./it's/mod.ts"), `'./it'\\''s/mod.ts'`);
+ * ```
+ */
+export function shellWord(word: string): string {
+  return SHELL_SAFE_PATTERN.test(word)
+    ? word
+    : `'${word.replaceAll("'", `'\\''`)}'`;
+}
+
+/**
+ * Renders a placeholder word of a `TRY` line, for a value only the user knows.
+ *
+ * The usage line writes a placeholder as `<coder>`, and a `TRY` line that
+ * carried that spelling through unquoted was not the line it appeared to be: to
+ * a shell `<coder>` is an **input redirection**, so the escape-hatch suggestion
+ * `binstruct png <coder> decode < input.bin` pasted back as
+ * `binstruct png decode` reading a file called `coder` — a different command,
+ * silently, and one that could succeed. It was exempted from
+ * {@linkcode shellWord} as prose; it is not prose, it is a word the user is
+ * meant to replace, and the only rendering that survives the paste is one the
+ * shell hands on whole.
+ *
+ * Quoted, the placeholder reaches the CLI as the literal text `<coder>` and is
+ * refused by name — which is the worst that a line nobody edited should do.
+ *
+ * @param name The value being asked for, e.g. `coder`
+ * @returns The placeholder, angle brackets and all, as one shell word
+ *
+ * @example The shell sees a word, not a redirection
+ * ```ts
+ * import { assertEquals } from "@std/assert";
+ * import { metavariable } from "./guide.ts";
+ *
+ * assertEquals(metavariable("coder"), "'<coder>'");
+ * ```
+ */
+export function metavariable(name: string): string {
+  return shellWord(`<${name}>`);
+}
+
+/**
+ * Levenshtein distance between two strings.
+ *
+ * @param a First string
+ * @param b Second string
+ * @returns Number of single-character edits separating them
+ */
+function editDistance(a: string, b: string): number {
+  let previous = Array.from({ length: b.length + 1 }, (_, index) => index);
+
+  for (let i = 1; i <= a.length; i++) {
+    const current = [i];
+    for (let j = 1; j <= b.length; j++) {
+      current[j] = Math.min(
+        previous[j] + 1,
+        current[j - 1] + 1,
+        previous[j - 1] + (a[i - 1] === b[j - 1] ? 0 : 1),
+      );
+    }
+    previous = current;
+  }
+
+  return previous[b.length];
+}
+
+/**
+ * Picks the candidate closest to a misspelling, for a "did you mean" line.
+ *
+ * Comparison is case-insensitive, so `pngfile` finds `pngFile`, and a
+ * candidate only counts as close when it is within roughly a third of the
+ * typed word in edits — otherwise nothing is suggested rather than something
+ * misleading. Ties go to the earliest candidate.
+ *
+ * **A word that is already among the candidates is not a misspelling of
+ * anything**, and gets no suggestion. It reads as one otherwise: a listed
+ * package that would not load answered
+ * `cannot read jsr:@binstruct/bencode … did you mean bencode?`, correcting the
+ * user's spelling to the spelling they had used. The guard is exact-match on
+ * the word as typed rather than a zero-distance one, because a distance of
+ * zero is also what makes `pngfile` find `pngFile`, which is worth keeping.
+ *
+ * @param input The word as typed
+ * @param candidates The names that would have been accepted
+ * @returns The nearest candidate, or `undefined` when none is close enough
+ *
+ * @example Case and small typos still find the intended name
+ * ```ts
+ * import { assertEquals } from "@std/assert";
+ * import { nearestName } from "./guide.ts";
+ *
+ * const coders = ["pngFile", "pngChunkUnknown", "pngFileChunks"];
+ *
+ * assertEquals(nearestName("pngfile", coders), "pngFile");
+ * assertEquals(nearestName("pngFiles", coders), "pngFile");
+ * assertEquals(nearestName("totallyUnrelated", coders), undefined);
+ * ```
+ *
+ * @example A name that is already a candidate suggests nothing
+ * ```ts
+ * import { assertEquals } from "@std/assert";
+ * import { nearestName } from "./guide.ts";
+ *
+ * assertEquals(nearestName("pngFile", ["pngFile", "pngFileChunks"]), undefined);
+ * ```
+ */
+export function nearestName(
+  input: string,
+  candidates: Iterable<string>,
+): string | undefined {
+  const threshold = Math.max(2, Math.ceil(input.length / 3));
+  const needle = input.toLowerCase();
+
+  let best: string | undefined;
+  let bestDistance = Infinity;
+
+  for (const candidate of candidates) {
+    if (candidate === input) return undefined;
+
+    const distance = editDistance(needle, candidate.toLowerCase());
+    if (distance < bestDistance) {
+      best = candidate;
+      bestDistance = distance;
+    }
+  }
+
+  return bestDistance <= threshold ? best : undefined;
+}

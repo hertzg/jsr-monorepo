@@ -1,50 +1,106 @@
 /**
  * Binary Structure CLI Tool
  *
- * A command-line interface for decoding binary files using binstruct packages.
- * This package provides a unified CLI for working with various binary formats
- * through JSR packages.
+ * A command-line interface for decoding and encoding binary data with any
+ * binstruct package. Binary arrives on stdin and JSON5 leaves on stdout, or
+ * the other way round, so the tool drops into a shell pipeline.
  *
- * The CLI supports both decoding binary data from stdin to JSON on stdout
- * and encoding JSON data from stdin to binary on stdout, making it easy to
- * integrate with shell pipelines and other tools. JSON5 (JSON with comments
- * and trailing commas) is the default on-the-wire format.
+ * The argument list is a prefix chain, and every prefix of it is a valid
+ * invocation:
  *
- * @example Basic decode usage (with flags) - JSON output
- * ```bash
- * deno run -A @binstruct/cli -p jsr:@binstruct/png -c pngFile decode < input.png > struct.json
+ * ```
+ * binstruct [<package> [<coder> [<command>]]] [options]
  * ```
  *
- * @example Basic decode usage (positional arguments) - JSON output
+ * A prefix that stops short prints guidance for the missing word — what it
+ * means, the values it may take, and a paste-ready command one step further
+ * along — to stderr, and exits 1; `--help` prints the same material to stdout
+ * and exits 0. Stdout otherwise carries the payload and nothing else. A bare
+ * package name means the `@binstruct` scope on JSR, and a package exposing
+ * exactly one zero-argument coder may omit the `<coder>` word.
+ *
+ * The package list shown for the missing `<package>` word is fetched from
+ * JSR's scope API and cached for a day, so it names what is published today
+ * rather than what was published when the CLI was released. That costs
+ * `--allow-net=jsr.io`; without it — or without a network — the list is
+ * omitted and everything else still works.
+ *
+ * @example Decode with the full three-word form
  * ```bash
- * deno run -A @binstruct/cli jsr:@binstruct/png pngFile decode < input.png > struct.json
+ * deno run -A @binstruct/cli png pngFile decode < input.png > struct.json5
  * ```
  *
- * @example Basic encode usage (with flags) - JSON input
+ * @example Encode it back
  * ```bash
- * deno run -A @binstruct/cli -p jsr:@binstruct/png -c pngFile encode < struct.json > output.png
+ * deno run -A @binstruct/cli png pngFile encode < struct.json5 > output.png
  * ```
  *
- * @example With custom package (positional arguments) - JSON format
+ * @example Omit the coder when the package has only one
  * ```bash
- * deno run -A @binstruct/cli ./my-package myStruct decode < input.bin > output.json
- * deno run -A @binstruct/cli ./my-package myStruct encode < input.json > output.bin
+ * deno run -A @binstruct/cli arp decode < arp.bin > arp.json5
  * ```
  *
- * @example Programmatic usage
+ * @example A local module works the same way, relative to the working directory
+ * ```bash
+ * deno run -A @binstruct/cli ./my-package/mod.ts myStruct decode < input.bin > output.json5
+ * ```
+ *
+ * @example Programmatic usage: plan an invocation without performing it
  * ```ts
- * import { main } from "@binstruct/cli";
+ * import { assertEquals } from "@std/assert";
+ * import { planCli } from "@binstruct/cli";
  *
- * // Run CLI with custom arguments
- * await main(["--help"]);
+ * const plan = await planCli(["png", "pngFile", "decode"]);
+ *
+ * assertEquals(plan.kind, "run");
+ * if (plan.kind === "run") assertEquals(plan.specifier, "jsr:@binstruct/png");
  * ```
  *
  * @module
  */
 
 import { main } from "./cli.ts";
-export { main } from "./cli.ts";
-export type { CliOptions } from "./cli.ts";
+export { explainFailure, main, parseCliArgs, planCli } from "./cli.ts";
+export type { CliOptions, CliPlan, CommandName } from "./cli.ts";
+export { nearestName, renderGuide } from "./guide.ts";
+export type { Guide, GuideNext, GuideOption, GuideOptions } from "./guide.ts";
+export {
+  diagnoseEmptyDiscovery,
+  discoverCoders,
+  readDocSurface,
+  readSymbolDocs,
+} from "./discover.ts";
+export type {
+  DenoDocDeclaration,
+  DenoDocJson,
+  DenoDocNode,
+  DenoDocParam,
+  DenoDocSymbol,
+  DenoDocType,
+  DiscoveredCoder,
+  DiscoveryOutcome,
+  DiscoverySuccess,
+  EmptyDiscoveryDiagnosis,
+  PackageSurface,
+  SymbolDocsOutcome,
+  ToolFailure,
+  ToolFailureReason,
+} from "./discover.ts";
+export {
+  isModulePath,
+  resolveSpecifier,
+  shortenSpecifier,
+} from "./specifier.ts";
+export type { ResolvedSpecifier, SpecifierForm } from "./specifier.ts";
+export { inspectLocalTarget } from "./target.ts";
+export type { LocalTarget } from "./target.ts";
+export { listScopePackages, readScopeListing } from "./scope.ts";
+export type {
+  ListingSource,
+  ScopeListing,
+  ScopeListingOptions,
+  ScopePackage,
+} from "./scope.ts";
 
 if (import.meta.main) {
   await main(Deno.args);

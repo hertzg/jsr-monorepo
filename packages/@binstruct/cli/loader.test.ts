@@ -1,30 +1,83 @@
 /**
  * Tests for the loader utilities.
+ *
+ * `loadCoder` forwards its argument to dynamic `import()`, which resolves
+ * nothing through a mock and everything through the module graph — so these
+ * point at real modules in this repository, and need no network.
  */
 
-import { assertEquals } from "@std/assert";
-import { loadCoder } from "./loader.ts";
+import { assertEquals, assertRejects } from "@std/assert";
+import { loadCoder, UnverifiedArityError } from "./loader.ts";
 
-Deno.test("loadCoder with valid JSR package", async () => {
-  // Mock the import to return a valid coder
-  const originalImport = (globalThis as Record<string, unknown>).import;
-  (globalThis as Record<string, unknown>).import = (specifier: string) => {
-    if (specifier === "jsr:@binstruct/png") {
-      return Promise.resolve({
-        pngFile: () => ({
-          decode: (data: Uint8Array) => [data, data.length],
-          encode: (_value: unknown, _buffer: Uint8Array) => 0,
-        }),
-      });
-    }
-    return Promise.reject(new Error("Module not found"));
-  };
+/** A package exporting exactly one coder factory, `arpData`. */
+const ARP = import.meta.resolve("../arp/mod.ts");
 
-  try {
-    const coder = await loadCoder("jsr:@binstruct/png", "pngFile");
-    assertEquals(typeof coder.decode, "function");
-    assertEquals(typeof coder.encode, "function");
-  } finally {
-    (globalThis as Record<string, unknown>).import = originalImport;
-  }
+/** A package whose every factory takes an argument, `pcapFile` among them. */
+const PCAP = import.meta.resolve("../pcap/mod.ts");
+
+/**
+ * A factory whose one parameter is optional, which `.length` cannot see.
+ *
+ * Written in JavaScript because the erasure is the point: `(flag) => …` is
+ * exactly what `maybe(flag?: boolean)` compiles to, and both report an arity
+ * of 1.
+ */
+const OPTIONAL = "data:text/javascript,export const maybe = (flag) => " +
+  "({ decode: () => [flag ?? null, 0], encode: () => 0 });";
+
+Deno.test("loadCoder calls the factory and returns its coder", async () => {
+  const coder = await loadCoder(ARP, "arpData");
+
+  assertEquals(typeof coder.decode, "function");
+  assertEquals(typeof coder.encode, "function");
+});
+
+Deno.test("loadCoder rejects a name the package does not export", async () => {
+  const error = await assertRejects(
+    () => loadCoder(ARP, "arpDatum"),
+    Error,
+    "not found in package",
+  );
+
+  assertEquals(error.message.includes("arpData"), true);
+});
+
+Deno.test("loadCoder rejects an export that is not a factory", async () => {
+  await assertRejects(
+    () =>
+      loadCoder(
+        "data:text/javascript,export const notAFactory = 42;",
+        "notAFactory",
+      ),
+    Error,
+    "is not a function",
+  );
+});
+
+Deno.test("loadCoder refuses a factory whose arity nothing has verified", async () => {
+  // The defect this guards: with `deno doc` unavailable the coder name is
+  // taken on trust, and calling `pcapFile()` bare lets `endianness` default —
+  // a whole capture of byte-swapped numbers, at exit 0.
+  const error = await assertRejects(
+    () => loadCoder(PCAP, "pcapFile"),
+    UnverifiedArityError,
+  );
+
+  assertEquals(error.coderName, "pcapFile");
+  assertEquals(error.arity, 1);
+});
+
+Deno.test("loadCoder calls a factory a declaration-level count vouched for", async () => {
+  // `.length` counts an optional parameter and the declaration does not, so
+  // discovery's answer has to be able to overrule this one — otherwise the
+  // check refuses a correct invocation whenever the permission is granted too.
+  const coder = await loadCoder(OPTIONAL, "maybe", { arityVerified: true });
+
+  assertEquals(coder.decode(new Uint8Array()), [null, 0]);
+});
+
+Deno.test("loadCoder rejects a package that cannot be resolved", async () => {
+  await assertRejects(() =>
+    loadCoder(import.meta.resolve("./no-such-module.ts"), "anything")
+  );
 });

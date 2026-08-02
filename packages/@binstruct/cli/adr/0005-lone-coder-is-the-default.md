@@ -39,10 +39,13 @@ word matches a command name it is the command, and the coder is inferred. A
 coder actually named `decode` or `encode` is therefore unreachable by that
 shorthand; this is documented, not defended against.
 
-The inference is always announced on **stderr**:
+The inference is always announced on **stderr**, in the short form of ADR 0004,
+since the header one line above has already paired that form with the resolved
+specifier:
 
 ```
-using coder: arpData (only coder in jsr:@binstruct/arp)
+package: arp → jsr:@binstruct/arp
+using coder: arpData (only coder in arp)
 ```
 
 The default applies only at exactly one candidate. Two or more — `png`, `bmp`,
@@ -66,8 +69,20 @@ The default applies only at exactly one candidate. Two or more — `png`, `bmp`,
 - **It rests on discovery.** Unlike specifier resolution (ADR 0004), the
   shortcut cannot work when `deno doc` is unavailable, so the failure path must
   fall back to demanding an explicit coder name.
-- **`pcap` is unreachable regardless.** Its only coder, `pcapFile(endianness)`,
-  takes a required argument, and the CLI has no way to supply one.
+- **`pcap` is unreachable regardless.** Its coders all take required arguments,
+  and the CLI has no way to supply one. Naming one explicitly is refused for the
+  same reason: `binstruct pcap pcapFile decode` would otherwise call
+  `pcapFile()` and let `endianness` default, turning a little-endian capture
+  into plausible, wrong numbers with exit 0. Refusal is what ADR 0002's
+  always-on discovery is for — and where discovery cannot run, the factory's
+  runtime arity refuses the same call, so the guarantee does not depend on
+  `--allow-run=deno` being granted.
+- **The runtime fallback refuses a little more than discovery does.** It reads
+  `Function.prototype.length`, which counts an optional parameter because `?` is
+  erased. `@binstruct/pcap` is being reshaped to `pcapFile(endianness?)`, and
+  that signature makes `pcap` a one-callable-coder package to discovery — the
+  shortcut of this ADR applies — while the permission-less path still refuses
+  it, naming the limit and pointing at `--allow-run=deno`.
 
 ## References
 
