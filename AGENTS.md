@@ -102,6 +102,7 @@ mirrors the JSR coordinate. Two scopes:
 - `pppoe` - PPPoE header parsing (RFC 2516)
 - `rtp` - RTP fixed header parsing (RFC 3550)
 - `sll` - Linux cooked capture (DLT_LINUX_SLL) header parsing
+- `sqlite` - SQLite database file header parsing
 - `tcp` - TCP segment parsing (RFC 9293)
 - `tga` - Truevision TGA image header
 - `tls-record` - TLS record layer header parsing (RFC 8446 section 5.1)
@@ -407,6 +408,7 @@ both tiresome and error-prone.
 - `@binstruct/pppoe`
 - `@binstruct/rtp`
 - `@binstruct/sll`
+- `@binstruct/sqlite`
 - `@binstruct/tcp`
 - `@binstruct/tga`
 - `@binstruct/tls-record`
