@@ -6,7 +6,7 @@
  * symlink that all lead to one directory have to reach one decision.
  */
 
-import { assert, assertEquals } from "@std/assert";
+import { assert, assertEquals, assertStringIncludes } from "@std/assert";
 import { toFileUrl } from "@std/path";
 import { inspectLocalTarget } from "./target.ts";
 
@@ -113,4 +113,49 @@ Deno.test("nothing at the path is its own answer", async () => {
   );
 
   assertEquals(target.kind, "missing");
+});
+
+Deno.test("a listed module is one the next invocation can actually name", async (t) => {
+  // `Deno.readDir` reports what it finds without following links, so a symlink
+  // is neither a file nor a directory to it. Filtering on `isDirectory` alone
+  // listed a dangling `aaa_link.ts` as a module and — sorting first — put it in
+  // the `TRY` line, where it failed with `no such path`; a `*.ts` link leading
+  // to a directory landed straight back on the directory refusal. The listing
+  // is the refusal's only suggestion, so it must never name either.
+  const directory = await fixture();
+  try {
+    await Deno.symlink(`${directory}/nowhere.ts`, `${directory}/aaa_dead.ts`);
+    await Deno.symlink(`${directory}/nested`, `${directory}/aaa_dir.ts`);
+    await Deno.symlink(`${directory}/mod.ts`, `${directory}/aaa_live.ts`);
+
+    const target = await inspectLocalTarget(toFileUrl(directory).href);
+
+    assert(target.kind === "directory", "the target is a directory");
+
+    await t.step("a dangling symlink is not a module", () => {
+      assertEquals(target.modules.includes("aaa_dead.ts"), false);
+    });
+
+    await t.step("a symlink to a directory is not a module", () => {
+      assertEquals(target.modules.includes("aaa_dir.ts"), false);
+    });
+
+    await t.step("a symlink to a real module still is one", () => {
+      // The filter follows the link rather than rejecting every link, because
+      // `import()` follows it too.
+      assertEquals(target.modules, ["aaa_live.ts", "aaa_other.mts", "mod.ts"]);
+    });
+  } finally {
+    await Deno.remove(directory, { recursive: true });
+  }
+});
+
+Deno.test("a file: specifier that is not a URL is refused, not thrown", async () => {
+  // `fromFileUrl` sat outside the try that guards the stat, so
+  // `binstruct "file://a b/x"` escaped as an uncaught TypeError and a stack
+  // trace. `unreadable` already models exactly this.
+  const target = await inspectLocalTarget("file://a b/x");
+
+  assert(target.kind === "unreadable", "a malformed URL is unreadable");
+  assertStringIncludes(target.reason, "file://a b/x");
 });

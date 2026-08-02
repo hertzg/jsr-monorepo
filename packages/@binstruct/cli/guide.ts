@@ -7,7 +7,8 @@
  *
  * - **`NEXT`** — the missing word and one line on what it means.
  * - **an options block** — the legal values, each with its one-line doc.
- * - **`TRY`** — a paste-ready command one step further along.
+ * - **`TRY`** — a paste-ready command one step further along, built by the
+ *   caller from words this module can make shell-safe ({@linkcode shellWord}).
  *
  * This module owns the shape of those blocks and nothing else. It performs no
  * I/O, spawns nothing and reads no arguments: {@linkcode renderGuide} turns a
@@ -232,6 +233,48 @@ export function renderGuide(guide: Guide): string {
   }
 
   return blocks.map((block) => block.join("\n")).join("\n\n");
+}
+
+/**
+ * Characters a shell word may hold without needing quotes.
+ *
+ * Deliberately narrow: everything a package name, a coder name, a path or a
+ * `file:` URL is normally made of, and nothing whose meaning to the shell is
+ * worth arguing about. A word outside this set is quoted rather than escaped
+ * character by character, so nothing here has to be exhaustive.
+ */
+const SHELL_SAFE_PATTERN = /^[A-Za-z0-9_@%+:,./-]+$/;
+
+/**
+ * Renders one word of a `TRY` line so a shell reads it as a single argument.
+ *
+ * A `TRY` line is a promise that the command works when pasted, and the words
+ * it is built from come from the filesystem and the command line, where spaces
+ * are ordinary: `binstruct "./spaced dir"` answered
+ * `TRY binstruct ./spaced dir/aaa_other.ts`, which pastes as two arguments and
+ * fails with `no such path: ./spaced`. Only the words that carry user data go
+ * through this — the redirections and the `<coder>` metavariable of an
+ * incomplete line are shell syntax and prose, and quoting either would break
+ * the very paste this protects.
+ *
+ * @param word One argument of a command line
+ * @returns The word as typed when it is already safe, else single-quoted
+ *
+ * @example An ordinary word is left alone and a spaced one is quoted
+ * ```ts
+ * import { assertEquals } from "@std/assert";
+ * import { shellWord } from "./guide.ts";
+ *
+ * assertEquals(shellWord("./pkg/mod.ts"), "./pkg/mod.ts");
+ * assertEquals(shellWord("jsr:@binstruct/wav@0.2.0"), "jsr:@binstruct/wav@0.2.0");
+ * assertEquals(shellWord("./spaced dir/mod.ts"), "'./spaced dir/mod.ts'");
+ * assertEquals(shellWord("./it's/mod.ts"), `'./it'\\''s/mod.ts'`);
+ * ```
+ */
+export function shellWord(word: string): string {
+  return SHELL_SAFE_PATTERN.test(word)
+    ? word
+    : `'${word.replaceAll("'", `'\\''`)}'`;
 }
 
 /**

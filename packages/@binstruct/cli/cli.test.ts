@@ -137,18 +137,45 @@ async function writeLocalPackage(entry = "mod.ts"): Promise<string> {
  * shapes, which is what makes a wrong choice observable rather than merely
  * arbitrary.
  *
+ * @param name Directory name for the package, for the shadowing cases
  * @returns The containing directory, realpathed, to be removed by the caller
  */
-async function writeAmbiguousPackage(): Promise<string> {
+async function writeAmbiguousPackage(name = "mypkg"): Promise<string> {
   const directory = await Deno.realPath(await Deno.makeTempDir());
 
-  await Deno.mkdir(`${directory}/mypkg`);
+  await Deno.mkdir(`${directory}/${name}`, { recursive: true });
   await Deno.writeTextFile(
-    `${directory}/mypkg/mod.ts`,
+    `${directory}/${name}/mod.ts`,
     coderModule("pair", ["a", "b"]),
   );
   await Deno.writeTextFile(
-    `${directory}/mypkg/aaa_other.ts`,
+    `${directory}/${name}/aaa_other.ts`,
+    coderModule("internalOnly", ["z"]),
+  );
+
+  return directory;
+}
+
+/**
+ * Writes a package under a directory name that holds a space.
+ *
+ * `spaced dir/mod.ts` exports two coders, so levels 1 and 2 are both reachable
+ * and each gets to build its own `TRY` line; `spaced dir/aaa_other.ts` sorts
+ * first, so it is what the directory refusal offers.
+ *
+ * @returns The containing directory, realpathed, to be removed by the caller
+ */
+async function writeSpacedPackage(): Promise<string> {
+  const directory = await Deno.realPath(await Deno.makeTempDir());
+  const [, ...second] = coderModule("solo", ["y"]).split("\n");
+
+  await Deno.mkdir(`${directory}/spaced dir`);
+  await Deno.writeTextFile(
+    `${directory}/spaced dir/mod.ts`,
+    coderModule("pair", ["a", "b"]) + second.join("\n"),
+  );
+  await Deno.writeTextFile(
+    `${directory}/spaced dir/aaa_other.ts`,
     coderModule("internalOnly", ["z"]),
   );
 
@@ -825,6 +852,227 @@ Deno.test("a directory is refused however it is spelled", async () => {
   } finally {
     await Deno.remove(directory, { recursive: true });
   }
+});
+
+Deno.test("a trailing slash is a directory, not a registry name", async () => {
+  // `arp/` is what shell tab-completion types for a directory, and it starts
+  // with neither `.` nor `/` and ends in no module extension — so the old
+  // classifier called it a bare name, expanded it to `jsr:@binstruct/arp/` and
+  // decoded stdin against the *published* @binstruct/arp while a local `arp/`
+  // sat in the working directory. Exit 0, 543 bytes of confident output from a
+  // package nobody named. The fixture is deliberately called `arp` so that a
+  // regression reaches the registry rather than a name that does not exist.
+  const directory = await writeAmbiguousPackage("arp");
+  try {
+    const run = await runCli(
+      ["arp/", "decode"],
+      ["-A"],
+      directory,
+      new Uint8Array([1, 2]),
+    );
+
+    assertEquals(run.code, 1);
+    assertEquals(run.stdout, "");
+    assertStringIncludes(run.stderr, "names a directory");
+    // Neither the registry nor either module was consulted.
+    assertEquals(run.stderr.includes("jsr:"), false);
+    assertEquals(run.stderr.includes("using coder"), false);
+    assertEquals(run.stderr.includes("hardwareType"), false);
+  } finally {
+    await Deno.remove(directory, { recursive: true });
+  }
+});
+
+Deno.test("a nested path is a path, not a scope and a package", async () => {
+  // Same leak, second spelling: `nested/inner` became `jsr:@binstruct/nested/inner`.
+  const directory = await writeAmbiguousPackage("nested/inner");
+  try {
+    const plan = printed(await planCli(["nested/inner", "decode"]));
+
+    assertEquals(plan.code, 1);
+    assertEquals(plan.text.includes("jsr:@binstruct/nested"), false);
+
+    const run = await runCli(
+      ["nested/inner", "decode"],
+      ["-A"],
+      directory,
+      new Uint8Array([1, 2]),
+    );
+
+    assertEquals(run.code, 1);
+    assertEquals(run.stdout, "");
+    assertStringIncludes(run.stderr, "names a directory");
+  } finally {
+    await Deno.remove(directory, { recursive: true });
+  }
+});
+
+Deno.test("every spelling of one directory reaches one decision", async () => {
+  // What `target.ts` and ADR 0004 claim, checked rather than assumed: the
+  // relative form, the trailing slash, the absolute path, the `file:` URL and
+  // a symlink to any of them are one thing and answer one way. Resolution
+  // supplies half of that — it classifies all of them as a path or a `file:`
+  // URL and normalizes the slash away — and the stat here supplies the rest.
+  // `pkg/` used to reach neither half.
+  const directory = await writeAmbiguousPackage();
+  try {
+    await Deno.symlink(`${directory}/mypkg`, `${directory}/link`);
+    const url = toFileUrl(`${directory}/mypkg`).href;
+
+    const spellings = [
+      "./mypkg",
+      "./mypkg/",
+      "mypkg/",
+      `${directory}/mypkg`,
+      `${directory}/mypkg/`,
+      url,
+      `${url}/`,
+      "./link",
+      "link/",
+    ];
+
+    for (const spelling of spellings) {
+      const run = await runCli(
+        [spelling, "decode"],
+        ["-A"],
+        directory,
+        new Uint8Array([1, 2]),
+      );
+
+      assertEquals(run.code, 1, `${spelling} is refused`);
+      assertEquals(run.stdout, "", `${spelling} writes no payload`);
+      assertStringIncludes(run.stderr, "names a directory");
+    }
+  } finally {
+    await Deno.remove(directory, { recursive: true });
+  }
+});
+
+Deno.test("a TRY line pastes back as one argument", async (t) => {
+  // A `TRY` line is a promise that the command works when pasted. Spaces are
+  // ordinary in a path, and `binstruct "./spaced dir"` answered
+  // `TRY binstruct ./spaced dir/aaa_other.ts`, which pastes as two arguments
+  // and dies on `no such path: ./spaced`. Every level that prints one is
+  // checked, since each builds its own.
+  const directory = await writeSpacedPackage();
+  const pkg = `${directory}/spaced dir`;
+  try {
+    await t.step("the directory refusal", async () => {
+      const plan = printed(await planCli([pkg, "decode"]));
+
+      assertStringIncludes(
+        plan.text,
+        `TRY\n  binstruct '${pkg}/aaa_other.ts'`,
+      );
+    });
+
+    await t.step("the `file:` spelling the header teaches", async () => {
+      const plan = printed(await planCli([`file://${pkg}`, "decode"]));
+
+      assertStringIncludes(
+        plan.text,
+        `TRY\n  binstruct 'file://${pkg}/aaa_other.ts'`,
+      );
+    });
+
+    await t.step("level 1, where the coder comes from discovery", async () => {
+      const plan = printed(await planCli([`${pkg}/mod.ts`]));
+
+      assertStringIncludes(plan.text, `TRY\n  binstruct '${pkg}/mod.ts' pair`);
+    });
+
+    await t.step("level 2, where the redirections must stay bare", async () => {
+      const plan = printed(await planCli([`${pkg}/mod.ts`, "pair"]));
+
+      assertStringIncludes(
+        plan.text,
+        `TRY\n  binstruct '${pkg}/mod.ts' pair decode < input.bin > output.json5`,
+      );
+    });
+  } finally {
+    await Deno.remove(directory, { recursive: true });
+  }
+});
+
+Deno.test("a quoted TRY line survives a real shell", async () => {
+  // The point of the quoting, end to end: the suggestion is pasted back into a
+  // shell, word-split by it, and still has to decode.
+  const directory = await writeSpacedPackage();
+  try {
+    const refusal = printed(
+      await planCli([`${directory}/spaced dir`, "decode"]),
+    );
+    const suggestion =
+      refusal.text.split("TRY\n  binstruct ")[1].split("\n")[0];
+
+    const shell = new Deno.Command("sh", {
+      args: [
+        "-c",
+        `printf '\\1' | "$0" run -A "$1" ${suggestion} decode`,
+        Deno.execPath(),
+        CLI,
+      ],
+      cwd: directory,
+      stdout: "piped",
+      stderr: "piped",
+    });
+    const output = await shell.output();
+
+    assertEquals(output.code, 0);
+    assertStringIncludes(new TextDecoder().decode(output.stdout), "'z'");
+  } finally {
+    await Deno.remove(directory, { recursive: true });
+  }
+});
+
+Deno.test("a symlink the refusal offers is one that loads", async () => {
+  // `Deno.readDir` does not follow links, so a dangling `aaa_link.ts` was
+  // listed as a module and — sorting first — became the `TRY` line, which then
+  // failed with `no such path`. A `*.ts` link to a directory landed back on
+  // the directory refusal. The refusal's only suggestion must work.
+  const directory = await writeAmbiguousPackage();
+  try {
+    await Deno.symlink(
+      `${directory}/mypkg/nowhere.ts`,
+      `${directory}/mypkg/aaa_dead.ts`,
+    );
+    await Deno.symlink(`${directory}/mypkg`, `${directory}/mypkg/aaa_dir.ts`);
+
+    const plan = printed(await planCli([`${directory}/mypkg`, "decode"]));
+
+    assertEquals(plan.text.includes("aaa_dead.ts"), false);
+    assertEquals(plan.text.includes("aaa_dir.ts"), false);
+    assertStringIncludes(
+      plan.text,
+      `TRY\n  binstruct ${directory}/mypkg/aaa_other.ts`,
+    );
+
+    // And the suggestion loads, rather than bouncing off another refusal.
+    const run = await runCli(
+      ["./mypkg/aaa_other.ts", "decode"],
+      ["-A"],
+      directory,
+      new Uint8Array([1]),
+    );
+
+    assertEquals(run.code, 0);
+    assertStringIncludes(run.stdout, "'z'");
+  } finally {
+    await Deno.remove(directory, { recursive: true });
+  }
+});
+
+Deno.test("a malformed file: URL is a refusal, not a stack trace", async () => {
+  // `fromFileUrl` sat outside the try that guards the stat, so this escaped as
+  // `error: Uncaught (in promise) TypeError: Invalid URL` with a trace through
+  // the CLI's own frames.
+  const run = await runCli(["file://a b/x", "decode"]);
+
+  assertEquals(run.code, 1);
+  assertEquals(run.stdout, "");
+  assertStringIncludes(run.stderr, "cannot inspect file://a b/x");
+  assertEquals(run.stderr.includes("Uncaught"), false);
+  assertEquals(run.stderr.includes("target.ts:"), false);
 });
 
 Deno.test("a directory with no modules is refused without a TRY line", async () => {

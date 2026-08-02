@@ -55,7 +55,7 @@ import {
   type SymbolDocsOutcome,
   type ToolFailure,
 } from "./discover.ts";
-import { type Guide, nearestName, renderGuide } from "./guide.ts";
+import { type Guide, nearestName, renderGuide, shellWord } from "./guide.ts";
 import { KNOWN_PACKAGES } from "./registry.ts";
 import { type ResolvedSpecifier, resolveSpecifier } from "./specifier.ts";
 import { inspectLocalTarget, type LocalTarget } from "./target.ts";
@@ -426,7 +426,7 @@ function coderGuide(
     },
     try: callable === undefined
       ? []
-      : [`${PROGRAM} ${resolved.short} ${callable.name}`],
+      : [`${PROGRAM} ${shellWord(resolved.short)} ${shellWord(callable.name)}`],
   };
 }
 
@@ -446,8 +446,8 @@ function commandGuide(
   notes?: readonly string[],
 ): Guide {
   const words = coder === undefined
-    ? resolved.short
-    : `${resolved.short} ${coder}`;
+    ? shellWord(resolved.short)
+    : `${shellWord(resolved.short)} ${shellWord(coder)}`;
   return {
     header,
     notes,
@@ -486,7 +486,11 @@ function unknownPackageGuide(
       `cannot read ${resolved.specifier}: ${reason}`,
       ...(resolved.form === "bare"
         ? [
-          `a bare name always means the @binstruct scope — write ${PROGRAM} @hertzg/${resolved.input} for another one, or ./${resolved.input}/mod.ts for a local module`,
+          `a bare name always means the @binstruct scope — write ${PROGRAM} ${
+            shellWord(`@hertzg/${resolved.input}`)
+          } for another one, or ${
+            shellWord(`./${resolved.input}/mod.ts`)
+          } for a local module`,
         ]
         : []),
     ],
@@ -554,7 +558,7 @@ function directoryGuide(
     },
     try: modules.length === 0
       ? []
-      : [`${PROGRAM} ${moduleInside(resolved.short, modules[0])}`],
+      : [`${PROGRAM} ${shellWord(moduleInside(resolved.short, modules[0]))}`],
   };
 }
 
@@ -655,9 +659,10 @@ function unknownCoderGuide(
     diagnostic: true,
   };
 
-  return suggestion === undefined
-    ? guide
-    : { ...guide, try: [`${PROGRAM} ${resolved.short} ${suggestion}`] };
+  return suggestion === undefined ? guide : {
+    ...guide,
+    try: [`${PROGRAM} ${shellWord(resolved.short)} ${shellWord(suggestion)}`],
+  };
 }
 
 /**
@@ -780,7 +785,9 @@ function toolFailureGuide(
       empty: "unknown — nothing could be listed",
     },
     try: [
-      `${PROGRAM} ${resolved.short} <coder> decode < input.bin > output.json5`,
+      `${PROGRAM} ${
+        shellWord(resolved.short)
+      } <coder> decode < input.bin > output.json5`,
     ],
     footer: [
       "naming the coder yourself needs no permissions and always works;",

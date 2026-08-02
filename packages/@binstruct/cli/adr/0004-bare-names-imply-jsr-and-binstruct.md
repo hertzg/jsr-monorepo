@@ -22,8 +22,8 @@ The specifier is resolved by first match:
 | input                                      | rule         | resolves to             |
 | ------------------------------------------ | ------------ | ----------------------- |
 | `jsr:@binstruct/png`, `npm:x`, `https://…` | has a scheme | unchanged               |
-| `./x`, `/abs/x`, `mod.ts`, `pkg/mod.mts`   | is a path    | `file://` URL under cwd |
-| `@hertzg/xhb`                              | starts `@`   | `jsr:@hertzg/xhb`       |
+| `@hertzg/xhb`, `@binstruct/png/sub`        | starts `@`   | `jsr:@hertzg/xhb`       |
+| `./x`, `/abs/x`, `pkg/`, `a/b`, `mod.ts`   | is a path    | `file://` URL under cwd |
 | `png`, `wav@0.2.0`                         | bare         | `jsr:@binstruct/png`    |
 
 Resolution is a pure function of the input string and the working directory.
@@ -31,12 +31,64 @@ What is at the far end of a `file:` URL is a separate question, asked afterwards
 and answered by the filesystem, not by the table.
 
 A scheme requires **at least two lowercase characters** before the colon
-(`^[a-z][a-z0-9+.-]+:`), so a bare name can never be mistaken for one. A path is
-anything beginning with `.` or `/`, or ending in a JS/TS module extension —
-`.ts`, `.tsx`, `.mts`, `.cts`, `.js`, `.jsx`, `.mjs`, `.cjs`, the whole set the
-runtime will load, in `isModulePath`. The list is no longer what decides file
-from directory, but it is still what the directory refusal offers as candidates,
-so a gap in it hides a real module from the listing.
+(`^[a-z][a-z0-9+.-]+:`), so a bare name — or a single-letter Windows drive
+prefix — can never be mistaken for one.
+
+**The table enumerates the registry coordinate, and calls what is left a path.**
+A JSR or npm coordinate is exactly one of:
+
+```
+name
+name@version
+@scope/name
+@scope/name@version
+@scope/name/sub-entrypoint
+```
+
+Every one of those either starts with `@` or contains no `/` at all. Therefore
+**a non-scheme input that contains a `/` and does not start with `@` cannot be a
+registry coordinate, and is a path.** That is the third row, and it is a closed
+rule: it follows from the grammar of the thing being excluded rather than from a
+list of the ways a path can look.
+
+The rule ran the other way round for five releases — enumerate the path
+spellings, call the remainder a registry name — and it leaked five times, once
+per attempt to complete the list. The set of ways to spell a path is open-ended;
+the set of ways to spell a coordinate is not. The last leak is the one that
+settles the direction: `arp/` begins with neither `.` nor `/` and ends in no
+module extension, so it fell through to `bare`, expanded to
+`jsr:@binstruct/arp/`, never reached `inspectLocalTarget` at all, and decoded
+stdin against the **published** `@binstruct/arp` while a local `arp/` sat in the
+working directory — exit 0, confident output, wrong package. A trailing slash is
+what shell tab-completion produces for a directory, so that is the likely way to
+type it, not an exotic one. `nested/inner` became `jsr:@binstruct/nested/inner`
+the same way.
+
+Two rules survive from the old form, and neither reopens the leak, because both
+can only move an input **towards** `path`, while the leak class is a path
+falling through to `bare`:
+
+- a leading `.`, which catches `.` and `..` — the only path spellings holding
+  neither a `/` nor an extension;
+- a JS/TS module extension — `.ts`, `.tsx`, `.mts`, `.cts`, `.js`, `.jsx`,
+  `.mjs`, `.cjs`, the whole set the runtime will load, in `isModulePath` — which
+  catches `mod.ts` typed from inside its own directory. The list is not what
+  decides file from directory, but it is still what the directory refusal offers
+  as candidates, so a gap in it hides a real module from the listing.
+
+The classification space is written out as a table of explicit rows in
+`specifier.test.ts`: every coordinate shape, every path shape, each with a
+trailing slash, plus the empty string, `/`, `.`, `..`, `@` and a scheme-like
+input with one leading character. A future gap should show up as a missing row
+in an obvious table rather than as a bug in the field.
+
+Two classifications change as a consequence, both towards the grammar.
+`@binstruct/png/mod.ts` is a coordinate with a sub-entrypoint rather than a
+path, because a leading `@` decides before the extension does; a local file
+under a scope directory is reached as `./@binstruct/png/mod.ts`, the same
+disambiguation a local `png/` already needed. And `c:/tmp/pkg` is a path rather
+than the bare name `jsr:@binstruct/c:/tmp/pkg`, which named nothing anyone could
+have meant.
 
 A path is **anchored to the working directory** and handed on as a `file://`
 URL. This row originally read "unchanged", which was wrong: the two consumers of
@@ -87,11 +139,19 @@ because `deno.json` sorts before `mod.ts`.
 
 So: **refusal, decided on the resolved target.** When the resolved specifier has
 the `file:` scheme, `Deno.stat` is called on it before discovery runs
-(`inspectLocalTarget` in `target.ts`); `isDirectory` refuses, and a `NotFound`
-gets its own "no such path" message rather than the directory one. Spelling is
-irrelevant by construction: `./pkg`, `/abs/pkg`, `file:///abs/pkg`, a trailing
-slash and a symlink all resolve to one URL and one target, and `Deno.stat`
-follows symlinks.
+(`inspectLocalTarget` in `target.ts`); `isDirectory` refuses, a `NotFound` gets
+its own "no such path" message rather than the directory one, and a specifier
+that does not parse as a URL at all is `unreadable` rather than an uncaught
+`TypeError` — `binstruct "file://a b/x"` used to escape as a stack trace,
+because the URL was decoded outside the `try` guarding the `stat`.
+
+Spelling is then irrelevant, but only because **both halves hold**: `./pkg`,
+`pkg/`, `/abs/pkg`, `file:///abs/pkg` and a symlink to any of them are one URL
+because the table above classifies every one of them as a path or a scheme and
+`resolve` normalizes the trailing slash away, and they are one target because
+`Deno.stat` follows symlinks. This paragraph asserted the conclusion for three
+releases while the first half was false for `pkg/`, which the table sent to the
+registry and which therefore reached neither the URL nor the target.
 
 Refusal is the only resolution-free option, and that is the whole argument for
 it. `import()` cannot load a directory **at all**, so there is no "the way
@@ -112,6 +172,24 @@ because it is a name that demonstrably exists — suggesting `mod.ts` unasked
 would be the same guess in prose — and a directory with no module files gets a
 plain refusal with no `TRY`, since the refusal must never name a command that
 does not exist. Nothing reads `deno.json`.
+
+"Demonstrably exists" is a claim about the target, on the same argument as the
+refusal itself, so **each candidate is stat'ed and kept only if a readable file
+is at the far end of it**. `Deno.readDir` reports what it finds without
+following links, so a symlink is neither a file nor a directory to it: filtering
+on `isDirectory` alone listed a dangling `aaa_link.ts` as a module and — sorting
+first — made it the `TRY` line, which then failed with `no such path`, while a
+`*.ts` link leading to a directory landed straight back on the directory
+refusal. A link that leads to a real module is still listed, because `import()`
+follows it too.
+
+Every `TRY` line is **shell-quoted**, by `shellWord` in `guide.ts`. A `TRY` line
+is a promise that the command works when pasted, and spaces are ordinary in a
+path: `binstruct "./spaced dir"` answered `TRY binstruct ./spaced dir/mod.ts`,
+which pastes as two arguments and dies on `no such path: ./spaced`. Only the
+words carrying user data are quoted — the redirections and the `<coder>`
+metavariable are shell syntax and prose, and quoting either would break the
+paste this protects.
 
 Nothing is substituted for the resolved specifier anywhere. Discovery, `--docs`
 and `import()` are handed the same string, which now names one module by
@@ -156,9 +234,20 @@ teaches it.
   it cannot behave differently on a stale registry or offline. The `Deno.cwd()`
   read means a path form now needs `--allow-read`, which every documented
   invocation already has.
-- **A local directory named like a package is shadowed.** `png/` resolves to the
-  JSR package, not the directory; `./png` disambiguates — and then says to name
-  the module inside it. Documented in `--help`, not defended against.
+- **A local directory named like a package is shadowed only while it is spelled
+  like a package.** Bare `png` resolves to the JSR package whatever is on disk;
+  `./png` and `png/` both name the directory, and then say to name the module
+  inside it. Documented in `--help`, not defended against.
+- **A local path under a scope directory needs a `./`.** `@binstruct/png/mod.ts`
+  is read as a coordinate with a sub-entrypoint, because a leading `@` decides
+  before the extension does. This is the same ambiguity as the bare name above
+  and takes the same fix. It is inherent to the shorthand: a leading `@` cannot
+  mean both things.
+- **Classification is now closed, and enumerated.** The rules follow from the
+  grammar of a registry coordinate rather than from a list of path spellings, so
+  a novel path spelling cannot fall through to the registry; and the space is
+  written out row by row in `specifier.test.ts`, so a gap shows up as a missing
+  row rather than as silent output from the wrong package.
 - **`binstruct ./pkg` never works, whatever is in `./pkg`**, and neither does
   any other spelling of the same directory. The cost is one extra word for
   everyone with a conventional layout; the price of the alternative was
@@ -180,12 +269,20 @@ teaches it.
   find `@hertzg/xhb` for you, per ADR 0003.
 - **Scheme detection is a heuristic.** Two lowercase characters is enough for
   every scheme that matters here while leaving single-letter Windows drive
-  prefixes out of scope.
+  prefixes out of scope. What follows such a prefix is then classified on its
+  own terms, so `c:` is a name and `c:/tmp/pkg` is a path.
+- **A `TRY` line may carry quotes.** A path holding a space is rendered
+  single-quoted, which is slightly noisier to read and is the only form that
+  survives being pasted.
+- **The directory listing costs one `stat` per candidate.** Paid only on the
+  refusal path, and it is what makes the offered names names that load.
 
 ## References
 
-- `specifier.ts` — `resolveSpecifier`, `isModulePath`
-- `target.ts` — `inspectLocalTarget`, the stat that decides
+- `specifier.ts` — `resolveSpecifier`, `classify`, `isModulePath`
+- `specifier.test.ts` — the enumerated classification space
+- `target.ts` — `inspectLocalTarget`, the stat that decides; `modulesInside`
+- `guide.ts` — `shellWord`, which makes a `TRY` line pasteable
 - `cli.ts` — `directoryGuide`, `missingPathGuide`, where refusal is rendered
 - `loader.ts` — `loadCoder`, which receives the specifier to import
 - `@binstruct/cli` ADR 0002 — why discovery needs a single-module specifier
