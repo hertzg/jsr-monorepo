@@ -45,6 +45,7 @@ Source layout mirrors the JSR scope: `packages/<scope>/<name>/`.
 | [@binstruct/ipv6](https://jsr.io/@binstruct/ipv6)         | [![JSR](https://jsr.io/badges/@binstruct/ipv6)](https://jsr.io/@binstruct/ipv6)         |
 | [@binstruct/pcap](https://jsr.io/@binstruct/pcap)         | [![JSR](https://jsr.io/badges/@binstruct/pcap)](https://jsr.io/@binstruct/pcap)         |
 | [@binstruct/png](https://jsr.io/@binstruct/png)           | [![JSR](https://jsr.io/badges/@binstruct/png)](https://jsr.io/@binstruct/png)           |
+| [@binstruct/pppoe](https://jsr.io/@binstruct/pppoe)       | [![JSR](https://jsr.io/badges/@binstruct/pppoe)](https://jsr.io/@binstruct/pppoe)       |
 | [@binstruct/sll](https://jsr.io/@binstruct/sll)           | [![JSR](https://jsr.io/badges/@binstruct/sll)](https://jsr.io/@binstruct/sll)           |
 | [@binstruct/tcp](https://jsr.io/@binstruct/tcp)           | [![JSR](https://jsr.io/badges/@binstruct/tcp)](https://jsr.io/@binstruct/tcp)           |
 | [@binstruct/tls-record](https://jsr.io/@binstruct/tls-record) | [![JSR](https://jsr.io/badges/@binstruct/tls-record)](https://jsr.io/@binstruct/tls-record) |
