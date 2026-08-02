@@ -10,7 +10,12 @@ import { IP_PROTOCOL_ESP } from "@binstruct/esp";
 import { IP_PROTOCOL_TCP } from "@binstruct/tcp";
 import { IP_PROTOCOL_UDP, type UdpPacket } from "@binstruct/udp";
 import { TPID_8021Q } from "@binstruct/vlan";
-import { ETHERTYPE_PPPOE_SESSION, PPPOE_CODE } from "@binstruct/pppoe";
+import {
+  ETHERTYPE_PPPOE_DISCOVERY,
+  ETHERTYPE_PPPOE_SESSION,
+  PPPOE_CODE,
+  type PppoeHeader,
+} from "@binstruct/pppoe";
 import {
   VXLAN_FLAG_VALID_VNI,
   VXLAN_HEADER_SIZE,
@@ -28,6 +33,7 @@ import {
   type Ipv4IgmpPacket,
   type Ipv4TcpPacket,
   type Ipv4UdpPacket,
+  type Ipv6EspPacket,
   type Ipv6Icmpv6Packet,
   type Ipv6Refined,
   type Ipv6TcpPacket,
@@ -609,6 +615,33 @@ Deno.test("inetFrame: round-trips ethernet → pppoe-session → ppp(ipv6) → t
   assertEquals(ip.payload.payload, tcpPayload);
 });
 
+Deno.test("inetFrame: round-trips ethernet → pppoe-discovery (PADI)", () => {
+  const coder = inetFrame();
+  const tags = new Uint8Array([0x01, 0x01, 0x00, 0x00]); // Service-Name tag, empty
+  const value: FrameRefined = {
+    dstMac: new Uint8Array([0xff, 0xff, 0xff, 0xff, 0xff, 0xff]),
+    srcMac: new Uint8Array([0, 0, 0, 0, 0, 2]),
+    etherType: ETHERTYPE_PPPOE_DISCOVERY,
+    payload: {
+      versionType: { version: 1, type: 1 },
+      code: PPPOE_CODE.PADI,
+      sessionId: 0,
+      length: tags.length,
+      payload: tags,
+    },
+  };
+
+  const buf = new Uint8Array(32);
+  const written = coder.encode(value, buf);
+  const [decoded, read] = coder.decode(buf.subarray(0, written));
+
+  assertEquals(read, written);
+  assertEquals(decoded.etherType, ETHERTYPE_PPPOE_DISCOVERY);
+  const discovery = decoded.payload as PppoeHeader;
+  assertEquals(discovery.code, PPPOE_CODE.PADI);
+  assertEquals(discovery.payload, tags);
+});
+
 Deno.test("inetFrame: round-trips ethernet → ipv6 → udp → ntp", () => {
   const coder = inetFrame();
   const ntpPacket = {
@@ -688,6 +721,38 @@ Deno.test("inetFrame: round-trips ethernet → ipv6 → icmpv6", () => {
   const ip = decoded.payload as Ipv6Icmpv6Packet;
   assertEquals(ip.payload.type, ICMPV6_TYPE.ECHO_REQUEST);
   assertEquals(ip.payload.body, body);
+});
+
+Deno.test("inetFrame: round-trips ethernet → ipv6 → esp", () => {
+  const coder = inetFrame();
+  const payloadData = new Uint8Array([0xde, 0xad, 0xbe, 0xef]);
+  const value: FrameRefined = {
+    dstMac: new Uint8Array([0, 0, 0, 0, 0, 1]),
+    srcMac: new Uint8Array([0, 0, 0, 0, 0, 2]),
+    etherType: ETHERTYPE_IPV6,
+    payload: {
+      versionClassFlow: { version: 6, trafficClass: 0, flowLabel: 0 },
+      payloadLength: 8 + payloadData.length,
+      nextHeader: IP_PROTOCOL_ESP,
+      hopLimit: 64,
+      sourceAddress: new Uint8Array(16).fill(0x11),
+      destinationAddress: new Uint8Array(16).fill(0x22),
+      payload: {
+        spi: 0x12345678,
+        sequenceNumber: 1,
+        payloadData,
+      },
+    },
+  };
+
+  const buf = new Uint8Array(128);
+  const written = coder.encode(value, buf);
+  const [decoded, read] = coder.decode(buf.subarray(0, written));
+
+  assertEquals(read, written);
+  const ip = decoded.payload as Ipv6EspPacket;
+  assertEquals(ip.payload.spi, 0x12345678);
+  assertEquals(ip.payload.payloadData, payloadData);
 });
 
 Deno.test("inetFrame: round-trips ethernet → ipv4 → igmp", () => {
@@ -1212,4 +1277,67 @@ Deno.test("sllInetFrame: round-trips sll → arp", () => {
   assert(!(decoded.payload instanceof Uint8Array));
   assert("operation" in decoded.payload);
   assertEquals(decoded.payload.operation, ARP_OPCODE.REQUEST);
+});
+
+Deno.test("sllInetFrame: round-trips sll → vlan → ipv4 → udp", () => {
+  const coder = sllInetFrame();
+  const udpPayload = new Uint8Array([0xaa, 0xbb]);
+  const value: SllFrameRefined = {
+    packetType: SLL_PACKET_TYPE.HOST,
+    arphrdType: 1,
+    linkLayerAddressLength: 6,
+    linkLayerAddress: new Uint8Array([
+      0x00,
+      0x11,
+      0x22,
+      0x33,
+      0x44,
+      0x55,
+      0x00,
+      0x00,
+    ]),
+    protocol: TPID_8021Q,
+    payload: {
+      tci: { pcp: 0, dei: 0, vlanId: 100 },
+      etherType: ETHERTYPE_IPV4,
+      payload: {
+        versionIhl: { version: 4, ihl: 5 },
+        typeOfService: 0,
+        totalLength: 20 + 8 + udpPayload.length,
+        identification: 0,
+        flagsFragmentOffset: {
+          reserved: 0,
+          dontFragment: 0,
+          moreFragments: 0,
+          fragmentOffset: 0,
+        },
+        timeToLive: 64,
+        protocol: IP_PROTOCOL_UDP,
+        headerChecksum: 0,
+        sourceAddress: parseIpv4("10.0.0.1"),
+        destinationAddress: parseIpv4("10.0.0.2"),
+        options: new Uint8Array(0),
+        payload: {
+          srcPort: 1111,
+          dstPort: 2222,
+          length: 8 + udpPayload.length,
+          checksum: 0,
+          payload: udpPayload,
+        },
+      },
+    },
+  };
+
+  const buf = new Uint8Array(128);
+  const written = coder.encode(value, buf);
+  const [decoded, read] = coder.decode(buf.subarray(0, written));
+
+  assertEquals(read, written);
+  assertEquals(decoded.protocol, TPID_8021Q);
+  const vlan = decoded.payload as VlanIpv4Frame;
+  assertEquals(vlan.tci.vlanId, 100);
+  const ip = vlan.payload;
+  assertEquals(ip.protocol, IP_PROTOCOL_UDP);
+  const udp = ip.payload as UdpPacket;
+  assertEquals(udp.payload, udpPayload);
 });

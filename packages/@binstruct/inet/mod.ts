@@ -596,9 +596,9 @@ function classifyL3(etherType: number): L3Key {
  * @returns A coder for {@linkcode VlanRefinedShallow} at `depth` `0`, or
  *   {@linkcode VlanRefined} (one level of QinQ included) at `depth` `1`.
  */
-export function vlanFrame(depth: 0): Coder<VlanRefinedShallow>;
-export function vlanFrame(depth: 1): Coder<VlanRefined>;
-export function vlanFrame(
+function vlanFrame(depth: 0): Coder<VlanRefinedShallow>;
+function vlanFrame(depth: 1): Coder<VlanRefined>;
+function vlanFrame(
   depth: 0 | 1,
 ): Coder<VlanRefinedShallow> | Coder<VlanRefined> {
   if (depth === 0) {
