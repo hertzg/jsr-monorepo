@@ -10,7 +10,7 @@
     },
     "test:parallel": "deno task test:sequential -- --parallel",
     "test:sequential": "deno test --allow-all --coverage --clean",
-    "test:doc": "deno test --allow-all --coverage --clean --doc --ignore=\"**/*.test.ts,**/adr/**\"",
+    "test:doc": "deno test --allow-all --coverage --clean --doc --ignore=\"**/*.test.ts,**/adr/**,.claude/**\"",
     "lint": {
       "dependencies": [
         "lint:deno",
@@ -34,6 +34,7 @@
   },
   "exclude": [
     ".git",
+    ".claude",
     "cov",
     "coverage",
     "docs",
