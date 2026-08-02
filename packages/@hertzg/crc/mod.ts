@@ -34,34 +34,55 @@
  */
 
 export {
+  /** Calculates CRC8 checksum for the given data, using CRC8-Maxim by default. */
   crc8,
+  /** CRC8-CCITT polynomial (ATM HEC). */
   CRC8_CCITT_POLYNOMIAL,
+  /** CRC8-Maxim/Dallas polynomial (1-Wire, iButton). */
   CRC8_MAXIM_POLYNOMIAL,
+  /** Creates a CRC8 function for the given polynomial. */
   createCrc8,
+  /** Memoized version of createCrc8. */
   memoizedCreateCrc8,
 } from "./crc8.ts";
 
 export {
+  /** Calculates CRC16 checksum for the given data, using CRC16-CCITT by default. */
   crc16,
+  /** CRC16-CCITT polynomial (X.25, HDLC, Bluetooth). */
   CRC16_CCITT_POLYNOMIAL,
+  /** CRC16-IBM/ANSI polynomial (USB, Modbus). */
   CRC16_IBM_POLYNOMIAL,
+  /** Creates a CRC16 function for the given polynomial. */
   createCrc16,
+  /** Memoized version of createCrc16. */
   memoizedCreateCrc16,
 } from "./crc16.ts";
 
 export {
+  /** Calculates CRC32 checksum for the given data, using the standard CRC32 polynomial by default. */
   crc32,
+  /** Standard CRC32 polynomial (ISO 3309, PNG, ZIP, gzip). */
   CRC32_POLYNOMIAL,
+  /** CRC32C polynomial (iSCSI, SCTP, ext4). Also known as Castagnoli. */
   CRC32C_POLYNOMIAL,
+  /** CRC32K polynomial (Koopman). Designed for improved Hamming-distance coverage. */
   CRC32K_POLYNOMIAL,
+  /** Creates a CRC32 function for the given polynomial. */
   createCrc32,
+  /** Memoized version of createCrc32. */
   memoizedCreateCrc32,
 } from "./crc32.ts";
 
 export {
+  /** Calculates CRC64 checksum for the given data, using CRC64-ECMA by default. */
   crc64,
+  /** CRC64-ECMA polynomial (XZ, 7z). */
   CRC64_ECMA_POLYNOMIAL,
+  /** CRC64-ISO polynomial (ISO 3309). */
   CRC64_ISO_POLYNOMIAL,
+  /** Creates a CRC64 function for the given polynomial. */
   createCrc64,
+  /** Memoized version of createCrc64. */
   memoizedCreateCrc64,
 } from "./crc64.ts";
