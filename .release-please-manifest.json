@@ -35,12 +35,12 @@
   "packages/@hertzg/wg-keys": "2.2.0",
   "packages/@hertzg/wg-ini": "0.2.4",
   "packages/@hertzg/wg-conf": "0.2.3",
-  "packages/@hertzg/mymagti-api": "0.1.1",
+  "packages/@hertzg/mymagti-api": "0.1.2",
   "packages/@hertzg/bx": "3.0.3",
   "packages/@hertzg/routeros-api": "0.1.2",
   "packages/@hertzg/tplink-api": "1.2.0",
-  "packages/@hertzg/ip": "4.1.0",
+  "packages/@hertzg/ip": "4.1.1",
   "packages/@hertzg/mac": "0.2.0",
-  "packages/@hertzg/crc": "0.3.0",
+  "packages/@hertzg/crc": "0.3.1",
   "packages/@hertzg/xhb": "4.0.0"
 }
