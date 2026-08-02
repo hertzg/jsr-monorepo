@@ -13,13 +13,12 @@
  * for a JSR specifier are absolute `https://jsr.io/@scope/name/1.2.3/mod.ts`
  * URLs.
  *
- * So does the **entrypoint**. `deno doc` keys its output by the module it
- * resolved, so asking about a local directory answers under the module URL
- * inside it — `./pkg` and `file:///abs/pkg` both come back as
- * `file:///abs/pkg/mod.ts`. {@linkcode PackageSurface.entrypoint} carries that
- * key on, so the CLI can import the very module the surface was read from
- * instead of the string the user typed, and discovery and execution cannot
- * disagree about which module they mean.
+ * Discovery is only ever asked about a specifier that names **one module**: a
+ * directory is refused before this runs (`./target.ts`, ADR 0004). That is what
+ * makes the output here a single node, and what makes the coders it lists the
+ * coders of the module the run will import. Pointed at a directory, `deno doc`
+ * emits one node per module file it finds underneath — no entrypoint among
+ * them — and reading any one of those is a guess about which module was meant.
  *
  * `deno info` is deliberately **not** part of the happy path. It is run only
  * by {@linkcode diagnoseEmptyDiscovery}, to tell "this is not a binstruct
@@ -100,7 +99,7 @@ export type DenoDocSymbol = {
  * A module entry in `deno doc --json` output.
  */
 export type DenoDocNode = {
-  /** The `@module` JSDoc of the entrypoint. */
+  /** The `@module` JSDoc of the documented module. */
   module_doc?: { doc?: string };
   /** Every exported symbol, in declaration order. */
   symbols: DenoDocSymbol[];
@@ -109,11 +108,13 @@ export type DenoDocNode = {
 /**
  * The `deno doc --json` document, narrowed to the parts discovery reads.
  *
- * A single entrypoint produces exactly one entry under `nodes`, keyed by the
- * specifier as it was given on the command line.
+ * A specifier that names one module produces exactly one entry under `nodes`,
+ * keyed by the module `deno doc` resolved — the specifier itself for a registry
+ * one. A directory produces one entry per module file found under it, which is
+ * why directories are refused before discovery runs.
  */
 export type DenoDocJson = {
-  /** One entry per entrypoint, keyed by specifier. */
+  /** One entry per documented module, keyed by the module's own URL. */
   nodes: Record<string, DenoDocNode>;
 };
 
@@ -135,15 +136,6 @@ export type DiscoveredCoder = {
  * The public surface of a package as read from its type declarations.
  */
 export type PackageSurface = {
-  /**
-   * The module `deno doc` resolved the specifier to, and therefore the one
-   * these coders were read from.
-   *
-   * A registry specifier keys the output under itself, so this is
-   * `jsr:@binstruct/png` again; a local one is keyed by its `file:` URL, which
-   * for a directory is the module inside it.
-   */
-  entrypoint: string;
   /** Resolved version, when the specifier resolved to a JSR package. */
   version?: string;
   /** First line of the module JSDoc, absent when the module is undocumented. */
@@ -266,19 +258,19 @@ function countRequiredParams(params: DenoDocParam[] | undefined): number {
 /**
  * Extracts the resolved JSR version from the symbols' source locations.
  *
- * Only a `jsr:` entrypoint has one. Symbols re-exported from other packages
- * are skipped by requiring the location to sit under the entrypoint's own
+ * Only a `jsr:` specifier has one. Symbols re-exported from other packages are
+ * skipped by requiring the location to sit under the package's own
  * `https://jsr.io/@scope/name/` prefix.
  *
- * @param entrypoint The key under `nodes`, i.e. the specifier as given
+ * @param key The key under `nodes`, which for a JSR package is the specifier as given
  * @param symbols The module's exported symbols
  * @returns The resolved version, or `undefined` for non-JSR specifiers
  */
 function resolvedVersion(
-  entrypoint: string,
+  key: string,
   symbols: DenoDocSymbol[],
 ): string | undefined {
-  const jsrName = /^jsr:(@[^/@]+\/[^@]+)/.exec(entrypoint)?.[1];
+  const jsrName = /^jsr:(@[^/@]+\/[^@]+)/.exec(key)?.[1];
   if (jsrName === undefined) return undefined;
 
   const prefix = `https://jsr.io/${jsrName}/`;
@@ -306,12 +298,12 @@ function resolvedVersion(
  * the ones the CLI can invoke on the user's behalf (ADR 0005). Declaration
  * order is preserved within each group.
  *
- * The key of the node the surface is read from is returned as
- * {@linkcode PackageSurface.entrypoint}: it is the module `deno doc` resolved,
- * so the caller can import exactly what was described here.
+ * The single node is read without choosing between nodes, which is sound only
+ * because the specifier named one module: a directory, whose output holds one
+ * node per file under it, never reaches here (`./target.ts`, ADR 0004).
  *
  * @param doc Parsed output of `deno doc --json --quiet <specifier>`
- * @returns The entrypoint, module summary, resolved version and coder list
+ * @returns The module summary, resolved version and coder list
  *
  * @example Read the coders of a package
  * ```ts
@@ -341,7 +333,6 @@ function resolvedVersion(
  *   },
  * });
  *
- * assertEquals(surface.entrypoint, "jsr:@binstruct/arp");
  * assertEquals(surface.version, "0.3.0");
  * assertEquals(surface.summary, "ARP packet encoding and decoding.");
  * assertEquals(surface.coders, [{
@@ -353,7 +344,7 @@ function resolvedVersion(
  * ```
  */
 export function readDocSurface(doc: DenoDocJson): PackageSurface {
-  const [entrypoint, node] = Object.entries(doc.nodes)[0];
+  const [key, node] = Object.entries(doc.nodes)[0];
 
   const nullary: DiscoveredCoder[] = [];
   const parameterized: DiscoveredCoder[] = [];
@@ -381,11 +372,10 @@ export function readDocSurface(doc: DenoDocJson): PackageSurface {
     }
   }
 
-  const version = resolvedVersion(entrypoint, node.symbols);
+  const version = resolvedVersion(key, node.symbols);
   const summary = firstLine(node.module_doc?.doc);
 
   return {
-    entrypoint,
     ...(version === undefined ? {} : { version }),
     ...(summary === undefined ? {} : { summary }),
     coders: [...nullary, ...parameterized],
@@ -456,11 +446,10 @@ async function runDeno(
  * A cold lookup pays for building the module graph — on the order of a second
  * for a JSR package — while a warm one is near-instant.
  *
- * The outcome carries both the specifier it was asked about and the
- * {@linkcode PackageSurface.entrypoint} `deno doc` resolved it to; for a local
- * specifier the latter is what the caller should import.
+ * The specifier must name a single module; callers refuse a directory first
+ * (`./target.ts`).
  *
- * @param specifier A resolved specifier, e.g. `jsr:@binstruct/arp` or a path
+ * @param specifier A resolved specifier, e.g. `jsr:@binstruct/arp` or a module path
  * @returns The discovered surface, or why `deno doc` produced none
  *
  * @example Discover the single coder of a local package
@@ -474,7 +463,6 @@ async function runDeno(
  * if (outcome.ok) {
  *   assertEquals(outcome.coders.map((coder) => coder.name), ["arpData"]);
  *   assertEquals(outcome.coders[0].requiredParams, 0);
- *   assertEquals(outcome.entrypoint, import.meta.resolve("../arp/mod.ts"));
  * }
  * ```
  */

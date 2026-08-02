@@ -425,42 +425,35 @@ Deno.test("readDocSurface has no version for a non-JSR entrypoint", () => {
   assertEquals(readDocSurface(BINSTRUCT_DOC).version, undefined);
 });
 
-Deno.test("readDocSurface reports the module deno doc resolved", () => {
-  // `deno doc` keys its output by the module it settled on, which is the one
-  // the surface was read from — and therefore the one the CLI should import,
-  // rather than whatever string the user typed to get here.
-  assertEquals(readDocSurface(PNG_DOC).entrypoint, "jsr:@binstruct/png");
-  assertEquals(
-    readDocSurface(BINSTRUCT_DOC).entrypoint,
-    "file:///repo/packages/@hertzg/binstruct/mod.ts",
-  );
-});
-
-Deno.test("discoverCoders resolves a local directory to the module inside it", async () => {
-  // Asking about a directory and about the module inside it answer with the
-  // same entrypoint, so no caller has to tell the two spellings apart.
+Deno.test("deno doc documents every module under a directory, not an entrypoint", async () => {
+  // The reason directories are refused before discovery runs. Asked about a
+  // directory, `deno doc` answers with one node per module file it finds
+  // underneath — none of them an entrypoint, and their order is the order of
+  // the file names, so reading the first is reading `aaa_other.ts`.
   const directory = await Deno.realPath(await Deno.makeTempDir());
   try {
     const binstruct = import.meta.resolve("../../@hertzg/binstruct/mod.ts");
-    await Deno.writeTextFile(
-      `${directory}/mod.ts`,
-      [
-        `import { type Coder, struct, u8 } from "${binstruct}";`,
-        "",
-        "/** A one-byte structure. */",
-        "export function myStruct(): Coder<{ a: number }> {",
-        "  return struct({ a: u8() });",
-        "}",
-        "",
-      ].join("\n"),
-    );
+    for (const name of ["mod.ts", "aaa_other.ts"]) {
+      await Deno.writeTextFile(
+        `${directory}/${name}`,
+        [
+          `import { type Coder, struct, u8 } from "${binstruct}";`,
+          "",
+          "/** A one-byte structure. */",
+          `export function ${
+            name === "mod.ts" ? "pair" : "internalOnly"
+          }(): Coder<{ a: number }> {`,
+          "  return struct({ a: u8() });",
+          "}",
+          "",
+        ].join("\n"),
+      );
+    }
 
-    const module = toFileUrl(`${directory}/mod.ts`).href;
     const outcome = await discoverCoders(toFileUrl(directory).href);
 
-    assert(outcome.ok, "discovery should succeed for a local directory");
-    assertEquals(outcome.entrypoint, module);
-    assertEquals(outcome.coders.map((coder) => coder.name), ["myStruct"]);
+    assert(outcome.ok, "deno doc reads a directory happily");
+    assertEquals(outcome.coders.map((coder) => coder.name), ["internalOnly"]);
   } finally {
     await Deno.remove(directory, { recursive: true });
   }

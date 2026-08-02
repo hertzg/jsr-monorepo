@@ -42,15 +42,22 @@ zero-required-parameter coders first.
 The resolved package version comes free from the same call: `location.filename`
 on any symbol is `https://jsr.io/@binstruct/png/0.4.0/mod.ts`.
 
-**So does the entrypoint.** The output is keyed by the module `deno doc`
-resolved, not by the string it was handed: `./pkg` and `file:///abs/pkg` both
-come back keyed `file:///abs/pkg/mod.ts`, while `jsr:@binstruct/png` is keyed by
-itself. That key is returned as `PackageSurface.entrypoint`, and for a local
-specifier it — not the user's argument — is what gets imported (ADR 0004). This
-costs nothing: the subprocess runs on every invocation anyway, and the answer
-was already in its output. It also removes the only remaining way for discovery
-and execution to disagree about which module they mean, since the surface is
-read from, and the coder loaded from, one and the same URL.
+**Discovery is only ever asked about a specifier that names one module.** A
+directory is refused before it runs (ADR 0004), and that precondition is what
+makes the output here a single node under `nodes` and therefore what makes the
+coders it lists the coders of the module the run will import.
+
+The precondition is not decoration. `deno doc --json` **does not resolve an
+entrypoint for a directory**: pointed at one it emits one node per module file
+it finds underneath, keyed by each file's own URL, with nothing marking any of
+them as the package's entry. An earlier version of this ADR claimed the opposite
+— that the first key was "the module `deno doc` resolved" — and the code took
+`Object.entries(doc.nodes)[0]`, i.e. whichever key sorted first. In a directory
+holding `mod.ts` (exporting a two-byte coder) and `aaa_other.ts` (exporting a
+one-byte internal one), `binstruct ./pkg decode` announced
+`using coder: internalOnly`, decoded two bytes of input as the one-byte
+structure, and exited 0. Silent wrong output, from the one mechanism this ADR
+exists to prevent.
 
 **`deno info` is not run on the happy path.** It is run only when discovery
 finds no coders, where its dependency graph distinguishes "this package does not
@@ -107,14 +114,17 @@ _unavailable_, which is what keeps the escape hatch below honest.
 - **Detection is a string match on `Coder`.** A coder returned through a type
   alias that does not render as `Coder<…>` is invisible to discovery. This
   constrains how format packages may declare their return types.
-- **A local package is imported through the entrypoint discovery reported**, so
-  directories work. Where `deno doc` cannot read the directory at all — it
-  documents every module it finds there rather than following a `deno.json`
-  `exports` map — nothing is reported and the invocation fails as an unreadable
-  package.
+- **Reading a single node is sound only because directories are refused.** The
+  precondition lives in another module (`target.ts`, ADR 0004), so anything that
+  weakens it there reintroduces a wrong-module read here. `discoverCoders` and
+  `readDocSurface` both say so.
+- **`deno doc` is not a resolver and is not used as one.** It reports what it
+  found, and what it found for a directory is a pile of files. Nothing in the
+  CLI treats its output as an answer to "which module did the user mean".
 
 ## References
 
+- `target.ts` — `inspectLocalTarget`, the precondition this relies on
 - `loader.ts` — `loadCoder`, the runtime import path used to run
 - `@hertzg/binstruct` — `isCoder`, the rejected runtime-probe route
 - Repo ADR 0011 — dependency age policy

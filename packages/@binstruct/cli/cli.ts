@@ -36,9 +36,9 @@
  * binstruct arp decode < arp.bin > arp.json5
  * ```
  *
- * @example A local package works whether you name the directory or the module
+ * @example A local package is named by its module file, never by its directory
  * ```bash
- * binstruct ./my-package decode < input.bin > output.json5
+ * binstruct ./my-package/mod.ts decode < input.bin > output.json5
  * ```
  *
  * @module
@@ -58,6 +58,7 @@ import {
 import { type Guide, nearestName, renderGuide } from "./guide.ts";
 import { KNOWN_PACKAGES } from "./registry.ts";
 import { type ResolvedSpecifier, resolveSpecifier } from "./specifier.ts";
+import { inspectLocalTarget, type LocalTarget } from "./target.ts";
 
 /** How the tool is spelled in every example it prints. */
 const PROGRAM = "binstruct";
@@ -87,7 +88,8 @@ const USAGE_FOOTER: readonly string[] = [
   "  -v, --version            print the version",
   "",
   "NOTES",
-  `  a bare <package> means jsr:@binstruct/<package>; write ./${SAMPLE_PACKAGE} for a local one`,
+  `  a bare <package> means jsr:@binstruct/<package>`,
+  `  a local <package> names a module file, not a directory: ./${SAMPLE_PACKAGE}/mod.ts`,
   "  the payload is JSON5, not JSON: quoted keys, 0x byte literals, comments",
   "  without --help, guidance goes to stderr and exits 1, so a half-typed",
   "  redirect stays empty",
@@ -148,8 +150,9 @@ export type CliPlan =
     /** Discriminant: this plan runs a coder over stdin. */
     readonly kind: "run";
     /**
-     * Module specifier to import: for a local package the module `deno doc`
-     * resolved, for a registry one the user's own specifier.
+     * The resolved module specifier to import, which is exactly the one
+     * discovery was asked about — it names a single module, so there is
+     * nothing to substitute.
      */
     readonly specifier: string;
     /** Coder factory to call, whether named or inferred. */
@@ -163,21 +166,16 @@ export type CliPlan =
 /**
  * The coder a run will use, or the guidance that replaces it.
  *
- * The successful shape carries what discovery learned on the way — the module
- * it actually read, the package's description and the coder's decoded type —
- * because every screen downstream of the choice wants one or the other and
- * none is worth a second subprocess.
+ * The successful shape carries what discovery learned on the way — the
+ * package's description and the coder's decoded type — because every screen
+ * downstream of the choice wants one or the other and neither is worth a
+ * second subprocess.
  */
 type CoderChoice =
   | {
     readonly ok: true;
     readonly name: string;
     readonly inferred: boolean;
-    /**
-     * The specifier to import: the module discovery read for a local package,
-     * the user's own specifier for a registry one.
-     */
-    readonly entrypoint: string;
     /** The `T` of `Coder<T>`, when discovery could name it. */
     readonly decodedType?: string;
     /** First line of the package's module doc, when it has one. */
@@ -496,6 +494,144 @@ function unknownPackageGuide(
 }
 
 /**
+ * Names a module file inside the directory that was typed.
+ *
+ * Written against {@linkcode ResolvedSpecifier.short}, so the suggestion is
+ * spelled the way the user spelled the directory — `./pkg/mod.ts` for `./pkg`,
+ * `file:///abs/pkg/mod.ts` for the URL form — and a trailing slash does not
+ * turn into a double one.
+ *
+ * @param directory The directory as typed
+ * @param name A module file name inside it
+ * @returns The two joined by a single slash
+ */
+function moduleInside(directory: string, name: string): string {
+  const trimmed = directory.endsWith("/") ? directory.slice(0, -1) : directory;
+  return `${trimmed}/${name}`;
+}
+
+/**
+ * Builds the guide for a package argument that names a directory.
+ *
+ * `import()` cannot load a directory at all, so — unlike every other argument —
+ * there is no resolution the runtime would perform for the CLI to agree with.
+ * Whatever the CLI picked would be an opinion only it holds, and one that can
+ * disagree with what the user meant: `deno doc` pointed at a directory
+ * documents *every* module file under it, and taking the first of those decoded
+ * two bytes of input as an unrelated one-byte internal structure and exited 0.
+ * So the directory is refused, and what is in it is listed the way the coder
+ * level lists coders — listing is guidance, picking would be resolution.
+ *
+ * The `TRY` line names the first module listed, because it is a module that
+ * demonstrably exists rather than a convention: suggesting `mod.ts` unasked
+ * would be the same guess in prose.
+ *
+ * @param resolved The package as typed and as resolved
+ * @param header The header block, specifier and all
+ * @param modules Module file names inside the directory, sorted
+ * @returns The guide, offering the modules that are actually there
+ */
+function directoryGuide(
+  resolved: ResolvedSpecifier,
+  header: string,
+  modules: readonly string[],
+): Guide {
+  return {
+    header,
+    diagnostic: true,
+    notes: [
+      `${resolved.short} names a directory, and import() cannot load one`,
+      "there is no directory resolution to agree with, so name the module yourself",
+    ],
+    next: {
+      word: "<package>",
+      meaning: "name the module inside the directory",
+    },
+    options: {
+      heading: `MODULES in ${resolved.short}`,
+      items: modules.map((name) => ({ name })),
+      empty: "none — this directory holds no module files",
+    },
+    try: modules.length === 0
+      ? []
+      : [`${PROGRAM} ${moduleInside(resolved.short, modules[0])}`],
+  };
+}
+
+/**
+ * Builds the guide for a local package argument that points at nothing.
+ *
+ * Kept apart from {@linkcode directoryGuide} because the two are different
+ * mistakes: a directory is a real thing named at the wrong granularity, while
+ * this is a typo or a wrong working directory, and telling someone to name the
+ * module inside a path that does not exist helps nobody.
+ *
+ * @param resolved The package as typed and as resolved
+ * @param header The header block, specifier and all
+ * @returns The guide
+ */
+function missingPathGuide(
+  resolved: ResolvedSpecifier,
+  header: string,
+): Guide {
+  return packageGuide({
+    header,
+    diagnostic: true,
+    notes: [`no such path: ${resolved.short}`],
+  });
+}
+
+/**
+ * Builds the guide for a local target that could not be inspected at all.
+ *
+ * Refusing beats assuming. The assumption available here is "it is a module",
+ * which for a directory is exactly the assumption that produced confident
+ * output from the wrong module.
+ *
+ * @param resolved The package as typed and as resolved
+ * @param header The header block, specifier and all
+ * @param reason What the filesystem said
+ * @returns The guide
+ */
+function unreadableTargetGuide(
+  resolved: ResolvedSpecifier,
+  header: string,
+  reason: string,
+): Guide {
+  return packageGuide({
+    header,
+    diagnostic: true,
+    notes: [`cannot inspect ${resolved.short}: ${reason}`],
+  });
+}
+
+/**
+ * Builds the refusal a local target calls for, if it calls for one.
+ *
+ * @param resolved The package as typed and as resolved
+ * @param header The header block, specifier and all
+ * @param target What was found at the resolved specifier
+ * @returns The guide, or `undefined` when the target is something to go on with
+ */
+function localTargetGuide(
+  resolved: ResolvedSpecifier,
+  header: string,
+  target: LocalTarget,
+): Guide | undefined {
+  switch (target.kind) {
+    case "elsewhere":
+    case "module":
+      return undefined;
+    case "directory":
+      return directoryGuide(resolved, header, target.modules);
+    case "missing":
+      return missingPathGuide(resolved, header);
+    case "unreadable":
+      return unreadableTargetGuide(resolved, header, target.reason);
+  }
+}
+
+/**
  * Builds the guide for a coder name the package does not export.
  *
  * @param resolved The package as typed and as resolved
@@ -703,50 +839,21 @@ async function deadEndGuide(
  *
  * @param coder The coder discovery found
  * @param inferred Whether the user named it or the CLI worked it out
- * @param entrypoint The specifier the run will import
  * @param summary First line of the package's module doc, when it has one
  * @returns The successful choice
  */
 function chose(
   coder: DiscoveredCoder,
   inferred: boolean,
-  entrypoint: string,
   summary: string | undefined,
 ): CoderChoice {
   return {
     ok: true,
     name: coder.name,
     inferred,
-    entrypoint,
     decodedType: coder.decodedType,
     summary,
   };
-}
-
-/**
- * Picks the specifier a run should import, given what discovery resolved.
- *
- * For a local package this is the module URL `deno doc` reported, not the one
- * the user typed. The two differ exactly when the argument names a directory —
- * `./pkg`, or the same thing spelled `file:///abs/pkg` — which `deno doc`
- * enters and `import()` refuses; taking the discovered module closes that split
- * without asking the filesystem anything, and directories start working rather
- * than being refused.
- *
- * A registry specifier is handed on untouched, so `jsr:` and `npm:` resolution
- * stays the runtime's business: substituting the `https://jsr.io/…` URL its
- * symbols live at would import the package by a route that bypasses the version
- * and the import map the user's project resolved it through.
- *
- * @param resolved The package as typed and as resolved
- * @param entrypoint The module `deno doc` resolved the specifier to
- * @returns The specifier to import
- */
-function importSpecifier(
-  resolved: ResolvedSpecifier,
-  entrypoint: string,
-): string {
-  return resolved.local ? entrypoint : resolved.specifier;
 }
 
 /**
@@ -767,9 +874,7 @@ function importSpecifier(
  * on `PATH`, a broken config in the working directory — a named coder is still
  * taken on trust, so the escape hatch of ADR 0002 survives. Only a message
  * blaming the specifier itself stops the run, because then the import would
- * fail too. Nothing reported the entrypoint in that case, so the run falls back
- * to the user's own specifier and a directory fails at the import as it always
- * did.
+ * fail too.
  *
  * @param resolved The package as typed and as resolved
  * @param header The resolved specifier line
@@ -795,16 +900,10 @@ async function chooseCoder(
     }
     return named === undefined
       ? { ok: false, guide: toolFailureGuide(resolved, header, discovery) }
-      : {
-        ok: true,
-        name: named,
-        inferred: false,
-        entrypoint: resolved.specifier,
-      };
+      : { ok: true, name: named, inferred: false };
   }
 
   const described = describedHeader(header, discovery.summary);
-  const entrypoint = importSpecifier(resolved, discovery.entrypoint);
 
   if (named !== undefined) {
     const chosen = discovery.coders.find((coder) => coder.name === named);
@@ -825,14 +924,14 @@ async function chooseCoder(
         ),
       };
     }
-    return chose(chosen, false, entrypoint, discovery.summary);
+    return chose(chosen, false, discovery.summary);
   }
 
   const callable = discovery.coders.filter((coder) =>
     coder.requiredParams === 0
   );
   if (callable.length === 1) {
-    return chose(callable[0], true, entrypoint, discovery.summary);
+    return chose(callable[0], true, discovery.summary);
   }
   if (callable.length === 0) {
     return {
@@ -933,10 +1032,13 @@ function withoutSharedPreamble(first: string, second: string): string {
  * exit 1, or on stdout with exit 0 under `--help`. Guidance that reports a
  * failure rather than a missing word stays on stderr either way.
  *
+ * A local package argument is inspected before any of that, and a directory is
+ * refused — see {@linkcode directoryGuide}. Everything downstream may therefore
+ * assume the specifier names one module, which is what lets discovery and
+ * `import()` be handed the same string.
+ *
  * Every path validates the coder through discovery first, including a complete
- * one: see {@linkcode chooseCoder} for why the shortcut had to go. A `run`
- * plan's `specifier` is therefore the module discovery read, not necessarily
- * the one that was typed — see {@linkcode importSpecifier}.
+ * one: see {@linkcode chooseCoder} for why the shortcut had to go.
  *
  * @param args Command line arguments
  * @returns What to do
@@ -973,7 +1075,7 @@ function withoutSharedPreamble(first: string, second: string): string {
  * }
  * ```
  *
- * @example A local package is run through the module `deno doc` resolved
+ * @example A local module runs under the specifier it was named by
  * ```ts
  * import { assertEquals } from "@std/assert";
  * import { planCli } from "./cli.ts";
@@ -985,6 +1087,21 @@ function withoutSharedPreamble(first: string, second: string): string {
  * if (plan.kind === "run") {
  *   assertEquals(plan.specifier, module);
  *   assertEquals(plan.coder, "arpData");
+ * }
+ * ```
+ *
+ * @example A directory is refused, and the modules in it are offered instead
+ * ```ts
+ * import { assertEquals, assertStringIncludes } from "@std/assert";
+ * import { planCli } from "./cli.ts";
+ *
+ * const plan = await planCli([import.meta.resolve("../arp/"), "decode"]);
+ *
+ * assertEquals(plan.kind, "print");
+ * if (plan.kind === "print") {
+ *   assertEquals(plan.code, 1);
+ *   assertStringIncludes(plan.text, "names a directory");
+ *   assertStringIncludes(plan.text, "mod.ts");
  * }
  * ```
  */
@@ -1003,6 +1120,15 @@ export async function planCli(args: string[]): Promise<CliPlan> {
   const header = specifierHeader(resolved);
   const { coder, command } = options;
 
+  const refusal = localTargetGuide(
+    resolved,
+    header,
+    await inspectLocalTarget(resolved.specifier),
+  );
+  if (refusal !== undefined) {
+    return present(refusal, options.help);
+  }
+
   const choice = await chooseCoder(resolved, header, coder);
   if (!choice.ok) {
     return present(choice.guide, options.help);
@@ -1017,7 +1143,7 @@ export async function planCli(args: string[]): Promise<CliPlan> {
     : [header];
 
   if (options.docs) {
-    const docs = await readCoderDocs(choice.entrypoint, choice);
+    const docs = await readCoderDocs(resolved.specifier, choice);
     return docs.ok
       ? {
         kind: "print",
@@ -1032,7 +1158,7 @@ export async function planCli(args: string[]): Promise<CliPlan> {
   if (!options.help && command !== undefined && isCommandName(command)) {
     return {
       kind: "run",
-      specifier: choice.entrypoint,
+      specifier: resolved.specifier,
       coder: choice.name,
       command,
       notices,

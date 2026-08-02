@@ -85,33 +85,71 @@ async function runCli(
 }
 
 /**
- * Writes a one-coder package into a fresh directory, as `<dir>/mypkg/<entry>`.
+ * Renders a module exporting one coder over a run of single-byte fields.
  *
  * It imports `@hertzg/binstruct` by absolute URL so the fixture needs no
  * `deno.json` of its own, which keeps the working directory free of anything
- * that could change how the CLI resolves what it is given. `mypkg` holds the
- * entrypoint and nothing else, which is what lets `deno doc` be pointed at the
- * directory.
+ * that could change how the CLI resolves what it is given.
+ *
+ * @param coder Name of the exported factory
+ * @param fields Field names, one byte each, in order
+ * @returns The module source
+ */
+function coderModule(coder: string, fields: readonly string[]): string {
+  const binstruct = import.meta.resolve("../../@hertzg/binstruct/mod.ts");
+  const decoded = fields.map((field) => `${field}: number`).join("; ");
+  const struct = fields.map((field) => `${field}: u8()`).join(", ");
+
+  return [
+    `import { type Coder, struct, u8 } from "${binstruct}";`,
+    "",
+    `/** A ${fields.length}-byte structure that exists only here. */`,
+    `export function ${coder}(): Coder<{ ${decoded} }> {`,
+    `  return struct({ ${struct} });`,
+    "}",
+    "",
+  ].join("\n");
+}
+
+/**
+ * Writes a one-coder package into a fresh directory, as `<dir>/mypkg/<entry>`.
  *
  * @param entry Name of the entrypoint module, for the extension cases
  * @returns The containing directory, realpathed, to be removed by the caller
  */
 async function writeLocalPackage(entry = "mod.ts"): Promise<string> {
   const directory = await Deno.realPath(await Deno.makeTempDir());
-  const binstruct = import.meta.resolve("../../@hertzg/binstruct/mod.ts");
 
   await Deno.mkdir(`${directory}/mypkg`);
   await Deno.writeTextFile(
     `${directory}/mypkg/${entry}`,
-    [
-      `import { type Coder, struct, u8 } from "${binstruct}";`,
-      "",
-      "/** A one-byte structure that exists only in this directory. */",
-      "export function myStruct(): Coder<{ a: number }> {",
-      "  return struct({ a: u8() });",
-      "}",
-      "",
-    ].join("\n"),
+    coderModule("myStruct", ["a"]),
+  );
+
+  return directory;
+}
+
+/**
+ * Writes a package whose alphabetically first module is not the intended one.
+ *
+ * `mypkg/mod.ts` exports `pair`, two bytes wide; `mypkg/aaa_other.ts` exports
+ * `internalOnly`, one byte wide. The two decode the same input to different
+ * shapes, which is what makes a wrong choice observable rather than merely
+ * arbitrary.
+ *
+ * @returns The containing directory, realpathed, to be removed by the caller
+ */
+async function writeAmbiguousPackage(): Promise<string> {
+  const directory = await Deno.realPath(await Deno.makeTempDir());
+
+  await Deno.mkdir(`${directory}/mypkg`);
+  await Deno.writeTextFile(
+    `${directory}/mypkg/mod.ts`,
+    coderModule("pair", ["a", "b"]),
+  );
+  await Deno.writeTextFile(
+    `${directory}/mypkg/aaa_other.ts`,
+    coderModule("internalOnly", ["z"]),
   );
 
   return directory;
@@ -336,13 +374,15 @@ Deno.test("two or more coders require the explicit name", async () => {
   assertStringIncludes(plan.text, "exposes 3 coders");
 });
 
-Deno.test("an unknown package is answered with the package list", async () => {
+Deno.test("a local path that is not there says so, and says nothing else", async () => {
+  // Distinct from the directory refusal: nothing exists here, so telling
+  // someone to name the module inside it would be nonsense.
   const plan = printed(await planCli(["./no-such-package.ts"]));
 
   assertEquals(plan.code, 1);
-  assertStringIncludes(plan.text, "cannot read file://");
-  assertStringIncludes(plan.text, "no-such-package.ts");
-  assertStringIncludes(plan.text, "Module not found");
+  assertStringIncludes(plan.text, "no such path: ./no-such-package.ts");
+  assertEquals(plan.text.includes("names a directory"), false);
+  assertStringIncludes(plan.text, "PACKAGES");
   assertStringIncludes(plan.text, "NEXT  <package>");
   assertEquals(plan.text.includes("["), false);
 });
@@ -656,64 +696,151 @@ Deno.test("a relative package is read from the working directory", async () => {
   }
 });
 
-Deno.test("a directory is imported as the module deno doc resolved", async () => {
-  // `deno doc ./mypkg` documents ./mypkg/mod.ts while import() refuses the
-  // directory outright, so the CLI listed the coder, announced it, printed a
-  // TRY line for the command, and then died with ERR_UNSUPPORTED_DIR_IMPORT.
-  // The module deno doc reports is what gets imported, so the two cannot
-  // disagree — and the directory simply works.
-  const directory = await writeLocalPackage();
+Deno.test("a directory is refused, and its modules are offered instead", async () => {
+  // `deno doc ./mypkg` documents every module file under it — one node each,
+  // no entrypoint among them — and the CLI read the first, so ./mypkg decoded
+  // through aaa_other.ts: the alphabetical accident, not the package. import()
+  // has no directory resolution to agree with, so nothing here picks one.
+  const directory = await writeAmbiguousPackage();
   try {
-    const plan = await planCli([`${directory}/mypkg`, "decode"]);
+    const plan = printed(await planCli([`${directory}/mypkg`, "decode"]));
 
-    assertEquals(plan.kind, "run");
-    if (plan.kind !== "run") return;
-
-    assertEquals(plan.specifier, toFileUrl(`${directory}/mypkg/mod.ts`).href);
-    assertEquals(plan.coder, "myStruct");
+    assertEquals(plan.stream, "stderr");
+    assertEquals(plan.code, 1);
+    assertStringIncludes(plan.text, "names a directory");
+    assertStringIncludes(plan.text, "import() cannot load one");
+    assertStringIncludes(plan.text, "MODULES in ");
+    assertStringIncludes(plan.text, "aaa_other.ts");
+    assertStringIncludes(plan.text, "mod.ts");
+    assertEquals(plan.text.includes("internalOnly"), false);
+    assertEquals(plan.text.includes("using coder"), false);
   } finally {
     await Deno.remove(directory, { recursive: true });
   }
 });
 
-Deno.test("a directory spelled as a file: URL is not a way round the rule", async () => {
+Deno.test("a directory never decodes to the wrong shape", async () => {
+  // Two bytes in, `{ 'z': 1 }` out, exit 0 — a one-byte internal structure
+  // decoded from input meant for a two-byte one, reported as a success.
+  const directory = await writeAmbiguousPackage();
+  try {
+    const run = await runCli(
+      ["./mypkg", "decode"],
+      ["-A"],
+      directory,
+      new Uint8Array([1, 2]),
+    );
+
+    assertEquals(run.code, 1);
+    assertEquals(run.stdout, "");
+    assertEquals(run.stderr.includes("'z'"), false);
+    assertEquals(run.stderr.includes("using coder: internalOnly"), false);
+    assertStringIncludes(run.stderr, "names a directory");
+  } finally {
+    await Deno.remove(directory, { recursive: true });
+  }
+});
+
+Deno.test("the module named directly decodes, end to end", async () => {
+  // The other half of the refusal: naming the module works, and works with the
+  // structure the module actually declares.
+  const directory = await writeAmbiguousPackage();
+  try {
+    const run = await runCli(
+      ["./mypkg/mod.ts", "decode"],
+      ["-A"],
+      directory,
+      new Uint8Array([1, 2]),
+    );
+
+    assertEquals(run.code, 0);
+    assertStringIncludes(run.stdout, "'a'");
+    assertStringIncludes(run.stdout, "'b'");
+    assertEquals(run.stdout.includes("'z'"), false);
+    assertStringIncludes(run.stderr, "using coder: pair");
+  } finally {
+    await Deno.remove(directory, { recursive: true });
+  }
+});
+
+Deno.test("the standard deno.json + mod.ts layout is refused, not called empty", async () => {
+  // This layout used to die inside the empty-discovery diagnosis, reported as
+  // "exposes no coders — its module graph could not be read:
+  // [ERR_UNSUPPORTED_DIR_IMPORT] …", which blames the package for the CLI
+  // having pointed a directory at import().
+  const directory = await writeLocalPackage();
+  try {
+    await Deno.writeTextFile(
+      `${directory}/mypkg/deno.json`,
+      '{ "name": "@x/mypkg", "version": "0.0.1", "exports": "./mod.ts" }\n',
+    );
+
+    const plan = printed(await planCli([`${directory}/mypkg`, "decode"]));
+
+    assertEquals(plan.code, 1);
+    assertStringIncludes(plan.text, "names a directory");
+    assertEquals(plan.text.includes("exposes no coders"), false);
+    assertEquals(plan.text.includes("ERR_UNSUPPORTED_DIR_IMPORT"), false);
+    // The listing offers modules, not everything in the directory: `deno.json`
+    // is not something the package argument may name, and the `exports` map in
+    // it is not consulted — reading it would be resolving.
+    assertStringIncludes(plan.text, "mod.ts");
+    assertEquals(plan.text.includes("deno.json"), false);
+    assertStringIncludes(
+      plan.text,
+      `TRY\n  binstruct ${directory}/mypkg/mod.ts`,
+    );
+  } finally {
+    await Deno.remove(directory, { recursive: true });
+  }
+});
+
+Deno.test("a directory is refused however it is spelled", async () => {
   // The header prints `→ file:///…` for every local path and `--docs` prints
-  // `Defined in file:///…`, so this spelling is one the CLI itself teaches.
-  // Classifying by spelling let it past every local rule and straight into
-  // ERR_UNSUPPORTED_DIR_IMPORT; classification does not decide it any more.
-  const directory = await writeLocalPackage();
+  // `Defined in file:///…`, so the URL spelling is one the CLI itself teaches;
+  // a trailing slash and a symlink are the same directory again. The decision
+  // is taken on the resolved target, so all of them reach it.
+  const directory = await writeAmbiguousPackage();
   try {
-    const url = toFileUrl(`${directory}/mypkg`).href;
-    const plan = await planCli([url, "decode"]);
+    await Deno.symlink(`${directory}/mypkg`, `${directory}/link`);
 
-    assertEquals(plan.kind, "run");
-    if (plan.kind !== "run") return;
+    const spellings = [
+      `${directory}/mypkg`,
+      `${directory}/mypkg/`,
+      toFileUrl(`${directory}/mypkg`).href,
+      `${toFileUrl(`${directory}/mypkg`).href}/`,
+      `${directory}/link`,
+    ];
 
-    assertEquals(plan.specifier, `${url}/mod.ts`);
-    assertEquals(plan.coder, "myStruct");
+    for (const spelling of spellings) {
+      const plan = printed(await planCli([spelling, "decode"]));
+
+      assertEquals(plan.code, 1);
+      assertStringIncludes(plan.text, "names a directory");
+      assertStringIncludes(plan.text, "aaa_other.ts");
+      // Never a TRY line pointing at a path that cannot exist.
+      assertEquals(plan.text.includes("//aaa_other.ts"), false);
+      assertStringIncludes(plan.text, "TRY\n  binstruct ");
+    }
   } finally {
     await Deno.remove(directory, { recursive: true });
   }
 });
 
-Deno.test("a directory decodes, whichever way it is spelled", async () => {
-  const directory = await writeLocalPackage();
+Deno.test("a directory with no modules is refused without a TRY line", async () => {
+  // The refusal must never name a command that does not exist, so when there
+  // is nothing to name it says so and stops.
+  const directory = await Deno.realPath(await Deno.makeTempDir());
   try {
-    for (
-      const spelling of ["./mypkg", toFileUrl(`${directory}/mypkg`).href]
-    ) {
-      const run = await runCli(
-        [spelling, "decode"],
-        ["-A"],
-        directory,
-        new Uint8Array([7]),
-      );
+    await Deno.writeTextFile(`${directory}/README.md`, "not a module\n");
 
-      assertEquals(run.code, 0);
-      assertStringIncludes(run.stdout, "7");
-      assertEquals(run.stderr.includes("ERR_UNSUPPORTED_DIR_IMPORT"), false);
-      assertEquals(run.stderr.includes("it names a directory"), false);
-    }
+    const plan = printed(await planCli([directory, "decode"]));
+
+    assertEquals(plan.code, 1);
+    assertStringIncludes(plan.text, "names a directory");
+    assertStringIncludes(plan.text, "holds no module files");
+    assertEquals(plan.text.includes("README.md"), false);
+    assertEquals(plan.text.includes("TRY"), false);
   } finally {
     await Deno.remove(directory, { recursive: true });
   }
@@ -721,7 +848,9 @@ Deno.test("a directory decodes, whichever way it is spelled", async () => {
 
 Deno.test("a .mts entrypoint is a module, not a directory", async () => {
   // `.mts`, `.cts` and `.jsx` were missing from the extension list, so a real
-  // module was called a directory and offered `./mypkg/mod.mts/mod.ts`.
+  // module was called a directory and offered `./mypkg/mod.mts/mod.ts`. The
+  // extension no longer decides it either way — the stat does — but the list
+  // still has to be right, because it is what the directory listing offers.
   const directory = await writeLocalPackage("mod.mts");
   try {
     const run = await runCli(
@@ -740,9 +869,9 @@ Deno.test("a .mts entrypoint is a module, not a directory", async () => {
   }
 });
 
-Deno.test("a registry specifier is imported exactly as it was typed", async () => {
-  // The entrypoint substitution is scoped to local specifiers: swapping in the
-  // https://jsr.io/… URL the symbols live at would import the package by a
+Deno.test("a specifier is imported exactly as it resolved", async () => {
+  // Nothing is substituted for what discovery was asked about. Importing the
+  // https://jsr.io/… URL the symbols live at, say, would load the package by a
   // route that bypasses the version and import map the project resolved.
   const plan = await planCli(["png", "pngFile", "decode"]);
 

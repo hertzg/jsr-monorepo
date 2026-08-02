@@ -16,8 +16,9 @@
  * A path is anything beginning with `.` or `/`, or ending in a JS/TS module
  * extension. Whether it names a file or a directory is deliberately *not*
  * decided here: that is a fact about the target, not about how the argument was
- * typed, and the CLI learns it from `deno doc`, which reports the module URL it
- * resolved (see `@binstruct/cli` ADRs 0002 and 0004).
+ * typed, so `./pkg`, `/abs/pkg`, `file:///abs/pkg` and a symlink to any of them
+ * all reach `inspectLocalTarget` in `./target.ts`, which stats the target and
+ * refuses a directory (see `@binstruct/cli` ADR 0004).
  *
  * A path is made absolute against the working directory rather than passed
  * through, because the two consumers of a specifier disagree about what a
@@ -27,12 +28,6 @@
  * Anchoring it once, here, is what keeps the two looking at the same module.
  * {@linkcode ResolvedSpecifier.short} keeps the typed form, so listings and
  * `TRY` lines still say `./pkg`.
- *
- * {@linkcode ResolvedSpecifier.local} marks the forms that end up as a `file:`
- * URL — a path, and a `file:` URL typed out in full. Those are the ones whose
- * discovered module URL the CLI substitutes before importing; registry
- * specifiers are handed to `import()` exactly as the user wrote them, so
- * `jsr:` and `npm:` resolution semantics are untouched.
  *
  * Nothing here consults the registry, the network or the filesystem, so an
  * unknown bare name resolves happily and fails later, at load time.
@@ -67,11 +62,34 @@ const MODULE_EXTENSIONS = [
   ".cjs",
 ];
 
+/**
+ * Reports whether a name ends in an extension the runtime will load.
+ *
+ * Shared by classification here and by the directory listing in `./target.ts`,
+ * so "what counts as a module" is answered in one place: a directory refusal
+ * that offered names the classifier would then reject would be teaching a form
+ * the tool does not accept.
+ *
+ * @param name A file name or path, e.g. `mod.ts` or `./pkg/mod.mts`.
+ * @returns Whether it ends in a JS/TS module extension.
+ *
+ * @example Every extension the runtime loads counts, and nothing else
+ * ```ts
+ * import { assertEquals } from "@std/assert";
+ * import { isModulePath } from "./specifier.ts";
+ *
+ * assertEquals(isModulePath("mod.ts"), true);
+ * assertEquals(isModulePath("./pkg/mod.mts"), true);
+ * assertEquals(isModulePath("deno.json"), false);
+ * assertEquals(isModulePath("README.md"), false);
+ * ```
+ */
+export function isModulePath(name: string): boolean {
+  return MODULE_EXTENSIONS.some((extension) => name.endsWith(extension));
+}
+
 /** Scheme implied by a specifier that names a package but no registry. */
 const JSR_SCHEME = "jsr:";
-
-/** Scheme of every specifier that names something on this machine. */
-const FILE_SCHEME = "file:";
 
 /** Scope implied by a bare package name. */
 const IMPLIED_SCOPE = "@binstruct/";
@@ -83,7 +101,9 @@ const IMPLIED_SCOPE = "@binstruct/";
  *   `file:`).
  * - `"path"` — the input pointed somewhere on disk, by leading `.` or `/` or by
  *   module extension. A file and a directory are the same form: which one it is
- *   cannot be read off the spelling, and nothing here goes looking.
+ *   cannot be read off the spelling, and nothing here goes looking. Nor is the
+ *   form the place to ask — `file:///abs/pkg` is a `"scheme"` and names a
+ *   directory all the same.
  * - `"scoped"` — the input named a scope and package, without a scheme.
  * - `"bare"` — the input named a package only.
  *
@@ -111,13 +131,6 @@ export interface ResolvedSpecifier {
   readonly form: SpecifierForm;
   /** Whether the input was shorthand, and therefore expanded. */
   readonly shorthand: boolean;
-  /**
-   * Whether the specifier names something on this machine, i.e. resolved to a
-   * `file:` URL. True for a path and for a `file:` URL typed in full, and the
-   * condition under which the CLI imports the module URL `deno doc` reported
-   * rather than the specifier itself.
-   */
-  readonly local: boolean;
 }
 
 /**
@@ -131,8 +144,7 @@ function classify(input: string): SpecifierForm {
     return "scheme";
   }
   if (
-    input.startsWith(".") || input.startsWith("/") ||
-    MODULE_EXTENSIONS.some((extension) => input.endsWith(extension))
+    input.startsWith(".") || input.startsWith("/") || isModulePath(input)
   ) {
     return "path";
   }
@@ -180,10 +192,10 @@ function expand(input: string, form: SpecifierForm): string {
  * and only for that form.
  *
  * Whether the path names a file or a directory is left open. Both are the
- * `"path"` form and both are `local`, and the CLI settles the question by
- * asking `deno doc` which module it resolved rather than by reading the
- * spelling — a directory and the module inside it are indistinguishable as
- * strings, and `file:///abs/pkg` is as much a directory as `./pkg` is.
+ * `"path"` form, because a directory and the module inside it are
+ * indistinguishable as strings and `file:///abs/pkg` is as much a directory as
+ * `./pkg` is; the CLI settles the question by stat'ing the resolved target
+ * (`inspectLocalTarget` in `./target.ts`).
  *
  * @param input Package argument as typed on the command line.
  * @returns The input, its resolved specifier, its short form and how it was classified.
@@ -199,7 +211,6 @@ function expand(input: string, form: SpecifierForm): string {
  * assertEquals(resolved.short, "png");
  * assertEquals(resolved.form, "bare");
  * assertEquals(resolved.shorthand, true);
- * assertEquals(resolved.local, false);
  * ```
  *
  * @example A scope, a scheme and a path
@@ -225,7 +236,7 @@ function expand(input: string, form: SpecifierForm): string {
  *
  * assertEquals(resolveSpecifier("./local").form, "path");
  * assertEquals(resolveSpecifier("./local/mod.mts").form, "path");
- * assertEquals(resolveSpecifier("file:///abs/local").local, true);
+ * assertEquals(resolveSpecifier("file:///abs/local").form, "scheme");
  * ```
  *
  * @example A version suffix rides along
@@ -249,7 +260,6 @@ export function resolveSpecifier(input: string): ResolvedSpecifier {
       short: input,
       form,
       shorthand: false,
-      local: true,
     };
   }
 
@@ -260,7 +270,6 @@ export function resolveSpecifier(input: string): ResolvedSpecifier {
     short: shortenSpecifier(specifier),
     form,
     shorthand: form === "scoped" || form === "bare",
-    local: specifier.startsWith(FILE_SCHEME),
   };
 }
 

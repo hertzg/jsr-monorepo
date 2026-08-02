@@ -34,9 +34,9 @@
  * deno run -A @binstruct/cli arp decode < arp.bin > arp.json5
  * ```
  *
- * @example A local package works the same way, relative to the working directory
+ * @example A local module works the same way, relative to the working directory
  * ```bash
- * deno run -A @binstruct/cli ./my-package myStruct decode < input.bin > output.json5
+ * deno run -A @binstruct/cli ./my-package/mod.ts myStruct decode < input.bin > output.json5
  * ```
  *
  * @example Programmatic usage: plan an invocation without performing it
@@ -80,8 +80,14 @@ export type {
   ToolFailure,
   ToolFailureReason,
 } from "./discover.ts";
-export { resolveSpecifier, shortenSpecifier } from "./specifier.ts";
+export {
+  isModulePath,
+  resolveSpecifier,
+  shortenSpecifier,
+} from "./specifier.ts";
 export type { ResolvedSpecifier, SpecifierForm } from "./specifier.ts";
+export { inspectLocalTarget } from "./target.ts";
+export type { LocalTarget } from "./target.ts";
 export { KNOWN_PACKAGES } from "./registry.ts";
 
 if (import.meta.main) {

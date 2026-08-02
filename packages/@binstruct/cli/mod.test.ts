@@ -61,7 +61,6 @@ Deno.test("the types in the exported signatures are exported too", () => {
   assertEquals(success.coders.map((coder) => coder.name), ["thing"]);
   assertEquals(success.coders[0].requiredParams, 1);
   assertEquals(success.version, "1.0.0");
-  assertEquals(success.entrypoint, "jsr:@scope/thing");
   assertEquals(docs.ok, true);
   assertEquals(diagnosis.ok, true);
 });
