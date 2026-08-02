@@ -19,6 +19,9 @@
 "@binstruct/icmpv6":
   - changed-files:
       - any-glob-to-any-file: packages/@binstruct/icmpv6/**
+"@binstruct/igmp":
+  - changed-files:
+      - any-glob-to-any-file: packages/@binstruct/igmp/**
 "@binstruct/inet":
   - changed-files:
       - any-glob-to-any-file: packages/@binstruct/inet/**
