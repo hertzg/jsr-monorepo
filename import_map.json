@@ -30,6 +30,7 @@
     "@binstruct/au": "jsr:@binstruct/au@^0.0.1",
     "@binstruct/bmp": "jsr:@binstruct/bmp@^1.0.0",
     "@binstruct/cli": "jsr:@binstruct/cli@^0.2.0",
+    "@binstruct/dos-mz": "jsr:@binstruct/dos-mz@^0.0.1",
     "@binstruct/ethernet": "jsr:@binstruct/ethernet@^1.1.0",
     "@binstruct/icmp": "jsr:@binstruct/icmp@^1.1.0",
     "@binstruct/icmpv6": "jsr:@binstruct/icmpv6@^0.0.1",

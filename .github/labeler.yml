@@ -10,6 +10,9 @@
 "@binstruct/cli":
   - changed-files:
       - any-glob-to-any-file: packages/@binstruct/cli/**
+"@binstruct/dos-mz":
+  - changed-files:
+      - any-glob-to-any-file: packages/@binstruct/dos-mz/**
 "@binstruct/ethernet":
   - changed-files:
       - any-glob-to-any-file: packages/@binstruct/ethernet/**
