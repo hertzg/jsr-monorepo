@@ -115,7 +115,7 @@ const ARP = import.meta.resolve("../arp/mod.ts");
 /** A package with three zero-argument coders and one that takes an argument. */
 const PNG = import.meta.resolve("../png/mod.ts");
 
-/** A package whose every coder takes an argument. */
+/** A package with three zero-argument coders and one that takes two. */
 const PCAP = import.meta.resolve("../pcap/mod.ts");
 
 /** A package that is not built on binstruct. */
@@ -253,6 +253,42 @@ async function writeOptionalParameterPackage(): Promise<string> {
       "",
       "/** A one-byte structure whose only parameter may be omitted. */",
       "export function maybe(_flag?: boolean): Coder<{ a: number }> {",
+      "  return struct({ a: u8() });",
+      "}",
+      "",
+    ].join("\n"),
+  );
+
+  return directory;
+}
+
+/**
+ * Writes a package whose every coder declares a *required* parameter.
+ *
+ * No published `@binstruct/*` package is shaped this way any more — `pcap` was
+ * the last one, and its factories now default their arguments — but the dead
+ * end is still reachable for anyone else's package, so the case is kept alive
+ * on a fixture rather than on whichever real package happens to fit today.
+ *
+ * @returns The containing directory, realpathed, to be removed by the caller
+ */
+async function writeArgumentOnlyPackage(): Promise<string> {
+  const directory = await Deno.realPath(await Deno.makeTempDir());
+  const binstruct = import.meta.resolve("../../@hertzg/binstruct/mod.ts");
+
+  await Deno.mkdir(`${directory}/mypkg`);
+  await Deno.writeTextFile(
+    `${directory}/mypkg/mod.ts`,
+    [
+      `import { type Coder, struct, u8 } from "${binstruct}";`,
+      "",
+      "/** A one-byte structure the caller must pick a width for. */",
+      "export function sized(_width: number): Coder<{ a: number }> {",
+      "  return struct({ a: u8() });",
+      "}",
+      "",
+      "/** A one-byte structure the caller must pick a byte order for. */",
+      'export function ordered(_order: "le" | "be"): Coder<{ a: number }> {',
       "  return struct({ a: u8() });",
       "}",
       "",
@@ -805,15 +841,21 @@ Deno.test("a package with no coders is diagnosed", async () => {
 });
 
 Deno.test("a package whose coders all take arguments is a dead end", async () => {
-  const plan = printed(await planCli([PCAP]));
+  const directory = await writeArgumentOnlyPackage();
+  try {
+    const plan = printed(await planCli([`file://${directory}/mypkg/mod.ts`]));
 
-  assertEquals(plan.code, 1);
-  assertStringIncludes(
-    plan.text,
-    "takes arguments, which the CLI cannot supply",
-  );
-  assertStringIncludes(plan.text, "pcapFile — 1 required");
-  assertStringIncludes(plan.text, "NEXT  <package>");
+    assertEquals(plan.code, 1);
+    assertStringIncludes(
+      plan.text,
+      "takes arguments, which the CLI cannot supply",
+    );
+    assertStringIncludes(plan.text, "sized — 1 required");
+    assertStringIncludes(plan.text, "ordered — 1 required");
+    assertStringIncludes(plan.text, "NEXT  <package>");
+  } finally {
+    await Deno.remove(directory, { recursive: true });
+  }
 });
 
 Deno.test("an unknown command is answered with the command list", async () => {
@@ -863,9 +905,12 @@ Deno.test("explainFailure leaves the header to its caller", async () => {
 });
 
 Deno.test("explainFailure explains a coder that takes arguments", async () => {
-  const text = await explainFailure(PCAP, "pcapFile", new Error("boom"));
+  const text = await explainFailure(PCAP, "pcapFileWith", new Error("boom"));
 
-  assertStringIncludes(text, "takes arguments, which the CLI cannot supply");
+  assertStringIncludes(
+    text,
+    "pcapFileWith takes 2 arguments, which the CLI cannot supply",
+  );
   assertEquals(text.includes("Error: boom"), false);
 });
 
@@ -1191,15 +1236,15 @@ Deno.test("the level 2 collapse keeps the description too", async () => {
 });
 
 Deno.test("a named coder that takes arguments is refused, not called", async () => {
-  // pcapFile(endianness) called bare defaults to big-endian and decodes a
-  // little-endian capture into plausible, wrong numbers with exit 0.
-  const plan = printed(await planCli([PCAP, "pcapFile", "decode"]));
+  // pcapFileWith(header, record) called bare would build a file coder over two
+  // undefined sub-coders and fail somewhere inside the decode instead of here.
+  const plan = printed(await planCli([PCAP, "pcapFileWith", "decode"]));
 
   assertEquals(plan.stream, "stderr");
   assertEquals(plan.code, 1);
   assertStringIncludes(
     plan.text,
-    "takes arguments, which the CLI cannot supply",
+    "pcapFileWith takes 2 arguments, which the CLI cannot supply",
   );
 });
 
