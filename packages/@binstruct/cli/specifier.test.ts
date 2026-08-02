@@ -1,7 +1,6 @@
 import { assertEquals, assertStringIncludes } from "@std/assert";
 import { join, resolve, toFileUrl } from "@std/path";
 import {
-  moduleInside,
   resolveSpecifier,
   shortenSpecifier,
   type SpecifierForm,
@@ -12,6 +11,7 @@ type ResolutionCase = {
   readonly specifier: string;
   readonly form: SpecifierForm;
   readonly short: string;
+  readonly local: boolean;
 };
 
 /**
@@ -31,104 +31,163 @@ const cases: readonly ResolutionCase[] = [
     specifier: "jsr:@binstruct/png",
     form: "scheme",
     short: "png",
+    local: false,
   },
   {
     input: "jsr:@hertzg/xhb",
     specifier: "jsr:@hertzg/xhb",
     form: "scheme",
     short: "@hertzg/xhb",
+    local: false,
   },
   {
     input: "jsr:@binstruct/wav@0.2.0",
     specifier: "jsr:@binstruct/wav@0.2.0",
     form: "scheme",
     short: "wav@0.2.0",
+    local: false,
   },
-  { input: "npm:foo", specifier: "npm:foo", form: "scheme", short: "npm:foo" },
+  {
+    input: "npm:foo",
+    specifier: "npm:foo",
+    form: "scheme",
+    short: "npm:foo",
+    local: false,
+  },
   {
     input: "npm:@scope/foo@1.2.3",
     specifier: "npm:@scope/foo@1.2.3",
     form: "scheme",
     short: "npm:@scope/foo@1.2.3",
+    local: false,
   },
   {
     input: "https://example.com/mod.ts",
     specifier: "https://example.com/mod.ts",
     form: "scheme",
     short: "https://example.com/mod.ts",
+    local: false,
   },
+  // A `file:` URL keeps its scheme form, but it is still something on this
+  // machine, so it is `local` and gets the same entrypoint treatment a path
+  // does. Classifying it as a registry specifier is what let a directory
+  // spelled `file:///abs/pkg` walk straight past every local rule.
   {
     input: "file:///abs/mod.ts",
     specifier: "file:///abs/mod.ts",
     form: "scheme",
     short: "file:///abs/mod.ts",
+    local: true,
+  },
+  {
+    input: "file:///abs/pkg",
+    specifier: "file:///abs/pkg",
+    form: "scheme",
+    short: "file:///abs/pkg",
+    local: true,
   },
 
   // Row 2: paths, by leading marker or by module extension. A path is anchored
   // to the working directory, because `deno doc` and `import()` disagree about
   // what a relative one is relative to; the typed form survives as `short`.
-  // A path that names no module file is a `directory`, which the CLI refuses:
-  // `deno doc` walks into it and `import()` will not.
+  // Whether it names a file or a directory is not decided here.
   {
     input: "./local",
     specifier: underCwd("./local"),
-    form: "directory",
+    form: "path",
     short: "./local",
+    local: true,
   },
   {
     input: "../up",
     specifier: underCwd("../up"),
-    form: "directory",
+    form: "path",
     short: "../up",
+    local: true,
   },
   {
     input: "/abs/path",
     specifier: "file:///abs/path",
-    form: "directory",
+    form: "path",
     short: "/abs/path",
+    local: true,
   },
-  { input: ".", specifier: underCwd("."), form: "directory", short: "." },
+  {
+    input: ".",
+    specifier: underCwd("."),
+    form: "path",
+    short: ".",
+    local: true,
+  },
   {
     input: "./local/mod.ts",
     specifier: underCwd("./local/mod.ts"),
     form: "path",
     short: "./local/mod.ts",
+    local: true,
   },
   {
     input: "mod.ts",
     specifier: underCwd("mod.ts"),
     form: "path",
     short: "mod.ts",
+    local: true,
   },
   {
     input: "mod.tsx",
     specifier: underCwd("mod.tsx"),
     form: "path",
     short: "mod.tsx",
+    local: true,
+  },
+  {
+    input: "mod.mts",
+    specifier: underCwd("mod.mts"),
+    form: "path",
+    short: "mod.mts",
+    local: true,
+  },
+  {
+    input: "mod.cts",
+    specifier: underCwd("mod.cts"),
+    form: "path",
+    short: "mod.cts",
+    local: true,
   },
   {
     input: "mod.js",
     specifier: underCwd("mod.js"),
     form: "path",
     short: "mod.js",
+    local: true,
+  },
+  {
+    input: "mod.jsx",
+    specifier: underCwd("mod.jsx"),
+    form: "path",
+    short: "mod.jsx",
+    local: true,
   },
   {
     input: "mod.mjs",
     specifier: underCwd("mod.mjs"),
     form: "path",
     short: "mod.mjs",
+    local: true,
   },
   {
     input: "mod.cjs",
     specifier: underCwd("mod.cjs"),
     form: "path",
     short: "mod.cjs",
+    local: true,
   },
   {
     input: "pkg/mod.ts",
     specifier: underCwd("pkg/mod.ts"),
     form: "path",
     short: "pkg/mod.ts",
+    local: true,
   },
 
   // Row 3: a scope, but no scheme.
@@ -137,41 +196,58 @@ const cases: readonly ResolutionCase[] = [
     specifier: "jsr:@hertzg/xhb",
     form: "scoped",
     short: "@hertzg/xhb",
+    local: false,
   },
   {
     input: "@binstruct/png",
     specifier: "jsr:@binstruct/png",
     form: "scoped",
     short: "png",
+    local: false,
   },
   {
     input: "@binstruct/wav@0.2.0",
     specifier: "jsr:@binstruct/wav@0.2.0",
     form: "scoped",
     short: "wav@0.2.0",
+    local: false,
   },
 
   // Row 4: bare names imply jsr: and @binstruct.
-  { input: "png", specifier: "jsr:@binstruct/png", form: "bare", short: "png" },
+  {
+    input: "png",
+    specifier: "jsr:@binstruct/png",
+    form: "bare",
+    short: "png",
+    local: false,
+  },
   {
     input: "wav@0.2.0",
     specifier: "jsr:@binstruct/wav@0.2.0",
     form: "bare",
     short: "wav@0.2.0",
+    local: false,
   },
   {
     input: "tls-record",
     specifier: "jsr:@binstruct/tls-record",
     form: "bare",
     short: "tls-record",
+    local: false,
   },
   // Unconditional: no registry lookup, so a package of another scope resolves
   // into @binstruct and fails later at load time.
-  { input: "xhb", specifier: "jsr:@binstruct/xhb", form: "bare", short: "xhb" },
+  {
+    input: "xhb",
+    specifier: "jsr:@binstruct/xhb",
+    form: "bare",
+    short: "xhb",
+    local: false,
+  },
 ];
 
 Deno.test("resolveSpecifier resolves by first match", async (t) => {
-  for (const { input, specifier, form, short } of cases) {
+  for (const { input, specifier, form, short, local } of cases) {
     await t.step(`${input === "" ? "<empty>" : input} -> ${specifier}`, () => {
       assertEquals(resolveSpecifier(input), {
         input,
@@ -179,6 +255,7 @@ Deno.test("resolveSpecifier resolves by first match", async (t) => {
         short,
         form,
         shorthand: form === "scoped" || form === "bare",
+        local,
       });
     });
   }
@@ -206,6 +283,7 @@ Deno.test("resolveSpecifier leaves an explicit file URL alone", () => {
 
   assertEquals(resolved.form, "scheme");
   assertEquals(resolved.specifier, url);
+  assertEquals(resolved.local, true);
 });
 
 Deno.test("resolveSpecifier flags shorthand but not explicit forms", () => {
@@ -216,27 +294,45 @@ Deno.test("resolveSpecifier flags shorthand but not explicit forms", () => {
   assertEquals(resolveSpecifier("./local/mod.ts").shorthand, false);
 });
 
-Deno.test("resolveSpecifier tells a module file from a directory", async (t) => {
-  // `deno doc ./pkg` documents ./pkg/mod.ts while import() refuses a directory,
-  // so the CLI listed a package's coders and then crashed on the run it had
-  // just advertised. The forms are split here so the caller can refuse one.
-  await t.step("every module extension names a module file", () => {
-    for (const extension of [".ts", ".tsx", ".js", ".mjs", ".cjs"]) {
-      assertEquals(resolveSpecifier(`./pkg/mod${extension}`).form, "path");
-    }
-  });
+Deno.test("resolveSpecifier accepts every module extension the runtime loads", () => {
+  // `.mts` was missing once, and `./pkg/mod.mts` — a module `deno doc` reads
+  // and `import()` loads — was classified as a directory and refused, with a
+  // TRY line pointing at `./pkg/mod.mts/mod.ts`, which cannot exist.
+  for (
+    const extension of [
+      ".ts",
+      ".tsx",
+      ".mts",
+      ".cts",
+      ".js",
+      ".jsx",
+      ".mjs",
+      ".cjs",
+    ]
+  ) {
+    assertEquals(resolveSpecifier(`pkg/mod${extension}`).form, "path");
+  }
+});
 
-  await t.step("anything else that looks like a path is a directory", () => {
+Deno.test("resolveSpecifier does not decide file or directory from the spelling", async (t) => {
+  // Which one it is is a fact about the target, not about how the argument was
+  // typed, so classification stops at "this is a path" and the CLI asks
+  // `deno doc` which module it resolved.
+  await t.step("a directory and the module inside it are the same form", () => {
     for (const input of ["./pkg", "../pkg", "/abs/pkg", ".", "./pkg/"]) {
-      assertEquals(resolveSpecifier(input).form, "directory");
+      assertEquals(resolveSpecifier(input).form, "path");
     }
+    assertEquals(resolveSpecifier("./pkg/mod.ts").form, "path");
   });
 
-  await t.step("a directory still resolves, so it can be echoed", () => {
-    const directory = resolveSpecifier("./pkg");
-
-    assertEquals(directory.specifier, underCwd("./pkg"));
-    assertEquals(directory.short, "./pkg");
+  await t.step("both are local, however they are spelled", () => {
+    assertEquals(resolveSpecifier("./pkg").local, true);
+    assertEquals(resolveSpecifier("./pkg/mod.ts").local, true);
+    assertEquals(resolveSpecifier("file:///abs/pkg").local, true);
+    assertEquals(resolveSpecifier("file:///abs/pkg/mod.ts").local, true);
+    assertEquals(resolveSpecifier("jsr:@binstruct/png").local, false);
+    assertEquals(resolveSpecifier("npm:foo").local, false);
+    assertEquals(resolveSpecifier("https://example.com/mod.ts").local, false);
   });
 
   await t.step("nothing on disk is consulted", () => {
@@ -244,19 +340,8 @@ Deno.test("resolveSpecifier tells a module file from a directory", async (t) => 
     // resolution stays a function of the input string and the working
     // directory, which is what ADR 0004 promises.
     assertEquals(resolveSpecifier("./nowhere/mod.ts").form, "path");
-    assertEquals(resolveSpecifier("./nowhere").form, "directory");
+    assertEquals(resolveSpecifier("./nowhere").form, "path");
   });
-});
-
-Deno.test("moduleInside names the entrypoint of a directory input", () => {
-  assertEquals(moduleInside("./pkg"), "./pkg/mod.ts");
-  assertEquals(moduleInside("./pkg/"), "./pkg/mod.ts");
-  assertEquals(moduleInside("/abs/pkg"), "/abs/pkg/mod.ts");
-  assertEquals(moduleInside("."), "./mod.ts");
-  // What it proposes must read back as a module file, or the guidance would
-  // hand the user a command the CLI refuses in turn.
-  assertEquals(resolveSpecifier(moduleInside("./pkg")).form, "path");
-  assertEquals(resolveSpecifier(moduleInside(".")).form, "path");
 });
 
 Deno.test("resolveSpecifier requires two lowercase characters for a scheme", async (t) => {
@@ -298,6 +383,7 @@ Deno.test("resolveSpecifier treats the empty string as a bare name", () => {
     short: "",
     form: "bare",
     shorthand: true,
+    local: false,
   });
 });
 

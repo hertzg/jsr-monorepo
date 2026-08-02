@@ -176,18 +176,18 @@ function renderOptions(options: GuideOptions): string[] {
  *   options: {
  *     heading: "COMMANDS",
  *     items: [
- *       { name: "decode", summary: "binary on stdin to JSON on stdout" },
- *       { name: "encode", summary: "JSON on stdin to binary on stdout" },
+ *       { name: "decode", summary: "binary on stdin to JSON5 on stdout" },
+ *       { name: "encode", summary: "JSON5 on stdin to binary on stdout" },
  *     ],
  *   },
- *   try: ["binstruct arp decode < arp.bin > arp.json"],
+ *   try: ["binstruct arp decode < arp.bin > arp.json5"],
  * });
  *
  * assertEquals(text.split("\n\n"), [
  *   "NEXT  <command>\n  what to do with the bytes",
- *   "COMMANDS\n  decode  binary on stdin to JSON on stdout\n" +
- *   "  encode  JSON on stdin to binary on stdout",
- *   "TRY\n  binstruct arp decode < arp.bin > arp.json",
+ *   "COMMANDS\n  decode  binary on stdin to JSON5 on stdout\n" +
+ *   "  encode  JSON5 on stdin to binary on stdout",
+ *   "TRY\n  binstruct arp decode < arp.bin > arp.json5",
  * ]);
  * ```
  *

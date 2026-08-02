@@ -21,22 +21,22 @@
  *
  * @example Decode with the full three-word form
  * ```bash
- * deno run -A @binstruct/cli png pngFile decode < input.png > struct.json
+ * deno run -A @binstruct/cli png pngFile decode < input.png > struct.json5
  * ```
  *
  * @example Encode it back
  * ```bash
- * deno run -A @binstruct/cli png pngFile encode < struct.json > output.png
+ * deno run -A @binstruct/cli png pngFile encode < struct.json5 > output.png
  * ```
  *
  * @example Omit the coder when the package has only one
  * ```bash
- * deno run -A @binstruct/cli arp decode < arp.bin > arp.json
+ * deno run -A @binstruct/cli arp decode < arp.bin > arp.json5
  * ```
  *
- * @example A local module works the same way, relative to the working directory
+ * @example A local package works the same way, relative to the working directory
  * ```bash
- * deno run -A @binstruct/cli ./my-package/mod.ts myStruct decode < input.bin > output.json
+ * deno run -A @binstruct/cli ./my-package myStruct decode < input.bin > output.json5
  * ```
  *
  * @example Programmatic usage: plan an invocation without performing it
@@ -80,11 +80,7 @@ export type {
   ToolFailure,
   ToolFailureReason,
 } from "./discover.ts";
-export {
-  moduleInside,
-  resolveSpecifier,
-  shortenSpecifier,
-} from "./specifier.ts";
+export { resolveSpecifier, shortenSpecifier } from "./specifier.ts";
 export type { ResolvedSpecifier, SpecifierForm } from "./specifier.ts";
 export { KNOWN_PACKAGES } from "./registry.ts";
 

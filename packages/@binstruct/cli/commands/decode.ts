@@ -3,7 +3,7 @@
  *
  * This module handles the decode command which reads binary data from stdin,
  * decodes it using a specified coder from a package, and outputs the result
- * as JSON to stdout.
+ * as JSON5 to stdout.
  *
  * @module
  */
@@ -15,7 +15,7 @@ import { readStdin, writeStdoutFormatted } from "../io.ts";
  * Executes the decode command.
  *
  * Reads binary data from stdin, loads the specified coder from the given package,
- * decodes the data, and outputs the result as JSON to stdout.
+ * decodes the data, and outputs the result as JSON5 to stdout.
  *
  * @param packageSpec Package specifier (JSR URL, local path, or npm package)
  * @param coderName Name of the coder to use from the package
@@ -35,6 +35,6 @@ export async function decodeCommand(
   // Decode the data
   const decoded = coder.decode(binaryData);
 
-  // Output as JSON to stdout
+  // Output as JSON5 to stdout
   await writeStdoutFormatted(decoded[0], format);
 }

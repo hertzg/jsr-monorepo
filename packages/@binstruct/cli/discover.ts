@@ -13,6 +13,14 @@
  * for a JSR specifier are absolute `https://jsr.io/@scope/name/1.2.3/mod.ts`
  * URLs.
  *
+ * So does the **entrypoint**. `deno doc` keys its output by the module it
+ * resolved, so asking about a local directory answers under the module URL
+ * inside it — `./pkg` and `file:///abs/pkg` both come back as
+ * `file:///abs/pkg/mod.ts`. {@linkcode PackageSurface.entrypoint} carries that
+ * key on, so the CLI can import the very module the surface was read from
+ * instead of the string the user typed, and discovery and execution cannot
+ * disagree about which module they mean.
+ *
  * `deno info` is deliberately **not** part of the happy path. It is run only
  * by {@linkcode diagnoseEmptyDiscovery}, to tell "this is not a binstruct
  * package at all" apart from "it is one, but ships no type declarations".
@@ -127,6 +135,15 @@ export type DiscoveredCoder = {
  * The public surface of a package as read from its type declarations.
  */
 export type PackageSurface = {
+  /**
+   * The module `deno doc` resolved the specifier to, and therefore the one
+   * these coders were read from.
+   *
+   * A registry specifier keys the output under itself, so this is
+   * `jsr:@binstruct/png` again; a local one is keyed by its `file:` URL, which
+   * for a directory is the module inside it.
+   */
+  entrypoint: string;
   /** Resolved version, when the specifier resolved to a JSR package. */
   version?: string;
   /** First line of the module JSDoc, absent when the module is undocumented. */
@@ -289,8 +306,12 @@ function resolvedVersion(
  * the ones the CLI can invoke on the user's behalf (ADR 0005). Declaration
  * order is preserved within each group.
  *
+ * The key of the node the surface is read from is returned as
+ * {@linkcode PackageSurface.entrypoint}: it is the module `deno doc` resolved,
+ * so the caller can import exactly what was described here.
+ *
  * @param doc Parsed output of `deno doc --json --quiet <specifier>`
- * @returns The module summary, resolved version and coder list
+ * @returns The entrypoint, module summary, resolved version and coder list
  *
  * @example Read the coders of a package
  * ```ts
@@ -320,6 +341,7 @@ function resolvedVersion(
  *   },
  * });
  *
+ * assertEquals(surface.entrypoint, "jsr:@binstruct/arp");
  * assertEquals(surface.version, "0.3.0");
  * assertEquals(surface.summary, "ARP packet encoding and decoding.");
  * assertEquals(surface.coders, [{
@@ -363,6 +385,7 @@ export function readDocSurface(doc: DenoDocJson): PackageSurface {
   const summary = firstLine(node.module_doc?.doc);
 
   return {
+    entrypoint,
     ...(version === undefined ? {} : { version }),
     ...(summary === undefined ? {} : { summary }),
     coders: [...nullary, ...parameterized],
@@ -433,6 +456,10 @@ async function runDeno(
  * A cold lookup pays for building the module graph — on the order of a second
  * for a JSR package — while a warm one is near-instant.
  *
+ * The outcome carries both the specifier it was asked about and the
+ * {@linkcode PackageSurface.entrypoint} `deno doc` resolved it to; for a local
+ * specifier the latter is what the caller should import.
+ *
  * @param specifier A resolved specifier, e.g. `jsr:@binstruct/arp` or a path
  * @returns The discovered surface, or why `deno doc` produced none
  *
@@ -447,6 +474,7 @@ async function runDeno(
  * if (outcome.ok) {
  *   assertEquals(outcome.coders.map((coder) => coder.name), ["arpData"]);
  *   assertEquals(outcome.coders[0].requiredParams, 0);
+ *   assertEquals(outcome.entrypoint, import.meta.resolve("../arp/mod.ts"));
  * }
  * ```
  */

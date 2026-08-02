@@ -40,11 +40,22 @@ line of `jsDoc.doc`, and a count of required parameters. Entries are sorted with
 zero-required-parameter coders first.
 
 The resolved package version comes free from the same call: `location.filename`
-on any symbol is `https://jsr.io/@binstruct/png/0.4.0/mod.ts`. **`deno info` is
-not run on the happy path.** It is run only when discovery finds no coders,
-where its dependency graph distinguishes "this package does not depend on
-`@hertzg/binstruct`, it is probably not a binstruct package" from "it is one,
-but ships no type declarations".
+on any symbol is `https://jsr.io/@binstruct/png/0.4.0/mod.ts`.
+
+**So does the entrypoint.** The output is keyed by the module `deno doc`
+resolved, not by the string it was handed: `./pkg` and `file:///abs/pkg` both
+come back keyed `file:///abs/pkg/mod.ts`, while `jsr:@binstruct/png` is keyed by
+itself. That key is returned as `PackageSurface.entrypoint`, and for a local
+specifier it — not the user's argument — is what gets imported (ADR 0004). This
+costs nothing: the subprocess runs on every invocation anyway, and the answer
+was already in its output. It also removes the only remaining way for discovery
+and execution to disagree about which module they mean, since the surface is
+read from, and the coder loaded from, one and the same URL.
+
+**`deno info` is not run on the happy path.** It is run only when discovery
+finds no coders, where its dependency graph distinguishes "this package does not
+depend on `@hertzg/binstruct`, it is probably not a binstruct package" from "it
+is one, but ships no type declarations".
 
 Formatted documentation is delegated rather than reimplemented. A `--docs` flag
 shells out to `deno doc --filter <symbol> <specifier>` for the coder and its
@@ -96,6 +107,11 @@ _unavailable_, which is what keeps the escape hatch below honest.
 - **Detection is a string match on `Coder`.** A coder returned through a type
   alias that does not render as `Coder<…>` is invisible to discovery. This
   constrains how format packages may declare their return types.
+- **A local package is imported through the entrypoint discovery reported**, so
+  directories work. Where `deno doc` cannot read the directory at all — it
+  documents every module it finds there rather than following a `deno.json`
+  `exports` map — nothing is reported and the invocation fails as an unreadable
+  package.
 
 ## References
 

@@ -1,11 +1,10 @@
 # ADR 0001 — Every argument prefix is a valid command that describes the next word
 
-**Status:** Accepted
+**Status:** Accepted — implemented
 
-> Not yet implemented. The CLI currently requires all three values up front and
-> fails with `Error: Package specifier is required (-p,
-> --package)`. This ADR
-> records the target contract; ADRs 0002–0005 record the mechanisms it rests on.
+> Implemented. `parseCliArgs` fills the three positionals in order, `planCli`
+> turns any prefix of them into a plan, and `renderGuide` prints the three
+> blocks; ADRs 0002–0005 record the mechanisms it rests on.
 
 ## Context
 
@@ -77,7 +76,8 @@ else.
 
 ## References
 
-- `cli.ts` — `parseCliArgs`, `showHelp`, the current three required values
+- `cli.ts` — `parseCliArgs`, `planCli`, `present`
+- `guide.ts` — `renderGuide`, the one renderer all three levels share
 - `@binstruct/cli` ADR 0002 — coder discovery via `deno doc --json`
 - `@binstruct/cli` ADR 0003 — the bundled package registry
 - `@binstruct/cli` ADR 0004 — bare names imply `jsr:` and `@binstruct`

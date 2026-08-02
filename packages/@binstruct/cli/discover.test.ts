@@ -425,6 +425,47 @@ Deno.test("readDocSurface has no version for a non-JSR entrypoint", () => {
   assertEquals(readDocSurface(BINSTRUCT_DOC).version, undefined);
 });
 
+Deno.test("readDocSurface reports the module deno doc resolved", () => {
+  // `deno doc` keys its output by the module it settled on, which is the one
+  // the surface was read from — and therefore the one the CLI should import,
+  // rather than whatever string the user typed to get here.
+  assertEquals(readDocSurface(PNG_DOC).entrypoint, "jsr:@binstruct/png");
+  assertEquals(
+    readDocSurface(BINSTRUCT_DOC).entrypoint,
+    "file:///repo/packages/@hertzg/binstruct/mod.ts",
+  );
+});
+
+Deno.test("discoverCoders resolves a local directory to the module inside it", async () => {
+  // Asking about a directory and about the module inside it answer with the
+  // same entrypoint, so no caller has to tell the two spellings apart.
+  const directory = await Deno.realPath(await Deno.makeTempDir());
+  try {
+    const binstruct = import.meta.resolve("../../@hertzg/binstruct/mod.ts");
+    await Deno.writeTextFile(
+      `${directory}/mod.ts`,
+      [
+        `import { type Coder, struct, u8 } from "${binstruct}";`,
+        "",
+        "/** A one-byte structure. */",
+        "export function myStruct(): Coder<{ a: number }> {",
+        "  return struct({ a: u8() });",
+        "}",
+        "",
+      ].join("\n"),
+    );
+
+    const module = toFileUrl(`${directory}/mod.ts`).href;
+    const outcome = await discoverCoders(toFileUrl(directory).href);
+
+    assert(outcome.ok, "discovery should succeed for a local directory");
+    assertEquals(outcome.entrypoint, module);
+    assertEquals(outcome.coders.map((coder) => coder.name), ["myStruct"]);
+  } finally {
+    await Deno.remove(directory, { recursive: true });
+  }
+});
+
 Deno.test("discoverCoders reads a real package through deno doc", async () => {
   const outcome = await discoverCoders(ARP_ENTRYPOINT);
 

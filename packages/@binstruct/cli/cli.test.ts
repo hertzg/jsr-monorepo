@@ -13,6 +13,7 @@ import {
   assertNotEquals,
   assertStringIncludes,
 } from "@std/assert";
+import { toFileUrl } from "@std/path";
 import { explainFailure, parseCliArgs, planCli } from "./cli.ts";
 
 /** A package with exactly one zero-argument coder, `arpData`. */
@@ -84,21 +85,24 @@ async function runCli(
 }
 
 /**
- * Writes a one-coder package into a fresh directory, as `<dir>/mypkg/mod.ts`.
+ * Writes a one-coder package into a fresh directory, as `<dir>/mypkg/<entry>`.
  *
  * It imports `@hertzg/binstruct` by absolute URL so the fixture needs no
  * `deno.json` of its own, which keeps the working directory free of anything
- * that could change how the CLI resolves what it is given.
+ * that could change how the CLI resolves what it is given. `mypkg` holds the
+ * entrypoint and nothing else, which is what lets `deno doc` be pointed at the
+ * directory.
  *
- * @returns The containing directory, to be removed by the caller
+ * @param entry Name of the entrypoint module, for the extension cases
+ * @returns The containing directory, realpathed, to be removed by the caller
  */
-async function writeLocalPackage(): Promise<string> {
-  const directory = await Deno.makeTempDir();
+async function writeLocalPackage(entry = "mod.ts"): Promise<string> {
+  const directory = await Deno.realPath(await Deno.makeTempDir());
   const binstruct = import.meta.resolve("../../@hertzg/binstruct/mod.ts");
 
   await Deno.mkdir(`${directory}/mypkg`);
   await Deno.writeTextFile(
-    `${directory}/mypkg/mod.ts`,
+    `${directory}/mypkg/${entry}`,
     [
       `import { type Coder, struct, u8 } from "${binstruct}";`,
       "",
@@ -265,9 +269,26 @@ Deno.test("level 2 asks for a command once the coder is known", async () => {
   assertEquals(plan.stream, "stderr");
   assertEquals(plan.code, 1);
   assertStringIncludes(plan.text, "NEXT  <command>");
-  assertStringIncludes(plan.text, "  decode  binary on stdin");
-  assertStringIncludes(plan.text, "  encode  JSON on stdin");
+  assertStringIncludes(plan.text, "  decode  binary on stdin → JSON5");
+  assertStringIncludes(plan.text, "  encode  JSON5 on stdin");
   assertStringIncludes(plan.text, `TRY\n  binstruct ${PNG} pngFile decode`);
+});
+
+Deno.test("the guidance names the format the CLI actually writes", async () => {
+  // The COMMANDS block advertised JSON and every TRY line said `> output.json`,
+  // while serialization.ts emits JSON5 — quoted keys, 0x literals, comments —
+  // which `python3 -c 'import json; json.load(...)'` rejects.
+  const plan = printed(await planCli([PNG, "pngFile"]));
+
+  assertStringIncludes(plan.text, "JSON5 on stdout");
+  assertStringIncludes(plan.text, "JSON5 on stdin");
+  assertStringIncludes(plan.text, "> output.json5");
+  assertStringIncludes(plan.text, "< output.json5");
+  assertEquals(/[>|<] \S*\.json(?!5)/.test(plan.text), false);
+
+  const help = printed(await planCli(["--help"]));
+
+  assertStringIncludes(help.text, "the payload is JSON5, not JSON");
 });
 
 Deno.test("a complete invocation runs, and announces the resolved specifier", async () => {
@@ -635,51 +656,100 @@ Deno.test("a relative package is read from the working directory", async () => {
   }
 });
 
-Deno.test("a directory is refused up front, not listed and then crashed on", async () => {
+Deno.test("a directory is imported as the module deno doc resolved", async () => {
   // `deno doc ./mypkg` documents ./mypkg/mod.ts while import() refuses the
   // directory outright, so the CLI listed the coder, announced it, printed a
   // TRY line for the command, and then died with ERR_UNSUPPORTED_DIR_IMPORT.
-  const plan = printed(await planCli(["./mypkg", "decode"]));
-
-  assertEquals(plan.stream, "stderr");
-  assertEquals(plan.code, 1);
-  assertStringIncludes(plan.text, "it names a directory");
-  assertStringIncludes(plan.text, "import() cannot load a directory");
-  assertStringIncludes(plan.text, "TRY\n  binstruct ./mypkg/mod.ts");
-  assertEquals(plan.text.includes("NEXT  <coder>"), false);
-});
-
-Deno.test("--help does not excuse a directory either", async () => {
-  const plan = printed(await planCli(["./mypkg", "--help"]));
-
-  assertEquals(plan.stream, "stderr");
-  assertEquals(plan.code, 1);
-});
-
-Deno.test("the command a directory is redirected to actually runs", async () => {
+  // The module deno doc reports is what gets imported, so the two cannot
+  // disagree — and the directory simply works.
   const directory = await writeLocalPackage();
   try {
-    const refused = await runCli(["./mypkg", "decode"], ["-A"], directory);
+    const plan = await planCli([`${directory}/mypkg`, "decode"]);
 
-    assertEquals(refused.code, 1);
-    assertEquals(refused.stdout, "");
-    assertStringIncludes(refused.stderr, "TRY\n  binstruct ./mypkg/mod.ts");
-    // Nothing was promised before the refusal, and nothing crashed after it.
-    assertEquals(refused.stderr.includes("using coder"), false);
-    assertEquals(refused.stderr.includes("ERR_UNSUPPORTED_DIR_IMPORT"), false);
+    assertEquals(plan.kind, "run");
+    if (plan.kind !== "run") return;
 
-    const accepted = await runCli(
-      ["./mypkg/mod.ts", "decode"],
+    assertEquals(plan.specifier, toFileUrl(`${directory}/mypkg/mod.ts`).href);
+    assertEquals(plan.coder, "myStruct");
+  } finally {
+    await Deno.remove(directory, { recursive: true });
+  }
+});
+
+Deno.test("a directory spelled as a file: URL is not a way round the rule", async () => {
+  // The header prints `→ file:///…` for every local path and `--docs` prints
+  // `Defined in file:///…`, so this spelling is one the CLI itself teaches.
+  // Classifying by spelling let it past every local rule and straight into
+  // ERR_UNSUPPORTED_DIR_IMPORT; classification does not decide it any more.
+  const directory = await writeLocalPackage();
+  try {
+    const url = toFileUrl(`${directory}/mypkg`).href;
+    const plan = await planCli([url, "decode"]);
+
+    assertEquals(plan.kind, "run");
+    if (plan.kind !== "run") return;
+
+    assertEquals(plan.specifier, `${url}/mod.ts`);
+    assertEquals(plan.coder, "myStruct");
+  } finally {
+    await Deno.remove(directory, { recursive: true });
+  }
+});
+
+Deno.test("a directory decodes, whichever way it is spelled", async () => {
+  const directory = await writeLocalPackage();
+  try {
+    for (
+      const spelling of ["./mypkg", toFileUrl(`${directory}/mypkg`).href]
+    ) {
+      const run = await runCli(
+        [spelling, "decode"],
+        ["-A"],
+        directory,
+        new Uint8Array([7]),
+      );
+
+      assertEquals(run.code, 0);
+      assertStringIncludes(run.stdout, "7");
+      assertEquals(run.stderr.includes("ERR_UNSUPPORTED_DIR_IMPORT"), false);
+      assertEquals(run.stderr.includes("it names a directory"), false);
+    }
+  } finally {
+    await Deno.remove(directory, { recursive: true });
+  }
+});
+
+Deno.test("a .mts entrypoint is a module, not a directory", async () => {
+  // `.mts`, `.cts` and `.jsx` were missing from the extension list, so a real
+  // module was called a directory and offered `./mypkg/mod.mts/mod.ts`.
+  const directory = await writeLocalPackage("mod.mts");
+  try {
+    const run = await runCli(
+      ["./mypkg/mod.mts", "decode"],
       ["-A"],
       directory,
       new Uint8Array([7]),
     );
 
-    assertEquals(accepted.code, 0);
-    assertStringIncludes(accepted.stdout, "7");
+    assertEquals(run.code, 0);
+    assertStringIncludes(run.stdout, "7");
+    assertEquals(run.stderr.includes("it names a directory"), false);
+    assertEquals(run.stderr.includes("mod.mts/mod.ts"), false);
   } finally {
     await Deno.remove(directory, { recursive: true });
   }
+});
+
+Deno.test("a registry specifier is imported exactly as it was typed", async () => {
+  // The entrypoint substitution is scoped to local specifiers: swapping in the
+  // https://jsr.io/… URL the symbols live at would import the package by a
+  // route that bypasses the version and import map the project resolved.
+  const plan = await planCli(["png", "pngFile", "decode"]);
+
+  assertEquals(plan.kind, "run");
+  if (plan.kind !== "run") return;
+
+  assertEquals(plan.specifier, "jsr:@binstruct/png");
 });
 
 Deno.test("the header and the inference notice keep the typed form", async () => {

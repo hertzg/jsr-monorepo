@@ -19,18 +19,20 @@ layered on without shadowing those forms.
 
 The specifier is resolved by first match:
 
-| input                                      | rule                 | resolves to                            |
-| ------------------------------------------ | -------------------- | -------------------------------------- |
-| `jsr:@binstruct/png`, `npm:x`, `https://…` | has a scheme         | unchanged                              |
-| `./x/mod.ts`, `/abs/mod.js`, `mod.ts`      | names a module file  | `file://` URL under cwd                |
-| `./x`, `../x`, `/abs/x`                    | names no module file | `file://` URL under cwd — then refused |
-| `@hertzg/xhb`                              | starts with `@`      | `jsr:@hertzg/xhb`                      |
-| `png`, `wav@0.2.0`                         | bare                 | `jsr:@binstruct/png`                   |
+| input                                      | rule         | resolves to             |
+| ------------------------------------------ | ------------ | ----------------------- |
+| `jsr:@binstruct/png`, `npm:x`, `https://…` | has a scheme | unchanged               |
+| `./x`, `/abs/x`, `mod.ts`, `pkg/mod.mts`   | is a path    | `file://` URL under cwd |
+| `@hertzg/xhb`                              | starts `@`   | `jsr:@hertzg/xhb`       |
+| `png`, `wav@0.2.0`                         | bare         | `jsr:@binstruct/png`    |
 
 A scheme requires **at least two lowercase characters** before the colon
 (`^[a-z][a-z0-9+.-]+:`), so a bare name can never be mistaken for one. A path is
-anything beginning with `.` or `/`, or ending in a JS/TS extension; the
-extension is also what separates the two path rows.
+anything beginning with `.` or `/`, or ending in a JS/TS module extension —
+`.ts`, `.tsx`, `.mts`, `.cts`, `.js`, `.jsx`, `.mjs`, `.cjs`, the whole set the
+runtime will load. Omitting one is not cosmetic: with `.mts` missing, the real
+module `./pkg/mod.mts` fell through to the catch-all and was rejected as
+something it was not.
 
 A path is **anchored to the working directory** and handed on as a `file://`
 URL. This row originally read "unchanged", which was wrong: the two consumers of
@@ -43,24 +45,51 @@ whose coder name collided with one of the CLI's exports would have been run
 instead of theirs. Published from JSR the mismatch is total: every relative path
 becomes `https://jsr.io/@binstruct/cli/<version>/pkg`.
 
-**A path must name a module file.** The disagreement above has a second half
-that anchoring did not close: `deno doc ./pkg` walks into the directory and
-documents `./pkg/mod.ts`, while dynamic `import()` refuses a directory outright
-with `ERR_UNSUPPORTED_DIR_IMPORT`. `binstruct ./pkg decode` therefore listed the
+**A local specifier is imported as the module `deno doc` resolved, not as it was
+typed.** The disagreement above has a second half that anchoring did not close:
+`deno doc ./pkg` enters the directory and documents the module inside it, while
+dynamic `import()` refuses a directory outright with
+`ERR_UNSUPPORTED_DIR_IMPORT`. `binstruct ./pkg decode` therefore listed the
 package's coders, inferred the lone one, printed a `TRY` line promising the
 command worked, and then died on the import — discovery and execution looking at
-different things again, only louder. So a path ending in a module extension is a
-`path`, anything else beginning with `.` or `/` is a `directory`, and the
-`directory` form is **refused before discovery runs**, naming the module to type
-instead (`./pkg/mod.ts`) in its `TRY` line.
+different things again, only louder.
 
-Refusing was chosen over resolving. The CLI could find the entrypoint the way
-`deno doc` does, but only by probing the filesystem — a `stat`, then `mod.ts`,
-or a `deno.json` `exports` map — which turns resolution from a function of its
-input into a second, independent opinion about which module a directory means,
-with its own ways to disagree with the one `import()` holds. The classification
-stays syntactic instead, and `mod.ts` appears only as a _suggestion in prose_
-that the user can correct, never as a lookup: nothing here is read off disk.
+An earlier attempt closed it by classifying: a path ending in a module extension
+was a `path`, anything else beginning with `.` or `/` was a `directory`, and the
+`directory` form was refused before discovery ran. That could not work, and its
+two failures are the same failure. `file:///abs/pkg` names exactly the same
+directory as `./pkg` and was classified `scheme`, so it skipped the refusal
+entirely — and this is not an exotic spelling, since the header prints
+`→ file:///…` for every local path and `--docs` prints `Defined in file:///…`,
+so the tool taught a form it then could not accept. Meanwhile `./pkg/mod.mts`
+was called a directory, because the extension list was short. **Whether a
+specifier names a directory is a fact about the target, not about how the
+argument was typed**, and no amount of pattern-matching on the string decides
+it.
+
+So classification stops at `path`, and the question is answered by the one
+component that already knows: `deno doc --json` keys its output by the module it
+resolved, so `./pkg` and `file:///abs/pkg` alike come back keyed
+`file:///abs/pkg/mod.ts`. That key is carried on `PackageSurface.entrypoint`,
+and a **local** specifier — `ResolvedSpecifier.local`, true for a path and for a
+`file:` URL typed in full — is imported through it. Discovery and execution then
+use literally the same URL, by construction rather than by agreement, and
+directories work instead of being refused.
+
+This is not the filesystem probe the refusal was chosen to avoid. Nothing is
+stat'd and no entrypoint is guessed: the CLI already ran `deno doc` on every
+invocation (ADR 0002), and this reads an answer that was in the output all
+along. Resolution itself stays a pure function of the input string and the
+working directory; the substitution happens afterwards, in `cli.ts`, with the
+subprocess's own report in hand.
+
+The substitution is **scoped to local specifiers**. `jsr:`, `npm:` and
+`http(s):` specifiers are handed to `import()` exactly as the user wrote them.
+Their symbols are located at `https://jsr.io/@scope/name/1.2.3/mod.ts`, and
+importing that URL would load the package by a route that bypasses the version
+resolution, the import map and the lockfile the user's project resolved it
+through — a much bigger change than the bug being fixed. Only the `file:` case
+has a discovered URL that means the same thing as what was typed.
 
 `ResolvedSpecifier.input` and `.short` keep the typed form, so listings, `TRY`
 lines and the left-hand half of the header still say `./pkg`. Reading
@@ -98,12 +127,21 @@ teaches it.
   read means a path form now needs `--allow-read`, which every documented
   invocation already has.
 - **A local directory named like a package is shadowed.** `png/` resolves to the
-  JSR package, not the directory; `./png` disambiguates — and then says to write
-  `./png/mod.ts`. Documented in `--help`, not defended against.
-- **`binstruct ./pkg` never works, whatever is in `./pkg`.** A package whose
-  entrypoint is not `mod.ts` gets a suggestion that is wrong in the filename and
-  right in the shape, which is the cost of not probing. Both halves of the tool
-  refuse it identically, so the refusal cannot become a promise the run breaks.
+  JSR package, not the directory; `./png` disambiguates. Documented in `--help`,
+  not defended against.
+- **`binstruct ./pkg` works, and works the same as
+  `binstruct
+  file:///abs/pkg`.** Whatever entrypoint `deno doc` settles on is
+  the one that runs, whether or not it is called `mod.ts`, so there is no
+  filename for the CLI to guess wrong.
+- **A directory `deno doc` cannot read is still a dead end.** It documents every
+  module it finds in a directory rather than following a `deno.json` `exports`
+  map, so a package directory holding non-module files fails there — reported as
+  an unreadable package, the same as any other `deno doc` failure, and never as
+  a promise the run then breaks.
+- **The escape hatch keeps the old behaviour.** When discovery is unavailable no
+  entrypoint was reported, so the typed specifier is imported as before and a
+  directory fails at the import. That path never promised anything either.
 - **The header is two forms, not one.** A line that carried only the resolved
   specifier disagreed with every other line on the screen; one that carried only
   the short form would hide the expansion the shorthand depends on.
@@ -115,6 +153,9 @@ teaches it.
 
 ## References
 
-- `loader.ts` — `loadCoder`, which receives the resolved specifier
+- `specifier.ts` — `resolveSpecifier`, `ResolvedSpecifier.local`
+- `cli.ts` — `importSpecifier`, where the substitution is scoped
+- `loader.ts` — `loadCoder`, which receives the specifier to import
+- `@binstruct/cli` ADR 0002 — where the entrypoint comes from
 - `@binstruct/cli` ADR 0003 — why the implied scope is `@binstruct`
 - `@binstruct/cli` ADR 0001 — where resolved and short forms are displayed
