@@ -2,26 +2,30 @@
  * Authentication for TP-Link router API.
  *
  * Implements the multi-step authentication flow required by TP-Link routers,
- * including RSA key exchange, AES encryption setup, and session/token retrieval.
+ * including RSA key exchange, AES encryption setup, and session/token
+ * retrieval. Every protocol detail lives in the {@linkcode Dialect}; this module
+ * owns only the I/O, the ordering, and the signature rule, and never branches on
+ * which dialect it was given.
  */
 
-import { fetchInfo, type RouterInfo } from "./client/fetchInfo.ts";
-import { fetchPublicKey } from "./client/fetchPublicKey.ts";
+import type { Dialect, RouterInfo } from "./dialect/dialect.ts";
+import { gdprText } from "./dialect/gdprText.ts";
 import { createEncryption, type Encryption } from "./client/encryption.ts";
-import { fetchBusy } from "./client/fetchBusy.ts";
-import { fetchSessionId } from "./client/fetchSessionId.ts";
-import { fetchTokenId } from "./client/fetchTokenId.ts";
 
 /**
  * Options for authenticating with the router.
  */
 export interface AuthOptions {
-  /** Username for authentication (defaults to "admin") */
+  /** Username for authentication (defaults to the dialect's default username) */
   username?: string;
   /** Password for authentication */
   password: string;
   /** Force re-authentication even if already logged in (defaults to true) */
   forceLogin?: boolean;
+  /** Firmware dialect to speak (defaults to {@linkcode gdprText}) */
+  dialect?: Dialect;
+  /** Swappable `fetch`, for tests or non-standard HTTP stacks */
+  fetch?: typeof globalThis.fetch;
 }
 
 /**
@@ -38,7 +42,12 @@ export interface AuthResult {
   sessionId: string;
   /** Security token for API requests */
   tokenId: string;
+  /** Dialect used, carried forward so `execute` needs no extra argument */
+  dialect: Dialect;
 }
+
+const encoder = new TextEncoder();
+const decoder = new TextDecoder();
 
 /**
  * Authenticates with a TP-Link router and returns session context.
@@ -78,41 +87,72 @@ export interface AuthResult {
  *   forceLogin: false,
  * });
  * ```
+ *
+ * @example Authentication against a JSON-dialect router
+ * ```ts ignore
+ * import { authenticate } from "./authenticate.ts";
+ * import { gdprJson } from "./dialect/mod.ts";
+ *
+ * const auth = await authenticate("http://192.168.254.1", {
+ *   password: "secret",
+ *   dialect: gdprJson,
+ * });
+ * ```
  */
 export async function authenticate(
   baseUrl: string,
   options: AuthOptions,
 ): Promise<AuthResult | null> {
-  const { username = "admin", password, forceLogin = true } = options;
+  const {
+    password,
+    forceLogin = true,
+    dialect = gdprText,
+    fetch = globalThis.fetch,
+    username = dialect.defaultUsername,
+  } = options;
 
-  const info = await fetchInfo(baseUrl);
+  const info = dialect.parseInfo(
+    await (await fetch(dialect.infoRequest(baseUrl))).text(),
+  );
 
-  const { sequence, ...keyParameters } = await fetchPublicKey(baseUrl);
+  const { sequence, ...keyParameters } = dialect.parsePublicKey(
+    await (await fetch(dialect.publicKeyRequest(baseUrl))).text(),
+  );
   const encryption = createEncryption({
     ...keyParameters,
     username,
     password,
   });
 
-  const { isLoggedIn } = await fetchBusy(baseUrl);
+  const { isLoggedIn } = dialect.parseBusy(
+    await (await fetch(dialect.busyRequest(baseUrl))).text(),
+  );
   if (isLoggedIn && !forceLogin) {
     return null;
   }
 
-  const sessionId = await fetchSessionId(baseUrl, {
-    encryption,
+  const envelope = encryption.encrypt(
+    encoder.encode(dialect.encodeLogin({ username, password })),
     sequence,
-    username,
-    password,
-  });
+    {
+      key: decoder.decode(encryption.key),
+      iv: decoder.decode(encryption.iv),
+    },
+  );
+
+  const loginResponse = await fetch(dialect.loginRequest(baseUrl, envelope));
+  const sessionId = dialect.parseSessionId(loginResponse.headers);
+  await loginResponse.body?.cancel();
   if (!sessionId) {
     return null;
   }
 
-  const tokenId = await fetchTokenId(baseUrl, {
-    authTimes: info.authTimes,
-    sessionId,
-  });
+  const tokenId = dialect.parseTokenId(
+    await (await fetch(dialect.tokenRequest(baseUrl, {
+      sessionId,
+      authTimes: info.authTimes ?? 1,
+    }))).text(),
+  );
 
-  return { encryption, sequence, info, sessionId, tokenId };
+  return { encryption, sequence, info, sessionId, tokenId, dialect };
 }

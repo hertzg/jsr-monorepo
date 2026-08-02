@@ -1,17 +1,14 @@
 /**
  * Execute commands on TP-Link router.
  *
- * Provides the main API for sending commands to the router after authentication.
+ * Provides the main API for sending commands to the router after
+ * authentication. Payload framing, endpoint selection and batching all live in
+ * the {@linkcode Dialect}; this module owns only the I/O and the encryption
+ * calls, and never branches on which dialect it was given.
  */
 
-import {
-  type Action,
-  parse,
-  type ParsedAction,
-  type Section,
-  stringify,
-} from "./payload.ts";
-import { fetchCgiGdpr } from "./client/fetchCgiGdpr.ts";
+import type { Action, Dialect, SessionContext } from "./dialect/dialect.ts";
+import { gdprText } from "./dialect/gdprText.ts";
 import type { Encryption } from "./client/encryption.ts";
 
 /**
@@ -29,6 +26,10 @@ export interface ExecuteOptions {
   tokenId: string;
   /** Authentication times counter (defaults to 1) */
   authTimes?: number;
+  /** Firmware dialect to speak (defaults to {@linkcode gdprText}) */
+  dialect?: Dialect;
+  /** Swappable `fetch`, for tests or non-standard HTTP stacks */
+  fetch?: typeof globalThis.fetch;
 }
 
 /**
@@ -47,18 +48,25 @@ export interface ActionResult {
 export interface ExecuteResult {
   /** Error code from router, or null if successful */
   error: number | null;
-  /** Array of action results corresponding to input actions */
+  /** Array of action results, positionally aligned with the input actions */
   actions: ActionResult[];
 }
+
+const encoder = new TextEncoder();
 
 /**
  * Executes one or more actions on the router.
  *
  * Handles the full request/response cycle:
- * 1. Serializes actions to the router's payload format
- * 2. Encrypts and sends the request
- * 3. Decrypts and parses the response
- * 4. Maps responses back to original requests
+ * 1. Splits the actions into as many round trips as the dialect needs
+ * 2. Encrypts and sends each request
+ * 3. Decrypts and decodes each response
+ * 4. Maps responses back onto the original requests by position
+ *
+ * The returned `actions` array always has one entry per input action, in input
+ * order; actions the router returned nothing for carry `res: null`. A transport
+ * failure (any non-200 response) short-circuits to
+ * `{ error: -1, actions: [] }`.
  *
  * @param baseUrl Base URL of the router
  * @param actions Array of actions to execute
@@ -102,53 +110,45 @@ export async function execute(
   actions: Action[],
   options: ExecuteOptions,
 ): Promise<ExecuteResult> {
-  const { encryption, sequence, sessionId, tokenId, authTimes = 1 } = options;
-
-  const payload = stringify(actions);
-
-  const response = await fetchCgiGdpr(baseUrl, payload, {
+  const {
     encryption,
     sequence,
     sessionId,
     tokenId,
-    authTimes,
-  });
+    authTimes = 1,
+    dialect = gdprText,
+    fetch = globalThis.fetch,
+  } = options;
 
-  if (!response) {
-    return { error: -1, actions: [] };
+  const session: SessionContext = { sessionId, tokenId, authTimes };
+  const results: ActionResult[] = actions.map((req) => ({ req, res: null }));
+  let error: number | null = null;
+
+  for (const batch of dialect.encodeCommands(actions)) {
+    const envelope = encryption.encrypt(
+      encoder.encode(batch.payload),
+      sequence,
+    );
+
+    const response = await fetch(
+      dialect.commandRequest(baseUrl, envelope, session),
+    );
+
+    if (response.status !== 200) {
+      await response.body?.cancel();
+      return { error: -1, actions: [] };
+    }
+
+    const decoded = dialect.decodeCommand(
+      encryption.decrypt(await response.text()),
+      batch,
+    );
+
+    error ??= decoded.error;
+    batch.indices.forEach((index, position) => {
+      results[index].res = decoded.results[position] ?? null;
+    });
   }
 
-  const result = parse(response);
-
-  const mappedActions: ActionResult[] = result.actions.map(
-    (item: ParsedAction) => {
-      const actionIndex = Array.isArray(item)
-        ? item[0]?.actionIndex ?? 0
-        : item?.actionIndex ?? 0;
-
-      let newItem: Record<string, string> | Record<string, string>[] | null;
-
-      if (Array.isArray(item)) {
-        newItem = item.map((section: Section) => section.attributes ?? {});
-      } else if (item && "attributes" in item && item.attributes) {
-        if (Object.keys(item.attributes).length) {
-          newItem = item.attributes;
-        } else {
-          newItem = null;
-        }
-      } else {
-        newItem = null;
-      }
-
-      return {
-        req: actions[actionIndex],
-        res: newItem,
-      };
-    },
-  );
-
-  return {
-    error: result.error,
-    actions: mappedActions,
-  };
+  return { error, actions: results };
 }

@@ -14,23 +14,66 @@
  * - Archer MR600 v2
  * - Other EU/GDPR TP-Link routers with similar firmware
  *
+ * These all speak the {@link gdprText} dialect, which is the default — nothing
+ * needs to be selected for them.
+ *
+ * ## Experimental: unconfirmed on hardware
+ *
+ * The {@link gdprJson} dialect describes a second protocol shape seen on newer
+ * 5G modems: a JSON payload posted to `/cgi_gdpr?9`. It was reconstructed from a
+ * partially-redacted HAR capture and a reporter's reverse-engineered example in
+ * [issue #82](https://github.com/hertzg/jsr-monorepo/issues/82), and **has never
+ * been run against a device**. Its tests assert the wire format only.
+ *
+ * It is believed to cover:
+ *
+ * - TP-LINK NE200 5G
+ * - VX800v (reported as "seems identical", zero captures)
+ *
+ * If you own one of these, pass `dialect: gdprJson` and please report what
+ * happens on issue #82 — confirming it is what moves these models onto the
+ * supported list.
+ *
+ * ```ts ignore
+ * import { authenticate, gdprJson } from "@hertzg/tplink-api";
+ *
+ * const auth = await authenticate("http://192.168.254.1", {
+ *   password: "secret",
+ *   dialect: gdprJson,
+ * });
+ * ```
+ *
  * ## Main Functions
  *
  * - {@link authenticate}: Establish a session with the router
  * - {@link execute}: Execute commands on an authenticated router
+ *
+ * ## Firmware Dialects
+ *
+ * A {@link Dialect} is a plain object of pure functions describing one firmware
+ * family's wire protocol. Both `authenticate` and `execute` take an optional
+ * `dialect` (and an optional `fetch`); `authenticate` carries the dialect
+ * forward on its result, so `execute(baseUrl, actions, auth)` keeps working
+ * unchanged. See the `@hertzg/tplink-api/dialect` entrypoint for the full
+ * contract and for how to author a dialect for a model that is not covered.
  *
  * ## Action Format
  *
  * Actions are tuples of type {@link Action} with the following structure:
  * `[actionType, operationId, attributes?, stack?, pStack?]`
  *
- * | Parameter   | Required | Default          | Description                              |
- * |-------------|----------|------------------|------------------------------------------|
- * | actionType  | Yes      | —                | Operation type from {@link ACT}          |
- * | operationId | Yes      | —                | Operation identifier (e.g., "LTE_BANDINFO") |
- * | attributes  | No       | `[]`             | Array for reads, object for writes       |
- * | stack       | No       | `"0,0,0,0,0,0"`  | Stack context (device-specific)          |
- * | pStack      | No       | `"0,0,0,0,0,0"`  | Parent stack (rarely modified)           |
+ * | Parameter   | Required | Default (`gdprText`) | Description                              |
+ * |-------------|----------|----------------------|------------------------------------------|
+ * | actionType  | Yes      | —                    | Operation type from {@link ACT}          |
+ * | operationId | Yes      | —                    | Operation identifier (e.g., "LTE_BANDINFO") |
+ * | attributes  | No       | `[]`                 | Array for reads, object for writes       |
+ * | stack       | No       | `"0,0,0,0,0,0"`      | Stack context (device-specific)          |
+ * | pStack      | No       | `"0,0,0,0,0,0"`      | Parent stack (rarely modified)           |
+ *
+ * What an omitted `stack` or `pStack` becomes on the wire is a dialect concern,
+ * so the Default column above is {@link gdprText}'s. {@link gdprJson} defaults
+ * `stack` to `"1,0,0,0,0,0"` for `go` reads and `"0,0,0,0,0,0"` otherwise; see
+ * each dialect's own documentation.
  *
  * ## Discovering Actions
  *
@@ -118,7 +161,22 @@
  * @module
  */
 
-export { ACT, type Action, type ActionType } from "./payload.ts";
+export {
+  ACT,
+  type Action,
+  type ActionType,
+  type BusyStatus,
+  type CommandBatch,
+  type Credentials,
+  type DecodedBatch,
+  type Dialect,
+  type Envelope,
+  gdprJson,
+  gdprText,
+  type PublicKeyInfo,
+  type RouterInfo,
+  type SessionContext,
+} from "./dialect/mod.ts";
 export {
   type ActionResult,
   execute,
