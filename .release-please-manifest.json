@@ -22,6 +22,7 @@
   "packages/@binstruct/rtp": "0.0.1",
   "packages/@binstruct/sll": "0.0.1",
   "packages/@binstruct/tcp": "0.2.0",
+  "packages/@binstruct/tga": "0.0.1",
   "packages/@binstruct/tls-record": "0.0.1",
   "packages/@binstruct/udp": "1.1.0",
   "packages/@binstruct/vlan": "0.0.1",
