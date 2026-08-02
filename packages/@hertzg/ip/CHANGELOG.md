@@ -1,5 +1,12 @@
 # Changelog
 
+## [4.1.1](https://github.com/hertzg/jsr-monorepo/compare/@hertzg/ip-v4.1.0...@hertzg/ip-v4.1.1) (2026-08-02)
+
+
+### Bug Fixes
+
+* **@hertzg/ip, @hertzg/crc, @hertzg/mymagti-api:** document public symbols for jsr score ([#217](https://github.com/hertzg/jsr-monorepo/issues/217)) ([090e16e](https://github.com/hertzg/jsr-monorepo/commit/090e16eb744f21f51a836002426543a5be987d79))
+
 ## [4.1.0](https://github.com/hertzg/jsr-monorepo/compare/@hertzg/ip-v4.0.0...@hertzg/ip-v4.1.0) (2026-04-30)
 
 
