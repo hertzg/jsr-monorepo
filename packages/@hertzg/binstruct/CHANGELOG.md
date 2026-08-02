@@ -1,5 +1,12 @@
 # Changelog
 
+## [3.3.0](https://github.com/hertzg/jsr-monorepo/compare/@hertzg/binstruct-v3.2.0...@hertzg/binstruct-v3.3.0) (2026-08-02)
+
+
+### Features
+
+* **@hertzg/binstruct:** add lazy coder for recursive structures ([#214](https://github.com/hertzg/jsr-monorepo/issues/214)) ([3eab4b7](https://github.com/hertzg/jsr-monorepo/commit/3eab4b763aa95466bb3f5d006c39bfb1c2de0d8d))
+
 ## [3.2.0](https://github.com/hertzg/jsr-monorepo/compare/@hertzg/binstruct-v3.1.0...@hertzg/binstruct-v3.2.0) (2026-05-02)
 
 
