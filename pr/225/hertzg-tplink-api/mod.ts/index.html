@@ -1,23 +1,23 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>All Symbols - @hertzg&#x2F;tplink-api documentation</title>
+  <title>mod.ts - @hertzg&#x2F;tplink-api documentation</title>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="doc-current-file" content="">
-  <link rel="stylesheet" href=".&#x2F;styles.css">
-  <link rel="stylesheet" href=".&#x2F;page.css">
-  <link id="ddocResetStylesheet" rel="stylesheet" href=".&#x2F;reset.css"><link href="./comrak.css" rel="stylesheet" /><link href="./prism.css" rel="stylesheet" /><script src="./prism.js"></script><script src=".&#x2F;script.js" defer></script>
-  <script src=".&#x2F;darkmode_toggle.js"></script><script src=".&#x2F;search_index.js" defer></script>
-    <script src=".&#x2F;fuse.js" defer></script>
-    <script src=".&#x2F;search.js" defer></script></head>
+  <link rel="stylesheet" href="..&#x2F;styles.css">
+  <link rel="stylesheet" href="..&#x2F;page.css">
+  <link id="ddocResetStylesheet" rel="stylesheet" href="..&#x2F;reset.css"><link href="../comrak.css" rel="stylesheet" /><link href="../prism.css" rel="stylesheet" /><script src="../prism.js"></script><script src="..&#x2F;script.js" defer></script>
+  <script src="..&#x2F;darkmode_toggle.js"></script><script src="..&#x2F;search_index.js" defer></script>
+    <script src="..&#x2F;fuse.js" defer></script>
+    <script src="..&#x2F;search.js" defer></script></head>
 <body>
 <div class="ddoc">
 <div><nav id="topnav">
   <div class="h-full">
     <div class="flex items-center"><ul class="breadcrumbs">
   <li>
-    <a href=".&#x2F;" class="contextLink">@hertzg&#x2F;tplink-api</a>
+    <a href="..&#x2F;" class="contextLink">@hertzg&#x2F;tplink-api</a>
   </li><span class="text-black dark:text-white"><svg
   width="16"
   height="16"
@@ -32,7 +32,7 @@
     fill="currentColor"
   />
 </svg>
-</span>all symbols</ul>
+</span>mod.ts</ul>
 </div>
 
     <div class="flex items-center gap-2">
@@ -97,12 +97,468 @@
   </div>
 </nav>
 <div id="searchResults"></div><div id="content">
-    <main><div class="space-y-6 max-w-prose">
-    <div>
-      <a href=".&#x2F;.&#x2F;mod.ts&#x2F;index.html" class="link text-xl font-bold">mod.ts</a>
+    <main><section>
+  <div class="space-y-2 flex-1"><div class="space-y-7" id="module_doc"><div class="markdown"><p>TP-Link Router API client library for Deno.</p>
+<p>This module provides authentication and command execution capabilities for
+TP-Link routers (EU/GDPR versions) via direct API calls. The library handles
+the router's proprietary encryption protocol (AES + RSA) and provides a
+type-safe interface for executing commands.</p>
+<h2 id="how-the-protocol-works">
+How the protocol works</h2>
+<p>There is no specification for any of this. It was read out of the routers'
+own web UI, which any of these devices will serve you without logging in.</p>
+<p>A TP-Link router is a <strong>settings database with a web page in front of it</strong>.
+The web UI has no real pages — every screen reads and writes rows in that
+database, and this library talks to the same interface. So every request
+says four things:</p>
+<ul>
+<li><strong>what to do</strong> — read, write, add, delete, list (<a href=".././mod.ts/~/ACT.html">ACT</a>)</li>
+<li><strong>which group of settings</strong> — the <code>oid</code></li>
+<li><strong>which one of them</strong> — the <code>stack</code></li>
+<li><strong>what values</strong> — the attributes</li>
+</ul>
+<h3 id="oid--a-group-of-settings">
+<code>oid</code> — a group of settings</h3>
+<p>Despite the name this is <em>not</em> an SNMP or ASN.1 OID; there are no dotted
+numbers. It is the name of an object in the device's data model, which
+descends from the Broadband Forum's CWMP/TR-069 standards for remotely
+managing home routers. Two generations are in the field, and the prefix
+tells you which one a device speaks:</p>
+<table>
+<thead>
+<tr>
+<th>Prefix</th>
+<th>Data model</th>
+<th>Specification</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>IGD_*</code></td>
+<td><code>InternetGatewayDevice:1</code></td>
+<td>TR-098 (older)</td>
+</tr>
+<tr>
+<td><code>DEV2_*</code></td>
+<td><code>Device:2</code></td>
+<td>TR-181 (newer)</td>
+</tr>
+</tbody>
+</table>
+<p>So <code>DEV2_DEV_INFO</code> is <code>Device.DeviceInfo</code>. Names containing <code>X_TP_</code> are
+TP-Link vendor extensions — <code>X_&lt;VENDOR&gt;_</code> is the TR-069 convention for
+anything outside the standard model.</p>
+<p>For <code>ACT.OP</code> the same slot holds an operation name instead (<code>ACT_REBOOT</code>,
+<code>ACT_WLAN_SCAN</code>, …), and for <code>ACT.CGI</code> it holds a CGI path (<code>/cgi/login</code>).</p>
+<h3 id="stack--which-instance">
+<code>stack</code> — which instance</h3>
+<p>A router can have several WAN connections and several wireless networks, so
+naming the settings group is not enough. <code>stack</code> is six comma-separated
+numbers selecting <em>which instance</em>, one slot per level of nesting:</p>
+<pre class="highlight"><code class="language-text">0,0,0,0,0,0   unspecified — the object itself, or every instance for a list
+1,0,0,0,0,0   the first instance
+2,3,0,0,0,0   the third instance nested under the second
+</code><button class="copyButton" data-copy="0,0,0,0,0,0   unspecified — the object itself, or every instance for a list
+1,0,0,0,0,0   the first instance
+2,3,0,0,0,0   the third instance nested under the second
+"><svg
+  class="copy"
+  width="15"
+  height="15"
+  viewBox="0 0 15 15"
+  fill="none"
+  xmlns="http://www.w3.org/2000/svg"
+>
+  <rect x="2" y="2" width="7" height="7" fill="none" />
+  <rect x="6" y="6" width="7" height="7" fill="none" />
+  <path
+    d="M1.55566 2.7C1.55566 2.03726 2.09292 1.5 2.75566 1.5H8.75566C9.41841 1.5 9.95566 2.03726 9.95566 2.7V5.1H12.3557C13.0184 5.1 13.5557 5.63726 13.5557 6.3V12.3C13.5557 12.9627 13.0184 13.5 12.3557 13.5H6.35566C5.69292 13.5 5.15566 12.9627 5.15566 12.3V9.9H2.75566C2.09292 9.9 1.55566 9.36274 1.55566 8.7V2.7ZM6.35566 9.9V12.3H12.3557V6.3H9.95566V8.7C9.95566 9.36274 9.41841 9.9 8.75566 9.9H6.35566ZM8.75566 8.7V2.7H2.75566V8.7H8.75566Z"
+    fill="currentColor"
+  />
+</svg>
+<svg
+  class="check"
+  width="15"
+  height="15"
+  viewBox="0 0 24 24"
+  stroke-width="2"
+  stroke="currentColor"
+  fill="none"
+  stroke-linecap="round"
+  stroke-linejoin="round"
+  xmlns="http://www.w3.org/2000/svg"
+>
+  <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+  <path d="M5 12l5 5l10 -10" />
+</svg>
+</button><code></code></pre>
+<p>Trailing zeros mean &quot;unset&quot;. <code>pStack</code> is the same path for the <em>parent</em>
+object; it exists for <a href=".././mod.ts/~/ACT.html">ACT</a>.ADD, where the instance being created has
+no path of its own yet.</p>
+<blockquote>
+<p><code>stack</code> here is unrelated to TR-181's <code>Device.InterfaceStack</code>, which is
+about network-interface layering. Same word, different concept.</p>
+</blockquote>
+<h3 id=""gdpr"-names-the-encryption,-not-the-format">
+&quot;GDPR&quot; names the encryption, not the format</h3>
+<p><code>cgi_gdpr</code>, <code>getGDPRParm</code> and the firmware's own <code>gdprProxy.js</code> all refer to
+the encryption layer TP-Link retrofitted for EU compliance. <strong>Both</strong> dialects
+below are &quot;GDPR&quot; firmware — the word does not distinguish them. What
+distinguishes them is the data model generation above.</p>
+<h2 id="supported-models">
+Supported Models</h2>
+<ul>
+<li>TL-MR6400</li>
+<li>Archer VR900v</li>
+<li>TL-MR6500v</li>
+<li>Archer MR600 v2</li>
+<li>Other EU/GDPR TP-Link routers with similar firmware</li>
+</ul>
+<p>These all speak the <a href=".././mod.ts/~/gdprText.html">gdprText</a> dialect, which is the default — nothing
+needs to be selected for them.</p>
+<h2 id="experimental:-unconfirmed-on-hardware">
+Experimental: unconfirmed on hardware</h2>
+<p>The <a href=".././mod.ts/~/gdprJson.html">gdprJson</a> dialect describes a second protocol shape seen on newer
+5G modems: a JSON payload posted to <code>/cgi_gdpr?9</code>. It is built from that
+firmware's own JavaScript, recovered from the capture attached to
+<a href="https://github.com/hertzg/jsr-monorepo/issues/82">issue #82</a> — so the
+endpoint, the operation vocabulary and the payload shape come from the
+vendor's source rather than from guesswork.</p>
+<p>It nonetheless <strong>has never been run against a device</strong>, and its tests assert
+the wire format only. The two dialects carry opposite kinds of confidence:
+<a href=".././mod.ts/~/gdprText.html">gdprText</a> has no recovered source but years of use against real
+hardware, while <a href=".././mod.ts/~/gdprJson.html">gdprJson</a> has the source and no hardware.</p>
+<p>It is believed to cover:</p>
+<ul>
+<li>TP-LINK NE200 5G</li>
+<li>VX800v (reported as &quot;seems identical&quot;, zero captures)</li>
+</ul>
+<p>If you own one of these, pass <code>dialect: gdprJson</code> and please report what
+happens on issue #82 — confirming it is what moves these models onto the
+supported list.</p>
+<pre class="highlight"><code class="language-ts">import { authenticate, gdprJson } from &quot;@hertzg/tplink-api&quot;;
 
-      <div class="ml-4 mt-2"><section>
-  <div class="space-y-2 flex-1"><div class="space-y-7" id="module_doc"><div class="markdown_summary"><p>TP-Link Router API client library for Deno.</p>
+const auth = await authenticate(&quot;http://192.168.254.1&quot;, {
+  password: &quot;secret&quot;,
+  dialect: gdprJson,
+});
+</code><button class="copyButton" data-copy="import { authenticate, gdprJson } from &quot;@hertzg/tplink-api&quot;;
+
+const auth = await authenticate(&quot;http://192.168.254.1&quot;, {
+  password: &quot;secret&quot;,
+  dialect: gdprJson,
+});
+"><svg
+  class="copy"
+  width="15"
+  height="15"
+  viewBox="0 0 15 15"
+  fill="none"
+  xmlns="http://www.w3.org/2000/svg"
+>
+  <rect x="2" y="2" width="7" height="7" fill="none" />
+  <rect x="6" y="6" width="7" height="7" fill="none" />
+  <path
+    d="M1.55566 2.7C1.55566 2.03726 2.09292 1.5 2.75566 1.5H8.75566C9.41841 1.5 9.95566 2.03726 9.95566 2.7V5.1H12.3557C13.0184 5.1 13.5557 5.63726 13.5557 6.3V12.3C13.5557 12.9627 13.0184 13.5 12.3557 13.5H6.35566C5.69292 13.5 5.15566 12.9627 5.15566 12.3V9.9H2.75566C2.09292 9.9 1.55566 9.36274 1.55566 8.7V2.7ZM6.35566 9.9V12.3H12.3557V6.3H9.95566V8.7C9.95566 9.36274 9.41841 9.9 8.75566 9.9H6.35566ZM8.75566 8.7V2.7H2.75566V8.7H8.75566Z"
+    fill="currentColor"
+  />
+</svg>
+<svg
+  class="check"
+  width="15"
+  height="15"
+  viewBox="0 0 24 24"
+  stroke-width="2"
+  stroke="currentColor"
+  fill="none"
+  stroke-linecap="round"
+  stroke-linejoin="round"
+  xmlns="http://www.w3.org/2000/svg"
+>
+  <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+  <path d="M5 12l5 5l10 -10" />
+</svg>
+</button><code></code></pre>
+<h2 id="main-functions">
+Main Functions</h2>
+<ul>
+<li><a href=".././mod.ts/~/authenticate.html">authenticate</a>: Establish a session with the router</li>
+<li><a href=".././mod.ts/~/execute.html">execute</a>: Execute commands on an authenticated router</li>
+</ul>
+<h2 id="firmware-dialects">
+Firmware Dialects</h2>
+<p>A <a href=".././mod.ts/~/Dialect.html">Dialect</a> is a plain object of pure functions describing one firmware
+family's wire protocol. Both <code>authenticate</code> and <code>execute</code> take an optional
+<code>dialect</code> (and an optional <code>fetch</code>); <code>authenticate</code> carries the dialect
+forward on its result, so <code>execute(baseUrl, actions, auth)</code> keeps working
+unchanged. See the <code>@hertzg/tplink-api/dialect</code> entrypoint for the full
+contract and for how to author a dialect for a model that is not covered.</p>
+<h2 id="action-format">
+Action Format</h2>
+<p>Actions are tuples of type <a href=".././mod.ts/~/Action.html">Action</a> with the following structure:
+<code>[actionType, operationId, attributes?, stack?, pStack?]</code></p>
+<table>
+<thead>
+<tr>
+<th>Parameter</th>
+<th>Required</th>
+<th>Default</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>actionType</td>
+<td>Yes</td>
+<td>—</td>
+<td>Operation type from <a href=".././mod.ts/~/ACT.html">ACT</a></td>
+</tr>
+<tr>
+<td>oid</td>
+<td>Yes</td>
+<td>—</td>
+<td>Settings group (<code>IGD_*</code> / <code>DEV2_*</code>); an operation name for <code>ACT.OP</code>; a CGI path for <code>ACT.CGI</code></td>
+</tr>
+<tr>
+<td>attributes</td>
+<td>No</td>
+<td><code>[]</code></td>
+<td>Names to read, or an object of values to write</td>
+</tr>
+<tr>
+<td>stack</td>
+<td>No</td>
+<td><code>&quot;0,0,0,0,0,0&quot;</code></td>
+<td>Which instance to address</td>
+</tr>
+<tr>
+<td>pStack</td>
+<td>No</td>
+<td><code>&quot;0,0,0,0,0,0&quot;</code></td>
+<td>Parent object's instance. Needed by <code>ACT.ADD</code></td>
+</tr>
+</tbody>
+</table>
+<p>On the wire, reading and writing are the same syntax — an attribute is sent
+bare to read it and as <code>name=value</code> to write it. The array form produces the
+former and the object form the latter, which is why they look like two
+different shapes in this API.</p>
+<h2 id="discovering-actions">
+Discovering Actions</h2>
+<h3 id="read-the-firmware--no-login-required">
+Read the firmware — no login required</h3>
+<p>The fastest route is usually the router's own JavaScript, which it serves
+unauthenticated:</p>
+<table>
+<thead>
+<tr>
+<th>Path</th>
+<th>What it tells you</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>/js/gdprProxy.js</code></td>
+<td>the <code>ACT_*</code> constants, the payload codec, the endpoint</td>
+</tr>
+<tr>
+<td><code>/js/oid_str.js</code></td>
+<td>every <code>oid</code> the firmware knows</td>
+</tr>
+<tr>
+<td><code>/js/lib.js</code></td>
+<td>real call sites — how <code>stack</code> values are actually used</td>
+</tr>
+<tr>
+<td><code>/locale/errCode.js</code></td>
+<td>every error code, by name</td>
+</tr>
+<tr>
+<td><code>/</code></td>
+<td>model name, <code>adminType</code>, lockout state (see below)</td>
+</tr>
+</tbody>
+</table>
+<p>In <code>gdprProxy.js</code>, look for the <code>ACT_*</code> block at the top, <code>act:</code> / <code>exe:</code>
+for the older text codec, and any <code>$.dm.Proxy.setup({ ajax: { url: … } })</code>
+block — its <code>url</code> <em>is</em> the command endpoint, and the operation table right
+after it is the complete vocabulary that firmware accepts.</p>
+<h3 id="watch-live-traffic">
+Watch live traffic</h3>
+<p>To see decrypted payloads as you click around, hook the encryptor from the
+browser console while logged in:</p>
+<pre class="highlight"><code class="language-js">$.Iencryptor.AESDecrypt_backup = $.Iencryptor.AESDecrypt;
+$.Iencryptor.AESEncrypt_backup = $.Iencryptor.AESEncrypt;
+$.Iencryptor.AESDecrypt = function (data) {
+    const decrypted = $.Iencryptor.AESDecrypt_backup(data);
+    console.log(&quot;RECV:\n&quot; + decrypted);
+    return decrypted;
+};
+$.Iencryptor.AESEncrypt = function (data, isLogin) {
+    console.log(&quot;SEND:\n&quot; + data);
+    return $.Iencryptor.AESEncrypt_backup(data, isLogin);
+};
+</code><button class="copyButton" data-copy="$.Iencryptor.AESDecrypt_backup = $.Iencryptor.AESDecrypt;
+$.Iencryptor.AESEncrypt_backup = $.Iencryptor.AESEncrypt;
+$.Iencryptor.AESDecrypt = function (data) {
+    const decrypted = $.Iencryptor.AESDecrypt_backup(data);
+    console.log(&quot;RECV:\n&quot; + decrypted);
+    return decrypted;
+};
+$.Iencryptor.AESEncrypt = function (data, isLogin) {
+    console.log(&quot;SEND:\n&quot; + data);
+    return $.Iencryptor.AESEncrypt_backup(data, isLogin);
+};
+"><svg
+  class="copy"
+  width="15"
+  height="15"
+  viewBox="0 0 15 15"
+  fill="none"
+  xmlns="http://www.w3.org/2000/svg"
+>
+  <rect x="2" y="2" width="7" height="7" fill="none" />
+  <rect x="6" y="6" width="7" height="7" fill="none" />
+  <path
+    d="M1.55566 2.7C1.55566 2.03726 2.09292 1.5 2.75566 1.5H8.75566C9.41841 1.5 9.95566 2.03726 9.95566 2.7V5.1H12.3557C13.0184 5.1 13.5557 5.63726 13.5557 6.3V12.3C13.5557 12.9627 13.0184 13.5 12.3557 13.5H6.35566C5.69292 13.5 5.15566 12.9627 5.15566 12.3V9.9H2.75566C2.09292 9.9 1.55566 9.36274 1.55566 8.7V2.7ZM6.35566 9.9V12.3H12.3557V6.3H9.95566V8.7C9.95566 9.36274 9.41841 9.9 8.75566 9.9H6.35566ZM8.75566 8.7V2.7H2.75566V8.7H8.75566Z"
+    fill="currentColor"
+  />
+</svg>
+<svg
+  class="check"
+  width="15"
+  height="15"
+  viewBox="0 0 24 24"
+  stroke-width="2"
+  stroke="currentColor"
+  fill="none"
+  stroke-linecap="round"
+  stroke-linejoin="round"
+  xmlns="http://www.w3.org/2000/svg"
+>
+  <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+  <path d="M5 12l5 5l10 -10" />
+</svg>
+</button><code></code></pre>
+<p>Note the second argument: <code>AESEncrypt</code> takes <code>isLogin</code>, and dropping it
+breaks the login request, because login is the one call that must carry the
+AES key and IV inside its signature. That flag — not any signature length —
+is the real distinction between a login and everything else.</p>
+<p>Navigate the UI and read the console to discover the <code>actionType</code>, <code>oid</code>,
+<code>attributes</code>, <code>stack</code> and <code>pStack</code> for each operation.</p>
+<h2 id="action-type-constants">
+Action Type Constants</h2>
+<p>The <a href=".././mod.ts/~/ACT.html">ACT</a> object provides action type constants:</p>
+<ul>
+<li><a href=".././mod.ts/~/ACT.html">ACT</a>.GET (1) - Read one object</li>
+<li><a href=".././mod.ts/~/ACT.html">ACT</a>.SET (2) - Write attributes</li>
+<li><a href=".././mod.ts/~/ACT.html">ACT</a>.ADD (3) - Create an instance</li>
+<li><a href=".././mod.ts/~/ACT.html">ACT</a>.DEL (4) - Delete an instance</li>
+<li><a href=".././mod.ts/~/ACT.html">ACT</a>.GL (5) - Get list — every instance</li>
+<li><a href=".././mod.ts/~/ACT.html">ACT</a>.GS (6) - Get sub-list — instances beneath a parent</li>
+<li><a href=".././mod.ts/~/ACT.html">ACT</a>.OP (7) - Invoke an operation</li>
+<li><a href=".././mod.ts/~/ACT.html">ACT</a>.CGI (8) - Call a CGI endpoint</li>
+</ul>
+<p>A ninth value, <code>ACT_SIG = 9</code>, exists in the firmware but is not an action you
+can request — it is why the newer firmware's endpoint is spelled
+<code>/cgi_gdpr?9</code>. In the pre-encryption protocol the query string carried the
+list of action types in the request (<code>/cgi?1&amp;2&amp;5</code>); encryption moved that
+list into the payload, and the newer JSON transport kept the old spelling
+with a single fixed type.</p>
+<h2 id="response-structure">
+Response Structure</h2>
+<p>The <a href=".././mod.ts/~/execute.html">execute</a> function returns an <a href=".././mod.ts/~/ExecuteResult.html">ExecuteResult</a>:</p>
+<ul>
+<li><code>error</code>: Error code from router (0 = success), or null</li>
+<li><code>actions</code>: Array of <a href=".././mod.ts/~/ActionResult.html">ActionResult</a> mapping requests to responses</li>
+</ul>
+<p><code>error</code> is a raw firmware code. The full table lives in the router's own
+<code>/locale/errCode.js</code>; the ones you are most likely to see:</p>
+<table>
+<thead>
+<tr>
+<th>Code</th>
+<th>Firmware name</th>
+<th>Meaning</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>9000</code></td>
+<td><code>CMM_METHOD_NOT_SUPPORTED</code></td>
+<td>that action is not allowed here</td>
+</tr>
+<tr>
+<td><code>9001</code></td>
+<td><code>CMM_REQUEST_DENIED</code></td>
+<td>refused, often not authenticated</td>
+</tr>
+<tr>
+<td><code>9003</code></td>
+<td><code>CMM_INVALID_ARGUMENTS</code></td>
+<td>malformed attributes</td>
+</tr>
+<tr>
+<td><code>9005</code></td>
+<td><code>CMM_INVALID_PARAM_NAME</code></td>
+<td>unknown attribute name</td>
+</tr>
+<tr>
+<td><code>9007</code></td>
+<td><code>CMM_INVALID_PARAM_VALUE</code></td>
+<td>value rejected</td>
+</tr>
+<tr>
+<td><code>9804</code></td>
+<td><code>CMM_OBJECT_NOT_FOUND</code></td>
+<td>no such <code>oid</code></td>
+</tr>
+<tr>
+<td><code>9805</code></td>
+<td><code>CMM_INSTANCE_NOT_FOUND</code></td>
+<td>no such <code>stack</code> instance</td>
+</tr>
+<tr>
+<td><code>9812</code></td>
+<td><code>CMM_REACH_MAX_INSTANCE_NUM</code></td>
+<td>cannot add another</td>
+</tr>
+<tr>
+<td><code>71012</code></td>
+<td><code>ERR_HTTP_ERR_GET</code></td>
+<td>read failed</td>
+</tr>
+<tr>
+<td><code>71013</code></td>
+<td><code>ERR_HTTP_ERR_SET</code></td>
+<td>write failed</td>
+</tr>
+<tr>
+<td><code>71233</code></td>
+<td><code>ERR_HTTP_ERR_USER_PWD_NOT_CORRECT</code></td>
+<td>bad credentials</td>
+</tr>
+</tbody>
+</table>
+<p>A <code>-1</code> means the request never completed — a non-200 response, not a
+firmware code.</p>
+<h2 id="why-a-failed-login-tells-you-so-little">
+Why a failed login tells you so little</h2>
+<p><a href=".././mod.ts/~/authenticate.html">authenticate</a> returns <code>null</code> when it does not get a session, and it
+cannot tell you why. That is the router's design, not an omission here: the
+device answers a wrong password and a correct one the same way, and its own
+web UI simply reloads the login page and reads the counters off it.</p>
+<p>Those counters are on <a href=".././mod.ts/~/AuthResult.html">AuthResult</a><code>.info</code> when a login succeeds, and
+they are the only signal available:</p>
+<ul>
+<li><code>authTimes</code> — the number of <strong>failed</strong> attempts so far</li>
+<li><code>forbidFlag</code> / <code>forbidTime</code> — whether the device has locked you out, and
+for how long</li>
+</ul>
+<p>Routers in this family lock out after 3–5 failed attempts. If you are
+automating retries, read those values rather than looping — and note that a
+lockout looks identical to a wrong password from <code>authenticate</code>'s return
+value alone.</p>
 </div><section class="section"  id="examples"><div>
       <h2 class="anchorable mb-1"><a href="#examples" class="anchor" aria-label="Anchor" tabIndex="-1"><svg
   width="16"
@@ -375,12 +831,12 @@ const actions: Action[] = [
 </a>
 Functions</h2></div><div class="namespaceSection"><div id="namespace_authenticate" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-Function bg-Function/15 dark:text-FunctionDark dark:bg-FunctionDark/15" title="Function">f</div></div>
 <div class="namespaceItemContent">
-		    <a href=".&#x2F;.&#x2F;mod.ts&#x2F;~&#x2F;authenticate.html" title="authenticate">
+		    <a href="..&#x2F;.&#x2F;mod.ts&#x2F;~&#x2F;authenticate.html" title="authenticate">
 			    <span>authenticate</span><span>(<div class="ml-4"><div><span>baseUrl<span>: <span class="td-kw">string</span></span></span>,</div><div><span>options<span>: <span class="td-ref">AuthOptions</span></span></span></div></div>)<span>: <span class="td-ref">Promise</span>&lt;<span><span class="td-ref">AuthResult</span><span class="td-op"> | </span><span class="td-kw">null</span></span>&gt;</span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Authenticates with a TP-Link router and returns session context.</p>
 </div></div></div>
     </div><div id="namespace_execute" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-Function bg-Function/15 dark:text-FunctionDark dark:bg-FunctionDark/15" title="Function">f</div></div>
 <div class="namespaceItemContent">
-		    <a href=".&#x2F;.&#x2F;mod.ts&#x2F;~&#x2F;execute.html" title="execute">
+		    <a href="..&#x2F;.&#x2F;mod.ts&#x2F;~&#x2F;execute.html" title="execute">
 			    <span>execute</span><span>(<div class="ml-4"><div><span>baseUrl<span>: <span class="td-kw">string</span></span></span>,</div><div><span>actions<span>: <span class="td-ref">Action</span>[]</span></span>,</div><div><span>options<span>: <span class="td-ref">ExecuteOptions</span></span></span></div></div>)<span>: <span class="td-ref">Promise</span>&lt;<span class="td-ref">ExecuteResult</span>&gt;</span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Executes one or more actions on the router.</p>
 </div></div></div>
     </div></div>
@@ -410,243 +866,243 @@ Functions</h2></div><div class="namespaceSection"><div id="namespace_authenticat
 </a>
 Interfaces</h2></div><div class="namespaceSection"><div id="namespace_actionresult" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-Interface bg-Interface/15 dark:text-InterfaceDark dark:bg-InterfaceDark/15" title="Interface">I</div></div>
 <div class="namespaceItemContent">
-		    <a href=".&#x2F;.&#x2F;mod.ts&#x2F;~&#x2F;ActionResult.html" title="ActionResult">
+		    <a href="..&#x2F;.&#x2F;mod.ts&#x2F;~&#x2F;ActionResult.html" title="ActionResult">
 			    <span>ActionResult</span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Result of a single action execution, mapping request to response.</p>
 </div></div><ul class="namespaceItemContentSubItems"><li>
-                <a href=".&#x2F;.&#x2F;mod.ts&#x2F;~&#x2F;ActionResult.html#property_req">
+                <a href="..&#x2F;.&#x2F;mod.ts&#x2F;~&#x2F;ActionResult.html#property_req">
                   <span>req</span><span>: <span class="td-ref">Action</span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Original action that was requested</p>
 </div></div></li><li>
-                <a href=".&#x2F;.&#x2F;mod.ts&#x2F;~&#x2F;ActionResult.html#property_res">
+                <a href="..&#x2F;.&#x2F;mod.ts&#x2F;~&#x2F;ActionResult.html#property_res">
                   <span>res</span><span>: <span><span class="td-ref">Record</span>&lt;<span class="td-kw">string</span><span>, </span><span class="td-kw">string</span>&gt;<span class="td-op"> | </span><span class="td-ref">Record</span>&lt;<span class="td-kw">string</span><span>, </span><span class="td-kw">string</span>&gt;[]<span class="td-op"> | </span><span class="td-kw">null</span></span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Response data: single object, array of objects, or null if no data</p>
 </div></div></li></ul></div>
     </div><div id="namespace_authoptions" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-Interface bg-Interface/15 dark:text-InterfaceDark dark:bg-InterfaceDark/15" title="Interface">I</div></div>
 <div class="namespaceItemContent">
-		    <a href=".&#x2F;.&#x2F;mod.ts&#x2F;~&#x2F;AuthOptions.html" title="AuthOptions">
+		    <a href="..&#x2F;.&#x2F;mod.ts&#x2F;~&#x2F;AuthOptions.html" title="AuthOptions">
 			    <span>AuthOptions</span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Options for authenticating with the router.</p>
 </div></div><ul class="namespaceItemContentSubItems"><li>
-                <a href=".&#x2F;.&#x2F;mod.ts&#x2F;~&#x2F;AuthOptions.html#property_dialect">
-                  <span>dialect</span><span>: <span class="td-ref">Dialect</span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Firmware dialect to speak (defaults to <code>gdprText</code>)</p>
+                <a href="..&#x2F;.&#x2F;mod.ts&#x2F;~&#x2F;AuthOptions.html#property_dialect">
+                  <span>dialect</span><span>: <span class="td-ref">Dialect</span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Firmware dialect to speak (defaults to <a href=".././mod.ts/~/gdprText.html"><code>gdprText</code></a>)</p>
 </div></div></li><li>
-                <a href=".&#x2F;.&#x2F;mod.ts&#x2F;~&#x2F;AuthOptions.html#property_fetch">
+                <a href="..&#x2F;.&#x2F;mod.ts&#x2F;~&#x2F;AuthOptions.html#property_fetch">
                   <span>fetch</span><span>: <span class="td-ref">globalThis.fetch</span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Swappable <code>fetch</code>, for tests or non-standard HTTP stacks</p>
 </div></div></li><li>
-                <a href=".&#x2F;.&#x2F;mod.ts&#x2F;~&#x2F;AuthOptions.html#property_forcelogin">
+                <a href="..&#x2F;.&#x2F;mod.ts&#x2F;~&#x2F;AuthOptions.html#property_forcelogin">
                   <span>forceLogin</span><span>: <span class="td-kw">boolean</span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Force re-authentication even if already logged in (defaults to true)</p>
 </div></div></li><li>
-                <a href=".&#x2F;.&#x2F;mod.ts&#x2F;~&#x2F;AuthOptions.html#property_password">
+                <a href="..&#x2F;.&#x2F;mod.ts&#x2F;~&#x2F;AuthOptions.html#property_password">
                   <span>password</span><span>: <span class="td-kw">string</span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Password for authentication</p>
 </div></div></li><li>
-                <a href=".&#x2F;.&#x2F;mod.ts&#x2F;~&#x2F;AuthOptions.html#property_username">
+                <a href="..&#x2F;.&#x2F;mod.ts&#x2F;~&#x2F;AuthOptions.html#property_username">
                   <span>username</span><span>: <span class="td-kw">string</span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Username for authentication (defaults to the dialect's default username)</p>
 </div></div></li></ul></div>
     </div><div id="namespace_authresult" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-Interface bg-Interface/15 dark:text-InterfaceDark dark:bg-InterfaceDark/15" title="Interface">I</div></div>
 <div class="namespaceItemContent">
-		    <a href=".&#x2F;.&#x2F;mod.ts&#x2F;~&#x2F;AuthResult.html" title="AuthResult">
+		    <a href="..&#x2F;.&#x2F;mod.ts&#x2F;~&#x2F;AuthResult.html" title="AuthResult">
 			    <span>AuthResult</span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Result of successful authentication containing all data needed for API calls.</p>
 </div></div><ul class="namespaceItemContentSubItems"><li>
-                <a href=".&#x2F;.&#x2F;mod.ts&#x2F;~&#x2F;AuthResult.html#property_dialect">
+                <a href="..&#x2F;.&#x2F;mod.ts&#x2F;~&#x2F;AuthResult.html#property_dialect">
                   <span>dialect</span><span>: <span class="td-ref">Dialect</span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Dialect used, carried forward so <code>execute</code> needs no extra argument</p>
 </div></div></li><li>
-                <a href=".&#x2F;.&#x2F;mod.ts&#x2F;~&#x2F;AuthResult.html#property_encryption">
+                <a href="..&#x2F;.&#x2F;mod.ts&#x2F;~&#x2F;AuthResult.html#property_encryption">
                   <span>encryption</span><span>: <span class="td-ref">Encryption</span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Encryption instance for encrypting/decrypting API payloads</p>
 </div></div></li><li>
-                <a href=".&#x2F;.&#x2F;mod.ts&#x2F;~&#x2F;AuthResult.html#property_info">
+                <a href="..&#x2F;.&#x2F;mod.ts&#x2F;~&#x2F;AuthResult.html#property_info">
                   <span>info</span><span>: <span class="td-ref">RouterInfo</span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Router information retrieved during authentication</p>
 </div></div></li><li>
-                <a href=".&#x2F;.&#x2F;mod.ts&#x2F;~&#x2F;AuthResult.html#property_sequence">
+                <a href="..&#x2F;.&#x2F;mod.ts&#x2F;~&#x2F;AuthResult.html#property_sequence">
                   <span>sequence</span><span>: <span class="td-kw">number</span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Sequence number for request signing</p>
 </div></div></li><li>
-                <a href=".&#x2F;.&#x2F;mod.ts&#x2F;~&#x2F;AuthResult.html#property_sessionid">
+                <a href="..&#x2F;.&#x2F;mod.ts&#x2F;~&#x2F;AuthResult.html#property_sessionid">
                   <span>sessionId</span><span>: <span class="td-kw">string</span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Session ID cookie value</p>
 </div></div></li><li>
-                <a href=".&#x2F;.&#x2F;mod.ts&#x2F;~&#x2F;AuthResult.html#property_tokenid">
+                <a href="..&#x2F;.&#x2F;mod.ts&#x2F;~&#x2F;AuthResult.html#property_tokenid">
                   <span>tokenId</span><span>: <span class="td-kw">string</span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Security token for API requests</p>
 </div></div></li></ul></div>
     </div><div id="namespace_busystatus" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-Interface bg-Interface/15 dark:text-InterfaceDark dark:bg-InterfaceDark/15" title="Interface">I</div></div>
 <div class="namespaceItemContent">
-		    <a href=".&#x2F;.&#x2F;mod.ts&#x2F;~&#x2F;BusyStatus.html" title="BusyStatus">
+		    <a href="..&#x2F;.&#x2F;mod.ts&#x2F;~&#x2F;BusyStatus.html" title="BusyStatus">
 			    <span>BusyStatus</span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Login and busy state reported by the router before authentication.</p>
 </div></div><ul class="namespaceItemContentSubItems"><li>
-                <a href=".&#x2F;.&#x2F;mod.ts&#x2F;~&#x2F;BusyStatus.html#property_isbusy">
+                <a href="..&#x2F;.&#x2F;mod.ts&#x2F;~&#x2F;BusyStatus.html#property_isbusy">
                   <span>isBusy</span><span>: <span class="td-kw">boolean</span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Whether the router is busy serving another management session.</p>
 </div></div></li><li>
-                <a href=".&#x2F;.&#x2F;mod.ts&#x2F;~&#x2F;BusyStatus.html#property_isloggedin">
+                <a href="..&#x2F;.&#x2F;mod.ts&#x2F;~&#x2F;BusyStatus.html#property_isloggedin">
                   <span>isLoggedIn</span><span>: <span class="td-kw">boolean</span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Whether a session is already established from another client.</p>
 </div></div></li></ul></div>
     </div><div id="namespace_commandbatch" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-Interface bg-Interface/15 dark:text-InterfaceDark dark:bg-InterfaceDark/15" title="Interface">I</div></div>
 <div class="namespaceItemContent">
-		    <a href=".&#x2F;.&#x2F;mod.ts&#x2F;~&#x2F;CommandBatch.html" title="CommandBatch">
+		    <a href="..&#x2F;.&#x2F;mod.ts&#x2F;~&#x2F;CommandBatch.html" title="CommandBatch">
 			    <span>CommandBatch</span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>One HTTP round trip's worth of actions.</p>
 </div></div><ul class="namespaceItemContentSubItems"><li>
-                <a href=".&#x2F;.&#x2F;mod.ts&#x2F;~&#x2F;CommandBatch.html#property_indices">
+                <a href="..&#x2F;.&#x2F;mod.ts&#x2F;~&#x2F;CommandBatch.html#property_indices">
                   <span>indices</span><span>: <span class="td-kw">readonly</span> <span class="td-kw">number</span>[]</span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Indices into the caller's actions array, in the order the response returns them.</p>
 </div></div></li><li>
-                <a href=".&#x2F;.&#x2F;mod.ts&#x2F;~&#x2F;CommandBatch.html#property_payload">
+                <a href="..&#x2F;.&#x2F;mod.ts&#x2F;~&#x2F;CommandBatch.html#property_payload">
                   <span>payload</span><span>: <span class="td-kw">string</span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Plaintext payload for this round trip, pre-encryption.</p>
 </div></div></li></ul></div>
     </div><div id="namespace_credentials" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-Interface bg-Interface/15 dark:text-InterfaceDark dark:bg-InterfaceDark/15" title="Interface">I</div></div>
 <div class="namespaceItemContent">
-		    <a href=".&#x2F;.&#x2F;mod.ts&#x2F;~&#x2F;Credentials.html" title="Credentials">
+		    <a href="..&#x2F;.&#x2F;mod.ts&#x2F;~&#x2F;Credentials.html" title="Credentials">
 			    <span>Credentials</span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Credentials as supplied by the caller, after the dialect's username default
 has been applied.</p>
 </div></div><ul class="namespaceItemContentSubItems"><li>
-                <a href=".&#x2F;.&#x2F;mod.ts&#x2F;~&#x2F;Credentials.html#property_password">
+                <a href="..&#x2F;.&#x2F;mod.ts&#x2F;~&#x2F;Credentials.html#property_password">
                   <span>password</span><span>: <span class="td-kw">string</span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Account password, verbatim.</p>
 </div></div></li><li>
-                <a href=".&#x2F;.&#x2F;mod.ts&#x2F;~&#x2F;Credentials.html#property_username">
-                  <span>username</span><span>: <span class="td-kw">string</span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Account name, defaulted from <code>Dialect.defaultUsername</code>.</p>
+                <a href="..&#x2F;.&#x2F;mod.ts&#x2F;~&#x2F;Credentials.html#property_username">
+                  <span>username</span><span>: <span class="td-kw">string</span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Account name, defaulted from <a href=".././mod.ts/~/Dialect.defaultUsername.html"><code>Dialect.defaultUsername</code></a>.</p>
 </div></div></li></ul></div>
     </div><div id="namespace_decodedbatch" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-Interface bg-Interface/15 dark:text-InterfaceDark dark:bg-InterfaceDark/15" title="Interface">I</div></div>
 <div class="namespaceItemContent">
-		    <a href=".&#x2F;.&#x2F;mod.ts&#x2F;~&#x2F;DecodedBatch.html" title="DecodedBatch">
+		    <a href="..&#x2F;.&#x2F;mod.ts&#x2F;~&#x2F;DecodedBatch.html" title="DecodedBatch">
 			    <span>DecodedBatch</span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Decoded result of one round trip, positionally aligned with
-<code>CommandBatch.indices</code>.</p>
+<a href=".././mod.ts/~/CommandBatch.indices.html"><code>CommandBatch.indices</code></a>.</p>
 </div></div><ul class="namespaceItemContentSubItems"><li>
-                <a href=".&#x2F;.&#x2F;mod.ts&#x2F;~&#x2F;DecodedBatch.html#property_error">
+                <a href="..&#x2F;.&#x2F;mod.ts&#x2F;~&#x2F;DecodedBatch.html#property_error">
                   <span>error</span><span>: <span><span class="td-kw">number</span><span class="td-op"> | </span><span class="td-kw">null</span></span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Router error code, or <code>null</code> when the batch reported no error.</p>
 </div></div></li><li>
-                <a href=".&#x2F;.&#x2F;mod.ts&#x2F;~&#x2F;DecodedBatch.html#property_results">
+                <a href="..&#x2F;.&#x2F;mod.ts&#x2F;~&#x2F;DecodedBatch.html#property_results">
                   <span>results</span><span>: <span class="td-kw">readonly</span> (<span><span class="td-ref">Record</span>&lt;<span class="td-kw">string</span><span>, </span><span class="td-kw">string</span>&gt;<span class="td-op"> | </span><span class="td-ref">Record</span>&lt;<span class="td-kw">string</span><span>, </span><span class="td-kw">string</span>&gt;[]<span class="td-op"> | </span><span class="td-kw">null</span></span>)[]</span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>One entry per index in the batch; <code>null</code> where the router returned nothing.</p>
 </div></div></li></ul></div>
     </div><div id="namespace_dialect" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-Interface bg-Interface/15 dark:text-InterfaceDark dark:bg-InterfaceDark/15" title="Interface">I</div></div>
 <div class="namespaceItemContent">
-		    <a href=".&#x2F;.&#x2F;mod.ts&#x2F;~&#x2F;Dialect.html" title="Dialect">
+		    <a href="..&#x2F;.&#x2F;mod.ts&#x2F;~&#x2F;Dialect.html" title="Dialect">
 			    <span>Dialect</span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>A firmware family's wire protocol, expressed as pure functions and data.</p>
 </div></div><ul class="namespaceItemContentSubItems"><li>
-                <a href=".&#x2F;.&#x2F;mod.ts&#x2F;~&#x2F;Dialect.html#method_busyrequest_0">
+                <a href="..&#x2F;.&#x2F;mod.ts&#x2F;~&#x2F;Dialect.html#method_busyrequest_0">
                   <span>busyRequest</span><span>(<span><span>baseUrl<span>: <span class="td-kw">string</span></span></span></span>)<span>: <span class="td-ref">Request</span></span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Builds the request that reports whether a session is already established.</p>
 </div></div></li><li>
-                <a href=".&#x2F;.&#x2F;mod.ts&#x2F;~&#x2F;Dialect.html#method_commandrequest_0">
+                <a href="..&#x2F;.&#x2F;mod.ts&#x2F;~&#x2F;Dialect.html#method_commandrequest_0">
                   <span>commandRequest</span><span>(<div class="ml-4"><div><span>baseUrl<span>: <span class="td-kw">string</span></span></span>,</div><div><span>envelope<span>: <span class="td-ref">Envelope</span></span></span>,</div><div><span>session<span>: <span class="td-ref">SessionContext</span></span></span></div></div>)<span>: <span class="td-ref">Request</span></span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Builds a command request for one batch's envelope.</p>
 </div></div></li><li>
-                <a href=".&#x2F;.&#x2F;mod.ts&#x2F;~&#x2F;Dialect.html#method_decodecommand_0">
+                <a href="..&#x2F;.&#x2F;mod.ts&#x2F;~&#x2F;Dialect.html#method_decodecommand_0">
                   <span>decodeCommand</span><span>(<div class="ml-4"><div><span>text<span>: <span class="td-kw">string</span></span></span>,</div><div><span>batch<span>: <span class="td-ref">CommandBatch</span></span></span></div></div>)<span>: <span class="td-ref">DecodedBatch</span></span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Decodes a decrypted command response into results aligned with the batch.</p>
 </div></div></li><li>
-                <a href=".&#x2F;.&#x2F;mod.ts&#x2F;~&#x2F;Dialect.html#property_defaultusername">
+                <a href="..&#x2F;.&#x2F;mod.ts&#x2F;~&#x2F;Dialect.html#property_defaultusername">
                   <span>defaultUsername</span><span>: <span class="td-kw">string</span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Username used when the caller supplies none.</p>
 </div></div></li><li>
-                <a href=".&#x2F;.&#x2F;mod.ts&#x2F;~&#x2F;Dialect.html#method_encodecommands_0">
+                <a href="..&#x2F;.&#x2F;mod.ts&#x2F;~&#x2F;Dialect.html#method_encodecommands_0">
                   <span>encodeCommands</span><span>(<span><span>actions<span>: <span class="td-kw">readonly</span> <span class="td-ref">Action</span>[]</span></span></span>)<span>: <span class="td-kw">readonly</span> <span class="td-ref">CommandBatch</span>[]</span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Splits actions into round trips and serializes each. Owns the operation
 vocabulary, stack defaults, and batching.</p>
 </div></div></li><li>
-                <a href=".&#x2F;.&#x2F;mod.ts&#x2F;~&#x2F;Dialect.html#method_encodelogin_0">
+                <a href="..&#x2F;.&#x2F;mod.ts&#x2F;~&#x2F;Dialect.html#method_encodelogin_0">
                   <span>encodeLogin</span><span>(<span><span>credentials<span>: <span class="td-ref">Credentials</span></span></span></span>)<span>: <span class="td-kw">string</span></span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Encodes credentials into the plaintext login payload, pre-encryption.</p>
 </div></div></li><li>
-                <a href=".&#x2F;.&#x2F;mod.ts&#x2F;~&#x2F;Dialect.html#property_id">
+                <a href="..&#x2F;.&#x2F;mod.ts&#x2F;~&#x2F;Dialect.html#property_id">
                   <span>id</span><span>: <span class="td-kw">string</span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Stable identifier, carried on the authentication result for diagnostics.</p>
 </div></div></li><li>
-                <a href=".&#x2F;.&#x2F;mod.ts&#x2F;~&#x2F;Dialect.html#method_inforequest_0">
+                <a href="..&#x2F;.&#x2F;mod.ts&#x2F;~&#x2F;Dialect.html#method_inforequest_0">
                   <span>infoRequest</span><span>(<span><span>baseUrl<span>: <span class="td-kw">string</span></span></span></span>)<span>: <span class="td-ref">Request</span></span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Builds the request for the login page, whose inline script carries
 <code>authTimes</code> and friends.</p>
 </div></div></li><li>
-                <a href=".&#x2F;.&#x2F;mod.ts&#x2F;~&#x2F;Dialect.html#method_loginrequest_0">
+                <a href="..&#x2F;.&#x2F;mod.ts&#x2F;~&#x2F;Dialect.html#method_loginrequest_0">
                   <span>loginRequest</span><span>(<div class="ml-4"><div><span>baseUrl<span>: <span class="td-kw">string</span></span></span>,</div><div><span>envelope<span>: <span class="td-ref">Envelope</span></span></span></div></div>)<span>: <span class="td-ref">Request</span></span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Builds the login request. Owns where the envelope rides — query string,
 request body, or anywhere else the firmware expects it.</p>
 </div></div></li><li>
-                <a href=".&#x2F;.&#x2F;mod.ts&#x2F;~&#x2F;Dialect.html#method_parsebusy_0">
+                <a href="..&#x2F;.&#x2F;mod.ts&#x2F;~&#x2F;Dialect.html#method_parsebusy_0">
                   <span>parseBusy</span><span>(<span><span>text<span>: <span class="td-kw">string</span></span></span></span>)<span>: <span class="td-ref">BusyStatus</span></span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Extracts login and busy flags from the busy response.</p>
 </div></div></li><li>
-                <a href=".&#x2F;.&#x2F;mod.ts&#x2F;~&#x2F;Dialect.html#method_parseinfo_0">
+                <a href="..&#x2F;.&#x2F;mod.ts&#x2F;~&#x2F;Dialect.html#method_parseinfo_0">
                   <span>parseInfo</span><span>(<span><span>html<span>: <span class="td-kw">string</span></span></span></span>)<span>: <span class="td-ref">RouterInfo</span></span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Scrapes router variables out of the login page.</p>
 </div></div></li><li>
-                <a href=".&#x2F;.&#x2F;mod.ts&#x2F;~&#x2F;Dialect.html#method_parsepublickey_0">
+                <a href="..&#x2F;.&#x2F;mod.ts&#x2F;~&#x2F;Dialect.html#method_parsepublickey_0">
                   <span>parsePublicKey</span><span>(<span><span>text<span>: <span class="td-kw">string</span></span></span></span>)<span>: <span class="td-ref">PublicKeyInfo</span></span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Extracts RSA parameters from the public key response.</p>
 </div></div></li><li>
-                <a href=".&#x2F;.&#x2F;mod.ts&#x2F;~&#x2F;Dialect.html#method_parsesessionid_0">
+                <a href="..&#x2F;.&#x2F;mod.ts&#x2F;~&#x2F;Dialect.html#method_parsesessionid_0">
                   <span>parseSessionId</span><span>(<span><span>headers<span>: <span class="td-ref">Headers</span></span></span></span>)<span>: <span><span class="td-kw">string</span><span class="td-op"> | </span><span class="td-kw">null</span></span></span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Extracts the session id from the login response headers.</p>
 </div></div></li><li>
-                <a href=".&#x2F;.&#x2F;mod.ts&#x2F;~&#x2F;Dialect.html#method_parsetokenid_0">
+                <a href="..&#x2F;.&#x2F;mod.ts&#x2F;~&#x2F;Dialect.html#method_parsetokenid_0">
                   <span>parseTokenId</span><span>(<span><span>html<span>: <span class="td-kw">string</span></span></span></span>)<span>: <span class="td-kw">string</span></span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Extracts the security token from the authenticated page.</p>
 </div></div></li><li>
-                <a href=".&#x2F;.&#x2F;mod.ts&#x2F;~&#x2F;Dialect.html#method_publickeyrequest_0">
+                <a href="..&#x2F;.&#x2F;mod.ts&#x2F;~&#x2F;Dialect.html#method_publickeyrequest_0">
                   <span>publicKeyRequest</span><span>(<span><span>baseUrl<span>: <span class="td-kw">string</span></span></span></span>)<span>: <span class="td-ref">Request</span></span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Builds the request for the RSA public key and sequence base.</p>
 </div></div></li><li>
-                <a href=".&#x2F;.&#x2F;mod.ts&#x2F;~&#x2F;Dialect.html#method_tokenrequest_0">
+                <a href="..&#x2F;.&#x2F;mod.ts&#x2F;~&#x2F;Dialect.html#method_tokenrequest_0">
                   <span>tokenRequest</span><span>(<div class="ml-4"><div><span>baseUrl<span>: <span class="td-kw">string</span></span></span>,</div><div><span>session<span>: <span class="td-ref">Pick</span>&lt;<span class="td-ref">SessionContext</span><span>, </span><span><span class="td-str">"sessionId"</span><span class="td-op"> | </span><span class="td-str">"authTimes"</span></span>&gt;</span></span></div></div>)<span>: <span class="td-ref">Request</span></span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Builds the request for the authenticated page carrying the security token.</p>
 </div></div></li></ul></div>
     </div><div id="namespace_envelope" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-Interface bg-Interface/15 dark:text-InterfaceDark dark:bg-InterfaceDark/15" title="Interface">I</div></div>
 <div class="namespaceItemContent">
-		    <a href=".&#x2F;.&#x2F;mod.ts&#x2F;~&#x2F;Envelope.html" title="Envelope">
+		    <a href="..&#x2F;.&#x2F;mod.ts&#x2F;~&#x2F;Envelope.html" title="Envelope">
 			    <span>Envelope</span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Encrypted request envelope: AES ciphertext plus the RSA-encrypted signature.</p>
 </div></div><ul class="namespaceItemContentSubItems"><li>
-                <a href=".&#x2F;.&#x2F;mod.ts&#x2F;~&#x2F;Envelope.html#property_data">
+                <a href="..&#x2F;.&#x2F;mod.ts&#x2F;~&#x2F;Envelope.html#property_data">
                   <span>data</span><span>: <span class="td-kw">string</span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Base64 AES-CBC ciphertext of the plaintext payload.</p>
 </div></div></li><li>
-                <a href=".&#x2F;.&#x2F;mod.ts&#x2F;~&#x2F;Envelope.html#property_sign">
+                <a href="..&#x2F;.&#x2F;mod.ts&#x2F;~&#x2F;Envelope.html#property_sign">
                   <span>sign</span><span>: <span class="td-kw">string</span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Hex RSA-encrypted parameter string: <code>key&amp;iv&amp;h&amp;s</code> for login, <code>h&amp;s</code> for commands.</p>
 </div></div></li></ul></div>
     </div><div id="namespace_executeoptions" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-Interface bg-Interface/15 dark:text-InterfaceDark dark:bg-InterfaceDark/15" title="Interface">I</div></div>
 <div class="namespaceItemContent">
-		    <a href=".&#x2F;.&#x2F;mod.ts&#x2F;~&#x2F;ExecuteOptions.html" title="ExecuteOptions">
+		    <a href="..&#x2F;.&#x2F;mod.ts&#x2F;~&#x2F;ExecuteOptions.html" title="ExecuteOptions">
 			    <span>ExecuteOptions</span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Options required for executing commands on the router.
-These values are obtained from <code>authenticate</code>.</p>
+These values are obtained from <a href=".././mod.ts/~/authenticate.html"><code>authenticate</code></a>.</p>
 </div></div><ul class="namespaceItemContentSubItems"><li>
-                <a href=".&#x2F;.&#x2F;mod.ts&#x2F;~&#x2F;ExecuteOptions.html#property_authtimes">
+                <a href="..&#x2F;.&#x2F;mod.ts&#x2F;~&#x2F;ExecuteOptions.html#property_authtimes">
                   <span>authTimes</span><span>: <span class="td-kw">number</span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Authentication times counter (defaults to 1)</p>
 </div></div></li><li>
-                <a href=".&#x2F;.&#x2F;mod.ts&#x2F;~&#x2F;ExecuteOptions.html#property_dialect">
-                  <span>dialect</span><span>: <span class="td-ref">Dialect</span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Firmware dialect to speak (defaults to <code>gdprText</code>)</p>
+                <a href="..&#x2F;.&#x2F;mod.ts&#x2F;~&#x2F;ExecuteOptions.html#property_dialect">
+                  <span>dialect</span><span>: <span class="td-ref">Dialect</span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Firmware dialect to speak (defaults to <a href=".././mod.ts/~/gdprText.html"><code>gdprText</code></a>)</p>
 </div></div></li><li>
-                <a href=".&#x2F;.&#x2F;mod.ts&#x2F;~&#x2F;ExecuteOptions.html#property_encryption">
+                <a href="..&#x2F;.&#x2F;mod.ts&#x2F;~&#x2F;ExecuteOptions.html#property_encryption">
                   <span>encryption</span><span>: <span class="td-ref">Encryption</span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Encryption instance for payload encryption/decryption</p>
 </div></div></li><li>
-                <a href=".&#x2F;.&#x2F;mod.ts&#x2F;~&#x2F;ExecuteOptions.html#property_fetch">
+                <a href="..&#x2F;.&#x2F;mod.ts&#x2F;~&#x2F;ExecuteOptions.html#property_fetch">
                   <span>fetch</span><span>: <span class="td-ref">globalThis.fetch</span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Swappable <code>fetch</code>, for tests or non-standard HTTP stacks</p>
 </div></div></li><li>
-                <a href=".&#x2F;.&#x2F;mod.ts&#x2F;~&#x2F;ExecuteOptions.html#property_sequence">
+                <a href="..&#x2F;.&#x2F;mod.ts&#x2F;~&#x2F;ExecuteOptions.html#property_sequence">
                   <span>sequence</span><span>: <span class="td-kw">number</span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Sequence number for request signing</p>
 </div></div></li><li>
-                <a href=".&#x2F;.&#x2F;mod.ts&#x2F;~&#x2F;ExecuteOptions.html#property_sessionid">
+                <a href="..&#x2F;.&#x2F;mod.ts&#x2F;~&#x2F;ExecuteOptions.html#property_sessionid">
                   <span>sessionId</span><span>: <span class="td-kw">string</span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Session ID from authentication</p>
 </div></div></li><li>
-                <a href=".&#x2F;.&#x2F;mod.ts&#x2F;~&#x2F;ExecuteOptions.html#property_tokenid">
+                <a href="..&#x2F;.&#x2F;mod.ts&#x2F;~&#x2F;ExecuteOptions.html#property_tokenid">
                   <span>tokenId</span><span>: <span class="td-kw">string</span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Security token from authentication</p>
 </div></div></li></ul></div>
     </div><div id="namespace_executeresult" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-Interface bg-Interface/15 dark:text-InterfaceDark dark:bg-InterfaceDark/15" title="Interface">I</div></div>
 <div class="namespaceItemContent">
-		    <a href=".&#x2F;.&#x2F;mod.ts&#x2F;~&#x2F;ExecuteResult.html" title="ExecuteResult">
+		    <a href="..&#x2F;.&#x2F;mod.ts&#x2F;~&#x2F;ExecuteResult.html" title="ExecuteResult">
 			    <span>ExecuteResult</span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Result of executing one or more actions on the router.</p>
 </div></div><ul class="namespaceItemContentSubItems"><li>
-                <a href=".&#x2F;.&#x2F;mod.ts&#x2F;~&#x2F;ExecuteResult.html#property_actions">
+                <a href="..&#x2F;.&#x2F;mod.ts&#x2F;~&#x2F;ExecuteResult.html#property_actions">
                   <span>actions</span><span>: <span class="td-ref">ActionResult</span>[]</span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Array of action results, positionally aligned with the input actions</p>
 </div></div></li><li>
-                <a href=".&#x2F;.&#x2F;mod.ts&#x2F;~&#x2F;ExecuteResult.html#property_error">
+                <a href="..&#x2F;.&#x2F;mod.ts&#x2F;~&#x2F;ExecuteResult.html#property_error">
                   <span>error</span><span>: <span><span class="td-kw">number</span><span class="td-op"> | </span><span class="td-kw">null</span></span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Error code from router, or null if successful</p>
 </div></div></li></ul></div>
     </div><div id="namespace_publickeyinfo" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-Interface bg-Interface/15 dark:text-InterfaceDark dark:bg-InterfaceDark/15" title="Interface">I</div></div>
 <div class="namespaceItemContent">
-		    <a href=".&#x2F;.&#x2F;mod.ts&#x2F;~&#x2F;PublicKeyInfo.html" title="PublicKeyInfo">
+		    <a href="..&#x2F;.&#x2F;mod.ts&#x2F;~&#x2F;PublicKeyInfo.html" title="PublicKeyInfo">
 			    <span>PublicKeyInfo</span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>RSA public key material and the request sequence base.</p>
 </div></div><ul class="namespaceItemContentSubItems"><li>
-                <a href=".&#x2F;.&#x2F;mod.ts&#x2F;~&#x2F;PublicKeyInfo.html#property_exponent">
+                <a href="..&#x2F;.&#x2F;mod.ts&#x2F;~&#x2F;PublicKeyInfo.html#property_exponent">
                   <span>exponent</span><span>: <span class="td-ref">Uint8Array</span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>RSA public exponent, big-endian.</p>
 </div></div></li><li>
-                <a href=".&#x2F;.&#x2F;mod.ts&#x2F;~&#x2F;PublicKeyInfo.html#property_modulus">
+                <a href="..&#x2F;.&#x2F;mod.ts&#x2F;~&#x2F;PublicKeyInfo.html#property_modulus">
                   <span>modulus</span><span>: <span class="td-ref">Uint8Array</span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>RSA modulus, big-endian. Its length fixes the RSA chunk size.</p>
 </div></div></li><li>
-                <a href=".&#x2F;.&#x2F;mod.ts&#x2F;~&#x2F;PublicKeyInfo.html#property_sequence">
+                <a href="..&#x2F;.&#x2F;mod.ts&#x2F;~&#x2F;PublicKeyInfo.html#property_sequence">
                   <span>sequence</span><span>: <span class="td-kw">number</span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Sequence base that every signature's <code>s</code> parameter is derived from.</p>
 </div></div></li></ul></div>
     </div><div id="namespace_routerinfo" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-Interface bg-Interface/15 dark:text-InterfaceDark dark:bg-InterfaceDark/15" title="Interface">I</div></div>
 <div class="namespaceItemContent">
-		    <a href=".&#x2F;.&#x2F;mod.ts&#x2F;~&#x2F;RouterInfo.html" title="RouterInfo">
+		    <a href="..&#x2F;.&#x2F;mod.ts&#x2F;~&#x2F;RouterInfo.html" title="RouterInfo">
 			    <span>RouterInfo</span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Variables scraped from the router's login page.</p>
 </div></div><ul class="namespaceItemContentSubItems"><li>
-                <a href=".&#x2F;.&#x2F;mod.ts&#x2F;~&#x2F;RouterInfo.html#property_authtimes">
+                <a href="..&#x2F;.&#x2F;mod.ts&#x2F;~&#x2F;RouterInfo.html#property_authtimes">
                   <span>authTimes</span><span>: <span class="td-kw">number</span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Login attempt counter, sent back as the <code>loginErrorShow</code> cookie.</p>
 </div></div></li></ul></div>
     </div><div id="namespace_sessioncontext" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-Interface bg-Interface/15 dark:text-InterfaceDark dark:bg-InterfaceDark/15" title="Interface">I</div></div>
 <div class="namespaceItemContent">
-		    <a href=".&#x2F;.&#x2F;mod.ts&#x2F;~&#x2F;SessionContext.html" title="SessionContext">
+		    <a href="..&#x2F;.&#x2F;mod.ts&#x2F;~&#x2F;SessionContext.html" title="SessionContext">
 			    <span>SessionContext</span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Session material carried on every request made after login.</p>
 </div></div><ul class="namespaceItemContentSubItems"><li>
-                <a href=".&#x2F;.&#x2F;mod.ts&#x2F;~&#x2F;SessionContext.html#property_authtimes">
+                <a href="..&#x2F;.&#x2F;mod.ts&#x2F;~&#x2F;SessionContext.html#property_authtimes">
                   <span>authTimes</span><span>: <span class="td-kw">number</span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Login attempt counter, sent back as the <code>loginErrorShow</code> cookie.</p>
 </div></div></li><li>
-                <a href=".&#x2F;.&#x2F;mod.ts&#x2F;~&#x2F;SessionContext.html#property_sessionid">
+                <a href="..&#x2F;.&#x2F;mod.ts&#x2F;~&#x2F;SessionContext.html#property_sessionid">
                   <span>sessionId</span><span>: <span class="td-kw">string</span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p><code>JSESSIONID</code> cookie value returned by the login response.</p>
 </div></div></li><li>
-                <a href=".&#x2F;.&#x2F;mod.ts&#x2F;~&#x2F;SessionContext.html#property_tokenid">
+                <a href="..&#x2F;.&#x2F;mod.ts&#x2F;~&#x2F;SessionContext.html#property_tokenid">
                   <span>tokenId</span><span>: <span class="td-kw">string</span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Token scraped from the authenticated landing page.</p>
 </div></div></li></ul></div>
     </div></div>
@@ -676,13 +1132,13 @@ These values are obtained from <code>authenticate</code>.</p>
 </a>
 Type Aliases</h2></div><div class="namespaceSection"><div id="namespace_action" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-TypeAlias bg-TypeAlias/15 dark:text-TypeAliasDark dark:bg-TypeAliasDark/15" title="Type Alias">T</div></div>
 <div class="namespaceItemContent">
-		    <a href=".&#x2F;.&#x2F;mod.ts&#x2F;~&#x2F;Action.html" title="Action">
+		    <a href="..&#x2F;.&#x2F;mod.ts&#x2F;~&#x2F;Action.html" title="Action">
 			    <span>Action</span><span> = <span>[</span><div class="ml-indent"><div><span><span class="td-ref">ActionType</span>,</span></div><div><span><span class="td-kw">string</span>,</span></div><div><span><span><span class="td-ref">Record</span>&lt;<span class="td-kw">string</span><span>, </span><span class="td-kw">string</span>&gt;<span class="td-op"> | </span><span class="td-kw">string</span>[]</span>,</span></div><div><span><span class="td-kw">string</span>,</span></div><div><span><span class="td-kw">string</span></span></div></div><span>]</span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Action tuple representing a single router command.</p>
 </div></div></div>
     </div><div id="namespace_actiontype" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-TypeAlias bg-TypeAlias/15 dark:text-TypeAliasDark dark:bg-TypeAliasDark/15" title="Type Alias">T</div></div>
 <div class="namespaceItemContent">
-		    <a href=".&#x2F;.&#x2F;mod.ts&#x2F;~&#x2F;ActionType.html" title="ActionType">
-			    <span>ActionType</span><span> = (<span class="td-ref">ACT</span>)[<span class="td-kw">keyof</span> <span class="td-ref">ACT</span>]</span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Numeric action type value from the <code>ACT</code> constant.</p>
+		    <a href="..&#x2F;.&#x2F;mod.ts&#x2F;~&#x2F;ActionType.html" title="ActionType">
+			    <span>ActionType</span><span> = (<span class="td-ref">ACT</span>)[<span class="td-kw">keyof</span> <span class="td-ref">ACT</span>]</span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Numeric action type value from the <a href=".././mod.ts/~/ACT.html"><code>ACT</code></a> constant.</p>
 </div></div></div>
     </div></div>
 </section>
@@ -711,33 +1167,33 @@ Type Aliases</h2></div><div class="namespaceSection"><div id="namespace_action" 
 </a>
 Variables</h2></div><div class="namespaceSection"><div id="namespace_act" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-Variable bg-Variable/15 dark:text-VariableDark dark:bg-VariableDark/15" title="Variable">v</div></div>
 <div class="namespaceItemContent">
-		    <a href=".&#x2F;.&#x2F;mod.ts&#x2F;~&#x2F;ACT.html" title="ACT">
+		    <a href="..&#x2F;.&#x2F;mod.ts&#x2F;~&#x2F;ACT.html" title="ACT">
 			    <span>ACT</span><span>: { GET<span>: <span class="td-kw">number</span></span>; SET<span>: <span class="td-kw">number</span></span>; ADD<span>: <span class="td-kw">number</span></span>; DEL<span>: <span class="td-kw">number</span></span>; GL<span>: <span class="td-kw">number</span></span>; GS<span>: <span class="td-kw">number</span></span>; OP<span>: <span class="td-kw">number</span></span>; CGI<span>: <span class="td-kw">number</span></span>;  }</span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Action type constants for TP-Link router commands.</p>
 </div></div><ul class="namespaceItemContentSubItems"><li>
-                <a href=".&#x2F;.&#x2F;mod.ts&#x2F;~&#x2F;ACT.html#property_add">
+                <a href="..&#x2F;.&#x2F;mod.ts&#x2F;~&#x2F;ACT.html#property_add">
                   <span>ADD</span><span>: <span class="td-kw">number</span></span></a></li><li>
-                <a href=".&#x2F;.&#x2F;mod.ts&#x2F;~&#x2F;ACT.html#property_cgi">
+                <a href="..&#x2F;.&#x2F;mod.ts&#x2F;~&#x2F;ACT.html#property_cgi">
                   <span>CGI</span><span>: <span class="td-kw">number</span></span></a></li><li>
-                <a href=".&#x2F;.&#x2F;mod.ts&#x2F;~&#x2F;ACT.html#property_del">
+                <a href="..&#x2F;.&#x2F;mod.ts&#x2F;~&#x2F;ACT.html#property_del">
                   <span>DEL</span><span>: <span class="td-kw">number</span></span></a></li><li>
-                <a href=".&#x2F;.&#x2F;mod.ts&#x2F;~&#x2F;ACT.html#property_get">
+                <a href="..&#x2F;.&#x2F;mod.ts&#x2F;~&#x2F;ACT.html#property_get">
                   <span>GET</span><span>: <span class="td-kw">number</span></span></a></li><li>
-                <a href=".&#x2F;.&#x2F;mod.ts&#x2F;~&#x2F;ACT.html#property_gl">
+                <a href="..&#x2F;.&#x2F;mod.ts&#x2F;~&#x2F;ACT.html#property_gl">
                   <span>GL</span><span>: <span class="td-kw">number</span></span></a></li><li>
-                <a href=".&#x2F;.&#x2F;mod.ts&#x2F;~&#x2F;ACT.html#property_gs">
+                <a href="..&#x2F;.&#x2F;mod.ts&#x2F;~&#x2F;ACT.html#property_gs">
                   <span>GS</span><span>: <span class="td-kw">number</span></span></a></li><li>
-                <a href=".&#x2F;.&#x2F;mod.ts&#x2F;~&#x2F;ACT.html#property_op">
+                <a href="..&#x2F;.&#x2F;mod.ts&#x2F;~&#x2F;ACT.html#property_op">
                   <span>OP</span><span>: <span class="td-kw">number</span></span></a></li><li>
-                <a href=".&#x2F;.&#x2F;mod.ts&#x2F;~&#x2F;ACT.html#property_set">
+                <a href="..&#x2F;.&#x2F;mod.ts&#x2F;~&#x2F;ACT.html#property_set">
                   <span>SET</span><span>: <span class="td-kw">number</span></span></a></li></ul></div>
     </div><div id="namespace_gdprjson" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-Variable bg-Variable/15 dark:text-VariableDark dark:bg-VariableDark/15" title="Variable">v</div></div>
 <div class="namespaceItemContent">
-		    <a href=".&#x2F;.&#x2F;mod.ts&#x2F;~&#x2F;gdprJson.html" title="gdprJson">
+		    <a href="..&#x2F;.&#x2F;mod.ts&#x2F;~&#x2F;gdprJson.html" title="gdprJson">
 			    <span>gdprJson</span><span>: <span class="td-ref">Dialect</span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>EU/GDPR firmware speaking a JSON payload format over <code>/cgi_gdpr?9</code>.</p>
 </div></div></div>
     </div><div id="namespace_gdprtext" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-Variable bg-Variable/15 dark:text-VariableDark dark:bg-VariableDark/15" title="Variable">v</div></div>
 <div class="namespaceItemContent">
-		    <a href=".&#x2F;.&#x2F;mod.ts&#x2F;~&#x2F;gdprText.html" title="gdprText">
+		    <a href="..&#x2F;.&#x2F;mod.ts&#x2F;~&#x2F;gdprText.html" title="gdprText">
 			    <span>gdprText</span><span>: <span class="td-ref">Dialect</span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>EU/GDPR firmware speaking the bespoke text payload format over <code>/cgi_gdpr</code>.</p>
 </div></div></div>
     </div></div>
@@ -745,70 +1201,10 @@ Variables</h2></div><div class="namespaceSection"><div id="namespace_act" class=
 </div>
 </div>
 </section>
-</div>
-    </div>
-    <div>
-      <a href=".&#x2F;.&#x2F;dialect&#x2F;mod.ts&#x2F;index.html" class="link text-xl font-bold">dialect&#x2F;mod.ts</a>
-
-      <div class="ml-4 mt-2"><section>
-  <div class="space-y-2 flex-1"><div class="space-y-7" id="module_doc-1"><div class="markdown_summary"><p>Firmware dialects for the TP-Link router API.</p>
-</div><section class="section"  id="examples-1"><div>
-      <h2 class="anchorable mb-1"><a href="#examples-1" class="anchor" aria-label="Anchor" tabIndex="-1"><svg
-  width="16"
-  height="16"
-  viewBox="0 0 14 14"
-  fill="none"
-  xmlns="http://www.w3.org/2000/svg"
->
-  <g clip-path="url(#clip0_1081_1237)">
-    <path
-      fill-rule="evenodd"
-      clip-rule="evenodd"
-      d="M6.80328 2.8656C6.68736 2.99 6.62425 3.15454 6.62725 3.32456C6.63025 3.49457 6.69913 3.65678 6.81936 3.77702C6.9396 3.89725 7.10181 3.96613 7.27182 3.96913C7.44184 3.97213 7.60638 3.90902 7.73078 3.7931L8.82453 2.69935C8.98712 2.53676 9.18015 2.40778 9.39259 2.31978C9.60503 2.23179 9.83272 2.1865 10.0627 2.1865C10.2926 2.1865 10.5203 2.23179 10.7327 2.31978C10.9452 2.40778 11.1382 2.53676 11.3008 2.69935C11.4634 2.86194 11.5923 3.05497 11.6803 3.2674C11.7683 3.47984 11.8136 3.70753 11.8136 3.93747C11.8136 4.16741 11.7683 4.3951 11.6803 4.60754C11.5923 4.81998 11.4634 5.013 11.3008 5.1756L9.11328 7.3631C8.95075 7.52581 8.75775 7.65488 8.5453 7.74295C8.33285 7.83102 8.10513 7.87635 7.87516 7.87635C7.64518 7.87635 7.41746 7.83102 7.20501 7.74295C6.99256 7.65488 6.79956 7.52581 6.63703 7.3631C6.51263 7.24718 6.34809 7.18407 6.17807 7.18707C6.00806 7.19007 5.84585 7.25894 5.72561 7.37918C5.60538 7.49942 5.5365 7.66163 5.5335 7.83164C5.5305 8.00165 5.59361 8.1662 5.70953 8.2906C5.99391 8.57501 6.33154 8.80062 6.70312 8.95455C7.0747 9.10847 7.47296 9.18769 7.87516 9.18769C8.27736 9.18769 8.67562 9.10847 9.0472 8.95455C9.41878 8.80062 9.7564 8.57501 10.0408 8.2906L12.2283 6.1031C12.8026 5.52874 13.1253 4.74974 13.1253 3.93747C13.1253 3.12521 12.8026 2.34621 12.2283 1.77185C11.6539 1.19749 10.8749 0.874817 10.0627 0.874817C9.25039 0.874817 8.47139 1.19749 7.89703 1.77185L6.80328 2.8656ZM2.69953 11.3006C2.53682 11.1381 2.40774 10.9451 2.31968 10.7326C2.23161 10.5202 2.18628 10.2924 2.18628 10.0625C2.18628 9.8325 2.23161 9.60477 2.31968 9.39233C2.40774 9.17988 2.53682 8.98688 2.69953 8.82435L4.88703 6.63685C5.04956 6.47414 5.24256 6.34506 5.45501 6.25699C5.66746 6.16893 5.89518 6.1236 6.12516 6.1236C6.35513 6.1236 6.58285 6.16893 6.7953 6.25699C7.00775 6.34506 7.20075 6.47414 7.36328 6.63685C7.48768 6.75277 7.65223 6.81588 7.82224 6.81288C7.99225 6.80988 8.15446 6.741 8.2747 6.62077C8.39494 6.50053 8.46381 6.33832 8.46681 6.1683C8.46981 5.99829 8.4067 5.83375 8.29078 5.70935C8.0064 5.42494 7.66878 5.19933 7.2972 5.0454C6.92562 4.89148 6.52736 4.81225 6.12516 4.81225C5.72296 4.81225 5.3247 4.89148 4.95312 5.0454C4.58154 5.19933 4.24391 5.42494 3.95953 5.70935L1.77203 7.89685C1.19767 8.47121 0.875 9.25021 0.875 10.0625C0.875 10.8747 1.19767 11.6537 1.77203 12.2281C2.34639 12.8025 3.12539 13.1251 3.93766 13.1251C4.74992 13.1251 5.52892 12.8025 6.10328 12.2281L7.19703 11.1343C7.31295 11.0099 7.37606 10.8454 7.37306 10.6754C7.37006 10.5054 7.30119 10.3432 7.18095 10.2229C7.06071 10.1027 6.8985 10.0338 6.72849 10.0308C6.55848 10.0278 6.39393 10.0909 6.26953 10.2068L5.17578 11.3006C5.01325 11.4633 4.82025 11.5924 4.6078 11.6805C4.39535 11.7685 4.16763 11.8138 3.93766 11.8138C3.70768 11.8138 3.47996 11.7685 3.26751 11.6805C3.05506 11.5924 2.86206 11.4633 2.69953 11.3006Z"
-      fill="currentColor"
-    />
-  </g>
-  <defs>
-    <clipPath id="clip0_1081_1237">
-      <rect width="14" height="14" fill="white" />
-    </clipPath>
-  </defs>
-</svg>
-</a>
-Examples</h2></div><div class="space-y-8"><div class="anchorable"><a href="#example_0-1" class="anchor" aria-label="Anchor" tabIndex="-1"><svg
-  width="16"
-  height="16"
-  viewBox="0 0 14 14"
-  fill="none"
-  xmlns="http://www.w3.org/2000/svg"
->
-  <g clip-path="url(#clip0_1081_1237)">
-    <path
-      fill-rule="evenodd"
-      clip-rule="evenodd"
-      d="M6.80328 2.8656C6.68736 2.99 6.62425 3.15454 6.62725 3.32456C6.63025 3.49457 6.69913 3.65678 6.81936 3.77702C6.9396 3.89725 7.10181 3.96613 7.27182 3.96913C7.44184 3.97213 7.60638 3.90902 7.73078 3.7931L8.82453 2.69935C8.98712 2.53676 9.18015 2.40778 9.39259 2.31978C9.60503 2.23179 9.83272 2.1865 10.0627 2.1865C10.2926 2.1865 10.5203 2.23179 10.7327 2.31978C10.9452 2.40778 11.1382 2.53676 11.3008 2.69935C11.4634 2.86194 11.5923 3.05497 11.6803 3.2674C11.7683 3.47984 11.8136 3.70753 11.8136 3.93747C11.8136 4.16741 11.7683 4.3951 11.6803 4.60754C11.5923 4.81998 11.4634 5.013 11.3008 5.1756L9.11328 7.3631C8.95075 7.52581 8.75775 7.65488 8.5453 7.74295C8.33285 7.83102 8.10513 7.87635 7.87516 7.87635C7.64518 7.87635 7.41746 7.83102 7.20501 7.74295C6.99256 7.65488 6.79956 7.52581 6.63703 7.3631C6.51263 7.24718 6.34809 7.18407 6.17807 7.18707C6.00806 7.19007 5.84585 7.25894 5.72561 7.37918C5.60538 7.49942 5.5365 7.66163 5.5335 7.83164C5.5305 8.00165 5.59361 8.1662 5.70953 8.2906C5.99391 8.57501 6.33154 8.80062 6.70312 8.95455C7.0747 9.10847 7.47296 9.18769 7.87516 9.18769C8.27736 9.18769 8.67562 9.10847 9.0472 8.95455C9.41878 8.80062 9.7564 8.57501 10.0408 8.2906L12.2283 6.1031C12.8026 5.52874 13.1253 4.74974 13.1253 3.93747C13.1253 3.12521 12.8026 2.34621 12.2283 1.77185C11.6539 1.19749 10.8749 0.874817 10.0627 0.874817C9.25039 0.874817 8.47139 1.19749 7.89703 1.77185L6.80328 2.8656ZM2.69953 11.3006C2.53682 11.1381 2.40774 10.9451 2.31968 10.7326C2.23161 10.5202 2.18628 10.2924 2.18628 10.0625C2.18628 9.8325 2.23161 9.60477 2.31968 9.39233C2.40774 9.17988 2.53682 8.98688 2.69953 8.82435L4.88703 6.63685C5.04956 6.47414 5.24256 6.34506 5.45501 6.25699C5.66746 6.16893 5.89518 6.1236 6.12516 6.1236C6.35513 6.1236 6.58285 6.16893 6.7953 6.25699C7.00775 6.34506 7.20075 6.47414 7.36328 6.63685C7.48768 6.75277 7.65223 6.81588 7.82224 6.81288C7.99225 6.80988 8.15446 6.741 8.2747 6.62077C8.39494 6.50053 8.46381 6.33832 8.46681 6.1683C8.46981 5.99829 8.4067 5.83375 8.29078 5.70935C8.0064 5.42494 7.66878 5.19933 7.2972 5.0454C6.92562 4.89148 6.52736 4.81225 6.12516 4.81225C5.72296 4.81225 5.3247 4.89148 4.95312 5.0454C4.58154 5.19933 4.24391 5.42494 3.95953 5.70935L1.77203 7.89685C1.19767 8.47121 0.875 9.25021 0.875 10.0625C0.875 10.8747 1.19767 11.6537 1.77203 12.2281C2.34639 12.8025 3.12539 13.1251 3.93766 13.1251C4.74992 13.1251 5.52892 12.8025 6.10328 12.2281L7.19703 11.1343C7.31295 11.0099 7.37606 10.8454 7.37306 10.6754C7.37006 10.5054 7.30119 10.3432 7.18095 10.2229C7.06071 10.1027 6.8985 10.0338 6.72849 10.0308C6.55848 10.0278 6.39393 10.0909 6.26953 10.2068L5.17578 11.3006C5.01325 11.4633 4.82025 11.5924 4.6078 11.6805C4.39535 11.7685 4.16763 11.8138 3.93766 11.8138C3.70768 11.8138 3.47996 11.7685 3.26751 11.6805C3.05506 11.5924 2.86206 11.4633 2.69953 11.3006Z"
-      fill="currentColor"
-    />
-  </g>
-  <defs>
-    <clipPath id="clip0_1081_1237">
-      <rect width="14" height="14" fill="white" />
-    </clipPath>
-  </defs>
-</svg>
-</a>
-<h3 class="example-header"><div class="markdown"><p>Select a dialect for a router that speaks JSON</p>
-</div></h3>
-  <div><div class="markdown"><pre class="highlight"><code class="language-ts">import { assertEquals } from &quot;@std/assert&quot;;
-import { gdprJson, gdprText } from &quot;./mod.ts&quot;;
-
-assertEquals(gdprText.defaultUsername, &quot;admin&quot;);
-assertEquals(gdprJson.defaultUsername, &quot;user&quot;);
-</code><button class="copyButton" data-copy="import { assertEquals } from &quot;@std/assert&quot;;
-import { gdprJson, gdprText } from &quot;./mod.ts&quot;;
-
-assertEquals(gdprText.defaultUsername, &quot;admin&quot;);
-assertEquals(gdprJson.defaultUsername, &quot;user&quot;);
+</main><div class="toc">
+    <div><div class="usageContent">
+    <h3>Usage</h3><div class="markdown"><pre class="highlight"><code class="language-typescript">import * as mod from &quot;mod.ts&quot;;
+</code><button class="copyButton" data-copy="import * as mod from &quot;mod.ts&quot;;
 "><svg
   class="copy"
   width="15"
@@ -840,369 +1236,56 @@ assertEquals(gdprJson.defaultUsername, &quot;user&quot;);
   <path d="M5 12l5 5l10 -10" />
 </svg>
 </button><code></code></pre>
-</div></div>
-</div>
-<div class="border-b border-gray-300 dark:border-gray-700"></div><div class="anchorable"><a href="#example_1-1" class="anchor" aria-label="Anchor" tabIndex="-1"><svg
+</div></div><nav class="topSymbols">
+          <h3>Symbols</h3>
+          <ul><li>
+                <a href="..&#x2F;.&#x2F;mod.ts&#x2F;~&#x2F;ACT.html" title="ACT"><div class="docNodeKindIcon"><div class="text-Variable bg-Variable/15 dark:text-VariableDark dark:bg-VariableDark/15" title="Variable">v</div></div>
+<span class="hover:bg-Variable/15 hover:bg-VariableDark/15">
+                    ACT
+                  </span>
+                </a>
+              </li><li>
+                <a href="..&#x2F;.&#x2F;mod.ts&#x2F;~&#x2F;Action.html" title="Action"><div class="docNodeKindIcon"><div class="text-TypeAlias bg-TypeAlias/15 dark:text-TypeAliasDark dark:bg-TypeAliasDark/15" title="Type Alias">T</div></div>
+<span class="hover:bg-TypeAlias/15 hover:bg-TypeAliasDark/15">
+                    Action
+                  </span>
+                </a>
+              </li><li>
+                <a href="..&#x2F;.&#x2F;mod.ts&#x2F;~&#x2F;ActionType.html" title="ActionType"><div class="docNodeKindIcon"><div class="text-TypeAlias bg-TypeAlias/15 dark:text-TypeAliasDark dark:bg-TypeAliasDark/15" title="Type Alias">T</div></div>
+<span class="hover:bg-TypeAlias/15 hover:bg-TypeAliasDark/15">
+                    ActionType
+                  </span>
+                </a>
+              </li><li>
+                <a href="..&#x2F;.&#x2F;mod.ts&#x2F;~&#x2F;BusyStatus.html" title="BusyStatus"><div class="docNodeKindIcon"><div class="text-Interface bg-Interface/15 dark:text-InterfaceDark dark:bg-InterfaceDark/15" title="Interface">I</div></div>
+<span class="hover:bg-Interface/15 hover:bg-InterfaceDark/15">
+                    BusyStatus
+                  </span>
+                </a>
+              </li><li>
+                <a href="..&#x2F;.&#x2F;mod.ts&#x2F;~&#x2F;CommandBatch.html" title="CommandBatch"><div class="docNodeKindIcon"><div class="text-Interface bg-Interface/15 dark:text-InterfaceDark dark:bg-InterfaceDark/15" title="Interface">I</div></div>
+<span class="hover:bg-Interface/15 hover:bg-InterfaceDark/15">
+                    CommandBatch
+                  </span>
+                </a>
+              </li></ul><a class="flex items-center gap-0.5" href="..&#x2F;.&#x2F;all_symbols.html">
+              <span class="leading-none">view all 35 symbols</span><svg
   width="16"
   height="16"
-  viewBox="0 0 14 14"
+  viewBox="0 0 16 16"
   fill="none"
   xmlns="http://www.w3.org/2000/svg"
 >
-  <g clip-path="url(#clip0_1081_1237)">
-    <path
-      fill-rule="evenodd"
-      clip-rule="evenodd"
-      d="M6.80328 2.8656C6.68736 2.99 6.62425 3.15454 6.62725 3.32456C6.63025 3.49457 6.69913 3.65678 6.81936 3.77702C6.9396 3.89725 7.10181 3.96613 7.27182 3.96913C7.44184 3.97213 7.60638 3.90902 7.73078 3.7931L8.82453 2.69935C8.98712 2.53676 9.18015 2.40778 9.39259 2.31978C9.60503 2.23179 9.83272 2.1865 10.0627 2.1865C10.2926 2.1865 10.5203 2.23179 10.7327 2.31978C10.9452 2.40778 11.1382 2.53676 11.3008 2.69935C11.4634 2.86194 11.5923 3.05497 11.6803 3.2674C11.7683 3.47984 11.8136 3.70753 11.8136 3.93747C11.8136 4.16741 11.7683 4.3951 11.6803 4.60754C11.5923 4.81998 11.4634 5.013 11.3008 5.1756L9.11328 7.3631C8.95075 7.52581 8.75775 7.65488 8.5453 7.74295C8.33285 7.83102 8.10513 7.87635 7.87516 7.87635C7.64518 7.87635 7.41746 7.83102 7.20501 7.74295C6.99256 7.65488 6.79956 7.52581 6.63703 7.3631C6.51263 7.24718 6.34809 7.18407 6.17807 7.18707C6.00806 7.19007 5.84585 7.25894 5.72561 7.37918C5.60538 7.49942 5.5365 7.66163 5.5335 7.83164C5.5305 8.00165 5.59361 8.1662 5.70953 8.2906C5.99391 8.57501 6.33154 8.80062 6.70312 8.95455C7.0747 9.10847 7.47296 9.18769 7.87516 9.18769C8.27736 9.18769 8.67562 9.10847 9.0472 8.95455C9.41878 8.80062 9.7564 8.57501 10.0408 8.2906L12.2283 6.1031C12.8026 5.52874 13.1253 4.74974 13.1253 3.93747C13.1253 3.12521 12.8026 2.34621 12.2283 1.77185C11.6539 1.19749 10.8749 0.874817 10.0627 0.874817C9.25039 0.874817 8.47139 1.19749 7.89703 1.77185L6.80328 2.8656ZM2.69953 11.3006C2.53682 11.1381 2.40774 10.9451 2.31968 10.7326C2.23161 10.5202 2.18628 10.2924 2.18628 10.0625C2.18628 9.8325 2.23161 9.60477 2.31968 9.39233C2.40774 9.17988 2.53682 8.98688 2.69953 8.82435L4.88703 6.63685C5.04956 6.47414 5.24256 6.34506 5.45501 6.25699C5.66746 6.16893 5.89518 6.1236 6.12516 6.1236C6.35513 6.1236 6.58285 6.16893 6.7953 6.25699C7.00775 6.34506 7.20075 6.47414 7.36328 6.63685C7.48768 6.75277 7.65223 6.81588 7.82224 6.81288C7.99225 6.80988 8.15446 6.741 8.2747 6.62077C8.39494 6.50053 8.46381 6.33832 8.46681 6.1683C8.46981 5.99829 8.4067 5.83375 8.29078 5.70935C8.0064 5.42494 7.66878 5.19933 7.2972 5.0454C6.92562 4.89148 6.52736 4.81225 6.12516 4.81225C5.72296 4.81225 5.3247 4.89148 4.95312 5.0454C4.58154 5.19933 4.24391 5.42494 3.95953 5.70935L1.77203 7.89685C1.19767 8.47121 0.875 9.25021 0.875 10.0625C0.875 10.8747 1.19767 11.6537 1.77203 12.2281C2.34639 12.8025 3.12539 13.1251 3.93766 13.1251C4.74992 13.1251 5.52892 12.8025 6.10328 12.2281L7.19703 11.1343C7.31295 11.0099 7.37606 10.8454 7.37306 10.6754C7.37006 10.5054 7.30119 10.3432 7.18095 10.2229C7.06071 10.1027 6.8985 10.0338 6.72849 10.0308C6.55848 10.0278 6.39393 10.0909 6.26953 10.2068L5.17578 11.3006C5.01325 11.4633 4.82025 11.5924 4.6078 11.6805C4.39535 11.7685 4.16763 11.8138 3.93766 11.8138C3.70768 11.8138 3.47996 11.7685 3.26751 11.6805C3.05506 11.5924 2.86206 11.4633 2.69953 11.3006Z"
-      fill="currentColor"
-    />
-  </g>
-  <defs>
-    <clipPath id="clip0_1081_1237">
-      <rect width="14" height="14" fill="white" />
-    </clipPath>
-  </defs>
-</svg>
-</a>
-<h3 class="example-header"><div class="markdown"><p>Derive a dialect for a model that differs in one place</p>
-</div></h3>
-  <div><div class="markdown"><pre class="highlight"><code class="language-ts">import { assertEquals } from &quot;@std/assert&quot;;
-import { type Dialect, gdprJson } from &quot;./mod.ts&quot;;
-
-const vx800v: Dialect = {
-  ...gdprJson,
-  id: &quot;vx800v&quot;,
-  publicKeyRequest: (baseUrl) =&gt;
-    new Request(new URL(&quot;cgi/getParm&quot;, baseUrl), { method: &quot;POST&quot; }),
-};
-
-assertEquals(
-  vx800v.publicKeyRequest(&quot;http://192.168.1.1&quot;).url,
-  &quot;http://192.168.1.1/cgi/getParm&quot;,
-);
-assertEquals(vx800v.defaultUsername, &quot;user&quot;);
-</code><button class="copyButton" data-copy="import { assertEquals } from &quot;@std/assert&quot;;
-import { type Dialect, gdprJson } from &quot;./mod.ts&quot;;
-
-const vx800v: Dialect = {
-  ...gdprJson,
-  id: &quot;vx800v&quot;,
-  publicKeyRequest: (baseUrl) =&gt;
-    new Request(new URL(&quot;cgi/getParm&quot;, baseUrl), { method: &quot;POST&quot; }),
-};
-
-assertEquals(
-  vx800v.publicKeyRequest(&quot;http://192.168.1.1&quot;).url,
-  &quot;http://192.168.1.1/cgi/getParm&quot;,
-);
-assertEquals(vx800v.defaultUsername, &quot;user&quot;);
-"><svg
-  class="copy"
-  width="15"
-  height="15"
-  viewBox="0 0 15 15"
-  fill="none"
-  xmlns="http://www.w3.org/2000/svg"
->
-  <rect x="2" y="2" width="7" height="7" fill="none" />
-  <rect x="6" y="6" width="7" height="7" fill="none" />
   <path
-    d="M1.55566 2.7C1.55566 2.03726 2.09292 1.5 2.75566 1.5H8.75566C9.41841 1.5 9.95566 2.03726 9.95566 2.7V5.1H12.3557C13.0184 5.1 13.5557 5.63726 13.5557 6.3V12.3C13.5557 12.9627 13.0184 13.5 12.3557 13.5H6.35566C5.69292 13.5 5.15566 12.9627 5.15566 12.3V9.9H2.75566C2.09292 9.9 1.55566 9.36274 1.55566 8.7V2.7ZM6.35566 9.9V12.3H12.3557V6.3H9.95566V8.7C9.95566 9.36274 9.41841 9.9 8.75566 9.9H6.35566ZM8.75566 8.7V2.7H2.75566V8.7H8.75566Z"
+    fill-rule="evenodd"
+    clip-rule="evenodd"
+    d="M5.76748 11.8159C5.5378 11.577 5.54525 11.1972 5.78411 10.9675L8.93431 8L5.78411 5.0325C5.54525 4.80282 5.5378 4.423 5.76748 4.18413C5.99715 3.94527 6.37698 3.93782 6.61584 4.1675L10.2158 7.5675C10.3335 7.68062 10.4 7.83679 10.4 8C10.4 8.16321 10.3335 8.31938 10.2158 8.4325L6.61584 11.8325C6.37698 12.0622 5.99715 12.0547 5.76748 11.8159Z"
     fill="currentColor"
   />
 </svg>
-<svg
-  class="check"
-  width="15"
-  height="15"
-  viewBox="0 0 24 24"
-  stroke-width="2"
-  stroke="currentColor"
-  fill="none"
-  stroke-linecap="round"
-  stroke-linejoin="round"
-  xmlns="http://www.w3.org/2000/svg"
->
-  <path stroke="none" d="M0 0h24v24H0z" fill="none" />
-  <path d="M5 12l5 5l10 -10" />
-</svg>
-</button><code></code></pre>
-</div></div>
-</div>
-</div></section>
-<section class="section"  id="dialect&#x2F;mod_ts_interfaces"><div>
-      <h2 class="anchorable mb-1"><a href="#dialect&#x2F;mod_ts_interfaces" class="anchor" aria-label="Anchor" tabIndex="-1"><svg
-  width="16"
-  height="16"
-  viewBox="0 0 14 14"
-  fill="none"
-  xmlns="http://www.w3.org/2000/svg"
->
-  <g clip-path="url(#clip0_1081_1237)">
-    <path
-      fill-rule="evenodd"
-      clip-rule="evenodd"
-      d="M6.80328 2.8656C6.68736 2.99 6.62425 3.15454 6.62725 3.32456C6.63025 3.49457 6.69913 3.65678 6.81936 3.77702C6.9396 3.89725 7.10181 3.96613 7.27182 3.96913C7.44184 3.97213 7.60638 3.90902 7.73078 3.7931L8.82453 2.69935C8.98712 2.53676 9.18015 2.40778 9.39259 2.31978C9.60503 2.23179 9.83272 2.1865 10.0627 2.1865C10.2926 2.1865 10.5203 2.23179 10.7327 2.31978C10.9452 2.40778 11.1382 2.53676 11.3008 2.69935C11.4634 2.86194 11.5923 3.05497 11.6803 3.2674C11.7683 3.47984 11.8136 3.70753 11.8136 3.93747C11.8136 4.16741 11.7683 4.3951 11.6803 4.60754C11.5923 4.81998 11.4634 5.013 11.3008 5.1756L9.11328 7.3631C8.95075 7.52581 8.75775 7.65488 8.5453 7.74295C8.33285 7.83102 8.10513 7.87635 7.87516 7.87635C7.64518 7.87635 7.41746 7.83102 7.20501 7.74295C6.99256 7.65488 6.79956 7.52581 6.63703 7.3631C6.51263 7.24718 6.34809 7.18407 6.17807 7.18707C6.00806 7.19007 5.84585 7.25894 5.72561 7.37918C5.60538 7.49942 5.5365 7.66163 5.5335 7.83164C5.5305 8.00165 5.59361 8.1662 5.70953 8.2906C5.99391 8.57501 6.33154 8.80062 6.70312 8.95455C7.0747 9.10847 7.47296 9.18769 7.87516 9.18769C8.27736 9.18769 8.67562 9.10847 9.0472 8.95455C9.41878 8.80062 9.7564 8.57501 10.0408 8.2906L12.2283 6.1031C12.8026 5.52874 13.1253 4.74974 13.1253 3.93747C13.1253 3.12521 12.8026 2.34621 12.2283 1.77185C11.6539 1.19749 10.8749 0.874817 10.0627 0.874817C9.25039 0.874817 8.47139 1.19749 7.89703 1.77185L6.80328 2.8656ZM2.69953 11.3006C2.53682 11.1381 2.40774 10.9451 2.31968 10.7326C2.23161 10.5202 2.18628 10.2924 2.18628 10.0625C2.18628 9.8325 2.23161 9.60477 2.31968 9.39233C2.40774 9.17988 2.53682 8.98688 2.69953 8.82435L4.88703 6.63685C5.04956 6.47414 5.24256 6.34506 5.45501 6.25699C5.66746 6.16893 5.89518 6.1236 6.12516 6.1236C6.35513 6.1236 6.58285 6.16893 6.7953 6.25699C7.00775 6.34506 7.20075 6.47414 7.36328 6.63685C7.48768 6.75277 7.65223 6.81588 7.82224 6.81288C7.99225 6.80988 8.15446 6.741 8.2747 6.62077C8.39494 6.50053 8.46381 6.33832 8.46681 6.1683C8.46981 5.99829 8.4067 5.83375 8.29078 5.70935C8.0064 5.42494 7.66878 5.19933 7.2972 5.0454C6.92562 4.89148 6.52736 4.81225 6.12516 4.81225C5.72296 4.81225 5.3247 4.89148 4.95312 5.0454C4.58154 5.19933 4.24391 5.42494 3.95953 5.70935L1.77203 7.89685C1.19767 8.47121 0.875 9.25021 0.875 10.0625C0.875 10.8747 1.19767 11.6537 1.77203 12.2281C2.34639 12.8025 3.12539 13.1251 3.93766 13.1251C4.74992 13.1251 5.52892 12.8025 6.10328 12.2281L7.19703 11.1343C7.31295 11.0099 7.37606 10.8454 7.37306 10.6754C7.37006 10.5054 7.30119 10.3432 7.18095 10.2229C7.06071 10.1027 6.8985 10.0338 6.72849 10.0308C6.55848 10.0278 6.39393 10.0909 6.26953 10.2068L5.17578 11.3006C5.01325 11.4633 4.82025 11.5924 4.6078 11.6805C4.39535 11.7685 4.16763 11.8138 3.93766 11.8138C3.70768 11.8138 3.47996 11.7685 3.26751 11.6805C3.05506 11.5924 2.86206 11.4633 2.69953 11.3006Z"
-      fill="currentColor"
-    />
-  </g>
-  <defs>
-    <clipPath id="clip0_1081_1237">
-      <rect width="14" height="14" fill="white" />
-    </clipPath>
-  </defs>
-</svg>
-</a>
-Interfaces</h2></div><div class="namespaceSection"><div id="namespace_busystatus-1" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-Interface bg-Interface/15 dark:text-InterfaceDark dark:bg-InterfaceDark/15" title="Interface">I</div></div>
-<div class="namespaceItemContent">
-		    <a href=".&#x2F;.&#x2F;mod.ts&#x2F;~&#x2F;BusyStatus.html" title="BusyStatus">
-			    <span>BusyStatus</span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Login and busy state reported by the router before authentication.</p>
-</div></div><ul class="namespaceItemContentSubItems"><li>
-                <a href=".&#x2F;.&#x2F;mod.ts&#x2F;~&#x2F;BusyStatus.html#property_isbusy">
-                  <span>isBusy</span><span>: <span class="td-kw">boolean</span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Whether the router is busy serving another management session.</p>
-</div></div></li><li>
-                <a href=".&#x2F;.&#x2F;mod.ts&#x2F;~&#x2F;BusyStatus.html#property_isloggedin">
-                  <span>isLoggedIn</span><span>: <span class="td-kw">boolean</span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Whether a session is already established from another client.</p>
-</div></div></li></ul></div>
-    </div><div id="namespace_commandbatch-1" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-Interface bg-Interface/15 dark:text-InterfaceDark dark:bg-InterfaceDark/15" title="Interface">I</div></div>
-<div class="namespaceItemContent">
-		    <a href=".&#x2F;.&#x2F;mod.ts&#x2F;~&#x2F;CommandBatch.html" title="CommandBatch">
-			    <span>CommandBatch</span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>One HTTP round trip's worth of actions.</p>
-</div></div><ul class="namespaceItemContentSubItems"><li>
-                <a href=".&#x2F;.&#x2F;mod.ts&#x2F;~&#x2F;CommandBatch.html#property_indices">
-                  <span>indices</span><span>: <span class="td-kw">readonly</span> <span class="td-kw">number</span>[]</span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Indices into the caller's actions array, in the order the response returns them.</p>
-</div></div></li><li>
-                <a href=".&#x2F;.&#x2F;mod.ts&#x2F;~&#x2F;CommandBatch.html#property_payload">
-                  <span>payload</span><span>: <span class="td-kw">string</span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Plaintext payload for this round trip, pre-encryption.</p>
-</div></div></li></ul></div>
-    </div><div id="namespace_credentials-1" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-Interface bg-Interface/15 dark:text-InterfaceDark dark:bg-InterfaceDark/15" title="Interface">I</div></div>
-<div class="namespaceItemContent">
-		    <a href=".&#x2F;.&#x2F;mod.ts&#x2F;~&#x2F;Credentials.html" title="Credentials">
-			    <span>Credentials</span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Credentials as supplied by the caller, after the dialect's username default
-has been applied.</p>
-</div></div><ul class="namespaceItemContentSubItems"><li>
-                <a href=".&#x2F;.&#x2F;mod.ts&#x2F;~&#x2F;Credentials.html#property_password">
-                  <span>password</span><span>: <span class="td-kw">string</span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Account password, verbatim.</p>
-</div></div></li><li>
-                <a href=".&#x2F;.&#x2F;mod.ts&#x2F;~&#x2F;Credentials.html#property_username">
-                  <span>username</span><span>: <span class="td-kw">string</span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Account name, defaulted from <code>Dialect.defaultUsername</code>.</p>
-</div></div></li></ul></div>
-    </div><div id="namespace_decodedbatch-1" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-Interface bg-Interface/15 dark:text-InterfaceDark dark:bg-InterfaceDark/15" title="Interface">I</div></div>
-<div class="namespaceItemContent">
-		    <a href=".&#x2F;.&#x2F;mod.ts&#x2F;~&#x2F;DecodedBatch.html" title="DecodedBatch">
-			    <span>DecodedBatch</span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Decoded result of one round trip, positionally aligned with
-<code>CommandBatch.indices</code>.</p>
-</div></div><ul class="namespaceItemContentSubItems"><li>
-                <a href=".&#x2F;.&#x2F;mod.ts&#x2F;~&#x2F;DecodedBatch.html#property_error">
-                  <span>error</span><span>: <span><span class="td-kw">number</span><span class="td-op"> | </span><span class="td-kw">null</span></span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Router error code, or <code>null</code> when the batch reported no error.</p>
-</div></div></li><li>
-                <a href=".&#x2F;.&#x2F;mod.ts&#x2F;~&#x2F;DecodedBatch.html#property_results">
-                  <span>results</span><span>: <span class="td-kw">readonly</span> (<span><span class="td-ref">Record</span>&lt;<span class="td-kw">string</span><span>, </span><span class="td-kw">string</span>&gt;<span class="td-op"> | </span><span class="td-ref">Record</span>&lt;<span class="td-kw">string</span><span>, </span><span class="td-kw">string</span>&gt;[]<span class="td-op"> | </span><span class="td-kw">null</span></span>)[]</span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>One entry per index in the batch; <code>null</code> where the router returned nothing.</p>
-</div></div></li></ul></div>
-    </div><div id="namespace_dialect-1" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-Interface bg-Interface/15 dark:text-InterfaceDark dark:bg-InterfaceDark/15" title="Interface">I</div></div>
-<div class="namespaceItemContent">
-		    <a href=".&#x2F;.&#x2F;mod.ts&#x2F;~&#x2F;Dialect.html" title="Dialect">
-			    <span>Dialect</span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>A firmware family's wire protocol, expressed as pure functions and data.</p>
-</div></div><ul class="namespaceItemContentSubItems"><li>
-                <a href=".&#x2F;.&#x2F;mod.ts&#x2F;~&#x2F;Dialect.html#method_busyrequest_0">
-                  <span>busyRequest</span><span>(<span><span>baseUrl<span>: <span class="td-kw">string</span></span></span></span>)<span>: <span class="td-ref">Request</span></span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Builds the request that reports whether a session is already established.</p>
-</div></div></li><li>
-                <a href=".&#x2F;.&#x2F;mod.ts&#x2F;~&#x2F;Dialect.html#method_commandrequest_0">
-                  <span>commandRequest</span><span>(<div class="ml-4"><div><span>baseUrl<span>: <span class="td-kw">string</span></span></span>,</div><div><span>envelope<span>: <span class="td-ref">Envelope</span></span></span>,</div><div><span>session<span>: <span class="td-ref">SessionContext</span></span></span></div></div>)<span>: <span class="td-ref">Request</span></span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Builds a command request for one batch's envelope.</p>
-</div></div></li><li>
-                <a href=".&#x2F;.&#x2F;mod.ts&#x2F;~&#x2F;Dialect.html#method_decodecommand_0">
-                  <span>decodeCommand</span><span>(<div class="ml-4"><div><span>text<span>: <span class="td-kw">string</span></span></span>,</div><div><span>batch<span>: <span class="td-ref">CommandBatch</span></span></span></div></div>)<span>: <span class="td-ref">DecodedBatch</span></span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Decodes a decrypted command response into results aligned with the batch.</p>
-</div></div></li><li>
-                <a href=".&#x2F;.&#x2F;mod.ts&#x2F;~&#x2F;Dialect.html#property_defaultusername">
-                  <span>defaultUsername</span><span>: <span class="td-kw">string</span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Username used when the caller supplies none.</p>
-</div></div></li><li>
-                <a href=".&#x2F;.&#x2F;mod.ts&#x2F;~&#x2F;Dialect.html#method_encodecommands_0">
-                  <span>encodeCommands</span><span>(<span><span>actions<span>: <span class="td-kw">readonly</span> <span class="td-ref">Action</span>[]</span></span></span>)<span>: <span class="td-kw">readonly</span> <span class="td-ref">CommandBatch</span>[]</span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Splits actions into round trips and serializes each. Owns the operation
-vocabulary, stack defaults, and batching.</p>
-</div></div></li><li>
-                <a href=".&#x2F;.&#x2F;mod.ts&#x2F;~&#x2F;Dialect.html#method_encodelogin_0">
-                  <span>encodeLogin</span><span>(<span><span>credentials<span>: <span class="td-ref">Credentials</span></span></span></span>)<span>: <span class="td-kw">string</span></span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Encodes credentials into the plaintext login payload, pre-encryption.</p>
-</div></div></li><li>
-                <a href=".&#x2F;.&#x2F;mod.ts&#x2F;~&#x2F;Dialect.html#property_id">
-                  <span>id</span><span>: <span class="td-kw">string</span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Stable identifier, carried on the authentication result for diagnostics.</p>
-</div></div></li><li>
-                <a href=".&#x2F;.&#x2F;mod.ts&#x2F;~&#x2F;Dialect.html#method_inforequest_0">
-                  <span>infoRequest</span><span>(<span><span>baseUrl<span>: <span class="td-kw">string</span></span></span></span>)<span>: <span class="td-ref">Request</span></span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Builds the request for the login page, whose inline script carries
-<code>authTimes</code> and friends.</p>
-</div></div></li><li>
-                <a href=".&#x2F;.&#x2F;mod.ts&#x2F;~&#x2F;Dialect.html#method_loginrequest_0">
-                  <span>loginRequest</span><span>(<div class="ml-4"><div><span>baseUrl<span>: <span class="td-kw">string</span></span></span>,</div><div><span>envelope<span>: <span class="td-ref">Envelope</span></span></span></div></div>)<span>: <span class="td-ref">Request</span></span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Builds the login request. Owns where the envelope rides — query string,
-request body, or anywhere else the firmware expects it.</p>
-</div></div></li><li>
-                <a href=".&#x2F;.&#x2F;mod.ts&#x2F;~&#x2F;Dialect.html#method_parsebusy_0">
-                  <span>parseBusy</span><span>(<span><span>text<span>: <span class="td-kw">string</span></span></span></span>)<span>: <span class="td-ref">BusyStatus</span></span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Extracts login and busy flags from the busy response.</p>
-</div></div></li><li>
-                <a href=".&#x2F;.&#x2F;mod.ts&#x2F;~&#x2F;Dialect.html#method_parseinfo_0">
-                  <span>parseInfo</span><span>(<span><span>html<span>: <span class="td-kw">string</span></span></span></span>)<span>: <span class="td-ref">RouterInfo</span></span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Scrapes router variables out of the login page.</p>
-</div></div></li><li>
-                <a href=".&#x2F;.&#x2F;mod.ts&#x2F;~&#x2F;Dialect.html#method_parsepublickey_0">
-                  <span>parsePublicKey</span><span>(<span><span>text<span>: <span class="td-kw">string</span></span></span></span>)<span>: <span class="td-ref">PublicKeyInfo</span></span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Extracts RSA parameters from the public key response.</p>
-</div></div></li><li>
-                <a href=".&#x2F;.&#x2F;mod.ts&#x2F;~&#x2F;Dialect.html#method_parsesessionid_0">
-                  <span>parseSessionId</span><span>(<span><span>headers<span>: <span class="td-ref">Headers</span></span></span></span>)<span>: <span><span class="td-kw">string</span><span class="td-op"> | </span><span class="td-kw">null</span></span></span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Extracts the session id from the login response headers.</p>
-</div></div></li><li>
-                <a href=".&#x2F;.&#x2F;mod.ts&#x2F;~&#x2F;Dialect.html#method_parsetokenid_0">
-                  <span>parseTokenId</span><span>(<span><span>html<span>: <span class="td-kw">string</span></span></span></span>)<span>: <span class="td-kw">string</span></span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Extracts the security token from the authenticated page.</p>
-</div></div></li><li>
-                <a href=".&#x2F;.&#x2F;mod.ts&#x2F;~&#x2F;Dialect.html#method_publickeyrequest_0">
-                  <span>publicKeyRequest</span><span>(<span><span>baseUrl<span>: <span class="td-kw">string</span></span></span></span>)<span>: <span class="td-ref">Request</span></span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Builds the request for the RSA public key and sequence base.</p>
-</div></div></li><li>
-                <a href=".&#x2F;.&#x2F;mod.ts&#x2F;~&#x2F;Dialect.html#method_tokenrequest_0">
-                  <span>tokenRequest</span><span>(<div class="ml-4"><div><span>baseUrl<span>: <span class="td-kw">string</span></span></span>,</div><div><span>session<span>: <span class="td-ref">Pick</span>&lt;<span class="td-ref">SessionContext</span><span>, </span><span><span class="td-str">"sessionId"</span><span class="td-op"> | </span><span class="td-str">"authTimes"</span></span>&gt;</span></span></div></div>)<span>: <span class="td-ref">Request</span></span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Builds the request for the authenticated page carrying the security token.</p>
-</div></div></li></ul></div>
-    </div><div id="namespace_envelope-1" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-Interface bg-Interface/15 dark:text-InterfaceDark dark:bg-InterfaceDark/15" title="Interface">I</div></div>
-<div class="namespaceItemContent">
-		    <a href=".&#x2F;.&#x2F;mod.ts&#x2F;~&#x2F;Envelope.html" title="Envelope">
-			    <span>Envelope</span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Encrypted request envelope: AES ciphertext plus the RSA-encrypted signature.</p>
-</div></div><ul class="namespaceItemContentSubItems"><li>
-                <a href=".&#x2F;.&#x2F;mod.ts&#x2F;~&#x2F;Envelope.html#property_data">
-                  <span>data</span><span>: <span class="td-kw">string</span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Base64 AES-CBC ciphertext of the plaintext payload.</p>
-</div></div></li><li>
-                <a href=".&#x2F;.&#x2F;mod.ts&#x2F;~&#x2F;Envelope.html#property_sign">
-                  <span>sign</span><span>: <span class="td-kw">string</span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Hex RSA-encrypted parameter string: <code>key&amp;iv&amp;h&amp;s</code> for login, <code>h&amp;s</code> for commands.</p>
-</div></div></li></ul></div>
-    </div><div id="namespace_publickeyinfo-1" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-Interface bg-Interface/15 dark:text-InterfaceDark dark:bg-InterfaceDark/15" title="Interface">I</div></div>
-<div class="namespaceItemContent">
-		    <a href=".&#x2F;.&#x2F;mod.ts&#x2F;~&#x2F;PublicKeyInfo.html" title="PublicKeyInfo">
-			    <span>PublicKeyInfo</span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>RSA public key material and the request sequence base.</p>
-</div></div><ul class="namespaceItemContentSubItems"><li>
-                <a href=".&#x2F;.&#x2F;mod.ts&#x2F;~&#x2F;PublicKeyInfo.html#property_exponent">
-                  <span>exponent</span><span>: <span class="td-ref">Uint8Array</span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>RSA public exponent, big-endian.</p>
-</div></div></li><li>
-                <a href=".&#x2F;.&#x2F;mod.ts&#x2F;~&#x2F;PublicKeyInfo.html#property_modulus">
-                  <span>modulus</span><span>: <span class="td-ref">Uint8Array</span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>RSA modulus, big-endian. Its length fixes the RSA chunk size.</p>
-</div></div></li><li>
-                <a href=".&#x2F;.&#x2F;mod.ts&#x2F;~&#x2F;PublicKeyInfo.html#property_sequence">
-                  <span>sequence</span><span>: <span class="td-kw">number</span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Sequence base that every signature's <code>s</code> parameter is derived from.</p>
-</div></div></li></ul></div>
-    </div><div id="namespace_routerinfo-1" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-Interface bg-Interface/15 dark:text-InterfaceDark dark:bg-InterfaceDark/15" title="Interface">I</div></div>
-<div class="namespaceItemContent">
-		    <a href=".&#x2F;.&#x2F;mod.ts&#x2F;~&#x2F;RouterInfo.html" title="RouterInfo">
-			    <span>RouterInfo</span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Variables scraped from the router's login page.</p>
-</div></div><ul class="namespaceItemContentSubItems"><li>
-                <a href=".&#x2F;.&#x2F;mod.ts&#x2F;~&#x2F;RouterInfo.html#property_authtimes">
-                  <span>authTimes</span><span>: <span class="td-kw">number</span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Login attempt counter, sent back as the <code>loginErrorShow</code> cookie.</p>
-</div></div></li></ul></div>
-    </div><div id="namespace_sessioncontext-1" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-Interface bg-Interface/15 dark:text-InterfaceDark dark:bg-InterfaceDark/15" title="Interface">I</div></div>
-<div class="namespaceItemContent">
-		    <a href=".&#x2F;.&#x2F;mod.ts&#x2F;~&#x2F;SessionContext.html" title="SessionContext">
-			    <span>SessionContext</span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Session material carried on every request made after login.</p>
-</div></div><ul class="namespaceItemContentSubItems"><li>
-                <a href=".&#x2F;.&#x2F;mod.ts&#x2F;~&#x2F;SessionContext.html#property_authtimes">
-                  <span>authTimes</span><span>: <span class="td-kw">number</span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Login attempt counter, sent back as the <code>loginErrorShow</code> cookie.</p>
-</div></div></li><li>
-                <a href=".&#x2F;.&#x2F;mod.ts&#x2F;~&#x2F;SessionContext.html#property_sessionid">
-                  <span>sessionId</span><span>: <span class="td-kw">string</span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p><code>JSESSIONID</code> cookie value returned by the login response.</p>
-</div></div></li><li>
-                <a href=".&#x2F;.&#x2F;mod.ts&#x2F;~&#x2F;SessionContext.html#property_tokenid">
-                  <span>tokenId</span><span>: <span class="td-kw">string</span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Token scraped from the authenticated landing page.</p>
-</div></div></li></ul></div>
-    </div></div>
-</section>
-<section class="section"  id="dialect&#x2F;mod_ts_type-aliases"><div>
-      <h2 class="anchorable mb-1"><a href="#dialect&#x2F;mod_ts_type-aliases" class="anchor" aria-label="Anchor" tabIndex="-1"><svg
-  width="16"
-  height="16"
-  viewBox="0 0 14 14"
-  fill="none"
-  xmlns="http://www.w3.org/2000/svg"
->
-  <g clip-path="url(#clip0_1081_1237)">
-    <path
-      fill-rule="evenodd"
-      clip-rule="evenodd"
-      d="M6.80328 2.8656C6.68736 2.99 6.62425 3.15454 6.62725 3.32456C6.63025 3.49457 6.69913 3.65678 6.81936 3.77702C6.9396 3.89725 7.10181 3.96613 7.27182 3.96913C7.44184 3.97213 7.60638 3.90902 7.73078 3.7931L8.82453 2.69935C8.98712 2.53676 9.18015 2.40778 9.39259 2.31978C9.60503 2.23179 9.83272 2.1865 10.0627 2.1865C10.2926 2.1865 10.5203 2.23179 10.7327 2.31978C10.9452 2.40778 11.1382 2.53676 11.3008 2.69935C11.4634 2.86194 11.5923 3.05497 11.6803 3.2674C11.7683 3.47984 11.8136 3.70753 11.8136 3.93747C11.8136 4.16741 11.7683 4.3951 11.6803 4.60754C11.5923 4.81998 11.4634 5.013 11.3008 5.1756L9.11328 7.3631C8.95075 7.52581 8.75775 7.65488 8.5453 7.74295C8.33285 7.83102 8.10513 7.87635 7.87516 7.87635C7.64518 7.87635 7.41746 7.83102 7.20501 7.74295C6.99256 7.65488 6.79956 7.52581 6.63703 7.3631C6.51263 7.24718 6.34809 7.18407 6.17807 7.18707C6.00806 7.19007 5.84585 7.25894 5.72561 7.37918C5.60538 7.49942 5.5365 7.66163 5.5335 7.83164C5.5305 8.00165 5.59361 8.1662 5.70953 8.2906C5.99391 8.57501 6.33154 8.80062 6.70312 8.95455C7.0747 9.10847 7.47296 9.18769 7.87516 9.18769C8.27736 9.18769 8.67562 9.10847 9.0472 8.95455C9.41878 8.80062 9.7564 8.57501 10.0408 8.2906L12.2283 6.1031C12.8026 5.52874 13.1253 4.74974 13.1253 3.93747C13.1253 3.12521 12.8026 2.34621 12.2283 1.77185C11.6539 1.19749 10.8749 0.874817 10.0627 0.874817C9.25039 0.874817 8.47139 1.19749 7.89703 1.77185L6.80328 2.8656ZM2.69953 11.3006C2.53682 11.1381 2.40774 10.9451 2.31968 10.7326C2.23161 10.5202 2.18628 10.2924 2.18628 10.0625C2.18628 9.8325 2.23161 9.60477 2.31968 9.39233C2.40774 9.17988 2.53682 8.98688 2.69953 8.82435L4.88703 6.63685C5.04956 6.47414 5.24256 6.34506 5.45501 6.25699C5.66746 6.16893 5.89518 6.1236 6.12516 6.1236C6.35513 6.1236 6.58285 6.16893 6.7953 6.25699C7.00775 6.34506 7.20075 6.47414 7.36328 6.63685C7.48768 6.75277 7.65223 6.81588 7.82224 6.81288C7.99225 6.80988 8.15446 6.741 8.2747 6.62077C8.39494 6.50053 8.46381 6.33832 8.46681 6.1683C8.46981 5.99829 8.4067 5.83375 8.29078 5.70935C8.0064 5.42494 7.66878 5.19933 7.2972 5.0454C6.92562 4.89148 6.52736 4.81225 6.12516 4.81225C5.72296 4.81225 5.3247 4.89148 4.95312 5.0454C4.58154 5.19933 4.24391 5.42494 3.95953 5.70935L1.77203 7.89685C1.19767 8.47121 0.875 9.25021 0.875 10.0625C0.875 10.8747 1.19767 11.6537 1.77203 12.2281C2.34639 12.8025 3.12539 13.1251 3.93766 13.1251C4.74992 13.1251 5.52892 12.8025 6.10328 12.2281L7.19703 11.1343C7.31295 11.0099 7.37606 10.8454 7.37306 10.6754C7.37006 10.5054 7.30119 10.3432 7.18095 10.2229C7.06071 10.1027 6.8985 10.0338 6.72849 10.0308C6.55848 10.0278 6.39393 10.0909 6.26953 10.2068L5.17578 11.3006C5.01325 11.4633 4.82025 11.5924 4.6078 11.6805C4.39535 11.7685 4.16763 11.8138 3.93766 11.8138C3.70768 11.8138 3.47996 11.7685 3.26751 11.6805C3.05506 11.5924 2.86206 11.4633 2.69953 11.3006Z"
-      fill="currentColor"
-    />
-  </g>
-  <defs>
-    <clipPath id="clip0_1081_1237">
-      <rect width="14" height="14" fill="white" />
-    </clipPath>
-  </defs>
-</svg>
-</a>
-Type Aliases</h2></div><div class="namespaceSection"><div id="namespace_action-1" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-TypeAlias bg-TypeAlias/15 dark:text-TypeAliasDark dark:bg-TypeAliasDark/15" title="Type Alias">T</div></div>
-<div class="namespaceItemContent">
-		    <a href=".&#x2F;.&#x2F;mod.ts&#x2F;~&#x2F;Action.html" title="Action">
-			    <span>Action</span><span> = <span>[</span><div class="ml-indent"><div><span><span class="td-ref">ActionType</span>,</span></div><div><span><span class="td-kw">string</span>,</span></div><div><span><span><span class="td-ref">Record</span>&lt;<span class="td-kw">string</span><span>, </span><span class="td-kw">string</span>&gt;<span class="td-op"> | </span><span class="td-kw">string</span>[]</span>,</span></div><div><span><span class="td-kw">string</span>,</span></div><div><span><span class="td-kw">string</span></span></div></div><span>]</span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Action tuple representing a single router command.</p>
-</div></div></div>
-    </div><div id="namespace_actiontype-1" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-TypeAlias bg-TypeAlias/15 dark:text-TypeAliasDark dark:bg-TypeAliasDark/15" title="Type Alias">T</div></div>
-<div class="namespaceItemContent">
-		    <a href=".&#x2F;.&#x2F;mod.ts&#x2F;~&#x2F;ActionType.html" title="ActionType">
-			    <span>ActionType</span><span> = (<span class="td-ref">ACT</span>)[<span class="td-kw">keyof</span> <span class="td-ref">ACT</span>]</span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Numeric action type value from the <code>ACT</code> constant.</p>
-</div></div></div>
-    </div></div>
-</section>
-<section class="section"  id="dialect&#x2F;mod_ts_variables"><div>
-      <h2 class="anchorable mb-1"><a href="#dialect&#x2F;mod_ts_variables" class="anchor" aria-label="Anchor" tabIndex="-1"><svg
-  width="16"
-  height="16"
-  viewBox="0 0 14 14"
-  fill="none"
-  xmlns="http://www.w3.org/2000/svg"
->
-  <g clip-path="url(#clip0_1081_1237)">
-    <path
-      fill-rule="evenodd"
-      clip-rule="evenodd"
-      d="M6.80328 2.8656C6.68736 2.99 6.62425 3.15454 6.62725 3.32456C6.63025 3.49457 6.69913 3.65678 6.81936 3.77702C6.9396 3.89725 7.10181 3.96613 7.27182 3.96913C7.44184 3.97213 7.60638 3.90902 7.73078 3.7931L8.82453 2.69935C8.98712 2.53676 9.18015 2.40778 9.39259 2.31978C9.60503 2.23179 9.83272 2.1865 10.0627 2.1865C10.2926 2.1865 10.5203 2.23179 10.7327 2.31978C10.9452 2.40778 11.1382 2.53676 11.3008 2.69935C11.4634 2.86194 11.5923 3.05497 11.6803 3.2674C11.7683 3.47984 11.8136 3.70753 11.8136 3.93747C11.8136 4.16741 11.7683 4.3951 11.6803 4.60754C11.5923 4.81998 11.4634 5.013 11.3008 5.1756L9.11328 7.3631C8.95075 7.52581 8.75775 7.65488 8.5453 7.74295C8.33285 7.83102 8.10513 7.87635 7.87516 7.87635C7.64518 7.87635 7.41746 7.83102 7.20501 7.74295C6.99256 7.65488 6.79956 7.52581 6.63703 7.3631C6.51263 7.24718 6.34809 7.18407 6.17807 7.18707C6.00806 7.19007 5.84585 7.25894 5.72561 7.37918C5.60538 7.49942 5.5365 7.66163 5.5335 7.83164C5.5305 8.00165 5.59361 8.1662 5.70953 8.2906C5.99391 8.57501 6.33154 8.80062 6.70312 8.95455C7.0747 9.10847 7.47296 9.18769 7.87516 9.18769C8.27736 9.18769 8.67562 9.10847 9.0472 8.95455C9.41878 8.80062 9.7564 8.57501 10.0408 8.2906L12.2283 6.1031C12.8026 5.52874 13.1253 4.74974 13.1253 3.93747C13.1253 3.12521 12.8026 2.34621 12.2283 1.77185C11.6539 1.19749 10.8749 0.874817 10.0627 0.874817C9.25039 0.874817 8.47139 1.19749 7.89703 1.77185L6.80328 2.8656ZM2.69953 11.3006C2.53682 11.1381 2.40774 10.9451 2.31968 10.7326C2.23161 10.5202 2.18628 10.2924 2.18628 10.0625C2.18628 9.8325 2.23161 9.60477 2.31968 9.39233C2.40774 9.17988 2.53682 8.98688 2.69953 8.82435L4.88703 6.63685C5.04956 6.47414 5.24256 6.34506 5.45501 6.25699C5.66746 6.16893 5.89518 6.1236 6.12516 6.1236C6.35513 6.1236 6.58285 6.16893 6.7953 6.25699C7.00775 6.34506 7.20075 6.47414 7.36328 6.63685C7.48768 6.75277 7.65223 6.81588 7.82224 6.81288C7.99225 6.80988 8.15446 6.741 8.2747 6.62077C8.39494 6.50053 8.46381 6.33832 8.46681 6.1683C8.46981 5.99829 8.4067 5.83375 8.29078 5.70935C8.0064 5.42494 7.66878 5.19933 7.2972 5.0454C6.92562 4.89148 6.52736 4.81225 6.12516 4.81225C5.72296 4.81225 5.3247 4.89148 4.95312 5.0454C4.58154 5.19933 4.24391 5.42494 3.95953 5.70935L1.77203 7.89685C1.19767 8.47121 0.875 9.25021 0.875 10.0625C0.875 10.8747 1.19767 11.6537 1.77203 12.2281C2.34639 12.8025 3.12539 13.1251 3.93766 13.1251C4.74992 13.1251 5.52892 12.8025 6.10328 12.2281L7.19703 11.1343C7.31295 11.0099 7.37606 10.8454 7.37306 10.6754C7.37006 10.5054 7.30119 10.3432 7.18095 10.2229C7.06071 10.1027 6.8985 10.0338 6.72849 10.0308C6.55848 10.0278 6.39393 10.0909 6.26953 10.2068L5.17578 11.3006C5.01325 11.4633 4.82025 11.5924 4.6078 11.6805C4.39535 11.7685 4.16763 11.8138 3.93766 11.8138C3.70768 11.8138 3.47996 11.7685 3.26751 11.6805C3.05506 11.5924 2.86206 11.4633 2.69953 11.3006Z"
-      fill="currentColor"
-    />
-  </g>
-  <defs>
-    <clipPath id="clip0_1081_1237">
-      <rect width="14" height="14" fill="white" />
-    </clipPath>
-  </defs>
-</svg>
-</a>
-Variables</h2></div><div class="namespaceSection"><div id="namespace_act-1" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-Variable bg-Variable/15 dark:text-VariableDark dark:bg-VariableDark/15" title="Variable">v</div></div>
-<div class="namespaceItemContent">
-		    <a href=".&#x2F;.&#x2F;mod.ts&#x2F;~&#x2F;ACT.html" title="ACT">
-			    <span>ACT</span><span>: { GET<span>: <span class="td-kw">number</span></span>; SET<span>: <span class="td-kw">number</span></span>; ADD<span>: <span class="td-kw">number</span></span>; DEL<span>: <span class="td-kw">number</span></span>; GL<span>: <span class="td-kw">number</span></span>; GS<span>: <span class="td-kw">number</span></span>; OP<span>: <span class="td-kw">number</span></span>; CGI<span>: <span class="td-kw">number</span></span>;  }</span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Action type constants for TP-Link router commands.</p>
-</div></div><ul class="namespaceItemContentSubItems"><li>
-                <a href=".&#x2F;.&#x2F;mod.ts&#x2F;~&#x2F;ACT.html#property_add">
-                  <span>ADD</span><span>: <span class="td-kw">number</span></span></a></li><li>
-                <a href=".&#x2F;.&#x2F;mod.ts&#x2F;~&#x2F;ACT.html#property_cgi">
-                  <span>CGI</span><span>: <span class="td-kw">number</span></span></a></li><li>
-                <a href=".&#x2F;.&#x2F;mod.ts&#x2F;~&#x2F;ACT.html#property_del">
-                  <span>DEL</span><span>: <span class="td-kw">number</span></span></a></li><li>
-                <a href=".&#x2F;.&#x2F;mod.ts&#x2F;~&#x2F;ACT.html#property_get">
-                  <span>GET</span><span>: <span class="td-kw">number</span></span></a></li><li>
-                <a href=".&#x2F;.&#x2F;mod.ts&#x2F;~&#x2F;ACT.html#property_gl">
-                  <span>GL</span><span>: <span class="td-kw">number</span></span></a></li><li>
-                <a href=".&#x2F;.&#x2F;mod.ts&#x2F;~&#x2F;ACT.html#property_gs">
-                  <span>GS</span><span>: <span class="td-kw">number</span></span></a></li><li>
-                <a href=".&#x2F;.&#x2F;mod.ts&#x2F;~&#x2F;ACT.html#property_op">
-                  <span>OP</span><span>: <span class="td-kw">number</span></span></a></li><li>
-                <a href=".&#x2F;.&#x2F;mod.ts&#x2F;~&#x2F;ACT.html#property_set">
-                  <span>SET</span><span>: <span class="td-kw">number</span></span></a></li></ul></div>
-    </div><div id="namespace_gdprjson-1" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-Variable bg-Variable/15 dark:text-VariableDark dark:bg-VariableDark/15" title="Variable">v</div></div>
-<div class="namespaceItemContent">
-		    <a href=".&#x2F;.&#x2F;mod.ts&#x2F;~&#x2F;gdprJson.html" title="gdprJson">
-			    <span>gdprJson</span><span>: <span class="td-ref">Dialect</span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>EU/GDPR firmware speaking a JSON payload format over <code>/cgi_gdpr?9</code>.</p>
-</div></div></div>
-    </div><div id="namespace_gdprtext-1" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-Variable bg-Variable/15 dark:text-VariableDark dark:bg-VariableDark/15" title="Variable">v</div></div>
-<div class="namespaceItemContent">
-		    <a href=".&#x2F;.&#x2F;mod.ts&#x2F;~&#x2F;gdprText.html" title="gdprText">
-			    <span>gdprText</span><span>: <span class="td-ref">Dialect</span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>EU/GDPR firmware speaking the bespoke text payload format over <code>/cgi_gdpr</code>.</p>
-</div></div></div>
-    </div></div>
-</section>
-</div>
-</div>
-</section>
-</div>
-    </div>
-</div>
-</main>
-  </div>
+</a></nav><nav class="documentNavigation">
+          <h3>Document Navigation</h3><ul><li><ul><li><a href="#how-the-protocol-works" title="How the protocol works">How the protocol works</a></li><li><ul><li><a href="#oid--a-group-of-settings" title="oid — a group of settings">oid — a group of settings</a></li><li><a href="#stack--which-instance" title="stack — which instance">stack — which instance</a></li><li><a href="#"gdpr"-names-the-encryption,-not-the-format" title="&quot;GDPR&quot; names the encryption, not the format">"GDPR" names the encryption, not the format</a></li></ul></li><li><a href="#supported-models" title="Supported Models">Supported Models</a></li><li><a href="#experimental:-unconfirmed-on-hardware" title="Experimental: unconfirmed on hardware">Experimental: unconfirmed on hardware</a></li><li><a href="#main-functions" title="Main Functions">Main Functions</a></li><li><a href="#firmware-dialects" title="Firmware Dialects">Firmware Dialects</a></li><li><a href="#action-format" title="Action Format">Action Format</a></li><li><a href="#discovering-actions" title="Discovering Actions">Discovering Actions</a></li><li><ul><li><a href="#read-the-firmware--no-login-required" title="Read the firmware — no login required">Read the firmware — no login required</a></li><li><a href="#watch-live-traffic" title="Watch live traffic">Watch live traffic</a></li></ul></li><li><a href="#action-type-constants" title="Action Type Constants">Action Type Constants</a></li><li><a href="#response-structure" title="Response Structure">Response Structure</a></li><li><a href="#why-a-failed-login-tells-you-so-little" title="Why a failed login tells you so little">Why a failed login tells you so little</a></li></ul></li><li><a href="#examples" title="Examples">Examples</a></li><li><ul><li><a href="#example_0" title="Basic authentication and command execution">Basic authentication and command execution</a></li><li><a href="#example_1" title="Get unread SMS count with specific attributes">Get unread SMS count with specific attributes</a></li><li><a href="#example_2" title="Retrieve SMS messages with pagination">Retrieve SMS messages with pagination</a></li></ul></li><li><a href="#mod_ts_functions" title="Functions">Functions</a></li><li><ul><li><a href="#namespace_authenticate" title="authenticate">authenticate</a></li><li><a href="#namespace_execute" title="execute">execute</a></li></ul></li><li><a href="#mod_ts_interfaces" title="Interfaces">Interfaces</a></li><li><ul><li><a href="#namespace_actionresult" title="ActionResult">ActionResult</a></li><li><a href="#namespace_authoptions" title="AuthOptions">AuthOptions</a></li><li><a href="#namespace_authresult" title="AuthResult">AuthResult</a></li><li><a href="#namespace_busystatus" title="BusyStatus">BusyStatus</a></li><li><a href="#namespace_commandbatch" title="CommandBatch">CommandBatch</a></li><li><a href="#namespace_credentials" title="Credentials">Credentials</a></li><li><a href="#namespace_decodedbatch" title="DecodedBatch">DecodedBatch</a></li><li><a href="#namespace_dialect" title="Dialect">Dialect</a></li><li><a href="#namespace_envelope" title="Envelope">Envelope</a></li><li><a href="#namespace_executeoptions" title="ExecuteOptions">ExecuteOptions</a></li><li><a href="#namespace_executeresult" title="ExecuteResult">ExecuteResult</a></li><li><a href="#namespace_publickeyinfo" title="PublicKeyInfo">PublicKeyInfo</a></li><li><a href="#namespace_routerinfo" title="RouterInfo">RouterInfo</a></li><li><a href="#namespace_sessioncontext" title="SessionContext">SessionContext</a></li></ul></li><li><a href="#mod_ts_type-aliases" title="Type Aliases">Type Aliases</a></li><li><ul><li><a href="#namespace_action" title="Action">Action</a></li><li><a href="#namespace_actiontype" title="ActionType">ActionType</a></li></ul></li><li><a href="#mod_ts_variables" title="Variables">Variables</a></li><li><ul><li><a href="#namespace_act" title="ACT">ACT</a></li><li><a href="#namespace_gdprjson" title="gdprJson">gdprJson</a></li><li><a href="#namespace_gdprtext" title="gdprText">gdprText</a></li></ul></li></ul></nav></div>
+  </div></div>
 </div>
 </div>
 </body>
