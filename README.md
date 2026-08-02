@@ -41,6 +41,7 @@ Source layout mirrors the JSR scope: `packages/<scope>/<name>/`.
 | [@binstruct/ethernet](https://jsr.io/@binstruct/ethernet) | [![JSR](https://jsr.io/badges/@binstruct/ethernet)](https://jsr.io/@binstruct/ethernet) |
 | [@binstruct/icmp](https://jsr.io/@binstruct/icmp)         | [![JSR](https://jsr.io/badges/@binstruct/icmp)](https://jsr.io/@binstruct/icmp)         |
 | [@binstruct/icmpv6](https://jsr.io/@binstruct/icmpv6)     | [![JSR](https://jsr.io/badges/@binstruct/icmpv6)](https://jsr.io/@binstruct/icmpv6)     |
+| [@binstruct/ico](https://jsr.io/@binstruct/ico)           | [![JSR](https://jsr.io/badges/@binstruct/ico)](https://jsr.io/@binstruct/ico)           |
 | [@binstruct/igmp](https://jsr.io/@binstruct/igmp)         | [![JSR](https://jsr.io/badges/@binstruct/igmp)](https://jsr.io/@binstruct/igmp)         |
 | [@binstruct/inet](https://jsr.io/@binstruct/inet)         | [![JSR](https://jsr.io/badges/@binstruct/inet)](https://jsr.io/@binstruct/inet)         |
 | [@binstruct/ipv4](https://jsr.io/@binstruct/ipv4)         | [![JSR](https://jsr.io/badges/@binstruct/ipv4)](https://jsr.io/@binstruct/ipv4)         |

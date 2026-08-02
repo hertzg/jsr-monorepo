@@ -89,6 +89,7 @@ mirrors the JSR coordinate. Two scopes:
 - `ethernet` - Ethernet frame parsing
 - `icmp` - ICMPv4 packet parsing (RFC 792)
 - `icmpv6` - ICMPv6 message parsing (RFC 4443)
+- `ico` - ICO/CUR icon directory header parsing
 - `igmp` - IGMPv2 message parsing (RFC 2236)
 - `inet` - Internet stack coder (Ethernet→IPv4→UDP/ICMP/ARP) + RFC 1071 checksum
 - `ipv4` - IPv4 packet header parsing
@@ -393,6 +394,7 @@ both tiresome and error-prone.
 - `@binstruct/ethernet`
 - `@binstruct/icmp`
 - `@binstruct/icmpv6`
+- `@binstruct/ico`
 - `@binstruct/igmp`
 - `@binstruct/inet`
 - `@binstruct/ipv4`
