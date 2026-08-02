@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.3.0](https://github.com/hertzg/jsr-monorepo/compare/@hertzg/tplink-api-v1.2.0...@hertzg/tplink-api-v1.3.0) (2026-08-02)
+
+
+### Features
+
+* **@hertzg/tplink-api:** add firmware dialect seam and experimental gdprJson dialect ([#224](https://github.com/hertzg/jsr-monorepo/issues/224)) ([bcdfa05](https://github.com/hertzg/jsr-monorepo/commit/bcdfa0562edfdedb0f84962cb360acfcc117b686))
+
 ## [1.2.0](https://github.com/hertzg/jsr-monorepo/compare/@hertzg/tplink-api-v1.1.0...@hertzg/tplink-api-v1.2.0) (2026-04-03)
 
 
