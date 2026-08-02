@@ -74,7 +74,15 @@ The default applies only at exactly one candidate. Two or more — `png`, `bmp`,
   same reason: `binstruct pcap pcapFile decode` would otherwise call
   `pcapFile()` and let `endianness` default, turning a little-endian capture
   into plausible, wrong numbers with exit 0. Refusal is what ADR 0002's
-  always-on discovery is for.
+  always-on discovery is for — and where discovery cannot run, the factory's
+  runtime arity refuses the same call, so the guarantee does not depend on
+  `--allow-run=deno` being granted.
+- **The runtime fallback refuses a little more than discovery does.** It reads
+  `Function.prototype.length`, which counts an optional parameter because `?` is
+  erased. `@binstruct/pcap` is being reshaped to `pcapFile(endianness?)`, and
+  that signature makes `pcap` a one-callable-coder package to discovery — the
+  shortcut of this ADR applies — while the permission-less path still refuses
+  it, naming the limit and pointing at `--allow-run=deno`.
 
 ## References
 

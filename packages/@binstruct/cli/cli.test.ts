@@ -232,6 +232,37 @@ async function writeLocalPackage(entry = "mod.ts"): Promise<string> {
 }
 
 /**
+ * Writes a package whose only coder declares one *optional* parameter.
+ *
+ * `maybe(flag?: boolean)` is callable with no arguments and reports an arity
+ * of 1 all the same, because `?` is erased. It is the shape `@binstruct/pcap`
+ * is being reshaped into, and the one case where the runtime check refuses
+ * something the declaration would have allowed.
+ *
+ * @returns The containing directory, realpathed, to be removed by the caller
+ */
+async function writeOptionalParameterPackage(): Promise<string> {
+  const directory = await Deno.realPath(await Deno.makeTempDir());
+  const binstruct = import.meta.resolve("../../@hertzg/binstruct/mod.ts");
+
+  await Deno.mkdir(`${directory}/mypkg`);
+  await Deno.writeTextFile(
+    `${directory}/mypkg/mod.ts`,
+    [
+      `import { type Coder, struct, u8 } from "${binstruct}";`,
+      "",
+      "/** A one-byte structure whose only parameter may be omitted. */",
+      "export function maybe(_flag?: boolean): Coder<{ a: number }> {",
+      "  return struct({ a: u8() });",
+      "}",
+      "",
+    ].join("\n"),
+  );
+
+  return directory;
+}
+
+/**
  * Writes a package whose alphabetically first module is not the intended one.
  *
  * `mypkg/mod.ts` exports `pair`, two bytes wide; `mypkg/aaa_other.ts` exports
@@ -910,6 +941,85 @@ Deno.test("a named coder outlives a discovery that ran out of time", async () =>
   if (plan.kind !== "run") return;
 
   assertEquals(plan.coder, "pngFile");
+});
+
+Deno.test("a coder taking arguments is refused when the listing is unavailable", async () => {
+  // The escape hatch of ADR 0002 accepts a name discovery could not check, and
+  // an accepted *name* was being turned into an unchecked *call*: without
+  // --allow-run=deno, `binstruct pcap pcapFile decode` called `pcapFile()`,
+  // let `endianness` default, and wrote a whole capture of byte-swapped
+  // numbers to stdout at exit 0 with nothing on stderr. `.length` is the check
+  // that survives the missing permission.
+  const refused = await runCli([PCAP, "pcapFile", "decode"], [
+    "--no-prompt",
+    "--allow-read",
+    "--allow-env",
+  ]);
+
+  assertEquals(refused.code, 1);
+  assertEquals(refused.stdout, "");
+  assertStringIncludes(refused.stderr, "pcapFile was not called");
+  assertStringIncludes(refused.stderr, "1 argument at runtime");
+  // And the screen owes the user the check's blind spot, plus the way out.
+  assertStringIncludes(refused.stderr, "'x?: T'");
+  assertStringIncludes(refused.stderr, "--allow-run=deno");
+});
+
+Deno.test("a zero-argument coder still runs when the listing is unavailable", async () => {
+  // The other half: refusing everything unverified would close the escape
+  // hatch, which is what makes a tightened permission set usable at all.
+  const directory = await writeLocalPackage();
+  try {
+    const run = await runCli(
+      ["./mypkg/mod.ts", "myStruct", "decode"],
+      ["--no-prompt", "--allow-read", "--allow-env"],
+      directory,
+      new Uint8Array([7]),
+    );
+
+    assertEquals(run.code, 0);
+    assertStringIncludes(run.stdout, "'a'");
+    assertStringIncludes(run.stdout, "7");
+  } finally {
+    await Deno.remove(directory, { recursive: true });
+  }
+});
+
+Deno.test("an optional parameter is refused unverified and runs once read", async () => {
+  // The honest limit of `.length`: TypeScript erases the `?`, so a factory
+  // that is genuinely callable with no arguments reports an arity of 1 and is
+  // refused. `@binstruct/pcap` is being reshaped to exactly this signature, so
+  // the two halves are asserted together — the refusal, and the fact that the
+  // permission is what lifts it.
+  const directory = await writeOptionalParameterPackage();
+  try {
+    const refused = await runCli(
+      ["./mypkg/mod.ts", "maybe", "decode"],
+      ["--no-prompt", "--allow-read", "--allow-env"],
+      directory,
+      new Uint8Array([7]),
+    );
+
+    assertEquals(refused.code, 1);
+    assertEquals(refused.stdout, "");
+    assertStringIncludes(refused.stderr, "maybe was not called");
+    assertStringIncludes(
+      refused.stderr,
+      "if maybe is one of those, run again with --allow-run=deno",
+    );
+
+    const granted = await runCli(
+      ["./mypkg/mod.ts", "maybe", "decode"],
+      ["-A"],
+      directory,
+      new Uint8Array([7]),
+    );
+
+    assertEquals(granted.code, 0);
+    assertStringIncludes(granted.stdout, "'a'");
+  } finally {
+    await Deno.remove(directory, { recursive: true });
+  }
 });
 
 Deno.test("parseCliArgs keeps a numeric-looking word as typed", () => {

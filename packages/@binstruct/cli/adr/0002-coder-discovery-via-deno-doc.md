@@ -90,11 +90,29 @@ nothing was being explored. That made the coder name unverified, and an
 unverified name is not merely a worse error message: `pcapFile(endianness)`
 called with no argument silently defaults to big-endian, so
 `binstruct pcap pcapFile decode` printed a whole capture of byte-swapped numbers
-and exited 0. No cheaper check distinguishes that from a correct run — a
-factory's runtime `.length` counts TypeScript's optional parameters, which the
-declaration-level count correctly does not — so the subprocess is the price of
-the guarantee. A named coder is still taken on trust when discovery is
-_unavailable_, which is what keeps the escape hatch below honest.
+and exited 0. The declaration-level count is the accurate answer — it alone can
+tell an optional parameter from a required one — so the subprocess is the price
+of getting the question right, and it is paid on every run.
+
+**When discovery is unavailable, the name is accepted and the call is still
+checked.** A named coder must survive a tightened permission set, or the escape
+hatch below is worthless; but accepting a _name_ is not accepting a _call_. The
+factory object is in hand after `import()`, and `Function.prototype.length` is a
+check that costs nothing and needs no permission, so `loadCoder` applies it
+before calling: a non-zero arity with nothing to vouch for it is refused rather
+than called with no arguments. Skipping it is what let the original defect
+survive the fix above — the refusal held only where `--allow-run=deno` happened
+to be granted, and `--help` documents that permission as optional.
+
+The fallback is coarser than the check it stands in for, and it is coarse in the
+safe direction. TypeScript erases the `?` of an optional parameter, so
+`f(x?: T)` reports an arity of 1 and is refused even though calling it bare is
+what its author intended; a defaulted parameter (`x = v`) and a rest tail do
+drop out of the count. `@binstruct/pcap` is being reshaped to
+`pcapFile(endianness?)`, which makes this the ordinary case rather than a corner
+one, so the refusal names the limit on screen and says that `--allow-run=deno`
+settles it from the declaration. Refusing a correct invocation is recoverable in
+one flag; emitting wrong bytes at exit 0 is not recoverable at all.
 
 **Every subprocess runs under a deadline of 30 seconds and is killed when it
 passes.** `deno doc` fetches, a fetch can stall, and `deno doc` carries no
@@ -130,6 +148,11 @@ graph. An expired deadline is an ordinary tool failure carrying
   but a tightened permission set breaks levels 1–2 while decode and encode keep
   working. Discovery failure must therefore always print the "you can still name
   the coder directly" escape hatch.
+- **The escape hatch does not extend to factories that take arguments.** Without
+  the permission, a name you supply is accepted and then checked against the
+  factory's runtime arity; a non-zero one is refused. So `--allow-run=deno` is
+  not purely a listing convenience — it is what lets a factory with an optional
+  parameter run at all, and both the `--help` screen and the refusal say so.
 - **Packages without type declarations show zero coders**, however well they
   work at runtime. Untyped `npm:` packages are the likely case.
 - **A pathologically slow but legitimate cold lookup now fails at 30 seconds**
@@ -154,7 +177,9 @@ graph. An expired deadline is an ordinary tool failure carrying
 ## References
 
 - `target.ts` — `inspectLocalTarget`, the precondition this relies on
-- `loader.ts` — `loadCoder`, the runtime import path used to run
+- `loader.ts` — `loadCoder`, the runtime import path used to run, and the
+  `Function.prototype.length` fallback it applies when nothing vouched for the
+  factory
 - `@hertzg/binstruct` — `isCoder`, the rejected runtime-probe route
 - Repo ADR 0011 — dependency age policy
 - `@binstruct/cli` ADR 0001 — the disclosure contract this feeds

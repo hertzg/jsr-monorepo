@@ -32,7 +32,11 @@
  * listing is a hint, so without the permission, without a network, or against a
  * JSR that will not answer, the block is omitted and the screen still says how
  * to name a package. Listing the *coders* of a package costs
- * `--allow-run=deno` in the same way (ADR 0002).
+ * `--allow-run=deno` in the same way (ADR 0002) — but that listing is not only
+ * a hint, since it also says how many arguments each factory takes. Without it
+ * a coder you name is accepted, and then refused unless its factory takes no
+ * arguments at runtime: the CLI has none to pass, and calling one that wanted
+ * some lets the argument default silently.
  *
  * @example Decode a PNG file
  * ```bash
@@ -60,6 +64,7 @@
 import { parseArgs } from "@std/cli";
 import { decodeCommand } from "./commands/decode.ts";
 import { encodeCommand } from "./commands/encode.ts";
+import { UnverifiedArityError } from "./loader.ts";
 import {
   diagnoseEmptyDiscovery,
   discoverCoders,
@@ -122,7 +127,10 @@ const USAGE_FOOTER: readonly string[] = [
   "PERMISSIONS",
   "  --allow-net=jsr.io  lists the @binstruct packages, live and cached for a",
   "                      day; without it the list is omitted, nothing else",
-  "  --allow-run=deno    lists the coders of a package, via deno doc",
+  "  --allow-run=deno    lists the coders of a package, via deno doc, and reads",
+  "                      how many arguments each one takes; without it a coder",
+  "                      you name runs only when its factory takes none at",
+  "                      runtime, and is refused rather than called otherwise",
 ];
 
 /**
@@ -214,6 +222,14 @@ export type CliPlan =
     readonly coder: string;
     /** What to do with the bytes. */
     readonly command: CommandName;
+    /**
+     * Whether discovery read the factory's parameter list.
+     *
+     * `false` means the name was taken on trust because discovery was
+     * unavailable, and the run must fall back to checking the factory's
+     * runtime arity before calling it (`./loader.ts`).
+     */
+    readonly arityVerified: boolean;
     /** Lines to write to stderr first: the resolved specifier, any inference. */
     readonly notices: readonly string[];
   };
@@ -231,6 +247,14 @@ type CoderChoice =
     readonly ok: true;
     readonly name: string;
     readonly inferred: boolean;
+    /**
+     * Whether the name came with a declaration-level parameter count.
+     *
+     * Only a choice discovery made carries one. A name taken on trust does
+     * not, and the run it produces has to check the factory's runtime arity
+     * itself before calling it.
+     */
+    readonly arityVerified: boolean;
     /** The `T` of `Coder<T>`, when discovery could name it. */
     readonly decodedType?: string;
     /** First line of the package's module doc, when it has one. */
@@ -1210,8 +1234,68 @@ function toolFailureGuide(
     ],
     footer: [
       `the ${metavariable("coder")} above is a placeholder: put the name there`,
-      "naming the coder yourself needs no permissions and always works;",
-      "only the listing above is unavailable.",
+      "naming the coder yourself needs no permissions; with the listing gone,",
+      "one whose factory takes arguments is refused on its runtime arity rather",
+      "than called with none.",
+    ],
+  };
+}
+
+/**
+ * Builds the guide for a factory refused because its arity was unverifiable.
+ *
+ * The other end of the escape hatch. A named coder is accepted when discovery
+ * cannot run, but accepting a *name* is not accepting a *call*: the CLI has no
+ * argument to pass, so `pcapFile()` would let `endianness` default and print a
+ * whole capture of byte-swapped numbers at exit 0. `Function.prototype.length`
+ * is the one check left that needs no subprocess, and this is the screen it
+ * produces (`./loader.ts`).
+ *
+ * The screen owes the user the check's limit, because the check is coarser than
+ * the one it stands in for. TypeScript erases the `?` of an optional parameter,
+ * so `f(x?: T)` — genuinely callable with no arguments — reports an arity of 1
+ * and lands here. `@binstruct/pcap` is about to be exactly that shape, so the
+ * footer names the way out rather than leaving a correct invocation looking
+ * broken: grant `--allow-run=deno` and the declaration settles it.
+ *
+ * @param resolved The package as typed and as resolved
+ * @param error The refusal, carrying the factory and its runtime arity
+ * @returns The guide
+ */
+function unverifiedArityGuide(
+  resolved: ResolvedSpecifier,
+  error: UnverifiedArityError,
+): Guide {
+  return {
+    diagnostic: true,
+    notes: [
+      `${error.coderName} was not called: it takes ${
+        argumentCount(error.arity)
+      } at runtime, which the CLI cannot supply`,
+      "the coder listing was unavailable, so the name was taken on trust and",
+      "that arity was the only check left before the call.",
+    ],
+    next: {
+      word: "<coder>",
+      meaning:
+        `which structure in ${resolved.short} to work with, taking no arguments`,
+    },
+    options: {
+      heading: `CODERS in ${resolved.short}`,
+      items: [],
+      empty: "unknown — nothing could be listed",
+    },
+    try: [
+      `${PROGRAM} ${packageWord(resolved.short)} ${
+        metavariable("coder")
+      } decode < input.bin > output.json5`,
+    ],
+    footer: [
+      "a parameter written 'x?: T' counts here too: TypeScript erases the '?',",
+      "so at runtime it cannot be told from a required one, and a factory that",
+      "really is callable with no arguments is refused all the same.",
+      `if ${error.coderName} is one of those, run again with --allow-run=deno`,
+      "and the count comes from its declaration rather than from the function.",
     ],
   };
 }
@@ -1278,6 +1362,7 @@ function chose(
     ok: true,
     name: coder.name,
     inferred,
+    arityVerified: true,
     decodedType: coder.decodedType,
     summary,
   };
@@ -1299,9 +1384,14 @@ function chose(
  *
  * When discovery is *unavailable* — no permission to spawn `deno`, no `deno`
  * on `PATH`, a broken config in the working directory — a named coder is still
- * taken on trust, so the escape hatch of ADR 0002 survives. Only a message
- * blaming the specifier itself stops the run, because then the import would
- * fail too.
+ * accepted, so the escape hatch of ADR 0002 survives. It is accepted
+ * **unverified**: the choice is marked `arityVerified: false`, and the run it
+ * produces checks the factory's runtime arity before calling it
+ * (`./loader.ts`). That check is coarser than this one — it cannot tell an
+ * optional parameter from a required one — so it refuses a little more than
+ * discovery would, in the direction that cannot emit wrong bytes. Only a
+ * message blaming the specifier itself stops the run here, because then the
+ * import would fail too.
  *
  * @param resolved The package as typed and as resolved
  * @param header The resolved specifier line
@@ -1333,7 +1423,7 @@ async function chooseCoder(
     }
     return named === undefined
       ? { ok: false, guide: toolFailureGuide(resolved, header, discovery) }
-      : { ok: true, name: named, inferred: false };
+      : { ok: true, name: named, inferred: false, arityVerified: false };
   }
 
   const described = describedHeader(header, discovery.summary);
@@ -1670,6 +1760,7 @@ export async function planCli(args: string[]): Promise<CliPlan> {
       specifier: resolved.specifier,
       coder: choice.name,
       command,
+      arityVerified: choice.arityVerified,
       notices,
     };
   }
@@ -1708,6 +1799,11 @@ export async function planCli(args: string[]): Promise<CliPlan> {
  * error when neither the package nor the coder is at fault — a malformed
  * input, say.
  *
+ * An {@linkcode UnverifiedArityError} is answered without running the listing.
+ * It is raised only on the trusted path, where discovery has already failed
+ * once, and asking again buys nothing but a second wait — up to another thirty
+ * seconds of it when the first attempt timed out.
+ *
  * The guides it renders carry no header: the caller announced the specifier
  * before the run started, and repeating it makes every failure open with the
  * same line twice.
@@ -1739,6 +1835,10 @@ export async function explainFailure(
 ): Promise<string> {
   const resolved = resolveSpecifier(packageInput);
   const message = error instanceof Error ? error.message : String(error);
+
+  if (error instanceof UnverifiedArityError) {
+    return renderGuide(unverifiedArityGuide(resolved, error));
+  }
 
   const discovery = await discoverCoders(resolved.specifier);
   if (!discovery.ok) {
@@ -1804,11 +1904,13 @@ export async function main(args: string[] = Deno.args): Promise<void> {
     return;
   }
 
+  const loading = { arityVerified: plan.arityVerified };
+
   try {
     if (plan.command === "decode") {
-      await decodeCommand(plan.specifier, plan.coder, "jsonc");
+      await decodeCommand(plan.specifier, plan.coder, "jsonc", loading);
     } else {
-      await encodeCommand(plan.specifier, plan.coder, "jsonc");
+      await encodeCommand(plan.specifier, plan.coder, "jsonc", loading);
     }
   } catch (error) {
     console.error(await explainFailure(plan.specifier, plan.coder, error));

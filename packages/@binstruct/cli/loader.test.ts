@@ -7,10 +7,23 @@
  */
 
 import { assertEquals, assertRejects } from "@std/assert";
-import { loadCoder } from "./loader.ts";
+import { loadCoder, UnverifiedArityError } from "./loader.ts";
 
 /** A package exporting exactly one coder factory, `arpData`. */
 const ARP = import.meta.resolve("../arp/mod.ts");
+
+/** A package whose every factory takes an argument, `pcapFile` among them. */
+const PCAP = import.meta.resolve("../pcap/mod.ts");
+
+/**
+ * A factory whose one parameter is optional, which `.length` cannot see.
+ *
+ * Written in JavaScript because the erasure is the point: `(flag) => …` is
+ * exactly what `maybe(flag?: boolean)` compiles to, and both report an arity
+ * of 1.
+ */
+const OPTIONAL = "data:text/javascript,export const maybe = (flag) => " +
+  "({ decode: () => [flag ?? null, 0], encode: () => 0 });";
 
 Deno.test("loadCoder calls the factory and returns its coder", async () => {
   const coder = await loadCoder(ARP, "arpData");
@@ -39,6 +52,28 @@ Deno.test("loadCoder rejects an export that is not a factory", async () => {
     Error,
     "is not a function",
   );
+});
+
+Deno.test("loadCoder refuses a factory whose arity nothing has verified", async () => {
+  // The defect this guards: with `deno doc` unavailable the coder name is
+  // taken on trust, and calling `pcapFile()` bare lets `endianness` default —
+  // a whole capture of byte-swapped numbers, at exit 0.
+  const error = await assertRejects(
+    () => loadCoder(PCAP, "pcapFile"),
+    UnverifiedArityError,
+  );
+
+  assertEquals(error.coderName, "pcapFile");
+  assertEquals(error.arity, 1);
+});
+
+Deno.test("loadCoder calls a factory a declaration-level count vouched for", async () => {
+  // `.length` counts an optional parameter and the declaration does not, so
+  // discovery's answer has to be able to overrule this one — otherwise the
+  // check refuses a correct invocation whenever the permission is granted too.
+  const coder = await loadCoder(OPTIONAL, "maybe", { arityVerified: true });
+
+  assertEquals(coder.decode(new Uint8Array()), [null, 0]);
 });
 
 Deno.test("loadCoder rejects a package that cannot be resolved", async () => {
