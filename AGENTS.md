@@ -88,6 +88,7 @@ mirrors the JSR coordinate. Two scopes:
 - `icmpv6` - ICMPv6 message parsing (RFC 4443)
 - `inet` - Internet stack coder (Ethernet→IPv4→UDP/ICMP/ARP) + RFC 1071 checksum
 - `ipv4` - IPv4 packet header parsing
+- `ipv6` - IPv6 fixed header parsing (RFC 8200)
 - `pcap` - libpcap (.pcap) capture file format support
 - `png` - PNG file format support
 - `sll` - Linux cooked capture (DLT_LINUX_SLL) header parsing
@@ -381,6 +382,7 @@ both tiresome and error-prone.
 - `@binstruct/icmpv6`
 - `@binstruct/inet`
 - `@binstruct/ipv4`
+- `@binstruct/ipv6`
 - `@binstruct/png`
 - `@binstruct/sll`
 - `@binstruct/tcp`

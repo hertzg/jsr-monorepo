@@ -40,6 +40,7 @@ Source layout mirrors the JSR scope: `packages/<scope>/<name>/`.
 | [@binstruct/icmpv6](https://jsr.io/@binstruct/icmpv6)     | [![JSR](https://jsr.io/badges/@binstruct/icmpv6)](https://jsr.io/@binstruct/icmpv6)     |
 | [@binstruct/inet](https://jsr.io/@binstruct/inet)         | [![JSR](https://jsr.io/badges/@binstruct/inet)](https://jsr.io/@binstruct/inet)         |
 | [@binstruct/ipv4](https://jsr.io/@binstruct/ipv4)         | [![JSR](https://jsr.io/badges/@binstruct/ipv4)](https://jsr.io/@binstruct/ipv4)         |
+| [@binstruct/ipv6](https://jsr.io/@binstruct/ipv6)         | [![JSR](https://jsr.io/badges/@binstruct/ipv6)](https://jsr.io/@binstruct/ipv6)         |
 | [@binstruct/pcap](https://jsr.io/@binstruct/pcap)         | [![JSR](https://jsr.io/badges/@binstruct/pcap)](https://jsr.io/@binstruct/pcap)         |
 | [@binstruct/png](https://jsr.io/@binstruct/png)           | [![JSR](https://jsr.io/badges/@binstruct/png)](https://jsr.io/@binstruct/png)           |
 | [@binstruct/sll](https://jsr.io/@binstruct/sll)           | [![JSR](https://jsr.io/badges/@binstruct/sll)](https://jsr.io/@binstruct/sll)           |
