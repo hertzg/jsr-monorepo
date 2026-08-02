@@ -148,10 +148,10 @@ Examples</h2></div><div class="space-y-8"><div class="anchorable"><a href="#exam
   </defs>
 </svg>
 </a>
-<h3 class="example-header"><div class="markdown"><p>Basic decode usage (with flags) - JSON output</p>
+<h3 class="example-header"><div class="markdown"><p>Decode with the full three-word form</p>
 </div></h3>
-  <div><div class="markdown"><pre class="highlight"><code class="language-bash">deno run -A @binstruct/cli -p jsr:@binstruct/png -c pngFile decode &lt; input.png &gt; struct.json
-</code><button class="copyButton" data-copy="deno run -A @binstruct/cli -p jsr:@binstruct/png -c pngFile decode &lt; input.png &gt; struct.json
+  <div><div class="markdown"><pre class="highlight"><code class="language-bash">deno run -A @binstruct/cli png pngFile decode &lt; input.png &gt; struct.json
+</code><button class="copyButton" data-copy="deno run -A @binstruct/cli png pngFile decode &lt; input.png &gt; struct.json
 "><svg
   class="copy"
   width="15"
@@ -207,10 +207,10 @@ Examples</h2></div><div class="space-y-8"><div class="anchorable"><a href="#exam
   </defs>
 </svg>
 </a>
-<h3 class="example-header"><div class="markdown"><p>Basic decode usage (positional arguments) - JSON output</p>
+<h3 class="example-header"><div class="markdown"><p>Encode it back</p>
 </div></h3>
-  <div><div class="markdown"><pre class="highlight"><code class="language-bash">deno run -A @binstruct/cli jsr:@binstruct/png pngFile decode &lt; input.png &gt; struct.json
-</code><button class="copyButton" data-copy="deno run -A @binstruct/cli jsr:@binstruct/png pngFile decode &lt; input.png &gt; struct.json
+  <div><div class="markdown"><pre class="highlight"><code class="language-bash">deno run -A @binstruct/cli png pngFile encode &lt; struct.json &gt; output.png
+</code><button class="copyButton" data-copy="deno run -A @binstruct/cli png pngFile encode &lt; struct.json &gt; output.png
 "><svg
   class="copy"
   width="15"
@@ -266,10 +266,10 @@ Examples</h2></div><div class="space-y-8"><div class="anchorable"><a href="#exam
   </defs>
 </svg>
 </a>
-<h3 class="example-header"><div class="markdown"><p>Basic encode usage (with flags) - JSON input</p>
+<h3 class="example-header"><div class="markdown"><p>Omit the coder when the package has only one</p>
 </div></h3>
-  <div><div class="markdown"><pre class="highlight"><code class="language-bash">deno run -A @binstruct/cli -p jsr:@binstruct/png -c pngFile encode &lt; struct.json &gt; output.png
-</code><button class="copyButton" data-copy="deno run -A @binstruct/cli -p jsr:@binstruct/png -c pngFile encode &lt; struct.json &gt; output.png
+  <div><div class="markdown"><pre class="highlight"><code class="language-bash">deno run -A @binstruct/cli arp decode &lt; arp.bin &gt; arp.json
+</code><button class="copyButton" data-copy="deno run -A @binstruct/cli arp decode &lt; arp.bin &gt; arp.json
 "><svg
   class="copy"
   width="15"
@@ -325,12 +325,10 @@ Examples</h2></div><div class="space-y-8"><div class="anchorable"><a href="#exam
   </defs>
 </svg>
 </a>
-<h3 class="example-header"><div class="markdown"><p>With custom package (positional arguments) - JSON format</p>
+<h3 class="example-header"><div class="markdown"><p>A local package works the same way</p>
 </div></h3>
   <div><div class="markdown"><pre class="highlight"><code class="language-bash">deno run -A @binstruct/cli ./my-package myStruct decode &lt; input.bin &gt; output.json
-deno run -A @binstruct/cli ./my-package myStruct encode &lt; input.json &gt; output.bin
 </code><button class="copyButton" data-copy="deno run -A @binstruct/cli ./my-package myStruct decode &lt; input.bin &gt; output.json
-deno run -A @binstruct/cli ./my-package myStruct encode &lt; input.json &gt; output.bin
 "><svg
   class="copy"
   width="15"
@@ -386,16 +384,22 @@ deno run -A @binstruct/cli ./my-package myStruct encode &lt; input.json &gt; out
   </defs>
 </svg>
 </a>
-<h3 class="example-header"><div class="markdown"><p>Programmatic usage</p>
+<h3 class="example-header"><div class="markdown"><p>Programmatic usage: plan an invocation without performing it</p>
 </div></h3>
-  <div><div class="markdown"><pre class="highlight"><code class="language-ts">import { main } from &quot;@binstruct/cli&quot;;
+  <div><div class="markdown"><pre class="highlight"><code class="language-ts">import { assertEquals } from &quot;@std/assert&quot;;
+import { planCli } from &quot;@binstruct/cli&quot;;
 
-// Run CLI with custom arguments
-await main([&quot;--help&quot;]);
-</code><button class="copyButton" data-copy="import { main } from &quot;@binstruct/cli&quot;;
+const plan = await planCli([&quot;png&quot;, &quot;pngFile&quot;, &quot;decode&quot;]);
 
-// Run CLI with custom arguments
-await main([&quot;--help&quot;]);
+assertEquals(plan.kind, &quot;run&quot;);
+if (plan.kind === &quot;run&quot;) assertEquals(plan.specifier, &quot;jsr:@binstruct/png&quot;);
+</code><button class="copyButton" data-copy="import { assertEquals } from &quot;@std/assert&quot;;
+import { planCli } from &quot;@binstruct/cli&quot;;
+
+const plan = await planCli([&quot;png&quot;, &quot;pngFile&quot;, &quot;decode&quot;]);
+
+assertEquals(plan.kind, &quot;run&quot;);
+if (plan.kind === &quot;run&quot;) assertEquals(plan.specifier, &quot;jsr:@binstruct/png&quot;);
 "><svg
   class="copy"
   width="15"
@@ -453,10 +457,65 @@ await main([&quot;--help&quot;]);
   </defs>
 </svg>
 </a>
-Functions</h2></div><div class="namespaceSection"><div id="namespace_main" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-Function bg-Function/15 dark:text-FunctionDark dark:bg-FunctionDark/15" title="Function">f</div></div>
+Functions</h2></div><div class="namespaceSection"><div id="namespace_diagnoseemptydiscovery" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-Function bg-Function/15 dark:text-FunctionDark dark:bg-FunctionDark/15" title="Function">f</div></div>
+<div class="namespaceItemContent">
+		    <a href=".&#x2F;.&#x2F;mod.ts&#x2F;~&#x2F;diagnoseEmptyDiscovery.html" title="diagnoseEmptyDiscovery">
+			    <span>diagnoseEmptyDiscovery</span><span>(<span><span>specifier<span>: <span class="td-kw">string</span></span></span></span>)<span>: <span class="td-ref">Promise</span>&lt;<span class="td-ref">EmptyDiscoveryDiagnosis</span>&gt;</span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Explains why a package yielded no coders, by reading its module graph.</p>
+</div></div></div>
+    </div><div id="namespace_discovercoders" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-Function bg-Function/15 dark:text-FunctionDark dark:bg-FunctionDark/15" title="Function">f</div></div>
+<div class="namespaceItemContent">
+		    <a href=".&#x2F;.&#x2F;mod.ts&#x2F;~&#x2F;discoverCoders.html" title="discoverCoders">
+			    <span>discoverCoders</span><span>(<span><span>specifier<span>: <span class="td-kw">string</span></span></span></span>)<span>: <span class="td-ref">Promise</span>&lt;<span class="td-ref">DiscoveryOutcome</span>&gt;</span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Discovers the coder factories a package exposes, without importing it.</p>
+</div></div></div>
+    </div><div id="namespace_explainfailure" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-Function bg-Function/15 dark:text-FunctionDark dark:bg-FunctionDark/15" title="Function">f</div></div>
+<div class="namespaceItemContent">
+		    <a href=".&#x2F;.&#x2F;cli.ts&#x2F;~&#x2F;explainFailure.html" title="explainFailure">
+			    <span>explainFailure</span><span>(<div class="ml-4"><div><span>packageInput<span>: <span class="td-kw">string</span></span></span>,</div><div><span>coderName<span>: <span class="td-kw">string</span></span></span>,</div><div><span>error<span>: <span class="td-kw">unknown</span></span></span></div></div>)<span>: <span class="td-ref">Promise</span>&lt;<span class="td-kw">string</span>&gt;</span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Explains a failure that only surfaced once the package was imported.</p>
+</div></div></div>
+    </div><div id="namespace_main" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-Function bg-Function/15 dark:text-FunctionDark dark:bg-FunctionDark/15" title="Function">f</div></div>
 <div class="namespaceItemContent">
 		    <a href=".&#x2F;.&#x2F;cli.ts&#x2F;~&#x2F;main.html" title="main">
 			    <span>main</span><span>(<span><span>args<span class="td-op">?</span><span>: <span class="td-kw">string</span>[]</span></span></span>)<span>: <span class="td-ref">Promise</span>&lt;<span class="td-kw">void</span>&gt;</span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Main CLI entry point.</p>
+</div></div></div>
+    </div><div id="namespace_nearestname" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-Function bg-Function/15 dark:text-FunctionDark dark:bg-FunctionDark/15" title="Function">f</div></div>
+<div class="namespaceItemContent">
+		    <a href=".&#x2F;.&#x2F;mod.ts&#x2F;~&#x2F;nearestName.html" title="nearestName">
+			    <span>nearestName</span><span>(<div class="ml-4"><div><span>input<span>: <span class="td-kw">string</span></span></span>,</div><div><span>candidates<span>: <span class="td-ref">Iterable</span>&lt;<span class="td-kw">string</span>&gt;</span></span></div></div>)<span>: <span><span class="td-kw">string</span><span class="td-op"> | </span><span class="td-kw">undefined</span></span></span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Picks the candidate closest to a misspelling, for a &quot;did you mean&quot; line.</p>
+</div></div></div>
+    </div><div id="namespace_parsecliargs" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-Function bg-Function/15 dark:text-FunctionDark dark:bg-FunctionDark/15" title="Function">f</div></div>
+<div class="namespaceItemContent">
+		    <a href=".&#x2F;.&#x2F;cli.ts&#x2F;~&#x2F;parseCliArgs.html" title="parseCliArgs">
+			    <span>parseCliArgs</span><span>(<span><span>args<span>: <span class="td-kw">string</span>[]</span></span></span>)<span>: <span class="td-ref">CliOptions</span></span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Parses command line arguments into the three positionals and the flags.</p>
+</div></div></div>
+    </div><div id="namespace_plancli" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-Function bg-Function/15 dark:text-FunctionDark dark:bg-FunctionDark/15" title="Function">f</div></div>
+<div class="namespaceItemContent">
+		    <a href=".&#x2F;.&#x2F;cli.ts&#x2F;~&#x2F;planCli.html" title="planCli">
+			    <span>planCli</span><span>(<span><span>args<span>: <span class="td-kw">string</span>[]</span></span></span>)<span>: <span class="td-ref">Promise</span>&lt;<span class="td-ref">CliPlan</span>&gt;</span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Works out what an invocation amounts to, without performing it.</p>
+</div></div></div>
+    </div><div id="namespace_readdocsurface" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-Function bg-Function/15 dark:text-FunctionDark dark:bg-FunctionDark/15" title="Function">f</div></div>
+<div class="namespaceItemContent">
+		    <a href=".&#x2F;.&#x2F;mod.ts&#x2F;~&#x2F;readDocSurface.html" title="readDocSurface">
+			    <span>readDocSurface</span><span>(<span><span>doc<span>: <span class="td-ref">DenoDocJson</span></span></span></span>)<span>: <span class="td-ref">PackageSurface</span></span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Reads a package's discoverable surface out of parsed <code>deno doc --json</code> output.</p>
+</div></div></div>
+    </div><div id="namespace_readsymboldocs" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-Function bg-Function/15 dark:text-FunctionDark dark:bg-FunctionDark/15" title="Function">f</div></div>
+<div class="namespaceItemContent">
+		    <a href=".&#x2F;.&#x2F;mod.ts&#x2F;~&#x2F;readSymbolDocs.html" title="readSymbolDocs">
+			    <span>readSymbolDocs</span><span>(<div class="ml-4"><div><span>specifier<span>: <span class="td-kw">string</span></span></span>,</div><div><span>symbol<span>: <span class="td-kw">string</span></span></span></div></div>)<span>: <span class="td-ref">Promise</span>&lt;<span class="td-ref">SymbolDocsOutcome</span>&gt;</span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Returns <code>deno doc</code>'s formatted documentation for one exported symbol.</p>
+</div></div></div>
+    </div><div id="namespace_renderguide" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-Function bg-Function/15 dark:text-FunctionDark dark:bg-FunctionDark/15" title="Function">f</div></div>
+<div class="namespaceItemContent">
+		    <a href=".&#x2F;.&#x2F;mod.ts&#x2F;~&#x2F;renderGuide.html" title="renderGuide">
+			    <span>renderGuide</span><span>(<span><span>guide<span>: <span class="td-ref">Guide</span></span></span></span>)<span>: <span class="td-kw">string</span></span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Renders a guidance screen.</p>
+</div></div></div>
+    </div><div id="namespace_resolvespecifier" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-Function bg-Function/15 dark:text-FunctionDark dark:bg-FunctionDark/15" title="Function">f</div></div>
+<div class="namespaceItemContent">
+		    <a href=".&#x2F;.&#x2F;mod.ts&#x2F;~&#x2F;resolveSpecifier.html" title="resolveSpecifier">
+			    <span>resolveSpecifier</span><span>(<span><span>input<span>: <span class="td-kw">string</span></span></span></span>)<span>: <span class="td-ref">ResolvedSpecifier</span></span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Resolves a user-typed package argument to a module specifier.</p>
+</div></div></div>
+    </div><div id="namespace_shortenspecifier" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-Function bg-Function/15 dark:text-FunctionDark dark:bg-FunctionDark/15" title="Function">f</div></div>
+<div class="namespaceItemContent">
+		    <a href=".&#x2F;.&#x2F;mod.ts&#x2F;~&#x2F;shortenSpecifier.html" title="shortenSpecifier">
+			    <span>shortenSpecifier</span><span>(<span><span>specifier<span>: <span class="td-kw">string</span></span></span></span>)<span>: <span class="td-kw">string</span></span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Renders the shortest form of a specifier that still resolves back to it.</p>
 </div></div></div>
     </div></div>
 </section>
@@ -489,20 +548,241 @@ Interfaces</h2></div><div class="namespaceSection"><div id="namespace_clioptions
 			    <span>CliOptions</span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>CLI configuration options.</p>
 </div></div><ul class="namespaceItemContentSubItems"><li>
                 <a href=".&#x2F;.&#x2F;cli.ts&#x2F;~&#x2F;CliOptions.html#property_coder">
-                  <span>coder</span><span>: <span class="td-kw">string</span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Coder name to use from the package</p>
+                  <span>coder</span><span>: <span><span class="td-kw">string</span><span class="td-op"> | </span><span class="td-kw">undefined</span></span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Coder name, absent when it is to be inferred or asked for.</p>
 </div></div></li><li>
                 <a href=".&#x2F;.&#x2F;cli.ts&#x2F;~&#x2F;CliOptions.html#property_command">
-                  <span>command</span><span>: <span class="td-kw">string</span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Command to execute</p>
+                  <span>command</span><span>: <span><span class="td-kw">string</span><span class="td-op"> | </span><span class="td-kw">undefined</span></span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Command word, absent when it is to be asked for.</p>
+</div></div></li><li>
+                <a href=".&#x2F;.&#x2F;cli.ts&#x2F;~&#x2F;CliOptions.html#property_docs">
+                  <span>docs</span><span>: <span class="td-kw">boolean</span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Print <code>deno doc</code> output for the chosen coder instead of running it.</p>
 </div></div></li><li>
                 <a href=".&#x2F;.&#x2F;cli.ts&#x2F;~&#x2F;CliOptions.html#property_help">
-                  <span>help</span><span>: <span class="td-kw">boolean</span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Show help information</p>
+                  <span>help</span><span>: <span class="td-kw">boolean</span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Print guidance to stdout and exit 0 instead of to stderr and exit 1.</p>
 </div></div></li><li>
                 <a href=".&#x2F;.&#x2F;cli.ts&#x2F;~&#x2F;CliOptions.html#property_package">
-                  <span>package</span><span>: <span class="td-kw">string</span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Package specifier (JSR URL, local path, or npm package)</p>
+                  <span>package</span><span>: <span><span class="td-kw">string</span><span class="td-op"> | </span><span class="td-kw">undefined</span></span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Package specifier as typed, before <code>resolveSpecifier</code>.</p>
 </div></div></li><li>
                 <a href=".&#x2F;.&#x2F;cli.ts&#x2F;~&#x2F;CliOptions.html#property_version">
-                  <span>version</span><span>: <span class="td-kw">boolean</span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Show version information</p>
+                  <span>version</span><span>: <span class="td-kw">boolean</span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Print version information.</p>
 </div></div></li></ul></div>
+    </div><div id="namespace_resolvedspecifier" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-Interface bg-Interface/15 dark:text-InterfaceDark dark:bg-InterfaceDark/15" title="Interface">I</div></div>
+<div class="namespaceItemContent">
+		    <a href=".&#x2F;.&#x2F;mod.ts&#x2F;~&#x2F;ResolvedSpecifier.html" title="ResolvedSpecifier">
+			    <span>ResolvedSpecifier</span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>A user-typed package argument and everything derived from it.</p>
+</div></div><ul class="namespaceItemContentSubItems"><li>
+                <a href=".&#x2F;.&#x2F;mod.ts&#x2F;~&#x2F;ResolvedSpecifier.html#property_form">
+                  <span>form</span><span>: <span class="td-ref">SpecifierForm</span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>The resolution rule that matched.</p>
+</div></div></li><li>
+                <a href=".&#x2F;.&#x2F;mod.ts&#x2F;~&#x2F;ResolvedSpecifier.html#property_input">
+                  <span>input</span><span>: <span class="td-kw">string</span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>The argument exactly as the user typed it.</p>
+</div></div></li><li>
+                <a href=".&#x2F;.&#x2F;mod.ts&#x2F;~&#x2F;ResolvedSpecifier.html#property_short">
+                  <span>short</span><span>: <span class="td-kw">string</span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>The shortest form that resolves back to <code>ResolvedSpecifier.specifier</code>,
+for listings and <code>TRY</code> lines. Equal to <code>shortenSpecifier(specifier)</code>.</p>
+</div></div></li><li>
+                <a href=".&#x2F;.&#x2F;mod.ts&#x2F;~&#x2F;ResolvedSpecifier.html#property_shorthand">
+                  <span>shorthand</span><span>: <span class="td-kw">boolean</span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Whether the input was shorthand, and therefore expanded.</p>
+</div></div></li><li>
+                <a href=".&#x2F;.&#x2F;mod.ts&#x2F;~&#x2F;ResolvedSpecifier.html#property_specifier">
+                  <span>specifier</span><span>: <span class="td-kw">string</span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>The module specifier to hand to <code>import()</code> or <code>deno doc</code>.</p>
+</div></div></li></ul></div>
+    </div></div>
+</section>
+<section class="section"  id="mod_ts_type-aliases"><div>
+      <h2 class="anchorable mb-1"><a href="#mod_ts_type-aliases" class="anchor" aria-label="Anchor" tabIndex="-1"><svg
+  width="16"
+  height="16"
+  viewBox="0 0 14 14"
+  fill="none"
+  xmlns="http://www.w3.org/2000/svg"
+>
+  <g clip-path="url(#clip0_1081_1237)">
+    <path
+      fill-rule="evenodd"
+      clip-rule="evenodd"
+      d="M6.80328 2.8656C6.68736 2.99 6.62425 3.15454 6.62725 3.32456C6.63025 3.49457 6.69913 3.65678 6.81936 3.77702C6.9396 3.89725 7.10181 3.96613 7.27182 3.96913C7.44184 3.97213 7.60638 3.90902 7.73078 3.7931L8.82453 2.69935C8.98712 2.53676 9.18015 2.40778 9.39259 2.31978C9.60503 2.23179 9.83272 2.1865 10.0627 2.1865C10.2926 2.1865 10.5203 2.23179 10.7327 2.31978C10.9452 2.40778 11.1382 2.53676 11.3008 2.69935C11.4634 2.86194 11.5923 3.05497 11.6803 3.2674C11.7683 3.47984 11.8136 3.70753 11.8136 3.93747C11.8136 4.16741 11.7683 4.3951 11.6803 4.60754C11.5923 4.81998 11.4634 5.013 11.3008 5.1756L9.11328 7.3631C8.95075 7.52581 8.75775 7.65488 8.5453 7.74295C8.33285 7.83102 8.10513 7.87635 7.87516 7.87635C7.64518 7.87635 7.41746 7.83102 7.20501 7.74295C6.99256 7.65488 6.79956 7.52581 6.63703 7.3631C6.51263 7.24718 6.34809 7.18407 6.17807 7.18707C6.00806 7.19007 5.84585 7.25894 5.72561 7.37918C5.60538 7.49942 5.5365 7.66163 5.5335 7.83164C5.5305 8.00165 5.59361 8.1662 5.70953 8.2906C5.99391 8.57501 6.33154 8.80062 6.70312 8.95455C7.0747 9.10847 7.47296 9.18769 7.87516 9.18769C8.27736 9.18769 8.67562 9.10847 9.0472 8.95455C9.41878 8.80062 9.7564 8.57501 10.0408 8.2906L12.2283 6.1031C12.8026 5.52874 13.1253 4.74974 13.1253 3.93747C13.1253 3.12521 12.8026 2.34621 12.2283 1.77185C11.6539 1.19749 10.8749 0.874817 10.0627 0.874817C9.25039 0.874817 8.47139 1.19749 7.89703 1.77185L6.80328 2.8656ZM2.69953 11.3006C2.53682 11.1381 2.40774 10.9451 2.31968 10.7326C2.23161 10.5202 2.18628 10.2924 2.18628 10.0625C2.18628 9.8325 2.23161 9.60477 2.31968 9.39233C2.40774 9.17988 2.53682 8.98688 2.69953 8.82435L4.88703 6.63685C5.04956 6.47414 5.24256 6.34506 5.45501 6.25699C5.66746 6.16893 5.89518 6.1236 6.12516 6.1236C6.35513 6.1236 6.58285 6.16893 6.7953 6.25699C7.00775 6.34506 7.20075 6.47414 7.36328 6.63685C7.48768 6.75277 7.65223 6.81588 7.82224 6.81288C7.99225 6.80988 8.15446 6.741 8.2747 6.62077C8.39494 6.50053 8.46381 6.33832 8.46681 6.1683C8.46981 5.99829 8.4067 5.83375 8.29078 5.70935C8.0064 5.42494 7.66878 5.19933 7.2972 5.0454C6.92562 4.89148 6.52736 4.81225 6.12516 4.81225C5.72296 4.81225 5.3247 4.89148 4.95312 5.0454C4.58154 5.19933 4.24391 5.42494 3.95953 5.70935L1.77203 7.89685C1.19767 8.47121 0.875 9.25021 0.875 10.0625C0.875 10.8747 1.19767 11.6537 1.77203 12.2281C2.34639 12.8025 3.12539 13.1251 3.93766 13.1251C4.74992 13.1251 5.52892 12.8025 6.10328 12.2281L7.19703 11.1343C7.31295 11.0099 7.37606 10.8454 7.37306 10.6754C7.37006 10.5054 7.30119 10.3432 7.18095 10.2229C7.06071 10.1027 6.8985 10.0338 6.72849 10.0308C6.55848 10.0278 6.39393 10.0909 6.26953 10.2068L5.17578 11.3006C5.01325 11.4633 4.82025 11.5924 4.6078 11.6805C4.39535 11.7685 4.16763 11.8138 3.93766 11.8138C3.70768 11.8138 3.47996 11.7685 3.26751 11.6805C3.05506 11.5924 2.86206 11.4633 2.69953 11.3006Z"
+      fill="currentColor"
+    />
+  </g>
+  <defs>
+    <clipPath id="clip0_1081_1237">
+      <rect width="14" height="14" fill="white" />
+    </clipPath>
+  </defs>
+</svg>
+</a>
+Type Aliases</h2></div><div class="namespaceSection"><div id="namespace_cliplan" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-TypeAlias bg-TypeAlias/15 dark:text-TypeAliasDark dark:bg-TypeAliasDark/15" title="Type Alias">T</div></div>
+<div class="namespaceItemContent">
+		    <a href=".&#x2F;.&#x2F;cli.ts&#x2F;~&#x2F;CliPlan.html" title="CliPlan">
+			    <span>CliPlan</span><span> = <div class="ml-indent"><span>{ <span class="td-kw">readonly </span>kind<span>: <span class="td-str">"print"</span></span>; <span class="td-kw">readonly </span>text<span>: <span class="td-kw">string</span></span>; <span class="td-kw">readonly </span>stream<span>: <span><span class="td-str">"stdout"</span><span class="td-op"> | </span><span class="td-str">"stderr"</span></span></span>; <span class="td-kw">readonly </span>code<span>: <span class="td-kw">number</span></span>;  }</span><br /><span><span class="td-op"> | </span>{ <span class="td-kw">readonly </span>kind<span>: <span class="td-str">"run"</span></span>; <span class="td-kw">readonly </span>specifier<span>: <span class="td-kw">string</span></span>; <span class="td-kw">readonly </span>coder<span>: <span class="td-kw">string</span></span>; <span class="td-kw">readonly </span>command<span>: <span class="td-ref">CommandName</span></span>; <span class="td-kw">readonly </span>notices<span>: <span class="td-kw">readonly</span> <span class="td-kw">string</span>[]</span>;  }</span></div></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>What an invocation amounts to, once its arguments are understood.</p>
+</div></div></div>
+    </div><div id="namespace_commandname" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-TypeAlias bg-TypeAlias/15 dark:text-TypeAliasDark dark:bg-TypeAliasDark/15" title="Type Alias">T</div></div>
+<div class="namespaceItemContent">
+		    <a href=".&#x2F;.&#x2F;cli.ts&#x2F;~&#x2F;CommandName.html" title="CommandName">
+			    <span>CommandName</span><span> = (<span class="td-ref">COMMANDS</span>)[<span class="td-kw">number</span>][<span class="td-str">"name"</span>]</span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>A command the CLI can carry out.</p>
+</div></div></div>
+    </div><div id="namespace_discoveredcoder" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-TypeAlias bg-TypeAlias/15 dark:text-TypeAliasDark dark:bg-TypeAliasDark/15" title="Type Alias">T</div></div>
+<div class="namespaceItemContent">
+		    <a href=".&#x2F;.&#x2F;mod.ts&#x2F;~&#x2F;DiscoveredCoder.html" title="DiscoveredCoder">
+			    <span>DiscoveredCoder</span><span> = { name<span>: <span class="td-kw">string</span></span>; decodedType<span class="td-op">?</span><span>: <span class="td-kw">string</span></span>; summary<span class="td-op">?</span><span>: <span class="td-kw">string</span></span>; requiredParams<span>: <span class="td-kw">number</span></span>;  }</span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>A coder factory found in a package's public types.</p>
+</div></div><ul class="namespaceItemContentSubItems"><li>
+                <a href=".&#x2F;.&#x2F;mod.ts&#x2F;~&#x2F;DiscoveredCoder.html#property_decodedtype">
+                  <span>decodedType</span><span>: <span class="td-kw">string</span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>The <code>T</code> of <code>Coder&lt;T&gt;</code>, absent when it is an anonymous type such as a union.</p>
+</div></div></li><li>
+                <a href=".&#x2F;.&#x2F;mod.ts&#x2F;~&#x2F;DiscoveredCoder.html#property_name">
+                  <span>name</span><span>: <span class="td-kw">string</span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>The exported name, e.g. <code>pngFile</code>.</p>
+</div></div></li><li>
+                <a href=".&#x2F;.&#x2F;mod.ts&#x2F;~&#x2F;DiscoveredCoder.html#property_requiredparams">
+                  <span>requiredParams</span><span>: <span class="td-kw">number</span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Arguments the caller must supply; <code>0</code> means the CLI can call it directly.</p>
+</div></div></li><li>
+                <a href=".&#x2F;.&#x2F;mod.ts&#x2F;~&#x2F;DiscoveredCoder.html#property_summary">
+                  <span>summary</span><span>: <span class="td-kw">string</span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>First line of the factory's JSDoc, absent when it is undocumented.</p>
+</div></div></li></ul></div>
+    </div><div id="namespace_discoveryoutcome" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-TypeAlias bg-TypeAlias/15 dark:text-TypeAliasDark dark:bg-TypeAliasDark/15" title="Type Alias">T</div></div>
+<div class="namespaceItemContent">
+		    <a href=".&#x2F;.&#x2F;mod.ts&#x2F;~&#x2F;DiscoveryOutcome.html" title="DiscoveryOutcome">
+			    <span>DiscoveryOutcome</span><span> = <span><span class="td-ref">DiscoverySuccess</span><span class="td-op"> | </span><span class="td-ref">ToolFailure</span></span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>The result of <code>discoverCoders</code>.</p>
+</div></div></div>
+    </div><div id="namespace_guide" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-TypeAlias bg-TypeAlias/15 dark:text-TypeAliasDark dark:bg-TypeAliasDark/15" title="Type Alias">T</div></div>
+<div class="namespaceItemContent">
+		    <a href=".&#x2F;.&#x2F;mod.ts&#x2F;~&#x2F;Guide.html" title="Guide">
+			    <span>Guide</span><span> = { <span class="td-kw">readonly </span>header<span class="td-op">?</span><span>: <span class="td-kw">string</span></span>; <span class="td-kw">readonly </span>notes<span class="td-op">?</span><span>: <span class="td-kw">readonly</span> <span class="td-kw">string</span>[]</span>; <span class="td-kw">readonly </span>next<span>: <span class="td-ref">GuideNext</span></span>; <span class="td-kw">readonly </span>options<span>: <span class="td-ref">GuideOptions</span></span>; <span class="td-kw">readonly </span>try<span class="td-op">?</span><span>: <span class="td-kw">readonly</span> <span class="td-kw">string</span>[]</span>; <span class="td-kw">readonly </span>footer<span class="td-op">?</span><span>: <span class="td-kw">readonly</span> <span class="td-kw">string</span>[]</span>;  }</span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Everything one guidance screen says.</p>
+</div></div><ul class="namespaceItemContentSubItems"><li>
+                <a href=".&#x2F;.&#x2F;mod.ts&#x2F;~&#x2F;Guide.html#property_footer">
+                  <span>footer</span><span>: <span class="td-kw">readonly</span> <span class="td-kw">string</span>[]</span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Trailing lines, e.g. the usage recap <code>--help</code> adds.</p>
+</div></div></li><li>
+                <a href=".&#x2F;.&#x2F;mod.ts&#x2F;~&#x2F;Guide.html#property_header">
+                  <span>header</span><span>: <span class="td-kw">string</span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>First line, echoing the resolved specifier so shorthand is never invisible.</p>
+</div></div></li><li>
+                <a href=".&#x2F;.&#x2F;mod.ts&#x2F;~&#x2F;Guide.html#property_next">
+                  <span>next</span><span>: <span class="td-ref">GuideNext</span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>The missing word.</p>
+</div></div></li><li>
+                <a href=".&#x2F;.&#x2F;mod.ts&#x2F;~&#x2F;Guide.html#property_notes">
+                  <span>notes</span><span>: <span class="td-kw">readonly</span> <span class="td-kw">string</span>[]</span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Lines shown before <code>NEXT</code>: what went wrong, or what was inferred.</p>
+</div></div></li><li>
+                <a href=".&#x2F;.&#x2F;mod.ts&#x2F;~&#x2F;Guide.html#property_options">
+                  <span>options</span><span>: <span class="td-ref">GuideOptions</span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>The values that word may take.</p>
+</div></div></li><li>
+                <a href=".&#x2F;.&#x2F;mod.ts&#x2F;~&#x2F;Guide.html#property_try">
+                  <span>try</span><span>: <span class="td-kw">readonly</span> <span class="td-kw">string</span>[]</span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Paste-ready commands one step further along.</p>
+</div></div></li></ul></div>
+    </div><div id="namespace_guidenext" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-TypeAlias bg-TypeAlias/15 dark:text-TypeAliasDark dark:bg-TypeAliasDark/15" title="Type Alias">T</div></div>
+<div class="namespaceItemContent">
+		    <a href=".&#x2F;.&#x2F;mod.ts&#x2F;~&#x2F;GuideNext.html" title="GuideNext">
+			    <span>GuideNext</span><span> = { <span class="td-kw">readonly </span>word<span>: <span class="td-kw">string</span></span>; <span class="td-kw">readonly </span>meaning<span>: <span class="td-kw">string</span></span>;  }</span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>The missing word and what it means.</p>
+</div></div><ul class="namespaceItemContentSubItems"><li>
+                <a href=".&#x2F;.&#x2F;mod.ts&#x2F;~&#x2F;GuideNext.html#property_meaning">
+                  <span>meaning</span><span>: <span class="td-kw">string</span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>One line on what the word selects.</p>
+</div></div></li><li>
+                <a href=".&#x2F;.&#x2F;mod.ts&#x2F;~&#x2F;GuideNext.html#property_word">
+                  <span>word</span><span>: <span class="td-kw">string</span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>The word, written as it appears in the usage line, e.g. <code>&lt;coder&gt;</code>.</p>
+</div></div></li></ul></div>
+    </div><div id="namespace_guideoption" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-TypeAlias bg-TypeAlias/15 dark:text-TypeAliasDark dark:bg-TypeAliasDark/15" title="Type Alias">T</div></div>
+<div class="namespaceItemContent">
+		    <a href=".&#x2F;.&#x2F;mod.ts&#x2F;~&#x2F;GuideOption.html" title="GuideOption">
+			    <span>GuideOption</span><span> = { <span class="td-kw">readonly </span>name<span>: <span class="td-kw">string</span></span>; <span class="td-kw">readonly </span>detail<span class="td-op">?</span><span>: <span class="td-kw">string</span></span>; <span class="td-kw">readonly </span>summary<span class="td-op">?</span><span>: <span class="td-kw">string</span></span>;  }</span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>One legal value of the missing word.</p>
+</div></div><ul class="namespaceItemContentSubItems"><li>
+                <a href=".&#x2F;.&#x2F;mod.ts&#x2F;~&#x2F;GuideOption.html#property_detail">
+                  <span>detail</span><span>: <span class="td-kw">string</span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Short annotation shown in its own column, e.g. <code>→ PngFile</code>.</p>
+</div></div></li><li>
+                <a href=".&#x2F;.&#x2F;mod.ts&#x2F;~&#x2F;GuideOption.html#property_name">
+                  <span>name</span><span>: <span class="td-kw">string</span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>The word to type, e.g. <code>png</code>, <code>pngFile</code> or <code>decode</code>.</p>
+</div></div></li><li>
+                <a href=".&#x2F;.&#x2F;mod.ts&#x2F;~&#x2F;GuideOption.html#property_summary">
+                  <span>summary</span><span>: <span class="td-kw">string</span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>One-line description, e.g. the first line of the coder's JSDoc.</p>
+</div></div></li></ul></div>
+    </div><div id="namespace_guideoptions" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-TypeAlias bg-TypeAlias/15 dark:text-TypeAliasDark dark:bg-TypeAliasDark/15" title="Type Alias">T</div></div>
+<div class="namespaceItemContent">
+		    <a href=".&#x2F;.&#x2F;mod.ts&#x2F;~&#x2F;GuideOptions.html" title="GuideOptions">
+			    <span>GuideOptions</span><span> = { <span class="td-kw">readonly </span>heading<span>: <span class="td-kw">string</span></span>; <span class="td-kw">readonly </span>items<span>: <span class="td-kw">readonly</span> <span class="td-ref">GuideOption</span>[]</span>; <span class="td-kw">readonly </span>empty<span class="td-op">?</span><span>: <span class="td-kw">string</span></span>;  }</span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>The options block: every value the missing word may take.</p>
+</div></div><ul class="namespaceItemContentSubItems"><li>
+                <a href=".&#x2F;.&#x2F;mod.ts&#x2F;~&#x2F;GuideOptions.html#property_empty">
+                  <span>empty</span><span>: <span class="td-kw">string</span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Line shown in place of an empty list, e.g. why discovery found nothing.</p>
+</div></div></li><li>
+                <a href=".&#x2F;.&#x2F;mod.ts&#x2F;~&#x2F;GuideOptions.html#property_heading">
+                  <span>heading</span><span>: <span class="td-kw">string</span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Block heading, e.g. <code>PACKAGES</code> or <code>CODERS in png</code>.</p>
+</div></div></li><li>
+                <a href=".&#x2F;.&#x2F;mod.ts&#x2F;~&#x2F;GuideOptions.html#property_items">
+                  <span>items</span><span>: <span class="td-kw">readonly</span> <span class="td-ref">GuideOption</span>[]</span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>The legal values, in the order they should be shown.</p>
+</div></div></li></ul></div>
+    </div><div id="namespace_packagesurface" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-TypeAlias bg-TypeAlias/15 dark:text-TypeAliasDark dark:bg-TypeAliasDark/15" title="Type Alias">T</div></div>
+<div class="namespaceItemContent">
+		    <a href=".&#x2F;.&#x2F;mod.ts&#x2F;~&#x2F;PackageSurface.html" title="PackageSurface">
+			    <span>PackageSurface</span><span> = { version<span class="td-op">?</span><span>: <span class="td-kw">string</span></span>; summary<span class="td-op">?</span><span>: <span class="td-kw">string</span></span>; coders<span>: <span class="td-ref">DiscoveredCoder</span>[]</span>;  }</span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>The public surface of a package as read from its type declarations.</p>
+</div></div><ul class="namespaceItemContentSubItems"><li>
+                <a href=".&#x2F;.&#x2F;mod.ts&#x2F;~&#x2F;PackageSurface.html#property_coders">
+                  <span>coders</span><span>: <span class="td-ref">DiscoveredCoder</span>[]</span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Coder factories, zero-required-parameter ones first.</p>
+</div></div></li><li>
+                <a href=".&#x2F;.&#x2F;mod.ts&#x2F;~&#x2F;PackageSurface.html#property_summary">
+                  <span>summary</span><span>: <span class="td-kw">string</span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>First line of the module JSDoc, absent when the module is undocumented.</p>
+</div></div></li><li>
+                <a href=".&#x2F;.&#x2F;mod.ts&#x2F;~&#x2F;PackageSurface.html#property_version">
+                  <span>version</span><span>: <span class="td-kw">string</span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Resolved version, when the specifier resolved to a JSR package.</p>
+</div></div></li></ul></div>
+    </div><div id="namespace_specifierform" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-TypeAlias bg-TypeAlias/15 dark:text-TypeAliasDark dark:bg-TypeAliasDark/15" title="Type Alias">T</div></div>
+<div class="namespaceItemContent">
+		    <a href=".&#x2F;.&#x2F;mod.ts&#x2F;~&#x2F;SpecifierForm.html" title="SpecifierForm">
+			    <span>SpecifierForm</span><span> = <span><span class="td-str">"scheme"</span><span class="td-op"> | </span><span class="td-str">"path"</span><span class="td-op"> | </span><span class="td-str">"scoped"</span><span class="td-op"> | </span><span class="td-str">"bare"</span></span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Which resolution rule matched an input.</p>
+</div></div></div>
+    </div><div id="namespace_toolfailure" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-TypeAlias bg-TypeAlias/15 dark:text-TypeAliasDark dark:bg-TypeAliasDark/15" title="Type Alias">T</div></div>
+<div class="namespaceItemContent">
+		    <a href=".&#x2F;.&#x2F;mod.ts&#x2F;~&#x2F;ToolFailure.html" title="ToolFailure">
+			    <span>ToolFailure</span><span> = { ok<span>: <span class="td-lit">false</span></span>; reason<span>: <span class="td-ref">ToolFailureReason</span></span>; specifier<span>: <span class="td-kw">string</span></span>; command<span>: <span class="td-kw">string</span>[]</span>; code<span class="td-op">?</span><span>: <span class="td-kw">number</span></span>; stderr<span>: <span class="td-kw">string</span></span>;  }</span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>A <code>deno</code> subprocess that did not produce usable output.</p>
+</div></div><ul class="namespaceItemContentSubItems"><li>
+                <a href=".&#x2F;.&#x2F;mod.ts&#x2F;~&#x2F;ToolFailure.html#property_code">
+                  <span>code</span><span>: <span class="td-kw">number</span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Exit status, absent when the process never started.</p>
+</div></div></li><li>
+                <a href=".&#x2F;.&#x2F;mod.ts&#x2F;~&#x2F;ToolFailure.html#property_command">
+                  <span>command</span><span>: <span class="td-kw">string</span>[]</span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>The argument vector, for a reproducible line in an error message.</p>
+</div></div></li><li>
+                <a href=".&#x2F;.&#x2F;mod.ts&#x2F;~&#x2F;ToolFailure.html#property_ok">
+                  <span>ok</span><span>: <span class="td-lit">false</span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Discriminant: this outcome carries no result.</p>
+</div></div></li><li>
+                <a href=".&#x2F;.&#x2F;mod.ts&#x2F;~&#x2F;ToolFailure.html#property_reason">
+                  <span>reason</span><span>: <span class="td-ref">ToolFailureReason</span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Which environmental condition stopped the tool.</p>
+</div></div></li><li>
+                <a href=".&#x2F;.&#x2F;mod.ts&#x2F;~&#x2F;ToolFailure.html#property_specifier">
+                  <span>specifier</span><span>: <span class="td-kw">string</span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>The specifier discovery was asked about.</p>
+</div></div></li><li>
+                <a href=".&#x2F;.&#x2F;mod.ts&#x2F;~&#x2F;ToolFailure.html#property_stderr">
+                  <span>stderr</span><span>: <span class="td-kw">string</span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>The subprocess's stderr, or the message of the error that replaced it.</p>
+</div></div></li></ul></div>
+    </div><div id="namespace_toolfailurereason" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-TypeAlias bg-TypeAlias/15 dark:text-TypeAliasDark dark:bg-TypeAliasDark/15" title="Type Alias">T</div></div>
+<div class="namespaceItemContent">
+		    <a href=".&#x2F;.&#x2F;mod.ts&#x2F;~&#x2F;ToolFailureReason.html" title="ToolFailureReason">
+			    <span>ToolFailureReason</span><span> = <div class="ml-indent"><span><span class="td-str">"permission-denied"</span></span><br /><span><span class="td-op"> | </span><span class="td-str">"not-spawned"</span></span><br /><span><span class="td-op"> | </span><span class="td-str">"minimum-dependency-age"</span></span><br /><span><span class="td-op"> | </span><span class="td-str">"exited-non-zero"</span></span></div></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Why a <code>deno</code> subprocess spawned by discovery produced no usable output.</p>
+</div></div></div>
+    </div></div>
+</section>
+<section class="section"  id="mod_ts_variables"><div>
+      <h2 class="anchorable mb-1"><a href="#mod_ts_variables" class="anchor" aria-label="Anchor" tabIndex="-1"><svg
+  width="16"
+  height="16"
+  viewBox="0 0 14 14"
+  fill="none"
+  xmlns="http://www.w3.org/2000/svg"
+>
+  <g clip-path="url(#clip0_1081_1237)">
+    <path
+      fill-rule="evenodd"
+      clip-rule="evenodd"
+      d="M6.80328 2.8656C6.68736 2.99 6.62425 3.15454 6.62725 3.32456C6.63025 3.49457 6.69913 3.65678 6.81936 3.77702C6.9396 3.89725 7.10181 3.96613 7.27182 3.96913C7.44184 3.97213 7.60638 3.90902 7.73078 3.7931L8.82453 2.69935C8.98712 2.53676 9.18015 2.40778 9.39259 2.31978C9.60503 2.23179 9.83272 2.1865 10.0627 2.1865C10.2926 2.1865 10.5203 2.23179 10.7327 2.31978C10.9452 2.40778 11.1382 2.53676 11.3008 2.69935C11.4634 2.86194 11.5923 3.05497 11.6803 3.2674C11.7683 3.47984 11.8136 3.70753 11.8136 3.93747C11.8136 4.16741 11.7683 4.3951 11.6803 4.60754C11.5923 4.81998 11.4634 5.013 11.3008 5.1756L9.11328 7.3631C8.95075 7.52581 8.75775 7.65488 8.5453 7.74295C8.33285 7.83102 8.10513 7.87635 7.87516 7.87635C7.64518 7.87635 7.41746 7.83102 7.20501 7.74295C6.99256 7.65488 6.79956 7.52581 6.63703 7.3631C6.51263 7.24718 6.34809 7.18407 6.17807 7.18707C6.00806 7.19007 5.84585 7.25894 5.72561 7.37918C5.60538 7.49942 5.5365 7.66163 5.5335 7.83164C5.5305 8.00165 5.59361 8.1662 5.70953 8.2906C5.99391 8.57501 6.33154 8.80062 6.70312 8.95455C7.0747 9.10847 7.47296 9.18769 7.87516 9.18769C8.27736 9.18769 8.67562 9.10847 9.0472 8.95455C9.41878 8.80062 9.7564 8.57501 10.0408 8.2906L12.2283 6.1031C12.8026 5.52874 13.1253 4.74974 13.1253 3.93747C13.1253 3.12521 12.8026 2.34621 12.2283 1.77185C11.6539 1.19749 10.8749 0.874817 10.0627 0.874817C9.25039 0.874817 8.47139 1.19749 7.89703 1.77185L6.80328 2.8656ZM2.69953 11.3006C2.53682 11.1381 2.40774 10.9451 2.31968 10.7326C2.23161 10.5202 2.18628 10.2924 2.18628 10.0625C2.18628 9.8325 2.23161 9.60477 2.31968 9.39233C2.40774 9.17988 2.53682 8.98688 2.69953 8.82435L4.88703 6.63685C5.04956 6.47414 5.24256 6.34506 5.45501 6.25699C5.66746 6.16893 5.89518 6.1236 6.12516 6.1236C6.35513 6.1236 6.58285 6.16893 6.7953 6.25699C7.00775 6.34506 7.20075 6.47414 7.36328 6.63685C7.48768 6.75277 7.65223 6.81588 7.82224 6.81288C7.99225 6.80988 8.15446 6.741 8.2747 6.62077C8.39494 6.50053 8.46381 6.33832 8.46681 6.1683C8.46981 5.99829 8.4067 5.83375 8.29078 5.70935C8.0064 5.42494 7.66878 5.19933 7.2972 5.0454C6.92562 4.89148 6.52736 4.81225 6.12516 4.81225C5.72296 4.81225 5.3247 4.89148 4.95312 5.0454C4.58154 5.19933 4.24391 5.42494 3.95953 5.70935L1.77203 7.89685C1.19767 8.47121 0.875 9.25021 0.875 10.0625C0.875 10.8747 1.19767 11.6537 1.77203 12.2281C2.34639 12.8025 3.12539 13.1251 3.93766 13.1251C4.74992 13.1251 5.52892 12.8025 6.10328 12.2281L7.19703 11.1343C7.31295 11.0099 7.37606 10.8454 7.37306 10.6754C7.37006 10.5054 7.30119 10.3432 7.18095 10.2229C7.06071 10.1027 6.8985 10.0338 6.72849 10.0308C6.55848 10.0278 6.39393 10.0909 6.26953 10.2068L5.17578 11.3006C5.01325 11.4633 4.82025 11.5924 4.6078 11.6805C4.39535 11.7685 4.16763 11.8138 3.93766 11.8138C3.70768 11.8138 3.47996 11.7685 3.26751 11.6805C3.05506 11.5924 2.86206 11.4633 2.69953 11.3006Z"
+      fill="currentColor"
+    />
+  </g>
+  <defs>
+    <clipPath id="clip0_1081_1237">
+      <rect width="14" height="14" fill="white" />
+    </clipPath>
+  </defs>
+</svg>
+</a>
+Variables</h2></div><div class="namespaceSection"><div id="namespace_known_packages" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-Variable bg-Variable/15 dark:text-VariableDark dark:bg-VariableDark/15" title="Variable">v</div></div>
+<div class="namespaceItemContent">
+		    <a href=".&#x2F;.&#x2F;mod.ts&#x2F;~&#x2F;KNOWN_PACKAGES.html" title="KNOWN_PACKAGES">
+			    <span>KNOWN_PACKAGES</span><span>: <span class="td-kw">readonly</span> <span class="td-kw">string</span>[]</span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Short names of the <code>@binstruct</code> packages the CLI knows about, sorted
+alphabetically.</p>
+</div></div></div>
     </div></div>
 </section>
 </div>
@@ -560,10 +840,10 @@ Examples</h2></div><div class="space-y-8"><div class="anchorable"><a href="#exam
   </defs>
 </svg>
 </a>
-<h3 class="example-header"><div class="markdown"><p>Basic usage</p>
+<h3 class="example-header"><div class="markdown"><p>Decode a PNG file</p>
 </div></h3>
-  <div><div class="markdown"><pre class="highlight"><code class="language-bash">deno run -A @binstruct/cli -p jsr:@binstruct/png -c pngFile decode &lt; input.png &gt; struct.json
-</code><button class="copyButton" data-copy="deno run -A @binstruct/cli -p jsr:@binstruct/png -c pngFile decode &lt; input.png &gt; struct.json
+  <div><div class="markdown"><pre class="highlight"><code class="language-bash">binstruct png pngFile decode &lt; input.png &gt; struct.json
+</code><button class="copyButton" data-copy="binstruct png pngFile decode &lt; input.png &gt; struct.json
 "><svg
   class="copy"
   width="15"
@@ -619,10 +899,10 @@ Examples</h2></div><div class="space-y-8"><div class="anchorable"><a href="#exam
   </defs>
 </svg>
 </a>
-<h3 class="example-header"><div class="markdown"><p>With custom package</p>
+<h3 class="example-header"><div class="markdown"><p>The coder word is optional when a package has only one</p>
 </div></h3>
-  <div><div class="markdown"><pre class="highlight"><code class="language-bash">deno run -A @binstruct/cli -p ./my-package -c myStruct decode &lt; input.bin &gt; output.json
-</code><button class="copyButton" data-copy="deno run -A @binstruct/cli -p ./my-package -c myStruct decode &lt; input.bin &gt; output.json
+  <div><div class="markdown"><pre class="highlight"><code class="language-bash">binstruct arp decode &lt; arp.bin &gt; arp.json
+</code><button class="copyButton" data-copy="binstruct arp decode &lt; arp.bin &gt; arp.json
 "><svg
   class="copy"
   width="15"
@@ -680,10 +960,25 @@ Examples</h2></div><div class="space-y-8"><div class="anchorable"><a href="#exam
   </defs>
 </svg>
 </a>
-Functions</h2></div><div class="namespaceSection"><div id="namespace_main-1" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-Function bg-Function/15 dark:text-FunctionDark dark:bg-FunctionDark/15" title="Function">f</div></div>
+Functions</h2></div><div class="namespaceSection"><div id="namespace_explainfailure-1" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-Function bg-Function/15 dark:text-FunctionDark dark:bg-FunctionDark/15" title="Function">f</div></div>
+<div class="namespaceItemContent">
+		    <a href=".&#x2F;.&#x2F;cli.ts&#x2F;~&#x2F;explainFailure.html" title="explainFailure">
+			    <span>explainFailure</span><span>(<div class="ml-4"><div><span>packageInput<span>: <span class="td-kw">string</span></span></span>,</div><div><span>coderName<span>: <span class="td-kw">string</span></span></span>,</div><div><span>error<span>: <span class="td-kw">unknown</span></span></span></div></div>)<span>: <span class="td-ref">Promise</span>&lt;<span class="td-kw">string</span>&gt;</span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Explains a failure that only surfaced once the package was imported.</p>
+</div></div></div>
+    </div><div id="namespace_main-1" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-Function bg-Function/15 dark:text-FunctionDark dark:bg-FunctionDark/15" title="Function">f</div></div>
 <div class="namespaceItemContent">
 		    <a href=".&#x2F;.&#x2F;cli.ts&#x2F;~&#x2F;main.html" title="main">
 			    <span>main</span><span>(<span><span>args<span class="td-op">?</span><span>: <span class="td-kw">string</span>[]</span></span></span>)<span>: <span class="td-ref">Promise</span>&lt;<span class="td-kw">void</span>&gt;</span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Main CLI entry point.</p>
+</div></div></div>
+    </div><div id="namespace_parsecliargs-1" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-Function bg-Function/15 dark:text-FunctionDark dark:bg-FunctionDark/15" title="Function">f</div></div>
+<div class="namespaceItemContent">
+		    <a href=".&#x2F;.&#x2F;cli.ts&#x2F;~&#x2F;parseCliArgs.html" title="parseCliArgs">
+			    <span>parseCliArgs</span><span>(<span><span>args<span>: <span class="td-kw">string</span>[]</span></span></span>)<span>: <span class="td-ref">CliOptions</span></span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Parses command line arguments into the three positionals and the flags.</p>
+</div></div></div>
+    </div><div id="namespace_plancli-1" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-Function bg-Function/15 dark:text-FunctionDark dark:bg-FunctionDark/15" title="Function">f</div></div>
+<div class="namespaceItemContent">
+		    <a href=".&#x2F;.&#x2F;cli.ts&#x2F;~&#x2F;planCli.html" title="planCli">
+			    <span>planCli</span><span>(<span><span>args<span>: <span class="td-kw">string</span>[]</span></span></span>)<span>: <span class="td-ref">Promise</span>&lt;<span class="td-ref">CliPlan</span>&gt;</span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Works out what an invocation amounts to, without performing it.</p>
 </div></div></div>
     </div></div>
 </section>
@@ -716,21 +1011,84 @@ Interfaces</h2></div><div class="namespaceSection"><div id="namespace_clioptions
 			    <span>CliOptions</span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>CLI configuration options.</p>
 </div></div><ul class="namespaceItemContentSubItems"><li>
                 <a href=".&#x2F;.&#x2F;cli.ts&#x2F;~&#x2F;CliOptions.html#property_coder">
-                  <span>coder</span><span>: <span class="td-kw">string</span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Coder name to use from the package</p>
+                  <span>coder</span><span>: <span><span class="td-kw">string</span><span class="td-op"> | </span><span class="td-kw">undefined</span></span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Coder name, absent when it is to be inferred or asked for.</p>
 </div></div></li><li>
                 <a href=".&#x2F;.&#x2F;cli.ts&#x2F;~&#x2F;CliOptions.html#property_command">
-                  <span>command</span><span>: <span class="td-kw">string</span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Command to execute</p>
+                  <span>command</span><span>: <span><span class="td-kw">string</span><span class="td-op"> | </span><span class="td-kw">undefined</span></span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Command word, absent when it is to be asked for.</p>
+</div></div></li><li>
+                <a href=".&#x2F;.&#x2F;cli.ts&#x2F;~&#x2F;CliOptions.html#property_docs">
+                  <span>docs</span><span>: <span class="td-kw">boolean</span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Print <code>deno doc</code> output for the chosen coder instead of running it.</p>
 </div></div></li><li>
                 <a href=".&#x2F;.&#x2F;cli.ts&#x2F;~&#x2F;CliOptions.html#property_help">
-                  <span>help</span><span>: <span class="td-kw">boolean</span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Show help information</p>
+                  <span>help</span><span>: <span class="td-kw">boolean</span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Print guidance to stdout and exit 0 instead of to stderr and exit 1.</p>
 </div></div></li><li>
                 <a href=".&#x2F;.&#x2F;cli.ts&#x2F;~&#x2F;CliOptions.html#property_package">
-                  <span>package</span><span>: <span class="td-kw">string</span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Package specifier (JSR URL, local path, or npm package)</p>
+                  <span>package</span><span>: <span><span class="td-kw">string</span><span class="td-op"> | </span><span class="td-kw">undefined</span></span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Package specifier as typed, before <code>resolveSpecifier</code>.</p>
 </div></div></li><li>
                 <a href=".&#x2F;.&#x2F;cli.ts&#x2F;~&#x2F;CliOptions.html#property_version">
-                  <span>version</span><span>: <span class="td-kw">boolean</span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Show version information</p>
+                  <span>version</span><span>: <span class="td-kw">boolean</span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Print version information.</p>
 </div></div></li></ul></div>
     </div></div>
+</section>
+<section class="section"  id="cli_ts_type-aliases"><div>
+      <h2 class="anchorable mb-1"><a href="#cli_ts_type-aliases" class="anchor" aria-label="Anchor" tabIndex="-1"><svg
+  width="16"
+  height="16"
+  viewBox="0 0 14 14"
+  fill="none"
+  xmlns="http://www.w3.org/2000/svg"
+>
+  <g clip-path="url(#clip0_1081_1237)">
+    <path
+      fill-rule="evenodd"
+      clip-rule="evenodd"
+      d="M6.80328 2.8656C6.68736 2.99 6.62425 3.15454 6.62725 3.32456C6.63025 3.49457 6.69913 3.65678 6.81936 3.77702C6.9396 3.89725 7.10181 3.96613 7.27182 3.96913C7.44184 3.97213 7.60638 3.90902 7.73078 3.7931L8.82453 2.69935C8.98712 2.53676 9.18015 2.40778 9.39259 2.31978C9.60503 2.23179 9.83272 2.1865 10.0627 2.1865C10.2926 2.1865 10.5203 2.23179 10.7327 2.31978C10.9452 2.40778 11.1382 2.53676 11.3008 2.69935C11.4634 2.86194 11.5923 3.05497 11.6803 3.2674C11.7683 3.47984 11.8136 3.70753 11.8136 3.93747C11.8136 4.16741 11.7683 4.3951 11.6803 4.60754C11.5923 4.81998 11.4634 5.013 11.3008 5.1756L9.11328 7.3631C8.95075 7.52581 8.75775 7.65488 8.5453 7.74295C8.33285 7.83102 8.10513 7.87635 7.87516 7.87635C7.64518 7.87635 7.41746 7.83102 7.20501 7.74295C6.99256 7.65488 6.79956 7.52581 6.63703 7.3631C6.51263 7.24718 6.34809 7.18407 6.17807 7.18707C6.00806 7.19007 5.84585 7.25894 5.72561 7.37918C5.60538 7.49942 5.5365 7.66163 5.5335 7.83164C5.5305 8.00165 5.59361 8.1662 5.70953 8.2906C5.99391 8.57501 6.33154 8.80062 6.70312 8.95455C7.0747 9.10847 7.47296 9.18769 7.87516 9.18769C8.27736 9.18769 8.67562 9.10847 9.0472 8.95455C9.41878 8.80062 9.7564 8.57501 10.0408 8.2906L12.2283 6.1031C12.8026 5.52874 13.1253 4.74974 13.1253 3.93747C13.1253 3.12521 12.8026 2.34621 12.2283 1.77185C11.6539 1.19749 10.8749 0.874817 10.0627 0.874817C9.25039 0.874817 8.47139 1.19749 7.89703 1.77185L6.80328 2.8656ZM2.69953 11.3006C2.53682 11.1381 2.40774 10.9451 2.31968 10.7326C2.23161 10.5202 2.18628 10.2924 2.18628 10.0625C2.18628 9.8325 2.23161 9.60477 2.31968 9.39233C2.40774 9.17988 2.53682 8.98688 2.69953 8.82435L4.88703 6.63685C5.04956 6.47414 5.24256 6.34506 5.45501 6.25699C5.66746 6.16893 5.89518 6.1236 6.12516 6.1236C6.35513 6.1236 6.58285 6.16893 6.7953 6.25699C7.00775 6.34506 7.20075 6.47414 7.36328 6.63685C7.48768 6.75277 7.65223 6.81588 7.82224 6.81288C7.99225 6.80988 8.15446 6.741 8.2747 6.62077C8.39494 6.50053 8.46381 6.33832 8.46681 6.1683C8.46981 5.99829 8.4067 5.83375 8.29078 5.70935C8.0064 5.42494 7.66878 5.19933 7.2972 5.0454C6.92562 4.89148 6.52736 4.81225 6.12516 4.81225C5.72296 4.81225 5.3247 4.89148 4.95312 5.0454C4.58154 5.19933 4.24391 5.42494 3.95953 5.70935L1.77203 7.89685C1.19767 8.47121 0.875 9.25021 0.875 10.0625C0.875 10.8747 1.19767 11.6537 1.77203 12.2281C2.34639 12.8025 3.12539 13.1251 3.93766 13.1251C4.74992 13.1251 5.52892 12.8025 6.10328 12.2281L7.19703 11.1343C7.31295 11.0099 7.37606 10.8454 7.37306 10.6754C7.37006 10.5054 7.30119 10.3432 7.18095 10.2229C7.06071 10.1027 6.8985 10.0338 6.72849 10.0308C6.55848 10.0278 6.39393 10.0909 6.26953 10.2068L5.17578 11.3006C5.01325 11.4633 4.82025 11.5924 4.6078 11.6805C4.39535 11.7685 4.16763 11.8138 3.93766 11.8138C3.70768 11.8138 3.47996 11.7685 3.26751 11.6805C3.05506 11.5924 2.86206 11.4633 2.69953 11.3006Z"
+      fill="currentColor"
+    />
+  </g>
+  <defs>
+    <clipPath id="clip0_1081_1237">
+      <rect width="14" height="14" fill="white" />
+    </clipPath>
+  </defs>
+</svg>
+</a>
+Type Aliases</h2></div><div class="namespaceSection"><div id="namespace_cliplan-1" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-TypeAlias bg-TypeAlias/15 dark:text-TypeAliasDark dark:bg-TypeAliasDark/15" title="Type Alias">T</div></div>
+<div class="namespaceItemContent">
+		    <a href=".&#x2F;.&#x2F;cli.ts&#x2F;~&#x2F;CliPlan.html" title="CliPlan">
+			    <span>CliPlan</span><span> = <div class="ml-indent"><span>{ <span class="td-kw">readonly </span>kind<span>: <span class="td-str">"print"</span></span>; <span class="td-kw">readonly </span>text<span>: <span class="td-kw">string</span></span>; <span class="td-kw">readonly </span>stream<span>: <span><span class="td-str">"stdout"</span><span class="td-op"> | </span><span class="td-str">"stderr"</span></span></span>; <span class="td-kw">readonly </span>code<span>: <span class="td-kw">number</span></span>;  }</span><br /><span><span class="td-op"> | </span>{ <span class="td-kw">readonly </span>kind<span>: <span class="td-str">"run"</span></span>; <span class="td-kw">readonly </span>specifier<span>: <span class="td-kw">string</span></span>; <span class="td-kw">readonly </span>coder<span>: <span class="td-kw">string</span></span>; <span class="td-kw">readonly </span>command<span>: <span class="td-ref">CommandName</span></span>; <span class="td-kw">readonly </span>notices<span>: <span class="td-kw">readonly</span> <span class="td-kw">string</span>[]</span>;  }</span></div></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>What an invocation amounts to, once its arguments are understood.</p>
+</div></div></div>
+    </div><div id="namespace_commandname-1" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-TypeAlias bg-TypeAlias/15 dark:text-TypeAliasDark dark:bg-TypeAliasDark/15" title="Type Alias">T</div></div>
+<div class="namespaceItemContent">
+		    <a href=".&#x2F;.&#x2F;cli.ts&#x2F;~&#x2F;CommandName.html" title="CommandName">
+			    <span>CommandName</span><span> = (<span class="td-ref">COMMANDS</span>)[<span class="td-kw">number</span>][<span class="td-str">"name"</span>]</span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>A command the CLI can carry out.</p>
+</div></div></div>
+    </div></div>
+</section>
+<section class="section"  id="cli_ts_variables"><div>
+      <h2 class="anchorable mb-1"><a href="#cli_ts_variables" class="anchor" aria-label="Anchor" tabIndex="-1"><svg
+  width="16"
+  height="16"
+  viewBox="0 0 14 14"
+  fill="none"
+  xmlns="http://www.w3.org/2000/svg"
+>
+  <g clip-path="url(#clip0_1081_1237)">
+    <path
+      fill-rule="evenodd"
+      clip-rule="evenodd"
+      d="M6.80328 2.8656C6.68736 2.99 6.62425 3.15454 6.62725 3.32456C6.63025 3.49457 6.69913 3.65678 6.81936 3.77702C6.9396 3.89725 7.10181 3.96613 7.27182 3.96913C7.44184 3.97213 7.60638 3.90902 7.73078 3.7931L8.82453 2.69935C8.98712 2.53676 9.18015 2.40778 9.39259 2.31978C9.60503 2.23179 9.83272 2.1865 10.0627 2.1865C10.2926 2.1865 10.5203 2.23179 10.7327 2.31978C10.9452 2.40778 11.1382 2.53676 11.3008 2.69935C11.4634 2.86194 11.5923 3.05497 11.6803 3.2674C11.7683 3.47984 11.8136 3.70753 11.8136 3.93747C11.8136 4.16741 11.7683 4.3951 11.6803 4.60754C11.5923 4.81998 11.4634 5.013 11.3008 5.1756L9.11328 7.3631C8.95075 7.52581 8.75775 7.65488 8.5453 7.74295C8.33285 7.83102 8.10513 7.87635 7.87516 7.87635C7.64518 7.87635 7.41746 7.83102 7.20501 7.74295C6.99256 7.65488 6.79956 7.52581 6.63703 7.3631C6.51263 7.24718 6.34809 7.18407 6.17807 7.18707C6.00806 7.19007 5.84585 7.25894 5.72561 7.37918C5.60538 7.49942 5.5365 7.66163 5.5335 7.83164C5.5305 8.00165 5.59361 8.1662 5.70953 8.2906C5.99391 8.57501 6.33154 8.80062 6.70312 8.95455C7.0747 9.10847 7.47296 9.18769 7.87516 9.18769C8.27736 9.18769 8.67562 9.10847 9.0472 8.95455C9.41878 8.80062 9.7564 8.57501 10.0408 8.2906L12.2283 6.1031C12.8026 5.52874 13.1253 4.74974 13.1253 3.93747C13.1253 3.12521 12.8026 2.34621 12.2283 1.77185C11.6539 1.19749 10.8749 0.874817 10.0627 0.874817C9.25039 0.874817 8.47139 1.19749 7.89703 1.77185L6.80328 2.8656ZM2.69953 11.3006C2.53682 11.1381 2.40774 10.9451 2.31968 10.7326C2.23161 10.5202 2.18628 10.2924 2.18628 10.0625C2.18628 9.8325 2.23161 9.60477 2.31968 9.39233C2.40774 9.17988 2.53682 8.98688 2.69953 8.82435L4.88703 6.63685C5.04956 6.47414 5.24256 6.34506 5.45501 6.25699C5.66746 6.16893 5.89518 6.1236 6.12516 6.1236C6.35513 6.1236 6.58285 6.16893 6.7953 6.25699C7.00775 6.34506 7.20075 6.47414 7.36328 6.63685C7.48768 6.75277 7.65223 6.81588 7.82224 6.81288C7.99225 6.80988 8.15446 6.741 8.2747 6.62077C8.39494 6.50053 8.46381 6.33832 8.46681 6.1683C8.46981 5.99829 8.4067 5.83375 8.29078 5.70935C8.0064 5.42494 7.66878 5.19933 7.2972 5.0454C6.92562 4.89148 6.52736 4.81225 6.12516 4.81225C5.72296 4.81225 5.3247 4.89148 4.95312 5.0454C4.58154 5.19933 4.24391 5.42494 3.95953 5.70935L1.77203 7.89685C1.19767 8.47121 0.875 9.25021 0.875 10.0625C0.875 10.8747 1.19767 11.6537 1.77203 12.2281C2.34639 12.8025 3.12539 13.1251 3.93766 13.1251C4.74992 13.1251 5.52892 12.8025 6.10328 12.2281L7.19703 11.1343C7.31295 11.0099 7.37606 10.8454 7.37306 10.6754C7.37006 10.5054 7.30119 10.3432 7.18095 10.2229C7.06071 10.1027 6.8985 10.0338 6.72849 10.0308C6.55848 10.0278 6.39393 10.0909 6.26953 10.2068L5.17578 11.3006C5.01325 11.4633 4.82025 11.5924 4.6078 11.6805C4.39535 11.7685 4.16763 11.8138 3.93766 11.8138C3.70768 11.8138 3.47996 11.7685 3.26751 11.6805C3.05506 11.5924 2.86206 11.4633 2.69953 11.3006Z"
+      fill="currentColor"
+    />
+  </g>
+  <defs>
+    <clipPath id="clip0_1081_1237">
+      <rect width="14" height="14" fill="white" />
+    </clipPath>
+  </defs>
+</svg>
+</a>
+Variables</h2></div><div class="namespaceSection"></div>
 </section>
 </div>
 </div>
