@@ -229,10 +229,17 @@ Examples</h2></div><div class="space-y-8"><div class="anchorable"><a href="#exam
   </defs>
 </svg>
 </a>
-<h3 class="example-header"><div class="markdown"><p>An empty command line asks for a package, on stderr, with exit 1</p>
+<h3 class="example-header"><div class="markdown"><p>An empty command line asks for a package, listing or no listing</p>
 </div></h3>
   <div><div class="markdown"><pre class="highlight"><code class="language-ts">import { assertEquals, assertStringIncludes } from &quot;@std/assert&quot;;
+import { stub } from &quot;@std/testing/mock&quot;;
 import { planCli } from &quot;./cli.ts&quot;;
+
+using _offline = stub(
+  globalThis,
+  &quot;fetch&quot;,
+  () =&gt; Promise.reject(new TypeError(&quot;offline&quot;)),
+);
 
 const plan = await planCli([]);
 
@@ -244,7 +251,14 @@ if (plan.kind === &quot;print&quot;) {
   assertStringIncludes(plan.text, &quot;TRY\n  binstruct png&quot;);
 }
 </code><button class="copyButton" data-copy="import { assertEquals, assertStringIncludes } from &quot;@std/assert&quot;;
+import { stub } from &quot;@std/testing/mock&quot;;
 import { planCli } from &quot;./cli.ts&quot;;
+
+using _offline = stub(
+  globalThis,
+  &quot;fetch&quot;,
+  () =&gt; Promise.reject(new TypeError(&quot;offline&quot;)),
+);
 
 const plan = await planCli([]);
 
@@ -783,7 +797,7 @@ Return Type</h2></div><div class="space-y-8"><div class=" docEntry" id="function
 </svg>
 </button><code></code></pre>
 </div></div><nav class="documentNavigation">
-          <h3>Document Navigation</h3><ul><li><a href="#examples" title="Examples">Examples</a></li><li><ul><li><a href="#example_0" title="An empty command line asks for a package, on stderr, with exit 1">An empty command line asks for a package, on stderr, with exit 1</a></li><li><a href="#example_1" title="A complete invocation resolves its shorthand and runs">A complete invocation resolves its shorthand and runs</a></li><li><a href="#example_2" title="A local module runs under the specifier it was named by">A local module runs under the specifier it was named by</a></li><li><a href="#example_3" title="A directory is refused, and the modules in it are offered instead">A directory is refused, and the modules in it are offered instead</a></li><li><a href="#example_4" title="An unknown flag is named, on stderr, and no package is guessed at">An unknown flag is named, on stderr, and no package is guessed at</a></li></ul></li><li><a href="#parameters" title="Parameters">Parameters</a></li><li><ul><li><a href="#function_plancli_0_parameter_args" title="args">args</a></li></ul></li><li><a href="#return-type" title="Return Type">Return Type</a></li></ul></nav></div>
+          <h3>Document Navigation</h3><ul><li><a href="#examples" title="Examples">Examples</a></li><li><ul><li><a href="#example_0" title="An empty command line asks for a package, listing or no listing">An empty command line asks for a package, listing or no listing</a></li><li><a href="#example_1" title="A complete invocation resolves its shorthand and runs">A complete invocation resolves its shorthand and runs</a></li><li><a href="#example_2" title="A local module runs under the specifier it was named by">A local module runs under the specifier it was named by</a></li><li><a href="#example_3" title="A directory is refused, and the modules in it are offered instead">A directory is refused, and the modules in it are offered instead</a></li><li><a href="#example_4" title="An unknown flag is named, on stderr, and no package is guessed at">An unknown flag is named, on stderr, and no package is guessed at</a></li></ul></li><li><a href="#parameters" title="Parameters">Parameters</a></li><li><ul><li><a href="#function_plancli_0_parameter_args" title="args">args</a></li></ul></li><li><a href="#return-type" title="Return Type">Return Type</a></li></ul></nav></div>
   </div></div>
 </div>
 </div>

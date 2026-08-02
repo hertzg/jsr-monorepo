@@ -147,6 +147,13 @@ instead of filling it with a help screen.</p>
 <p>A bare package name means the <code>@binstruct</code> scope on JSR (ADR 0004), and a
 package exposing exactly one zero-argument coder may omit the <code>&lt;coder&gt;</code> word
 (ADR 0005).</p>
+<p>The <code>PACKAGES</code> block is JSR's own scope listing, fetched and cached for a day
+(<code>./scope.ts</code>, ADR 0006), so it names what is published rather than what was
+published when this CLI was released. That costs <code>--allow-net=jsr.io</code>; the
+listing is a hint, so without the permission, without a network, or against a
+JSR that will not answer, the block is omitted and the screen still says how
+to name a package. Listing the <em>coders</em> of a package costs
+<code>--allow-run=deno</code> in the same way (ADR 0002).</p>
 </div><section class="section"  id="examples"><div>
       <h2 class="anchorable mb-1"><a href="#examples" class="anchor" aria-label="Anchor" tabIndex="-1"><svg
   width="16"
@@ -640,7 +647,7 @@ Variables</h2></div><div class="namespaceSection"></div>
                   </span>
                 </a>
               </li></ul><a class="flex items-center gap-0.5" href="..&#x2F;.&#x2F;all_symbols.html">
-              <span class="leading-none">view all 46 symbols</span><svg
+              <span class="leading-none">view all 51 symbols</span><svg
   width="16"
   height="16"
   viewBox="0 0 16 16"
