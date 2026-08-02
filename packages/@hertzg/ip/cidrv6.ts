@@ -322,6 +322,7 @@ export function cidrv6Size(prefixLength: number): bigint;
  * @returns The total number of addresses as a bigint
  */
 export function cidrv6Size(cidrOrPrefixLength: Cidrv6 | number): bigint;
+/** Returns the total number of IP addresses for either a CIDR block or a prefix length. */
 export function cidrv6Size(cidrOrPrefixLength: Cidrv6 | number): bigint {
   const prefixLength = typeof cidrOrPrefixLength === "number"
     ? cidrOrPrefixLength

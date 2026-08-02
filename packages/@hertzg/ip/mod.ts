@@ -313,19 +313,36 @@ import { parseIp, stringifyIp } from "./ip.ts";
 import type { Cidrv4 } from "./cidr.ts";
 import type { Cidrv6 } from "./cidr.ts";
 
-export { parseIp, stringifyIp } from "./ip.ts";
 export {
+  /** Parse any IP address string to number (IPv4) or bigint (IPv6). */
+  parseIp,
+  /** Convert number or bigint to IP address string. */
+  stringifyIp,
+} from "./ip.ts";
+export {
+  /** A CIDR block of either IP version. */
   type Cidr,
+  /** Generate IP addresses in a CIDR block. */
   cidrAddresses,
+  /** Check if one CIDR fully contains another. */
   cidrContainsCidr,
+  /** Return the overlapping CIDR block, or null. */
   cidrIntersect,
+  /** Merge CIDR blocks into the minimal covering set. */
   cidrMerge,
+  /** Check if two CIDRs share at least one address. */
   cidrOverlaps,
+  /** Get total number of addresses in a CIDR block. */
   cidrSize,
+  /** Return CIDR blocks in A but not in B. */
   cidrSubtract,
+  /** Type guard that checks whether a Cidr is an IPv4 CIDR block. */
   isCidrv4,
+  /** Type guard that checks whether a Cidr is an IPv6 CIDR block. */
   isCidrv6,
+  /** Parse any CIDR notation string to Cidrv4 or Cidrv6. */
   parseCidr,
+  /** Convert Cidrv4 or Cidrv6 to CIDR notation string. */
   stringifyCidr,
 } from "./cidr.ts";
 
@@ -405,6 +422,7 @@ export function stringify(value: Cidrv6): string;
  * ```
  */
 export function stringify(value: number | bigint | Cidrv4 | Cidrv6): string;
+/** Stringifies an IP address or CIDR block to its standard notation. */
 export function stringify(value: number | bigint | Cidrv4 | Cidrv6): string {
   if (typeof value === "number" || typeof value === "bigint") {
     return stringifyIp(value);
@@ -412,97 +430,191 @@ export function stringify(value: number | bigint | Cidrv4 | Cidrv6): string {
   return stringifyCidr(value);
 }
 export {
+  /** Type for all IPv4 classification labels. */
   type ClassificationIpv4,
+  /** Type for all IPv6 classification labels. */
   type ClassificationIpv6,
+  /** Discriminated union result with kind, value, and classification. */
   type ClassifiedIp,
+  /** Result type for IPv4 classification. */
   type ClassifiedIpv4,
+  /** Result type for IPv6 classification. */
   type ClassifiedIpv6,
+  /** Classify an IPv4 (number) or IPv6 (bigint) address. */
   classifyIp,
 } from "./classify.ts";
-export { isValidCidr, isValidIp } from "./validate.ts";
+export {
+  /** Check if a string is valid CIDR notation (IPv4 or IPv6). */
+  isValidCidr,
+  /** Check if a string is a valid plain IP address (IPv4 or IPv6). */
+  isValidIp,
+} from "./validate.ts";
 
 // --- IPv4 ---
 
-export { parseIpv4, stringifyIpv4 } from "./ipv4.ts";
-export { isValidCidrv4, isValidIpv4 } from "./validatev4.ts";
+export {
+  /** Parse dotted decimal notation to number. */
+  parseIpv4,
+  /** Convert number to dotted decimal notation. */
+  stringifyIpv4,
+} from "./ipv4.ts";
+export {
+  /** Check if a string is valid IPv4 CIDR notation. */
+  isValidCidrv4,
+  /** Check if a string is a valid IPv4 address. */
+  isValidIpv4,
+} from "./validatev4.ts";
 
 export {
+  /** Type representing an IPv4 CIDR block. */
   type Cidrv4,
+  /** Generate IP addresses in CIDR range. */
   cidrv4Addresses,
+  /** Alias for cidrv4LastAddress. */
   cidrv4BroadcastAddress,
+  /** Check if IP is within CIDR range. */
   cidrv4Contains,
+  /** Check if one IPv4 CIDR fully contains another. */
   cidrv4ContainsCidr,
+  /** Get first address in CIDR range. */
   cidrv4FirstAddress,
+  /** Return the overlapping IPv4 CIDR block, or null. */
   cidrv4Intersect,
+  /** Get last address in CIDR range. */
   cidrv4LastAddress,
+  /** Create network mask from prefix length (0-32). */
   cidrv4Mask,
+  /** Merge IPv4 CIDR blocks into the minimal covering set. */
   cidrv4Merge,
+  /** Alias for cidrv4FirstAddress. */
   cidrv4NetworkAddress,
+  /** Check if two IPv4 CIDRs share at least one address. */
   cidrv4Overlaps,
+  /** Get total number of addresses in CIDR range. */
   cidrv4Size,
+  /** Return IPv4 CIDR blocks in A but not in B. */
   cidrv4Subtract,
+  /** Parse CIDR notation string to Cidrv4. */
   parseCidrv4,
+  /** Convert Cidrv4 to CIDR notation string. */
   stringifyCidrv4,
 } from "./cidrv4.ts";
 
 export {
+  /** Classify an IPv4 address into its well-known range. */
   classifyIpv4,
+  /** Check if address is benchmarking (198.18.0.0/15). */
   isIpv4Benchmarking,
+  /** Check if address is broadcast (255.255.255.255). */
   isIpv4Broadcast,
+  /** Check if address is Carrier-Grade NAT (100.64.0.0/10). */
   isIpv4CgNat,
+  /** Check if address is documentation (RFC 5737). */
   isIpv4Documentation,
+  /** Check if address is link-local (169.254.0.0/16). */
   isIpv4LinkLocal,
+  /** Check if address is loopback (127.0.0.0/8). */
   isIpv4Loopback,
+  /** Check if address is multicast (224.0.0.0/4). */
   isIpv4Multicast,
+  /** Check if address is private (RFC 1918). */
   isIpv4Private,
+  /** Check if address is publicly routable. */
   isIpv4Public,
+  /** Check if address is reserved (240.0.0.0/4). */
   isIpv4Reserved,
+  /** Check if address is "this network" (0.0.0.0/8). */
   isIpv4ThisNetwork,
 } from "./classifyv4.ts";
 
 // --- IPv6 ---
 
-export { compressIpv6, expandIpv6, parseIpv6, stringifyIpv6 } from "./ipv6.ts";
-export { isValidCidrv6, isValidIpv6 } from "./validatev6.ts";
+export {
+  /** Compress to canonical shortest form. */
+  compressIpv6,
+  /** Expand to full uncompressed form. */
+  expandIpv6,
+  /** Parse colon-hexadecimal notation to bigint. */
+  parseIpv6,
+  /** Convert bigint to compressed colon-hexadecimal. */
+  stringifyIpv6,
+} from "./ipv6.ts";
+export {
+  /** Check if a string is valid IPv6 CIDR notation. */
+  isValidCidrv6,
+  /** Check if a string is a valid IPv6 address. */
+  isValidIpv6,
+} from "./validatev6.ts";
 
 export {
+  /** Type representing an IPv6 CIDR block. */
   type Cidrv6,
+  /** Generate IP addresses in CIDR range. */
   cidrv6Addresses,
+  /** Check if IP is within CIDR range. */
   cidrv6Contains,
+  /** Check if one IPv6 CIDR fully contains another. */
   cidrv6ContainsCidr,
+  /** Get first address in CIDR range. */
   cidrv6FirstAddress,
+  /** Return the overlapping IPv6 CIDR block, or null. */
   cidrv6Intersect,
+  /** Get last address in CIDR range. */
   cidrv6LastAddress,
+  /** Create network mask from prefix length (0-128). */
   cidrv6Mask,
+  /** Merge IPv6 CIDR blocks into the minimal covering set. */
   cidrv6Merge,
+  /** Check if two IPv6 CIDRs share at least one address. */
   cidrv6Overlaps,
+  /** Get total number of addresses in CIDR range. */
   cidrv6Size,
+  /** Return IPv6 CIDR blocks in A but not in B. */
   cidrv6Subtract,
+  /** Parse CIDR notation string to Cidrv6. */
   parseCidrv6,
+  /** Convert Cidrv6 to CIDR notation string. */
   stringifyCidrv6,
 } from "./cidrv6.ts";
 
 export {
+  /** Classify an IPv6 address into its well-known range. */
   classifyIpv6,
+  /** Check if address is benchmarking (2001:2::/48). */
   isIpv6Benchmarking,
+  /** Check if address is documentation (2001:db8::/32). */
   isIpv6Documentation,
+  /** Check if address is global unicast (2000::/3). */
   isIpv6GlobalUnicast,
+  /** Check if address is IPv4-mapped (::ffff:0:0/96). */
   isIpv6Ipv4Mapped,
+  /** Check if address is IPv4-translated (64:ff9b::/96). */
   isIpv6Ipv4Translated,
+  /** Check if address is link-local (fe80::/10). */
   isIpv6LinkLocal,
+  /** Check if address is loopback (::1). */
   isIpv6Loopback,
+  /** Check if address is multicast (ff00::/8). */
   isIpv6Multicast,
+  /** Check if address is ORCHIDv2 (2001:20::/28). */
   isIpv6Orchidv2,
+  /** Check if address is Teredo (2001::/32). */
   isIpv6Teredo,
+  /** Check if address is unique local (fc00::/7). */
   isIpv6UniqueLocal,
+  /** Check if address is unspecified (::). */
   isIpv6Unspecified,
 } from "./classifyv6.ts";
 
 // --- IPv4-mapped IPv6 conversion ---
 
 export {
+  /** Convert IPv4-mapped IPv6 CIDR to IPv4 CIDR. */
   cidrv4FromCidrv64Mapped,
+  /** Convert IPv4 CIDR to IPv4-mapped IPv6 CIDR. */
   cidrv4ToCidrv64Mapped,
+  /** Extract IPv4 number from IPv4-mapped IPv6 bigint. */
   ipv4From64Mapped,
+  /** Convert IPv4 number to IPv4-mapped IPv6 bigint. */
   ipv4To64Mapped,
 } from "./4to6.ts";
