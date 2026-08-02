@@ -7,6 +7,7 @@
   "packages/@binstruct/ethernet": "1.1.0",
   "packages/@binstruct/icmp": "1.1.0",
   "packages/@binstruct/icmpv6": "0.0.1",
+  "packages/@binstruct/igmp": "0.0.1",
   "packages/@binstruct/inet": "0.3.0",
   "packages/@binstruct/ipv4": "0.3.0",
   "packages/@binstruct/ipv6": "0.0.1",

@@ -65,6 +65,14 @@
         { "type": "json", "path": "deno.json", "jsonpath": "$.version" }
       ]
     },
+    "packages/@binstruct/igmp": {
+      "release-type": "simple",
+      "package-name": "@binstruct/igmp",
+      "component": "@binstruct/igmp",
+      "extra-files": [
+        { "type": "json", "path": "deno.json", "jsonpath": "$.version" }
+      ]
+    },
     "packages/@binstruct/inet": {
       "release-type": "simple",
       "package-name": "@binstruct/inet",
