@@ -94,6 +94,7 @@ mirrors the JSR coordinate. Two scopes:
 - `tcp` - TCP segment parsing (RFC 9293)
 - `udp` - UDP datagram parsing (RFC 768)
 - `vlan` - IEEE 802.1Q VLAN tag encoding/decoding
+- `vxlan` - VXLAN header encoding/decoding (RFC 7348)
 - `wav` - WAV audio file format support
 
 ## Core Architecture
@@ -385,6 +386,7 @@ both tiresome and error-prone.
 - `@binstruct/tcp`
 - `@binstruct/udp`
 - `@binstruct/vlan`
+- `@binstruct/vxlan`
 - `@binstruct/wav`
 - `@binstruct/pcap`
 - `@hertzg/wg-keys`

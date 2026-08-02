@@ -46,6 +46,7 @@ Source layout mirrors the JSR scope: `packages/<scope>/<name>/`.
 | [@binstruct/tcp](https://jsr.io/@binstruct/tcp)           | [![JSR](https://jsr.io/badges/@binstruct/tcp)](https://jsr.io/@binstruct/tcp)           |
 | [@binstruct/udp](https://jsr.io/@binstruct/udp)           | [![JSR](https://jsr.io/badges/@binstruct/udp)](https://jsr.io/@binstruct/udp)           |
 | [@binstruct/vlan](https://jsr.io/@binstruct/vlan)         | [![JSR](https://jsr.io/badges/@binstruct/vlan)](https://jsr.io/@binstruct/vlan)         |
+| [@binstruct/vxlan](https://jsr.io/@binstruct/vxlan)       | [![JSR](https://jsr.io/badges/@binstruct/vxlan)](https://jsr.io/@binstruct/vxlan)       |
 | [@binstruct/wav](https://jsr.io/@binstruct/wav)           | [![JSR](https://jsr.io/badges/@binstruct/wav)](https://jsr.io/@binstruct/wav)           |
 
 ## Installation
@@ -73,12 +74,11 @@ deno task cov
 
 ## Releasing
 
-Releases are automated via
-[Release Please](https://github.com/googleapis/release-please). Commits
-following [Conventional Commits](https://www.conventionalcommits.org/) are
-analyzed automatically, and a release PR is maintained with version bumps and
-changelogs. Merging the release PR creates GitHub Releases and publishes all
-packages to JSR.
+Releases are automated via [Release Please](https://github.com/googleapis/release-please).
+Commits following [Conventional Commits](https://www.conventionalcommits.org/)
+are analyzed automatically, and a release PR is maintained with version bumps
+and changelogs. Merging the release PR creates GitHub Releases and publishes
+all packages to JSR.
 
 ## License
 
