@@ -95,6 +95,7 @@ mirrors the JSR coordinate. Two scopes:
 - `ipv4` - IPv4 packet header parsing
 - `ipv6` - IPv6 fixed header parsing (RFC 8200)
 - `mbr` - Master Boot Record (MBR) partition table parsing
+- `mp3` - MPEG audio (MP3) frame header parsing
 - `ntp` - NTPv4 packet header parsing (RFC 5905)
 - `pcap` - libpcap (.pcap) capture file format support
 - `png` - PNG file format support
@@ -400,6 +401,7 @@ both tiresome and error-prone.
 - `@binstruct/ipv4`
 - `@binstruct/ipv6`
 - `@binstruct/mbr`
+- `@binstruct/mp3`
 - `@binstruct/ntp`
 - `@binstruct/png`
 - `@binstruct/pppoe`

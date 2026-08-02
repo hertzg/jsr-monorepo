@@ -46,6 +46,9 @@
 "@binstruct/mbr":
   - changed-files:
       - any-glob-to-any-file: packages/@binstruct/mbr/**
+"@binstruct/mp3":
+  - changed-files:
+      - any-glob-to-any-file: packages/@binstruct/mp3/**
 "@binstruct/ntp":
   - changed-files:
       - any-glob-to-any-file: packages/@binstruct/ntp/**
