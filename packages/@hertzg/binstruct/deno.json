@@ -12,6 +12,7 @@
     "./bytes": "./bytes/bytes.ts",
     "./refine": "./refine/refine.ts",
     "./ref": "./ref/ref.ts",
+    "./lazy": "./lazy/lazy.ts",
     "./helpers": "./helpers.ts"
   },
   "types": "./mod.ts"
