@@ -37,6 +37,9 @@
 "@binstruct/ipv6":
   - changed-files:
       - any-glob-to-any-file: packages/@binstruct/ipv6/**
+"@binstruct/ntp":
+  - changed-files:
+      - any-glob-to-any-file: packages/@binstruct/ntp/**
 "@binstruct/pcap":
   - changed-files:
       - any-glob-to-any-file: packages/@binstruct/pcap/**
