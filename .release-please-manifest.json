@@ -14,6 +14,7 @@
   "packages/@binstruct/inet": "0.3.0",
   "packages/@binstruct/ipv4": "0.3.0",
   "packages/@binstruct/ipv6": "0.0.1",
+  "packages/@binstruct/mbr": "0.0.1",
   "packages/@binstruct/ntp": "0.0.1",
   "packages/@binstruct/pcap": "0.3.0",
   "packages/@binstruct/png": "0.4.0",

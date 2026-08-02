@@ -45,6 +45,7 @@ Source layout mirrors the JSR scope: `packages/<scope>/<name>/`.
 | [@binstruct/inet](https://jsr.io/@binstruct/inet)         | [![JSR](https://jsr.io/badges/@binstruct/inet)](https://jsr.io/@binstruct/inet)         |
 | [@binstruct/ipv4](https://jsr.io/@binstruct/ipv4)         | [![JSR](https://jsr.io/badges/@binstruct/ipv4)](https://jsr.io/@binstruct/ipv4)         |
 | [@binstruct/ipv6](https://jsr.io/@binstruct/ipv6)         | [![JSR](https://jsr.io/badges/@binstruct/ipv6)](https://jsr.io/@binstruct/ipv6)         |
+| [@binstruct/mbr](https://jsr.io/@binstruct/mbr)           | [![JSR](https://jsr.io/badges/@binstruct/mbr)](https://jsr.io/@binstruct/mbr)           |
 | [@binstruct/ntp](https://jsr.io/@binstruct/ntp)           | [![JSR](https://jsr.io/badges/@binstruct/ntp)](https://jsr.io/@binstruct/ntp)           |
 | [@binstruct/pcap](https://jsr.io/@binstruct/pcap)         | [![JSR](https://jsr.io/badges/@binstruct/pcap)](https://jsr.io/@binstruct/pcap)         |
 | [@binstruct/png](https://jsr.io/@binstruct/png)           | [![JSR](https://jsr.io/badges/@binstruct/png)](https://jsr.io/@binstruct/png)           |
