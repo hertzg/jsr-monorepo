@@ -144,17 +144,16 @@
 </a>
 </div><div><div class="space-y-7" id=""><div class="markdown"><p>Which resolution rule matched an input.</p>
 <ul>
-<li><code>&quot;scheme&quot;</code> — the input carried its own scheme (<code>jsr:</code>, <code>npm:</code>, <code>https:</code>).</li>
-<li><code>&quot;path&quot;</code> — the input pointed at a module file, by extension.</li>
-<li><code>&quot;directory&quot;</code> — the input pointed somewhere on disk without naming a module
-file. A directory is the case that provokes it, and the only one worth a
-message: <code>import()</code> cannot load one, so the CLI refuses the form rather
-than let discovery describe a module the run could never reach.</li>
+<li><code>&quot;scheme&quot;</code> — the input carried its own scheme (<code>jsr:</code>, <code>npm:</code>, <code>https:</code>,
+<code>file:</code>).</li>
+<li><code>&quot;path&quot;</code> — the input pointed somewhere on disk, by leading <code>.</code> or <code>/</code> or by
+module extension. A file and a directory are the same form: which one it is
+cannot be read off the spelling, and nothing here goes looking.</li>
 <li><code>&quot;scoped&quot;</code> — the input named a scope and package, without a scheme.</li>
 <li><code>&quot;bare&quot;</code> — the input named a package only.</li>
 </ul>
-<p>The first three are explicit forms and pass through untouched; the last two
-are shorthand and get expanded.</p>
+<p>The first two are explicit forms and pass through untouched; the last two are
+shorthand and get expanded.</p>
 </div><section class="section"  id="definition"><div>
       <h2 class="anchorable mb-1"><a href="#definition" class="anchor" aria-label="Anchor" tabIndex="-1"><svg
   width="16"
@@ -181,7 +180,7 @@ are shorthand and get expanded.</p>
 Definition</h2></div><div class="space-y-8"><div class=" docEntry" id="typealias_specifierform">
 
   <div class="docEntryHeader">
-    <div><code><span class="font-medium text-stone-500 dark:text-stone-200"><span><span class="td-str">"scheme"</span><span class="td-op"> | </span><span class="td-str">"path"</span><span class="td-op"> | </span><span class="td-str">"directory"</span><span class="td-op"> | </span><span class="td-str">"scoped"</span><span class="td-op"> | </span><span class="td-str">"bare"</span></span></span>
+    <div><code><span class="font-medium text-stone-500 dark:text-stone-200"><span><span class="td-str">"scheme"</span><span class="td-op"> | </span><span class="td-str">"path"</span><span class="td-op"> | </span><span class="td-str">"scoped"</span><span class="td-op"> | </span><span class="td-str">"bare"</span></span></span>
       </code>
     </div><a
   class="sourceButton"

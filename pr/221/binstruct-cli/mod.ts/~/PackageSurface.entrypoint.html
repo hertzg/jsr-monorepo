@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>ResolvedSpecifier.specifier - mod.ts - @binstruct&#x2F;cli documentation</title>
+  <title>PackageSurface.entrypoint - mod.ts - @binstruct&#x2F;cli documentation</title>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="doc-current-file" content="mod.ts">
@@ -49,7 +49,7 @@
 </span>
 
     <ul><li><span>.</span>
-            <a href="..&#x2F;..&#x2F;.&#x2F;mod.ts&#x2F;~&#x2F;ResolvedSpecifier.html" class="contextLink">ResolvedSpecifier</a></li><li>specifier</li></ul></ul>
+            <a href="..&#x2F;..&#x2F;.&#x2F;mod.ts&#x2F;~&#x2F;PackageSurface.html" class="contextLink">PackageSurface</a></li><li>entrypoint</li></ul></ul>
 </div>
 
     <div class="flex items-center gap-2">
@@ -113,14 +113,14 @@
     </div>
   </div>
 </nav>
-<div id="searchResults"></div><div id="content"><main class="symbolGroup" id="symbol_ResolvedSpecifier.specifier"><article>
+<div id="searchResults"></div><div id="content"><main class="symbolGroup" id="symbol_PackageSurface.entrypoint"><article>
       <div class="symbolTitle">
         <div>
           <div class="text-2xl leading-none break-all">
-            <span class="text-Property">property</span>&nbsp;<span class="font-bold">ResolvedSpecifier.specifier</span>
+            <span class="text-Property">property</span>&nbsp;<span class="font-bold">PackageSurface.entrypoint</span>
           </div></div><a
   class="sourceButton"
-  href="file:&#x2F;&#x2F;&#x2F;home&#x2F;runner&#x2F;work&#x2F;jsr-monorepo&#x2F;jsr-monorepo&#x2F;packages&#x2F;@binstruct&#x2F;cli&#x2F;specifier.ts"><svg
+  href="file:&#x2F;&#x2F;&#x2F;home&#x2F;runner&#x2F;work&#x2F;jsr-monorepo&#x2F;jsr-monorepo&#x2F;packages&#x2F;@binstruct&#x2F;cli&#x2F;discover.ts"><svg
   width="14"
   height="14"
   viewBox="0 0 14 14"
@@ -143,7 +143,11 @@
   />
 </svg>
 </a>
-</div><div><div class="space-y-7" id=""><div class="markdown"><p>The module specifier to hand to <code>deno doc</code>.</p>
+</div><div><div class="space-y-7" id=""><div class="markdown"><p>The module <code>deno doc</code> resolved the specifier to, and therefore the one
+these coders were read from.</p>
+<p>A registry specifier keys the output under itself, so this is
+<code>jsr:@binstruct/png</code> again; a local one is keyed by its <code>file:</code> URL, which
+for a directory is the module inside it.</p>
 </div><section class="section"  id="type"><div>
       <h2 class="anchorable mb-1"><a href="#type" class="anchor" aria-label="Anchor" tabIndex="-1"><svg
   width="16"
@@ -167,14 +171,14 @@
   </defs>
 </svg>
 </a>
-Type</h2></div><div class="space-y-8"><div class=" docEntry" id="variable_resolvedspecifier_specifier">
+Type</h2></div><div class="space-y-8"><div class=" docEntry" id="variable_packagesurface_entrypoint">
 
   <div class="docEntryHeader">
     <div><code><span class="font-medium text-stone-500 dark:text-stone-200"><span class="td-kw">string</span></span>
       </code>
     </div><a
   class="sourceButton"
-  href="file:&#x2F;&#x2F;&#x2F;home&#x2F;runner&#x2F;work&#x2F;jsr-monorepo&#x2F;jsr-monorepo&#x2F;packages&#x2F;@binstruct&#x2F;cli&#x2F;specifier.ts"><svg
+  href="file:&#x2F;&#x2F;&#x2F;home&#x2F;runner&#x2F;work&#x2F;jsr-monorepo&#x2F;jsr-monorepo&#x2F;packages&#x2F;@binstruct&#x2F;cli&#x2F;discover.ts"><svg
   width="14"
   height="14"
   viewBox="0 0 14 14"
@@ -204,8 +208,8 @@ Type</h2></div><div class="space-y-8"><div class=" docEntry" id="variable_resolv
     </article></main>
 <div class="toc">
     <div><div class="usageContent">
-    <h3>Usage</h3><div class="markdown"><pre class="highlight"><code class="language-typescript">import { type ResolvedSpecifier } from &quot;mod.ts&quot;;
-</code><button class="copyButton" data-copy="import { type ResolvedSpecifier } from &quot;mod.ts&quot;;
+    <h3>Usage</h3><div class="markdown"><pre class="highlight"><code class="language-typescript">import { type PackageSurface } from &quot;mod.ts&quot;;
+</code><button class="copyButton" data-copy="import { type PackageSurface } from &quot;mod.ts&quot;;
 "><svg
   class="copy"
   width="15"

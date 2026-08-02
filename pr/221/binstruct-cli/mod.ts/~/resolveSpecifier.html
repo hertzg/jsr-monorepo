@@ -177,10 +177,11 @@ so that discovery and <code>import()</code> — which disagree about what a rela
 specifier is relative to — resolve it to the same module. Reading
 <code>Deno.cwd()</code> is the one thing this function needs from outside its argument,
 and only for that form.</p>
-<p>A path that names no module file is classified <code>&quot;directory&quot;</code> rather than
-<code>&quot;path&quot;</code>. It still resolves, so the caller can echo where it pointed, but the
-caller is expected to refuse it and offer <a href="../.././mod.ts/~/moduleInside.html"><code>moduleInside</code></a> instead:
-<code>deno doc</code> would enter the directory and <code>import()</code> would not.</p>
+<p>Whether the path names a file or a directory is left open. Both are the
+<code>&quot;path&quot;</code> form and both are <code>local</code>, and the CLI settles the question by
+asking <code>deno doc</code> which module it resolved rather than by reading the
+spelling — a directory and the module inside it are indistinguishable as
+strings, and <code>file:///abs/pkg</code> is as much a directory as <code>./pkg</code> is.</p>
 </div><section class="section"  id="examples"><div>
       <h2 class="anchorable mb-1"><a href="#examples" class="anchor" aria-label="Anchor" tabIndex="-1"><svg
   width="16"
@@ -237,6 +238,7 @@ assertEquals(resolved.specifier, &quot;jsr:@binstruct/png&quot;);
 assertEquals(resolved.short, &quot;png&quot;);
 assertEquals(resolved.form, &quot;bare&quot;);
 assertEquals(resolved.shorthand, true);
+assertEquals(resolved.local, false);
 </code><button class="copyButton" data-copy="import { assertEquals } from &quot;@std/assert&quot;;
 import { resolveSpecifier } from &quot;./specifier.ts&quot;;
 
@@ -246,6 +248,7 @@ assertEquals(resolved.specifier, &quot;jsr:@binstruct/png&quot;);
 assertEquals(resolved.short, &quot;png&quot;);
 assertEquals(resolved.form, &quot;bare&quot;);
 assertEquals(resolved.shorthand, true);
+assertEquals(resolved.local, false);
 "><svg
   class="copy"
   width="15"
@@ -382,18 +385,20 @@ assertEquals(local.form, &quot;path&quot;);
   </defs>
 </svg>
 </a>
-<h3 class="example-header"><div class="markdown"><p>A path that names no module file is told apart from one that does</p>
+<h3 class="example-header"><div class="markdown"><p>A directory and the module inside it are the same form</p>
 </div></h3>
   <div><div class="markdown"><pre class="highlight"><code class="language-ts">import { assertEquals } from &quot;@std/assert&quot;;
 import { resolveSpecifier } from &quot;./specifier.ts&quot;;
 
-assertEquals(resolveSpecifier(&quot;./local&quot;).form, &quot;directory&quot;);
-assertEquals(resolveSpecifier(&quot;./local/mod.ts&quot;).form, &quot;path&quot;);
+assertEquals(resolveSpecifier(&quot;./local&quot;).form, &quot;path&quot;);
+assertEquals(resolveSpecifier(&quot;./local/mod.mts&quot;).form, &quot;path&quot;);
+assertEquals(resolveSpecifier(&quot;file:///abs/local&quot;).local, true);
 </code><button class="copyButton" data-copy="import { assertEquals } from &quot;@std/assert&quot;;
 import { resolveSpecifier } from &quot;./specifier.ts&quot;;
 
-assertEquals(resolveSpecifier(&quot;./local&quot;).form, &quot;directory&quot;);
-assertEquals(resolveSpecifier(&quot;./local/mod.ts&quot;).form, &quot;path&quot;);
+assertEquals(resolveSpecifier(&quot;./local&quot;).form, &quot;path&quot;);
+assertEquals(resolveSpecifier(&quot;./local/mod.mts&quot;).form, &quot;path&quot;);
+assertEquals(resolveSpecifier(&quot;file:///abs/local&quot;).local, true);
 "><svg
   class="copy"
   width="15"
@@ -673,7 +678,7 @@ Return Type</h2></div><div class="space-y-8"><div class=" docEntry" id="function
 </svg>
 </button><code></code></pre>
 </div></div><nav class="documentNavigation">
-          <h3>Document Navigation</h3><ul><li><a href="#examples" title="Examples">Examples</a></li><li><ul><li><a href="#example_0" title="A bare name implies jsr: and the @binstruct scope">A bare name implies jsr: and the @binstruct scope</a></li><li><a href="#example_1" title="A scope, a scheme and a path">A scope, a scheme and a path</a></li><li><a href="#example_2" title="A path that names no module file is told apart from one that does">A path that names no module file is told apart from one that does</a></li><li><a href="#example_3" title="A version suffix rides along">A version suffix rides along</a></li></ul></li><li><a href="#parameters" title="Parameters">Parameters</a></li><li><ul><li><a href="#function_resolvespecifier_0_parameter_input" title="input">input</a></li></ul></li><li><a href="#return-type" title="Return Type">Return Type</a></li></ul></nav></div>
+          <h3>Document Navigation</h3><ul><li><a href="#examples" title="Examples">Examples</a></li><li><ul><li><a href="#example_0" title="A bare name implies jsr: and the @binstruct scope">A bare name implies jsr: and the @binstruct scope</a></li><li><a href="#example_1" title="A scope, a scheme and a path">A scope, a scheme and a path</a></li><li><a href="#example_2" title="A directory and the module inside it are the same form">A directory and the module inside it are the same form</a></li><li><a href="#example_3" title="A version suffix rides along">A version suffix rides along</a></li></ul></li><li><a href="#parameters" title="Parameters">Parameters</a></li><li><ul><li><a href="#function_resolvespecifier_0_parameter_input" title="input">input</a></li></ul></li><li><a href="#return-type" title="Return Type">Return Type</a></li></ul></nav></div>
   </div></div>
 </div>
 </div>

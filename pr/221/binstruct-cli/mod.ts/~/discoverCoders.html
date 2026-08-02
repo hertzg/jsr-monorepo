@@ -174,6 +174,9 @@
 explicit coder name.</p>
 <p>A cold lookup pays for building the module graph — on the order of a second
 for a JSR package — while a warm one is near-instant.</p>
+<p>The outcome carries both the specifier it was asked about and the
+<a href="../.././mod.ts/~/PackageSurface.entrypoint.html"><code>PackageSurface.entrypoint</code></a> <code>deno doc</code> resolved it to; for a local
+specifier the latter is what the caller should import.</p>
 </div><section class="section"  id="examples"><div>
       <h2 class="anchorable mb-1"><a href="#examples" class="anchor" aria-label="Anchor" tabIndex="-1"><svg
   width="16"
@@ -230,6 +233,7 @@ assertEquals(outcome.ok, true);
 if (outcome.ok) {
   assertEquals(outcome.coders.map((coder) =&gt; coder.name), [&quot;arpData&quot;]);
   assertEquals(outcome.coders[0].requiredParams, 0);
+  assertEquals(outcome.entrypoint, import.meta.resolve(&quot;../arp/mod.ts&quot;));
 }
 </code><button class="copyButton" data-copy="import { assertEquals } from &quot;@std/assert&quot;;
 import { discoverCoders } from &quot;./discover.ts&quot;;
@@ -240,6 +244,7 @@ assertEquals(outcome.ok, true);
 if (outcome.ok) {
   assertEquals(outcome.coders.map((coder) =&gt; coder.name), [&quot;arpData&quot;]);
   assertEquals(outcome.coders[0].requiredParams, 0);
+  assertEquals(outcome.entrypoint, import.meta.resolve(&quot;../arp/mod.ts&quot;));
 }
 "><svg
   class="copy"

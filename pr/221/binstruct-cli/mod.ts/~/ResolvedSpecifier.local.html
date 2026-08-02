@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>ResolvedSpecifier.specifier - mod.ts - @binstruct&#x2F;cli documentation</title>
+  <title>ResolvedSpecifier.local - mod.ts - @binstruct&#x2F;cli documentation</title>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="doc-current-file" content="mod.ts">
@@ -49,7 +49,7 @@
 </span>
 
     <ul><li><span>.</span>
-            <a href="..&#x2F;..&#x2F;.&#x2F;mod.ts&#x2F;~&#x2F;ResolvedSpecifier.html" class="contextLink">ResolvedSpecifier</a></li><li>specifier</li></ul></ul>
+            <a href="..&#x2F;..&#x2F;.&#x2F;mod.ts&#x2F;~&#x2F;ResolvedSpecifier.html" class="contextLink">ResolvedSpecifier</a></li><li>local</li></ul></ul>
 </div>
 
     <div class="flex items-center gap-2">
@@ -113,11 +113,11 @@
     </div>
   </div>
 </nav>
-<div id="searchResults"></div><div id="content"><main class="symbolGroup" id="symbol_ResolvedSpecifier.specifier"><article>
+<div id="searchResults"></div><div id="content"><main class="symbolGroup" id="symbol_ResolvedSpecifier.local"><article>
       <div class="symbolTitle">
         <div>
           <div class="text-2xl leading-none break-all">
-            <span class="text-Property">property</span>&nbsp;<span class="font-bold">ResolvedSpecifier.specifier</span>
+            <span class="text-Property">property</span>&nbsp;<span class="font-bold">ResolvedSpecifier.local</span>
           </div></div><a
   class="sourceButton"
   href="file:&#x2F;&#x2F;&#x2F;home&#x2F;runner&#x2F;work&#x2F;jsr-monorepo&#x2F;jsr-monorepo&#x2F;packages&#x2F;@binstruct&#x2F;cli&#x2F;specifier.ts"><svg
@@ -143,7 +143,10 @@
   />
 </svg>
 </a>
-</div><div><div class="space-y-7" id=""><div class="markdown"><p>The module specifier to hand to <code>deno doc</code>.</p>
+</div><div><div class="space-y-7" id=""><div class="markdown"><p>Whether the specifier names something on this machine, i.e. resolved to a
+<code>file:</code> URL. True for a path and for a <code>file:</code> URL typed in full, and the
+condition under which the CLI imports the module URL <code>deno doc</code> reported
+rather than the specifier itself.</p>
 </div><section class="section"  id="type"><div>
       <h2 class="anchorable mb-1"><a href="#type" class="anchor" aria-label="Anchor" tabIndex="-1"><svg
   width="16"
@@ -167,10 +170,10 @@
   </defs>
 </svg>
 </a>
-Type</h2></div><div class="space-y-8"><div class=" docEntry" id="variable_resolvedspecifier_specifier">
+Type</h2></div><div class="space-y-8"><div class=" docEntry" id="variable_resolvedspecifier_local">
 
   <div class="docEntryHeader">
-    <div><code><span class="font-medium text-stone-500 dark:text-stone-200"><span class="td-kw">string</span></span>
+    <div><code><span class="font-medium text-stone-500 dark:text-stone-200"><span class="td-kw">boolean</span></span>
       </code>
     </div><a
   class="sourceButton"

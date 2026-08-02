@@ -227,18 +227,18 @@ const text = renderGuide({
   options: {
     heading: &quot;COMMANDS&quot;,
     items: [
-      { name: &quot;decode&quot;, summary: &quot;binary on stdin to JSON on stdout&quot; },
-      { name: &quot;encode&quot;, summary: &quot;JSON on stdin to binary on stdout&quot; },
+      { name: &quot;decode&quot;, summary: &quot;binary on stdin to JSON5 on stdout&quot; },
+      { name: &quot;encode&quot;, summary: &quot;JSON5 on stdin to binary on stdout&quot; },
     ],
   },
-  try: [&quot;binstruct arp decode &lt; arp.bin &gt; arp.json&quot;],
+  try: [&quot;binstruct arp decode &lt; arp.bin &gt; arp.json5&quot;],
 });
 
 assertEquals(text.split(&quot;\n\n&quot;), [
   &quot;NEXT  &lt;command&gt;\n  what to do with the bytes&quot;,
-  &quot;COMMANDS\n  decode  binary on stdin to JSON on stdout\n&quot; +
-  &quot;  encode  JSON on stdin to binary on stdout&quot;,
-  &quot;TRY\n  binstruct arp decode &lt; arp.bin &gt; arp.json&quot;,
+  &quot;COMMANDS\n  decode  binary on stdin to JSON5 on stdout\n&quot; +
+  &quot;  encode  JSON5 on stdin to binary on stdout&quot;,
+  &quot;TRY\n  binstruct arp decode &lt; arp.bin &gt; arp.json5&quot;,
 ]);
 </code><button class="copyButton" data-copy="import { assertEquals } from &quot;@std/assert&quot;;
 import { renderGuide } from &quot;./guide.ts&quot;;
@@ -248,18 +248,18 @@ const text = renderGuide({
   options: {
     heading: &quot;COMMANDS&quot;,
     items: [
-      { name: &quot;decode&quot;, summary: &quot;binary on stdin to JSON on stdout&quot; },
-      { name: &quot;encode&quot;, summary: &quot;JSON on stdin to binary on stdout&quot; },
+      { name: &quot;decode&quot;, summary: &quot;binary on stdin to JSON5 on stdout&quot; },
+      { name: &quot;encode&quot;, summary: &quot;JSON5 on stdin to binary on stdout&quot; },
     ],
   },
-  try: [&quot;binstruct arp decode &lt; arp.bin &gt; arp.json&quot;],
+  try: [&quot;binstruct arp decode &lt; arp.bin &gt; arp.json5&quot;],
 });
 
 assertEquals(text.split(&quot;\n\n&quot;), [
   &quot;NEXT  &lt;command&gt;\n  what to do with the bytes&quot;,
-  &quot;COMMANDS\n  decode  binary on stdin to JSON on stdout\n&quot; +
-  &quot;  encode  JSON on stdin to binary on stdout&quot;,
-  &quot;TRY\n  binstruct arp decode &lt; arp.bin &gt; arp.json&quot;,
+  &quot;COMMANDS\n  decode  binary on stdin to JSON5 on stdout\n&quot; +
+  &quot;  encode  JSON5 on stdin to binary on stdout&quot;,
+  &quot;TRY\n  binstruct arp decode &lt; arp.bin &gt; arp.json5&quot;,
 ]);
 "><svg
   class="copy"

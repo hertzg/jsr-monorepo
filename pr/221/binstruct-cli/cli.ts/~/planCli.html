@@ -172,7 +172,9 @@
 exit 1, or on stdout with exit 0 under <code>--help</code>. Guidance that reports a
 failure rather than a missing word stays on stderr either way.</p>
 <p>Every path validates the coder through discovery first, including a complete
-one: see <code>chooseCoder</code> for why the shortcut had to go.</p>
+one: see <code>chooseCoder</code> for why the shortcut had to go. A <code>run</code>
+plan's <code>specifier</code> is therefore the module discovery read, not necessarily
+the one that was typed — see <code>importSpecifier</code>.</p>
 </div><section class="section"  id="examples"><div>
       <h2 class="anchorable mb-1"><a href="#examples" class="anchor" aria-label="Anchor" tabIndex="-1"><svg
   width="16"
@@ -380,29 +382,29 @@ if (plan.kind === &quot;run&quot;) {
   </defs>
 </svg>
 </a>
-<h3 class="example-header"><div class="markdown"><p>A directory is refused rather than listed and then failed on</p>
+<h3 class="example-header"><div class="markdown"><p>A local package is run through the module <code>deno doc</code> resolved</p>
 </div></h3>
-  <div><div class="markdown"><pre class="highlight"><code class="language-ts">import { assertEquals, assertStringIncludes } from &quot;@std/assert&quot;;
+  <div><div class="markdown"><pre class="highlight"><code class="language-ts">import { assertEquals } from &quot;@std/assert&quot;;
 import { planCli } from &quot;./cli.ts&quot;;
 
-const plan = await planCli([&quot;./mypkg&quot;, &quot;decode&quot;]);
+const module = import.meta.resolve(&quot;../arp/mod.ts&quot;);
+const plan = await planCli([module, &quot;decode&quot;]);
 
-assertEquals(plan.kind, &quot;print&quot;);
-if (plan.kind === &quot;print&quot;) {
-  assertEquals(plan.code, 1);
-  assertStringIncludes(plan.text, &quot;it names a directory&quot;);
-  assertStringIncludes(plan.text, &quot;TRY\n  binstruct ./mypkg/mod.ts&quot;);
+assertEquals(plan.kind, &quot;run&quot;);
+if (plan.kind === &quot;run&quot;) {
+  assertEquals(plan.specifier, module);
+  assertEquals(plan.coder, &quot;arpData&quot;);
 }
-</code><button class="copyButton" data-copy="import { assertEquals, assertStringIncludes } from &quot;@std/assert&quot;;
+</code><button class="copyButton" data-copy="import { assertEquals } from &quot;@std/assert&quot;;
 import { planCli } from &quot;./cli.ts&quot;;
 
-const plan = await planCli([&quot;./mypkg&quot;, &quot;decode&quot;]);
+const module = import.meta.resolve(&quot;../arp/mod.ts&quot;);
+const plan = await planCli([module, &quot;decode&quot;]);
 
-assertEquals(plan.kind, &quot;print&quot;);
-if (plan.kind === &quot;print&quot;) {
-  assertEquals(plan.code, 1);
-  assertStringIncludes(plan.text, &quot;it names a directory&quot;);
-  assertStringIncludes(plan.text, &quot;TRY\n  binstruct ./mypkg/mod.ts&quot;);
+assertEquals(plan.kind, &quot;run&quot;);
+if (plan.kind === &quot;run&quot;) {
+  assertEquals(plan.specifier, module);
+  assertEquals(plan.coder, &quot;arpData&quot;);
 }
 "><svg
   class="copy"
@@ -612,7 +614,7 @@ Return Type</h2></div><div class="space-y-8"><div class=" docEntry" id="function
 </svg>
 </button><code></code></pre>
 </div></div><nav class="documentNavigation">
-          <h3>Document Navigation</h3><ul><li><a href="#examples" title="Examples">Examples</a></li><li><ul><li><a href="#example_0" title="An empty command line asks for a package, on stderr, with exit 1">An empty command line asks for a package, on stderr, with exit 1</a></li><li><a href="#example_1" title="A complete invocation resolves its shorthand and runs">A complete invocation resolves its shorthand and runs</a></li><li><a href="#example_2" title="A directory is refused rather than listed and then failed on">A directory is refused rather than listed and then failed on</a></li></ul></li><li><a href="#parameters" title="Parameters">Parameters</a></li><li><ul><li><a href="#function_plancli_0_parameter_args" title="args">args</a></li></ul></li><li><a href="#return-type" title="Return Type">Return Type</a></li></ul></nav></div>
+          <h3>Document Navigation</h3><ul><li><a href="#examples" title="Examples">Examples</a></li><li><ul><li><a href="#example_0" title="An empty command line asks for a package, on stderr, with exit 1">An empty command line asks for a package, on stderr, with exit 1</a></li><li><a href="#example_1" title="A complete invocation resolves its shorthand and runs">A complete invocation resolves its shorthand and runs</a></li><li><a href="#example_2" title="A local package is run through the module deno doc resolved">A local package is run through the module deno doc resolved</a></li></ul></li><li><a href="#parameters" title="Parameters">Parameters</a></li><li><ul><li><a href="#function_plancli_0_parameter_args" title="args">args</a></li></ul></li><li><a href="#return-type" title="Return Type">Return Type</a></li></ul></nav></div>
   </div></div>
 </div>
 </div>
