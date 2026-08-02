@@ -1,6 +1,6 @@
 # ADR 0003 — Targets the EU/GDPR `cgi_gdpr` firmware family; firmware-variant support is an open design problem
 
-**Status:** Accepted
+**Status:** Superseded by ADR 0004
 
 ## Context
 
@@ -76,8 +76,11 @@ target and call out variant support as an open problem.
 
 ## References
 
+- ADR 0004 — supersedes this ADR; resolves variant support as
+  pure `Dialect` values consumed by non-branching orchestrators
 - `mod.ts` — supported-models list and action discovery snippet
 - `authenticate.ts`, `execute.ts` — current single-firmware flow
-- `client/fetchCgiGdpr.ts` — the GDPR endpoint binding
+- `client/fetchCgiGdpr.ts` — the GDPR endpoint binding, absorbed
+  into `dialect/gdprText.ts` by ADR 0004
 - Issue [#82](https://github.com/hertzg/jsr-monorepo/issues/82)
   — TP-LINK NE200 5G outdoor modem support
