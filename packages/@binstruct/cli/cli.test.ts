@@ -191,6 +191,8 @@ Deno.test("parseCliArgs fills the three positionals in order", () => {
     version: false,
     docs: false,
     unknownFlags: [],
+    blankSlots: [],
+    extraArgs: [],
   });
 });
 
@@ -233,6 +235,8 @@ Deno.test("parseCliArgs leaves absent positionals undefined", () => {
     version: false,
     docs: false,
     unknownFlags: [],
+    blankSlots: [],
+    extraArgs: [],
   });
 
   assertEquals(parseCliArgs(["png"]).coder, undefined);
@@ -610,23 +614,142 @@ Deno.test("parseCliArgs keeps a numeric-looking word as typed", () => {
     version: false,
     docs: false,
     unknownFlags: [],
+    blankSlots: [],
+    extraArgs: [],
   });
 });
 
-Deno.test("parseCliArgs treats a blank word as a missing one", () => {
-  assertEquals(parseCliArgs(["png", "", "decode"]).coder, undefined);
-  assertEquals(parseCliArgs(["png", "", "decode"]).command, "decode");
-  assertEquals(parseCliArgs(["-p", "png", "-c", "   "]).coder, undefined);
-  assertEquals(parseCliArgs([""]).package, undefined);
-  assertEquals(parseCliArgs(["-p", ""]).package, undefined);
+Deno.test("parseCliArgs lets a blank word occupy the slot it was typed in", () => {
+  // Filtering blanks out of the positional list before filling the slots is the
+  // unknown-flag shift by another route: an argument the user typed silently
+  // changed the meaning of the ones after it.
+  const first = parseCliArgs(["", "decode"]);
+
+  assertEquals(first.package, "");
+  assertEquals(first.coder, undefined);
+  assertEquals(first.command, "decode");
+  assertEquals(first.blankSlots, ["<package>"]);
+
+  const second = parseCliArgs(["png", "", "decode"]);
+
+  assertEquals(second.package, "png");
+  assertEquals(second.coder, "");
+  assertEquals(second.command, "decode");
+  assertEquals(second.blankSlots, ["<coder>"]);
+
+  // Whitespace says nothing either, and the flag form takes the same route:
+  // `-p ""` used to leave the package slot open for the next word to fall into.
+  assertEquals(parseCliArgs(["-p", "png", "-c", "   "]).blankSlots, [
+    "<coder>",
+  ]);
+  assertEquals(parseCliArgs(["-p", "", "decode"]).blankSlots, [
+    "<package>",
+    "<coder>",
+  ]);
+  assertEquals(parseCliArgs(["png", "pngFile", "decode"]).blankSlots, []);
 });
 
-Deno.test("a blank coder word asks which coder instead of importing", async () => {
+Deno.test("parseCliArgs keeps the positionals it has no slot for", () => {
+  const forgotten = parseCliArgs(["arp", "arpData", "decode", "input.bin"]);
+
+  assertEquals(forgotten.package, "arp");
+  assertEquals(forgotten.coder, "arpData");
+  assertEquals(forgotten.command, "decode");
+  assertEquals(forgotten.extraArgs, ["input.bin"]);
+
+  assertEquals(parseCliArgs(["arp", "decode", "a", "b"]).extraArgs, ["a", "b"]);
+  assertEquals(parseCliArgs(["png", "pngFile", "decode"]).extraArgs, []);
+});
+
+Deno.test("a blank word is refused, and never shifts the package", async () => {
+  // `binstruct "" decode` read `decode` as the package and reported on
+  // jsr:@binstruct/decode — a package nobody named, from an argument that was
+  // dropped rather than answered.
+  const plan = printed(await planCli(["", "decode"]));
+
+  assertEquals(plan.stream, "stderr");
+  assertEquals(plan.code, 1);
+  assertStringIncludes(plan.text, "<package> is blank");
+  assertStringIncludes(plan.text, "still fills its slot, so nothing was run");
+  assertEquals(plan.text.includes("jsr:@binstruct/decode"), false);
+  assertEquals(plan.text.includes("cannot read"), false);
+  assertStringIncludes(plan.text, "OPTIONS");
+});
+
+Deno.test("a blank coder word is refused rather than inferred around", async () => {
+  // The same shift one slot along: the blank vanished, `decode` moved into the
+  // coder slot, was reserved as a command there, and the run went ahead with an
+  // inferred coder — a decode nobody asked for from a word nobody typed.
   const plan = printed(await planCli([PNG, "", "decode"]));
 
   assertEquals(plan.code, 1);
-  assertStringIncludes(plan.text, "NEXT  <coder>");
+  assertStringIncludes(plan.text, "<coder> is blank");
   assertEquals(plan.text.includes("no coder named ''"), false);
+
+  const inferred = printed(await planCli([ARP, "", "decode"]));
+
+  assertEquals(inferred.code, 1);
+  assertStringIncludes(inferred.text, "<coder> is blank");
+  assertEquals(inferred.text.includes("using coder"), false);
+});
+
+Deno.test("a blank word beats --version and --help to the answer", async () => {
+  const version = printed(await planCli(["", "--version"]));
+
+  assertEquals(version.stream, "stderr");
+  assertEquals(version.code, 1);
+  assertStringIncludes(version.text, "<package> is blank");
+
+  const help = printed(await planCli(["", "--help"]));
+
+  assertEquals(help.stream, "stderr");
+  assertEquals(help.code, 1);
+});
+
+Deno.test("an extra positional is named, not discarded", async () => {
+  // The forgotten `<`: the file was dropped where it stood and the CLI sat
+  // reading a terminal, with nothing on the screen to say input.bin had been
+  // ignored.
+  const plan = printed(
+    await planCli(["arp", "arpData", "decode", "input.bin"]),
+  );
+
+  assertEquals(plan.stream, "stderr");
+  assertEquals(plan.code, 1);
+  assertStringIncludes(plan.text, "unexpected argument: input.bin");
+  assertStringIncludes(plan.text, "takes three words at most");
+  assertStringIncludes(plan.text, "a file is named with a redirection");
+  assertStringIncludes(
+    plan.text,
+    "TRY\n  binstruct arp arpData decode < input.bin",
+  );
+});
+
+Deno.test("extra positionals are only guessed at when there is one", async () => {
+  // Two words past the third are anyone's guess, so the screen says what
+  // happened and offers no command it cannot vouch for.
+  const plan = printed(await planCli(["arp", "arpData", "decode", "a", "b"]));
+
+  assertEquals(plan.code, 1);
+  assertStringIncludes(plan.text, "unexpected arguments: a, b");
+  assertEquals(plan.text.includes("< a"), false);
+
+  // Nor is one guessed at when the words before it do not make a command.
+  const incomplete = printed(
+    await planCli(["arp", "arpData", "frobnicate", "input.bin"]),
+  );
+
+  assertEquals(incomplete.code, 1);
+  assertStringIncludes(incomplete.text, "unexpected argument: input.bin");
+  assertEquals(incomplete.text.includes("< input.bin"), false);
+});
+
+Deno.test("an extra positional writes nothing to stdout", async () => {
+  const run = await runCli([ARP, "arpData", "decode", "input.bin"]);
+
+  assertEquals(run.code, 1);
+  assertEquals(run.stdout, "");
+  assertStringIncludes(run.stderr, "unexpected argument: input.bin");
 });
 
 Deno.test("level 1 shows the package's own description", async () => {
@@ -1042,6 +1165,129 @@ Deno.test("a TRY line pastes back as one argument", async (t) => {
   }
 });
 
+/**
+ * Reads the `TRY` block of a rendered screen.
+ *
+ * @param text The rendered guidance
+ * @returns One entry per suggested command line, without its indent
+ */
+function tryLines(text: string): string[] {
+  const block = text.split("\nTRY\n")[1];
+  if (block === undefined) return [];
+
+  return block.split("\n\n")[0].split("\n").map((line) => line.trim())
+    .filter((line) => line.length > 0);
+}
+
+/**
+ * Reports the words of a `TRY` line a shell would not hand on as typed.
+ *
+ * The redirection operators are the only shell syntax a `TRY` line is allowed
+ * to carry, and they stand alone as `<` and `>`. Anything longer holding a
+ * shell metacharacter unquoted is a word the shell will act on instead of
+ * passing along — which is what `<coder>` was.
+ *
+ * @param line One suggested command line
+ * @returns The words that would not survive the paste
+ */
+function shellHazards(line: string): string[] {
+  return line.split(" ").filter((word) =>
+    word.length > 1 && !word.startsWith("'") && /[<>|&;$`()*?]/.test(word)
+  );
+}
+
+Deno.test("no TRY line carries shell syntax outside a redirection", async () => {
+  // `toolFailureGuide` put a bare `<coder>` in its TRY line, exempted from
+  // `shellWord` as if it were prose. To a shell it is an input redirection, so
+  // the promised command pasted back as a decode of a file called `coder`.
+  // Every screen that prints a TRY line is checked, not just that one.
+  const directory = await writeSpacedPackage();
+  try {
+    const plans = [
+      await planCli([]),
+      await planCli([PNG]),
+      await planCli([PNG, "pngFile"]),
+      await planCli([PNG, "pngfile"]),
+      await planCli([PNG, "pngFileChunks", "decode"]),
+      await planCli([`${directory}/spaced dir`, "decode"]),
+      await planCli(["arp", "arpData", "decode", "input.bin"]),
+    ];
+
+    // The guide that carried the metavariable is only reachable with discovery
+    // unavailable, which takes a subprocess, so it joins the scan from there.
+    const denied = await runCli([ARP], [
+      "--no-prompt",
+      "--allow-read",
+      "--allow-env",
+    ]);
+
+    assertStringIncludes(denied.stderr, "cannot list the coders");
+
+    const lines = [
+      ...plans.flatMap((plan) =>
+        plan.kind === "print" ? tryLines(plan.text) : []
+      ),
+      ...tryLines(denied.stderr),
+    ];
+
+    assertNotEquals(lines.length, 0);
+    for (const line of lines) {
+      assertEquals(shellHazards(line), [], line);
+    }
+  } finally {
+    await Deno.remove(directory, { recursive: true });
+  }
+});
+
+Deno.test("the escape-hatch TRY line pastes back as a placeholder", async () => {
+  // The one TRY line the CLI cannot finish, since the missing word is the one
+  // it could not look up. Bare, `<coder>` is an input redirection: the line
+  // pasted back as `binstruct ./mypkg/mod.ts decode`, reading a file called
+  // `coder` — a different command, and one that could exit 0.
+  const directory = await writeLocalPackage();
+  try {
+    await Deno.writeTextFile(`${directory}/coder`, "not a coder\n");
+    await Deno.writeFile(`${directory}/input.bin`, new Uint8Array([7]));
+
+    const denied = await runCli(
+      ["./mypkg/mod.ts"],
+      ["--no-prompt", "--allow-read", "--allow-env"],
+      directory,
+    );
+
+    assertEquals(denied.code, 1);
+    assertStringIncludes(denied.stderr, "cannot list the coders");
+
+    const suggestion = denied.stderr
+      .split("TRY\n  binstruct ")[1]
+      .split("\n")[0];
+
+    assertEquals(
+      suggestion,
+      `./mypkg/mod.ts '<coder>' decode < input.bin > output.json5`,
+    );
+
+    const shell = new Deno.Command("sh", {
+      args: ["-c", `"$0" run -A "$1" ${suggestion}`, Deno.execPath(), CLI],
+      cwd: directory,
+      stdout: "piped",
+      stderr: "piped",
+    });
+    const output = await shell.output();
+
+    // The placeholder reaches the CLI as a word and is refused by name, rather
+    // than being eaten by the shell and decoding whatever `coder` held.
+    assertNotEquals(output.code, 0);
+    assertStringIncludes(
+      new TextDecoder().decode(output.stderr),
+      "no coder named '<coder>'",
+    );
+    assertEquals(await Deno.readTextFile(`${directory}/output.json5`), "");
+  } finally {
+    await Deno.remove(directory, { recursive: true });
+  }
+});
+
 Deno.test("a quoted TRY line survives a real shell", async () => {
   // The point of the quoting, end to end: the suggestion is pasted back into a
   // shell, word-split by it, and still has to decode.
@@ -1373,6 +1619,37 @@ Deno.test("a colon inside a path segment is a path, not a scheme", async () => {
     assertEquals(refused.code, 1);
     assertEquals(refused.stdout, "");
     assertStringIncludes(refused.stderr, "names a directory");
+  } finally {
+    await Deno.remove(directory, { recursive: true });
+  }
+});
+
+Deno.test("a node: word is not a scheme, and a local file of that name loads", async () => {
+  // `node:` and `data:` were in the scheme set because `import()` resolves
+  // them, which is the wrong question: the set is the schemes a *package* can
+  // live behind, and a runtime built-in hosts none. Keeping them was the
+  // discovery-versus-execution divergence a third time — `deno doc` resolved a
+  // positional `node:evil.ts` against the working directory and listed the
+  // local file's coder, then `import()` asked for a built-in module and died
+  // with `No such built-in module: node:evil.ts`.
+  const directory = await Deno.realPath(await Deno.makeTempDir());
+  try {
+    await Deno.writeTextFile(
+      `${directory}/node:evil.ts`,
+      coderModule("evilStruct", ["a"]),
+    );
+
+    const run = await runCli(
+      ["node:evil.ts", "decode"],
+      ["-A"],
+      directory,
+      new Uint8Array([7]),
+    );
+
+    assertEquals(run.code, 0);
+    assertStringIncludes(run.stdout, "7");
+    assertStringIncludes(run.stderr, "package: node:evil.ts → file://");
+    assertEquals(run.stderr.includes("No such built-in module"), false);
   } finally {
     await Deno.remove(directory, { recursive: true });
   }

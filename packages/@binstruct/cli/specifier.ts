@@ -14,8 +14,8 @@
  * | `png`, `wav@0.2.0`                          | bare         | `jsr:@binstruct/png`    |
  *
  * Both explicit rules are **closed sets**, and everything left over is a path.
- * A scheme is one of {@linkcode MODULE_SCHEMES}, the seven Deno resolves a
- * module under. A JSR or npm coordinate is exactly one of `name`,
+ * A scheme is one of {@linkcode MODULE_SCHEMES}, the five a *package* can live
+ * behind. A JSR or npm coordinate is exactly one of `name`,
  * `name@version`, `@scope/name`, `@scope/name@version` or
  * `@scope/name/sub-entrypoint`, and every one of those either starts with `@`
  * or contains no `/` at all — so **a non-scheme input that contains `/` and
@@ -47,7 +47,7 @@
 import { resolve, toFileUrl } from "@std/path";
 
 /**
- * Every scheme Deno resolves a module specifier under.
+ * Every scheme a coder package can live behind.
  *
  * A **closed set**, not a pattern. `^[a-z][a-z0-9+.-]+:` accepted any word
  * before a colon, so `my:dir/mod.ts` — a perfectly ordinary relative path whose
@@ -56,8 +56,20 @@ import { resolve, toFileUrl } from "@std/path";
  * the path it is. That is the discovery-versus-execution divergence again, in
  * one more spelling, and it is the same open-predicate mistake the coordinate
  * rule made: the set of things that are *not* schemes is unbounded, the set of
- * schemes is seven long. Anything else carrying a colon falls through to the
+ * schemes is five long. Anything else carrying a colon falls through to the
  * `/` rule and becomes a path, which is what `deno doc` already thinks it is.
+ *
+ * `node:` and `data:` are **not** in the set, though `import()` resolves both.
+ * The set is the schemes a package can be *hosted* at, and neither hosts one: a
+ * `node:` specifier names a runtime built-in and a `data:` one carries inline
+ * source. Admitting them bought nothing and cost the same divergence a third
+ * time, because `deno doc` reads a positional `node:…` against the working
+ * directory while `import()` reads it as a built-in — so a local file called
+ * `node:evil.ts` was discovered on disk, announced its coder, and then died in
+ * `No such built-in module`. Without them `node:fs` is a bare name that misses
+ * in the registry, `node:evil.ts` is the local file it is, and
+ * `data:text/plain,x` holds a slash and is a path: three clean refusals in
+ * place of one divergence.
  *
  * Membership is case-sensitive, so `JSR:@binstruct/png` is not one — it holds a
  * slash outside a scope and is therefore a path, exactly as `c:/tmp/pkg` is.
@@ -68,8 +80,6 @@ const MODULE_SCHEMES: readonly string[] = [
   "http:",
   "https:",
   "file:",
-  "node:",
-  "data:",
 ];
 
 /**
@@ -136,8 +146,8 @@ const IMPLIED_SCOPE = "@binstruct/";
  * Which resolution rule matched an input.
  *
  * - `"scheme"` — the input opened with one of {@linkcode MODULE_SCHEMES}
- *   (`jsr:`, `npm:`, `http:`, `https:`, `file:`, `node:`, `data:`). A colon
- *   that is not one of those is just a character in a path.
+ *   (`jsr:`, `npm:`, `http:`, `https:`, `file:`). A colon that is not one of
+ *   those is just a character in a name or a path.
  * - `"scoped"` — the input named a scope and package, without a scheme.
  * - `"path"` — the input pointed somewhere on disk: it held a `/` without being
  *   scoped, or began with `.`, or ended in a module extension. A file and a
@@ -318,13 +328,14 @@ function expand(input: string, form: SpecifierForm): string {
  * );
  * ```
  *
- * @example Only a known scheme is a scheme; any other colon is part of a path
+ * @example Only a package-hosting scheme is a scheme; any other colon is ordinary
  * ```ts
  * import { assertEquals } from "@std/assert";
  * import { resolveSpecifier } from "./specifier.ts";
  *
- * assertEquals(resolveSpecifier("node:fs").form, "scheme");
- * assertEquals(resolveSpecifier("data:text/plain,x").form, "scheme");
+ * assertEquals(resolveSpecifier("node:fs").form, "bare");
+ * assertEquals(resolveSpecifier("node:evil.ts").form, "path");
+ * assertEquals(resolveSpecifier("data:text/plain,x").form, "path");
  * assertEquals(resolveSpecifier("my:dir/mod.ts").form, "path");
  * assertEquals(resolveSpecifier("gopher:x").form, "bare");
  * ```

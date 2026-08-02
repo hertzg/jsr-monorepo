@@ -68,14 +68,42 @@ The `TRY` lines follow the same rule: a suggestion whose package word starts
 with `-` is written with the separator, so pasting it back runs the command it
 promises (`packageWord` in `cli.ts`, ADR 0004).
 
-**An unrecognised flag is refused, not ignored.** Only `-p/--package`,
-`-c/--coder`, `--docs`, `-h/--help` and `-v/--version` exist. Anything else
-consumes a word — its value — and every positional behind it shifts, so
-`binstruct --format png decode` read `decode` as the package and answered
-confidently about `jsr:@binstruct/decode`. The refusal names the flag, goes to
-stderr, exits 1 and leaves stdout untouched, like every other diagnostic; it is
-checked before `--help` and `--version`, since a version banner for a command
-line the parser did not understand reports success for one that failed.
+**An argument the parser cannot use is refused, not ignored.** Three shapes
+qualify, and they share a screen — the level 0 guidance, the flag list from
+`--help` as its footer, and the notes naming what was not understood — because
+they share a consequence: what was typed is not what the CLI would act on. All
+three are checked before `--help` and `--version`, since a version banner for a
+command line the parser did not understand reports success for one that failed.
+
+- **An unrecognised flag.** Only `-p/--package`, `-c/--coder`, `--docs`,
+  `-h/--help` and `-v/--version` exist. Anything else consumes a word — its
+  value — and every positional behind it shifts, so
+  `binstruct --format png
+  decode` read `decode` as the package and answered
+  confidently about `jsr:@binstruct/decode`.
+- **A blank word.** `binstruct "" decode` did the same thing by a quieter route:
+  the blank was filtered out of the positional list before the slots were
+  filled, `decode` slid into the package slot, and the CLI reported on
+  `jsr:@binstruct/decode` again. `-p ""` did it too, and
+  `binstruct png ""
+  decode` ran an inferred decode nobody had asked for. **A
+  blank word is an argument**: it occupies the slot it was typed into — which is
+  the only way the words after it keep the meaning they were typed with — and is
+  then refused by the name of that slot. Blank-means-missing was a convenience
+  that cost the same shift the flag rule had just closed.
+- **A word past the third.** There are three slots and no fourth, and an extra
+  positional used to be discarded where it stood.
+  `binstruct arp arpData decode
+  input.bin` — the `<` forgotten — sat waiting
+  on the terminal for the bytes in the file it had just dropped, with nothing on
+  the screen to say so. The refusal names the words it could not place and, when
+  there is exactly one and the three slots before it are usable, offers the
+  redirection that was probably meant:
+  `TRY binstruct arp arpData decode < input.bin`. Two extra words are anyone's
+  guess, so that screen says what happened and offers nothing.
+
+Each refusal goes to stderr, exits 1 and leaves stdout untouched, like every
+other diagnostic.
 
 ## Consequences
 
@@ -103,11 +131,16 @@ line the parser did not understand reports success for one that failed.
 - **A mistyped flag now fails instead of nearly working.** It used to run
   something; it now names the flag and stops. This is louder, and it is the only
   way the word in the package slot is the word that was typed.
+- **A blank argument is louder than it was, and `binstruct -p` no longer opens
+  the package screen** — it says `<package>` is blank. Both are the price of the
+  rule that a word the user typed never changes what the words after it mean.
+- **A fourth positional fails instead of vanishing.** Anyone who was passing an
+  input file as an argument and getting an empty read now gets told why.
 
 ## References
 
-- `cli.ts` — `parseCliArgs`, `planCli`, `present`, `unknownFlagGuide`,
-  `packageWord`
+- `cli.ts` — `parseCliArgs`, `planCli`, `present`, `unusableArgumentGuide` and
+  the three refusals built on it, `packageWord`
 - `guide.ts` — `renderGuide`, the one renderer all three levels share
 - `@binstruct/cli` ADR 0002 — coder discovery via `deno doc --json`
 - `@binstruct/cli` ADR 0003 — the bundled package registry

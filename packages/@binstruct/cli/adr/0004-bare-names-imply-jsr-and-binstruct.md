@@ -32,9 +32,9 @@ and answered by the filesystem, not by the table.
 
 **Both explicit rules are closed sets, and everything left over is a path.**
 
-**A scheme is one of seven**, the schemes Deno resolves a module specifier
-under: `jsr:`, `npm:`, `http:`, `https:`, `file:`, `node:`, `data:`. Membership,
-not a pattern, and case-sensitive.
+**A scheme is one of five**, the schemes a coder package can live behind:
+`jsr:`, `npm:`, `http:`, `https:`, `file:`. Membership, not a pattern, and
+case-sensitive.
 
 The rule was `^[a-z][a-z0-9+.-]+:` — any word of two or more lowercase
 characters before a colon — and it leaked in exactly the way the coordinate rule
@@ -55,10 +55,24 @@ path, which is what `deno doc` already thought it was; a colon with no slash
 (`gopher:x`, `ab:x`, `c:`) falls all the way through to a bare name, as `c:`
 always did.
 
-`node:` and `data:` are in the set because `import()` resolves them, which is
-what a specifier is for. `deno doc` happens to read a _positional_ `node:fs` as
-a relative file path and fail; the result either way is a refusal naming the
-specifier, never output from a package nobody asked about.
+`node:` and `data:` are **not** in the set, though `import()` resolves both.
+They were, on the reasoning that a specifier is what `import()` takes — the
+wrong question. The set is the schemes a _package_ can be hosted at, and neither
+hosts one: `node:` names a runtime built-in and `data:` carries inline source.
+Admitting them bought nothing and cost the divergence a third time, because the
+two consumers read them differently: `deno doc` resolves a positional `node:…`
+against the working directory, `import()` treats it as a built-in. A local file
+named `node:evil.ts` was therefore discovered on disk, announced its coder, and
+died in `No such built-in module: node:evil.ts` — discovery and execution
+looking at two different things, which is the failure this table exists to make
+impossible.
+
+Out of the set, each falls where it belongs. `node:fs` and `node:dir` hold no
+slash and no module extension, so they are bare names, expand to
+`jsr:@binstruct/node:fs` and miss in the registry. `node:evil.ts` ends in a
+module extension, so it is the local file it is. `data:text/plain,x` holds a
+slash, so it is a path. Three clean refusals — or, in the third case, the right
+answer — in place of one divergence.
 
 **The table enumerates the registry coordinate, and calls what is left a path.**
 A JSR or npm coordinate is exactly one of:
@@ -213,10 +227,23 @@ follows it too.
 Every `TRY` line is **shell-quoted**, by `shellWord` in `guide.ts`. A `TRY` line
 is a promise that the command works when pasted, and spaces are ordinary in a
 path: `binstruct "./spaced dir"` answered `TRY binstruct ./spaced dir/mod.ts`,
-which pastes as two arguments and dies on `no such path: ./spaced`. Only the
-words carrying user data are quoted — the redirections and the `<coder>`
-metavariable are shell syntax and prose, and quoting either would break the
-paste this protects.
+which pastes as two arguments and dies on `no such path: ./spaced`. **The
+redirections are the only shell syntax a `TRY` line carries, and the only part
+of it left bare.**
+
+A **metavariable is not an exception to that**, though it was written as one.
+The escape-hatch line of a failed listing is the one suggestion the CLI cannot
+finish — the missing word is the word it could not look up — so it leaves
+`<coder>` for the user, and `<coder>` is an input redirection to a shell. The
+promised `binstruct png <coder> decode < input.bin > output.json5` pasted back
+as `binstruct png decode` reading a file called `coder`: a different command,
+silently, and one that can exit 0. It was exempted from `shellWord` as prose; it
+is not prose, it is a word the user is meant to replace. `metavariable` in
+`guide.ts` renders it quoted, so the shell hands it on whole and the CLI refuses
+it by name — the worst a line nobody edited should do. Nothing else the CLI
+prints may carry shell syntax outside a redirection, and `cli.test.ts` scans the
+`TRY` lines of every screen that prints one, the failed listing included, rather
+than trusting the call sites.
 
 Surviving the shell is half of it: the line then has to survive **this CLI's own
 argument parsing**, which `shellWord` knows nothing about. A module file may be
@@ -282,11 +309,11 @@ teaches it.
   and takes the same fix. It is inherent to the shorthand: a leading `@` cannot
   mean both things.
 - **Classification is now closed, and enumerated.** Both explicit rules are
-  finite sets — seven schemes, five coordinate shapes — rather than patterns
-  over the ways a path can be spelled, so a novel path spelling can fall through
-  to neither the registry nor the pass-through; and the space is written out row
-  by row in `specifier.test.ts`, so a gap shows up as a missing row rather than
-  as silent output from the wrong package.
+  finite sets — five schemes, five coordinate shapes — rather than patterns over
+  the ways a path can be spelled, so a novel path spelling can fall through to
+  neither the registry nor the pass-through; and the space is written out row by
+  row in `specifier.test.ts`, so a gap shows up as a missing row rather than as
+  silent output from the wrong package.
 - **`binstruct ./pkg` never works, whatever is in `./pkg`**, and neither does
   any other spelling of the same directory. The cost is one extra word for
   everyone with a conventional layout; the price of the alternative was
@@ -306,6 +333,12 @@ teaches it.
   the short form would hide the expansion the shorthand depends on.
 - **Cross-scope discovery is deliberately absent.** `binstruct xhb` will not
   find `@hertzg/xhb` for you, per ADR 0003.
+- **A scheme the runtime resolves but no package lives at is refused, not
+  followed.** `binstruct node:fs` is a registry miss and `binstruct data:…` is a
+  path that is not there. Both used to be passed through to `import()` on the
+  strength of a `deno doc` run that had read something else entirely. A refusal
+  naming what was typed is the worst case; the alternative was the wrong module
+  loading under the right name.
 - **A scheme outside the set is not a scheme.** Anything else with a colon is
   classified on its own terms, so `c:` and `gopher:x` are names, `c:/tmp/pkg`
   and `my:dir/mod.ts` are paths, and `JSR:@binstruct/png` — membership is
@@ -315,8 +348,9 @@ teaches it.
 - **A `TRY` line may carry quotes, and may carry `--`.** A path holding a space
   is rendered single-quoted; a package word starting with `-` is preceded by the
   end-of-flags separator, since a module file may be called `-dash.ts` and the
-  refusal above is what offers its name. Both are noisier to read and both are
-  the only forms that survive being pasted (ADR 0001).
+  refusal above is what offers its name; and a placeholder is quoted as
+  `'<coder>'`, since bare it is a redirection. All three are noisier to read and
+  all three are the only forms that survive being pasted (ADR 0001).
 - **The directory listing costs one `stat` per candidate.** Paid only on the
   refusal path, and it is what makes the offered names names that load.
 
@@ -326,7 +360,8 @@ teaches it.
   `isModulePath`
 - `specifier.test.ts` — the enumerated classification space
 - `target.ts` — `inspectLocalTarget`, the stat that decides; `modulesInside`
-- `guide.ts` — `shellWord`, which makes a `TRY` line survive the shell
+- `guide.ts` — `shellWord`, which makes a `TRY` line survive the shell;
+  `metavariable`, which makes a placeholder survive it too
 - `cli.ts` — `packageWord`, which makes it survive this CLI's own parser;
   `directoryGuide`, `missingPathGuide`, where refusal is rendered
 - `loader.ts` — `loadCoder`, which receives the specifier to import

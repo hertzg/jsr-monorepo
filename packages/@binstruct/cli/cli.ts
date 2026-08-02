@@ -60,7 +60,13 @@ import {
   type SymbolDocsOutcome,
   type ToolFailure,
 } from "./discover.ts";
-import { type Guide, nearestName, renderGuide, shellWord } from "./guide.ts";
+import {
+  type Guide,
+  metavariable,
+  nearestName,
+  renderGuide,
+  shellWord,
+} from "./guide.ts";
 import { KNOWN_PACKAGES } from "./registry.ts";
 import { type ResolvedSpecifier, resolveSpecifier } from "./specifier.ts";
 import { inspectLocalTarget, type LocalTarget } from "./target.ts";
@@ -135,6 +141,23 @@ export interface CliOptions {
    * while this is non-empty.
    */
   readonly unknownFlags: readonly string[];
+  /**
+   * Slots filled with a word that says nothing, named as `<package>` and so on.
+   *
+   * A blank argument is still an argument. Dropping it made the words after it
+   * mean something else — `binstruct "" decode` read `decode` as the package —
+   * which is the shift an unknown flag causes, by another route. Nothing runs
+   * while this is non-empty.
+   */
+  readonly blankSlots: readonly string[];
+  /**
+   * Positionals beyond the third, as typed.
+   *
+   * There are three slots and no fourth. A word past them was discarded in
+   * silence, so `binstruct arp arpData decode input.bin` — a forgotten `<` —
+   * sat reading a terminal with nothing to say it had ignored the file.
+   */
+  readonly extraArgs: readonly string[];
 }
 
 /**
@@ -218,15 +241,8 @@ function spoken(value: string): boolean {
   return value.trim().length > 0;
 }
 
-/**
- * Reads a flag-filled slot, treating a blank value as an unfilled one.
- *
- * @param value The flag's value, absent when the flag was not given
- * @returns The value, or `undefined` when it was absent or blank
- */
-function filled(value: string | undefined): string | undefined {
-  return value !== undefined && spoken(value) ? value : undefined;
-}
+/** The three slots, in the order positionals fill them. */
+const SLOT_WORDS = ["<package>", "<coder>", "<command>"] as const;
 
 /**
  * Colour escapes, which `deno` emits on stderr even when it is piped.
@@ -254,10 +270,21 @@ function firstLine(text: string): string | undefined {
  * the coder is left to be inferred (ADR 0005).
  *
  * Every slot is text: positionals are read as strings, so `007` stays `007`
- * rather than becoming the number `7` on its way to the specifier resolver. A
- * slot that is blank or nothing but whitespace is *missing*, not empty, so
- * `binstruct png "" decode` asks which coder rather than importing the package
- * to discover that the word said nothing.
+ * rather than becoming the number `7` on its way to the specifier resolver.
+ *
+ * **A blank word fills its slot, and is then refused on its own terms.** It
+ * used to be dropped as if it had never been typed, which is not a smaller
+ * version of the same thing: `binstruct "" decode` slid `decode` into the
+ * package slot and answered confidently about `jsr:@binstruct/decode`, and
+ * `-p ""` did it too. That is the shift an unknown flag causes, arriving by
+ * another route, and it takes the same answer — the slots it landed in are
+ * named in {@linkcode CliOptions.blankSlots} and nothing runs.
+ *
+ * **There is no fourth slot, and a word that reaches for one is refused.**
+ * Extra positionals used to be dropped where they stood, so
+ * `binstruct arp arpData decode input.bin` — the `<` forgotten — waited on a
+ * terminal for input that was sitting in the file it had just discarded. They
+ * are collected in {@linkcode CliOptions.extraArgs} instead.
  *
  * **A word starting with `-` is a flag, and `--` is how you say it is not.**
  * Everything after the separator fills a slot whatever it starts with, so
@@ -289,6 +316,8 @@ function firstLine(text: string): string | undefined {
  *   version: false,
  *   docs: false,
  *   unknownFlags: [],
+ *   blankSlots: [],
+ *   extraArgs: [],
  * });
  *
  * const flagged = parseCliArgs(["-p", "png", "-c", "pngFile", "decode"]);
@@ -325,6 +354,23 @@ function firstLine(text: string): string | undefined {
  *   "--format",
  * ]);
  * ```
+ *
+ * @example A blank word keeps its slot, and a fourth word is kept as well
+ * ```ts
+ * import { assertEquals } from "@std/assert";
+ * import { parseCliArgs } from "./cli.ts";
+ *
+ * const blank = parseCliArgs(["", "decode"]);
+ *
+ * assertEquals(blank.package, "");
+ * assertEquals(blank.command, "decode");
+ * assertEquals(blank.blankSlots, ["<package>"]);
+ *
+ * const extra = parseCliArgs(["arp", "arpData", "decode", "input.bin"]);
+ *
+ * assertEquals(extra.command, "decode");
+ * assertEquals(extra.extraArgs, ["input.bin"]);
+ * ```
  */
 export function parseCliArgs(args: string[]): CliOptions {
   const unknownFlags: string[] = [];
@@ -344,21 +390,26 @@ export function parseCliArgs(args: string[]): CliOptions {
     },
   });
 
-  const positionals = (parsed._ as string[]).filter(spoken);
-  const packageInput = filled(parsed.package) ?? positionals.shift();
-  const coder = filled(parsed.coder) ??
+  const positionals = [...(parsed._ as string[])];
+  const packageInput = parsed.package ?? positionals.shift();
+  const coder = parsed.coder ??
     (positionals[0] !== undefined && !isCommandName(positionals[0])
       ? positionals.shift()
       : undefined);
+  const command = positionals.shift();
 
   return {
     package: packageInput,
     coder,
-    command: positionals.shift(),
+    command,
     help: parsed.help,
     version: parsed.version,
     docs: parsed.docs,
     unknownFlags,
+    blankSlots: [packageInput, coder, command].flatMap((value, slot) =>
+      value !== undefined && !spoken(value) ? [SLOT_WORDS[slot]] : []
+    ),
+    extraArgs: positionals,
   };
 }
 
@@ -387,32 +438,115 @@ function packageGuide(
 }
 
 /**
+ * Builds the refusal for a command line the parser could not use as typed.
+ *
+ * Three mistakes end up here — a flag that does not exist, a word that says
+ * nothing, a word past the third — and they share a screen because they share a
+ * consequence: what the user typed is not what the CLI would act on. The answer
+ * is the level 0 screen, since which word was meant to be the package is
+ * exactly what is no longer known, and the footer is the `--help` recap
+ * verbatim, so the calling convention shown here cannot drift from the one
+ * `--help` teaches.
+ *
+ * @param notes What was not understood, and what it would have done
+ * @param attempt A paste-ready correction, when the CLI can name one
+ * @returns The guide
+ */
+function unusableArgumentGuide(
+  notes: readonly string[],
+  attempt?: string,
+): Guide {
+  const guide = packageGuide({ diagnostic: true, notes });
+  return {
+    ...guide,
+    try: attempt === undefined ? guide.try : [attempt],
+    footer: USAGE_FOOTER,
+  };
+}
+
+/**
  * Builds the guide for flags the parser does not know.
  *
  * An unrecognised flag is not a harmless extra word. `parseArgs` accepted it,
  * consumed whatever followed it as its value, and handed back a positional list
  * one word short — so `binstruct --format json png` reported on `json`, with
- * `png` never having been the package. The answer is the level 0 screen,
- * because a parse that shifted is a parse nothing downstream may be built on:
- * which word was meant to be the package is exactly what is no longer known.
- *
- * The footer is the `--help` recap verbatim, so the list of flags that *do*
- * exist is the same list `--help` prints and cannot drift from it.
+ * `png` never having been the package.
  *
  * @param flags The unrecognised flags, as typed
  * @returns The guide
  */
 function unknownFlagGuide(flags: readonly string[]): Guide {
-  return {
-    ...packageGuide({
-      diagnostic: true,
-      notes: [
-        `unknown option${flags.length === 1 ? "" : "s"}: ${flags.join(", ")}`,
-        "an unknown flag shifts which word is the package, so nothing was run",
-      ],
-    }),
-    footer: USAGE_FOOTER,
-  };
+  return unusableArgumentGuide([
+    `unknown option${flags.length === 1 ? "" : "s"}: ${flags.join(", ")}`,
+    "an unknown flag shifts which word is the package, so nothing was run",
+  ]);
+}
+
+/**
+ * Builds the guide for a slot filled with a word that says nothing.
+ *
+ * The same shift as an unknown flag, by a quieter route. A blank positional was
+ * filtered out of the list before the slots were filled, so `binstruct "" decode`
+ * put `decode` in the package slot and answered about `jsr:@binstruct/decode` —
+ * an argument the user typed silently changing the meaning of the ones after it.
+ * A blank word now occupies the slot it was typed into, which is the only way
+ * the word after it keeps the meaning it was typed with, and is refused here by
+ * the name of that slot.
+ *
+ * @param slots The slots that were given a blank word, e.g. `<coder>`
+ * @returns The guide
+ */
+function blankArgumentGuide(slots: readonly string[]): Guide {
+  return unusableArgumentGuide([
+    `${slots.join(" and ")} ${
+      slots.length === 1 ? "is" : "are"
+    } blank, and a blank word names nothing`,
+    "a blank argument still fills its slot, so nothing was run",
+  ]);
+}
+
+/**
+ * Builds the guide for positionals past the third.
+ *
+ * There are three slots and no fourth, and a word reaching for one used to
+ * vanish where it stood. The likely spelling is a forgotten redirection:
+ * `binstruct arp arpData decode input.bin` waits on the terminal for the bytes
+ * that are sitting in the file it discarded, and nothing on the screen says so.
+ *
+ * The correction is offered as a `TRY` line only when there is exactly one
+ * extra word and the three slots before it are usable — that is the case where
+ * the missing `<` is the whole story and the line can be written out in full.
+ * With two extra words it is anyone's guess what was meant, so the notes say
+ * what happened and stop.
+ *
+ * @param options The parsed command line, for the slots that were understood
+ * @returns The guide
+ */
+function extraArgumentGuide(options: CliOptions): Guide {
+  const extra = options.extraArgs;
+  const { package: packageInput, coder, command } = options;
+  const complete = packageInput !== undefined && spoken(packageInput) &&
+    command !== undefined && isCommandName(command) &&
+    (coder === undefined || spoken(coder));
+
+  const words = [
+    packageInput === undefined ? undefined : packageWord(packageInput),
+    coder === undefined ? undefined : shellWord(coder),
+    command,
+  ].filter((word) => word !== undefined).join(" ");
+
+  return unusableArgumentGuide(
+    [
+      `unexpected argument${extra.length === 1 ? "" : "s"}: ${
+        extra.map(shellWord).join(", ")
+      }`,
+      `${PROGRAM} takes three words at most: <package> <coder> <command>`,
+      "input is read from stdin, so a file is named with a redirection",
+    ],
+    complete && extra.length === 1
+      ? `${PROGRAM} ${words} < ${shellWord(extra[0])}`
+      : undefined,
+  );
 }
 
 /**
@@ -866,7 +1000,11 @@ function blamesSpecifier(stderr: string): boolean {
  *
  * Discovery is the one part of the CLI that needs `--allow-run=deno`, so this
  * screen always carries the escape hatch: naming the coder yourself works
- * whether or not the listing does.
+ * whether or not the listing does. It is the one `TRY` line the CLI cannot
+ * finish, since the missing word is the one it could not look up, so the word
+ * is left as a quoted placeholder ({@linkcode metavariable}) — bare, `<coder>`
+ * is an input redirection, and the promised line pasted back as a decode of a
+ * file called `coder`.
  *
  * @param resolved The package as typed and as resolved
  * @param header The header block, absent when the caller announced the specifier already
@@ -895,11 +1033,12 @@ function toolFailureGuide(
       empty: "unknown — nothing could be listed",
     },
     try: [
-      `${PROGRAM} ${
-        packageWord(resolved.short)
-      } <coder> decode < input.bin > output.json5`,
+      `${PROGRAM} ${packageWord(resolved.short)} ${
+        metavariable("coder")
+      } decode < input.bin > output.json5`,
     ],
     footer: [
+      `the ${metavariable("coder")} above is a placeholder: put the name there`,
       "naming the coder yourself needs no permissions and always works;",
       "only the listing above is unavailable.",
     ],
@@ -1149,11 +1288,13 @@ function withoutSharedPreamble(first: string, second: string): string {
  * exit 1, or on stdout with exit 0 under `--help`. Guidance that reports a
  * failure rather than a missing word stays on stderr either way.
  *
- * An unrecognised flag is refused before anything else is read, `--help` and
- * `--version` included. It consumed a word on its way through the parser, so
- * the positionals behind it shifted and the package slot no longer holds what
- * was typed — and answering confidently about a package nobody named is the
- * defect class this whole module is built to avoid.
+ * An argument the parser could not use is refused before anything else is read,
+ * `--help` and `--version` included: an unrecognised flag, a blank word, a word
+ * past the third slot. The first two shift what the package is — the flag by
+ * swallowing the next word, the blank by having been dropped — and the third
+ * used to disappear without a word. Answering confidently about a package
+ * nobody named, or about bytes that never arrived, is the defect class this
+ * whole module is built to avoid.
  *
  * A local package argument is inspected before any of that, and a directory is
  * refused — see {@linkcode directoryGuide}. Everything downstream may therefore
@@ -1249,6 +1390,14 @@ export async function planCli(args: string[]): Promise<CliPlan> {
 
   if (options.unknownFlags.length > 0) {
     return present(unknownFlagGuide(options.unknownFlags), options.help);
+  }
+
+  if (options.blankSlots.length > 0) {
+    return present(blankArgumentGuide(options.blankSlots), options.help);
+  }
+
+  if (options.extraArgs.length > 0) {
+    return present(extraArgumentGuide(options), options.help);
   }
 
   if (options.version) {

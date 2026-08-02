@@ -8,7 +8,8 @@
  * - **`NEXT`** — the missing word and one line on what it means.
  * - **an options block** — the legal values, each with its one-line doc.
  * - **`TRY`** — a paste-ready command one step further along, built by the
- *   caller from words this module can make shell-safe ({@linkcode shellWord}).
+ *   caller from words this module can make shell-safe ({@linkcode shellWord},
+ *   and {@linkcode metavariable} for the ones the user has to fill in).
  *
  * This module owns the shape of those blocks and nothing else. It performs no
  * I/O, spawns nothing and reads no arguments: {@linkcode renderGuide} turns a
@@ -252,10 +253,9 @@ const SHELL_SAFE_PATTERN = /^[A-Za-z0-9_@%+:,./-]+$/;
  * it is built from come from the filesystem and the command line, where spaces
  * are ordinary: `binstruct "./spaced dir"` answered
  * `TRY binstruct ./spaced dir/aaa_other.ts`, which pastes as two arguments and
- * fails with `no such path: ./spaced`. Only the words that carry user data go
- * through this — the redirections and the `<coder>` metavariable of an
- * incomplete line are shell syntax and prose, and quoting either would break
- * the very paste this protects.
+ * fails with `no such path: ./spaced`. The **redirections** are the only part
+ * of a line that is shell syntax and the only part that stays bare; every other
+ * word goes through this, {@linkcode metavariable} included.
  *
  * @param word One argument of a command line
  * @returns The word as typed when it is already safe, else single-quoted
@@ -275,6 +275,37 @@ export function shellWord(word: string): string {
   return SHELL_SAFE_PATTERN.test(word)
     ? word
     : `'${word.replaceAll("'", `'\\''`)}'`;
+}
+
+/**
+ * Renders a placeholder word of a `TRY` line, for a value only the user knows.
+ *
+ * The usage line writes a placeholder as `<coder>`, and a `TRY` line that
+ * carried that spelling through unquoted was not the line it appeared to be: to
+ * a shell `<coder>` is an **input redirection**, so the escape-hatch suggestion
+ * `binstruct png <coder> decode < input.bin` pasted back as
+ * `binstruct png decode` reading a file called `coder` — a different command,
+ * silently, and one that could succeed. It was exempted from
+ * {@linkcode shellWord} as prose; it is not prose, it is a word the user is
+ * meant to replace, and the only rendering that survives the paste is one the
+ * shell hands on whole.
+ *
+ * Quoted, the placeholder reaches the CLI as the literal text `<coder>` and is
+ * refused by name — which is the worst that a line nobody edited should do.
+ *
+ * @param name The value being asked for, e.g. `coder`
+ * @returns The placeholder, angle brackets and all, as one shell word
+ *
+ * @example The shell sees a word, not a redirection
+ * ```ts
+ * import { assertEquals } from "@std/assert";
+ * import { metavariable } from "./guide.ts";
+ *
+ * assertEquals(metavariable("coder"), "'<coder>'");
+ * ```
+ */
+export function metavariable(name: string): string {
+  return shellWord(`<${name}>`);
 }
 
 /**

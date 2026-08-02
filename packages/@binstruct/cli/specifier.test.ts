@@ -237,8 +237,8 @@ type ClassificationCase = {
  * The classification space, enumerated.
  *
  * The rules this table pins down run **towards** the two closed sets and let
- * everything else be a path. A scheme is one of the seven Deno resolves a
- * module under. A JSR or npm coordinate is exactly one of `name`,
+ * everything else be a path. A scheme is one of the five a coder package can
+ * live behind. A JSR or npm coordinate is exactly one of `name`,
  * `name@version`, `@scope/name`, `@scope/name@version` or
  * `@scope/name/sub-entrypoint`; every one either starts with `@` or holds no
  * `/`; therefore a non-scheme input that holds a `/` outside a scope is a path.
@@ -273,16 +273,35 @@ const classifications: readonly ClassificationCase[] = [
   { input: "file:///abs/mod.ts", form: "scheme", why: "local file url" },
   { input: "file:///abs/pkg", form: "scheme", why: "local directory url" },
   { input: "file:///abs/pkg/", form: "scheme", why: "trailing slash" },
-  { input: "node:fs", form: "scheme", why: "a built-in module" },
-  { input: "data:text/plain,x", form: "scheme", why: "inline source" },
 
-  // ── a colon that is not one of those seven ──────────────────────────────
+  // ── a colon that is not one of those five ───────────────────────────────
   // The scheme rule is a closed set, not a pattern. `^[a-z][a-z0-9+.-]+:`
   // matched any word before a colon, so `my:dir/mod.ts` — an ordinary relative
   // path whose first segment holds one — was called a scheme, passed through
   // unanchored and never stat'ed, while `deno doc` read it as the path it is.
   // What is left of such an input is classified on its own terms: it holds a
   // slash, so it is a path; it holds none, so it is a name.
+  //
+  // `node:` and `data:` were in the set because `import()` resolves them, and
+  // that was the divergence a third time: `deno doc` resolves a positional
+  // `node:evil.ts` against the working directory, so a local file of that name
+  // was discovered and announced, and `import()` then asked for a built-in
+  // module and died. Neither scheme can host a coder package — one names a
+  // runtime built-in, the other carries inline source — so neither is one, and
+  // the three rows below are what that costs: two clean registry misses and a
+  // local file read as the local file it is.
+  { input: "node:fs", form: "bare", why: "a built-in cannot host a package" },
+  { input: "node:dir", form: "bare", why: "no slash, no extension" },
+  {
+    input: "node:evil.ts",
+    form: "path",
+    why: "a local file, extension and all",
+  },
+  {
+    input: "data:text/plain,x",
+    form: "path",
+    why: "inline source holds a slash",
+  },
   { input: "my:dir/mod.ts", form: "path", why: "no such scheme, and a slash" },
   { input: "gopher:x", form: "bare", why: "no such scheme, and no slash" },
   { input: "ab:x", form: "bare", why: "two characters is not a scheme" },
@@ -467,8 +486,8 @@ Deno.test("resolveSpecifier does not decide file or directory from the spelling"
   });
 });
 
-Deno.test("resolveSpecifier admits only the schemes deno resolves", async (t) => {
-  await t.step("each of the seven passes through unchanged", () => {
+Deno.test("resolveSpecifier admits only the schemes a package lives behind", async (t) => {
+  await t.step("each of the five passes through unchanged", () => {
     for (
       const input of [
         "jsr:@binstruct/png",
@@ -476,14 +495,34 @@ Deno.test("resolveSpecifier admits only the schemes deno resolves", async (t) =>
         "http://example.com/mod.ts",
         "https://example.com/mod.ts",
         "file:///abs/mod.ts",
-        "node:fs",
-        "data:text/plain,x",
       ]
     ) {
       const resolved = resolveSpecifier(input);
       assertEquals(resolved.form, "scheme", input);
       assertEquals(resolved.specifier, input);
     }
+  });
+
+  await t.step("a scheme that cannot host a package is not one", () => {
+    // The leak, third spelling. `deno doc` resolves a positional `node:…`
+    // against the working directory while `import()` treats it as a built-in,
+    // so a local `node:evil.ts` was discovered on disk and then imported as a
+    // built-in module that does not exist. `data:` carries inline source, which
+    // is not a package either. Both now classify on their own terms.
+    assertEquals(resolveSpecifier("node:fs").form, "bare");
+    assertEquals(
+      resolveSpecifier("node:fs").specifier,
+      "jsr:@binstruct/node:fs",
+    );
+    assertEquals(resolveSpecifier("node:dir").form, "bare");
+
+    const local = resolveSpecifier("node:evil.ts");
+
+    assertEquals(local.form, "path");
+    assertEquals(local.short, "node:evil.ts");
+    assertEquals(local.specifier, underCwd("node:evil.ts"));
+
+    assertEquals(resolveSpecifier("data:text/plain,x").form, "path");
   });
 
   await t.step("a colon that is not one of them is part of a path", () => {
