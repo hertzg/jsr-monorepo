@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>ToolFailureReason - mod.ts - @binstruct&#x2F;cli documentation</title>
+  <title>ScopePackage.latestVersion - mod.ts - @binstruct&#x2F;cli documentation</title>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="doc-current-file" content="mod.ts">
@@ -48,7 +48,8 @@
 </svg>
 </span>
 
-    <ul><li>ToolFailureReason</li></ul></ul>
+    <ul><li><span>.</span>
+            <a href="..&#x2F;..&#x2F;.&#x2F;mod.ts&#x2F;~&#x2F;ScopePackage.html" class="contextLink">ScopePackage</a></li><li>latestVersion</li></ul></ul>
 </div>
 
     <div class="flex items-center gap-2">
@@ -112,14 +113,14 @@
     </div>
   </div>
 </nav>
-<div id="searchResults"></div><div id="content"><main class="symbolGroup" id="symbol_ToolFailureReason"><article>
+<div id="searchResults"></div><div id="content"><main class="symbolGroup" id="symbol_ScopePackage.latestVersion"><article>
       <div class="symbolTitle">
         <div>
           <div class="text-2xl leading-none break-all">
-            <span class="text-TypeAlias">type alias</span>&nbsp;<span class="font-bold">ToolFailureReason</span>
+            <span class="text-Property">property</span>&nbsp;<span class="font-bold">ScopePackage.latestVersion</span>
           </div></div><a
   class="sourceButton"
-  href="file:&#x2F;&#x2F;&#x2F;home&#x2F;runner&#x2F;work&#x2F;jsr-monorepo&#x2F;jsr-monorepo&#x2F;packages&#x2F;@binstruct&#x2F;cli&#x2F;discover.ts"><svg
+  href="file:&#x2F;&#x2F;&#x2F;home&#x2F;runner&#x2F;work&#x2F;jsr-monorepo&#x2F;jsr-monorepo&#x2F;packages&#x2F;@binstruct&#x2F;cli&#x2F;scope.ts"><svg
   width="14"
   height="14"
   viewBox="0 0 14 14"
@@ -142,26 +143,11 @@
   />
 </svg>
 </a>
-</div><div><div class="space-y-7" id=""><div class="markdown"><p>Why a <code>deno</code> subprocess spawned by discovery produced no usable output.</p>
-<ul>
-<li><code>permission-denied</code> — the CLI was run without <code>--allow-run=deno</code>.
-Decoding and encoding still work; only discovery is unavailable.</li>
-<li><code>not-spawned</code> — the process could not be started at all, e.g. no <code>deno</code>
-on <code>PATH</code>.</li>
-<li><code>minimum-dependency-age</code> — the requested version is younger than the
-consuming project's <code>minimumDependencyAge</code>, so the graph refused to
-resolve. Nothing about the invocation was wrong.</li>
-<li><code>exited-non-zero</code> — anything else the tool rejected: unknown package,
-network failure, syntax error in a local entrypoint.</li>
-<li><code>graph-incomplete</code> — the tool succeeded, but the module graph it printed
-carries an error, so it was never walked. <code>deno info</code> exits 0 in this
-case, which would otherwise read as a graph that simply contains nothing.</li>
-<li><code>timed-out</code> — the tool said nothing for <code>TOOL_TIMEOUT</code> and was
-killed. A stalled fetch inside <code>deno doc</code> has no deadline of its own, so
-without this the CLI waits forever with a blank screen.</li>
-</ul>
-</div><section class="section"  id="definition"><div>
-      <h2 class="anchorable mb-1"><a href="#definition" class="anchor" aria-label="Anchor" tabIndex="-1"><svg
+</div><div><div class="space-y-7" id=""><div class="markdown"><p>The version a bare <code>jsr:@binstruct/&lt;name&gt;</code> resolves to today.</p>
+<p>Never absent: an entry without one is a reserved name rather than a
+package, and is dropped by <a href="../.././mod.ts/~/readScopeListing.html"><code>readScopeListing</code></a>.</p>
+</div><section class="section"  id="type"><div>
+      <h2 class="anchorable mb-1"><a href="#type" class="anchor" aria-label="Anchor" tabIndex="-1"><svg
   width="16"
   height="16"
   viewBox="0 0 14 14"
@@ -183,14 +169,14 @@ without this the CLI waits forever with a blank screen.</li>
   </defs>
 </svg>
 </a>
-Definition</h2></div><div class="space-y-8"><div class=" docEntry" id="typealias_toolfailurereason">
+Type</h2></div><div class="space-y-8"><div class=" docEntry" id="variable_scopepackage_latestversion">
 
   <div class="docEntryHeader">
-    <div><code><span class="font-medium text-stone-500 dark:text-stone-200"><div class="ml-indent"><span><span class="td-str">"permission-denied"</span></span><br /><span><span class="td-op"> | </span><span class="td-str">"not-spawned"</span></span><br /><span><span class="td-op"> | </span><span class="td-str">"minimum-dependency-age"</span></span><br /><span><span class="td-op"> | </span><span class="td-str">"exited-non-zero"</span></span><br /><span><span class="td-op"> | </span><span class="td-str">"graph-incomplete"</span></span><br /><span><span class="td-op"> | </span><span class="td-str">"timed-out"</span></span></div></span>
+    <div><code><span class="font-medium text-stone-500 dark:text-stone-200"><span class="td-kw">string</span></span>
       </code>
     </div><a
   class="sourceButton"
-  href="file:&#x2F;&#x2F;&#x2F;home&#x2F;runner&#x2F;work&#x2F;jsr-monorepo&#x2F;jsr-monorepo&#x2F;packages&#x2F;@binstruct&#x2F;cli&#x2F;discover.ts"><svg
+  href="file:&#x2F;&#x2F;&#x2F;home&#x2F;runner&#x2F;work&#x2F;jsr-monorepo&#x2F;jsr-monorepo&#x2F;packages&#x2F;@binstruct&#x2F;cli&#x2F;scope.ts"><svg
   width="14"
   height="14"
   viewBox="0 0 14 14"
@@ -220,8 +206,8 @@ Definition</h2></div><div class="space-y-8"><div class=" docEntry" id="typealias
     </article></main>
 <div class="toc">
     <div><div class="usageContent">
-    <h3>Usage</h3><div class="markdown"><pre class="highlight"><code class="language-typescript">import { type ToolFailureReason } from &quot;mod.ts&quot;;
-</code><button class="copyButton" data-copy="import { type ToolFailureReason } from &quot;mod.ts&quot;;
+    <h3>Usage</h3><div class="markdown"><pre class="highlight"><code class="language-typescript">import { type ScopePackage } from &quot;mod.ts&quot;;
+</code><button class="copyButton" data-copy="import { type ScopePackage } from &quot;mod.ts&quot;;
 "><svg
   class="copy"
   width="15"
@@ -254,7 +240,7 @@ Definition</h2></div><div class="space-y-8"><div class=" docEntry" id="typealias
 </svg>
 </button><code></code></pre>
 </div></div><nav class="documentNavigation">
-          <h3>Document Navigation</h3><ul><li><a href="#definition" title="Definition">Definition</a></li></ul></nav></div>
+          <h3>Document Navigation</h3><ul><li><a href="#type" title="Type">Type</a></li></ul></nav></div>
   </div></div>
 </div>
 </div>

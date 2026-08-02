@@ -229,14 +229,18 @@ using _fetch = stub(
   &quot;fetch&quot;,
   () =&gt;
     Promise.resolve(
-      Response.json({ items: [{ name: &quot;png&quot;, description: &quot;PNG.&quot; }] }),
+      Response.json({
+        items: [{ name: &quot;png&quot;, description: &quot;PNG.&quot;, latestVersion: &quot;0.4.0&quot; }],
+      }),
     ),
 );
 
 const listing = await listScopePackages({ cacheDir: null });
 
 assertEquals(listing.source, &quot;network&quot;);
-assertEquals(listing.packages, [{ name: &quot;png&quot;, description: &quot;PNG.&quot; }]);
+assertEquals(listing.packages, [
+  { name: &quot;png&quot;, description: &quot;PNG.&quot;, latestVersion: &quot;0.4.0&quot; },
+]);
 </code><button class="copyButton" data-copy="import { assertEquals } from &quot;@std/assert&quot;;
 import { stub } from &quot;@std/testing/mock&quot;;
 import { listScopePackages } from &quot;./scope.ts&quot;;
@@ -246,14 +250,18 @@ using _fetch = stub(
   &quot;fetch&quot;,
   () =&gt;
     Promise.resolve(
-      Response.json({ items: [{ name: &quot;png&quot;, description: &quot;PNG.&quot; }] }),
+      Response.json({
+        items: [{ name: &quot;png&quot;, description: &quot;PNG.&quot;, latestVersion: &quot;0.4.0&quot; }],
+      }),
     ),
 );
 
 const listing = await listScopePackages({ cacheDir: null });
 
 assertEquals(listing.source, &quot;network&quot;);
-assertEquals(listing.packages, [{ name: &quot;png&quot;, description: &quot;PNG.&quot; }]);
+assertEquals(listing.packages, [
+  { name: &quot;png&quot;, description: &quot;PNG.&quot;, latestVersion: &quot;0.4.0&quot; },
+]);
 "><svg
   class="copy"
   width="15"

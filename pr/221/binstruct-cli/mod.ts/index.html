@@ -505,12 +505,12 @@ if (plan.kind === &quot;run&quot;) assertEquals(plan.specifier, &quot;jsr:@binst
 Functions</h2></div><div class="namespaceSection"><div id="namespace_diagnoseemptydiscovery" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-Function bg-Function/15 dark:text-FunctionDark dark:bg-FunctionDark/15" title="Function">f</div></div>
 <div class="namespaceItemContent">
 		    <a href="..&#x2F;.&#x2F;mod.ts&#x2F;~&#x2F;diagnoseEmptyDiscovery.html" title="diagnoseEmptyDiscovery">
-			    <span>diagnoseEmptyDiscovery</span><span>(<span><span>specifier<span>: <span class="td-kw">string</span></span></span></span>)<span>: <span class="td-ref">Promise</span>&lt;<span class="td-ref">EmptyDiscoveryDiagnosis</span>&gt;</span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Explains why a package yielded no coders, by reading its module graph.</p>
+			    <span>diagnoseEmptyDiscovery</span><span>(<div class="ml-4"><div><span>specifier<span>: <span class="td-kw">string</span></span></span>,</div><div><span>timeout<span class="td-op">?</span><span>: <span class="td-kw">number</span></span></span></div></div>)<span>: <span class="td-ref">Promise</span>&lt;<span class="td-ref">EmptyDiscoveryDiagnosis</span>&gt;</span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Explains why a package yielded no coders, by reading its module graph.</p>
 </div></div></div>
     </div><div id="namespace_discovercoders" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-Function bg-Function/15 dark:text-FunctionDark dark:bg-FunctionDark/15" title="Function">f</div></div>
 <div class="namespaceItemContent">
 		    <a href="..&#x2F;.&#x2F;mod.ts&#x2F;~&#x2F;discoverCoders.html" title="discoverCoders">
-			    <span>discoverCoders</span><span>(<span><span>specifier<span>: <span class="td-kw">string</span></span></span></span>)<span>: <span class="td-ref">Promise</span>&lt;<span class="td-ref">DiscoveryOutcome</span>&gt;</span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Discovers the coder factories a package exposes, without importing it.</p>
+			    <span>discoverCoders</span><span>(<div class="ml-4"><div><span>specifier<span>: <span class="td-kw">string</span></span></span>,</div><div><span>timeout<span class="td-op">?</span><span>: <span class="td-kw">number</span></span></span></div></div>)<span>: <span class="td-ref">Promise</span>&lt;<span class="td-ref">DiscoveryOutcome</span>&gt;</span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Discovers the coder factories a package exposes, without importing it.</p>
 </div></div></div>
     </div><div id="namespace_explainfailure" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-Function bg-Function/15 dark:text-FunctionDark dark:bg-FunctionDark/15" title="Function">f</div></div>
 <div class="namespaceItemContent">
@@ -565,7 +565,7 @@ Functions</h2></div><div class="namespaceSection"><div id="namespace_diagnoseemp
     </div><div id="namespace_readsymboldocs" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-Function bg-Function/15 dark:text-FunctionDark dark:bg-FunctionDark/15" title="Function">f</div></div>
 <div class="namespaceItemContent">
 		    <a href="..&#x2F;.&#x2F;mod.ts&#x2F;~&#x2F;readSymbolDocs.html" title="readSymbolDocs">
-			    <span>readSymbolDocs</span><span>(<div class="ml-4"><div><span>specifier<span>: <span class="td-kw">string</span></span></span>,</div><div><span>symbol<span>: <span class="td-kw">string</span></span></span></div></div>)<span>: <span class="td-ref">Promise</span>&lt;<span class="td-ref">SymbolDocsOutcome</span>&gt;</span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Returns <code>deno doc</code>'s formatted documentation for one exported symbol.</p>
+			    <span>readSymbolDocs</span><span>(<div class="ml-4"><div><span>specifier<span>: <span class="td-kw">string</span></span></span>,</div><div><span>symbol<span>: <span class="td-kw">string</span></span></span>,</div><div><span>timeout<span class="td-op">?</span><span>: <span class="td-kw">number</span></span></span></div></div>)<span>: <span class="td-ref">Promise</span>&lt;<span class="td-ref">SymbolDocsOutcome</span>&gt;</span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Returns <code>deno doc</code>'s formatted documentation for one exported symbol.</p>
 </div></div></div>
     </div><div id="namespace_renderguide" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-Function bg-Function/15 dark:text-FunctionDark dark:bg-FunctionDark/15" title="Function">f</div></div>
 <div class="namespaceItemContent">
@@ -893,7 +893,7 @@ Type Aliases</h2></div><div class="namespaceSection"><div id="namespace_cliplan"
 			    <span>ScopeListing</span><span> = { <span class="td-kw">readonly </span>packages<span>: <span class="td-kw">readonly</span> <span class="td-ref">ScopePackage</span>[]</span>; <span class="td-kw">readonly </span>source<span>: <span class="td-ref">ListingSource</span></span>; <span class="td-kw">readonly </span>reason<span class="td-op">?</span><span>: <span class="td-kw">string</span></span>;  }</span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>The result of <a href=".././mod.ts/~/listScopePackages.html"><code>listScopePackages</code></a>.</p>
 </div></div><ul class="namespaceItemContentSubItems"><li>
                 <a href="..&#x2F;.&#x2F;mod.ts&#x2F;~&#x2F;ScopeListing.html#property_packages">
-                  <span>packages</span><span>: <span class="td-kw">readonly</span> <span class="td-ref">ScopePackage</span>[]</span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>The scope's packages, sorted by name, without <code>@binstruct/cli</code>.</p>
+                  <span>packages</span><span>: <span class="td-kw">readonly</span> <span class="td-ref">ScopePackage</span>[]</span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>The scope's published packages, sorted by name, without <code>@binstruct/cli</code>.</p>
 </div></div></li><li>
                 <a href="..&#x2F;.&#x2F;mod.ts&#x2F;~&#x2F;ScopeListing.html#property_reason">
                   <span>reason</span><span>: <span class="td-kw">string</span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Why the network answer is missing, when it is.</p>
@@ -919,10 +919,13 @@ Type Aliases</h2></div><div class="namespaceSection"><div id="namespace_cliplan"
     </div><div id="namespace_scopepackage" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-TypeAlias bg-TypeAlias/15 dark:text-TypeAliasDark dark:bg-TypeAliasDark/15" title="Type Alias">T</div></div>
 <div class="namespaceItemContent">
 		    <a href="..&#x2F;.&#x2F;mod.ts&#x2F;~&#x2F;ScopePackage.html" title="ScopePackage">
-			    <span>ScopePackage</span><span> = { <span class="td-kw">readonly </span>name<span>: <span class="td-kw">string</span></span>; <span class="td-kw">readonly </span>description<span>: <span class="td-kw">string</span></span>;  }</span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>One package of the scope, as JSR describes it.</p>
+			    <span>ScopePackage</span><span> = { <span class="td-kw">readonly </span>name<span>: <span class="td-kw">string</span></span>; <span class="td-kw">readonly </span>description<span>: <span class="td-kw">string</span></span>; <span class="td-kw">readonly </span>latestVersion<span>: <span class="td-kw">string</span></span>;  }</span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>One <strong>published</strong> package of the scope, as JSR describes it.</p>
 </div></div><ul class="namespaceItemContentSubItems"><li>
                 <a href="..&#x2F;.&#x2F;mod.ts&#x2F;~&#x2F;ScopePackage.html#property_description">
                   <span>description</span><span>: <span class="td-kw">string</span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>JSR's one-paragraph description, empty when the package has none.</p>
+</div></div></li><li>
+                <a href="..&#x2F;.&#x2F;mod.ts&#x2F;~&#x2F;ScopePackage.html#property_latestversion">
+                  <span>latestVersion</span><span>: <span class="td-kw">string</span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>The version a bare <code>jsr:@binstruct/&lt;name&gt;</code> resolves to today.</p>
 </div></div></li><li>
                 <a href="..&#x2F;.&#x2F;mod.ts&#x2F;~&#x2F;ScopePackage.html#property_name">
                   <span>name</span><span>: <span class="td-kw">string</span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Short name, e.g. <code>png</code>; prefix <code>@binstruct/</code> for the JSR coordinate.</p>
@@ -963,7 +966,7 @@ Type Aliases</h2></div><div class="namespaceSection"><div id="namespace_cliplan"
     </div><div id="namespace_toolfailurereason" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-TypeAlias bg-TypeAlias/15 dark:text-TypeAliasDark dark:bg-TypeAliasDark/15" title="Type Alias">T</div></div>
 <div class="namespaceItemContent">
 		    <a href="..&#x2F;.&#x2F;mod.ts&#x2F;~&#x2F;ToolFailureReason.html" title="ToolFailureReason">
-			    <span>ToolFailureReason</span><span> = <div class="ml-indent"><span><span class="td-str">"permission-denied"</span></span><br /><span><span class="td-op"> | </span><span class="td-str">"not-spawned"</span></span><br /><span><span class="td-op"> | </span><span class="td-str">"minimum-dependency-age"</span></span><br /><span><span class="td-op"> | </span><span class="td-str">"exited-non-zero"</span></span><br /><span><span class="td-op"> | </span><span class="td-str">"graph-incomplete"</span></span></div></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Why a <code>deno</code> subprocess spawned by discovery produced no usable output.</p>
+			    <span>ToolFailureReason</span><span> = <div class="ml-indent"><span><span class="td-str">"permission-denied"</span></span><br /><span><span class="td-op"> | </span><span class="td-str">"not-spawned"</span></span><br /><span><span class="td-op"> | </span><span class="td-str">"minimum-dependency-age"</span></span><br /><span><span class="td-op"> | </span><span class="td-str">"exited-non-zero"</span></span><br /><span><span class="td-op"> | </span><span class="td-str">"graph-incomplete"</span></span><br /><span><span class="td-op"> | </span><span class="td-str">"timed-out"</span></span></div></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Why a <code>deno</code> subprocess spawned by discovery produced no usable output.</p>
 </div></div></div>
     </div></div>
 </section>
