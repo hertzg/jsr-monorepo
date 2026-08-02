@@ -81,6 +81,7 @@ mirrors the JSR coordinate. Two scopes:
 
 - `arp` - ARP packet parsing (RFC 826)
 - `au` - Sun/NeXT `.au` audio file header
+- `bfd` - BFD control packet mandatory section (RFC 5880)
 - `bmp` - BMP/DIB image file format support
 - `cli` - CLI tools for binary structure operations
 - `dos-mz` - DOS MZ executable header
@@ -378,6 +379,7 @@ both tiresome and error-prone.
 - `@hertzg/binstruct`
 - `@binstruct/arp`
 - `@binstruct/au`
+- `@binstruct/bfd`
 - `@binstruct/bmp`
 - `@binstruct/cli`
 - `@binstruct/dos-mz`

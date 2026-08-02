@@ -4,6 +4,9 @@
 "@binstruct/au":
   - changed-files:
       - any-glob-to-any-file: packages/@binstruct/au/**
+"@binstruct/bfd":
+  - changed-files:
+      - any-glob-to-any-file: packages/@binstruct/bfd/**
 "@binstruct/bmp":
   - changed-files:
       - any-glob-to-any-file: packages/@binstruct/bmp/**
