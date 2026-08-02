@@ -1,6 +1,7 @@
 import { assertEquals, assertStringIncludes } from "@std/assert";
 import { join, resolve, toFileUrl } from "@std/path";
 import {
+  moduleInside,
   resolveSpecifier,
   shortenSpecifier,
   type SpecifierForm,
@@ -66,25 +67,33 @@ const cases: readonly ResolutionCase[] = [
   // Row 2: paths, by leading marker or by module extension. A path is anchored
   // to the working directory, because `deno doc` and `import()` disagree about
   // what a relative one is relative to; the typed form survives as `short`.
+  // A path that names no module file is a `directory`, which the CLI refuses:
+  // `deno doc` walks into it and `import()` will not.
   {
     input: "./local",
     specifier: underCwd("./local"),
-    form: "path",
+    form: "directory",
     short: "./local",
   },
   {
     input: "../up",
     specifier: underCwd("../up"),
-    form: "path",
+    form: "directory",
     short: "../up",
   },
   {
     input: "/abs/path",
     specifier: "file:///abs/path",
-    form: "path",
+    form: "directory",
     short: "/abs/path",
   },
-  { input: ".", specifier: underCwd("."), form: "path", short: "." },
+  { input: ".", specifier: underCwd("."), form: "directory", short: "." },
+  {
+    input: "./local/mod.ts",
+    specifier: underCwd("./local/mod.ts"),
+    form: "path",
+    short: "./local/mod.ts",
+  },
   {
     input: "mod.ts",
     specifier: underCwd("mod.ts"),
@@ -204,6 +213,50 @@ Deno.test("resolveSpecifier flags shorthand but not explicit forms", () => {
   assertEquals(resolveSpecifier("@hertzg/xhb").shorthand, true);
   assertEquals(resolveSpecifier("jsr:@binstruct/png").shorthand, false);
   assertEquals(resolveSpecifier("./local").shorthand, false);
+  assertEquals(resolveSpecifier("./local/mod.ts").shorthand, false);
+});
+
+Deno.test("resolveSpecifier tells a module file from a directory", async (t) => {
+  // `deno doc ./pkg` documents ./pkg/mod.ts while import() refuses a directory,
+  // so the CLI listed a package's coders and then crashed on the run it had
+  // just advertised. The forms are split here so the caller can refuse one.
+  await t.step("every module extension names a module file", () => {
+    for (const extension of [".ts", ".tsx", ".js", ".mjs", ".cjs"]) {
+      assertEquals(resolveSpecifier(`./pkg/mod${extension}`).form, "path");
+    }
+  });
+
+  await t.step("anything else that looks like a path is a directory", () => {
+    for (const input of ["./pkg", "../pkg", "/abs/pkg", ".", "./pkg/"]) {
+      assertEquals(resolveSpecifier(input).form, "directory");
+    }
+  });
+
+  await t.step("a directory still resolves, so it can be echoed", () => {
+    const directory = resolveSpecifier("./pkg");
+
+    assertEquals(directory.specifier, underCwd("./pkg"));
+    assertEquals(directory.short, "./pkg");
+  });
+
+  await t.step("nothing on disk is consulted", () => {
+    // Neither of these exists, and the classification does not go looking:
+    // resolution stays a function of the input string and the working
+    // directory, which is what ADR 0004 promises.
+    assertEquals(resolveSpecifier("./nowhere/mod.ts").form, "path");
+    assertEquals(resolveSpecifier("./nowhere").form, "directory");
+  });
+});
+
+Deno.test("moduleInside names the entrypoint of a directory input", () => {
+  assertEquals(moduleInside("./pkg"), "./pkg/mod.ts");
+  assertEquals(moduleInside("./pkg/"), "./pkg/mod.ts");
+  assertEquals(moduleInside("/abs/pkg"), "/abs/pkg/mod.ts");
+  assertEquals(moduleInside("."), "./mod.ts");
+  // What it proposes must read back as a module file, or the guidance would
+  // hand the user a command the CLI refuses in turn.
+  assertEquals(resolveSpecifier(moduleInside("./pkg")).form, "path");
+  assertEquals(resolveSpecifier(moduleInside(".")).form, "path");
 });
 
 Deno.test("resolveSpecifier requires two lowercase characters for a scheme", async (t) => {

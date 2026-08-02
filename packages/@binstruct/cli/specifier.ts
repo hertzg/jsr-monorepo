@@ -6,12 +6,13 @@
  * bare name implies the `jsr:` scheme and the `@binstruct` scope. Resolution is
  * a pure function of the input string, by first match:
  *
- * | input                                      | rule              | resolves to             |
- * | ------------------------------------------ | ----------------- | ----------------------- |
- * | `jsr:@binstruct/png`, `npm:x`, `https://…` | has a scheme      | unchanged               |
- * | `./x`, `../x`, `/abs/x`, `mod.ts`          | looks like a path | `file://` URL under cwd |
- * | `@hertzg/xhb`                              | starts with `@`   | `jsr:@hertzg/xhb`       |
- * | `png`, `wav@0.2.0`                         | bare              | `jsr:@binstruct/png`    |
+ * | input                                      | rule                | resolves to             |
+ * | ------------------------------------------ | ------------------- | ----------------------- |
+ * | `jsr:@binstruct/png`, `npm:x`, `https://…` | has a scheme        | unchanged               |
+ * | `./x/mod.ts`, `/abs/mod.js`, `mod.ts`      | names a module file | `file://` URL under cwd |
+ * | `./x`, `../x`, `/abs/x`                    | names no module     | `file://` URL under cwd |
+ * | `@hertzg/xhb`                              | starts with `@`     | `jsr:@hertzg/xhb`       |
+ * | `png`, `wav@0.2.0`                         | bare                | `jsr:@binstruct/png`    |
  *
  * A path is made absolute against the working directory rather than passed
  * through, because the two consumers of a specifier disagree about what a
@@ -21,6 +22,14 @@
  * Anchoring it once, here, is what keeps the two looking at the same module.
  * {@linkcode ResolvedSpecifier.short} keeps the typed form, so listings and
  * `TRY` lines still say `./pkg`.
+ *
+ * The two path rows differ only in their {@linkcode SpecifierForm}, and the
+ * split exists for the same reason as the anchoring: `deno doc ./pkg` walks
+ * into the directory and documents `./pkg/mod.ts`, while `import()` refuses a
+ * directory outright, so a `"directory"` input would again have discovery and
+ * execution looking at different things. The classification is syntactic — a
+ * module file is one ending in a module extension — so nothing here is read off
+ * disk; the caller refuses the form and names {@linkcode moduleInside} instead.
  *
  * Nothing here consults the registry or the network, and nothing is read off
  * disk, so an unknown bare name resolves happily and fails later, at load time.
@@ -46,18 +55,30 @@ const JSR_SCHEME = "jsr:";
 /** Scope implied by a bare package name. */
 const IMPLIED_SCOPE = "@binstruct/";
 
+/** Module a directory is conventionally entered through. */
+const DEFAULT_ENTRYPOINT = "mod.ts";
+
 /**
  * Which resolution rule matched an input.
  *
  * - `"scheme"` — the input carried its own scheme (`jsr:`, `npm:`, `https:`).
- * - `"path"` — the input pointed at a file or directory.
+ * - `"path"` — the input pointed at a module file, by extension.
+ * - `"directory"` — the input pointed somewhere on disk without naming a module
+ *   file. A directory is the case that provokes it, and the only one worth a
+ *   message: `import()` cannot load one, so the CLI refuses the form rather
+ *   than let discovery describe a module the run could never reach.
  * - `"scoped"` — the input named a scope and package, without a scheme.
  * - `"bare"` — the input named a package only.
  *
- * The first two are explicit forms and pass through untouched; the last two are
- * shorthand and get expanded.
+ * The first three are explicit forms and pass through untouched; the last two
+ * are shorthand and get expanded.
  */
-export type SpecifierForm = "scheme" | "path" | "scoped" | "bare";
+export type SpecifierForm =
+  | "scheme"
+  | "path"
+  | "directory"
+  | "scoped"
+  | "bare";
 
 /**
  * A user-typed package argument and everything derived from it.
@@ -90,11 +111,11 @@ function classify(input: string): SpecifierForm {
   if (SCHEME_PATTERN.test(input)) {
     return "scheme";
   }
-  if (
-    input.startsWith(".") || input.startsWith("/") ||
-    MODULE_EXTENSIONS.some((extension) => input.endsWith(extension))
-  ) {
+  if (MODULE_EXTENSIONS.some((extension) => input.endsWith(extension))) {
     return "path";
+  }
+  if (input.startsWith(".") || input.startsWith("/")) {
+    return "directory";
   }
   return input.startsWith("@") ? "scoped" : "bare";
 }
@@ -116,6 +137,7 @@ function expand(input: string, form: SpecifierForm): string {
   switch (form) {
     case "scheme":
     case "path":
+    case "directory":
       return input;
     case "scoped":
       return `${JSR_SCHEME}${input}`;
@@ -138,6 +160,11 @@ function expand(input: string, form: SpecifierForm): string {
  * specifier is relative to — resolve it to the same module. Reading
  * `Deno.cwd()` is the one thing this function needs from outside its argument,
  * and only for that form.
+ *
+ * A path that names no module file is classified `"directory"` rather than
+ * `"path"`. It still resolves, so the caller can echo where it pointed, but the
+ * caller is expected to refuse it and offer {@linkcode moduleInside} instead:
+ * `deno doc` would enter the directory and `import()` would not.
  *
  * @param input Package argument as typed on the command line.
  * @returns The input, its resolved specifier, its short form and how it was classified.
@@ -164,10 +191,20 @@ function expand(input: string, form: SpecifierForm): string {
  * assertEquals(resolveSpecifier("@hertzg/xhb").specifier, "jsr:@hertzg/xhb");
  * assertEquals(resolveSpecifier("npm:foo").specifier, "npm:foo");
  *
- * const local = resolveSpecifier("./local");
+ * const local = resolveSpecifier("./local/mod.ts");
  *
- * assertEquals(local.specifier, toFileUrl(`${Deno.cwd()}/local`).href);
- * assertEquals(local.short, "./local");
+ * assertEquals(local.specifier, toFileUrl(`${Deno.cwd()}/local/mod.ts`).href);
+ * assertEquals(local.short, "./local/mod.ts");
+ * assertEquals(local.form, "path");
+ * ```
+ *
+ * @example A path that names no module file is told apart from one that does
+ * ```ts
+ * import { assertEquals } from "@std/assert";
+ * import { resolveSpecifier } from "./specifier.ts";
+ *
+ * assertEquals(resolveSpecifier("./local").form, "directory");
+ * assertEquals(resolveSpecifier("./local/mod.ts").form, "path");
  * ```
  *
  * @example A version suffix rides along
@@ -184,7 +221,7 @@ function expand(input: string, form: SpecifierForm): string {
 export function resolveSpecifier(input: string): ResolvedSpecifier {
   const form = classify(input);
 
-  if (form === "path") {
+  if (form === "path" || form === "directory") {
     return {
       input,
       specifier: toFileUrl(resolve(input)).href,
@@ -261,4 +298,33 @@ export function shortenSpecifier(specifier: string): string {
     }
   }
   return specifier;
+}
+
+/**
+ * Names the module a `"directory"` input was probably reaching for.
+ *
+ * The suggestion is conventional rather than discovered: nothing is read off
+ * disk, so this proposes `mod.ts` — the entrypoint every package in this
+ * repository uses, and the one `deno doc` itself walks into — and leaves the
+ * user to correct it if their package is spelled otherwise. Keeping it a guess
+ * is what preserves the property that resolution consults only the input string
+ * and the working directory.
+ *
+ * @param path A path input, typically one that classified as `"directory"`
+ * @returns The same path with the conventional entrypoint appended
+ *
+ * @example The entrypoint to offer when a directory was typed
+ * ```ts
+ * import { assertEquals } from "@std/assert";
+ * import { moduleInside, resolveSpecifier } from "./specifier.ts";
+ *
+ * assertEquals(moduleInside("./mypkg"), "./mypkg/mod.ts");
+ * assertEquals(moduleInside("./mypkg/"), "./mypkg/mod.ts");
+ * assertEquals(moduleInside("."), "./mod.ts");
+ * assertEquals(resolveSpecifier(moduleInside("./mypkg")).form, "path");
+ * ```
+ */
+export function moduleInside(path: string): string {
+  const base = path.endsWith("/") ? path : `${path}/`;
+  return `${base}${DEFAULT_ENTRYPOINT}`;
 }

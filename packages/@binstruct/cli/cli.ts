@@ -50,7 +50,11 @@ import {
 } from "./discover.ts";
 import { type Guide, nearestName, renderGuide } from "./guide.ts";
 import { KNOWN_PACKAGES } from "./registry.ts";
-import { type ResolvedSpecifier, resolveSpecifier } from "./specifier.ts";
+import {
+  moduleInside,
+  type ResolvedSpecifier,
+  resolveSpecifier,
+} from "./specifier.ts";
 
 /** How the tool is spelled in every example it prints. */
 const PROGRAM = "binstruct";
@@ -325,6 +329,26 @@ function argumentCount(count: number): string {
 }
 
 /**
+ * Renders the first line of output: what was typed, and what it resolved to.
+ *
+ * Both halves are load-bearing and neither replaces the other. The short form
+ * comes first because every other line of the screen — the listings, the `TRY`
+ * lines — is written in it, and a header spelled differently reads as being
+ * about a different package; this matters most for a path, where the resolved
+ * form is an absolute `file://` URL nobody typed. The resolved form follows,
+ * and only when it differs, because the shorthand of ADR 0004 has to be visible
+ * to be trusted: `png` must be seen to become `jsr:@binstruct/png`.
+ *
+ * @param resolved The package as typed and as resolved
+ * @returns The header line
+ */
+function specifierHeader(resolved: ResolvedSpecifier): string {
+  return resolved.short === resolved.specifier
+    ? `package: ${resolved.short}`
+    : `package: ${resolved.short} → ${resolved.specifier}`;
+}
+
+/**
  * Puts a package's own description under the resolved-specifier line.
  *
  * ADR 0003 keeps descriptions out of the level 0 listing — thirty rows of
@@ -457,6 +481,40 @@ function unknownPackageGuide(
         : []),
     ],
   });
+}
+
+/**
+ * Builds the guide for a path argument that names no module file.
+ *
+ * `deno doc ./pkg` walks into the directory and documents `./pkg/mod.ts`;
+ * `import()` refuses a directory outright. Letting discovery run would
+ * therefore list coders, name one, and print a `TRY` line for a command that
+ * cannot start — the same split between discovery and execution that anchoring
+ * a relative path to the working directory closed, only louder. Teaching the
+ * CLI to find the entrypoint itself would close it the other way, at the price
+ * of a filesystem probe and a second opinion about which module a directory
+ * means; refusing costs one line and keeps resolution a function of the input
+ * string.
+ *
+ * @param resolved The package as typed and as resolved
+ * @param header The header block, specifier and all
+ * @returns The guide, naming the module to type instead
+ */
+function directoryGuide(
+  resolved: ResolvedSpecifier,
+  header: string,
+): Guide {
+  const entrypoint = moduleInside(resolved.input);
+  return {
+    ...packageGuide({
+      header,
+      diagnostic: true,
+      notes: [
+        `cannot use ${resolved.short}: it names a directory, and a package argument has to name a module file — import() cannot load a directory, however well deno doc reads one`,
+      ],
+    }),
+    try: [`${PROGRAM} ${entrypoint}`],
+  };
 }
 
 /**
@@ -894,7 +952,22 @@ function withoutSharedPreamble(first: string, second: string): string {
  *   assertEquals(plan.specifier, "jsr:@binstruct/png");
  *   assertEquals(plan.coder, "pngFile");
  *   assertEquals(plan.command, "decode");
- *   assertEquals(plan.notices, ["package: jsr:@binstruct/png"]);
+ *   assertEquals(plan.notices, ["package: png → jsr:@binstruct/png"]);
+ * }
+ * ```
+ *
+ * @example A directory is refused rather than listed and then failed on
+ * ```ts
+ * import { assertEquals, assertStringIncludes } from "@std/assert";
+ * import { planCli } from "./cli.ts";
+ *
+ * const plan = await planCli(["./mypkg", "decode"]);
+ *
+ * assertEquals(plan.kind, "print");
+ * if (plan.kind === "print") {
+ *   assertEquals(plan.code, 1);
+ *   assertStringIncludes(plan.text, "it names a directory");
+ *   assertStringIncludes(plan.text, "TRY\n  binstruct ./mypkg/mod.ts");
  * }
  * ```
  */
@@ -910,8 +983,12 @@ export async function planCli(args: string[]): Promise<CliPlan> {
   }
 
   const resolved = resolveSpecifier(options.package);
-  const header = `package: ${resolved.specifier}`;
+  const header = specifierHeader(resolved);
   const { coder, command } = options;
+
+  if (resolved.form === "directory") {
+    return present(directoryGuide(resolved, header), options.help);
+  }
 
   const choice = await chooseCoder(resolved, header, coder);
   if (!choice.ok) {
@@ -922,7 +999,7 @@ export async function planCli(args: string[]): Promise<CliPlan> {
   const notices = choice.inferred
     ? [
       header,
-      `using coder: ${choice.name} (only coder in ${resolved.specifier})`,
+      `using coder: ${choice.name} (only coder in ${resolved.short})`,
     ]
     : [header];
 

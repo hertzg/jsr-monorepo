@@ -48,21 +48,32 @@ function printed(plan: Awaited<ReturnType<typeof planCli>>) {
  *
  * @param args Arguments after the script name
  * @param permissions Permission flags, defaulting to everything
+ * @param cwd Working directory, for the path-resolution cases
+ * @param input Bytes to feed stdin, for the cases that actually decode
  * @returns Exit code and decoded output
  */
 async function runCli(
   args: string[],
   permissions: string[] = ["-A"],
   cwd?: string,
+  input?: Uint8Array,
 ): Promise<{ code: number; stdout: string; stderr: string }> {
   const command = new Deno.Command(Deno.execPath(), {
     args: ["run", ...permissions, CLI, ...args],
     cwd,
-    stdin: "null",
+    stdin: input === undefined ? "null" : "piped",
     stdout: "piped",
     stderr: "piped",
   });
-  const output = await command.output();
+
+  const child = command.spawn();
+  if (input !== undefined) {
+    const writer = child.stdin.getWriter();
+    await writer.write(input);
+    await writer.close();
+  }
+
+  const output = await child.output();
   const decoder = new TextDecoder();
 
   return {
@@ -70,6 +81,36 @@ async function runCli(
     stdout: decoder.decode(output.stdout),
     stderr: decoder.decode(output.stderr),
   };
+}
+
+/**
+ * Writes a one-coder package into a fresh directory, as `<dir>/mypkg/mod.ts`.
+ *
+ * It imports `@hertzg/binstruct` by absolute URL so the fixture needs no
+ * `deno.json` of its own, which keeps the working directory free of anything
+ * that could change how the CLI resolves what it is given.
+ *
+ * @returns The containing directory, to be removed by the caller
+ */
+async function writeLocalPackage(): Promise<string> {
+  const directory = await Deno.makeTempDir();
+  const binstruct = import.meta.resolve("../../@hertzg/binstruct/mod.ts");
+
+  await Deno.mkdir(`${directory}/mypkg`);
+  await Deno.writeTextFile(
+    `${directory}/mypkg/mod.ts`,
+    [
+      `import { type Coder, struct, u8 } from "${binstruct}";`,
+      "",
+      "/** A one-byte structure that exists only in this directory. */",
+      "export function myStruct(): Coder<{ a: number }> {",
+      "  return struct({ a: u8() });",
+      "}",
+      "",
+    ].join("\n"),
+  );
+
+  return directory;
 }
 
 Deno.test("parseCliArgs fills the three positionals in order", () => {
@@ -238,7 +279,7 @@ Deno.test("a complete invocation runs, and announces the resolved specifier", as
   assertEquals(plan.specifier, "jsr:@binstruct/png");
   assertEquals(plan.coder, "pngFile");
   assertEquals(plan.command, "decode");
-  assertEquals(plan.notices, ["package: jsr:@binstruct/png"]);
+  assertEquals(plan.notices, ["package: png → jsr:@binstruct/png"]);
 });
 
 Deno.test("the -p/-c form still reaches a run", async () => {
@@ -291,7 +332,7 @@ Deno.test("a bare name that cannot be read explains the implied scope", async ()
   assertEquals(plan.code, 1);
   assertStringIncludes(
     plan.text,
-    "package: jsr:@binstruct/definitely-not-a-package",
+    "package: definitely-not-a-package → jsr:@binstruct/definitely-not-a-package",
   );
   assertStringIncludes(
     plan.text,
@@ -587,11 +628,101 @@ Deno.test("a relative package is read from the working directory", async () => {
 
     assertEquals(listed.code, 1);
     assertStringIncludes(listed.stderr, "localOnly");
-    assertStringIncludes(listed.stderr, `package: file://`);
+    assertStringIncludes(listed.stderr, `package: ./local.ts → file://`);
     assertEquals(listed.stderr.includes("@binstruct/cli/local.ts"), false);
   } finally {
     await Deno.remove(directory, { recursive: true });
   }
+});
+
+Deno.test("a directory is refused up front, not listed and then crashed on", async () => {
+  // `deno doc ./mypkg` documents ./mypkg/mod.ts while import() refuses the
+  // directory outright, so the CLI listed the coder, announced it, printed a
+  // TRY line for the command, and then died with ERR_UNSUPPORTED_DIR_IMPORT.
+  const plan = printed(await planCli(["./mypkg", "decode"]));
+
+  assertEquals(plan.stream, "stderr");
+  assertEquals(plan.code, 1);
+  assertStringIncludes(plan.text, "it names a directory");
+  assertStringIncludes(plan.text, "import() cannot load a directory");
+  assertStringIncludes(plan.text, "TRY\n  binstruct ./mypkg/mod.ts");
+  assertEquals(plan.text.includes("NEXT  <coder>"), false);
+});
+
+Deno.test("--help does not excuse a directory either", async () => {
+  const plan = printed(await planCli(["./mypkg", "--help"]));
+
+  assertEquals(plan.stream, "stderr");
+  assertEquals(plan.code, 1);
+});
+
+Deno.test("the command a directory is redirected to actually runs", async () => {
+  const directory = await writeLocalPackage();
+  try {
+    const refused = await runCli(["./mypkg", "decode"], ["-A"], directory);
+
+    assertEquals(refused.code, 1);
+    assertEquals(refused.stdout, "");
+    assertStringIncludes(refused.stderr, "TRY\n  binstruct ./mypkg/mod.ts");
+    // Nothing was promised before the refusal, and nothing crashed after it.
+    assertEquals(refused.stderr.includes("using coder"), false);
+    assertEquals(refused.stderr.includes("ERR_UNSUPPORTED_DIR_IMPORT"), false);
+
+    const accepted = await runCli(
+      ["./mypkg/mod.ts", "decode"],
+      ["-A"],
+      directory,
+      new Uint8Array([7]),
+    );
+
+    assertEquals(accepted.code, 0);
+    assertStringIncludes(accepted.stdout, "7");
+  } finally {
+    await Deno.remove(directory, { recursive: true });
+  }
+});
+
+Deno.test("the header and the inference notice keep the typed form", async () => {
+  // Both used to print the resolved specifier, so a local package announced
+  // itself twice as an absolute file:// URL nobody had typed, while every
+  // listing and TRY line on the same screen said ./mypkg/mod.ts.
+  const directory = await writeLocalPackage();
+  try {
+    const run = await runCli(
+      ["./mypkg/mod.ts", "decode"],
+      ["-A"],
+      directory,
+      new Uint8Array([7]),
+    );
+
+    assertEquals(run.code, 0);
+    assertStringIncludes(run.stderr, "package: ./mypkg/mod.ts → file://");
+    assertStringIncludes(
+      run.stderr,
+      "using coder: myStruct (only coder in ./mypkg/mod.ts)",
+    );
+    assertEquals(run.stderr.includes("only coder in file://"), false);
+  } finally {
+    await Deno.remove(directory, { recursive: true });
+  }
+});
+
+Deno.test("the header still shows what shorthand expanded to", async () => {
+  // The short form leads, but ADR 0004's echo rule stands: a bare name has to
+  // be seen becoming jsr:@binstruct/<name>, or the shorthand is a guess.
+  const plan = await planCli(["png", "pngFile", "decode"]);
+
+  assertEquals(plan.kind, "run");
+  if (plan.kind !== "run") return;
+
+  assertEquals(plan.notices, ["package: png → jsr:@binstruct/png"]);
+});
+
+Deno.test("the header does not repeat itself when nothing was expanded", async () => {
+  const plan = printed(await planCli([PNG]));
+
+  assertEquals(plan.text.split("\n")[0], `package: ${PNG}`);
+  assertEquals(plan.text.includes("→ file://"), false);
 });
 
 Deno.test("an environmental failure is not blamed on the package name", async () => {

@@ -80,7 +80,11 @@ export type {
   ToolFailure,
   ToolFailureReason,
 } from "./discover.ts";
-export { resolveSpecifier, shortenSpecifier } from "./specifier.ts";
+export {
+  moduleInside,
+  resolveSpecifier,
+  shortenSpecifier,
+} from "./specifier.ts";
 export type { ResolvedSpecifier, SpecifierForm } from "./specifier.ts";
 export { KNOWN_PACKAGES } from "./registry.ts";
 

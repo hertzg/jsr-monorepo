@@ -39,10 +39,13 @@ word matches a command name it is the command, and the coder is inferred. A
 coder actually named `decode` or `encode` is therefore unreachable by that
 shorthand; this is documented, not defended against.
 
-The inference is always announced on **stderr**:
+The inference is always announced on **stderr**, in the short form of ADR 0004,
+since the header one line above has already paired that form with the resolved
+specifier:
 
 ```
-using coder: arpData (only coder in jsr:@binstruct/arp)
+package: arp → jsr:@binstruct/arp
+using coder: arpData (only coder in arp)
 ```
 
 The default applies only at exactly one candidate. Two or more — `png`, `bmp`,
