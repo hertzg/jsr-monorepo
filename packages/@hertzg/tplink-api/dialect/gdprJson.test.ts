@@ -37,8 +37,34 @@ Deno.test("shares the gdprText parsers it does not override", () => {
   assertEquals(gdprJson.busyRequest, gdprText.busyRequest);
 });
 
-Deno.test("parseInfo does not scrape a page it has never seen", () => {
-  assertEquals(gdprJson.parseInfo("<html>anything at all</html>"), {});
+/**
+ * The tail of a real NE200 login page, verbatim from the capture attached to
+ * issue #82. The variables sit in a `<script>` *after* `</html>`, which is the
+ * shape the shared scraper expects.
+ */
+const NE200_LOGIN_PAGE =
+  `<html><body>…</body></html>\n<script type="text/javascript"> var authTimes=0; var forbidFlag=0; var forbidTime=0; var modelName="NE200-Outdoor"; var modelDesc="5G Outdoor Router"; var locale_language="en_US"; var adminType="user"; var hasMobile="0";</script>`;
+
+Deno.test("parseInfo reads the login page this firmware actually serves", () => {
+  assertEquals(gdprJson.parseInfo(NE200_LOGIN_PAGE), {
+    authTimes: 0,
+    forbidFlag: 0,
+    forbidTime: 0,
+    modelName: "NE200-Outdoor",
+    modelDesc: "5G Outdoor Router",
+    locale_language: "en_US",
+    adminType: "user",
+    hasMobile: "0",
+  });
+});
+
+Deno.test("parseInfo surfaces the account this firmware expects", () => {
+  const info = gdprJson.parseInfo(NE200_LOGIN_PAGE);
+
+  // `defaultUsername` is a fallback; the device states the real answer here,
+  // and a provisioned device would report "admin" instead.
+  assertEquals(info.adminType, "user");
+  assertEquals(gdprJson.defaultUsername, "user");
 });
 
 Deno.test("publicKeyRequest posts to cgi/getGDPRParm", () => {
@@ -97,7 +123,7 @@ Deno.test("tokenRequest sends only the session cookie", () => {
 Deno.test("encodeAction serializes a go read", () => {
   assertEquals(
     encodeAction([ACT.GET, "DEV2_LTE_LINK_CFG"]),
-    '{"data":{"stack":"1,0,0,0,0,0","pstack":"0,0,0,0,0,0"},' +
+    '{"data":{"stack":"0,0,0,0,0,0","pstack":"0,0,0,0,0,0"},' +
       '"operation":"go","oid":"DEV2_LTE_LINK_CFG"}',
   );
 });
@@ -113,7 +139,7 @@ Deno.test("encodeAction serializes a gl read with the list stack", () => {
 Deno.test("encodeAction turns requested attribute names into empty fields", () => {
   assertEquals(
     encodeAction([ACT.GET, "DEV2_MEM_STATUS", ["total", "free"]]),
-    '{"data":{"total":"","free":"","stack":"1,0,0,0,0,0","pstack":"0,0,0,0,0,0"},' +
+    '{"data":{"total":"","free":"","stack":"0,0,0,0,0,0","pstack":"0,0,0,0,0,0"},' +
       '"operation":"go","oid":"DEV2_MEM_STATUS"}',
   );
 });

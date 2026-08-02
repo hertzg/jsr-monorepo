@@ -22,13 +22,10 @@ import {
   type DecodedBatch,
   type Dialect,
   type Envelope,
-  type RouterInfo,
   type SessionContext,
 } from "./dialect.ts";
 import { gdprText } from "./gdprText.ts";
 import { envelopeBody, rootHref } from "../client/request.ts";
-
-const DEFAULT_PSTACK = "0,0,0,0,0,0";
 
 /**
  * Operation names observed in the NE200's web UI traffic.
@@ -44,14 +41,20 @@ const OPERATIONS: Partial<Record<ActionType, string>> = {
 };
 
 /**
- * Stack default per operation, from the single captured sample: `go` requests
- * address the first instance, `gl` requests enumerate from the root.
+ * Instance path used when the caller supplies none.
+ *
+ * The firmware's own request prefilter fills both `stack` and `pstack` with
+ * all-zeros for every operation, without regard to which one it is:
+ *
+ * ```js ignore
+ * if (!data.data.stack)  data.data.stack  = "0,0,0,0,0,0";
+ * if (!data.data.pstack) data.data.pstack = "0,0,0,0,0,0";
+ * ```
+ *
+ * "First instance" is a property of the object being addressed, not of the
+ * operation addressing it, so there is nothing to vary per operation here.
  */
-const STACK_DEFAULTS: Record<string, string> = {
-  go: "1,0,0,0,0,0",
-  gl: "0,0,0,0,0,0",
-  cgi: "0,0,0,0,0,0",
-};
+const DEFAULT_STACK = "0,0,0,0,0,0";
 
 function base64(text: string): string {
   return new TextEncoder().encode(text).toBase64();
@@ -91,7 +94,7 @@ function attributeFields(
  *
  * assertEquals(
  *   encodeAction([ACT.GET, "DEV2_LTE_LINK_CFG"]),
- *   '{"data":{"stack":"1,0,0,0,0,0","pstack":"0,0,0,0,0,0"},' +
+ *   '{"data":{"stack":"0,0,0,0,0,0","pstack":"0,0,0,0,0,0"},' +
  *     '"operation":"go","oid":"DEV2_LTE_LINK_CFG"}',
  * );
  * ```
@@ -106,7 +109,7 @@ function attributeFields(
  * ```
  */
 export function encodeAction(action: Action): string {
-  const [type, oid, attributes = [], stack, pStack = DEFAULT_PSTACK] = action;
+  const [type, oid, attributes = [], stack, pStack = DEFAULT_STACK] = action;
   const operation = OPERATIONS[type];
 
   if (!operation) {
@@ -120,7 +123,7 @@ export function encodeAction(action: Action): string {
   return JSON.stringify({
     data: {
       ...attributeFields(attributes),
-      stack: stack ?? STACK_DEFAULTS[operation],
+      stack: stack ?? DEFAULT_STACK,
       pstack: pStack,
     },
     operation,
@@ -204,7 +207,7 @@ function errorCode(value: unknown): number {
  * | Credentials | `username\npassword` | base64 fields inside JSON |
  * | Payload | bracketed text blocks | JSON envelope |
  * | Operations | `1`, `2`, … | `go`, `gl`, `cgi` |
- * | Stack default | `0,0,0,0,0,0` | `1,0,0,0,0,0` for `go`, `0,0,0,0,0,0` otherwise |
+ * | Stack default | `0,0,0,0,0,0` | `0,0,0,0,0,0` |
  * | Batching | N actions per request | one action per request |
  * | Session cookie | `loginErrorShow` + `JSESSIONID` | `JSESSIONID` only |
  *
@@ -273,16 +276,14 @@ export const gdprJson: Dialect = {
   ...gdprText,
 
   id: "gdprJson",
-  defaultUsername: "user",
 
   /**
-   * The NE200's login page structure is unverified and nothing in this
-   * dialect's flow consumes scraped variables — it never sends the
-   * `loginErrorShow` cookie — so the page is fetched for session order and
-   * then discarded rather than run through a scraper written for a different
-   * firmware.
+   * Last-resort fallback only. This firmware states which account it expects
+   * in the login page's `adminType`, so a caller that reads the info step can
+   * do better than this constant — a device with a provisioned admin account
+   * reports `"admin"`, for which this default is wrong.
    */
-  parseInfo: (): RouterInfo => ({}),
+  defaultUsername: "user",
 
   publicKeyRequest: (baseUrl: string): Request =>
     new Request(new URL("cgi/getGDPRParm", baseUrl), {
