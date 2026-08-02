@@ -178,10 +178,10 @@ specifier is relative to — resolve it to the same module. Reading
 <code>Deno.cwd()</code> is the one thing this function needs from outside its argument,
 and only for that form.</p>
 <p>Whether the path names a file or a directory is left open. Both are the
-<code>&quot;path&quot;</code> form and both are <code>local</code>, and the CLI settles the question by
-asking <code>deno doc</code> which module it resolved rather than by reading the
-spelling — a directory and the module inside it are indistinguishable as
-strings, and <code>file:///abs/pkg</code> is as much a directory as <code>./pkg</code> is.</p>
+<code>&quot;path&quot;</code> form, because a directory and the module inside it are
+indistinguishable as strings and <code>file:///abs/pkg</code> is as much a directory as
+<code>./pkg</code> is; the CLI settles the question by stat'ing the resolved target
+(<code>inspectLocalTarget</code> in <code>./target.ts</code>).</p>
 </div><section class="section"  id="examples"><div>
       <h2 class="anchorable mb-1"><a href="#examples" class="anchor" aria-label="Anchor" tabIndex="-1"><svg
   width="16"
@@ -238,7 +238,6 @@ assertEquals(resolved.specifier, &quot;jsr:@binstruct/png&quot;);
 assertEquals(resolved.short, &quot;png&quot;);
 assertEquals(resolved.form, &quot;bare&quot;);
 assertEquals(resolved.shorthand, true);
-assertEquals(resolved.local, false);
 </code><button class="copyButton" data-copy="import { assertEquals } from &quot;@std/assert&quot;;
 import { resolveSpecifier } from &quot;./specifier.ts&quot;;
 
@@ -248,7 +247,6 @@ assertEquals(resolved.specifier, &quot;jsr:@binstruct/png&quot;);
 assertEquals(resolved.short, &quot;png&quot;);
 assertEquals(resolved.form, &quot;bare&quot;);
 assertEquals(resolved.shorthand, true);
-assertEquals(resolved.local, false);
 "><svg
   class="copy"
   width="15"
@@ -392,13 +390,13 @@ import { resolveSpecifier } from &quot;./specifier.ts&quot;;
 
 assertEquals(resolveSpecifier(&quot;./local&quot;).form, &quot;path&quot;);
 assertEquals(resolveSpecifier(&quot;./local/mod.mts&quot;).form, &quot;path&quot;);
-assertEquals(resolveSpecifier(&quot;file:///abs/local&quot;).local, true);
+assertEquals(resolveSpecifier(&quot;file:///abs/local&quot;).form, &quot;scheme&quot;);
 </code><button class="copyButton" data-copy="import { assertEquals } from &quot;@std/assert&quot;;
 import { resolveSpecifier } from &quot;./specifier.ts&quot;;
 
 assertEquals(resolveSpecifier(&quot;./local&quot;).form, &quot;path&quot;);
 assertEquals(resolveSpecifier(&quot;./local/mod.mts&quot;).form, &quot;path&quot;);
-assertEquals(resolveSpecifier(&quot;file:///abs/local&quot;).local, true);
+assertEquals(resolveSpecifier(&quot;file:///abs/local&quot;).form, &quot;scheme&quot;);
 "><svg
   class="copy"
   width="15"

@@ -325,10 +325,10 @@ Examples</h2></div><div class="space-y-8"><div class="anchorable"><a href="#exam
   </defs>
 </svg>
 </a>
-<h3 class="example-header"><div class="markdown"><p>A local package works the same way, relative to the working directory</p>
+<h3 class="example-header"><div class="markdown"><p>A local module works the same way, relative to the working directory</p>
 </div></h3>
-  <div><div class="markdown"><pre class="highlight"><code class="language-bash">deno run -A @binstruct/cli ./my-package myStruct decode &lt; input.bin &gt; output.json5
-</code><button class="copyButton" data-copy="deno run -A @binstruct/cli ./my-package myStruct decode &lt; input.bin &gt; output.json5
+  <div><div class="markdown"><pre class="highlight"><code class="language-bash">deno run -A @binstruct/cli ./my-package/mod.ts myStruct decode &lt; input.bin &gt; output.json5
+</code><button class="copyButton" data-copy="deno run -A @binstruct/cli ./my-package/mod.ts myStruct decode &lt; input.bin &gt; output.json5
 "><svg
   class="copy"
   width="15"
@@ -472,6 +472,16 @@ Functions</h2></div><div class="namespaceSection"><div id="namespace_diagnoseemp
 		    <a href=".&#x2F;.&#x2F;cli.ts&#x2F;~&#x2F;explainFailure.html" title="explainFailure">
 			    <span>explainFailure</span><span>(<div class="ml-4"><div><span>packageInput<span>: <span class="td-kw">string</span></span></span>,</div><div><span>coderName<span>: <span class="td-kw">string</span></span></span>,</div><div><span>error<span>: <span class="td-kw">unknown</span></span></span></div></div>)<span>: <span class="td-ref">Promise</span>&lt;<span class="td-kw">string</span>&gt;</span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Explains a failure that only surfaced once the package was imported.</p>
 </div></div></div>
+    </div><div id="namespace_inspectlocaltarget" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-Function bg-Function/15 dark:text-FunctionDark dark:bg-FunctionDark/15" title="Function">f</div></div>
+<div class="namespaceItemContent">
+		    <a href=".&#x2F;.&#x2F;mod.ts&#x2F;~&#x2F;inspectLocalTarget.html" title="inspectLocalTarget">
+			    <span>inspectLocalTarget</span><span>(<span><span>specifier<span>: <span class="td-kw">string</span></span></span></span>)<span>: <span class="td-ref">Promise</span>&lt;<span class="td-ref">LocalTarget</span>&gt;</span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Reports what a resolved specifier points at, before anything is run on it.</p>
+</div></div></div>
+    </div><div id="namespace_ismodulepath" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-Function bg-Function/15 dark:text-FunctionDark dark:bg-FunctionDark/15" title="Function">f</div></div>
+<div class="namespaceItemContent">
+		    <a href=".&#x2F;.&#x2F;mod.ts&#x2F;~&#x2F;isModulePath.html" title="isModulePath">
+			    <span>isModulePath</span><span>(<span><span>name<span>: <span class="td-kw">string</span></span></span></span>)<span>: <span class="td-kw">boolean</span></span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Reports whether a name ends in an extension the runtime will load.</p>
+</div></div></div>
     </div><div id="namespace_main" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-Function bg-Function/15 dark:text-FunctionDark dark:bg-FunctionDark/15" title="Function">f</div></div>
 <div class="namespaceItemContent">
 		    <a href=".&#x2F;.&#x2F;cli.ts&#x2F;~&#x2F;main.html" title="main">
@@ -576,12 +586,6 @@ Interfaces</h2></div><div class="namespaceSection"><div id="namespace_clioptions
                 <a href=".&#x2F;.&#x2F;mod.ts&#x2F;~&#x2F;ResolvedSpecifier.html#property_input">
                   <span>input</span><span>: <span class="td-kw">string</span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>The argument exactly as the user typed it.</p>
 </div></div></li><li>
-                <a href=".&#x2F;.&#x2F;mod.ts&#x2F;~&#x2F;ResolvedSpecifier.html#property_local">
-                  <span>local</span><span>: <span class="td-kw">boolean</span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Whether the specifier names something on this machine, i.e. resolved to a
-<code>file:</code> URL. True for a path and for a <code>file:</code> URL typed in full, and the
-condition under which the CLI imports the module URL <code>deno doc</code> reported
-rather than the specifier itself.</p>
-</div></div></li><li>
                 <a href=".&#x2F;.&#x2F;mod.ts&#x2F;~&#x2F;ResolvedSpecifier.html#property_short">
                   <span>short</span><span>: <span class="td-kw">string</span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>The shortest form that resolves back to <code>ResolvedSpecifier.specifier</code>,
 for listings and <code>TRY</code> lines. Equal to <code>shortenSpecifier(specifier)</code>, except
@@ -652,7 +656,7 @@ Type Aliases</h2></div><div class="namespaceSection"><div id="namespace_cliplan"
 			    <span>DenoDocJson</span><span> = { nodes<span>: <span class="td-ref">Record</span>&lt;<span class="td-kw">string</span><span>, </span><span class="td-ref">DenoDocNode</span>&gt;</span>;  }</span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>The <code>deno doc --json</code> document, narrowed to the parts discovery reads.</p>
 </div></div><ul class="namespaceItemContentSubItems"><li>
                 <a href=".&#x2F;.&#x2F;mod.ts&#x2F;~&#x2F;DenoDocJson.html#property_nodes">
-                  <span>nodes</span><span>: <span class="td-ref">Record</span>&lt;<span class="td-kw">string</span><span>, </span><span class="td-ref">DenoDocNode</span>&gt;</span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>One entry per entrypoint, keyed by specifier.</p>
+                  <span>nodes</span><span>: <span class="td-ref">Record</span>&lt;<span class="td-kw">string</span><span>, </span><span class="td-ref">DenoDocNode</span>&gt;</span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>One entry per documented module, keyed by the module's own URL.</p>
 </div></div></li></ul></div>
     </div><div id="namespace_denodocnode" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-TypeAlias bg-TypeAlias/15 dark:text-TypeAliasDark dark:bg-TypeAliasDark/15" title="Type Alias">T</div></div>
 <div class="namespaceItemContent">
@@ -660,7 +664,7 @@ Type Aliases</h2></div><div class="namespaceSection"><div id="namespace_cliplan"
 			    <span>DenoDocNode</span><span> = { module_doc<span class="td-op">?</span><span>: { doc<span class="td-op">?</span><span>: <span class="td-kw">string</span></span>;  }</span>; symbols<span>: <span class="td-ref">DenoDocSymbol</span>[]</span>;  }</span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>A module entry in <code>deno doc --json</code> output.</p>
 </div></div><ul class="namespaceItemContentSubItems"><li>
                 <a href=".&#x2F;.&#x2F;mod.ts&#x2F;~&#x2F;DenoDocNode.html#property_module_doc">
-                  <span>module_doc</span><span>: { doc<span class="td-op">?</span><span>: <span class="td-kw">string</span></span>;  }</span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>The <code>@module</code> JSDoc of the entrypoint.</p>
+                  <span>module_doc</span><span>: { doc<span class="td-op">?</span><span>: <span class="td-kw">string</span></span>;  }</span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>The <code>@module</code> JSDoc of the documented module.</p>
 </div></div></li><li>
                 <a href=".&#x2F;.&#x2F;mod.ts&#x2F;~&#x2F;DenoDocNode.html#property_symbols">
                   <span>symbols</span><span>: <span class="td-ref">DenoDocSymbol</span>[]</span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Every exported symbol, in declaration order.</p>
@@ -795,17 +799,18 @@ Type Aliases</h2></div><div class="namespaceSection"><div id="namespace_cliplan"
                 <a href=".&#x2F;.&#x2F;mod.ts&#x2F;~&#x2F;GuideOptions.html#property_items">
                   <span>items</span><span>: <span class="td-kw">readonly</span> <span class="td-ref">GuideOption</span>[]</span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>The legal values, in the order they should be shown.</p>
 </div></div></li></ul></div>
+    </div><div id="namespace_localtarget" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-TypeAlias bg-TypeAlias/15 dark:text-TypeAliasDark dark:bg-TypeAliasDark/15" title="Type Alias">T</div></div>
+<div class="namespaceItemContent">
+		    <a href=".&#x2F;.&#x2F;mod.ts&#x2F;~&#x2F;LocalTarget.html" title="LocalTarget">
+			    <span>LocalTarget</span><span> = <div class="ml-indent"><span>{ <span class="td-kw">readonly </span>kind<span>: <span class="td-str">"elsewhere"</span></span>;  }</span><br /><span><span class="td-op"> | </span>{ <span class="td-kw">readonly </span>kind<span>: <span class="td-str">"module"</span></span>;  }</span><br /><span><span class="td-op"> | </span>{ <span class="td-kw">readonly </span>kind<span>: <span class="td-str">"directory"</span></span>; <span class="td-kw">readonly </span>modules<span>: <span class="td-kw">readonly</span> <span class="td-kw">string</span>[]</span>;  }</span><br /><span><span class="td-op"> | </span>{ <span class="td-kw">readonly </span>kind<span>: <span class="td-str">"missing"</span></span>;  }</span><br /><span><span class="td-op"> | </span>{ <span class="td-kw">readonly </span>kind<span>: <span class="td-str">"unreadable"</span></span>; <span class="td-kw">readonly </span>reason<span>: <span class="td-kw">string</span></span>;  }</span></div></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>What sits at the far end of a resolved specifier.</p>
+</div></div></div>
     </div><div id="namespace_packagesurface" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-TypeAlias bg-TypeAlias/15 dark:text-TypeAliasDark dark:bg-TypeAliasDark/15" title="Type Alias">T</div></div>
 <div class="namespaceItemContent">
 		    <a href=".&#x2F;.&#x2F;mod.ts&#x2F;~&#x2F;PackageSurface.html" title="PackageSurface">
-			    <span>PackageSurface</span><span> = { entrypoint<span>: <span class="td-kw">string</span></span>; version<span class="td-op">?</span><span>: <span class="td-kw">string</span></span>; summary<span class="td-op">?</span><span>: <span class="td-kw">string</span></span>; coders<span>: <span class="td-ref">DiscoveredCoder</span>[]</span>;  }</span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>The public surface of a package as read from its type declarations.</p>
+			    <span>PackageSurface</span><span> = { version<span class="td-op">?</span><span>: <span class="td-kw">string</span></span>; summary<span class="td-op">?</span><span>: <span class="td-kw">string</span></span>; coders<span>: <span class="td-ref">DiscoveredCoder</span>[]</span>;  }</span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>The public surface of a package as read from its type declarations.</p>
 </div></div><ul class="namespaceItemContentSubItems"><li>
                 <a href=".&#x2F;.&#x2F;mod.ts&#x2F;~&#x2F;PackageSurface.html#property_coders">
                   <span>coders</span><span>: <span class="td-ref">DiscoveredCoder</span>[]</span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Coder factories, zero-required-parameter ones first.</p>
-</div></div></li><li>
-                <a href=".&#x2F;.&#x2F;mod.ts&#x2F;~&#x2F;PackageSurface.html#property_entrypoint">
-                  <span>entrypoint</span><span>: <span class="td-kw">string</span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>The module <code>deno doc</code> resolved the specifier to, and therefore the one
-these coders were read from.</p>
 </div></div></li><li>
                 <a href=".&#x2F;.&#x2F;mod.ts&#x2F;~&#x2F;PackageSurface.html#property_summary">
                   <span>summary</span><span>: <span class="td-kw">string</span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>First line of the module JSDoc, absent when the module is undocumented.</p>
@@ -1057,10 +1062,10 @@ Examples</h2></div><div class="space-y-8"><div class="anchorable"><a href="#exam
   </defs>
 </svg>
 </a>
-<h3 class="example-header"><div class="markdown"><p>A local package works whether you name the directory or the module</p>
+<h3 class="example-header"><div class="markdown"><p>A local package is named by its module file, never by its directory</p>
 </div></h3>
-  <div><div class="markdown"><pre class="highlight"><code class="language-bash">binstruct ./my-package decode &lt; input.bin &gt; output.json5
-</code><button class="copyButton" data-copy="binstruct ./my-package decode &lt; input.bin &gt; output.json5
+  <div><div class="markdown"><pre class="highlight"><code class="language-bash">binstruct ./my-package/mod.ts decode &lt; input.bin &gt; output.json5
+</code><button class="copyButton" data-copy="binstruct ./my-package/mod.ts decode &lt; input.bin &gt; output.json5
 "><svg
   class="copy"
   width="15"

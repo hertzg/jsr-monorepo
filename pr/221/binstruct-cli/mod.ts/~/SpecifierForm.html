@@ -148,7 +148,9 @@
 <code>file:</code>).</li>
 <li><code>&quot;path&quot;</code> — the input pointed somewhere on disk, by leading <code>.</code> or <code>/</code> or by
 module extension. A file and a directory are the same form: which one it is
-cannot be read off the spelling, and nothing here goes looking.</li>
+cannot be read off the spelling, and nothing here goes looking. Nor is the
+form the place to ask — <code>file:///abs/pkg</code> is a <code>&quot;scheme&quot;</code> and names a
+directory all the same.</li>
 <li><code>&quot;scoped&quot;</code> — the input named a scope and package, without a scheme.</li>
 <li><code>&quot;bare&quot;</code> — the input named a package only.</li>
 </ul>

@@ -175,9 +175,9 @@ that renders as something else is invisible here.</p>
 <p>Coders that take no required arguments are listed first, because those are
 the ones the CLI can invoke on the user's behalf (ADR 0005). Declaration
 order is preserved within each group.</p>
-<p>The key of the node the surface is read from is returned as
-<a href="../.././mod.ts/~/PackageSurface.entrypoint.html"><code>PackageSurface.entrypoint</code></a>: it is the module <code>deno doc</code> resolved,
-so the caller can import exactly what was described here.</p>
+<p>The single node is read without choosing between nodes, which is sound only
+because the specifier named one module: a directory, whose output holds one
+node per file under it, never reaches here (<code>./target.ts</code>, ADR 0004).</p>
 </div><section class="section"  id="examples"><div>
       <h2 class="anchorable mb-1"><a href="#examples" class="anchor" aria-label="Anchor" tabIndex="-1"><svg
   width="16"
@@ -251,7 +251,6 @@ const surface = readDocSurface({
   },
 });
 
-assertEquals(surface.entrypoint, &quot;jsr:@binstruct/arp&quot;);
 assertEquals(surface.version, &quot;0.3.0&quot;);
 assertEquals(surface.summary, &quot;ARP packet encoding and decoding.&quot;);
 assertEquals(surface.coders, [{
@@ -286,7 +285,6 @@ const surface = readDocSurface({
   },
 });
 
-assertEquals(surface.entrypoint, &quot;jsr:@binstruct/arp&quot;);
 assertEquals(surface.version, &quot;0.3.0&quot;);
 assertEquals(surface.summary, &quot;ARP packet encoding and decoding.&quot;);
 assertEquals(surface.coders, [{
@@ -460,7 +458,7 @@ Return Type</h2></div><div class="space-y-8"><div class=" docEntry" id="function
   />
 </svg>
 </a>
-</div><div class="max-w-[75ch]"><div class="markdown"><p>The entrypoint, module summary, resolved version and coder list</p>
+</div><div class="max-w-[75ch]"><div class="markdown"><p>The module summary, resolved version and coder list</p>
 </div></div></div>
 </div></section>
 </div>

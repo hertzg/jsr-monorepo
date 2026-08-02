@@ -143,8 +143,10 @@
 </svg>
 </a>
 </div><div><div class="space-y-7" id=""><div class="markdown"><p>The <code>deno doc --json</code> document, narrowed to the parts discovery reads.</p>
-<p>A single entrypoint produces exactly one entry under <code>nodes</code>, keyed by the
-specifier as it was given on the command line.</p>
+<p>A specifier that names one module produces exactly one entry under <code>nodes</code>,
+keyed by the module <code>deno doc</code> resolved — the specifier itself for a registry
+one. A directory produces one entry per module file found under it, which is
+why directories are refused before discovery runs.</p>
 </div><section class="section"  id="properties"><div>
       <h2 class="anchorable mb-1"><a href="#properties" class="anchor" aria-label="Anchor" tabIndex="-1"><svg
   width="16"
@@ -220,7 +222,7 @@ Properties</h2></div><div class="space-y-8"><div class="anchorable docEntry" id=
   />
 </svg>
 </a>
-</div><div class="max-w-[75ch]"><div class="markdown"><p>One entry per entrypoint, keyed by specifier.</p>
+</div><div class="max-w-[75ch]"><div class="markdown"><p>One entry per documented module, keyed by the module's own URL.</p>
 </div></div></div>
 </div></section>
 </div>

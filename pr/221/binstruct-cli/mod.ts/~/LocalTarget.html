@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>ResolvedSpecifier.local - mod.ts - @binstruct&#x2F;cli documentation</title>
+  <title>LocalTarget - mod.ts - @binstruct&#x2F;cli documentation</title>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="doc-current-file" content="mod.ts">
@@ -48,8 +48,7 @@
 </svg>
 </span>
 
-    <ul><li><span>.</span>
-            <a href="..&#x2F;..&#x2F;.&#x2F;mod.ts&#x2F;~&#x2F;ResolvedSpecifier.html" class="contextLink">ResolvedSpecifier</a></li><li>local</li></ul></ul>
+    <ul><li>LocalTarget</li></ul></ul>
 </div>
 
     <div class="flex items-center gap-2">
@@ -113,14 +112,14 @@
     </div>
   </div>
 </nav>
-<div id="searchResults"></div><div id="content"><main class="symbolGroup" id="symbol_ResolvedSpecifier.local"><article>
+<div id="searchResults"></div><div id="content"><main class="symbolGroup" id="symbol_LocalTarget"><article>
       <div class="symbolTitle">
         <div>
           <div class="text-2xl leading-none break-all">
-            <span class="text-Property">property</span>&nbsp;<span class="font-bold">ResolvedSpecifier.local</span>
+            <span class="text-TypeAlias">type alias</span>&nbsp;<span class="font-bold">LocalTarget</span>
           </div></div><a
   class="sourceButton"
-  href="file:&#x2F;&#x2F;&#x2F;home&#x2F;runner&#x2F;work&#x2F;jsr-monorepo&#x2F;jsr-monorepo&#x2F;packages&#x2F;@binstruct&#x2F;cli&#x2F;specifier.ts"><svg
+  href="file:&#x2F;&#x2F;&#x2F;home&#x2F;runner&#x2F;work&#x2F;jsr-monorepo&#x2F;jsr-monorepo&#x2F;packages&#x2F;@binstruct&#x2F;cli&#x2F;target.ts"><svg
   width="14"
   height="14"
   viewBox="0 0 14 14"
@@ -143,12 +142,21 @@
   />
 </svg>
 </a>
-</div><div><div class="space-y-7" id=""><div class="markdown"><p>Whether the specifier names something on this machine, i.e. resolved to a
-<code>file:</code> URL. True for a path and for a <code>file:</code> URL typed in full, and the
-condition under which the CLI imports the module URL <code>deno doc</code> reported
-rather than the specifier itself.</p>
-</div><section class="section"  id="type"><div>
-      <h2 class="anchorable mb-1"><a href="#type" class="anchor" aria-label="Anchor" tabIndex="-1"><svg
+</div><div><div class="space-y-7" id=""><div class="markdown"><p>What sits at the far end of a resolved specifier.</p>
+<ul>
+<li><code>&quot;elsewhere&quot;</code> — not on this machine (<code>jsr:</code>, <code>npm:</code>, <code>https:</code>), so there is
+nothing to stat and the runtime resolves it.</li>
+<li><code>&quot;module&quot;</code> — a file, which is what a package argument has to name.</li>
+<li><code>&quot;directory&quot;</code> — refused, with <code>LocalTarget.modules</code> offered as
+the candidates to name instead.</li>
+<li><code>&quot;missing&quot;</code> — nothing is there at all, which is a different mistake from
+naming a directory and gets a different message.</li>
+<li><code>&quot;unreadable&quot;</code> — the target could not be inspected, e.g. read permission
+was denied. Refused rather than assumed to be a module: assuming is how
+the directory case produced confident wrong output.</li>
+</ul>
+</div><section class="section"  id="definition"><div>
+      <h2 class="anchorable mb-1"><a href="#definition" class="anchor" aria-label="Anchor" tabIndex="-1"><svg
   width="16"
   height="16"
   viewBox="0 0 14 14"
@@ -170,14 +178,14 @@ rather than the specifier itself.</p>
   </defs>
 </svg>
 </a>
-Type</h2></div><div class="space-y-8"><div class=" docEntry" id="variable_resolvedspecifier_local">
+Definition</h2></div><div class="space-y-8"><div class=" docEntry" id="typealias_localtarget">
 
   <div class="docEntryHeader">
-    <div><code><span class="font-medium text-stone-500 dark:text-stone-200"><span class="td-kw">boolean</span></span>
+    <div><code><span class="font-medium text-stone-500 dark:text-stone-200"><div class="ml-indent"><span>{ <span class="td-kw">readonly </span>kind<span>: <span class="td-str">"elsewhere"</span></span>;  }</span><br /><span><span class="td-op"> | </span>{ <span class="td-kw">readonly </span>kind<span>: <span class="td-str">"module"</span></span>;  }</span><br /><span><span class="td-op"> | </span>{ <span class="td-kw">readonly </span>kind<span>: <span class="td-str">"directory"</span></span>; <span class="td-kw">readonly </span>modules<span>: <span class="td-kw">readonly</span> <span class="td-kw">string</span>[]</span>;  }</span><br /><span><span class="td-op"> | </span>{ <span class="td-kw">readonly </span>kind<span>: <span class="td-str">"missing"</span></span>;  }</span><br /><span><span class="td-op"> | </span>{ <span class="td-kw">readonly </span>kind<span>: <span class="td-str">"unreadable"</span></span>; <span class="td-kw">readonly </span>reason<span>: <span class="td-kw">string</span></span>;  }</span></div></span>
       </code>
     </div><a
   class="sourceButton"
-  href="file:&#x2F;&#x2F;&#x2F;home&#x2F;runner&#x2F;work&#x2F;jsr-monorepo&#x2F;jsr-monorepo&#x2F;packages&#x2F;@binstruct&#x2F;cli&#x2F;specifier.ts"><svg
+  href="file:&#x2F;&#x2F;&#x2F;home&#x2F;runner&#x2F;work&#x2F;jsr-monorepo&#x2F;jsr-monorepo&#x2F;packages&#x2F;@binstruct&#x2F;cli&#x2F;target.ts"><svg
   width="14"
   height="14"
   viewBox="0 0 14 14"
@@ -207,8 +215,8 @@ Type</h2></div><div class="space-y-8"><div class=" docEntry" id="variable_resolv
     </article></main>
 <div class="toc">
     <div><div class="usageContent">
-    <h3>Usage</h3><div class="markdown"><pre class="highlight"><code class="language-typescript">import { type ResolvedSpecifier } from &quot;mod.ts&quot;;
-</code><button class="copyButton" data-copy="import { type ResolvedSpecifier } from &quot;mod.ts&quot;;
+    <h3>Usage</h3><div class="markdown"><pre class="highlight"><code class="language-typescript">import { type LocalTarget } from &quot;mod.ts&quot;;
+</code><button class="copyButton" data-copy="import { type LocalTarget } from &quot;mod.ts&quot;;
 "><svg
   class="copy"
   width="15"
@@ -241,7 +249,7 @@ Type</h2></div><div class="space-y-8"><div class=" docEntry" id="variable_resolv
 </svg>
 </button><code></code></pre>
 </div></div><nav class="documentNavigation">
-          <h3>Document Navigation</h3><ul><li><a href="#type" title="Type">Type</a></li></ul></nav></div>
+          <h3>Document Navigation</h3><ul><li><a href="#definition" title="Definition">Definition</a></li></ul></nav></div>
   </div></div>
 </div>
 </div>
