@@ -172,8 +172,10 @@
 <li>4-byte chunk ID (&quot;LIST&quot;)</li>
 <li>4-byte chunk size</li>
 <li>4-byte list type</li>
-<li>Variable-length list data</li>
+<li>Exactly <code>chunkSize - 4</code> bytes of list data</li>
 </ul>
+<p>A RIFF <code>LIST</code> chunk counts its list type towards <code>chunkSize</code>, so the payload
+that follows the list type is four bytes shorter than <code>chunkSize</code>.</p>
 </div><section class="section"  id="examples"><div>
       <h2 class="anchorable mb-1"><a href="#examples" class="anchor" aria-label="Anchor" tabIndex="-1"><svg
   width="16"
@@ -229,7 +231,7 @@ const testList = {
   chunkId: &quot;LIST&quot;,
   chunkSize: 20,
   listType: &quot;INFO&quot;,
-  data: new Array(12).fill(0)
+  data: new Array(16).fill(0)
 };
 
 const buffer = new Uint8Array(100);
@@ -237,11 +239,11 @@ const bytesWritten = listCoder.encode(testList, buffer);
 const [decoded, bytesRead] = listCoder.decode(buffer);
 
 assertEquals(bytesRead, 28);
-assertEquals(bytesWritten, 28); // 4 (chunkId) + 4 (chunkSize) + 4 (listType) + 4 (length) + 12 (data)
+assertEquals(bytesWritten, 28); // 4 (chunkId) + 4 (chunkSize) + 4 (listType) + 16 (data)
 assertEquals(decoded.chunkId, &quot;LIST&quot;);
 assertEquals(decoded.chunkSize, 20);
 assertEquals(decoded.listType, &quot;INFO&quot;);
-assertEquals(decoded.data.length, 12); // Uses chunkSize reference
+assertEquals(decoded.data.length, 16); // chunkSize - 4 (listType)
 </code><button class="copyButton" data-copy="import { assertEquals } from &quot;@std/assert&quot;;
 import { listChunk } from &quot;@binstruct/wav&quot;;
 
@@ -250,7 +252,7 @@ const testList = {
   chunkId: &quot;LIST&quot;,
   chunkSize: 20,
   listType: &quot;INFO&quot;,
-  data: new Array(12).fill(0)
+  data: new Array(16).fill(0)
 };
 
 const buffer = new Uint8Array(100);
@@ -258,11 +260,11 @@ const bytesWritten = listCoder.encode(testList, buffer);
 const [decoded, bytesRead] = listCoder.decode(buffer);
 
 assertEquals(bytesRead, 28);
-assertEquals(bytesWritten, 28); // 4 (chunkId) + 4 (chunkSize) + 4 (listType) + 4 (length) + 12 (data)
+assertEquals(bytesWritten, 28); // 4 (chunkId) + 4 (chunkSize) + 4 (listType) + 16 (data)
 assertEquals(decoded.chunkId, &quot;LIST&quot;);
 assertEquals(decoded.chunkSize, 20);
 assertEquals(decoded.listType, &quot;INFO&quot;);
-assertEquals(decoded.data.length, 12); // Uses chunkSize reference
+assertEquals(decoded.data.length, 16); // chunkSize - 4 (listType)
 "><svg
   class="copy"
   width="15"

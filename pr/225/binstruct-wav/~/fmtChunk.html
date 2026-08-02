@@ -169,10 +169,12 @@
       </code><div class="space-y-7" id=""><div class="markdown"><p>Creates a coder for format chunks.</p>
 <p>Encodes and decodes format chunk structures supporting:</p>
 <ul>
-<li>Standard PCM format (16 bytes)</li>
 <li>Extended formats with cbSize field (18+ bytes)</li>
 <li>Multiple audio format codes (PCM, IEEE float, A-law, μ-law, extensible)</li>
 </ul>
+<p>The <code>cbSize</code> field is always encoded and decoded, so the chunk payload is
+always 18 bytes and <code>chunkSize</code> should be 18. The canonical 16-byte PCM
+<code>fmt </code> chunk, which omits <code>cbSize</code>, is not supported.</p>
 </div><section class="section"  id="examples"><div>
       <h2 class="anchorable mb-1"><a href="#examples" class="anchor" aria-label="Anchor" tabIndex="-1"><svg
   width="16"
@@ -226,7 +228,7 @@ import { fmtChunk } from &quot;@binstruct/wav&quot;;
 const fmtCoder = fmtChunk();
 const testFmt = {
   chunkId: &quot;fmt &quot;,
-  chunkSize: 16,
+  chunkSize: 18, // 16 PCM fields plus the 2-byte cbSize
   audioFormat: 1, // PCM
   numChannels: 2, // Stereo
   sampleRate: 44100,
@@ -253,7 +255,7 @@ import { fmtChunk } from &quot;@binstruct/wav&quot;;
 const fmtCoder = fmtChunk();
 const testFmt = {
   chunkId: &quot;fmt &quot;,
-  chunkSize: 16,
+  chunkSize: 18, // 16 PCM fields plus the 2-byte cbSize
   audioFormat: 1, // PCM
   numChannels: 2, // Stereo
   sampleRate: 44100,

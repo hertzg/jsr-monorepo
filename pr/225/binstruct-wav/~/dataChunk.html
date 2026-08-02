@@ -171,8 +171,10 @@
 <ul>
 <li>4-byte chunk ID (&quot;data&quot;)</li>
 <li>4-byte chunk size (little-endian)</li>
-<li>Variable-length audio data</li>
+<li>Exactly <code>chunkSize</code> bytes of audio data</li>
 </ul>
+<p>The audio data length is driven by the <code>chunkSize</code> field, as required by RIFF:
+a <code>data</code> chunk carries no length of its own beyond <code>chunkSize</code>.</p>
 </div><section class="section"  id="examples"><div>
       <h2 class="anchorable mb-1"><a href="#examples" class="anchor" aria-label="Anchor" tabIndex="-1"><svg
   width="16"
@@ -234,8 +236,8 @@ const buffer = new Uint8Array(2048);
 const bytesWritten = dataCoder.encode(testData, buffer);
 const [decoded, bytesRead] = dataCoder.decode(buffer);
 
-assertEquals(bytesRead, 1012);
-assertEquals(bytesWritten, 1012); // 4 (chunkId) + 4 (chunkSize) + 4 (length) + 1000 (audioData)
+assertEquals(bytesRead, 1008);
+assertEquals(bytesWritten, 1008); // 4 (chunkId) + 4 (chunkSize) + 1000 (audioData)
 assertEquals(decoded.chunkId, &quot;data&quot;);
 assertEquals(decoded.chunkSize, 1000);
 assertEquals(decoded.audioData.length, 1000); // Uses chunkSize reference
@@ -253,8 +255,8 @@ const buffer = new Uint8Array(2048);
 const bytesWritten = dataCoder.encode(testData, buffer);
 const [decoded, bytesRead] = dataCoder.decode(buffer);
 
-assertEquals(bytesRead, 1012);
-assertEquals(bytesWritten, 1012); // 4 (chunkId) + 4 (chunkSize) + 4 (length) + 1000 (audioData)
+assertEquals(bytesRead, 1008);
+assertEquals(bytesWritten, 1008); // 4 (chunkId) + 4 (chunkSize) + 1000 (audioData)
 assertEquals(decoded.chunkId, &quot;data&quot;);
 assertEquals(decoded.chunkSize, 1000);
 assertEquals(decoded.audioData.length, 1000); // Uses chunkSize reference
