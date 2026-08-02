@@ -64,6 +64,9 @@
 "@binstruct/tcp":
   - changed-files:
       - any-glob-to-any-file: packages/@binstruct/tcp/**
+"@binstruct/tga":
+  - changed-files:
+      - any-glob-to-any-file: packages/@binstruct/tga/**
 "@binstruct/tls-record":
   - changed-files:
       - any-glob-to-any-file: packages/@binstruct/tls-record/**
