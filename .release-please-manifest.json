@@ -12,7 +12,7 @@
   "packages/@binstruct/icmpv6": "0.1.0",
   "packages/@binstruct/ico": "0.1.0",
   "packages/@binstruct/igmp": "0.1.0",
-  "packages/@binstruct/inet": "0.3.0",
+  "packages/@binstruct/inet": "1.0.0",
   "packages/@binstruct/ipv4": "0.3.0",
   "packages/@binstruct/ipv6": "0.1.0",
   "packages/@binstruct/mbr": "0.1.0",
