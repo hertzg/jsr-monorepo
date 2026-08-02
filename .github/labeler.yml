@@ -70,6 +70,9 @@
 "@binstruct/sqlite":
   - changed-files:
       - any-glob-to-any-file: packages/@binstruct/sqlite/**
+"@binstruct/tar":
+  - changed-files:
+      - any-glob-to-any-file: packages/@binstruct/tar/**
 "@binstruct/tcp":
   - changed-files:
       - any-glob-to-any-file: packages/@binstruct/tcp/**

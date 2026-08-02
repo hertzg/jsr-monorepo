@@ -55,6 +55,7 @@ Source layout mirrors the JSR scope: `packages/<scope>/<name>/`.
 | [@binstruct/rtp](https://jsr.io/@binstruct/rtp)           | [![JSR](https://jsr.io/badges/@binstruct/rtp)](https://jsr.io/@binstruct/rtp)           |
 | [@binstruct/sll](https://jsr.io/@binstruct/sll)           | [![JSR](https://jsr.io/badges/@binstruct/sll)](https://jsr.io/@binstruct/sll)           |
 | [@binstruct/sqlite](https://jsr.io/@binstruct/sqlite)     | [![JSR](https://jsr.io/badges/@binstruct/sqlite)](https://jsr.io/@binstruct/sqlite)     |
+| [@binstruct/tar](https://jsr.io/@binstruct/tar)           | [![JSR](https://jsr.io/badges/@binstruct/tar)](https://jsr.io/@binstruct/tar)           |
 | [@binstruct/tcp](https://jsr.io/@binstruct/tcp)           | [![JSR](https://jsr.io/badges/@binstruct/tcp)](https://jsr.io/@binstruct/tcp)           |
 | [@binstruct/tga](https://jsr.io/@binstruct/tga)           | [![JSR](https://jsr.io/badges/@binstruct/tga)](https://jsr.io/@binstruct/tga)           |
 | [@binstruct/tls-record](https://jsr.io/@binstruct/tls-record) | [![JSR](https://jsr.io/badges/@binstruct/tls-record)](https://jsr.io/@binstruct/tls-record) |
@@ -88,11 +89,12 @@ deno task cov
 
 ## Releasing
 
-Releases are automated via [Release Please](https://github.com/googleapis/release-please).
-Commits following [Conventional Commits](https://www.conventionalcommits.org/)
-are analyzed automatically, and a release PR is maintained with version bumps
-and changelogs. Merging the release PR creates GitHub Releases and publishes
-all packages to JSR.
+Releases are automated via
+[Release Please](https://github.com/googleapis/release-please). Commits
+following [Conventional Commits](https://www.conventionalcommits.org/) are
+analyzed automatically, and a release PR is maintained with version bumps and
+changelogs. Merging the release PR creates GitHub Releases and publishes all
+packages to JSR.
 
 ## License
 
