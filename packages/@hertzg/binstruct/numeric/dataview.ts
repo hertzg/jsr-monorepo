@@ -59,15 +59,20 @@ export function dataViewType<TDecoded extends number | bigint>(
   endianness: Endianness,
   kind: symbol,
 ): Coder<TDecoded> {
-  const bits = Number((type.match(/[0-9]+$/)?.[0])!);
-
-  if (isNaN(bits)) {
-    throw new Error(`Unable to infer size from type ${type}`);
-  }
-
-  const bytes = Math.trunc(bits / 8);
-
-  const methodSuffix = `${type}` as const;
+  const byteSizes: Record<DataViewMethodSuffixes, number> = {
+    Int8: 1,
+    Uint8: 1,
+    Int16: 2,
+    Uint16: 2,
+    Float16: 2,
+    Int32: 4,
+    Uint32: 4,
+    Float32: 4,
+    BigInt64: 8,
+    BigUint64: 8,
+    Float64: 8,
+  };
+  const bytes = byteSizes[type];
 
   let self: Coder<TDecoded>;
   return self = {
@@ -80,27 +85,19 @@ export function dataViewType<TDecoded extends number | bigint>(
         target.byteOffset,
         target.byteLength,
       );
-      switch (methodSuffix) {
+      switch (type) {
         case "Uint8":
         case "Int8":
-          dataView[`set${methodSuffix}`](0, value as number);
+          dataView[`set${type}`](0, value as number);
           break;
 
         case "BigUint64":
         case "BigInt64":
-          dataView[`set${methodSuffix}`](
-            0,
-            value as bigint,
-            endianness === "le",
-          );
+          dataView[`set${type}`](0, value as bigint, endianness === "le");
           break;
 
         default:
-          dataView[`set${methodSuffix}`](
-            0,
-            value as number,
-            endianness === "le",
-          );
+          dataView[`set${type}`](0, value as number, endianness === "le");
           break;
       }
       return bytes;
@@ -117,17 +114,14 @@ export function dataViewType<TDecoded extends number | bigint>(
       );
 
       let value: TDecoded;
-      switch (methodSuffix) {
+      switch (type) {
         case "Uint8":
         case "Int8":
-          value = dataView[`get${methodSuffix}`](0) as TDecoded;
+          value = dataView[`get${type}`](0) as TDecoded;
           break;
 
         default:
-          value = dataView[`get${methodSuffix}`](
-            0,
-            endianness === "le",
-          ) as TDecoded;
+          value = dataView[`get${type}`](0, endianness === "le") as TDecoded;
           break;
       }
 

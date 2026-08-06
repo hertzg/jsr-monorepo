@@ -91,20 +91,23 @@ export function stringFL(
   decoderEncoding: string = "utf-8",
   decoderOptions: TextDecoderOptions = {},
 ): Coder<string> {
+  const decoderInit: TextDecoderOptions = {
+    fatal: true,
+    ignoreBOM: true,
+    ...decoderOptions,
+  };
+
   let self: Coder<string>;
   return self = {
     [kCoderKind]: kKindStringFL,
     encode: (decoded, target, context) => {
       const ctx = context ?? createContext("encode");
 
-      let len: number;
-      if (byteLength == null) {
-        len = decoded.length;
-      } else {
-        len = lengthRefGet(ctx, byteLength) ?? decoded.length;
-      }
+      const len = (byteLength == null
+        ? undefined
+        : lengthRefGet(ctx, byteLength)) ?? decoded.length;
 
-      if (len != null && !isValidLength(len)) {
+      if (!isValidLength(len)) {
         throw new Error(
           `Invalid length: ${len}. Must be a non-negative integer.`,
         );
@@ -118,8 +121,9 @@ export function stringFL(
     },
     decode: (encoded, context) => {
       const ctx = context ?? createContext("decode");
-      const len = lengthRefGet(ctx, byteLength ?? encoded.length) ??
-        encoded.length;
+      const len = (byteLength == null
+        ? undefined
+        : lengthRefGet(ctx, byteLength)) ?? encoded.length;
 
       if (!isValidLength(len)) {
         throw new Error(
@@ -127,14 +131,9 @@ export function stringFL(
         );
       }
 
-      const stringBytes = encoded.subarray(0, len ?? undefined);
-      const decoded = new TextDecoder(decoderEncoding, {
-        fatal: true,
-        ignoreBOM: true,
-        ...decoderOptions,
-      }).decode(
-        stringBytes,
-      );
+      const stringBytes = encoded.subarray(0, len);
+      const decoded = new TextDecoder(decoderEncoding, decoderInit)
+        .decode(stringBytes);
 
       refSetValue(ctx, self, decoded);
 
