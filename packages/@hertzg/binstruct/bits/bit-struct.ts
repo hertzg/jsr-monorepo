@@ -140,7 +140,14 @@ export function bitStruct<T extends BitSchema>(
 ): Coder<BitStructDecoded<T>> {
   const fields = Object.entries(schema) as [keyof T, number][];
 
-  // Validate each field's bit count
+  // Validate each field's bit count and resolve its position once, since the
+  // schema is fixed for the lifetime of the coder.
+  const layout: {
+    key: keyof T;
+    bitCount: number;
+    byteOffset: number;
+    bitOffset: number;
+  }[] = [];
   let totalBits = 0;
   for (const [key, bitCount] of fields) {
     if (
@@ -152,6 +159,12 @@ export function bitStruct<T extends BitSchema>(
         }": ${bitCount}. Must be integer 1-32.`,
       );
     }
+    layout.push({
+      key,
+      bitCount,
+      byteOffset: totalBits >>> 3,
+      bitOffset: totalBits & 7,
+    });
     totalBits += bitCount;
   }
 
@@ -178,11 +191,8 @@ export function bitStruct<T extends BitSchema>(
       const ctx = context ?? createContext("encode");
       const view = new BitDataView(target);
 
-      let byteOffset = 0;
-      let bitOffset = 0;
-
       // Process fields in declaration order
-      for (const [key, bitCount] of fields) {
+      for (const { key, bitCount, byteOffset, bitOffset } of layout) {
         const value = decoded[key];
 
         // Validate value fits in bitCount bits
@@ -196,13 +206,6 @@ export function bitStruct<T extends BitSchema>(
         }
 
         view.setBits(byteOffset, bitOffset, value, bitCount);
-
-        // Advance bit position
-        bitOffset += bitCount;
-        if (bitOffset >= 8) {
-          byteOffset += Math.floor(bitOffset / 8);
-          bitOffset %= 8;
-        }
       }
 
       // Store entire struct result in context for refs
@@ -223,19 +226,9 @@ export function bitStruct<T extends BitSchema>(
       const view = new BitDataView(encoded);
       const result = {} as BitStructDecoded<T>;
 
-      let byteOffset = 0;
-      let bitOffset = 0;
-
       // Process fields in declaration order
-      for (const [key, bitCount] of fields) {
+      for (const { key, bitCount, byteOffset, bitOffset } of layout) {
         result[key] = view.getBits(byteOffset, bitOffset, bitCount);
-
-        // Advance bit position
-        bitOffset += bitCount;
-        if (bitOffset >= 8) {
-          byteOffset += Math.floor(bitOffset / 8);
-          bitOffset %= 8;
-        }
       }
 
       // Store entire struct result in context for refs

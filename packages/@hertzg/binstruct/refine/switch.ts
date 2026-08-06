@@ -336,6 +336,30 @@ export function refineSwitch<
 ): Coder<RefinedUnion<TRefiners>> {
   const refinerKeys = Object.keys(refiners);
 
+  const selectRefiner = (
+    key: keyof TRefiners | null,
+    selectorName: "refine" | "unrefine",
+  ) => {
+    if (key === null) {
+      throw new Error(
+        `refineSwitch: selector.${selectorName} returned null for value. ` +
+          `No refiner selected. Available refiners: ${refinerKeys.join(", ")}`,
+      );
+    }
+
+    const refiner = refiners[key as string];
+    if (!refiner) {
+      throw new Error(
+        `refineSwitch: Invalid refiner key "${
+          String(key)
+        }" returned by selector.${selectorName}. ` +
+          `Available refiners: ${refinerKeys.join(", ")}`,
+      );
+    }
+
+    return refiner;
+  };
+
   let self: Coder<RefinedUnion<TRefiners>>;
   return self = {
     [kCoderKind]: kKindRefineSwitch,
@@ -344,25 +368,7 @@ export function refineSwitch<
       refSetValue(ctx, self, refined);
 
       // Select which refiner to use for encoding
-      const key = selector.unrefine(refined, ctx);
-      if (key === null) {
-        throw new Error(
-          `refineSwitch: selector.unrefine returned null for value. ` +
-            `No refiner selected. Available refiners: ${
-              refinerKeys.join(", ")
-            }`,
-        );
-      }
-
-      const refiner = refiners[key as string];
-      if (!refiner) {
-        throw new Error(
-          `refineSwitch: Invalid refiner key "${
-            String(key)
-          }" returned by selector.unrefine. ` +
-            `Available refiners: ${refinerKeys.join(", ")}`,
-        );
-      }
+      const refiner = selectRefiner(selector.unrefine(refined, ctx), "unrefine");
 
       // Unrefine the value back to base type
       // deno-lint-ignore no-explicit-any
@@ -378,25 +384,7 @@ export function refineSwitch<
       const [base, bytesRead] = baseCoder.decode(buffer, ctx);
 
       // Select which refiner to use for decoding
-      const key = selector.refine(base, ctx);
-      if (key === null) {
-        throw new Error(
-          `refineSwitch: selector.refine returned null for value. ` +
-            `No refiner selected. Available refiners: ${
-              refinerKeys.join(", ")
-            }`,
-        );
-      }
-
-      const refiner = refiners[key as string];
-      if (!refiner) {
-        throw new Error(
-          `refineSwitch: Invalid refiner key "${
-            String(key)
-          }" returned by selector.refine. ` +
-            `Available refiners: ${refinerKeys.join(", ")}`,
-        );
-      }
+      const refiner = selectRefiner(selector.refine(base, ctx), "refine");
 
       // Refine the base value to the target type
       const refined = refiner.refine(base, ctx);
