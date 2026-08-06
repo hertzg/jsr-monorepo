@@ -16,7 +16,7 @@
     "@std/encoding/base64": "jsr:@std/encoding@^1.0.10/base64",
     "@std/encoding/base64url": "jsr:@std/encoding@^1.0.10/base64url",
     "@std/path": "jsr:@std/path@^1.1.4",
-    "@hertzg/binstruct": "jsr:@hertzg/binstruct@^3.3.0",
+    "@hertzg/binstruct": "jsr:@hertzg/binstruct@^3.3.1",
     "@hertzg/bx": "jsr:@hertzg/bx@^3.0.3",
     "@hertzg/ip": "jsr:@hertzg/ip@^4.1.1",
     "@hertzg/mac": "jsr:@hertzg/mac@^0.2.0",
