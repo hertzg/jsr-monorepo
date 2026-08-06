@@ -1,5 +1,6 @@
 import { type Coder, createContext, kCoderKind } from "../core.ts";
 import { isValidLength, type LengthOrRef, lengthRefGet } from "../length.ts";
+import { refSetValue } from "../ref/ref.ts";
 
 /**
  * Symbol identifier for fixed-length array coders.
@@ -95,10 +96,13 @@ export function arrayFL<TDecoded>(
   elementType: Coder<TDecoded>,
   lengthOrRef: LengthOrRef,
 ): Coder<TDecoded[]> {
-  return {
+  let self: Coder<TDecoded[]>;
+  return self = {
     [kCoderKind]: kKindArrayFL,
     encode: (decoded, target, context) => {
       const ctx = context ?? createContext("encode");
+      refSetValue(ctx, self, decoded);
+
       const len = lengthRefGet(ctx, lengthOrRef) ?? decoded.length;
 
       if (!isValidLength(len)) {
@@ -134,7 +138,9 @@ export function arrayFL<TDecoded>(
         );
       }
 
-      const decoded = new Array<TDecoded>();
+      const decoded = new Array<TDecoded>(len);
+      refSetValue(ctx, self, decoded);
+
       let cursor = 0;
       for (let i = 0; i < len; i++) {
         const [element, bytesRead] = elementType.decode(
