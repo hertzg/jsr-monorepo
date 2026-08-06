@@ -23,29 +23,30 @@ Deno.test("isValidLength", () => {
 
 Deno.test("lengthRefGetSet", async (t) => {
   await t.step("without context", () => {
-    const mockCoder = u8be();
-    const mockCoderRef = ref(mockCoder);
+    const lengthCoder = u8be();
+    const lengthRef = ref(lengthCoder);
     assertEquals(lengthRefGet(null, 5), 5);
     assertEquals(lengthRefGet(undefined, 10), 10);
-    assertEquals(lengthRefGet(null, mockCoderRef), undefined);
-    assertEquals(lengthRefGet(undefined, mockCoderRef), undefined);
+    assertEquals(lengthRefGet(null, lengthRef), undefined);
+    assertEquals(lengthRefGet(undefined, lengthRef), undefined);
   });
 
   await t.step("with context", () => {
     const context = createContext("encode");
-    const mockCoder = u8be();
-    const mockCoderRef = ref(mockCoder);
+    const lengthCoder = u8be();
+    const lengthRef = ref(lengthCoder);
     assertEquals(lengthRefGet(context, 42), 42);
     assertEquals(lengthRefGet(context, 1000), 1000);
 
-    assertEquals(lengthRefGet({} as Context, mockCoderRef), undefined);
+    // A bare object stands in for a context built without ref storage.
+    assertEquals(lengthRefGet({} as Context, lengthRef), undefined);
     assertThrows(
-      () => lengthRefGet(context, mockCoderRef),
+      () => lengthRefGet(context, lengthRef),
       Error,
       "Ref not found",
     );
 
-    refSetValue(context, mockCoder, 123);
-    assertEquals(lengthRefGet(context, mockCoderRef), 123);
+    refSetValue(context, lengthCoder, 123);
+    assertEquals(lengthRefGet(context, lengthRef), 123);
   });
 });

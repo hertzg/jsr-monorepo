@@ -31,7 +31,7 @@ Deno.test("string - fixed length - does not fit in byteLength", () => {
   const bytesWritten = coder.encode(testString, buffer);
   const [decoded, bytesRead] = coder.decode(buffer);
 
-  assertEquals(decoded, testString.slice(0, length));
+  assertEquals(decoded, "Hello");
   assertEquals(bytesWritten, bytesRead);
   assertEquals(bytesWritten, length);
 });
@@ -45,7 +45,7 @@ Deno.test("string - fixed length - empty string", () => {
   const bytesWritten = coder.encode(testString, buffer);
   const [decoded, bytesRead] = coder.decode(buffer);
 
-  assertEquals(decoded, `${"\0".repeat(length)}`);
+  assertEquals(decoded, "\0\0\0\0\0");
   assertNotEquals(bytesWritten, bytesRead);
   assertEquals(bytesWritten, testString.length);
   assertEquals(bytesRead, length);
