@@ -91,6 +91,7 @@
 
 import type { Coder } from "../core.ts";
 import { dataViewType } from "./dataview.ts";
+import type { Endianness } from "./numeric.ts";
 
 // Symbol definitions for unsigned integer types
 const kKindU8 = Symbol("u8");
@@ -141,7 +142,7 @@ const kKindU64LE = Symbol("u64le");
  * assertEquals(bytesReadLE, 1);
  * ```
  */
-export function u8(endianness: "be" | "le" = "be"): Coder<number> {
+export function u8(endianness: Endianness = "be"): Coder<number> {
   return dataViewType("Uint8", endianness, kKindU8);
 }
 
@@ -185,7 +186,7 @@ export function u8(endianness: "be" | "le" = "be"): Coder<number> {
  * assertEquals(bytesReadLE, 2);
  * ```
  */
-export function u16(endianness: "be" | "le" = "be"): Coder<number> {
+export function u16(endianness: Endianness = "be"): Coder<number> {
   return dataViewType(
     "Uint16",
     endianness,
@@ -233,7 +234,7 @@ export function u16(endianness: "be" | "le" = "be"): Coder<number> {
  * assertEquals(bytesReadLE, 4);
  * ```
  */
-export function u32(endianness: "be" | "le" = "be"): Coder<number> {
+export function u32(endianness: Endianness = "be"): Coder<number> {
   return dataViewType(
     "Uint32",
     endianness,
@@ -282,7 +283,7 @@ export function u32(endianness: "be" | "le" = "be"): Coder<number> {
  * assertEquals(bytesReadLE, 8);
  * ```
  */
-export function u64(endianness: "be" | "le" = "be"): Coder<bigint> {
+export function u64(endianness: Endianness = "be"): Coder<bigint> {
   return dataViewType(
     "BigUint64",
     endianness,

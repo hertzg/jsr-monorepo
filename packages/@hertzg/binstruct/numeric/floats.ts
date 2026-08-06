@@ -91,6 +91,7 @@
 
 import type { Coder } from "../core.ts";
 import { dataViewType } from "./dataview.ts";
+import type { Endianness } from "./numeric.ts";
 
 // Symbol definitions for floating-point types
 const kKindF16BE = Symbol("f16be");
@@ -142,7 +143,7 @@ const kKindF64LE = Symbol("f64le");
  * assertEquals(bytesReadLE, 2);
  * ```
  */
-export function f16(endianness: "be" | "le" = "be"): Coder<number> {
+export function f16(endianness: Endianness = "be"): Coder<number> {
   return dataViewType(
     "Float16",
     endianness,
@@ -192,7 +193,7 @@ export function f16(endianness: "be" | "le" = "be"): Coder<number> {
  * assertEquals(bytesReadLE, 4);
  * ```
  */
-export function f32(endianness: "be" | "le" = "be"): Coder<number> {
+export function f32(endianness: Endianness = "be"): Coder<number> {
   return dataViewType(
     "Float32",
     endianness,
@@ -242,7 +243,7 @@ export function f32(endianness: "be" | "le" = "be"): Coder<number> {
  * assertEquals(bytesReadLE, 8);
  * ```
  */
-export function f64(endianness: "be" | "le" = "be"): Coder<number> {
+export function f64(endianness: Endianness = "be"): Coder<number> {
   return dataViewType(
     "Float64",
     endianness,
