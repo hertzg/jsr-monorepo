@@ -10,7 +10,7 @@ Deno.test("bytes - fixed length", () => {
   const [decoded, read] = coder.decode(buffer);
 
   // Should truncate to the specified length
-  assertEquals(Array.from(decoded), [1, 2, 3, 4]);
+  assertEquals(decoded, new Uint8Array([1, 2, 3, 4]));
   assertEquals(written, 4);
   assertEquals(read, 4);
 });
@@ -23,8 +23,9 @@ Deno.test("bytes - variable length", () => {
   const written = coder.encode(data, buffer);
   const [decoded, read] = coder.decode(buffer);
 
-  // For variable length, should read/write the entire buffer
-  assertEquals(decoded, buffer);
+  // For variable length, should read/write the entire buffer. `decoded` is the
+  // input view itself, so assert on the written bytes rather than on identity.
+  assertEquals(decoded.subarray(0, data.length), new Uint8Array([1, 2, 3, 4, 5]));
   assertEquals(written, data.length);
   assertEquals(read, buffer.length);
 });

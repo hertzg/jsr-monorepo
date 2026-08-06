@@ -1,8 +1,13 @@
-import { assertEquals, assertThrows } from "@std/assert";
+import {
+  assertEquals,
+  assertStringIncludes,
+  assertThrows,
+} from "@std/assert";
 import { bitStruct } from "./bit-struct.ts";
 import { struct } from "../struct/struct.ts";
 import { u32le } from "../numeric/numeric.ts";
 import { createContext } from "../core.ts";
+import { ref } from "../ref/ref.ts";
 
 Deno.test("bitStruct: schema validation", async (t) => {
   await t.step("rejects bit count < 1", () => {
@@ -67,8 +72,8 @@ Deno.test("bitStruct: schema validation", async (t) => {
       () => bitStruct({ a: 5 }),
       Error,
     );
-    assertEquals(error.message.includes("Add 3 padding bit(s)"), true);
-    assertEquals(error.message.includes("{ _padding: 3 }"), true);
+    assertStringIncludes(error.message, "Add 3 padding bit(s)");
+    assertStringIncludes(error.message, "{ _padding: 3 }");
   });
 });
 
@@ -342,10 +347,7 @@ Deno.test("bitStruct: edge cases", async (t) => {
     const buffer = new Uint8Array(4);
 
     coder.encode(original, buffer);
-    assertEquals(buffer[0], 0);
-    assertEquals(buffer[1], 0);
-    assertEquals(buffer[2], 0);
-    assertEquals(buffer[3], 0);
+    assertEquals(buffer, new Uint8Array([0, 0, 0, 0]));
 
     const [decoded] = coder.decode(buffer);
     assertEquals(decoded, original);
@@ -358,10 +360,7 @@ Deno.test("bitStruct: edge cases", async (t) => {
     const buffer = new Uint8Array(4);
 
     coder.encode(original, buffer);
-    assertEquals(buffer[0], 0xFF);
-    assertEquals(buffer[1], 0xFF);
-    assertEquals(buffer[2], 0xFF);
-    assertEquals(buffer[3], 0xFF);
+    assertEquals(buffer, new Uint8Array([0xFF, 0xFF, 0xFF, 0xFF]));
 
     const [decoded] = coder.decode(buffer);
     assertEquals(decoded, original);
@@ -417,13 +416,12 @@ Deno.test("bitStruct: context integration", async (t) => {
   await t.step("stores value in context during encode", () => {
     const coder = bitStruct({ a: 4, b: 4 });
     const ctx = createContext("encode");
-    const value = { a: 15, b: 7 };
     const buffer = new Uint8Array(1);
 
-    coder.encode(value, buffer, ctx);
+    coder.encode({ a: 15, b: 7 }, buffer, ctx);
 
-    // Context should have the encoded value stored
-    // (verified by the fact that refs would be able to access it)
+    // `ref` throws unless the coder published itself to the context.
+    assertEquals(ref(coder)(ctx), { a: 15, b: 7 });
   });
 
   await t.step("stores value in context during decode", () => {
@@ -433,8 +431,7 @@ Deno.test("bitStruct: context integration", async (t) => {
 
     coder.decode(buffer, ctx);
 
-    // Context should have the decoded value stored
-    // (verified by the fact that refs would be able to access it)
+    assertEquals(ref(coder)(ctx), { a: 15, b: 15 });
   });
 });
 

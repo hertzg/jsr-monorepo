@@ -95,11 +95,12 @@ Deno.test("refineFields: composes as a refineSwitch arm", () => {
   const written = coder.encode(wordValue, buffer);
   const [decoded] = coder.decode(buffer.subarray(0, written));
 
+  // `payload` is a union across the switch arms; narrowing it in a guard would
+  // let a wrong-arm result skip the assertion entirely, so cast and assert.
+  const payload = decoded.payload as { value: number };
+
   assertEquals(decoded.tag, 1);
-  assertEquals("value" in decoded.payload, true);
-  if ("value" in decoded.payload && typeof decoded.payload.value === "number") {
-    assertEquals(decoded.payload.value, 0xabcd);
-  }
+  assertEquals(payload.value, 0xabcd);
 });
 
 Deno.test("refineFields: round-trips an empty coder map (identity)", () => {
