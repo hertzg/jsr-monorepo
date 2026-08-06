@@ -1,10 +1,11 @@
-import { assertEquals, assertThrows } from "@std/assert";
+import { assertEquals, assertStrictEquals, assertThrows } from "@std/assert";
+import { assertSpyCalls, spy } from "@std/testing/mock";
 import { struct } from "../struct/struct.ts";
 import { u8 } from "../numeric/numeric.ts";
 import { bytes } from "../bytes/bytes.ts";
 import { string } from "../string/string.ts";
 import { decode, encode } from "../helpers.ts";
-import { createContext } from "../core.ts";
+import { type Context, createContext } from "../core.ts";
 import { refineSwitch } from "./switch.ts";
 import type { Refiner } from "./refine.ts";
 
@@ -318,24 +319,19 @@ Deno.test("refineSwitch - encode error when selector returns invalid key", () =>
 });
 
 Deno.test("refineSwitch - context propagation", () => {
-  let refineContextDirection: string | undefined;
-  let unrefineContextDirection: string | undefined;
+  const refinePing = spy((packet: BasePacket, ctx: Context): PingPacket => ({
+    type: 1,
+    timestamp: decode(u8(), packet.data, ctx),
+  }));
+
+  const unrefinePing = spy((ping: PingPacket, ctx: Context): BasePacket => ({
+    type: ping.type,
+    data: encode(u8(), ping.timestamp, ctx, new Uint8Array(1)),
+  }));
 
   const pingRefiner: Refiner<BasePacket, PingPacket, []> = {
-    refine: (packet, ctx) => {
-      refineContextDirection = ctx.direction;
-      return {
-        type: 1,
-        timestamp: decode(u8(), packet.data, ctx),
-      };
-    },
-    unrefine: (ping, ctx) => {
-      unrefineContextDirection = ctx.direction;
-      return {
-        type: ping.type,
-        data: encode(u8(), ping.timestamp, ctx, new Uint8Array(1)),
-      };
-    },
+    refine: refinePing,
+    unrefine: unrefinePing,
   };
 
   const baseCoder = struct({
@@ -357,15 +353,17 @@ Deno.test("refineSwitch - context propagation", () => {
   const buffer = new Uint8Array(10);
   const ping: PingPacket = { type: 1, timestamp: 42 };
 
-  // Test encode context
+  // The caller's own context must reach the refiner — asserting on its
+  // `direction` alone would also accept a freshly created one.
   const encodeCtx = createContext("encode");
   packetCoder.encode(ping, buffer, encodeCtx);
-  assertEquals(unrefineContextDirection, "encode");
+  assertSpyCalls(unrefinePing, 1);
+  assertStrictEquals(unrefinePing.calls[0].args[1], encodeCtx);
 
-  // Test decode context
   const decodeCtx = createContext("decode");
   packetCoder.decode(buffer, decodeCtx);
-  assertEquals(refineContextDirection, "decode");
+  assertSpyCalls(refinePing, 1);
+  assertStrictEquals(refinePing.calls[0].args[1], decodeCtx);
 });
 
 Deno.test("refineSwitch - passthrough refiner for unknown values", () => {

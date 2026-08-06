@@ -1,5 +1,6 @@
-import { assertEquals, assertThrows } from "@std/assert";
-import { autoGrowBuffer, type AutogrowOptions } from "./buffer.ts";
+import { assertEquals, assertLessOrEqual, assertThrows } from "@std/assert";
+import { assertSpyCalls, spy } from "@std/testing/mock";
+import { autoGrowBuffer } from "./buffer.ts";
 
 Deno.test("autoGrowBuffer - basic functionality", () => {
   const data = new Uint8Array(10000);
@@ -74,19 +75,17 @@ Deno.test("autoGrowBuffer - data integrity", () => {
 });
 
 Deno.test("autoGrowBuffer - growth behavior", () => {
-  let callCount = 0;
   const requiredSize = 20000;
 
-  const result = autoGrowBuffer((buffer) => {
-    callCount++;
+  const fill = spy((buffer: Uint8Array) => {
     if (buffer.length < requiredSize) {
       throw new RangeError("Buffer too small");
     }
-    return `success after ${callCount} attempts`;
+    return "encoded";
   });
 
-  assertEquals(result, "success after 4 attempts");
-  assertEquals(callCount, 4);
+  assertEquals(autoGrowBuffer(fill), "encoded");
+  assertSpyCalls(fill, 4);
 });
 
 Deno.test("autoGrowBuffer - invalid configuration", () => {
@@ -118,74 +117,18 @@ Deno.test("autoGrowBuffer - return type flexibility", () => {
   assertEquals(objectResult, { success: true });
 });
 
-Deno.test("AutogrowOptions interface", () => {
-  const options: AutogrowOptions = {
-    initialSize: 1024,
-    maxByteLength: 1024 * 1024,
-    growthFactor: 1.5,
-  };
-
-  assertEquals(options.initialSize, 1024);
-  assertEquals(options.maxByteLength, 1024 * 1024);
-  assertEquals(options.growthFactor, 1.5);
-});
-
 Deno.test("autoGrowBuffer - growth factor validation", () => {
-  // Test growth factor = 1 (should be rejected)
-  assertThrows(
-    () => {
-      autoGrowBuffer(
-        (_buffer) => "success",
-        {
-          growthFactor: 1,
-        },
-      );
-    },
-    Error,
-    "Growth factor must be greater than 1",
-  );
+  // Anything at or below 1 fails to grow the buffer, so it is rejected up front
+  // rather than looping forever.
+  const rejected = [1, 0.5, 0, -1];
 
-  // Test growth factor < 1 (should be rejected)
-  assertThrows(
-    () => {
-      autoGrowBuffer(
-        (_buffer) => "success",
-        {
-          growthFactor: 0.5,
-        },
-      );
-    },
-    Error,
-    "Growth factor must be greater than 1",
-  );
-
-  // Test growth factor = 0 (should be rejected)
-  assertThrows(
-    () => {
-      autoGrowBuffer(
-        (_buffer) => "success",
-        {
-          growthFactor: 0,
-        },
-      );
-    },
-    Error,
-    "Growth factor must be greater than 1",
-  );
-
-  // Test growth factor < 0 (should be rejected)
-  assertThrows(
-    () => {
-      autoGrowBuffer(
-        (_buffer) => "success",
-        {
-          growthFactor: -1,
-        },
-      );
-    },
-    Error,
-    "Growth factor must be greater than 1",
-  );
+  for (const growthFactor of rejected) {
+    assertThrows(
+      () => autoGrowBuffer((_buffer) => "success", { growthFactor }),
+      Error,
+      "Growth factor must be greater than 1",
+    );
+  }
 });
 
 Deno.test("autoGrowBuffer - minimum growth guarantee", () => {
@@ -209,44 +152,38 @@ Deno.test("autoGrowBuffer - minimum growth guarantee", () => {
 Deno.test("autoGrowBuffer - small growth factor edge case", () => {
   // Test with growth factor that would result in same size due to truncation
   // This tests the Math.max fix that ensures at least 1 byte growth
-  let attemptCount = 0;
-  const result = autoGrowBuffer(
-    (buffer) => {
-      attemptCount++;
-      if (buffer.length < 5) {
-        throw new RangeError("Buffer too small");
-      }
-      return `success after ${attemptCount} attempts`;
-    },
-    {
-      initialSize: 1,
-      growthFactor: 1.01, // Very small growth factor
-    },
-  );
+  const fill = spy((buffer: Uint8Array) => {
+    if (buffer.length < 5) {
+      throw new RangeError("Buffer too small");
+    }
+    return "encoded";
+  });
 
-  assertEquals(result, "success after 5 attempts");
-  assertEquals(attemptCount, 5);
+  const result = autoGrowBuffer(fill, {
+    initialSize: 1,
+    growthFactor: 1.01, // Very small growth factor
+  });
+
+  assertEquals(result, "encoded");
+  assertSpyCalls(fill, 5);
 });
 
 Deno.test("autoGrowBuffer - integer truncation safety", () => {
   // Test that truncation doesn't cause infinite loops
-  let attemptCount = 0;
-  const result = autoGrowBuffer(
-    (buffer) => {
-      attemptCount++;
-      if (buffer.length < 3) {
-        throw new RangeError("Buffer too small");
-      }
-      return `success after ${attemptCount} attempts`;
-    },
-    {
-      initialSize: 1,
-      growthFactor: 1.5, // This will truncate to same size initially
-    },
-  );
+  const fill = spy((buffer: Uint8Array) => {
+    if (buffer.length < 3) {
+      throw new RangeError("Buffer too small");
+    }
+    return "encoded";
+  });
 
-  assertEquals(result, "success after 3 attempts");
-  assertEquals(attemptCount, 3);
+  const result = autoGrowBuffer(fill, {
+    initialSize: 1,
+    growthFactor: 1.5, // This will truncate to same size initially
+  });
+
+  assertEquals(result, "encoded");
+  assertSpyCalls(fill, 3);
 });
 
 Deno.test("autoGrowBuffer - robustness with edge case configurations", () => {
@@ -258,21 +195,16 @@ Deno.test("autoGrowBuffer - robustness with edge case configurations", () => {
   ];
 
   for (const config of testCases) {
-    let attemptCount = 0;
-    const result = autoGrowBuffer(
-      (buffer) => {
-        attemptCount++;
-        if (buffer.length < 10) {
-          throw new RangeError("Buffer too small");
-        }
-        return `success with ${config.growthFactor} growth factor`;
-      },
-      config,
-    );
+    const fill = spy((buffer: Uint8Array) => {
+      if (buffer.length < 10) {
+        throw new RangeError("Buffer too small");
+      }
+      return "encoded";
+    });
 
-    assertEquals(result, `success with ${config.growthFactor} growth factor`);
+    assertEquals(autoGrowBuffer(fill, config), "encoded");
     // Ensure it doesn't take too many attempts (indicating no infinite loop)
-    assertEquals(attemptCount <= 10, true);
+    assertLessOrEqual(fill.calls.length, 10);
   }
 });
 

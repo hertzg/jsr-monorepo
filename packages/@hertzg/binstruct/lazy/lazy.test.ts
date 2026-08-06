@@ -1,4 +1,5 @@
 import { assertEquals } from "@std/assert";
+import { assertSpyCalls, spy } from "@std/testing/mock";
 import { lazy } from "./lazy.ts";
 import { type Coder, type Context, createContext } from "../core.ts";
 import { u8be } from "../numeric/numeric.ts";
@@ -24,26 +25,20 @@ Deno.test("lazy - round-trips like the coder it wraps", () => {
 });
 
 Deno.test("lazy - does not call the factory until first use", () => {
-  let builds = 0;
-  const coder = lazy(() => {
-    builds++;
-    return u8be();
-  });
+  const factory = spy(() => u8be());
+  const coder = lazy(factory);
 
-  assertEquals(builds, 0);
+  assertSpyCalls(factory, 0);
 
   const buffer = new Uint8Array(4);
   coder.encode(7, buffer);
 
-  assertEquals(builds, 1);
+  assertSpyCalls(factory, 1);
 });
 
 Deno.test("lazy - builds the inner coder at most once across many calls", () => {
-  let builds = 0;
-  const coder = lazy(() => {
-    builds++;
-    return u8be();
-  });
+  const factory = spy(() => u8be());
+  const coder = lazy(factory);
 
   const buffer = new Uint8Array(4);
   for (let i = 0; i < 5; i++) {
@@ -51,7 +46,7 @@ Deno.test("lazy - builds the inner coder at most once across many calls", () => 
     coder.decode(buffer);
   }
 
-  assertEquals(builds, 1);
+  assertSpyCalls(factory, 1);
 });
 
 Deno.test("lazy - shares a single context across nested encode/decode calls", () => {
@@ -81,41 +76,49 @@ interface FrameHost {
   rest: Uint8Array;
 }
 
-// `lazyFrame` closes the cycle: it's created before `frameCoder` exists, but
-// its factory (`() => frameCoder`) isn't invoked until the first
-// encode/decode, by which point `frameCoder`'s own initializer has finished.
-const lazyFrame: Coder<Frame> = lazy(() => frameCoder);
+// `lazy()` memoizes the coder its factory returns, so each test builds its own
+// pair rather than sharing one across the file — otherwise the second test to
+// run would only ever see an already-resolved cycle.
+function makeFrameCoder(): Coder<Frame> {
+  // `lazyFrame` closes the cycle: it's created before `frameCoder` exists, but
+  // its factory (`() => frameCoder`) isn't invoked until the first
+  // encode/decode, by which point `frameCoder`'s own initializer has finished.
+  const lazyFrame: Coder<Frame> = lazy(() => frameCoder);
 
-// `rest` is a greedy `bytes()` field, so it always consumes everything left
-// in the view it's handed. Encoding first (to learn the exact byte count)
-// and then decoding only that exact slice keeps every level self-delimiting
-// without needing an explicit length field.
-const frameCoder: Coder<Frame> = refine(
-  struct({ hasNext: u8be() as unknown as Coder<0 | 1>, rest: bytes() }),
-  {
-    refine: (host: FrameHost, ctx: Context): Frame => {
-      if (host.hasNext === 0) {
-        return { hasNext: 0, rest: host.rest };
-      }
-      const [rest] = lazyFrame.decode(host.rest, ctx);
-      return { hasNext: 1, rest };
+  // `rest` is a greedy `bytes()` field, so it always consumes everything left
+  // in the view it's handed. Encoding first (to learn the exact byte count)
+  // and then decoding only that exact slice keeps every level self-delimiting
+  // without needing an explicit length field.
+  const frameCoder: Coder<Frame> = refine(
+    struct({ hasNext: u8be() as unknown as Coder<0 | 1>, rest: bytes() }),
+    {
+      refine: (host: FrameHost, ctx: Context): Frame => {
+        if (host.hasNext === 0) {
+          return { hasNext: 0, rest: host.rest };
+        }
+        const [rest] = lazyFrame.decode(host.rest, ctx);
+        return { hasNext: 1, rest };
+      },
+      unrefine: (frame: Frame, ctx: Context): FrameHost => {
+        if (frame.hasNext === 0) {
+          return { hasNext: 0, rest: frame.rest as Uint8Array };
+        }
+        const scratch = new Uint8Array(1024);
+        const bytesWritten = lazyFrame.encode(
+          frame.rest as Frame,
+          scratch,
+          ctx,
+        );
+        return { hasNext: 1, rest: scratch.subarray(0, bytesWritten) };
+      },
     },
-    unrefine: (frame: Frame, ctx: Context): FrameHost => {
-      if (frame.hasNext === 0) {
-        return { hasNext: 0, rest: frame.rest as Uint8Array };
-      }
-      const scratch = new Uint8Array(1024);
-      const bytesWritten = lazyFrame.encode(
-        frame.rest as Frame,
-        scratch,
-        ctx,
-      );
-      return { hasNext: 1, rest: scratch.subarray(0, bytesWritten) };
-    },
-  },
-)();
+  )();
+
+  return frameCoder;
+}
 
 Deno.test("lazy - self-referential graph round-trips through multiple levels", () => {
+  const frameCoder = makeFrameCoder();
   const value: Frame = {
     hasNext: 1,
     rest: {
@@ -136,6 +139,7 @@ Deno.test("lazy - self-referential graph round-trips through multiple levels", (
 });
 
 Deno.test("lazy - self-referential graph round-trips a single leaf", () => {
+  const frameCoder = makeFrameCoder();
   const value: Frame = { hasNext: 0, rest: new Uint8Array(0) };
 
   const buffer = new Uint8Array(16);
