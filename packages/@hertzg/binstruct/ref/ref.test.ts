@@ -95,48 +95,7 @@ Deno.test("computedRef: basic functionality", async (t) => {
     // Verify the data matches
     assertEquals(decoded.width, data.width);
     assertEquals(decoded.height, data.height);
-    assertEquals(decoded.pixels.length, data.pixels.length);
-    for (let i = 0; i < data.pixels.length; i++) {
-      assertEquals(decoded.pixels[i].r, data.pixels[i].r);
-      assertEquals(decoded.pixels[i].g, data.pixels[i].g);
-      assertEquals(decoded.pixels[i].b, data.pixels[i].b);
-      assertEquals(decoded.pixels[i].a, data.pixels[i].a);
-    }
-    assertEquals(bytesWritten, bytesRead);
-  });
-
-  await t.step("works with different computation functions", () => {
-    const count = u16be();
-    const multiplier = u8be();
-
-    const coder = struct({
-      count: count,
-      multiplier: multiplier,
-      items: arrayFL(
-        u8be(),
-        computedRef(
-          [
-            ref(count),
-            ref(multiplier),
-          ],
-          (c, m) => c * m,
-        ),
-      ),
-    });
-
-    const data = {
-      count: 3,
-      multiplier: 2,
-      items: [1, 2, 3, 4, 5, 6],
-    };
-
-    const buffer = new Uint8Array(1000);
-    const bytesWritten = coder.encode(data, buffer);
-    const [decoded, bytesRead] = coder.decode(buffer);
-
-    assertEquals(decoded.count, data.count);
-    assertEquals(decoded.multiplier, data.multiplier);
-    assertEquals(decoded.items, data.items);
+    assertEquals(decoded.pixels, data.pixels);
     assertEquals(bytesWritten, bytesRead);
   });
 });

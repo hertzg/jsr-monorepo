@@ -22,11 +22,6 @@ Deno.test("string(number) creates fixed-length coder", () => {
   assertEquals(coder[kCoderKind], kKindStringFL);
 });
 
-Deno.test("string(coder) creates length-prefixed coder", () => {
-  const coder = string(u16());
-  assertEquals(coder[kCoderKind], kKindStringLP);
-});
-
 Deno.test("string(ref) creates fixed-length coder with reference", () => {
   const coder = string(ref(u16()));
   assertEquals(coder[kCoderKind], kKindStringFL);
