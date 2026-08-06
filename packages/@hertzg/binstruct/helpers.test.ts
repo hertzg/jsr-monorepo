@@ -29,27 +29,50 @@ Deno.test("encode - provided target buffer", () => {
   assertEquals(encoded.buffer, buffer.buffer);
 });
 
-Deno.test("encode - large data requiring growth", async (t) => {
-  await t.step("array with 10000 elements", () => {
-    const coder = struct({
-      data: array(u8le(), u16le()),
-    });
-    const largeArray = new Array(10000).fill(42);
-    const data = { data: largeArray };
+Deno.test("encode - grows the target buffer to fit the payload", async (t) => {
+  // How many times the grow-and-retry loop runs is driven by `initialSize`,
+  // not by payload size — a one-byte initial buffer walks more of the loop
+  // than a huge payload does against the 4KB default, at a fraction of the
+  // cost. The large-payload step below is here to prove real-scale encoding,
+  // not to reach the growth path.
+  await t.step("fits within the initial buffer without growing", () => {
+    const coder = struct({ data: array(u8le(), u16le()) });
 
-    const encoded = encode(coder, data);
-    assertEquals(encoded.length, 10002); // 2 bytes length + 10000 bytes data
+    const encoded = encode(coder, { data: new Array(100).fill(42) });
+    assertEquals(encoded.length, 102); // 2 bytes length + 100 bytes data
   });
 
-  await t.step("very large array requiring multiple growth cycles", () => {
-    const coder = struct({
-      data: array(u8le(), u32le()),
-    });
-    const largeArray = new Array(50000).fill(42);
-    const data = { data: largeArray };
+  await t.step("grows repeatedly from a one-byte initial buffer", () => {
+    const coder = struct({ data: array(u8le(), u16le()) });
 
-    const encoded = encode(coder, data);
-    assertEquals(encoded.length, 50004); // 4 bytes length + 50000 bytes data
+    const encoded = encode(
+      coder,
+      { data: new Array(100).fill(42) },
+      undefined,
+      undefined,
+      { initialSize: 1 },
+    );
+    assertEquals(encoded.length, 102); // 2 bytes length + 100 bytes data
+  });
+
+  await t.step("grows past a 4-byte length prefix", () => {
+    const coder = struct({ data: array(u8le(), u32le()) });
+
+    const encoded = encode(
+      coder,
+      { data: new Array(100).fill(42) },
+      undefined,
+      undefined,
+      { initialSize: 1 },
+    );
+    assertEquals(encoded.length, 104); // 4 bytes length + 100 bytes data
+  });
+
+  await t.step("encodes a payload larger than the default initial size", () => {
+    const coder = struct({ data: array(u8le(), u16le()) });
+
+    const encoded = encode(coder, { data: new Array(10000).fill(42) });
+    assertEquals(encoded.length, 10002); // 2 bytes length + 10000 bytes data
   });
 });
 
@@ -153,9 +176,7 @@ Deno.test("round-trip integrity", async (t) => {
     // Decode
     const decodedData = decode(coder, encoded);
 
-    assertEquals(decodedData.id, originalData.id);
-    assertEquals(decodedData.name, originalData.name);
-    assertEquals(decodedData.active, originalData.active);
+    assertEquals(decodedData, originalData);
   });
 
   await t.step("complex nested structure", () => {
@@ -186,15 +207,7 @@ Deno.test("round-trip integrity", async (t) => {
     // Decode
     const decodedData = decode(outerCoder, encoded);
 
-    assertEquals(decodedData.id, originalData.id);
-    assertEquals(decodedData.points.length, originalData.points.length);
-    assertEquals(decodedData.points[0].x, originalData.points[0].x);
-    assertEquals(decodedData.points[0].y, originalData.points[0].y);
-    assertEquals(decodedData.points[1].x, originalData.points[1].x);
-    assertEquals(decodedData.points[1].y, originalData.points[1].y);
-    assertEquals(decodedData.points[2].x, originalData.points[2].x);
-    assertEquals(decodedData.points[2].y, originalData.points[2].y);
-    assertEquals(decodedData.metadata, originalData.metadata);
+    assertEquals(decodedData, originalData);
   });
 });
 
@@ -234,40 +247,7 @@ Deno.test("edge cases", async (t) => {
     assertEquals(encoded.length, 7);
 
     const decoded = decode(coder, encoded);
-    assertEquals(decoded.a, 0);
-    assertEquals(decoded.b, 0);
-    assertEquals(decoded.c, 0);
+    assertEquals(decoded, data);
   });
 });
 
-Deno.test("buffer growth strategy", async (t) => {
-  await t.step("small data uses initial buffer", () => {
-    const coder = struct({ value: u8le() });
-    const data = { value: 42 };
-
-    const encoded = encode(coder, data);
-    assertEquals(encoded.length, 1);
-  });
-
-  await t.step("medium data triggers growth", () => {
-    const coder = struct({
-      data: array(u8le(), u16le()),
-    });
-    const mediumArray = new Array(2000).fill(42);
-    const data = { data: mediumArray };
-
-    const encoded = encode(coder, data);
-    assertEquals(encoded.length, 2002); // 2 bytes length + 2000 bytes data
-  });
-
-  await t.step("large data uses chunked growth", () => {
-    const coder = struct({
-      data: array(u8le(), u32le()),
-    });
-    const largeArray = new Array(100000).fill(42);
-    const data = { data: largeArray };
-
-    const encoded = encode(coder, data);
-    assertEquals(encoded.length, 100004); // 4 bytes length + 100000 bytes data
-  });
-});
