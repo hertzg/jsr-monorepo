@@ -1,4 +1,4 @@
-import { assertEquals, assertThrows } from "@std/assert";
+import { assertAlmostEquals, assertEquals, assertThrows } from "@std/assert";
 import { f32be, f64be, s16be, u16be, u32be, u8be } from "../numeric/numeric.ts";
 import { stringNT } from "../string/null-terminated.ts";
 import { stringLP } from "../string/length-prefixed.ts";
@@ -39,7 +39,7 @@ Deno.test("arrayLP: basic functionality", async (t) => {
 
     assertEquals(decoded.length, data.length);
     for (let i = 0; i < data.length; i++) {
-      assertEquals(Math.abs(decoded[i] - data[i]) < 0.001, true);
+      assertAlmostEquals(decoded[i], data[i], 0.001);
     }
     assertEquals(bytesWritten, bytesRead);
   });
@@ -171,26 +171,16 @@ Deno.test("arrayLP: edge cases", async (t) => {
 
 Deno.test("arrayLP: error handling", async (t) => {
   await t.step("throws on buffer too small for length", () => {
+    // The u16be prefix needs 2 bytes; only 1 is available.
     const coder = arrayLP(u8be(), u16be());
-    const data = [1, 2, 3, 4, 5];
-
-    const buffer = new Uint8Array(100);
-    coder.encode(data, buffer);
-
-    const smallBuffer = new Uint8Array(1);
-    assertThrows(() => coder.decode(smallBuffer), Error);
+    assertThrows(() => coder.decode(new Uint8Array(1)), Error);
   });
 
   await t.step("throws on buffer too small for elements", () => {
+    // The u8be prefix reads cleanly and announces 5 u32be elements, but none
+    // of the 20 bytes they need are present.
     const coder = arrayLP(u32be(), u8be());
-    const data = [1, 2, 3, 4, 5];
-
-    const buffer = new Uint8Array(100);
-    coder.encode(data, buffer);
-
-    // Buffer too small for length field (1 byte) - this should cause an error
-    const smallBuffer = new Uint8Array(0);
-    assertThrows(() => coder.decode(smallBuffer), Error);
+    assertThrows(() => coder.decode(new Uint8Array([5])), Error);
   });
 
   await t.step("throws on empty buffer", () => {
@@ -254,7 +244,7 @@ Deno.test("arrayLP: floating point precision", async (t) => {
 
     assertEquals(decoded.length, data.length);
     for (let i = 0; i < data.length; i++) {
-      assertEquals(Math.abs(decoded[i] - data[i]) < 0.0001, true);
+      assertAlmostEquals(decoded[i], data[i], 0.0001);
     }
     assertEquals(bytesWritten, bytesRead);
   });
@@ -269,7 +259,7 @@ Deno.test("arrayLP: floating point precision", async (t) => {
 
     assertEquals(decoded.length, data.length);
     for (let i = 0; i < data.length; i++) {
-      assertEquals(Math.abs(decoded[i] - data[i]) < 0.000000000000001, true);
+      assertAlmostEquals(decoded[i], data[i], 0.000000000000001);
     }
     assertEquals(bytesWritten, bytesRead);
   });

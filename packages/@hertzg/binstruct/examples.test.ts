@@ -185,15 +185,10 @@ Deno.test("Comprehensive examples showcasing all library functionality", async (
     bytesStructCoder.encode(testData, buffer);
     const [decoded] = bytesStructCoder.decode(buffer);
 
+    assertEquals(decoded.fixedBytes, testData.fixedBytes);
     assertEquals(
-      Array.from(decoded.fixedBytes),
-      Array.from(testData.fixedBytes),
-      "Fixed bytes should match",
-    );
-    assertEquals(
-      Array.from(decoded.variableBytes.slice(0, testData.variableBytes.length)),
-      Array.from(testData.variableBytes),
-      "Variable bytes should match",
+      decoded.variableBytes.slice(0, testData.variableBytes.length),
+      testData.variableBytes,
     );
     // bytes() without a length reads the entire remaining buffer on decode,
     // so bytesRead will be larger than bytesWritten
@@ -238,53 +233,7 @@ Deno.test("Comprehensive examples showcasing all library functionality", async (
     const bytesWritten = personCoder.encode(testData, buffer);
     const [decoded, bytesRead] = personCoder.decode(buffer);
 
-    assertEquals(decoded.id, testData.id, "ID should match");
-    assertEquals(decoded.name, testData.name, "Name should match");
-    assertEquals(decoded.age, testData.age, "Age should match");
-    assertEquals(
-      decoded.addresses.length,
-      testData.addresses.length,
-      "Addresses count should match",
-    );
-    assertEquals(
-      decoded.phones.length,
-      testData.phones.length,
-      "Phones count should match",
-    );
-
-    // Verify addresses
-    for (let i = 0; i < testData.addresses.length; i++) {
-      assertEquals(
-        decoded.addresses[i].street,
-        testData.addresses[i].street,
-        `Address ${i} street should match`,
-      );
-      assertEquals(
-        decoded.addresses[i].city,
-        testData.addresses[i].city,
-        `Address ${i} city should match`,
-      );
-      assertEquals(
-        decoded.addresses[i].zipCode,
-        testData.addresses[i].zipCode,
-        `Address ${i} zip code should match`,
-      );
-    }
-
-    // Verify phones
-    for (let i = 0; i < testData.phones.length; i++) {
-      assertEquals(
-        decoded.phones[i].countryCode,
-        testData.phones[i].countryCode,
-        `Phone ${i} country code should match`,
-      );
-      assertEquals(
-        decoded.phones[i].number,
-        testData.phones[i].number,
-        `Phone ${i} number should match`,
-      );
-    }
-
+    assertEquals(decoded, testData);
     assertEquals(
       bytesWritten,
       bytesRead,
@@ -330,16 +279,8 @@ Deno.test("Comprehensive examples showcasing all library functionality", async (
       testData.dataLength,
       "Data length should match",
     );
-    assertEquals(
-      Array.from(decoded.header),
-      Array.from(testData.header),
-      "Header data should match",
-    );
-    assertEquals(
-      Array.from(decoded.data),
-      Array.from(testData.data),
-      "Data should match",
-    );
+    assertEquals(decoded.header, testData.header, "Header data should match");
+    assertEquals(decoded.data, testData.data, "Data should match");
     assertEquals(decoded.checksum, testData.checksum, "Checksum should match");
     assertEquals(
       bytesWritten,
@@ -418,44 +359,6 @@ Deno.test("Comprehensive examples showcasing all library functionality", async (
     const buffer = new Uint8Array(1024);
     const bytesWritten = helloReplyCoder.encode(testData, buffer);
     const [decoded, bytesRead] = helloReplyCoder.decode(buffer);
-
-    // Verify basic fields
-    assertEquals(decoded.version, testData.version, "Version should match");
-    assertEquals(decoded.opcode, testData.opcode, "Opcode should match");
-    assertEquals(decoded.smac, testData.smac, "Source MAC should match");
-    assertEquals(decoded.dmac, testData.dmac, "Destination MAC should match");
-    assertEquals(decoded.sequence, testData.sequence, "Sequence should match");
-    assertEquals(decoded.errCode, testData.errCode, "Error code should match");
-    assertEquals(decoded.length, testData.length, "Length should match");
-    assertEquals(decoded.offset, testData.offset, "Offset should match");
-    assertEquals(decoded.flag, testData.flag, "Flag should match");
-    assertEquals(decoded.tokenId, testData.tokenId, "Token ID should match");
-    assertEquals(decoded.reserved, testData.reserved, "Reserved should match");
-
-    // Verify TLV data
-    assertEquals(
-      decoded.tlvs.length,
-      testData.tlvs.length,
-      "Number of TLVs should match",
-    );
-
-    for (let i = 0; i < testData.tlvs.length; i++) {
-      assertEquals(
-        decoded.tlvs[i].type,
-        testData.tlvs[i].type,
-        `TLV ${i} type should match`,
-      );
-      assertEquals(
-        decoded.tlvs[i].length,
-        testData.tlvs[i].length,
-        `TLV ${i} length should match`,
-      );
-      assertEquals(
-        decoded.tlvs[i].value,
-        testData.tlvs[i].value,
-        `TLV ${i} value should match`,
-      );
-    }
 
     // Verify encoding/decoding integrity
     assertEquals(

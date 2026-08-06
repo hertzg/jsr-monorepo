@@ -1,4 +1,4 @@
-import { assertEquals, assertThrows } from "@std/assert";
+import { assertAlmostEquals, assertEquals, assertThrows } from "@std/assert";
 import { struct } from "./struct.ts";
 import {
   f32be,
@@ -64,8 +64,8 @@ Deno.test("struct: basic functionality", async (t) => {
     assertEquals(decoded.s8, data.s8);
     assertEquals(decoded.s16, data.s16);
     assertEquals(decoded.s32, data.s32);
-    assertEquals(Math.abs(decoded.f32 - data.f32) < 0.0001, true);
-    assertEquals(Math.abs(decoded.f64 - data.f64) < 0.000000000000001, true);
+    assertAlmostEquals(decoded.f32, data.f32, 0.0001);
+    assertAlmostEquals(decoded.f64, data.f64, 0.000000000000001);
     assertEquals(bytesWritten, bytesRead);
   });
 
@@ -102,10 +102,7 @@ Deno.test("struct: basic functionality", async (t) => {
     assertEquals(decoded.scores, gameState.scores);
     assertEquals(decoded.positions.length, gameState.positions.length);
     for (let i = 0; i < gameState.positions.length; i++) {
-      assertEquals(
-        Math.abs(decoded.positions[i] - gameState.positions[i]) < 0.001,
-        true,
-      );
+      assertAlmostEquals(decoded.positions[i], gameState.positions[i], 0.001);
     }
     assertEquals(bytesWritten, bytesRead);
   });
@@ -129,10 +126,7 @@ Deno.test("struct: basic functionality", async (t) => {
     const bytesWritten = userCoder.encode(user, buffer);
     const [decoded, bytesRead] = userCoder.decode(buffer);
 
-    assertEquals(decoded.id, user.id);
-    assertEquals(decoded.name, user.name);
-    assertEquals(decoded.email, user.email);
-    assertEquals(decoded.bio, user.bio);
+    assertEquals(decoded, user);
     assertEquals(bytesWritten, bytesRead);
   });
 });
@@ -261,11 +255,7 @@ Deno.test("struct: edge cases", async (t) => {
     const bytesWritten = zeroCoder.encode(data, buffer);
     const [decoded, bytesRead] = zeroCoder.decode(buffer);
 
-    assertEquals(decoded.u8, data.u8);
-    assertEquals(decoded.u16, data.u16);
-    assertEquals(decoded.u32, data.u32);
-    assertEquals(decoded.f32, data.f32);
-    assertEquals(decoded.f64, data.f64);
+    assertEquals(decoded, data);
     assertEquals(bytesWritten, bytesRead);
   });
 
@@ -315,10 +305,7 @@ Deno.test("struct: edge cases", async (t) => {
     const bytesWritten = configCoder.encode(config, buffer);
     const [decoded, bytesRead] = configCoder.decode(buffer);
 
-    assertEquals(decoded.version, config.version);
-    assertEquals(decoded.names, config.names);
-    assertEquals(decoded.tags, config.tags);
-    assertEquals(decoded.description, config.description);
+    assertEquals(decoded, config);
     assertEquals(bytesWritten, bytesRead);
   });
 });
@@ -330,11 +317,7 @@ Deno.test("struct: error handling", async (t) => {
       age: u8be(),
     });
 
-    const data = { id: 12345, age: 30 };
-    const buffer = new Uint8Array(100);
-    coder.encode(data, buffer);
-
-    // Try to decode with a buffer that's too small for the first property
+    // Too small for the leading u32be
     const smallBuffer = new Uint8Array(2);
     assertThrows(() => coder.decode(smallBuffer), Error);
   });
@@ -345,11 +328,7 @@ Deno.test("struct: error handling", async (t) => {
       age: u32be(),
     });
 
-    const data = { id: 123, age: 30 };
-    const buffer = new Uint8Array(100);
-    coder.encode(data, buffer);
-
-    // Create a buffer that's big enough for first property but not for second
+    // Big enough for the leading u8be but not for the u32be after it
     const partialBuffer = new Uint8Array(2);
     assertThrows(() => coder.decode(partialBuffer), Error);
   });
@@ -429,9 +408,9 @@ Deno.test("struct: floating point precision", async (t) => {
     const bytesWritten = coder.encode(data, buffer);
     const [decoded, bytesRead] = coder.decode(buffer);
 
-    assertEquals(Math.abs(decoded.x - data.x) < 0.0001, true);
-    assertEquals(Math.abs(decoded.y - data.y) < 0.0001, true);
-    assertEquals(Math.abs(decoded.z - data.z) < 0.0001, true);
+    assertAlmostEquals(decoded.x, data.x, 0.0001);
+    assertAlmostEquals(decoded.y, data.y, 0.0001);
+    assertAlmostEquals(decoded.z, data.z, 0.0001);
     assertEquals(bytesWritten, bytesRead);
   });
 
@@ -447,9 +426,9 @@ Deno.test("struct: floating point precision", async (t) => {
     const bytesWritten = coder.encode(data, buffer);
     const [decoded, bytesRead] = coder.decode(buffer);
 
-    assertEquals(Math.abs(decoded.pi - data.pi) < 0.000000000000001, true);
-    assertEquals(Math.abs(decoded.e - data.e) < 0.000000000000001, true);
-    assertEquals(Math.abs(decoded.phi - data.phi) < 0.000000000000001, true);
+    assertAlmostEquals(decoded.pi, data.pi, 0.000000000000001);
+    assertAlmostEquals(decoded.e, data.e, 0.000000000000001);
+    assertAlmostEquals(decoded.phi, data.phi, 0.000000000000001);
     assertEquals(bytesWritten, bytesRead);
   });
 });
@@ -480,11 +459,7 @@ Deno.test("struct: complex nested structures", async (t) => {
     const bytesWritten = nestedCoder.encode(data, buffer);
     const [decoded, bytesRead] = nestedCoder.decode(buffer);
 
-    assertEquals(decoded.id, data.id);
-    assertEquals(decoded.tags, data.tags);
-    assertEquals(decoded.scores, data.scores);
-    assertEquals(decoded.metadata.created, data.metadata.created);
-    assertEquals(decoded.metadata.updated, data.metadata.updated);
+    assertEquals(decoded, data);
     assertEquals(bytesWritten, bytesRead);
   });
 
@@ -512,14 +487,7 @@ Deno.test("struct: complex nested structures", async (t) => {
     const bytesWritten = gameCoder.encode(data, buffer);
     const [decoded, bytesRead] = gameCoder.decode(buffer);
 
-    assertEquals(decoded.gameId, data.gameId);
-    assertEquals(decoded.players.length, data.players.length);
-    assertEquals(decoded.players[0].id, data.players[0].id);
-    assertEquals(decoded.players[0].name, data.players[0].name);
-    assertEquals(decoded.players[0].score, data.players[0].score);
-    assertEquals(decoded.players[1].id, data.players[1].id);
-    assertEquals(decoded.players[1].name, data.players[1].name);
-    assertEquals(decoded.players[1].score, data.players[1].score);
+    assertEquals(decoded, data);
     assertEquals(bytesWritten, bytesRead);
   });
 });
