@@ -1,13 +1,12 @@
-import { assertEquals, assertThrows } from "@std/assert";
+import { assertAlmostEquals, assertEquals, assertThrows } from "@std/assert";
 import type { Coder } from "../core.ts";
 // deno-fmt-ignore
 import {
-  type Endianness,
-  f16, f16be, f16le, f32, f32be, f32le, f64, f64be, f64le,
-  u8, u8be, u8le, s8, s8be, s8le,
-  u16, u16be, u16le, s16, s16be, s16le,
-  u32, u32be, u32le, s32, s32be, s32le,
-  s64, s64be, s64le, u64, u64be, u64le,
+  f16be, f16le, f32be, f32le, f64be, f64le,
+  u8, u8be, u8le, s8be, s8le,
+  u16be, u16le, s16be, s16le,
+  u32be, u32le, s32be, s32le,
+  s64be, s64le, u64be, u64le,
 } from "./numeric.ts";
 
 // Truth table for testing numeric types
@@ -77,40 +76,34 @@ const TRUTH_TABLE = [
 ] as const;
 
 // Test each type
-testNumericType("u8", u8, u8le, u8be, 1);
+testNumericType("u8", u8le, u8be, 1);
 
-testNumericType("s8", s8, s8le, s8be, 1);
+testNumericType("s8", s8le, s8be, 1);
 
-testNumericType("u16", u16, u16le, u16be, 2);
+testNumericType("u16", u16le, u16be, 2);
 
-testNumericType("s16", s16, s16le, s16be, 2);
+testNumericType("s16", s16le, s16be, 2);
 
-testNumericType("f16", f16, f16le, f16be, 2);
+testNumericType("f16", f16le, f16be, 2);
 
-testNumericType("u32", u32, u32le, u32be, 4);
+testNumericType("u32", u32le, u32be, 4);
 
-testNumericType("s32", s32, s32le, s32be, 4);
+testNumericType("s32", s32le, s32be, 4);
 
-testNumericType("f32", f32, f32le, f32be, 4);
+testNumericType("f32", f32le, f32be, 4);
 
-testNumericType("u64", u64, u64le, u64be, 8);
-testNumericType("s64", s64, s64le, s64be, 8);
-testNumericType("f64", f64, f64le, f64be, 8);
+testNumericType("u64", u64le, u64be, 8);
+testNumericType("s64", s64le, s64be, 8);
+testNumericType("f64", f64le, f64be, 8);
 
 // Helper function to convert big-endian bytes to little-endian
 function toLittleEndian(bytes: readonly number[]): number[] {
-  // For single-byte values, BE and LE are the same
-  if (bytes.length === 1) {
-    return [...bytes];
-  }
-  // For multi-byte values, reverse the byte order
   return [...bytes].reverse();
 }
 
 // Generic test function for each type
 function testNumericType<T extends number | bigint>(
   name: string,
-  _defaultType: (endianness: Endianness) => Coder<T>,
   littleEndianType: () => Coder<T>,
   bigEndianType: () => Coder<T>,
   expectedSize: number,
@@ -118,114 +111,100 @@ function testNumericType<T extends number | bigint>(
   const typeTests = TRUTH_TABLE.filter(([type]) => type === name);
 
   Deno.test(`${name}:`, async (t) => {
-    for (const [, value, bytesBe, description] of typeTests) {
-      await t.step("reads", async (t) => {
-        await t.step(`big-endian: ${description}`, async (t) => {
-          // Test reading from buffer with expected bytes
-          const buffer = new Uint8Array(bytesBe);
-          const [result] = bigEndianType().decode(buffer);
-          assertEquals(result, value as T);
+    // Each leaf step covers the aligned and the offset case for one truth-table
+    // row: they are the same claim about the same bytes, and folding them into
+    // one body keeps the offset case from depending on a parent step's locals.
+    await t.step("reads", async (t) => {
+      for (const [, value, bytesBe, description] of typeTests) {
+        await t.step(`big-endian: ${description}`, () => {
+          const coder = bigEndianType();
 
-          await t.step(`with offset`, () => {
-            const bufferWithOffset = new Uint8Array([0, 0, 0, 0, ...bytesBe]);
-            const view = bufferWithOffset.subarray(4, 4 + bytesBe.length);
-            const [result] = bigEndianType().decode(view);
-            assertEquals(result, value as T);
-          });
+          const [aligned] = coder.decode(new Uint8Array(bytesBe));
+          assertEquals(aligned, value as T);
+
+          const withOffset = new Uint8Array([0, 0, 0, 0, ...bytesBe]);
+          const [offset] = coder.decode(
+            withOffset.subarray(4, 4 + bytesBe.length),
+          );
+          assertEquals(offset, value as T);
         });
 
-        await t.step(`little-endian: ${description}`, async (t) => {
+        await t.step(`little-endian: ${description}`, () => {
+          const coder = littleEndianType();
           const bytesLe = toLittleEndian(bytesBe);
-          const buffer = new Uint8Array(bytesLe);
 
-          const [result] = littleEndianType().decode(buffer);
-          assertEquals(result, value as T);
+          const [aligned] = coder.decode(new Uint8Array(bytesLe));
+          assertEquals(aligned, value as T);
 
-          await t.step(`with offset`, () => {
-            const bufferWithOffset = new Uint8Array([0, 0, 0, 0, ...bytesLe]);
-            const view = bufferWithOffset.subarray(4, 4 + bytesLe.length);
-            const [result] = littleEndianType().decode(view);
-            assertEquals(result, value as T);
-          });
+          const withOffset = new Uint8Array([0, 0, 0, 0, ...bytesLe]);
+          const [offset] = coder.decode(
+            withOffset.subarray(4, 4 + bytesLe.length),
+          );
+          assertEquals(offset, value as T);
         });
-      });
+      }
+    });
 
-      await t.step("writes", async (t) => {
-        await t.step(`big-endian: ${description}`, async (t) => {
+    await t.step("writes", async (t) => {
+      for (const [, value, bytesBe, description] of typeTests) {
+        await t.step(`big-endian: ${description}`, () => {
+          const coder = bigEndianType();
+
           const buffer = new Uint8Array(bytesBe.length);
-          const bytesWritten = bigEndianType().encode(value as T, buffer);
-          assertEquals(bytesWritten, bytesBe.length);
+          assertEquals(coder.encode(value as T, buffer), bytesBe.length);
           assertEquals(buffer, new Uint8Array(bytesBe));
 
-          await t.step(`with offset`, () => {
-            const bufferWithOffset = new Uint8Array(bytesBe.length + 4);
-            const view = bufferWithOffset.subarray(4, 4 + bytesBe.length);
-            const bytesWritten = bigEndianType().encode(value as T, view);
-            assertEquals(bytesWritten, bytesBe.length);
-            assertEquals(
-              bufferWithOffset,
-              new Uint8Array([0, 0, 0, 0, ...bytesBe]),
-            );
-          });
+          const withOffset = new Uint8Array(bytesBe.length + 4);
+          const view = withOffset.subarray(4, 4 + bytesBe.length);
+          assertEquals(coder.encode(value as T, view), bytesBe.length);
+          assertEquals(withOffset, new Uint8Array([0, 0, 0, 0, ...bytesBe]));
         });
 
-        await t.step(`little-endian: ${description}`, async (t) => {
+        await t.step(`little-endian: ${description}`, () => {
+          const coder = littleEndianType();
           const bytesLe = toLittleEndian(bytesBe);
+
           const buffer = new Uint8Array(bytesLe.length);
-          const bytesWritten = littleEndianType().encode(value as T, buffer);
-          assertEquals(bytesWritten, bytesLe.length);
+          assertEquals(coder.encode(value as T, buffer), bytesLe.length);
           assertEquals(buffer, new Uint8Array(bytesLe));
 
-          await t.step(`with offset`, () => {
-            const bufferWithOffset = new Uint8Array(bytesLe.length + 4);
-            const view = bufferWithOffset.subarray(4, 4 + bytesLe.length);
-            const bytesWritten = littleEndianType().encode(value as T, view);
-            assertEquals(bytesWritten, bytesLe.length);
-            assertEquals(
-              bufferWithOffset,
-              new Uint8Array([0, 0, 0, 0, ...bytesLe]),
-            );
-          });
+          const withOffset = new Uint8Array(bytesLe.length + 4);
+          const view = withOffset.subarray(4, 4 + bytesLe.length);
+          assertEquals(coder.encode(value as T, view), bytesLe.length);
+          assertEquals(withOffset, new Uint8Array([0, 0, 0, 0, ...bytesLe]));
         });
-      });
+      }
+    });
 
-      await t.step("roundtrip", async (t) => {
-        await t.step(`big-endian: ${description}`, async (t) => {
-          // Write value to buffer, then read it back
+    await t.step("roundtrip", async (t) => {
+      for (const [, value, , description] of typeTests) {
+        await t.step(`big-endian: ${description}`, () => {
+          const coder = bigEndianType();
+
           const buffer = new Uint8Array(expectedSize);
-          const bytesWritten = bigEndianType().encode(value as T, buffer);
-          assertEquals(bytesWritten, expectedSize);
-          const [result] = bigEndianType().decode(buffer);
-          assertEquals(result, value as T);
+          assertEquals(coder.encode(value as T, buffer), expectedSize);
+          assertEquals(coder.decode(buffer)[0], value as T);
 
-          await t.step(`with offset`, () => {
-            const bufferWithOffset = new Uint8Array(expectedSize + 4);
-            const view = bufferWithOffset.subarray(4, 4 + expectedSize);
-            const bytesWritten = bigEndianType().encode(value as T, view);
-            assertEquals(bytesWritten, expectedSize);
-            const [result] = bigEndianType().decode(view);
-            assertEquals(result, value as T);
-          });
+          const withOffset = new Uint8Array(expectedSize + 4);
+          const view = withOffset.subarray(4, 4 + expectedSize);
+          assertEquals(coder.encode(value as T, view), expectedSize);
+          assertEquals(coder.decode(view)[0], value as T);
         });
 
-        await t.step(`little-endian: ${description}`, async (t) => {
+        await t.step(`little-endian: ${description}`, () => {
+          const coder = littleEndianType();
+
           const buffer = new Uint8Array(expectedSize);
-          const bytesWritten = littleEndianType().encode(value as T, buffer);
-          assertEquals(bytesWritten, expectedSize);
-          const [result] = littleEndianType().decode(buffer);
-          assertEquals(result, value as T);
+          assertEquals(coder.encode(value as T, buffer), expectedSize);
+          assertEquals(coder.decode(buffer)[0], value as T);
 
-          await t.step(`with offset`, () => {
-            const bufferWithOffset = new Uint8Array(expectedSize + 4);
-            const view = bufferWithOffset.subarray(4, 4 + expectedSize);
-            const bytesWritten = littleEndianType().encode(value as T, view);
-            assertEquals(bytesWritten, expectedSize);
-            const [result] = littleEndianType().decode(view);
-            assertEquals(result, value as T);
-          });
+          const withOffset = new Uint8Array(expectedSize + 4);
+          const view = withOffset.subarray(4, 4 + expectedSize);
+          assertEquals(coder.encode(value as T, view), expectedSize);
+          assertEquals(coder.decode(view)[0], value as T);
         });
-      });
-    }
+      }
+    });
 
     await t.step("size", async (t) => {
       await t.step("buffer too small for read", () => {
@@ -237,7 +216,18 @@ function testNumericType<T extends number | bigint>(
       });
 
       await t.step("buffer too small for write", () => {
-        // This test doesn't apply to the new API since encode takes a target buffer
+        // A short encode target must raise RangeError — that is the signal
+        // `autoGrowBuffer` catches to resize and retry (ADR 0009).
+        const [, value] = typeTests[0];
+        const buffer = new Uint8Array(Math.max(expectedSize - 1, 0));
+        assertThrows(
+          () => bigEndianType().encode(value as T, buffer),
+          RangeError,
+        );
+        assertThrows(
+          () => littleEndianType().encode(value as T, buffer),
+          RangeError,
+        );
       });
 
       await t.step("empty buffer", () => {
@@ -258,7 +248,7 @@ Deno.test("floating point precision", async (t) => {
     assertEquals(bytesWritten, 4);
     const [result] = f32be().decode(buffer);
     // Should be close but not necessarily exact due to floating point precision
-    assertEquals(Math.abs(result - value) < 0.0001, true);
+    assertAlmostEquals(result, value, 0.0001);
   });
 
   await t.step("f64 precision", () => {
@@ -268,7 +258,7 @@ Deno.test("floating point precision", async (t) => {
     assertEquals(bytesWritten, 8);
     const [result] = f64be().decode(buffer);
     // Should be very close due to double precision
-    assertEquals(Math.abs(result - value) < 0.000000000000001, true);
+    assertAlmostEquals(result, value, 0.000000000000001);
   });
 });
 
