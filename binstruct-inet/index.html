@@ -96,7 +96,7 @@ dispatching on a host discriminator field at every layer (<code>etherType</code>
 <code>protocol</code>, <code>nextHeader</code>, IP <code>protocol</code>, UDP port, PPP protocol ID) — into
 round-trippable coder factories that walk a captured frame top-down. Each
 layer's payload field is surfaced as the typed value of the next layer;
-layers we don't have a coder for default to a raw <a href="https://deno.land/api@v2.9.4?s=Uint8Array"><code>Uint8Array</code></a>,
+layers we don't have a coder for default to a raw <a href="https://deno.land/api@v2.9.5?s=Uint8Array"><code>Uint8Array</code></a>,
 so the coders are safe to point at arbitrary captured traffic.</p>
 <p>Coverage:</p>
 <ul>
