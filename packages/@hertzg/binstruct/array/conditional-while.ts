@@ -16,11 +16,9 @@ export const kKindArrayWhile = Symbol("arrayWhile");
  *
  * @param params - Object containing all parameters for the condition
  * @param params.index - Current iteration index (0-based)
- * @param params.element - Current element being processed (null during decode when element not yet available)
+ * @param params.array - Elements accumulated so far (being filled during decode)
+ * @param params.buffer - Remaining buffer data from the current cursor position
  * @param params.context - Encoding/decoding context
- * @param params.cursor - Current position in the buffer
- * @param params.remaining - Remaining buffer data from cursor position
- * @param params.args - Additional arguments passed to the condition function
  * @returns True to continue processing, false to stop
  */
 export type ArrayWhileCondition<TDecoded> = (params: {
@@ -42,7 +40,6 @@ export type ArrayWhileCondition<TDecoded> = (params: {
  *
  * @param elementType - The coder for individual array elements
  * @param condition - Function that determines when to continue processing
- * @param args - Additional arguments to pass to the condition function
  * @returns A Coder that can encode/decode arrays using the custom condition
  */
 
@@ -60,21 +57,18 @@ export function arrayWhile<TDecoded>(
       refSetValue(ctx, self, decoded);
 
       for (let i = 0; i < decoded.length; i++) {
+        const remaining = target.subarray(cursor);
         if (
           !condition({
             index: i,
             array: decoded,
-            buffer: target.subarray(cursor),
+            buffer: remaining,
             context: ctx,
           })
         ) {
           break;
         }
-        cursor += elementType.encode(
-          decoded[i],
-          target.subarray(cursor),
-          ctx,
-        );
+        cursor += elementType.encode(decoded[i], remaining, ctx);
       }
 
       return cursor;
@@ -89,21 +83,19 @@ export function arrayWhile<TDecoded>(
       let i = 0;
 
       while (cursor < encoded.length) {
+        const remaining = encoded.subarray(cursor);
         if (
           !condition({
             index: i,
             array: decoded,
-            buffer: encoded.subarray(cursor),
+            buffer: remaining,
             context: ctx,
           })
         ) {
           break;
         }
 
-        const [element, bytesRead] = elementType.decode(
-          encoded.subarray(cursor),
-          ctx,
-        );
+        const [element, bytesRead] = elementType.decode(remaining, ctx);
         cursor += bytesRead;
         decoded[i] = element;
         i++;
