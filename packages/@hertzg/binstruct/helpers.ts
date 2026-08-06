@@ -186,12 +186,10 @@ export function encode<T>(
     return target.subarray(0, bytesWritten);
   }
 
-  const buffer = autoGrowBuffer((buffer) => {
+  return autoGrowBuffer((buffer) => {
     const bytesWritten = coder.encode(data, buffer, ctx);
     return buffer.subarray(0, bytesWritten);
   }, autogrowOptions);
-
-  return buffer;
 }
 
 /**

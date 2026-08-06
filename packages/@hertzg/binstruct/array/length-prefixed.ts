@@ -68,7 +68,7 @@ export function arrayLP<TDecoded>(
   lengthType: Coder<number>,
 ): Coder<TDecoded[]> {
   let self: Coder<TDecoded[]>;
-  return self = self = {
+  return self = {
     [kCoderKind]: kKindArrayLP,
     encode: (decoded, target, context) => {
       const ctx = context ?? createContext("encode");

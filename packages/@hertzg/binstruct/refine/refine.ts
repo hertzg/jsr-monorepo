@@ -180,12 +180,11 @@ export function refine<
       ) => {
         const ctx = context ?? createContext("encode");
         refSetValue(ctx, self, refined);
-        const bytesWritten = coder.encode(
+        return coder.encode(
           refiner.unrefine(refined, ctx, ...args),
           buffer,
           ctx,
         );
-        return bytesWritten;
       },
       decode: (buffer: Uint8Array, context?: Context) => {
         const ctx = context ?? createContext("decode");

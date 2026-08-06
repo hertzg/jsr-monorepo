@@ -80,7 +80,6 @@ export class BitDataView {
     count: number,
   ): void {
     let remaining = count;
-    const val = value;
     let currentByteOffset = byteOffset;
     let currentBitOffset = bitOffset;
 
@@ -91,11 +90,10 @@ export class BitDataView {
 
       // Extract the bits to write from value
       const shift = remaining - bitsToWrite;
-      const bits = (val >> shift) & ((1 << bitsToWrite) - 1);
+      const bits = (value >> shift) & ((1 << bitsToWrite) - 1);
 
       // Place bits in current byte (MSB first)
-      const currentByte = this.buffer[currentByteOffset] || 0;
-      this.buffer[currentByteOffset] = currentByte |
+      this.buffer[currentByteOffset] = this.buffer[currentByteOffset] |
         (bits << (bitsAvailable - bitsToWrite));
 
       currentBitOffset += bitsToWrite;
