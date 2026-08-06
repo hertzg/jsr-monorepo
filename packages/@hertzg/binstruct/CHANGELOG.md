@@ -1,5 +1,12 @@
 # Changelog
 
+## [3.3.1](https://github.com/hertzg/jsr-monorepo/compare/@hertzg/binstruct-v3.3.0...@hertzg/binstruct-v3.3.1) (2026-08-06)
+
+
+### Bug Fixes
+
+* **@hertzg/binstruct:** publish arrayFL values to the ref map ([#228](https://github.com/hertzg/jsr-monorepo/issues/228)) ([aa2d4c2](https://github.com/hertzg/jsr-monorepo/commit/aa2d4c2db5a242b88e7036b4785896da2e2f6202))
+
 ## [3.3.0](https://github.com/hertzg/jsr-monorepo/compare/@hertzg/binstruct-v3.2.0...@hertzg/binstruct-v3.3.0) (2026-08-02)
 
 
