@@ -264,7 +264,7 @@ assertEquals(str6.classification, &quot;documentation&quot;);
 Functions</h2></div><div class="namespaceSection"><div id="namespace_classifyip" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-Function bg-Function/15 dark:text-FunctionDark dark:bg-FunctionDark/15" title="Function">f</div></div>
 <div class="namespaceItemContent">
 		    <a href="..&#x2F;.&#x2F;classify.ts&#x2F;~&#x2F;classifyIp.html" title="classifyIp">
-			    <span>classifyIp</span><span>(<span><span>ip<span>: <span><span class="td-kw">number</span><span class="td-op"> | </span><span class="td-kw">bigint</span><span class="td-op"> | </span><span class="td-kw">string</span></span></span></span></span>)<span>: <span class="td-ref">ClassifiedIp</span></span></span><div class="namespaceItemContentTypeInfo">4 overloads</div></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Classifies an IPv4 address into its well-known range.</p>
+			    <span>classifyIp</span><span>(<span><span>address<span>: <span><span class="td-ref">Address</span><span class="td-op"> | </span><span class="td-kw">string</span></span></span></span></span>)<span>: <span class="td-ref">ClassifiedIp</span></span></span><div class="namespaceItemContentTypeInfo">4 overloads</div></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Classifies an IPv4 address into its well-known range.</p>
 </div></div></div>
     </div></div>
 </section>
@@ -291,7 +291,12 @@ Functions</h2></div><div class="namespaceSection"><div id="namespace_classifyip"
   </defs>
 </svg>
 </a>
-Type Aliases</h2></div><div class="namespaceSection"><div id="namespace_classificationipv4" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-TypeAlias bg-TypeAlias/15 dark:text-TypeAliasDark dark:bg-TypeAliasDark/15" title="Type Alias">T</div></div>
+Type Aliases</h2></div><div class="namespaceSection"><div id="namespace_address" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-TypeAlias bg-TypeAlias/15 dark:text-TypeAliasDark dark:bg-TypeAliasDark/15" title="Type Alias">T</div></div>
+<div class="namespaceItemContent">
+		    <a href="..&#x2F;.&#x2F;ip.ts&#x2F;~&#x2F;Address.html" title="Address">
+			    <span>Address</span><span> = <span><span class="td-kw">number</span><span class="td-op"> | </span><span class="td-kw">bigint</span></span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>A plain IP address of either IP version.</p>
+</div></div></div>
+    </div><div id="namespace_classificationipv4" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-TypeAlias bg-TypeAlias/15 dark:text-TypeAliasDark dark:bg-TypeAliasDark/15" title="Type Alias">T</div></div>
 <div class="namespaceItemContent">
 		    <a href="..&#x2F;.&#x2F;classifyv4.ts&#x2F;~&#x2F;ClassificationIpv4.html" title="ClassificationIpv4">
 			    <span>ClassificationIpv4</span><span> = <div class="ml-indent"><span><span class="td-str">"broadcast"</span></span><br /><span><span class="td-op"> | </span><span class="td-str">"this-network"</span></span><br /><span><span class="td-op"> | </span><span class="td-str">"loopback"</span></span><br /><span><span class="td-op"> | </span><span class="td-str">"link-local"</span></span><br /><span><span class="td-op"> | </span><span class="td-str">"documentation"</span></span><br /><span><span class="td-op"> | </span><span class="td-str">"benchmarking"</span></span><br /><span><span class="td-op"> | </span><span class="td-str">"cg-nat"</span></span><br /><span><span class="td-op"> | </span><span class="td-str">"private"</span></span><br /><span><span class="td-op"> | </span><span class="td-str">"multicast"</span></span><br /><span><span class="td-op"> | </span><span class="td-str">"reserved"</span></span><br /><span><span class="td-op"> | </span><span class="td-str">"public"</span></span></div></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>All possible IPv4 address classification labels.</p>
@@ -371,6 +376,12 @@ Type Aliases</h2></div><div class="namespaceSection"><div id="namespace_classifi
 </div></div><nav class="topSymbols">
           <h3>Symbols</h3>
           <ul><li>
+                <a href="..&#x2F;.&#x2F;ip.ts&#x2F;~&#x2F;Address.html" title="Address"><div class="docNodeKindIcon"><div class="text-TypeAlias bg-TypeAlias/15 dark:text-TypeAliasDark dark:bg-TypeAliasDark/15" title="Type Alias">T</div></div>
+<span class="hover:bg-TypeAlias/15 hover:bg-TypeAliasDark/15">
+                    Address
+                  </span>
+                </a>
+              </li><li>
                 <a href="..&#x2F;.&#x2F;ip.ts&#x2F;~&#x2F;parseIp.html" title="parseIp"><div class="docNodeKindIcon"><div class="text-Function bg-Function/15 dark:text-FunctionDark dark:bg-FunctionDark/15" title="Function">f</div></div>
 <span class="hover:bg-Function/15 hover:bg-FunctionDark/15">
                     parseIp
@@ -394,14 +405,8 @@ Type Aliases</h2></div><div class="namespaceSection"><div id="namespace_classifi
                     stringifyIp
                   </span>
                 </a>
-              </li><li>
-                <a href="..&#x2F;.&#x2F;ip.ts&#x2F;~&#x2F;stringifyIp.html" title="stringifyIp"><div class="docNodeKindIcon"><div class="text-Function bg-Function/15 dark:text-FunctionDark dark:bg-FunctionDark/15" title="Function">f</div></div>
-<span class="hover:bg-Function/15 hover:bg-FunctionDark/15">
-                    stringifyIp
-                  </span>
-                </a>
               </li></ul><a class="flex items-center gap-0.5" href="..&#x2F;.&#x2F;all_symbols.html">
-              <span class="leading-none">view all 210 symbols</span><svg
+              <span class="leading-none">view all 216 symbols</span><svg
   width="16"
   height="16"
   viewBox="0 0 16 16"
@@ -416,7 +421,7 @@ Type Aliases</h2></div><div class="namespaceSection"><div id="namespace_classifi
   />
 </svg>
 </a></nav><nav class="documentNavigation">
-          <h3>Document Navigation</h3><ul><li><a href="#examples" title="Examples">Examples</a></li><li><ul><li><a href="#example_0" title="Classify any IP address">Classify any IP address</a></li></ul></li><li><a href="#classify_ts_functions" title="Functions">Functions</a></li><li><ul><li><a href="#namespace_classifyip" title="classifyIp">classifyIp</a></li></ul></li><li><a href="#classify_ts_type-aliases" title="Type Aliases">Type Aliases</a></li><li><ul><li><a href="#namespace_classificationipv4" title="ClassificationIpv4">ClassificationIpv4</a></li><li><a href="#namespace_classificationipv6" title="ClassificationIpv6">ClassificationIpv6</a></li><li><a href="#namespace_classifiedip" title="ClassifiedIp">ClassifiedIp</a></li><li><a href="#namespace_classifiedipv4" title="ClassifiedIpv4">ClassifiedIpv4</a></li><li><a href="#namespace_classifiedipv6" title="ClassifiedIpv6">ClassifiedIpv6</a></li></ul></li></ul></nav></div>
+          <h3>Document Navigation</h3><ul><li><a href="#examples" title="Examples">Examples</a></li><li><ul><li><a href="#example_0" title="Classify any IP address">Classify any IP address</a></li></ul></li><li><a href="#classify_ts_functions" title="Functions">Functions</a></li><li><ul><li><a href="#namespace_classifyip" title="classifyIp">classifyIp</a></li></ul></li><li><a href="#classify_ts_type-aliases" title="Type Aliases">Type Aliases</a></li><li><ul><li><a href="#namespace_address" title="Address">Address</a></li><li><a href="#namespace_classificationipv4" title="ClassificationIpv4">ClassificationIpv4</a></li><li><a href="#namespace_classificationipv6" title="ClassificationIpv6">ClassificationIpv6</a></li><li><a href="#namespace_classifiedip" title="ClassifiedIp">ClassifiedIp</a></li><li><a href="#namespace_classifiedipv4" title="ClassifiedIpv4">ClassifiedIpv4</a></li><li><a href="#namespace_classifiedipv6" title="ClassifiedIpv6">ClassifiedIpv6</a></li></ul></li></ul></nav></div>
   </div></div>
 </div>
 </div>

@@ -165,7 +165,7 @@
   </defs>
 </svg>
 </a>
-<span class="font-bold">stringifyIp</span><span class="font-medium">(<span><span>ip<span>: <span class="td-kw">number</span></span></span></span>)<span>: <span class="td-kw">string</span></span> </span>
+<span class="font-bold">stringifyIp</span><span class="font-medium">(<span><span>address<span>: <span class="td-kw">number</span></span></span></span>)<span>: <span class="td-kw">string</span></span> </span>
       </code><div class="space-y-7" id=""><div class="markdown"><p>Stringifies an IPv4 (<code>number</code>) or IPv6 (<code>bigint</code>) address to its
 standard notation.</p>
 <p>IPv4 addresses (numbers) are always stringified as dotted decimal.
@@ -361,10 +361,10 @@ assertEquals(stringifyIpv6(ipv4To64Mapped(ip as number)), &quot;::ffff:c0a8:101&
   </defs>
 </svg>
 </a>
-Parameters</h2></div><div class="space-y-8"><div class="anchorable docEntry" id="function_stringifyip_0_parameter_ip">
+Parameters</h2></div><div class="space-y-8"><div class="anchorable docEntry" id="function_stringifyip_0_parameter_address">
 
   <div class="docEntryHeader">
-    <div><code><a href="#function_stringifyip_0_parameter_ip" class="anchor" aria-label="Anchor" tabIndex="-1"><svg
+    <div><code><a href="#function_stringifyip_0_parameter_address" class="anchor" aria-label="Anchor" tabIndex="-1"><svg
   width="16"
   height="16"
   viewBox="0 0 14 14"
@@ -386,7 +386,7 @@ Parameters</h2></div><div class="space-y-8"><div class="anchorable docEntry" id=
   </defs>
 </svg>
 </a>
-<span class="font-bold font-lg">ip</span><span class="font-medium text-stone-500 dark:text-stone-200"><span>: <span class="td-kw">number</span></span></span>
+<span class="font-bold font-lg">address</span><span class="font-medium text-stone-500 dark:text-stone-200"><span>: <span class="td-kw">number</span></span></span>
       </code>
     </div><a
   class="sourceButton"
@@ -413,7 +413,7 @@ Parameters</h2></div><div class="space-y-8"><div class="anchorable docEntry" id=
   />
 </svg>
 </a>
-</div><div class="max-w-[75ch]"><div class="markdown"><p>The IP address as <code>number</code> (IPv4) or <code>bigint</code> (IPv6)</p>
+</div><div class="max-w-[75ch]"><div class="markdown"><p>The address as a <code>number</code> (IPv4) or <code>bigint</code> (IPv6)</p>
 </div></div></div>
 </div></section>
 <section class="section"  id="return-type"><div>
@@ -525,7 +525,7 @@ Throws</h2></div><div class="space-y-8"><div class=" docEntry" id="function_stri
   />
 </svg>
 </a>
-</div><div class="max-w-[75ch]"><div class="markdown"><p>If the value is out of range</p>
+</div><div class="max-w-[75ch]"><div class="markdown"><p>If the address is out of range</p>
 </div></div></div>
 </div></section>
 </div>
@@ -552,7 +552,7 @@ Throws</h2></div><div class="space-y-8"><div class=" docEntry" id="function_stri
   </defs>
 </svg>
 </a>
-<span class="font-bold">stringifyIp</span><span class="font-medium">(<span><span>ip<span>: <span class="td-kw">bigint</span></span></span></span>)<span>: <span class="td-kw">string</span></span> </span>
+<span class="font-bold">stringifyIp</span><span class="font-medium">(<span><span>address<span>: <span class="td-kw">bigint</span></span></span></span>)<span>: <span class="td-kw">string</span></span> </span>
       </code><div class="space-y-7" id=""><div class="markdown"><p>Stringifies an IPv6 (<code>bigint</code>) address to compressed colon-hexadecimal notation.</p>
 </div><section class="section"  id="parameters-1"><div>
       <h2 class="anchorable mb-1"><a href="#parameters-1" class="anchor" aria-label="Anchor" tabIndex="-1"><svg
@@ -577,10 +577,10 @@ Throws</h2></div><div class="space-y-8"><div class=" docEntry" id="function_stri
   </defs>
 </svg>
 </a>
-Parameters</h2></div><div class="space-y-8"><div class="anchorable docEntry" id="function_stringifyip_1_parameter_ip">
+Parameters</h2></div><div class="space-y-8"><div class="anchorable docEntry" id="function_stringifyip_1_parameter_address">
 
   <div class="docEntryHeader">
-    <div><code><a href="#function_stringifyip_1_parameter_ip" class="anchor" aria-label="Anchor" tabIndex="-1"><svg
+    <div><code><a href="#function_stringifyip_1_parameter_address" class="anchor" aria-label="Anchor" tabIndex="-1"><svg
   width="16"
   height="16"
   viewBox="0 0 14 14"
@@ -602,7 +602,7 @@ Parameters</h2></div><div class="space-y-8"><div class="anchorable docEntry" id=
   </defs>
 </svg>
 </a>
-<span class="font-bold font-lg">ip</span><span class="font-medium text-stone-500 dark:text-stone-200"><span>: <span class="td-kw">bigint</span></span></span>
+<span class="font-bold font-lg">address</span><span class="font-medium text-stone-500 dark:text-stone-200"><span>: <span class="td-kw">bigint</span></span></span>
       </code>
     </div><a
   class="sourceButton"
@@ -710,7 +710,7 @@ Return Type</h2></div><div class="space-y-8"><div class=" docEntry" id="function
   </defs>
 </svg>
 </a>
-<span class="font-bold">stringifyIp</span><span class="font-medium">(<span><span>ip<span>: <span><span class="td-kw">number</span><span class="td-op"> | </span><span class="td-kw">bigint</span></span></span></span></span>)<span>: <span class="td-kw">string</span></span> </span>
+<span class="font-bold">stringifyIp</span><span class="font-medium">(<span><span>address<span>: <a href="../.././ip.ts/~/Address.html" class="link td-ref">Address</a></span></span></span>)<span>: <span class="td-kw">string</span></span> </span>
       </code><div class="space-y-7" id=""><div class="markdown"><p>Stringifies an IPv4 or IPv6 address to its standard notation.</p>
 </div><section class="section"  id="parameters-2"><div>
       <h2 class="anchorable mb-1"><a href="#parameters-2" class="anchor" aria-label="Anchor" tabIndex="-1"><svg
@@ -735,10 +735,10 @@ Return Type</h2></div><div class="space-y-8"><div class=" docEntry" id="function
   </defs>
 </svg>
 </a>
-Parameters</h2></div><div class="space-y-8"><div class="anchorable docEntry" id="function_stringifyip_2_parameter_ip">
+Parameters</h2></div><div class="space-y-8"><div class="anchorable docEntry" id="function_stringifyip_2_parameter_address">
 
   <div class="docEntryHeader">
-    <div><code><a href="#function_stringifyip_2_parameter_ip" class="anchor" aria-label="Anchor" tabIndex="-1"><svg
+    <div><code><a href="#function_stringifyip_2_parameter_address" class="anchor" aria-label="Anchor" tabIndex="-1"><svg
   width="16"
   height="16"
   viewBox="0 0 14 14"
@@ -760,7 +760,7 @@ Parameters</h2></div><div class="space-y-8"><div class="anchorable docEntry" id=
   </defs>
 </svg>
 </a>
-<span class="font-bold font-lg">ip</span><span class="font-medium text-stone-500 dark:text-stone-200"><span>: <span><span class="td-kw">number</span><span class="td-op"> | </span><span class="td-kw">bigint</span></span></span></span>
+<span class="font-bold font-lg">address</span><span class="font-medium text-stone-500 dark:text-stone-200"><span>: <a href="../.././ip.ts/~/Address.html" class="link td-ref">Address</a></span></span>
       </code>
     </div><a
   class="sourceButton"
@@ -884,7 +884,7 @@ Return Type</h2></div><div class="space-y-8"><div class=" docEntry" id="function
 </svg>
 </button><code></code></pre>
 </div></div><nav class="documentNavigation">
-          <h3>Document Navigation</h3><ul><li><a href="#function_stringifyip_0" title="Overload 1">Overload 1</a></li><li><ul><li><a href="#examples" title="Examples">Examples</a></li><li><ul><li><a href="#example_0" title="Example 1">Example 1</a></li><li><a href="#example_1" title="Producing the mapped IPv6 representation">Producing the mapped IPv6 representation</a></li></ul></li><li><a href="#parameters" title="Parameters">Parameters</a></li><li><ul><li><a href="#function_stringifyip_0_parameter_ip" title="ip">ip</a></li></ul></li><li><a href="#return-type" title="Return Type">Return Type</a></li><li><a href="#throws" title="Throws">Throws</a></li></ul></li><li><a href="#function_stringifyip_1" title="Overload 2">Overload 2</a></li><li><ul><li><a href="#parameters-1" title="Parameters">Parameters</a></li><li><ul><li><a href="#function_stringifyip_1_parameter_ip" title="ip">ip</a></li></ul></li><li><a href="#return-type-1" title="Return Type">Return Type</a></li></ul></li><li><a href="#function_stringifyip_2" title="Overload 3">Overload 3</a></li><li><ul><li><a href="#parameters-2" title="Parameters">Parameters</a></li><li><ul><li><a href="#function_stringifyip_2_parameter_ip" title="ip">ip</a></li></ul></li><li><a href="#return-type-2" title="Return Type">Return Type</a></li></ul></li></ul></nav></div>
+          <h3>Document Navigation</h3><ul><li><a href="#function_stringifyip_0" title="Overload 1">Overload 1</a></li><li><ul><li><a href="#examples" title="Examples">Examples</a></li><li><ul><li><a href="#example_0" title="Example 1">Example 1</a></li><li><a href="#example_1" title="Producing the mapped IPv6 representation">Producing the mapped IPv6 representation</a></li></ul></li><li><a href="#parameters" title="Parameters">Parameters</a></li><li><ul><li><a href="#function_stringifyip_0_parameter_address" title="address">address</a></li></ul></li><li><a href="#return-type" title="Return Type">Return Type</a></li><li><a href="#throws" title="Throws">Throws</a></li></ul></li><li><a href="#function_stringifyip_1" title="Overload 2">Overload 2</a></li><li><ul><li><a href="#parameters-1" title="Parameters">Parameters</a></li><li><ul><li><a href="#function_stringifyip_1_parameter_address" title="address">address</a></li></ul></li><li><a href="#return-type-1" title="Return Type">Return Type</a></li></ul></li><li><a href="#function_stringifyip_2" title="Overload 3">Overload 3</a></li><li><ul><li><a href="#parameters-2" title="Parameters">Parameters</a></li><li><ul><li><a href="#function_stringifyip_2_parameter_address" title="address">address</a></li></ul></li><li><a href="#return-type-2" title="Return Type">Return Type</a></li></ul></li></ul></nav></div>
   </div></div>
 </div>
 </div>

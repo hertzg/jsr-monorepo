@@ -329,22 +329,22 @@ assertEquals(parseIpv6(&quot;::1&quot;) === parseIpv6(&quot;::2&quot;), false);
 Functions</h2></div><div class="namespaceSection"><div id="namespace_compressipv6" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-Function bg-Function/15 dark:text-FunctionDark dark:bg-FunctionDark/15" title="Function">f</div></div>
 <div class="namespaceItemContent">
 		    <a href="..&#x2F;.&#x2F;ipv6.ts&#x2F;~&#x2F;compressIpv6.html" title="compressIpv6">
-			    <span>compressIpv6</span><span>(<span><span>ip<span>: <span class="td-kw">string</span></span></span></span>)<span>: <span class="td-kw">string</span></span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Compresses an IPv6 address to its shortest canonical form.</p>
+			    <span>compressIpv6</span><span>(<span><span>address<span>: <span class="td-kw">string</span></span></span></span>)<span>: <span class="td-kw">string</span></span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Compresses an IPv6 address to its shortest canonical form.</p>
 </div></div></div>
     </div><div id="namespace_expandipv6" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-Function bg-Function/15 dark:text-FunctionDark dark:bg-FunctionDark/15" title="Function">f</div></div>
 <div class="namespaceItemContent">
 		    <a href="..&#x2F;.&#x2F;ipv6.ts&#x2F;~&#x2F;expandIpv6.html" title="expandIpv6">
-			    <span>expandIpv6</span><span>(<span><span>ip<span>: <span class="td-kw">string</span></span></span></span>)<span>: <span class="td-kw">string</span></span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Expands an IPv6 address to its full uncompressed form.</p>
+			    <span>expandIpv6</span><span>(<span><span>address<span>: <span class="td-kw">string</span></span></span></span>)<span>: <span class="td-kw">string</span></span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Expands an IPv6 address to its full uncompressed form.</p>
 </div></div></div>
     </div><div id="namespace_parseipv6" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-Function bg-Function/15 dark:text-FunctionDark dark:bg-FunctionDark/15" title="Function">f</div></div>
 <div class="namespaceItemContent">
 		    <a href="..&#x2F;.&#x2F;ipv6.ts&#x2F;~&#x2F;parseIpv6.html" title="parseIpv6">
-			    <span>parseIpv6</span><span>(<span><span>ip<span>: <span class="td-kw">string</span></span></span></span>)<span>: <span class="td-kw">bigint</span></span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Parses an IPv6 address in colon-hexadecimal notation to a bigint.</p>
+			    <span>parseIpv6</span><span>(<span><span>address<span>: <span class="td-kw">string</span></span></span></span>)<span>: <span class="td-kw">bigint</span></span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Parses an IPv6 address in colon-hexadecimal notation to a bigint.</p>
 </div></div></div>
     </div><div id="namespace_stringifyipv6" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-Function bg-Function/15 dark:text-FunctionDark dark:bg-FunctionDark/15" title="Function">f</div></div>
 <div class="namespaceItemContent">
 		    <a href="..&#x2F;.&#x2F;ipv6.ts&#x2F;~&#x2F;stringifyIpv6.html" title="stringifyIpv6">
-			    <span>stringifyIpv6</span><span>(<span><span>value<span>: <span class="td-kw">bigint</span></span></span></span>)<span>: <span class="td-kw">string</span></span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Stringifies a bigint to an IPv6 address in compressed colon-hexadecimal notation.</p>
+			    <span>stringifyIpv6</span><span>(<span><span>address<span>: <span class="td-kw">bigint</span></span></span></span>)<span>: <span class="td-kw">string</span></span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Stringifies a bigint to an IPv6 address in compressed colon-hexadecimal notation.</p>
 </div></div></div>
     </div></div>
 </section>
@@ -389,6 +389,12 @@ Functions</h2></div><div class="namespaceSection"><div id="namespace_compressipv
 </div></div><nav class="topSymbols">
           <h3>Symbols</h3>
           <ul><li>
+                <a href="..&#x2F;.&#x2F;ip.ts&#x2F;~&#x2F;Address.html" title="Address"><div class="docNodeKindIcon"><div class="text-TypeAlias bg-TypeAlias/15 dark:text-TypeAliasDark dark:bg-TypeAliasDark/15" title="Type Alias">T</div></div>
+<span class="hover:bg-TypeAlias/15 hover:bg-TypeAliasDark/15">
+                    Address
+                  </span>
+                </a>
+              </li><li>
                 <a href="..&#x2F;.&#x2F;ip.ts&#x2F;~&#x2F;parseIp.html" title="parseIp"><div class="docNodeKindIcon"><div class="text-Function bg-Function/15 dark:text-FunctionDark dark:bg-FunctionDark/15" title="Function">f</div></div>
 <span class="hover:bg-Function/15 hover:bg-FunctionDark/15">
                     parseIp
@@ -412,14 +418,8 @@ Functions</h2></div><div class="namespaceSection"><div id="namespace_compressipv
                     stringifyIp
                   </span>
                 </a>
-              </li><li>
-                <a href="..&#x2F;.&#x2F;ip.ts&#x2F;~&#x2F;stringifyIp.html" title="stringifyIp"><div class="docNodeKindIcon"><div class="text-Function bg-Function/15 dark:text-FunctionDark dark:bg-FunctionDark/15" title="Function">f</div></div>
-<span class="hover:bg-Function/15 hover:bg-FunctionDark/15">
-                    stringifyIp
-                  </span>
-                </a>
               </li></ul><a class="flex items-center gap-0.5" href="..&#x2F;.&#x2F;all_symbols.html">
-              <span class="leading-none">view all 210 symbols</span><svg
+              <span class="leading-none">view all 216 symbols</span><svg
   width="16"
   height="16"
   viewBox="0 0 16 16"
