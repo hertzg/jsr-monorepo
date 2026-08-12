@@ -171,6 +171,9 @@
 a resizable buffer using exponential growth strategy. The buffer starts
 at 4KB and grows by 2x when needed, up to a maximum of 400MB. This approach
 minimizes memory waste while ensuring efficient encoding.</p>
+<p>The returned Uint8Array is a zero-copy view over the allocated buffer, so it
+keeps the buffer's full capacity alive; call <code>.slice()</code> on the result if you
+hold onto it long-term and want an exact-size copy instead.</p>
 </div><section class="section"  id="examples"><div>
       <h2 class="anchorable mb-1"><a href="#examples" class="anchor" aria-label="Anchor" tabIndex="-1"><svg
   width="16"
