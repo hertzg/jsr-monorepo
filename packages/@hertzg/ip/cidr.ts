@@ -88,9 +88,9 @@ export type Cidr = Cidrv4 | Cidrv6;
  * An IP address or a CIDR block, of either IP version.
  *
  * This is a union of {@link Address} and {@link Cidr} — everything the
- * universal `parse` and `stringify` from `@hertzg/ip` accept. Narrow with a
- * `typeof` check to split the address half from the CIDR half, then use
- * {@link isCidrv4} and {@link isCidrv6} on the latter.
+ * universal `parse` and `stringify` from `@hertzg/ip` accept and return.
+ * Narrow with a `typeof` check to split the address half from the CIDR half,
+ * then use {@link isCidrv4} and {@link isCidrv6} on the latter.
  */
 export type AddressOrCidr = Address | Cidr;
 

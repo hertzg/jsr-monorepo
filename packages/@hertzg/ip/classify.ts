@@ -46,6 +46,8 @@ import { type ClassificationIpv4, classifyIpv4 } from "./classifyv4.ts";
 import { type ClassificationIpv6, classifyIpv6 } from "./classifyv6.ts";
 
 export type {
+  /** A plain IP address of either IP version. */
+  Address,
   /** Type for all IPv4 classification labels. */
   ClassificationIpv4,
   /** Type for all IPv6 classification labels. */
