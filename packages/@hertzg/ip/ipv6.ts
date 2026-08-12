@@ -62,7 +62,7 @@ import { parseIpv4 } from "./ipv4.ts";
  * - Mixed IPv4 form: `::ffff:192.168.1.1`
  * - Zone IDs are stripped: `fe80::1%eth0` becomes `fe80::1`
  *
- * @param ip The IPv6 address string in colon-hexadecimal notation
+ * @param address The address string in colon-hexadecimal notation
  * @returns The IPv6 address as a 128-bit bigint
  * @throws {TypeError} If the format is invalid
  * @throws {RangeError} If any group is out of range (not 0-ffff)
@@ -106,34 +106,35 @@ import { parseIpv4 } from "./ipv4.ts";
  * assertThrows(() => parseIpv6("2001:gggg::1"), TypeError);
  * ```
  */
-export function parseIpv6(ip: string): bigint {
+export function parseIpv6(address: string): bigint {
   // Strip zone ID if present (e.g., fe80::1%eth0)
-  const zoneIndex = ip.indexOf("%");
+  const zoneIndex = address.indexOf("%");
   if (zoneIndex !== -1) {
-    ip = ip.slice(0, zoneIndex);
+    address = address.slice(0, zoneIndex);
   }
 
   // Check for IPv4-mapped address (::ffff:192.168.1.1)
-  const lastColonIndex = ip.lastIndexOf(":");
-  const possibleIpv4 = ip.slice(lastColonIndex + 1);
+  const lastColonIndex = address.lastIndexOf(":");
+  const possibleIpv4 = address.slice(lastColonIndex + 1);
   if (possibleIpv4.includes(".")) {
     // Parse using the IPv4 parser for proper validation and consistency
     const ipv4Value = parseIpv4(possibleIpv4);
     // Replace the IPv4 portion with two hex groups (high 16 bits, low 16 bits)
     const hexGroup1 = ((ipv4Value >>> 16) & 0xFFFF).toString(16);
     const hexGroup2 = (ipv4Value & 0xFFFF).toString(16);
-    ip = ip.slice(0, lastColonIndex + 1) + hexGroup1 + ":" + hexGroup2;
+    address = address.slice(0, lastColonIndex + 1) + hexGroup1 + ":" +
+      hexGroup2;
   }
 
   // Handle :: expansion
-  const firstDoubleColon = ip.indexOf("::");
+  const firstDoubleColon = address.indexOf("::");
   if (firstDoubleColon !== -1) {
     // Check for multiple :: by comparing first and last occurrence
-    if (ip.indexOf("::", firstDoubleColon + 2) !== -1) {
+    if (address.indexOf("::", firstDoubleColon + 2) !== -1) {
       throw new TypeError("IPv6 address can only contain one '::'");
     }
 
-    const [left, right] = ip.split("::");
+    const [left, right] = address.split("::");
     const leftParts = left === "" ? [] : left.split(":");
     const rightParts = right === "" ? [] : right.split(":");
 
@@ -152,7 +153,7 @@ export function parseIpv6(ip: string): bigint {
   }
 
   // Standard form - must have exactly 8 groups
-  const parts = ip.split(":");
+  const parts = address.split(":");
   if (parts.length !== 8) {
     throw new TypeError(
       `IPv6 address must have exactly 8 groups (or use ::), got ${parts.length}`,
@@ -201,7 +202,7 @@ function parseFullIpv6(parts: string[]): bigint {
  * - The longest run of consecutive all-zero groups is replaced with `::`
  * - If there are multiple runs of the same length, the first one is compressed
  *
- * @param value The IPv6 address as a bigint
+ * @param address The address as a 128-bit bigint
  * @returns The IPv6 address string in compressed colon-hexadecimal notation
  * @throws {RangeError} If the value is negative or greater than 2^128-1
  *
@@ -234,17 +235,17 @@ function parseFullIpv6(parts: string[]): bigint {
  * assertThrows(() => stringifyIpv6(340282366920938463463374607431768211456n), RangeError);
  * ```
  */
-export function stringifyIpv6(value: bigint): string {
-  if (value < 0n || value > 0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFn) {
+export function stringifyIpv6(address: bigint): string {
+  if (address < 0n || address > 0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFn) {
     throw new RangeError(
-      `IPv6 value out of range: ${value} (must be 0 to 2^128-1)`,
+      `IPv6 value out of range: ${address} (must be 0 to 2^128-1)`,
     );
   }
 
   // Extract 8 groups of 16 bits each
   const groups: number[] = [];
   for (let i = 0; i < 8; i++) {
-    const group = Number((value >> BigInt((7 - i) * 16)) & 0xFFFFn);
+    const group = Number((address >> BigInt((7 - i) * 16)) & 0xFFFFn);
     groups.push(group);
   }
 
@@ -306,7 +307,7 @@ export function stringifyIpv6(value: bigint): string {
  *
  * Returns the address with all 8 groups fully specified with 4 hex digits each.
  *
- * @param ip The IPv6 address string (can be compressed)
+ * @param address The address string (can be compressed)
  * @returns The fully expanded IPv6 address string
  * @throws Propagates errors from parseIpv6 if the input is invalid
  *
@@ -321,8 +322,8 @@ export function stringifyIpv6(value: bigint): string {
  * assertEquals(expandIpv6("fe80::1%eth0"), "fe80:0000:0000:0000:0000:0000:0000:0001");
  * ```
  */
-export function expandIpv6(ip: string): string {
-  const value = parseIpv6(ip);
+export function expandIpv6(address: string): string {
+  const value = parseIpv6(address);
 
   const groups: string[] = [];
   for (let i = 0; i < 8; i++) {
@@ -339,7 +340,7 @@ export function expandIpv6(ip: string): string {
  * This is equivalent to parsing and re-stringifying the address,
  * which produces the canonical compressed representation.
  *
- * @param ip The IPv6 address string
+ * @param address The address string
  * @returns The compressed IPv6 address string
  * @throws Propagates errors from parseIpv6 if the input is invalid
  *
@@ -354,6 +355,6 @@ export function expandIpv6(ip: string): string {
  * assertEquals(compressIpv6("fe80:0000:0000:0000:0000:0000:0000:0001"), "fe80::1");
  * ```
  */
-export function compressIpv6(ip: string): string {
-  return stringifyIpv6(parseIpv6(ip));
+export function compressIpv6(address: string): string {
+  return stringifyIpv6(parseIpv6(address));
 }

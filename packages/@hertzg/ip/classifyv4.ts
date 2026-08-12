@@ -77,7 +77,7 @@ export type ClassificationIpv4 =
  * - `172.16.0.0/12` (172.16.0.0 – 172.31.255.255)
  * - `192.168.0.0/16` (192.168.0.0 – 192.168.255.255)
  *
- * @param ip The IPv4 address as a 32-bit unsigned integer
+ * @param address The address as a 32-bit unsigned integer
  * @returns `true` if the address is in a private range
  *
  * @example
@@ -92,10 +92,10 @@ export type ClassificationIpv4 =
  * assertEquals(isIpv4Private(parseIpv4("8.8.8.8")), false);
  * ```
  */
-export function isIpv4Private(ip: number): boolean {
-  return cidrv4Contains(CIDR_PRIVATE_10, ip) ||
-    cidrv4Contains(CIDR_PRIVATE_172, ip) ||
-    cidrv4Contains(CIDR_PRIVATE_192, ip);
+export function isIpv4Private(address: number): boolean {
+  return cidrv4Contains(CIDR_PRIVATE_10, address) ||
+    cidrv4Contains(CIDR_PRIVATE_172, address) ||
+    cidrv4Contains(CIDR_PRIVATE_192, address);
 }
 
 /**
@@ -103,7 +103,7 @@ export function isIpv4Private(ip: number): boolean {
  *
  * Loopback range: `127.0.0.0/8` (127.0.0.0 – 127.255.255.255)
  *
- * @param ip The IPv4 address as a 32-bit unsigned integer
+ * @param address The address as a 32-bit unsigned integer
  * @returns `true` if the address is a loopback address
  *
  * @example
@@ -117,8 +117,8 @@ export function isIpv4Private(ip: number): boolean {
  * assertEquals(isIpv4Loopback(parseIpv4("128.0.0.1")), false);
  * ```
  */
-export function isIpv4Loopback(ip: number): boolean {
-  return cidrv4Contains(CIDR_LOOPBACK, ip);
+export function isIpv4Loopback(address: number): boolean {
+  return cidrv4Contains(CIDR_LOOPBACK, address);
 }
 
 /**
@@ -126,7 +126,7 @@ export function isIpv4Loopback(ip: number): boolean {
  *
  * Link-local range: `169.254.0.0/16` (169.254.0.0 – 169.254.255.255)
  *
- * @param ip The IPv4 address as a 32-bit unsigned integer
+ * @param address The address as a 32-bit unsigned integer
  * @returns `true` if the address is link-local
  *
  * @example
@@ -139,8 +139,8 @@ export function isIpv4Loopback(ip: number): boolean {
  * assertEquals(isIpv4LinkLocal(parseIpv4("169.255.0.0")), false);
  * ```
  */
-export function isIpv4LinkLocal(ip: number): boolean {
-  return cidrv4Contains(CIDR_LINK_LOCAL, ip);
+export function isIpv4LinkLocal(address: number): boolean {
+  return cidrv4Contains(CIDR_LINK_LOCAL, address);
 }
 
 /**
@@ -148,7 +148,7 @@ export function isIpv4LinkLocal(ip: number): boolean {
  *
  * Multicast range: `224.0.0.0/4` (224.0.0.0 – 239.255.255.255)
  *
- * @param ip The IPv4 address as a 32-bit unsigned integer
+ * @param address The address as a 32-bit unsigned integer
  * @returns `true` if the address is multicast
  *
  * @example
@@ -162,8 +162,8 @@ export function isIpv4LinkLocal(ip: number): boolean {
  * assertEquals(isIpv4Multicast(parseIpv4("240.0.0.0")), false);
  * ```
  */
-export function isIpv4Multicast(ip: number): boolean {
-  return cidrv4Contains(CIDR_MULTICAST, ip);
+export function isIpv4Multicast(address: number): boolean {
+  return cidrv4Contains(CIDR_MULTICAST, address);
 }
 
 /**
@@ -172,7 +172,7 @@ export function isIpv4Multicast(ip: number): boolean {
  * Reserved range: `240.0.0.0/4` (240.0.0.0 – 255.255.255.254),
  * excluding the broadcast address `255.255.255.255`.
  *
- * @param ip The IPv4 address as a 32-bit unsigned integer
+ * @param address The address as a 32-bit unsigned integer
  * @returns `true` if the address is reserved
  *
  * @example
@@ -187,9 +187,9 @@ export function isIpv4Multicast(ip: number): boolean {
  * assertEquals(isIpv4Reserved(parseIpv4("239.255.255.255")), false); // multicast
  * ```
  */
-export function isIpv4Reserved(ip: number): boolean {
-  return cidrv4Contains(CIDR_RESERVED, ip) &&
-    !cidrv4Contains(CIDR_BROADCAST, ip);
+export function isIpv4Reserved(address: number): boolean {
+  return cidrv4Contains(CIDR_RESERVED, address) &&
+    !cidrv4Contains(CIDR_BROADCAST, address);
 }
 
 /**
@@ -197,7 +197,7 @@ export function isIpv4Reserved(ip: number): boolean {
  *
  * Broadcast address: `255.255.255.255`
  *
- * @param ip The IPv4 address as a 32-bit unsigned integer
+ * @param address The address as a 32-bit unsigned integer
  * @returns `true` if the address is the broadcast address
  *
  * @example
@@ -210,8 +210,8 @@ export function isIpv4Reserved(ip: number): boolean {
  * assertEquals(isIpv4Broadcast(parseIpv4("255.255.255.254")), false);
  * ```
  */
-export function isIpv4Broadcast(ip: number): boolean {
-  return cidrv4Contains(CIDR_BROADCAST, ip);
+export function isIpv4Broadcast(address: number): boolean {
+  return cidrv4Contains(CIDR_BROADCAST, address);
 }
 
 /**
@@ -219,7 +219,7 @@ export function isIpv4Broadcast(ip: number): boolean {
  *
  * This network range: `0.0.0.0/8` (0.0.0.0 – 0.255.255.255)
  *
- * @param ip The IPv4 address as a 32-bit unsigned integer
+ * @param address The address as a 32-bit unsigned integer
  * @returns `true` if the address is in the "this network" range
  *
  * @example
@@ -233,8 +233,8 @@ export function isIpv4Broadcast(ip: number): boolean {
  * assertEquals(isIpv4ThisNetwork(parseIpv4("1.0.0.0")), false);
  * ```
  */
-export function isIpv4ThisNetwork(ip: number): boolean {
-  return cidrv4Contains(CIDR_THIS_NETWORK, ip);
+export function isIpv4ThisNetwork(address: number): boolean {
+  return cidrv4Contains(CIDR_THIS_NETWORK, address);
 }
 
 /**
@@ -242,7 +242,7 @@ export function isIpv4ThisNetwork(ip: number): boolean {
  *
  * CG-NAT range: `100.64.0.0/10` (100.64.0.0 – 100.127.255.255)
  *
- * @param ip The IPv4 address as a 32-bit unsigned integer
+ * @param address The address as a 32-bit unsigned integer
  * @returns `true` if the address is in the CG-NAT range
  *
  * @example
@@ -256,8 +256,8 @@ export function isIpv4ThisNetwork(ip: number): boolean {
  * assertEquals(isIpv4CgNat(parseIpv4("100.128.0.0")), false);
  * ```
  */
-export function isIpv4CgNat(ip: number): boolean {
-  return cidrv4Contains(CIDR_CG_NAT, ip);
+export function isIpv4CgNat(address: number): boolean {
+  return cidrv4Contains(CIDR_CG_NAT, address);
 }
 
 /**
@@ -265,7 +265,7 @@ export function isIpv4CgNat(ip: number): boolean {
  *
  * Benchmarking range: `198.18.0.0/15` (198.18.0.0 – 198.19.255.255)
  *
- * @param ip The IPv4 address as a 32-bit unsigned integer
+ * @param address The address as a 32-bit unsigned integer
  * @returns `true` if the address is in the benchmarking range
  *
  * @example
@@ -279,8 +279,8 @@ export function isIpv4CgNat(ip: number): boolean {
  * assertEquals(isIpv4Benchmarking(parseIpv4("198.20.0.0")), false);
  * ```
  */
-export function isIpv4Benchmarking(ip: number): boolean {
-  return cidrv4Contains(CIDR_BENCHMARKING, ip);
+export function isIpv4Benchmarking(address: number): boolean {
+  return cidrv4Contains(CIDR_BENCHMARKING, address);
 }
 
 /**
@@ -291,7 +291,7 @@ export function isIpv4Benchmarking(ip: number): boolean {
  * - `198.51.100.0/24` (TEST-NET-2)
  * - `203.0.113.0/24` (TEST-NET-3)
  *
- * @param ip The IPv4 address as a 32-bit unsigned integer
+ * @param address The address as a 32-bit unsigned integer
  * @returns `true` if the address is in a documentation range
  *
  * @example
@@ -306,10 +306,10 @@ export function isIpv4Benchmarking(ip: number): boolean {
  * assertEquals(isIpv4Documentation(parseIpv4("192.0.3.0")), false);
  * ```
  */
-export function isIpv4Documentation(ip: number): boolean {
-  return cidrv4Contains(CIDR_DOC_1, ip) ||
-    cidrv4Contains(CIDR_DOC_2, ip) ||
-    cidrv4Contains(CIDR_DOC_3, ip);
+export function isIpv4Documentation(address: number): boolean {
+  return cidrv4Contains(CIDR_DOC_1, address) ||
+    cidrv4Contains(CIDR_DOC_2, address) ||
+    cidrv4Contains(CIDR_DOC_3, address);
 }
 
 /**
@@ -319,7 +319,7 @@ export function isIpv4Documentation(ip: number): boolean {
  * special-purpose range (private, loopback, link-local, multicast,
  * reserved, broadcast, this-network, CG-NAT, benchmarking, or documentation).
  *
- * @param ip The IPv4 address as a 32-bit unsigned integer
+ * @param address The address as a 32-bit unsigned integer
  * @returns `true` if the address is publicly routable
  *
  * @example
@@ -334,12 +334,12 @@ export function isIpv4Documentation(ip: number): boolean {
  * assertEquals(isIpv4Public(parseIpv4("127.0.0.1")), false);
  * ```
  */
-export function isIpv4Public(ip: number): boolean {
-  return !isIpv4Private(ip) && !isIpv4Loopback(ip) &&
-    !isIpv4LinkLocal(ip) && !isIpv4Multicast(ip) &&
-    !isIpv4Reserved(ip) && !isIpv4Broadcast(ip) &&
-    !isIpv4ThisNetwork(ip) && !isIpv4CgNat(ip) &&
-    !isIpv4Benchmarking(ip) && !isIpv4Documentation(ip);
+export function isIpv4Public(address: number): boolean {
+  return !isIpv4Private(address) && !isIpv4Loopback(address) &&
+    !isIpv4LinkLocal(address) && !isIpv4Multicast(address) &&
+    !isIpv4Reserved(address) && !isIpv4Broadcast(address) &&
+    !isIpv4ThisNetwork(address) && !isIpv4CgNat(address) &&
+    !isIpv4Benchmarking(address) && !isIpv4Documentation(address);
 }
 
 /**
@@ -348,7 +348,7 @@ export function isIpv4Public(ip: number): boolean {
  * Returns the most specific classification label for the given address.
  * Every valid 32-bit unsigned integer maps to exactly one classification.
  *
- * @param ip The IPv4 address as a 32-bit unsigned integer
+ * @param address The address as a 32-bit unsigned integer
  * @returns The classification label
  *
  * @example
@@ -370,27 +370,27 @@ export function isIpv4Public(ip: number): boolean {
  * assertEquals(classifyIpv4(parseIpv4("240.0.0.0")), "reserved");
  * ```
  */
-export function classifyIpv4(ip: number): ClassificationIpv4 {
+export function classifyIpv4(address: number): ClassificationIpv4 {
   switch (true) {
-    case isIpv4Broadcast(ip):
+    case isIpv4Broadcast(address):
       return "broadcast";
-    case isIpv4ThisNetwork(ip):
+    case isIpv4ThisNetwork(address):
       return "this-network";
-    case isIpv4Loopback(ip):
+    case isIpv4Loopback(address):
       return "loopback";
-    case isIpv4LinkLocal(ip):
+    case isIpv4LinkLocal(address):
       return "link-local";
-    case isIpv4Documentation(ip):
+    case isIpv4Documentation(address):
       return "documentation";
-    case isIpv4Benchmarking(ip):
+    case isIpv4Benchmarking(address):
       return "benchmarking";
-    case isIpv4CgNat(ip):
+    case isIpv4CgNat(address):
       return "cg-nat";
-    case isIpv4Private(ip):
+    case isIpv4Private(address):
       return "private";
-    case isIpv4Multicast(ip):
+    case isIpv4Multicast(address):
       return "multicast";
-    case isIpv4Reserved(ip):
+    case isIpv4Reserved(address):
       return "reserved";
     default:
       return "public";

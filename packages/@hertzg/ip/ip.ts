@@ -44,7 +44,7 @@ import { parseIpv6, stringifyIpv6 } from "./ipv6.ts";
  * To preserve the full IPv6 bigint for mapped addresses, use
  * {@link parseIpv6} directly instead.
  *
- * @param ip The IP address string in dotted decimal or colon-hexadecimal notation
+ * @param address The address string in dotted decimal or colon-hexadecimal notation
  * @returns The parsed address as `number` (IPv4) or `bigint` (IPv6)
  * @throws {TypeError} If the format is invalid
  * @throws {RangeError} If values are out of range
@@ -59,15 +59,15 @@ import { parseIpv6, stringifyIpv6 } from "./ipv6.ts";
  * assertEquals(parseIp("::ffff:192.168.1.1"), 3232235777);
  * ```
  */
-export function parseIp(ip: string): number | bigint {
-  if (ip.includes(":")) {
-    const ipv6 = parseIpv6(ip);
+export function parseIp(address: string): number | bigint {
+  if (address.includes(":")) {
+    const ipv6 = parseIpv6(address);
     if (isIpv6Ipv4Mapped(ipv6)) {
       return ipv4From64Mapped(ipv6);
     }
     return ipv6;
   }
-  return parseIpv4(ip);
+  return parseIpv4(address);
 }
 
 /**
@@ -82,7 +82,7 @@ export function parseIp(ip: string): number | bigint {
  * To produce the mapped IPv6 representation, use {@link ipv4To64Mapped}
  * with {@link stringifyIpv6}:
  *
- * @param ip The IP address as `number` (IPv4) or `bigint` (IPv6)
+ * @param address The address as `number` (IPv4) or `bigint` (IPv6)
  * @returns The address string in dotted decimal or compressed colon-hexadecimal notation
  * @throws {RangeError} If the value is out of range
  *
@@ -107,15 +107,15 @@ export function parseIp(ip: string): number | bigint {
  * assertEquals(stringifyIpv6(ipv4To64Mapped(ip as number)), "::ffff:c0a8:101");
  * ```
  */
-export function stringifyIp(ip: number): string;
+export function stringifyIp(address: number): string;
 /** Stringifies an IPv6 (`bigint`) address to compressed colon-hexadecimal notation. */
-export function stringifyIp(ip: bigint): string;
+export function stringifyIp(address: bigint): string;
 /** Stringifies an IPv4 or IPv6 address to its standard notation. */
-export function stringifyIp(ip: number | bigint): string;
+export function stringifyIp(address: number | bigint): string;
 /** Stringifies an IPv4 or IPv6 address to its standard notation. */
-export function stringifyIp(ip: number | bigint): string {
-  if (typeof ip === "bigint") {
-    return stringifyIpv6(ip);
+export function stringifyIp(address: number | bigint): string {
+  if (typeof address === "bigint") {
+    return stringifyIpv6(address);
   }
-  return stringifyIpv4(ip);
+  return stringifyIpv4(address);
 }

@@ -126,7 +126,7 @@ export type ClassifiedIp =
 /**
  * Classifies an IPv4 address into its well-known range.
  *
- * @param ip The IPv4 address as a 32-bit unsigned integer
+ * @param address The address as a 32-bit unsigned integer
  * @returns A {@link ClassifiedIpv4} with `kind`, `value`, and `classification`
  *
  * @example
@@ -141,11 +141,11 @@ export type ClassifiedIp =
  * assertEquals(result.classification, "private");
  * ```
  */
-export function classifyIp(ip: number): ClassifiedIpv4;
+export function classifyIp(address: number): ClassifiedIpv4;
 /**
  * Classifies an IPv6 address into its well-known range.
  *
- * @param ip The IPv6 address as a 128-bit bigint
+ * @param address The address as a 128-bit bigint
  * @returns A {@link ClassifiedIpv6} with `kind`, `value`, and `classification`
  *
  * @example
@@ -159,14 +159,14 @@ export function classifyIp(ip: number): ClassifiedIpv4;
  * assertEquals(result.classification, "unique-local");
  * ```
  */
-export function classifyIp(ip: bigint): ClassifiedIpv6;
+export function classifyIp(address: bigint): ClassifiedIpv6;
 /**
  * Parses an IP address string and classifies it into its well-known range.
  *
  * The string is parsed using {@link parseIp} to detect IPv4 vs IPv6,
  * then classified accordingly.
  *
- * @param ip The IP address string in dotted decimal or colon-hexadecimal notation
+ * @param address The address string in dotted decimal or colon-hexadecimal notation
  * @returns A {@link ClassifiedIp} with `kind`, `value`, and `classification`
  * @throws {TypeError} If the string is not a valid IP address
  * @throws {RangeError} If values are out of range
@@ -185,7 +185,7 @@ export function classifyIp(ip: bigint): ClassifiedIpv6;
  * assertEquals(v6.classification, "loopback");
  * ```
  */
-export function classifyIp(ip: string): ClassifiedIp;
+export function classifyIp(address: string): ClassifiedIp;
 /**
  * Classifies an IPv4 or IPv6 address into its well-known range.
  *
@@ -193,7 +193,7 @@ export function classifyIp(ip: string): ClassifiedIp;
  * {@link parseIp}. At runtime, the value is dispatched to the
  * version-specific classifier based on its type.
  *
- * @param ip The IP address as a `number` (IPv4) or `bigint` (IPv6)
+ * @param address The address as a `number` (IPv4) or `bigint` (IPv6)
  * @returns A {@link ClassifiedIp} with `kind`, `value`, and `classification`
  *
  * @example
@@ -207,14 +207,22 @@ export function classifyIp(ip: string): ClassifiedIp;
  * assertEquals(result.classification, "loopback");
  * ```
  */
-export function classifyIp(ip: number | bigint): ClassifiedIp;
+export function classifyIp(address: number | bigint): ClassifiedIp;
 /** Classifies an IPv4 or IPv6 address, or parses and classifies an IP address string. */
-export function classifyIp(ip: number | bigint | string): ClassifiedIp {
-  if (typeof ip === "string") {
-    return classifyIp(parseIp(ip));
+export function classifyIp(address: number | bigint | string): ClassifiedIp {
+  if (typeof address === "string") {
+    return classifyIp(parseIp(address));
   }
-  if (typeof ip === "bigint") {
-    return { kind: "ipv6", value: ip, classification: classifyIpv6(ip) };
+  if (typeof address === "bigint") {
+    return {
+      kind: "ipv6",
+      value: address,
+      classification: classifyIpv6(address),
+    };
   }
-  return { kind: "ipv4", value: ip, classification: classifyIpv4(ip) };
+  return {
+    kind: "ipv4",
+    value: address,
+    classification: classifyIpv4(address),
+  };
 }
