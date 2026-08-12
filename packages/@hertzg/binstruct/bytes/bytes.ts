@@ -31,7 +31,12 @@
  * @module
  */
 import { isValidLength, type LengthOrRef, lengthRefGet } from "../length.ts";
-import { type Coder, createContext, kCoderKind } from "../core.ts";
+import {
+  type Coder,
+  type Context,
+  createContext,
+  kCoderKind,
+} from "../core.ts";
 import { isRef, refSetValue } from "../ref/ref.ts";
 
 const kKindBytes = Symbol("bytes");
@@ -77,24 +82,28 @@ export function bytes(
     );
   }
 
+  const resolveLength = lengthOrRef == null ? null : (ctx: Context): number => {
+    const len = lengthRefGet(ctx, lengthOrRef);
+
+    if (len === undefined) {
+      throw new Error("Invalid length: Unable to resolve length");
+    }
+
+    if (!isValidLength(len)) {
+      throw new Error(
+        `Invalid length: ${len}. Must be a non-negative integer.`,
+      );
+    }
+
+    return len;
+  };
+
   let self: Coder<Uint8Array>;
   return self = {
     [kCoderKind]: kKindBytes,
     encode: (value, target, context): number => {
       const ctx = context ?? createContext("encode");
-      const len = lengthOrRef == null
-        ? value.length
-        : lengthRefGet(ctx, lengthOrRef);
-
-      if (len === undefined) {
-        throw new Error("Invalid length: Unable to resolve length");
-      }
-
-      if (!isValidLength(len)) {
-        throw new Error(
-          `Invalid length: ${len}. Must be a non-negative integer.`,
-        );
-      }
+      const len = resolveLength === null ? value.length : resolveLength(ctx);
 
       refSetValue(ctx, self, value);
 
@@ -105,25 +114,16 @@ export function bytes(
     decode: (encoded, context) => {
       const ctx = context ?? createContext("decode");
 
-      if (lengthOrRef == null) {
+      if (resolveLength === null) {
         refSetValue(ctx, self, encoded);
         return [encoded, encoded.length];
       }
 
-      const len = lengthRefGet(ctx, lengthOrRef);
-      if (len === undefined) {
-        throw new Error("Invalid length: Unable to resolve length");
-      }
-
-      if (!isValidLength(len)) {
-        throw new Error(
-          `Invalid length: ${len}. Must be a non-negative integer.`,
-        );
-      }
+      const len = resolveLength(ctx);
 
       if (encoded.length < len) {
         throw new Error(
-          `Need ${len} bytes, got only ${encoded.length}`,
+          `Need ${len} bytes, got ${encoded.length}`,
         );
       }
 

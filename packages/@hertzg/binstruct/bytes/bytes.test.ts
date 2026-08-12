@@ -46,6 +46,6 @@ Deno.test("bytes - error on insufficient buffer", () => {
   assertThrows(
     () => coder.decode(shortBuffer),
     Error,
-    "Need 4 bytes, got only 2",
+    "Need 4 bytes, got 2",
   );
 });

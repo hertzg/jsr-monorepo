@@ -80,13 +80,11 @@ export function arrayWhile<TDecoded>(
       const decoded: TDecoded[] = [];
       refSetValue(ctx, self, decoded);
 
-      let i = 0;
-
       while (cursor < encoded.length) {
         const remaining = encoded.subarray(cursor);
         if (
           !condition({
-            index: i,
+            index: decoded.length,
             array: decoded,
             buffer: remaining,
             context: ctx,
@@ -97,8 +95,7 @@ export function arrayWhile<TDecoded>(
 
         const [element, bytesRead] = elementType.decode(remaining, ctx);
         cursor += bytesRead;
-        decoded[i] = element;
-        i++;
+        decoded.push(element);
       }
 
       return [decoded, cursor];
