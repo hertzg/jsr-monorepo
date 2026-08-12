@@ -1,4 +1,15 @@
 {
+  // A standalone import map follows the strict HTML-standard spec, not the
+  // relaxed `imports` field of deno.json. The difference bites on prefix
+  // mappings: here a directory mapping needs its own trailing-slash entry AND
+  // the `jsr:/` form with a slash after the scheme.
+  //
+  //   "@std/async":  "jsr:@std/async@^1.0.0",     // the module
+  //   "@std/async/": "jsr:/@std/async@^1.0.0/",   // the prefix, note `jsr:/`
+  //
+  // import_map.json currently enumerates every subpath instead, so this does
+  // not apply today. It applies the moment someone adds a trailing slash.
+  // See ADR 0001.
   "importMap": "./import_map.json",
   "minimumDependencyAge": "PT12H",
   "tasks": {
