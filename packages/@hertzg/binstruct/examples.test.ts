@@ -28,36 +28,10 @@ Deno.test("Comprehensive examples showcasing all library functionality", async (
     const bytesWritten = basicStructCoder.encode(testData, buffer);
     const [decoded, bytesRead] = basicStructCoder.decode(buffer);
 
-    assertEquals(
-      decoded.unsigned8,
-      testData.unsigned8,
-      "Unsigned 8-bit should match",
-    );
-    assertEquals(
-      decoded.unsigned16,
-      testData.unsigned16,
-      "Unsigned 16-bit should match",
-    );
-    assertEquals(
-      decoded.unsigned32,
-      testData.unsigned32,
-      "Unsigned 32-bit should match",
-    );
-    assertEquals(
-      decoded.signed8,
-      testData.signed8,
-      "Signed 32-bit should match",
-    );
-    assertEquals(
-      decoded.float32,
-      Math.fround(testData.float32),
-      "Float 32-bit should match (f32 precision)",
-    );
-    assertEquals(
-      decoded.float64,
-      testData.float64,
-      "Float 64-bit should match",
-    );
+    assertEquals(decoded, {
+      ...testData,
+      float32: Math.fround(testData.float32), // f32 precision
+    });
     assertEquals(
       bytesWritten,
       bytesRead,
@@ -83,21 +57,7 @@ Deno.test("Comprehensive examples showcasing all library functionality", async (
     const bytesWritten = stringStructCoder.encode(testData, buffer);
     const [decoded, bytesRead] = stringStructCoder.decode(buffer);
 
-    assertEquals(
-      decoded.lengthPrefixed,
-      testData.lengthPrefixed,
-      "Length-prefixed string should match",
-    );
-    assertEquals(
-      decoded.nullTerminated,
-      testData.nullTerminated,
-      "Null-terminated string should match",
-    );
-    assertEquals(
-      decoded.fixedLength,
-      testData.fixedLength,
-      "Fixed-length string should match",
-    );
+    assertEquals(decoded, testData);
     assertEquals(
       bytesWritten,
       bytesRead,
@@ -121,16 +81,7 @@ Deno.test("Comprehensive examples showcasing all library functionality", async (
     const bytesWritten = arrayStructCoder.encode(testData, buffer);
     const [decoded, bytesRead] = arrayStructCoder.decode(buffer);
 
-    assertEquals(
-      decoded.lengthPrefixed,
-      testData.lengthPrefixed,
-      "Length-prefixed array should match",
-    );
-    assertEquals(
-      decoded.fixedLength,
-      testData.fixedLength,
-      "Fixed-length array should match",
-    );
+    assertEquals(decoded, testData);
     assertEquals(
       bytesWritten,
       bytesRead,
@@ -155,13 +106,7 @@ Deno.test("Comprehensive examples showcasing all library functionality", async (
     const bytesWritten = dataCoder.encode(testData, buffer);
     const [decoded, bytesRead] = dataCoder.decode(buffer);
 
-    assertEquals(decoded.length, testData.length, "Length should match");
-    assertEquals(decoded.items, testData.items, "Items should match");
-    assertEquals(
-      decoded.items.length,
-      decoded.length,
-      "Array length should match length field",
-    );
+    assertEquals(decoded, testData);
     assertEquals(
       bytesWritten,
       bytesRead,
@@ -269,19 +214,7 @@ Deno.test("Comprehensive examples showcasing all library functionality", async (
     const bytesWritten = mixedDataCoder.encode(testData, buffer);
     const [decoded, bytesRead] = mixedDataCoder.decode(buffer);
 
-    assertEquals(
-      decoded.headerLength,
-      testData.headerLength,
-      "Header length should match",
-    );
-    assertEquals(
-      decoded.dataLength,
-      testData.dataLength,
-      "Data length should match",
-    );
-    assertEquals(decoded.header, testData.header, "Header data should match");
-    assertEquals(decoded.data, testData.data, "Data should match");
-    assertEquals(decoded.checksum, testData.checksum, "Checksum should match");
+    assertEquals(decoded, testData);
     assertEquals(
       bytesWritten,
       bytesRead,
