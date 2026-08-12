@@ -41,7 +41,7 @@
  * @module
  */
 
-import { parseIp } from "./ip.ts";
+import { type Address, parseIp } from "./ip.ts";
 import { type ClassificationIpv4, classifyIpv4 } from "./classifyv4.ts";
 import { type ClassificationIpv6, classifyIpv6 } from "./classifyv6.ts";
 
@@ -189,7 +189,7 @@ export function classifyIp(address: string): ClassifiedIp;
 /**
  * Classifies an IPv4 or IPv6 address into its well-known range.
  *
- * This overload accepts `number | bigint`, which is the return type of
+ * This overload accepts an {@link Address}, which is the return type of
  * {@link parseIp}. At runtime, the address is dispatched to the
  * version-specific classifier based on its type.
  *
@@ -207,9 +207,9 @@ export function classifyIp(address: string): ClassifiedIp;
  * assertEquals(result.classification, "loopback");
  * ```
  */
-export function classifyIp(address: number | bigint): ClassifiedIp;
+export function classifyIp(address: Address): ClassifiedIp;
 /** Classifies an IPv4 or IPv6 address, or parses and classifies an IP address string. */
-export function classifyIp(address: number | bigint | string): ClassifiedIp {
+export function classifyIp(address: Address | string): ClassifiedIp {
   if (typeof address === "string") {
     return classifyIp(parseIp(address));
   }

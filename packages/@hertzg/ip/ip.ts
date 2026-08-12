@@ -3,7 +3,8 @@
  *
  * This module provides {@link parseIp} and {@link stringifyIp} that
  * auto-detect IPv4 vs IPv6 and delegate to the appropriate version-specific
- * function.
+ * function. The {@link Address} type alias is also exported for working with
+ * version-polymorphic address values.
  *
  * For version-specific functions, see:
  * - [`ipv4`](https://jsr.io/@hertzg/ip/doc/ipv4): {@link parseIpv4}, {@link stringifyIpv4}
@@ -34,6 +35,16 @@ import { parseIpv4, stringifyIpv4 } from "./ipv4.ts";
 import { parseIpv6, stringifyIpv6 } from "./ipv6.ts";
 
 /**
+ * A plain IP address of either IP version.
+ *
+ * This is a union of `number` (IPv4, 32-bit) and `bigint` (IPv6, 128-bit) —
+ * the JS primitive type is what carries the version. Useful for functions
+ * that operate on addresses regardless of IP version; narrow with a
+ * `typeof` check.
+ */
+export type Address = number | bigint;
+
+/**
  * Parses an IPv4 or IPv6 address string to its numeric representation.
  *
  * Detects the IP version by checking for `:` in the input — if present,
@@ -59,7 +70,7 @@ import { parseIpv6, stringifyIpv6 } from "./ipv6.ts";
  * assertEquals(parseIp("::ffff:192.168.1.1"), 3232235777);
  * ```
  */
-export function parseIp(address: string): number | bigint {
+export function parseIp(address: string): Address {
   if (address.includes(":")) {
     const ipv6 = parseIpv6(address);
     if (isIpv6Ipv4Mapped(ipv6)) {
@@ -111,9 +122,9 @@ export function stringifyIp(address: number): string;
 /** Stringifies an IPv6 (`bigint`) address to compressed colon-hexadecimal notation. */
 export function stringifyIp(address: bigint): string;
 /** Stringifies an IPv4 or IPv6 address to its standard notation. */
-export function stringifyIp(address: number | bigint): string;
+export function stringifyIp(address: Address): string;
 /** Stringifies an IPv4 or IPv6 address to its standard notation. */
-export function stringifyIp(address: number | bigint): string {
+export function stringifyIp(address: Address): string {
   if (typeof address === "bigint") {
     return stringifyIpv6(address);
   }

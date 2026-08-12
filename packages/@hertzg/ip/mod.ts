@@ -185,6 +185,8 @@
  * ## API Reference
  *
  * ### Universal (auto-detect IPv4/IPv6)
+ * - {@link Address}: An IP address of either version (`number` or `bigint`)
+ * - {@link AddressOrCidr}: An IP address or a CIDR block, either version
  * - {@link parse}: Parse any IP address or CIDR string to its typed representation
  * - {@link stringify}: Convert any IP address or CIDR value to its string notation
  * - {@link parseIp}: Parse any IP address string to number (IPv4) or bigint (IPv6)
@@ -310,16 +312,21 @@
 
 import { parseCidr, stringifyCidr } from "./cidr.ts";
 import { parseIp, stringifyIp } from "./ip.ts";
+import type { AddressOrCidr } from "./cidr.ts";
 import type { Cidrv4 } from "./cidr.ts";
 import type { Cidrv6 } from "./cidr.ts";
 
 export {
+  /** A plain IP address of either IP version. */
+  type Address,
   /** Parse any IP address string to number (IPv4) or bigint (IPv6). */
   parseIp,
   /** Convert number or bigint to IP address string. */
   stringifyIp,
 } from "./ip.ts";
 export {
+  /** An IP address or a CIDR block, of either IP version. */
+  type AddressOrCidr,
   /** A CIDR block of either IP version. */
   type Cidr,
   /** Generate IP addresses in a CIDR block. */
@@ -349,13 +356,14 @@ export {
 /**
  * Parses an IP address or CIDR notation string.
  *
- * Detects CIDR notation by checking for `/` in the input. If present,
- * delegates to {@link parseCidr}; otherwise delegates to {@link parseIp}.
- * The IP version (IPv4 vs IPv6) is auto-detected within each delegate.
+ * Detects CIDR notation by checking for `/`. If present, delegates to
+ * {@link parseCidr}; otherwise delegates to {@link parseIp}. The IP version
+ * (IPv4 vs IPv6) is auto-detected within each delegate.
  *
- * @param input The IP address or CIDR notation string
- * @returns The parsed value — `number` (IPv4), `bigint` (IPv6),
- *   {@link Cidrv4} (IPv4 CIDR), or {@link Cidrv6} (IPv6 CIDR)
+ * @param notation The address or CIDR notation string
+ * @returns The parsed {@link AddressOrCidr} — `number` (IPv4),
+ *   `bigint` (IPv6), {@link Cidrv4} (IPv4 CIDR), or {@link Cidrv6}
+ *   (IPv6 CIDR)
  * @throws {TypeError} If the format is invalid
  * @throws {RangeError} If values are out of range
  *
@@ -384,11 +392,11 @@ export {
  * assertEquals(mapped, { address: 3232235776, prefixLength: 24 });
  * ```
  */
-export function parse(input: string): number | bigint | Cidrv4 | Cidrv6 {
-  if (input.includes("/")) {
-    return parseCidr(input);
+export function parse(notation: string): AddressOrCidr {
+  if (notation.includes("/")) {
+    return parseCidr(notation);
   }
-  return parseIp(input);
+  return parseIp(notation);
 }
 
 /** Stringifies an IPv4 address (`number`) to dotted decimal notation. */
@@ -421,9 +429,9 @@ export function stringify(value: Cidrv6): string;
  * assertEquals(stringify(parse("2001:db8::/32")), "2001:db8::/32");
  * ```
  */
-export function stringify(value: number | bigint | Cidrv4 | Cidrv6): string;
+export function stringify(value: AddressOrCidr): string;
 /** Stringifies an IP address or CIDR block to its standard notation. */
-export function stringify(value: number | bigint | Cidrv4 | Cidrv6): string {
+export function stringify(value: AddressOrCidr): string {
   if (typeof value === "number" || typeof value === "bigint") {
     return stringifyIp(value);
   }
