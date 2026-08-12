@@ -264,11 +264,12 @@ export function ref<TDecoded>(
 ): RefValue<TDecoded> {
   const unref: RefValue<TDecoded> = (ctx: Context | null | undefined) => {
     if (!isRefsInContext(ctx)) {
-      throw new Error("Context initiatized without refs");
+      throw new Error("Context initialized without refs");
     }
 
-    if (ctx[kCtxRefs].has(coder)) {
-      return ctx[kCtxRefs].get(coder)!;
+    const refs = ctx[kCtxRefs];
+    if (refs.has(coder)) {
+      return refs.get(coder)!;
     }
 
     throw new Error("Ref not found in context");

@@ -74,6 +74,18 @@ export function dataViewType<TDecoded extends number | bigint>(
   };
   const bytes = byteSizes[type];
 
+  const le = endianness === "le";
+  const write: (dataView: DataView, value: TDecoded) => void =
+    type === "Uint8" || type === "Int8"
+      ? (dataView, value) => dataView[`set${type}`](0, value as number)
+      : type === "BigUint64" || type === "BigInt64"
+      ? (dataView, value) => dataView[`set${type}`](0, value as bigint, le)
+      : (dataView, value) => dataView[`set${type}`](0, value as number, le);
+  const read: (dataView: DataView) => TDecoded =
+    type === "Uint8" || type === "Int8"
+      ? (dataView) => dataView[`get${type}`](0) as TDecoded
+      : (dataView) => dataView[`get${type}`](0, le) as TDecoded;
+
   let self: Coder<TDecoded>;
   return self = {
     [kCoderKind]: kind,
@@ -85,21 +97,7 @@ export function dataViewType<TDecoded extends number | bigint>(
         target.byteOffset,
         target.byteLength,
       );
-      switch (type) {
-        case "Uint8":
-        case "Int8":
-          dataView[`set${type}`](0, value as number);
-          break;
-
-        case "BigUint64":
-        case "BigInt64":
-          dataView[`set${type}`](0, value as bigint, endianness === "le");
-          break;
-
-        default:
-          dataView[`set${type}`](0, value as number, endianness === "le");
-          break;
-      }
+      write(dataView, value);
       return bytes;
     },
     decode: (encoded, ctx) => {
@@ -112,18 +110,7 @@ export function dataViewType<TDecoded extends number | bigint>(
         encoded.byteOffset,
         encoded.byteLength,
       );
-
-      let value: TDecoded;
-      switch (type) {
-        case "Uint8":
-        case "Int8":
-          value = dataView[`get${type}`](0) as TDecoded;
-          break;
-
-        default:
-          value = dataView[`get${type}`](0, endianness === "le") as TDecoded;
-          break;
-      }
+      const value = read(dataView);
 
       refSetValue(ctx, self, value);
 
