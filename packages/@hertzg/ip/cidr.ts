@@ -7,7 +7,9 @@
  * {@link cidrSize}, and {@link cidrAddresses} that auto-detect IPv4 vs IPv6
  * and delegate to the appropriate version-specific function. The {@link Cidr}
  * type alias and {@link isCidrv4}/{@link isCidrv6} type guards are also
- * exported for working with version-polymorphic CIDR values.
+ * exported for working with version-polymorphic CIDR values, along with the
+ * {@link AddressOrCidr} union used by the universal `parse` and `stringify`
+ * at the package root.
  *
  * For version-specific functions, see:
  * - [`cidrv4`](https://jsr.io/@hertzg/ip/doc/cidrv4): {@link parseCidrv4}, {@link stringifyCidrv4}, {@link isValidCidrv4}
@@ -58,7 +60,12 @@ import {
   parseCidrv6,
   stringifyCidrv6,
 } from "./cidrv6.ts";
+import type { Address } from "./ip.ts";
 
+export type {
+  /** A plain IP address of either IP version. */
+  Address,
+} from "./ip.ts";
 export type {
   /** Type representing an IPv4 CIDR block. */
   Cidrv4,
@@ -76,6 +83,16 @@ export type {
  * {@link isCidrv4} and {@link isCidrv6} type guards to narrow.
  */
 export type Cidr = Cidrv4 | Cidrv6;
+
+/**
+ * An IP address or a CIDR block, of either IP version.
+ *
+ * This is a union of {@link Address} and {@link Cidr} — everything the
+ * universal `parse` and `stringify` from `@hertzg/ip` accept and return.
+ * Narrow with a `typeof` check to split the address half from the CIDR half,
+ * then use {@link isCidrv4} and {@link isCidrv6} on the latter.
+ */
+export type AddressOrCidr = Address | Cidr;
 
 /**
  * Type guard that checks whether a {@link Cidr} is an IPv4 CIDR block.
@@ -537,7 +554,7 @@ export function cidrAddresses(
     count?: number | bigint;
     step?: number | bigint;
   },
-): Generator<number | bigint>;
+): Generator<Address>;
 /** Generates IP addresses within a CIDR block. */
 export function* cidrAddresses(
   cidr: Cidr,
@@ -546,7 +563,7 @@ export function* cidrAddresses(
     count?: number | bigint;
     step?: number | bigint;
   },
-): Generator<number | bigint> {
+): Generator<Address> {
   if (isCidrv6(cidr)) {
     yield* cidrv6Addresses(cidr, options);
   } else {

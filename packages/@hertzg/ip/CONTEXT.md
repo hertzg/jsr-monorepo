@@ -9,11 +9,21 @@ ADR 0001).
 
 **Address**: The primitive value of an IP host — a `number` for IPv4, a `bigint`
 for IPv6. The same noun applies to both versions; the version is read from the
-type. The corresponding string form is the "address string" (or "dotted decimal"
-/ "colon-hexadecimal" when the format matters). _Avoid_: `host`, `endpoint`. In
+type. Exported as the type alias `Address` from the package root and re-exported
+from the submodules whose signatures use it; prefer it over spelling the union
+inline, but only where the value _is_ an address — counts and strides
+(`cidrSize`, `offset`, `count`, `step`) keep the plain `number | bigint`. The
+corresponding string form is the "address string" (or "dotted decimal" /
+"colon-hexadecimal" when the format matters). _Avoid_: `host`, `endpoint`. In
 parameter names, JSDoc, and prose, use `address`. "IP address" is acceptable in
 prose when the protocol context isn't already obvious. In function names, the
 version qualifier (`Ip` / `Ipv4` / `Ipv6`) is what disambiguates — see below.
+
+**AddressOrCidr**: The union of `Address` and `Cidr` — everything the universal
+`parse` and `stringify` accept and return. Exported as a type alias from the
+`cidr` submodule and the package root. The union has no short noun of its own,
+so parameters holding one keep a role name: `notation` for the string form,
+`value` for the parsed form. _Avoid_: `addressOrCidr`, `input`.
 
 ## Function-name convention
 
