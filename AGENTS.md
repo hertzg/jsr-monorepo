@@ -536,9 +536,9 @@ GitHub Issues via `gh`, on `hertzg/jsr-monorepo`. See
 
 ### Triage labels
 
-Five canonical labels, no overrides: `needs-triage`, `needs-info`,
-`ready-for-agent`, `ready-for-human`, `wontfix`. See
-`docs/agents/triage-labels.md`.
+Two category labels: `bug`, `enhancement`. Five state labels: `needs-triage`,
+`needs-info`, `ready-for-agent`, `ready-for-human`, `wontfix`. No overrides — a
+triaged issue carries one of each. See `docs/agents/triage-labels.md`.
 
 ### Domain docs
 
