@@ -32,6 +32,28 @@
     "bench": "deno bench --allow-all",
     "bench:json": "deno bench --allow-all --json"
   },
+  "publish": {
+    // SAFETY NET ONLY. Every package declares its own `publish.exclude`, and
+    // each one is expected to be correct on its own - deleting this block
+    // must not change what any package ships. What a package ships is part of
+    // that package's contract, so it is stated in that package's deno.json.
+    //
+    // Members inherit these patterns on top of their own. `publish.include`
+    // does NOT inherit, which is why this is a blocklist. `deno publish`
+    // always adds LICENSE and deno.json, so neither is listed anywhere.
+    "exclude": [
+      // Tests and benchmarks, both naming conventions.
+      "**/*.test.ts",
+      "**/*.bench.ts",
+      "**/*_test.ts",
+      "**/*_bench.ts",
+      // ADRs are internal decision records, not consumer documentation.
+      "**/adr/**",
+      // Markdown is repo-internal. CHANGELOG stays readable on GitHub and on
+      // the JSR versions tab without shipping in the tarball.
+      "**/*.md"
+    ]
+  },
   "exclude": [
     ".git",
     ".claude",

@@ -7,5 +7,13 @@
   "exclude": [
     "./pngsuite"
   ],
-  "types": "./mod.ts"
+  "types": "./mod.ts",
+  "publish": {
+    "exclude": [
+      "**/*.test.ts",
+      "**/*.md",
+      "adr",
+      "pngsuite"
+    ]
+  }
 }

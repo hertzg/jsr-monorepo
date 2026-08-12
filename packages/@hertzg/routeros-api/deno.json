@@ -12,5 +12,12 @@
     "./streams/decode": "./streams/decode.ts",
     "./utils/tag": "./utils/tag.ts",
     "./client": "./client.ts"
+  },
+  "publish": {
+    "exclude": [
+      "**/*.test.ts",
+      "**/*.md",
+      "adr"
+    ]
   }
 }

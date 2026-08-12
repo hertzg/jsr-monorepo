@@ -3,5 +3,11 @@
   "version": "3.0.3",
   "exports": {
     ".": "./mod.ts"
+  },
+  "publish": {
+    "exclude": [
+      "**/*.test.ts",
+      "**/*.md"
+    ]
   }
 }
