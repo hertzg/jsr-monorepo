@@ -165,7 +165,7 @@
   </defs>
 </svg>
 </a>
-<span class="font-bold">stringifyIpv4</span><span class="font-medium">(<span><span>value<span>: <span class="td-kw">number</span></span></span></span>)<span>: <span class="td-kw">string</span></span> </span>
+<span class="font-bold">stringifyIpv4</span><span class="font-medium">(<span><span>address<span>: <span class="td-kw">number</span></span></span></span>)<span>: <span class="td-kw">string</span></span> </span>
       </code><div class="space-y-7" id=""><div class="markdown"><p>Stringifies a number to an IPv4 address in dotted decimal notation.</p>
 <p>The number must represent a valid 32-bit unsigned integer (0 to 4294967295).</p>
 </div><section class="section"  id="examples"><div>
@@ -353,10 +353,10 @@ assertThrows(() =&gt; stringifyIpv4(4294967296), RangeError);
   </defs>
 </svg>
 </a>
-Parameters</h2></div><div class="space-y-8"><div class="anchorable docEntry" id="function_stringifyipv4_0_parameter_value">
+Parameters</h2></div><div class="space-y-8"><div class="anchorable docEntry" id="function_stringifyipv4_0_parameter_address">
 
   <div class="docEntryHeader">
-    <div><code><a href="#function_stringifyipv4_0_parameter_value" class="anchor" aria-label="Anchor" tabIndex="-1"><svg
+    <div><code><a href="#function_stringifyipv4_0_parameter_address" class="anchor" aria-label="Anchor" tabIndex="-1"><svg
   width="16"
   height="16"
   viewBox="0 0 14 14"
@@ -378,7 +378,7 @@ Parameters</h2></div><div class="space-y-8"><div class="anchorable docEntry" id=
   </defs>
 </svg>
 </a>
-<span class="font-bold font-lg">value</span><span class="font-medium text-stone-500 dark:text-stone-200"><span>: <span class="td-kw">number</span></span></span>
+<span class="font-bold font-lg">address</span><span class="font-medium text-stone-500 dark:text-stone-200"><span>: <span class="td-kw">number</span></span></span>
       </code>
     </div><a
   class="sourceButton"
@@ -405,7 +405,7 @@ Parameters</h2></div><div class="space-y-8"><div class="anchorable docEntry" id=
   />
 </svg>
 </a>
-</div><div class="max-w-[75ch]"><div class="markdown"><p>The IPv4 address as a 32-bit unsigned integer</p>
+</div><div class="max-w-[75ch]"><div class="markdown"><p>The address as a 32-bit unsigned integer</p>
 </div></div></div>
 </div></section>
 <section class="section"  id="return-type"><div>
@@ -517,7 +517,7 @@ Throws</h2></div><div class="space-y-8"><div class=" docEntry" id="function_stri
   />
 </svg>
 </a>
-</div><div class="max-w-[75ch]"><div class="markdown"><p>If the value is negative or greater than 2^32-1</p>
+</div><div class="max-w-[75ch]"><div class="markdown"><p>If the address is negative or greater than 2^32-1</p>
 </div></div></div>
 </div></section>
 </div>
@@ -560,7 +560,7 @@ Throws</h2></div><div class="space-y-8"><div class=" docEntry" id="function_stri
 </svg>
 </button><code></code></pre>
 </div></div><nav class="documentNavigation">
-          <h3>Document Navigation</h3><ul><li><a href="#examples" title="Examples">Examples</a></li><li><ul><li><a href="#example_0" title="Basic stringifying">Basic stringifying</a></li><li><a href="#example_1" title="Error handling">Error handling</a></li></ul></li><li><a href="#parameters" title="Parameters">Parameters</a></li><li><ul><li><a href="#function_stringifyipv4_0_parameter_value" title="value">value</a></li></ul></li><li><a href="#return-type" title="Return Type">Return Type</a></li><li><a href="#throws" title="Throws">Throws</a></li></ul></nav></div>
+          <h3>Document Navigation</h3><ul><li><a href="#examples" title="Examples">Examples</a></li><li><ul><li><a href="#example_0" title="Basic stringifying">Basic stringifying</a></li><li><a href="#example_1" title="Error handling">Error handling</a></li></ul></li><li><a href="#parameters" title="Parameters">Parameters</a></li><li><ul><li><a href="#function_stringifyipv4_0_parameter_address" title="address">address</a></li></ul></li><li><a href="#return-type" title="Return Type">Return Type</a></li><li><a href="#throws" title="Throws">Throws</a></li></ul></nav></div>
   </div></div>
 </div>
 </div>
