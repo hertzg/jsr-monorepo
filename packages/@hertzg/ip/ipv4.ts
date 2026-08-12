@@ -133,7 +133,7 @@ export function parseIpv4(address: string): number {
  *
  * @param address The address as a 32-bit unsigned integer
  * @returns The IPv4 address string in dotted decimal notation
- * @throws {RangeError} If the value is negative or greater than 2^32-1
+ * @throws {RangeError} If the address is negative or greater than 2^32-1
  *
  * @example Basic stringifying
  * ```ts

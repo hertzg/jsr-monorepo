@@ -82,9 +82,9 @@ export function parseIp(address: string): number | bigint {
  * To produce the mapped IPv6 representation, use {@link ipv4To64Mapped}
  * with {@link stringifyIpv6}:
  *
- * @param address The address as `number` (IPv4) or `bigint` (IPv6)
+ * @param address The address as a `number` (IPv4) or `bigint` (IPv6)
  * @returns The address string in dotted decimal or compressed colon-hexadecimal notation
- * @throws {RangeError} If the value is out of range
+ * @throws {RangeError} If the address is out of range
  *
  * @example
  * ```ts

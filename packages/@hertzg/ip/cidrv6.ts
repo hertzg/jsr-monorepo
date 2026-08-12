@@ -176,10 +176,10 @@ export function stringifyCidrv6(cidr: Cidrv6): string {
 }
 
 /**
- * Checks if an IPv6 address (as bigint) is contained within a CIDR block.
+ * Checks if an IPv6 address is contained within a CIDR block.
  *
  * @param cidr The CIDR block to check against
- * @param address The address to check
+ * @param address The address to check, as a 128-bit bigint
  * @returns true if the address is within the CIDR range, false otherwise
  *
  * @example Basic contains check

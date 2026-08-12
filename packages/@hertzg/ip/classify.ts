@@ -190,7 +190,7 @@ export function classifyIp(address: string): ClassifiedIp;
  * Classifies an IPv4 or IPv6 address into its well-known range.
  *
  * This overload accepts `number | bigint`, which is the return type of
- * {@link parseIp}. At runtime, the value is dispatched to the
+ * {@link parseIp}. At runtime, the address is dispatched to the
  * version-specific classifier based on its type.
  *
  * @param address The address as a `number` (IPv4) or `bigint` (IPv6)

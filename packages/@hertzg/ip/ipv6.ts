@@ -204,7 +204,7 @@ function parseFullIpv6(parts: string[]): bigint {
  *
  * @param address The address as a 128-bit bigint
  * @returns The IPv6 address string in compressed colon-hexadecimal notation
- * @throws {RangeError} If the value is negative or greater than 2^128-1
+ * @throws {RangeError} If the address is negative or greater than 2^128-1
  *
  * @example Basic stringifying
  * ```ts

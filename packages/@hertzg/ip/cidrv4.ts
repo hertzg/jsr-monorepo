@@ -172,7 +172,7 @@ export function stringifyCidrv4(cidr: Cidrv4): string {
  * Checks if an IPv4 address is contained within a CIDR block.
  *
  * @param cidr The CIDR block to check against
- * @param address The address to check
+ * @param address The address to check, as a 32-bit unsigned integer
  * @returns true if the address is within the CIDR range, false otherwise
  *
  * @example Basic contains check
