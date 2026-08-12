@@ -11,6 +11,7 @@
  * @module
  */
 
+import { parse as parseJsonc } from "@std/jsonc";
 import { join, toFileUrl } from "@std/path";
 import { getWorkspacePaths } from "./utils.ts";
 
@@ -80,9 +81,9 @@ async function getDepsForPackage(
   rootPath: string,
   workspacePath: string,
 ): Promise<DepsSnapshot> {
-  const pkgJsonUrl = toFileUrl(join(rootPath, workspacePath, "deno.json"));
-  const pkgJson: PackageJson =
-    (await import(pkgJsonUrl.href, { with: { type: "json" } })).default;
+  const pkgJson = parseJsonc(
+    await Deno.readTextFile(join(rootPath, workspacePath, "deno.json")),
+  ) as PackageJson;
 
   const exports = typeof pkgJson.exports === "string"
     ? { ".": pkgJson.exports }
@@ -137,9 +138,9 @@ let failed = false;
 let updated = 0;
 
 for (const workspacePath of await getWorkspacePaths()) {
-  const pkgJsonUrl = toFileUrl(join(rootPath, workspacePath, "deno.json"));
-  const pkgJson: PackageJson =
-    (await import(pkgJsonUrl.href, { with: { type: "json" } })).default;
+  const pkgJson = parseJsonc(
+    await Deno.readTextFile(join(rootPath, workspacePath, "deno.json")),
+  ) as PackageJson;
 
   const snapshotPath = join(rootPath, workspacePath, "_deps.snap");
   const currentSnapshot = await getDepsForPackage(rootPath, workspacePath);
