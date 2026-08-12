@@ -118,7 +118,6 @@ export interface Ethernet2Frame {
   payload: Uint8Array;
 }
 
-
 /**
  * Creates a coder for Ethernet II frames.
  *

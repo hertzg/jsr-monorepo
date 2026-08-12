@@ -12,7 +12,10 @@ Deno.test("parseIp", async (t) => {
   await t.step("parses IPv6 addresses", () => {
     assertEquals(parseIp("::1"), 1n);
     assertEquals(parseIp("::"), 0n);
-    assertEquals(parseIp("2001:db8::1"), 42540766411282592856903984951653826561n);
+    assertEquals(
+      parseIp("2001:db8::1"),
+      42540766411282592856903984951653826561n,
+    );
   });
 
   await t.step("unwraps IPv4-mapped IPv6 to IPv4", () => {
@@ -31,7 +34,10 @@ Deno.test("stringifyIp", async (t) => {
   await t.step("stringifies IPv6 addresses", () => {
     assertEquals(stringifyIp(1n), "::1");
     assertEquals(stringifyIp(0n), "::");
-    assertEquals(stringifyIp(42540766411282592856903984951653826561n), "2001:db8::1");
+    assertEquals(
+      stringifyIp(42540766411282592856903984951653826561n),
+      "2001:db8::1",
+    );
   });
 });
 

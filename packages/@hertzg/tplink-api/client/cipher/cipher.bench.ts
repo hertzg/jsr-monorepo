@@ -43,7 +43,9 @@ const rsaTestData = rsaSizes.map((size) => {
 for (const { size, data } of rsaTestData) {
   const chunks = Math.ceil(size / modulus.length);
   Deno.bench(
-    `cipher.rsaEncrypt (${size} bytes, ${chunks} chunk${chunks > 1 ? "s" : ""})`,
+    `cipher.rsaEncrypt (${size} bytes, ${chunks} chunk${
+      chunks > 1 ? "s" : ""
+    })`,
     () => {
       cipher.rsaEncrypt(data);
     },

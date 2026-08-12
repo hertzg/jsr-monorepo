@@ -1,8 +1,4 @@
-import {
-  assertEquals,
-  assertStringIncludes,
-  assertThrows,
-} from "@std/assert";
+import { assertEquals, assertStringIncludes, assertThrows } from "@std/assert";
 import { bitStruct } from "./bit-struct.ts";
 import { struct } from "../struct/struct.ts";
 import { u32le } from "../numeric/numeric.ts";

@@ -9,9 +9,7 @@ import type { gCharP, gDouble, gUInt32 } from "./_g_types.ts";
  * @returns The formatted `name="value"` pair, or `""`.
  */
 export const hb_xml_attr_txt = (attrName: string, value: gCharP): string =>
-  value === null || value === undefined
-    ? ""
-    : `${attrName}="${value}"`;
+  value === null || value === undefined ? "" : `${attrName}="${value}"`;
 
 /**
  * Escapes special XML characters and control characters in a string,
@@ -89,9 +87,7 @@ export const hb_xml_attr_txt_crlf = (
  * @returns The formatted `name="value"` pair, or `""`.
  */
 export const hb_xml_attr_int0 = (attrName: string, value: number): string =>
-  value === null || value === undefined
-    ? ""
-    : `${attrName}="${value}"`;
+  value === null || value === undefined ? "" : `${attrName}="${value}"`;
 
 /**
  * Formats an integer XML attribute, omitting it when the value is zero.
@@ -133,9 +129,7 @@ export const hb_xml_tag = (prefix: string, ..._attrs: string[]): string => {
  * @returns The formatted `name="value"` pair, or `""`.
  */
 export const hb_xml_attr_amt = (attrName: string, amt: gDouble): string =>
-  amt === null || amt === undefined
-    ? ""
-    : `${attrName}="${dtostr(amt)}"`;
+  amt === null || amt === undefined ? "" : `${attrName}="${dtostr(amt)}"`;
 
 /**
  * Joins an array of tag names into a space-separated string.

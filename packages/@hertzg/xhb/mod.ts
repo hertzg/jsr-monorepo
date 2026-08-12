@@ -103,34 +103,14 @@ import {
   type Properties,
   serializeProperties,
 } from "./properties.ts";
-import {
-  type Category,
-  parseCategory,
-  serializeCategory,
-} from "./category.ts";
+import { type Category, parseCategory, serializeCategory } from "./category.ts";
 import { parsePayee, type Payee, serializePayee } from "./payee.ts";
 import { type Assign, parseAssign, serializeAssign } from "./assign.ts";
-import {
-  type Account,
-  parseAccount,
-  serializeAccount,
-} from "./account.ts";
-import {
-  parseVersions,
-  serializeVersions,
-  type Versions,
-} from "./versions.ts";
-import {
-  type Currency,
-  parseCurrency,
-  serializeCurrency,
-} from "./currency.ts";
+import { type Account, parseAccount, serializeAccount } from "./account.ts";
+import { parseVersions, serializeVersions, type Versions } from "./versions.ts";
+import { type Currency, parseCurrency, serializeCurrency } from "./currency.ts";
 import { parseTag, serializeTag, type Tag } from "./tag.ts";
-import {
-  type Archive,
-  parseArchive,
-  serializeArchive,
-} from "./archive.ts";
+import { type Archive, parseArchive, serializeArchive } from "./archive.ts";
 import {
   type Operation,
   parseOperation,
@@ -165,8 +145,9 @@ export interface XHB {
  * A partially-constructed {@linkcode XHB} where only `versions` is required.
  * Used during parsing when the full object is still being built.
  */
-export type VolatileXHB = Pick<XHB, "versions"> &
-  Partial<Omit<XHB, "versions">>;
+export type VolatileXHB =
+  & Pick<XHB, "versions">
+  & Partial<Omit<XHB, "versions">>;
 
 const NODE_NAME_ACCOUNT = "account";
 const NODE_NAME_ARCHIVE = "fav";

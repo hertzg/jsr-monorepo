@@ -54,7 +54,10 @@ export const ASSIGN_FLAG_OVWMOD = 1 << 11;
  * @param xhb - The partially-parsed XHB (needed for version check).
  * @returns The parsed assign rule.
  */
-export function parseAssign({ attributes }: XmlElement, xhb: VolatileXHB): Assign {
+export function parseAssign(
+  { attributes }: XmlElement,
+  xhb: VolatileXHB,
+): Assign {
   const entry: Assign = {
     key: atoi(attributes.key),
     flags: atoi(attributes.flags),

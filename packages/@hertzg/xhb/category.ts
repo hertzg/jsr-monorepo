@@ -62,7 +62,6 @@ const hb_xml_attrs_budgets = (budget: gDouble[]) =>
     ? budget
       .filter((b) => b !== null && b !== undefined)
       .map((v, i) => `b${i}="${dtostr(v)}"`)
-
       .join(" ")
     : "";
 
