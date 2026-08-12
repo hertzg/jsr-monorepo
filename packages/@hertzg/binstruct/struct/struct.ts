@@ -33,6 +33,17 @@ import { refSetValue } from "../ref/ref.ts";
 const kKindStruct = Symbol("struct");
 
 /**
+ * The decoded object type of a struct schema: each property's coder
+ * `Coder<U>` contributes a property of type `U`.
+ *
+ * @template T - Object where keys are property names and values are coders
+ */
+// deno-lint-ignore no-explicit-any
+export type StructDecoded<T extends Record<string, Coder<any>>> = {
+  [K in keyof T]: T[K] extends Coder<infer U> ? U : never;
+};
+
+/**
  * Creates a Coder for structured data from an object of property names to coders.
  *
  * The struct is encoded by encoding each property in order, and decoded by
@@ -90,10 +101,10 @@ const kKindStruct = Symbol("struct");
 // deno-lint-ignore no-explicit-any
 export function struct<T extends Record<string, Coder<any>>>(
   schema: T,
-): Coder<{ [K in keyof T]: T[K] extends Coder<infer U> ? U : never }> {
+): Coder<StructDecoded<T>> {
   const keys = Object.keys(schema) as (keyof T)[];
 
-  let self: Coder<{ [K in keyof T]: T[K] extends Coder<infer U> ? U : never }>;
+  let self: Coder<StructDecoded<T>>;
   return self = {
     [kCoderKind]: kKindStruct,
     encode: (decoded, target, context) => {
@@ -113,9 +124,7 @@ export function struct<T extends Record<string, Coder<any>>>(
     decode: (encoded, context) => {
       const ctx = context ?? createContext("decode");
       let cursor = 0;
-      const result = {} as {
-        [K in keyof T]: T[K] extends Coder<infer U> ? U : never;
-      };
+      const result = {} as StructDecoded<T>;
 
       refSetValue(ctx, self, result);
 
