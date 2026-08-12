@@ -1,10 +1,10 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>AddressOrCidr - mod.ts - @hertzg&#x2F;ip documentation</title>
+  <title>Address - classify.ts - @hertzg&#x2F;ip documentation</title>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="doc-current-file" content="mod.ts">
+  <meta name="doc-current-file" content="classify.ts">
   <link rel="stylesheet" href="..&#x2F;..&#x2F;styles.css">
   <link rel="stylesheet" href="..&#x2F;..&#x2F;page.css">
   <link id="ddocResetStylesheet" rel="stylesheet" href="..&#x2F;..&#x2F;reset.css"><link href="../../comrak.css" rel="stylesheet" /><link href="../../prism.css" rel="stylesheet" /><script src="../../prism.js"></script><script src="..&#x2F;..&#x2F;script.js" defer></script>
@@ -32,7 +32,7 @@
     fill="currentColor"
   />
 </svg>
-</span><a href="..&#x2F;..&#x2F;.&#x2F;mod.ts&#x2F;index.html" class="contextLink">mod.ts</a><span class="text-black dark:text-white"><svg
+</span><a href="..&#x2F;..&#x2F;.&#x2F;classify.ts&#x2F;index.html" class="contextLink">classify.ts</a><span class="text-black dark:text-white"><svg
   width="16"
   height="16"
   viewBox="0 0 16 16"
@@ -48,7 +48,7 @@
 </svg>
 </span>
 
-    <ul><li>AddressOrCidr</li></ul></ul>
+    <ul><li>Address</li></ul></ul>
 </div>
 
     <div class="flex items-center gap-2">
@@ -112,14 +112,14 @@
     </div>
   </div>
 </nav>
-<div id="searchResults"></div><div id="content"><main class="symbolGroup" id="symbol_AddressOrCidr"><article>
+<div id="searchResults"></div><div id="content"><main class="symbolGroup" id="symbol_Address"><article>
       <div class="symbolTitle">
         <div>
           <div class="text-2xl leading-none break-all">
-            <span class="text-TypeAlias">type alias</span>&nbsp;<span class="font-bold">AddressOrCidr</span>
+            <span class="text-TypeAlias">type alias</span>&nbsp;<span class="font-bold">Address</span>
           </div></div><a
   class="sourceButton"
-  href="file:&#x2F;&#x2F;&#x2F;home&#x2F;runner&#x2F;work&#x2F;jsr-monorepo&#x2F;jsr-monorepo&#x2F;packages&#x2F;@hertzg&#x2F;ip&#x2F;cidr.ts"><svg
+  href="file:&#x2F;&#x2F;&#x2F;home&#x2F;runner&#x2F;work&#x2F;jsr-monorepo&#x2F;jsr-monorepo&#x2F;packages&#x2F;@hertzg&#x2F;ip&#x2F;ip.ts"><svg
   width="14"
   height="14"
   viewBox="0 0 14 14"
@@ -142,11 +142,11 @@
   />
 </svg>
 </a>
-</div><div><div class="space-y-7" id=""><div class="markdown"><p>An IP address or a CIDR block, of either IP version.</p>
-<p>This is a union of <a href="../.././mod.ts/~/Address.html">Address</a> and <a href="../.././mod.ts/~/Cidr.html">Cidr</a> — everything the
-universal <code>parse</code> and <code>stringify</code> from <code>@hertzg/ip</code> accept and return.
-Narrow with a <code>typeof</code> check to split the address half from the CIDR half,
-then use <a href="../.././mod.ts/~/isCidrv4.html">isCidrv4</a> and <a href="../.././mod.ts/~/isCidrv6.html">isCidrv6</a> on the latter.</p>
+</div><div><div class="space-y-7" id=""><div class="markdown"><p>A plain IP address of either IP version.</p>
+<p>This is a union of <code>number</code> (IPv4, 32-bit) and <code>bigint</code> (IPv6, 128-bit) —
+the JS primitive type is what carries the version. Useful for functions
+that operate on addresses regardless of IP version; narrow with a
+<code>typeof</code> check.</p>
 </div><section class="section"  id="definition"><div>
       <h2 class="anchorable mb-1"><a href="#definition" class="anchor" aria-label="Anchor" tabIndex="-1"><svg
   width="16"
@@ -170,14 +170,14 @@ then use <a href="../.././mod.ts/~/isCidrv4.html">isCidrv4</a> and <a href="../.
   </defs>
 </svg>
 </a>
-Definition</h2></div><div class="space-y-8"><div class=" docEntry" id="typealias_addressorcidr">
+Definition</h2></div><div class="space-y-8"><div class=" docEntry" id="typealias_address">
 
   <div class="docEntryHeader">
-    <div><code><span class="font-medium text-stone-500 dark:text-stone-200"><span><a href="../.././mod.ts/~/Address.html" class="link td-ref">Address</a><span class="td-op"> | </span><a href="../.././mod.ts/~/Cidr.html" class="link td-ref">Cidr</a></span></span>
+    <div><code><span class="font-medium text-stone-500 dark:text-stone-200"><span><span class="td-kw">number</span><span class="td-op"> | </span><span class="td-kw">bigint</span></span></span>
       </code>
     </div><a
   class="sourceButton"
-  href="file:&#x2F;&#x2F;&#x2F;home&#x2F;runner&#x2F;work&#x2F;jsr-monorepo&#x2F;jsr-monorepo&#x2F;packages&#x2F;@hertzg&#x2F;ip&#x2F;cidr.ts"><svg
+  href="file:&#x2F;&#x2F;&#x2F;home&#x2F;runner&#x2F;work&#x2F;jsr-monorepo&#x2F;jsr-monorepo&#x2F;packages&#x2F;@hertzg&#x2F;ip&#x2F;ip.ts"><svg
   width="14"
   height="14"
   viewBox="0 0 14 14"
@@ -207,8 +207,8 @@ Definition</h2></div><div class="space-y-8"><div class=" docEntry" id="typealias
     </article></main>
 <div class="toc">
     <div><div class="usageContent">
-    <h3>Usage</h3><div class="markdown"><pre class="highlight"><code class="language-typescript">import { type AddressOrCidr } from &quot;mod.ts&quot;;
-</code><button class="copyButton" data-copy="import { type AddressOrCidr } from &quot;mod.ts&quot;;
+    <h3>Usage</h3><div class="markdown"><pre class="highlight"><code class="language-typescript">import { type Address } from &quot;classify.ts&quot;;
+</code><button class="copyButton" data-copy="import { type Address } from &quot;classify.ts&quot;;
 "><svg
   class="copy"
   width="15"

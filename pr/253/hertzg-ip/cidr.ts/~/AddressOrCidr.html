@@ -144,9 +144,9 @@
 </a>
 </div><div><div class="space-y-7" id=""><div class="markdown"><p>An IP address or a CIDR block, of either IP version.</p>
 <p>This is a union of <a href="../.././cidr.ts/~/Address.html">Address</a> and <a href="../.././cidr.ts/~/Cidr.html">Cidr</a> — everything the
-universal <code>parse</code> and <code>stringify</code> from <code>@hertzg/ip</code> accept. Narrow with a
-<code>typeof</code> check to split the address half from the CIDR half, then use
-<a href="../.././cidr.ts/~/isCidrv4.html">isCidrv4</a> and <a href="../.././cidr.ts/~/isCidrv6.html">isCidrv6</a> on the latter.</p>
+universal <code>parse</code> and <code>stringify</code> from <code>@hertzg/ip</code> accept and return.
+Narrow with a <code>typeof</code> check to split the address half from the CIDR half,
+then use <a href="../.././cidr.ts/~/isCidrv4.html">isCidrv4</a> and <a href="../.././cidr.ts/~/isCidrv6.html">isCidrv6</a> on the latter.</p>
 </div><section class="section"  id="definition"><div>
       <h2 class="anchorable mb-1"><a href="#definition" class="anchor" aria-label="Anchor" tabIndex="-1"><svg
   width="16"
