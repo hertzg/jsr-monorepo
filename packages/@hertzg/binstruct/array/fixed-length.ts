@@ -105,12 +105,6 @@ export function arrayFL<TDecoded>(
 
       const len = lengthRefGet(ctx, lengthOrRef) ?? decoded.length;
 
-      if (!isValidLength(len)) {
-        throw new Error(
-          `Invalid length: ${len}. Must be a non-negative integer.`,
-        );
-      }
-
       if (len != decoded.length) {
         throw new Error(
           `Invalid length: ${len}. Must be equal to the decoded length.`,

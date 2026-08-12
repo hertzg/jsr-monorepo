@@ -103,6 +103,10 @@ import { type Coder, type Context, createContext } from "./core.ts";
  * at 4KB and grows by 2x when needed, up to a maximum of 400MB. This approach
  * minimizes memory waste while ensuring efficient encoding.
  *
+ * The returned Uint8Array is a zero-copy view over the allocated buffer, so it
+ * keeps the buffer's full capacity alive; call `.slice()` on the result if you
+ * hold onto it long-term and want an exact-size copy instead.
+ *
  * @template T - The type of data to encode
  * @param coder - The coder to use for encoding
  * @param data - The data to encode
@@ -258,7 +262,7 @@ export function encode<T>(
 export function decode<T>(
   coder: Coder<T>,
   buffer: Uint8Array,
-  context?: Context | undefined,
+  context?: Context,
 ): T {
   const ctx = context ?? createContext("decode");
   const [value] = coder.decode(buffer, ctx);

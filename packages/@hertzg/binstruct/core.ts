@@ -69,8 +69,8 @@ export type Coder<TDecoded> = {
 /**
  * Type guard to check if a value is a Coder.
  *
- * This function verifies that a value implements the Coder interface by checking
- * for the presence of encode and decode methods and the kCoderKind symbol.
+ * This function verifies that a value is a Coder by checking for the
+ * kCoderKind brand symbol that every coder factory stamps on its coders.
  *
  * @param value - The value to check
  * @returns True if the value is a Coder, false otherwise
@@ -97,13 +97,5 @@ export type Coder<TDecoded> = {
  * ```
  */
 export function isCoder<TDecoded>(value: unknown): value is Coder<TDecoded> {
-  return (
-    typeof value === "object" &&
-    value !== null &&
-    "encode" in value &&
-    "decode" in value &&
-    typeof value.encode === "function" &&
-    typeof value.decode === "function" &&
-    kCoderKind in value
-  );
+  return typeof value === "object" && value !== null && kCoderKind in value;
 }
