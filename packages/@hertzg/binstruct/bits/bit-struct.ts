@@ -9,7 +9,7 @@
 
 import { type Coder, createContext, kCoderKind } from "../core.ts";
 import { refSetValue } from "../ref/ref.ts";
-import { BitDataView } from "./view.ts";
+import { getBits, setBits } from "./view.ts";
 
 const kKindBitStruct = Symbol("bitStruct");
 
@@ -147,6 +147,7 @@ export function bitStruct<T extends BitSchema>(
     bitCount: number;
     byteOffset: number;
     bitOffset: number;
+    maxValue: number;
   }[] = [];
   let totalBits = 0;
   for (const [key, bitCount] of fields) {
@@ -164,6 +165,7 @@ export function bitStruct<T extends BitSchema>(
       bitCount,
       byteOffset: totalBits >>> 3,
       bitOffset: totalBits & 7,
+      maxValue: bitCount === 32 ? 0xFFFFFFFF : (1 << bitCount) - 1,
     });
     totalBits += bitCount;
   }
@@ -189,14 +191,12 @@ export function bitStruct<T extends BitSchema>(
     [kCoderKind]: kKindBitStruct,
     encode: (decoded, target, context) => {
       const ctx = context ?? createContext("encode");
-      const view = new BitDataView(target);
 
       // Process fields in declaration order
-      for (const { key, bitCount, byteOffset, bitOffset } of layout) {
+      for (const { key, bitCount, byteOffset, bitOffset, maxValue } of layout) {
         const value = decoded[key];
 
         // Validate value fits in bitCount bits
-        const maxValue = bitCount === 32 ? 0xFFFFFFFF : (1 << bitCount) - 1;
         if (value < 0 || value > maxValue) {
           throw new Error(
             `Value ${value} for field "${
@@ -205,7 +205,7 @@ export function bitStruct<T extends BitSchema>(
           );
         }
 
-        view.setBits(byteOffset, bitOffset, value, bitCount);
+        setBits(target, byteOffset, bitOffset, value, bitCount);
       }
 
       // Store entire struct result in context for refs
@@ -223,12 +223,11 @@ export function bitStruct<T extends BitSchema>(
         );
       }
 
-      const view = new BitDataView(encoded);
       const result = {} as BitStructDecoded<T>;
 
       // Process fields in declaration order
       for (const { key, bitCount, byteOffset, bitOffset } of layout) {
-        result[key] = view.getBits(byteOffset, bitOffset, bitCount);
+        result[key] = getBits(encoded, byteOffset, bitOffset, bitCount);
       }
 
       // Store entire struct result in context for refs

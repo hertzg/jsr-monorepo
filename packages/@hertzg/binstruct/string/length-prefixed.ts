@@ -47,13 +47,16 @@ export const kKindStringLP = Symbol("stringLP");
  */
 
 export function stringLP(lengthType: Coder<number>): Coder<string> {
+  const encoder = new TextEncoder();
+  const decoder = new TextDecoder();
+
   let self: Coder<string>;
   return self = {
     [kCoderKind]: kKindStringLP,
     encode: (decoded, target, context) => {
       const ctx = context ?? createContext("encode");
       let cursor = 0;
-      const stringBytes = new TextEncoder().encode(decoded);
+      const stringBytes = encoder.encode(decoded);
 
       refSetValue(ctx, self, decoded);
 
@@ -76,7 +79,7 @@ export function stringLP(lengthType: Coder<number>): Coder<string> {
       cursor += bytesRead;
 
       const stringBytes = encoded.subarray(cursor, cursor + length);
-      const decoded = new TextDecoder().decode(stringBytes);
+      const decoded = decoder.decode(stringBytes);
       refSetValue(ctx, self, decoded);
       cursor += length;
 

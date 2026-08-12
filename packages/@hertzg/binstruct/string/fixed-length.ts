@@ -1,4 +1,9 @@
-import { type Coder, createContext, kCoderKind } from "../core.ts";
+import {
+  type Coder,
+  type Context,
+  createContext,
+  kCoderKind,
+} from "../core.ts";
 import { isValidLength, type LengthOrRef, lengthRefGet } from "../length.ts";
 import { refSetValue } from "../ref/ref.ts";
 
@@ -96,44 +101,42 @@ export function stringFL(
     ignoreBOM: true,
     ...decoderOptions,
   };
+  const encoder = new TextEncoder();
+  const decoder = new TextDecoder(decoderEncoding, decoderInit);
+
+  const resolveLength = (ctx: Context, fallback: number): number => {
+    const len = byteLength == null
+      ? fallback
+      : lengthRefGet(ctx, byteLength) ?? fallback;
+
+    if (!isValidLength(len)) {
+      throw new Error(
+        `Invalid length: ${len}. Must be a non-negative integer.`,
+      );
+    }
+
+    return len;
+  };
 
   let self: Coder<string>;
   return self = {
     [kCoderKind]: kKindStringFL,
     encode: (decoded, target, context) => {
       const ctx = context ?? createContext("encode");
-
-      const len =
-        (byteLength == null ? undefined : lengthRefGet(ctx, byteLength)) ??
-          decoded.length;
-
-      if (!isValidLength(len)) {
-        throw new Error(
-          `Invalid length: ${len}. Must be a non-negative integer.`,
-        );
-      }
+      const len = resolveLength(ctx, decoded.length);
 
       refSetValue(ctx, self, decoded);
 
       const truncated = target.subarray(0, len);
-      const encoded = new TextEncoder().encodeInto(decoded, truncated);
+      const encoded = encoder.encodeInto(decoded, truncated);
       return encoded.written;
     },
     decode: (encoded, context) => {
       const ctx = context ?? createContext("decode");
-      const len =
-        (byteLength == null ? undefined : lengthRefGet(ctx, byteLength)) ??
-          encoded.length;
-
-      if (!isValidLength(len)) {
-        throw new Error(
-          `Invalid length: ${len}. Must be a non-negative integer.`,
-        );
-      }
+      const len = resolveLength(ctx, encoded.length);
 
       const stringBytes = encoded.subarray(0, len);
-      const decoded = new TextDecoder(decoderEncoding, decoderInit)
-        .decode(stringBytes);
+      const decoded = decoder.decode(stringBytes);
 
       refSetValue(ctx, self, decoded);
 

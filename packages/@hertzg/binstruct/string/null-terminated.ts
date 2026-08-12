@@ -48,16 +48,18 @@ export const kKindStringNT = Symbol("stringNT");
  */
 
 export function stringNT(): Coder<string> {
+  const encoder = new TextEncoder();
+  const decoder = new TextDecoder();
+
   let self: Coder<string>;
   return self = {
     [kCoderKind]: kKindStringNT,
     encode: (decoded, target, context) => {
       const ctx = context ?? createContext("encode");
       refSetValue(ctx, self, decoded);
-      const stringBytes = new TextEncoder().encode(decoded);
-      target.set(stringBytes, 0);
-      target[stringBytes.length] = 0; // null terminator
-      return stringBytes.length + 1;
+      const { written } = encoder.encodeInto(decoded, target);
+      target[written] = 0; // null terminator
+      return written + 1;
     },
     decode: (encoded, context) => {
       const ctx = context ?? createContext("decode");
@@ -68,7 +70,7 @@ export function stringNT(): Coder<string> {
       }
 
       const stringBytes = encoded.subarray(0, cursor);
-      const decoded = new TextDecoder().decode(stringBytes);
+      const decoded = decoder.decode(stringBytes);
       refSetValue(ctx, self, decoded);
       return [decoded, cursor + 1];
     },
