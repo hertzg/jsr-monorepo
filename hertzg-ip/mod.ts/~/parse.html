@@ -165,11 +165,11 @@
   </defs>
 </svg>
 </a>
-<span class="font-bold">parse</span><span class="font-medium">(<span><span>input<span>: <span class="td-kw">string</span></span></span></span>)<span>: <span><span class="td-kw">number</span><span class="td-op"> | </span><span class="td-kw">bigint</span><span class="td-op"> | </span><a href="../.././mod.ts/~/Cidrv4.html" class="link td-ref">Cidrv4</a><span class="td-op"> | </span><a href="../.././mod.ts/~/Cidrv6.html" class="link td-ref">Cidrv6</a></span></span> </span>
+<span class="font-bold">parse</span><span class="font-medium">(<span><span>notation<span>: <span class="td-kw">string</span></span></span></span>)<span>: <a href="../.././mod.ts/~/AddressOrCidr.html" class="link td-ref">AddressOrCidr</a></span> </span>
       </code><div class="space-y-7" id=""><div class="markdown"><p>Parses an IP address or CIDR notation string.</p>
-<p>Detects CIDR notation by checking for <code>/</code> in the input. If present,
-delegates to <a href="../.././mod.ts/~/parseCidr.html">parseCidr</a>; otherwise delegates to <a href="../.././mod.ts/~/parseIp.html">parseIp</a>.
-The IP version (IPv4 vs IPv6) is auto-detected within each delegate.</p>
+<p>Detects CIDR notation by checking for <code>/</code>. If present, delegates to
+<a href="../.././mod.ts/~/parseCidr.html">parseCidr</a>; otherwise delegates to <a href="../.././mod.ts/~/parseIp.html">parseIp</a>. The IP version
+(IPv4 vs IPv6) is auto-detected within each delegate.</p>
 </div><section class="section"  id="examples"><div>
       <h2 class="anchorable mb-1"><a href="#examples" class="anchor" aria-label="Anchor" tabIndex="-1"><svg
   width="16"
@@ -365,10 +365,10 @@ assertEquals(mapped, { address: 3232235776, prefixLength: 24 });
   </defs>
 </svg>
 </a>
-Parameters</h2></div><div class="space-y-8"><div class="anchorable docEntry" id="function_parse_0_parameter_input">
+Parameters</h2></div><div class="space-y-8"><div class="anchorable docEntry" id="function_parse_0_parameter_notation">
 
   <div class="docEntryHeader">
-    <div><code><a href="#function_parse_0_parameter_input" class="anchor" aria-label="Anchor" tabIndex="-1"><svg
+    <div><code><a href="#function_parse_0_parameter_notation" class="anchor" aria-label="Anchor" tabIndex="-1"><svg
   width="16"
   height="16"
   viewBox="0 0 14 14"
@@ -390,7 +390,7 @@ Parameters</h2></div><div class="space-y-8"><div class="anchorable docEntry" id=
   </defs>
 </svg>
 </a>
-<span class="font-bold font-lg">input</span><span class="font-medium text-stone-500 dark:text-stone-200"><span>: <span class="td-kw">string</span></span></span>
+<span class="font-bold font-lg">notation</span><span class="font-medium text-stone-500 dark:text-stone-200"><span>: <span class="td-kw">string</span></span></span>
       </code>
     </div><a
   class="sourceButton"
@@ -417,7 +417,7 @@ Parameters</h2></div><div class="space-y-8"><div class="anchorable docEntry" id=
   />
 </svg>
 </a>
-</div><div class="max-w-[75ch]"><div class="markdown"><p>The IP address or CIDR notation string</p>
+</div><div class="max-w-[75ch]"><div class="markdown"><p>The address or CIDR notation string</p>
 </div></div></div>
 </div></section>
 <section class="section"  id="return-type"><div>
@@ -446,7 +446,7 @@ Parameters</h2></div><div class="space-y-8"><div class="anchorable docEntry" id=
 Return Type</h2></div><div class="space-y-8"><div class=" docEntry" id="function_parse_0_return">
 
   <div class="docEntryHeader">
-    <div><code><span class="font-medium text-stone-500 dark:text-stone-200"><span><span class="td-kw">number</span><span class="td-op"> | </span><span class="td-kw">bigint</span><span class="td-op"> | </span><a href="../.././mod.ts/~/Cidrv4.html" class="link td-ref">Cidrv4</a><span class="td-op"> | </span><a href="../.././mod.ts/~/Cidrv6.html" class="link td-ref">Cidrv6</a></span></span>
+    <div><code><span class="font-medium text-stone-500 dark:text-stone-200"><a href="../.././mod.ts/~/AddressOrCidr.html" class="link td-ref">AddressOrCidr</a></span>
       </code>
     </div><a
   class="sourceButton"
@@ -473,8 +473,9 @@ Return Type</h2></div><div class="space-y-8"><div class=" docEntry" id="function
   />
 </svg>
 </a>
-</div><div class="max-w-[75ch]"><div class="markdown"><p>The parsed value — <code>number</code> (IPv4), <code>bigint</code> (IPv6),
-<a href="../.././mod.ts/~/Cidrv4.html">Cidrv4</a> (IPv4 CIDR), or <a href="../.././mod.ts/~/Cidrv6.html">Cidrv6</a> (IPv6 CIDR)</p>
+</div><div class="max-w-[75ch]"><div class="markdown"><p>The parsed <a href="../.././mod.ts/~/AddressOrCidr.html">AddressOrCidr</a> — <code>number</code> (IPv4),
+<code>bigint</code> (IPv6), <a href="../.././mod.ts/~/Cidrv4.html">Cidrv4</a> (IPv4 CIDR), or <a href="../.././mod.ts/~/Cidrv6.html">Cidrv6</a>
+(IPv6 CIDR)</p>
 </div></div></div>
 </div></section>
 <section class="section"  id="throws"><div>
@@ -605,7 +606,7 @@ Throws</h2></div><div class="space-y-8"><div class=" docEntry" id="function_pars
 </svg>
 </button><code></code></pre>
 </div></div><nav class="documentNavigation">
-          <h3>Document Navigation</h3><ul><li><a href="#examples" title="Examples">Examples</a></li><li><ul><li><a href="#example_0" title="Parse IP addresses">Parse IP addresses</a></li><li><a href="#example_1" title="Parse CIDR blocks">Parse CIDR blocks</a></li></ul></li><li><a href="#parameters" title="Parameters">Parameters</a></li><li><ul><li><a href="#function_parse_0_parameter_input" title="input">input</a></li></ul></li><li><a href="#return-type" title="Return Type">Return Type</a></li><li><a href="#throws" title="Throws">Throws</a></li></ul></nav></div>
+          <h3>Document Navigation</h3><ul><li><a href="#examples" title="Examples">Examples</a></li><li><ul><li><a href="#example_0" title="Parse IP addresses">Parse IP addresses</a></li><li><a href="#example_1" title="Parse CIDR blocks">Parse CIDR blocks</a></li></ul></li><li><a href="#parameters" title="Parameters">Parameters</a></li><li><ul><li><a href="#function_parse_0_parameter_notation" title="notation">notation</a></li></ul></li><li><a href="#return-type" title="Return Type">Return Type</a></li><li><a href="#throws" title="Throws">Throws</a></li></ul></nav></div>
   </div></div>
 </div>
 </div>
