@@ -25,7 +25,10 @@ Deno.test("bytes - variable length", () => {
 
   // For variable length, should read/write the entire buffer. `decoded` is the
   // input view itself, so assert on the written bytes rather than on identity.
-  assertEquals(decoded.subarray(0, data.length), new Uint8Array([1, 2, 3, 4, 5]));
+  assertEquals(
+    decoded.subarray(0, data.length),
+    new Uint8Array([1, 2, 3, 4, 5]),
+  );
   assertEquals(written, data.length);
   assertEquals(read, buffer.length);
 });

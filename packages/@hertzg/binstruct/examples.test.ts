@@ -290,86 +290,89 @@ Deno.test("Comprehensive examples showcasing all library functionality", async (
   });
 
   // Example 8: Protocol-like structure with TLV and complex references
-  await t.step("Protocol-like structure with TLV and complex references", () => {
-    const tlvLengthCoder = u16be();
-    const tlvCoder = struct({
-      type: u16be(),
-      length: tlvLengthCoder,
-      value: bytes(ref(tlvLengthCoder)),
-    });
+  await t.step(
+    "Protocol-like structure with TLV and complex references",
+    () => {
+      const tlvLengthCoder = u16be();
+      const tlvCoder = struct({
+        type: u16be(),
+        length: tlvLengthCoder,
+        value: bytes(ref(tlvLengthCoder)),
+      });
 
-    const helloReplyCoder = struct({
-      version: u8be(),
-      opcode: u8be(),
-      smac: array(u8be(), 6),
-      dmac: array(u8be(), 6),
-      sequence: u16be(),
-      errCode: s32be(),
-      length: u16be(),
-      offset: u16be(),
-      flag: u16be(),
-      tokenId: u16be(),
-      reserved: u32be(),
-      tlvs: array(tlvCoder, u8be()),
-    });
+      const helloReplyCoder = struct({
+        version: u8be(),
+        opcode: u8be(),
+        smac: array(u8be(), 6),
+        dmac: array(u8be(), 6),
+        sequence: u16be(),
+        errCode: s32be(),
+        length: u16be(),
+        offset: u16be(),
+        flag: u16be(),
+        tokenId: u16be(),
+        reserved: u32be(),
+        tlvs: array(tlvCoder, u8be()),
+      });
 
-    const testData = {
-      version: 1,
-      opcode: 2,
-      smac: [0x12, 0x34, 0x56, 0x78, 0x9A, 0xBC],
-      dmac: [0x00, 0x11, 0x22, 0x33, 0x44, 0x55],
-      sequence: 0x0216,
-      errCode: 0,
-      length: 0x00B5,
-      offset: 0,
-      flag: 0,
-      tokenId: 0,
-      reserved: 0,
-      tlvs: [
-        {
-          type: 1,
-          length: 11,
-          value: new Uint8Array([
-            0x4E,
-            0x58,
-            0x2D,
-            0x44,
-            0x45,
-            0x56,
-            0x31,
-            0x32,
-            0x33,
-            0x34,
-            0x35,
-          ]),
-        },
-        {
-          type: 2,
-          length: 7,
-          value: new Uint8Array([0x54, 0x45, 0x53, 0x54, 0x2D, 0x44, 0x56]),
-        },
-        {
-          type: 3,
-          length: 6,
-          value: new Uint8Array([0x12, 0x34, 0x56, 0x78, 0x9A, 0xBC]),
-        },
-      ],
-    };
+      const testData = {
+        version: 1,
+        opcode: 2,
+        smac: [0x12, 0x34, 0x56, 0x78, 0x9A, 0xBC],
+        dmac: [0x00, 0x11, 0x22, 0x33, 0x44, 0x55],
+        sequence: 0x0216,
+        errCode: 0,
+        length: 0x00B5,
+        offset: 0,
+        flag: 0,
+        tokenId: 0,
+        reserved: 0,
+        tlvs: [
+          {
+            type: 1,
+            length: 11,
+            value: new Uint8Array([
+              0x4E,
+              0x58,
+              0x2D,
+              0x44,
+              0x45,
+              0x56,
+              0x31,
+              0x32,
+              0x33,
+              0x34,
+              0x35,
+            ]),
+          },
+          {
+            type: 2,
+            length: 7,
+            value: new Uint8Array([0x54, 0x45, 0x53, 0x54, 0x2D, 0x44, 0x56]),
+          },
+          {
+            type: 3,
+            length: 6,
+            value: new Uint8Array([0x12, 0x34, 0x56, 0x78, 0x9A, 0xBC]),
+          },
+        ],
+      };
 
-    const buffer = new Uint8Array(1024);
-    const bytesWritten = helloReplyCoder.encode(testData, buffer);
-    const [decoded, bytesRead] = helloReplyCoder.decode(buffer);
+      const buffer = new Uint8Array(1024);
+      const bytesWritten = helloReplyCoder.encode(testData, buffer);
+      const [decoded, bytesRead] = helloReplyCoder.decode(buffer);
 
-    // Verify encoding/decoding integrity
-    assertEquals(
-      bytesWritten,
-      bytesRead,
-      "Bytes written should equal bytes read",
-    );
-    assertEquals(
-      decoded,
-      testData,
-      "Complete structure should round-trip correctly",
-    );
-  });
+      // Verify encoding/decoding integrity
+      assertEquals(
+        bytesWritten,
+        bytesRead,
+        "Bytes written should equal bytes read",
+      );
+      assertEquals(
+        decoded,
+        testData,
+        "Complete structure should round-trip correctly",
+      );
+    },
+  );
 });

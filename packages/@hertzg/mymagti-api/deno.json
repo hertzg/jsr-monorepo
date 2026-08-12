@@ -4,5 +4,11 @@
   "exports": {
     ".": "./mod.ts",
     "./oauth": "./oauth/oauth.ts"
+  },
+  "publish": {
+    "exclude": [
+      "**/*.test.ts",
+      "**/*.md"
+    ]
   }
 }

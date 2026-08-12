@@ -147,7 +147,10 @@ Deno.test("stringifyCidrv6", async (t) => {
 
   await t.step("various CIDRs", () => {
     assertEquals(stringifyCidrv6(parseCidrv6("fd00::/8")), "fd00::/8");
-    assertEquals(stringifyCidrv6(parseCidrv6("2001:db8::/64")), "2001:db8::/64");
+    assertEquals(
+      stringifyCidrv6(parseCidrv6("2001:db8::/64")),
+      "2001:db8::/64",
+    );
     assertEquals(
       stringifyCidrv6(parseCidrv6("2001:db8::1/128")),
       "2001:db8::1/128",
@@ -195,7 +198,10 @@ Deno.test("cidrv6Contains", async (t) => {
     assertEquals(cidrv6Contains(cidr, parseIpv6("::")), true);
     assertEquals(cidrv6Contains(cidr, parseIpv6("2001:db8::1")), true);
     assertEquals(
-      cidrv6Contains(cidr, parseIpv6("ffff:ffff:ffff:ffff:ffff:ffff:ffff:ffff")),
+      cidrv6Contains(
+        cidr,
+        parseIpv6("ffff:ffff:ffff:ffff:ffff:ffff:ffff:ffff"),
+      ),
       true,
     );
   });
@@ -611,13 +617,19 @@ Deno.test("cidrv6ContainsCidr", async (t) => {
 Deno.test("cidrv6Overlaps", async (t) => {
   await t.step("supernet and subnet overlap", () => {
     assert(
-      cidrv6Overlaps(parseCidrv6("2001:db8::/32"), parseCidrv6("2001:db8:1::/48")),
+      cidrv6Overlaps(
+        parseCidrv6("2001:db8::/32"),
+        parseCidrv6("2001:db8:1::/48"),
+      ),
     );
   });
 
   await t.step("symmetric", () => {
     assert(
-      cidrv6Overlaps(parseCidrv6("2001:db8:1::/48"), parseCidrv6("2001:db8::/32")),
+      cidrv6Overlaps(
+        parseCidrv6("2001:db8:1::/48"),
+        parseCidrv6("2001:db8::/32"),
+      ),
     );
   });
 
@@ -687,7 +699,10 @@ Deno.test("isValidCidrv6", async (t) => {
 Deno.test("cidrv6Intersect", async (t) => {
   await t.step("no overlap returns null", () => {
     assertEquals(
-      cidrv6Intersect(parseCidrv6("2001:db8::/32"), parseCidrv6("2001:db9::/32")),
+      cidrv6Intersect(
+        parseCidrv6("2001:db8::/32"),
+        parseCidrv6("2001:db9::/32"),
+      ),
       null,
     );
   });

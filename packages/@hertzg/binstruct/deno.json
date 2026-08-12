@@ -15,5 +15,12 @@
     "./lazy": "./lazy/lazy.ts",
     "./helpers": "./helpers.ts"
   },
-  "types": "./mod.ts"
+  "types": "./mod.ts",
+  "publish": {
+    "exclude": [
+      "**/*.test.ts",
+      "**/*.md",
+      "adr"
+    ]
+  }
 }

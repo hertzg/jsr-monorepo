@@ -103,9 +103,9 @@ export function stringFL(
     encode: (decoded, target, context) => {
       const ctx = context ?? createContext("encode");
 
-      const len = (byteLength == null
-        ? undefined
-        : lengthRefGet(ctx, byteLength)) ?? decoded.length;
+      const len =
+        (byteLength == null ? undefined : lengthRefGet(ctx, byteLength)) ??
+          decoded.length;
 
       if (!isValidLength(len)) {
         throw new Error(
@@ -121,9 +121,9 @@ export function stringFL(
     },
     decode: (encoded, context) => {
       const ctx = context ?? createContext("decode");
-      const len = (byteLength == null
-        ? undefined
-        : lengthRefGet(ctx, byteLength)) ?? encoded.length;
+      const len =
+        (byteLength == null ? undefined : lengthRefGet(ctx, byteLength)) ??
+          encoded.length;
 
       if (!isValidLength(len)) {
         throw new Error(

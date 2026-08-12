@@ -68,4 +68,6 @@ export function parseCurrency({ attributes }: XmlElement): Currency {
  * @returns The self-closing XML tag string.
  */
 export const serializeCurrency = (currency: Currency): string =>
-  `<cur key="${currency.key}" flags="${currency.flags}" iso="${currency.isoCode}" name="${currency.name}" symb="${currency.symbol}" syprf="${currency.symbolIsPrefixed}" dchar="${currency.decimalCharacter}" gchar="${currency.groupingCharacter}" frac="${currency.fractionDigits}" rate="${dtostr(currency.exchangeRate)}" mdate="${currency.lastUpdatedDate}"/>`;
+  `<cur key="${currency.key}" flags="${currency.flags}" iso="${currency.isoCode}" name="${currency.name}" symb="${currency.symbol}" syprf="${currency.symbolIsPrefixed}" dchar="${currency.decimalCharacter}" gchar="${currency.groupingCharacter}" frac="${currency.fractionDigits}" rate="${
+    dtostr(currency.exchangeRate)
+  }" mdate="${currency.lastUpdatedDate}"/>`;

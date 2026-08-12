@@ -2,8 +2,8 @@ import { assertEquals } from "@std/assert";
 import {
   bitmapFileHeader,
   bitmapInfoHeader,
-  type BmpFile,
   bmp,
+  type BmpFile,
   pixelDataSize,
   rowStride,
 } from "@binstruct/bmp";

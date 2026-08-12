@@ -250,7 +250,9 @@ Deno.test("decodeCommand surfaces the router error code", () => {
 });
 
 Deno.test("decodeCommand reads the plain-text reply of a cgi operation", () => {
-  for (const body of ["$.ret=0", "$.ret=0;", "$.ret=0;\n", "\r\n$.ret=0;\r\n"]) {
+  for (
+    const body of ["$.ret=0", "$.ret=0;", "$.ret=0;\n", "\r\n$.ret=0;\r\n"]
+  ) {
     const decoded = gdprJson.decodeCommand(body, { payload: "", indices: [0] });
 
     assertEquals(decoded.error, null);

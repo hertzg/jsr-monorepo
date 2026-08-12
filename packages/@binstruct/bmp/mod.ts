@@ -80,10 +80,7 @@ import {
   ref,
   struct,
 } from "@hertzg/binstruct";
-import {
-  type BitmapFileHeader,
-  bitmapFileHeader,
-} from "./file_header.ts";
+import { type BitmapFileHeader, bitmapFileHeader } from "./file_header.ts";
 import {
   type BitmapInfoHeader,
   bitmapInfoHeader,

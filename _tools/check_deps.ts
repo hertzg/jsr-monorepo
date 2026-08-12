@@ -11,6 +11,7 @@
  * @module
  */
 
+import { parse as parseJsonc } from "@std/jsonc";
 import { join, toFileUrl } from "@std/path";
 import { getWorkspacePaths } from "./utils.ts";
 
@@ -80,9 +81,9 @@ async function getDepsForPackage(
   rootPath: string,
   workspacePath: string,
 ): Promise<DepsSnapshot> {
-  const pkgJsonUrl = toFileUrl(join(rootPath, workspacePath, "deno.json"));
-  const pkgJson: PackageJson =
-    (await import(pkgJsonUrl.href, { with: { type: "json" } })).default;
+  const pkgJson = parseJsonc(
+    await Deno.readTextFile(join(rootPath, workspacePath, "deno.json")),
+  ) as PackageJson;
 
   const exports = typeof pkgJson.exports === "string"
     ? { ".": pkgJson.exports }
@@ -97,34 +98,43 @@ async function getDepsForPackage(
     deps: {},
   };
 
-  for (const [mod, path] of Object.entries(exports)) {
-    const entrypointPath = join(fullWorkspacePath, path);
+  // Each entrypoint spawns its own `deno info`, and they do not depend on each
+  // other. Promise.all preserves input order, so the snapshot keys stay in
+  // `exports` order regardless of which subprocess finishes first.
+  const entries = await Promise.all(
+    Object.entries(exports).map(async ([mod, path]) => {
+      const entrypointPath = join(fullWorkspacePath, path);
 
-    const info = await getDenoInfo(entrypointPath);
-    const workspaceModules = info.modules.filter((m) =>
-      m.specifier.startsWith(workspacePathUrl.href)
-    );
+      const info = await getDenoInfo(entrypointPath);
+      const workspaceModules = info.modules.filter((m) =>
+        m.specifier.startsWith(workspacePathUrl.href)
+      );
 
-    const deps = workspaceModules
-      .filter((m) => m.specifier.startsWith(`file://${rootPath}`))
-      .flatMap((m) => m.dependencies ?? [])
-      .map((d) => ({
-        source: d.specifier,
-        resolved: d.code?.specifier ?? d.type?.specifier ?? d.specifier,
-      }))
-      .filter(({ source, resolved }) => {
-        if (source.startsWith(".")) return false;
-        if (resolved.startsWith(workspacePathUrl.href)) return false;
-        return true;
-      })
-      .map(({ source, resolved }) => {
-        if (resolved.startsWith("file://")) {
-          return source;
-        }
-        return resolved;
-      });
+      const deps = workspaceModules
+        .filter((m) => m.specifier.startsWith(`file://${rootPath}`))
+        .flatMap((m) => m.dependencies ?? [])
+        .map((d) => ({
+          source: d.specifier,
+          resolved: d.code?.specifier ?? d.type?.specifier ?? d.specifier,
+        }))
+        .filter(({ source, resolved }) => {
+          if (source.startsWith(".")) return false;
+          if (resolved.startsWith(workspacePathUrl.href)) return false;
+          return true;
+        })
+        .map(({ source, resolved }) => {
+          if (resolved.startsWith("file://")) {
+            return source;
+          }
+          return resolved;
+        });
 
-    depsSnapshot.deps[mod] = Array.from(new Set(deps)).sort();
+      return [mod, Array.from(new Set(deps)).sort()] as const;
+    }),
+  );
+
+  for (const [mod, deps] of entries) {
+    depsSnapshot.deps[mod] = deps;
   }
 
   return depsSnapshot;
@@ -137,9 +147,9 @@ let failed = false;
 let updated = 0;
 
 for (const workspacePath of await getWorkspacePaths()) {
-  const pkgJsonUrl = toFileUrl(join(rootPath, workspacePath, "deno.json"));
-  const pkgJson: PackageJson =
-    (await import(pkgJsonUrl.href, { with: { type: "json" } })).default;
+  const pkgJson = parseJsonc(
+    await Deno.readTextFile(join(rootPath, workspacePath, "deno.json")),
+  ) as PackageJson;
 
   const snapshotPath = join(rootPath, workspacePath, "_deps.snap");
   const currentSnapshot = await getDepsForPackage(rootPath, workspacePath);

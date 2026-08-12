@@ -6,5 +6,11 @@
   },
   "include": [
     "mod.ts"
-  ]
+  ],
+  "publish": {
+    "exclude": [
+      "**/*.test.ts",
+      "**/*.md"
+    ]
+  }
 }

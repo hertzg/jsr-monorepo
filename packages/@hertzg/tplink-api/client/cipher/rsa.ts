@@ -5,10 +5,7 @@
  * See: https://github.com/denoland/deno/issues/27295
  */
 
-import {
-  type MontgomeryParams,
-  modPowMontgomery,
-} from "./montgomery.ts";
+import { modPowMontgomery, type MontgomeryParams } from "./montgomery.ts";
 
 /**
  * Raw RSA encryption (no padding): c = m^e mod n

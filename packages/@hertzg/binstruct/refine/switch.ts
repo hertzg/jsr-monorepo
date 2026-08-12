@@ -368,7 +368,10 @@ export function refineSwitch<
       refSetValue(ctx, self, refined);
 
       // Select which refiner to use for encoding
-      const refiner = selectRefiner(selector.unrefine(refined, ctx), "unrefine");
+      const refiner = selectRefiner(
+        selector.unrefine(refined, ctx),
+        "unrefine",
+      );
 
       // Unrefine the value back to base type
       // deno-lint-ignore no-explicit-any

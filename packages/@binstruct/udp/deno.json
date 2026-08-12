@@ -4,5 +4,11 @@
   "exports": {
     ".": "./mod.ts"
   },
-  "types": "./mod.ts"
+  "types": "./mod.ts",
+  "publish": {
+    "exclude": [
+      "**/*.test.ts",
+      "**/*.md"
+    ]
+  }
 }

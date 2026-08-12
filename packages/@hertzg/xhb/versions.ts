@@ -30,4 +30,6 @@ export function parseVersions({ attributes }: XmlElement): Versions {
  * @returns The opening `<homebank v="..." d="...">` tag.
  */
 export const serializeVersions = (versions: Versions): string =>
-  `<homebank v="${versions.file}" d="${String(versions.data).padStart(6, "0")}">`;
+  `<homebank v="${versions.file}" d="${
+    String(versions.data).padStart(6, "0")
+  }">`;

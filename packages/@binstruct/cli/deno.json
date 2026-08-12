@@ -9,5 +9,12 @@
   "tasks": {
     "test": "deno test --allow-all",
     "lint": "deno lint"
+  },
+  "publish": {
+    "exclude": [
+      "**/*.test.ts",
+      "**/*.md",
+      "adr"
+    ]
   }
 }

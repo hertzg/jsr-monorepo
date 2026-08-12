@@ -12,8 +12,8 @@ import {
   isIpv6Multicast,
   isIpv6Orchidv2,
   isIpv6Teredo,
-  isIpv6Unspecified,
   isIpv6UniqueLocal,
+  isIpv6Unspecified,
 } from "./classifyv6.ts";
 
 Deno.test("isIpv6Loopback", async (t) => {
@@ -43,7 +43,9 @@ Deno.test("isIpv6LinkLocal", async (t) => {
   await t.step("matches fe80::/10", () => {
     assert(isIpv6LinkLocal(parseIpv6("fe80::")));
     assert(isIpv6LinkLocal(parseIpv6("fe80::1")));
-    assert(isIpv6LinkLocal(parseIpv6("febf:ffff:ffff:ffff:ffff:ffff:ffff:ffff")));
+    assert(
+      isIpv6LinkLocal(parseIpv6("febf:ffff:ffff:ffff:ffff:ffff:ffff:ffff")),
+    );
   });
 
   await t.step("rejects non-link-local", () => {
@@ -56,7 +58,9 @@ Deno.test("isIpv6Multicast", async (t) => {
   await t.step("matches ff00::/8", () => {
     assert(isIpv6Multicast(parseIpv6("ff00::")));
     assert(isIpv6Multicast(parseIpv6("ff02::1")));
-    assert(isIpv6Multicast(parseIpv6("ffff:ffff:ffff:ffff:ffff:ffff:ffff:ffff")));
+    assert(
+      isIpv6Multicast(parseIpv6("ffff:ffff:ffff:ffff:ffff:ffff:ffff:ffff")),
+    );
   });
 
   await t.step("rejects non-multicast", () => {
@@ -70,7 +74,9 @@ Deno.test("isIpv6UniqueLocal", async (t) => {
     assert(isIpv6UniqueLocal(parseIpv6("fc00::")));
     assert(isIpv6UniqueLocal(parseIpv6("fc00::1")));
     assert(isIpv6UniqueLocal(parseIpv6("fd00::1")));
-    assert(isIpv6UniqueLocal(parseIpv6("fdff:ffff:ffff:ffff:ffff:ffff:ffff:ffff")));
+    assert(
+      isIpv6UniqueLocal(parseIpv6("fdff:ffff:ffff:ffff:ffff:ffff:ffff:ffff")),
+    );
   });
 
   await t.step("rejects non-unique-local", () => {
@@ -84,7 +90,9 @@ Deno.test("isIpv6GlobalUnicast", async (t) => {
     assert(isIpv6GlobalUnicast(parseIpv6("2000::")));
     assert(isIpv6GlobalUnicast(parseIpv6("2001:db8::1")));
     assert(isIpv6GlobalUnicast(parseIpv6("2607:f8b0:4004:800::200e")));
-    assert(isIpv6GlobalUnicast(parseIpv6("3fff:ffff:ffff:ffff:ffff:ffff:ffff:ffff")));
+    assert(
+      isIpv6GlobalUnicast(parseIpv6("3fff:ffff:ffff:ffff:ffff:ffff:ffff:ffff")),
+    );
   });
 
   await t.step("rejects non-global-unicast", () => {
@@ -125,7 +133,9 @@ Deno.test("isIpv6Documentation", async (t) => {
   await t.step("matches 2001:db8::/32", () => {
     assert(isIpv6Documentation(parseIpv6("2001:db8::")));
     assert(isIpv6Documentation(parseIpv6("2001:db8::1")));
-    assert(isIpv6Documentation(parseIpv6("2001:db8:ffff:ffff:ffff:ffff:ffff:ffff")));
+    assert(
+      isIpv6Documentation(parseIpv6("2001:db8:ffff:ffff:ffff:ffff:ffff:ffff")),
+    );
   });
 
   await t.step("rejects non-documentation", () => {
@@ -186,7 +196,10 @@ Deno.test("classifyIpv6", async (t) => {
     assertEquals(classifyIpv6(parseIpv6("fe80::1")), "link-local");
     assertEquals(classifyIpv6(parseIpv6("ff02::1")), "multicast");
     assertEquals(classifyIpv6(parseIpv6("fd00::1")), "unique-local");
-    assertEquals(classifyIpv6(parseIpv6("2607:f8b0:4004:800::200e")), "global-unicast");
+    assertEquals(
+      classifyIpv6(parseIpv6("2607:f8b0:4004:800::200e")),
+      "global-unicast",
+    );
   });
 
   await t.step("returns unassigned for unknown ranges", () => {
