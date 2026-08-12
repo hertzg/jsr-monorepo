@@ -28,7 +28,7 @@ import { parseCidrv4 } from "./cidrv4.ts";
 /**
  * Checks if a string is a valid IPv4 address in dotted decimal notation.
  *
- * @param s The string to validate
+ * @param address The address string to validate
  * @returns `true` if the string is a valid IPv4 address
  *
  * @example Valid addresses
@@ -53,9 +53,9 @@ import { parseCidrv4 } from "./cidrv4.ts";
  * assertEquals(isValidIpv4("::1"), false);
  * ```
  */
-export function isValidIpv4(s: string): boolean {
+export function isValidIpv4(address: string): boolean {
   try {
-    parseIpv4(s);
+    parseIpv4(address);
     return true;
   } catch {
     return false;
@@ -65,7 +65,7 @@ export function isValidIpv4(s: string): boolean {
 /**
  * Checks if a string is valid IPv4 CIDR notation.
  *
- * @param s The string to validate
+ * @param cidr The CIDR string to validate
  * @returns `true` if the string is valid IPv4 CIDR notation
  *
  * @example Valid CIDR
@@ -90,9 +90,9 @@ export function isValidIpv4(s: string): boolean {
  * assertEquals(isValidCidrv4("2001:db8::/32"), false);
  * ```
  */
-export function isValidCidrv4(s: string): boolean {
+export function isValidCidrv4(cidr: string): boolean {
   try {
-    parseCidrv4(s);
+    parseCidrv4(cidr);
     return true;
   } catch {
     return false;

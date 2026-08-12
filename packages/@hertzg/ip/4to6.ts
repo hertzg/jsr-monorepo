@@ -65,7 +65,7 @@ const IPV4_MASK = 0xFFFF_FFFFn;
  * the 128-bit IPv4-mapped IPv6 address defined in
  * {@link https://www.rfc-editor.org/rfc/rfc4291#section-2.5.5.2 | RFC 4291 Section 2.5.5.2}.
  *
- * @param ip The IPv4 address as a 32-bit unsigned integer
+ * @param address The address as a 32-bit unsigned integer
  * @returns The IPv4-mapped IPv6 address as a 128-bit bigint
  *
  * @example
@@ -89,8 +89,8 @@ const IPV4_MASK = 0xFFFF_FFFFn;
  * );
  * ```
  */
-export function ipv4To64Mapped(ip: number): bigint {
-  return IPV4_MAPPED_PREFIX | BigInt(ip);
+export function ipv4To64Mapped(address: number): bigint {
+  return IPV4_MAPPED_PREFIX | BigInt(address);
 }
 
 /**
@@ -100,7 +100,7 @@ export function ipv4To64Mapped(ip: number): bigint {
  * the embedded 32-bit IPv4 address as defined in
  * {@link https://www.rfc-editor.org/rfc/rfc4291#section-2.5.5.2 | RFC 4291 Section 2.5.5.2}.
  *
- * @param ip The IPv6 address as a 128-bit bigint
+ * @param address The IPv4-mapped address as a 128-bit bigint
  * @returns The extracted IPv4 address as a 32-bit unsigned integer
  *
  * @example
@@ -124,8 +124,8 @@ export function ipv4To64Mapped(ip: number): bigint {
  * );
  * ```
  */
-export function ipv4From64Mapped(ip: bigint): number {
-  return Number(ip & IPV4_MASK);
+export function ipv4From64Mapped(address: bigint): number {
+  return Number(address & IPV4_MASK);
 }
 
 /** The number of prefix bits occupied by the IPv4-mapped prefix (`::ffff:0:0/96`). */

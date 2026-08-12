@@ -73,7 +73,7 @@ export type ClassificationIpv6 =
  *
  * Loopback: `::1`
  *
- * @param ip The IPv6 address as a 128-bit bigint
+ * @param address The address as a 128-bit bigint
  * @returns `true` if the address is the loopback address
  *
  * @example
@@ -87,8 +87,8 @@ export type ClassificationIpv6 =
  * assertEquals(isIpv6Loopback(parseIpv6("::2")), false);
  * ```
  */
-export function isIpv6Loopback(ip: bigint): boolean {
-  return cidrv6Contains(CIDR_LOOPBACK, ip);
+export function isIpv6Loopback(address: bigint): boolean {
+  return cidrv6Contains(CIDR_LOOPBACK, address);
 }
 
 /**
@@ -96,7 +96,7 @@ export function isIpv6Loopback(ip: bigint): boolean {
  *
  * Unspecified: `::`
  *
- * @param ip The IPv6 address as a 128-bit bigint
+ * @param address The address as a 128-bit bigint
  * @returns `true` if the address is the unspecified address
  *
  * @example
@@ -109,8 +109,8 @@ export function isIpv6Loopback(ip: bigint): boolean {
  * assertEquals(isIpv6Unspecified(parseIpv6("::1")), false);
  * ```
  */
-export function isIpv6Unspecified(ip: bigint): boolean {
-  return cidrv6Contains(CIDR_UNSPECIFIED, ip);
+export function isIpv6Unspecified(address: bigint): boolean {
+  return cidrv6Contains(CIDR_UNSPECIFIED, address);
 }
 
 /**
@@ -118,7 +118,7 @@ export function isIpv6Unspecified(ip: bigint): boolean {
  *
  * Link-local range: `fe80::/10` (fe80:: – febf:ffff:...:ffff)
  *
- * @param ip The IPv6 address as a 128-bit bigint
+ * @param address The address as a 128-bit bigint
  * @returns `true` if the address is link-local
  *
  * @example
@@ -132,8 +132,8 @@ export function isIpv6Unspecified(ip: bigint): boolean {
  * assertEquals(isIpv6LinkLocal(parseIpv6("fec0::1")), false);
  * ```
  */
-export function isIpv6LinkLocal(ip: bigint): boolean {
-  return cidrv6Contains(CIDR_LINK_LOCAL, ip);
+export function isIpv6LinkLocal(address: bigint): boolean {
+  return cidrv6Contains(CIDR_LINK_LOCAL, address);
 }
 
 /**
@@ -141,7 +141,7 @@ export function isIpv6LinkLocal(ip: bigint): boolean {
  *
  * Multicast range: `ff00::/8` (ff00:: – ffff:ffff:...:ffff)
  *
- * @param ip The IPv6 address as a 128-bit bigint
+ * @param address The address as a 128-bit bigint
  * @returns `true` if the address is multicast
  *
  * @example
@@ -155,8 +155,8 @@ export function isIpv6LinkLocal(ip: bigint): boolean {
  * assertEquals(isIpv6Multicast(parseIpv6("fe80::1")), false);
  * ```
  */
-export function isIpv6Multicast(ip: bigint): boolean {
-  return cidrv6Contains(CIDR_MULTICAST, ip);
+export function isIpv6Multicast(address: bigint): boolean {
+  return cidrv6Contains(CIDR_MULTICAST, address);
 }
 
 /**
@@ -166,7 +166,7 @@ export function isIpv6Multicast(ip: bigint): boolean {
  *
  * This is the IPv6 equivalent of IPv4 private addresses (RFC 1918).
  *
- * @param ip The IPv6 address as a 128-bit bigint
+ * @param address The address as a 128-bit bigint
  * @returns `true` if the address is unique local
  *
  * @example
@@ -180,8 +180,8 @@ export function isIpv6Multicast(ip: bigint): boolean {
  * assertEquals(isIpv6UniqueLocal(parseIpv6("fe00::1")), false);
  * ```
  */
-export function isIpv6UniqueLocal(ip: bigint): boolean {
-  return cidrv6Contains(CIDR_UNIQUE_LOCAL, ip);
+export function isIpv6UniqueLocal(address: bigint): boolean {
+  return cidrv6Contains(CIDR_UNIQUE_LOCAL, address);
 }
 
 /**
@@ -193,7 +193,7 @@ export function isIpv6UniqueLocal(ip: bigint): boolean {
  * Teredo (`2001::/32`), and benchmarking (`2001:2::/48`). Use the more
  * specific classifiers or {@link classifyIpv6} to distinguish them.
  *
- * @param ip The IPv6 address as a 128-bit bigint
+ * @param address The address as a 128-bit bigint
  * @returns `true` if the address is in the global unicast range
  *
  * @example
@@ -207,8 +207,8 @@ export function isIpv6UniqueLocal(ip: bigint): boolean {
  * assertEquals(isIpv6GlobalUnicast(parseIpv6("fe80::1")), false);
  * ```
  */
-export function isIpv6GlobalUnicast(ip: bigint): boolean {
-  return cidrv6Contains(CIDR_GLOBAL_UNICAST, ip);
+export function isIpv6GlobalUnicast(address: bigint): boolean {
+  return cidrv6Contains(CIDR_GLOBAL_UNICAST, address);
 }
 
 /**
@@ -216,7 +216,7 @@ export function isIpv6GlobalUnicast(ip: bigint): boolean {
  *
  * IPv4-mapped range: `::ffff:0:0/96` (::ffff:0.0.0.0 – ::ffff:255.255.255.255)
  *
- * @param ip The IPv6 address as a 128-bit bigint
+ * @param address The address as a 128-bit bigint
  * @returns `true` if the address is IPv4-mapped
  *
  * @example
@@ -230,8 +230,8 @@ export function isIpv6GlobalUnicast(ip: bigint): boolean {
  * assertEquals(isIpv6Ipv4Mapped(parseIpv6("::1")), false);
  * ```
  */
-export function isIpv6Ipv4Mapped(ip: bigint): boolean {
-  return cidrv6Contains(CIDR_IPV4_MAPPED, ip);
+export function isIpv6Ipv4Mapped(address: bigint): boolean {
+  return cidrv6Contains(CIDR_IPV4_MAPPED, address);
 }
 
 /**
@@ -241,7 +241,7 @@ export function isIpv6Ipv4Mapped(ip: bigint): boolean {
  *
  * Used by NAT64 for IPv4/IPv6 translation.
  *
- * @param ip The IPv6 address as a 128-bit bigint
+ * @param address The address as a 128-bit bigint
  * @returns `true` if the address is IPv4-translated
  *
  * @example
@@ -255,8 +255,8 @@ export function isIpv6Ipv4Mapped(ip: bigint): boolean {
  * assertEquals(isIpv6Ipv4Translated(parseIpv6("64:ff9a::1")), false);
  * ```
  */
-export function isIpv6Ipv4Translated(ip: bigint): boolean {
-  return cidrv6Contains(CIDR_IPV4_TRANSLATED, ip);
+export function isIpv6Ipv4Translated(address: bigint): boolean {
+  return cidrv6Contains(CIDR_IPV4_TRANSLATED, address);
 }
 
 /**
@@ -264,7 +264,7 @@ export function isIpv6Ipv4Translated(ip: bigint): boolean {
  *
  * Documentation range: `2001:db8::/32`
  *
- * @param ip The IPv6 address as a 128-bit bigint
+ * @param address The address as a 128-bit bigint
  * @returns `true` if the address is in the documentation range
  *
  * @example
@@ -278,8 +278,8 @@ export function isIpv6Ipv4Translated(ip: bigint): boolean {
  * assertEquals(isIpv6Documentation(parseIpv6("2001:db9::1")), false);
  * ```
  */
-export function isIpv6Documentation(ip: bigint): boolean {
-  return cidrv6Contains(CIDR_DOCUMENTATION, ip);
+export function isIpv6Documentation(address: bigint): boolean {
+  return cidrv6Contains(CIDR_DOCUMENTATION, address);
 }
 
 /**
@@ -291,7 +291,7 @@ export function isIpv6Documentation(ip: bigint): boolean {
  * (`2001:2::/48`), and ORCHIDv2 (`2001:20::/28`) ranges. Use
  * {@link classifyIpv6} for the most specific classification.
  *
- * @param ip The IPv6 address as a 128-bit bigint
+ * @param address The address as a 128-bit bigint
  * @returns `true` if the address is in the Teredo range
  *
  * @example
@@ -305,8 +305,8 @@ export function isIpv6Documentation(ip: bigint): boolean {
  * assertEquals(isIpv6Teredo(parseIpv6("2002::1")), false);
  * ```
  */
-export function isIpv6Teredo(ip: bigint): boolean {
-  return cidrv6Contains(CIDR_TEREDO, ip);
+export function isIpv6Teredo(address: bigint): boolean {
+  return cidrv6Contains(CIDR_TEREDO, address);
 }
 
 /**
@@ -314,7 +314,7 @@ export function isIpv6Teredo(ip: bigint): boolean {
  *
  * Benchmarking range: `2001:2::/48`
  *
- * @param ip The IPv6 address as a 128-bit bigint
+ * @param address The address as a 128-bit bigint
  * @returns `true` if the address is in the benchmarking range
  *
  * @example
@@ -327,8 +327,8 @@ export function isIpv6Teredo(ip: bigint): boolean {
  * assertEquals(isIpv6Benchmarking(parseIpv6("2001:3::1")), false);
  * ```
  */
-export function isIpv6Benchmarking(ip: bigint): boolean {
-  return cidrv6Contains(CIDR_BENCHMARKING, ip);
+export function isIpv6Benchmarking(address: bigint): boolean {
+  return cidrv6Contains(CIDR_BENCHMARKING, address);
 }
 
 /**
@@ -336,7 +336,7 @@ export function isIpv6Benchmarking(ip: bigint): boolean {
  *
  * ORCHIDv2 range: `2001:20::/28`
  *
- * @param ip The IPv6 address as a 128-bit bigint
+ * @param address The address as a 128-bit bigint
  * @returns `true` if the address is an ORCHIDv2 address
  *
  * @example
@@ -350,8 +350,8 @@ export function isIpv6Benchmarking(ip: bigint): boolean {
  * assertEquals(isIpv6Orchidv2(parseIpv6("2001:30::1")), false);
  * ```
  */
-export function isIpv6Orchidv2(ip: bigint): boolean {
-  return cidrv6Contains(CIDR_ORCHIDV2, ip);
+export function isIpv6Orchidv2(address: bigint): boolean {
+  return cidrv6Contains(CIDR_ORCHIDV2, address);
 }
 
 /**
@@ -361,7 +361,7 @@ export function isIpv6Orchidv2(ip: bigint): boolean {
  * For overlapping ranges (e.g., `2001:db8::/32` within `2001::/32` within
  * `2000::/3`), the most specific match is returned.
  *
- * @param ip The IPv6 address as a 128-bit bigint
+ * @param address The address as a 128-bit bigint
  * @returns The classification label
  *
  * @example
@@ -384,31 +384,31 @@ export function isIpv6Orchidv2(ip: bigint): boolean {
  * assertEquals(classifyIpv6(parseIpv6("2607:f8b0:4004:800::200e")), "global-unicast");
  * ```
  */
-export function classifyIpv6(ip: bigint): ClassificationIpv6 {
+export function classifyIpv6(address: bigint): ClassificationIpv6 {
   switch (true) {
-    case isIpv6Loopback(ip):
+    case isIpv6Loopback(address):
       return "loopback";
-    case isIpv6Unspecified(ip):
+    case isIpv6Unspecified(address):
       return "unspecified";
-    case isIpv6Ipv4Mapped(ip):
+    case isIpv6Ipv4Mapped(address):
       return "ipv4-mapped";
-    case isIpv6Ipv4Translated(ip):
+    case isIpv6Ipv4Translated(address):
       return "ipv4-translated";
-    case isIpv6Documentation(ip):
+    case isIpv6Documentation(address):
       return "documentation";
-    case isIpv6Benchmarking(ip):
+    case isIpv6Benchmarking(address):
       return "benchmarking";
-    case isIpv6Orchidv2(ip):
+    case isIpv6Orchidv2(address):
       return "orchidv2";
-    case isIpv6Teredo(ip):
+    case isIpv6Teredo(address):
       return "teredo";
-    case isIpv6LinkLocal(ip):
+    case isIpv6LinkLocal(address):
       return "link-local";
-    case isIpv6Multicast(ip):
+    case isIpv6Multicast(address):
       return "multicast";
-    case isIpv6UniqueLocal(ip):
+    case isIpv6UniqueLocal(address):
       return "unique-local";
-    case isIpv6GlobalUnicast(ip):
+    case isIpv6GlobalUnicast(address):
       return "global-unicast";
     default:
       return "unassigned";

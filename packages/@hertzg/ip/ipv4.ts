@@ -57,7 +57,7 @@
  * The function validates the format and range of each octet. Leading zeros
  * are not allowed (except for "0" itself).
  *
- * @param ip The IPv4 address string in dotted decimal notation
+ * @param address The address string in dotted decimal notation
  * @returns The IPv4 address as a 32-bit unsigned integer
  * @throws {TypeError} If the format is invalid (wrong number of octets, non-numeric, leading zeros)
  * @throws {RangeError} If any octet is out of range (not 0-255)
@@ -83,8 +83,8 @@
  * assertThrows(() => parseIpv4("192.168.01.1"), TypeError);
  * ```
  */
-export function parseIpv4(ip: string): number {
-  const parts = ip.split(".");
+export function parseIpv4(address: string): number {
+  const parts = address.split(".");
 
   if (parts.length !== 4) {
     throw new TypeError(
@@ -131,9 +131,9 @@ export function parseIpv4(ip: string): number {
  *
  * The number must represent a valid 32-bit unsigned integer (0 to 4294967295).
  *
- * @param value The IPv4 address as a 32-bit unsigned integer
+ * @param address The address as a 32-bit unsigned integer
  * @returns The IPv4 address string in dotted decimal notation
- * @throws {RangeError} If the value is negative or greater than 2^32-1
+ * @throws {RangeError} If the address is negative or greater than 2^32-1
  *
  * @example Basic stringifying
  * ```ts
@@ -155,17 +155,17 @@ export function parseIpv4(ip: string): number {
  * assertThrows(() => stringifyIpv4(4294967296), RangeError);
  * ```
  */
-export function stringifyIpv4(value: number): string {
-  if (value < 0 || value > 4294967295 || !Number.isInteger(value)) {
+export function stringifyIpv4(address: number): string {
+  if (address < 0 || address > 4294967295 || !Number.isInteger(address)) {
     throw new RangeError(
-      `IPv4 value out of range: ${value} (must be 0 to 4294967295)`,
+      `IPv4 value out of range: ${address} (must be 0 to 4294967295)`,
     );
   }
 
-  const octet0 = (value >>> 24) & 0xFF;
-  const octet1 = (value >>> 16) & 0xFF;
-  const octet2 = (value >>> 8) & 0xFF;
-  const octet3 = value & 0xFF;
+  const octet0 = (address >>> 24) & 0xFF;
+  const octet1 = (address >>> 16) & 0xFF;
+  const octet2 = (address >>> 8) & 0xFF;
+  const octet3 = address & 0xFF;
 
   return `${octet0}.${octet1}.${octet2}.${octet3}`;
 }

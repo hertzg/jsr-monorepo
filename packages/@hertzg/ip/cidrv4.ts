@@ -172,8 +172,8 @@ export function stringifyCidrv4(cidr: Cidrv4): string {
  * Checks if an IPv4 address is contained within a CIDR block.
  *
  * @param cidr The CIDR block to check against
- * @param ip The IPv4 address to check
- * @returns true if the IP is within the CIDR range, false otherwise
+ * @param address The address to check, as a 32-bit unsigned integer
+ * @returns true if the address is within the CIDR range, false otherwise
  *
  * @example Basic contains check
  * ```ts
@@ -211,10 +211,10 @@ export function stringifyCidrv4(cidr: Cidrv4): string {
  * }
  * ```
  */
-export function cidrv4Contains(cidr: Cidrv4, ip: number): boolean {
+export function cidrv4Contains(cidr: Cidrv4, address: number): boolean {
   const mask = cidrv4Mask(cidr.prefixLength);
   const network = (cidr.address & mask) >>> 0;
-  return ((ip & mask) >>> 0) === network;
+  return ((address & mask) >>> 0) === network;
 }
 
 /**

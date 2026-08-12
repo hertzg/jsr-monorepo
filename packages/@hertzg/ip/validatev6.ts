@@ -31,7 +31,7 @@ import { parseCidrv6 } from "./cidrv6.ts";
  * Accepts full form, compressed form with `::`, IPv4-mapped addresses
  * (`::ffff:192.168.1.1`), and addresses with zone IDs (`fe80::1%eth0`).
  *
- * @param s The string to validate
+ * @param address The address string to validate
  * @returns `true` if the string is a valid IPv6 address
  *
  * @example Valid addresses
@@ -57,9 +57,9 @@ import { parseCidrv6 } from "./cidrv6.ts";
  * assertEquals(isValidIpv6("gggg::1"), false);
  * ```
  */
-export function isValidIpv6(s: string): boolean {
+export function isValidIpv6(address: string): boolean {
   try {
-    parseIpv6(s);
+    parseIpv6(address);
     return true;
   } catch {
     return false;
@@ -69,7 +69,7 @@ export function isValidIpv6(s: string): boolean {
 /**
  * Checks if a string is valid IPv6 CIDR notation.
  *
- * @param s The string to validate
+ * @param cidr The CIDR string to validate
  * @returns `true` if the string is valid IPv6 CIDR notation
  *
  * @example Valid CIDR
@@ -93,9 +93,9 @@ export function isValidIpv6(s: string): boolean {
  * assertEquals(isValidCidrv6("192.168.1.0/24"), false);
  * ```
  */
-export function isValidCidrv6(s: string): boolean {
+export function isValidCidrv6(cidr: string): boolean {
   try {
-    parseCidrv6(s);
+    parseCidrv6(cidr);
     return true;
   } catch {
     return false;

@@ -36,7 +36,7 @@ import { isValidCidrv6 } from "./validatev6.ts";
  *
  * Does **not** accept CIDR notation — use {@link isValidCidr} for that.
  *
- * @param s The string to validate
+ * @param address The address string to validate
  * @returns `true` if the string is a valid IPv4 or IPv6 address
  *
  * @example Valid inputs
@@ -62,9 +62,9 @@ import { isValidCidrv6 } from "./validatev6.ts";
  * assertEquals(isValidIp("2001:db8::/32"), false);
  * ```
  */
-export function isValidIp(s: string): boolean {
+export function isValidIp(address: string): boolean {
   try {
-    parseIp(s);
+    parseIp(address);
     return true;
   } catch {
     return false;
@@ -74,7 +74,7 @@ export function isValidIp(s: string): boolean {
 /**
  * Checks if a string is valid IPv4 or IPv6 CIDR notation.
  *
- * @param s The string to validate
+ * @param cidr The CIDR string to validate
  * @returns `true` if the string is valid CIDR notation
  *
  * @example
@@ -88,6 +88,6 @@ export function isValidIp(s: string): boolean {
  * assertEquals(isValidCidr("garbage/24"), false);
  * ```
  */
-export function isValidCidr(s: string): boolean {
-  return isValidCidrv4(s) || isValidCidrv6(s);
+export function isValidCidr(cidr: string): boolean {
+  return isValidCidrv4(cidr) || isValidCidrv6(cidr);
 }
