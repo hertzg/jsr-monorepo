@@ -14,6 +14,7 @@
     "lint": {
       "dependencies": [
         "lint:deno",
+        "lint:fmt",
         "lint:import-map",
         "lint:labeler",
         "lint:readme",
@@ -31,6 +32,16 @@
     "cov:view": "deno task cov --html",
     "bench": "deno bench --allow-all",
     "bench:json": "deno bench --allow-all --json"
+  },
+  "fmt": {
+    "exclude": [
+      // Prose is hand-wrapped; the formatter reflows it and the result renders
+      // identically, so the churn buys nothing.
+      "**/*.md",
+      // Release Please regenerates this on every release, in its own style.
+      // Covered by the rule above, listed so the conflict stays visible.
+      "**/CHANGELOG.md"
+    ]
   },
   "publish": {
     // SAFETY NET ONLY. Every package declares its own `publish.exclude`, and
