@@ -156,6 +156,95 @@ Deno.test("pngFileChunks() - round-trip with empty chunks array", () => {
   assertEquals(decoded.chunks.length, 0);
 });
 
+Deno.test("pngFileChunks() - defaults to the same chunk coder as pngFile()", () => {
+  const pngData: PngFile<IhdrChunk | IendChunk> = {
+    signature: PNG_SIGNATURE_DECODED,
+    chunks: [
+      {
+        length: 13,
+        type: "IHDR",
+        data: {
+          width: 7,
+          height: 11,
+          bitDepth: 8,
+          colorType: 2,
+          compressionMethod: 0,
+          filterMethod: 0,
+          interlaceMethod: 0,
+        },
+        crc: 0x12345678,
+      },
+      {
+        length: 0,
+        type: "IEND",
+        crc: 0xAE426082,
+      },
+    ],
+  };
+
+  const defaultedBuffer = new Uint8Array(100);
+  const defaultedBytes = pngFileChunks().encode(pngData, defaultedBuffer);
+  const explicitBuffer = new Uint8Array(100);
+  const explicitBytes = pngFile().encode(pngData, explicitBuffer);
+
+  assertEquals(defaultedBytes, explicitBytes);
+  assertEquals(defaultedBuffer, explicitBuffer);
+});
+
+Deno.test("pngFileChunks() - zero-argument call round-trips refined chunks", () => {
+  const coder = pngFileChunks();
+  const pngData: PngFile<IhdrChunk | IendChunk> = {
+    signature: PNG_SIGNATURE_DECODED,
+    chunks: [
+      {
+        length: 13,
+        type: "IHDR",
+        data: {
+          width: 3,
+          height: 5,
+          bitDepth: 8,
+          colorType: 2,
+          compressionMethod: 0,
+          filterMethod: 0,
+          interlaceMethod: 0,
+        },
+        crc: 0x12345678,
+      },
+      {
+        length: 0,
+        type: "IEND",
+        crc: 0xAE426082,
+      },
+    ],
+  };
+
+  const buffer = new Uint8Array(100);
+  const bytesWritten = coder.encode(pngData, buffer);
+  const [decoded, bytesRead] = coder.decode(buffer.subarray(0, bytesWritten));
+
+  assertEquals(bytesRead, bytesWritten);
+  assertEquals(decoded.signature, pngData.signature);
+  assertEquals((decoded.chunks[0] as IhdrChunk).type, "IHDR");
+  assertEquals((decoded.chunks[0] as IhdrChunk).data.width, 3);
+  assertEquals((decoded.chunks[1] as IendChunk).type, "IEND");
+});
+
+Deno.test("pngFileChunks() - explicit chunk coder still leaves chunks unrefined", () => {
+  const coder = pngFileChunks(pngChunkUnknown());
+  // deno-fmt-ignore
+  const buffer = new Uint8Array([
+    ...PNG_SIGNATURE,
+    0, 0, 0, 0, // length: 0
+    73, 69, 78, 68, // type: "IEND"
+    0xAE, 0x42, 0x60, 0x82, // crc
+  ]);
+
+  const [decoded, bytesRead] = coder.decode(buffer);
+
+  assertEquals(bytesRead, 20);
+  assertEquals(decoded.chunks[0].type, new Uint8Array([73, 69, 78, 68]));
+});
+
 Deno.test("pngChunkRefined() - decodes IHDR chunk", () => {
   const coder = pngChunkRefined();
   // deno-fmt-ignore

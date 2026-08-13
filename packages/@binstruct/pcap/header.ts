@@ -198,9 +198,9 @@ export interface PcapGlobalHeader {
  * ```
  */
 export function pcapGlobalHeader(
-  endianness?: PcapEndianness,
+  endianness: PcapEndianness = PCAP_DEFAULT_ENDIANNESS,
 ): Coder<PcapGlobalHeader> {
-  const order = endianness ?? PCAP_DEFAULT_ENDIANNESS;
+  const order = endianness;
 
   return struct({
     magic: u32(order),

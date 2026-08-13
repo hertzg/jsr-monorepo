@@ -449,7 +449,10 @@ const kKindPcapFileAuto = Symbol("pcapFileAuto");
  * ```
  */
 export function pcapFile(
-  endianness?: PcapEndianness,
+  // `undefined` is a third mode here, not an absent value: it selects magic
+  // sniffing. The explicit `= undefined` keeps that meaning while making
+  // `pcapFile.length` 0, which is what zero-argument tooling gates on.
+  endianness: PcapEndianness | undefined = undefined,
 ): Coder<PcapFile<PcapGlobalHeader, PcapRecord>> {
   const fixed = (order: PcapEndianness) =>
     pcapFileWith(pcapGlobalHeader(order), pcapRecord(order));

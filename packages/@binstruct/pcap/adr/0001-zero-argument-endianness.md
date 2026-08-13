@@ -1,6 +1,8 @@
 # ADR 0001 — Zero-argument coder factories: `pcapFile()` sniffs the magic, the building blocks default to little-endian
 
-**Status:** Accepted
+**Status:** Accepted — the spelling paragraph below (`?` over a parameter
+default) is superseded by ADR 0002, which records why it was wrong and what
+replaced it. Every other decision here stands.
 
 ## Context
 
@@ -91,6 +93,7 @@ reachability by `deno doc`-driven tooling is the whole point of the change.
 - `mod.ts` — `pcapFile`
 - `header.ts` — `PCAP_DEFAULT_ENDIANNESS`, `pcapGlobalHeader`, `detectPcapMagic`
 - `record.ts` — `pcapRecord`, `pcapFileWith`
+- ADR 0002 — Parameter defaults over optional marks (amends this ADR)
 - `@binstruct/png` ADR 0001 — Two-tier coder API
 - `@hertzg/binstruct` ADR 0001 — Coder protocol
 - `@hertzg/binstruct` ADR 0003 — Refs resolve values, single-pass forward-only

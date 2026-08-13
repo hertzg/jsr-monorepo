@@ -465,6 +465,18 @@ Deno.test("pcapFile: zero-argument coder reads the dns.cap fixture", async () =>
   assertEquals(auto.records.length, 38);
 });
 
+Deno.test("coder factories report an arity of zero", () => {
+  // Zero-argument tooling gates on Function.length, and a `?` parameter counts
+  // as 1 there even though `deno doc` calls it optional. See ADR 0002.
+  assertEquals(pcapGlobalHeader.length, 0);
+  assertEquals(pcapRecord.length, 0);
+  assertEquals(pcapFile.length, 0);
+});
+
+Deno.test("pcapFileWith: keeps both coder arguments required", () => {
+  assertEquals(pcapFileWith.length, 2);
+});
+
 Deno.test("pcapFile: zero-argument coder is usable as a struct field", () => {
   const value = { header: sampleHeader(), records: [] };
 

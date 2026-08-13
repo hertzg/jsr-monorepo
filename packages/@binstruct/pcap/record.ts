@@ -129,9 +129,9 @@ export interface PcapRecord {
  * ```
  */
 export function pcapRecord(
-  endianness?: PcapEndianness,
+  endianness: PcapEndianness = PCAP_DEFAULT_ENDIANNESS,
 ): Coder<PcapRecord> {
-  const order = endianness ?? PCAP_DEFAULT_ENDIANNESS;
+  const order = endianness;
 
   // inclLen is bound to a const so the bytes() coder can ref() the same
   // identity we register in the struct — sibling fields call u32(order)
