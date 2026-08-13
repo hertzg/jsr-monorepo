@@ -1,5 +1,12 @@
 # Changelog
 
+## [3.4.0](https://github.com/hertzg/jsr-monorepo/compare/@hertzg/binstruct-v3.3.1...@hertzg/binstruct-v3.4.0) (2026-08-13)
+
+
+### Features
+
+* **@hertzg/binstruct:** export StructDecoded schema type ([#250](https://github.com/hertzg/jsr-monorepo/issues/250)) ([12f6525](https://github.com/hertzg/jsr-monorepo/commit/12f6525fed1c180b6872fa8635274d5bd4c73066))
+
 ## [3.3.1](https://github.com/hertzg/jsr-monorepo/compare/@hertzg/binstruct-v3.3.0...@hertzg/binstruct-v3.3.1) (2026-08-06)
 
 

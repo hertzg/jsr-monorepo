@@ -1,5 +1,18 @@
 # Changelog
 
+## [4.2.0](https://github.com/hertzg/jsr-monorepo/compare/@hertzg/ip-v4.1.1...@hertzg/ip-v4.2.0) (2026-08-13)
+
+
+### Features
+
+* **@hertzg/ip:** add CIDR and prefix length glossary entries ([#258](https://github.com/hertzg/jsr-monorepo/issues/258)) ([9f10155](https://github.com/hertzg/jsr-monorepo/commit/9f10155287a521024bb5895d9066e3dd36f9eefd)), closes [#246](https://github.com/hertzg/jsr-monorepo/issues/246)
+* **@hertzg/ip:** name the address and address-or-CIDR union types ([#253](https://github.com/hertzg/jsr-monorepo/issues/253)) ([6d079dc](https://github.com/hertzg/jsr-monorepo/commit/6d079dc4e3d465b8a01c9a75b99b08a539c738b6))
+
+
+### Bug Fixes
+
+* **@hertzg/ip:** name address parameters `address` ([#245](https://github.com/hertzg/jsr-monorepo/issues/245)) ([e75ac37](https://github.com/hertzg/jsr-monorepo/commit/e75ac3794091091e0cbacecd4ab5961d10821471))
+
 ## [4.1.1](https://github.com/hertzg/jsr-monorepo/compare/@hertzg/ip-v4.1.0...@hertzg/ip-v4.1.1) (2026-08-02)
 
 
