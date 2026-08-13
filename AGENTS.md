@@ -545,3 +545,24 @@ triaged issue carries one of each. See `docs/agents/triage-labels.md`.
 Multi-context: root-level decisions in `adr/`, per-package decisions in
 `packages/<scope>/<name>/adr/`. `CONTEXT-MAP.md` at the root, per-package
 `CONTEXT.md` files created lazily. See `docs/agents/domain.md`.
+
+### Code navigation
+
+When tracing where a symbol is defined or finding all references to it, use LSP
+(`goToDefinition`, `findReferences`, `hover`) instead of Grep. LSP gives exact
+results; Grep gives text matches.
+
+Use Grep/Glob for discovery (finding files, searching patterns). Use LSP for
+understanding (definitions, references, type info).
+
+After locating a file with Grep/Glob, use LSP to navigate within it rather than
+reading the whole file.
+
+Not every agent has an LSP tool. Background subagents in particular do not — the
+tool is absent from their registry, so it cannot be loaded on demand, while
+foreground subagents load it normally. Without one, use
+`deno doc --json <files>`, where `def.params[].name` is the real signature
+identifier and `jsDoc.tags` holds the `@param` tags. This matters because
+nothing in `deno task lint` checks that a `@param` tag names a real parameter:
+`deno doc --lint` exits 0 when it does not, so a half-finished rename is
+invisible to the gate.
