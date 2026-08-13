@@ -38,6 +38,18 @@ deno test --doc
 deno lint
 ```
 
+The root `deno task test` is two subtasks that run concurrently, and the doc
+examples are roughly twice the wall clock of the unit tests. Run one alone when
+only half the surface changed:
+
+```bash
+deno task test:doc       # JSDoc examples only - for documentation changes
+deno task test:parallel  # unit tests only - for changes with no JSDoc impact
+```
+
+Neither substitutes for the mandatory root `deno task test` before completing
+work.
+
 ### Additional Commands
 
 ```bash
