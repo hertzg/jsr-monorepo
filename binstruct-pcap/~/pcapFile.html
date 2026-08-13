@@ -165,7 +165,7 @@
   </defs>
 </svg>
 </a>
-<span class="font-bold">pcapFile</span><span class="font-medium">(<span><span>endianness<span class="td-op">?</span><span>: <a href="../././~/PcapEndianness.html" class="link td-ref">PcapEndianness</a></span></span></span>)<span>: <span class="td-ref">Coder</span>&lt;<a href="../././~/PcapFile.html" class="link td-ref">PcapFile</a>&lt;<a href="../././~/PcapGlobalHeader.html" class="link td-ref">PcapGlobalHeader</a><span>, </span><a href="../././~/PcapRecord.html" class="link td-ref">PcapRecord</a>&gt;&gt;</span> </span>
+<span class="font-bold">pcapFile</span><span class="font-medium">(<span><span>endianness<span class="td-op">?</span><span>: <span><a href="../././~/PcapEndianness.html" class="link td-ref">PcapEndianness</a><span class="td-op"> | </span><span class="td-kw">undefined</span></span></span></span></span>)<span>: <span class="td-ref">Coder</span>&lt;<a href="../././~/PcapFile.html" class="link td-ref">PcapFile</a>&lt;<a href="../././~/PcapGlobalHeader.html" class="link td-ref">PcapGlobalHeader</a><span>, </span><a href="../././~/PcapRecord.html" class="link td-ref">PcapRecord</a>&gt;&gt;</span> </span>
       </code><div class="space-y-7" id=""><div class="markdown"><p>Creates a coder for a complete pcap capture file.</p>
 <p>The returned coder pairs <a href="../././~/pcapGlobalHeader.html">pcapGlobalHeader</a> with <a href="../././~/pcapRecord.html">pcapRecord</a> via
 <a href="../././~/pcapFileWith.html">pcapFileWith</a>. Records are read greedily until the buffer no longer
@@ -621,7 +621,7 @@ Parameters</h2></div><div class="space-y-8"><div class="anchorable docEntry" id=
   </defs>
 </svg>
 </a>
-<span class="font-bold font-lg">endianness</span><span class="font-medium text-stone-500 dark:text-stone-200"><span>: <a href="../././~/PcapEndianness.html" class="link td-ref">PcapEndianness</a></span></span>
+<span class="font-bold font-lg">endianness</span><span class="font-medium text-stone-500 dark:text-stone-200"><span>: <span><a href="../././~/PcapEndianness.html" class="link td-ref">PcapEndianness</a><span class="td-op"> | </span><span class="td-kw">undefined</span></span></span><span><span class="font-normal"> = </span>undefined</span></span>
       </code>
     </div><a
   class="sourceButton"
