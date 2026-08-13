@@ -237,7 +237,7 @@ Trusted Network Allowlist</h2>
   </defs>
 </svg>
 </a>
-<h3 class="example-header"><div class="markdown"><p>Check if a client IP is in a set of trusted CIDR ranges</p>
+<h3 class="example-header"><div class="markdown"><p>Check if a client IP is in a set of trusted CIDR blocks</p>
 </div></h3>
   <div><div class="markdown"><pre class="highlight"><code class="language-ts">import { assert, assertEquals } from &quot;@std/assert&quot;;
 import { cidrv4Contains, parseCidrv4, parseIp } from &quot;@hertzg/ip&quot;;
@@ -621,8 +621,8 @@ assertEquals(cidrv4Size(cidr), 256);
   <path d="M5 12l5 5l10 -10" />
 </svg>
 </button><code></code></pre>
-<h2 id="range-checking">
-Range Checking</h2>
+<h2 id="containment-checking">
+Containment Checking</h2>
 </div></div>
 </div>
 <div class="border-b border-gray-300 dark:border-gray-700"></div><div class="anchorable"><a href="#example_5" class="anchor" aria-label="Anchor" tabIndex="-1"><svg
@@ -647,7 +647,7 @@ Range Checking</h2>
   </defs>
 </svg>
 </a>
-<h3 class="example-header"><div class="markdown"><p>Check if IPs fall within a CIDR range</p>
+<h3 class="example-header"><div class="markdown"><p>Check if IPs fall within a CIDR block</p>
 </div></h3>
   <div><div class="markdown"><pre class="highlight"><code class="language-ts">import { assert, assertEquals } from &quot;@std/assert&quot;;
 import { cidrv4Contains, parseCidrv4, parseIpv4 } from &quot;@hertzg/ip&quot;;
@@ -696,8 +696,8 @@ assertEquals(cidrv4Contains(cidr, parseIpv4(&quot;11.0.0.0&quot;)), false);
   <path d="M5 12l5 5l10 -10" />
 </svg>
 </button><code></code></pre>
-<h2 id="subnet-enumeration">
-Subnet Enumeration</h2>
+<h2 id="address-enumeration">
+Address Enumeration</h2>
 </div></div>
 </div>
 <div class="border-b border-gray-300 dark:border-gray-700"></div><div class="anchorable"><a href="#example_6" class="anchor" aria-label="Anchor" tabIndex="-1"><svg
@@ -722,7 +722,7 @@ Subnet Enumeration</h2>
   </defs>
 </svg>
 </a>
-<h3 class="example-header"><div class="markdown"><p>Generate addresses in a CIDR range</p>
+<h3 class="example-header"><div class="markdown"><p>Generate addresses in a CIDR block</p>
 </div></h3>
   <div><div class="markdown"><pre class="highlight"><code class="language-ts">import { assertEquals } from &quot;@std/assert&quot;;
 import { cidrv4Addresses, parseCidrv4, stringifyIpv4 } from &quot;@hertzg/ip&quot;;
@@ -826,18 +826,18 @@ IPv4 CIDR</h3>
 <li>parseCidrv4: Parse CIDR notation string to Cidrv4</li>
 <li>stringifyCidrv4: Convert Cidrv4 to CIDR notation string</li>
 <li>cidrv4Mask: Create network mask from prefix length (0-32)</li>
-<li>cidrv4Contains: Check if IP is within CIDR range</li>
+<li>cidrv4Contains: Check if IP is within CIDR block</li>
 <li>cidrv4ContainsCidr: Check if one IPv4 CIDR fully contains another</li>
 <li>cidrv4Overlaps: Check if two IPv4 CIDRs share at least one address</li>
 <li>cidrv4Intersect: Return the overlapping IPv4 CIDR block, or null</li>
 <li>cidrv4Subtract: Return IPv4 CIDR blocks in A but not in B</li>
 <li>cidrv4Merge: Merge IPv4 CIDR blocks into the minimal covering set</li>
-<li>cidrv4FirstAddress: Get first address in CIDR range</li>
-<li>cidrv4LastAddress: Get last address in CIDR range</li>
+<li>cidrv4FirstAddress: Get first address in CIDR block</li>
+<li>cidrv4LastAddress: Get last address in CIDR block</li>
 <li>cidrv4NetworkAddress: Alias for cidrv4FirstAddress</li>
 <li>cidrv4BroadcastAddress: Alias for cidrv4LastAddress</li>
-<li>cidrv4Size: Get total number of addresses in CIDR range</li>
-<li>cidrv4Addresses: Generate IP addresses in CIDR range</li>
+<li>cidrv4Size: Get total number of addresses in CIDR block</li>
+<li>cidrv4Addresses: Generate IP addresses in CIDR block</li>
 <li>isValidCidrv4: Check if a string is valid IPv4 CIDR notation</li>
 </ul>
 <h3 id="ipv6">
@@ -856,16 +856,16 @@ IPv6 CIDR</h3>
 <li>parseCidrv6: Parse CIDR notation string to Cidrv6</li>
 <li>stringifyCidrv6: Convert Cidrv6 to CIDR notation string</li>
 <li>cidrv6Mask: Create network mask from prefix length (0-128)</li>
-<li>cidrv6Contains: Check if IP is within CIDR range</li>
+<li>cidrv6Contains: Check if IP is within CIDR block</li>
 <li>cidrv6ContainsCidr: Check if one IPv6 CIDR fully contains another</li>
 <li>cidrv6Overlaps: Check if two IPv6 CIDRs share at least one address</li>
 <li>cidrv6Intersect: Return the overlapping IPv6 CIDR block, or null</li>
 <li>cidrv6Subtract: Return IPv6 CIDR blocks in A but not in B</li>
 <li>cidrv6Merge: Merge IPv6 CIDR blocks into the minimal covering set</li>
-<li>cidrv6FirstAddress: Get first address in CIDR range</li>
-<li>cidrv6LastAddress: Get last address in CIDR range</li>
-<li>cidrv6Size: Get total number of addresses in CIDR range</li>
-<li>cidrv6Addresses: Generate IP addresses in CIDR range</li>
+<li>cidrv6FirstAddress: Get first address in CIDR block</li>
+<li>cidrv6LastAddress: Get last address in CIDR block</li>
+<li>cidrv6Size: Get total number of addresses in CIDR block</li>
+<li>cidrv6Addresses: Generate IP addresses in CIDR block</li>
 <li>isValidCidrv6: Check if a string is valid IPv6 CIDR notation</li>
 </ul>
 <h3 id="ipv4-classification">
@@ -1942,7 +1942,7 @@ const mask = cidrv4Mask(24);
 const inverted = (~ip &gt;&gt;&gt; 0);
 assertEquals(stringifyIpv4(inverted), &quot;63.87.254.155&quot;);
 
-// Bitwise AND (apply subnet mask to get network address)
+// Bitwise AND (apply network mask to get network address)
 const network = ((ip &amp; mask) &gt;&gt;&gt; 0);
 assertEquals(stringifyIpv4(network), &quot;192.168.1.0&quot;);
 
@@ -1964,7 +1964,7 @@ const mask = cidrv4Mask(24);
 const inverted = (~ip &gt;&gt;&gt; 0);
 assertEquals(stringifyIpv4(inverted), &quot;63.87.254.155&quot;);
 
-// Bitwise AND (apply subnet mask to get network address)
+// Bitwise AND (apply network mask to get network address)
 const network = ((ip &amp; mask) &gt;&gt;&gt; 0);
 assertEquals(stringifyIpv4(network), &quot;192.168.1.0&quot;);
 
@@ -2736,7 +2736,7 @@ const MAX_IPV6 = (1n &lt;&lt; 128n) - 1n;
 const inverted = ~ip &amp; MAX_IPV6;
 assertEquals(stringifyIpv6(inverted), &quot;dffe:f247:ffff:ffff:ffff:ffff:ffff:fffe&quot;);
 
-// Bitwise AND (apply prefix mask to get network address)
+// Bitwise AND (apply network mask to get network address)
 const mask = (MAX_IPV6 &lt;&lt; 96n) &amp; MAX_IPV6; // /32 mask
 const network = ip &amp; mask;
 assertEquals(stringifyIpv6(network), &quot;2001:db8::&quot;);
@@ -2758,7 +2758,7 @@ const MAX_IPV6 = (1n &lt;&lt; 128n) - 1n;
 const inverted = ~ip &amp; MAX_IPV6;
 assertEquals(stringifyIpv6(inverted), &quot;dffe:f247:ffff:ffff:ffff:ffff:ffff:fffe&quot;);
 
-// Bitwise AND (apply prefix mask to get network address)
+// Bitwise AND (apply network mask to get network address)
 const mask = (MAX_IPV6 &lt;&lt; 96n) &amp; MAX_IPV6; // /32 mask
 const network = ip &amp; mask;
 assertEquals(stringifyIpv6(network), &quot;2001:db8::&quot;);

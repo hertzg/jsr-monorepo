@@ -170,8 +170,8 @@
 <p>Yields IP addresses starting at the specified offset from the
 network address. The offset is relative to the network address (offset 0 = network address).
 The step parameter controls the increment (positive or negative) between consecutive addresses.
-Only addresses within the CIDR range are yielded.</p>
-<p>By default (when count is not specified), iterates through all addresses in the CIDR range
+Only addresses within the CIDR block are yielded.</p>
+<p>By default (when count is not specified), iterates through all addresses in the CIDR block
 from the offset to the boundary (broadcast for positive step, network for negative step).</p>
 </div><section class="section"  id="examples"><div>
       <h2 class="anchorable mb-1"><a href="#examples" class="anchor" aria-label="Anchor" tabIndex="-1"><svg
@@ -218,7 +218,7 @@ Examples</h2></div><div class="space-y-8"><div class="anchorable"><a href="#exam
   </defs>
 </svg>
 </a>
-<h3 class="example-header"><div class="markdown"><p>Default behavior - iterate full CIDR range</p>
+<h3 class="example-header"><div class="markdown"><p>Default behavior - iterate full CIDR block</p>
 </div></h3>
   <div><div class="markdown"><pre class="highlight"><code class="language-ts">import { assertEquals } from &quot;@std/assert&quot;;
 import { cidrv4Addresses, parseCidrv4 } from &quot;@hertzg/ip/cidrv4&quot;;
@@ -875,7 +875,7 @@ Return Type</h2></div><div class="space-y-8"><div class=" docEntry" id="function
 </svg>
 </button><code></code></pre>
 </div></div><nav class="documentNavigation">
-          <h3>Document Navigation</h3><ul><li><a href="#examples" title="Examples">Examples</a></li><li><ul><li><a href="#example_0" title="Default behavior - iterate full CIDR range">Default behavior - iterate full CIDR range</a></li><li><a href="#example_1" title="Limiting with count parameter">Limiting with count parameter</a></li><li><a href="#example_2" title="Custom step for even/odd IPs">Custom step for even/odd IPs</a></li><li><a href="#example_3" title="Negative step for reverse iteration">Negative step for reverse iteration</a></li><li><a href="#example_4" title="CIDR boundary handling">CIDR boundary handling</a></li></ul></li><li><a href="#parameters" title="Parameters">Parameters</a></li><li><ul><li><a href="#function_cidrv4addresses_0_parameter_cidr" title="cidr">cidr</a></li><li><a href="#function_cidrv4addresses_0_parameter_options" title="options">options</a></li></ul></li><li><a href="#return-type" title="Return Type">Return Type</a></li></ul></nav></div>
+          <h3>Document Navigation</h3><ul><li><a href="#examples" title="Examples">Examples</a></li><li><ul><li><a href="#example_0" title="Default behavior - iterate full CIDR block">Default behavior - iterate full CIDR block</a></li><li><a href="#example_1" title="Limiting with count parameter">Limiting with count parameter</a></li><li><a href="#example_2" title="Custom step for even/odd IPs">Custom step for even/odd IPs</a></li><li><a href="#example_3" title="Negative step for reverse iteration">Negative step for reverse iteration</a></li><li><a href="#example_4" title="CIDR boundary handling">CIDR boundary handling</a></li></ul></li><li><a href="#parameters" title="Parameters">Parameters</a></li><li><ul><li><a href="#function_cidrv4addresses_0_parameter_cidr" title="cidr">cidr</a></li><li><a href="#function_cidrv4addresses_0_parameter_options" title="options">options</a></li></ul></li><li><a href="#return-type" title="Return Type">Return Type</a></li></ul></nav></div>
   </div></div>
 </div>
 </div>

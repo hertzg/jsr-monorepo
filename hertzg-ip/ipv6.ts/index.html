@@ -235,7 +235,7 @@ const MAX_IPV6 = (1n &lt;&lt; 128n) - 1n;
 const inverted = ~ip &amp; MAX_IPV6;
 assertEquals(stringifyIpv6(inverted), &quot;dffe:f247:ffff:ffff:ffff:ffff:ffff:fffe&quot;);
 
-// Bitwise AND (apply prefix mask to get network address)
+// Bitwise AND (apply network mask to get network address)
 const mask = (MAX_IPV6 &lt;&lt; 96n) &amp; MAX_IPV6; // /32 mask
 const network = ip &amp; mask;
 assertEquals(stringifyIpv6(network), &quot;2001:db8::&quot;);
@@ -257,7 +257,7 @@ const MAX_IPV6 = (1n &lt;&lt; 128n) - 1n;
 const inverted = ~ip &amp; MAX_IPV6;
 assertEquals(stringifyIpv6(inverted), &quot;dffe:f247:ffff:ffff:ffff:ffff:ffff:fffe&quot;);
 
-// Bitwise AND (apply prefix mask to get network address)
+// Bitwise AND (apply network mask to get network address)
 const mask = (MAX_IPV6 &lt;&lt; 96n) &amp; MAX_IPV6; // /32 mask
 const network = ip &amp; mask;
 assertEquals(stringifyIpv6(network), &quot;2001:db8::&quot;);
