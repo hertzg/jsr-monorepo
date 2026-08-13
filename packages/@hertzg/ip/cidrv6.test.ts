@@ -248,7 +248,7 @@ Deno.test("cidrv6LastAddress", async (t) => {
 });
 
 Deno.test("IP assignment workflow", async (t) => {
-  await t.step("sequential IP assignment in CIDR range", () => {
+  await t.step("sequential IP assignment in CIDR block", () => {
     const cidr = parseCidrv6("fd00::/125"); // 8 IPs: fd00::0 to fd00::7
 
     const firstAddr = cidrv6FirstAddress(cidr);
@@ -468,7 +468,7 @@ Deno.test("cidrv6Addresses", async (t) => {
     ]);
   });
 
-  await t.step("starting outside CIDR range returns empty", () => {
+  await t.step("starting outside CIDR block returns empty", () => {
     const cidr = parseCidrv6("fd00::/125"); // ::0 to ::7
 
     const ips = Array.from(
@@ -615,7 +615,7 @@ Deno.test("cidrv6ContainsCidr", async (t) => {
 });
 
 Deno.test("cidrv6Overlaps", async (t) => {
-  await t.step("supernet and subnet overlap", () => {
+  await t.step("outer and inner block overlap", () => {
     assert(
       cidrv6Overlaps(
         parseCidrv6("2001:db8::/32"),
