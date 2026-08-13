@@ -190,8 +190,19 @@ export function pngChunkUnknown(): Coder<PngChunkUnknown> {
  * This function allows you to specify how individual chunks should be
  * encoded/decoded, enabling custom chunk handling or type-specific refinement.
  *
- * @template TChunk The type of chunks in the PNG file.
+ * Omitting the chunk coder is the common case: it defaults to
+ * {@link pngChunkRefined}, which makes `pngFileChunks()` behave exactly like
+ * {@link pngFile}. Pass an explicit coder when you want different chunk
+ * handling — {@link pngChunkUnknown} to keep every chunk as raw bytes, or your
+ * own refiner pipeline for custom chunk types.
+ *
+ * @template TChunk The type of chunks in the PNG file. Inferred from
+ * `chunkCoder`, and defaults to the refined chunk union that
+ * {@link pngChunkRefined} produces.
  * @param chunkCoder The coder to use for encoding/decoding individual chunks.
+ * Defaults to {@link pngChunkRefined}, the same chunk coder {@link pngFile}
+ * passes. Override it when the refined chunk types are not what you want, for
+ * example `pngChunkUnknown()` to inspect or rewrite chunks at the byte level.
  * @returns A coder for {@link PngFile} structures with the specified chunk type.
  *
  * @example Create a PNG file coder with unknown chunks
@@ -216,9 +227,44 @@ export function pngChunkUnknown(): Coder<PngChunkUnknown> {
  *
  * assertEquals(bytesWritten, 8); // Just the signature
  * ```
+ *
+ * @example Round-trip using the default refined chunk coder
+ * ```ts
+ * import { assertEquals } from "@std/assert";
+ * import { pngFileChunks } from "@binstruct/png";
+ *
+ * const coder = pngFileChunks();
+ * const png = {
+ *   signature: {
+ *     highBitByte: 137,
+ *     signature: "PNG",
+ *     dosLineEnding: "\r\n",
+ *     dosEOF: "\u001a",
+ *     unixLineEnding: "\n",
+ *   },
+ *   chunks: [
+ *     { length: 0, type: "IEND" as const, crc: 0xAE426082 },
+ *   ],
+ * };
+ *
+ * const buffer = new Uint8Array(20);
+ * const bytesWritten = coder.encode(png, buffer);
+ * const [decoded, bytesRead] = coder.decode(buffer.subarray(0, bytesWritten));
+ *
+ * assertEquals(bytesRead, bytesWritten);
+ * assertEquals(decoded.chunks[0].type, "IEND");
+ * ```
  */
-export function pngFileChunks<TChunk>(
-  chunkCoder: Coder<TChunk>,
+export function pngFileChunks<
+  TChunk = ReturnType<typeof pngChunkRefined> extends Coder<infer T> ? T
+    : never,
+>(
+  // `Coder` is invariant, so the refined-union coder needs `as unknown as` to
+  // stand in for `Coder<TChunk>`. Overloads would close the hole, but `deno doc`
+  // emits one declaration per overload and `discover.ts` lists a coder per
+  // declaration, so the CLI would show this coder three times, once as
+  // `needs 1 argument`.
+  chunkCoder: Coder<TChunk> = pngChunkRefined() as unknown as Coder<TChunk>,
 ): Coder<PngFile<TChunk>> {
   return struct({
     signature: struct({

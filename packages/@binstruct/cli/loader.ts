@@ -38,8 +38,9 @@ export type LoadCoderOptions = {
  * Raised by {@linkcode loadCoder} when the factory reports a non-zero
  * `Function.prototype.length` and the caller did not set
  * {@linkcode LoadCoderOptions.arityVerified}. The CLI has no way to supply an
- * argument, so the alternative is calling `pcapFile()` and letting `endianness`
- * default — a whole capture of byte-swapped numbers at exit 0.
+ * argument, so the alternative is calling `pcapFileWith()` with no sub-coders
+ * at all — `undefined` where a header coder belongs, and a failure somewhere
+ * inside the decode rather than here.
  *
  * `.length` is a coarser instrument than the declaration: TypeScript erases the
  * `?` of an optional parameter, so `f(x?: T)` reports an arity of 1 and is
@@ -54,12 +55,12 @@ export type LoadCoderOptions = {
  * import { loadCoder, UnverifiedArityError } from "./loader.ts";
  *
  * const error = await assertRejects(
- *   () => loadCoder(import.meta.resolve("../pcap/mod.ts"), "pcapFile"),
+ *   () => loadCoder(import.meta.resolve("../pcap/mod.ts"), "pcapFileWith"),
  *   UnverifiedArityError,
  * );
  *
- * assertEquals(error.coderName, "pcapFile");
- * assertEquals(error.arity, 1);
+ * assertEquals(error.coderName, "pcapFileWith");
+ * assertEquals(error.arity, 2);
  * ```
  */
 export class UnverifiedArityError extends Error {

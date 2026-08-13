@@ -3,9 +3,9 @@
  *
  * Discovery-backed cases point at packages inside this repository rather than
  * at JSR, so `deno doc` resolves them from disk and nothing here needs the
- * network. `arp` has exactly one zero-argument coder, `png` has three plus one
- * that takes an argument, `pcap` has none that the CLI can call, and
- * `@hertzg/mac` is not a binstruct package at all.
+ * network. `arp` has exactly one zero-argument coder, `png` has four and every
+ * one of them is callable, `pcap` has three plus `pcapFileWith` which takes
+ * two, and `@hertzg/mac` is not a binstruct package at all.
  *
  * The package listing is stubbed for the whole file, and the permissions its
  * cache needs are refused, so level 0 answers from {@linkcode LISTED} without
@@ -112,7 +112,7 @@ stub(
 /** A package with exactly one zero-argument coder, `arpData`. */
 const ARP = import.meta.resolve("../arp/mod.ts");
 
-/** A package with three zero-argument coders and one that takes an argument. */
+/** A package with four coders, all of them zero-argument. */
 const PNG = import.meta.resolve("../png/mod.ts");
 
 /** A package with three zero-argument coders and one that takes two. */
@@ -642,9 +642,20 @@ Deno.test("level 1 lists the coders of a package with several", async () => {
   assertStringIncludes(plan.text, "→ PngFile");
   assertStringIncludes(
     plan.text,
+    "exposes 4 coders, so the coder word is required",
+  );
+});
+
+Deno.test("level 1 names the callable subset when it is smaller", async () => {
+  // The count only qualifies itself when the two differ, so a package where
+  // every coder is callable — png — cannot show this sentence at all.
+  const plan = printed(await planCli([PCAP]));
+
+  assertStringIncludes(
+    plan.text,
     "exposes 4 coders, 3 of them callable, so the coder word is required",
   );
-  assertStringIncludes(plan.text, "needs 1 argument");
+  assertStringIncludes(plan.text, "needs 2 arguments");
 });
 
 Deno.test("the coder count agrees with the coders listed under it", async () => {
@@ -773,12 +784,12 @@ Deno.test("a TRY line keeps the words the user already typed", async () => {
   );
 
   const parameterized = printed(
-    await planCli([PNG, "pngFileChunks", "decode"]),
+    await planCli([PCAP, "pcapFileWith", "decode"]),
   );
 
   assertStringIncludes(
     parameterized.text,
-    `TRY\n  binstruct ${PNG} pngChunkUnknown decode`,
+    `TRY\n  binstruct ${PCAP} pcapGlobalHeader decode`,
   );
 
   // A word in the command slot that is not a command is not carried: a TRY
@@ -991,11 +1002,11 @@ Deno.test("a named coder outlives a discovery that ran out of time", async () =>
 Deno.test("a coder taking arguments is refused when the listing is unavailable", async () => {
   // The escape hatch of ADR 0002 accepts a name discovery could not check, and
   // an accepted *name* was being turned into an unchecked *call*: without
-  // --allow-run=deno, `binstruct pcap pcapFile decode` called `pcapFile()`,
-  // let `endianness` default, and wrote a whole capture of byte-swapped
-  // numbers to stdout at exit 0 with nothing on stderr. `.length` is the check
-  // that survives the missing permission.
-  const refused = await runCli([PCAP, "pcapFile", "decode"], [
+  // --allow-run=deno, `binstruct pcap pcapFileWith decode` called
+  // `pcapFileWith()` with no sub-coders and wrote whatever that decoded to
+  // stdout at exit 0 with nothing on stderr. `.length` is the check that
+  // survives the missing permission.
+  const refused = await runCli([PCAP, "pcapFileWith", "decode"], [
     "--no-prompt",
     "--allow-read",
     "--allow-env",
@@ -1003,8 +1014,8 @@ Deno.test("a coder taking arguments is refused when the listing is unavailable",
 
   assertEquals(refused.code, 1);
   assertEquals(refused.stdout, "");
-  assertStringIncludes(refused.stderr, "pcapFile was not called");
-  assertStringIncludes(refused.stderr, "1 argument at runtime");
+  assertStringIncludes(refused.stderr, "pcapFileWith was not called");
+  assertStringIncludes(refused.stderr, "2 arguments at runtime");
   // And the screen owes the user the check's blind spot, plus the way out.
   assertStringIncludes(refused.stderr, "'x?: T'");
   assertStringIncludes(refused.stderr, "--allow-run=deno");
@@ -1249,12 +1260,12 @@ Deno.test("a named coder that takes arguments is refused, not called", async () 
 });
 
 Deno.test("a named coder that takes arguments still lists the callable ones", async () => {
-  const plan = printed(await planCli([PNG, "pngFileChunks", "decode"]));
+  const plan = printed(await planCli([PCAP, "pcapFileWith", "decode"]));
 
   assertEquals(plan.code, 1);
-  assertStringIncludes(plan.text, "pngFileChunks takes 1 argument");
+  assertStringIncludes(plan.text, "pcapFileWith takes 2 arguments");
   assertStringIncludes(plan.text, "NEXT  <coder>");
-  assertStringIncludes(plan.text, `TRY\n  binstruct ${PNG} pngChunkUnknown`);
+  assertStringIncludes(plan.text, `TRY\n  binstruct ${PCAP} pcapGlobalHeader`);
 });
 
 Deno.test("--docs announces the specifier and the inferred coder", async () => {
@@ -1673,7 +1684,7 @@ Deno.test("no TRY line carries shell syntax outside a redirection", async () => 
       await planCli([PNG]),
       await planCli([PNG, "pngFile"]),
       await planCli([PNG, "pngfile"]),
-      await planCli([PNG, "pngFileChunks", "decode"]),
+      await planCli([PCAP, "pcapFileWith", "decode"]),
       await planCli([`${directory}/spaced dir`, "decode"]),
       await planCli(["arp", "arpData", "decode", "input.bin"]),
     ];

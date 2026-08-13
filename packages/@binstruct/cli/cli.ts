@@ -1104,11 +1104,11 @@ function unknownCoderGuide(
  * Builds the guide for a coder that exists but cannot be called.
  *
  * A factory that declares required parameters has no command-line spelling —
- * `pcapFile(endianness)` is the standing example — and calling it with none
- * would let the argument default silently, producing plausible bytes from the
- * wrong interpretation. When nothing in the package is callable either, the
- * answer is a different package rather than a different coder, so this defers
- * to {@linkcode deadEndGuide}.
+ * `pcapFileWith(headerCoder, recordCoder)` is the standing example — and
+ * calling it with none would hand the struct `undefined` sub-coders, failing
+ * somewhere inside the decode. When nothing in the package is callable either,
+ * the answer is a different package rather than a different coder, so this
+ * defers to {@linkcode deadEndGuide}.
  *
  * @param resolved The package as typed and as resolved
  * @param header The header block, absent when the caller announced the specifier already
@@ -1246,17 +1246,19 @@ function toolFailureGuide(
  *
  * The other end of the escape hatch. A named coder is accepted when discovery
  * cannot run, but accepting a *name* is not accepting a *call*: the CLI has no
- * argument to pass, so `pcapFile()` would let `endianness` default and print a
- * whole capture of byte-swapped numbers at exit 0. `Function.prototype.length`
+ * argument to pass, so `pcapFileWith()` would build a struct over `undefined`
+ * sub-coders and fail somewhere inside the decode. `Function.prototype.length`
  * is the one check left that needs no subprocess, and this is the screen it
  * produces (`./loader.ts`).
  *
  * The screen owes the user the check's limit, because the check is coarser than
  * the one it stands in for. TypeScript erases the `?` of an optional parameter,
  * so `f(x?: T)` — genuinely callable with no arguments — reports an arity of 1
- * and lands here. `@binstruct/pcap` is about to be exactly that shape, so the
- * footer names the way out rather than leaving a correct invocation looking
- * broken: grant `--allow-run=deno` and the declaration settles it.
+ * and lands here. A parameter default (`x = v`) drops out of the count and a
+ * `?` does not, which is why `@binstruct/pcap` spells its optional endianness
+ * with a default (its ADR 0002). For the packages that do not, the footer names
+ * the way out rather than leaving a correct invocation looking broken: grant
+ * `--allow-run=deno` and the declaration settles it.
  *
  * @param resolved The package as typed and as resolved
  * @param error The refusal, carrying the factory and its runtime arity

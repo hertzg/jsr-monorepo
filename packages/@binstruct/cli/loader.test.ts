@@ -12,7 +12,7 @@ import { loadCoder, UnverifiedArityError } from "./loader.ts";
 /** A package exporting exactly one coder factory, `arpData`. */
 const ARP = import.meta.resolve("../arp/mod.ts");
 
-/** A package whose every factory takes an argument, `pcapFile` among them. */
+/** A package with three zero-argument factories and `pcapFileWith`, which takes two. */
 const PCAP = import.meta.resolve("../pcap/mod.ts");
 
 /**
@@ -56,15 +56,15 @@ Deno.test("loadCoder rejects an export that is not a factory", async () => {
 
 Deno.test("loadCoder refuses a factory whose arity nothing has verified", async () => {
   // The defect this guards: with `deno doc` unavailable the coder name is
-  // taken on trust, and calling `pcapFile()` bare lets `endianness` default —
-  // a whole capture of byte-swapped numbers, at exit 0.
+  // taken on trust, and calling `pcapFileWith()` bare hands the struct
+  // `undefined` sub-coders, failing somewhere inside the decode instead.
   const error = await assertRejects(
-    () => loadCoder(PCAP, "pcapFile"),
+    () => loadCoder(PCAP, "pcapFileWith"),
     UnverifiedArityError,
   );
 
-  assertEquals(error.coderName, "pcapFile");
-  assertEquals(error.arity, 1);
+  assertEquals(error.coderName, "pcapFileWith");
+  assertEquals(error.arity, 2);
 });
 
 Deno.test("loadCoder calls a factory a declaration-level count vouched for", async () => {

@@ -42,6 +42,40 @@ as `PngChunkUnknown` — and feed it to `pngFileChunks`.
 The shortcut has no privileged access; any consumer could
 recreate it.
 
+### Amendment — `pngFileChunks` defaults its chunk coder
+
+`pngFileChunks` now defaults `chunkCoder` to `pngChunkRefined()`
+and defaults `TChunk` to the refined chunk union, so
+`pngFileChunks()` is both type-equal and value-equal to
+`pngFile()`. The two tiers are unchanged: `pngFileChunks` still
+takes a chunk coder, it merely supplies the obvious one when the
+caller omits it. The rule is **default a factory when a correct
+default exists; keep the argument required when the obvious
+default would be silently wrong.** `pngChunkRefined()` is exactly
+what `pngFile()` passes, so there is no wrong default to pick.
+
+`pngFile()` stays. It is the documented entry point, it is what
+`pngsuite.test.ts` uses, and removing it would be a breaking
+change for no gain. The cost is a synonym: `pngFileChunks()` and
+`pngFile()` are the same call, and tooling that enumerates
+zero-argument coders (the CLI menu) now lists both.
+
+The type-parameter default is derived from `pngChunkRefined`'s
+return type rather than restating the union, so adding a known
+chunk type still means updating two places, not three.
+
+`Coder` is invariant, so the default value needs
+`as unknown as Coder<TChunk>`; that cast makes
+`pngFileChunks<Other>()` with no value argument unsound. Overloads
+would close that hole and keep `Function.length` at 0, but
+`deno doc --json` emits one declaration per overload and the CLI's
+`discover.ts` appends a coder per declaration, so an overloaded
+`pngFileChunks` is listed three times — twice as callable and once
+as `needs 1 argument`. The unsound call is a type-level hole that
+requires an explicit type argument to reach; the duplicate listing
+is user-visible in the tool this decision exists to serve. The
+cast is the lesser cost.
+
 ## Consequences
 
 - **Common case stays one call.** `decode(pngFile(), bytes)` works.
