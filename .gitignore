@@ -3,6 +3,10 @@ cov/
 docs/*
 !docs/agents/
 
+# agent tooling state
+.claude/
+.serena/
+
 # coverage
 coverage/
 cov.lcov
