@@ -236,7 +236,7 @@ const mask = cidrv4Mask(24);
 const inverted = (~ip &gt;&gt;&gt; 0);
 assertEquals(stringifyIpv4(inverted), &quot;63.87.254.155&quot;);
 
-// Bitwise AND (apply subnet mask to get network address)
+// Bitwise AND (apply network mask to get network address)
 const network = ((ip &amp; mask) &gt;&gt;&gt; 0);
 assertEquals(stringifyIpv4(network), &quot;192.168.1.0&quot;);
 
@@ -258,7 +258,7 @@ const mask = cidrv4Mask(24);
 const inverted = (~ip &gt;&gt;&gt; 0);
 assertEquals(stringifyIpv4(inverted), &quot;63.87.254.155&quot;);
 
-// Bitwise AND (apply subnet mask to get network address)
+// Bitwise AND (apply network mask to get network address)
 const network = ((ip &amp; mask) &gt;&gt;&gt; 0);
 assertEquals(stringifyIpv4(network), &quot;192.168.1.0&quot;);
 
