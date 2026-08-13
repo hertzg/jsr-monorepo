@@ -266,7 +266,7 @@ export function cidrContainsCidr(outer: Cidr, inner: Cidr): boolean {
  *
  * @param a The first CIDR block
  * @param b The second CIDR block
- * @returns true if the two CIDR ranges share at least one address, false otherwise
+ * @returns true if the two CIDR blocks share at least one address, false otherwise
  * @throws {TypeError} If the two CIDRs are different IP versions
  *
  * @example IPv4 overlap

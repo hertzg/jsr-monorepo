@@ -25,6 +25,36 @@ version qualifier (`Ip` / `Ipv4` / `Ipv6`) is what disambiguates — see below.
 so parameters holding one keep a role name: `notation` for the string form,
 `value` for the parsed form. _Avoid_: `addressOrCidr`, `input`.
 
+**CIDR**: A block of addresses defined by a starting address and a prefix
+length. The parsed object form is `{ address, prefixLength }`, exported as
+`Cidrv4` (`number` address), `Cidrv6` (`bigint` address), and their union
+`Cidr`; the version is read from the address type as everywhere else (see
+ADR 0003). The noun phrase is "CIDR block" — a block always holds a
+power-of-two count of addresses, aligned to its own size. The corresponding
+string form is the "CIDR notation" (`"192.168.1.0/24"`), the same split the
+**Address** entry makes for "address string". _Avoid_: `subnet`, `supernet`,
+`net`, and "CIDR range" — a range is any start-to-end span, which this package
+has no type for. That distinction is load-bearing: `cidrSubtract` and
+`cidrMerge` return arrays because their result is a range, and a range only
+expresses as several blocks. "Range" stays correct in the looser classification
+sense ("well-known range"), where one category spans several blocks. `network`
+is not a synonym either — it names the first address of a block
+(`cidrv4NetworkAddress`) and the mask that produces it (`cidrv4Mask`). In
+parameter names, JSDoc, and prose, use `cidr` for both forms —
+`parseCidr(cidr: string)` and `stringifyCidr(cidr: Cidr)` — exactly as
+`address` covers both forms of an address. Where a signature takes two blocks
+the role name carries the meaning instead: `outer` / `inner` for containment,
+`a` / `b` for symmetric operations, `cidrs` for a collection.
+
+**Prefix length**: The count of leading bits a CIDR fixes — the `24` in
+`192.168.1.0/24`. Spelled `prefixLength` as a field and as a parameter, "prefix
+length" in prose. _Avoid_: `prefix`, `length`, `bits`. Bare "prefix" names the
+fixed bits themselves rather than their count, and is reserved for that (the
+`::ffff:0:0/96` well-known prefix in `4to6.ts`); the bitmask derived from a
+prefix length is the "network mask", returned by `cidrv4Mask` / `cidrv6Mask`. A
+parameter accepting either a whole CIDR or a bare prefix length keeps the union
+role name `cidrOrPrefixLength`, following **AddressOrCidr**.
+
 ## Function-name convention
 
 Function names use one of three version qualifiers; **the qualifier is not a

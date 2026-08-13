@@ -35,7 +35,7 @@
  * const inverted = (~ip >>> 0);
  * assertEquals(stringifyIpv4(inverted), "63.87.254.155");
  *
- * // Bitwise AND (apply subnet mask to get network address)
+ * // Bitwise AND (apply network mask to get network address)
  * const network = ((ip & mask) >>> 0);
  * assertEquals(stringifyIpv4(network), "192.168.1.0");
  *

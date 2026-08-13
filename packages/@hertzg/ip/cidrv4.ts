@@ -173,7 +173,7 @@ export function stringifyCidrv4(cidr: Cidrv4): string {
  *
  * @param cidr The CIDR block to check against
  * @param address The address to check, as a 32-bit unsigned integer
- * @returns true if the address is within the CIDR range, false otherwise
+ * @returns true if the address is within the CIDR block, false otherwise
  *
  * @example Basic contains check
  * ```ts
@@ -308,7 +308,7 @@ export const cidrv4BroadcastAddress: typeof cidrv4LastAddress =
  * For a /24 network, this returns 256. For a /32, this returns 1.
  *
  * @param cidr The CIDR block
- * @returns The total number of addresses in the CIDR range
+ * @returns The total number of addresses in the CIDR block
  *
  * @example Getting CIDR size from Cidrv4 object
  * ```ts
@@ -385,7 +385,7 @@ export function cidrv4Size(cidrOrPrefixLength: Cidrv4 | number): number {
  * @param inner The CIDR block that may be contained
  * @returns true if every address in `inner` is within `outer`
  *
- * @example Supernet contains subnet
+ * @example Outer block contains inner block
  * ```ts
  * import { assert, assertEquals } from "@std/assert";
  * import { cidrv4ContainsCidr, parseCidrv4 } from "@hertzg/ip/cidrv4";
@@ -430,7 +430,7 @@ export function cidrv4ContainsCidr(outer: Cidrv4, inner: Cidrv4): boolean {
  *
  * @param a The first CIDR block
  * @param b The second CIDR block
- * @returns true if the two CIDR ranges share at least one address
+ * @returns true if the two CIDR blocks share at least one address
  *
  * @example Overlapping CIDRs
  * ```ts
@@ -592,9 +592,9 @@ export function cidrv4Subtract(a: Cidrv4, b: Cidrv4): Cidrv4[] {
  * Yields IP addresses starting at the specified offset from the
  * network address. The offset is relative to the network address (offset 0 = network address).
  * The step parameter controls the increment (positive or negative) between consecutive addresses.
- * Only addresses within the CIDR range are yielded.
+ * Only addresses within the CIDR block are yielded.
  *
- * By default (when count is not specified), iterates through all addresses in the CIDR range
+ * By default (when count is not specified), iterates through all addresses in the CIDR block
  * from the offset to the boundary (broadcast for positive step, network for negative step).
  *
  * @param cidr The CIDR block to generate addresses from
@@ -604,7 +604,7 @@ export function cidrv4Subtract(a: Cidrv4, b: Cidrv4): Cidrv4[] {
  * @param options.step The increment between addresses (positive or negative, defaults to 1)
  * @returns A generator yielding IP addresses as 32-bit unsigned integers (may yield less than count if CIDR boundary is reached)
  *
- * @example Default behavior - iterate full CIDR range
+ * @example Default behavior - iterate full CIDR block
  * ```ts
  * import { assertEquals } from "@std/assert";
  * import { cidrv4Addresses, parseCidrv4 } from "@hertzg/ip/cidrv4";

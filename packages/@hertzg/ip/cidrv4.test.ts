@@ -226,7 +226,7 @@ Deno.test("cidrv4BroadcastAddress", async (t) => {
 });
 
 Deno.test("IP assignment workflow", async (t) => {
-  await t.step("sequential IP assignment in CIDR range", () => {
+  await t.step("sequential IP assignment in CIDR block", () => {
     const cidr = parseCidrv4("10.0.0.0/29"); // 8 IPs: 10.0.0.0 to 10.0.0.7
 
     const networkAddr = cidrv4NetworkAddress(cidr);
@@ -580,7 +580,7 @@ Deno.test("cidrv4Addresses", async (t) => {
   await t.step("stops at CIDR boundary with large step", () => {
     const cidr = parseCidrv4("10.0.0.0/28"); // .0 to .15
 
-    // Large step will quickly exceed CIDR range
+    // Large step will quickly exceed CIDR block
     const ips = Array.from(
       cidrv4Addresses(cidr, { offset: 5, count: 10, step: 5 }),
     );
@@ -593,7 +593,7 @@ Deno.test("cidrv4Addresses", async (t) => {
     ]);
   });
 
-  await t.step("starting outside CIDR range returns empty", () => {
+  await t.step("starting outside CIDR block returns empty", () => {
     const cidr = parseCidrv4("192.168.1.0/29"); // .0 to .7
 
     // Offset 10 is outside the /29 range
@@ -612,7 +612,7 @@ Deno.test("cidrv4Addresses", async (t) => {
       cidrv4Addresses(cidr, { offset: -5, count: 3, step: -1 }),
     );
 
-    // All addresses are outside the CIDR range
+    // All addresses are outside the CIDR block
     assertEquals(ips, []);
   });
 
@@ -714,7 +714,7 @@ Deno.test("cidrv4ContainsCidr", async (t) => {
 });
 
 Deno.test("cidrv4Overlaps", async (t) => {
-  await t.step("supernet and subnet overlap", () => {
+  await t.step("outer and inner block overlap", () => {
     assert(
       cidrv4Overlaps(parseCidrv4("10.0.0.0/8"), parseCidrv4("10.1.0.0/16")),
     );

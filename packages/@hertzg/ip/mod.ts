@@ -11,7 +11,7 @@
  * - **IP Classification**: Identify private, loopback, multicast, public, and other well-known ranges
  * - **CIDR Support**: Parse CIDR notation, check containment, compute network boundaries
  * - **IPv4 & IPv6 Parsing**: Convert between standard notation and number/bigint for arithmetic
- * - **Address Generation**: Lazily enumerate addresses in CIDR ranges
+ * - **Address Generation**: Lazily enumerate addresses in CIDR blocks
  * - **IPv4-Mapped Conversion**: Convert between IPv4 and IPv4-mapped IPv6 addresses and CIDRs
  * - **Validation**: Non-throwing validity checks for IP addresses and CIDR notation
  *
@@ -38,7 +38,7 @@
  *
  * ## Trusted Network Allowlist
  *
- * @example Check if a client IP is in a set of trusted CIDR ranges
+ * @example Check if a client IP is in a set of trusted CIDR blocks
  * ```ts
  * import { assert, assertEquals } from "@std/assert";
  * import { cidrv4Contains, parseCidrv4, parseIp } from "@hertzg/ip";
@@ -147,9 +147,9 @@
  * assertEquals(cidrv4Size(cidr), 256);
  * ```
  *
- * ## Range Checking
+ * ## Containment Checking
  *
- * @example Check if IPs fall within a CIDR range
+ * @example Check if IPs fall within a CIDR block
  * ```ts
  * import { assert, assertEquals } from "@std/assert";
  * import { cidrv4Contains, parseCidrv4, parseIpv4 } from "@hertzg/ip";
@@ -161,9 +161,9 @@
  * assertEquals(cidrv4Contains(cidr, parseIpv4("11.0.0.0")), false);
  * ```
  *
- * ## Subnet Enumeration
+ * ## Address Enumeration
  *
- * @example Generate addresses in a CIDR range
+ * @example Generate addresses in a CIDR block
  * ```ts
  * import { assertEquals } from "@std/assert";
  * import { cidrv4Addresses, parseCidrv4, stringifyIpv4 } from "@hertzg/ip";
@@ -217,18 +217,18 @@
  * - {@link parseCidrv4}: Parse CIDR notation string to Cidrv4
  * - {@link stringifyCidrv4}: Convert Cidrv4 to CIDR notation string
  * - {@link cidrv4Mask}: Create network mask from prefix length (0-32)
- * - {@link cidrv4Contains}: Check if IP is within CIDR range
+ * - {@link cidrv4Contains}: Check if IP is within CIDR block
  * - {@link cidrv4ContainsCidr}: Check if one IPv4 CIDR fully contains another
  * - {@link cidrv4Overlaps}: Check if two IPv4 CIDRs share at least one address
  * - {@link cidrv4Intersect}: Return the overlapping IPv4 CIDR block, or null
  * - {@link cidrv4Subtract}: Return IPv4 CIDR blocks in A but not in B
  * - {@link cidrv4Merge}: Merge IPv4 CIDR blocks into the minimal covering set
- * - {@link cidrv4FirstAddress}: Get first address in CIDR range
- * - {@link cidrv4LastAddress}: Get last address in CIDR range
+ * - {@link cidrv4FirstAddress}: Get first address in CIDR block
+ * - {@link cidrv4LastAddress}: Get last address in CIDR block
  * - {@link cidrv4NetworkAddress}: Alias for cidrv4FirstAddress
  * - {@link cidrv4BroadcastAddress}: Alias for cidrv4LastAddress
- * - {@link cidrv4Size}: Get total number of addresses in CIDR range
- * - {@link cidrv4Addresses}: Generate IP addresses in CIDR range
+ * - {@link cidrv4Size}: Get total number of addresses in CIDR block
+ * - {@link cidrv4Addresses}: Generate IP addresses in CIDR block
  * - {@link isValidCidrv4}: Check if a string is valid IPv4 CIDR notation
  *
  * ### IPv6
@@ -243,16 +243,16 @@
  * - {@link parseCidrv6}: Parse CIDR notation string to Cidrv6
  * - {@link stringifyCidrv6}: Convert Cidrv6 to CIDR notation string
  * - {@link cidrv6Mask}: Create network mask from prefix length (0-128)
- * - {@link cidrv6Contains}: Check if IP is within CIDR range
+ * - {@link cidrv6Contains}: Check if IP is within CIDR block
  * - {@link cidrv6ContainsCidr}: Check if one IPv6 CIDR fully contains another
  * - {@link cidrv6Overlaps}: Check if two IPv6 CIDRs share at least one address
  * - {@link cidrv6Intersect}: Return the overlapping IPv6 CIDR block, or null
  * - {@link cidrv6Subtract}: Return IPv6 CIDR blocks in A but not in B
  * - {@link cidrv6Merge}: Merge IPv6 CIDR blocks into the minimal covering set
- * - {@link cidrv6FirstAddress}: Get first address in CIDR range
- * - {@link cidrv6LastAddress}: Get last address in CIDR range
- * - {@link cidrv6Size}: Get total number of addresses in CIDR range
- * - {@link cidrv6Addresses}: Generate IP addresses in CIDR range
+ * - {@link cidrv6FirstAddress}: Get first address in CIDR block
+ * - {@link cidrv6LastAddress}: Get last address in CIDR block
+ * - {@link cidrv6Size}: Get total number of addresses in CIDR block
+ * - {@link cidrv6Addresses}: Generate IP addresses in CIDR block
  * - {@link isValidCidrv6}: Check if a string is valid IPv6 CIDR notation
  *
  * ### IPv4 Classification
@@ -476,19 +476,19 @@ export {
 export {
   /** Type representing an IPv4 CIDR block. */
   type Cidrv4,
-  /** Generate IP addresses in CIDR range. */
+  /** Generate IP addresses in CIDR block. */
   cidrv4Addresses,
   /** Alias for cidrv4LastAddress. */
   cidrv4BroadcastAddress,
-  /** Check if IP is within CIDR range. */
+  /** Check if IP is within CIDR block. */
   cidrv4Contains,
   /** Check if one IPv4 CIDR fully contains another. */
   cidrv4ContainsCidr,
-  /** Get first address in CIDR range. */
+  /** Get first address in CIDR block. */
   cidrv4FirstAddress,
   /** Return the overlapping IPv4 CIDR block, or null. */
   cidrv4Intersect,
-  /** Get last address in CIDR range. */
+  /** Get last address in CIDR block. */
   cidrv4LastAddress,
   /** Create network mask from prefix length (0-32). */
   cidrv4Mask,
@@ -498,7 +498,7 @@ export {
   cidrv4NetworkAddress,
   /** Check if two IPv4 CIDRs share at least one address. */
   cidrv4Overlaps,
-  /** Get total number of addresses in CIDR range. */
+  /** Get total number of addresses in CIDR block. */
   cidrv4Size,
   /** Return IPv4 CIDR blocks in A but not in B. */
   cidrv4Subtract,
@@ -557,17 +557,17 @@ export {
 export {
   /** Type representing an IPv6 CIDR block. */
   type Cidrv6,
-  /** Generate IP addresses in CIDR range. */
+  /** Generate IP addresses in CIDR block. */
   cidrv6Addresses,
-  /** Check if IP is within CIDR range. */
+  /** Check if IP is within CIDR block. */
   cidrv6Contains,
   /** Check if one IPv6 CIDR fully contains another. */
   cidrv6ContainsCidr,
-  /** Get first address in CIDR range. */
+  /** Get first address in CIDR block. */
   cidrv6FirstAddress,
   /** Return the overlapping IPv6 CIDR block, or null. */
   cidrv6Intersect,
-  /** Get last address in CIDR range. */
+  /** Get last address in CIDR block. */
   cidrv6LastAddress,
   /** Create network mask from prefix length (0-128). */
   cidrv6Mask,
@@ -575,7 +575,7 @@ export {
   cidrv6Merge,
   /** Check if two IPv6 CIDRs share at least one address. */
   cidrv6Overlaps,
-  /** Get total number of addresses in CIDR range. */
+  /** Get total number of addresses in CIDR block. */
   cidrv6Size,
   /** Return IPv6 CIDR blocks in A but not in B. */
   cidrv6Subtract,

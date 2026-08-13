@@ -180,7 +180,7 @@ export function stringifyCidrv6(cidr: Cidrv6): string {
  *
  * @param cidr The CIDR block to check against
  * @param address The address to check, as a 128-bit bigint
- * @returns true if the address is within the CIDR range, false otherwise
+ * @returns true if the address is within the CIDR block, false otherwise
  *
  * @example Basic contains check
  * ```ts
@@ -271,10 +271,10 @@ export function cidrv6LastAddress(cidr: Cidrv6): bigint {
  * Returns the total number of IP addresses in a CIDR block.
  *
  * For a /120 network, this returns 256n. For a /128, this returns 1n.
- * The result is a bigint because IPv6 subnets can hold up to 2^128 addresses.
+ * The result is a bigint because IPv6 blocks can hold up to 2^128 addresses.
  *
  * @param cidr The CIDR block
- * @returns The total number of addresses in the CIDR range as a bigint
+ * @returns The total number of addresses in the CIDR block as a bigint
  *
  * @example Getting CIDR size from Cidrv6 object
  * ```ts
@@ -350,7 +350,7 @@ export function cidrv6Size(cidrOrPrefixLength: Cidrv6 | number): bigint {
  * @param inner The CIDR block that may be contained
  * @returns true if every address in `inner` is within `outer`
  *
- * @example Supernet contains subnet
+ * @example Outer block contains inner block
  * ```ts
  * import { assert, assertEquals } from "@std/assert";
  * import { cidrv6ContainsCidr, parseCidrv6 } from "@hertzg/ip/cidrv6";
@@ -394,7 +394,7 @@ export function cidrv6ContainsCidr(outer: Cidrv6, inner: Cidrv6): boolean {
  *
  * @param a The first CIDR block
  * @param b The second CIDR block
- * @returns true if the two CIDR ranges share at least one address
+ * @returns true if the two CIDR blocks share at least one address
  *
  * @example Overlapping CIDRs
  * ```ts
@@ -552,12 +552,12 @@ export function cidrv6Subtract(a: Cidrv6, b: Cidrv6): Cidrv6[] {
  * Yields IP addresses starting at the specified offset from the
  * network address. The offset is relative to the network address (offset 0 = network address).
  * The step parameter controls the increment (positive or negative) between consecutive addresses.
- * Only addresses within the CIDR range are yielded.
+ * Only addresses within the CIDR block are yielded.
  *
- * By default (when count is not specified), iterates through all addresses in the CIDR range
+ * By default (when count is not specified), iterates through all addresses in the CIDR block
  * from the offset to the boundary (last address for positive step, network for negative step).
  *
- * IPv6 subnets can be enormous. A /64 has 2^64 addresses. Use `count` or iterate lazily
+ * IPv6 blocks can be enormous. A /64 has 2^64 addresses. Use `count` or iterate lazily
  * to avoid memory issues.
  *
  * @param cidr The CIDR block to generate addresses from
