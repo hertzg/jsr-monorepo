@@ -254,7 +254,8 @@ Trusted Network Allowlist</h2>
   <div><div class="markdown"><pre class="highlight"><code class="language-ts">import { assert, assertEquals } from &quot;@std/assert&quot;;
 import { cidrContainsAny, parseCidr, parseIp } from &quot;@hertzg/ip&quot;;
 
-// The list may mix IP versions — a version mismatch is a miss, not an error
+// The list may mix IP versions; each entry is only ever compared against an
+// address of its own version, and a mismatch is a miss rather than an error
 const trustedRanges = [
   &quot;10.0.0.0/8&quot;,
   &quot;172.16.0.0/12&quot;,
@@ -268,14 +269,16 @@ function isTrusted(ip: string): boolean {
 
 assert(isTrusted(&quot;192.168.1.100&quot;));
 assert(isTrusted(&quot;10.0.0.1&quot;));
-assert(isTrusted(&quot;::ffff:172.16.5.1&quot;));
-assert(isTrusted(&quot;fd00::1&quot;));
+assert(isTrusted(&quot;::ffff:172.16.5.1&quot;)); // parseIp unwrapped this to IPv4 first
+assert(isTrusted(&quot;fd00::1&quot;)); // matched the IPv6 entry, no conversion involved
+
 assertEquals(isTrusted(&quot;8.8.8.8&quot;), false);
 assertEquals(isTrusted(&quot;2001:db8::1&quot;), false);
 </code><button class="copyButton" data-copy="import { assert, assertEquals } from &quot;@std/assert&quot;;
 import { cidrContainsAny, parseCidr, parseIp } from &quot;@hertzg/ip&quot;;
 
-// The list may mix IP versions — a version mismatch is a miss, not an error
+// The list may mix IP versions; each entry is only ever compared against an
+// address of its own version, and a mismatch is a miss rather than an error
 const trustedRanges = [
   &quot;10.0.0.0/8&quot;,
   &quot;172.16.0.0/12&quot;,
@@ -289,8 +292,9 @@ function isTrusted(ip: string): boolean {
 
 assert(isTrusted(&quot;192.168.1.100&quot;));
 assert(isTrusted(&quot;10.0.0.1&quot;));
-assert(isTrusted(&quot;::ffff:172.16.5.1&quot;));
-assert(isTrusted(&quot;fd00::1&quot;));
+assert(isTrusted(&quot;::ffff:172.16.5.1&quot;)); // parseIp unwrapped this to IPv4 first
+assert(isTrusted(&quot;fd00::1&quot;)); // matched the IPv6 entry, no conversion involved
+
 assertEquals(isTrusted(&quot;8.8.8.8&quot;), false);
 assertEquals(isTrusted(&quot;2001:db8::1&quot;), false);
 "><svg
