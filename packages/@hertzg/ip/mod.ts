@@ -14,6 +14,7 @@
  * - **Address Generation**: Lazily enumerate addresses in CIDR blocks
  * - **IPv4-Mapped Conversion**: Convert between IPv4 and IPv4-mapped IPv6 addresses and CIDRs
  * - **Validation**: Non-throwing validity checks for IP addresses and CIDR notation
+ * - **Wire Bytes**: Read and write addresses directly in packet buffers, no string round-trip
  *
  * ## Dual-Stack Server
  *
@@ -182,6 +183,31 @@
  * assertEquals(usable.map(stringifyIpv4), ["10.0.0.1", "10.0.0.2", "10.0.0.3"]);
  * ```
  *
+ * ## Wire Bytes
+ *
+ * @example Decode addresses straight out of a packet buffer
+ * ```ts
+ * import { assertEquals } from "@std/assert";
+ * import { ipv4FromBytes, ipv4ToBytes, stringifyIpv4 } from "@hertzg/ip";
+ *
+ * // deno-fmt-ignore
+ * const packet = new Uint8Array([
+ *   0x45, 0x00, 0x00, 0x54, 0x1c, 0x46, 0x40, 0x00,
+ *   0x40, 0x06, 0x00, 0x00,
+ *   10, 0, 0, 1,
+ *   192, 168, 1, 1,
+ * ]);
+ *
+ * // Read the source and destination fields in place
+ * assertEquals(stringifyIpv4(ipv4FromBytes(packet, 12)), "10.0.0.1");
+ * assertEquals(stringifyIpv4(ipv4FromBytes(packet, 16)), "192.168.1.1");
+ *
+ * // Rewrite the destination in place; the return is only the bytes written
+ * const written = ipv4ToBytes(ipv4FromBytes(packet, 12), packet, 16);
+ * assertEquals(written, new Uint8Array([10, 0, 0, 1]));
+ * assertEquals(stringifyIpv4(ipv4FromBytes(packet, 16)), "10.0.0.1");
+ * ```
+ *
  * ## API Reference
  *
  * ### Universal (auto-detect IPv4/IPv6)
@@ -294,6 +320,14 @@
  * - {@link cidrv4ToCidrv64Mapped}: Convert IPv4 CIDR to IPv4-mapped IPv6 CIDR
  * - {@link cidrv4FromCidrv64Mapped}: Convert IPv4-mapped IPv6 CIDR to IPv4 CIDR
  *
+ * ### Wire Byte Conversion (bytes)
+ * - {@link ipFromBytes}: Read a 4- or 16-byte address, version from the span width
+ * - {@link ipToBytes}: Write an address as its wire bytes, width from its type
+ * - {@link ipv4FromBytes}: Read a 4-byte IPv4 address from a buffer
+ * - {@link ipv4ToBytes}: Write a 4-byte IPv4 address to a buffer
+ * - {@link ipv6FromBytes}: Read a 16-byte IPv6 address from a buffer
+ * - {@link ipv6ToBytes}: Write a 16-byte IPv6 address to a buffer
+ *
  * ### Submodules
  * - [`ip`](https://jsr.io/@hertzg/ip/doc/ip): Universal IP parsing via {@link parseIp}, {@link stringifyIp}
  * - [`cidr`](https://jsr.io/@hertzg/ip/doc/cidr): Universal CIDR parsing via {@link parseCidr}, {@link stringifyCidr}
@@ -306,6 +340,7 @@
  * - [`classifyv6`](https://jsr.io/@hertzg/ip/doc/classifyv6): IPv6 classification via {@link classifyIpv6}, {@link isIpv6Loopback}, etc.
  * - [`validate`](https://jsr.io/@hertzg/ip/doc/validate): Universal validation via {@link isValidIp}, {@link isValidCidr}
  * - [`4to6`](https://jsr.io/@hertzg/ip/doc/4to6): IPv4-mapped IPv6 conversion via {@link ipv4To64Mapped}, {@link ipv4From64Mapped}, {@link cidrv4ToCidrv64Mapped}, {@link cidrv4FromCidrv64Mapped}
+ * - [`bytes`](https://jsr.io/@hertzg/ip/doc/bytes): Wire byte conversion via {@link ipFromBytes}, {@link ipToBytes}, {@link ipv4FromBytes}, {@link ipv4ToBytes}, {@link ipv6FromBytes}, {@link ipv6ToBytes}
  *
  * @module
  */
@@ -632,3 +667,20 @@ export {
   /** Convert IPv4 number to IPv4-mapped IPv6 bigint. */
   ipv4To64Mapped,
 } from "./4to6.ts";
+
+// --- Wire byte conversion ---
+
+export {
+  /** Read a 4- or 16-byte address, picking the version from the span width. */
+  ipFromBytes,
+  /** Write an address as its wire bytes, 4 for IPv4 and 16 for IPv6. */
+  ipToBytes,
+  /** Read a 4-byte IPv4 address from a buffer. */
+  ipv4FromBytes,
+  /** Write a 4-byte IPv4 address to a buffer. */
+  ipv4ToBytes,
+  /** Read a 16-byte IPv6 address from a buffer. */
+  ipv6FromBytes,
+  /** Write a 16-byte IPv6 address to a buffer. */
+  ipv6ToBytes,
+} from "./bytes.ts";

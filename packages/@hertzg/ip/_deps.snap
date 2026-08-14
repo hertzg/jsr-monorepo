@@ -14,6 +14,7 @@
     "./validate": [],
     "./validatev4": [],
     "./validatev6": [],
-    "./4to6": []
+    "./4to6": [],
+    "./bytes": []
   }
 }
