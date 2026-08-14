@@ -17,11 +17,15 @@
     "./validatev6": "./validatev6.ts",
     "./4to6": "./4to6.ts"
   },
+  "tasks": {
+    "bench:ecosystem": "deno bench --allow-all _bench/"
+  },
   "publish": {
     "exclude": [
       "**/*.test.ts",
       "**/*.md",
-      "adr"
+      "adr",
+      "_bench"
     ]
   }
 }

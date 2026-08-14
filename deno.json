@@ -41,8 +41,15 @@
     "cov": "deno coverage --ignore=\"**/*.generated.mjs,**/_test_utils.ts,.github\"",
     "cov:gen": "deno task cov --lcov --output=cov.lcov",
     "cov:view": "deno task cov --html",
-    "bench": "deno bench --allow-all",
-    "bench:json": "deno bench --allow-all --json"
+    // `**/_bench` holds comparisons against third-party packages, and is
+    // excluded from these two repo-wide tasks on purpose. Both run on every PR
+    // (see .github/workflows/bench.yaml) and compare base against head; the
+    // competitor numbers are identical on both sides, so they would
+    // contribute only noise plus an npm download per run. Each such benchmark
+    // is owned by its package and run from there — see the `bench:ecosystem`
+    // task in packages/@hertzg/ip/deno.json.
+    "bench": "deno bench --allow-all --ignore=**/_bench",
+    "bench:json": "deno bench --allow-all --ignore=**/_bench --json"
   },
   "fmt": {
     "exclude": [
