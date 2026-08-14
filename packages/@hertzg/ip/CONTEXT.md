@@ -55,6 +55,19 @@ prefix length is the "network mask", returned by `cidrv4Mask` / `cidrv6Mask`. A
 parameter accepting either a whole CIDR or a bare prefix length keeps the union
 role name `cidrOrPrefixLength`, following **AddressOrCidr**.
 
+**Order**: The sort order this package defines over addresses and CIDR blocks,
+produced by the `compare*` family. It is _version-first_: every IPv4 value sorts
+before every IPv6 value, and within a version values sort numerically ascending
+(CIDR blocks tie-breaking on prefix length ascending, so the supernet precedes
+its subnets). "Version-first" is a claim about order only — the two address
+spaces stay disjoint and nothing is converted between them, so `compareIp` never
+throws where the operations of ADR 0005 do. See ADR 0011. The functions are
+named verb-first (`compareIp`, `compareCidr`) like `parseCidr` and
+`stringifyCidr`, not noun-first like `cidrOverlaps`, because the name is
+normally read as a value handed to `sort`. _Avoid_: `sortIp`, `ipCompare`,
+`cidrCompare`, and "rank". The return value is spelled `-1 | 0 | 1` and carries
+no magnitude.
+
 ## Function-name convention
 
 Function names use one of three version qualifiers; **the qualifier is not a
