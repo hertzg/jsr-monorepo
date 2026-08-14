@@ -165,12 +165,12 @@
   </defs>
 </svg>
 </a>
-<span class="font-bold">cidrv6MaskToPrefixLength</span><span class="font-medium">(<span><span>mask<span>: <span class="td-kw">bigint</span></span></span></span>)<span>: <span><span class="td-kw">number</span><span class="td-op"> | </span><span class="td-kw">null</span></span></span> </span>
+<span class="font-bold">cidrv6MaskToPrefixLength</span><span class="font-medium">(<span><span>mask<span>: <span class="td-kw">bigint</span></span></span></span>)<span>: <span class="td-kw">number</span></span> </span>
       </code><div class="space-y-7" id=""><div class="markdown"><p>Recovers the prefix length from an IPv6 network mask.</p>
 <p>The inverse of <a href="../.././cidrv6.ts/~/cidrv6Mask.html">cidrv6Mask</a>. A CIDR mask is a run of one bits
 from the most significant end followed by zeros; masks that do not
-have that shape describe no prefix length at all and return <code>null</code>
-rather than a plausible-looking count of set bits.</p>
+have that shape describe no prefix length at all and are rejected
+rather than answered with a plausible-looking count of set bits.</p>
 </div><section class="section"  id="examples"><div>
       <h2 class="anchorable mb-1"><a href="#examples" class="anchor" aria-label="Anchor" tabIndex="-1"><svg
   width="16"
@@ -289,20 +289,20 @@ assertEquals(cidrv6MaskToPrefixLength(0n), 0);
   </defs>
 </svg>
 </a>
-<h3 class="example-header"><div class="markdown"><p>Non-contiguous masks return null</p>
+<h3 class="example-header"><div class="markdown"><p>Non-contiguous masks throw</p>
 </div></h3>
-  <div><div class="markdown"><pre class="highlight"><code class="language-ts">import { assertEquals } from &quot;@std/assert&quot;;
+  <div><div class="markdown"><pre class="highlight"><code class="language-ts">import { assertThrows } from &quot;@std/assert&quot;;
 import { cidrv6MaskToPrefixLength } from &quot;@hertzg/ip/cidrv6&quot;;
 
-assertEquals(cidrv6MaskToPrefixLength(0xFFFF0000FFFF00000000000000000000n), null);
-assertEquals(cidrv6MaskToPrefixLength(0x0000000000000000FFFFFFFFFFFFFFFFn), null);
-assertEquals(cidrv6MaskToPrefixLength(0xFFFFFFFFFFFFFFFF0000000000000001n), null);
-</code><button class="copyButton" data-copy="import { assertEquals } from &quot;@std/assert&quot;;
+assertThrows(() =&gt; cidrv6MaskToPrefixLength(0xFFFF0000FFFF00000000000000000000n), TypeError);
+assertThrows(() =&gt; cidrv6MaskToPrefixLength(0x0000000000000000FFFFFFFFFFFFFFFFn), TypeError);
+assertThrows(() =&gt; cidrv6MaskToPrefixLength(0xFFFFFFFFFFFFFFFF0000000000000001n), TypeError);
+</code><button class="copyButton" data-copy="import { assertThrows } from &quot;@std/assert&quot;;
 import { cidrv6MaskToPrefixLength } from &quot;@hertzg/ip/cidrv6&quot;;
 
-assertEquals(cidrv6MaskToPrefixLength(0xFFFF0000FFFF00000000000000000000n), null);
-assertEquals(cidrv6MaskToPrefixLength(0x0000000000000000FFFFFFFFFFFFFFFFn), null);
-assertEquals(cidrv6MaskToPrefixLength(0xFFFFFFFFFFFFFFFF0000000000000001n), null);
+assertThrows(() =&gt; cidrv6MaskToPrefixLength(0xFFFF0000FFFF00000000000000000000n), TypeError);
+assertThrows(() =&gt; cidrv6MaskToPrefixLength(0x0000000000000000FFFFFFFFFFFFFFFFn), TypeError);
+assertThrows(() =&gt; cidrv6MaskToPrefixLength(0xFFFFFFFFFFFFFFFF0000000000000001n), TypeError);
 "><svg
   class="copy"
   width="15"
@@ -432,11 +432,19 @@ for (let prefixLength = 0; prefixLength &lt;= 128; prefixLength++) {
   <div><div class="markdown"><pre class="highlight"><code class="language-ts">import { assertThrows } from &quot;@std/assert&quot;;
 import { cidrv6MaskToPrefixLength } from &quot;@hertzg/ip/cidrv6&quot;;
 
+// Wrong shape -- a 128-bit value that is not a mask
+assertThrows(() =&gt; cidrv6MaskToPrefixLength(0xFFFF0000FFFF00000000000000000000n), TypeError);
+
+// Wrong range -- not a 128-bit unsigned integer at all
 assertThrows(() =&gt; cidrv6MaskToPrefixLength(-1n), RangeError);
 assertThrows(() =&gt; cidrv6MaskToPrefixLength(1n &lt;&lt; 128n), RangeError);
 </code><button class="copyButton" data-copy="import { assertThrows } from &quot;@std/assert&quot;;
 import { cidrv6MaskToPrefixLength } from &quot;@hertzg/ip/cidrv6&quot;;
 
+// Wrong shape -- a 128-bit value that is not a mask
+assertThrows(() =&gt; cidrv6MaskToPrefixLength(0xFFFF0000FFFF00000000000000000000n), TypeError);
+
+// Wrong range -- not a 128-bit unsigned integer at all
 assertThrows(() =&gt; cidrv6MaskToPrefixLength(-1n), RangeError);
 assertThrows(() =&gt; cidrv6MaskToPrefixLength(1n &lt;&lt; 128n), RangeError);
 "><svg
@@ -577,7 +585,7 @@ Parameters</h2></div><div class="space-y-8"><div class="anchorable docEntry" id=
 Return Type</h2></div><div class="space-y-8"><div class=" docEntry" id="function_cidrv6masktoprefixlength_0_return">
 
   <div class="docEntryHeader">
-    <div><code><span class="font-medium text-stone-500 dark:text-stone-200"><span><span class="td-kw">number</span><span class="td-op"> | </span><span class="td-kw">null</span></span></span>
+    <div><code><span class="font-medium text-stone-500 dark:text-stone-200"><span class="td-kw">number</span></span>
       </code>
     </div><a
   class="sourceButton"
@@ -604,7 +612,7 @@ Return Type</h2></div><div class="space-y-8"><div class=" docEntry" id="function
   />
 </svg>
 </a>
-</div><div class="max-w-[75ch]"><div class="markdown"><p>The prefix length (0-128), or <code>null</code> if the mask is not contiguous</p>
+</div><div class="max-w-[75ch]"><div class="markdown"><p>The prefix length (0-128)</p>
 </div></div></div>
 </div></section>
 <section class="section"  id="throws"><div>
@@ -631,6 +639,38 @@ Return Type</h2></div><div class="space-y-8"><div class=" docEntry" id="function
 </svg>
 </a>
 Throws</h2></div><div class="space-y-8"><div class=" docEntry" id="function_cidrv6masktoprefixlength_0_throws_0">
+
+  <div class="docEntryHeader">
+    <div><code><span class="font-medium text-stone-500 dark:text-stone-200">TypeError</span>
+      </code>
+    </div><a
+  class="sourceButton"
+  href="file:&#x2F;&#x2F;&#x2F;home&#x2F;runner&#x2F;work&#x2F;jsr-monorepo&#x2F;jsr-monorepo&#x2F;packages&#x2F;@hertzg&#x2F;ip&#x2F;cidrv6.ts"><svg
+  width="14"
+  height="14"
+  viewBox="0 0 14 14"
+  fill="none"
+  xmlns="http://www.w3.org/2000/svg"
+>
+  <path
+    d="M3.16675 12.6667H11.3334C11.6428 12.6667 11.9396 12.5438 12.1584 12.325C12.3772 12.1062 12.5001 11.8094 12.5001 11.5V4.20834L9.29175 1H4.33342C4.024 1 3.72725 1.12292 3.50846 1.34171C3.28966 1.5605 3.16675 1.85725 3.16675 2.16667V4.5"
+    stroke="currentColor"
+    stroke-width="1.4"
+    stroke-linecap="round"
+    stroke-linejoin="round"
+  />
+  <path
+    d="M6.08334 10.3333L7.83334 8.58334L6.08334 6.83334M3.75 6.83334L2 8.58334L3.75 10.3333M9.00001 1V4.5H12.5L9.00001 1Z"
+    stroke="currentColor"
+    stroke-width="1.4"
+    stroke-linecap="round"
+    stroke-linejoin="round"
+  />
+</svg>
+</a>
+</div><div class="max-w-[75ch]"><div class="markdown"><p>If the mask's one bits are not contiguous from the top</p>
+</div></div></div>
+<div class=" docEntry" id="function_cidrv6masktoprefixlength_0_throws_1">
 
   <div class="docEntryHeader">
     <div><code><span class="font-medium text-stone-500 dark:text-stone-200">RangeError</span>
@@ -703,7 +743,7 @@ Throws</h2></div><div class="space-y-8"><div class=" docEntry" id="function_cidr
 </svg>
 </button><code></code></pre>
 </div></div><nav class="documentNavigation">
-          <h3>Document Navigation</h3><ul><li><a href="#examples" title="Examples">Examples</a></li><li><ul><li><a href="#example_0" title="Recovering prefix lengths">Recovering prefix lengths</a></li><li><a href="#example_1" title="Non-contiguous masks return null">Non-contiguous masks return null</a></li><li><a href="#example_2" title="Round-trips with cidrv6Mask">Round-trips with cidrv6Mask</a></li><li><a href="#example_3" title="Error handling">Error handling</a></li></ul></li><li><a href="#parameters" title="Parameters">Parameters</a></li><li><ul><li><a href="#function_cidrv6masktoprefixlength_0_parameter_mask" title="mask">mask</a></li></ul></li><li><a href="#return-type" title="Return Type">Return Type</a></li><li><a href="#throws" title="Throws">Throws</a></li></ul></nav></div>
+          <h3>Document Navigation</h3><ul><li><a href="#examples" title="Examples">Examples</a></li><li><ul><li><a href="#example_0" title="Recovering prefix lengths">Recovering prefix lengths</a></li><li><a href="#example_1" title="Non-contiguous masks throw">Non-contiguous masks throw</a></li><li><a href="#example_2" title="Round-trips with cidrv6Mask">Round-trips with cidrv6Mask</a></li><li><a href="#example_3" title="Error handling">Error handling</a></li></ul></li><li><a href="#parameters" title="Parameters">Parameters</a></li><li><ul><li><a href="#function_cidrv6masktoprefixlength_0_parameter_mask" title="mask">mask</a></li></ul></li><li><a href="#return-type" title="Return Type">Return Type</a></li><li><a href="#throws" title="Throws">Throws</a></li></ul></nav></div>
   </div></div>
 </div>
 </div>
