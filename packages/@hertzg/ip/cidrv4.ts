@@ -949,7 +949,7 @@ export function cidrv4Merge(cidrs: readonly Cidrv4[]): Cidrv4[] {
   }));
 
   // Step 2: Sort by (address ascending, prefixLength ascending)
-  list.sort((a, b) => a.address - b.address || a.prefixLength - b.prefixLength);
+  list.sort(compareCidrv4);
 
   // Step 3: Remove contained blocks
   const deduped: Cidrv4[] = [];
@@ -987,4 +987,56 @@ export function cidrv4Merge(cidrs: readonly Cidrv4[]): Cidrv4[] {
   }
 
   return list;
+}
+
+/**
+ * Compares two IPv4 CIDR blocks for sorting.
+ *
+ * Orders by address ascending, then by prefix length ascending — so where
+ * two blocks share a start address, the shorter prefix (the larger block,
+ * the supernet) sorts first. This is the order PostgreSQL's `cidr` type
+ * uses, and the order every containing block needs to precede the blocks
+ * it contains, which is what {@link cidrv4Merge} relies on internally.
+ *
+ * The block is ordered **as written**: the `address` field is compared as
+ * stored, without applying the network mask first. A block carrying host
+ * bits therefore sorts by the address {@link stringifyCidrv4} will print
+ * for it, and `10.0.0.5/24` does not compare equal to `10.0.0.0/24` even
+ * though they cover the same addresses. Normalize with
+ * {@link cidrv4NetworkAddress} first if that is the order you want.
+ *
+ * @param a The first CIDR block
+ * @param b The second CIDR block
+ * @returns `-1` if `a` sorts before `b`, `1` if after, `0` if equal
+ *
+ * @example Sort a routing table
+ * ```ts
+ * import { assertEquals } from "@std/assert";
+ * import { compareCidrv4, parseCidrv4, stringifyCidrv4 } from "@hertzg/ip/cidrv4";
+ *
+ * const routes = ["192.168.1.0/24", "10.0.0.0/16", "10.0.0.0/8"].map(parseCidrv4);
+ *
+ * assertEquals(routes.toSorted(compareCidrv4).map(stringifyCidrv4), [
+ *   "10.0.0.0/8",
+ *   "10.0.0.0/16",
+ *   "192.168.1.0/24",
+ * ]);
+ * ```
+ *
+ * @example A supernet sorts before its subnets
+ * ```ts
+ * import { assertEquals } from "@std/assert";
+ * import { compareCidrv4, parseCidrv4 } from "@hertzg/ip/cidrv4";
+ *
+ * assertEquals(compareCidrv4(parseCidrv4("10.0.0.0/8"), parseCidrv4("10.0.0.0/16")), -1);
+ * assertEquals(compareCidrv4(parseCidrv4("10.0.0.0/16"), parseCidrv4("10.0.0.0/8")), 1);
+ * assertEquals(compareCidrv4(parseCidrv4("10.0.0.0/8"), parseCidrv4("10.0.0.0/8")), 0);
+ * ```
+ */
+export function compareCidrv4(a: Cidrv4, b: Cidrv4): -1 | 0 | 1 {
+  if (a.address !== b.address) return a.address < b.address ? -1 : 1;
+  if (a.prefixLength !== b.prefixLength) {
+    return a.prefixLength < b.prefixLength ? -1 : 1;
+  }
+  return 0;
 }

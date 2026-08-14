@@ -11,6 +11,7 @@ import {
   cidrv4NetworkAddress,
   cidrv4Overlaps,
   cidrv4Subtract,
+  compareCidrv4,
   parseCidrv4,
   stringifyCidrv4,
 } from "./cidrv4.ts";
@@ -1227,5 +1228,82 @@ Deno.test("cidrv4Merge", async (t) => {
       ]).map(stringifyCidrv4),
       ["198.51.100.0/24", "203.0.113.0/24"],
     );
+  });
+});
+
+Deno.test("compareCidrv4", async (t) => {
+  await t.step("orders by address ascending", () => {
+    assertEquals(
+      compareCidrv4(parseCidrv4("10.0.0.0/8"), parseCidrv4("192.168.0.0/16")),
+      -1,
+    );
+    assertEquals(
+      compareCidrv4(parseCidrv4("192.168.0.0/16"), parseCidrv4("10.0.0.0/8")),
+      1,
+    );
+  });
+
+  await t.step("tie-breaks on prefix length: supernet before subnet", () => {
+    assertEquals(
+      compareCidrv4(parseCidrv4("10.0.0.0/8"), parseCidrv4("10.0.0.0/16")),
+      -1,
+    );
+    assertEquals(
+      compareCidrv4(parseCidrv4("10.0.0.0/16"), parseCidrv4("10.0.0.0/8")),
+      1,
+    );
+  });
+
+  await t.step("equal address and prefix length compares equal", () => {
+    assertEquals(
+      compareCidrv4(parseCidrv4("10.0.0.0/8"), parseCidrv4("10.0.0.0/8")),
+      0,
+    );
+  });
+
+  await t.step(
+    "returns only -1, 0 or 1, never a prefix-length difference",
+    () => {
+      assertEquals(
+        compareCidrv4(parseCidrv4("0.0.0.0/0"), parseCidrv4("0.0.0.0/32")),
+        -1,
+      );
+      assertEquals(
+        compareCidrv4(parseCidrv4("0.0.0.0/32"), parseCidrv4("0.0.0.0/0")),
+        1,
+      );
+    },
+  );
+
+  await t.step(
+    "compares the block as written, without masking host bits",
+    () => {
+      assertEquals(
+        compareCidrv4(parseCidrv4("10.0.0.5/24"), parseCidrv4("10.0.0.0/24")),
+        1,
+      );
+    },
+  );
+
+  await t.step("sorts a routing table", () => {
+    const routes = ["192.168.1.0/24", "10.0.0.0/16", "10.0.0.0/8"].map(
+      parseCidrv4,
+    );
+    assertEquals(routes.toSorted(compareCidrv4).map(stringifyCidrv4), [
+      "10.0.0.0/8",
+      "10.0.0.0/16",
+      "192.168.1.0/24",
+    ]);
+  });
+
+  await t.step("puts a containing block before every block it contains", () => {
+    const blocks = ["10.1.0.0/16", "10.0.0.0/16", "10.0.0.0/8"].map(
+      parseCidrv4,
+    );
+    assertEquals(blocks.toSorted(compareCidrv4).map(stringifyCidrv4), [
+      "10.0.0.0/8",
+      "10.0.0.0/16",
+      "10.1.0.0/16",
+    ]);
   });
 });

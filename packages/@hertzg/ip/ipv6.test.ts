@@ -1,5 +1,11 @@
 import { assert, assertEquals, assertThrows } from "@std/assert";
-import { compressIpv6, expandIpv6, parseIpv6, stringifyIpv6 } from "./ipv6.ts";
+import {
+  compareIpv6,
+  compressIpv6,
+  expandIpv6,
+  parseIpv6,
+  stringifyIpv6,
+} from "./ipv6.ts";
 import { isValidIpv6 } from "./validatev6.ts";
 
 Deno.test("parseIpv6", async (t) => {
@@ -425,5 +431,40 @@ Deno.test("isValidIpv6", async (t) => {
     assertEquals(isValidIpv6("gggg::1"), false);
     assertEquals(isValidIpv6("abc"), false);
     assertEquals(isValidIpv6("2001:db8::/32"), false);
+  });
+});
+
+Deno.test("compareIpv6", async (t) => {
+  await t.step("orders numerically ascending", () => {
+    assertEquals(compareIpv6(parseIpv6("::1"), parseIpv6("::2")), -1);
+    assertEquals(compareIpv6(parseIpv6("::2"), parseIpv6("::1")), 1);
+    assertEquals(compareIpv6(parseIpv6("::1"), parseIpv6("::1")), 0);
+  });
+
+  await t.step("returns only -1, 0 or 1, never a magnitude", () => {
+    const lowest = parseIpv6("::");
+    const highest = parseIpv6("ffff:ffff:ffff:ffff:ffff:ffff:ffff:ffff");
+    assertEquals(compareIpv6(lowest, highest), -1);
+    assertEquals(compareIpv6(highest, lowest), 1);
+  });
+
+  await t.step("sorts numerically, not lexicographically", () => {
+    const addresses = ["2001:db8::9", "2001:db8::10", "2001:db8::2"].map(
+      parseIpv6,
+    );
+    assertEquals(addresses.toSorted(compareIpv6).map(stringifyIpv6), [
+      "2001:db8::2",
+      "2001:db8::9",
+      "2001:db8::10",
+    ]);
+  });
+
+  await t.step("orders IPv4-mapped addresses by their 128-bit value", () => {
+    const addresses = ["::ffff:10.0.0.1", "::1", "2001:db8::1"].map(parseIpv6);
+    assertEquals(addresses.toSorted(compareIpv6).map(stringifyIpv6), [
+      "::1",
+      "::ffff:a00:1",
+      "2001:db8::1",
+    ]);
   });
 });

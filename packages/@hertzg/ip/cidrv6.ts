@@ -879,10 +879,7 @@ export function cidrv6Merge(cidrs: readonly Cidrv6[]): Cidrv6[] {
   }));
 
   // Step 2: Sort by (address ascending, prefixLength ascending)
-  list.sort((a, b) =>
-    Number(a.address < b.address ? -1n : a.address > b.address ? 1n : 0n) ||
-    a.prefixLength - b.prefixLength
-  );
+  list.sort(compareCidrv6);
 
   // Step 3: Remove contained blocks
   const deduped: Cidrv6[] = [];
@@ -920,4 +917,56 @@ export function cidrv6Merge(cidrs: readonly Cidrv6[]): Cidrv6[] {
   }
 
   return list;
+}
+
+/**
+ * Compares two IPv6 CIDR blocks for sorting.
+ *
+ * Orders by address ascending, then by prefix length ascending — so where
+ * two blocks share a start address, the shorter prefix (the larger block,
+ * the supernet) sorts first. This is the order PostgreSQL's `cidr` type
+ * uses, and the order every containing block needs to precede the blocks
+ * it contains, which is what {@link cidrv6Merge} relies on internally.
+ *
+ * The block is ordered **as written**: the `address` field is compared as
+ * stored, without applying the network mask first. A block carrying host
+ * bits therefore sorts by the address {@link stringifyCidrv6} will print
+ * for it, and `2001:db8::5/64` does not compare equal to `2001:db8::/64`
+ * even though they cover the same addresses. Normalize with
+ * {@link cidrv6FirstAddress} first if that is the order you want.
+ *
+ * @param a The first CIDR block
+ * @param b The second CIDR block
+ * @returns `-1` if `a` sorts before `b`, `1` if after, `0` if equal
+ *
+ * @example Sort a list of allocations
+ * ```ts
+ * import { assertEquals } from "@std/assert";
+ * import { compareCidrv6, parseCidrv6, stringifyCidrv6 } from "@hertzg/ip/cidrv6";
+ *
+ * const blocks = ["2001:db8:1::/48", "2001:db8::/48", "2001:db8::/32"].map(parseCidrv6);
+ *
+ * assertEquals(blocks.toSorted(compareCidrv6).map(stringifyCidrv6), [
+ *   "2001:db8::/32",
+ *   "2001:db8::/48",
+ *   "2001:db8:1::/48",
+ * ]);
+ * ```
+ *
+ * @example A supernet sorts before its subnets
+ * ```ts
+ * import { assertEquals } from "@std/assert";
+ * import { compareCidrv6, parseCidrv6 } from "@hertzg/ip/cidrv6";
+ *
+ * assertEquals(compareCidrv6(parseCidrv6("2001:db8::/32"), parseCidrv6("2001:db8::/48")), -1);
+ * assertEquals(compareCidrv6(parseCidrv6("2001:db8::/48"), parseCidrv6("2001:db8::/32")), 1);
+ * assertEquals(compareCidrv6(parseCidrv6("2001:db8::/32"), parseCidrv6("2001:db8::/32")), 0);
+ * ```
+ */
+export function compareCidrv6(a: Cidrv6, b: Cidrv6): -1 | 0 | 1 {
+  if (a.address !== b.address) return a.address < b.address ? -1 : 1;
+  if (a.prefixLength !== b.prefixLength) {
+    return a.prefixLength < b.prefixLength ? -1 : 1;
+  }
+  return 0;
 }

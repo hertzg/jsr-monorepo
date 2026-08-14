@@ -11,6 +11,7 @@ import {
   cidrv6Merge,
   cidrv6Overlaps,
   cidrv6Subtract,
+  compareCidrv6,
   parseCidrv6,
   stringifyCidrv6,
 } from "./cidrv6.ts";
@@ -1107,5 +1108,83 @@ Deno.test("cidrv6Merge", async (t) => {
       ]).map(stringifyCidrv6),
       ["2001:db8::/32", "fd00::/120"],
     );
+  });
+});
+
+Deno.test("compareCidrv6", async (t) => {
+  await t.step("orders by address ascending", () => {
+    assertEquals(
+      compareCidrv6(parseCidrv6("2001:db8::/32"), parseCidrv6("fd00::/8")),
+      -1,
+    );
+    assertEquals(
+      compareCidrv6(parseCidrv6("fd00::/8"), parseCidrv6("2001:db8::/32")),
+      1,
+    );
+  });
+
+  await t.step("tie-breaks on prefix length: supernet before subnet", () => {
+    assertEquals(
+      compareCidrv6(parseCidrv6("2001:db8::/32"), parseCidrv6("2001:db8::/48")),
+      -1,
+    );
+    assertEquals(
+      compareCidrv6(parseCidrv6("2001:db8::/48"), parseCidrv6("2001:db8::/32")),
+      1,
+    );
+  });
+
+  await t.step("equal address and prefix length compares equal", () => {
+    assertEquals(
+      compareCidrv6(parseCidrv6("2001:db8::/32"), parseCidrv6("2001:db8::/32")),
+      0,
+    );
+  });
+
+  await t.step(
+    "returns only -1, 0 or 1, never a prefix-length difference",
+    () => {
+      assertEquals(
+        compareCidrv6(parseCidrv6("::/0"), parseCidrv6("::/128")),
+        -1,
+      );
+      assertEquals(
+        compareCidrv6(parseCidrv6("::/128"), parseCidrv6("::/0")),
+        1,
+      );
+    },
+  );
+
+  await t.step(
+    "compares the block as written, without masking host bits",
+    () => {
+      assertEquals(
+        compareCidrv6(
+          parseCidrv6("2001:db8::5/64"),
+          parseCidrv6("2001:db8::/64"),
+        ),
+        1,
+      );
+    },
+  );
+
+  await t.step("sorts a list of allocations", () => {
+    const blocks = ["2001:db8:1::/48", "2001:db8::/48", "2001:db8::/32"].map(
+      parseCidrv6,
+    );
+    assertEquals(blocks.toSorted(compareCidrv6).map(stringifyCidrv6), [
+      "2001:db8::/32",
+      "2001:db8::/48",
+      "2001:db8:1::/48",
+    ]);
+  });
+
+  await t.step("puts a containing block before every block it contains", () => {
+    const blocks = ["fd00:1::/32", "fd00::/32", "fd00::/8"].map(parseCidrv6);
+    assertEquals(blocks.toSorted(compareCidrv6).map(stringifyCidrv6), [
+      "fd00::/8",
+      "fd00::/32",
+      "fd00:1::/32",
+    ]);
   });
 });
