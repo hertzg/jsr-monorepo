@@ -1,6 +1,6 @@
 # ADR 0005 — Universal CIDR operations throw `TypeError` on cross-version arguments
 
-**Status:** Accepted
+**Status:** Accepted — amended by ADR 0011
 
 ## Context
 
@@ -24,8 +24,9 @@ ADR 0001), surfacing it loudly is the safer default.
 
 ## Decision
 
-Universal CIDR operations throw `TypeError` when their arguments
-are mixed versions:
+Universal CIDR operations whose result would depend on an implicit
+cross-version conversion throw `TypeError` when their arguments are
+mixed versions:
 
 - `cidrContainsCidr(v4, v6)` → `TypeError`
 - `cidrOverlaps(v4, v6)` → `TypeError`
@@ -40,6 +41,11 @@ known; the runtime check covers cases where types widen to `Cidr`.
 
 Callers who genuinely want to compare across versions convert
 explicitly via the `4to6` submodule before calling.
+
+**Comparators are excluded.** `compareIp` and `compareCidr` are total
+and version-first, and never throw — ordering a disjoint union needs
+no conversion, and a throwing comparator cannot sort. See ADR 0011
+for why the two rules do not conflict.
 
 ## Consequences
 
@@ -63,3 +69,5 @@ explicitly via the `4to6` submodule before calling.
 - ADR 0001 — Numeric representation: IPv4 and IPv6 are different
   primitive types
 - ADR 0004 — `4to6` is the explicit conversion API
+- ADR 0011 — comparators are total and version-first; the carve-out
+  from this rule
