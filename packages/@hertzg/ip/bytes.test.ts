@@ -132,7 +132,6 @@ Deno.test("ipv4ToBytes", async (t) => {
     written[3] = 9;
 
     assertEquals(frame[7], 9);
-    assertEquals(written.buffer, frame.buffer);
   });
 
   await t.step("writes through a subarray view", () => {
@@ -304,7 +303,11 @@ Deno.test("ipv6ToBytes", async (t) => {
     const written = ipv6ToBytes(parseIpv6("fe80::1"), frame, 8);
 
     assertEquals(written.length, 16);
-    assertEquals(written, ipv6ToBytes(parseIpv6("fe80::1")));
+    // deno-fmt-ignore
+    assertEquals(written, new Uint8Array([
+      0xfe, 0x80, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+      0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x01,
+    ]));
   });
 
   await t.step("the returned span is a view aliasing the target buffer", () => {
@@ -313,7 +316,6 @@ Deno.test("ipv6ToBytes", async (t) => {
     written[15] = 9;
 
     assertEquals(frame[31], 9);
-    assertEquals(written.buffer, frame.buffer);
   });
 
   await t.step("an out-of-range address throws", () => {
@@ -449,8 +451,15 @@ Deno.test("ipToBytes", async (t) => {
   await t.step("returns only the written span, not the whole buffer", () => {
     const frame = new Uint8Array(40).fill(0xaa);
 
-    assertEquals(ipToBytes(parseIpv4("203.0.113.7"), frame, 20).length, 4);
-    assertEquals(ipToBytes(parseIpv6("fe80::1"), frame, 20).length, 16);
+    assertEquals(
+      ipToBytes(parseIpv4("203.0.113.7"), frame, 20),
+      new Uint8Array([203, 0, 113, 7]),
+    );
+    // deno-fmt-ignore
+    assertEquals(ipToBytes(parseIpv6("fe80::1"), frame, 20), new Uint8Array([
+      0xfe, 0x80, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+      0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x01,
+    ]));
   });
 
   await t.step("an out-of-range address throws for either version", () => {

@@ -70,9 +70,6 @@ const IPV4_BYTE_LENGTH = 4;
 /** The wire width of an IPv6 address, in bytes. */
 const IPV6_BYTE_LENGTH = 16;
 
-/** Mask for extracting one 32-bit group out of a 128-bit address. */
-const U32_MASK = 0xFFFF_FFFFn;
-
 /**
  * Throws unless `[offset, offset + width)` lies inside a buffer of
  * `byteLength` bytes.
@@ -93,6 +90,32 @@ function requireSpan(
       `${version} needs ${width} bytes at offset ${offset} of a ${byteLength}-byte buffer`,
     );
   }
+}
+
+/**
+ * Resolves the `width`-byte span a write should land in: a fresh buffer when
+ * `into` is omitted, otherwise a view into `into` at `offset`.
+ *
+ * The span is validated before it is returned, so a caller's buffer is never
+ * partially written when the offset does not fit.
+ *
+ * @param into The caller's buffer, or `undefined` to allocate
+ * @param offset The offset within `into` to write at
+ * @param width The wire width of the address being written
+ * @param version The version label used in the error message
+ * @returns The span to write into, which aliases `into` when one was given
+ */
+function targetSpan(
+  into: Uint8Array | undefined,
+  offset: number,
+  width: number,
+  version: string,
+): Uint8Array {
+  if (into === undefined) {
+    return new Uint8Array(width);
+  }
+  requireSpan(into.length, offset, width, version);
+  return into.subarray(offset, offset + width);
 }
 
 /**
@@ -241,15 +264,9 @@ export function ipv4ToBytes(
     );
   }
 
-  if (into === undefined) {
-    const bytes = new Uint8Array(IPV4_BYTE_LENGTH);
-    writeUint32(address, bytes, 0);
-    return bytes;
-  }
-
-  requireSpan(into.length, offset, IPV4_BYTE_LENGTH, "IPv4");
-  writeUint32(address, into, offset);
-  return into.subarray(offset, offset + IPV4_BYTE_LENGTH);
+  const span = targetSpan(into, offset, IPV4_BYTE_LENGTH, "IPv4");
+  writeUint32(address, span, 0);
+  return span;
 }
 
 /**
@@ -373,30 +390,23 @@ export function ipv6ToBytes(
     );
   }
 
-  if (into === undefined) {
-    const bytes = new Uint8Array(IPV6_BYTE_LENGTH);
-    writeIpv6(address, bytes, 0);
-    return bytes;
-  }
-
-  requireSpan(into.length, offset, IPV6_BYTE_LENGTH, "IPv6");
-  writeIpv6(address, into, offset);
-  return into.subarray(offset, offset + IPV6_BYTE_LENGTH);
+  const span = targetSpan(into, offset, IPV6_BYTE_LENGTH, "IPv6");
+  writeIpv6(address, span);
+  return span;
 }
 
 /**
  * Writes a 128-bit address as sixteen bytes in network order, as four 32-bit
- * groups. The caller is responsible for the span being in bounds.
+ * groups. The caller is responsible for `into` being exactly the span.
  *
  * @param address The address as a 128-bit unsigned bigint
- * @param into The buffer to write into
- * @param offset The offset of the first byte
+ * @param into The 16-byte span to write into
  */
-function writeIpv6(address: bigint, into: Uint8Array, offset: number): void {
-  writeUint32(Number((address >> 96n) & U32_MASK), into, offset);
-  writeUint32(Number((address >> 64n) & U32_MASK), into, offset + 4);
-  writeUint32(Number((address >> 32n) & U32_MASK), into, offset + 8);
-  writeUint32(Number(address & U32_MASK), into, offset + 12);
+function writeIpv6(address: bigint, into: Uint8Array): void {
+  writeUint32(Number(BigInt.asUintN(32, address >> 96n)), into, 0);
+  writeUint32(Number(BigInt.asUintN(32, address >> 64n)), into, 4);
+  writeUint32(Number(BigInt.asUintN(32, address >> 32n)), into, 8);
+  writeUint32(Number(BigInt.asUintN(32, address)), into, 12);
 }
 
 /**
@@ -529,6 +539,10 @@ export function ipToBytes(
   into?: Uint8Array,
   offset = 0,
 ): Uint8Array {
+  // The delegates deliberately publish no overload taking `into?`, so that
+  // `(address, undefined, 8)` — an offset with nothing to apply it to — is a
+  // compile error. That costs this dispatcher an extra fork; both arms of it
+  // reach the same code.
   if (typeof address === "bigint") {
     return into === undefined
       ? ipv6ToBytes(address)

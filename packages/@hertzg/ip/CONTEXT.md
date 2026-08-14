@@ -1,6 +1,7 @@
 # @hertzg/ip
 
-IPv4 and IPv6 address parsing, stringifying, classification, and CIDR utilities.
+IPv4 and IPv6 address parsing, stringifying, classification, CIDR utilities, and
+conversion to and from wire bytes.
 The value-level vocabulary is shared across both protocol versions; the version
 is encoded in the JS primitive type (`number` for IPv4, `bigint` for IPv6 — see
 ADR 0001).
@@ -54,6 +55,23 @@ fixed bits themselves rather than their count, and is reserved for that (the
 prefix length is the "network mask", returned by `cidrv4Mask` / `cidrv6Mask`. A
 parameter accepting either a whole CIDR or a bare prefix length keeps the union
 role name `cidrOrPrefixLength`, following **AddressOrCidr**.
+
+**Span**: A window of _bytes_ — a start offset and a fixed width — inside a
+`Uint8Array`, as used by the `bytes` submodule. An IPv4 address occupies a
+4-byte span, an IPv6 address a 16-byte span. Note this is a **different sense
+from the "start-to-end span" in the CIDR entry above**, which is about address
+space, not byte space; the two never appear in the same signature, and only
+this byte sense is spelled `span` in code and error messages. _Avoid_: `range`,
+`window`, `slice` — `slice` in particular implies the copying `Uint8Array`
+method, while the byte functions hand back a non-copying `subarray` view.
+
+**bytes / into**: The role names for the two buffer positions. `bytes` is the
+buffer being read _from_ (`ipv4FromBytes(bytes, offset)`); `into` is the
+optional buffer being written _to_ (`ipv4ToBytes(address, into, offset)`),
+named for the preposition so the call site reads as a sentence. `offset`
+locates the span in whichever of the two is present, and it never says how wide
+the span is — the width comes from the function. _Avoid_: `buf`, `buffer`,
+`target`, `dst`, and `out` for the destination. See ADR 0012.
 
 ## Function-name convention
 

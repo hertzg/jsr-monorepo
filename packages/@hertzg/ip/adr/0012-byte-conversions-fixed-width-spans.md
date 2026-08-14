@@ -45,10 +45,34 @@ holds one address and nothing else. There is no version parameter: a
 function that takes both bytes and a version is `ipv4FromBytes` with
 extra steps.
 
-**A short span throws `RangeError`, on both read and write.** This is
-not the buffer-capacity checking the repo forbids: the span is a value
-domain, checked exactly the way `stringifyIpv4` already checks that its
-argument fits in 32 bits. It measures free — see Consequences.
+**A short span throws `RangeError`, on both read and write.** The two
+halves stand on different ground, and it is worth being straight about
+which.
+
+On the **read** side this is not an exception to repo ADR 0006 at all.
+That ADR already carves out "boundary errors (network, parsing
+untrusted bytes)" as real failures rather than type assertions, and a
+buffer arriving off a wire is exactly that.
+
+On the **write** side it *is* in tension with the same ADR, which lists
+"callers are responsible for buffer sizes" as a consequence. The check
+stays anyway, for two reasons. A partial write into a caller's frame
+corrupts a buffer they still hold, which is worse than a bad return
+value they can inspect. And symmetry matters more than the rule here:
+a module where the read validates and the write does not is a module
+whose contract nobody can remember. It measures free — see
+Consequences.
+
+**Both v4 and v6 functions live in one module, against ADR 0002's
+`<concern>[v4|v6]` grouping.** That grouping exists for tree-shaking,
+and there is nothing here to shake: `ipv4FromBytes` is two lines and
+`ipv6FromBytes` is five, against the ~27 KB each that justifies
+splitting `cidrv4.ts` from `cidrv6.ts`. Splitting would also strand the
+private `readUint32` / `writeUint32` helpers, which both versions
+share and which the package has no private-module convention to hold.
+`4to6.ts` is the standing precedent for a cross-version concern in one
+file. The naming convention that callers actually read — the
+`Ip` / `Ipv4` / `Ipv6` qualifier — is followed exactly.
 
 **Index arithmetic, not `DataView`, in all six functions.** The 32-bit
 read and write are shared private helpers; the 128-bit functions call
@@ -67,7 +91,9 @@ addresses have exactly one wire order.
 
 ## Consequences
 
-- **`DataView`'s cost is its constructor, not its accessors.** On an
+- **`DataView`'s cost is its constructor, not its accessors.** From a
+  throwaway `deno bench` run while deciding this, not a committed
+  benchmark; re-measure before leaning on the exact figures. On an
   M2 Pro, Deno 2.9.5, per call: IPv4 read 3.9 ns by index vs 50.7 ns
   via `DataView`, IPv4 write 3.8 ns vs 48.2 ns, IPv6 read 37.6 ns vs
   49.9 ns. `DataView` wins one case, the IPv6 write, by 12 % (57.1 ns
@@ -98,6 +124,14 @@ addresses have exactly one wire order.
   `result.length` is the answer.
 - **The subarray is a view, not a copy.** Writing through the returned
   value writes into `into`. That is the point, and it is documented.
+- **The view is the dominant cost of the in-place write, and callers
+  cannot opt out.** Writing four bytes into an existing frame costs
+  ~25 ns, of which ~24 ns is the `subarray`; the write alone is
+  ~1.4 ns. V8 does not elide it even when the call site discards the
+  result, which is the common packet-encoder shape. That is the price
+  of `result.length` meaning something. If a consumer ever needs the
+  bytes-written path without it, add a separate void-returning entry
+  point rather than making the return type conditional.
 
 ## References
 
@@ -107,5 +141,9 @@ addresses have exactly one wire order.
   conversion of those, not a third representation
 - ADR 0004 — universal parsers auto-unwrap IPv4-mapped IPv6; the byte
   conversions deliberately do not
+- ADR 0002 — `<concern>[v4|v6]` submodule grouping, which this module
+  deliberately collapses into one file
 - ADR 0005 — cross-version misuse throws rather than answering quietly
+- Repo ADR 0006 — no defensive programming; its boundary-error carve-out
+  covers the read side, and the write-side check is argued above
 - Repo ADR 0010 — sub-entrypoint exports per package
