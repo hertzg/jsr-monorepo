@@ -4,16 +4,17 @@
  * This module provides {@link parseCidr}, {@link stringifyCidr},
  * {@link isValidCidr}, {@link cidrContainsCidr}, {@link cidrOverlaps},
  * {@link cidrIntersect}, {@link cidrSubtract}, {@link cidrMerge},
- * {@link cidrSize}, and {@link cidrAddresses} that auto-detect IPv4 vs IPv6
- * and delegate to the appropriate version-specific function. The {@link Cidr}
+ * {@link cidrSize}, {@link cidrAddresses}, and {@link compareCidr} that
+ * auto-detect IPv4 vs IPv6 and delegate to the appropriate
+ * version-specific function. The {@link Cidr}
  * type alias and {@link isCidrv4}/{@link isCidrv6} type guards are also
  * exported for working with version-polymorphic CIDR values, along with the
  * {@link AddressOrCidr} union used by the universal `parse` and `stringify`
  * at the package root.
  *
  * For version-specific functions, see:
- * - [`cidrv4`](https://jsr.io/@hertzg/ip/doc/cidrv4): {@link parseCidrv4}, {@link stringifyCidrv4}, {@link isValidCidrv4}
- * - [`cidrv6`](https://jsr.io/@hertzg/ip/doc/cidrv6): {@link parseCidrv6}, {@link stringifyCidrv6}, {@link isValidCidrv6}
+ * - [`cidrv4`](https://jsr.io/@hertzg/ip/doc/cidrv4): {@link parseCidrv4}, {@link stringifyCidrv4}, {@link isValidCidrv4}, {@link compareCidrv4}
+ * - [`cidrv6`](https://jsr.io/@hertzg/ip/doc/cidrv6): {@link parseCidrv6}, {@link stringifyCidrv6}, {@link isValidCidrv6}, {@link compareCidrv6}
  *
  * @example Parse and stringify any CIDR block
  * ```ts
@@ -45,6 +46,7 @@ import {
   cidrv4Overlaps,
   cidrv4Size,
   cidrv4Subtract,
+  compareCidrv4,
   parseCidrv4,
   stringifyCidrv4,
 } from "./cidrv4.ts";
@@ -57,6 +59,7 @@ import {
   cidrv6Overlaps,
   cidrv6Size,
   cidrv6Subtract,
+  compareCidrv6,
   parseCidrv6,
   stringifyCidrv6,
 } from "./cidrv6.ts";
@@ -576,4 +579,62 @@ export function* cidrAddresses(
       },
     );
   }
+}
+
+/**
+ * Compares two CIDR blocks of either version for sorting.
+ *
+ * The order is **version-first and total**: every {@link Cidrv4} sorts
+ * before every {@link Cidrv6}, and within a version blocks sort by address
+ * ascending, then by prefix length ascending — the shorter prefix (the
+ * larger block) first. Mixed-version arguments are not an error: unlike
+ * {@link cidrContainsCidr}, {@link cidrOverlaps}, {@link cidrIntersect},
+ * {@link cidrSubtract} and {@link cidrMerge}, this function never throws,
+ * because sorting a mixed list is the reason it exists. Ordering a disjoint
+ * union needs no cross-version conversion — see ADR 0011.
+ *
+ * The block is ordered **as written**: the `address` field is compared as
+ * stored, without applying the network mask first. See
+ * {@link compareCidrv4} for what that means for blocks carrying host bits.
+ *
+ * @param a The first CIDR block
+ * @param b The second CIDR block
+ * @returns `-1` if `a` sorts before `b`, `1` if after, `0` if equal
+ *
+ * @example Sort a mixed dual-stack allowlist
+ * ```ts
+ * import { assertEquals } from "@std/assert";
+ * import { compareCidr, parseCidr, stringifyCidr } from "@hertzg/ip/cidr";
+ *
+ * const allowlist = [
+ *   "2001:db8::/32",
+ *   "192.168.1.0/24",
+ *   "10.0.0.0/16",
+ *   "fd00::/8",
+ *   "10.0.0.0/8",
+ * ].map(parseCidr);
+ *
+ * assertEquals(allowlist.toSorted(compareCidr).map(stringifyCidr), [
+ *   "10.0.0.0/8",
+ *   "10.0.0.0/16",
+ *   "192.168.1.0/24",
+ *   "2001:db8::/32",
+ *   "fd00::/8",
+ * ]);
+ * ```
+ *
+ * @example Mixed versions sort, they do not throw
+ * ```ts
+ * import { assertEquals } from "@std/assert";
+ * import { compareCidr, parseCidr } from "@hertzg/ip/cidr";
+ *
+ * assertEquals(compareCidr(parseCidr("255.0.0.0/8"), parseCidr("::/0")), -1);
+ * assertEquals(compareCidr(parseCidr("::/0"), parseCidr("0.0.0.0/0")), 1);
+ * ```
+ */
+export function compareCidr(a: Cidr, b: Cidr): -1 | 0 | 1 {
+  if (isCidrv4(a)) {
+    return isCidrv4(b) ? compareCidrv4(a, b) : -1;
+  }
+  return isCidrv6(b) ? compareCidrv6(a, b) : 1;
 }

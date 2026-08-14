@@ -10,6 +10,7 @@
  * - **Dual-Stack Support**: Auto-unwrap IPv4-mapped IPv6 addresses from dual-stack sockets
  * - **IP Classification**: Identify private, loopback, multicast, public, and other well-known ranges
  * - **CIDR Support**: Parse CIDR notation, check containment, compute network boundaries
+ * - **Sorting**: Version-first comparators for addresses and CIDR blocks, mixed lists included
  * - **IPv4 & IPv6 Parsing**: Convert between standard notation and number/bigint for arithmetic
  * - **Address Generation**: Lazily enumerate addresses in CIDR blocks
  * - **IPv4-Mapped Conversion**: Convert between IPv4 and IPv4-mapped IPv6 addresses and CIDRs
@@ -107,6 +108,31 @@
  * // internalIp.parse("8.8.8.8");     // throws: public
  * ```
  *
+ * ## Sorting
+ *
+ * @example Sort a mixed dual-stack list of addresses and CIDR blocks
+ * ```ts
+ * import { assertEquals } from "@std/assert";
+ * import { compareCidr, compareIp, parseCidr, parseIp, stringify } from "@hertzg/ip";
+ *
+ * // All IPv4 sorts before all IPv6, numerically ascending within each version
+ * const clients = ["2001:db8::1", "10.0.0.10", "::1", "10.0.0.2"].map(parseIp);
+ * assertEquals(clients.toSorted(compareIp).map(stringify), [
+ *   "10.0.0.2",
+ *   "10.0.0.10",
+ *   "::1",
+ *   "2001:db8::1",
+ * ]);
+ *
+ * // CIDR blocks tie-break on prefix length: the larger block comes first
+ * const ranges = ["10.0.0.0/16", "2001:db8::/32", "10.0.0.0/8"].map(parseCidr);
+ * assertEquals(ranges.toSorted(compareCidr).map(stringify), [
+ *   "10.0.0.0/8",
+ *   "10.0.0.0/16",
+ *   "2001:db8::/32",
+ * ]);
+ * ```
+ *
  * ## Parsing and Stringifying
  *
  * @example Parse and stringify IPv4 and IPv6 addresses
@@ -200,6 +226,8 @@
  * - {@link cidrIntersect}: Return the overlapping CIDR block, or null
  * - {@link cidrSubtract}: Return CIDR blocks in A but not in B
  * - {@link cidrMerge}: Merge CIDR blocks into the minimal covering set
+ * - {@link compareIp}: Compare two IP addresses of either version for sorting
+ * - {@link compareCidr}: Compare two CIDR blocks of either version for sorting
  * - {@link isValidIp}: Check if a string is a valid plain IP address (IPv4 or IPv6)
  * - {@link isValidCidr}: Check if a string is valid CIDR notation (IPv4 or IPv6)
  * - {@link classifyIp}: Classify an IPv4 (number) or IPv6 (bigint) address
@@ -210,6 +238,7 @@
  * ### IPv4
  * - {@link parseIpv4}: Parse dotted decimal notation to number
  * - {@link stringifyIpv4}: Convert number to dotted decimal notation
+ * - {@link compareIpv4}: Compare two IPv4 addresses for sorting
  * - {@link isValidIpv4}: Check if a string is a valid IPv4 address
  *
  * ### IPv4 CIDR
@@ -230,6 +259,7 @@
  * - {@link cidrv4BroadcastAddress}: Alias for cidrv4LastAddress
  * - {@link cidrv4Size}: Get total number of addresses in CIDR block
  * - {@link cidrv4Addresses}: Generate IP addresses in CIDR block
+ * - {@link compareCidrv4}: Compare two IPv4 CIDR blocks for sorting
  * - {@link isValidCidrv4}: Check if a string is valid IPv4 CIDR notation
  *
  * ### IPv6
@@ -237,6 +267,7 @@
  * - {@link stringifyIpv6}: Convert bigint to compressed colon-hexadecimal
  * - {@link expandIpv6}: Expand to full uncompressed form
  * - {@link compressIpv6}: Compress to canonical shortest form
+ * - {@link compareIpv6}: Compare two IPv6 addresses for sorting
  * - {@link isValidIpv6}: Check if a string is a valid IPv6 address
  *
  * ### IPv6 CIDR
@@ -255,6 +286,7 @@
  * - {@link cidrv6LastAddress}: Get last address in CIDR block
  * - {@link cidrv6Size}: Get total number of addresses in CIDR block
  * - {@link cidrv6Addresses}: Generate IP addresses in CIDR block
+ * - {@link compareCidrv6}: Compare two IPv6 CIDR blocks for sorting
  * - {@link isValidCidrv6}: Check if a string is valid IPv6 CIDR notation
  *
  * ### IPv4 Classification
@@ -295,12 +327,12 @@
  * - {@link cidrv4FromCidrv64Mapped}: Convert IPv4-mapped IPv6 CIDR to IPv4 CIDR
  *
  * ### Submodules
- * - [`ip`](https://jsr.io/@hertzg/ip/doc/ip): Universal IP parsing via {@link parseIp}, {@link stringifyIp}
- * - [`cidr`](https://jsr.io/@hertzg/ip/doc/cidr): Universal CIDR parsing via {@link parseCidr}, {@link stringifyCidr}
- * - [`ipv4`](https://jsr.io/@hertzg/ip/doc/ipv4): IPv4 parsing and validation
- * - [`cidrv4`](https://jsr.io/@hertzg/ip/doc/cidrv4): IPv4 CIDR utilities and validation
- * - [`ipv6`](https://jsr.io/@hertzg/ip/doc/ipv6): IPv6 parsing and validation
- * - [`cidrv6`](https://jsr.io/@hertzg/ip/doc/cidrv6): IPv6 CIDR utilities and validation
+ * - [`ip`](https://jsr.io/@hertzg/ip/doc/ip): Universal IP parsing via {@link parseIp}, {@link stringifyIp}, {@link compareIp}
+ * - [`cidr`](https://jsr.io/@hertzg/ip/doc/cidr): Universal CIDR parsing via {@link parseCidr}, {@link stringifyCidr}, {@link compareCidr}
+ * - [`ipv4`](https://jsr.io/@hertzg/ip/doc/ipv4): IPv4 parsing, sorting, and validation
+ * - [`cidrv4`](https://jsr.io/@hertzg/ip/doc/cidrv4): IPv4 CIDR utilities, sorting, and validation
+ * - [`ipv6`](https://jsr.io/@hertzg/ip/doc/ipv6): IPv6 parsing, sorting, and validation
+ * - [`cidrv6`](https://jsr.io/@hertzg/ip/doc/cidrv6): IPv6 CIDR utilities, sorting, and validation
  * - [`classify`](https://jsr.io/@hertzg/ip/doc/classify): Universal classifier via {@link classifyIp}
  * - [`classifyv4`](https://jsr.io/@hertzg/ip/doc/classifyv4): IPv4 classification via {@link classifyIpv4}, {@link isIpv4Private}, etc.
  * - [`classifyv6`](https://jsr.io/@hertzg/ip/doc/classifyv6): IPv6 classification via {@link classifyIpv6}, {@link isIpv6Loopback}, etc.
@@ -321,6 +353,8 @@ import type { Cidrv6 } from "./cidr.ts";
 export {
   /** A plain IP address of either IP version. */
   type Address,
+  /** Compare two IP addresses of either version for sorting. */
+  compareIp,
   /** Parse any IP address string to number (IPv4) or bigint (IPv6). */
   parseIp,
   /** Convert number or bigint to IP address string. */
@@ -345,6 +379,8 @@ export {
   cidrSize,
   /** Return CIDR blocks in A but not in B. */
   cidrSubtract,
+  /** Compare two CIDR blocks of either version for sorting. */
+  compareCidr,
   /** Type guard that checks whether a Cidr is an IPv4 CIDR block. */
   isCidrv4,
   /** Type guard that checks whether a Cidr is an IPv6 CIDR block. */
@@ -463,6 +499,8 @@ export {
 // --- IPv4 ---
 
 export {
+  /** Compare two IPv4 addresses for sorting. */
+  compareIpv4,
   /** Parse dotted decimal notation to number. */
   parseIpv4,
   /** Convert number to dotted decimal notation. */
@@ -506,6 +544,8 @@ export {
   cidrv4Size,
   /** Return IPv4 CIDR blocks in A but not in B. */
   cidrv4Subtract,
+  /** Compare two IPv4 CIDR blocks for sorting. */
+  compareCidrv4,
   /** Parse CIDR notation string to Cidrv4. */
   parseCidrv4,
   /** Convert Cidrv4 to CIDR notation string. */
@@ -542,6 +582,8 @@ export {
 // --- IPv6 ---
 
 export {
+  /** Compare two IPv6 addresses for sorting. */
+  compareIpv6,
   /** Compress to canonical shortest form. */
   compressIpv6,
   /** Expand to full uncompressed form. */
@@ -585,6 +627,8 @@ export {
   cidrv6Size,
   /** Return IPv6 CIDR blocks in A but not in B. */
   cidrv6Subtract,
+  /** Compare two IPv6 CIDR blocks for sorting. */
+  compareCidrv6,
   /** Parse CIDR notation string to Cidrv6. */
   parseCidrv6,
   /** Convert Cidrv6 to CIDR notation string. */

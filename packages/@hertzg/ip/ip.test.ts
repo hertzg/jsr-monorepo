@@ -1,5 +1,7 @@
 import { assertEquals } from "@std/assert";
-import { parseIp, stringifyIp } from "./ip.ts";
+import { compareIp, parseIp, stringifyIp } from "./ip.ts";
+import { parseIpv4 } from "./ipv4.ts";
+import { parseIpv6 } from "./ipv6.ts";
 
 Deno.test("parseIp", async (t) => {
   await t.step("parses IPv4 addresses", () => {
@@ -54,5 +56,75 @@ Deno.test("parseIp round-trip", async (t) => {
     for (const addr of addrs) {
       assertEquals(stringifyIp(parseIp(addr) as bigint), addr);
     }
+  });
+});
+
+Deno.test("compareIp", async (t) => {
+  await t.step("orders IPv4 addresses numerically ascending", () => {
+    assertEquals(compareIp(parseIp("10.0.0.1"), parseIp("10.0.0.2")), -1);
+    assertEquals(compareIp(parseIp("10.0.0.2"), parseIp("10.0.0.1")), 1);
+    assertEquals(compareIp(parseIp("10.0.0.1"), parseIp("10.0.0.1")), 0);
+  });
+
+  await t.step("orders IPv6 addresses numerically ascending", () => {
+    assertEquals(compareIp(parseIp("::1"), parseIp("::2")), -1);
+    assertEquals(compareIp(parseIp("::2"), parseIp("::1")), 1);
+    assertEquals(compareIp(parseIp("::1"), parseIp("::1")), 0);
+  });
+
+  await t.step("sorts every IPv4 address before every IPv6 address", () => {
+    assertEquals(compareIp(parseIp("255.255.255.255"), parseIp("::")), -1);
+    assertEquals(compareIp(parseIp("::"), parseIp("0.0.0.0")), 1);
+  });
+
+  await t.step("does not throw on mixed versions", () => {
+    const mixed = ["2001:db8::1", "10.0.0.2", "::1", "10.0.0.1"].map(parseIp);
+    assertEquals(mixed.toSorted(compareIp).map(stringifyIp), [
+      "10.0.0.1",
+      "10.0.0.2",
+      "::1",
+      "2001:db8::1",
+    ]);
+  });
+
+  await t.step("sorts a mixed list the same way from any input order", () => {
+    const expected = ["0.0.0.0", "255.255.255.255", "::", "2001:db8::1"];
+    const forwards = expected.map(parseIp);
+    const backwards = expected.toReversed().map(parseIp);
+
+    assertEquals(forwards.toSorted(compareIp).map(stringifyIp), expected);
+    assertEquals(backwards.toSorted(compareIp).map(stringifyIp), expected);
+  });
+
+  await t.step(
+    "an IPv4-mapped bigint is an IPv6 value, not its IPv4 twin",
+    () => {
+      const mapped = parseIpv6("::ffff:10.0.0.1");
+      const plain = parseIpv4("10.0.0.1");
+
+      assertEquals(compareIp(mapped, plain), 1);
+      assertEquals(compareIp(plain, mapped), -1);
+    },
+  );
+
+  await t.step(
+    "parseIp unwraps mapped addresses, so they compare equal",
+    () => {
+      assertEquals(
+        compareIp(parseIp("::ffff:10.0.0.1"), parseIp("10.0.0.1")),
+        0,
+      );
+    },
+  );
+
+  await t.step("returns only -1, 0 or 1, never a magnitude", () => {
+    assertEquals(compareIp(parseIp("0.0.0.0"), parseIp("255.255.255.255")), -1);
+    assertEquals(
+      compareIp(
+        parseIp("::"),
+        parseIp("ffff:ffff:ffff:ffff:ffff:ffff:ffff:ffff"),
+      ),
+      -1,
+    );
   });
 });
