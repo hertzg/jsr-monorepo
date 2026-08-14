@@ -32,7 +32,7 @@
  * @module
  */
 
-import { parseIpv6, stringifyIpv6 } from "./ipv6.ts";
+import { compareIpv6, parseIpv6, stringifyIpv6 } from "./ipv6.ts";
 
 /**
  * Represents an IPv6 CIDR block.
@@ -878,7 +878,7 @@ export function cidrv6Merge(cidrs: readonly Cidrv6[]): Cidrv6[] {
     prefixLength: cidr.prefixLength,
   }));
 
-  // Step 2: Sort by (address ascending, prefixLength ascending)
+  // Step 2: Sort into comparator order (supernets before their subnets)
   list.sort(compareCidrv6);
 
   // Step 3: Remove contained blocks
@@ -964,9 +964,9 @@ export function cidrv6Merge(cidrs: readonly Cidrv6[]): Cidrv6[] {
  * ```
  */
 export function compareCidrv6(a: Cidrv6, b: Cidrv6): -1 | 0 | 1 {
-  if (a.address !== b.address) return a.address < b.address ? -1 : 1;
-  if (a.prefixLength !== b.prefixLength) {
-    return a.prefixLength < b.prefixLength ? -1 : 1;
-  }
+  const byAddress = compareIpv6(a.address, b.address);
+  if (byAddress !== 0) return byAddress;
+  if (a.prefixLength < b.prefixLength) return -1;
+  if (a.prefixLength > b.prefixLength) return 1;
   return 0;
 }

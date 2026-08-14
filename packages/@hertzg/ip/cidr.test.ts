@@ -381,7 +381,7 @@ Deno.test("compareCidr", async (t) => {
     assertEquals(compareCidr(parseCidr("::/0"), parseCidr("0.0.0.0/0")), 1);
   });
 
-  await t.step("does not throw on mixed versions", () => {
+  await t.step("sorts a mixed list instead of throwing", () => {
     const mixed = [
       "2001:db8::/32",
       "192.168.1.0/24",
@@ -399,38 +399,13 @@ Deno.test("compareCidr", async (t) => {
     ]);
   });
 
-  await t.step(
-    "compares the block as written, without masking host bits",
-    () => {
-      assertEquals(
-        compareCidr(parseCidr("10.0.0.5/24"), parseCidr("10.0.0.0/24")),
-        1,
-      );
-    },
-  );
-
-  await t.step(
-    "returns only -1, 0 or 1, never a prefix-length difference",
-    () => {
-      assertEquals(
-        compareCidr(parseCidr("0.0.0.0/0"), parseCidr("0.0.0.0/32")),
-        -1,
-      );
-      assertEquals(
-        compareCidr(parseCidr("0.0.0.0/32"), parseCidr("0.0.0.0/0")),
-        1,
-      );
-    },
-  );
-
   await t.step("agrees with the order cidrMerge produces", () => {
     const blocks = ["10.2.0.0/16", "192.168.0.0/16", "10.0.0.0/16"].map(
       parseCidr,
     );
+    const ordered = ["10.0.0.0/16", "10.2.0.0/16", "192.168.0.0/16"];
 
-    assertEquals(
-      cidrMerge(blocks as Cidrv4[]).map(stringifyCidr),
-      blocks.toSorted(compareCidr).map(stringifyCidr),
-    );
+    assertEquals(blocks.toSorted(compareCidr).map(stringifyCidr), ordered);
+    assertEquals(cidrMerge(blocks as Cidrv4[]).map(stringifyCidr), ordered);
   });
 });

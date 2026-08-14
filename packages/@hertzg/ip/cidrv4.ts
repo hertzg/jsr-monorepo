@@ -32,7 +32,7 @@
  * @module
  */
 
-import { parseIpv4, stringifyIpv4 } from "./ipv4.ts";
+import { compareIpv4, parseIpv4, stringifyIpv4 } from "./ipv4.ts";
 
 /**
  * Represents an IPv4 CIDR block.
@@ -948,7 +948,7 @@ export function cidrv4Merge(cidrs: readonly Cidrv4[]): Cidrv4[] {
     prefixLength: cidr.prefixLength,
   }));
 
-  // Step 2: Sort by (address ascending, prefixLength ascending)
+  // Step 2: Sort into comparator order (supernets before their subnets)
   list.sort(compareCidrv4);
 
   // Step 3: Remove contained blocks
@@ -1034,9 +1034,9 @@ export function cidrv4Merge(cidrs: readonly Cidrv4[]): Cidrv4[] {
  * ```
  */
 export function compareCidrv4(a: Cidrv4, b: Cidrv4): -1 | 0 | 1 {
-  if (a.address !== b.address) return a.address < b.address ? -1 : 1;
-  if (a.prefixLength !== b.prefixLength) {
-    return a.prefixLength < b.prefixLength ? -1 : 1;
-  }
+  const byAddress = compareIpv4(a.address, b.address);
+  if (byAddress !== 0) return byAddress;
+  if (a.prefixLength < b.prefixLength) return -1;
+  if (a.prefixLength > b.prefixLength) return 1;
   return 0;
 }

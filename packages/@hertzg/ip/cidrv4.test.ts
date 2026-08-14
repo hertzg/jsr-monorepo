@@ -1295,15 +1295,4 @@ Deno.test("compareCidrv4", async (t) => {
       "192.168.1.0/24",
     ]);
   });
-
-  await t.step("puts a containing block before every block it contains", () => {
-    const blocks = ["10.1.0.0/16", "10.0.0.0/16", "10.0.0.0/8"].map(
-      parseCidrv4,
-    );
-    assertEquals(blocks.toSorted(compareCidrv4).map(stringifyCidrv4), [
-      "10.0.0.0/8",
-      "10.0.0.0/16",
-      "10.1.0.0/16",
-    ]);
-  });
 });

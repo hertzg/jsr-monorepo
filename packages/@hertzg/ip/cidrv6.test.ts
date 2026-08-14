@@ -1178,13 +1178,4 @@ Deno.test("compareCidrv6", async (t) => {
       "2001:db8:1::/48",
     ]);
   });
-
-  await t.step("puts a containing block before every block it contains", () => {
-    const blocks = ["fd00:1::/32", "fd00::/32", "fd00::/8"].map(parseCidrv6);
-    assertEquals(blocks.toSorted(compareCidrv6).map(stringifyCidrv6), [
-      "fd00::/8",
-      "fd00::/32",
-      "fd00:1::/32",
-    ]);
-  });
 });

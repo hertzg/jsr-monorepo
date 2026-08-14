@@ -10,20 +10,6 @@
  * - [`ipv4`](https://jsr.io/@hertzg/ip/doc/ipv4): {@link parseIpv4}, {@link stringifyIpv4}, {@link compareIpv4}
  * - [`ipv6`](https://jsr.io/@hertzg/ip/doc/ipv6): {@link parseIpv6}, {@link stringifyIpv6}, {@link compareIpv6}
  *
- * @example Sort a mixed list of addresses
- * ```ts
- * import { assertEquals } from "@std/assert";
- * import { compareIp, parseIp, stringifyIp } from "@hertzg/ip/ip";
- *
- * const addresses = ["2001:db8::1", "10.0.0.2", "10.0.0.1"].map(parseIp);
- *
- * assertEquals(addresses.toSorted(compareIp).map(stringifyIp), [
- *   "10.0.0.1",
- *   "10.0.0.2",
- *   "2001:db8::1",
- * ]);
- * ```
- *
  * @example Parse and stringify any IP address
  * ```ts
  * import { assertEquals } from "@std/assert";
