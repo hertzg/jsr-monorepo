@@ -320,11 +320,15 @@
  * - {@link cidrv4ToCidrv64Mapped}: Convert IPv4 CIDR to IPv4-mapped IPv6 CIDR
  * - {@link cidrv4FromCidrv64Mapped}: Convert IPv4-mapped IPv6 CIDR to IPv4 CIDR
  *
- * ### Wire Byte Conversion (bytes)
+ * ### Universal Wire Byte Conversion (bytes)
  * - {@link ipFromBytes}: Read a 4- or 16-byte address, version from the span width
  * - {@link ipToBytes}: Write an address as its wire bytes, width from its type
+ *
+ * ### IPv4 Wire Byte Conversion (bytesv4)
  * - {@link ipv4FromBytes}: Read a 4-byte IPv4 address from a buffer
  * - {@link ipv4ToBytes}: Write a 4-byte IPv4 address to a buffer
+ *
+ * ### IPv6 Wire Byte Conversion (bytesv6)
  * - {@link ipv6FromBytes}: Read a 16-byte IPv6 address from a buffer
  * - {@link ipv6ToBytes}: Write a 16-byte IPv6 address to a buffer
  *
@@ -340,7 +344,9 @@
  * - [`classifyv6`](https://jsr.io/@hertzg/ip/doc/classifyv6): IPv6 classification via {@link classifyIpv6}, {@link isIpv6Loopback}, etc.
  * - [`validate`](https://jsr.io/@hertzg/ip/doc/validate): Universal validation via {@link isValidIp}, {@link isValidCidr}
  * - [`4to6`](https://jsr.io/@hertzg/ip/doc/4to6): IPv4-mapped IPv6 conversion via {@link ipv4To64Mapped}, {@link ipv4From64Mapped}, {@link cidrv4ToCidrv64Mapped}, {@link cidrv4FromCidrv64Mapped}
- * - [`bytes`](https://jsr.io/@hertzg/ip/doc/bytes): Wire byte conversion via {@link ipFromBytes}, {@link ipToBytes}, {@link ipv4FromBytes}, {@link ipv4ToBytes}, {@link ipv6FromBytes}, {@link ipv6ToBytes}
+ * - [`bytes`](https://jsr.io/@hertzg/ip/doc/bytes): Universal wire byte conversion via {@link ipFromBytes}, {@link ipToBytes}
+ * - [`bytesv4`](https://jsr.io/@hertzg/ip/doc/bytesv4): IPv4 wire byte conversion via {@link ipv4FromBytes}, {@link ipv4ToBytes}
+ * - [`bytesv6`](https://jsr.io/@hertzg/ip/doc/bytesv6): IPv6 wire byte conversion via {@link ipv6FromBytes}, {@link ipv6ToBytes}
  *
  * @module
  */
@@ -675,12 +681,16 @@ export {
   ipFromBytes,
   /** Write an address as its wire bytes, 4 for IPv4 and 16 for IPv6. */
   ipToBytes,
+} from "./bytes.ts";
+export {
   /** Read a 4-byte IPv4 address from a buffer. */
   ipv4FromBytes,
   /** Write a 4-byte IPv4 address to a buffer. */
   ipv4ToBytes,
+} from "./bytesv4.ts";
+export {
   /** Read a 16-byte IPv6 address from a buffer. */
   ipv6FromBytes,
   /** Write a 16-byte IPv6 address to a buffer. */
   ipv6ToBytes,
-} from "./bytes.ts";
+} from "./bytesv6.ts";

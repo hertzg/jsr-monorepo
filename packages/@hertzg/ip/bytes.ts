@@ -1,414 +1,53 @@
 /**
- * Conversion between numeric IP addresses and their network-order wire bytes.
+ * Universal conversion between IP addresses and their network-order wire
+ * bytes.
  *
- * This module reads addresses straight out of a packet buffer and writes them
- * straight back into one, with no string round-trip. It is the byte-form
- * counterpart of the `ipv4` and `ipv6` submodules: {@link ipv4FromBytes} is to
- * {@link parseIpv4} what {@link ipv4ToBytes} is to {@link stringifyIpv4}.
+ * This module provides {@link ipFromBytes} and {@link ipToBytes}, which pick
+ * the IP version from the shape of their argument and delegate to the
+ * version-specific function. Addresses keep the numeric representation of the
+ * rest of the package — `number` for IPv4, `bigint` for IPv6. Bytes are a
+ * conversion, not a third representation.
  *
- * Addresses keep the numeric representation of the rest of the package —
- * `number` for IPv4, `bigint` for IPv6. Bytes are a conversion, not a third
- * representation.
+ * For version-specific functions, see:
+ * - [`bytesv4`](https://jsr.io/@hertzg/ip/doc/bytesv4): {@link ipv4FromBytes}, {@link ipv4ToBytes}
+ * - [`bytesv6`](https://jsr.io/@hertzg/ip/doc/bytesv6): {@link ipv6FromBytes}, {@link ipv6ToBytes}
  *
  * ## Byte order
  *
  * Always network order (big-endian), on both the read and the write side.
  * There is no option, because an IP address has exactly one wire order.
  *
- * ## Widths and offsets
+ * ## Picking the version
  *
- * Each version-specific function has a fixed width — 4 bytes for IPv4, 16 for
- * IPv6 — and `offset` selects where in the buffer that span sits, never how
- * wide it is. A span that runs past the end of the buffer throws a
- * `RangeError` rather than reading `undefined` and quietly decoding as
- * `0.0.0.0`.
+ * {@link ipFromBytes} reads the version off the **span width**, which must be
+ * exactly 4 or 16 bytes; anything else throws rather than guessing.
+ * {@link ipToBytes} reads it off the **type** of the address, the same
+ * `typeof` dispatch {@link stringifyIp} uses.
  *
- * The universal {@link ipFromBytes} instead picks the version from the span
- * width, which must be exactly 4 or 16 bytes; anything else throws. Decoders
- * that know the version and the field offset want the version-specific
- * functions.
+ * Decoders that already know the version and the field offset want the
+ * version-specific functions, where the width is fixed by the function rather
+ * than inferred from the buffer.
  *
- * @example Decode both addresses out of an IPv4 header
+ * @example Read and write without knowing the version up front
  * ```ts
  * import { assertEquals } from "@std/assert";
- * import { ipv4FromBytes } from "@hertzg/ip/bytes";
- * import { stringifyIpv4 } from "@hertzg/ip/ipv4";
+ * import { ipFromBytes, ipToBytes } from "@hertzg/ip/bytes";
+ * import { stringifyIp } from "@hertzg/ip/ip";
  *
- * // deno-fmt-ignore
- * const packet = new Uint8Array([
- *   0x45, 0x00, 0x00, 0x54, 0x1c, 0x46, 0x40, 0x00,
- *   0x40, 0x06, 0x00, 0x00,
- *   10, 0, 0, 1,
- *   192, 168, 1, 1,
- * ]);
+ * const field = new Uint8Array([10, 0, 0, 1]);
+ * assertEquals(stringifyIp(ipFromBytes(field)), "10.0.0.1");
  *
- * assertEquals(stringifyIpv4(ipv4FromBytes(packet, 12)), "10.0.0.1");
- * assertEquals(stringifyIpv4(ipv4FromBytes(packet, 16)), "192.168.1.1");
- * ```
- *
- * @example Assemble an IPv4 header in place
- * ```ts
- * import { assertEquals } from "@std/assert";
- * import { ipv4ToBytes } from "@hertzg/ip/bytes";
- * import { parseIpv4 } from "@hertzg/ip/ipv4";
- *
- * const frame = new Uint8Array(20);
- * ipv4ToBytes(parseIpv4("10.0.0.1"), frame, 12);
- * ipv4ToBytes(parseIpv4("192.168.1.1"), frame, 16);
- *
- * assertEquals(frame.slice(12), new Uint8Array([10, 0, 0, 1, 192, 168, 1, 1]));
+ * // The width comes back out unchanged
+ * assertEquals(ipToBytes(ipFromBytes(field)), field);
  * ```
  *
  * @module
  */
 
+import { IPV4_BYTE_LENGTH, IPV6_BYTE_LENGTH } from "./_bytes.ts";
+import { ipv4FromBytes, ipv4ToBytes } from "./bytesv4.ts";
+import { ipv6FromBytes, ipv6ToBytes } from "./bytesv6.ts";
 import type { Address } from "./ip.ts";
-
-/** The wire width of an IPv4 address, in bytes. */
-const IPV4_BYTE_LENGTH = 4;
-
-/** The wire width of an IPv6 address, in bytes. */
-const IPV6_BYTE_LENGTH = 16;
-
-/**
- * The error for a fixed-width span that does not fit the buffer it was asked
- * for. Shared so the four sites that report it cannot drift apart.
- *
- * @param version The version label naming the width
- * @param width The width of the span
- * @param offset The start of the span
- * @param byteLength The length of the buffer being indexed
- * @returns The error to throw
- */
-function spanRangeError(
-  version: string,
-  width: number,
-  offset: number,
-  byteLength: number,
-): RangeError {
-  return new RangeError(
-    `${version} needs ${width} bytes at offset ${offset} of a ${byteLength}-byte buffer`,
-  );
-}
-
-// Index arithmetic rather than a `DataView`: the view has to be constructed
-// per call, since the buffer differs per call, and that constructor is the
-// whole cost. The IPv4 read measures 3.7 ns this way against 47.5 ns via
-// `DataView`. Before swapping either of these for an accessor, run
-// `deno task bench:bytes` — it holds a complete `DataView` implementation of
-// the same interface and will show you the whole table.
-
-/**
- * Reads four bytes in network order as a 32-bit unsigned integer. The caller
- * is responsible for the span being in bounds.
- *
- * @param bytes The buffer to read from
- * @param offset The offset of the first byte
- * @returns The 32-bit unsigned integer
- */
-function readUint32(bytes: Uint8Array, offset: number): number {
-  return ((bytes[offset] << 24) |
-    (bytes[offset + 1] << 16) |
-    (bytes[offset + 2] << 8) |
-    bytes[offset + 3]) >>> 0;
-}
-
-/**
- * Writes a 32-bit unsigned integer as four bytes in network order. The caller
- * is responsible for the span being in bounds.
- *
- * @param value The 32-bit unsigned integer
- * @param into The buffer to write into
- * @param offset The offset of the first byte
- */
-function writeUint32(value: number, into: Uint8Array, offset: number): void {
-  into[offset] = value >>> 24;
-  into[offset + 1] = (value >>> 16) & 0xFF;
-  into[offset + 2] = (value >>> 8) & 0xFF;
-  into[offset + 3] = value & 0xFF;
-}
-
-/**
- * Reads a 4-byte IPv4 address from a buffer.
- *
- * The four bytes at `offset` are read in network order (big-endian) and
- * combined into the 32-bit unsigned integer representation used throughout
- * this package.
- *
- * @param bytes The buffer to read from
- * @param offset The offset of the first of the four bytes, defaulting to `0`
- * @returns The address as a 32-bit unsigned integer
- * @throws {RangeError} If four bytes are not available at `offset`
- *
- * @example Read an address out of a packet
- * ```ts
- * import { assertEquals } from "@std/assert";
- * import { ipv4FromBytes } from "@hertzg/ip/bytes";
- * import { stringifyIpv4 } from "@hertzg/ip/ipv4";
- *
- * assertEquals(ipv4FromBytes(new Uint8Array([10, 0, 0, 1])), 167772161);
- * assertEquals(
- *   stringifyIpv4(ipv4FromBytes(new Uint8Array([0xaa, 0xaa, 192, 168, 1, 1]), 2)),
- *   "192.168.1.1",
- * );
- * ```
- *
- * @example The high bit does not produce a negative number
- * ```ts
- * import { assertEquals } from "@std/assert";
- * import { ipv4FromBytes } from "@hertzg/ip/bytes";
- *
- * assertEquals(ipv4FromBytes(new Uint8Array([255, 255, 255, 255])), 4294967295);
- * ```
- *
- * @example A span that runs off the end throws
- * ```ts
- * import { assertThrows } from "@std/assert";
- * import { ipv4FromBytes } from "@hertzg/ip/bytes";
- *
- * assertThrows(() => ipv4FromBytes(new Uint8Array([1, 2, 3])), RangeError);
- * assertThrows(() => ipv4FromBytes(new Uint8Array([1, 2, 3, 4]), 1), RangeError);
- * ```
- */
-export function ipv4FromBytes(bytes: Uint8Array, offset = 0): number {
-  if (offset < 0 || offset + IPV4_BYTE_LENGTH > bytes.length) {
-    throw spanRangeError("IPv4", IPV4_BYTE_LENGTH, offset, bytes.length);
-  }
-  return readUint32(bytes, offset);
-}
-
-/** Writes an IPv4 address into a freshly allocated 4-byte buffer. */
-export function ipv4ToBytes(address: number): Uint8Array;
-/** Writes an IPv4 address into an existing buffer at `offset`. */
-export function ipv4ToBytes(
-  address: number,
-  into: Uint8Array,
-  offset?: number,
-): Uint8Array;
-/**
- * Writes a 4-byte IPv4 address, either into a fresh buffer or into one you
- * supply.
- *
- * The address is written in network order (big-endian). The return value is
- * always exactly the four bytes written: a fresh `Uint8Array` when `into` is
- * omitted, and a **view** into `into` when it is given — never the whole of
- * `into`. Writing through that view writes into `into`.
- *
- * @param address The address as a 32-bit unsigned integer
- * @param into The buffer to write into; a 4-byte buffer is allocated when omitted
- * @param offset The offset within `into` to write at, defaulting to `0`
- * @returns The four bytes written
- * @throws {RangeError} If the address is out of range, or four bytes are not
- *   available at `offset`
- *
- * @example Allocate
- * ```ts
- * import { assertEquals } from "@std/assert";
- * import { ipv4ToBytes } from "@hertzg/ip/bytes";
- * import { parseIpv4 } from "@hertzg/ip/ipv4";
- *
- * assertEquals(ipv4ToBytes(parseIpv4("10.0.0.1")), new Uint8Array([10, 0, 0, 1]));
- * ```
- *
- * @example Write into an existing frame, and get back only what was written
- * ```ts
- * import { assertEquals } from "@std/assert";
- * import { ipv4ToBytes } from "@hertzg/ip/bytes";
- * import { parseIpv4 } from "@hertzg/ip/ipv4";
- *
- * const frame = new Uint8Array(20).fill(0xaa);
- * const written = ipv4ToBytes(parseIpv4("192.168.1.1"), frame, 6);
- *
- * assertEquals(written, new Uint8Array([192, 168, 1, 1]));
- * assertEquals(frame.slice(4, 12), new Uint8Array([0xaa, 0xaa, 192, 168, 1, 1, 0xaa, 0xaa]));
- * ```
- *
- * @example The returned view aliases the buffer it was written into
- * ```ts
- * import { assertEquals } from "@std/assert";
- * import { ipv4ToBytes } from "@hertzg/ip/bytes";
- *
- * const frame = new Uint8Array(8);
- * const written = ipv4ToBytes(167772161, frame, 4);
- * written[3] = 9;
- *
- * assertEquals(frame[7], 9);
- * ```
- */
-export function ipv4ToBytes(
-  address: number,
-  into?: Uint8Array,
-  offset = 0,
-): Uint8Array {
-  if (address < 0 || address > 4294967295 || !Number.isInteger(address)) {
-    throw new RangeError(
-      `IPv4 value out of range: ${address} (must be 0 to 4294967295)`,
-    );
-  }
-
-  if (into === undefined) {
-    const bytes = new Uint8Array(IPV4_BYTE_LENGTH);
-    writeUint32(address, bytes, 0);
-    return bytes;
-  }
-
-  if (offset < 0 || offset + IPV4_BYTE_LENGTH > into.length) {
-    throw spanRangeError("IPv4", IPV4_BYTE_LENGTH, offset, into.length);
-  }
-  writeUint32(address, into, offset);
-  return into.subarray(offset, offset + IPV4_BYTE_LENGTH);
-}
-
-/**
- * Reads a 16-byte IPv6 address from a buffer.
- *
- * The sixteen bytes at `offset` are read in network order (big-endian) and
- * combined into the 128-bit `bigint` representation used throughout this
- * package. IPv4-mapped byte sequences (`::ffff:x.x.x.x`) are returned as the
- * full 128-bit value, not unwrapped to a `number`.
- *
- * @param bytes The buffer to read from
- * @param offset The offset of the first of the sixteen bytes, defaulting to `0`
- * @returns The address as a 128-bit unsigned bigint
- * @throws {RangeError} If sixteen bytes are not available at `offset`
- *
- * @example Read an address out of a packet
- * ```ts
- * import { assertEquals } from "@std/assert";
- * import { ipv6FromBytes } from "@hertzg/ip/bytes";
- * import { stringifyIpv6 } from "@hertzg/ip/ipv6";
- *
- * // deno-fmt-ignore
- * const bytes = new Uint8Array([
- *   0x20, 0x01, 0x0d, 0xb8, 0x00, 0x00, 0x00, 0x00,
- *   0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x01,
- * ]);
- *
- * assertEquals(stringifyIpv6(ipv6FromBytes(bytes)), "2001:db8::1");
- * ```
- *
- * @example IPv4-mapped bytes stay a 128-bit value
- * ```ts
- * import { assertEquals } from "@std/assert";
- * import { ipv6FromBytes } from "@hertzg/ip/bytes";
- * import { stringifyIpv6 } from "@hertzg/ip/ipv6";
- *
- * // deno-fmt-ignore
- * const bytes = new Uint8Array([
- *   0, 0, 0, 0, 0, 0, 0, 0,
- *   0, 0, 0xff, 0xff, 192, 168, 1, 1,
- * ]);
- *
- * assertEquals(stringifyIpv6(ipv6FromBytes(bytes)), "::ffff:c0a8:101");
- * ```
- *
- * @example A span that runs off the end throws
- * ```ts
- * import { assertThrows } from "@std/assert";
- * import { ipv6FromBytes } from "@hertzg/ip/bytes";
- *
- * assertThrows(() => ipv6FromBytes(new Uint8Array(15)), RangeError);
- * assertThrows(() => ipv6FromBytes(new Uint8Array(16), 1), RangeError);
- * ```
- */
-export function ipv6FromBytes(bytes: Uint8Array, offset = 0): bigint {
-  if (offset < 0 || offset + IPV6_BYTE_LENGTH > bytes.length) {
-    throw spanRangeError("IPv6", IPV6_BYTE_LENGTH, offset, bytes.length);
-  }
-  return (BigInt(readUint32(bytes, offset)) << 96n) |
-    (BigInt(readUint32(bytes, offset + 4)) << 64n) |
-    (BigInt(readUint32(bytes, offset + 8)) << 32n) |
-    BigInt(readUint32(bytes, offset + 12));
-}
-
-/** Writes an IPv6 address into a freshly allocated 16-byte buffer. */
-export function ipv6ToBytes(address: bigint): Uint8Array;
-/** Writes an IPv6 address into an existing buffer at `offset`. */
-export function ipv6ToBytes(
-  address: bigint,
-  into: Uint8Array,
-  offset?: number,
-): Uint8Array;
-/**
- * Writes a 16-byte IPv6 address, either into a fresh buffer or into one you
- * supply.
- *
- * The address is written in network order (big-endian). The return value is
- * always exactly the sixteen bytes written: a fresh `Uint8Array` when `into`
- * is omitted, and a **view** into `into` when it is given — never the whole of
- * `into`. Writing through that view writes into `into`.
- *
- * @param address The address as a 128-bit unsigned bigint
- * @param into The buffer to write into; a 16-byte buffer is allocated when omitted
- * @param offset The offset within `into` to write at, defaulting to `0`
- * @returns The sixteen bytes written
- * @throws {RangeError} If the address is out of range, or sixteen bytes are
- *   not available at `offset`
- *
- * @example Allocate
- * ```ts
- * import { assertEquals } from "@std/assert";
- * import { ipv6ToBytes } from "@hertzg/ip/bytes";
- * import { parseIpv6 } from "@hertzg/ip/ipv6";
- *
- * // deno-fmt-ignore
- * assertEquals(ipv6ToBytes(parseIpv6("2001:db8::1")), new Uint8Array([
- *   0x20, 0x01, 0x0d, 0xb8, 0x00, 0x00, 0x00, 0x00,
- *   0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x01,
- * ]));
- * ```
- *
- * @example Write into an existing frame
- * ```ts
- * import { assertEquals } from "@std/assert";
- * import { ipv6ToBytes } from "@hertzg/ip/bytes";
- * import { parseIpv6 } from "@hertzg/ip/ipv6";
- *
- * const frame = new Uint8Array(40);
- * const written = ipv6ToBytes(parseIpv6("::1"), frame, 8);
- *
- * assertEquals(written.length, 16);
- * assertEquals(frame[23], 1);
- * ```
- */
-export function ipv6ToBytes(
-  address: bigint,
-  into?: Uint8Array,
-  offset = 0,
-): Uint8Array {
-  if (address < 0n || address > 0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFn) {
-    throw new RangeError(
-      `IPv6 value out of range: ${address} (must be 0 to 2^128-1)`,
-    );
-  }
-
-  if (into === undefined) {
-    const bytes = new Uint8Array(IPV6_BYTE_LENGTH);
-    writeIpv6(address, bytes, 0);
-    return bytes;
-  }
-
-  if (offset < 0 || offset + IPV6_BYTE_LENGTH > into.length) {
-    throw spanRangeError("IPv6", IPV6_BYTE_LENGTH, offset, into.length);
-  }
-  writeIpv6(address, into, offset);
-  return into.subarray(offset, offset + IPV6_BYTE_LENGTH);
-}
-
-/**
- * Writes a 128-bit address as sixteen bytes in network order, as four 32-bit
- * groups. The caller is responsible for the span being in bounds.
- *
- * @param address The address as a 128-bit unsigned bigint
- * @param into The buffer to write into
- * @param offset The offset of the first byte
- */
-function writeIpv6(address: bigint, into: Uint8Array, offset: number): void {
-  writeUint32(Number(BigInt.asUintN(32, address >> 96n)), into, offset);
-  writeUint32(Number(BigInt.asUintN(32, address >> 64n)), into, offset + 4);
-  writeUint32(Number(BigInt.asUintN(32, address >> 32n)), into, offset + 8);
-  writeUint32(Number(BigInt.asUintN(32, address)), into, offset + 12);
-}
 
 /**
  * Reads an IPv4 or IPv6 address from a buffer, picking the version from the

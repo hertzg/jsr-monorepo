@@ -63,23 +63,27 @@ a module where the read validates and the write does not is a module
 whose contract nobody can remember. It measures free — see
 Consequences.
 
-**Both v4 and v6 functions live in one module, against ADR 0002's
-`<concern>[v4|v6]` grouping.** That grouping exists for tree-shaking,
-and there is nothing here to shake: `ipv4FromBytes` is two lines and
-`ipv6FromBytes` is five, against the ~27 KB each that justifies
-splitting `cidrv4.ts` from `cidrv6.ts`. Splitting would also strand the
-private `readUint32` / `writeUint32` helpers, which both versions
-share and which the package has no private-module convention to hold.
-`4to6.ts` is the standing precedent for a cross-version concern in one
-file. The naming convention that callers actually read — the
-`Ip` / `Ipv4` / `Ipv6` qualifier — is followed exactly.
+**Three modules, following ADR 0002's `<concern>[v4|v6]` grouping.**
+`bytesv4.ts` and `bytesv6.ts` hold the version-specific pairs;
+`bytes.ts` holds only the two universal dispatchers, exactly as
+`ip.ts` sits over `ipv4.ts` and `ipv6.ts`. An earlier draft put all
+six in one file on the grounds that the bodies are small and there is
+little to tree-shake. That reasoning optimizes the wrong thing: the
+grouping is what a reader navigates by, and one concern shaped
+differently from every other concern costs more than the bytes it
+saves.
+
+**The shared 32-bit primitives live in a private `_bytes.ts`.** This
+is the one real cost of the split — `readUint32` and `writeUint32` are
+needed by both versions, and neither version's public entrypoint
+should export them. `_bytes.ts` is not in `exports`, so it is not
+public API; the underscore prefix follows `@hertzg/xhb`'s `_parse.ts`.
+The alternative, duplicating them, would state the network-order
+convention in two places, which is the one thing worth centralizing.
 
 **Index arithmetic, not `DataView`, in all six functions.** The 32-bit
 read and write are shared private helpers; the 128-bit functions call
-them four times each. `_bench/bytes_dataview.bench.ts` keeps a full
-`DataView` implementation of the same interface next to the shipped
-one, so the comparison stays reproducible instead of living only in
-this document.
+them four times each.
 
 **No version reinterpretation.** `ipFromBytes` on 16 bytes returns a
 `bigint` even when those bytes are `::ffff:x.x.x.x`. This is a
@@ -95,13 +99,9 @@ addresses have exactly one wire order.
 ## Consequences
 
 - **`DataView`'s cost is its constructor, not its accessors.** It
-  cannot be hoisted, because the buffer differs on every call.
-  Reproduce with `deno task bench:bytes`, which runs both
-  implementations of the same `ByteCodec` interface —
-  `_bench/bytes_dataview.bench.ts` imports the shipped one from
-  `bytes.ts` and defines the `DataView` one alongside, and refuses to
-  measure if the two ever disagree. On an M2 Pro, Deno 2.9.5, ns per
-  call:
+  cannot be hoisted, because the buffer differs on every call. From a
+  throwaway run of both implementations behind one interface, on an
+  M2 Pro, Deno 2.9.5, ns per call:
 
   | operation | index | `DataView` | |
   | --- | --- | --- | --- |
@@ -114,7 +114,8 @@ addresses have exactly one wire order.
 
   **`DataView` wins nothing.** An earlier measurement of the bare
   32-bit helpers in isolation had it ahead on the IPv6 write by 12 %,
-  and that is what this ADR claimed until the benchmark was committed.
+  and that is what this ADR claimed until both sides were measured
+  through the real API.
   At the real API surface the shared range check, the branch and the
   returned view are paid on both sides, and the gap closes to a tie.
   The decision does not change; the reason it was close, did.
@@ -155,14 +156,16 @@ addresses have exactly one wire order.
 
 ## References
 
-- `bytes.ts` — `ipv4FromBytes`, `ipv4ToBytes`, `ipv6FromBytes`,
-  `ipv6ToBytes`, `ipFromBytes`, `ipToBytes`
+- `bytes.ts` — `ipFromBytes`, `ipToBytes`
+- `bytesv4.ts` — `ipv4FromBytes`, `ipv4ToBytes`
+- `bytesv6.ts` — `ipv6FromBytes`, `ipv6ToBytes`
+- `_bytes.ts` — the private 32-bit primitives both versions share
 - ADR 0001 — IPv4 is `number`, IPv6 is `bigint`; bytes are a
   conversion of those, not a third representation
+- ADR 0002 — `<concern>[v4|v6]` submodule grouping, which these three
+  modules follow
 - ADR 0004 — universal parsers auto-unwrap IPv4-mapped IPv6; the byte
   conversions deliberately do not
-- ADR 0002 — `<concern>[v4|v6]` submodule grouping, which this module
-  deliberately collapses into one file
 - ADR 0005 — cross-version misuse throws rather than answering quietly
 - Repo ADR 0006 — no defensive programming; its boundary-error carve-out
   covers the read side, and the write-side check is argued above
