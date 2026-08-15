@@ -104,6 +104,10 @@ has no file to inspect and writes <a href="././~/PCAP_DEFAULT_ENDIANNESS.html">P
 building blocks <a href="././~/pcapGlobalHeader.html">pcapGlobalHeader</a> and <a href="././~/pcapRecord.html">pcapRecord</a> are fixed to
 one byte order and default to that same constant — <a href="././~/detectPcapMagic.html">detectPcapMagic</a>
 probes a buffer when you drive them yourself.</p>
+<p>To pin the encoded byte order without passing an argument, call
+<a href="././~/pcapFileLe.html">pcapFileLe</a> or <a href="././~/pcapFileBe.html">pcapFileBe</a>. They exist for callers that can only
+invoke a factory with no arguments, and writing a big-endian capture is the
+case <code>pcapFile()</code> alone cannot cover.</p>
 <h2 id="timestamp-resolution">
 Timestamp resolution</h2>
 <p>Two magic values exist: one for microsecond timestamps
@@ -826,7 +830,7 @@ assertEquals(decoded.payload.payload.payload, new Uint8Array([0xde, 0xad, 0xbe, 
                   </span>
                 </a>
               </li></ul><a class="flex items-center gap-0.5" href=".&#x2F;all_symbols.html">
-              <span class="leading-none">view all 15 symbols</span><svg
+              <span class="leading-none">view all 17 symbols</span><svg
   width="16"
   height="16"
   viewBox="0 0 16 16"
