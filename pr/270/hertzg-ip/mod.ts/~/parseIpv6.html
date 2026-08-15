@@ -659,7 +659,8 @@ Throws</h2></div><div class="space-y-8"><div class=" docEntry" id="function_pars
   />
 </svg>
 </a>
-</div><div class="max-w-[75ch]"><div class="markdown"><p>If the format is invalid</p>
+</div><div class="max-w-[75ch]"><div class="markdown"><p>If the format is invalid -- including a group that is
+not 1-4 hex digits, more than one <code>::</code>, or the wrong number of groups</p>
 </div></div></div>
 <div class=" docEntry" id="function_parseipv6_0_throws_1">
 
@@ -691,7 +692,10 @@ Throws</h2></div><div class="space-y-8"><div class=" docEntry" id="function_pars
   />
 </svg>
 </a>
-</div><div class="max-w-[75ch]"><div class="markdown"><p>If any group is out of range (not 0-ffff)</p>
+</div><div class="max-w-[75ch]"><div class="markdown"><p>If an embedded IPv4 octet is out of range, as in
+<code>&quot;::1.2.3.256&quot;</code>. A malformed hex group is a <code>TypeError</code>, not this;
+a group cannot be numerically out of range, since 4 hex digits
+cannot exceed <code>ffff</code>.</p>
 </div></div></div>
 </div></section>
 </div>

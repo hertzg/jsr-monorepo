@@ -515,6 +515,15 @@ Throws</h2></div><div class="space-y-8"><div class=" docEntry" id="function_cidr
 colon-hexadecimal notation.</p>
 <p>The string is parsed with the same rules as <a href="../.././ipv6.ts/~/parseIpv6.html">parseIpv6</a> and then
 interpreted as a mask rather than an address.</p>
+<p>Note that IPv6 has no standard netmask notation. RFC 4291 section 2.3
+defines exactly one way to write a prefix -- <code>address/prefix-length</code> --
+and nothing equivalent to IPv4's dotted netmask. A string like
+<code>&quot;ffff:ffff:ffff:ffff::&quot;</code> is a well-formed IPv6 <em>address</em> literal whose
+128 bits are being read as a mask. It is accepted here because system
+APIs do report masks that way: POSIX <code>getifaddrs()</code> fills <code>ifa_netmask</code>
+with a <code>sockaddr_in6</code>, which is what <code>Deno.networkInterfaces()</code> surfaces
+as <code>netmask: &quot;ffff:ffff:ffff:ffff::&quot;</code>. Prefer the prefix length when a
+source offers one -- those same APIs usually also report <code>cidr</code>.</p>
 </div><section class="section"  id="examples-1"><div>
       <h2 class="anchorable mb-1"><a href="#examples-1" class="anchor" aria-label="Anchor" tabIndex="-1"><svg
   width="16"
