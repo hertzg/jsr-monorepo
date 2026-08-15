@@ -42,23 +42,27 @@
  * @example Check if a client IP is in a set of trusted CIDR blocks
  * ```ts
  * import { assert, assertEquals } from "@std/assert";
- * import { cidrv4Contains, parseCidrv4, parseIp } from "@hertzg/ip";
+ * import { cidrContains, parseCidr, parseIp } from "@hertzg/ip";
  *
+ * // The list may mix IP versions; each entry is only ever compared against an
+ * // address of its own version, and a mismatch is a miss rather than an error
  * const trustedRanges = [
- *   parseCidrv4("10.0.0.0/8"),
- *   parseCidrv4("172.16.0.0/12"),
- *   parseCidrv4("192.168.0.0/16"),
- * ];
+ *   "10.0.0.0/8",
+ *   "172.16.0.0/12",
+ *   "192.168.0.0/16",
+ *   "fd00::/8",
+ * ].map(parseCidr);
  *
  * function isTrusted(ip: string): boolean {
- *   const addr = parseIp(ip);
- *   if (typeof addr !== "number") return false;
- *   return trustedRanges.some((cidr) => cidrv4Contains(cidr, addr));
+ *   const address = parseIp(ip);
+ *   return trustedRanges.some((cidr) => cidrContains(cidr, address));
  * }
  *
  * assert(isTrusted("192.168.1.100"));
  * assert(isTrusted("10.0.0.1"));
- * assert(isTrusted("::ffff:172.16.5.1"));
+ * assert(isTrusted("::ffff:172.16.5.1")); // parseIp unwrapped this to IPv4 first
+ * assert(isTrusted("fd00::1")); // matched the IPv6 entry, no conversion involved
+ *
  * assertEquals(isTrusted("8.8.8.8"), false);
  * assertEquals(isTrusted("2001:db8::1"), false);
  * ```
@@ -221,6 +225,7 @@
  * - {@link stringifyCidr}: Convert Cidrv4 or Cidrv6 to CIDR notation string
  * - {@link cidrSize}: Get total number of addresses in a CIDR block
  * - {@link cidrAddresses}: Generate IP addresses in a CIDR block
+ * - {@link cidrContains}: Check if a CIDR block contains an address
  * - {@link cidrContainsCidr}: Check if one CIDR fully contains another
  * - {@link cidrOverlaps}: Check if two CIDRs share at least one address
  * - {@link cidrIntersect}: Return the overlapping CIDR block, or null
@@ -367,6 +372,8 @@ export {
   type Cidr,
   /** Generate IP addresses in a CIDR block. */
   cidrAddresses,
+  /** Check if a CIDR block contains an address. */
+  cidrContains,
   /** Check if one CIDR fully contains another. */
   cidrContainsCidr,
   /** Return the overlapping CIDR block, or null. */
