@@ -154,7 +154,7 @@ export function stringifyIp(address: Address): string {
  * @param b The second address
  * @returns `-1` if `a` sorts before `b`, `1` if after, `0` if equal
  *
- * @example Sort a mixed dual-stack list
+ * @example Sort a mixed dual-stack list, ascending or descending
  * ```ts
  * import { assertEquals } from "@std/assert";
  * import { compareIp, parseIp, stringifyIp } from "@hertzg/ip/ip";
@@ -166,6 +166,14 @@ export function stringifyIp(address: Address): string {
  *   "10.0.0.2",
  *   "::1",
  *   "2001:db8::1",
+ * ]);
+ *
+ * // Descending: swap the arguments
+ * assertEquals(clients.toSorted((a, b) => compareIp(b, a)).map(stringifyIp), [
+ *   "2001:db8::1",
+ *   "::1",
+ *   "10.0.0.2",
+ *   "10.0.0.1",
  * ]);
  * ```
  *
