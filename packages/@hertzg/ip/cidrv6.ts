@@ -57,16 +57,19 @@ export type Cidrv6 = {
  * repeat that work for every entry. The domain is 129 values known at
  * author time, which is what makes a plain array the right cache — see
  * ADR 0006 for the same reasoning applied to the classifier ranges.
+ *
+ * Deliberately not `Object.freeze`d. Freezing transitions the elements kind
+ * and takes element reads off V8's fast path, measuring 3.2x slower than the
+ * plain array (60.8ns vs 19.1ns per 12 lookups) and slower even than a `Map`.
+ * The `readonly` type already prevents mutation everywhere it matters.
  */
-const MASKS_V6: readonly bigint[] = Object.freeze(
-  Array.from(
-    { length: 129 },
-    (_, prefixLength) =>
-      prefixLength === 0
-        ? 0n
-        : (0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFn << BigInt(128 - prefixLength)) &
-          0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFn,
-  ),
+const MASKS_V6: readonly bigint[] = Array.from(
+  { length: 129 },
+  (_, prefixLength) =>
+    prefixLength === 0
+      ? 0n
+      : (0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFn << BigInt(128 - prefixLength)) &
+        0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFn,
 );
 
 /**
@@ -75,11 +78,9 @@ const MASKS_V6: readonly bigint[] = Object.freeze(
  * Hoisted for the same reason as {@link MASKS_V6}: `2n ** BigInt(128 - n)`
  * over a domain of 129 known values.
  */
-const SIZES_V6: readonly bigint[] = Object.freeze(
-  Array.from(
-    { length: 129 },
-    (_, prefixLength) => 2n ** BigInt(128 - prefixLength),
-  ),
+const SIZES_V6: readonly bigint[] = Array.from(
+  { length: 129 },
+  (_, prefixLength) => 2n ** BigInt(128 - prefixLength),
 );
 
 /**
