@@ -59,8 +59,9 @@ export type Cidrv6 = {
  * ADR 0006 for the same reasoning applied to the classifier ranges.
  *
  * Deliberately not `Object.freeze`d. Freezing transitions the elements kind
- * and takes element reads off V8's fast path, measuring 3.2x slower than the
- * plain array (60.8ns vs 19.1ns per 12 lookups) and slower even than a `Map`.
+ * and takes element reads off V8's fast path: 4.33ns per lookup frozen versus
+ * 0.92ns plain, slower even than a `Map` at 3.10ns. (Loop floor subtracted;
+ * measured one lookup at a time, `Deno.bench` overhead swamps all three.)
  * The `readonly` type already prevents mutation everywhere it matters.
  */
 const MASKS_V6: readonly bigint[] = Array.from(
