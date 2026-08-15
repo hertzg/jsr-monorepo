@@ -17,10 +17,10 @@
     "./validatev4": "./validatev4.ts",
     "./validatev6": "./validatev6.ts",
     "./4to6": "./4to6.ts",
-    "./arpa": "./arpa.ts",
     "./bytes": "./bytes.ts",
     "./bytesv4": "./bytesv4.ts",
-    "./bytesv6": "./bytesv6.ts"
+    "./bytesv6": "./bytesv6.ts",
+    "./arpa": "./arpa.ts"
   },
   "tasks": {
     "bench:ecosystem": "deno bench --allow-all _bench/"

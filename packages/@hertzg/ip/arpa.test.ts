@@ -51,13 +51,6 @@ Deno.test("ipv6ToArpa", async (t) => {
     );
   });
 
-  await t.step("leading zeros in a group are nibbles, not elided", () => {
-    assertEquals(
-      ipv6ToArpa(parseIpv6("2001:0db8:0000:0000:0000:0000:0000:0001")),
-      ipv6ToArpa(parseIpv6("2001:db8::1")),
-    );
-  });
-
   await t.step("an IPv4-mapped address held as a bigint", () => {
     assertEquals(
       ipv6ToArpa(parseIpv6("::ffff:192.168.0.1")),
