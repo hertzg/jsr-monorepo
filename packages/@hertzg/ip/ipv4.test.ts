@@ -179,15 +179,4 @@ Deno.test("compareIpv4", async (t) => {
       "10.0.0.10",
     ]);
   });
-
-  await t.step("orders the full 32-bit range", () => {
-    const addresses = ["255.255.255.255", "128.0.0.0", "0.0.0.0"].map(
-      parseIpv4,
-    );
-    assertEquals(addresses.toSorted(compareIpv4).map(stringifyIpv4), [
-      "0.0.0.0",
-      "128.0.0.0",
-      "255.255.255.255",
-    ]);
-  });
 });

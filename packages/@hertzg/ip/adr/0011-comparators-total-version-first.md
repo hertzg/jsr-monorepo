@@ -52,8 +52,9 @@ the sort already inside `cidrv4Merge` / `cidrv6Merge`.
 
 ## Decision
 
-**Comparators are the carve-out from ADR 0005.** They are total,
-infallible, and version-first.
+**The rule ADR 0005 states is "operations whose result would depend on
+an implicit cross-version conversion throw."** Ordering is not such an
+operation, so comparators are total, infallible, and version-first.
 
 - `compareIp(a, b)` and `compareCidr(a, b)` accept any mix of IPv4 and
   IPv6 arguments and return `-1 | 0 | 1`. They never throw.
@@ -79,7 +80,7 @@ infallible, and version-first.
   split of ADR 0002. Where the version is already known statically,
   they skip the dispatch.
 
-### Why this does not contradict ADR 0005
+### Why ordering is not one of those operations
 
 ADR 0005 throws where the answer would require an implicit conversion
 to exist at all. "Does `10.0.0.0/8` contain `2001:db8::/32`?" has no
@@ -94,10 +95,11 @@ claiming any relationship between the two address spaces. It says
 IPv4 values sort first; it does not say they are smaller as
 addresses.
 
-The line, then, is not "universal operations throw" but **"operations
-whose result would depend on an implicit cross-version conversion
-throw."** Containment, overlap, intersection and subtraction fall on
-one side; ordering falls on the other.
+Containment, overlap, intersection and subtraction fall on one side of
+that line; ordering falls on the other. ADR 0005 as first written said
+"universal operations throw", which read as though ordering were an
+exception to be argued for. It is not one — it never fell under the
+rule. ADR 0005 is amended to state the rule it was always expressing.
 
 ## Consequences
 
@@ -107,9 +109,6 @@ one side; ordering falls on the other.
   `cidrContainsCidr`, `cidrOverlaps`, `cidrIntersect`, `cidrSubtract`
   and `cidrMerge` still throw on mixed versions. This ADR adds
   comparators to the package; it removes nothing.
-- **`cidrMerge` still throws on a mixed array** even though the sort
-  inside it no longer needs to. Merging asks the containment
-  question, not the ordering question.
 - **The comparators are the single sort implementation.**
   `cidrv4Merge` and `cidrv6Merge` sort with `compareCidrv4` /
   `compareCidrv6` rather than an inline arrow, so there is one

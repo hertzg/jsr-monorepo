@@ -346,7 +346,7 @@ Deno.test("cidrAddresses", async (t) => {
 });
 
 Deno.test("compareCidr", async (t) => {
-  await t.step("orders IPv4 blocks by address then prefix length", () => {
+  await t.step("delegates to IPv4", () => {
     assertEquals(
       compareCidr(parseCidr("10.0.0.0/8"), parseCidr("192.168.0.0/16")),
       -1,
@@ -361,7 +361,7 @@ Deno.test("compareCidr", async (t) => {
     );
   });
 
-  await t.step("orders IPv6 blocks by address then prefix length", () => {
+  await t.step("delegates to IPv6", () => {
     assertEquals(
       compareCidr(parseCidr("2001:db8::/32"), parseCidr("fd00::/8")),
       -1,
@@ -406,6 +406,6 @@ Deno.test("compareCidr", async (t) => {
     const ordered = ["10.0.0.0/16", "10.2.0.0/16", "192.168.0.0/16"];
 
     assertEquals(blocks.toSorted(compareCidr).map(stringifyCidr), ordered);
-    assertEquals(cidrMerge(blocks as Cidrv4[]).map(stringifyCidr), ordered);
+    assertEquals(cidrMerge(blocks).map(stringifyCidr), ordered);
   });
 });

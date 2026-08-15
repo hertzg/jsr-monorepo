@@ -18,7 +18,8 @@ Two reasonable behaviors:
   passes guards.
 - **Throw.** Force the caller to acknowledge the version mismatch.
 
-Since cross-version comparison is almost always a programmer error
+Since asking a containment question across versions is almost always a
+programmer error
 (IPv4 and IPv6 address spaces are disjoint at the type level — see
 ADR 0001), surfacing it loudly is the safer default.
 
@@ -39,13 +40,12 @@ The TypeScript signature uses a generic `T extends Cidr` so the
 mixed-version case is rejected at compile time when types are
 known; the runtime check covers cases where types widen to `Cidr`.
 
-Callers who genuinely want to compare across versions convert
-explicitly via the `4to6` submodule before calling.
+Callers who genuinely want one of these operations across versions
+convert explicitly via the `4to6` submodule before calling.
 
-**Comparators are excluded.** `compareIp` and `compareCidr` are total
-and version-first, and never throw — ordering a disjoint union needs
-no conversion, and a throwing comparator cannot sort. See ADR 0011
-for why the two rules do not conflict.
+Ordering does not fall under this rule: a total order over a disjoint
+union needs no conversion, so `compareIp` and `compareCidr` are total,
+version-first, and never throw. See ADR 0011.
 
 ## Consequences
 
@@ -54,8 +54,8 @@ for why the two rules do not conflict.
 - **Generic constraint catches most mistakes at compile time.**
   `cidrContainsCidr<T extends Cidr>(outer: T, inner: T)` rejects
   mixed `Cidrv4` / `Cidrv6` arguments before runtime.
-- **Callers needing cross-version comparison** convert via
-  `cidrv4ToCidrv64Mapped` first, then call IPv6 operations.
+- **Callers needing containment or overlap across versions** convert
+  via `cidrv4ToCidrv64Mapped` first, then call IPv6 operations.
 - **`TypeError` (not `RangeError` or custom error)** matches the
   semantic: the operation isn't defined on these types together.
 - **No silent conversion.** The library never auto-maps IPv4 → IPv6
@@ -69,5 +69,5 @@ for why the two rules do not conflict.
 - ADR 0001 — Numeric representation: IPv4 and IPv6 are different
   primitive types
 - ADR 0004 — `4to6` is the explicit conversion API
-- ADR 0011 — comparators are total and version-first; the carve-out
-  from this rule
+- ADR 0011 — comparators are total and version-first; ordering needs
+  no conversion and so does not fall under this rule

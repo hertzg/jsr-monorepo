@@ -948,7 +948,7 @@ export function cidrv4Merge(cidrs: readonly Cidrv4[]): Cidrv4[] {
     prefixLength: cidr.prefixLength,
   }));
 
-  // Step 2: Sort into comparator order (supernets before their subnets)
+  // Step 2: Sort so supernets precede their subnets
   list.sort(compareCidrv4);
 
   // Step 3: Remove contained blocks

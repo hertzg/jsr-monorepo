@@ -5,8 +5,8 @@
  * {@link isValidCidr}, {@link cidrContainsCidr}, {@link cidrOverlaps},
  * {@link cidrIntersect}, {@link cidrSubtract}, {@link cidrMerge},
  * {@link cidrSize}, {@link cidrAddresses}, and {@link compareCidr} that
- * auto-detect IPv4 vs IPv6 and delegate to the appropriate
- * version-specific function. The {@link Cidr}
+ * auto-detect IPv4 vs IPv6 and delegate to the appropriate version-specific
+ * function. The {@link Cidr}
  * type alias and {@link isCidrv4}/{@link isCidrv6} type guards are also
  * exported for working with version-polymorphic CIDR values, along with the
  * {@link AddressOrCidr} union used by the universal `parse` and `stringify`
@@ -587,11 +587,10 @@ export function* cidrAddresses(
  * The order is **version-first and total**: every {@link Cidrv4} sorts
  * before every {@link Cidrv6}, and within a version blocks sort by address
  * ascending, then by prefix length ascending — the shorter prefix (the
- * larger block) first. Mixed-version arguments are not an error: unlike
- * {@link cidrContainsCidr}, {@link cidrOverlaps}, {@link cidrIntersect},
- * {@link cidrSubtract} and {@link cidrMerge}, this function never throws,
- * because sorting a mixed list is the reason it exists. Ordering a disjoint
- * union needs no cross-version conversion — see ADR 0011.
+ * larger block) first. Mixed-version arguments are not an error: unlike the
+ * other universal CIDR operations in this module, this function never
+ * throws, because sorting a mixed list is the reason it exists. Ordering a
+ * disjoint union needs no cross-version conversion — see ADR 0011.
  *
  * The block is ordered **as written**: the `address` field is compared as
  * stored, without applying the network mask first. See

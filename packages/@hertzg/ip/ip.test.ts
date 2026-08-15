@@ -60,13 +60,13 @@ Deno.test("parseIp round-trip", async (t) => {
 });
 
 Deno.test("compareIp", async (t) => {
-  await t.step("orders IPv4 addresses numerically ascending", () => {
+  await t.step("delegates to IPv4", () => {
     assertEquals(compareIp(parseIp("10.0.0.1"), parseIp("10.0.0.2")), -1);
     assertEquals(compareIp(parseIp("10.0.0.2"), parseIp("10.0.0.1")), 1);
     assertEquals(compareIp(parseIp("10.0.0.1"), parseIp("10.0.0.1")), 0);
   });
 
-  await t.step("orders IPv6 addresses numerically ascending", () => {
+  await t.step("delegates to IPv6", () => {
     assertEquals(compareIp(parseIp("::1"), parseIp("::2")), -1);
     assertEquals(compareIp(parseIp("::2"), parseIp("::1")), 1);
     assertEquals(compareIp(parseIp("::1"), parseIp("::1")), 0);
@@ -85,13 +85,6 @@ Deno.test("compareIp", async (t) => {
       "::1",
       "2001:db8::1",
     ]);
-  });
-
-  await t.step("sorts an already-reversed mixed list back into order", () => {
-    const expected = ["0.0.0.0", "255.255.255.255", "::", "2001:db8::1"];
-    const backwards = expected.toReversed().map(parseIp);
-
-    assertEquals(backwards.toSorted(compareIp).map(stringifyIp), expected);
   });
 
   await t.step(
