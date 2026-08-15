@@ -113,15 +113,16 @@ const SIZES_V6: readonly bigint[] = Object.freeze(
  * ```
  */
 export function cidrv6Mask(prefixLength: number): bigint {
-  if (
-    prefixLength < 0 || prefixLength > 128 || !Number.isInteger(prefixLength)
-  ) {
+  // The table is the range check: anything that is not an index into it --
+  // out of range, fractional, NaN, Infinity -- misses and yields undefined.
+  const mask = MASKS_V6[prefixLength];
+  if (mask === undefined) {
     throw new RangeError(
       `CIDR prefix length must be 0-128, got ${prefixLength}`,
     );
   }
 
-  return MASKS_V6[prefixLength];
+  return mask;
 }
 
 /**
@@ -535,15 +536,15 @@ export function cidrv6Size(cidrOrPrefixLength: Cidrv6 | number): bigint {
     ? cidrOrPrefixLength
     : cidrOrPrefixLength.prefixLength;
 
-  if (
-    prefixLength < 0 || prefixLength > 128 || !Number.isInteger(prefixLength)
-  ) {
+  // As in cidrv6Mask, the table doubles as the range check.
+  const size = SIZES_V6[prefixLength];
+  if (size === undefined) {
     throw new RangeError(
       `CIDR prefix length must be 0-128, got ${prefixLength}`,
     );
   }
 
-  return SIZES_V6[prefixLength];
+  return size;
 }
 
 /**
