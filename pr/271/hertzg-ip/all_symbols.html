@@ -799,6 +799,8 @@ Universal (auto-detect IPv4/IPv6)</h3>
 <li>parseCidr: Parse any CIDR notation string to Cidrv4 or Cidrv6</li>
 <li>stringifyCidr: Convert Cidrv4 or Cidrv6 to CIDR notation string</li>
 <li>cidrSize: Get total number of addresses in a CIDR block</li>
+<li>cidrFirstAddress: Get the first address of a CIDR block</li>
+<li>cidrLastAddress: Get the last address of a CIDR block</li>
 <li>cidrAddresses: Generate IP addresses in a CIDR block</li>
 <li>cidrContainsCidr: Check if one CIDR fully contains another</li>
 <li>cidrOverlaps: Check if two CIDRs share at least one address</li>
@@ -986,6 +988,16 @@ Functions</h2></div><div class="namespaceSection"><div id="namespace_cidraddress
 		    <a href=".&#x2F;.&#x2F;cidr.ts&#x2F;~&#x2F;cidrContainsCidr.html" title="cidrContainsCidr">
 			    <span>cidrContainsCidr</span><span>(<div class="ml-4"><div><span>outer<span>: <span class="td-ref">Cidr</span></span></span>,</div><div><span>inner<span>: <span class="td-ref">Cidr</span></span></span></div></div>)<span>: <span class="td-kw">boolean</span></span></span><div class="namespaceItemContentTypeInfo">1 overloads</div></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Checks if one CIDR block fully contains another.</p>
 </div></div></div>
+    </div><div id="namespace_cidrfirstaddress" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-Function bg-Function/15 dark:text-FunctionDark dark:bg-FunctionDark/15" title="Function">f</div></div>
+<div class="namespaceItemContent">
+		    <a href=".&#x2F;.&#x2F;cidr.ts&#x2F;~&#x2F;cidrFirstAddress.html" title="cidrFirstAddress">
+			    <span>cidrFirstAddress</span><span>(<span><span>cidr<span>: <span class="td-ref">Cidr</span></span></span></span>)<span>: <span class="td-ref">Address</span></span></span><div class="namespaceItemContentTypeInfo">1 overloads</div></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Returns the first address of a CIDR block.</p>
+</div></div></div>
+    </div><div id="namespace_cidrfirstaddress-1" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-Function bg-Function/15 dark:text-FunctionDark dark:bg-FunctionDark/15" title="Function">f</div></div>
+<div class="namespaceItemContent">
+		    <a href=".&#x2F;.&#x2F;cidr.ts&#x2F;~&#x2F;cidrFirstAddress.html" title="cidrFirstAddress">
+			    <span>cidrFirstAddress</span><span>(<span><span>cidr<span>: <span class="td-ref">Cidr</span></span></span></span>)<span>: <span class="td-ref">Address</span></span></span><div class="namespaceItemContentTypeInfo">1 overloads</div></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Returns the first address of a CIDR block.</p>
+</div></div></div>
     </div><div id="namespace_cidrintersect" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-Function bg-Function/15 dark:text-FunctionDark dark:bg-FunctionDark/15" title="Function">f</div></div>
 <div class="namespaceItemContent">
 		    <a href=".&#x2F;.&#x2F;cidr.ts&#x2F;~&#x2F;cidrIntersect.html" title="cidrIntersect">
@@ -995,6 +1007,16 @@ Functions</h2></div><div class="namespaceSection"><div id="namespace_cidraddress
 <div class="namespaceItemContent">
 		    <a href=".&#x2F;.&#x2F;cidr.ts&#x2F;~&#x2F;cidrIntersect.html" title="cidrIntersect">
 			    <span>cidrIntersect</span><span>(<div class="ml-4"><div><span>a<span>: <span class="td-ref">Cidr</span></span></span>,</div><div><span>b<span>: <span class="td-ref">Cidr</span></span></span></div></div>)<span>: <span><span class="td-ref">Cidr</span><span class="td-op"> | </span><span class="td-kw">null</span></span></span></span><div class="namespaceItemContentTypeInfo">1 overloads</div></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Returns the intersection of two CIDR blocks.</p>
+</div></div></div>
+    </div><div id="namespace_cidrlastaddress" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-Function bg-Function/15 dark:text-FunctionDark dark:bg-FunctionDark/15" title="Function">f</div></div>
+<div class="namespaceItemContent">
+		    <a href=".&#x2F;.&#x2F;cidr.ts&#x2F;~&#x2F;cidrLastAddress.html" title="cidrLastAddress">
+			    <span>cidrLastAddress</span><span>(<span><span>cidr<span>: <span class="td-ref">Cidr</span></span></span></span>)<span>: <span class="td-ref">Address</span></span></span><div class="namespaceItemContentTypeInfo">1 overloads</div></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Returns the last address of a CIDR block.</p>
+</div></div></div>
+    </div><div id="namespace_cidrlastaddress-1" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-Function bg-Function/15 dark:text-FunctionDark dark:bg-FunctionDark/15" title="Function">f</div></div>
+<div class="namespaceItemContent">
+		    <a href=".&#x2F;.&#x2F;cidr.ts&#x2F;~&#x2F;cidrLastAddress.html" title="cidrLastAddress">
+			    <span>cidrLastAddress</span><span>(<span><span>cidr<span>: <span class="td-ref">Cidr</span></span></span></span>)<span>: <span class="td-ref">Address</span></span></span><div class="namespaceItemContentTypeInfo">1 overloads</div></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Returns the last address of a CIDR block.</p>
 </div></div></div>
     </div><div id="namespace_cidrmerge" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-Function bg-Function/15 dark:text-FunctionDark dark:bg-FunctionDark/15" title="Function">f</div></div>
 <div class="namespaceItemContent">
@@ -2231,10 +2253,20 @@ Functions</h2></div><div class="namespaceSection"><div id="namespace_cidraddress
 		    <a href=".&#x2F;.&#x2F;cidr.ts&#x2F;~&#x2F;cidrContainsCidr.html" title="cidrContainsCidr">
 			    <span>cidrContainsCidr</span><span>(<div class="ml-4"><div><span>outer<span>: <span class="td-ref">Cidr</span></span></span>,</div><div><span>inner<span>: <span class="td-ref">Cidr</span></span></span></div></div>)<span>: <span class="td-kw">boolean</span></span></span><div class="namespaceItemContentTypeInfo">1 overloads</div></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Checks if one CIDR block fully contains another.</p>
 </div></div></div>
+    </div><div id="namespace_cidrfirstaddress-2" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-Function bg-Function/15 dark:text-FunctionDark dark:bg-FunctionDark/15" title="Function">f</div></div>
+<div class="namespaceItemContent">
+		    <a href=".&#x2F;.&#x2F;cidr.ts&#x2F;~&#x2F;cidrFirstAddress.html" title="cidrFirstAddress">
+			    <span>cidrFirstAddress</span><span>(<span><span>cidr<span>: <span class="td-ref">Cidr</span></span></span></span>)<span>: <span class="td-ref">Address</span></span></span><div class="namespaceItemContentTypeInfo">1 overloads</div></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Returns the first address of a CIDR block.</p>
+</div></div></div>
     </div><div id="namespace_cidrintersect-2" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-Function bg-Function/15 dark:text-FunctionDark dark:bg-FunctionDark/15" title="Function">f</div></div>
 <div class="namespaceItemContent">
 		    <a href=".&#x2F;.&#x2F;cidr.ts&#x2F;~&#x2F;cidrIntersect.html" title="cidrIntersect">
 			    <span>cidrIntersect</span><span>(<div class="ml-4"><div><span>a<span>: <span class="td-ref">Cidr</span></span></span>,</div><div><span>b<span>: <span class="td-ref">Cidr</span></span></span></div></div>)<span>: <span><span class="td-ref">Cidr</span><span class="td-op"> | </span><span class="td-kw">null</span></span></span></span><div class="namespaceItemContentTypeInfo">1 overloads</div></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Returns the intersection of two CIDR blocks.</p>
+</div></div></div>
+    </div><div id="namespace_cidrlastaddress-2" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-Function bg-Function/15 dark:text-FunctionDark dark:bg-FunctionDark/15" title="Function">f</div></div>
+<div class="namespaceItemContent">
+		    <a href=".&#x2F;.&#x2F;cidr.ts&#x2F;~&#x2F;cidrLastAddress.html" title="cidrLastAddress">
+			    <span>cidrLastAddress</span><span>(<span><span>cidr<span>: <span class="td-ref">Cidr</span></span></span></span>)<span>: <span class="td-ref">Address</span></span></span><div class="namespaceItemContentTypeInfo">1 overloads</div></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Returns the last address of a CIDR block.</p>
 </div></div></div>
     </div><div id="namespace_cidrmerge-2" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-Function bg-Function/15 dark:text-FunctionDark dark:bg-FunctionDark/15" title="Function">f</div></div>
 <div class="namespaceItemContent">
