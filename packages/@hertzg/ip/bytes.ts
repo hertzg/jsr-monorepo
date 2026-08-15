@@ -71,26 +71,30 @@ const IPV4_BYTE_LENGTH = 4;
 const IPV6_BYTE_LENGTH = 16;
 
 /**
- * Throws unless `[offset, offset + width)` lies inside a buffer of
- * `byteLength` bytes.
+ * The error for a fixed-width span that does not fit the buffer it was asked
+ * for. Shared so the four sites that report it cannot drift apart.
  *
- * @param byteLength The length of the buffer being indexed
- * @param offset The start of the span
+ * @param version The version label naming the width
  * @param width The width of the span
- * @param version The version label used in the error message
+ * @param offset The start of the span
+ * @param byteLength The length of the buffer being indexed
+ * @returns The error to throw
  */
-function requireSpan(
-  byteLength: number,
-  offset: number,
-  width: number,
+function spanRangeError(
   version: string,
-): void {
-  if (offset < 0 || offset + width > byteLength) {
-    throw new RangeError(
-      `${version} needs ${width} bytes at offset ${offset} of a ${byteLength}-byte buffer`,
-    );
-  }
+  width: number,
+  offset: number,
+  byteLength: number,
+): RangeError {
+  return new RangeError(
+    `${version} needs ${width} bytes at offset ${offset} of a ${byteLength}-byte buffer`,
+  );
 }
+
+// Index arithmetic rather than a `DataView`: the view has to be constructed
+// per call, since the buffer differs per call, and that constructor is the
+// whole cost. Measured at ~3.9 ns vs ~50.7 ns for the IPv4 read. See ADR 0012
+// for the full table before swapping either of these for an accessor.
 
 /**
  * Reads four bytes in network order as a 32-bit unsigned integer. The caller
@@ -165,7 +169,9 @@ function writeUint32(value: number, into: Uint8Array, offset: number): void {
  * ```
  */
 export function ipv4FromBytes(bytes: Uint8Array, offset = 0): number {
-  requireSpan(bytes.length, offset, IPV4_BYTE_LENGTH, "IPv4");
+  if (offset < 0 || offset + IPV4_BYTE_LENGTH > bytes.length) {
+    throw spanRangeError("IPv4", IPV4_BYTE_LENGTH, offset, bytes.length);
+  }
   return readUint32(bytes, offset);
 }
 
@@ -244,7 +250,9 @@ export function ipv4ToBytes(
     return bytes;
   }
 
-  requireSpan(into.length, offset, IPV4_BYTE_LENGTH, "IPv4");
+  if (offset < 0 || offset + IPV4_BYTE_LENGTH > into.length) {
+    throw spanRangeError("IPv4", IPV4_BYTE_LENGTH, offset, into.length);
+  }
   writeUint32(address, into, offset);
   return into.subarray(offset, offset + IPV4_BYTE_LENGTH);
 }
@@ -302,7 +310,9 @@ export function ipv4ToBytes(
  * ```
  */
 export function ipv6FromBytes(bytes: Uint8Array, offset = 0): bigint {
-  requireSpan(bytes.length, offset, IPV6_BYTE_LENGTH, "IPv6");
+  if (offset < 0 || offset + IPV6_BYTE_LENGTH > bytes.length) {
+    throw spanRangeError("IPv6", IPV6_BYTE_LENGTH, offset, bytes.length);
+  }
   return (BigInt(readUint32(bytes, offset)) << 96n) |
     (BigInt(readUint32(bytes, offset + 4)) << 64n) |
     (BigInt(readUint32(bytes, offset + 8)) << 32n) |
@@ -376,7 +386,9 @@ export function ipv6ToBytes(
     return bytes;
   }
 
-  requireSpan(into.length, offset, IPV6_BYTE_LENGTH, "IPv6");
+  if (offset < 0 || offset + IPV6_BYTE_LENGTH > into.length) {
+    throw spanRangeError("IPv6", IPV6_BYTE_LENGTH, offset, into.length);
+  }
   writeIpv6(address, into, offset);
   return into.subarray(offset, offset + IPV6_BYTE_LENGTH);
 }
