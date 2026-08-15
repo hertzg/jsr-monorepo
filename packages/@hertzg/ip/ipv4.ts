@@ -55,36 +55,35 @@
 const CHAR_ZERO = 0x30;
 const CHAR_NINE = 0x39;
 const CHAR_MINUS = 0x2d;
+const CHAR_DOT = 0x2e;
+
+/** The text of the octet starting at `from`, for an error message. */
+function octetText(address: string, from: number): string {
+  const dot = address.indexOf(".", from);
+  return address.slice(from, dot === -1 ? address.length : dot);
+}
 
 /**
- * Reads one dotted-decimal octet: digits with no leading zero, and an
- * optional leading `-` so that a negative reaches the caller's range check
- * rather than being reported as a shape error.
+ * Reports a malformed octet, unless the address does not have four of them --
+ * the octet count is the coarser complaint and is made first, as it was when
+ * the address was read by splitting on ".".
+ *
+ * Counting is done here rather than up front so that the scan itself never
+ * pays for it; only the failing call does.
  */
-function parseOctet(part: string): number {
-  const negative = part.charCodeAt(0) === CHAR_MINUS;
-  let index = negative ? 1 : 0;
-
-  if (index === part.length) {
-    throw new TypeError("IPv4 address octets must be decimal numbers");
+function failIpv4(address: string, error: TypeError | RangeError): never {
+  let octets = 1;
+  for (let index = 0; index < address.length; index++) {
+    if (address.charCodeAt(index) === CHAR_DOT) octets++;
   }
 
-  if (part.length - index > 1 && part.charCodeAt(index) === CHAR_ZERO) {
+  if (octets !== 4) {
     throw new TypeError(
-      "IPv4 octets cannot have leading zeros except '0' itself",
+      `IPv4 address must have exactly 4 octets, got ${octets}`,
     );
   }
 
-  let octet = 0;
-  for (; index < part.length; index++) {
-    const code = part.charCodeAt(index);
-    if (code < CHAR_ZERO || code > CHAR_NINE) {
-      throw new TypeError("IPv4 address octets must be decimal numbers");
-    }
-    octet = octet * 10 + (code - CHAR_ZERO);
-  }
-
-  return negative ? -octet : octet;
+  throw error;
 }
 
 /**
@@ -93,13 +92,15 @@ function parseOctet(part: string): number {
  * An octet is decimal digits and nothing else: no leading zeros (except "0"
  * itself), no surrounding or embedded whitespace, no sign other than a
  * leading `-`, no radix prefix, and no trailing text. A leading `-` is read
- * so that it reaches the range check below.
+ * rather than rejected outright, so a negative octet is reported as out of
+ * range instead of as a malformed one -- `"-0"` included.
  *
  * @param address The address string in dotted decimal notation
  * @returns The IPv4 address as a 32-bit unsigned integer
  * @throws {TypeError} If the format is invalid -- wrong number of octets, a
  *   non-decimal octet, leading zeros, whitespace, or trailing text
- * @throws {RangeError} If any octet is out of range (not 0-255)
+ * @throws {RangeError} If any octet is out of range (not 0-255), including
+ *   any negative octet
  *
  * @example Basic parsing
  * ```ts
@@ -125,25 +126,68 @@ function parseOctet(part: string): number {
  * ```
  */
 export function parseIpv4(address: string): number {
-  const parts = address.split(".");
-
-  if (parts.length !== 4) {
-    throw new TypeError(
-      `IPv4 address must have exactly 4 octets, got ${parts.length}`,
-    );
-  }
-
+  const length = address.length;
   let value = 0;
+  let index = 0;
 
-  for (const part of parts) {
-    const octet = parseOctet(part);
+  for (let octetIndex = 0; octetIndex < 4; octetIndex++) {
+    const octetStart = index;
+    let code = address.charCodeAt(index);
 
-    if (octet < 0 || octet > 255) {
-      throw new RangeError(
-        `IPv4 octet out of range: ${octet} (must be 0-255)`,
+    // A leading "-" is read rather than rejected, so the octet is reported as
+    // out of range instead of as a malformed one.
+    const negative = code === CHAR_MINUS;
+    if (negative) code = address.charCodeAt(++index);
+
+    const digitStart = index;
+    let octet = 0;
+    while (code >= CHAR_ZERO && code <= CHAR_NINE) {
+      octet = octet * 10 + (code - CHAR_ZERO);
+      code = address.charCodeAt(++index); // NaN past the end ends the loop
+    }
+
+    // The octet runs to the "." before the next one, or to the end of the
+    // string for the last one. Anything else left over is trailing text.
+    const ended = octetIndex === 3 ? index === length : code === CHAR_DOT;
+
+    // "0" alone is the only octet that may start with a zero, so the check is
+    // on the whole octet rather than on the digits scanned: "0a" is a leading
+    // zero, not a stray letter.
+    if (
+      address.charCodeAt(digitStart) === CHAR_ZERO &&
+      !(index - digitStart === 1 && ended)
+    ) {
+      failIpv4(
+        address,
+        new TypeError(
+          "IPv4 octets cannot have leading zeros except '0' itself",
+        ),
       );
     }
 
+    if (index === digitStart || !ended) {
+      failIpv4(
+        address,
+        new TypeError(
+          `IPv4 address octets must be decimal numbers, got '${
+            octetText(address, octetStart)
+          }'`,
+        ),
+      );
+    }
+
+    if (negative || octet > 255) {
+      failIpv4(
+        address,
+        new RangeError(
+          `IPv4 octet out of range: ${
+            negative ? "-" : ""
+          }${octet} (must be 0-255)`,
+        ),
+      );
+    }
+
+    index++; // the "." that ended the octet, or one past the end of the string
     value = (value << 8) | octet;
   }
 

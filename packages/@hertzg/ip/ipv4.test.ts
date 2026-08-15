@@ -98,6 +98,14 @@ Deno.test("parseIpv4", async (t) => {
         RangeError,
         "IPv4 octet out of range: -1 (must be 0-255)",
       );
+
+      // -0 is numerically 0, so a range check on the returned value alone
+      // cannot see the sign. It is still a signed octet and still rejected.
+      assertThrows(
+        () => parseIpv4("-0.1.2.3"),
+        RangeError,
+        "IPv4 octet out of range: -0 (must be 0-255)",
+      );
     },
   );
 

@@ -260,31 +260,43 @@ const CHAR_MINUS = 0x2d;
 
 /**
  * Reads a prefix length: decimal digits with no leading zero, and an optional
- * leading `-` so that a negative reaches the range check in `cidrv4Mask`
- * rather than being reported as a shape error.
+ * leading `-` so that a negative is reported as out of range rather than as a
+ * shape error.
+ *
+ * A negative is rejected here rather than left to `cidrv4Mask`, because `-0`
+ * is numerically `0` and would otherwise pass that range check and reach the
+ * caller as a `Cidrv4` holding a negative zero.
  */
 function parsePrefixLength(part: string): number {
   const negative = part.charCodeAt(0) === CHAR_MINUS;
   let index = negative ? 1 : 0;
 
   if (index === part.length) {
-    throw new TypeError("CIDR prefix length must be a number");
+    throw new TypeError(`CIDR prefix length must be a number, got '${part}'`);
   }
 
   if (part.length - index > 1 && part.charCodeAt(index) === CHAR_ZERO) {
-    throw new TypeError("CIDR prefix length cannot have leading zeros");
+    throw new TypeError(
+      `CIDR prefix length cannot have leading zeros, got '${part}'`,
+    );
   }
 
   let prefixLength = 0;
   for (; index < part.length; index++) {
     const code = part.charCodeAt(index);
     if (code < CHAR_ZERO || code > CHAR_NINE) {
-      throw new TypeError("CIDR prefix length must be a number");
+      throw new TypeError(`CIDR prefix length must be a number, got '${part}'`);
     }
     prefixLength = prefixLength * 10 + (code - CHAR_ZERO);
   }
 
-  return negative ? -prefixLength : prefixLength;
+  if (negative) {
+    throw new RangeError(
+      `CIDR prefix length must be 0-32, got -${prefixLength}`,
+    );
+  }
+
+  return prefixLength;
 }
 
 /**

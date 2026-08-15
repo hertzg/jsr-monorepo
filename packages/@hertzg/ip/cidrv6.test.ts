@@ -314,6 +314,14 @@ Deno.test("parseCidrv6", async (t) => {
     assertThrows(() => parseCidrv6("::/ 8"), TypeError);
     assertThrows(() => parseCidrv6("::/8\n"), TypeError);
     assertThrows(() => parseCidrv6("::/+8"), TypeError);
+
+    // -0 is numerically 0, so it would pass cidrv6Mask's range check and
+    // reach the caller as a Cidrv6 holding a negative zero.
+    assertThrows(
+      () => parseCidrv6("::/-0"),
+      RangeError,
+      "CIDR prefix length must be 0-128, got -0",
+    );
   });
 
   await t.step("invalid address", () => {
