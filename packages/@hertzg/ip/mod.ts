@@ -217,6 +217,7 @@
  * - {@link parseCidrv4}: Parse CIDR notation string to Cidrv4
  * - {@link stringifyCidrv4}: Convert Cidrv4 to CIDR notation string
  * - {@link cidrv4Mask}: Create network mask from prefix length (0-32)
+ * - {@link cidrv4MaskToPrefixLength}: Recover prefix length from a network mask, as a number or notation string
  * - {@link cidrv4Contains}: Check if IP is within CIDR block
  * - {@link cidrv4ContainsCidr}: Check if one IPv4 CIDR fully contains another
  * - {@link cidrv4Overlaps}: Check if two IPv4 CIDRs share at least one address
@@ -243,6 +244,7 @@
  * - {@link parseCidrv6}: Parse CIDR notation string to Cidrv6
  * - {@link stringifyCidrv6}: Convert Cidrv6 to CIDR notation string
  * - {@link cidrv6Mask}: Create network mask from prefix length (0-128)
+ * - {@link cidrv6MaskToPrefixLength}: Recover prefix length from a network mask, as a bigint or notation string
  * - {@link cidrv6Contains}: Check if IP is within CIDR block
  * - {@link cidrv6ContainsCidr}: Check if one IPv6 CIDR fully contains another
  * - {@link cidrv6Overlaps}: Check if two IPv6 CIDRs share at least one address
@@ -492,6 +494,8 @@ export {
   cidrv4LastAddress,
   /** Create network mask from prefix length (0-32). */
   cidrv4Mask,
+  /** Recover prefix length from a network mask, as a number or notation string. */
+  cidrv4MaskToPrefixLength,
   /** Merge IPv4 CIDR blocks into the minimal covering set. */
   cidrv4Merge,
   /** Alias for cidrv4FirstAddress. */
@@ -571,6 +575,8 @@ export {
   cidrv6LastAddress,
   /** Create network mask from prefix length (0-128). */
   cidrv6Mask,
+  /** Recover prefix length from a network mask, as a bigint or notation string. */
+  cidrv6MaskToPrefixLength,
   /** Merge IPv6 CIDR blocks into the minimal covering set. */
   cidrv6Merge,
   /** Check if two IPv6 CIDRs share at least one address. */

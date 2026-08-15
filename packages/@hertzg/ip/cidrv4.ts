@@ -93,6 +93,161 @@ export function cidrv4Mask(prefixLength: number): number {
 }
 
 /**
+ * Recovers the prefix length from an IPv4 network mask given as a
+ * 32-bit unsigned integer.
+ *
+ * @param mask The network mask as a 32-bit unsigned integer
+ * @returns The prefix length (0-32)
+ * @throws {TypeError} If the mask's one bits are not contiguous from the top
+ * @throws {RangeError} If the mask is not an integer in 0 to 0xFFFFFFFF
+ *
+ * @example Recovering prefix lengths from numbers
+ * ```ts
+ * import { assertEquals } from "@std/assert";
+ * import { cidrv4MaskToPrefixLength } from "@hertzg/ip/cidrv4";
+ *
+ * assertEquals(cidrv4MaskToPrefixLength(0xFFFFFF00), 24);
+ * assertEquals(cidrv4MaskToPrefixLength(0xFFFF0000), 16);
+ * assertEquals(cidrv4MaskToPrefixLength(0xFF000000), 8);
+ * assertEquals(cidrv4MaskToPrefixLength(0xFFFFFFFF), 32);
+ * assertEquals(cidrv4MaskToPrefixLength(0), 0);
+ * ```
+ */
+export function cidrv4MaskToPrefixLength(mask: number): number;
+/**
+ * Recovers the prefix length from an IPv4 network mask given in dotted
+ * decimal notation.
+ *
+ * The string is parsed with the same rules as {@link parseIpv4} -- four
+ * octets, each 0-255, no leading zeros -- and then interpreted as a mask
+ * rather than an address.
+ *
+ * @param mask The network mask in dotted decimal notation (e.g. "255.255.255.0")
+ * @returns The prefix length (0-32)
+ * @throws {TypeError} If the notation is malformed, or the mask's one bits
+ *   are not contiguous from the top
+ * @throws {RangeError} If any octet is out of range (not 0-255)
+ *
+ * @example Recovering prefix lengths from dotted decimal
+ * ```ts
+ * import { assertEquals } from "@std/assert";
+ * import { cidrv4MaskToPrefixLength } from "@hertzg/ip/cidrv4";
+ *
+ * assertEquals(cidrv4MaskToPrefixLength("255.255.255.0"), 24);
+ * assertEquals(cidrv4MaskToPrefixLength("255.255.0.0"), 16);
+ * assertEquals(cidrv4MaskToPrefixLength("255.255.255.252"), 30);
+ * assertEquals(cidrv4MaskToPrefixLength("0.0.0.0"), 0);
+ * assertEquals(cidrv4MaskToPrefixLength("255.255.255.255"), 32);
+ * ```
+ *
+ * @example Building a CIDR from an interface netmask
+ * ```ts
+ * import { assertEquals } from "@std/assert";
+ * import { cidrv4MaskToPrefixLength, stringifyCidrv4 } from "@hertzg/ip/cidrv4";
+ * import { parseIpv4 } from "@hertzg/ip/ipv4";
+ *
+ * const { address, netmask } = { address: "192.168.1.42", netmask: "255.255.255.0" };
+ *
+ * assertEquals(
+ *   stringifyCidrv4({
+ *     address: parseIpv4(address),
+ *     prefixLength: cidrv4MaskToPrefixLength(netmask),
+ *   }),
+ *   "192.168.1.42/24",
+ * );
+ * ```
+ */
+export function cidrv4MaskToPrefixLength(mask: string): number;
+/**
+ * Recovers the prefix length from an IPv4 network mask.
+ *
+ * The inverse of {@link cidrv4Mask}. Accepts either a 32-bit unsigned
+ * integer or dotted decimal notation.
+ *
+ * A CIDR mask is a run of one bits from the most significant end followed
+ * by zeros; masks that do not have that shape (`0xFF00FF00`,
+ * `"255.0.255.0"`) describe no prefix length at all and are rejected
+ * rather than answered with a plausible-looking count of set bits.
+ *
+ * @param mask The network mask, as a 32-bit unsigned integer or dotted decimal
+ * @returns The prefix length (0-32)
+ * @throws {TypeError} If the mask is not contiguous, or the notation is malformed
+ * @throws {RangeError} If the mask is out of range
+ *
+ * @example Both forms agree
+ * ```ts
+ * import { assertEquals } from "@std/assert";
+ * import { cidrv4MaskToPrefixLength } from "@hertzg/ip/cidrv4";
+ *
+ * assertEquals(cidrv4MaskToPrefixLength("255.255.255.0"), 24);
+ * assertEquals(cidrv4MaskToPrefixLength(0xFFFFFF00), 24);
+ * ```
+ *
+ * @example Non-contiguous masks throw, in either form
+ * ```ts
+ * import { assertThrows } from "@std/assert";
+ * import { cidrv4MaskToPrefixLength } from "@hertzg/ip/cidrv4";
+ *
+ * assertThrows(() => cidrv4MaskToPrefixLength(0xFF00FF00), TypeError);
+ * assertThrows(() => cidrv4MaskToPrefixLength("255.0.255.0"), TypeError);
+ * assertThrows(() => cidrv4MaskToPrefixLength("0.0.0.255"), TypeError);
+ * ```
+ *
+ * @example Round-trips with cidrv4Mask
+ * ```ts
+ * import { assertEquals } from "@std/assert";
+ * import { cidrv4Mask, cidrv4MaskToPrefixLength } from "@hertzg/ip/cidrv4";
+ *
+ * for (let prefixLength = 0; prefixLength <= 32; prefixLength++) {
+ *   assertEquals(cidrv4MaskToPrefixLength(cidrv4Mask(prefixLength)), prefixLength);
+ * }
+ * ```
+ *
+ * @example Error handling
+ * ```ts
+ * import { assertThrows } from "@std/assert";
+ * import { cidrv4MaskToPrefixLength } from "@hertzg/ip/cidrv4";
+ *
+ * // Wrong shape -- in range, but not a mask
+ * assertThrows(() => cidrv4MaskToPrefixLength(0xFF00FF00), TypeError);
+ * assertThrows(() => cidrv4MaskToPrefixLength("255.0.255.0"), TypeError);
+ *
+ * // Malformed notation
+ * assertThrows(() => cidrv4MaskToPrefixLength("255.255.255"), TypeError);
+ * assertThrows(() => cidrv4MaskToPrefixLength("255.255.255.256"), RangeError);
+ *
+ * // Wrong range -- not a 32-bit unsigned integer at all
+ * assertThrows(() => cidrv4MaskToPrefixLength(-1), RangeError);
+ * assertThrows(() => cidrv4MaskToPrefixLength(0x100000000), RangeError);
+ * assertThrows(() => cidrv4MaskToPrefixLength(1.5), RangeError);
+ * ```
+ */
+export function cidrv4MaskToPrefixLength(mask: string | number): number;
+/** Recovers the prefix length from an IPv4 network mask. */
+export function cidrv4MaskToPrefixLength(mask: string | number): number {
+  const value = typeof mask === "string" ? parseIpv4(mask) : mask;
+
+  if (value < 0 || value > 0xFFFFFFFF || !Number.isInteger(value)) {
+    throw new RangeError(
+      `IPv4 mask must be a 32-bit unsigned integer, got ${value}`,
+    );
+  }
+
+  // The complement of a contiguous mask is a run of trailing ones, i.e.
+  // 2^hostBits - 1. Only those values satisfy `n & (n + 1) === 0`.
+  const hostBits = (~value) >>> 0;
+  if ((hostBits & (hostBits + 1)) !== 0) {
+    throw new TypeError(
+      `IPv4 mask is not contiguous: 0x${value.toString(16).padStart(8, "0")}`,
+    );
+  }
+
+  // clz32 counts the leading zeros of the complement, which are exactly
+  // the mask's leading ones.
+  return Math.clz32(hostBits);
+}
+
+/**
  * Parses an IPv4 CIDR notation string to a Cidrv4 object.
  *
  * Returns only the parsed values (address and prefix length).
