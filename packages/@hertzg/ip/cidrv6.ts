@@ -47,6 +47,42 @@ export type Cidrv6 = {
 };
 
 /**
+ * Every IPv6 network mask, indexed by prefix length.
+ *
+ * Hoisted to module scope rather than built per call: each entry is an
+ * immutable `bigint`, and producing one costs a 128-bit shift plus the
+ * allocations that come with bigint arithmetic. `cidrv6Contains`,
+ * `cidrv6FirstAddress` and `cidrv6LastAddress` all route through
+ * {@link cidrv6Mask}, so a CIDR list scanned per request would otherwise
+ * repeat that work for every entry. The domain is 129 values known at
+ * author time, which is what makes a plain array the right cache — see
+ * ADR 0006 for the same reasoning applied to the classifier ranges.
+ */
+const MASKS_V6: readonly bigint[] = Object.freeze(
+  Array.from(
+    { length: 129 },
+    (_, prefixLength) =>
+      prefixLength === 0
+        ? 0n
+        : (0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFn << BigInt(128 - prefixLength)) &
+          0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFn,
+  ),
+);
+
+/**
+ * Every IPv6 CIDR block size, indexed by prefix length.
+ *
+ * Hoisted for the same reason as {@link MASKS_V6}: `2n ** BigInt(128 - n)`
+ * over a domain of 129 known values.
+ */
+const SIZES_V6: readonly bigint[] = Object.freeze(
+  Array.from(
+    { length: 129 },
+    (_, prefixLength) => 2n ** BigInt(128 - prefixLength),
+  ),
+);
+
+/**
  * Creates a network mask from an IPv6 prefix length.
  *
  * The prefix length must be between 0 and 128 (inclusive).
@@ -85,12 +121,7 @@ export function cidrv6Mask(prefixLength: number): bigint {
     );
   }
 
-  if (prefixLength === 0) {
-    return 0n;
-  }
-
-  return (0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFn << BigInt(128 - prefixLength)) &
-    0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFn;
+  return MASKS_V6[prefixLength];
 }
 
 /**
@@ -512,7 +543,7 @@ export function cidrv6Size(cidrOrPrefixLength: Cidrv6 | number): bigint {
     );
   }
 
-  return 2n ** BigInt(128 - prefixLength);
+  return SIZES_V6[prefixLength];
 }
 
 /**
