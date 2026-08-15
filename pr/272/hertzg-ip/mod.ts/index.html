@@ -1023,13 +1023,21 @@ IPv4-Mapped IPv6 Conversion (4to6)</h3>
 <li><a href=".././mod.ts/~/cidrv4ToCidrv64Mapped.html">cidrv4ToCidrv64Mapped</a>: Convert IPv4 CIDR to IPv4-mapped IPv6 CIDR</li>
 <li><a href=".././mod.ts/~/cidrv4FromCidrv64Mapped.html">cidrv4FromCidrv64Mapped</a>: Convert IPv4-mapped IPv6 CIDR to IPv4 CIDR</li>
 </ul>
-<h3 id="wire-byte-conversion-(bytes)">
-Wire Byte Conversion (bytes)</h3>
+<h3 id="universal-wire-byte-conversion-(bytes)">
+Universal Wire Byte Conversion (bytes)</h3>
 <ul>
 <li><a href=".././mod.ts/~/ipFromBytes.html">ipFromBytes</a>: Read a 4- or 16-byte address, version from the span width</li>
 <li><a href=".././mod.ts/~/ipToBytes.html">ipToBytes</a>: Write an address as its wire bytes, width from its type</li>
+</ul>
+<h3 id="ipv4-wire-byte-conversion-(bytesv4)">
+IPv4 Wire Byte Conversion (bytesv4)</h3>
+<ul>
 <li><a href=".././mod.ts/~/ipv4FromBytes.html">ipv4FromBytes</a>: Read a 4-byte IPv4 address from a buffer</li>
 <li><a href=".././mod.ts/~/ipv4ToBytes.html">ipv4ToBytes</a>: Write a 4-byte IPv4 address to a buffer</li>
+</ul>
+<h3 id="ipv6-wire-byte-conversion-(bytesv6)">
+IPv6 Wire Byte Conversion (bytesv6)</h3>
+<ul>
 <li><a href=".././mod.ts/~/ipv6FromBytes.html">ipv6FromBytes</a>: Read a 16-byte IPv6 address from a buffer</li>
 <li><a href=".././mod.ts/~/ipv6ToBytes.html">ipv6ToBytes</a>: Write a 16-byte IPv6 address to a buffer</li>
 </ul>
@@ -1047,7 +1055,9 @@ Submodules</h3>
 <li><a href="https://jsr.io/@hertzg/ip/doc/classifyv6"><code>classifyv6</code></a>: IPv6 classification via <a href=".././mod.ts/~/classifyIpv6.html">classifyIpv6</a>, <a href=".././mod.ts/~/isIpv6Loopback.html">isIpv6Loopback</a>, etc.</li>
 <li><a href="https://jsr.io/@hertzg/ip/doc/validate"><code>validate</code></a>: Universal validation via <a href=".././mod.ts/~/isValidIp.html">isValidIp</a>, <a href=".././mod.ts/~/isValidCidr.html">isValidCidr</a></li>
 <li><a href="https://jsr.io/@hertzg/ip/doc/4to6"><code>4to6</code></a>: IPv4-mapped IPv6 conversion via <a href=".././mod.ts/~/ipv4To64Mapped.html">ipv4To64Mapped</a>, <a href=".././mod.ts/~/ipv4From64Mapped.html">ipv4From64Mapped</a>, <a href=".././mod.ts/~/cidrv4ToCidrv64Mapped.html">cidrv4ToCidrv64Mapped</a>, <a href=".././mod.ts/~/cidrv4FromCidrv64Mapped.html">cidrv4FromCidrv64Mapped</a></li>
-<li><a href="https://jsr.io/@hertzg/ip/doc/bytes"><code>bytes</code></a>: Wire byte conversion via <a href=".././mod.ts/~/ipFromBytes.html">ipFromBytes</a>, <a href=".././mod.ts/~/ipToBytes.html">ipToBytes</a>, <a href=".././mod.ts/~/ipv4FromBytes.html">ipv4FromBytes</a>, <a href=".././mod.ts/~/ipv4ToBytes.html">ipv4ToBytes</a>, <a href=".././mod.ts/~/ipv6FromBytes.html">ipv6FromBytes</a>, <a href=".././mod.ts/~/ipv6ToBytes.html">ipv6ToBytes</a></li>
+<li><a href="https://jsr.io/@hertzg/ip/doc/bytes"><code>bytes</code></a>: Universal wire byte conversion via <a href=".././mod.ts/~/ipFromBytes.html">ipFromBytes</a>, <a href=".././mod.ts/~/ipToBytes.html">ipToBytes</a></li>
+<li><a href="https://jsr.io/@hertzg/ip/doc/bytesv4"><code>bytesv4</code></a>: IPv4 wire byte conversion via <a href=".././mod.ts/~/ipv4FromBytes.html">ipv4FromBytes</a>, <a href=".././mod.ts/~/ipv4ToBytes.html">ipv4ToBytes</a></li>
+<li><a href="https://jsr.io/@hertzg/ip/doc/bytesv6"><code>bytesv6</code></a>: IPv6 wire byte conversion via <a href=".././mod.ts/~/ipv6FromBytes.html">ipv6FromBytes</a>, <a href=".././mod.ts/~/ipv6ToBytes.html">ipv6ToBytes</a></li>
 </ul>
 </div></div>
 </div>
@@ -1422,7 +1432,7 @@ width of the span.</p>
 </div></div></div>
     </div><div id="namespace_ipv4frombytes" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-Function bg-Function/15 dark:text-FunctionDark dark:bg-FunctionDark/15" title="Function">f</div></div>
 <div class="namespaceItemContent">
-		    <a href="..&#x2F;.&#x2F;bytes.ts&#x2F;~&#x2F;ipv4FromBytes.html" title="ipv4FromBytes">
+		    <a href="..&#x2F;.&#x2F;bytesv4.ts&#x2F;~&#x2F;ipv4FromBytes.html" title="ipv4FromBytes">
 			    <span>ipv4FromBytes</span><span>(<div class="ml-4"><div><span>bytes<span>: <span class="td-ref">Uint8Array</span></span></span>,</div><div><span>offset<span class="td-op">?</span><span>: <span class="td-kw">number</span></span></span></div></div>)<span>: <span class="td-kw">number</span></span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Reads a 4-byte IPv4 address from a buffer.</p>
 </div></div></div>
     </div><div id="namespace_ipv4to64mapped" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-Function bg-Function/15 dark:text-FunctionDark dark:bg-FunctionDark/15" title="Function">f</div></div>
@@ -1432,37 +1442,37 @@ width of the span.</p>
 </div></div></div>
     </div><div id="namespace_ipv4tobytes" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-Function bg-Function/15 dark:text-FunctionDark dark:bg-FunctionDark/15" title="Function">f</div></div>
 <div class="namespaceItemContent">
-		    <a href="..&#x2F;.&#x2F;bytes.ts&#x2F;~&#x2F;ipv4ToBytes.html" title="ipv4ToBytes">
+		    <a href="..&#x2F;.&#x2F;bytesv4.ts&#x2F;~&#x2F;ipv4ToBytes.html" title="ipv4ToBytes">
 			    <span>ipv4ToBytes</span><span>(<div class="ml-4"><div><span>address<span>: <span class="td-kw">number</span></span></span>,</div><div><span>into<span class="td-op">?</span><span>: <span class="td-ref">Uint8Array</span></span></span>,</div><div><span>offset<span class="td-op">?</span><span>: <span class="td-kw">number</span></span></span></div></div>)<span>: <span class="td-ref">Uint8Array</span></span></span><div class="namespaceItemContentTypeInfo">2 overloads</div></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Writes an IPv4 address into a freshly allocated 4-byte buffer.</p>
 </div></div></div>
     </div><div id="namespace_ipv4tobytes-1" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-Function bg-Function/15 dark:text-FunctionDark dark:bg-FunctionDark/15" title="Function">f</div></div>
 <div class="namespaceItemContent">
-		    <a href="..&#x2F;.&#x2F;bytes.ts&#x2F;~&#x2F;ipv4ToBytes.html" title="ipv4ToBytes">
+		    <a href="..&#x2F;.&#x2F;bytesv4.ts&#x2F;~&#x2F;ipv4ToBytes.html" title="ipv4ToBytes">
 			    <span>ipv4ToBytes</span><span>(<div class="ml-4"><div><span>address<span>: <span class="td-kw">number</span></span></span>,</div><div><span>into<span class="td-op">?</span><span>: <span class="td-ref">Uint8Array</span></span></span>,</div><div><span>offset<span class="td-op">?</span><span>: <span class="td-kw">number</span></span></span></div></div>)<span>: <span class="td-ref">Uint8Array</span></span></span><div class="namespaceItemContentTypeInfo">2 overloads</div></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Writes an IPv4 address into a freshly allocated 4-byte buffer.</p>
 </div></div></div>
     </div><div id="namespace_ipv4tobytes-2" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-Function bg-Function/15 dark:text-FunctionDark dark:bg-FunctionDark/15" title="Function">f</div></div>
 <div class="namespaceItemContent">
-		    <a href="..&#x2F;.&#x2F;bytes.ts&#x2F;~&#x2F;ipv4ToBytes.html" title="ipv4ToBytes">
+		    <a href="..&#x2F;.&#x2F;bytesv4.ts&#x2F;~&#x2F;ipv4ToBytes.html" title="ipv4ToBytes">
 			    <span>ipv4ToBytes</span><span>(<div class="ml-4"><div><span>address<span>: <span class="td-kw">number</span></span></span>,</div><div><span>into<span class="td-op">?</span><span>: <span class="td-ref">Uint8Array</span></span></span>,</div><div><span>offset<span class="td-op">?</span><span>: <span class="td-kw">number</span></span></span></div></div>)<span>: <span class="td-ref">Uint8Array</span></span></span><div class="namespaceItemContentTypeInfo">2 overloads</div></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Writes an IPv4 address into a freshly allocated 4-byte buffer.</p>
 </div></div></div>
     </div><div id="namespace_ipv6frombytes" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-Function bg-Function/15 dark:text-FunctionDark dark:bg-FunctionDark/15" title="Function">f</div></div>
 <div class="namespaceItemContent">
-		    <a href="..&#x2F;.&#x2F;bytes.ts&#x2F;~&#x2F;ipv6FromBytes.html" title="ipv6FromBytes">
+		    <a href="..&#x2F;.&#x2F;bytesv6.ts&#x2F;~&#x2F;ipv6FromBytes.html" title="ipv6FromBytes">
 			    <span>ipv6FromBytes</span><span>(<div class="ml-4"><div><span>bytes<span>: <span class="td-ref">Uint8Array</span></span></span>,</div><div><span>offset<span class="td-op">?</span><span>: <span class="td-kw">number</span></span></span></div></div>)<span>: <span class="td-kw">bigint</span></span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Reads a 16-byte IPv6 address from a buffer.</p>
 </div></div></div>
     </div><div id="namespace_ipv6tobytes" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-Function bg-Function/15 dark:text-FunctionDark dark:bg-FunctionDark/15" title="Function">f</div></div>
 <div class="namespaceItemContent">
-		    <a href="..&#x2F;.&#x2F;bytes.ts&#x2F;~&#x2F;ipv6ToBytes.html" title="ipv6ToBytes">
+		    <a href="..&#x2F;.&#x2F;bytesv6.ts&#x2F;~&#x2F;ipv6ToBytes.html" title="ipv6ToBytes">
 			    <span>ipv6ToBytes</span><span>(<div class="ml-4"><div><span>address<span>: <span class="td-kw">bigint</span></span></span>,</div><div><span>into<span class="td-op">?</span><span>: <span class="td-ref">Uint8Array</span></span></span>,</div><div><span>offset<span class="td-op">?</span><span>: <span class="td-kw">number</span></span></span></div></div>)<span>: <span class="td-ref">Uint8Array</span></span></span><div class="namespaceItemContentTypeInfo">2 overloads</div></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Writes an IPv6 address into a freshly allocated 16-byte buffer.</p>
 </div></div></div>
     </div><div id="namespace_ipv6tobytes-1" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-Function bg-Function/15 dark:text-FunctionDark dark:bg-FunctionDark/15" title="Function">f</div></div>
 <div class="namespaceItemContent">
-		    <a href="..&#x2F;.&#x2F;bytes.ts&#x2F;~&#x2F;ipv6ToBytes.html" title="ipv6ToBytes">
+		    <a href="..&#x2F;.&#x2F;bytesv6.ts&#x2F;~&#x2F;ipv6ToBytes.html" title="ipv6ToBytes">
 			    <span>ipv6ToBytes</span><span>(<div class="ml-4"><div><span>address<span>: <span class="td-kw">bigint</span></span></span>,</div><div><span>into<span class="td-op">?</span><span>: <span class="td-ref">Uint8Array</span></span></span>,</div><div><span>offset<span class="td-op">?</span><span>: <span class="td-kw">number</span></span></span></div></div>)<span>: <span class="td-ref">Uint8Array</span></span></span><div class="namespaceItemContentTypeInfo">2 overloads</div></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Writes an IPv6 address into a freshly allocated 16-byte buffer.</p>
 </div></div></div>
     </div><div id="namespace_ipv6tobytes-2" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-Function bg-Function/15 dark:text-FunctionDark dark:bg-FunctionDark/15" title="Function">f</div></div>
 <div class="namespaceItemContent">
-		    <a href="..&#x2F;.&#x2F;bytes.ts&#x2F;~&#x2F;ipv6ToBytes.html" title="ipv6ToBytes">
+		    <a href="..&#x2F;.&#x2F;bytesv6.ts&#x2F;~&#x2F;ipv6ToBytes.html" title="ipv6ToBytes">
 			    <span>ipv6ToBytes</span><span>(<div class="ml-4"><div><span>address<span>: <span class="td-kw">bigint</span></span></span>,</div><div><span>into<span class="td-op">?</span><span>: <span class="td-ref">Uint8Array</span></span></span>,</div><div><span>offset<span class="td-op">?</span><span>: <span class="td-kw">number</span></span></span></div></div>)<span>: <span class="td-ref">Uint8Array</span></span></span><div class="namespaceItemContentTypeInfo">2 overloads</div></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Writes an IPv6 address into a freshly allocated 16-byte buffer.</p>
 </div></div></div>
     </div><div id="namespace_iscidrv4" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-Function bg-Function/15 dark:text-FunctionDark dark:bg-FunctionDark/15" title="Function">f</div></div>

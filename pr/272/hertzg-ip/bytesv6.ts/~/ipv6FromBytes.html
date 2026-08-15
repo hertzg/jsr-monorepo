@@ -1,10 +1,10 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>ipv4FromBytes - bytes.ts - @hertzg&#x2F;ip documentation</title>
+  <title>ipv6FromBytes - bytesv6.ts - @hertzg&#x2F;ip documentation</title>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="doc-current-file" content="bytes.ts">
+  <meta name="doc-current-file" content="bytesv6.ts">
   <link rel="stylesheet" href="..&#x2F;..&#x2F;styles.css">
   <link rel="stylesheet" href="..&#x2F;..&#x2F;page.css">
   <link id="ddocResetStylesheet" rel="stylesheet" href="..&#x2F;..&#x2F;reset.css"><link href="../../comrak.css" rel="stylesheet" /><link href="../../prism.css" rel="stylesheet" /><script src="../../prism.js"></script><script src="..&#x2F;..&#x2F;script.js" defer></script>
@@ -32,7 +32,7 @@
     fill="currentColor"
   />
 </svg>
-</span><a href="..&#x2F;..&#x2F;.&#x2F;bytes.ts&#x2F;index.html" class="contextLink">bytes.ts</a><span class="text-black dark:text-white"><svg
+</span><a href="..&#x2F;..&#x2F;.&#x2F;bytesv6.ts&#x2F;index.html" class="contextLink">bytesv6.ts</a><span class="text-black dark:text-white"><svg
   width="16"
   height="16"
   viewBox="0 0 16 16"
@@ -48,7 +48,7 @@
 </svg>
 </span>
 
-    <ul><li>ipv4FromBytes</li></ul></ul>
+    <ul><li>ipv6FromBytes</li></ul></ul>
 </div>
 
     <div class="flex items-center gap-2">
@@ -112,14 +112,14 @@
     </div>
   </div>
 </nav>
-<div id="searchResults"></div><div id="content"><main class="symbolGroup" id="symbol_ipv4FromBytes"><article>
+<div id="searchResults"></div><div id="content"><main class="symbolGroup" id="symbol_ipv6FromBytes"><article>
       <div class="symbolTitle">
         <div>
           <div class="text-2xl leading-none break-all">
-            <span class="text-Function">function</span>&nbsp;<span class="font-bold">ipv4FromBytes</span>
+            <span class="text-Function">function</span>&nbsp;<span class="font-bold">ipv6FromBytes</span>
           </div></div><a
   class="sourceButton"
-  href="file:&#x2F;&#x2F;&#x2F;home&#x2F;runner&#x2F;work&#x2F;jsr-monorepo&#x2F;jsr-monorepo&#x2F;packages&#x2F;@hertzg&#x2F;ip&#x2F;bytes.ts"><svg
+  href="file:&#x2F;&#x2F;&#x2F;home&#x2F;runner&#x2F;work&#x2F;jsr-monorepo&#x2F;jsr-monorepo&#x2F;packages&#x2F;@hertzg&#x2F;ip&#x2F;bytesv6.ts"><svg
   width="14"
   height="14"
   viewBox="0 0 14 14"
@@ -142,8 +142,8 @@
   />
 </svg>
 </a>
-</div><div><div class="mt-3 space-y-8"><div class="scroll-mt-16" id="function_ipv4frombytes_0">
-      <code class="anchorable text-base break-words"><a href="#function_ipv4frombytes_0" class="anchor" aria-label="Anchor" tabIndex="-1"><svg
+</div><div><div class="mt-3 space-y-8"><div class="scroll-mt-16" id="function_ipv6frombytes_0">
+      <code class="anchorable text-base break-words"><a href="#function_ipv6frombytes_0" class="anchor" aria-label="Anchor" tabIndex="-1"><svg
   width="16"
   height="16"
   viewBox="0 0 14 14"
@@ -165,11 +165,12 @@
   </defs>
 </svg>
 </a>
-<span class="font-bold">ipv4FromBytes</span><span class="font-medium">(<div class="ml-4"><div><span>bytes<span>: <a href="https://deno.land/api@v2.9.5?s=Uint8Array" class="link td-ref">Uint8Array</a></span></span>,</div><div><span>offset<span class="td-op">?</span><span>: <span class="td-kw">number</span></span></span></div></div>)<span>: <span class="td-kw">number</span></span> </span>
-      </code><div class="space-y-7" id=""><div class="markdown"><p>Reads a 4-byte IPv4 address from a buffer.</p>
-<p>The four bytes at <code>offset</code> are read in network order (big-endian) and
-combined into the 32-bit unsigned integer representation used throughout
-this package.</p>
+<span class="font-bold">ipv6FromBytes</span><span class="font-medium">(<div class="ml-4"><div><span>bytes<span>: <a href="https://deno.land/api@v2.9.5?s=Uint8Array" class="link td-ref">Uint8Array</a></span></span>,</div><div><span>offset<span class="td-op">?</span><span>: <span class="td-kw">number</span></span></span></div></div>)<span>: <span class="td-kw">bigint</span></span> </span>
+      </code><div class="space-y-7" id=""><div class="markdown"><p>Reads a 16-byte IPv6 address from a buffer.</p>
+<p>The sixteen bytes at <code>offset</code> are read in network order (big-endian) and
+combined into the 128-bit <code>bigint</code> representation used throughout this
+package. IPv4-mapped byte sequences (<code>::ffff:x.x.x.x</code>) are returned as the
+full 128-bit value, not unwrapped to a <code>number</code>.</p>
 </div><section class="section"  id="examples"><div>
       <h2 class="anchorable mb-1"><a href="#examples" class="anchor" aria-label="Anchor" tabIndex="-1"><svg
   width="16"
@@ -218,23 +219,27 @@ Examples</h2></div><div class="space-y-8"><div class="anchorable"><a href="#exam
 <h3 class="example-header"><div class="markdown"><p>Read an address out of a packet</p>
 </div></h3>
   <div><div class="markdown"><pre class="highlight"><code class="language-ts">import { assertEquals } from &quot;@std/assert&quot;;
-import { ipv4FromBytes } from &quot;@hertzg/ip/bytes&quot;;
-import { stringifyIpv4 } from &quot;@hertzg/ip/ipv4&quot;;
+import { ipv6FromBytes } from &quot;@hertzg/ip/bytesv6&quot;;
+import { stringifyIpv6 } from &quot;@hertzg/ip/ipv6&quot;;
 
-assertEquals(ipv4FromBytes(new Uint8Array([10, 0, 0, 1])), 167772161);
-assertEquals(
-  stringifyIpv4(ipv4FromBytes(new Uint8Array([0xaa, 0xaa, 192, 168, 1, 1]), 2)),
-  &quot;192.168.1.1&quot;,
-);
+// deno-fmt-ignore
+const bytes = new Uint8Array([
+  0x20, 0x01, 0x0d, 0xb8, 0x00, 0x00, 0x00, 0x00,
+  0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x01,
+]);
+
+assertEquals(stringifyIpv6(ipv6FromBytes(bytes)), &quot;2001:db8::1&quot;);
 </code><button class="copyButton" data-copy="import { assertEquals } from &quot;@std/assert&quot;;
-import { ipv4FromBytes } from &quot;@hertzg/ip/bytes&quot;;
-import { stringifyIpv4 } from &quot;@hertzg/ip/ipv4&quot;;
+import { ipv6FromBytes } from &quot;@hertzg/ip/bytesv6&quot;;
+import { stringifyIpv6 } from &quot;@hertzg/ip/ipv6&quot;;
 
-assertEquals(ipv4FromBytes(new Uint8Array([10, 0, 0, 1])), 167772161);
-assertEquals(
-  stringifyIpv4(ipv4FromBytes(new Uint8Array([0xaa, 0xaa, 192, 168, 1, 1]), 2)),
-  &quot;192.168.1.1&quot;,
-);
+// deno-fmt-ignore
+const bytes = new Uint8Array([
+  0x20, 0x01, 0x0d, 0xb8, 0x00, 0x00, 0x00, 0x00,
+  0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x01,
+]);
+
+assertEquals(stringifyIpv6(ipv6FromBytes(bytes)), &quot;2001:db8::1&quot;);
 "><svg
   class="copy"
   width="15"
@@ -290,16 +295,30 @@ assertEquals(
   </defs>
 </svg>
 </a>
-<h3 class="example-header"><div class="markdown"><p>The high bit does not produce a negative number</p>
+<h3 class="example-header"><div class="markdown"><p>IPv4-mapped bytes stay a 128-bit value</p>
 </div></h3>
   <div><div class="markdown"><pre class="highlight"><code class="language-ts">import { assertEquals } from &quot;@std/assert&quot;;
-import { ipv4FromBytes } from &quot;@hertzg/ip/bytes&quot;;
+import { ipv6FromBytes } from &quot;@hertzg/ip/bytesv6&quot;;
+import { stringifyIpv6 } from &quot;@hertzg/ip/ipv6&quot;;
 
-assertEquals(ipv4FromBytes(new Uint8Array([255, 255, 255, 255])), 4294967295);
+// deno-fmt-ignore
+const bytes = new Uint8Array([
+  0, 0, 0, 0, 0, 0, 0, 0,
+  0, 0, 0xff, 0xff, 192, 168, 1, 1,
+]);
+
+assertEquals(stringifyIpv6(ipv6FromBytes(bytes)), &quot;::ffff:c0a8:101&quot;);
 </code><button class="copyButton" data-copy="import { assertEquals } from &quot;@std/assert&quot;;
-import { ipv4FromBytes } from &quot;@hertzg/ip/bytes&quot;;
+import { ipv6FromBytes } from &quot;@hertzg/ip/bytesv6&quot;;
+import { stringifyIpv6 } from &quot;@hertzg/ip/ipv6&quot;;
 
-assertEquals(ipv4FromBytes(new Uint8Array([255, 255, 255, 255])), 4294967295);
+// deno-fmt-ignore
+const bytes = new Uint8Array([
+  0, 0, 0, 0, 0, 0, 0, 0,
+  0, 0, 0xff, 0xff, 192, 168, 1, 1,
+]);
+
+assertEquals(stringifyIpv6(ipv6FromBytes(bytes)), &quot;::ffff:c0a8:101&quot;);
 "><svg
   class="copy"
   width="15"
@@ -358,15 +377,15 @@ assertEquals(ipv4FromBytes(new Uint8Array([255, 255, 255, 255])), 4294967295);
 <h3 class="example-header"><div class="markdown"><p>A span that runs off the end throws</p>
 </div></h3>
   <div><div class="markdown"><pre class="highlight"><code class="language-ts">import { assertThrows } from &quot;@std/assert&quot;;
-import { ipv4FromBytes } from &quot;@hertzg/ip/bytes&quot;;
+import { ipv6FromBytes } from &quot;@hertzg/ip/bytesv6&quot;;
 
-assertThrows(() =&gt; ipv4FromBytes(new Uint8Array([1, 2, 3])), RangeError);
-assertThrows(() =&gt; ipv4FromBytes(new Uint8Array([1, 2, 3, 4]), 1), RangeError);
+assertThrows(() =&gt; ipv6FromBytes(new Uint8Array(15)), RangeError);
+assertThrows(() =&gt; ipv6FromBytes(new Uint8Array(16), 1), RangeError);
 </code><button class="copyButton" data-copy="import { assertThrows } from &quot;@std/assert&quot;;
-import { ipv4FromBytes } from &quot;@hertzg/ip/bytes&quot;;
+import { ipv6FromBytes } from &quot;@hertzg/ip/bytesv6&quot;;
 
-assertThrows(() =&gt; ipv4FromBytes(new Uint8Array([1, 2, 3])), RangeError);
-assertThrows(() =&gt; ipv4FromBytes(new Uint8Array([1, 2, 3, 4]), 1), RangeError);
+assertThrows(() =&gt; ipv6FromBytes(new Uint8Array(15)), RangeError);
+assertThrows(() =&gt; ipv6FromBytes(new Uint8Array(16), 1), RangeError);
 "><svg
   class="copy"
   width="15"
@@ -424,10 +443,10 @@ assertThrows(() =&gt; ipv4FromBytes(new Uint8Array([1, 2, 3, 4]), 1), RangeError
   </defs>
 </svg>
 </a>
-Parameters</h2></div><div class="space-y-8"><div class="anchorable docEntry" id="function_ipv4frombytes_0_parameter_bytes">
+Parameters</h2></div><div class="space-y-8"><div class="anchorable docEntry" id="function_ipv6frombytes_0_parameter_bytes">
 
   <div class="docEntryHeader">
-    <div><code><a href="#function_ipv4frombytes_0_parameter_bytes" class="anchor" aria-label="Anchor" tabIndex="-1"><svg
+    <div><code><a href="#function_ipv6frombytes_0_parameter_bytes" class="anchor" aria-label="Anchor" tabIndex="-1"><svg
   width="16"
   height="16"
   viewBox="0 0 14 14"
@@ -453,7 +472,7 @@ Parameters</h2></div><div class="space-y-8"><div class="anchorable docEntry" id=
       </code>
     </div><a
   class="sourceButton"
-  href="file:&#x2F;&#x2F;&#x2F;home&#x2F;runner&#x2F;work&#x2F;jsr-monorepo&#x2F;jsr-monorepo&#x2F;packages&#x2F;@hertzg&#x2F;ip&#x2F;bytes.ts"><svg
+  href="file:&#x2F;&#x2F;&#x2F;home&#x2F;runner&#x2F;work&#x2F;jsr-monorepo&#x2F;jsr-monorepo&#x2F;packages&#x2F;@hertzg&#x2F;ip&#x2F;bytesv6.ts"><svg
   width="14"
   height="14"
   viewBox="0 0 14 14"
@@ -478,11 +497,11 @@ Parameters</h2></div><div class="space-y-8"><div class="anchorable docEntry" id=
 </a>
 </div><div class="max-w-[75ch]"><div class="markdown"><p>The buffer to read from</p>
 </div></div></div>
-<div class="anchorable docEntry" id="function_ipv4frombytes_0_parameter_offset">
+<div class="anchorable docEntry" id="function_ipv6frombytes_0_parameter_offset">
 
   <div class="docEntryHeader">
     <div><div class="space-x-1 mb-1"><div class="text-optional border border-optional/50 bg-optional/5 inline-flex items-center gap-0.5 *:flex-none rounded-md leading-none text-sm py-1 px-2">optional</div>
-</div><code><a href="#function_ipv4frombytes_0_parameter_offset" class="anchor" aria-label="Anchor" tabIndex="-1"><svg
+</div><code><a href="#function_ipv6frombytes_0_parameter_offset" class="anchor" aria-label="Anchor" tabIndex="-1"><svg
   width="16"
   height="16"
   viewBox="0 0 14 14"
@@ -508,7 +527,7 @@ Parameters</h2></div><div class="space-y-8"><div class="anchorable docEntry" id=
       </code>
     </div><a
   class="sourceButton"
-  href="file:&#x2F;&#x2F;&#x2F;home&#x2F;runner&#x2F;work&#x2F;jsr-monorepo&#x2F;jsr-monorepo&#x2F;packages&#x2F;@hertzg&#x2F;ip&#x2F;bytes.ts"><svg
+  href="file:&#x2F;&#x2F;&#x2F;home&#x2F;runner&#x2F;work&#x2F;jsr-monorepo&#x2F;jsr-monorepo&#x2F;packages&#x2F;@hertzg&#x2F;ip&#x2F;bytesv6.ts"><svg
   width="14"
   height="14"
   viewBox="0 0 14 14"
@@ -531,7 +550,7 @@ Parameters</h2></div><div class="space-y-8"><div class="anchorable docEntry" id=
   />
 </svg>
 </a>
-</div><div class="max-w-[75ch]"><div class="markdown"><p>The offset of the first of the four bytes, defaulting to <code>0</code></p>
+</div><div class="max-w-[75ch]"><div class="markdown"><p>The offset of the first of the sixteen bytes, defaulting to <code>0</code></p>
 </div></div></div>
 </div></section>
 <section class="section"  id="return-type"><div>
@@ -557,14 +576,14 @@ Parameters</h2></div><div class="space-y-8"><div class="anchorable docEntry" id=
   </defs>
 </svg>
 </a>
-Return Type</h2></div><div class="space-y-8"><div class=" docEntry" id="function_ipv4frombytes_0_return">
+Return Type</h2></div><div class="space-y-8"><div class=" docEntry" id="function_ipv6frombytes_0_return">
 
   <div class="docEntryHeader">
-    <div><code><span class="font-medium text-stone-500 dark:text-stone-200"><span class="td-kw">number</span></span>
+    <div><code><span class="font-medium text-stone-500 dark:text-stone-200"><span class="td-kw">bigint</span></span>
       </code>
     </div><a
   class="sourceButton"
-  href="file:&#x2F;&#x2F;&#x2F;home&#x2F;runner&#x2F;work&#x2F;jsr-monorepo&#x2F;jsr-monorepo&#x2F;packages&#x2F;@hertzg&#x2F;ip&#x2F;bytes.ts"><svg
+  href="file:&#x2F;&#x2F;&#x2F;home&#x2F;runner&#x2F;work&#x2F;jsr-monorepo&#x2F;jsr-monorepo&#x2F;packages&#x2F;@hertzg&#x2F;ip&#x2F;bytesv6.ts"><svg
   width="14"
   height="14"
   viewBox="0 0 14 14"
@@ -587,7 +606,7 @@ Return Type</h2></div><div class="space-y-8"><div class=" docEntry" id="function
   />
 </svg>
 </a>
-</div><div class="max-w-[75ch]"><div class="markdown"><p>The address as a 32-bit unsigned integer</p>
+</div><div class="max-w-[75ch]"><div class="markdown"><p>The address as a 128-bit unsigned bigint</p>
 </div></div></div>
 </div></section>
 <section class="section"  id="throws"><div>
@@ -613,14 +632,14 @@ Return Type</h2></div><div class="space-y-8"><div class=" docEntry" id="function
   </defs>
 </svg>
 </a>
-Throws</h2></div><div class="space-y-8"><div class=" docEntry" id="function_ipv4frombytes_0_throws_0">
+Throws</h2></div><div class="space-y-8"><div class=" docEntry" id="function_ipv6frombytes_0_throws_0">
 
   <div class="docEntryHeader">
     <div><code><span class="font-medium text-stone-500 dark:text-stone-200">RangeError</span>
       </code>
     </div><a
   class="sourceButton"
-  href="file:&#x2F;&#x2F;&#x2F;home&#x2F;runner&#x2F;work&#x2F;jsr-monorepo&#x2F;jsr-monorepo&#x2F;packages&#x2F;@hertzg&#x2F;ip&#x2F;bytes.ts"><svg
+  href="file:&#x2F;&#x2F;&#x2F;home&#x2F;runner&#x2F;work&#x2F;jsr-monorepo&#x2F;jsr-monorepo&#x2F;packages&#x2F;@hertzg&#x2F;ip&#x2F;bytesv6.ts"><svg
   width="14"
   height="14"
   viewBox="0 0 14 14"
@@ -643,7 +662,7 @@ Throws</h2></div><div class="space-y-8"><div class=" docEntry" id="function_ipv4
   />
 </svg>
 </a>
-</div><div class="max-w-[75ch]"><div class="markdown"><p>If four bytes are not available at <code>offset</code></p>
+</div><div class="max-w-[75ch]"><div class="markdown"><p>If sixteen bytes are not available at <code>offset</code></p>
 </div></div></div>
 </div></section>
 </div>
@@ -652,8 +671,8 @@ Throws</h2></div><div class="space-y-8"><div class=" docEntry" id="function_ipv4
     </article></main>
 <div class="toc">
     <div><div class="usageContent">
-    <h3>Usage</h3><div class="markdown"><pre class="highlight"><code class="language-typescript">import { ipv4FromBytes } from &quot;bytes.ts&quot;;
-</code><button class="copyButton" data-copy="import { ipv4FromBytes } from &quot;bytes.ts&quot;;
+    <h3>Usage</h3><div class="markdown"><pre class="highlight"><code class="language-typescript">import { ipv6FromBytes } from &quot;bytesv6.ts&quot;;
+</code><button class="copyButton" data-copy="import { ipv6FromBytes } from &quot;bytesv6.ts&quot;;
 "><svg
   class="copy"
   width="15"
@@ -686,7 +705,7 @@ Throws</h2></div><div class="space-y-8"><div class=" docEntry" id="function_ipv4
 </svg>
 </button><code></code></pre>
 </div></div><nav class="documentNavigation">
-          <h3>Document Navigation</h3><ul><li><a href="#examples" title="Examples">Examples</a></li><li><ul><li><a href="#example_0" title="Read an address out of a packet">Read an address out of a packet</a></li><li><a href="#example_1" title="The high bit does not produce a negative number">The high bit does not produce a negative number</a></li><li><a href="#example_2" title="A span that runs off the end throws">A span that runs off the end throws</a></li></ul></li><li><a href="#parameters" title="Parameters">Parameters</a></li><li><ul><li><a href="#function_ipv4frombytes_0_parameter_bytes" title="bytes">bytes</a></li><li><a href="#function_ipv4frombytes_0_parameter_offset" title="offset">offset</a></li></ul></li><li><a href="#return-type" title="Return Type">Return Type</a></li><li><a href="#throws" title="Throws">Throws</a></li></ul></nav></div>
+          <h3>Document Navigation</h3><ul><li><a href="#examples" title="Examples">Examples</a></li><li><ul><li><a href="#example_0" title="Read an address out of a packet">Read an address out of a packet</a></li><li><a href="#example_1" title="IPv4-mapped bytes stay a 128-bit value">IPv4-mapped bytes stay a 128-bit value</a></li><li><a href="#example_2" title="A span that runs off the end throws">A span that runs off the end throws</a></li></ul></li><li><a href="#parameters" title="Parameters">Parameters</a></li><li><ul><li><a href="#function_ipv6frombytes_0_parameter_bytes" title="bytes">bytes</a></li><li><a href="#function_ipv6frombytes_0_parameter_offset" title="offset">offset</a></li></ul></li><li><a href="#return-type" title="Return Type">Return Type</a></li><li><a href="#throws" title="Throws">Throws</a></li></ul></nav></div>
   </div></div>
 </div>
 </div>

@@ -173,7 +173,7 @@ width of the span.</p>
 returning <code>bigint</code>). Any other width throws a <code>RangeError</code> rather than
 guessing: a 60-byte frame at offset 12 leaves a 48-byte span, which names no
 version. Decoders that know the version and the field offset want
-<a href="../.././bytes.ts/~/ipv4FromBytes.html">ipv4FromBytes</a> or <a href="../.././bytes.ts/~/ipv6FromBytes.html">ipv6FromBytes</a>, where the width is fixed by
+<a href="../.././bytesv4.ts/~/ipv4FromBytes.html">ipv4FromBytes</a> or <a href="../.././bytesv6.ts/~/ipv6FromBytes.html">ipv6FromBytes</a>, where the width is fixed by
 the function.</p>
 <p>Unlike parseIp, this does <strong>not</strong> unwrap IPv4-mapped addresses.
 Sixteen bytes always return a <code>bigint</code>, so that
