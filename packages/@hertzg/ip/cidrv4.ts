@@ -8,25 +8,31 @@
  * @example CIDR operations
  * ```ts
  * import { assert, assertEquals } from "@std/assert";
- * import {
- *   cidrv4BroadcastAddress,
- *   cidrv4Contains,
- *   cidrv4NetworkAddress,
- *   parseCidrv4,
- * } from "@hertzg/ip/cidrv4";
- * import { parseIpv4, stringifyIpv4 } from "@hertzg/ip/ipv4";
+ * import { cidrv4Contains, parseCidrv4 } from "@hertzg/ip/cidrv4";
+ * import { parseIpv4 } from "@hertzg/ip/ipv4";
  *
  * const cidr = parseCidrv4("192.168.1.0/24");
- * let currentIp = cidrv4NetworkAddress(cidr) + 1;
- *
- * while (cidrv4Contains(cidr, currentIp)) {
- *   const assigned = stringifyIpv4(currentIp);
- *   currentIp = currentIp + 1;
- *   if (currentIp > cidrv4BroadcastAddress(cidr)) break;
- * }
  *
  * assert(cidrv4Contains(cidr, parseIpv4("192.168.1.1")));
  * assertEquals(cidrv4Contains(cidr, parseIpv4("192.168.2.1")), false);
+ * ```
+ *
+ * @example Handing out assignable addresses
+ * ```ts
+ * import { assertEquals } from "@std/assert";
+ * import {
+ *   cidrv4UsableAddresses,
+ *   cidrv4UsableSize,
+ *   parseCidrv4,
+ * } from "@hertzg/ip/cidrv4";
+ * import { stringifyIpv4 } from "@hertzg/ip/ipv4";
+ *
+ * const pool = parseCidrv4("192.168.1.0/24");
+ * const assigned = Array.from(cidrv4UsableAddresses(pool), stringifyIpv4);
+ *
+ * assertEquals(assigned.length, cidrv4UsableSize(pool));
+ * assertEquals(assigned[0], "192.168.1.1");
+ * assertEquals(assigned.at(-1), "192.168.1.254");
  * ```
  *
  * @module
@@ -394,9 +400,17 @@ export function cidrv4FirstAddress(cidr: Cidrv4): number {
 }
 
 /**
- * Returns the network address (first IP) of a CIDR block.
+ * Returns the network address of a CIDR block.
  *
- * Alias for {@link cidrv4FirstAddress}.
+ * The network address is the block's first address — the one whose host
+ * part is all zeros. It names the subnet itself rather than a machine on
+ * it, so it is not assignable to an interface (RFC 1812 section 5.3.5);
+ * {@link cidrv4FirstUsableAddress} is the first address that is. The
+ * exception is a `/31` or `/32`, where the whole block is assignable.
+ *
+ * Same address as {@link cidrv4FirstAddress}, under the IPv4 name for it.
+ * IPv6 has no counterpart to the {@link cidrv4BroadcastAddress} half of
+ * this pair, which is why the `cidrv6` side stays with first/last only.
  *
  * @param cidr The CIDR block
  * @returns The network address as a 32-bit unsigned integer
@@ -409,6 +423,21 @@ export function cidrv4FirstAddress(cidr: Cidrv4): number {
  *
  * const cidr = parseCidrv4("192.168.1.0/24");
  * assertEquals(cidrv4NetworkAddress(cidr), parseIpv4("192.168.1.0"));
+ * ```
+ *
+ * @example The network address is not assignable, the next one is
+ * ```ts
+ * import { assertEquals } from "@std/assert";
+ * import {
+ *   cidrv4FirstUsableAddress,
+ *   cidrv4NetworkAddress,
+ *   parseCidrv4,
+ * } from "@hertzg/ip/cidrv4";
+ * import { stringifyIpv4 } from "@hertzg/ip/ipv4";
+ *
+ * const cidr = parseCidrv4("10.0.0.0/24");
+ * assertEquals(stringifyIpv4(cidrv4NetworkAddress(cidr)), "10.0.0.0");
+ * assertEquals(stringifyIpv4(cidrv4FirstUsableAddress(cidr)), "10.0.0.1");
  * ```
  */
 export const cidrv4NetworkAddress: typeof cidrv4FirstAddress =
@@ -437,9 +466,17 @@ export function cidrv4LastAddress(cidr: Cidrv4): number {
 }
 
 /**
- * Returns the broadcast address (last IP) of a CIDR block.
+ * Returns the directed broadcast address of a CIDR block.
  *
- * Alias for {@link cidrv4LastAddress}.
+ * The broadcast address is the block's last address — the one whose host
+ * part is all ones. It addresses every machine on the subnet at once, so
+ * it is not assignable to an interface (RFC 1812 section 5.3.5);
+ * {@link cidrv4LastUsableAddress} is the last address that is. The
+ * exception is a `/31` or `/32`, where the whole block is assignable.
+ *
+ * Same address as {@link cidrv4LastAddress}, under the IPv4 name for it.
+ * IPv6 has no broadcast address at all, so there is deliberately no
+ * `cidrv6BroadcastAddress` to pair with this one.
  *
  * @param cidr The CIDR block
  * @returns The broadcast address as a 32-bit unsigned integer
@@ -453,9 +490,138 @@ export function cidrv4LastAddress(cidr: Cidrv4): number {
  * const cidr = parseCidrv4("192.168.1.0/24");
  * assertEquals(cidrv4BroadcastAddress(cidr), parseIpv4("192.168.1.255"));
  * ```
+ *
+ * @example The broadcast address is not assignable, the one before it is
+ * ```ts
+ * import { assertEquals } from "@std/assert";
+ * import {
+ *   cidrv4BroadcastAddress,
+ *   cidrv4LastUsableAddress,
+ *   parseCidrv4,
+ * } from "@hertzg/ip/cidrv4";
+ * import { stringifyIpv4 } from "@hertzg/ip/ipv4";
+ *
+ * const cidr = parseCidrv4("10.0.0.0/24");
+ * assertEquals(stringifyIpv4(cidrv4BroadcastAddress(cidr)), "10.0.0.255");
+ * assertEquals(stringifyIpv4(cidrv4LastUsableAddress(cidr)), "10.0.0.254");
+ * ```
  */
 export const cidrv4BroadcastAddress: typeof cidrv4LastAddress =
   cidrv4LastAddress;
+
+/**
+ * Checks whether every address in a block is assignable.
+ *
+ * True for `/31` (RFC 3021 point-to-point, both ends assignable) and `/32`
+ * (a single host route). Both lack the reserved network and broadcast
+ * addresses that shorter prefixes carve out.
+ *
+ * @param prefixLength The CIDR prefix length (0-32)
+ * @returns true if the block reserves neither a network nor a broadcast address
+ */
+function cidrv4IsFullyUsable(prefixLength: number): boolean {
+  return prefixLength >= 31;
+}
+
+/**
+ * Returns the first assignable address of a CIDR block.
+ *
+ * This is the {@link cidrv4NetworkAddress} plus one, because the network
+ * address names the subnet rather than a machine on it (RFC 1812
+ * section 5.3.5).
+ *
+ * Two prefix lengths are exceptions and yield the network address itself:
+ *
+ * - `/31` — a point-to-point link, where RFC 3021 assigns both addresses
+ *   to the two ends and there is no broadcast address to reserve.
+ * - `/32` — a host route, which is a single address and nothing else.
+ *
+ * Every IPv4 block therefore has at least one assignable address, so this
+ * never returns a value outside the block and never has to signal "none".
+ *
+ * @param cidr The CIDR block
+ * @returns The first assignable address as a 32-bit unsigned integer
+ *
+ * @example First assignable address of a subnet
+ * ```ts
+ * import { assertEquals } from "@std/assert";
+ * import { cidrv4FirstUsableAddress, parseCidrv4 } from "@hertzg/ip/cidrv4";
+ * import { stringifyIpv4 } from "@hertzg/ip/ipv4";
+ *
+ * const gateway = cidrv4FirstUsableAddress(parseCidrv4("192.168.1.0/24"));
+ * assertEquals(stringifyIpv4(gateway), "192.168.1.1");
+ * ```
+ *
+ * @example RFC 3021 /31 and /32 keep the network address
+ * ```ts
+ * import { assertEquals } from "@std/assert";
+ * import { cidrv4FirstUsableAddress, parseCidrv4 } from "@hertzg/ip/cidrv4";
+ * import { stringifyIpv4 } from "@hertzg/ip/ipv4";
+ *
+ * assertEquals(
+ *   stringifyIpv4(cidrv4FirstUsableAddress(parseCidrv4("10.0.0.0/31"))),
+ *   "10.0.0.0",
+ * );
+ * assertEquals(
+ *   stringifyIpv4(cidrv4FirstUsableAddress(parseCidrv4("10.0.0.7/32"))),
+ *   "10.0.0.7",
+ * );
+ * ```
+ */
+export function cidrv4FirstUsableAddress(cidr: Cidrv4): number {
+  const network = cidrv4FirstAddress(cidr);
+  return cidrv4IsFullyUsable(cidr.prefixLength) ? network : (network + 1) >>> 0;
+}
+
+/**
+ * Returns the last assignable address of a CIDR block.
+ *
+ * This is the {@link cidrv4BroadcastAddress} minus one, because the
+ * broadcast address addresses the whole subnet rather than a machine on
+ * it (RFC 1812 section 5.3.5).
+ *
+ * Two prefix lengths are exceptions and yield the broadcast address
+ * itself:
+ *
+ * - `/31` — a point-to-point link, where RFC 3021 assigns both addresses
+ *   to the two ends and there is no broadcast address to reserve.
+ * - `/32` — a host route, which is a single address and nothing else.
+ *
+ * @param cidr The CIDR block
+ * @returns The last assignable address as a 32-bit unsigned integer
+ *
+ * @example Last assignable address of a subnet
+ * ```ts
+ * import { assertEquals } from "@std/assert";
+ * import { cidrv4LastUsableAddress, parseCidrv4 } from "@hertzg/ip/cidrv4";
+ * import { stringifyIpv4 } from "@hertzg/ip/ipv4";
+ *
+ * const last = cidrv4LastUsableAddress(parseCidrv4("192.168.1.0/24"));
+ * assertEquals(stringifyIpv4(last), "192.168.1.254");
+ * ```
+ *
+ * @example RFC 3021 /31 and /32 keep the broadcast address
+ * ```ts
+ * import { assertEquals } from "@std/assert";
+ * import { cidrv4LastUsableAddress, parseCidrv4 } from "@hertzg/ip/cidrv4";
+ * import { stringifyIpv4 } from "@hertzg/ip/ipv4";
+ *
+ * assertEquals(
+ *   stringifyIpv4(cidrv4LastUsableAddress(parseCidrv4("10.0.0.0/31"))),
+ *   "10.0.0.1",
+ * );
+ * assertEquals(
+ *   stringifyIpv4(cidrv4LastUsableAddress(parseCidrv4("10.0.0.7/32"))),
+ *   "10.0.0.7",
+ * );
+ * ```
+ */
+export function cidrv4LastUsableAddress(cidr: Cidrv4): number {
+  const broadcast = cidrv4LastAddress(cidr);
+  return cidrv4IsFullyUsable(cidr.prefixLength)
+    ? broadcast
+    : (broadcast - 1) >>> 0;
+}
 
 /**
  * Returns the total number of IP addresses in a CIDR block.
@@ -527,6 +693,78 @@ export function cidrv4Size(cidrOrPrefixLength: Cidrv4 | number): number {
   }
 
   return 2 ** (32 - prefixLength);
+}
+
+/**
+ * Returns the number of assignable addresses in a CIDR block.
+ *
+ * This is {@link cidrv4Size} minus the network and broadcast addresses,
+ * except at `/31` and `/32` where the whole block is assignable — see
+ * {@link cidrv4FirstUsableAddress}. Writing `cidrv4Size(cidr) - 2` by
+ * hand gets `0` for a `/31` and `-1` for a `/32`, which is why this is a
+ * function rather than a note in the docs.
+ *
+ * The result is never zero: every IPv4 block has at least one assignable
+ * address.
+ *
+ * @param cidr The CIDR block
+ * @returns The number of assignable addresses
+ *
+ * @example Usable size from a Cidrv4 object
+ * ```ts
+ * import { assertEquals } from "@std/assert";
+ * import { cidrv4UsableSize, parseCidrv4 } from "@hertzg/ip/cidrv4";
+ *
+ * assertEquals(cidrv4UsableSize(parseCidrv4("192.168.1.0/24")), 254);
+ * assertEquals(cidrv4UsableSize(parseCidrv4("10.0.0.0/30")), 2);
+ * assertEquals(cidrv4UsableSize(parseCidrv4("10.0.0.0/31")), 2);
+ * assertEquals(cidrv4UsableSize(parseCidrv4("10.0.0.1/32")), 1);
+ * ```
+ */
+export function cidrv4UsableSize(cidr: Cidrv4): number;
+/**
+ * Returns the number of assignable addresses for a given prefix length.
+ *
+ * @param prefixLength The CIDR prefix length (0-32)
+ * @returns The number of assignable addresses
+ * @throws {RangeError} If the prefix length is out of range (not 0-32)
+ *
+ * @example Usable size from a prefix length
+ * ```ts
+ * import { assertEquals } from "@std/assert";
+ * import { cidrv4UsableSize } from "@hertzg/ip/cidrv4";
+ *
+ * assertEquals(cidrv4UsableSize(24), 254);
+ * assertEquals(cidrv4UsableSize(31), 2);
+ * assertEquals(cidrv4UsableSize(32), 1);
+ * assertEquals(cidrv4UsableSize(0), 4294967294);
+ * ```
+ *
+ * @example Out-of-range prefix length throws
+ * ```ts
+ * import { assertThrows } from "@std/assert";
+ * import { cidrv4UsableSize } from "@hertzg/ip/cidrv4";
+ *
+ * assertThrows(() => cidrv4UsableSize(-1), RangeError);
+ * assertThrows(() => cidrv4UsableSize(33), RangeError);
+ * ```
+ */
+export function cidrv4UsableSize(prefixLength: number): number;
+/**
+ * Returns the number of assignable addresses for either a CIDR block or a prefix length.
+ *
+ * @param cidrOrPrefixLength A Cidrv4 block or a prefix length (0-32)
+ * @returns The number of assignable addresses
+ */
+export function cidrv4UsableSize(cidrOrPrefixLength: Cidrv4 | number): number;
+/** Returns the number of assignable addresses for either a CIDR block or a prefix length. */
+export function cidrv4UsableSize(cidrOrPrefixLength: Cidrv4 | number): number {
+  const prefixLength = typeof cidrOrPrefixLength === "number"
+    ? cidrOrPrefixLength
+    : cidrOrPrefixLength.prefixLength;
+
+  const size = cidrv4Size(prefixLength);
+  return cidrv4IsFullyUsable(prefixLength) ? size : size - 2;
 }
 
 /**
@@ -883,6 +1121,72 @@ export function* cidrv4Addresses(
     currentIp = (currentIp + step) >>> 0;
     i++;
   }
+}
+
+/**
+ * Generates every assignable address in a CIDR block, in ascending order.
+ *
+ * Yields {@link cidrv4FirstUsableAddress} through
+ * {@link cidrv4LastUsableAddress} inclusive — {@link cidrv4UsableSize}
+ * addresses in total, with the network and broadcast addresses skipped
+ * except at `/31` and `/32` where the whole block is assignable.
+ *
+ * Lazy: nothing is materialized, so a short prefix costs nothing until
+ * the caller iterates it.
+ *
+ * Unlike {@link cidrv4Addresses} this takes no offset, count, or step —
+ * its extent is fixed by the block. Reach for `cidrv4Addresses` to slice
+ * a block on any other terms.
+ *
+ * @param cidr The CIDR block to enumerate
+ * @returns A generator yielding assignable addresses as 32-bit unsigned integers
+ *
+ * @example Assign addresses out of a pool
+ * ```ts
+ * import { assertEquals } from "@std/assert";
+ * import { cidrv4UsableAddresses, parseCidrv4 } from "@hertzg/ip/cidrv4";
+ * import { stringifyIpv4 } from "@hertzg/ip/ipv4";
+ *
+ * const pool = Array.from(cidrv4UsableAddresses(parseCidrv4("10.0.1.0/29")));
+ * assertEquals(pool.map(stringifyIpv4), [
+ *   "10.0.1.1",
+ *   "10.0.1.2",
+ *   "10.0.1.3",
+ *   "10.0.1.4",
+ *   "10.0.1.5",
+ *   "10.0.1.6",
+ * ]);
+ * ```
+ *
+ * @example RFC 3021 /31 yields both ends of the link
+ * ```ts
+ * import { assertEquals } from "@std/assert";
+ * import { cidrv4UsableAddresses, parseCidrv4 } from "@hertzg/ip/cidrv4";
+ * import { stringifyIpv4 } from "@hertzg/ip/ipv4";
+ *
+ * const link = Array.from(cidrv4UsableAddresses(parseCidrv4("10.0.0.0/31")));
+ * assertEquals(link.map(stringifyIpv4), ["10.0.0.0", "10.0.0.1"]);
+ *
+ * const route = Array.from(cidrv4UsableAddresses(parseCidrv4("10.0.0.7/32")));
+ * assertEquals(route.map(stringifyIpv4), ["10.0.0.7"]);
+ * ```
+ *
+ * @example Lazy — a /8 costs nothing until iterated
+ * ```ts
+ * import { assertEquals } from "@std/assert";
+ * import { cidrv4UsableAddresses, parseCidrv4 } from "@hertzg/ip/cidrv4";
+ * import { stringifyIpv4 } from "@hertzg/ip/ipv4";
+ *
+ * const addresses = cidrv4UsableAddresses(parseCidrv4("10.0.0.0/8"));
+ * assertEquals(stringifyIpv4(addresses.next().value as number), "10.0.0.1");
+ * addresses.return(undefined);
+ * ```
+ */
+export function* cidrv4UsableAddresses(cidr: Cidrv4): Generator<number> {
+  yield* cidrv4Addresses(cidr, {
+    offset: cidrv4IsFullyUsable(cidr.prefixLength) ? 0 : 1,
+    count: cidrv4UsableSize(cidr),
+  });
 }
 
 /**
