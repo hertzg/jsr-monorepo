@@ -170,11 +170,10 @@
 <p>The order is <strong>version-first and total</strong>: every <a href="../.././cidr.ts/~/Cidrv4.html">Cidrv4</a> sorts
 before every <a href="../.././cidr.ts/~/Cidrv6.html">Cidrv6</a>, and within a version blocks sort by address
 ascending, then by prefix length ascending — the shorter prefix (the
-larger block) first. Mixed-version arguments are not an error: unlike
-<a href="../.././cidr.ts/~/cidrContainsCidr.html">cidrContainsCidr</a>, <a href="../.././cidr.ts/~/cidrOverlaps.html">cidrOverlaps</a>, <a href="../.././cidr.ts/~/cidrIntersect.html">cidrIntersect</a>,
-<a href="../.././cidr.ts/~/cidrSubtract.html">cidrSubtract</a> and <a href="../.././cidr.ts/~/cidrMerge.html">cidrMerge</a>, this function never throws,
-because sorting a mixed list is the reason it exists. Ordering a disjoint
-union needs no cross-version conversion — see ADR 0011.</p>
+larger block) first. Mixed-version arguments are not an error: unlike the
+other universal CIDR operations in this module, this function never
+throws, because sorting a mixed list is the reason it exists. Ordering a
+disjoint union needs no cross-version conversion — see ADR 0011.</p>
 <p>The block is ordered <strong>as written</strong>: the <code>address</code> field is compared as
 stored, without applying the network mask first. See
 <a href="../.././cidrv4.ts/~/compareCidrv4.html">compareCidrv4</a> for what that means for blocks carrying host bits.</p>
