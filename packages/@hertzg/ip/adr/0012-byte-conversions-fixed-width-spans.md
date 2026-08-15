@@ -63,6 +63,11 @@ a module where the read validates and the write does not is a module
 whose contract nobody can remember. It measures free — see
 Consequences.
 
+The write side also range-checks the **address** itself, which needs
+less defending: `stringifyIpv4` and `stringifyIpv6` already reject the
+same out-of-domain values with the same `RangeError` and the same
+message, so the byte writers only match what the string writers do.
+
 **Three modules, following ADR 0002's `<concern>[v4|v6]` grouping.**
 `bytesv4.ts` and `bytesv6.ts` hold the version-specific pairs;
 `bytes.ts` holds only the two universal dispatchers, exactly as
@@ -75,7 +80,8 @@ saves.
 
 **Each module is self-contained; nothing is shared between them.** The
 32-bit shift arithmetic is written out in both `bytesv4.ts` and
-`bytesv6.ts`, and each declares the width it needs. A draft of the
+`bytesv6.ts`, and each module declares the widths it needs —
+`bytes.ts` both of them, for its span dispatch. A draft of the
 split factored the primitives into a private `_bytes.ts`, on the
 argument that the network-order convention should be stated once. That
 was the wrong trade. The convention is four lines of shifting fixed by
@@ -89,12 +95,12 @@ path consumers can import but should not.
 
 Within each module the rule is call sites, not symmetry: a helper
 earns a name at two or more uses. So `bytesv4.ts` inlines its single
-read and keeps `writeBytes` for its two writes, while `bytesv6.ts`
-keeps both `readGroup` and `writeGroup`, at four and eight uses.
+read and keeps `writeUint32` for its two writes, while `bytesv6.ts`
+keeps its own `readUint32` and `writeUint32`, at four and eight uses.
+The two `writeUint32` copies are identical and deliberately so.
 
-**Index arithmetic, not `DataView`, in all six functions.** The 32-bit
-read and write are shared private helpers; the 128-bit functions call
-them four times each.
+**Index arithmetic, not `DataView`, in all six functions.** Each
+128-bit function calls its module's own 32-bit helper four times.
 
 **No version reinterpretation.** `ipFromBytes` on 16 bytes returns a
 `bigint` even when those bytes are `::ffff:x.x.x.x`. This is a

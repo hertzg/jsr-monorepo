@@ -45,9 +45,14 @@ Deno.test("ipv6FromBytes", async (t) => {
   });
 
   await t.step("reads at an offset inside a larger buffer", () => {
-    const packet = new Uint8Array(40);
-    packet.set(ipv6ToBytes(parseIpv6("fe80::1")), 8);
-    packet.set(ipv6ToBytes(parseIpv6("2001:db8::2")), 24);
+    // deno-fmt-ignore
+    const packet = new Uint8Array([
+      ...new Uint8Array(8),
+      0xfe, 0x80, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+      0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x01,
+      0x20, 0x01, 0x0d, 0xb8, 0x00, 0x00, 0x00, 0x00,
+      0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02,
+    ]);
 
     assertEquals(ipv6FromBytes(packet, 8), parseIpv6("fe80::1"));
     assertEquals(ipv6FromBytes(packet, 24), parseIpv6("2001:db8::2"));
@@ -114,7 +119,6 @@ Deno.test("ipv6ToBytes", async (t) => {
     const frame = new Uint8Array(40).fill(0xaa);
     const written = ipv6ToBytes(parseIpv6("fe80::1"), frame, 8);
 
-    assertEquals(written.length, 16);
     // deno-fmt-ignore
     assertEquals(written, new Uint8Array([
       0xfe, 0x80, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,

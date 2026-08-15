@@ -113,7 +113,6 @@ Deno.test("ipv4ToBytes", async (t) => {
     const frame = new Uint8Array(20).fill(0xaa);
     const written = ipv4ToBytes(parseIpv4("203.0.113.7"), frame, 6);
 
-    assertEquals(written.length, 4);
     assertEquals(written, new Uint8Array([203, 0, 113, 7]));
   });
 

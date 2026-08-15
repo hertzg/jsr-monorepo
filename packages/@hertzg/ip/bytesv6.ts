@@ -69,33 +69,18 @@ const IPV6_MAX = 0xFFFF_FFFF_FFFF_FFFF_FFFF_FFFF_FFFF_FFFFn;
 // Bytes reach a `bigint` through 32-bit chunks because that is the widest a
 // plain `number` can carry — JS bitwise operators coerce to 32-bit integers.
 //
-// What costs is the *width of the bigint operands*, not the number of
-// conversions. `ipv6FromBytes` therefore folds the chunks into two 64-bit
-// halves and joins those, so only the last operation touches a 128-bit value;
-// accumulating all four chunks into one 128-bit value instead measures 1.5x
-// slower. Going the other way and using fewer, wider chunks is worse still:
-// three chunks of 48/48/32 bits, assembled with multiply-add to dodge the
-// 32-bit bitwise limit, is 2x slower than four, and a byte-at-a-time
-// `(acc << 8n) | BigInt(b)` loop is 5.8x slower.
+// Three shapes here look like tidy-ups and are all slower; ADR 0012 has the
+// measurements, so take them from there rather than re-deriving them.
 //
-// This is also why the read helper is 32-bit while the algorithm works in
-// 64-bit halves, which looks like a mismatch worth tidying. It is not: pulling
-// the halves out into a `readUint64` returning a `bigint` measures 1.57x
-// slower, and identically so whether or not it calls `readUint32` inside, so
-// it is not the inner call. A `bigint` that crosses a function boundary has to
-// be materialized on the heap, while one kept in a local V8 can keep in a
-// cheaper form. `readUint32` is free to extract precisely because it returns a
-// `number`. Keep the halves inline.
-//
-// The write does not mirror this. It starts from one 128-bit value, so
-// splitting it into halves first only adds two allocations; shifting straight
-// out of the original measured 1.05x faster and is what `ipv6ToBytes` does.
-//
-// `DataView` has 64-bit accessors, but must be constructed per call, which
-// costs more than they save. See ADR 0012.
-//
-// Note these are not IPv6 "groups" — that word means a 16-bit hextet
-// throughout `ipv6.ts`, and there are eight of those, not four.
+//   - Keep the two 64-bit halves in `ipv6FromBytes` inline. Extracting them
+//     into a `readUint64` is slower, because a `bigint` crossing a function
+//     boundary has to be materialized on the heap. That is also why the
+//     helpers below are 32-bit while the algorithm works in halves — they
+//     return a `number`, which is free to pass.
+//   - Do not fold the read into one 128-bit accumulator. What costs is bigint
+//     operand width, so joining two 64-bit halves last is cheaper.
+//   - Do not mirror the halves into the write. It starts from one 128-bit
+//     value, so splitting it first only adds allocations.
 
 /**
  * Reads a 32-bit chunk in network order. The caller is responsible for the

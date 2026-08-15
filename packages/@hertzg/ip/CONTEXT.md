@@ -57,21 +57,29 @@ parameter accepting either a whole CIDR or a bare prefix length keeps the union
 role name `cidrOrPrefixLength`, following **AddressOrCidr**.
 
 **Span**: A window of _bytes_ — a start offset and a fixed width — inside a
-`Uint8Array`, as used by the `bytes` submodule. An IPv4 address occupies a
-4-byte span, an IPv6 address a 16-byte span. Note this is a **different sense
-from the "start-to-end span" in the CIDR entry above**, which is about address
-space, not byte space; the two never appear in the same signature, and only
-this byte sense is spelled `span` in code and error messages. _Avoid_: `range`,
-`window`, `slice` — `slice` in particular implies the copying `Uint8Array`
-method, while the byte functions hand back a non-copying `subarray` view.
+`Uint8Array`, as used by the `bytes` submodules. An IPv4 address occupies a
+4-byte span, an IPv6 address a 16-byte span. Only this byte sense is spelled
+`span` in code and error messages; the "start-to-end span" wording in the CIDR
+entry above is prose about address space and names no parameter. _Avoid_:
+`range`, `window`, `slice` — `slice` in particular implies the copying
+`Uint8Array` method, while the byte functions hand back a non-copying
+`subarray` view.
 
 **bytes / into**: The role names for the two buffer positions. `bytes` is the
 buffer being read _from_ (`ipv4FromBytes(bytes, offset)`); `into` is the
 optional buffer being written _to_ (`ipv4ToBytes(address, into, offset)`),
-named for the preposition so the call site reads as a sentence. `offset`
-locates the span in whichever of the two is present, and it never says how wide
-the span is — the width comes from the function. _Avoid_: `buf`, `buffer`,
-`target`, `dst`, and `out` for the destination. See ADR 0012.
+named for the preposition so the call site reads as a sentence. _Avoid_:
+`buf`, `buffer`, `target`, `dst`, and `out` for the destination. See ADR 0012.
+
+**offset**: Carries **two senses**, and this is the one real collision in the
+package's vocabulary. In the `bytes` submodules it is a **byte** position — it
+locates the span inside `bytes` or `into`, and never says how wide the span is,
+since the width comes from the function. In `cidrv4Addresses` /
+`cidrv6Addresses` it is an **address** position — how many addresses into the
+block to start, listed under counts and strides in the **Address** entry above.
+Nothing takes both, so neither needs renaming, but do not describe one in the
+other's terms: a byte offset is never "how far into the block", and an address
+offset is never "where the span starts".
 
 ## Function-name convention
 

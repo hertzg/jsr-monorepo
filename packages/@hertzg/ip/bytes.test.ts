@@ -92,13 +92,15 @@ Deno.test("ipToBytes", async (t) => {
 
   await t.step("writes into an existing buffer at an offset", () => {
     const frame = new Uint8Array(40).fill(0xaa);
-    const v4 = ipToBytes(parseIpv4("10.0.0.1"), frame, 0);
-    const v6 = ipToBytes(parseIpv6("2001:db8::1"), frame, 8);
+    ipToBytes(parseIpv4("10.0.0.1"), frame, 0);
+    ipToBytes(parseIpv6("2001:db8::1"), frame, 8);
 
-    assertEquals(v4.length, 4);
-    assertEquals(v6.length, 16);
     assertEquals(frame.slice(0, 4), new Uint8Array([10, 0, 0, 1]));
-    assertEquals(frame.slice(8, 24), ipToBytes(parseIpv6("2001:db8::1")));
+    // deno-fmt-ignore
+    assertEquals(frame.slice(8, 24), new Uint8Array([
+      0x20, 0x01, 0x0d, 0xb8, 0x00, 0x00, 0x00, 0x00,
+      0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x01,
+    ]));
   });
 
   await t.step("returns only the written span, not the whole buffer", () => {
