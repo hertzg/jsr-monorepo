@@ -273,14 +273,52 @@ export function cidrv6MaskToPrefixLength(mask: string | bigint): number {
   return 128 - hostBitCount;
 }
 
+/** Character codes the prefix-length scanner compares against. */
+const CHAR_ZERO = 0x30;
+const CHAR_NINE = 0x39;
+const CHAR_MINUS = 0x2d;
+
+/**
+ * Reads a prefix length: decimal digits with no leading zero, and an optional
+ * leading `-` so that a negative reaches the range check in `cidrv6Mask`
+ * rather than being reported as a shape error.
+ */
+function parsePrefixLength(part: string): number {
+  const negative = part.charCodeAt(0) === CHAR_MINUS;
+  let index = negative ? 1 : 0;
+
+  if (index === part.length) {
+    throw new TypeError("CIDR prefix length must be a number");
+  }
+
+  if (part.length - index > 1 && part.charCodeAt(index) === CHAR_ZERO) {
+    throw new TypeError("CIDR prefix length cannot have leading zeros");
+  }
+
+  let prefixLength = 0;
+  for (; index < part.length; index++) {
+    const code = part.charCodeAt(index);
+    if (code < CHAR_ZERO || code > CHAR_NINE) {
+      throw new TypeError("CIDR prefix length must be a number");
+    }
+    prefixLength = prefixLength * 10 + (code - CHAR_ZERO);
+  }
+
+  return negative ? -prefixLength : prefixLength;
+}
+
 /**
  * Parses an IPv6 CIDR notation string to a Cidrv6 object.
  *
  * Returns only the parsed values (address and prefix length).
  *
+ * The prefix length is decimal digits and nothing else: no leading zeros, no
+ * whitespace, no sign other than a leading `-`, and no trailing text.
+ *
  * @param cidr The CIDR notation string (e.g., "2001:db8::/32")
  * @returns A Cidrv6 object containing the parsed address and prefix length
- * @throws {TypeError} If the format is invalid
+ * @throws {TypeError} If the format is invalid, including a prefix length
+ *   with leading zeros, whitespace or trailing text
  * @throws {RangeError} If the prefix length is out of range (not 0-128)
  * @throws Propagates errors from parseIpv6 if the address part is invalid
  *
@@ -302,6 +340,7 @@ export function cidrv6MaskToPrefixLength(mask: string | bigint): number {
  * assertThrows(() => parseCidrv6("2001:db8::"), TypeError);
  * assertThrows(() => parseCidrv6("2001:db8::/"), TypeError);
  * assertThrows(() => parseCidrv6("2001:db8::/129"), RangeError);
+ * assertThrows(() => parseCidrv6("2001:db8::/032"), TypeError);
  * ```
  */
 export function parseCidrv6(cidr: string): Cidrv6 {
@@ -321,11 +360,7 @@ export function parseCidrv6(cidr: string): Cidrv6 {
   }
 
   const address = parseIpv6(addressPart);
-  const prefixLength = parseInt(prefixPart, 10);
-
-  if (Number.isNaN(prefixLength)) {
-    throw new TypeError("CIDR prefix length must be a number");
-  }
+  const prefixLength = parsePrefixLength(prefixPart);
 
   // Validate prefix length
   cidrv6Mask(prefixLength);

@@ -62,10 +62,16 @@ import { parseIpv4 } from "./ipv4.ts";
  * - Mixed IPv4 form: `::ffff:192.168.1.1`
  * - Zone IDs are stripped: `fe80::1%eth0` becomes `fe80::1`
  *
+ * The accepted grammar is exactly RFC 4291 section 2.2 and nothing else. A
+ * group is 1-4 hex digits, with no `0x`, no sign and no trailing text; `::`
+ * covers one or more groups, so at most seven may be written alongside it;
+ * and whitespace is accepted nowhere, including around the whole string.
+ *
  * @param address The address string in colon-hexadecimal notation
  * @returns The IPv6 address as a 128-bit bigint
  * @throws {TypeError} If the format is invalid -- including a group that is
- *   not 1-4 hex digits, more than one `::`, or the wrong number of groups
+ *   not 1-4 hex digits, more than one `::`, a `::` covering no groups,
+ *   whitespace, or the wrong number of groups
  * @throws {RangeError} If an embedded IPv4 octet is out of range, as in
  *   `"::1.2.3.256"`. A malformed hex group is a `TypeError`, not this;
  *   a group cannot be numerically out of range, since 4 hex digits
@@ -108,94 +114,127 @@ import { parseIpv4 } from "./ipv4.ts";
  * assertThrows(() => parseIpv6("2001:db8:::1"), TypeError);
  * assertThrows(() => parseIpv6("2001:db8::1::1"), TypeError);
  * assertThrows(() => parseIpv6("2001:gggg::1"), TypeError);
+ * assertThrows(() => parseIpv6("1:2:3:4:5:6:7:8::"), TypeError);
+ * assertThrows(() => parseIpv6("::1 "), TypeError);
  * ```
  */
 export function parseIpv6(address: string): bigint {
-  // Strip zone ID if present (e.g., fe80::1%eth0)
+  // The zone ID is stripped without being examined; its grammar (RFC 6874)
+  // is deliberately not enforced here.
   const zoneIndex = address.indexOf("%");
-  if (zoneIndex !== -1) {
-    address = address.slice(0, zoneIndex);
+  const end = zoneIndex === -1 ? address.length : zoneIndex;
+
+  // Groups are accumulated packed together, low group last; where "::" sits
+  // is remembered as a group index and the zero run is opened at the end,
+  // which needs no filler array.
+  let packed = 0n;
+  let groups = 0;
+  let zeroRunAt = -1;
+  let index = 0;
+
+  if (
+    address.charCodeAt(0) === CHAR_COLON && address.charCodeAt(1) === CHAR_COLON
+  ) {
+    zeroRunAt = 0;
+    index = 2;
+    if (index >= end) return 0n;
   }
 
-  // Check for IPv4-mapped address (::ffff:192.168.1.1)
-  const lastColonIndex = address.lastIndexOf(":");
-  const possibleIpv4 = address.slice(lastColonIndex + 1);
-  if (possibleIpv4.includes(".")) {
-    // Parse using the IPv4 parser for proper validation and consistency
-    const ipv4Value = parseIpv4(possibleIpv4);
-    // Replace the IPv4 portion with two hex groups (high 16 bits, low 16 bits)
-    const hexGroup1 = ((ipv4Value >>> 16) & 0xFFFF).toString(16);
-    const hexGroup2 = (ipv4Value & 0xFFFF).toString(16);
-    address = address.slice(0, lastColonIndex + 1) + hexGroup1 + ":" +
-      hexGroup2;
-  }
+  for (;;) {
+    const start = index;
+    let value = 0;
+    let digits = 0;
 
-  // Handle :: expansion
-  const firstDoubleColon = address.indexOf("::");
-  if (firstDoubleColon !== -1) {
-    // Check for multiple :: by comparing first and last occurrence
-    if (address.indexOf("::", firstDoubleColon + 2) !== -1) {
-      throw new TypeError("IPv6 address can only contain one '::'");
+    while (index < end) {
+      const digit = hexDigit(address.charCodeAt(index));
+      if (digit < 0) break;
+      value = value * 16 + digit;
+      digits++;
+      index++;
     }
 
-    const [left, right] = address.split("::");
-    const leftParts = left === "" ? [] : left.split(":");
-    const rightParts = right === "" ? [] : right.split(":");
+    // A "." in the final field means the embedded IPv4 tail, which is handed
+    // to parseIpv4 whole -- including any over-long run of digits before it,
+    // which is an octet rather than a hex group. A dotted field with a group
+    // still to come is not a tail, and falls through to the group error.
+    if (index < end && address.charCodeAt(index) === CHAR_DOT) {
+      const nextColon = address.indexOf(":", index);
+      if (nextColon === -1 || nextColon >= end) {
+        packed = (packed << 32n) | BigInt(parseIpv4(address.slice(start, end)));
+        groups += 2;
+        break;
+      }
+    }
 
-    const totalParts = leftParts.length + rightParts.length;
-    if (totalParts > 8) {
+    if (
+      digits === 0 || digits > 4 ||
+      (index < end && address.charCodeAt(index) !== CHAR_COLON)
+    ) {
+      let stop = index;
+      while (stop < end && address.charCodeAt(stop) !== CHAR_COLON) stop++;
       throw new TypeError(
-        `IPv6 address has too many groups: ${totalParts} (max 8)`,
+        `Invalid IPv6 group: '${
+          address.slice(start, stop)
+        }' (must be 1-4 hex digits)`,
       );
     }
 
-    const missingParts = 8 - totalParts;
-    const zeroParts = Array(missingParts).fill("0");
-    const allParts = [...leftParts, ...zeroParts, ...rightParts];
+    packed = (packed << 16n) | BigInt(value);
+    groups++;
+    if (groups > 8) {
+      throw new TypeError(
+        "IPv6 address must have exactly 8 groups (or use ::), got more",
+      );
+    }
 
-    return parseFullIpv6(allParts);
+    if (index >= end) break;
+
+    index++; // the ":" that ended the group
+    if (index < end && address.charCodeAt(index) === CHAR_COLON) {
+      if (zeroRunAt !== -1) {
+        throw new TypeError("IPv6 address can only contain one '::'");
+      }
+      zeroRunAt = groups;
+      index++;
+      if (index >= end) break;
+      if (address.charCodeAt(index) === CHAR_COLON) {
+        throw new TypeError("Invalid IPv6 group: '' (must be 1-4 hex digits)");
+      }
+    }
   }
 
-  // Standard form - must have exactly 8 groups
-  const parts = address.split(":");
-  if (parts.length !== 8) {
+  if (zeroRunAt === -1) {
+    if (groups !== 8) {
+      throw new TypeError(
+        `IPv6 address must have exactly 8 groups (or use ::), got ${groups}`,
+      );
+    }
+    return packed;
+  }
+
+  if (groups >= 8) {
     throw new TypeError(
-      `IPv6 address must have exactly 8 groups (or use ::), got ${parts.length}`,
+      `'::' must cover at least one group, so at most 7 may be written, got ${groups}`,
     );
   }
 
-  return parseFullIpv6(parts);
+  // Open the zero run by lifting the groups written before "::" clear of the
+  // ones written after it.
+  const trailing = BigInt((groups - zeroRunAt) * 16);
+  return ((packed >> trailing) << BigInt((8 - zeroRunAt) * 16)) |
+    (packed & ((1n << trailing) - 1n));
 }
 
-/**
- * Parses an array of 8 hex groups to a bigint.
- */
-function parseFullIpv6(parts: string[]): bigint {
-  let result = 0n;
+/** Character codes the address scanner compares against. */
+const CHAR_COLON = 0x3a;
+const CHAR_DOT = 0x2e;
 
-  for (let i = 0; i < 8; i++) {
-    const part = parts[i];
-    const len = part.length;
-
-    // Validate: must be 1-4 characters
-    if (len === 0 || len > 4) {
-      throw new TypeError(
-        `Invalid IPv6 group: '${part}' (must be 1-4 hex digits)`,
-      );
-    }
-
-    // Parse as hex - parseInt returns NaN for invalid hex
-    const value = parseInt(part, 16);
-    if (Number.isNaN(value)) {
-      throw new TypeError(
-        `Invalid IPv6 group: '${part}' (must be 1-4 hex digits)`,
-      );
-    }
-
-    result = (result << 16n) | BigInt(value);
-  }
-
-  return result;
+/** The value of one hex digit, or -1 for anything else. */
+function hexDigit(code: number): number {
+  if (code >= 0x30 && code <= 0x39) return code - 0x30; // "0".."9"
+  if (code >= 0x61 && code <= 0x66) return code - 0x61 + 10; // "a".."f"
+  if (code >= 0x41 && code <= 0x46) return code - 0x41 + 10; // "A".."F"
+  return -1;
 }
 
 /**

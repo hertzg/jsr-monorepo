@@ -253,14 +253,52 @@ export function cidrv4MaskToPrefixLength(mask: string | number): number {
   return Math.clz32(hostBits);
 }
 
+/** Character codes the prefix-length scanner compares against. */
+const CHAR_ZERO = 0x30;
+const CHAR_NINE = 0x39;
+const CHAR_MINUS = 0x2d;
+
+/**
+ * Reads a prefix length: decimal digits with no leading zero, and an optional
+ * leading `-` so that a negative reaches the range check in `cidrv4Mask`
+ * rather than being reported as a shape error.
+ */
+function parsePrefixLength(part: string): number {
+  const negative = part.charCodeAt(0) === CHAR_MINUS;
+  let index = negative ? 1 : 0;
+
+  if (index === part.length) {
+    throw new TypeError("CIDR prefix length must be a number");
+  }
+
+  if (part.length - index > 1 && part.charCodeAt(index) === CHAR_ZERO) {
+    throw new TypeError("CIDR prefix length cannot have leading zeros");
+  }
+
+  let prefixLength = 0;
+  for (; index < part.length; index++) {
+    const code = part.charCodeAt(index);
+    if (code < CHAR_ZERO || code > CHAR_NINE) {
+      throw new TypeError("CIDR prefix length must be a number");
+    }
+    prefixLength = prefixLength * 10 + (code - CHAR_ZERO);
+  }
+
+  return negative ? -prefixLength : prefixLength;
+}
+
 /**
  * Parses an IPv4 CIDR notation string to a Cidrv4 object.
  *
  * Returns only the parsed values (address and prefix length).
  *
+ * The prefix length is decimal digits and nothing else: no leading zeros, no
+ * whitespace, no sign other than a leading `-`, and no trailing text.
+ *
  * @param cidr The CIDR notation string (e.g., "192.168.1.0/24")
  * @returns A Cidrv4 object containing the parsed address and prefix length
- * @throws {TypeError} If the format is invalid
+ * @throws {TypeError} If the format is invalid, including a prefix length
+ *   with leading zeros, whitespace or trailing text
  * @throws {RangeError} If the prefix length is out of range (not 0-32)
  * @throws Propagates errors from parseIpv4 if the address part is invalid
  *
@@ -283,6 +321,7 @@ export function cidrv4MaskToPrefixLength(mask: string | number): number {
  * assertThrows(() => parseCidrv4("192.168.1.0/"), TypeError);
  * assertThrows(() => parseCidrv4("192.168.1.0/33"), RangeError);
  * assertThrows(() => parseCidrv4("256.0.0.0/24"), RangeError);
+ * assertThrows(() => parseCidrv4("192.168.1.0/024"), TypeError);
  * ```
  */
 export function parseCidrv4(cidr: string): Cidrv4 {
@@ -295,11 +334,7 @@ export function parseCidrv4(cidr: string): Cidrv4 {
   }
 
   const address = parseIpv4(parts[0]);
-  const prefixLength = parseInt(parts[1], 10);
-
-  if (Number.isNaN(prefixLength)) {
-    throw new TypeError("CIDR prefix length must be a number");
-  }
+  const prefixLength = parsePrefixLength(parts[1]);
 
   // Validate prefix length
   cidrv4Mask(prefixLength);

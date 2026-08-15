@@ -51,15 +51,54 @@
  * @module
  */
 
+/** Character codes the octet scanner compares against. */
+const CHAR_ZERO = 0x30;
+const CHAR_NINE = 0x39;
+const CHAR_MINUS = 0x2d;
+
+/**
+ * Reads one dotted-decimal octet: digits with no leading zero, and an
+ * optional leading `-` so that a negative reaches the caller's range check
+ * rather than being reported as a shape error.
+ */
+function parseOctet(part: string): number {
+  const negative = part.charCodeAt(0) === CHAR_MINUS;
+  let index = negative ? 1 : 0;
+
+  if (index === part.length) {
+    throw new TypeError("IPv4 address octets must be decimal numbers");
+  }
+
+  if (part.length - index > 1 && part.charCodeAt(index) === CHAR_ZERO) {
+    throw new TypeError(
+      "IPv4 octets cannot have leading zeros except '0' itself",
+    );
+  }
+
+  let octet = 0;
+  for (; index < part.length; index++) {
+    const code = part.charCodeAt(index);
+    if (code < CHAR_ZERO || code > CHAR_NINE) {
+      throw new TypeError("IPv4 address octets must be decimal numbers");
+    }
+    octet = octet * 10 + (code - CHAR_ZERO);
+  }
+
+  return negative ? -octet : octet;
+}
+
 /**
  * Parses an IPv4 address in dotted decimal notation to a number.
  *
- * The function validates the format and range of each octet. Leading zeros
- * are not allowed (except for "0" itself).
+ * An octet is decimal digits and nothing else: no leading zeros (except "0"
+ * itself), no surrounding or embedded whitespace, no sign other than a
+ * leading `-`, no radix prefix, and no trailing text. A leading `-` is read
+ * so that it reaches the range check below.
  *
  * @param address The address string in dotted decimal notation
  * @returns The IPv4 address as a 32-bit unsigned integer
- * @throws {TypeError} If the format is invalid (wrong number of octets, non-numeric, leading zeros)
+ * @throws {TypeError} If the format is invalid -- wrong number of octets, a
+ *   non-decimal octet, leading zeros, whitespace, or trailing text
  * @throws {RangeError} If any octet is out of range (not 0-255)
  *
  * @example Basic parsing
@@ -81,6 +120,8 @@
  * assertThrows(() => parseIpv4("192.168.1"), TypeError);
  * assertThrows(() => parseIpv4("192.168.1.256"), RangeError);
  * assertThrows(() => parseIpv4("192.168.01.1"), TypeError);
+ * assertThrows(() => parseIpv4(" 192.168.1.1"), TypeError);
+ * assertThrows(() => parseIpv4("192.168.1.1abc"), TypeError);
  * ```
  */
 export function parseIpv4(address: string): number {
@@ -92,23 +133,10 @@ export function parseIpv4(address: string): number {
     );
   }
 
-  const octets: number[] = [];
+  let value = 0;
 
-  for (let i = 0; i < 4; i++) {
-    const part = parts[i];
-
-    // Check for leading zeros (except "0" itself)
-    if (part.length > 1 && part[0] === "0") {
-      throw new TypeError(
-        "IPv4 octets cannot have leading zeros except '0' itself",
-      );
-    }
-
-    const octet = parseInt(part, 10);
-
-    if (Number.isNaN(octet)) {
-      throw new TypeError("IPv4 address octets must be decimal numbers");
-    }
+  for (const part of parts) {
+    const octet = parseOctet(part);
 
     if (octet < 0 || octet > 255) {
       throw new RangeError(
@@ -116,12 +144,8 @@ export function parseIpv4(address: string): number {
       );
     }
 
-    octets.push(octet);
+    value = (value << 8) | octet;
   }
-
-  // Compute the 32-bit value
-  const value = (octets[0] << 24) | (octets[1] << 16) | (octets[2] << 8) |
-    octets[3];
 
   return value >>> 0; // Unsigned 32-bit
 }
