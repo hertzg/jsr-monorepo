@@ -4,13 +4,18 @@ import {
   cidrv4BroadcastAddress,
   cidrv4Contains,
   cidrv4ContainsCidr,
+  cidrv4FirstUsableAddress,
   cidrv4Intersect,
+  cidrv4LastUsableAddress,
   cidrv4Mask,
   cidrv4MaskToPrefixLength,
   cidrv4Merge,
   cidrv4NetworkAddress,
   cidrv4Overlaps,
+  cidrv4Size,
   cidrv4Subtract,
+  cidrv4UsableAddresses,
+  cidrv4UsableSize,
   compareCidrv4,
   parseCidrv4,
   stringifyCidrv4,
@@ -1294,5 +1299,238 @@ Deno.test("compareCidrv4", async (t) => {
       "10.0.0.0/16",
       "192.168.1.0/24",
     ]);
+  });
+});
+
+Deno.test("cidrv4FirstUsableAddress", async (t) => {
+  await t.step("skips the network address", () => {
+    assertEquals(
+      stringifyIpv4(cidrv4FirstUsableAddress(parseCidrv4("192.168.1.0/24"))),
+      "192.168.1.1",
+    );
+    assertEquals(
+      stringifyIpv4(cidrv4FirstUsableAddress(parseCidrv4("10.0.0.0/30"))),
+      "10.0.0.1",
+    );
+  });
+
+  await t.step("/31 keeps the network address (RFC 3021)", () => {
+    assertEquals(
+      stringifyIpv4(cidrv4FirstUsableAddress(parseCidrv4("10.0.0.0/31"))),
+      "10.0.0.0",
+    );
+  });
+
+  await t.step("/32 is the address itself", () => {
+    assertEquals(
+      stringifyIpv4(cidrv4FirstUsableAddress(parseCidrv4("10.0.0.7/32"))),
+      "10.0.0.7",
+    );
+  });
+
+  await t.step("/0 starts at 0.0.0.1", () => {
+    assertEquals(
+      stringifyIpv4(cidrv4FirstUsableAddress(parseCidrv4("0.0.0.0/0"))),
+      "0.0.0.1",
+    );
+  });
+
+  await t.step("non-canonical address is masked to the network first", () => {
+    assertEquals(
+      stringifyIpv4(cidrv4FirstUsableAddress(parseCidrv4("192.168.1.77/24"))),
+      "192.168.1.1",
+    );
+  });
+
+  await t.step("stays inside the block", () => {
+    for (let prefixLength = 0; prefixLength <= 32; prefixLength++) {
+      const cidr = parseCidrv4(`10.20.30.40/${prefixLength}`);
+      assert(cidrv4Contains(cidr, cidrv4FirstUsableAddress(cidr)));
+    }
+  });
+});
+
+Deno.test("cidrv4LastUsableAddress", async (t) => {
+  await t.step("skips the broadcast address", () => {
+    assertEquals(
+      stringifyIpv4(cidrv4LastUsableAddress(parseCidrv4("192.168.1.0/24"))),
+      "192.168.1.254",
+    );
+    assertEquals(
+      stringifyIpv4(cidrv4LastUsableAddress(parseCidrv4("10.0.0.0/30"))),
+      "10.0.0.2",
+    );
+  });
+
+  await t.step("/31 keeps the broadcast address (RFC 3021)", () => {
+    assertEquals(
+      stringifyIpv4(cidrv4LastUsableAddress(parseCidrv4("10.0.0.0/31"))),
+      "10.0.0.1",
+    );
+  });
+
+  await t.step("/32 is the address itself", () => {
+    assertEquals(
+      stringifyIpv4(cidrv4LastUsableAddress(parseCidrv4("10.0.0.7/32"))),
+      "10.0.0.7",
+    );
+  });
+
+  await t.step("/0 ends at 255.255.255.254", () => {
+    assertEquals(
+      stringifyIpv4(cidrv4LastUsableAddress(parseCidrv4("0.0.0.0/0"))),
+      "255.255.255.254",
+    );
+  });
+
+  await t.step("non-canonical address is masked to the network first", () => {
+    assertEquals(
+      stringifyIpv4(cidrv4LastUsableAddress(parseCidrv4("192.168.1.77/24"))),
+      "192.168.1.254",
+    );
+  });
+
+  await t.step("stays inside the block", () => {
+    for (let prefixLength = 0; prefixLength <= 32; prefixLength++) {
+      const cidr = parseCidrv4(`10.20.30.40/${prefixLength}`);
+      assert(cidrv4Contains(cidr, cidrv4LastUsableAddress(cidr)));
+    }
+  });
+
+  await t.step("never precedes the first usable address", () => {
+    for (let prefixLength = 0; prefixLength <= 32; prefixLength++) {
+      const cidr = parseCidrv4(`10.20.30.40/${prefixLength}`);
+      assert(cidrv4FirstUsableAddress(cidr) <= cidrv4LastUsableAddress(cidr));
+    }
+  });
+});
+
+Deno.test("cidrv4UsableSize", async (t) => {
+  await t.step("size minus network and broadcast", () => {
+    assertEquals(cidrv4UsableSize(parseCidrv4("192.168.1.0/24")), 254);
+    assertEquals(cidrv4UsableSize(parseCidrv4("10.0.0.0/30")), 2);
+    assertEquals(cidrv4UsableSize(parseCidrv4("10.0.0.0/8")), 16777214);
+  });
+
+  await t.step("/31 is 2, /32 is 1", () => {
+    assertEquals(cidrv4UsableSize(parseCidrv4("10.0.0.0/31")), 2);
+    assertEquals(cidrv4UsableSize(parseCidrv4("10.0.0.1/32")), 1);
+  });
+
+  await t.step("/0 is the whole space minus two", () => {
+    assertEquals(cidrv4UsableSize(parseCidrv4("0.0.0.0/0")), 4294967294);
+  });
+
+  await t.step("accepts a bare prefix length", () => {
+    assertEquals(cidrv4UsableSize(24), 254);
+    assertEquals(cidrv4UsableSize(30), 2);
+    assertEquals(cidrv4UsableSize(31), 2);
+    assertEquals(cidrv4UsableSize(32), 1);
+    assertEquals(cidrv4UsableSize(0), 4294967294);
+  });
+
+  await t.step("out of range prefix lengths", () => {
+    assertThrows(() => cidrv4UsableSize(-1), RangeError);
+    assertThrows(() => cidrv4UsableSize(33), RangeError);
+    assertThrows(() => cidrv4UsableSize(24.5), RangeError);
+  });
+
+  await t.step("size - 2 is wrong exactly at /31 and /32", () => {
+    for (let prefixLength = 0; prefixLength <= 30; prefixLength++) {
+      assertEquals(
+        cidrv4UsableSize(prefixLength),
+        cidrv4Size(prefixLength) - 2,
+      );
+    }
+    assertEquals(cidrv4Size(31) - 2, 0);
+    assertEquals(cidrv4Size(32) - 2, -1);
+  });
+
+  await t.step("never zero", () => {
+    for (let prefixLength = 0; prefixLength <= 32; prefixLength++) {
+      assert(cidrv4UsableSize(prefixLength) >= 1);
+    }
+  });
+});
+
+Deno.test("cidrv4UsableAddresses", async (t) => {
+  await t.step("/30 yields both link addresses", () => {
+    const addresses = Array.from(
+      cidrv4UsableAddresses(parseCidrv4("10.0.0.0/30")),
+    );
+    assertEquals(addresses.map(stringifyIpv4), ["10.0.0.1", "10.0.0.2"]);
+  });
+
+  await t.step("/31 yields both addresses (RFC 3021)", () => {
+    const addresses = Array.from(
+      cidrv4UsableAddresses(parseCidrv4("10.0.0.0/31")),
+    );
+    assertEquals(addresses.map(stringifyIpv4), ["10.0.0.0", "10.0.0.1"]);
+  });
+
+  await t.step("/32 yields the single address", () => {
+    const addresses = Array.from(
+      cidrv4UsableAddresses(parseCidrv4("10.0.0.7/32")),
+    );
+    assertEquals(addresses.map(stringifyIpv4), ["10.0.0.7"]);
+  });
+
+  await t.step("non-canonical address is masked to the network first", () => {
+    const addresses = Array.from(
+      cidrv4UsableAddresses(parseCidrv4("10.0.1.5/29")),
+    );
+    assertEquals(addresses.length, 6);
+    assertEquals(stringifyIpv4(addresses[0]), "10.0.1.1");
+  });
+
+  await t.step("count matches cidrv4UsableSize", () => {
+    for (let prefixLength = 16; prefixLength <= 32; prefixLength++) {
+      const cidr = parseCidrv4(`172.16.0.0/${prefixLength}`);
+      assertEquals(
+        Array.from(cidrv4UsableAddresses(cidr)).length,
+        cidrv4UsableSize(cidr),
+      );
+    }
+  });
+
+  await t.step("ends match the first/last usable addresses", () => {
+    for (let prefixLength = 16; prefixLength <= 32; prefixLength++) {
+      const cidr = parseCidrv4(`172.16.0.0/${prefixLength}`);
+      const addresses = Array.from(cidrv4UsableAddresses(cidr));
+      assertEquals(addresses[0], cidrv4FirstUsableAddress(cidr));
+      assertEquals(addresses.at(-1), cidrv4LastUsableAddress(cidr));
+    }
+  });
+
+  await t.step("never yields the network or broadcast address of a /24", () => {
+    const cidr = parseCidrv4("192.168.1.0/24");
+    const addresses = Array.from(cidrv4UsableAddresses(cidr));
+    assert(!addresses.includes(cidrv4NetworkAddress(cidr)));
+    assert(!addresses.includes(cidrv4BroadcastAddress(cidr)));
+  });
+
+  await t.step("is lazy — a /0 costs nothing until iterated", () => {
+    const addresses = cidrv4UsableAddresses(parseCidrv4("0.0.0.0/0"));
+    assertEquals(stringifyIpv4(addresses.next().value as number), "0.0.0.1");
+    assertEquals(stringifyIpv4(addresses.next().value as number), "0.0.0.2");
+    addresses.return(undefined);
+  });
+
+  await t.step("the naive cidrv4Addresses recipe is wrong at /31", () => {
+    const cidr = parseCidrv4("10.0.0.0/31");
+    const naive = Array.from(
+      cidrv4Addresses(cidr, { offset: 1, count: cidrv4Size(cidr) - 2 }),
+    );
+    assertEquals(naive, []);
+    assertEquals(Array.from(cidrv4UsableAddresses(cidr)).length, 2);
+  });
+
+  await t.step("the naive cidrv4Addresses recipe is wrong at /32", () => {
+    const cidr = parseCidrv4("10.0.0.7/32");
+    const naive = Array.from(
+      cidrv4Addresses(cidr, { offset: 1, count: cidrv4Size(cidr) - 2 }),
+    );
+    assertEquals(naive, []);
+    assertEquals(Array.from(cidrv4UsableAddresses(cidr)).length, 1);
   });
 });

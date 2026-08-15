@@ -250,6 +250,8 @@
  * - {@link parseCidr}: Parse any CIDR notation string to Cidrv4 or Cidrv6
  * - {@link stringifyCidr}: Convert Cidrv4 or Cidrv6 to CIDR notation string
  * - {@link cidrSize}: Get total number of addresses in a CIDR block
+ * - {@link cidrFirstAddress}: Get the first address of a CIDR block
+ * - {@link cidrLastAddress}: Get the last address of a CIDR block
  * - {@link cidrAddresses}: Generate IP addresses in a CIDR block
  * - {@link cidrContains}: Check if a CIDR block contains an address
  * - {@link cidrContainsCidr}: Check if one CIDR fully contains another
@@ -289,10 +291,14 @@
  * - {@link cidrv4Merge}: Merge IPv4 CIDR blocks into the minimal covering set
  * - {@link cidrv4FirstAddress}: Get first address in CIDR block
  * - {@link cidrv4LastAddress}: Get last address in CIDR block
- * - {@link cidrv4NetworkAddress}: Alias for cidrv4FirstAddress
- * - {@link cidrv4BroadcastAddress}: Alias for cidrv4LastAddress
+ * - {@link cidrv4NetworkAddress}: Get the network address (first address) of a CIDR block
+ * - {@link cidrv4BroadcastAddress}: Get the directed broadcast address (last address) of a CIDR block
+ * - {@link cidrv4FirstUsableAddress}: Get first assignable address in CIDR block (RFC 3021 aware)
+ * - {@link cidrv4LastUsableAddress}: Get last assignable address in CIDR block (RFC 3021 aware)
  * - {@link cidrv4Size}: Get total number of addresses in CIDR block
+ * - {@link cidrv4UsableSize}: Get number of assignable addresses in CIDR block
  * - {@link cidrv4Addresses}: Generate IP addresses in CIDR block
+ * - {@link cidrv4UsableAddresses}: Generate every assignable address in CIDR block
  * - {@link compareCidrv4}: Compare two IPv4 CIDR blocks for sorting
  * - {@link isValidCidrv4}: Check if a string is valid IPv4 CIDR notation
  *
@@ -421,8 +427,12 @@ export {
   cidrContains,
   /** Check if one CIDR fully contains another. */
   cidrContainsCidr,
+  /** Get the first address of a CIDR block. */
+  cidrFirstAddress,
   /** Return the overlapping CIDR block, or null. */
   cidrIntersect,
+  /** Get the last address of a CIDR block. */
+  cidrLastAddress,
   /** Merge CIDR blocks into the minimal covering set. */
   cidrMerge,
   /** Check if two CIDRs share at least one address. */
@@ -578,7 +588,7 @@ export {
   type Cidrv4,
   /** Generate IP addresses in CIDR block. */
   cidrv4Addresses,
-  /** Alias for cidrv4LastAddress. */
+  /** Get the directed broadcast address (last address) of a CIDR block. */
   cidrv4BroadcastAddress,
   /** Check if IP is within CIDR block. */
   cidrv4Contains,
@@ -586,17 +596,21 @@ export {
   cidrv4ContainsCidr,
   /** Get first address in CIDR block. */
   cidrv4FirstAddress,
+  /** Get first assignable address in CIDR block (RFC 3021 aware). */
+  cidrv4FirstUsableAddress,
   /** Return the overlapping IPv4 CIDR block, or null. */
   cidrv4Intersect,
   /** Get last address in CIDR block. */
   cidrv4LastAddress,
+  /** Get last assignable address in CIDR block (RFC 3021 aware). */
+  cidrv4LastUsableAddress,
   /** Create network mask from prefix length (0-32). */
   cidrv4Mask,
   /** Recover prefix length from a network mask, as a number or notation string. */
   cidrv4MaskToPrefixLength,
   /** Merge IPv4 CIDR blocks into the minimal covering set. */
   cidrv4Merge,
-  /** Alias for cidrv4FirstAddress. */
+  /** Get the network address (first address) of a CIDR block. */
   cidrv4NetworkAddress,
   /** Check if two IPv4 CIDRs share at least one address. */
   cidrv4Overlaps,
@@ -604,6 +618,10 @@ export {
   cidrv4Size,
   /** Return IPv4 CIDR blocks in A but not in B. */
   cidrv4Subtract,
+  /** Generate every assignable address in CIDR block. */
+  cidrv4UsableAddresses,
+  /** Get number of assignable addresses in CIDR block. */
+  cidrv4UsableSize,
   /** Compare two IPv4 CIDR blocks for sorting. */
   compareCidrv4,
   /** Parse CIDR notation string to Cidrv4. */
