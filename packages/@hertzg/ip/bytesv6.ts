@@ -177,14 +177,6 @@ export function ipv6FromBytes(bytes: Uint8Array, offset = 0): bigint {
   return (high << 64n) | low;
 }
 
-/** Writes an IPv6 address into a freshly allocated 16-byte buffer. */
-export function ipv6ToBytes(address: bigint): Uint8Array;
-/** Writes an IPv6 address into an existing buffer at `offset`. */
-export function ipv6ToBytes(
-  address: bigint,
-  into: Uint8Array,
-  offset?: number,
-): Uint8Array;
 /**
  * Writes a 16-byte IPv6 address, either into a fresh buffer or into one you
  * supply.

@@ -138,14 +138,6 @@ export function ipv4FromBytes(bytes: Uint8Array, offset = 0): number {
     bytes[offset + 3]) >>> 0;
 }
 
-/** Writes an IPv4 address into a freshly allocated 4-byte buffer. */
-export function ipv4ToBytes(address: number): Uint8Array;
-/** Writes an IPv4 address into an existing buffer at `offset`. */
-export function ipv4ToBytes(
-  address: number,
-  into: Uint8Array,
-  offset?: number,
-): Uint8Array;
 /**
  * Writes a 4-byte IPv4 address, either into a fresh buffer or into one you
  * supply.

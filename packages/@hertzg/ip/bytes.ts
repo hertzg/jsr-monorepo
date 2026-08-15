@@ -133,14 +133,6 @@ export function ipFromBytes(bytes: Uint8Array, offset = 0): Address {
     : ipv6FromBytes(bytes, offset);
 }
 
-/** Writes an IP address into a freshly allocated buffer of its wire width. */
-export function ipToBytes(address: Address): Uint8Array;
-/** Writes an IP address into an existing buffer at `offset`. */
-export function ipToBytes(
-  address: Address,
-  into: Uint8Array,
-  offset?: number,
-): Uint8Array;
 /**
  * Writes an IPv4 or IPv6 address, either into a fresh buffer or into one you
  * supply.
@@ -184,16 +176,7 @@ export function ipToBytes(
   into?: Uint8Array,
   offset = 0,
 ): Uint8Array {
-  // The delegates deliberately publish no overload taking `into?`, so that
-  // `(address, undefined, 8)` — an offset with nothing to apply it to — is a
-  // compile error. That costs this dispatcher an extra fork; both arms of it
-  // reach the same code.
-  if (typeof address === "bigint") {
-    return into === undefined
-      ? ipv6ToBytes(address)
-      : ipv6ToBytes(address, into, offset);
-  }
-  return into === undefined
-    ? ipv4ToBytes(address)
+  return typeof address === "bigint"
+    ? ipv6ToBytes(address, into, offset)
     : ipv4ToBytes(address, into, offset);
 }
