@@ -7,6 +7,7 @@ import {
   cidrv6Intersect,
   cidrv6LastAddress,
   cidrv6Mask,
+  cidrv6MaskToPrefixLength,
   cidrv6Merge,
   cidrv6Overlaps,
   cidrv6Subtract,
@@ -69,6 +70,180 @@ Deno.test("cidrv6Mask", async (t) => {
       () => cidrv6Mask(129),
       RangeError,
       "CIDR prefix length must be 0-128",
+    );
+  });
+});
+
+Deno.test("cidrv6MaskToPrefixLength", async (t) => {
+  await t.step("common masks", () => {
+    assertEquals(
+      cidrv6MaskToPrefixLength(0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFn),
+      128,
+    );
+    assertEquals(
+      cidrv6MaskToPrefixLength(0xFFFFFFFFFFFFFFFF0000000000000000n),
+      64,
+    );
+    assertEquals(
+      cidrv6MaskToPrefixLength(0xFFFFFFFFFFFF00000000000000000000n),
+      48,
+    );
+    assertEquals(
+      cidrv6MaskToPrefixLength(0xFFFFFFFF000000000000000000000000n),
+      32,
+    );
+  });
+
+  await t.step("edge cases", () => {
+    assertEquals(cidrv6MaskToPrefixLength(0n), 0);
+    assertEquals(
+      cidrv6MaskToPrefixLength(0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFn),
+      128,
+    );
+  });
+
+  await t.step("various masks", () => {
+    assertEquals(
+      cidrv6MaskToPrefixLength(0x80000000000000000000000000000000n),
+      1,
+    );
+    assertEquals(
+      cidrv6MaskToPrefixLength(0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF00n),
+      120,
+    );
+    assertEquals(
+      cidrv6MaskToPrefixLength(0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFEn),
+      127,
+    );
+  });
+
+  await t.step("accepts colon-hexadecimal notation", () => {
+    assertEquals(cidrv6MaskToPrefixLength("ffff:ffff:ffff:ffff::"), 64);
+    assertEquals(cidrv6MaskToPrefixLength("ffff:ffff::"), 32);
+    assertEquals(cidrv6MaskToPrefixLength("ffff:ffff:ffff::"), 48);
+    assertEquals(cidrv6MaskToPrefixLength("::"), 0);
+    assertEquals(
+      cidrv6MaskToPrefixLength("ffff:ffff:ffff:ffff:ffff:ffff:ffff:ffff"),
+      128,
+    );
+  });
+
+  await t.step("both forms agree for every prefix length", () => {
+    for (let prefixLength = 0; prefixLength <= 128; prefixLength++) {
+      const mask = cidrv6Mask(prefixLength);
+      assertEquals(
+        cidrv6MaskToPrefixLength(stringifyIpv6(mask)),
+        cidrv6MaskToPrefixLength(mask),
+      );
+    }
+  });
+
+  await t.step("non-contiguous colon-hexadecimal throws", () => {
+    assertThrows(
+      () => cidrv6MaskToPrefixLength("ffff:0:ffff::"),
+      TypeError,
+      "IPv6 mask is not contiguous: 0xffff0000ffff00000000000000000000",
+    );
+    assertThrows(() => cidrv6MaskToPrefixLength("::ffff:ffff"), TypeError);
+    assertThrows(() => cidrv6MaskToPrefixLength("::1"), TypeError);
+  });
+
+  await t.step("malformed notation propagates parseIpv6's errors", () => {
+    assertThrows(
+      () => cidrv6MaskToPrefixLength("gggg::"),
+      TypeError,
+      "Invalid IPv6 group",
+    );
+    assertThrows(() => cidrv6MaskToPrefixLength("fffff::"), TypeError);
+    assertThrows(() => cidrv6MaskToPrefixLength(""), TypeError);
+
+    // The only RangeError parseIpv6 can raise comes from the embedded
+    // IPv4 form; an over-long hex group is a TypeError, not this.
+    assertThrows(
+      () => cidrv6MaskToPrefixLength("::1.2.3.256"),
+      RangeError,
+      "IPv4 octet out of range",
+    );
+  });
+
+  await t.step("non-contiguous masks throw", () => {
+    assertThrows(
+      () => cidrv6MaskToPrefixLength(0xFFFF0000FFFF00000000000000000000n),
+      TypeError,
+      "IPv6 mask is not contiguous: 0xffff0000ffff00000000000000000000",
+    );
+    assertThrows(
+      () => cidrv6MaskToPrefixLength(0xFFFFFFFFFFFFFFFF0000000000000001n),
+      TypeError,
+    );
+    assertThrows(
+      () => cidrv6MaskToPrefixLength(0x7FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFn),
+      TypeError,
+    );
+  });
+
+  await t.step("wildcard (host) masks throw", () => {
+    assertThrows(
+      () => cidrv6MaskToPrefixLength(0x0000000000000000FFFFFFFFFFFFFFFFn),
+      TypeError,
+      "IPv6 mask is not contiguous: 0x0000000000000000ffffffffffffffff",
+    );
+    assertThrows(
+      () => cidrv6MaskToPrefixLength(0x000000000000000000000000000000FFn),
+      TypeError,
+    );
+  });
+
+  await t.step("counts leading ones, not set bits", () => {
+    // 64 set bits, but the run is split -- not a /64 mask.
+    assertThrows(
+      () => cidrv6MaskToPrefixLength(0xFFFFFFFF00000000FFFFFFFF00000000n),
+      TypeError,
+    );
+    assertEquals(
+      cidrv6MaskToPrefixLength(0xFFFFFFFFFFFFFFFF0000000000000000n),
+      64,
+    );
+  });
+
+  await t.step("round-trips with cidrv6Mask for every prefix length", () => {
+    for (let prefixLength = 0; prefixLength <= 128; prefixLength++) {
+      assertEquals(
+        cidrv6MaskToPrefixLength(cidrv6Mask(prefixLength)),
+        prefixLength,
+      );
+    }
+  });
+
+  await t.step("a single cleared bit breaks contiguity", () => {
+    // Starts at 2 because clearing bit 127 of a /1 mask leaves 0n, which
+    // is the valid /0 mask rather than a punctured one.
+    for (let prefixLength = 2; prefixLength <= 128; prefixLength++) {
+      // Clear the most significant bit of an otherwise valid mask.
+      const punctured = cidrv6Mask(prefixLength) &
+        ~(1n << 127n) & 0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFn;
+      assertThrows(() => cidrv6MaskToPrefixLength(punctured), TypeError);
+    }
+  });
+
+  await t.step("a single extra bit breaks contiguity", () => {
+    for (let prefixLength = 0; prefixLength < 127; prefixLength++) {
+      // Set the least significant bit of an otherwise valid mask.
+      const polluted = cidrv6Mask(prefixLength) | 1n;
+      assertThrows(() => cidrv6MaskToPrefixLength(polluted), TypeError);
+    }
+  });
+
+  await t.step("out of range masks throw", () => {
+    assertThrows(
+      () => cidrv6MaskToPrefixLength(-1n),
+      RangeError,
+      "IPv6 mask must be a 128-bit unsigned integer, got -1",
+    );
+    assertThrows(
+      () => cidrv6MaskToPrefixLength(1n << 128n),
+      RangeError,
+      "IPv6 mask must be a 128-bit unsigned integer",
     );
   });
 });

@@ -155,6 +155,24 @@ Deno.test("parseIpv6", async (t) => {
       TypeError,
     );
   });
+
+  await t.step("RangeError only from the embedded IPv4 form", () => {
+    // A hex group cannot be numerically out of range -- 4 digits cannot
+    // exceed ffff -- so an over-long group is a TypeError, not a RangeError.
+    assertThrows(
+      () => parseIpv6("fffff::"),
+      TypeError,
+      "Invalid IPv6 group",
+    );
+
+    // The embedded IPv4 tail delegates to parseIpv4, which does have a
+    // range check. This is the only path that produces a RangeError.
+    assertThrows(
+      () => parseIpv6("::1.2.3.256"),
+      RangeError,
+      "IPv4 octet out of range",
+    );
+  });
 });
 
 Deno.test("stringifyIpv6", async (t) => {

@@ -6,6 +6,7 @@ import {
   cidrv4ContainsCidr,
   cidrv4Intersect,
   cidrv4Mask,
+  cidrv4MaskToPrefixLength,
   cidrv4Merge,
   cidrv4NetworkAddress,
   cidrv4Overlaps,
@@ -44,6 +45,148 @@ Deno.test("cidrv4Mask", async (t) => {
       () => cidrv4Mask(33),
       RangeError,
       "CIDR prefix length must be 0-32, got 33",
+    );
+  });
+});
+
+Deno.test("cidrv4MaskToPrefixLength", async (t) => {
+  await t.step("common masks", () => {
+    assertEquals(cidrv4MaskToPrefixLength(0xFFFFFF00), 24);
+    assertEquals(cidrv4MaskToPrefixLength(0xFFFF0000), 16);
+    assertEquals(cidrv4MaskToPrefixLength(0xFF000000), 8);
+  });
+
+  await t.step("edge cases", () => {
+    assertEquals(cidrv4MaskToPrefixLength(0), 0);
+    assertEquals(cidrv4MaskToPrefixLength(0xFFFFFFFF), 32);
+  });
+
+  await t.step("various masks", () => {
+    assertEquals(cidrv4MaskToPrefixLength(0x80000000), 1);
+    assertEquals(cidrv4MaskToPrefixLength(0xFFFFFFFC), 30);
+    assertEquals(cidrv4MaskToPrefixLength(0xFFFFFFFE), 31);
+  });
+
+  await t.step("accepts dotted decimal notation", () => {
+    assertEquals(cidrv4MaskToPrefixLength("255.255.255.0"), 24);
+    assertEquals(cidrv4MaskToPrefixLength("255.255.0.0"), 16);
+    assertEquals(cidrv4MaskToPrefixLength("255.0.0.0"), 8);
+    assertEquals(cidrv4MaskToPrefixLength("255.255.255.252"), 30);
+    assertEquals(cidrv4MaskToPrefixLength("0.0.0.0"), 0);
+    assertEquals(cidrv4MaskToPrefixLength("255.255.255.255"), 32);
+  });
+
+  await t.step("both forms agree for every prefix length", () => {
+    for (let prefixLength = 0; prefixLength <= 32; prefixLength++) {
+      const mask = cidrv4Mask(prefixLength);
+      assertEquals(
+        cidrv4MaskToPrefixLength(stringifyIpv4(mask)),
+        cidrv4MaskToPrefixLength(mask),
+      );
+    }
+  });
+
+  await t.step("non-contiguous dotted decimal throws", () => {
+    assertThrows(
+      () => cidrv4MaskToPrefixLength("255.0.255.0"),
+      TypeError,
+      "IPv4 mask is not contiguous: 0xff00ff00",
+    );
+    assertThrows(() => cidrv4MaskToPrefixLength("0.0.0.255"), TypeError);
+    assertThrows(() => cidrv4MaskToPrefixLength("255.255.255.1"), TypeError);
+  });
+
+  await t.step("malformed notation propagates parseIpv4's errors", () => {
+    assertThrows(
+      () => cidrv4MaskToPrefixLength("255.255.255"),
+      TypeError,
+      "IPv4 address must have exactly 4 octets",
+    );
+    assertThrows(
+      () => cidrv4MaskToPrefixLength("255.255.255.256"),
+      RangeError,
+      "IPv4 octet out of range",
+    );
+    assertThrows(() => cidrv4MaskToPrefixLength("255.255.255.01"), TypeError);
+    assertThrows(() => cidrv4MaskToPrefixLength(""), TypeError);
+  });
+
+  await t.step("non-contiguous masks throw", () => {
+    assertThrows(
+      () => cidrv4MaskToPrefixLength(0xFF00FF00),
+      TypeError,
+      "IPv4 mask is not contiguous: 0xff00ff00",
+    );
+    assertThrows(() => cidrv4MaskToPrefixLength(0xFFFFFF01), TypeError);
+    assertThrows(() => cidrv4MaskToPrefixLength(0x7FFFFFFF), TypeError);
+  });
+
+  await t.step("wildcard (host) masks throw", () => {
+    assertThrows(
+      () => cidrv4MaskToPrefixLength(0x000000FF),
+      TypeError,
+      "IPv4 mask is not contiguous: 0x000000ff",
+    );
+    assertThrows(() => cidrv4MaskToPrefixLength(0x0000FFFF), TypeError);
+  });
+
+  await t.step("counts leading ones, not set bits", () => {
+    // node-ip's bug: 0xFF00FF00 has 16 set bits but is not a /16 mask.
+    assertThrows(() => cidrv4MaskToPrefixLength(0xFF00FF00), TypeError);
+    assertEquals(cidrv4MaskToPrefixLength(0xFFFF0000), 16);
+  });
+
+  await t.step("round-trips with cidrv4Mask for every prefix length", () => {
+    for (let prefixLength = 0; prefixLength <= 32; prefixLength++) {
+      assertEquals(
+        cidrv4MaskToPrefixLength(cidrv4Mask(prefixLength)),
+        prefixLength,
+      );
+    }
+  });
+
+  await t.step("only cidrv4Mask outputs are accepted", () => {
+    const contiguous = new Set(
+      Array.from({ length: 33 }, (_, prefixLength) => cidrv4Mask(prefixLength)),
+    );
+
+    // Exhaustive over 32-bit space is too slow; sweep the low 16 bits
+    // paired with every contiguous high half instead.
+    for (let low = 0; low <= 0xFFFF; low++) {
+      const mask = (0xFFFF0000 | low) >>> 0;
+      let threw = false;
+      try {
+        cidrv4MaskToPrefixLength(mask);
+      } catch {
+        threw = true;
+      }
+      assertEquals(threw, !contiguous.has(mask));
+    }
+  });
+
+  await t.step("out of range masks throw", () => {
+    assertThrows(
+      () => cidrv4MaskToPrefixLength(-1),
+      RangeError,
+      "IPv4 mask must be a 32-bit unsigned integer, got -1",
+    );
+    assertThrows(
+      () => cidrv4MaskToPrefixLength(0x100000000),
+      RangeError,
+      "IPv4 mask must be a 32-bit unsigned integer, got 4294967296",
+    );
+  });
+
+  await t.step("non-integer masks throw", () => {
+    assertThrows(
+      () => cidrv4MaskToPrefixLength(1.5),
+      RangeError,
+      "IPv4 mask must be a 32-bit unsigned integer, got 1.5",
+    );
+    assertThrows(
+      () => cidrv4MaskToPrefixLength(NaN),
+      RangeError,
+      "IPv4 mask must be a 32-bit unsigned integer, got NaN",
     );
   });
 });

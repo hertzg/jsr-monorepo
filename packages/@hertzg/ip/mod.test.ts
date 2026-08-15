@@ -1,8 +1,10 @@
-import { assertEquals } from "@std/assert";
+import { assertEquals, assertThrows } from "@std/assert";
 import {
   cidrv4BroadcastAddress,
   cidrv4Contains,
+  cidrv4MaskToPrefixLength,
   cidrv4NetworkAddress,
+  cidrv6MaskToPrefixLength,
   parse,
   parseCidrv4,
   parseIpv4,
@@ -25,6 +27,19 @@ Deno.test("mod.ts re-exports", async (t) => {
     assertEquals(cidrv4NetworkAddress(cidr), 3232235776);
     assertEquals(cidrv4BroadcastAddress(cidr), 3232236031);
     assertEquals(cidrv4Contains(cidr, parseIpv4("192.168.1.100")), true);
+  });
+
+  await t.step("mask to prefix length works via main module", () => {
+    assertEquals(cidrv4MaskToPrefixLength(0xFFFFFF00), 24);
+    assertThrows(() => cidrv4MaskToPrefixLength(0xFF00FF00), TypeError);
+    assertEquals(
+      cidrv6MaskToPrefixLength(0xFFFFFFFFFFFFFFFF0000000000000000n),
+      64,
+    );
+    assertThrows(
+      () => cidrv6MaskToPrefixLength(0xFFFF0000FFFF00000000000000000000n),
+      TypeError,
+    );
   });
 
   await t.step("parse/stringify IPv4 address", () => {

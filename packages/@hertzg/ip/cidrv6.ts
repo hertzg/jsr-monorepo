@@ -94,6 +94,150 @@ export function cidrv6Mask(prefixLength: number): bigint {
 }
 
 /**
+ * Recovers the prefix length from an IPv6 network mask given as a bigint.
+ *
+ * @param mask The network mask as a bigint
+ * @returns The prefix length (0-128)
+ * @throws {TypeError} If the mask's one bits are not contiguous from the top
+ * @throws {RangeError} If the mask is not in 0n to 2^128 - 1
+ *
+ * @example Recovering prefix lengths from bigints
+ * ```ts
+ * import { assertEquals } from "@std/assert";
+ * import { cidrv6MaskToPrefixLength } from "@hertzg/ip/cidrv6";
+ *
+ * assertEquals(cidrv6MaskToPrefixLength(0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFn), 128);
+ * assertEquals(cidrv6MaskToPrefixLength(0xFFFFFFFFFFFFFFFF0000000000000000n), 64);
+ * assertEquals(cidrv6MaskToPrefixLength(0xFFFFFFFFFFFF00000000000000000000n), 48);
+ * assertEquals(cidrv6MaskToPrefixLength(0xFFFFFFFF000000000000000000000000n), 32);
+ * assertEquals(cidrv6MaskToPrefixLength(0n), 0);
+ * ```
+ */
+export function cidrv6MaskToPrefixLength(mask: bigint): number;
+/**
+ * Recovers the prefix length from an IPv6 network mask given in
+ * colon-hexadecimal notation.
+ *
+ * The string is parsed with the same rules as {@link parseIpv6} and then
+ * interpreted as a mask rather than an address.
+ *
+ * Note that IPv6 has no standard netmask notation. RFC 4291 section 2.3
+ * defines exactly one way to write a prefix -- `address/prefix-length` --
+ * and nothing equivalent to IPv4's dotted netmask. A string like
+ * `"ffff:ffff:ffff:ffff::"` is a well-formed IPv6 *address* literal whose
+ * 128 bits are being read as a mask. It is accepted here because system
+ * APIs do report masks that way: POSIX `getifaddrs()` fills `ifa_netmask`
+ * with a `sockaddr_in6`, which is what `Deno.networkInterfaces()` surfaces
+ * as `netmask: "ffff:ffff:ffff:ffff::"`. Prefer the prefix length when a
+ * source offers one -- those same APIs usually also report `cidr`.
+ *
+ * @param mask The network mask in colon-hexadecimal notation (e.g. "ffff:ffff::")
+ * @returns The prefix length (0-128)
+ * @throws {TypeError} If the notation is malformed (bad group, wrong group
+ *   count), or the mask's one bits are not contiguous from the top
+ * @throws {RangeError} If an embedded IPv4 octet is out of range, as in
+ *   `"::1.2.3.256"` -- a malformed hex group is a `TypeError`, not this
+ *
+ * @example Recovering prefix lengths from colon-hexadecimal
+ * ```ts
+ * import { assertEquals } from "@std/assert";
+ * import { cidrv6MaskToPrefixLength } from "@hertzg/ip/cidrv6";
+ *
+ * assertEquals(cidrv6MaskToPrefixLength("ffff:ffff:ffff:ffff::"), 64);
+ * assertEquals(cidrv6MaskToPrefixLength("ffff:ffff::"), 32);
+ * assertEquals(cidrv6MaskToPrefixLength("::"), 0);
+ * ```
+ */
+export function cidrv6MaskToPrefixLength(mask: string): number;
+/**
+ * Recovers the prefix length from an IPv6 network mask.
+ *
+ * The inverse of {@link cidrv6Mask}. Accepts either a bigint or
+ * colon-hexadecimal notation.
+ *
+ * A CIDR mask is a run of one bits from the most significant end followed
+ * by zeros; masks that do not have that shape describe no prefix length at
+ * all and are rejected rather than answered with a plausible-looking count
+ * of set bits.
+ *
+ * @param mask The network mask, as a bigint or colon-hexadecimal notation
+ * @returns The prefix length (0-128)
+ * @throws {TypeError} If the mask is not contiguous, or the notation is malformed
+ * @throws {RangeError} If the mask is out of range
+ *
+ * @example Both forms agree
+ * ```ts
+ * import { assertEquals } from "@std/assert";
+ * import { cidrv6MaskToPrefixLength } from "@hertzg/ip/cidrv6";
+ *
+ * assertEquals(cidrv6MaskToPrefixLength("ffff:ffff:ffff:ffff::"), 64);
+ * assertEquals(cidrv6MaskToPrefixLength(0xFFFFFFFFFFFFFFFF0000000000000000n), 64);
+ * ```
+ *
+ * @example Non-contiguous masks throw, in either form
+ * ```ts
+ * import { assertThrows } from "@std/assert";
+ * import { cidrv6MaskToPrefixLength } from "@hertzg/ip/cidrv6";
+ *
+ * assertThrows(() => cidrv6MaskToPrefixLength(0xFFFF0000FFFF00000000000000000000n), TypeError);
+ * assertThrows(() => cidrv6MaskToPrefixLength("ffff:0:ffff::"), TypeError);
+ * assertThrows(() => cidrv6MaskToPrefixLength("::ffff:ffff"), TypeError);
+ * ```
+ *
+ * @example Round-trips with cidrv6Mask
+ * ```ts
+ * import { assertEquals } from "@std/assert";
+ * import { cidrv6Mask, cidrv6MaskToPrefixLength } from "@hertzg/ip/cidrv6";
+ *
+ * for (let prefixLength = 0; prefixLength <= 128; prefixLength++) {
+ *   assertEquals(cidrv6MaskToPrefixLength(cidrv6Mask(prefixLength)), prefixLength);
+ * }
+ * ```
+ *
+ * @example Error handling
+ * ```ts
+ * import { assertThrows } from "@std/assert";
+ * import { cidrv6MaskToPrefixLength } from "@hertzg/ip/cidrv6";
+ *
+ * // Wrong shape -- in range, but not a mask
+ * assertThrows(() => cidrv6MaskToPrefixLength(0xFFFF0000FFFF00000000000000000000n), TypeError);
+ * assertThrows(() => cidrv6MaskToPrefixLength("ffff:0:ffff::"), TypeError);
+ *
+ * // Malformed notation
+ * assertThrows(() => cidrv6MaskToPrefixLength("gggg::"), TypeError);
+ *
+ * // Wrong range -- not a 128-bit unsigned integer at all
+ * assertThrows(() => cidrv6MaskToPrefixLength(-1n), RangeError);
+ * assertThrows(() => cidrv6MaskToPrefixLength(1n << 128n), RangeError);
+ * ```
+ */
+export function cidrv6MaskToPrefixLength(mask: string | bigint): number;
+/** Recovers the prefix length from an IPv6 network mask. */
+export function cidrv6MaskToPrefixLength(mask: string | bigint): number {
+  const value = typeof mask === "string" ? parseIpv6(mask) : mask;
+
+  if (value < 0n || value > 0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFn) {
+    throw new RangeError(
+      `IPv6 mask must be a 128-bit unsigned integer, got ${value}`,
+    );
+  }
+
+  // The complement of a contiguous mask is a run of trailing ones, i.e.
+  // 2^hostBitCount - 1. Only those values satisfy `n & (n + 1) === 0`.
+  const hostBits = ~value & 0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFn;
+  if ((hostBits & (hostBits + 1n)) !== 0n) {
+    throw new TypeError(
+      `IPv6 mask is not contiguous: 0x${value.toString(16).padStart(32, "0")}`,
+    );
+  }
+
+  // hostBits + 1n is therefore an exact power of two, whose binary
+  // length is the host bit count plus one.
+  const hostBitCount = (hostBits + 1n).toString(2).length - 1;
+  return 128 - hostBitCount;
+}
+
+/**
  * Parses an IPv6 CIDR notation string to a Cidrv6 object.
  *
  * Returns only the parsed values (address and prefix length).
