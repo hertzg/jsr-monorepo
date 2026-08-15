@@ -12,6 +12,7 @@
     "./classifyv4": [],
     "./classifyv6": [],
     "./validate": [],
+    "./version": [],
     "./validatev4": [],
     "./validatev6": [],
     "./4to6": []

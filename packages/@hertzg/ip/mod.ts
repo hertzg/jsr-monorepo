@@ -235,6 +235,9 @@
  * - {@link compareCidr}: Compare two CIDR blocks of either version for sorting
  * - {@link isValidIp}: Check if a string is a valid plain IP address (IPv4 or IPv6)
  * - {@link isValidCidr}: Check if a string is valid CIDR notation (IPv4 or IPv6)
+ * - {@link ipVersion}: Report which IP version an address string is written in, or undefined
+ * - {@link cidrVersion}: Report which IP version a CIDR string is written in, or undefined
+ * - {@link IpVersion}: An IP version number, 4 or 6
  * - {@link classifyIp}: Classify an IPv4 (number) or IPv6 (bigint) address
  * - {@link ClassifiedIp}: Discriminated union result with kind, value, and classification
  * - {@link ClassifiedIpv4}: Result type for IPv4 classification
@@ -342,6 +345,7 @@
  * - [`classifyv4`](https://jsr.io/@hertzg/ip/doc/classifyv4): IPv4 classification via {@link classifyIpv4}, {@link isIpv4Private}, etc.
  * - [`classifyv6`](https://jsr.io/@hertzg/ip/doc/classifyv6): IPv6 classification via {@link classifyIpv6}, {@link isIpv6Loopback}, etc.
  * - [`validate`](https://jsr.io/@hertzg/ip/doc/validate): Universal validation via {@link isValidIp}, {@link isValidCidr}
+ * - [`version`](https://jsr.io/@hertzg/ip/doc/version): IP version detection via {@link ipVersion}, {@link cidrVersion}
  * - [`4to6`](https://jsr.io/@hertzg/ip/doc/4to6): IPv4-mapped IPv6 conversion via {@link ipv4To64Mapped}, {@link ipv4From64Mapped}, {@link cidrv4ToCidrv64Mapped}, {@link cidrv4FromCidrv64Mapped}
  *
  * @module
@@ -502,6 +506,14 @@ export {
   /** Check if a string is a valid plain IP address (IPv4 or IPv6). */
   isValidIp,
 } from "./validate.ts";
+export {
+  /** Report which IP version a CIDR string is written in, or undefined. */
+  cidrVersion,
+  /** An IP version number: 4 for IPv4, 6 for IPv6. */
+  type IpVersion,
+  /** Report which IP version an address string is written in, or undefined. */
+  ipVersion,
+} from "./version.ts";
 
 // --- IPv4 ---
 
