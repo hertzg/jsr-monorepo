@@ -9,6 +9,7 @@
  * @module
  */
 
+import { writeAll } from "@std/io/write-all";
 import { deserializeFromJson, serializeToJson } from "./serialization.ts";
 
 /**
@@ -102,12 +103,19 @@ export async function readStdinFormatted(
 }
 
 /**
- * Writes binary data to stdout.
+ * Writes binary data to stdout, in full.
+ *
+ * A single `Deno.stdout.write` is not enough. Stdout is line buffered, so one
+ * write consumes only up to and including the last `0x0a` in the buffer plus a
+ * short remainder, and returns how much it took. Binary output routinely holds
+ * a `0x0a` far from its end, so the rest would be dropped without a word and
+ * the CLI would still exit 0. {@linkcode writeAll} keeps writing until every
+ * byte has landed.
  *
  * @param data Binary data to write
  */
 export async function writeStdout(data: Uint8Array): Promise<void> {
-  await Deno.stdout.write(data);
+  await writeAll(Deno.stdout, data);
 }
 
 /**

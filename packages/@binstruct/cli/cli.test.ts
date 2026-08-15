@@ -17,7 +17,7 @@ import {
   assertNotEquals,
   assertStringIncludes,
 } from "@std/assert";
-import { toFileUrl } from "@std/path";
+import { fromFileUrl, toFileUrl } from "@std/path";
 import { stub } from "@std/testing/mock";
 import { FakeTime } from "@std/testing/time";
 import { explainFailure, parseCliArgs, planCli } from "./cli.ts";
@@ -153,14 +153,17 @@ function printed(plan: Awaited<ReturnType<typeof planCli>>) {
  * @param permissions Permission flags, defaulting to everything
  * @param cwd Working directory, for the path-resolution cases
  * @param input Bytes to feed stdin, for the cases that actually decode
- * @returns Exit code and decoded output
+ * @returns Exit code, decoded output, and stdout as it came, for the cases
+ * whose output is binary rather than text
  */
 async function runCli(
   args: string[],
   permissions: string[] = ["-A"],
   cwd?: string,
   input?: Uint8Array,
-): Promise<{ code: number; stdout: string; stderr: string }> {
+): Promise<
+  { code: number; stdout: string; stderr: string; bytes: Uint8Array }
+> {
   const command = new Deno.Command(Deno.execPath(), {
     args: ["run", ...permissions, CLI, ...args],
     cwd,
@@ -183,6 +186,7 @@ async function runCli(
     code: output.code,
     stdout: decoder.decode(output.stdout),
     stderr: decoder.decode(output.stderr),
+    bytes: output.stdout,
   };
 }
 
@@ -2200,4 +2204,31 @@ Deno.test("an environmental failure is not blamed on the package name", async ()
   } finally {
     await Deno.remove(directory, { recursive: true });
   }
+});
+
+Deno.test("a decode and encode round trip gives the file back", async () => {
+  // Encoded output is binary, and binary holds 0x0a wherever the bytes fall.
+  // Stdout being line buffered, a single write would have stopped at the last
+  // one of those: in this capture it sits 1921 bytes from the end, so that is
+  // how much used to go missing, with an exit status of 0 over it.
+  const capture = await Deno.readFile(
+    fromFileUrl(import.meta.resolve("../pcap/_fixtures/dns.cap")),
+  );
+
+  const decoded = await runCli(
+    [PCAP, "pcapFile", "decode"],
+    OFFLINE,
+    undefined,
+    capture,
+  );
+  assertEquals(decoded.code, 0, decoded.stderr);
+
+  const encoded = await runCli(
+    [PCAP, "pcapFile", "encode"],
+    OFFLINE,
+    undefined,
+    decoded.bytes,
+  );
+
+  assertEquals(encoded.bytes, capture);
 });
