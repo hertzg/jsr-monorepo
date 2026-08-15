@@ -1,5 +1,7 @@
 import { assertEquals } from "@std/assert";
-import { parseIp, stringifyIp } from "./ip.ts";
+import { compareIp, parseIp, stringifyIp } from "./ip.ts";
+import { parseIpv4 } from "./ipv4.ts";
+import { parseIpv6 } from "./ipv6.ts";
 
 Deno.test("parseIp", async (t) => {
   await t.step("parses IPv4 addresses", () => {
@@ -55,4 +57,54 @@ Deno.test("parseIp round-trip", async (t) => {
       assertEquals(stringifyIp(parseIp(addr) as bigint), addr);
     }
   });
+});
+
+Deno.test("compareIp", async (t) => {
+  await t.step("delegates to IPv4", () => {
+    assertEquals(compareIp(parseIp("10.0.0.1"), parseIp("10.0.0.2")), -1);
+    assertEquals(compareIp(parseIp("10.0.0.2"), parseIp("10.0.0.1")), 1);
+    assertEquals(compareIp(parseIp("10.0.0.1"), parseIp("10.0.0.1")), 0);
+  });
+
+  await t.step("delegates to IPv6", () => {
+    assertEquals(compareIp(parseIp("::1"), parseIp("::2")), -1);
+    assertEquals(compareIp(parseIp("::2"), parseIp("::1")), 1);
+    assertEquals(compareIp(parseIp("::1"), parseIp("::1")), 0);
+  });
+
+  await t.step("sorts every IPv4 address before every IPv6 address", () => {
+    assertEquals(compareIp(parseIp("255.255.255.255"), parseIp("::")), -1);
+    assertEquals(compareIp(parseIp("::"), parseIp("0.0.0.0")), 1);
+  });
+
+  await t.step("sorts a mixed list instead of throwing", () => {
+    const mixed = ["2001:db8::1", "10.0.0.2", "::1", "10.0.0.1"].map(parseIp);
+    assertEquals(mixed.toSorted(compareIp).map(stringifyIp), [
+      "10.0.0.1",
+      "10.0.0.2",
+      "::1",
+      "2001:db8::1",
+    ]);
+  });
+
+  await t.step(
+    "an IPv4-mapped bigint is an IPv6 value, not its IPv4 twin",
+    () => {
+      const mapped = parseIpv6("::ffff:10.0.0.1");
+      const plain = parseIpv4("10.0.0.1");
+
+      assertEquals(compareIp(mapped, plain), 1);
+      assertEquals(compareIp(plain, mapped), -1);
+    },
+  );
+
+  await t.step(
+    "parseIp unwraps mapped addresses, so they compare equal",
+    () => {
+      assertEquals(
+        compareIp(parseIp("::ffff:10.0.0.1"), parseIp("10.0.0.1")),
+        0,
+      );
+    },
+  );
 });

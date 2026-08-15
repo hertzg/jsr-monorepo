@@ -362,3 +362,47 @@ export function expandIpv6(address: string): string {
 export function compressIpv6(address: string): string {
   return stringifyIpv6(parseIpv6(address));
 }
+
+/**
+ * Compares two IPv6 addresses for sorting, numerically ascending.
+ *
+ * Suitable as an `Array.prototype.sort` / `toSorted` comparator. For a
+ * comparator that also accepts IPv4 addresses, see {@link compareIp}, which
+ * sorts every IPv4 address before every IPv6 one.
+ *
+ * IPv4-mapped addresses (`::ffff:x.x.x.x`) are ordinary IPv6 values here —
+ * they sort by their 128-bit value, inside the `::ffff:0:0/96` block.
+ *
+ * @param a The first address
+ * @param b The second address
+ * @returns `-1` if `a` sorts before `b`, `1` if after, `0` if equal
+ *
+ * @example Sort addresses numerically, not lexicographically
+ * ```ts
+ * import { assertEquals } from "@std/assert";
+ * import { compareIpv6, parseIpv6, stringifyIpv6 } from "@hertzg/ip/ipv6";
+ *
+ * const addresses = ["2001:db8::9", "2001:db8::10", "2001:db8::2"].map(parseIpv6);
+ *
+ * assertEquals(addresses.toSorted(compareIpv6).map(stringifyIpv6), [
+ *   "2001:db8::2",
+ *   "2001:db8::9",
+ *   "2001:db8::10",
+ * ]);
+ * ```
+ *
+ * @example The three possible results
+ * ```ts
+ * import { assertEquals } from "@std/assert";
+ * import { compareIpv6, parseIpv6 } from "@hertzg/ip/ipv6";
+ *
+ * assertEquals(compareIpv6(parseIpv6("::1"), parseIpv6("::2")), -1);
+ * assertEquals(compareIpv6(parseIpv6("::2"), parseIpv6("::1")), 1);
+ * assertEquals(compareIpv6(parseIpv6("::1"), parseIpv6("::1")), 0);
+ * ```
+ */
+export function compareIpv6(a: bigint, b: bigint): -1 | 0 | 1 {
+  if (a < b) return -1;
+  if (a > b) return 1;
+  return 0;
+}

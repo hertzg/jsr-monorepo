@@ -7,6 +7,7 @@ import {
   cidrOverlaps,
   cidrSize,
   cidrSubtract,
+  compareCidr,
   parseCidr,
   stringifyCidr,
 } from "./cidr.ts";
@@ -341,5 +342,70 @@ Deno.test("cidrAddresses", async (t) => {
       cidrAddresses(parseCidr("fd00::/120"), { offset: 1, count: 3 }),
     );
     assertEquals(addrs.length, 3);
+  });
+});
+
+Deno.test("compareCidr", async (t) => {
+  await t.step("delegates to IPv4", () => {
+    assertEquals(
+      compareCidr(parseCidr("10.0.0.0/8"), parseCidr("192.168.0.0/16")),
+      -1,
+    );
+    assertEquals(
+      compareCidr(parseCidr("10.0.0.0/8"), parseCidr("10.0.0.0/16")),
+      -1,
+    );
+    assertEquals(
+      compareCidr(parseCidr("10.0.0.0/8"), parseCidr("10.0.0.0/8")),
+      0,
+    );
+  });
+
+  await t.step("delegates to IPv6", () => {
+    assertEquals(
+      compareCidr(parseCidr("2001:db8::/32"), parseCidr("fd00::/8")),
+      -1,
+    );
+    assertEquals(
+      compareCidr(parseCidr("2001:db8::/32"), parseCidr("2001:db8::/48")),
+      -1,
+    );
+    assertEquals(
+      compareCidr(parseCidr("2001:db8::/32"), parseCidr("2001:db8::/32")),
+      0,
+    );
+  });
+
+  await t.step("sorts every IPv4 block before every IPv6 block", () => {
+    assertEquals(compareCidr(parseCidr("255.0.0.0/8"), parseCidr("::/0")), -1);
+    assertEquals(compareCidr(parseCidr("::/0"), parseCidr("0.0.0.0/0")), 1);
+  });
+
+  await t.step("sorts a mixed list instead of throwing", () => {
+    const mixed = [
+      "2001:db8::/32",
+      "192.168.1.0/24",
+      "10.0.0.0/16",
+      "fd00::/8",
+      "10.0.0.0/8",
+    ].map(parseCidr);
+
+    assertEquals(mixed.toSorted(compareCidr).map(stringifyCidr), [
+      "10.0.0.0/8",
+      "10.0.0.0/16",
+      "192.168.1.0/24",
+      "2001:db8::/32",
+      "fd00::/8",
+    ]);
+  });
+
+  await t.step("agrees with the order cidrMerge produces", () => {
+    const blocks = ["10.2.0.0/16", "192.168.0.0/16", "10.0.0.0/16"].map(
+      parseCidr,
+    );
+    const ordered = ["10.0.0.0/16", "10.2.0.0/16", "192.168.0.0/16"];
+
+    assertEquals(blocks.toSorted(compareCidr).map(stringifyCidr), ordered);
+    assertEquals(cidrMerge(blocks).map(stringifyCidr), ordered);
   });
 });

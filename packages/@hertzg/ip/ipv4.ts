@@ -169,3 +169,44 @@ export function stringifyIpv4(address: number): string {
 
   return `${octet0}.${octet1}.${octet2}.${octet3}`;
 }
+
+/**
+ * Compares two IPv4 addresses for sorting, numerically ascending.
+ *
+ * Suitable as an `Array.prototype.sort` / `toSorted` comparator. For a
+ * comparator that also accepts IPv6 addresses, see {@link compareIp}, which
+ * sorts every IPv4 address before every IPv6 one.
+ *
+ * @param a The first address
+ * @param b The second address
+ * @returns `-1` if `a` sorts before `b`, `1` if after, `0` if equal
+ *
+ * @example Sort addresses numerically, not lexicographically
+ * ```ts
+ * import { assertEquals } from "@std/assert";
+ * import { compareIpv4, parseIpv4, stringifyIpv4 } from "@hertzg/ip/ipv4";
+ *
+ * const addresses = ["10.0.0.9", "10.0.0.10", "10.0.0.2"].map(parseIpv4);
+ *
+ * assertEquals(addresses.toSorted(compareIpv4).map(stringifyIpv4), [
+ *   "10.0.0.2",
+ *   "10.0.0.9",
+ *   "10.0.0.10",
+ * ]);
+ * ```
+ *
+ * @example The three possible results
+ * ```ts
+ * import { assertEquals } from "@std/assert";
+ * import { compareIpv4, parseIpv4 } from "@hertzg/ip/ipv4";
+ *
+ * assertEquals(compareIpv4(parseIpv4("10.0.0.1"), parseIpv4("10.0.0.2")), -1);
+ * assertEquals(compareIpv4(parseIpv4("10.0.0.2"), parseIpv4("10.0.0.1")), 1);
+ * assertEquals(compareIpv4(parseIpv4("10.0.0.1"), parseIpv4("10.0.0.1")), 0);
+ * ```
+ */
+export function compareIpv4(a: number, b: number): -1 | 0 | 1 {
+  if (a < b) return -1;
+  if (a > b) return 1;
+  return 0;
+}

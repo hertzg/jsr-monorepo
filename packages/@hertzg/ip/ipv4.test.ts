@@ -1,5 +1,5 @@
 import { assert, assertEquals, assertThrows } from "@std/assert";
-import { parseIpv4, stringifyIpv4 } from "./ipv4.ts";
+import { compareIpv4, parseIpv4, stringifyIpv4 } from "./ipv4.ts";
 import { isValidIpv4 } from "./validatev4.ts";
 
 Deno.test("parseIpv4", async (t) => {
@@ -150,5 +150,33 @@ Deno.test("isValidIpv4", async (t) => {
     assertEquals(isValidIpv4("abc"), false);
     assertEquals(isValidIpv4("::1"), false);
     assertEquals(isValidIpv4("192.168.1.0/24"), false);
+  });
+});
+
+Deno.test("compareIpv4", async (t) => {
+  await t.step("orders numerically ascending", () => {
+    assertEquals(compareIpv4(parseIpv4("10.0.0.1"), parseIpv4("10.0.0.2")), -1);
+    assertEquals(compareIpv4(parseIpv4("10.0.0.2"), parseIpv4("10.0.0.1")), 1);
+    assertEquals(compareIpv4(parseIpv4("10.0.0.1"), parseIpv4("10.0.0.1")), 0);
+  });
+
+  await t.step("returns only -1, 0 or 1, never a magnitude", () => {
+    assertEquals(
+      compareIpv4(parseIpv4("0.0.0.0"), parseIpv4("255.255.255.255")),
+      -1,
+    );
+    assertEquals(
+      compareIpv4(parseIpv4("255.255.255.255"), parseIpv4("0.0.0.0")),
+      1,
+    );
+  });
+
+  await t.step("sorts numerically, not lexicographically", () => {
+    const addresses = ["10.0.0.9", "10.0.0.10", "10.0.0.2"].map(parseIpv4);
+    assertEquals(addresses.toSorted(compareIpv4).map(stringifyIpv4), [
+      "10.0.0.2",
+      "10.0.0.9",
+      "10.0.0.10",
+    ]);
   });
 });

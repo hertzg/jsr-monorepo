@@ -1,14 +1,14 @@
 /**
  * Universal IP address parsing and stringifying.
  *
- * This module provides {@link parseIp} and {@link stringifyIp} that
- * auto-detect IPv4 vs IPv6 and delegate to the appropriate version-specific
- * function. The {@link Address} type alias is also exported for working with
- * version-polymorphic address values.
+ * This module provides {@link parseIp}, {@link stringifyIp} and
+ * {@link compareIp} that auto-detect IPv4 vs IPv6 and delegate to the
+ * appropriate version-specific function. The {@link Address} type alias is
+ * also exported for working with version-polymorphic address values.
  *
  * For version-specific functions, see:
- * - [`ipv4`](https://jsr.io/@hertzg/ip/doc/ipv4): {@link parseIpv4}, {@link stringifyIpv4}
- * - [`ipv6`](https://jsr.io/@hertzg/ip/doc/ipv6): {@link parseIpv6}, {@link stringifyIpv6}
+ * - [`ipv4`](https://jsr.io/@hertzg/ip/doc/ipv4): {@link parseIpv4}, {@link stringifyIpv4}, {@link compareIpv4}
+ * - [`ipv6`](https://jsr.io/@hertzg/ip/doc/ipv6): {@link parseIpv6}, {@link stringifyIpv6}, {@link compareIpv6}
  *
  * @example Parse and stringify any IP address
  * ```ts
@@ -31,8 +31,8 @@
 
 import { ipv4From64Mapped } from "./4to6.ts";
 import { isIpv6Ipv4Mapped } from "./classifyv6.ts";
-import { parseIpv4, stringifyIpv4 } from "./ipv4.ts";
-import { parseIpv6, stringifyIpv6 } from "./ipv6.ts";
+import { compareIpv4, parseIpv4, stringifyIpv4 } from "./ipv4.ts";
+import { compareIpv6, parseIpv6, stringifyIpv6 } from "./ipv6.ts";
 
 /**
  * A plain IP address of either IP version.
@@ -129,4 +129,79 @@ export function stringifyIp(address: Address): string {
     return stringifyIpv6(address);
   }
   return stringifyIpv4(address);
+}
+
+/**
+ * Compares two IP addresses of either version for sorting.
+ *
+ * The order is **version-first and total**: every IPv4 address (`number`)
+ * sorts before every IPv6 address (`bigint`), and within a version
+ * addresses sort numerically ascending. Mixed-version arguments are not an
+ * error — unlike the universal CIDR operations, this function never throws,
+ * because sorting a mixed dual-stack list is the reason it exists. Go's
+ * `net/netip`, Rust's `std::net::IpAddr` and PostgreSQL's `inet` all order
+ * addresses the same way.
+ *
+ * Note that "IPv4 sorts first" is a statement about order, not about
+ * magnitude: the two address spaces are disjoint and nothing is converted
+ * between them. An IPv4-mapped address held as a `bigint` is an IPv6 value
+ * and sorts in the IPv6 half — see the example below. In practice
+ * {@link parseIp} already unwraps mapped addresses to their IPv4 `number`
+ * form, so a mapped `bigint` only reaches this function via
+ * {@link parseIpv6}.
+ *
+ * @param a The first address
+ * @param b The second address
+ * @returns `-1` if `a` sorts before `b`, `1` if after, `0` if equal
+ *
+ * @example Sort a mixed dual-stack list, ascending or descending
+ * ```ts
+ * import { assertEquals } from "@std/assert";
+ * import { compareIp, parseIp, stringifyIp } from "@hertzg/ip/ip";
+ *
+ * const clients = ["2001:db8::1", "10.0.0.2", "::1", "10.0.0.1"].map(parseIp);
+ *
+ * assertEquals(clients.toSorted(compareIp).map(stringifyIp), [
+ *   "10.0.0.1",
+ *   "10.0.0.2",
+ *   "::1",
+ *   "2001:db8::1",
+ * ]);
+ *
+ * // Descending: swap the arguments
+ * assertEquals(clients.toSorted((a, b) => compareIp(b, a)).map(stringifyIp), [
+ *   "2001:db8::1",
+ *   "::1",
+ *   "10.0.0.2",
+ *   "10.0.0.1",
+ * ]);
+ * ```
+ *
+ * @example Every IPv4 address sorts before every IPv6 address
+ * ```ts
+ * import { assertEquals } from "@std/assert";
+ * import { compareIp, parseIp } from "@hertzg/ip/ip";
+ *
+ * assertEquals(compareIp(parseIp("255.255.255.255"), parseIp("::")), -1);
+ * assertEquals(compareIp(parseIp("::"), parseIp("0.0.0.0")), 1);
+ * ```
+ *
+ * @example An IPv4-mapped bigint is an IPv6 value, not its IPv4 twin
+ * ```ts
+ * import { assertEquals } from "@std/assert";
+ * import { compareIp } from "@hertzg/ip/ip";
+ * import { parseIpv4 } from "@hertzg/ip/ipv4";
+ * import { parseIpv6 } from "@hertzg/ip/ipv6";
+ *
+ * const mapped = parseIpv6("::ffff:10.0.0.1");
+ * const plain = parseIpv4("10.0.0.1");
+ *
+ * assertEquals(compareIp(mapped, plain), 1);
+ * ```
+ */
+export function compareIp(a: Address, b: Address): -1 | 0 | 1 {
+  if (typeof a === "number") {
+    return typeof b === "number" ? compareIpv4(a, b) : -1;
+  }
+  return typeof b === "bigint" ? compareIpv6(a, b) : 1;
 }
