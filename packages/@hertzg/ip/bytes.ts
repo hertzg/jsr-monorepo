@@ -93,8 +93,10 @@ function spanRangeError(
 
 // Index arithmetic rather than a `DataView`: the view has to be constructed
 // per call, since the buffer differs per call, and that constructor is the
-// whole cost. Measured at ~3.9 ns vs ~50.7 ns for the IPv4 read. See ADR 0012
-// for the full table before swapping either of these for an accessor.
+// whole cost. The IPv4 read measures 3.7 ns this way against 47.5 ns via
+// `DataView`. Before swapping either of these for an accessor, run
+// `deno task bench:bytes` — it holds a complete `DataView` implementation of
+// the same interface and will show you the whole table.
 
 /**
  * Reads four bytes in network order as a 32-bit unsigned integer. The caller

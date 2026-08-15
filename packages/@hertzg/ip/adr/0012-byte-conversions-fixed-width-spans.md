@@ -76,7 +76,10 @@ file. The naming convention that callers actually read — the
 
 **Index arithmetic, not `DataView`, in all six functions.** The 32-bit
 read and write are shared private helpers; the 128-bit functions call
-them four times each.
+them four times each. `_bench/bytes_dataview.bench.ts` keeps a full
+`DataView` implementation of the same interface next to the shipped
+one, so the comparison stays reproducible instead of living only in
+this document.
 
 **No version reinterpretation.** `ipFromBytes` on 16 bytes returns a
 `bigint` even when those bytes are `::ffff:x.x.x.x`. This is a
@@ -91,13 +94,30 @@ addresses have exactly one wire order.
 
 ## Consequences
 
-- **`DataView`'s cost is its constructor, not its accessors.** From a
-  throwaway `deno bench` run while deciding this, not a committed
-  benchmark; re-measure before leaning on the exact figures. On an
-  M2 Pro, Deno 2.9.5, per call: IPv4 read 3.9 ns by index vs 50.7 ns
-  via `DataView`, IPv4 write 3.8 ns vs 48.2 ns, IPv6 read 37.6 ns vs
-  49.9 ns. `DataView` wins one case, the IPv6 write, by 12 % (57.1 ns
-  vs 64.5 ns) — not enough to split the idiom across the module.
+- **`DataView`'s cost is its constructor, not its accessors.** It
+  cannot be hoisted, because the buffer differs on every call.
+  Reproduce with `deno task bench:bytes`, which runs both
+  implementations of the same `ByteCodec` interface —
+  `_bench/bytes_dataview.bench.ts` imports the shipped one from
+  `bytes.ts` and defines the `DataView` one alongside, and refuses to
+  measure if the two ever disagree. On an M2 Pro, Deno 2.9.5, ns per
+  call:
+
+  | operation | index | `DataView` | |
+  | --- | --- | --- | --- |
+  | IPv4 read | 3.7 | 47.5 | 12.7× |
+  | IPv4 write into a frame | 26.0 | 71.3 | 2.75× |
+  | IPv4 write, allocating | 200.0 | 226.0 | 1.13× |
+  | IPv6 read | 36.9 | 48.1 | 1.30× |
+  | IPv6 write into a frame | 79.7 | 79.0 | tie |
+  | IPv6 write, allocating | 226.1 | 225.8 | tie |
+
+  **`DataView` wins nothing.** An earlier measurement of the bare
+  32-bit helpers in isolation had it ahead on the IPv6 write by 12 %,
+  and that is what this ADR claimed until the benchmark was committed.
+  At the real API surface the shared range check, the branch and the
+  returned view are paid on both sides, and the gap closes to a tie.
+  The decision does not change; the reason it was close, did.
 - **The bounds check is free.** Checked vs unchecked measures inside
   noise: IPv4 read 3.8 ns either way, IPv6 read 38.1 ns checked vs
   40.0 ns unchecked. It buys back the bounds checking `DataView` would

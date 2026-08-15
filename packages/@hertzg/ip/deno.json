@@ -19,7 +19,8 @@
     "./bytes": "./bytes.ts"
   },
   "tasks": {
-    "bench:ecosystem": "deno bench --allow-all _bench/"
+    "bench:ecosystem": "deno bench --allow-all _bench/",
+    "bench:bytes": "deno bench --allow-all _bench/bytes_dataview.bench.ts"
   },
   "publish": {
     "exclude": [
