@@ -46,14 +46,14 @@ Deno.test("ipVersion", async (t) => {
     assertEquals(ipVersion("3232235777"), undefined);
   });
 
-  await t.step("is exactly as lenient as the parsers underneath", () => {
-    // parseIpv4 / parseIpv6 tolerate surrounding whitespace and trailing
-    // text, so these report a version rather than undefined. is-ip answers
-    // undefined for all three. Tracked separately from this module.
-    assertEquals(ipVersion(" 10.1.2.3"), 4);
-    assertEquals(ipVersion("1.2.3.4abc"), 4);
-    assertEquals(ipVersion("::1 "), 6);
-  });
+  await t.step(
+    "rejects whitespace and trailing text, as the parsers do",
+    () => {
+      assertEquals(ipVersion(" 10.1.2.3"), undefined);
+      assertEquals(ipVersion("1.2.3.4abc"), undefined);
+      assertEquals(ipVersion("::1 "), undefined);
+    },
+  );
 });
 
 Deno.test("cidrVersion", async (t) => {

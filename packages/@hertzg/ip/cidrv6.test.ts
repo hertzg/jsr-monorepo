@@ -307,6 +307,15 @@ Deno.test("parseCidrv6", async (t) => {
     );
   });
 
+  await t.step("prefix length is digits with no leading zero", () => {
+    assertThrows(() => parseCidrv6("::/08"), TypeError);
+    assertThrows(() => parseCidrv6("::/008"), TypeError);
+    assertThrows(() => parseCidrv6("::/8x"), TypeError);
+    assertThrows(() => parseCidrv6("::/ 8"), TypeError);
+    assertThrows(() => parseCidrv6("::/8\n"), TypeError);
+    assertThrows(() => parseCidrv6("::/+8"), TypeError);
+  });
+
   await t.step("invalid address", () => {
     assertThrows(
       () => parseCidrv6("gggg::/32"),

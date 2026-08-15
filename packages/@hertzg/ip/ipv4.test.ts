@@ -71,6 +71,41 @@ Deno.test("parseIpv4", async (t) => {
       "IPv4 octet out of range: 300 (must be 0-255)",
     );
   });
+
+  await t.step("rejects whitespace anywhere", () => {
+    assertThrows(() => parseIpv4(" 10.1.2.3"), TypeError);
+    assertThrows(() => parseIpv4("10.1.2.3 "), TypeError);
+    assertThrows(() => parseIpv4("1.2.3.4\n"), TypeError);
+    assertThrows(() => parseIpv4("1.2. 3.4"), TypeError);
+  });
+
+  await t.step("rejects trailing text after an octet", () => {
+    assertThrows(() => parseIpv4("1.2.3.4abc"), TypeError);
+  });
+
+  await t.step("rejects a sign or radix prefix on an octet", () => {
+    assertThrows(() => parseIpv4("1.2.3.+4"), TypeError);
+    assertThrows(() => parseIpv4("+1.2.3.4"), TypeError);
+    assertThrows(() => parseIpv4("0x1.2.3.4"), TypeError);
+    assertThrows(() => parseIpv4("1.2.3.0x4"), TypeError);
+  });
+
+  await t.step(
+    "still reads a leading '-', so a negative is a RangeError",
+    () => {
+      assertThrows(
+        () => parseIpv4("-1.2.3.4"),
+        RangeError,
+        "IPv4 octet out of range: -1 (must be 0-255)",
+      );
+    },
+  );
+
+  await t.step("never reads a non-numeric octet as a number", () => {
+    // Number("NaN") is NaN and String(NaN) is "NaN", so validating an octet
+    // by that round-trip would accept this and return 16909056.
+    assertThrows(() => parseIpv4("1.2.3.NaN"), TypeError);
+  });
 });
 
 Deno.test("stringifyIpv4", async (t) => {
