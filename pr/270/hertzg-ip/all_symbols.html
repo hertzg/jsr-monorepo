@@ -826,7 +826,7 @@ IPv4 CIDR</h3>
 <li>parseCidrv4: Parse CIDR notation string to Cidrv4</li>
 <li>stringifyCidrv4: Convert Cidrv4 to CIDR notation string</li>
 <li>cidrv4Mask: Create network mask from prefix length (0-32)</li>
-<li>cidrv4MaskToPrefixLength: Recover prefix length from a network mask (throws if non-contiguous)</li>
+<li>cidrv4MaskToPrefixLength: Recover prefix length from a network mask, as a number or notation string</li>
 <li>cidrv4Contains: Check if IP is within CIDR block</li>
 <li>cidrv4ContainsCidr: Check if one IPv4 CIDR fully contains another</li>
 <li>cidrv4Overlaps: Check if two IPv4 CIDRs share at least one address</li>
@@ -857,7 +857,7 @@ IPv6 CIDR</h3>
 <li>parseCidrv6: Parse CIDR notation string to Cidrv6</li>
 <li>stringifyCidrv6: Convert Cidrv6 to CIDR notation string</li>
 <li>cidrv6Mask: Create network mask from prefix length (0-128)</li>
-<li>cidrv6MaskToPrefixLength: Recover prefix length from a network mask (throws if non-contiguous)</li>
+<li>cidrv6MaskToPrefixLength: Recover prefix length from a network mask, as a number or notation string</li>
 <li>cidrv6Contains: Check if IP is within CIDR block</li>
 <li>cidrv6ContainsCidr: Check if one IPv6 CIDR fully contains another</li>
 <li>cidrv6Overlaps: Check if two IPv6 CIDRs share at least one address</li>
@@ -1077,7 +1077,26 @@ Functions</h2></div><div class="namespaceSection"><div id="namespace_cidraddress
     </div><div id="namespace_cidrv4masktoprefixlength" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-Function bg-Function/15 dark:text-FunctionDark dark:bg-FunctionDark/15" title="Function">f</div></div>
 <div class="namespaceItemContent">
 		    <a href=".&#x2F;.&#x2F;cidrv4.ts&#x2F;~&#x2F;cidrv4MaskToPrefixLength.html" title="cidrv4MaskToPrefixLength">
-			    <span>cidrv4MaskToPrefixLength</span><span>(<span><span>mask<span>: <span class="td-kw">number</span></span></span></span>)<span>: <span class="td-kw">number</span></span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Recovers the prefix length from an IPv4 network mask.</p>
+			    <span>cidrv4MaskToPrefixLength</span><span>(<span><span>mask<span>: <span><span class="td-kw">string</span><span class="td-op"> | </span><span class="td-kw">number</span></span></span></span></span>)<span>: <span class="td-kw">number</span></span></span><div class="namespaceItemContentTypeInfo">3 overloads</div></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Recovers the prefix length from an IPv4 network mask given as a
+32-bit unsigned integer.</p>
+</div></div></div>
+    </div><div id="namespace_cidrv4masktoprefixlength-1" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-Function bg-Function/15 dark:text-FunctionDark dark:bg-FunctionDark/15" title="Function">f</div></div>
+<div class="namespaceItemContent">
+		    <a href=".&#x2F;.&#x2F;cidrv4.ts&#x2F;~&#x2F;cidrv4MaskToPrefixLength.html" title="cidrv4MaskToPrefixLength">
+			    <span>cidrv4MaskToPrefixLength</span><span>(<span><span>mask<span>: <span><span class="td-kw">string</span><span class="td-op"> | </span><span class="td-kw">number</span></span></span></span></span>)<span>: <span class="td-kw">number</span></span></span><div class="namespaceItemContentTypeInfo">3 overloads</div></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Recovers the prefix length from an IPv4 network mask given as a
+32-bit unsigned integer.</p>
+</div></div></div>
+    </div><div id="namespace_cidrv4masktoprefixlength-2" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-Function bg-Function/15 dark:text-FunctionDark dark:bg-FunctionDark/15" title="Function">f</div></div>
+<div class="namespaceItemContent">
+		    <a href=".&#x2F;.&#x2F;cidrv4.ts&#x2F;~&#x2F;cidrv4MaskToPrefixLength.html" title="cidrv4MaskToPrefixLength">
+			    <span>cidrv4MaskToPrefixLength</span><span>(<span><span>mask<span>: <span><span class="td-kw">string</span><span class="td-op"> | </span><span class="td-kw">number</span></span></span></span></span>)<span>: <span class="td-kw">number</span></span></span><div class="namespaceItemContentTypeInfo">3 overloads</div></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Recovers the prefix length from an IPv4 network mask given as a
+32-bit unsigned integer.</p>
+</div></div></div>
+    </div><div id="namespace_cidrv4masktoprefixlength-3" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-Function bg-Function/15 dark:text-FunctionDark dark:bg-FunctionDark/15" title="Function">f</div></div>
+<div class="namespaceItemContent">
+		    <a href=".&#x2F;.&#x2F;cidrv4.ts&#x2F;~&#x2F;cidrv4MaskToPrefixLength.html" title="cidrv4MaskToPrefixLength">
+			    <span>cidrv4MaskToPrefixLength</span><span>(<span><span>mask<span>: <span><span class="td-kw">string</span><span class="td-op"> | </span><span class="td-kw">number</span></span></span></span></span>)<span>: <span class="td-kw">number</span></span></span><div class="namespaceItemContentTypeInfo">3 overloads</div></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Recovers the prefix length from an IPv4 network mask given as a
+32-bit unsigned integer.</p>
 </div></div></div>
     </div><div id="namespace_cidrv4merge" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-Function bg-Function/15 dark:text-FunctionDark dark:bg-FunctionDark/15" title="Function">f</div></div>
 <div class="namespaceItemContent">
@@ -1157,7 +1176,22 @@ Functions</h2></div><div class="namespaceSection"><div id="namespace_cidraddress
     </div><div id="namespace_cidrv6masktoprefixlength" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-Function bg-Function/15 dark:text-FunctionDark dark:bg-FunctionDark/15" title="Function">f</div></div>
 <div class="namespaceItemContent">
 		    <a href=".&#x2F;.&#x2F;cidrv6.ts&#x2F;~&#x2F;cidrv6MaskToPrefixLength.html" title="cidrv6MaskToPrefixLength">
-			    <span>cidrv6MaskToPrefixLength</span><span>(<span><span>mask<span>: <span class="td-kw">bigint</span></span></span></span>)<span>: <span class="td-kw">number</span></span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Recovers the prefix length from an IPv6 network mask.</p>
+			    <span>cidrv6MaskToPrefixLength</span><span>(<span><span>mask<span>: <span><span class="td-kw">string</span><span class="td-op"> | </span><span class="td-kw">bigint</span></span></span></span></span>)<span>: <span class="td-kw">number</span></span></span><div class="namespaceItemContentTypeInfo">3 overloads</div></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Recovers the prefix length from an IPv6 network mask given as a bigint.</p>
+</div></div></div>
+    </div><div id="namespace_cidrv6masktoprefixlength-1" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-Function bg-Function/15 dark:text-FunctionDark dark:bg-FunctionDark/15" title="Function">f</div></div>
+<div class="namespaceItemContent">
+		    <a href=".&#x2F;.&#x2F;cidrv6.ts&#x2F;~&#x2F;cidrv6MaskToPrefixLength.html" title="cidrv6MaskToPrefixLength">
+			    <span>cidrv6MaskToPrefixLength</span><span>(<span><span>mask<span>: <span><span class="td-kw">string</span><span class="td-op"> | </span><span class="td-kw">bigint</span></span></span></span></span>)<span>: <span class="td-kw">number</span></span></span><div class="namespaceItemContentTypeInfo">3 overloads</div></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Recovers the prefix length from an IPv6 network mask given as a bigint.</p>
+</div></div></div>
+    </div><div id="namespace_cidrv6masktoprefixlength-2" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-Function bg-Function/15 dark:text-FunctionDark dark:bg-FunctionDark/15" title="Function">f</div></div>
+<div class="namespaceItemContent">
+		    <a href=".&#x2F;.&#x2F;cidrv6.ts&#x2F;~&#x2F;cidrv6MaskToPrefixLength.html" title="cidrv6MaskToPrefixLength">
+			    <span>cidrv6MaskToPrefixLength</span><span>(<span><span>mask<span>: <span><span class="td-kw">string</span><span class="td-op"> | </span><span class="td-kw">bigint</span></span></span></span></span>)<span>: <span class="td-kw">number</span></span></span><div class="namespaceItemContentTypeInfo">3 overloads</div></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Recovers the prefix length from an IPv6 network mask given as a bigint.</p>
+</div></div></div>
+    </div><div id="namespace_cidrv6masktoprefixlength-3" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-Function bg-Function/15 dark:text-FunctionDark dark:bg-FunctionDark/15" title="Function">f</div></div>
+<div class="namespaceItemContent">
+		    <a href=".&#x2F;.&#x2F;cidrv6.ts&#x2F;~&#x2F;cidrv6MaskToPrefixLength.html" title="cidrv6MaskToPrefixLength">
+			    <span>cidrv6MaskToPrefixLength</span><span>(<span><span>mask<span>: <span><span class="td-kw">string</span><span class="td-op"> | </span><span class="td-kw">bigint</span></span></span></span></span>)<span>: <span class="td-kw">number</span></span></span><div class="namespaceItemContentTypeInfo">3 overloads</div></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Recovers the prefix length from an IPv6 network mask given as a bigint.</p>
 </div></div></div>
     </div><div id="namespace_cidrv6merge" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-Function bg-Function/15 dark:text-FunctionDark dark:bg-FunctionDark/15" title="Function">f</div></div>
 <div class="namespaceItemContent">
@@ -2502,10 +2536,11 @@ Functions</h2></div><div class="namespaceSection"><div id="namespace_cidrv4addre
 		    <a href=".&#x2F;.&#x2F;cidrv4.ts&#x2F;~&#x2F;cidrv4Mask.html" title="cidrv4Mask">
 			    <span>cidrv4Mask</span><span>(<span><span>prefixLength<span>: <span class="td-kw">number</span></span></span></span>)<span>: <span class="td-kw">number</span></span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Creates a network mask from an IPv4 prefix length.</p>
 </div></div></div>
-    </div><div id="namespace_cidrv4masktoprefixlength-1" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-Function bg-Function/15 dark:text-FunctionDark dark:bg-FunctionDark/15" title="Function">f</div></div>
+    </div><div id="namespace_cidrv4masktoprefixlength-4" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-Function bg-Function/15 dark:text-FunctionDark dark:bg-FunctionDark/15" title="Function">f</div></div>
 <div class="namespaceItemContent">
 		    <a href=".&#x2F;.&#x2F;cidrv4.ts&#x2F;~&#x2F;cidrv4MaskToPrefixLength.html" title="cidrv4MaskToPrefixLength">
-			    <span>cidrv4MaskToPrefixLength</span><span>(<span><span>mask<span>: <span class="td-kw">number</span></span></span></span>)<span>: <span class="td-kw">number</span></span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Recovers the prefix length from an IPv4 network mask.</p>
+			    <span>cidrv4MaskToPrefixLength</span><span>(<span><span>mask<span>: <span><span class="td-kw">string</span><span class="td-op"> | </span><span class="td-kw">number</span></span></span></span></span>)<span>: <span class="td-kw">number</span></span></span><div class="namespaceItemContentTypeInfo">3 overloads</div></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Recovers the prefix length from an IPv4 network mask given as a
+32-bit unsigned integer.</p>
 </div></div></div>
     </div><div id="namespace_cidrv4merge-1" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-Function bg-Function/15 dark:text-FunctionDark dark:bg-FunctionDark/15" title="Function">f</div></div>
 <div class="namespaceItemContent">
@@ -3055,10 +3090,10 @@ Functions</h2></div><div class="namespaceSection"><div id="namespace_cidrv6addre
 		    <a href=".&#x2F;.&#x2F;cidrv6.ts&#x2F;~&#x2F;cidrv6Mask.html" title="cidrv6Mask">
 			    <span>cidrv6Mask</span><span>(<span><span>prefixLength<span>: <span class="td-kw">number</span></span></span></span>)<span>: <span class="td-kw">bigint</span></span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Creates a network mask from an IPv6 prefix length.</p>
 </div></div></div>
-    </div><div id="namespace_cidrv6masktoprefixlength-1" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-Function bg-Function/15 dark:text-FunctionDark dark:bg-FunctionDark/15" title="Function">f</div></div>
+    </div><div id="namespace_cidrv6masktoprefixlength-4" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-Function bg-Function/15 dark:text-FunctionDark dark:bg-FunctionDark/15" title="Function">f</div></div>
 <div class="namespaceItemContent">
 		    <a href=".&#x2F;.&#x2F;cidrv6.ts&#x2F;~&#x2F;cidrv6MaskToPrefixLength.html" title="cidrv6MaskToPrefixLength">
-			    <span>cidrv6MaskToPrefixLength</span><span>(<span><span>mask<span>: <span class="td-kw">bigint</span></span></span></span>)<span>: <span class="td-kw">number</span></span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Recovers the prefix length from an IPv6 network mask.</p>
+			    <span>cidrv6MaskToPrefixLength</span><span>(<span><span>mask<span>: <span><span class="td-kw">string</span><span class="td-op"> | </span><span class="td-kw">bigint</span></span></span></span></span>)<span>: <span class="td-kw">number</span></span></span><div class="namespaceItemContentTypeInfo">3 overloads</div></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Recovers the prefix length from an IPv6 network mask given as a bigint.</p>
 </div></div></div>
     </div><div id="namespace_cidrv6merge-1" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-Function bg-Function/15 dark:text-FunctionDark dark:bg-FunctionDark/15" title="Function">f</div></div>
 <div class="namespaceItemContent">
