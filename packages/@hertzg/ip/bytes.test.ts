@@ -19,21 +19,21 @@ Deno.test("ipFromBytes", async (t) => {
     assertEquals(address, 0n);
   });
 
-  await t.step("the span, not the buffer length, picks the version", () => {
+  await t.step("a subarray of the exact width reads through", () => {
     const packet = new Uint8Array(20);
     packet.set([203, 0, 113, 7], 16);
 
-    // The same four bytes: a 4-byte span reads them as IPv4, while a 16-byte
-    // span reads them as the low end of an IPv6 address.
-    assertEquals(ipFromBytes(packet, 16), 3405803783);
-    assertEquals(ipFromBytes(packet, 4), 3405803783n);
+    // The same four bytes: sliced to 4 they read as IPv4, sliced to 16 they
+    // read as the low end of an IPv6 address. The slice states which.
+    assertEquals(ipFromBytes(packet.subarray(16, 20)), 3405803783);
+    assertEquals(ipFromBytes(packet.subarray(4, 20)), 3405803783n);
   });
 
-  await t.step("a span that is neither 4 nor 16 throws", () => {
+  await t.step("a length that is neither 4 nor 16 throws", () => {
     assertThrows(
       () => ipFromBytes(new Uint8Array([1, 2, 3])),
       RangeError,
-      "IP address needs a span of exactly 4 or 16 bytes, but offset 0 of a 3-byte buffer leaves 3",
+      "IP address must be exactly 4 or 16 bytes, got 3",
     );
     assertThrows(() => ipFromBytes(new Uint8Array(6)), RangeError);
     assertThrows(() => ipFromBytes(new Uint8Array(15)), RangeError);
@@ -47,19 +47,25 @@ Deno.test("ipFromBytes", async (t) => {
       assertThrows(
         () => ipFromBytes(new Uint8Array(20)),
         RangeError,
-        "leaves 20",
+        "got 20",
       );
       assertThrows(
-        () => ipFromBytes(new Uint8Array(60), 12),
+        () => ipFromBytes(new Uint8Array(60)),
         RangeError,
-        "leaves 48",
+        "got 60",
       );
     },
   );
 
-  await t.step("a negative offset throws", () => {
-    assertThrows(() => ipFromBytes(new Uint8Array(4), -0.5), RangeError);
-    assertThrows(() => ipFromBytes(new Uint8Array(20), -4), RangeError);
+  await t.step("the amount of trailing data cannot change the version", () => {
+    // The same 4-byte field at the same place in frames of different sizes.
+    // Slicing pins the width, so every frame reads it identically.
+    for (const total of [20, 24, 28, 32]) {
+      const packet = new Uint8Array(total);
+      packet.set([10, 0, 0, 1], 12);
+
+      assertEquals(ipFromBytes(packet.subarray(12, 16)), 167772161);
+    }
   });
 
   await t.step("IPv4-mapped bytes are not unwrapped to a number", () => {

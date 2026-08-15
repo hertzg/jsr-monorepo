@@ -72,7 +72,7 @@ named for the preposition so the call site reads as a sentence. _Avoid_:
 `buf`, `buffer`, `target`, `dst`, and `out` for the destination. See ADR 0012.
 
 **offset**: Carries **two senses**, and this is the one real collision in the
-package's vocabulary. In the `bytes` submodules it is a **byte** position — it
+package's vocabulary. In `bytesv4` / `bytesv6` it is a **byte** position — it
 locates the span inside `bytes` or `into`, and never says how wide the span is,
 since the width comes from the function. In `cidrv4Addresses` /
 `cidrv6Addresses` it is an **address** position — how many addresses into the
@@ -80,6 +80,13 @@ block to start, listed under counts and strides in the **Address** entry above.
 Nothing takes both, so neither needs renaming, but do not describe one in the
 other's terms: a byte offset is never "how far into the block", and an address
 offset is never "where the span starts".
+
+A function only takes a byte `offset` when its width is fixed independently of
+the buffer. That holds for the four version-specific byte functions, whose
+width comes from their name, and for `ipToBytes`, whose width comes from the
+address type. It does not hold for `ipFromBytes`, which infers the version from
+the buffer, so it takes no offset — callers slice to the exact width instead.
+See ADR 0012.
 
 ## Function-name convention
 

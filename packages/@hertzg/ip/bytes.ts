@@ -19,10 +19,14 @@
  *
  * ## Picking the version
  *
- * {@link ipFromBytes} reads the version off the **span width**, which must be
- * exactly 4 or 16 bytes; anything else throws rather than guessing.
- * {@link ipToBytes} reads it off the **type** of the address, the same
- * `typeof` dispatch {@link stringifyIp} uses.
+ * {@link ipFromBytes} reads the version off the **length** of the buffer,
+ * which must be exactly 4 or 16 bytes; anything else throws rather than
+ * guessing. It takes no `offset` — an offset would let the amount of trailing
+ * data decide the version, so pass exact bytes (`packet.subarray(12, 16)`, a
+ * view rather than a copy). {@link ipToBytes} reads the version off the
+ * **type** of the address, the same `typeof` dispatch {@link stringifyIp}
+ * uses, and does take `into` and `offset`, since its width comes from the
+ * address rather than from the buffer.
  *
  * Decoders that already know the version and the field offset want the
  * version-specific functions, where the width is fixed by the function rather
@@ -58,25 +62,30 @@ const IPV6_BYTE_LENGTH = 16;
  * Reads an IPv4 or IPv6 address from a buffer, picking the version from the
  * width of the span.
  *
- * The span is `bytes.length - offset`, and it must be **exactly** 4 bytes
- * (read as IPv4, returning `number`) or **exactly** 16 (read as IPv6,
- * returning `bigint`). Any other width throws a `RangeError` rather than
- * guessing: a 60-byte frame at offset 12 leaves a 48-byte span, which names no
- * version. Decoders that know the version and the field offset want
- * {@link ipv4FromBytes} or {@link ipv6FromBytes}, where the width is fixed by
- * the function.
+ * `bytes` must be **exactly** 4 bytes (read as IPv4, returning `number`) or
+ * **exactly** 16 (read as IPv6, returning `bigint`). Any other length throws a
+ * `RangeError` rather than guessing.
+ *
+ * There is deliberately no `offset` parameter. An offset would make the width
+ * depend on how much data happens to trail the field rather than on the
+ * caller's intent — a 4-byte address 8 bytes from the end of a frame would
+ * read as IPv4, and the same field in the same position would read as IPv6 the
+ * day the frame grew. Pass the exact bytes instead, with
+ * `packet.subarray(12, 16)`, which is a non-copying view; or, when the version
+ * is already known, use {@link ipv4FromBytes} or {@link ipv6FromBytes}, which
+ * do take an offset because their width comes from the function rather than
+ * from the buffer.
  *
  * Unlike {@link parseIp}, this does **not** unwrap IPv4-mapped addresses.
  * Sixteen bytes always return a `bigint`, so that
  * `ipToBytes(ipFromBytes(b)).length === b.length`. Callers wanting the
  * dual-stack normalization compose {@link ipv4From64Mapped} explicitly.
  *
- * @param bytes The buffer to read from
- * @param offset The offset the span starts at, defaulting to `0`
+ * @param bytes The buffer to read, which must be exactly 4 or 16 bytes long
  * @returns The address as `number` (IPv4) or `bigint` (IPv6)
- * @throws {RangeError} If the span is neither 4 nor 16 bytes wide
+ * @throws {RangeError} If `bytes` is neither 4 nor 16 bytes long
  *
- * @example The span width picks the version
+ * @example The length picks the version
  * ```ts
  * import { assertEquals } from "@std/assert";
  * import { ipFromBytes } from "@hertzg/ip/bytes";
@@ -107,30 +116,49 @@ const IPV6_BYTE_LENGTH = 16;
  * assertEquals(stringifyIpv4(ipv4From64Mapped(address as bigint)), "192.168.1.1");
  * ```
  *
- * @example Any other span width throws instead of guessing
+ * @example Any other length throws instead of guessing
  * ```ts
  * import { assertThrows } from "@std/assert";
  * import { ipFromBytes } from "@hertzg/ip/bytes";
  *
  * assertThrows(() => ipFromBytes(new Uint8Array(20)), RangeError);
- * assertThrows(() => ipFromBytes(new Uint8Array(20), 12), RangeError);
  * assertThrows(() => ipFromBytes(new Uint8Array(6)), RangeError);
+ * ```
  *
- * // ...but a slice of exactly one address is fine, offset or not
- * ipFromBytes(new Uint8Array(20), 16);
+ * @example Reading a field out of a frame, by slicing rather than offsetting
+ * ```ts
+ * import { assertEquals } from "@std/assert";
+ * import { ipFromBytes } from "@hertzg/ip/bytes";
+ * import { ipv4FromBytes } from "@hertzg/ip/bytesv4";
+ * import { stringifyIp } from "@hertzg/ip/ip";
+ *
+ * // deno-fmt-ignore
+ * const packet = new Uint8Array([
+ *   0x45, 0x00, 0x00, 0x54, 0x1c, 0x46, 0x40, 0x00,
+ *   0x40, 0x06, 0x00, 0x00,
+ *   10, 0, 0, 1,
+ *   192, 168, 1, 1,
+ * ]);
+ *
+ * // `subarray` is a view, not a copy, and it states the width
+ * assertEquals(stringifyIp(ipFromBytes(packet.subarray(12, 16))), "10.0.0.1");
+ *
+ * // When the version is known, the version-specific function takes the offset
+ * assertEquals(ipv4FromBytes(packet, 12), ipFromBytes(packet.subarray(12, 16)));
  * ```
  */
-export function ipFromBytes(bytes: Uint8Array, offset = 0): Address {
-  const span = bytes.length - offset;
-  if (offset < 0 || (span !== IPV4_BYTE_LENGTH && span !== IPV6_BYTE_LENGTH)) {
+export function ipFromBytes(bytes: Uint8Array): Address {
+  if (
+    bytes.length !== IPV4_BYTE_LENGTH && bytes.length !== IPV6_BYTE_LENGTH
+  ) {
     throw new RangeError(
-      `IP address needs a span of exactly ${IPV4_BYTE_LENGTH} or ${IPV6_BYTE_LENGTH} bytes, but offset ${offset} of a ${bytes.length}-byte buffer leaves ${span}`,
+      `IP address must be exactly ${IPV4_BYTE_LENGTH} or ${IPV6_BYTE_LENGTH} bytes, got ${bytes.length}`,
     );
   }
 
-  return span === IPV4_BYTE_LENGTH
-    ? ipv4FromBytes(bytes, offset)
-    : ipv6FromBytes(bytes, offset);
+  return bytes.length === IPV4_BYTE_LENGTH
+    ? ipv4FromBytes(bytes)
+    : ipv6FromBytes(bytes);
 }
 
 /**

@@ -321,7 +321,7 @@
  * - {@link cidrv4FromCidrv64Mapped}: Convert IPv4-mapped IPv6 CIDR to IPv4 CIDR
  *
  * ### Universal Wire Byte Conversion (bytes)
- * - {@link ipFromBytes}: Read a 4- or 16-byte address, version from the span width
+ * - {@link ipFromBytes}: Read a 4- or 16-byte address, version from its length
  * - {@link ipToBytes}: Write an address as its wire bytes, width from its type
  *
  * ### IPv4 Wire Byte Conversion (bytesv4)
@@ -677,7 +677,7 @@ export {
 // --- Wire byte conversion ---
 
 export {
-  /** Read a 4- or 16-byte address, picking the version from the span width. */
+  /** Read a 4- or 16-byte address, picking the version from its length. */
   ipFromBytes,
   /** Write an address as its wire bytes, 4 for IPv4 and 16 for IPv6. */
   ipToBytes,

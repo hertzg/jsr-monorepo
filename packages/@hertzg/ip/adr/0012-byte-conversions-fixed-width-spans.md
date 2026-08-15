@@ -34,16 +34,30 @@ question arises for a 16-byte read.
 
 **Fixed width per function; `offset` selects where, never how much.**
 `ipv4FromBytes` / `ipv4ToBytes` are always 4 bytes, `ipv6FromBytes` /
-`ipv6ToBytes` always 16. `offset` defaults to `0`.
+`ipv6ToBytes` always 16. `offset` defaults to `0`. These four take an
+offset safely precisely because their width comes from the function
+name, so nothing about the surrounding buffer can change what they
+read.
 
-**`ipFromBytes` dispatches on the span width, and the span must be
-exactly 4 or 16.** The span is `bytes.length - offset`. A 60-byte frame
-at offset 12 is a 48-byte span and throws `RangeError` — it is not
-silently read as 16 bytes. Callers who know the version and the offset
-use the version-specific function; `ipFromBytes` is for a buffer that
-holds one address and nothing else. There is no version parameter: a
-function that takes both bytes and a version is `ipv4FromBytes` with
-extra steps.
+**`ipFromBytes` dispatches on `bytes.length`, which must be exactly 4
+or 16, and it takes no `offset`.** A 20-byte frame throws `RangeError`
+rather than being read as its first 16 bytes. The missing `offset` is
+the load-bearing part, and an earlier draft had one: with an offset,
+the width is decided by how much data happens to *trail* the field
+rather than by what the caller meant. The same 4-byte field at offset
+12 reads as IPv4 in a 20-byte frame and as IPv6 in a 28-byte one, so
+code that passes its tests against option-free headers returns a
+`bigint` the first time a packet carries options. Callers pass exact
+bytes instead — `packet.subarray(12, 16)`, a view rather than a copy,
+which states the width at the call site — or use the version-specific
+function when the version is known. There is no version parameter
+either: a function taking both bytes and a version is `ipv4FromBytes`
+with extra steps.
+
+`ipToBytes` keeps `into` and `offset`, and the asymmetry is deliberate:
+its width comes from the address's type, so trailing bytes cannot
+change what it writes. Writing a field into a frame is the use case;
+reading one is served by slicing.
 
 **A short span throws `RangeError`, on both read and write.** The two
 halves stand on different ground, and it is worth being straight about
@@ -179,9 +193,14 @@ addresses have exactly one wire order.
   goes through `parseIp` — the same explicit-conversion path ADR 0004
   and ADR 0005 already point at.
 - **`ipFromBytes` is narrower than `ipaddr.js`'s `fromByteArray`.**
-  It rejects a span that is neither 4 nor 16 rather than guessing,
+  It rejects a length that is neither 4 nor 16 rather than guessing,
   which is the failure mode the issue that prompted this ADR called
   out.
+- **Reading a field costs a `subarray`; writing one does not.** The
+  read side asks callers to slice, which allocates a view. That is the
+  price of the width being a statement rather than an inference, and a
+  decoder that knows the version avoids it entirely by calling
+  `ipv4FromBytes(packet, 12)`.
 - **The subarray return keeps `.length` meaningful.** `node-ip`'s
   `toBuffer` returns the whole destination buffer, so callers cannot
   tell how much was written without already knowing the version. Here
