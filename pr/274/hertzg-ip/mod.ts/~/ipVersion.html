@@ -119,7 +119,7 @@
             <span class="text-Function">function</span>&nbsp;<span class="font-bold">ipVersion</span>
           </div></div><a
   class="sourceButton"
-  href="file:&#x2F;&#x2F;&#x2F;home&#x2F;runner&#x2F;work&#x2F;jsr-monorepo&#x2F;jsr-monorepo&#x2F;packages&#x2F;@hertzg&#x2F;ip&#x2F;validate.ts"><svg
+  href="file:&#x2F;&#x2F;&#x2F;home&#x2F;runner&#x2F;work&#x2F;jsr-monorepo&#x2F;jsr-monorepo&#x2F;packages&#x2F;@hertzg&#x2F;ip&#x2F;version.ts"><svg
   width="14"
   height="14"
   viewBox="0 0 14 14"
@@ -173,11 +173,14 @@ version number in a numeric context.</p>
 <p>The answer describes the <strong>string</strong>, not the value it would parse to. An
 IPv4-mapped IPv6 address such as <code>::ffff:10.1.2.3</code> is written as IPv6 and
 reports <code>6</code>, even though <a href="../.././mod.ts/~/parseIp.html">parseIp</a> unwraps it to an IPv4 <code>number</code>.
-Version <code>n</code> always means &quot;the parser for that version accepts this
-string&quot;. To get the version of an already parsed value, use <code>typeof</code> —
-<code>number</code> is IPv4, <code>bigint</code> is IPv6.</p>
-<p>CIDR notation is not an address — use <a href="../.././mod.ts/~/cidrVersion.html">cidrVersion</a> for that.
-Nothing is trimmed: a string with surrounding whitespace is not an address.</p>
+Version <code>n</code> always means &quot;<a href="../.././mod.ts/~/parseIpv4.html">parseIpv4</a> / <a href="../.././mod.ts/~/parseIpv6.html">parseIpv6</a> for that
+version accepts this string&quot;. To get the version of an already parsed
+value, use <code>typeof</code> — <code>number</code> is IPv4, <code>bigint</code> is IPv6.</p>
+<p>CIDR notation is not an address — use <a href="../.././mod.ts/~/cidrVersion.html">cidrVersion</a> for that.</p>
+<p>What counts as valid is exactly what <a href="../.././mod.ts/~/isValidIpv4.html">isValidIpv4</a> and
+<a href="../.././mod.ts/~/isValidIpv6.html">isValidIpv6</a> accept, which is looser than some other libraries:
+surrounding whitespace and trailing text are tolerated by the parsers
+underneath, so <code>ipVersion(&quot; 10.1.2.3&quot;)</code> is <code>4</code>.</p>
 </div><section class="section"  id="examples"><div>
       <h2 class="anchorable mb-1"><a href="#examples" class="anchor" aria-label="Anchor" tabIndex="-1"><svg
   width="16"
@@ -226,23 +229,21 @@ Examples</h2></div><div class="space-y-8"><div class="anchorable"><a href="#exam
 <h3 class="example-header"><div class="markdown"><p>Both versions and the reject case</p>
 </div></h3>
   <div><div class="markdown"><pre class="highlight"><code class="language-ts">import { assertEquals } from &quot;@std/assert&quot;;
-import { ipVersion } from &quot;@hertzg/ip/validate&quot;;
+import { ipVersion } from &quot;@hertzg/ip/version&quot;;
 
 assertEquals(ipVersion(&quot;10.1.2.3&quot;), 4);
 assertEquals(ipVersion(&quot;::1&quot;), 6);
 assertEquals(ipVersion(&quot;fe80::1%eth0&quot;), 6);
 assertEquals(ipVersion(&quot;notanip&quot;), undefined);
 assertEquals(ipVersion(&quot;10.0.0.0/8&quot;), undefined);
-assertEquals(ipVersion(&quot; 10.1.2.3&quot;), undefined);
 </code><button class="copyButton" data-copy="import { assertEquals } from &quot;@std/assert&quot;;
-import { ipVersion } from &quot;@hertzg/ip/validate&quot;;
+import { ipVersion } from &quot;@hertzg/ip/version&quot;;
 
 assertEquals(ipVersion(&quot;10.1.2.3&quot;), 4);
 assertEquals(ipVersion(&quot;::1&quot;), 6);
 assertEquals(ipVersion(&quot;fe80::1%eth0&quot;), 6);
 assertEquals(ipVersion(&quot;notanip&quot;), undefined);
 assertEquals(ipVersion(&quot;10.0.0.0/8&quot;), undefined);
-assertEquals(ipVersion(&quot; 10.1.2.3&quot;), undefined);
 "><svg
   class="copy"
   width="15"
@@ -301,13 +302,13 @@ assertEquals(ipVersion(&quot; 10.1.2.3&quot;), undefined);
 <h3 class="example-header"><div class="markdown"><p>IPv4-mapped IPv6 is written as IPv6</p>
 </div></h3>
   <div><div class="markdown"><pre class="highlight"><code class="language-ts">import { assertEquals } from &quot;@std/assert&quot;;
-import { ipVersion } from &quot;@hertzg/ip/validate&quot;;
+import { ipVersion } from &quot;@hertzg/ip/version&quot;;
 import { parseIp } from &quot;@hertzg/ip/ip&quot;;
 
 assertEquals(ipVersion(&quot;::ffff:10.1.2.3&quot;), 6);
 assertEquals(typeof parseIp(&quot;::ffff:10.1.2.3&quot;), &quot;number&quot;);
 </code><button class="copyButton" data-copy="import { assertEquals } from &quot;@std/assert&quot;;
-import { ipVersion } from &quot;@hertzg/ip/validate&quot;;
+import { ipVersion } from &quot;@hertzg/ip/version&quot;;
 import { parseIp } from &quot;@hertzg/ip/ip&quot;;
 
 assertEquals(ipVersion(&quot;::ffff:10.1.2.3&quot;), 6);
@@ -398,7 +399,7 @@ Parameters</h2></div><div class="space-y-8"><div class="anchorable docEntry" id=
       </code>
     </div><a
   class="sourceButton"
-  href="file:&#x2F;&#x2F;&#x2F;home&#x2F;runner&#x2F;work&#x2F;jsr-monorepo&#x2F;jsr-monorepo&#x2F;packages&#x2F;@hertzg&#x2F;ip&#x2F;validate.ts"><svg
+  href="file:&#x2F;&#x2F;&#x2F;home&#x2F;runner&#x2F;work&#x2F;jsr-monorepo&#x2F;jsr-monorepo&#x2F;packages&#x2F;@hertzg&#x2F;ip&#x2F;version.ts"><svg
   width="14"
   height="14"
   viewBox="0 0 14 14"
@@ -454,7 +455,7 @@ Return Type</h2></div><div class="space-y-8"><div class=" docEntry" id="function
       </code>
     </div><a
   class="sourceButton"
-  href="file:&#x2F;&#x2F;&#x2F;home&#x2F;runner&#x2F;work&#x2F;jsr-monorepo&#x2F;jsr-monorepo&#x2F;packages&#x2F;@hertzg&#x2F;ip&#x2F;validate.ts"><svg
+  href="file:&#x2F;&#x2F;&#x2F;home&#x2F;runner&#x2F;work&#x2F;jsr-monorepo&#x2F;jsr-monorepo&#x2F;packages&#x2F;@hertzg&#x2F;ip&#x2F;version.ts"><svg
   width="14"
   height="14"
   viewBox="0 0 14 14"

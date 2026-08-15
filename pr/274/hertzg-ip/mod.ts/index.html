@@ -1053,7 +1053,8 @@ Submodules</h3>
 <li><a href="https://jsr.io/@hertzg/ip/doc/classify"><code>classify</code></a>: Universal classifier via <a href=".././mod.ts/~/classifyIp.html">classifyIp</a></li>
 <li><a href="https://jsr.io/@hertzg/ip/doc/classifyv4"><code>classifyv4</code></a>: IPv4 classification via <a href=".././mod.ts/~/classifyIpv4.html">classifyIpv4</a>, <a href=".././mod.ts/~/isIpv4Private.html">isIpv4Private</a>, etc.</li>
 <li><a href="https://jsr.io/@hertzg/ip/doc/classifyv6"><code>classifyv6</code></a>: IPv6 classification via <a href=".././mod.ts/~/classifyIpv6.html">classifyIpv6</a>, <a href=".././mod.ts/~/isIpv6Loopback.html">isIpv6Loopback</a>, etc.</li>
-<li><a href="https://jsr.io/@hertzg/ip/doc/validate"><code>validate</code></a>: Universal validation via <a href=".././mod.ts/~/isValidIp.html">isValidIp</a>, <a href=".././mod.ts/~/isValidCidr.html">isValidCidr</a>, <a href=".././mod.ts/~/ipVersion.html">ipVersion</a>, <a href=".././mod.ts/~/cidrVersion.html">cidrVersion</a></li>
+<li><a href="https://jsr.io/@hertzg/ip/doc/validate"><code>validate</code></a>: Universal validation via <a href=".././mod.ts/~/isValidIp.html">isValidIp</a>, <a href=".././mod.ts/~/isValidCidr.html">isValidCidr</a></li>
+<li><a href="https://jsr.io/@hertzg/ip/doc/version"><code>version</code></a>: IP version detection via <a href=".././mod.ts/~/ipVersion.html">ipVersion</a>, <a href=".././mod.ts/~/cidrVersion.html">cidrVersion</a></li>
 <li><a href="https://jsr.io/@hertzg/ip/doc/4to6"><code>4to6</code></a>: IPv4-mapped IPv6 conversion via <a href=".././mod.ts/~/ipv4To64Mapped.html">ipv4To64Mapped</a>, <a href=".././mod.ts/~/ipv4From64Mapped.html">ipv4From64Mapped</a>, <a href=".././mod.ts/~/cidrv4ToCidrv64Mapped.html">cidrv4ToCidrv64Mapped</a>, <a href=".././mod.ts/~/cidrv4FromCidrv64Mapped.html">cidrv4FromCidrv64Mapped</a></li>
 </ul>
 </div></div>
@@ -1363,7 +1364,7 @@ Functions</h2></div><div class="namespaceSection"><div id="namespace_cidraddress
 </div></div></div>
     </div><div id="namespace_cidrversion" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-Function bg-Function/15 dark:text-FunctionDark dark:bg-FunctionDark/15" title="Function">f</div></div>
 <div class="namespaceItemContent">
-		    <a href="..&#x2F;.&#x2F;validate.ts&#x2F;~&#x2F;cidrVersion.html" title="cidrVersion">
+		    <a href="..&#x2F;.&#x2F;version.ts&#x2F;~&#x2F;cidrVersion.html" title="cidrVersion">
 			    <span>cidrVersion</span><span>(<span><span>cidr<span>: <span class="td-kw">string</span></span></span></span>)<span>: <span><span class="td-ref">IpVersion</span><span class="td-op"> | </span><span class="td-kw">undefined</span></span></span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Reports which IP version a CIDR notation string is written in.</p>
 </div></div></div>
     </div><div id="namespace_classifyip" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-Function bg-Function/15 dark:text-FunctionDark dark:bg-FunctionDark/15" title="Function">f</div></div>
@@ -1453,7 +1454,7 @@ Functions</h2></div><div class="namespaceSection"><div id="namespace_cidraddress
 </div></div></div>
     </div><div id="namespace_ipversion" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-Function bg-Function/15 dark:text-FunctionDark dark:bg-FunctionDark/15" title="Function">f</div></div>
 <div class="namespaceItemContent">
-		    <a href="..&#x2F;.&#x2F;validate.ts&#x2F;~&#x2F;ipVersion.html" title="ipVersion">
+		    <a href="..&#x2F;.&#x2F;version.ts&#x2F;~&#x2F;ipVersion.html" title="ipVersion">
 			    <span>ipVersion</span><span>(<span><span>address<span>: <span class="td-kw">string</span></span></span></span>)<span>: <span><span class="td-ref">IpVersion</span><span class="td-op"> | </span><span class="td-kw">undefined</span></span></span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Reports which IP version a plain address string is written in.</p>
 </div></div></div>
     </div><div id="namespace_iscidrv4" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-Function bg-Function/15 dark:text-FunctionDark dark:bg-FunctionDark/15" title="Function">f</div></div>
@@ -1801,7 +1802,7 @@ Type Aliases</h2></div><div class="namespaceSection"><div id="namespace_address"
                   <span>value</span><span>: <span class="td-kw">bigint</span></span></a></li></ul></div>
     </div><div id="namespace_ipversion-1" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-TypeAlias bg-TypeAlias/15 dark:text-TypeAliasDark dark:bg-TypeAliasDark/15" title="Type Alias">T</div></div>
 <div class="namespaceItemContent">
-		    <a href="..&#x2F;.&#x2F;validate.ts&#x2F;~&#x2F;IpVersion.html" title="IpVersion">
+		    <a href="..&#x2F;.&#x2F;version.ts&#x2F;~&#x2F;IpVersion.html" title="IpVersion">
 			    <span>IpVersion</span><span> = <span><span class="td-lit">4</span><span class="td-op"> | </span><span class="td-lit">6</span></span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>An IP version number: <code>4</code> for IPv4, <code>6</code> for IPv6.</p>
 </div></div></div>
     </div></div>
