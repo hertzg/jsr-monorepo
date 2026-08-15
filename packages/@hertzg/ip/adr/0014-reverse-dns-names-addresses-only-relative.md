@@ -25,7 +25,7 @@ The IPv4 output is RFC 2317 classless-delegation syntax, which is a real
 thing but only carries meaning for prefixes longer than `/24`; emitting
 it for a `/24` is noise. The IPv6 output is not a name at all — `2.3./.`
 is the literal string `"/32"` reversed character by character and spliced
-into the nibble sequence, giving 36 labels where 32 belong.
+into the nibble sequence, giving 35 labels where 32 belong.
 
 The interesting part is *why* it is wrong. Two distinct concepts got one
 method: the boundary-aligned zone name of a prefix, which is well defined

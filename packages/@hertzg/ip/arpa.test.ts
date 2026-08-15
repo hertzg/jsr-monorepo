@@ -1,4 +1,4 @@
-import { assertEquals, assertFalse } from "@std/assert";
+import { assertEquals, assertFalse, assertThrows } from "@std/assert";
 import { ipToArpa, ipv4ToArpa, ipv6ToArpa } from "./arpa.ts";
 import { parseIp } from "./ip.ts";
 import { parseIpv4 } from "./ipv4.ts";
@@ -95,4 +95,25 @@ Deno.test("ipToArpa", async (t) => {
 Deno.test("the names are relative -- no trailing dot", () => {
   assertFalse(ipv4ToArpa(parseIpv4("192.168.0.1")).endsWith("."));
   assertFalse(ipv6ToArpa(parseIpv6("2001:db8::1")).endsWith("."));
+});
+
+Deno.test("an address outside its version's range", async (t) => {
+  await t.step("ipv4ToArpa", () => {
+    assertThrows(() => ipv4ToArpa(-1), RangeError);
+    assertThrows(() => ipv4ToArpa(4294967296), RangeError);
+    assertThrows(() => ipv4ToArpa(1.5), RangeError);
+  });
+
+  await t.step("ipv6ToArpa", () => {
+    assertThrows(() => ipv6ToArpa(-1n), RangeError);
+    assertThrows(
+      () => ipv6ToArpa(340282366920938463463374607431768211456n),
+      RangeError,
+    );
+  });
+
+  await t.step("ipToArpa", () => {
+    assertThrows(() => ipToArpa(-1), RangeError);
+    assertThrows(() => ipToArpa(-1n), RangeError);
+  });
 });

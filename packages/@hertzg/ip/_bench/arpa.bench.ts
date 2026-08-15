@@ -6,7 +6,10 @@
 //
 // Competitor address objects are built outside the timed function so this
 // measures the name construction alone, not parsing. `reverseForm()` returns
-// the relative name by default, matching what this package emits.
+// the absolute name -- trailing dot included -- where this package returns the
+// relative one, so the two build strings that differ by a single character.
+// Its only option, `{ omitSuffix: true }`, drops `in-addr.arpa` entirely, so
+// no call reproduces the relative-with-suffix form.
 //
 // The routes weighed for where `ipv6ToArpa` gets its nibbles are not benched
 // here: that was a one-time comparison and ADR 0014 records its table.

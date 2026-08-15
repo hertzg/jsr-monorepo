@@ -241,6 +241,9 @@
  *
  * ## Reverse DNS
  *
+ * The names are relative -- no trailing dot. Append `"."` if a resolver
+ * requires an absolute name.
+ *
  * @example Build the name a PTR record lives at
  * ```ts
  * import { assertEquals } from "@std/assert";
@@ -252,9 +255,6 @@
  *   "1.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.8.b.d.0.1.0.0.2.ip6.arpa",
  * );
  * ```
- *
- * The names are relative -- no trailing dot. Append `"."` if a resolver
- * requires an absolute name.
  *
  * ## API Reference
  *
