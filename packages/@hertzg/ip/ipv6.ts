@@ -64,8 +64,12 @@ import { parseIpv4 } from "./ipv4.ts";
  *
  * @param address The address string in colon-hexadecimal notation
  * @returns The IPv6 address as a 128-bit bigint
- * @throws {TypeError} If the format is invalid
- * @throws {RangeError} If any group is out of range (not 0-ffff)
+ * @throws {TypeError} If the format is invalid -- including a group that is
+ *   not 1-4 hex digits, more than one `::`, or the wrong number of groups
+ * @throws {RangeError} If an embedded IPv4 octet is out of range, as in
+ *   `"::1.2.3.256"`. A malformed hex group is a `TypeError`, not this;
+ *   a group cannot be numerically out of range, since 4 hex digits
+ *   cannot exceed `ffff`.
  *
  * @example Basic parsing
  * ```ts
