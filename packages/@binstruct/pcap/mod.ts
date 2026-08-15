@@ -24,6 +24,11 @@
  * one byte order and default to that same constant — {@link detectPcapMagic}
  * probes a buffer when you drive them yourself.
  *
+ * To pin the encoded byte order without passing an argument, call
+ * {@link pcapFileLe} or {@link pcapFileBe}. They exist for callers that can only
+ * invoke a factory with no arguments, and writing a big-endian capture is the
+ * case `pcapFile()` alone cannot cover.
+ *
  * ## Timestamp resolution
  *
  * Two magic values exist: one for microsecond timestamps
@@ -488,4 +493,164 @@ export function pcapFile(
       return [decoded, bytesRead];
     },
   };
+}
+
+/**
+ * Creates a coder for a complete pcap capture file fixed to little-endian byte
+ * order. Exactly `pcapFile("le")`, spelled so it can be called with no
+ * arguments.
+ *
+ * Unlike `pcapFile()`, this coder never sniffs: it reads and writes the
+ * little-endian layout whatever the buffer holds. Prefer `pcapFile()` for
+ * reading, since it follows the file's own magic. Reach for this one when the
+ * byte order must be pinned and the call site cannot pass an argument.
+ *
+ * The building blocks {@link pcapGlobalHeader} and {@link pcapRecord} have no
+ * such variants on purpose — you compose those in TypeScript, where passing
+ * `"le"` costs nothing.
+ *
+ * @returns A coder for a {@link PcapFile} of {@link PcapGlobalHeader} and
+ *   {@link PcapRecord}, fixed to little-endian.
+ *
+ * @example Encode a capture in little-endian byte order
+ * ```ts
+ * import { assertEquals } from "@std/assert";
+ * import {
+ *   detectPcapMagic,
+ *   LINKTYPE,
+ *   PCAP_MAGIC_MICROS,
+ *   pcapFileLe,
+ * } from "@binstruct/pcap";
+ *
+ * const coder = pcapFileLe();
+ * const capture = {
+ *   header: {
+ *     magic: PCAP_MAGIC_MICROS,
+ *     versionMajor: 2,
+ *     versionMinor: 4,
+ *     thisZone: 0,
+ *     sigFigs: 0,
+ *     snapLen: 65535,
+ *     network: LINKTYPE.ETHERNET,
+ *   },
+ *   records: [{
+ *     tsSec: 1_700_000_000,
+ *     tsUsec: 250_000,
+ *     inclLen: 4,
+ *     origLen: 1500,
+ *     data: new Uint8Array([0xde, 0xad, 0xbe, 0xef]),
+ *   }],
+ * };
+ *
+ * const buffer = new Uint8Array(64);
+ * const written = coder.encode(capture, buffer);
+ * const [decoded, read] = coder.decode(buffer.subarray(0, written));
+ *
+ * assertEquals(written, 24 + 16 + 4);
+ * assertEquals(read, written);
+ * assertEquals(decoded, capture);
+ * assertEquals(
+ *   buffer.subarray(0, 4),
+ *   new Uint8Array([0xd4, 0xc3, 0xb2, 0xa1]),
+ * );
+ * assertEquals(detectPcapMagic(buffer), { endianness: "le", nanos: false });
+ * ```
+ */
+export function pcapFileLe(): Coder<PcapFile<PcapGlobalHeader, PcapRecord>> {
+  return pcapFile("le");
+}
+
+/**
+ * Creates a coder for a complete pcap capture file fixed to big-endian byte
+ * order. Exactly `pcapFile("be")`, spelled so it can be called with no
+ * arguments.
+ *
+ * This is the one thing `pcapFile()` cannot do. Sniffing already covers reading
+ * a big-endian capture, but encoding has no file to inspect and always writes
+ * {@link PCAP_DEFAULT_ENDIANNESS}, so producing a big-endian capture needs a
+ * coder that says so up front.
+ *
+ * The building blocks {@link pcapGlobalHeader} and {@link pcapRecord} have no
+ * such variants on purpose — you compose those in TypeScript, where passing
+ * `"be"` costs nothing.
+ *
+ * @returns A coder for a {@link PcapFile} of {@link PcapGlobalHeader} and
+ *   {@link PcapRecord}, fixed to big-endian.
+ *
+ * @example Encode a capture in big-endian byte order
+ * ```ts
+ * import { assertEquals } from "@std/assert";
+ * import {
+ *   detectPcapMagic,
+ *   LINKTYPE,
+ *   PCAP_MAGIC_MICROS,
+ *   pcapFileBe,
+ * } from "@binstruct/pcap";
+ *
+ * const coder = pcapFileBe();
+ * const capture = {
+ *   header: {
+ *     magic: PCAP_MAGIC_MICROS,
+ *     versionMajor: 2,
+ *     versionMinor: 4,
+ *     thisZone: 0,
+ *     sigFigs: 0,
+ *     snapLen: 65535,
+ *     network: LINKTYPE.ETHERNET,
+ *   },
+ *   records: [{
+ *     tsSec: 1_700_000_000,
+ *     tsUsec: 250_000,
+ *     inclLen: 4,
+ *     origLen: 1500,
+ *     data: new Uint8Array([0xde, 0xad, 0xbe, 0xef]),
+ *   }],
+ * };
+ *
+ * const buffer = new Uint8Array(64);
+ * const written = coder.encode(capture, buffer);
+ * const [decoded, read] = coder.decode(buffer.subarray(0, written));
+ *
+ * assertEquals(written, 24 + 16 + 4);
+ * assertEquals(read, written);
+ * assertEquals(decoded, capture);
+ * assertEquals(
+ *   buffer.subarray(0, 4),
+ *   new Uint8Array([0xa1, 0xb2, 0xc3, 0xd4]),
+ * );
+ * assertEquals(detectPcapMagic(buffer), { endianness: "be", nanos: false });
+ * ```
+ *
+ * @example A big-endian capture reads back through the sniffing coder
+ * ```ts
+ * import { assertEquals } from "@std/assert";
+ * import {
+ *   LINKTYPE,
+ *   PCAP_MAGIC_NANOS,
+ *   pcapFile,
+ *   pcapFileBe,
+ * } from "@binstruct/pcap";
+ *
+ * const capture = {
+ *   header: {
+ *     magic: PCAP_MAGIC_NANOS,
+ *     versionMajor: 2,
+ *     versionMinor: 4,
+ *     thisZone: 0,
+ *     sigFigs: 0,
+ *     snapLen: 1500,
+ *     network: LINKTYPE.RAW,
+ *   },
+ *   records: [],
+ * };
+ *
+ * const buffer = new Uint8Array(24);
+ * const written = pcapFileBe().encode(capture, buffer);
+ * const [decoded] = pcapFile().decode(buffer.subarray(0, written));
+ *
+ * assertEquals(decoded, capture);
+ * ```
+ */
+export function pcapFileBe(): Coder<PcapFile<PcapGlobalHeader, PcapRecord>> {
+  return pcapFile("be");
 }
