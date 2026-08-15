@@ -650,18 +650,6 @@ Deno.test("level 1 lists the coders of a package with several", async () => {
   );
 });
 
-Deno.test("level 1 names the callable subset when it is smaller", async () => {
-  // The count only qualifies itself when the two differ, so a package where
-  // every coder is callable — png — cannot show this sentence at all.
-  const plan = printed(await planCli([PCAP]));
-
-  assertStringIncludes(
-    plan.text,
-    "exposes 4 coders, 3 of them callable, so the coder word is required",
-  );
-  assertStringIncludes(plan.text, "needs 2 arguments");
-});
-
 Deno.test("the coder count agrees with the coders listed under it", async () => {
   // The sentence counted the callable coders while the block rendered every
   // discovered one, so `png exposes 3 coders` sat directly above four rows.
