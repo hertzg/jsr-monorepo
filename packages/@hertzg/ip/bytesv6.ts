@@ -78,6 +78,15 @@ const IPV6_MAX = 0xFFFF_FFFF_FFFF_FFFF_FFFF_FFFF_FFFF_FFFFn;
 // 32-bit bitwise limit, is 2x slower than four, and a byte-at-a-time
 // `(acc << 8n) | BigInt(b)` loop is 5.8x slower.
 //
+// This is also why the read helper is 32-bit while the algorithm works in
+// 64-bit halves, which looks like a mismatch worth tidying. It is not: pulling
+// the halves out into a `readUint64` returning a `bigint` measures 1.57x
+// slower, and identically so whether or not it calls `readUint32` inside, so
+// it is not the inner call. A `bigint` that crosses a function boundary has to
+// be materialized on the heap, while one kept in a local V8 can keep in a
+// cheaper form. `readUint32` is free to extract precisely because it returns a
+// `number`. Keep the halves inline.
+//
 // The write does not mirror this. It starts from one 128-bit value, so
 // splitting it into halves first only adds two allocations; shifting straight
 // out of the original measured 1.05x faster and is what `ipv6ToBytes` does.

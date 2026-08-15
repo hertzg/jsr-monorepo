@@ -145,13 +145,20 @@ addresses have exactly one wire order.
   | --- | --- |
   | four chunks → two 64-bit halves → join | 1.00 |
   | four chunks accumulated into one 128-bit value | 1.53x slower |
+  | the same halves, via a `readUint64` helper | 1.57x slower |
   | three chunks of 48/48/32, multiply-add assembled | 2.03x slower |
   | `(acc << 8n) \| BigInt(b)` over all 16 bytes | 5.76x slower |
 
-  Note the middle row: *fewer* `bigint` conversions is slower, because
-  the multiply-add arithmetic that dodges the 32-bit bitwise limit
-  costs more than the conversion it saves. An earlier draft of this
-  ADR reasoned that four conversions was a floor. It is not.
+  Two rows are worth dwelling on. *Fewer* `bigint` conversions is
+  slower, because the multiply-add arithmetic that dodges the 32-bit
+  bitwise limit costs more than the conversion it saves — an earlier
+  draft of this ADR reasoned that four conversions was a floor, and it
+  is not. And extracting the halves into a `readUint64` helper, the
+  obvious tidy-up given the algorithm works in halves, is slower than
+  the 128-bit accumulator it was meant to improve on: a `bigint`
+  crossing a function boundary must be materialized on the heap, while
+  one kept in a local can stay cheaper. The 32-bit helpers extract
+  freely because they deal in `number`.
 
   The write does not mirror the read. It starts from one 128-bit
   value, so splitting into halves first only adds allocations;
