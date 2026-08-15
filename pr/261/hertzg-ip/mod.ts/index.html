@@ -113,6 +113,7 @@ Features</h2>
 <li><strong>Address Generation</strong>: Lazily enumerate addresses in CIDR blocks</li>
 <li><strong>IPv4-Mapped Conversion</strong>: Convert between IPv4 and IPv4-mapped IPv6 addresses and CIDRs</li>
 <li><strong>Validation</strong>: Non-throwing validity checks for IP addresses and CIDR notation</li>
+<li><strong>Wire Bytes</strong>: Read and write addresses directly in packet buffers, no string round-trip</li>
 </ul>
 <h2 id="dual-stack-server">
 Dual-Stack Server</h2>
@@ -903,6 +904,103 @@ assertEquals(usable.map(stringifyIpv4), [&quot;10.0.0.1&quot;, &quot;10.0.0.2&qu
   <path d="M5 12l5 5l10 -10" />
 </svg>
 </button><code></code></pre>
+<h2 id="wire-bytes">
+Wire Bytes</h2>
+</div></div>
+</div>
+<div class="border-b border-gray-300 dark:border-gray-700"></div><div class="anchorable"><a href="#example_8" class="anchor" aria-label="Anchor" tabIndex="-1"><svg
+  width="16"
+  height="16"
+  viewBox="0 0 14 14"
+  fill="none"
+  xmlns="http://www.w3.org/2000/svg"
+>
+  <g clip-path="url(#clip0_1081_1237)">
+    <path
+      fill-rule="evenodd"
+      clip-rule="evenodd"
+      d="M6.80328 2.8656C6.68736 2.99 6.62425 3.15454 6.62725 3.32456C6.63025 3.49457 6.69913 3.65678 6.81936 3.77702C6.9396 3.89725 7.10181 3.96613 7.27182 3.96913C7.44184 3.97213 7.60638 3.90902 7.73078 3.7931L8.82453 2.69935C8.98712 2.53676 9.18015 2.40778 9.39259 2.31978C9.60503 2.23179 9.83272 2.1865 10.0627 2.1865C10.2926 2.1865 10.5203 2.23179 10.7327 2.31978C10.9452 2.40778 11.1382 2.53676 11.3008 2.69935C11.4634 2.86194 11.5923 3.05497 11.6803 3.2674C11.7683 3.47984 11.8136 3.70753 11.8136 3.93747C11.8136 4.16741 11.7683 4.3951 11.6803 4.60754C11.5923 4.81998 11.4634 5.013 11.3008 5.1756L9.11328 7.3631C8.95075 7.52581 8.75775 7.65488 8.5453 7.74295C8.33285 7.83102 8.10513 7.87635 7.87516 7.87635C7.64518 7.87635 7.41746 7.83102 7.20501 7.74295C6.99256 7.65488 6.79956 7.52581 6.63703 7.3631C6.51263 7.24718 6.34809 7.18407 6.17807 7.18707C6.00806 7.19007 5.84585 7.25894 5.72561 7.37918C5.60538 7.49942 5.5365 7.66163 5.5335 7.83164C5.5305 8.00165 5.59361 8.1662 5.70953 8.2906C5.99391 8.57501 6.33154 8.80062 6.70312 8.95455C7.0747 9.10847 7.47296 9.18769 7.87516 9.18769C8.27736 9.18769 8.67562 9.10847 9.0472 8.95455C9.41878 8.80062 9.7564 8.57501 10.0408 8.2906L12.2283 6.1031C12.8026 5.52874 13.1253 4.74974 13.1253 3.93747C13.1253 3.12521 12.8026 2.34621 12.2283 1.77185C11.6539 1.19749 10.8749 0.874817 10.0627 0.874817C9.25039 0.874817 8.47139 1.19749 7.89703 1.77185L6.80328 2.8656ZM2.69953 11.3006C2.53682 11.1381 2.40774 10.9451 2.31968 10.7326C2.23161 10.5202 2.18628 10.2924 2.18628 10.0625C2.18628 9.8325 2.23161 9.60477 2.31968 9.39233C2.40774 9.17988 2.53682 8.98688 2.69953 8.82435L4.88703 6.63685C5.04956 6.47414 5.24256 6.34506 5.45501 6.25699C5.66746 6.16893 5.89518 6.1236 6.12516 6.1236C6.35513 6.1236 6.58285 6.16893 6.7953 6.25699C7.00775 6.34506 7.20075 6.47414 7.36328 6.63685C7.48768 6.75277 7.65223 6.81588 7.82224 6.81288C7.99225 6.80988 8.15446 6.741 8.2747 6.62077C8.39494 6.50053 8.46381 6.33832 8.46681 6.1683C8.46981 5.99829 8.4067 5.83375 8.29078 5.70935C8.0064 5.42494 7.66878 5.19933 7.2972 5.0454C6.92562 4.89148 6.52736 4.81225 6.12516 4.81225C5.72296 4.81225 5.3247 4.89148 4.95312 5.0454C4.58154 5.19933 4.24391 5.42494 3.95953 5.70935L1.77203 7.89685C1.19767 8.47121 0.875 9.25021 0.875 10.0625C0.875 10.8747 1.19767 11.6537 1.77203 12.2281C2.34639 12.8025 3.12539 13.1251 3.93766 13.1251C4.74992 13.1251 5.52892 12.8025 6.10328 12.2281L7.19703 11.1343C7.31295 11.0099 7.37606 10.8454 7.37306 10.6754C7.37006 10.5054 7.30119 10.3432 7.18095 10.2229C7.06071 10.1027 6.8985 10.0338 6.72849 10.0308C6.55848 10.0278 6.39393 10.0909 6.26953 10.2068L5.17578 11.3006C5.01325 11.4633 4.82025 11.5924 4.6078 11.6805C4.39535 11.7685 4.16763 11.8138 3.93766 11.8138C3.70768 11.8138 3.47996 11.7685 3.26751 11.6805C3.05506 11.5924 2.86206 11.4633 2.69953 11.3006Z"
+      fill="currentColor"
+    />
+  </g>
+  <defs>
+    <clipPath id="clip0_1081_1237">
+      <rect width="14" height="14" fill="white" />
+    </clipPath>
+  </defs>
+</svg>
+</a>
+<h3 class="example-header"><div class="markdown"><p>Decode addresses straight out of a packet buffer</p>
+</div></h3>
+  <div><div class="markdown"><pre class="highlight"><code class="language-ts">import { assertEquals } from &quot;@std/assert&quot;;
+import { ipv4FromBytes, ipv4ToBytes, stringifyIpv4 } from &quot;@hertzg/ip&quot;;
+
+// deno-fmt-ignore
+const packet = new Uint8Array([
+  0x45, 0x00, 0x00, 0x54, 0x1c, 0x46, 0x40, 0x00,
+  0x40, 0x06, 0x00, 0x00,
+  10, 0, 0, 1,
+  192, 168, 1, 1,
+]);
+
+// Read the source and destination fields in place
+assertEquals(stringifyIpv4(ipv4FromBytes(packet, 12)), &quot;10.0.0.1&quot;);
+assertEquals(stringifyIpv4(ipv4FromBytes(packet, 16)), &quot;192.168.1.1&quot;);
+
+// Rewrite the destination in place; the return is only the bytes written
+const written = ipv4ToBytes(ipv4FromBytes(packet, 12), packet, 16);
+assertEquals(written, new Uint8Array([10, 0, 0, 1]));
+assertEquals(stringifyIpv4(ipv4FromBytes(packet, 16)), &quot;10.0.0.1&quot;);
+</code><button class="copyButton" data-copy="import { assertEquals } from &quot;@std/assert&quot;;
+import { ipv4FromBytes, ipv4ToBytes, stringifyIpv4 } from &quot;@hertzg/ip&quot;;
+
+// deno-fmt-ignore
+const packet = new Uint8Array([
+  0x45, 0x00, 0x00, 0x54, 0x1c, 0x46, 0x40, 0x00,
+  0x40, 0x06, 0x00, 0x00,
+  10, 0, 0, 1,
+  192, 168, 1, 1,
+]);
+
+// Read the source and destination fields in place
+assertEquals(stringifyIpv4(ipv4FromBytes(packet, 12)), &quot;10.0.0.1&quot;);
+assertEquals(stringifyIpv4(ipv4FromBytes(packet, 16)), &quot;192.168.1.1&quot;);
+
+// Rewrite the destination in place; the return is only the bytes written
+const written = ipv4ToBytes(ipv4FromBytes(packet, 12), packet, 16);
+assertEquals(written, new Uint8Array([10, 0, 0, 1]));
+assertEquals(stringifyIpv4(ipv4FromBytes(packet, 16)), &quot;10.0.0.1&quot;);
+"><svg
+  class="copy"
+  width="15"
+  height="15"
+  viewBox="0 0 15 15"
+  fill="none"
+  xmlns="http://www.w3.org/2000/svg"
+>
+  <rect x="2" y="2" width="7" height="7" fill="none" />
+  <rect x="6" y="6" width="7" height="7" fill="none" />
+  <path
+    d="M1.55566 2.7C1.55566 2.03726 2.09292 1.5 2.75566 1.5H8.75566C9.41841 1.5 9.95566 2.03726 9.95566 2.7V5.1H12.3557C13.0184 5.1 13.5557 5.63726 13.5557 6.3V12.3C13.5557 12.9627 13.0184 13.5 12.3557 13.5H6.35566C5.69292 13.5 5.15566 12.9627 5.15566 12.3V9.9H2.75566C2.09292 9.9 1.55566 9.36274 1.55566 8.7V2.7ZM6.35566 9.9V12.3H12.3557V6.3H9.95566V8.7C9.95566 9.36274 9.41841 9.9 8.75566 9.9H6.35566ZM8.75566 8.7V2.7H2.75566V8.7H8.75566Z"
+    fill="currentColor"
+  />
+</svg>
+<svg
+  class="check"
+  width="15"
+  height="15"
+  viewBox="0 0 24 24"
+  stroke-width="2"
+  stroke="currentColor"
+  fill="none"
+  stroke-linecap="round"
+  stroke-linejoin="round"
+  xmlns="http://www.w3.org/2000/svg"
+>
+  <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+  <path d="M5 12l5 5l10 -10" />
+</svg>
+</button><code></code></pre>
 <h2 id="api-reference">
 API Reference</h2>
 <h3 id="universal-(auto-detect-ipv4/ipv6)">
@@ -917,6 +1015,8 @@ Universal (auto-detect IPv4/IPv6)</h3>
 <li><a href=".././mod.ts/~/parseCidr.html">parseCidr</a>: Parse any CIDR notation string to Cidrv4 or Cidrv6</li>
 <li><a href=".././mod.ts/~/stringifyCidr.html">stringifyCidr</a>: Convert Cidrv4 or Cidrv6 to CIDR notation string</li>
 <li><a href=".././mod.ts/~/cidrSize.html">cidrSize</a>: Get total number of addresses in a CIDR block</li>
+<li><a href=".././mod.ts/~/cidrFirstAddress.html">cidrFirstAddress</a>: Get the first address of a CIDR block</li>
+<li><a href=".././mod.ts/~/cidrLastAddress.html">cidrLastAddress</a>: Get the last address of a CIDR block</li>
 <li><a href=".././mod.ts/~/cidrAddresses.html">cidrAddresses</a>: Generate IP addresses in a CIDR block</li>
 <li><a href=".././mod.ts/~/cidrContains.html">cidrContains</a>: Check if a CIDR block contains an address</li>
 <li><a href=".././mod.ts/~/cidrContainsCidr.html">cidrContainsCidr</a>: Check if one CIDR fully contains another</li>
@@ -960,10 +1060,14 @@ IPv4 CIDR</h3>
 <li><a href=".././mod.ts/~/cidrv4Merge.html">cidrv4Merge</a>: Merge IPv4 CIDR blocks into the minimal covering set</li>
 <li><a href=".././mod.ts/~/cidrv4FirstAddress.html">cidrv4FirstAddress</a>: Get first address in CIDR block</li>
 <li><a href=".././mod.ts/~/cidrv4LastAddress.html">cidrv4LastAddress</a>: Get last address in CIDR block</li>
-<li><a href=".././mod.ts/~/cidrv4NetworkAddress.html">cidrv4NetworkAddress</a>: Alias for cidrv4FirstAddress</li>
-<li><a href=".././mod.ts/~/cidrv4BroadcastAddress.html">cidrv4BroadcastAddress</a>: Alias for cidrv4LastAddress</li>
+<li><a href=".././mod.ts/~/cidrv4NetworkAddress.html">cidrv4NetworkAddress</a>: Get the network address (first address) of a CIDR block</li>
+<li><a href=".././mod.ts/~/cidrv4BroadcastAddress.html">cidrv4BroadcastAddress</a>: Get the directed broadcast address (last address) of a CIDR block</li>
+<li><a href=".././mod.ts/~/cidrv4FirstUsableAddress.html">cidrv4FirstUsableAddress</a>: Get first assignable address in CIDR block (RFC 3021 aware)</li>
+<li><a href=".././mod.ts/~/cidrv4LastUsableAddress.html">cidrv4LastUsableAddress</a>: Get last assignable address in CIDR block (RFC 3021 aware)</li>
 <li><a href=".././mod.ts/~/cidrv4Size.html">cidrv4Size</a>: Get total number of addresses in CIDR block</li>
+<li><a href=".././mod.ts/~/cidrv4UsableSize.html">cidrv4UsableSize</a>: Get number of assignable addresses in CIDR block</li>
 <li><a href=".././mod.ts/~/cidrv4Addresses.html">cidrv4Addresses</a>: Generate IP addresses in CIDR block</li>
+<li><a href=".././mod.ts/~/cidrv4UsableAddresses.html">cidrv4UsableAddresses</a>: Generate every assignable address in CIDR block</li>
 <li><a href=".././mod.ts/~/compareCidrv4.html">compareCidrv4</a>: Compare two IPv4 CIDR blocks for sorting</li>
 <li><a href=".././mod.ts/~/isValidCidrv4.html">isValidCidrv4</a>: Check if a string is valid IPv4 CIDR notation</li>
 </ul>
@@ -1041,6 +1145,24 @@ IPv4-Mapped IPv6 Conversion (4to6)</h3>
 <li><a href=".././mod.ts/~/cidrv4ToCidrv64Mapped.html">cidrv4ToCidrv64Mapped</a>: Convert IPv4 CIDR to IPv4-mapped IPv6 CIDR</li>
 <li><a href=".././mod.ts/~/cidrv4FromCidrv64Mapped.html">cidrv4FromCidrv64Mapped</a>: Convert IPv4-mapped IPv6 CIDR to IPv4 CIDR</li>
 </ul>
+<h3 id="universal-wire-byte-conversion-(bytes)">
+Universal Wire Byte Conversion (bytes)</h3>
+<ul>
+<li><a href=".././mod.ts/~/ipFromBytes.html">ipFromBytes</a>: Read a 4- or 16-byte address, version from its length</li>
+<li><a href=".././mod.ts/~/ipToBytes.html">ipToBytes</a>: Write an address as its wire bytes, width from its type</li>
+</ul>
+<h3 id="ipv4-wire-byte-conversion-(bytesv4)">
+IPv4 Wire Byte Conversion (bytesv4)</h3>
+<ul>
+<li><a href=".././mod.ts/~/ipv4FromBytes.html">ipv4FromBytes</a>: Read a 4-byte IPv4 address from a buffer</li>
+<li><a href=".././mod.ts/~/ipv4ToBytes.html">ipv4ToBytes</a>: Write a 4-byte IPv4 address to a buffer</li>
+</ul>
+<h3 id="ipv6-wire-byte-conversion-(bytesv6)">
+IPv6 Wire Byte Conversion (bytesv6)</h3>
+<ul>
+<li><a href=".././mod.ts/~/ipv6FromBytes.html">ipv6FromBytes</a>: Read a 16-byte IPv6 address from a buffer</li>
+<li><a href=".././mod.ts/~/ipv6ToBytes.html">ipv6ToBytes</a>: Write a 16-byte IPv6 address to a buffer</li>
+</ul>
 <h3 id="submodules">
 Submodules</h3>
 <ul>
@@ -1056,6 +1178,9 @@ Submodules</h3>
 <li><a href="https://jsr.io/@hertzg/ip/doc/validate"><code>validate</code></a>: Universal validation via <a href=".././mod.ts/~/isValidIp.html">isValidIp</a>, <a href=".././mod.ts/~/isValidCidr.html">isValidCidr</a></li>
 <li><a href="https://jsr.io/@hertzg/ip/doc/version"><code>version</code></a>: IP version detection via <a href=".././mod.ts/~/ipVersion.html">ipVersion</a>, <a href=".././mod.ts/~/cidrVersion.html">cidrVersion</a></li>
 <li><a href="https://jsr.io/@hertzg/ip/doc/4to6"><code>4to6</code></a>: IPv4-mapped IPv6 conversion via <a href=".././mod.ts/~/ipv4To64Mapped.html">ipv4To64Mapped</a>, <a href=".././mod.ts/~/ipv4From64Mapped.html">ipv4From64Mapped</a>, <a href=".././mod.ts/~/cidrv4ToCidrv64Mapped.html">cidrv4ToCidrv64Mapped</a>, <a href=".././mod.ts/~/cidrv4FromCidrv64Mapped.html">cidrv4FromCidrv64Mapped</a></li>
+<li><a href="https://jsr.io/@hertzg/ip/doc/bytes"><code>bytes</code></a>: Universal wire byte conversion via <a href=".././mod.ts/~/ipFromBytes.html">ipFromBytes</a>, <a href=".././mod.ts/~/ipToBytes.html">ipToBytes</a></li>
+<li><a href="https://jsr.io/@hertzg/ip/doc/bytesv4"><code>bytesv4</code></a>: IPv4 wire byte conversion via <a href=".././mod.ts/~/ipv4FromBytes.html">ipv4FromBytes</a>, <a href=".././mod.ts/~/ipv4ToBytes.html">ipv4ToBytes</a></li>
+<li><a href="https://jsr.io/@hertzg/ip/doc/bytesv6"><code>bytesv6</code></a>: IPv6 wire byte conversion via <a href=".././mod.ts/~/ipv6FromBytes.html">ipv6FromBytes</a>, <a href=".././mod.ts/~/ipv6ToBytes.html">ipv6ToBytes</a></li>
 </ul>
 </div></div>
 </div>
@@ -1118,6 +1243,16 @@ Functions</h2></div><div class="namespaceSection"><div id="namespace_cidraddress
 		    <a href="..&#x2F;.&#x2F;cidr.ts&#x2F;~&#x2F;cidrContainsCidr.html" title="cidrContainsCidr">
 			    <span>cidrContainsCidr</span><span>(<div class="ml-4"><div><span>outer<span>: <span class="td-ref">Cidr</span></span></span>,</div><div><span>inner<span>: <span class="td-ref">Cidr</span></span></span></div></div>)<span>: <span class="td-kw">boolean</span></span></span><div class="namespaceItemContentTypeInfo">1 overloads</div></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Checks if one CIDR block fully contains another.</p>
 </div></div></div>
+    </div><div id="namespace_cidrfirstaddress" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-Function bg-Function/15 dark:text-FunctionDark dark:bg-FunctionDark/15" title="Function">f</div></div>
+<div class="namespaceItemContent">
+		    <a href="..&#x2F;.&#x2F;cidr.ts&#x2F;~&#x2F;cidrFirstAddress.html" title="cidrFirstAddress">
+			    <span>cidrFirstAddress</span><span>(<span><span>cidr<span>: <span class="td-ref">Cidr</span></span></span></span>)<span>: <span class="td-ref">Address</span></span></span><div class="namespaceItemContentTypeInfo">1 overloads</div></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Returns the first address of a CIDR block.</p>
+</div></div></div>
+    </div><div id="namespace_cidrfirstaddress-1" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-Function bg-Function/15 dark:text-FunctionDark dark:bg-FunctionDark/15" title="Function">f</div></div>
+<div class="namespaceItemContent">
+		    <a href="..&#x2F;.&#x2F;cidr.ts&#x2F;~&#x2F;cidrFirstAddress.html" title="cidrFirstAddress">
+			    <span>cidrFirstAddress</span><span>(<span><span>cidr<span>: <span class="td-ref">Cidr</span></span></span></span>)<span>: <span class="td-ref">Address</span></span></span><div class="namespaceItemContentTypeInfo">1 overloads</div></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Returns the first address of a CIDR block.</p>
+</div></div></div>
     </div><div id="namespace_cidrintersect" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-Function bg-Function/15 dark:text-FunctionDark dark:bg-FunctionDark/15" title="Function">f</div></div>
 <div class="namespaceItemContent">
 		    <a href="..&#x2F;.&#x2F;cidr.ts&#x2F;~&#x2F;cidrIntersect.html" title="cidrIntersect">
@@ -1127,6 +1262,16 @@ Functions</h2></div><div class="namespaceSection"><div id="namespace_cidraddress
 <div class="namespaceItemContent">
 		    <a href="..&#x2F;.&#x2F;cidr.ts&#x2F;~&#x2F;cidrIntersect.html" title="cidrIntersect">
 			    <span>cidrIntersect</span><span>(<div class="ml-4"><div><span>a<span>: <span class="td-ref">Cidr</span></span></span>,</div><div><span>b<span>: <span class="td-ref">Cidr</span></span></span></div></div>)<span>: <span><span class="td-ref">Cidr</span><span class="td-op"> | </span><span class="td-kw">null</span></span></span></span><div class="namespaceItemContentTypeInfo">1 overloads</div></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Returns the intersection of two CIDR blocks.</p>
+</div></div></div>
+    </div><div id="namespace_cidrlastaddress" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-Function bg-Function/15 dark:text-FunctionDark dark:bg-FunctionDark/15" title="Function">f</div></div>
+<div class="namespaceItemContent">
+		    <a href="..&#x2F;.&#x2F;cidr.ts&#x2F;~&#x2F;cidrLastAddress.html" title="cidrLastAddress">
+			    <span>cidrLastAddress</span><span>(<span><span>cidr<span>: <span class="td-ref">Cidr</span></span></span></span>)<span>: <span class="td-ref">Address</span></span></span><div class="namespaceItemContentTypeInfo">1 overloads</div></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Returns the last address of a CIDR block.</p>
+</div></div></div>
+    </div><div id="namespace_cidrlastaddress-1" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-Function bg-Function/15 dark:text-FunctionDark dark:bg-FunctionDark/15" title="Function">f</div></div>
+<div class="namespaceItemContent">
+		    <a href="..&#x2F;.&#x2F;cidr.ts&#x2F;~&#x2F;cidrLastAddress.html" title="cidrLastAddress">
+			    <span>cidrLastAddress</span><span>(<span><span>cidr<span>: <span class="td-ref">Cidr</span></span></span></span>)<span>: <span class="td-ref">Address</span></span></span><div class="namespaceItemContentTypeInfo">1 overloads</div></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Returns the last address of a CIDR block.</p>
 </div></div></div>
     </div><div id="namespace_cidrmerge" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-Function bg-Function/15 dark:text-FunctionDark dark:bg-FunctionDark/15" title="Function">f</div></div>
 <div class="namespaceItemContent">
@@ -1188,6 +1333,11 @@ Functions</h2></div><div class="namespaceSection"><div id="namespace_cidraddress
 		    <a href="..&#x2F;.&#x2F;cidrv4.ts&#x2F;~&#x2F;cidrv4FirstAddress.html" title="cidrv4FirstAddress">
 			    <span>cidrv4FirstAddress</span><span>(<span><span>cidr<span>: <span class="td-ref">Cidrv4</span></span></span></span>)<span>: <span class="td-kw">number</span></span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Returns the first address of a CIDR block (network address).</p>
 </div></div></div>
+    </div><div id="namespace_cidrv4firstusableaddress" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-Function bg-Function/15 dark:text-FunctionDark dark:bg-FunctionDark/15" title="Function">f</div></div>
+<div class="namespaceItemContent">
+		    <a href="..&#x2F;.&#x2F;cidrv4.ts&#x2F;~&#x2F;cidrv4FirstUsableAddress.html" title="cidrv4FirstUsableAddress">
+			    <span>cidrv4FirstUsableAddress</span><span>(<span><span>cidr<span>: <span class="td-ref">Cidrv4</span></span></span></span>)<span>: <span class="td-kw">number</span></span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Returns the first assignable address of a CIDR block.</p>
+</div></div></div>
     </div><div id="namespace_cidrv4fromcidrv64mapped" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-Function bg-Function/15 dark:text-FunctionDark dark:bg-FunctionDark/15" title="Function">f</div></div>
 <div class="namespaceItemContent">
 		    <a href="..&#x2F;.&#x2F;4to6.ts&#x2F;~&#x2F;cidrv4FromCidrv64Mapped.html" title="cidrv4FromCidrv64Mapped">
@@ -1202,6 +1352,11 @@ Functions</h2></div><div class="namespaceSection"><div id="namespace_cidraddress
 <div class="namespaceItemContent">
 		    <a href="..&#x2F;.&#x2F;cidrv4.ts&#x2F;~&#x2F;cidrv4LastAddress.html" title="cidrv4LastAddress">
 			    <span>cidrv4LastAddress</span><span>(<span><span>cidr<span>: <span class="td-ref">Cidrv4</span></span></span></span>)<span>: <span class="td-kw">number</span></span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Returns the last address of a CIDR block (broadcast address for IPv4).</p>
+</div></div></div>
+    </div><div id="namespace_cidrv4lastusableaddress" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-Function bg-Function/15 dark:text-FunctionDark dark:bg-FunctionDark/15" title="Function">f</div></div>
+<div class="namespaceItemContent">
+		    <a href="..&#x2F;.&#x2F;cidrv4.ts&#x2F;~&#x2F;cidrv4LastUsableAddress.html" title="cidrv4LastUsableAddress">
+			    <span>cidrv4LastUsableAddress</span><span>(<span><span>cidr<span>: <span class="td-ref">Cidrv4</span></span></span></span>)<span>: <span class="td-kw">number</span></span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Returns the last assignable address of a CIDR block.</p>
 </div></div></div>
     </div><div id="namespace_cidrv4mask" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-Function bg-Function/15 dark:text-FunctionDark dark:bg-FunctionDark/15" title="Function">f</div></div>
 <div class="namespaceItemContent">
@@ -1271,6 +1426,31 @@ Functions</h2></div><div class="namespaceSection"><div id="namespace_cidraddress
 <div class="namespaceItemContent">
 		    <a href="..&#x2F;.&#x2F;4to6.ts&#x2F;~&#x2F;cidrv4ToCidrv64Mapped.html" title="cidrv4ToCidrv64Mapped">
 			    <span>cidrv4ToCidrv64Mapped</span><span>(<span><span>cidr<span>: <span class="td-ref">Cidrv4</span></span></span></span>)<span>: <span class="td-ref">Cidrv6</span></span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Converts an IPv4 CIDR block to its IPv4-mapped IPv6 CIDR representation.</p>
+</div></div></div>
+    </div><div id="namespace_cidrv4usableaddresses" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-Function bg-Function/15 dark:text-FunctionDark dark:bg-FunctionDark/15" title="Function">f</div></div>
+<div class="namespaceItemContent">
+		    <a href="..&#x2F;.&#x2F;cidrv4.ts&#x2F;~&#x2F;cidrv4UsableAddresses.html" title="cidrv4UsableAddresses">
+			    <span>cidrv4UsableAddresses</span><span>(<span><span>cidr<span>: <span class="td-ref">Cidrv4</span></span></span></span>)<span>: <span class="td-ref">Generator</span>&lt;<span class="td-kw">number</span>&gt;</span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Generates every assignable address in a CIDR block, in ascending order.</p>
+</div></div></div>
+    </div><div id="namespace_cidrv4usablesize" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-Function bg-Function/15 dark:text-FunctionDark dark:bg-FunctionDark/15" title="Function">f</div></div>
+<div class="namespaceItemContent">
+		    <a href="..&#x2F;.&#x2F;cidrv4.ts&#x2F;~&#x2F;cidrv4UsableSize.html" title="cidrv4UsableSize">
+			    <span>cidrv4UsableSize</span><span>(<span><span>cidrOrPrefixLength<span>: <span><span class="td-ref">Cidrv4</span><span class="td-op"> | </span><span class="td-kw">number</span></span></span></span></span>)<span>: <span class="td-kw">number</span></span></span><div class="namespaceItemContentTypeInfo">3 overloads</div></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Returns the number of assignable addresses in a CIDR block.</p>
+</div></div></div>
+    </div><div id="namespace_cidrv4usablesize-1" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-Function bg-Function/15 dark:text-FunctionDark dark:bg-FunctionDark/15" title="Function">f</div></div>
+<div class="namespaceItemContent">
+		    <a href="..&#x2F;.&#x2F;cidrv4.ts&#x2F;~&#x2F;cidrv4UsableSize.html" title="cidrv4UsableSize">
+			    <span>cidrv4UsableSize</span><span>(<span><span>cidrOrPrefixLength<span>: <span><span class="td-ref">Cidrv4</span><span class="td-op"> | </span><span class="td-kw">number</span></span></span></span></span>)<span>: <span class="td-kw">number</span></span></span><div class="namespaceItemContentTypeInfo">3 overloads</div></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Returns the number of assignable addresses in a CIDR block.</p>
+</div></div></div>
+    </div><div id="namespace_cidrv4usablesize-2" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-Function bg-Function/15 dark:text-FunctionDark dark:bg-FunctionDark/15" title="Function">f</div></div>
+<div class="namespaceItemContent">
+		    <a href="..&#x2F;.&#x2F;cidrv4.ts&#x2F;~&#x2F;cidrv4UsableSize.html" title="cidrv4UsableSize">
+			    <span>cidrv4UsableSize</span><span>(<span><span>cidrOrPrefixLength<span>: <span><span class="td-ref">Cidrv4</span><span class="td-op"> | </span><span class="td-kw">number</span></span></span></span></span>)<span>: <span class="td-kw">number</span></span></span><div class="namespaceItemContentTypeInfo">3 overloads</div></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Returns the number of assignable addresses in a CIDR block.</p>
+</div></div></div>
+    </div><div id="namespace_cidrv4usablesize-3" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-Function bg-Function/15 dark:text-FunctionDark dark:bg-FunctionDark/15" title="Function">f</div></div>
+<div class="namespaceItemContent">
+		    <a href="..&#x2F;.&#x2F;cidrv4.ts&#x2F;~&#x2F;cidrv4UsableSize.html" title="cidrv4UsableSize">
+			    <span>cidrv4UsableSize</span><span>(<span><span>cidrOrPrefixLength<span>: <span><span class="td-ref">Cidrv4</span><span class="td-op"> | </span><span class="td-kw">number</span></span></span></span></span>)<span>: <span class="td-kw">number</span></span></span><div class="namespaceItemContentTypeInfo">3 overloads</div></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Returns the number of assignable addresses in a CIDR block.</p>
 </div></div></div>
     </div><div id="namespace_cidrv6addresses" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-Function bg-Function/15 dark:text-FunctionDark dark:bg-FunctionDark/15" title="Function">f</div></div>
 <div class="namespaceItemContent">
@@ -1442,15 +1622,49 @@ Functions</h2></div><div class="namespaceSection"><div id="namespace_cidraddress
 		    <a href="..&#x2F;.&#x2F;ipv6.ts&#x2F;~&#x2F;expandIpv6.html" title="expandIpv6">
 			    <span>expandIpv6</span><span>(<span><span>address<span>: <span class="td-kw">string</span></span></span></span>)<span>: <span class="td-kw">string</span></span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Expands an IPv6 address to its full uncompressed form.</p>
 </div></div></div>
+    </div><div id="namespace_ipfrombytes" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-Function bg-Function/15 dark:text-FunctionDark dark:bg-FunctionDark/15" title="Function">f</div></div>
+<div class="namespaceItemContent">
+		    <a href="..&#x2F;.&#x2F;bytes.ts&#x2F;~&#x2F;ipFromBytes.html" title="ipFromBytes">
+			    <span>ipFromBytes</span><span>(<span><span>bytes<span>: <span class="td-ref">Uint8Array</span></span></span></span>)<span>: <span class="td-ref">Address</span></span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Reads an IPv4 or IPv6 address from a buffer, picking the version from its
+length.</p>
+</div></div></div>
+    </div><div id="namespace_iptobytes" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-Function bg-Function/15 dark:text-FunctionDark dark:bg-FunctionDark/15" title="Function">f</div></div>
+<div class="namespaceItemContent">
+		    <a href="..&#x2F;.&#x2F;bytes.ts&#x2F;~&#x2F;ipToBytes.html" title="ipToBytes">
+			    <span>ipToBytes</span><span>(<div class="ml-4"><div><span>address<span>: <span class="td-ref">Address</span></span></span>,</div><div><span>into<span class="td-op">?</span><span>: <span class="td-ref">Uint8Array</span></span></span>,</div><div><span>offset<span class="td-op">?</span><span>: <span class="td-kw">number</span></span></span></div></div>)<span>: <span class="td-ref">Uint8Array</span></span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Writes an IPv4 or IPv6 address, either into a fresh buffer or into one you
+supply.</p>
+</div></div></div>
     </div><div id="namespace_ipv4from64mapped" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-Function bg-Function/15 dark:text-FunctionDark dark:bg-FunctionDark/15" title="Function">f</div></div>
 <div class="namespaceItemContent">
 		    <a href="..&#x2F;.&#x2F;4to6.ts&#x2F;~&#x2F;ipv4From64Mapped.html" title="ipv4From64Mapped">
 			    <span>ipv4From64Mapped</span><span>(<span><span>address<span>: <span class="td-kw">bigint</span></span></span></span>)<span>: <span class="td-kw">number</span></span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Extracts the IPv4 address from an IPv4-mapped IPv6 address.</p>
 </div></div></div>
+    </div><div id="namespace_ipv4frombytes" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-Function bg-Function/15 dark:text-FunctionDark dark:bg-FunctionDark/15" title="Function">f</div></div>
+<div class="namespaceItemContent">
+		    <a href="..&#x2F;.&#x2F;bytesv4.ts&#x2F;~&#x2F;ipv4FromBytes.html" title="ipv4FromBytes">
+			    <span>ipv4FromBytes</span><span>(<div class="ml-4"><div><span>bytes<span>: <span class="td-ref">Uint8Array</span></span></span>,</div><div><span>offset<span class="td-op">?</span><span>: <span class="td-kw">number</span></span></span></div></div>)<span>: <span class="td-kw">number</span></span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Reads a 4-byte IPv4 address from a buffer.</p>
+</div></div></div>
     </div><div id="namespace_ipv4to64mapped" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-Function bg-Function/15 dark:text-FunctionDark dark:bg-FunctionDark/15" title="Function">f</div></div>
 <div class="namespaceItemContent">
 		    <a href="..&#x2F;.&#x2F;4to6.ts&#x2F;~&#x2F;ipv4To64Mapped.html" title="ipv4To64Mapped">
 			    <span>ipv4To64Mapped</span><span>(<span><span>address<span>: <span class="td-kw">number</span></span></span></span>)<span>: <span class="td-kw">bigint</span></span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Converts an IPv4 address to its IPv4-mapped IPv6 representation.</p>
+</div></div></div>
+    </div><div id="namespace_ipv4tobytes" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-Function bg-Function/15 dark:text-FunctionDark dark:bg-FunctionDark/15" title="Function">f</div></div>
+<div class="namespaceItemContent">
+		    <a href="..&#x2F;.&#x2F;bytesv4.ts&#x2F;~&#x2F;ipv4ToBytes.html" title="ipv4ToBytes">
+			    <span>ipv4ToBytes</span><span>(<div class="ml-4"><div><span>address<span>: <span class="td-kw">number</span></span></span>,</div><div><span>into<span class="td-op">?</span><span>: <span class="td-ref">Uint8Array</span></span></span>,</div><div><span>offset<span class="td-op">?</span><span>: <span class="td-kw">number</span></span></span></div></div>)<span>: <span class="td-ref">Uint8Array</span></span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Writes a 4-byte IPv4 address, either into a fresh buffer or into one you
+supply.</p>
+</div></div></div>
+    </div><div id="namespace_ipv6frombytes" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-Function bg-Function/15 dark:text-FunctionDark dark:bg-FunctionDark/15" title="Function">f</div></div>
+<div class="namespaceItemContent">
+		    <a href="..&#x2F;.&#x2F;bytesv6.ts&#x2F;~&#x2F;ipv6FromBytes.html" title="ipv6FromBytes">
+			    <span>ipv6FromBytes</span><span>(<div class="ml-4"><div><span>bytes<span>: <span class="td-ref">Uint8Array</span></span></span>,</div><div><span>offset<span class="td-op">?</span><span>: <span class="td-kw">number</span></span></span></div></div>)<span>: <span class="td-kw">bigint</span></span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Reads a 16-byte IPv6 address from a buffer.</p>
+</div></div></div>
+    </div><div id="namespace_ipv6tobytes" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-Function bg-Function/15 dark:text-FunctionDark dark:bg-FunctionDark/15" title="Function">f</div></div>
+<div class="namespaceItemContent">
+		    <a href="..&#x2F;.&#x2F;bytesv6.ts&#x2F;~&#x2F;ipv6ToBytes.html" title="ipv6ToBytes">
+			    <span>ipv6ToBytes</span><span>(<div class="ml-4"><div><span>address<span>: <span class="td-kw">bigint</span></span></span>,</div><div><span>into<span class="td-op">?</span><span>: <span class="td-ref">Uint8Array</span></span></span>,</div><div><span>offset<span class="td-op">?</span><span>: <span class="td-kw">number</span></span></span></div></div>)<span>: <span class="td-ref">Uint8Array</span></span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Writes a 16-byte IPv6 address, either into a fresh buffer or into one you
+supply.</p>
 </div></div></div>
     </div><div id="namespace_ipversion" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-Function bg-Function/15 dark:text-FunctionDark dark:bg-FunctionDark/15" title="Function">f</div></div>
 <div class="namespaceItemContent">
@@ -1833,12 +2047,12 @@ Type Aliases</h2></div><div class="namespaceSection"><div id="namespace_address"
 Variables</h2></div><div class="namespaceSection"><div id="namespace_cidrv4broadcastaddress" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-Variable bg-Variable/15 dark:text-VariableDark dark:bg-VariableDark/15" title="Variable">v</div></div>
 <div class="namespaceItemContent">
 		    <a href="..&#x2F;.&#x2F;cidrv4.ts&#x2F;~&#x2F;cidrv4BroadcastAddress.html" title="cidrv4BroadcastAddress">
-			    <span>cidrv4BroadcastAddress</span><span>: <span class="td-ref">cidrv4LastAddress</span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Returns the broadcast address (last IP) of a CIDR block.</p>
+			    <span>cidrv4BroadcastAddress</span><span>: <span class="td-ref">cidrv4LastAddress</span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Returns the directed broadcast address of a CIDR block.</p>
 </div></div></div>
     </div><div id="namespace_cidrv4networkaddress" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-Variable bg-Variable/15 dark:text-VariableDark dark:bg-VariableDark/15" title="Variable">v</div></div>
 <div class="namespaceItemContent">
 		    <a href="..&#x2F;.&#x2F;cidrv4.ts&#x2F;~&#x2F;cidrv4NetworkAddress.html" title="cidrv4NetworkAddress">
-			    <span>cidrv4NetworkAddress</span><span>: <span class="td-ref">cidrv4FirstAddress</span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Returns the network address (first IP) of a CIDR block.</p>
+			    <span>cidrv4NetworkAddress</span><span>: <span class="td-ref">cidrv4FirstAddress</span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Returns the network address of a CIDR block.</p>
 </div></div></div>
     </div></div>
 </section>
@@ -1913,7 +2127,7 @@ Variables</h2></div><div class="namespaceSection"><div id="namespace_cidrv4broad
                   </span>
                 </a>
               </li></ul><a class="flex items-center gap-0.5" href="..&#x2F;.&#x2F;all_symbols.html">
-              <span class="leading-none">view all 246 symbols</span><svg
+              <span class="leading-none">view all 275 symbols</span><svg
   width="16"
   height="16"
   viewBox="0 0 16 16"
@@ -1928,7 +2142,7 @@ Variables</h2></div><div class="namespaceSection"><div id="namespace_cidrv4broad
   />
 </svg>
 </a></nav><nav class="documentNavigation">
-          <h3>Document Navigation</h3><ul><li><ul><li><a href="#features" title="Features">Features</a></li><li><a href="#dual-stack-server" title="Dual-Stack Server">Dual-Stack Server</a></li></ul></li><li><a href="#examples" title="Examples">Examples</a></li><li><ul><li><a href="#example_0" title="Normalize client addresses from a dual-stack server">Normalize client addresses from a dual-stack server</a></li><li><a href="#example_1" title="Check if a client IP is in a set of trusted CIDR blocks">Check if a client IP is in a set of trusted CIDR blocks</a></li><li><a href="#example_2" title="Classify addresses for logging, analytics, or input validation">Classify addresses for logging, analytics, or input validation</a></li><li><a href="#example_3" title="Sort a mixed dual-stack list of addresses and CIDR blocks">Sort a mixed dual-stack list of addresses and CIDR blocks</a></li><li><a href="#example_4" title="Parse and stringify IPv4 and IPv6 addresses">Parse and stringify IPv4 and IPv6 addresses</a></li><li><a href="#example_5" title="Compute network and broadcast addresses from CIDR">Compute network and broadcast addresses from CIDR</a></li><li><a href="#example_6" title="Check if IPs fall within a CIDR block">Check if IPs fall within a CIDR block</a></li><li><a href="#example_7" title="Generate addresses in a CIDR block">Generate addresses in a CIDR block</a></li></ul></li><li><a href="#mod_ts_functions" title="Functions">Functions</a></li><li><ul><li><a href="#namespace_cidraddresses" title="cidrAddresses">cidrAddresses</a></li><li><a href="#namespace_cidrcontains" title="cidrContains">cidrContains</a></li><li><a href="#namespace_cidrcontainscidr" title="cidrContainsCidr">cidrContainsCidr</a></li><li><a href="#namespace_cidrintersect" title="cidrIntersect">cidrIntersect</a></li><li><a href="#namespace_cidrmerge" title="cidrMerge">cidrMerge</a></li><li><a href="#namespace_cidroverlaps" title="cidrOverlaps">cidrOverlaps</a></li><li><a href="#namespace_cidrsize" title="cidrSize">cidrSize</a></li><li><a href="#namespace_cidrsubtract" title="cidrSubtract">cidrSubtract</a></li><li><a href="#namespace_cidrv4addresses" title="cidrv4Addresses">cidrv4Addresses</a></li><li><a href="#namespace_cidrv4contains" title="cidrv4Contains">cidrv4Contains</a></li><li><a href="#namespace_cidrv4containscidr" title="cidrv4ContainsCidr">cidrv4ContainsCidr</a></li><li><a href="#namespace_cidrv4firstaddress" title="cidrv4FirstAddress">cidrv4FirstAddress</a></li><li><a href="#namespace_cidrv4fromcidrv64mapped" title="cidrv4FromCidrv64Mapped">cidrv4FromCidrv64Mapped</a></li><li><a href="#namespace_cidrv4intersect" title="cidrv4Intersect">cidrv4Intersect</a></li><li><a href="#namespace_cidrv4lastaddress" title="cidrv4LastAddress">cidrv4LastAddress</a></li><li><a href="#namespace_cidrv4mask" title="cidrv4Mask">cidrv4Mask</a></li><li><a href="#namespace_cidrv4masktoprefixlength" title="cidrv4MaskToPrefixLength">cidrv4MaskToPrefixLength</a></li><li><a href="#namespace_cidrv4merge" title="cidrv4Merge">cidrv4Merge</a></li><li><a href="#namespace_cidrv4overlaps" title="cidrv4Overlaps">cidrv4Overlaps</a></li><li><a href="#namespace_cidrv4size" title="cidrv4Size">cidrv4Size</a></li><li><a href="#namespace_cidrv4subtract" title="cidrv4Subtract">cidrv4Subtract</a></li><li><a href="#namespace_cidrv4tocidrv64mapped" title="cidrv4ToCidrv64Mapped">cidrv4ToCidrv64Mapped</a></li><li><a href="#namespace_cidrv6addresses" title="cidrv6Addresses">cidrv6Addresses</a></li><li><a href="#namespace_cidrv6contains" title="cidrv6Contains">cidrv6Contains</a></li><li><a href="#namespace_cidrv6containscidr" title="cidrv6ContainsCidr">cidrv6ContainsCidr</a></li><li><a href="#namespace_cidrv6firstaddress" title="cidrv6FirstAddress">cidrv6FirstAddress</a></li><li><a href="#namespace_cidrv6intersect" title="cidrv6Intersect">cidrv6Intersect</a></li><li><a href="#namespace_cidrv6lastaddress" title="cidrv6LastAddress">cidrv6LastAddress</a></li><li><a href="#namespace_cidrv6mask" title="cidrv6Mask">cidrv6Mask</a></li><li><a href="#namespace_cidrv6masktoprefixlength" title="cidrv6MaskToPrefixLength">cidrv6MaskToPrefixLength</a></li><li><a href="#namespace_cidrv6merge" title="cidrv6Merge">cidrv6Merge</a></li><li><a href="#namespace_cidrv6overlaps" title="cidrv6Overlaps">cidrv6Overlaps</a></li><li><a href="#namespace_cidrv6size" title="cidrv6Size">cidrv6Size</a></li><li><a href="#namespace_cidrv6subtract" title="cidrv6Subtract">cidrv6Subtract</a></li><li><a href="#namespace_cidrversion" title="cidrVersion">cidrVersion</a></li><li><a href="#namespace_classifyip" title="classifyIp">classifyIp</a></li><li><a href="#namespace_classifyipv4" title="classifyIpv4">classifyIpv4</a></li><li><a href="#namespace_classifyipv6" title="classifyIpv6">classifyIpv6</a></li><li><a href="#namespace_comparecidr" title="compareCidr">compareCidr</a></li><li><a href="#namespace_comparecidrv4" title="compareCidrv4">compareCidrv4</a></li><li><a href="#namespace_comparecidrv6" title="compareCidrv6">compareCidrv6</a></li><li><a href="#namespace_compareip" title="compareIp">compareIp</a></li><li><a href="#namespace_compareipv4" title="compareIpv4">compareIpv4</a></li><li><a href="#namespace_compareipv6" title="compareIpv6">compareIpv6</a></li><li><a href="#namespace_compressipv6" title="compressIpv6">compressIpv6</a></li><li><a href="#namespace_expandipv6" title="expandIpv6">expandIpv6</a></li><li><a href="#namespace_ipv4from64mapped" title="ipv4From64Mapped">ipv4From64Mapped</a></li><li><a href="#namespace_ipv4to64mapped" title="ipv4To64Mapped">ipv4To64Mapped</a></li><li><a href="#namespace_ipversion" title="ipVersion">ipVersion</a></li><li><a href="#namespace_iscidrv4" title="isCidrv4">isCidrv4</a></li><li><a href="#namespace_iscidrv6" title="isCidrv6">isCidrv6</a></li><li><a href="#namespace_isipv4benchmarking" title="isIpv4Benchmarking">isIpv4Benchmarking</a></li><li><a href="#namespace_isipv4broadcast" title="isIpv4Broadcast">isIpv4Broadcast</a></li><li><a href="#namespace_isipv4cgnat" title="isIpv4CgNat">isIpv4CgNat</a></li><li><a href="#namespace_isipv4documentation" title="isIpv4Documentation">isIpv4Documentation</a></li><li><a href="#namespace_isipv4linklocal" title="isIpv4LinkLocal">isIpv4LinkLocal</a></li><li><a href="#namespace_isipv4loopback" title="isIpv4Loopback">isIpv4Loopback</a></li><li><a href="#namespace_isipv4multicast" title="isIpv4Multicast">isIpv4Multicast</a></li><li><a href="#namespace_isipv4private" title="isIpv4Private">isIpv4Private</a></li><li><a href="#namespace_isipv4public" title="isIpv4Public">isIpv4Public</a></li><li><a href="#namespace_isipv4reserved" title="isIpv4Reserved">isIpv4Reserved</a></li><li><a href="#namespace_isipv4thisnetwork" title="isIpv4ThisNetwork">isIpv4ThisNetwork</a></li><li><a href="#namespace_isipv6benchmarking" title="isIpv6Benchmarking">isIpv6Benchmarking</a></li><li><a href="#namespace_isipv6documentation" title="isIpv6Documentation">isIpv6Documentation</a></li><li><a href="#namespace_isipv6globalunicast" title="isIpv6GlobalUnicast">isIpv6GlobalUnicast</a></li><li><a href="#namespace_isipv6ipv4mapped" title="isIpv6Ipv4Mapped">isIpv6Ipv4Mapped</a></li><li><a href="#namespace_isipv6ipv4translated" title="isIpv6Ipv4Translated">isIpv6Ipv4Translated</a></li><li><a href="#namespace_isipv6linklocal" title="isIpv6LinkLocal">isIpv6LinkLocal</a></li><li><a href="#namespace_isipv6loopback" title="isIpv6Loopback">isIpv6Loopback</a></li><li><a href="#namespace_isipv6multicast" title="isIpv6Multicast">isIpv6Multicast</a></li><li><a href="#namespace_isipv6orchidv2" title="isIpv6Orchidv2">isIpv6Orchidv2</a></li><li><a href="#namespace_isipv6teredo" title="isIpv6Teredo">isIpv6Teredo</a></li><li><a href="#namespace_isipv6uniquelocal" title="isIpv6UniqueLocal">isIpv6UniqueLocal</a></li><li><a href="#namespace_isipv6unspecified" title="isIpv6Unspecified">isIpv6Unspecified</a></li><li><a href="#namespace_isvalidcidr" title="isValidCidr">isValidCidr</a></li><li><a href="#namespace_isvalidcidrv4" title="isValidCidrv4">isValidCidrv4</a></li><li><a href="#namespace_isvalidcidrv6" title="isValidCidrv6">isValidCidrv6</a></li><li><a href="#namespace_isvalidip" title="isValidIp">isValidIp</a></li><li><a href="#namespace_isvalidipv4" title="isValidIpv4">isValidIpv4</a></li><li><a href="#namespace_isvalidipv6" title="isValidIpv6">isValidIpv6</a></li><li><a href="#namespace_parse" title="parse">parse</a></li><li><a href="#namespace_parsecidr" title="parseCidr">parseCidr</a></li><li><a href="#namespace_parsecidrv4" title="parseCidrv4">parseCidrv4</a></li><li><a href="#namespace_parsecidrv6" title="parseCidrv6">parseCidrv6</a></li><li><a href="#namespace_parseip" title="parseIp">parseIp</a></li><li><a href="#namespace_parseipv4" title="parseIpv4">parseIpv4</a></li><li><a href="#namespace_parseipv6" title="parseIpv6">parseIpv6</a></li><li><a href="#namespace_stringify" title="stringify">stringify</a></li><li><a href="#namespace_stringifycidr" title="stringifyCidr">stringifyCidr</a></li><li><a href="#namespace_stringifycidrv4" title="stringifyCidrv4">stringifyCidrv4</a></li><li><a href="#namespace_stringifycidrv6" title="stringifyCidrv6">stringifyCidrv6</a></li><li><a href="#namespace_stringifyip" title="stringifyIp">stringifyIp</a></li><li><a href="#namespace_stringifyipv4" title="stringifyIpv4">stringifyIpv4</a></li><li><a href="#namespace_stringifyipv6" title="stringifyIpv6">stringifyIpv6</a></li></ul></li><li><a href="#mod_ts_type-aliases" title="Type Aliases">Type Aliases</a></li><li><ul><li><a href="#namespace_address" title="Address">Address</a></li><li><a href="#namespace_addressorcidr" title="AddressOrCidr">AddressOrCidr</a></li><li><a href="#namespace_cidr" title="Cidr">Cidr</a></li><li><a href="#namespace_cidrv4" title="Cidrv4">Cidrv4</a></li><li><a href="#namespace_cidrv6" title="Cidrv6">Cidrv6</a></li><li><a href="#namespace_classificationipv4" title="ClassificationIpv4">ClassificationIpv4</a></li><li><a href="#namespace_classificationipv6" title="ClassificationIpv6">ClassificationIpv6</a></li><li><a href="#namespace_classifiedip" title="ClassifiedIp">ClassifiedIp</a></li><li><a href="#namespace_classifiedipv4" title="ClassifiedIpv4">ClassifiedIpv4</a></li><li><a href="#namespace_classifiedipv6" title="ClassifiedIpv6">ClassifiedIpv6</a></li><li><a href="#namespace_ipversion-1" title="IpVersion">IpVersion</a></li></ul></li><li><a href="#mod_ts_variables" title="Variables">Variables</a></li><li><ul><li><a href="#namespace_cidrv4broadcastaddress" title="cidrv4BroadcastAddress">cidrv4BroadcastAddress</a></li><li><a href="#namespace_cidrv4networkaddress" title="cidrv4NetworkAddress">cidrv4NetworkAddress</a></li></ul></li></ul></nav></div>
+          <h3>Document Navigation</h3><ul><li><ul><li><a href="#features" title="Features">Features</a></li><li><a href="#dual-stack-server" title="Dual-Stack Server">Dual-Stack Server</a></li></ul></li><li><a href="#examples" title="Examples">Examples</a></li><li><ul><li><a href="#example_0" title="Normalize client addresses from a dual-stack server">Normalize client addresses from a dual-stack server</a></li><li><a href="#example_1" title="Check if a client IP is in a set of trusted CIDR blocks">Check if a client IP is in a set of trusted CIDR blocks</a></li><li><a href="#example_2" title="Classify addresses for logging, analytics, or input validation">Classify addresses for logging, analytics, or input validation</a></li><li><a href="#example_3" title="Sort a mixed dual-stack list of addresses and CIDR blocks">Sort a mixed dual-stack list of addresses and CIDR blocks</a></li><li><a href="#example_4" title="Parse and stringify IPv4 and IPv6 addresses">Parse and stringify IPv4 and IPv6 addresses</a></li><li><a href="#example_5" title="Compute network and broadcast addresses from CIDR">Compute network and broadcast addresses from CIDR</a></li><li><a href="#example_6" title="Check if IPs fall within a CIDR block">Check if IPs fall within a CIDR block</a></li><li><a href="#example_7" title="Generate addresses in a CIDR block">Generate addresses in a CIDR block</a></li><li><a href="#example_8" title="Decode addresses straight out of a packet buffer">Decode addresses straight out of a packet buffer</a></li></ul></li><li><a href="#mod_ts_functions" title="Functions">Functions</a></li><li><ul><li><a href="#namespace_cidraddresses" title="cidrAddresses">cidrAddresses</a></li><li><a href="#namespace_cidrcontains" title="cidrContains">cidrContains</a></li><li><a href="#namespace_cidrcontainscidr" title="cidrContainsCidr">cidrContainsCidr</a></li><li><a href="#namespace_cidrfirstaddress" title="cidrFirstAddress">cidrFirstAddress</a></li><li><a href="#namespace_cidrintersect" title="cidrIntersect">cidrIntersect</a></li><li><a href="#namespace_cidrlastaddress" title="cidrLastAddress">cidrLastAddress</a></li><li><a href="#namespace_cidrmerge" title="cidrMerge">cidrMerge</a></li><li><a href="#namespace_cidroverlaps" title="cidrOverlaps">cidrOverlaps</a></li><li><a href="#namespace_cidrsize" title="cidrSize">cidrSize</a></li><li><a href="#namespace_cidrsubtract" title="cidrSubtract">cidrSubtract</a></li><li><a href="#namespace_cidrv4addresses" title="cidrv4Addresses">cidrv4Addresses</a></li><li><a href="#namespace_cidrv4contains" title="cidrv4Contains">cidrv4Contains</a></li><li><a href="#namespace_cidrv4containscidr" title="cidrv4ContainsCidr">cidrv4ContainsCidr</a></li><li><a href="#namespace_cidrv4firstaddress" title="cidrv4FirstAddress">cidrv4FirstAddress</a></li><li><a href="#namespace_cidrv4firstusableaddress" title="cidrv4FirstUsableAddress">cidrv4FirstUsableAddress</a></li><li><a href="#namespace_cidrv4fromcidrv64mapped" title="cidrv4FromCidrv64Mapped">cidrv4FromCidrv64Mapped</a></li><li><a href="#namespace_cidrv4intersect" title="cidrv4Intersect">cidrv4Intersect</a></li><li><a href="#namespace_cidrv4lastaddress" title="cidrv4LastAddress">cidrv4LastAddress</a></li><li><a href="#namespace_cidrv4lastusableaddress" title="cidrv4LastUsableAddress">cidrv4LastUsableAddress</a></li><li><a href="#namespace_cidrv4mask" title="cidrv4Mask">cidrv4Mask</a></li><li><a href="#namespace_cidrv4masktoprefixlength" title="cidrv4MaskToPrefixLength">cidrv4MaskToPrefixLength</a></li><li><a href="#namespace_cidrv4merge" title="cidrv4Merge">cidrv4Merge</a></li><li><a href="#namespace_cidrv4overlaps" title="cidrv4Overlaps">cidrv4Overlaps</a></li><li><a href="#namespace_cidrv4size" title="cidrv4Size">cidrv4Size</a></li><li><a href="#namespace_cidrv4subtract" title="cidrv4Subtract">cidrv4Subtract</a></li><li><a href="#namespace_cidrv4tocidrv64mapped" title="cidrv4ToCidrv64Mapped">cidrv4ToCidrv64Mapped</a></li><li><a href="#namespace_cidrv4usableaddresses" title="cidrv4UsableAddresses">cidrv4UsableAddresses</a></li><li><a href="#namespace_cidrv4usablesize" title="cidrv4UsableSize">cidrv4UsableSize</a></li><li><a href="#namespace_cidrv6addresses" title="cidrv6Addresses">cidrv6Addresses</a></li><li><a href="#namespace_cidrv6contains" title="cidrv6Contains">cidrv6Contains</a></li><li><a href="#namespace_cidrv6containscidr" title="cidrv6ContainsCidr">cidrv6ContainsCidr</a></li><li><a href="#namespace_cidrv6firstaddress" title="cidrv6FirstAddress">cidrv6FirstAddress</a></li><li><a href="#namespace_cidrv6intersect" title="cidrv6Intersect">cidrv6Intersect</a></li><li><a href="#namespace_cidrv6lastaddress" title="cidrv6LastAddress">cidrv6LastAddress</a></li><li><a href="#namespace_cidrv6mask" title="cidrv6Mask">cidrv6Mask</a></li><li><a href="#namespace_cidrv6masktoprefixlength" title="cidrv6MaskToPrefixLength">cidrv6MaskToPrefixLength</a></li><li><a href="#namespace_cidrv6merge" title="cidrv6Merge">cidrv6Merge</a></li><li><a href="#namespace_cidrv6overlaps" title="cidrv6Overlaps">cidrv6Overlaps</a></li><li><a href="#namespace_cidrv6size" title="cidrv6Size">cidrv6Size</a></li><li><a href="#namespace_cidrv6subtract" title="cidrv6Subtract">cidrv6Subtract</a></li><li><a href="#namespace_cidrversion" title="cidrVersion">cidrVersion</a></li><li><a href="#namespace_classifyip" title="classifyIp">classifyIp</a></li><li><a href="#namespace_classifyipv4" title="classifyIpv4">classifyIpv4</a></li><li><a href="#namespace_classifyipv6" title="classifyIpv6">classifyIpv6</a></li><li><a href="#namespace_comparecidr" title="compareCidr">compareCidr</a></li><li><a href="#namespace_comparecidrv4" title="compareCidrv4">compareCidrv4</a></li><li><a href="#namespace_comparecidrv6" title="compareCidrv6">compareCidrv6</a></li><li><a href="#namespace_compareip" title="compareIp">compareIp</a></li><li><a href="#namespace_compareipv4" title="compareIpv4">compareIpv4</a></li><li><a href="#namespace_compareipv6" title="compareIpv6">compareIpv6</a></li><li><a href="#namespace_compressipv6" title="compressIpv6">compressIpv6</a></li><li><a href="#namespace_expandipv6" title="expandIpv6">expandIpv6</a></li><li><a href="#namespace_ipfrombytes" title="ipFromBytes">ipFromBytes</a></li><li><a href="#namespace_iptobytes" title="ipToBytes">ipToBytes</a></li><li><a href="#namespace_ipv4from64mapped" title="ipv4From64Mapped">ipv4From64Mapped</a></li><li><a href="#namespace_ipv4frombytes" title="ipv4FromBytes">ipv4FromBytes</a></li><li><a href="#namespace_ipv4to64mapped" title="ipv4To64Mapped">ipv4To64Mapped</a></li><li><a href="#namespace_ipv4tobytes" title="ipv4ToBytes">ipv4ToBytes</a></li><li><a href="#namespace_ipv6frombytes" title="ipv6FromBytes">ipv6FromBytes</a></li><li><a href="#namespace_ipv6tobytes" title="ipv6ToBytes">ipv6ToBytes</a></li><li><a href="#namespace_ipversion" title="ipVersion">ipVersion</a></li><li><a href="#namespace_iscidrv4" title="isCidrv4">isCidrv4</a></li><li><a href="#namespace_iscidrv6" title="isCidrv6">isCidrv6</a></li><li><a href="#namespace_isipv4benchmarking" title="isIpv4Benchmarking">isIpv4Benchmarking</a></li><li><a href="#namespace_isipv4broadcast" title="isIpv4Broadcast">isIpv4Broadcast</a></li><li><a href="#namespace_isipv4cgnat" title="isIpv4CgNat">isIpv4CgNat</a></li><li><a href="#namespace_isipv4documentation" title="isIpv4Documentation">isIpv4Documentation</a></li><li><a href="#namespace_isipv4linklocal" title="isIpv4LinkLocal">isIpv4LinkLocal</a></li><li><a href="#namespace_isipv4loopback" title="isIpv4Loopback">isIpv4Loopback</a></li><li><a href="#namespace_isipv4multicast" title="isIpv4Multicast">isIpv4Multicast</a></li><li><a href="#namespace_isipv4private" title="isIpv4Private">isIpv4Private</a></li><li><a href="#namespace_isipv4public" title="isIpv4Public">isIpv4Public</a></li><li><a href="#namespace_isipv4reserved" title="isIpv4Reserved">isIpv4Reserved</a></li><li><a href="#namespace_isipv4thisnetwork" title="isIpv4ThisNetwork">isIpv4ThisNetwork</a></li><li><a href="#namespace_isipv6benchmarking" title="isIpv6Benchmarking">isIpv6Benchmarking</a></li><li><a href="#namespace_isipv6documentation" title="isIpv6Documentation">isIpv6Documentation</a></li><li><a href="#namespace_isipv6globalunicast" title="isIpv6GlobalUnicast">isIpv6GlobalUnicast</a></li><li><a href="#namespace_isipv6ipv4mapped" title="isIpv6Ipv4Mapped">isIpv6Ipv4Mapped</a></li><li><a href="#namespace_isipv6ipv4translated" title="isIpv6Ipv4Translated">isIpv6Ipv4Translated</a></li><li><a href="#namespace_isipv6linklocal" title="isIpv6LinkLocal">isIpv6LinkLocal</a></li><li><a href="#namespace_isipv6loopback" title="isIpv6Loopback">isIpv6Loopback</a></li><li><a href="#namespace_isipv6multicast" title="isIpv6Multicast">isIpv6Multicast</a></li><li><a href="#namespace_isipv6orchidv2" title="isIpv6Orchidv2">isIpv6Orchidv2</a></li><li><a href="#namespace_isipv6teredo" title="isIpv6Teredo">isIpv6Teredo</a></li><li><a href="#namespace_isipv6uniquelocal" title="isIpv6UniqueLocal">isIpv6UniqueLocal</a></li><li><a href="#namespace_isipv6unspecified" title="isIpv6Unspecified">isIpv6Unspecified</a></li><li><a href="#namespace_isvalidcidr" title="isValidCidr">isValidCidr</a></li><li><a href="#namespace_isvalidcidrv4" title="isValidCidrv4">isValidCidrv4</a></li><li><a href="#namespace_isvalidcidrv6" title="isValidCidrv6">isValidCidrv6</a></li><li><a href="#namespace_isvalidip" title="isValidIp">isValidIp</a></li><li><a href="#namespace_isvalidipv4" title="isValidIpv4">isValidIpv4</a></li><li><a href="#namespace_isvalidipv6" title="isValidIpv6">isValidIpv6</a></li><li><a href="#namespace_parse" title="parse">parse</a></li><li><a href="#namespace_parsecidr" title="parseCidr">parseCidr</a></li><li><a href="#namespace_parsecidrv4" title="parseCidrv4">parseCidrv4</a></li><li><a href="#namespace_parsecidrv6" title="parseCidrv6">parseCidrv6</a></li><li><a href="#namespace_parseip" title="parseIp">parseIp</a></li><li><a href="#namespace_parseipv4" title="parseIpv4">parseIpv4</a></li><li><a href="#namespace_parseipv6" title="parseIpv6">parseIpv6</a></li><li><a href="#namespace_stringify" title="stringify">stringify</a></li><li><a href="#namespace_stringifycidr" title="stringifyCidr">stringifyCidr</a></li><li><a href="#namespace_stringifycidrv4" title="stringifyCidrv4">stringifyCidrv4</a></li><li><a href="#namespace_stringifycidrv6" title="stringifyCidrv6">stringifyCidrv6</a></li><li><a href="#namespace_stringifyip" title="stringifyIp">stringifyIp</a></li><li><a href="#namespace_stringifyipv4" title="stringifyIpv4">stringifyIpv4</a></li><li><a href="#namespace_stringifyipv6" title="stringifyIpv6">stringifyIpv6</a></li></ul></li><li><a href="#mod_ts_type-aliases" title="Type Aliases">Type Aliases</a></li><li><ul><li><a href="#namespace_address" title="Address">Address</a></li><li><a href="#namespace_addressorcidr" title="AddressOrCidr">AddressOrCidr</a></li><li><a href="#namespace_cidr" title="Cidr">Cidr</a></li><li><a href="#namespace_cidrv4" title="Cidrv4">Cidrv4</a></li><li><a href="#namespace_cidrv6" title="Cidrv6">Cidrv6</a></li><li><a href="#namespace_classificationipv4" title="ClassificationIpv4">ClassificationIpv4</a></li><li><a href="#namespace_classificationipv6" title="ClassificationIpv6">ClassificationIpv6</a></li><li><a href="#namespace_classifiedip" title="ClassifiedIp">ClassifiedIp</a></li><li><a href="#namespace_classifiedipv4" title="ClassifiedIpv4">ClassifiedIpv4</a></li><li><a href="#namespace_classifiedipv6" title="ClassifiedIpv6">ClassifiedIpv6</a></li><li><a href="#namespace_ipversion-1" title="IpVersion">IpVersion</a></li></ul></li><li><a href="#mod_ts_variables" title="Variables">Variables</a></li><li><ul><li><a href="#namespace_cidrv4broadcastaddress" title="cidrv4BroadcastAddress">cidrv4BroadcastAddress</a></li><li><a href="#namespace_cidrv4networkaddress" title="cidrv4NetworkAddress">cidrv4NetworkAddress</a></li></ul></li></ul></nav></div>
   </div></div>
 </div>
 </div>
