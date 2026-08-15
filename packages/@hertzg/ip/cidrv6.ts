@@ -58,11 +58,13 @@ export type Cidrv6 = {
  * author time, which is what makes a plain array the right cache — see
  * ADR 0006 for the same reasoning applied to the classifier ranges.
  *
- * Deliberately not `Object.freeze`d. Freezing transitions the elements kind
- * and takes element reads off V8's fast path: 4.33ns per lookup frozen versus
- * 0.92ns plain, slower even than a `Map` at 3.10ns. (Loop floor subtracted;
- * measured one lookup at a time, `Deno.bench` overhead swamps all three.)
- * The `readonly` type already prevents mutation everywhere it matters.
+ * Deliberately left extensible. Making an array non-extensible moves it out
+ * of `PACKED_ELEMENTS` into the sealed/frozen elements kinds, which are not
+ * on V8's fast path for keyed loads: 4.33ns per lookup versus 0.92ns packed,
+ * slower even than a `Map` at 3.10ns. `Object.seal` and
+ * `Object.preventExtensions` measure the same as `Object.freeze` here -- the
+ * cost is the non-extensibility, not the immutability -- so none of the three
+ * is a way out. The `readonly` type prevents mutation where it matters.
  */
 const MASKS_V6: readonly bigint[] = Array.from(
   { length: 129 },
