@@ -167,6 +167,10 @@
 </a>
 <span class="font-bold">cidrv6LastAddress</span><span class="font-medium">(<span><span>cidr<span>: <a href="../.././mod.ts/~/Cidrv6.html" class="link td-ref">Cidrv6</a></span></span></span>)<span>: <span class="td-kw">bigint</span></span> </span>
       </code><div class="space-y-7" id=""><div class="markdown"><p>Returns the last address of a CIDR block.</p>
+<p>IPv6 has no broadcast address, so nothing is reserved at the top of a
+block and this address is assignable. That is why there is deliberately
+no <code>cidrv6BroadcastAddress</code> and no <code>cidrv6LastUsableAddress</code> to pair with
+their IPv4 counterparts — the asymmetry is a fact about IPv6, not a gap.</p>
 </div><section class="section"  id="examples"><div>
       <h2 class="anchorable mb-1"><a href="#examples" class="anchor" aria-label="Anchor" tabIndex="-1"><svg
   width="16"
