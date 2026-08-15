@@ -3,7 +3,9 @@ import {
   cidrAddresses,
   cidrContains,
   cidrContainsCidr,
+  cidrFirstAddress,
   cidrIntersect,
+  cidrLastAddress,
   cidrMerge,
   cidrOverlaps,
   cidrSize,
@@ -12,10 +14,10 @@ import {
   parseCidr,
   stringifyCidr,
 } from "./cidr.ts";
+import { parseIp, stringifyIp } from "./ip.ts";
 import { isValidCidr } from "./validate.ts";
-import { parseIp } from "./ip.ts";
 import { parseIpv6 } from "./ipv6.ts";
-import type { Cidrv4 } from "./cidrv4.ts";
+import { type Cidrv4, parseCidrv4 } from "./cidrv4.ts";
 import { type Cidrv6, parseCidrv6 } from "./cidrv6.ts";
 
 Deno.test("parseCidr", async (t) => {
@@ -464,5 +466,63 @@ Deno.test("compareCidr", async (t) => {
 
     assertEquals(blocks.toSorted(compareCidr).map(stringifyCidr), ordered);
     assertEquals(cidrMerge(blocks).map(stringifyCidr), ordered);
+  });
+});
+
+Deno.test("cidrFirstAddress", async (t) => {
+  await t.step("returns number for IPv4", () => {
+    const address = cidrFirstAddress(parseCidr("192.168.1.0/24"));
+    assertEquals(typeof address, "number");
+    assertEquals(stringifyIp(address), "192.168.1.0");
+  });
+
+  await t.step("returns bigint for IPv6", () => {
+    const address = cidrFirstAddress(parseCidr("2001:db8::/32"));
+    assertEquals(typeof address, "bigint");
+    assertEquals(stringifyIp(address), "2001:db8::");
+  });
+
+  await t.step("masks a non-canonical block of either version", () => {
+    assertEquals(
+      stringifyIp(cidrFirstAddress(parseCidr("192.168.1.77/24"))),
+      "192.168.1.0",
+    );
+    assertEquals(
+      stringifyIp(cidrFirstAddress(parseCidr("2001:db8::dead/32"))),
+      "2001:db8::",
+    );
+  });
+});
+
+Deno.test("cidrLastAddress", async (t) => {
+  await t.step("returns number for IPv4", () => {
+    const address = cidrLastAddress(parseCidr("192.168.1.0/24"));
+    assertEquals(typeof address, "number");
+    assertEquals(stringifyIp(address), "192.168.1.255");
+  });
+
+  await t.step("returns bigint for IPv6", () => {
+    const address = cidrLastAddress(parseCidr("2001:db8::/120"));
+    assertEquals(typeof address, "bigint");
+    assertEquals(stringifyIp(address), "2001:db8::ff");
+  });
+
+  await t.step("masks a non-canonical block of either version", () => {
+    assertEquals(
+      stringifyIp(cidrLastAddress(parseCidr("192.168.1.77/24"))),
+      "192.168.1.255",
+    );
+    assertEquals(
+      stringifyIp(cidrLastAddress(parseCidr("2001:db8::dead/112"))),
+      "2001:db8::ffff",
+    );
+  });
+
+  await t.step("bounds span the whole block when the version is known", () => {
+    const v4 = parseCidrv4("10.0.0.0/29");
+    assertEquals(cidrLastAddress(v4) - cidrFirstAddress(v4) + 1, cidrSize(v4));
+
+    const v6 = parseCidrv6("fd00::/120");
+    assertEquals(cidrLastAddress(v6) - cidrFirstAddress(v6) + 1n, cidrSize(v6));
   });
 });

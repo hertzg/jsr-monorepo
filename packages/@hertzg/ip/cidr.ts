@@ -5,8 +5,9 @@
  * {@link isValidCidr}, {@link cidrContains},
  * {@link cidrContainsCidr}, {@link cidrOverlaps},
  * {@link cidrIntersect}, {@link cidrSubtract}, {@link cidrMerge},
- * {@link cidrSize}, {@link cidrAddresses}, and {@link compareCidr} that
- * auto-detect IPv4 vs IPv6 and delegate to the appropriate version-specific
+ * {@link cidrSize}, {@link cidrFirstAddress}, {@link cidrLastAddress},
+ * {@link cidrAddresses}, and {@link compareCidr} that auto-detect IPv4 vs
+ * IPv6 and delegate to the appropriate version-specific
  * function. The {@link Cidr}
  * type alias and {@link isCidrv4}/{@link isCidrv6} type guards are also
  * exported for working with version-polymorphic CIDR values, along with the
@@ -43,7 +44,9 @@ import {
   cidrv4Addresses,
   cidrv4Contains,
   cidrv4ContainsCidr,
+  cidrv4FirstAddress,
   cidrv4Intersect,
+  cidrv4LastAddress,
   cidrv4Merge,
   cidrv4Overlaps,
   cidrv4Size,
@@ -57,7 +60,9 @@ import {
   cidrv6Addresses,
   cidrv6Contains,
   cidrv6ContainsCidr,
+  cidrv6FirstAddress,
   cidrv6Intersect,
+  cidrv6LastAddress,
   cidrv6Merge,
   cidrv6Overlaps,
   cidrv6Size,
@@ -577,6 +582,113 @@ export function cidrSize(cidr: Cidr): number | bigint {
     return cidrv6Size(cidr);
   }
   return cidrv4Size(cidr);
+}
+
+/**
+ * Returns the first address of a CIDR block.
+ *
+ * Dispatches to {@link cidrv4FirstAddress} or {@link cidrv6FirstAddress}
+ * based on the address type. Masking a non-canonical block through this is
+ * the version-agnostic way to canonicalize it.
+ *
+ * There is deliberately no universal `cidrFirstUsableAddress`: the addresses
+ * an operator may assign differ per version, and IPv6 has no library-wide
+ * rule to apply. The usable-address vocabulary is IPv4-only — see
+ * {@link https://jsr.io/@hertzg/ip/doc/cidrv4/~/cidrv4FirstUsableAddress | cidrv4FirstUsableAddress}.
+ *
+ * @param cidr The CIDR block
+ * @returns The first address (number for IPv4, bigint for IPv6)
+ *
+ * @example
+ * ```ts
+ * import { assertEquals } from "@std/assert";
+ * import { cidrFirstAddress, parseCidr } from "@hertzg/ip/cidr";
+ * import { stringifyIp } from "@hertzg/ip/ip";
+ *
+ * assertEquals(stringifyIp(cidrFirstAddress(parseCidr("192.168.1.0/24"))), "192.168.1.0");
+ * assertEquals(stringifyIp(cidrFirstAddress(parseCidr("2001:db8::/32"))), "2001:db8::");
+ * ```
+ *
+ * @example Sorting blocks by their first address
+ * ```ts
+ * import { assertEquals } from "@std/assert";
+ * import { cidrFirstAddress, parseCidr, stringifyCidr } from "@hertzg/ip/cidr";
+ *
+ * const blocks = [
+ *   parseCidr("10.0.2.0/24"),
+ *   parseCidr("10.0.0.0/24"),
+ *   parseCidr("10.0.1.0/24"),
+ * ];
+ * blocks.sort((a, b) => Number(cidrFirstAddress(a)) - Number(cidrFirstAddress(b)));
+ *
+ * assertEquals(blocks.map(stringifyCidr), [
+ *   "10.0.0.0/24",
+ *   "10.0.1.0/24",
+ *   "10.0.2.0/24",
+ * ]);
+ * ```
+ */
+export function cidrFirstAddress<T extends Cidr>(
+  cidr: T,
+): T extends Cidrv6 ? bigint : number;
+/** Returns the first address of a CIDR block. */
+export function cidrFirstAddress(cidr: Cidr): Address {
+  if (isCidrv6(cidr)) {
+    return cidrv6FirstAddress(cidr);
+  }
+  return cidrv4FirstAddress(cidr);
+}
+
+/**
+ * Returns the last address of a CIDR block.
+ *
+ * Dispatches to {@link cidrv4LastAddress} or {@link cidrv6LastAddress} based
+ * on the address type. Together with {@link cidrFirstAddress} this gives the
+ * numeric bounds of a block without knowing its version — the pair sorting,
+ * range comparison, and interval arithmetic want.
+ *
+ * Note the versions differ in what the last address *means*: for IPv4 it is
+ * the directed broadcast address and is not assignable
+ * ({@link https://jsr.io/@hertzg/ip/doc/cidrv4/~/cidrv4BroadcastAddress | cidrv4BroadcastAddress}),
+ * while IPv6 has no broadcast address and the last address is assignable.
+ *
+ * @param cidr The CIDR block
+ * @returns The last address (number for IPv4, bigint for IPv6)
+ *
+ * @example
+ * ```ts
+ * import { assertEquals } from "@std/assert";
+ * import { cidrLastAddress, parseCidr } from "@hertzg/ip/cidr";
+ * import { stringifyIp } from "@hertzg/ip/ip";
+ *
+ * assertEquals(stringifyIp(cidrLastAddress(parseCidr("192.168.1.0/24"))), "192.168.1.255");
+ * assertEquals(stringifyIp(cidrLastAddress(parseCidr("2001:db8::/120"))), "2001:db8::ff");
+ * ```
+ *
+ * @example The bounds of a block, without knowing its version
+ * ```ts
+ * import { assertEquals } from "@std/assert";
+ * import { cidrFirstAddress, cidrLastAddress, parseCidr } from "@hertzg/ip/cidr";
+ * import { stringifyIp } from "@hertzg/ip/ip";
+ *
+ * const v4 = parseCidr("10.0.0.0/29");
+ * assertEquals(stringifyIp(cidrFirstAddress(v4)), "10.0.0.0");
+ * assertEquals(stringifyIp(cidrLastAddress(v4)), "10.0.0.7");
+ *
+ * const v6 = parseCidr("fd00::/125");
+ * assertEquals(stringifyIp(cidrFirstAddress(v6)), "fd00::");
+ * assertEquals(stringifyIp(cidrLastAddress(v6)), "fd00::7");
+ * ```
+ */
+export function cidrLastAddress<T extends Cidr>(
+  cidr: T,
+): T extends Cidrv6 ? bigint : number;
+/** Returns the last address of a CIDR block. */
+export function cidrLastAddress(cidr: Cidr): Address {
+  if (isCidrv6(cidr)) {
+    return cidrv6LastAddress(cidr);
+  }
+  return cidrv4LastAddress(cidr);
 }
 
 /** Generates all addresses in an IPv4 CIDR block. */
