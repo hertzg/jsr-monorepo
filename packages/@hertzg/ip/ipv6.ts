@@ -355,13 +355,13 @@ export function stringifyIpv6Expanded(address: bigint): string {
     );
   }
 
-  const groups: string[] = [];
-  for (let i = 0; i < 8; i++) {
-    const group = Number((address >> BigInt((7 - i) * 16)) & 0xFFFFn);
-    groups.push(group.toString(16).padStart(4, "0"));
-  }
+  const hex = address.toString(16).padStart(32, "0");
 
-  return groups.join(":");
+  return `${hex.slice(0, 4)}:${hex.slice(4, 8)}:${hex.slice(8, 12)}:${
+    hex.slice(12, 16)
+  }:${hex.slice(16, 20)}:${hex.slice(20, 24)}:${hex.slice(24, 28)}:${
+    hex.slice(28, 32)
+  }`;
 }
 
 /**

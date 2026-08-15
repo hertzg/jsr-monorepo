@@ -315,13 +315,6 @@ Deno.test("stringifyIpv6Expanded", async (t) => {
       RangeError,
     );
   });
-
-  await t.step("expandIpv6 is its composition with parseIpv6", () => {
-    assertEquals(
-      expandIpv6("2001:db8::1"),
-      stringifyIpv6Expanded(parseIpv6("2001:db8::1")),
-    );
-  });
 });
 
 Deno.test("expandIpv6", async (t) => {

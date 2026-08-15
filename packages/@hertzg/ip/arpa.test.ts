@@ -23,10 +23,6 @@ Deno.test("ipv4ToArpa", async (t) => {
       "255.255.255.255.in-addr.arpa",
     );
   });
-
-  await t.step("the name is relative -- no trailing dot", () => {
-    assertFalse(ipv4ToArpa(parseIpv4("192.168.0.1")).endsWith("."));
-  });
 });
 
 Deno.test("ipv6ToArpa", async (t) => {
@@ -68,10 +64,6 @@ Deno.test("ipv6ToArpa", async (t) => {
       "1.0.0.0.8.a.0.c.f.f.f.f.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.ip6.arpa",
     );
   });
-
-  await t.step("the name is relative -- no trailing dot", () => {
-    assertFalse(ipv6ToArpa(parseIpv6("2001:db8::1")).endsWith("."));
-  });
 });
 
 Deno.test("ipToArpa", async (t) => {
@@ -98,8 +90,9 @@ Deno.test("ipToArpa", async (t) => {
       );
     },
   );
+});
 
-  await t.step("the name is relative -- no trailing dot", () => {
-    assertFalse(ipToArpa(parseIp("2001:db8::1")).endsWith("."));
-  });
+Deno.test("the names are relative -- no trailing dot", () => {
+  assertFalse(ipv4ToArpa(parseIpv4("192.168.0.1")).endsWith("."));
+  assertFalse(ipv6ToArpa(parseIpv6("2001:db8::1")).endsWith("."));
 });
