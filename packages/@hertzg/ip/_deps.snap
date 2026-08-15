@@ -16,6 +16,7 @@
     "./validatev4": [],
     "./validatev6": [],
     "./4to6": [],
+    "./arpa": [],
     "./bytes": [],
     "./bytesv4": [],
     "./bytesv6": []

@@ -670,6 +670,8 @@ export {
   parseIpv6,
   /** Convert bigint to compressed colon-hexadecimal. */
   stringifyIpv6,
+  /** Convert bigint to full uncompressed colon-hexadecimal. */
+  stringifyIpv6Expanded,
 } from "./ipv6.ts";
 export {
   /** Check if a string is valid IPv6 CIDR notation. */
@@ -775,3 +777,14 @@ export {
   /** Write a 16-byte IPv6 address to a buffer. */
   ipv6ToBytes,
 } from "./bytesv6.ts";
+
+// --- Reverse DNS pointer names ---
+
+export {
+  /** Build the reverse DNS pointer name of an address of either version. */
+  ipToArpa,
+  /** Build the `in-addr.arpa` pointer name of an IPv4 address. */
+  ipv4ToArpa,
+  /** Build the `ip6.arpa` pointer name of an IPv6 address. */
+  ipv6ToArpa,
+} from "./arpa.ts";

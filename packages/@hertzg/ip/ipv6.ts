@@ -307,9 +307,69 @@ export function stringifyIpv6(address: bigint): string {
 }
 
 /**
+ * Stringifies a bigint to an IPv6 address in full uncompressed
+ * colon-hexadecimal notation.
+ *
+ * Every one of the 8 groups is written with all 4 hex digits, and no run of
+ * zero groups is replaced with `::`. This is the counterpart of
+ * {@link stringifyIpv6}, which produces the canonical compressed form, and
+ * the bigint-taking counterpart of {@link expandIpv6}, which takes a string.
+ *
+ * @param address The address as a 128-bit bigint
+ * @returns The IPv6 address string with all 8 groups written in full
+ * @throws {RangeError} If the address is negative or greater than 2^128-1
+ *
+ * @example Basic stringifying
+ * ```ts
+ * import { assertEquals } from "@std/assert";
+ * import { stringifyIpv6Expanded } from "@hertzg/ip/ipv6";
+ *
+ * assertEquals(stringifyIpv6Expanded(0n), "0000:0000:0000:0000:0000:0000:0000:0000");
+ * assertEquals(stringifyIpv6Expanded(1n), "0000:0000:0000:0000:0000:0000:0000:0001");
+ * assertEquals(stringifyIpv6Expanded(42540766411282592856903984951653826561n), "2001:0db8:0000:0000:0000:0000:0000:0001");
+ * ```
+ *
+ * @example Nothing is compressed or elided
+ * ```ts
+ * import { assertEquals } from "@std/assert";
+ * import { parseIpv6, stringifyIpv6, stringifyIpv6Expanded } from "@hertzg/ip/ipv6";
+ *
+ * const address = parseIpv6("2001:db8::1");
+ * assertEquals(stringifyIpv6(address), "2001:db8::1");
+ * assertEquals(stringifyIpv6Expanded(address), "2001:0db8:0000:0000:0000:0000:0000:0001");
+ * ```
+ *
+ * @example Error handling
+ * ```ts
+ * import { assertThrows } from "@std/assert";
+ * import { stringifyIpv6Expanded } from "@hertzg/ip/ipv6";
+ *
+ * assertThrows(() => stringifyIpv6Expanded(-1n), RangeError);
+ * assertThrows(() => stringifyIpv6Expanded(340282366920938463463374607431768211456n), RangeError);
+ * ```
+ */
+export function stringifyIpv6Expanded(address: bigint): string {
+  if (address < 0n || address > 0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFn) {
+    throw new RangeError(
+      `IPv6 value out of range: ${address} (must be 0 to 2^128-1)`,
+    );
+  }
+
+  const groups: string[] = [];
+  for (let i = 0; i < 8; i++) {
+    const group = Number((address >> BigInt((7 - i) * 16)) & 0xFFFFn);
+    groups.push(group.toString(16).padStart(4, "0"));
+  }
+
+  return groups.join(":");
+}
+
+/**
  * Expands an IPv6 address to its full uncompressed form.
  *
  * Returns the address with all 8 groups fully specified with 4 hex digits each.
+ * This is equivalent to parsing the address and re-stringifying it with
+ * {@link stringifyIpv6Expanded}.
  *
  * @param address The address string (can be compressed)
  * @returns The fully expanded IPv6 address string
@@ -327,15 +387,7 @@ export function stringifyIpv6(address: bigint): string {
  * ```
  */
 export function expandIpv6(address: string): string {
-  const value = parseIpv6(address);
-
-  const groups: string[] = [];
-  for (let i = 0; i < 8; i++) {
-    const group = Number((value >> BigInt((7 - i) * 16)) & 0xFFFFn);
-    groups.push(group.toString(16).padStart(4, "0"));
-  }
-
-  return groups.join(":");
+  return stringifyIpv6Expanded(parseIpv6(address));
 }
 
 /**
