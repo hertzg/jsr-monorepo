@@ -795,8 +795,8 @@ Throws</h2></div><div class="space-y-8"><div class=" docEntry" id="function_cidr
   />
 </svg>
 </a>
-</div><div class="max-w-[75ch]"><div class="markdown"><p>If the notation is malformed, or the mask's one bits
-are not contiguous from the top</p>
+</div><div class="max-w-[75ch]"><div class="markdown"><p>If the notation is malformed (bad group, wrong group
+count), or the mask's one bits are not contiguous from the top</p>
 </div></div></div>
 <div class=" docEntry" id="function_cidrv6masktoprefixlength_1_throws_1">
 
@@ -828,7 +828,8 @@ are not contiguous from the top</p>
   />
 </svg>
 </a>
-</div><div class="max-w-[75ch]"><div class="markdown"><p>If a group is out of range</p>
+</div><div class="max-w-[75ch]"><div class="markdown"><p>If an embedded IPv4 octet is out of range, as in
+<code>&quot;::1.2.3.256&quot;</code> -- a malformed hex group is a <code>TypeError</code>, not this</p>
 </div></div></div>
 </div></section>
 </div>
