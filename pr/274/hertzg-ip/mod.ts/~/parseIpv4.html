@@ -168,8 +168,7 @@
 <span class="font-bold">parseIpv4</span><span class="font-medium">(<span><span>address<span>: <span class="td-kw">string</span></span></span></span>)<span>: <span class="td-kw">number</span></span> </span>
       </code><div class="space-y-7" id=""><div class="markdown"><p>Parses an IPv4 address in dotted decimal notation to a number.</p>
 <p>The function validates the format and range of each octet. Leading zeros
-are not allowed (except for &quot;0&quot; itself), and an octet must be nothing but
-decimal digits — no sign, no surrounding whitespace, no trailing remainder.</p>
+are not allowed (except for &quot;0&quot; itself).</p>
 </div><section class="section"  id="examples"><div>
       <h2 class="anchorable mb-1"><a href="#examples" class="anchor" aria-label="Anchor" tabIndex="-1"><svg
   width="16"
@@ -294,14 +293,12 @@ import { parseIpv4 } from &quot;@hertzg/ip/ipv4&quot;;
 assertThrows(() =&gt; parseIpv4(&quot;192.168.1&quot;), TypeError);
 assertThrows(() =&gt; parseIpv4(&quot;192.168.1.256&quot;), RangeError);
 assertThrows(() =&gt; parseIpv4(&quot;192.168.01.1&quot;), TypeError);
-assertThrows(() =&gt; parseIpv4(&quot; 192.168.1.1&quot;), TypeError);
 </code><button class="copyButton" data-copy="import { assertThrows } from &quot;@std/assert&quot;;
 import { parseIpv4 } from &quot;@hertzg/ip/ipv4&quot;;
 
 assertThrows(() =&gt; parseIpv4(&quot;192.168.1&quot;), TypeError);
 assertThrows(() =&gt; parseIpv4(&quot;192.168.1.256&quot;), RangeError);
 assertThrows(() =&gt; parseIpv4(&quot;192.168.01.1&quot;), TypeError);
-assertThrows(() =&gt; parseIpv4(&quot; 192.168.1.1&quot;), TypeError);
 "><svg
   class="copy"
   width="15"

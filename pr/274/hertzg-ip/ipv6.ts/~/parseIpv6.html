@@ -174,8 +174,6 @@
 <li>Mixed IPv4 form: <code>::ffff:192.168.1.1</code></li>
 <li>Zone IDs are stripped: <code>fe80::1%eth0</code> becomes <code>fe80::1</code></li>
 </ul>
-<p>A group must be nothing but 1-4 hex digits — no sign, no <code>0x</code> prefix, no
-surrounding whitespace, no trailing remainder.</p>
 </div><section class="section"  id="examples"><div>
       <h2 class="anchorable mb-1"><a href="#examples" class="anchor" aria-label="Anchor" tabIndex="-1"><svg
   width="16"
@@ -433,7 +431,6 @@ assertThrows(() =&gt; parseIpv6(&quot;192.168.1.1&quot;), TypeError);
 assertThrows(() =&gt; parseIpv6(&quot;2001:db8:::1&quot;), TypeError);
 assertThrows(() =&gt; parseIpv6(&quot;2001:db8::1::1&quot;), TypeError);
 assertThrows(() =&gt; parseIpv6(&quot;2001:gggg::1&quot;), TypeError);
-assertThrows(() =&gt; parseIpv6(&quot;2001:db8::1 &quot;), TypeError);
 </code><button class="copyButton" data-copy="import { assertThrows } from &quot;@std/assert&quot;;
 import { parseIpv6 } from &quot;@hertzg/ip/ipv6&quot;;
 
@@ -441,7 +438,6 @@ assertThrows(() =&gt; parseIpv6(&quot;192.168.1.1&quot;), TypeError);
 assertThrows(() =&gt; parseIpv6(&quot;2001:db8:::1&quot;), TypeError);
 assertThrows(() =&gt; parseIpv6(&quot;2001:db8::1::1&quot;), TypeError);
 assertThrows(() =&gt; parseIpv6(&quot;2001:gggg::1&quot;), TypeError);
-assertThrows(() =&gt; parseIpv6(&quot;2001:db8::1 &quot;), TypeError);
 "><svg
   class="copy"
   width="15"

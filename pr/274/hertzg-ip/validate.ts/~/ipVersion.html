@@ -172,10 +172,10 @@ for anything else — never <code>0</code>, so the answer cannot be mistaken for
 version number in a numeric context.</p>
 <p>The answer describes the <strong>string</strong>, not the value it would parse to. An
 IPv4-mapped IPv6 address such as <code>::ffff:10.1.2.3</code> is written as IPv6 and
-reports <code>6</code>, even though parseIp unwraps it to an IPv4 <code>number</code>.
-Version <code>n</code> always means &quot;parseIpv4 / parseIpv6 for that
-version accepts this string&quot;. To get the version of an already parsed
-value, use <code>typeof</code> — <code>number</code> is IPv4, <code>bigint</code> is IPv6.</p>
+reports <code>6</code>, even though <a href="../.././ip.ts/~/parseIp.html">parseIp</a> unwraps it to an IPv4 <code>number</code>.
+Version <code>n</code> always means &quot;the parser for that version accepts this
+string&quot;. To get the version of an already parsed value, use <code>typeof</code> —
+<code>number</code> is IPv4, <code>bigint</code> is IPv6.</p>
 <p>CIDR notation is not an address — use <a href="../.././validate.ts/~/cidrVersion.html">cidrVersion</a> for that.
 Nothing is trimmed: a string with surrounding whitespace is not an address.</p>
 </div><section class="section"  id="examples"><div>
