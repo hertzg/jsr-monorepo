@@ -226,7 +226,7 @@ Examples</h2></div><div class="space-y-8"><div class="anchorable"><a href="#exam
   </defs>
 </svg>
 </a>
-<h3 class="example-header"><div class="markdown"><p>Sort a mixed dual-stack list</p>
+<h3 class="example-header"><div class="markdown"><p>Sort a mixed dual-stack list, ascending or descending</p>
 </div></h3>
   <div><div class="markdown"><pre class="highlight"><code class="language-ts">import { assertEquals } from &quot;@std/assert&quot;;
 import { compareIp, parseIp, stringifyIp } from &quot;@hertzg/ip/ip&quot;;
@@ -239,6 +239,14 @@ assertEquals(clients.toSorted(compareIp).map(stringifyIp), [
   &quot;::1&quot;,
   &quot;2001:db8::1&quot;,
 ]);
+
+// Descending: swap the arguments
+assertEquals(clients.toSorted((a, b) =&gt; compareIp(b, a)).map(stringifyIp), [
+  &quot;2001:db8::1&quot;,
+  &quot;::1&quot;,
+  &quot;10.0.0.2&quot;,
+  &quot;10.0.0.1&quot;,
+]);
 </code><button class="copyButton" data-copy="import { assertEquals } from &quot;@std/assert&quot;;
 import { compareIp, parseIp, stringifyIp } from &quot;@hertzg/ip/ip&quot;;
 
@@ -249,6 +257,14 @@ assertEquals(clients.toSorted(compareIp).map(stringifyIp), [
   &quot;10.0.0.2&quot;,
   &quot;::1&quot;,
   &quot;2001:db8::1&quot;,
+]);
+
+// Descending: swap the arguments
+assertEquals(clients.toSorted((a, b) =&gt; compareIp(b, a)).map(stringifyIp), [
+  &quot;2001:db8::1&quot;,
+  &quot;::1&quot;,
+  &quot;10.0.0.2&quot;,
+  &quot;10.0.0.1&quot;,
 ]);
 "><svg
   class="copy"
@@ -654,7 +670,7 @@ Return Type</h2></div><div class="space-y-8"><div class=" docEntry" id="function
 </svg>
 </button><code></code></pre>
 </div></div><nav class="documentNavigation">
-          <h3>Document Navigation</h3><ul><li><a href="#examples" title="Examples">Examples</a></li><li><ul><li><a href="#example_0" title="Sort a mixed dual-stack list">Sort a mixed dual-stack list</a></li><li><a href="#example_1" title="Every IPv4 address sorts before every IPv6 address">Every IPv4 address sorts before every IPv6 address</a></li><li><a href="#example_2" title="An IPv4-mapped bigint is an IPv6 value, not its IPv4 twin">An IPv4-mapped bigint is an IPv6 value, not its IPv4 twin</a></li></ul></li><li><a href="#parameters" title="Parameters">Parameters</a></li><li><ul><li><a href="#function_compareip_0_parameter_a" title="a">a</a></li><li><a href="#function_compareip_0_parameter_b" title="b">b</a></li></ul></li><li><a href="#return-type" title="Return Type">Return Type</a></li></ul></nav></div>
+          <h3>Document Navigation</h3><ul><li><a href="#examples" title="Examples">Examples</a></li><li><ul><li><a href="#example_0" title="Sort a mixed dual-stack list, ascending or descending">Sort a mixed dual-stack list, ascending or descending</a></li><li><a href="#example_1" title="Every IPv4 address sorts before every IPv6 address">Every IPv4 address sorts before every IPv6 address</a></li><li><a href="#example_2" title="An IPv4-mapped bigint is an IPv6 value, not its IPv4 twin">An IPv4-mapped bigint is an IPv6 value, not its IPv4 twin</a></li></ul></li><li><a href="#parameters" title="Parameters">Parameters</a></li><li><ul><li><a href="#function_compareip_0_parameter_a" title="a">a</a></li><li><a href="#function_compareip_0_parameter_b" title="b">b</a></li></ul></li><li><a href="#return-type" title="Return Type">Return Type</a></li></ul></nav></div>
   </div></div>
 </div>
 </div>
