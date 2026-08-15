@@ -541,7 +541,8 @@ Parameters</h2></div><div class="space-y-8"><div class="anchorable docEntry" id=
   />
 </svg>
 </a>
-</div><div class="max-w-[75ch]"><div class="markdown"><p>The buffer to write into; a 4-byte buffer is allocated when omitted</p>
+</div><div class="max-w-[75ch]"><div class="markdown"><p>The buffer to write into, whose size the caller owns; a 4-byte
+buffer is allocated when omitted</p>
 </div></div></div>
 <div class="anchorable docEntry" id="function_ipv4tobytes_0_parameter_offset">
 
@@ -596,7 +597,7 @@ Parameters</h2></div><div class="space-y-8"><div class="anchorable docEntry" id=
   />
 </svg>
 </a>
-</div><div class="max-w-[75ch]"><div class="markdown"><p>The offset within <code>into</code> to write at, defaulting to <code>0</code></p>
+</div><div class="max-w-[75ch]"><div class="markdown"><p>Where in <code>into</code> to start writing, defaulting to <code>0</code></p>
 </div></div></div>
 </div></section>
 <section class="section"  id="return-type"><div>

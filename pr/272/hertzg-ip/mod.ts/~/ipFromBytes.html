@@ -166,8 +166,8 @@
 </svg>
 </a>
 <span class="font-bold">ipFromBytes</span><span class="font-medium">(<span><span>bytes<span>: <a href="https://deno.land/api@v2.9.5?s=Uint8Array" class="link td-ref">Uint8Array</a></span></span></span>)<span>: <a href="../.././mod.ts/~/Address.html" class="link td-ref">Address</a></span> </span>
-      </code><div class="space-y-7" id=""><div class="markdown"><p>Reads an IPv4 or IPv6 address from a buffer, picking the version from the
-width of the span.</p>
+      </code><div class="space-y-7" id=""><div class="markdown"><p>Reads an IPv4 or IPv6 address from a buffer, picking the version from its
+length.</p>
 <p><code>bytes</code> must be <strong>exactly</strong> 4 bytes (read as IPv4, returning <code>number</code>) or
 <strong>exactly</strong> 16 (read as IPv6, returning <code>bigint</code>). Any other length throws a
 <code>RangeError</code> rather than guessing.</p>
