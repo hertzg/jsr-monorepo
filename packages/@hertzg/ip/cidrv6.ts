@@ -371,6 +371,18 @@ export function cidrv6Contains(cidr: Cidrv6, address: bigint): boolean {
 /**
  * Returns the first address of a CIDR block.
  *
+ * IPv6 has no equivalent of the IPv4 network address, so unlike
+ * `cidrv4FirstAddress` this is normally assignable to an interface. The one
+ * caveat is per-link rather than universal: RFC 4291 section 2.6.1 reserves
+ * the all-zeros interface identifier as the Subnet-Router anycast address,
+ * while RFC 6164 assigns both addresses of a `/127` inter-router link.
+ *
+ * Because that reservation depends on the link, there is deliberately no
+ * `cidrv6FirstUsableAddress` to pair with
+ * {@link https://jsr.io/@hertzg/ip/doc/cidrv4/~/cidrv4FirstUsableAddress | cidrv4FirstUsableAddress}.
+ * Callers whose link does reserve the anycast skip it themselves — see the
+ * second example.
+ *
  * @param cidr The CIDR block
  * @returns The first address as a bigint
  *
@@ -383,6 +395,21 @@ export function cidrv6Contains(cidr: Cidrv6, address: bigint): boolean {
  * const cidr = parseCidrv6("2001:db8::/32");
  * assertEquals(cidrv6FirstAddress(cidr), parseIpv6("2001:db8::"));
  * ```
+ *
+ * @example Skipping the Subnet-Router anycast on a link that reserves it
+ * ```ts
+ * import { assertEquals } from "@std/assert";
+ * import { cidrv6Addresses, parseCidrv6 } from "@hertzg/ip/cidrv6";
+ * import { stringifyIpv6 } from "@hertzg/ip/ipv6";
+ *
+ * const cidr = parseCidrv6("2001:db8::/126");
+ * const assignable = Array.from(cidrv6Addresses(cidr, { offset: 1n }));
+ * assertEquals(assignable.map(stringifyIpv6), [
+ *   "2001:db8::1",
+ *   "2001:db8::2",
+ *   "2001:db8::3",
+ * ]);
+ * ```
  */
 export function cidrv6FirstAddress(cidr: Cidrv6): bigint {
   const mask = cidrv6Mask(cidr.prefixLength);
@@ -391,6 +418,11 @@ export function cidrv6FirstAddress(cidr: Cidrv6): bigint {
 
 /**
  * Returns the last address of a CIDR block.
+ *
+ * IPv6 has no broadcast address, so nothing is reserved at the top of a
+ * block and this address is assignable. That is why there is deliberately
+ * no `cidrv6BroadcastAddress` and no `cidrv6LastUsableAddress` to pair with
+ * their IPv4 counterparts — the asymmetry is a fact about IPv6, not a gap.
  *
  * @param cidr The CIDR block
  * @returns The last address as a bigint

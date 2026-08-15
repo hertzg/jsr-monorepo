@@ -58,6 +58,31 @@ not noun-first like `cidrOverlaps`, because the name is normally read as a value
 handed to `sort`. _Avoid_: `sortIp`, `ipCompare`, `cidrCompare`, and "rank". The
 return value is spelled `-1 | 0 | 1` and carries no magnitude.
 
+**Block bounds**: The first and last addresses of a CIDR block, named
+version-agnostically — `cidrFirstAddress` / `cidrLastAddress` universally,
+`cidrv4FirstAddress` / `cidrv6FirstAddress` and their `Last` counterparts
+per version. These carry no policy: they are the numeric ends, which is
+what sorting, range comparison, and canonicalizing a non-canonical block
+want. IPv4 additionally names them after what they *are* on that version
+(`cidrv4NetworkAddress`, `cidrv4BroadcastAddress`); IPv6 has neither
+concept, so it has neither name. Contrast **Usable address**, which does
+carry policy and is therefore IPv4-only.
+
+**Usable address**: An address inside a CIDR block that may be assigned to
+an interface. The qualifier is _usable_, and it is IPv4-only:
+`cidrv4FirstUsableAddress`, `cidrv4LastUsableAddress`, `cidrv4UsableSize`,
+`cidrv4UsableAddresses`. IPv4 carves out the network and broadcast
+addresses (RFC 1812 §5.3.5), except at `/31` and `/32` where the whole
+block is usable (RFC 3021). There is no IPv6 counterpart on purpose — IPv6
+has no broadcast address, and the Subnet-Router anycast is a per-link
+reservation rather than a blanket rule, so the package declines to guess
+(see ADR 0013). _Avoid_: `host`, `hosts()`, "usable host", "host range" —
+the noun for the value is **Address**, as everywhere else, and "host" would
+smuggle in the IPv4-era framing this package keeps out of its v6 vocabulary.
+_Avoid_ also: `assignable` as an identifier — it is the right word in prose
+and JSDoc, but the exported names say `Usable`, matching the term operators
+read off a subnet calculator.
+
 **Prefix length**: The count of leading bits a CIDR fixes — the `24` in
 `192.168.1.0/24`. Spelled `prefixLength` as a field and as a parameter, "prefix
 length" in prose. _Avoid_: `prefix`, `length`, `bits`. Bare "prefix" names the
