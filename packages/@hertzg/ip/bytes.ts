@@ -44,10 +44,15 @@
  * @module
  */
 
-import { IPV4_BYTE_LENGTH, IPV6_BYTE_LENGTH } from "./_bytes.ts";
 import { ipv4FromBytes, ipv4ToBytes } from "./bytesv4.ts";
 import { ipv6FromBytes, ipv6ToBytes } from "./bytesv6.ts";
 import type { Address } from "./ip.ts";
+
+/** The wire width of an IPv4 address, in bytes. */
+const IPV4_BYTE_LENGTH = 4;
+
+/** The wire width of an IPv6 address, in bytes. */
+const IPV6_BYTE_LENGTH = 16;
 
 /**
  * Reads an IPv4 or IPv6 address from a buffer, picking the version from the

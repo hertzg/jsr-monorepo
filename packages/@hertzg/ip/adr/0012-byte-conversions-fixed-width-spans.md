@@ -73,13 +73,24 @@ grouping is what a reader navigates by, and one concern shaped
 differently from every other concern costs more than the bytes it
 saves.
 
-**The shared 32-bit primitives live in a private `_bytes.ts`.** This
-is the one real cost of the split — `readUint32` and `writeUint32` are
-needed by both versions, and neither version's public entrypoint
-should export them. `_bytes.ts` is not in `exports`, so it is not
-public API; the underscore prefix follows `@hertzg/xhb`'s `_parse.ts`.
-The alternative, duplicating them, would state the network-order
-convention in two places, which is the one thing worth centralizing.
+**Each module is self-contained; nothing is shared between them.** The
+32-bit shift arithmetic is written out in both `bytesv4.ts` and
+`bytesv6.ts`, and each declares the width it needs. A draft of the
+split factored the primitives into a private `_bytes.ts`, on the
+argument that the network-order convention should be stated once. That
+was the wrong trade. The convention is four lines of shifting fixed by
+RFC, and each copy is covered by its own round-trip and byte-order
+tests, so a wrong copy fails its own file. Against that: the package
+has no underscore-module convention to draw on, an entrypoint you can
+only understand by opening a fourth file is worse to read, and a
+module absent from `exports` is still **published** — `publish.exclude`
+only drops tests, markdown, `adr` and `_bench` — so it would ship as a
+path consumers can import but should not.
+
+Within each module the rule is call sites, not symmetry: a helper
+earns a name at two or more uses. So `bytesv4.ts` inlines its single
+read and keeps `writeBytes` for its two writes, while `bytesv6.ts`
+keeps both `readGroup` and `writeGroup`, at four and eight uses.
 
 **Index arithmetic, not `DataView`, in all six functions.** The 32-bit
 read and write are shared private helpers; the 128-bit functions call
@@ -159,7 +170,6 @@ addresses have exactly one wire order.
 - `bytes.ts` — `ipFromBytes`, `ipToBytes`
 - `bytesv4.ts` — `ipv4FromBytes`, `ipv4ToBytes`
 - `bytesv6.ts` — `ipv6FromBytes`, `ipv6ToBytes`
-- `_bytes.ts` — the private 32-bit primitives both versions share
 - ADR 0001 — IPv4 is `number`, IPv6 is `bigint`; bytes are a
   conversion of those, not a third representation
 - ADR 0002 — `<concern>[v4|v6]` submodule grouping, which these three

@@ -59,10 +59,30 @@
  * @module
  */
 
-import { IPV4_BYTE_LENGTH, readUint32, writeUint32 } from "./_bytes.ts";
+/** The wire width of an IPv4 address, in bytes. */
+const IPV4_BYTE_LENGTH = 4;
 
 /** The largest value an IPv4 address can hold, as a 32-bit unsigned integer. */
 const IPV4_MAX = 4294967295;
+
+/**
+ * Writes an address as four bytes in network order. The caller is responsible
+ * for the span being in bounds.
+ *
+ * Index arithmetic rather than a `DataView`: the view would have to be built
+ * per call, since the buffer differs per call, and that constructor is the
+ * whole cost. See ADR 0012.
+ *
+ * @param address The address as a 32-bit unsigned integer
+ * @param into The buffer to write into
+ * @param offset The offset of the first byte
+ */
+function writeBytes(address: number, into: Uint8Array, offset: number): void {
+  into[offset] = address >>> 24;
+  into[offset + 1] = (address >>> 16) & 0xFF;
+  into[offset + 2] = (address >>> 8) & 0xFF;
+  into[offset + 3] = address & 0xFF;
+}
 
 /**
  * Reads a 4-byte IPv4 address from a buffer.
@@ -112,7 +132,10 @@ export function ipv4FromBytes(bytes: Uint8Array, offset = 0): number {
       `IPv4 needs ${IPV4_BYTE_LENGTH} bytes at offset ${offset} of a ${bytes.length}-byte buffer`,
     );
   }
-  return readUint32(bytes, offset);
+  return ((bytes[offset] << 24) |
+    (bytes[offset + 1] << 16) |
+    (bytes[offset + 2] << 8) |
+    bytes[offset + 3]) >>> 0;
 }
 
 /** Writes an IPv4 address into a freshly allocated 4-byte buffer. */
@@ -186,7 +209,7 @@ export function ipv4ToBytes(
 
   if (into === undefined) {
     const bytes = new Uint8Array(IPV4_BYTE_LENGTH);
-    writeUint32(address, bytes, 0);
+    writeBytes(address, bytes, 0);
     return bytes;
   }
 
@@ -195,6 +218,6 @@ export function ipv4ToBytes(
       `IPv4 needs ${IPV4_BYTE_LENGTH} bytes at offset ${offset} of a ${into.length}-byte buffer`,
     );
   }
-  writeUint32(address, into, offset);
+  writeBytes(address, into, offset);
   return into.subarray(offset, offset + IPV4_BYTE_LENGTH);
 }

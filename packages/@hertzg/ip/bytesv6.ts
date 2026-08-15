@@ -60,10 +60,47 @@
  * @module
  */
 
-import { IPV6_BYTE_LENGTH, readUint32, writeUint32 } from "./_bytes.ts";
+/** The wire width of an IPv6 address, in bytes. */
+const IPV6_BYTE_LENGTH = 16;
 
 /** The largest value an IPv6 address can hold, as a 128-bit unsigned bigint. */
 const IPV6_MAX = 0xFFFF_FFFF_FFFF_FFFF_FFFF_FFFF_FFFF_FFFFn;
+
+// A 128-bit address moves as four 32-bit groups. Index arithmetic rather than
+// a `DataView`: the view would have to be built per call, since the buffer
+// differs per call, and that constructor is the whole cost. A naive
+// `(acc << 8n) | BigInt(b)` loop over all sixteen bytes is ~6x slower again.
+// See ADR 0012.
+
+/**
+ * Reads one 32-bit group in network order. The caller is responsible for the
+ * span being in bounds.
+ *
+ * @param bytes The buffer to read from
+ * @param offset The offset of the first byte of the group
+ * @returns The group as a 32-bit unsigned integer
+ */
+function readGroup(bytes: Uint8Array, offset: number): number {
+  return ((bytes[offset] << 24) |
+    (bytes[offset + 1] << 16) |
+    (bytes[offset + 2] << 8) |
+    bytes[offset + 3]) >>> 0;
+}
+
+/**
+ * Writes one 32-bit group in network order. The caller is responsible for the
+ * span being in bounds.
+ *
+ * @param group The group as a 32-bit unsigned integer
+ * @param into The buffer to write into
+ * @param offset The offset of the first byte of the group
+ */
+function writeGroup(group: number, into: Uint8Array, offset: number): void {
+  into[offset] = group >>> 24;
+  into[offset + 1] = (group >>> 16) & 0xFF;
+  into[offset + 2] = (group >>> 8) & 0xFF;
+  into[offset + 3] = group & 0xFF;
+}
 
 /**
  * Reads a 16-byte IPv6 address from a buffer.
@@ -123,10 +160,10 @@ export function ipv6FromBytes(bytes: Uint8Array, offset = 0): bigint {
       `IPv6 needs ${IPV6_BYTE_LENGTH} bytes at offset ${offset} of a ${bytes.length}-byte buffer`,
     );
   }
-  return (BigInt(readUint32(bytes, offset)) << 96n) |
-    (BigInt(readUint32(bytes, offset + 4)) << 64n) |
-    (BigInt(readUint32(bytes, offset + 8)) << 32n) |
-    BigInt(readUint32(bytes, offset + 12));
+  return (BigInt(readGroup(bytes, offset)) << 96n) |
+    (BigInt(readGroup(bytes, offset + 4)) << 64n) |
+    (BigInt(readGroup(bytes, offset + 8)) << 32n) |
+    BigInt(readGroup(bytes, offset + 12));
 }
 
 /** Writes an IPv6 address into a freshly allocated 16-byte buffer. */
@@ -193,10 +230,10 @@ export function ipv6ToBytes(
 
   if (into === undefined) {
     const bytes = new Uint8Array(IPV6_BYTE_LENGTH);
-    writeUint32(Number(BigInt.asUintN(32, address >> 96n)), bytes, 0);
-    writeUint32(Number(BigInt.asUintN(32, address >> 64n)), bytes, 4);
-    writeUint32(Number(BigInt.asUintN(32, address >> 32n)), bytes, 8);
-    writeUint32(Number(BigInt.asUintN(32, address)), bytes, 12);
+    writeGroup(Number(BigInt.asUintN(32, address >> 96n)), bytes, 0);
+    writeGroup(Number(BigInt.asUintN(32, address >> 64n)), bytes, 4);
+    writeGroup(Number(BigInt.asUintN(32, address >> 32n)), bytes, 8);
+    writeGroup(Number(BigInt.asUintN(32, address)), bytes, 12);
     return bytes;
   }
 
@@ -205,9 +242,9 @@ export function ipv6ToBytes(
       `IPv6 needs ${IPV6_BYTE_LENGTH} bytes at offset ${offset} of a ${into.length}-byte buffer`,
     );
   }
-  writeUint32(Number(BigInt.asUintN(32, address >> 96n)), into, offset);
-  writeUint32(Number(BigInt.asUintN(32, address >> 64n)), into, offset + 4);
-  writeUint32(Number(BigInt.asUintN(32, address >> 32n)), into, offset + 8);
-  writeUint32(Number(BigInt.asUintN(32, address)), into, offset + 12);
+  writeGroup(Number(BigInt.asUintN(32, address >> 96n)), into, offset);
+  writeGroup(Number(BigInt.asUintN(32, address >> 64n)), into, offset + 4);
+  writeGroup(Number(BigInt.asUintN(32, address >> 32n)), into, offset + 8);
+  writeGroup(Number(BigInt.asUintN(32, address)), into, offset + 12);
   return into.subarray(offset, offset + IPV6_BYTE_LENGTH);
 }
