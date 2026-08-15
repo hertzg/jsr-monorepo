@@ -240,43 +240,51 @@ Trusted Network Allowlist</h2>
 <h3 class="example-header"><div class="markdown"><p>Check if a client IP is in a set of trusted CIDR blocks</p>
 </div></h3>
   <div><div class="markdown"><pre class="highlight"><code class="language-ts">import { assert, assertEquals } from &quot;@std/assert&quot;;
-import { cidrv4Contains, parseCidrv4, parseIp } from &quot;@hertzg/ip&quot;;
+import { cidrContains, parseCidr, parseIp } from &quot;@hertzg/ip&quot;;
 
+// The list may mix IP versions; each entry is only ever compared against an
+// address of its own version, and a mismatch is a miss rather than an error
 const trustedRanges = [
-  parseCidrv4(&quot;10.0.0.0/8&quot;),
-  parseCidrv4(&quot;172.16.0.0/12&quot;),
-  parseCidrv4(&quot;192.168.0.0/16&quot;),
-];
+  &quot;10.0.0.0/8&quot;,
+  &quot;172.16.0.0/12&quot;,
+  &quot;192.168.0.0/16&quot;,
+  &quot;fd00::/8&quot;,
+].map(parseCidr);
 
 function isTrusted(ip: string): boolean {
-  const addr = parseIp(ip);
-  if (typeof addr !== &quot;number&quot;) return false;
-  return trustedRanges.some((cidr) =&gt; cidrv4Contains(cidr, addr));
+  const address = parseIp(ip);
+  return trustedRanges.some((cidr) =&gt; cidrContains(cidr, address));
 }
 
 assert(isTrusted(&quot;192.168.1.100&quot;));
 assert(isTrusted(&quot;10.0.0.1&quot;));
-assert(isTrusted(&quot;::ffff:172.16.5.1&quot;));
+assert(isTrusted(&quot;::ffff:172.16.5.1&quot;)); // parseIp unwrapped this to IPv4 first
+assert(isTrusted(&quot;fd00::1&quot;)); // matched the IPv6 entry, no conversion involved
+
 assertEquals(isTrusted(&quot;8.8.8.8&quot;), false);
 assertEquals(isTrusted(&quot;2001:db8::1&quot;), false);
 </code><button class="copyButton" data-copy="import { assert, assertEquals } from &quot;@std/assert&quot;;
-import { cidrv4Contains, parseCidrv4, parseIp } from &quot;@hertzg/ip&quot;;
+import { cidrContains, parseCidr, parseIp } from &quot;@hertzg/ip&quot;;
 
+// The list may mix IP versions; each entry is only ever compared against an
+// address of its own version, and a mismatch is a miss rather than an error
 const trustedRanges = [
-  parseCidrv4(&quot;10.0.0.0/8&quot;),
-  parseCidrv4(&quot;172.16.0.0/12&quot;),
-  parseCidrv4(&quot;192.168.0.0/16&quot;),
-];
+  &quot;10.0.0.0/8&quot;,
+  &quot;172.16.0.0/12&quot;,
+  &quot;192.168.0.0/16&quot;,
+  &quot;fd00::/8&quot;,
+].map(parseCidr);
 
 function isTrusted(ip: string): boolean {
-  const addr = parseIp(ip);
-  if (typeof addr !== &quot;number&quot;) return false;
-  return trustedRanges.some((cidr) =&gt; cidrv4Contains(cidr, addr));
+  const address = parseIp(ip);
+  return trustedRanges.some((cidr) =&gt; cidrContains(cidr, address));
 }
 
 assert(isTrusted(&quot;192.168.1.100&quot;));
 assert(isTrusted(&quot;10.0.0.1&quot;));
-assert(isTrusted(&quot;::ffff:172.16.5.1&quot;));
+assert(isTrusted(&quot;::ffff:172.16.5.1&quot;)); // parseIp unwrapped this to IPv4 first
+assert(isTrusted(&quot;fd00::1&quot;)); // matched the IPv6 entry, no conversion involved
+
 assertEquals(isTrusted(&quot;8.8.8.8&quot;), false);
 assertEquals(isTrusted(&quot;2001:db8::1&quot;), false);
 "><svg
@@ -994,6 +1002,7 @@ Universal (auto-detect IPv4/IPv6)</h3>
 <li>stringifyCidr: Convert Cidrv4 or Cidrv6 to CIDR notation string</li>
 <li>cidrSize: Get total number of addresses in a CIDR block</li>
 <li>cidrAddresses: Generate IP addresses in a CIDR block</li>
+<li>cidrContains: Check if a CIDR block contains an address</li>
 <li>cidrContainsCidr: Check if one CIDR fully contains another</li>
 <li>cidrOverlaps: Check if two CIDRs share at least one address</li>
 <li>cidrIntersect: Return the overlapping CIDR block, or null</li>
@@ -1194,6 +1203,11 @@ Functions</h2></div><div class="namespaceSection"><div id="namespace_cidraddress
 <div class="namespaceItemContent">
 		    <a href=".&#x2F;.&#x2F;cidr.ts&#x2F;~&#x2F;cidrAddresses.html" title="cidrAddresses">
 			    <span>cidrAddresses</span><span>(<div class="ml-4"><div><span>cidr<span>: <span class="td-ref">Cidr</span></span></span>,</div><div><span>options<span class="td-op">?</span><span>: { offset<span class="td-op">?</span><span>: <span><span class="td-kw">number</span><span class="td-op"> | </span><span class="td-kw">bigint</span></span></span>; count<span class="td-op">?</span><span>: <span><span class="td-kw">number</span><span class="td-op"> | </span><span class="td-kw">bigint</span></span></span>; step<span class="td-op">?</span><span>: <span><span class="td-kw">number</span><span class="td-op"> | </span><span class="td-kw">bigint</span></span></span>;  }</span></span></div></div>)<span>: <span class="td-ref">Generator</span>&lt;<span class="td-ref">Address</span>&gt;</span></span><div class="namespaceItemContentTypeInfo">3 overloads</div></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Generates all addresses in an IPv4 CIDR block.</p>
+</div></div></div>
+    </div><div id="namespace_cidrcontains" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-Function bg-Function/15 dark:text-FunctionDark dark:bg-FunctionDark/15" title="Function">f</div></div>
+<div class="namespaceItemContent">
+		    <a href=".&#x2F;.&#x2F;cidr.ts&#x2F;~&#x2F;cidrContains.html" title="cidrContains">
+			    <span>cidrContains</span><span>(<div class="ml-4"><div><span>cidr<span>: <span class="td-ref">Cidr</span></span></span>,</div><div><span>address<span>: <span class="td-ref">Address</span></span></span></div></div>)<span>: <span class="td-kw">boolean</span></span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Checks if a CIDR block contains an address.</p>
 </div></div></div>
     </div><div id="namespace_cidrcontainscidr" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-Function bg-Function/15 dark:text-FunctionDark dark:bg-FunctionDark/15" title="Function">f</div></div>
 <div class="namespaceItemContent">
@@ -2554,6 +2568,11 @@ Functions</h2></div><div class="namespaceSection"><div id="namespace_cidraddress
 <div class="namespaceItemContent">
 		    <a href=".&#x2F;.&#x2F;cidr.ts&#x2F;~&#x2F;cidrAddresses.html" title="cidrAddresses">
 			    <span>cidrAddresses</span><span>(<div class="ml-4"><div><span>cidr<span>: <span class="td-ref">Cidr</span></span></span>,</div><div><span>options<span class="td-op">?</span><span>: { offset<span class="td-op">?</span><span>: <span><span class="td-kw">number</span><span class="td-op"> | </span><span class="td-kw">bigint</span></span></span>; count<span class="td-op">?</span><span>: <span><span class="td-kw">number</span><span class="td-op"> | </span><span class="td-kw">bigint</span></span></span>; step<span class="td-op">?</span><span>: <span><span class="td-kw">number</span><span class="td-op"> | </span><span class="td-kw">bigint</span></span></span>;  }</span></span></div></div>)<span>: <span class="td-ref">Generator</span>&lt;<span class="td-ref">Address</span>&gt;</span></span><div class="namespaceItemContentTypeInfo">3 overloads</div></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Generates all addresses in an IPv4 CIDR block.</p>
+</div></div></div>
+    </div><div id="namespace_cidrcontains-1" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-Function bg-Function/15 dark:text-FunctionDark dark:bg-FunctionDark/15" title="Function">f</div></div>
+<div class="namespaceItemContent">
+		    <a href=".&#x2F;.&#x2F;cidr.ts&#x2F;~&#x2F;cidrContains.html" title="cidrContains">
+			    <span>cidrContains</span><span>(<div class="ml-4"><div><span>cidr<span>: <span class="td-ref">Cidr</span></span></span>,</div><div><span>address<span>: <span class="td-ref">Address</span></span></span></div></div>)<span>: <span class="td-kw">boolean</span></span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Checks if a CIDR block contains an address.</p>
 </div></div></div>
     </div><div id="namespace_cidrcontainscidr-2" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-Function bg-Function/15 dark:text-FunctionDark dark:bg-FunctionDark/15" title="Function">f</div></div>
 <div class="namespaceItemContent">
