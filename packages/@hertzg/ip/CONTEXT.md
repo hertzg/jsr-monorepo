@@ -1,6 +1,7 @@
 # @hertzg/ip
 
-IPv4 and IPv6 address parsing, stringifying, classification, and CIDR utilities.
+IPv4 and IPv6 address parsing, stringifying, classification, CIDR utilities, and
+conversion to and from wire bytes.
 The value-level vocabulary is shared across both protocol versions; the version
 is encoded in the JS primitive type (`number` for IPv4, `bigint` for IPv6 — see
 ADR 0001).
@@ -65,6 +66,41 @@ fixed bits themselves rather than their count, and is reserved for that (the
 prefix length is the "network mask", returned by `cidrv4Mask` / `cidrv6Mask`. A
 parameter accepting either a whole CIDR or a bare prefix length keeps the union
 role name `cidrOrPrefixLength`, following **AddressOrCidr**.
+
+**Span**: A window of _bytes_ — a start offset and a fixed width — inside a
+`Uint8Array`, as used by the `bytes` submodules. An IPv4 address occupies a
+4-byte span, an IPv6 address a 16-byte span. Only this byte sense is spelled
+`span` in code and error messages; the "start-to-end span" wording in the CIDR
+entry above is prose about address space and names no parameter. _Avoid_:
+`range`, `window`, `slice` — `slice` in particular implies the copying
+`Uint8Array` method, while the byte functions hand back a non-copying
+`subarray` view.
+
+**bytes / into**: The role names for the two buffer positions. `bytes` is the
+buffer being read _from_ (`ipv4FromBytes(bytes, offset)`); `into` is the
+optional buffer being written _to_ (`ipv4ToBytes(address, into, offset)`),
+named for the preposition so the call site reads as a sentence. _Avoid_:
+`buf`, `buffer`, `target`, `dst`, and `out` for the destination. See ADR 0012.
+
+**offset**: Carries **two senses**, and this is the one real collision in the
+package's vocabulary. In `bytesv4` / `bytesv6` it is a **byte** position — it
+locates the span inside `bytes` or `into`, and never says how wide the span is,
+since the width comes from the function. In `cidrv4Addresses` /
+`cidrv6Addresses` it is an **address** position — how many addresses into the
+block to start, listed under counts and strides in the **Address** entry above.
+Nothing takes both, so neither needs renaming, but do not describe one in the
+other's terms: a byte offset is never "how far into the block", and an address
+offset is never "where the span starts".
+
+A function only takes a byte `offset` when its width is fixed independently of
+the buffer. That holds for the four version-specific byte functions, whose
+width comes from their name, and for `ipToBytes`, whose width comes from the
+address type. It does not hold for `ipFromBytes`, which infers the version from
+the buffer, so it takes no offset — callers slice to the exact width instead.
+
+The writers put it more directly: they take the destination rather than
+creating one, so the caller already owns the buffer and its size, and `offset`
+only says where in it to begin. See ADR 0012.
 
 ## Function-name convention
 
