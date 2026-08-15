@@ -2,7 +2,8 @@
  * Universal CIDR notation parsing, stringifying, and validation.
  *
  * This module provides {@link parseCidr}, {@link stringifyCidr},
- * {@link isValidCidr}, {@link cidrContainsCidr}, {@link cidrOverlaps},
+ * {@link isValidCidr}, {@link cidrContains},
+ * {@link cidrContainsCidr}, {@link cidrOverlaps},
  * {@link cidrIntersect}, {@link cidrSubtract}, {@link cidrMerge},
  * {@link cidrSize}, {@link cidrAddresses}, and {@link compareCidr} that
  * auto-detect IPv4 vs IPv6 and delegate to the appropriate version-specific
@@ -40,6 +41,7 @@ import { isIpv6Ipv4Mapped } from "./classifyv6.ts";
 import {
   type Cidrv4,
   cidrv4Addresses,
+  cidrv4Contains,
   cidrv4ContainsCidr,
   cidrv4Intersect,
   cidrv4Merge,
@@ -53,6 +55,7 @@ import {
 import {
   type Cidrv6,
   cidrv6Addresses,
+  cidrv6Contains,
   cidrv6ContainsCidr,
   cidrv6Intersect,
   cidrv6Merge,
@@ -196,6 +199,68 @@ export function stringifyCidr(cidr: Cidr): string {
     return stringifyCidrv6(cidr);
   }
   return stringifyCidrv4(cidr);
+}
+
+/**
+ * Checks if a CIDR block contains an address.
+ *
+ * Dispatches to {@link cidrv4Contains} or {@link cidrv6Contains} based on the
+ * address type. Unlike {@link cidrContainsCidr}, a version mismatch does not
+ * throw — an IPv6 address is not contained in an IPv4 CIDR block, and the
+ * reverse, so both return `false`. The address usually arrives from the
+ * network while the CIDR comes from configuration, which makes a mismatch
+ * ordinary traffic on a dual-stack listener rather than a caller mistake.
+ *
+ * IPv4-mapped IPv6 addresses are not converted here. {@link parseIp} already
+ * unwraps them, so an address from `parseIp` matches an IPv4 CIDR; one from
+ * {@link parseIpv6} stays a `bigint` and does not.
+ *
+ * @param cidr The CIDR block that may contain the address
+ * @param address The address to test for membership
+ * @returns true if the address falls within the CIDR block, false otherwise
+ *
+ * @example IPv4 and IPv6 containment
+ * ```ts
+ * import { assert, assertEquals } from "@std/assert";
+ * import { cidrContains, parseCidr } from "@hertzg/ip/cidr";
+ * import { parseIp } from "@hertzg/ip/ip";
+ *
+ * assert(cidrContains(parseCidr("10.0.0.0/8"), parseIp("10.1.2.3")));
+ * assertEquals(cidrContains(parseCidr("10.0.0.0/8"), parseIp("11.0.0.1")), false);
+ *
+ * assert(cidrContains(parseCidr("2001:db8::/32"), parseIp("2001:db8::1")));
+ * assertEquals(cidrContains(parseCidr("2001:db8::/32"), parseIp("2001:db9::1")), false);
+ * ```
+ *
+ * @example Mixed versions return false instead of throwing
+ * ```ts
+ * import { assertEquals } from "@std/assert";
+ * import { cidrContains, parseCidr } from "@hertzg/ip/cidr";
+ * import { parseIp } from "@hertzg/ip/ip";
+ *
+ * assertEquals(cidrContains(parseCidr("10.0.0.0/8"), parseIp("2001:db8::1")), false);
+ * assertEquals(cidrContains(parseCidr("::/0"), parseIp("10.1.2.3")), false);
+ * ```
+ *
+ * @example IPv4-mapped IPv6 depends on which parser produced the address
+ * ```ts
+ * import { assert, assertEquals } from "@std/assert";
+ * import { cidrContains, parseCidr } from "@hertzg/ip/cidr";
+ * import { parseIp } from "@hertzg/ip/ip";
+ * import { parseIpv6 } from "@hertzg/ip/ipv6";
+ *
+ * assert(cidrContains(parseCidr("10.0.0.0/8"), parseIp("::ffff:10.1.2.3")));
+ * assertEquals(
+ *   cidrContains(parseCidr("10.0.0.0/8"), parseIpv6("::ffff:10.1.2.3")),
+ *   false,
+ * );
+ * ```
+ */
+export function cidrContains(cidr: Cidr, address: Address): boolean {
+  if (isCidrv6(cidr)) {
+    return typeof address === "bigint" && cidrv6Contains(cidr, address);
+  }
+  return typeof address === "number" && cidrv4Contains(cidr, address);
 }
 
 /**

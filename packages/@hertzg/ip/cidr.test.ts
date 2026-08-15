@@ -1,6 +1,7 @@
 import { assert, assertEquals, assertThrows } from "@std/assert";
 import {
   cidrAddresses,
+  cidrContains,
   cidrContainsCidr,
   cidrIntersect,
   cidrMerge,
@@ -12,8 +13,10 @@ import {
   stringifyCidr,
 } from "./cidr.ts";
 import { isValidCidr } from "./validate.ts";
+import { parseIp } from "./ip.ts";
+import { parseIpv6 } from "./ipv6.ts";
 import type { Cidrv4 } from "./cidrv4.ts";
-import type { Cidrv6 } from "./cidrv6.ts";
+import { type Cidrv6, parseCidrv6 } from "./cidrv6.ts";
 
 Deno.test("parseCidr", async (t) => {
   await t.step("parses IPv4 CIDR", () => {
@@ -127,6 +130,60 @@ Deno.test("isValidCidr", async (t) => {
     assertEquals(isValidCidr(""), false);
     assertEquals(isValidCidr("garbage/24"), false);
     assertEquals(isValidCidr("10.0.0.0/33"), false);
+  });
+});
+
+Deno.test("cidrContains", async (t) => {
+  await t.step("delegates to IPv4", () => {
+    assert(cidrContains(parseCidr("10.0.0.0/8"), parseIp("10.1.2.3")));
+    assertEquals(
+      cidrContains(parseCidr("10.0.0.0/8"), parseIp("11.0.0.1")),
+      false,
+    );
+  });
+
+  await t.step("delegates to IPv6", () => {
+    assert(cidrContains(parseCidr("2001:db8::/32"), parseIp("2001:db8::1")));
+    assertEquals(
+      cidrContains(parseCidr("2001:db8::/32"), parseIp("2001:db9::1")),
+      false,
+    );
+  });
+
+  await t.step("non-canonical CIDRs are masked to their network", () => {
+    assert(cidrContains(parseCidr("10.1.2.3/8"), parseIp("10.9.9.9")));
+    assert(cidrContains(parseCidr("2001:db8:1::5/32"), parseIp("2001:db8::1")));
+  });
+
+  await t.step("mixed v4/v6 returns false instead of throwing", () => {
+    assertEquals(
+      cidrContains(parseCidr("10.0.0.0/8"), parseIp("2001:db8::1")),
+      false,
+    );
+    assertEquals(
+      cidrContains(parseCidr("2001:db8::/32"), parseIp("10.1.2.3")),
+      false,
+    );
+    assertEquals(cidrContains(parseCidr("::/0"), parseIp("10.1.2.3")), false);
+    assertEquals(
+      cidrContains(parseCidr("0.0.0.0/0"), parseIp("2001:db8::1")),
+      false,
+    );
+  });
+
+  await t.step("IPv4-mapped address from parseIp matches an IPv4 CIDR", () => {
+    assert(cidrContains(parseCidr("10.0.0.0/8"), parseIp("::ffff:10.1.2.3")));
+  });
+
+  await t.step("IPv4-mapped address from parseIpv6 stays IPv6", () => {
+    assertEquals(
+      cidrContains(parseCidr("10.0.0.0/8"), parseIpv6("::ffff:10.1.2.3")),
+      false,
+    );
+    // parseCidr would unwrap the mapped prefix to 0.0.0.0/0; parseCidrv6 keeps it IPv6
+    assert(
+      cidrContains(parseCidrv6("::ffff:0:0/96"), parseIpv6("::ffff:10.1.2.3")),
+    );
   });
 });
 
