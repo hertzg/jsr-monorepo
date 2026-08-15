@@ -116,10 +116,14 @@ Byte order</h2>
 There is no option, because an IP address has exactly one wire order.</p>
 <h2 id="picking-the-version">
 Picking the version</h2>
-<p><a href=".././bytes.ts/~/ipFromBytes.html">ipFromBytes</a> reads the version off the <strong>span width</strong>, which must be
-exactly 4 or 16 bytes; anything else throws rather than guessing.
-<a href=".././bytes.ts/~/ipToBytes.html">ipToBytes</a> reads it off the <strong>type</strong> of the address, the same
-<code>typeof</code> dispatch stringifyIp uses.</p>
+<p><a href=".././bytes.ts/~/ipFromBytes.html">ipFromBytes</a> reads the version off the <strong>length</strong> of the buffer,
+which must be exactly 4 or 16 bytes; anything else throws rather than
+guessing. It takes no <code>offset</code> — an offset would let the amount of trailing
+data decide the version, so pass exact bytes (<code>packet.subarray(12, 16)</code>, a
+view rather than a copy). <a href=".././bytes.ts/~/ipToBytes.html">ipToBytes</a> reads the version off the
+<strong>type</strong> of the address, the same <code>typeof</code> dispatch stringifyIp
+uses, and does take <code>into</code> and <code>offset</code>, since its width comes from the
+address rather than from the buffer.</p>
 <p>Decoders that already know the version and the field offset want the
 version-specific functions, where the width is fixed by the function rather
 than inferred from the buffer.</p>
@@ -248,7 +252,7 @@ assertEquals(ipToBytes(ipFromBytes(field)), field);
 Functions</h2></div><div class="namespaceSection"><div id="namespace_ipfrombytes" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-Function bg-Function/15 dark:text-FunctionDark dark:bg-FunctionDark/15" title="Function">f</div></div>
 <div class="namespaceItemContent">
 		    <a href="..&#x2F;.&#x2F;bytes.ts&#x2F;~&#x2F;ipFromBytes.html" title="ipFromBytes">
-			    <span>ipFromBytes</span><span>(<div class="ml-4"><div><span>bytes<span>: <span class="td-ref">Uint8Array</span></span></span>,</div><div><span>offset<span class="td-op">?</span><span>: <span class="td-kw">number</span></span></span></div></div>)<span>: <span class="td-ref">Address</span></span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Reads an IPv4 or IPv6 address from a buffer, picking the version from the
+			    <span>ipFromBytes</span><span>(<span><span>bytes<span>: <span class="td-ref">Uint8Array</span></span></span></span>)<span>: <span class="td-ref">Address</span></span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Reads an IPv4 or IPv6 address from a buffer, picking the version from the
 width of the span.</p>
 </div></div></div>
     </div><div id="namespace_iptobytes" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-Function bg-Function/15 dark:text-FunctionDark dark:bg-FunctionDark/15" title="Function">f</div></div>

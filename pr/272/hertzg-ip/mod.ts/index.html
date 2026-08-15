@@ -1139,7 +1139,7 @@ IPv4-Mapped IPv6 Conversion (4to6)</h3>
 <h3 id="universal-wire-byte-conversion-(bytes)">
 Universal Wire Byte Conversion (bytes)</h3>
 <ul>
-<li><a href=".././mod.ts/~/ipFromBytes.html">ipFromBytes</a>: Read a 4- or 16-byte address, version from the span width</li>
+<li><a href=".././mod.ts/~/ipFromBytes.html">ipFromBytes</a>: Read a 4- or 16-byte address, version from its length</li>
 <li><a href=".././mod.ts/~/ipToBytes.html">ipToBytes</a>: Write an address as its wire bytes, width from its type</li>
 </ul>
 <h3 id="ipv4-wire-byte-conversion-(bytesv4)">
@@ -1555,7 +1555,7 @@ Functions</h2></div><div class="namespaceSection"><div id="namespace_cidraddress
     </div><div id="namespace_ipfrombytes" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-Function bg-Function/15 dark:text-FunctionDark dark:bg-FunctionDark/15" title="Function">f</div></div>
 <div class="namespaceItemContent">
 		    <a href="..&#x2F;.&#x2F;bytes.ts&#x2F;~&#x2F;ipFromBytes.html" title="ipFromBytes">
-			    <span>ipFromBytes</span><span>(<div class="ml-4"><div><span>bytes<span>: <span class="td-ref">Uint8Array</span></span></span>,</div><div><span>offset<span class="td-op">?</span><span>: <span class="td-kw">number</span></span></span></div></div>)<span>: <span class="td-ref">Address</span></span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Reads an IPv4 or IPv6 address from a buffer, picking the version from the
+			    <span>ipFromBytes</span><span>(<span><span>bytes<span>: <span class="td-ref">Uint8Array</span></span></span></span>)<span>: <span class="td-ref">Address</span></span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Reads an IPv4 or IPv6 address from a buffer, picking the version from the
 width of the span.</p>
 </div></div></div>
     </div><div id="namespace_iptobytes" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-Function bg-Function/15 dark:text-FunctionDark dark:bg-FunctionDark/15" title="Function">f</div></div>
