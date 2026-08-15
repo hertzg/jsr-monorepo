@@ -134,10 +134,29 @@ addresses have exactly one wire order.
   noise: IPv4 read 3.8 ns either way, IPv6 read 38.1 ns checked vs
   40.0 ns unchecked. It buys back the bounds checking `DataView` would
   have given, at a thirteenth of `DataView`'s cost.
-- **Do not reach for a naive `bigint` byte loop.** Accumulating 16
-  bytes with `(acc << 8n) | BigInt(b)` costs 227 ns to read and 352 ns
-  to write. Decomposing into four 32-bit halves keeps `bigint` work to
-  four conversions and three shifts.
+- **On the IPv6 path, bigint operand width is what costs — not the
+  number of conversions.** Bytes reach a `bigint` in 32-bit chunks
+  because that is the widest a plain `number` can carry, JS bitwise
+  operators being 32-bit. But the assembly order matters more than the
+  chunk count. Relative to four chunks folded into two 64-bit halves,
+  which is what `ipv6FromBytes` does:
+
+  | IPv6 read variant | relative |
+  | --- | --- |
+  | four chunks → two 64-bit halves → join | 1.00 |
+  | four chunks accumulated into one 128-bit value | 1.53x slower |
+  | three chunks of 48/48/32, multiply-add assembled | 2.03x slower |
+  | `(acc << 8n) \| BigInt(b)` over all 16 bytes | 5.76x slower |
+
+  Note the middle row: *fewer* `bigint` conversions is slower, because
+  the multiply-add arithmetic that dodges the 32-bit bitwise limit
+  costs more than the conversion it saves. An earlier draft of this
+  ADR reasoned that four conversions was a floor. It is not.
+
+  The write does not mirror the read. It starts from one 128-bit
+  value, so splitting into halves first only adds allocations;
+  shifting straight out of the original measured 1.05x faster, and
+  that is what `ipv6ToBytes` does.
 - **Round-trip preserves width.** `ipToBytes(ipFromBytes(b))` returns
   the same number of bytes it was given. Under ADR 0004's unwrapping
   it would return 4 bytes for a 16-byte input, and a caller assembling

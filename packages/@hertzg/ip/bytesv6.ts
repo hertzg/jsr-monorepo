@@ -66,14 +66,24 @@ const IPV6_BYTE_LENGTH = 16;
 /** The largest value an IPv6 address can hold, as a 128-bit unsigned bigint. */
 const IPV6_MAX = 0xFFFF_FFFF_FFFF_FFFF_FFFF_FFFF_FFFF_FFFFn;
 
-// A 128-bit address is assembled from four 32-bit chunks. 32 is not an
-// arbitrary choice: JS bitwise operators coerce to 32-bit integers, so that is
-// the widest chunk a plain `number` can carry, and every chunk boundary costs
-// one `bigint` conversion. Four is therefore the fewest `bigint` operations
-// that get sixteen bytes in or out. A `(acc << 8n) | BigInt(b)` loop over all
-// sixteen bytes does the same job with four times the `bigint` work and
-// measures ~6x slower. `DataView` would offer a 64-bit accessor, but has to be
-// constructed per call, which costs more than it saves. See ADR 0012.
+// Bytes reach a `bigint` through 32-bit chunks because that is the widest a
+// plain `number` can carry — JS bitwise operators coerce to 32-bit integers.
+//
+// What costs is the *width of the bigint operands*, not the number of
+// conversions. `ipv6FromBytes` therefore folds the chunks into two 64-bit
+// halves and joins those, so only the last operation touches a 128-bit value;
+// accumulating all four chunks into one 128-bit value instead measures 1.5x
+// slower. Going the other way and using fewer, wider chunks is worse still:
+// three chunks of 48/48/32 bits, assembled with multiply-add to dodge the
+// 32-bit bitwise limit, is 2x slower than four, and a byte-at-a-time
+// `(acc << 8n) | BigInt(b)` loop is 5.8x slower.
+//
+// The write does not mirror this. It starts from one 128-bit value, so
+// splitting it into halves first only adds two allocations; shifting straight
+// out of the original measured 1.05x faster and is what `ipv6ToBytes` does.
+//
+// `DataView` has 64-bit accessors, but must be constructed per call, which
+// costs more than they save. See ADR 0012.
 //
 // Note these are not IPv6 "groups" — that word means a 16-bit hextet
 // throughout `ipv6.ts`, and there are eight of those, not four.
@@ -166,10 +176,11 @@ export function ipv6FromBytes(bytes: Uint8Array, offset = 0): bigint {
       `IPv6 needs ${IPV6_BYTE_LENGTH} bytes at offset ${offset} of a ${bytes.length}-byte buffer`,
     );
   }
-  return (BigInt(readUint32(bytes, offset)) << 96n) |
-    (BigInt(readUint32(bytes, offset + 4)) << 64n) |
-    (BigInt(readUint32(bytes, offset + 8)) << 32n) |
+  const high = (BigInt(readUint32(bytes, offset)) << 32n) |
+    BigInt(readUint32(bytes, offset + 4));
+  const low = (BigInt(readUint32(bytes, offset + 8)) << 32n) |
     BigInt(readUint32(bytes, offset + 12));
+  return (high << 64n) | low;
 }
 
 /** Writes an IPv6 address into a freshly allocated 16-byte buffer. */
