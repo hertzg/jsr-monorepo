@@ -86,7 +86,10 @@ the buffer. That holds for the four version-specific byte functions, whose
 width comes from their name, and for `ipToBytes`, whose width comes from the
 address type. It does not hold for `ipFromBytes`, which infers the version from
 the buffer, so it takes no offset — callers slice to the exact width instead.
-See ADR 0012.
+
+The writers put it more directly: they take the destination rather than
+creating one, so the caller already owns the buffer and its size, and `offset`
+only says where in it to begin. See ADR 0012.
 
 ## Function-name convention
 

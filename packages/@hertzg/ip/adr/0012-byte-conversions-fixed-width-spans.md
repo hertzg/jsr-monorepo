@@ -55,9 +55,11 @@ either: a function taking both bytes and a version is `ipv4FromBytes`
 with extra steps.
 
 `ipToBytes` keeps `into` and `offset`, and the asymmetry is deliberate:
-its width comes from the address's type, so trailing bytes cannot
-change what it writes. Writing a field into a frame is the use case;
-reading one is served by slicing.
+it takes the destination rather than creating one, so the caller
+already owns the buffer and its size; `offset` only says where in it
+to begin. Nothing about the surrounding bytes can change what gets
+written, because the width comes from the address's type. Writing a
+field into a frame is the use case; reading one is served by slicing.
 
 **A short span throws `RangeError`, on both read and write.** The two
 halves stand on different ground, and it is worth being straight about
@@ -69,12 +71,17 @@ untrusted bytes)" as real failures rather than type assertions, and a
 buffer arriving off a wire is exactly that.
 
 On the **write** side it *is* in tension with the same ADR, which lists
-"callers are responsible for buffer sizes" as a consequence. The check
-stays anyway, for two reasons. A partial write into a caller's frame
-corrupts a buffer they still hold, which is worse than a bad return
-value they can inspect. And symmetry matters more than the rule here:
-a module where the read validates and the write does not is a module
-whose contract nobody can remember. It measures free — see
+"callers are responsible for buffer sizes" as a consequence — and the
+caller genuinely does own the buffer here, since they supplied it. The
+check stays anyway, because of what its absence actually does rather
+than as a matter of taste. `ipv4ToBytes(address, new Uint8Array(2))`
+unchecked writes the first two bytes, silently discards the other two
+(typed arrays drop out-of-bounds writes), and then returns
+`into.subarray(0, 4)` — which `subarray` clamps to length 2. So a
+half-written address comes back looking like a whole one, and the
+caller's frame is left corrupt. That is not undefined behaviour a
+caller can reason about; it is a wrong answer with no signal. The
+check turns it into a `RangeError`, and it measures free — see
 Consequences.
 
 The write side also range-checks the **address** itself, which needs

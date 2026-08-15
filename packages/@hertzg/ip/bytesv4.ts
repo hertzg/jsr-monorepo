@@ -148,8 +148,9 @@ export function ipv4FromBytes(bytes: Uint8Array, offset = 0): number {
  * `into`. Writing through that view writes into `into`.
  *
  * @param address The address as a 32-bit unsigned integer
- * @param into The buffer to write into; a 4-byte buffer is allocated when omitted
- * @param offset The offset within `into` to write at, defaulting to `0`
+ * @param into The buffer to write into, whose size the caller owns; a 4-byte
+ *   buffer is allocated when omitted
+ * @param offset Where in `into` to start writing, defaulting to `0`
  * @returns The four bytes written
  * @throws {RangeError} If the address is out of range, or four bytes are not
  *   available at `offset`

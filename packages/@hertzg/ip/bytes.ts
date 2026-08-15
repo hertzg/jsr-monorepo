@@ -59,8 +59,8 @@ const IPV4_BYTE_LENGTH = 4;
 const IPV6_BYTE_LENGTH = 16;
 
 /**
- * Reads an IPv4 or IPv6 address from a buffer, picking the version from the
- * width of the span.
+ * Reads an IPv4 or IPv6 address from a buffer, picking the version from its
+ * length.
  *
  * `bytes` must be **exactly** 4 bytes (read as IPv4, returning `number`) or
  * **exactly** 16 (read as IPv6, returning `bigint`). Any other length throws a
@@ -173,9 +173,9 @@ export function ipFromBytes(bytes: Uint8Array): Address {
  * it.
  *
  * @param address The address as a `number` (IPv4) or `bigint` (IPv6)
- * @param into The buffer to write into; one of the address's wire width is
- *   allocated when omitted
- * @param offset The offset within `into` to write at, defaulting to `0`
+ * @param into The buffer to write into, whose size the caller owns; one of the
+ *   address's wire width is allocated when omitted
+ * @param offset Where in `into` to start writing, defaulting to `0`
  * @returns The bytes written — 4 for IPv4, 16 for IPv6
  * @throws {RangeError} If the address is out of range, or its width is not
  *   available at `offset`
