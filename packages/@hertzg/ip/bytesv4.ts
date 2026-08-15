@@ -77,7 +77,7 @@ const IPV4_MAX = 4294967295;
  * @param into The buffer to write into
  * @param offset The offset of the first byte
  */
-function writeBytes(address: number, into: Uint8Array, offset: number): void {
+function writeUint32(address: number, into: Uint8Array, offset: number): void {
   into[offset] = address >>> 24;
   into[offset + 1] = (address >>> 16) & 0xFF;
   into[offset + 2] = (address >>> 8) & 0xFF;
@@ -209,7 +209,7 @@ export function ipv4ToBytes(
 
   if (into === undefined) {
     const bytes = new Uint8Array(IPV4_BYTE_LENGTH);
-    writeBytes(address, bytes, 0);
+    writeUint32(address, bytes, 0);
     return bytes;
   }
 
@@ -218,6 +218,6 @@ export function ipv4ToBytes(
       `IPv4 needs ${IPV4_BYTE_LENGTH} bytes at offset ${offset} of a ${into.length}-byte buffer`,
     );
   }
-  writeBytes(address, into, offset);
+  writeUint32(address, into, offset);
   return into.subarray(offset, offset + IPV4_BYTE_LENGTH);
 }
