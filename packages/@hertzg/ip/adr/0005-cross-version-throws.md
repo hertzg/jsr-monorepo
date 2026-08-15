@@ -69,5 +69,7 @@ version-first, and never throw. See ADR 0011.
 - ADR 0001 — Numeric representation: IPv4 and IPv6 are different
   primitive types
 - ADR 0004 — `4to6` is the explicit conversion API
+- ADR 0007 — Address-in-CIDR containment (`cidrContains`) returns
+  `false` across versions instead
 - ADR 0011 — comparators are total and version-first; ordering needs
   no conversion and so does not fall under this rule
