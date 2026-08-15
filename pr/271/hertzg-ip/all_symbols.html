@@ -834,10 +834,14 @@ IPv4 CIDR</h3>
 <li>cidrv4Merge: Merge IPv4 CIDR blocks into the minimal covering set</li>
 <li>cidrv4FirstAddress: Get first address in CIDR block</li>
 <li>cidrv4LastAddress: Get last address in CIDR block</li>
-<li>cidrv4NetworkAddress: Alias for cidrv4FirstAddress</li>
-<li>cidrv4BroadcastAddress: Alias for cidrv4LastAddress</li>
+<li>cidrv4NetworkAddress: Get the network address (first address) of a CIDR block</li>
+<li>cidrv4BroadcastAddress: Get the directed broadcast address (last address) of a CIDR block</li>
+<li>cidrv4FirstUsableAddress: Get first assignable address in CIDR block (RFC 3021 aware)</li>
+<li>cidrv4LastUsableAddress: Get last assignable address in CIDR block (RFC 3021 aware)</li>
 <li>cidrv4Size: Get total number of addresses in CIDR block</li>
+<li>cidrv4UsableSize: Get number of assignable addresses in CIDR block</li>
 <li>cidrv4Addresses: Generate IP addresses in CIDR block</li>
+<li>cidrv4UsableAddresses: Generate every assignable address in CIDR block</li>
 <li>isValidCidrv4: Check if a string is valid IPv4 CIDR notation</li>
 </ul>
 <h3 id="ipv6">
