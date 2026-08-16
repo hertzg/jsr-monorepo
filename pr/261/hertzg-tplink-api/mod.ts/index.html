@@ -207,6 +207,8 @@ below are &quot;GDPR&quot; firmware — the word does not distinguish them. What
 distinguishes them is the data model generation above.</p>
 <h2 id="supported-models">
 Supported Models</h2>
+<p>Speaking the <a href=".././mod.ts/~/gdprText.html">gdprText</a> dialect, which is the default — nothing needs
+to be selected for them:</p>
 <ul>
 <li>TL-MR6400</li>
 <li>Archer VR900v</li>
@@ -214,25 +216,28 @@ Supported Models</h2>
 <li>Archer MR600 v2</li>
 <li>Other EU/GDPR TP-Link routers with similar firmware</li>
 </ul>
-<p>These all speak the <a href=".././mod.ts/~/gdprText.html">gdprText</a> dialect, which is the default — nothing
-needs to be selected for them.</p>
-<h2 id="experimental:-unconfirmed-on-hardware">
-Experimental: unconfirmed on hardware</h2>
+<p>Speaking the <a href=".././mod.ts/~/gdprJson.html">gdprJson</a> dialect, which has to be passed explicitly:</p>
+<ul>
+<li>EX220</li>
+</ul>
+<h2 id="unconfirmed-on-hardware">
+Unconfirmed on hardware</h2>
 <p>The <a href=".././mod.ts/~/gdprJson.html">gdprJson</a> dialect describes a second protocol shape seen on newer
-5G modems: a JSON payload posted to <code>/cgi_gdpr?9</code>. It is built from that
+firmware: a JSON payload posted to <code>/cgi_gdpr?9</code>. It is built from that
 firmware's own JavaScript, recovered from the capture attached to
 <a href="https://github.com/hertzg/jsr-monorepo/issues/82">issue #82</a> — so the
 endpoint, the operation vocabulary and the payload shape come from the
-vendor's source rather than from guesswork.</p>
-<p>It nonetheless <strong>has never been run against a device</strong>, and its tests assert
-the wire format only. The two dialects carry opposite kinds of confidence:
-<a href=".././mod.ts/~/gdprText.html">gdprText</a> has no recovered source but years of use against real
-hardware, while <a href=".././mod.ts/~/gdprJson.html">gdprJson</a> has the source and no hardware.</p>
-<p>It is believed to cover:</p>
+vendor's source rather than from guesswork. An EX220 owner then ran it
+unmodified and both the login and a read worked
+(<a href="https://github.com/hertzg/jsr-monorepo/issues/254">issue #254</a>).</p>
+<p>The models it was reconstructed from are the ones still nobody has run it
+against:</p>
 <ul>
 <li>TP-LINK NE200 5G</li>
 <li>VX800v (reported as &quot;seems identical&quot;, zero captures)</li>
 </ul>
+<p>Only reads and the login call have ever been observed on this wire format, so
+write actions have no mapping and throw.</p>
 <p>If you own one of these, pass <code>dialect: gdprJson</code> and please report what
 happens on issue #82 — confirming it is what moves these models onto the
 supported list.</p>
@@ -1284,7 +1289,7 @@ Variables</h2></div><div class="namespaceSection"><div id="namespace_act" class=
   />
 </svg>
 </a></nav><nav class="documentNavigation">
-          <h3>Document Navigation</h3><ul><li><ul><li><a href="#how-the-protocol-works" title="How the protocol works">How the protocol works</a></li><li><ul><li><a href="#oid--a-group-of-settings" title="oid — a group of settings">oid — a group of settings</a></li><li><a href="#stack--which-instance" title="stack — which instance">stack — which instance</a></li><li><a href="#"gdpr"-names-the-encryption,-not-the-format" title="&quot;GDPR&quot; names the encryption, not the format">"GDPR" names the encryption, not the format</a></li></ul></li><li><a href="#supported-models" title="Supported Models">Supported Models</a></li><li><a href="#experimental:-unconfirmed-on-hardware" title="Experimental: unconfirmed on hardware">Experimental: unconfirmed on hardware</a></li><li><a href="#main-functions" title="Main Functions">Main Functions</a></li><li><a href="#firmware-dialects" title="Firmware Dialects">Firmware Dialects</a></li><li><a href="#action-format" title="Action Format">Action Format</a></li><li><a href="#discovering-actions" title="Discovering Actions">Discovering Actions</a></li><li><ul><li><a href="#read-the-firmware--no-login-required" title="Read the firmware — no login required">Read the firmware — no login required</a></li><li><a href="#watch-live-traffic" title="Watch live traffic">Watch live traffic</a></li></ul></li><li><a href="#action-type-constants" title="Action Type Constants">Action Type Constants</a></li><li><a href="#response-structure" title="Response Structure">Response Structure</a></li><li><a href="#why-a-failed-login-tells-you-so-little" title="Why a failed login tells you so little">Why a failed login tells you so little</a></li></ul></li><li><a href="#examples" title="Examples">Examples</a></li><li><ul><li><a href="#example_0" title="Basic authentication and command execution">Basic authentication and command execution</a></li><li><a href="#example_1" title="Get unread SMS count with specific attributes">Get unread SMS count with specific attributes</a></li><li><a href="#example_2" title="Retrieve SMS messages with pagination">Retrieve SMS messages with pagination</a></li></ul></li><li><a href="#mod_ts_functions" title="Functions">Functions</a></li><li><ul><li><a href="#namespace_authenticate" title="authenticate">authenticate</a></li><li><a href="#namespace_execute" title="execute">execute</a></li></ul></li><li><a href="#mod_ts_interfaces" title="Interfaces">Interfaces</a></li><li><ul><li><a href="#namespace_actionresult" title="ActionResult">ActionResult</a></li><li><a href="#namespace_authoptions" title="AuthOptions">AuthOptions</a></li><li><a href="#namespace_authresult" title="AuthResult">AuthResult</a></li><li><a href="#namespace_busystatus" title="BusyStatus">BusyStatus</a></li><li><a href="#namespace_commandbatch" title="CommandBatch">CommandBatch</a></li><li><a href="#namespace_credentials" title="Credentials">Credentials</a></li><li><a href="#namespace_decodedbatch" title="DecodedBatch">DecodedBatch</a></li><li><a href="#namespace_dialect" title="Dialect">Dialect</a></li><li><a href="#namespace_envelope" title="Envelope">Envelope</a></li><li><a href="#namespace_executeoptions" title="ExecuteOptions">ExecuteOptions</a></li><li><a href="#namespace_executeresult" title="ExecuteResult">ExecuteResult</a></li><li><a href="#namespace_publickeyinfo" title="PublicKeyInfo">PublicKeyInfo</a></li><li><a href="#namespace_routerinfo" title="RouterInfo">RouterInfo</a></li><li><a href="#namespace_sessioncontext" title="SessionContext">SessionContext</a></li></ul></li><li><a href="#mod_ts_type-aliases" title="Type Aliases">Type Aliases</a></li><li><ul><li><a href="#namespace_action" title="Action">Action</a></li><li><a href="#namespace_actiontype" title="ActionType">ActionType</a></li></ul></li><li><a href="#mod_ts_variables" title="Variables">Variables</a></li><li><ul><li><a href="#namespace_act" title="ACT">ACT</a></li><li><a href="#namespace_gdprjson" title="gdprJson">gdprJson</a></li><li><a href="#namespace_gdprtext" title="gdprText">gdprText</a></li></ul></li></ul></nav></div>
+          <h3>Document Navigation</h3><ul><li><ul><li><a href="#how-the-protocol-works" title="How the protocol works">How the protocol works</a></li><li><ul><li><a href="#oid--a-group-of-settings" title="oid — a group of settings">oid — a group of settings</a></li><li><a href="#stack--which-instance" title="stack — which instance">stack — which instance</a></li><li><a href="#"gdpr"-names-the-encryption,-not-the-format" title="&quot;GDPR&quot; names the encryption, not the format">"GDPR" names the encryption, not the format</a></li></ul></li><li><a href="#supported-models" title="Supported Models">Supported Models</a></li><li><a href="#unconfirmed-on-hardware" title="Unconfirmed on hardware">Unconfirmed on hardware</a></li><li><a href="#main-functions" title="Main Functions">Main Functions</a></li><li><a href="#firmware-dialects" title="Firmware Dialects">Firmware Dialects</a></li><li><a href="#action-format" title="Action Format">Action Format</a></li><li><a href="#discovering-actions" title="Discovering Actions">Discovering Actions</a></li><li><ul><li><a href="#read-the-firmware--no-login-required" title="Read the firmware — no login required">Read the firmware — no login required</a></li><li><a href="#watch-live-traffic" title="Watch live traffic">Watch live traffic</a></li></ul></li><li><a href="#action-type-constants" title="Action Type Constants">Action Type Constants</a></li><li><a href="#response-structure" title="Response Structure">Response Structure</a></li><li><a href="#why-a-failed-login-tells-you-so-little" title="Why a failed login tells you so little">Why a failed login tells you so little</a></li></ul></li><li><a href="#examples" title="Examples">Examples</a></li><li><ul><li><a href="#example_0" title="Basic authentication and command execution">Basic authentication and command execution</a></li><li><a href="#example_1" title="Get unread SMS count with specific attributes">Get unread SMS count with specific attributes</a></li><li><a href="#example_2" title="Retrieve SMS messages with pagination">Retrieve SMS messages with pagination</a></li></ul></li><li><a href="#mod_ts_functions" title="Functions">Functions</a></li><li><ul><li><a href="#namespace_authenticate" title="authenticate">authenticate</a></li><li><a href="#namespace_execute" title="execute">execute</a></li></ul></li><li><a href="#mod_ts_interfaces" title="Interfaces">Interfaces</a></li><li><ul><li><a href="#namespace_actionresult" title="ActionResult">ActionResult</a></li><li><a href="#namespace_authoptions" title="AuthOptions">AuthOptions</a></li><li><a href="#namespace_authresult" title="AuthResult">AuthResult</a></li><li><a href="#namespace_busystatus" title="BusyStatus">BusyStatus</a></li><li><a href="#namespace_commandbatch" title="CommandBatch">CommandBatch</a></li><li><a href="#namespace_credentials" title="Credentials">Credentials</a></li><li><a href="#namespace_decodedbatch" title="DecodedBatch">DecodedBatch</a></li><li><a href="#namespace_dialect" title="Dialect">Dialect</a></li><li><a href="#namespace_envelope" title="Envelope">Envelope</a></li><li><a href="#namespace_executeoptions" title="ExecuteOptions">ExecuteOptions</a></li><li><a href="#namespace_executeresult" title="ExecuteResult">ExecuteResult</a></li><li><a href="#namespace_publickeyinfo" title="PublicKeyInfo">PublicKeyInfo</a></li><li><a href="#namespace_routerinfo" title="RouterInfo">RouterInfo</a></li><li><a href="#namespace_sessioncontext" title="SessionContext">SessionContext</a></li></ul></li><li><a href="#mod_ts_type-aliases" title="Type Aliases">Type Aliases</a></li><li><ul><li><a href="#namespace_action" title="Action">Action</a></li><li><a href="#namespace_actiontype" title="ActionType">ActionType</a></li></ul></li><li><a href="#mod_ts_variables" title="Variables">Variables</a></li><li><ul><li><a href="#namespace_act" title="ACT">ACT</a></li><li><a href="#namespace_gdprjson" title="gdprJson">gdprJson</a></li><li><a href="#namespace_gdprtext" title="gdprText">gdprText</a></li></ul></li></ul></nav></div>
   </div></div>
 </div>
 </div>
