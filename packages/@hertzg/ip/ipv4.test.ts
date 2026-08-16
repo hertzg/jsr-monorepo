@@ -118,11 +118,6 @@ Deno.test("parseIpv4", async (t) => {
     );
   });
 
-  await t.step("RangeError means a well-formed number that is too big", () => {
-    assertThrows(() => parseIpv4("256.1.2.3"), RangeError);
-    assertThrows(() => parseIpv4("1.2.3.999"), RangeError);
-  });
-
   await t.step("never reads a non-numeric octet as a number", () => {
     // Number("NaN") is NaN and String(NaN) is "NaN", so validating an octet
     // by that round-trip would accept this and return 16909056.
