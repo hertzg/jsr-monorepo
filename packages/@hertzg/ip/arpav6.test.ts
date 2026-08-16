@@ -1,4 +1,4 @@
-import { assertEquals, assertFalse, assertThrows } from "@std/assert";
+import { assertEquals, assertNotMatch, assertThrows } from "@std/assert";
 import { ipv6ToArpa } from "./arpav6.ts";
 import { parseIpv6 } from "./ipv6.ts";
 
@@ -36,13 +36,13 @@ Deno.test("ipv6ToArpa", async (t) => {
   });
 
   await t.step("the name is relative -- no trailing dot", () => {
-    assertFalse(ipv6ToArpa(parseIpv6("2001:db8::1")).endsWith("."));
+    assertNotMatch(ipv6ToArpa(parseIpv6("2001:db8::1")), /\.$/);
   });
 
   await t.step("an address outside the IPv6 range", () => {
-    const MAX_IPV6 = 340282366920938463463374607431768211455n;
+    const IPV6_MAX = 0xFFFF_FFFF_FFFF_FFFF_FFFF_FFFF_FFFF_FFFFn;
 
     assertThrows(() => ipv6ToArpa(-1n), RangeError);
-    assertThrows(() => ipv6ToArpa(MAX_IPV6 + 1n), RangeError);
+    assertThrows(() => ipv6ToArpa(IPV6_MAX + 1n), RangeError);
   });
 });
