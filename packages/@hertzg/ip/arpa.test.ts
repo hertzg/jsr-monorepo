@@ -1,8 +1,8 @@
 import { assertEquals, assertFalse, assertThrows } from "@std/assert";
-import { ipToArpa, ipv4ToArpa, ipv6ToArpa } from "./arpa.ts";
+import { ipToArpa } from "./arpa.ts";
 import { parseIp } from "./ip.ts";
-import { parseIpv4 } from "./ipv4.ts";
-import { parseIpv6 } from "./ipv6.ts";
+import { ipv4ToArpa, parseIpv4 } from "./ipv4.ts";
+import { ipv6ToArpa, parseIpv6 } from "./ipv6.ts";
 
 Deno.test("ipv4ToArpa", async (t) => {
   await t.step("reverses the four octets under in-addr.arpa", () => {
@@ -92,17 +92,18 @@ Deno.test("the names are relative -- no trailing dot", () => {
 
 Deno.test("an address outside its version's range", async (t) => {
   await t.step("ipv4ToArpa", () => {
+    const MAX_IPV4 = 4294967295;
+
     assertThrows(() => ipv4ToArpa(-1), RangeError);
-    assertThrows(() => ipv4ToArpa(4294967296), RangeError);
+    assertThrows(() => ipv4ToArpa(MAX_IPV4 + 1), RangeError);
     assertThrows(() => ipv4ToArpa(1.5), RangeError);
   });
 
   await t.step("ipv6ToArpa", () => {
+    const MAX_IPV6 = 340282366920938463463374607431768211455n;
+
     assertThrows(() => ipv6ToArpa(-1n), RangeError);
-    assertThrows(
-      () => ipv6ToArpa(340282366920938463463374607431768211456n),
-      RangeError,
-    );
+    assertThrows(() => ipv6ToArpa(MAX_IPV6 + 1n), RangeError);
   });
 
   await t.step("ipToArpa", () => {

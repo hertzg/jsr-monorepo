@@ -1,11 +1,15 @@
 /**
- * Reverse DNS pointer names for IP addresses.
+ * Universal reverse DNS pointer names for IP addresses.
  *
- * This module provides {@link ipv4ToArpa}, {@link ipv6ToArpa} and the
- * universal {@link ipToArpa}, which build the name a `PTR` record for an
- * address lives at: the four IPv4 octets reversed under `in-addr.arpa`
- * (RFC 1035 §3.5), or all 32 IPv6 nibbles reversed under `ip6.arpa`
- * (RFC 3596 §2.5).
+ * This module provides {@link ipToArpa}, which picks the IP version from the
+ * shape of its argument and delegates to the version-specific function. The
+ * name it builds is where a `PTR` record for the address lives: the four IPv4
+ * octets reversed under `in-addr.arpa` (RFC 1035 §3.5), or all 32 IPv6
+ * nibbles reversed under `ip6.arpa` (RFC 3596 §2.5).
+ *
+ * For version-specific functions, see:
+ * - [`ipv4`](https://jsr.io/@hertzg/ip/doc/ipv4): {@link ipv4ToArpa}
+ * - [`ipv6`](https://jsr.io/@hertzg/ip/doc/ipv6): {@link ipv6ToArpa}
  *
  * ## The names are relative
  *
@@ -40,107 +44,8 @@
  */
 
 import type { Address } from "./ip.ts";
-import { stringifyIpv4 } from "./ipv4.ts";
-import { stringifyIpv6Expanded } from "./ipv6.ts";
-
-/**
- * Builds the reverse DNS pointer name of an IPv4 address.
- *
- * The four octets are written in reverse order under `in-addr.arpa`, as
- * RFC 1035 §3.5 specifies.
- *
- * The name is **relative** — it carries no trailing dot. Append `"."` if a
- * resolver requires an absolute name.
- *
- * @param address The address as a 32-bit number
- * @returns The `in-addr.arpa` name, without a trailing dot
- * @throws {RangeError} If the address is negative, fractional, or greater
- *   than 2^32-1
- *
- * @example Building the name
- * ```ts
- * import { assertEquals } from "@std/assert";
- * import { ipv4ToArpa } from "@hertzg/ip/arpa";
- * import { parseIpv4 } from "@hertzg/ip/ipv4";
- *
- * assertEquals(ipv4ToArpa(parseIpv4("192.168.0.1")), "1.0.168.192.in-addr.arpa");
- * assertEquals(ipv4ToArpa(parseIpv4("0.0.0.0")), "0.0.0.0.in-addr.arpa");
- * assertEquals(ipv4ToArpa(parseIpv4("255.255.255.255")), "255.255.255.255.in-addr.arpa");
- * ```
- *
- * @example The name is relative, so make it absolute yourself
- * ```ts
- * import { assertEquals } from "@std/assert";
- * import { ipv4ToArpa } from "@hertzg/ip/arpa";
- * import { parseIpv4 } from "@hertzg/ip/ipv4";
- *
- * assertEquals(ipv4ToArpa(parseIpv4("8.8.8.8")) + ".", "8.8.8.8.in-addr.arpa.");
- * ```
- */
-export function ipv4ToArpa(address: number): string {
-  const [first, second, third, fourth] = stringifyIpv4(address).split(".");
-  return `${fourth}.${third}.${second}.${first}.in-addr.arpa`;
-}
-
-/**
- * Builds the reverse DNS pointer name of an IPv6 address.
- *
- * All 32 nibbles of the expanded address are written in reverse order,
- * one per label, under `ip6.arpa`, as RFC 3596 §2.5 specifies. Nothing is
- * compressed and no leading zero is elided — the name always has 34 labels.
- *
- * The name is **relative** — it carries no trailing dot. Append `"."` if a
- * resolver requires an absolute name.
- *
- * An IPv4-mapped address reaches this function only when the caller holds it
- * as a `bigint`, in which case it gets the `ip6.arpa` name of its 128-bit
- * value. {@link ipToArpa} never sees one, since {@link parseIp} unwraps
- * mapped addresses to IPv4 (see ADR 0004).
- *
- * @param address The address as a 128-bit bigint
- * @returns The `ip6.arpa` name, without a trailing dot
- * @throws {RangeError} If the address is negative or greater than 2^128-1
- *
- * @example Building the name
- * ```ts
- * import { assertEquals } from "@std/assert";
- * import { ipv6ToArpa } from "@hertzg/ip/arpa";
- * import { parseIpv6 } from "@hertzg/ip/ipv6";
- *
- * assertEquals(
- *   ipv6ToArpa(parseIpv6("2001:db8::1")),
- *   "1.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.8.b.d.0.1.0.0.2.ip6.arpa",
- * );
- * assertEquals(
- *   ipv6ToArpa(parseIpv6("::")),
- *   "0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.ip6.arpa",
- * );
- * ```
- *
- * @example An IPv4-mapped address held as a bigint keeps its ip6.arpa name
- * ```ts
- * import { assertEquals } from "@std/assert";
- * import { ipv6ToArpa } from "@hertzg/ip/arpa";
- * import { parseIpv6 } from "@hertzg/ip/ipv6";
- *
- * assertEquals(
- *   ipv6ToArpa(parseIpv6("::ffff:192.168.0.1")),
- *   "1.0.0.0.8.a.0.c.f.f.f.f.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.ip6.arpa",
- * );
- * ```
- */
-export function ipv6ToArpa(address: bigint): string {
-  const expanded = stringifyIpv6Expanded(address);
-
-  const nibbles: string[] = [];
-  for (let i = expanded.length - 1; i >= 0; i--) {
-    if (expanded[i] !== ":") {
-      nibbles.push(expanded[i]);
-    }
-  }
-
-  return `${nibbles.join(".")}.ip6.arpa`;
-}
+import { ipv4ToArpa } from "./ipv4.ts";
+import { ipv6ToArpa } from "./ipv6.ts";
 
 /**
  * Builds the reverse DNS pointer name of an IP address of either version.

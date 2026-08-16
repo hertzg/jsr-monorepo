@@ -61,13 +61,14 @@ formatting cells filled:
 
 ## Decision
 
-**Three functions, addresses only, in their own module.** `arpa.ts`
-holds `ipv4ToArpa`, `ipv6ToArpa` and `ipToArpa`, exported as `./arpa`.
-The `To<TargetForm>` shape is `ipv4ToBytes` / `ipv6ToBytes` /
-`ipToBytes`, which is the closest existing precedent; a separate module
-follows ADR 0012's reasoning that a concern is what a reader navigates
-by, and `version.ts` already shows a two-function entrypoint is normal
-here.
+**Three functions, addresses only, each beside its own version.**
+`ipv4ToArpa` lives in `ipv4.ts` and `ipv6ToArpa` in `ipv6.ts`, next to the
+stringifiers each one builds on; `arpa.ts` holds only the universal
+`ipToArpa` and is exported as `./arpa`. The `To<TargetForm>` shape is
+`ipv4ToBytes` / `ipv6ToBytes` / `ipToBytes`, which is the closest existing
+precedent, and this is the layout that precedent actually has: a
+version-specific function sits with its version, and the universal arm gets
+the module of its own that dispatch needs.
 
 **No prefix or zone form.** Not because Python's is broken, but because
 no caller has asked for one. If it is ever wanted it takes its own name
@@ -137,8 +138,10 @@ genuinely varies across the arms.
 
 ## References
 
-- `arpa.ts` — `ipv4ToArpa`, `ipv6ToArpa`, `ipToArpa`
-- `ipv6.ts` — `stringifyIpv6Expanded`, `expandIpv6`, `compressIpv6`
+- `arpa.ts` — `ipToArpa`
+- `ipv4.ts` — `ipv4ToArpa`, `stringifyIpv4`
+- `ipv6.ts` — `ipv6ToArpa`, `stringifyIpv6Expanded`, `expandIpv6`,
+  `compressIpv6`
 - RFC 1035 §3.5 — `in-addr.arpa`
 - RFC 3596 §2.5 — `ip6.arpa`
 - RFC 2317 — classless `in-addr.arpa` delegation, the construct Python
