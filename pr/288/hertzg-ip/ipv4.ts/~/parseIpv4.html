@@ -168,10 +168,8 @@
 <span class="font-bold">parseIpv4</span><span class="font-medium">(<span><span>address<span>: <span class="td-kw">string</span></span></span></span>)<span>: <span class="td-kw">number</span></span> </span>
       </code><div class="space-y-7" id=""><div class="markdown"><p>Parses an IPv4 address in dotted decimal notation to a number.</p>
 <p>An octet is decimal digits and nothing else: no leading zeros (except &quot;0&quot;
-itself), no surrounding or embedded whitespace, no sign other than a
-leading <code>-</code>, no radix prefix, and no trailing text. A leading <code>-</code> is read
-rather than rejected outright, so a negative octet is reported as out of
-range instead of as a malformed one -- <code>&quot;-0&quot;</code> included.</p>
+itself), no surrounding or embedded whitespace, no sign, no radix prefix,
+and no trailing text.</p>
 </div><section class="section"  id="examples"><div>
       <h2 class="anchorable mb-1"><a href="#examples" class="anchor" aria-label="Anchor" tabIndex="-1"><svg
   width="16"
@@ -528,7 +526,7 @@ Throws</h2></div><div class="space-y-8"><div class=" docEntry" id="function_pars
 </svg>
 </a>
 </div><div class="max-w-[75ch]"><div class="markdown"><p>If the format is invalid -- wrong number of octets, a
-non-decimal octet, leading zeros, whitespace, or trailing text</p>
+non-decimal octet, leading zeros, a sign, whitespace, or trailing text</p>
 </div></div></div>
 <div class=" docEntry" id="function_parseipv4_0_throws_1">
 
@@ -560,8 +558,7 @@ non-decimal octet, leading zeros, whitespace, or trailing text</p>
   />
 </svg>
 </a>
-</div><div class="max-w-[75ch]"><div class="markdown"><p>If any octet is out of range (not 0-255), including
-any negative octet</p>
+</div><div class="max-w-[75ch]"><div class="markdown"><p>If an octet is a well-formed number greater than 255</p>
 </div></div></div>
 </div></section>
 </div>

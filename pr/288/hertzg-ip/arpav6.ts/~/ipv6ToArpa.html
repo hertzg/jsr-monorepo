@@ -1,10 +1,10 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>parseCidrv6 - mod.ts - @hertzg&#x2F;ip documentation</title>
+  <title>ipv6ToArpa - arpav6.ts - @hertzg&#x2F;ip documentation</title>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="doc-current-file" content="mod.ts">
+  <meta name="doc-current-file" content="arpav6.ts">
   <link rel="stylesheet" href="..&#x2F;..&#x2F;styles.css">
   <link rel="stylesheet" href="..&#x2F;..&#x2F;page.css">
   <link id="ddocResetStylesheet" rel="stylesheet" href="..&#x2F;..&#x2F;reset.css"><link href="../../comrak.css" rel="stylesheet" /><link href="../../prism.css" rel="stylesheet" /><script src="../../prism.js"></script><script src="..&#x2F;..&#x2F;script.js" defer></script>
@@ -32,7 +32,7 @@
     fill="currentColor"
   />
 </svg>
-</span><a href="..&#x2F;..&#x2F;.&#x2F;mod.ts&#x2F;index.html" class="contextLink">mod.ts</a><span class="text-black dark:text-white"><svg
+</span><a href="..&#x2F;..&#x2F;.&#x2F;arpav6.ts&#x2F;index.html" class="contextLink">arpav6.ts</a><span class="text-black dark:text-white"><svg
   width="16"
   height="16"
   viewBox="0 0 16 16"
@@ -48,7 +48,7 @@
 </svg>
 </span>
 
-    <ul><li>parseCidrv6</li></ul></ul>
+    <ul><li>ipv6ToArpa</li></ul></ul>
 </div>
 
     <div class="flex items-center gap-2">
@@ -112,14 +112,14 @@
     </div>
   </div>
 </nav>
-<div id="searchResults"></div><div id="content"><main class="symbolGroup" id="symbol_parseCidrv6"><article>
+<div id="searchResults"></div><div id="content"><main class="symbolGroup" id="symbol_ipv6ToArpa"><article>
       <div class="symbolTitle">
         <div>
           <div class="text-2xl leading-none break-all">
-            <span class="text-Function">function</span>&nbsp;<span class="font-bold">parseCidrv6</span>
+            <span class="text-Function">function</span>&nbsp;<span class="font-bold">ipv6ToArpa</span>
           </div></div><a
   class="sourceButton"
-  href="file:&#x2F;&#x2F;&#x2F;home&#x2F;runner&#x2F;work&#x2F;jsr-monorepo&#x2F;jsr-monorepo&#x2F;packages&#x2F;@hertzg&#x2F;ip&#x2F;cidrv6.ts"><svg
+  href="file:&#x2F;&#x2F;&#x2F;home&#x2F;runner&#x2F;work&#x2F;jsr-monorepo&#x2F;jsr-monorepo&#x2F;packages&#x2F;@hertzg&#x2F;ip&#x2F;arpav6.ts"><svg
   width="14"
   height="14"
   viewBox="0 0 14 14"
@@ -142,8 +142,8 @@
   />
 </svg>
 </a>
-</div><div><div class="mt-3 space-y-8"><div class="scroll-mt-16" id="function_parsecidrv6_0">
-      <code class="anchorable text-base break-words"><a href="#function_parsecidrv6_0" class="anchor" aria-label="Anchor" tabIndex="-1"><svg
+</div><div><div class="mt-3 space-y-8"><div class="scroll-mt-16" id="function_ipv6toarpa_0">
+      <code class="anchorable text-base break-words"><a href="#function_ipv6toarpa_0" class="anchor" aria-label="Anchor" tabIndex="-1"><svg
   width="16"
   height="16"
   viewBox="0 0 14 14"
@@ -165,11 +165,17 @@
   </defs>
 </svg>
 </a>
-<span class="font-bold">parseCidrv6</span><span class="font-medium">(<span><span>cidr<span>: <span class="td-kw">string</span></span></span></span>)<span>: <a href="../.././mod.ts/~/Cidrv6.html" class="link td-ref">Cidrv6</a></span> </span>
-      </code><div class="space-y-7" id=""><div class="markdown"><p>Parses an IPv6 CIDR notation string to a Cidrv6 object.</p>
-<p>Returns only the parsed values (address and prefix length).</p>
-<p>The prefix length is decimal digits and nothing else: no leading zeros, no
-whitespace, no sign, and no trailing text.</p>
+<span class="font-bold">ipv6ToArpa</span><span class="font-medium">(<span><span>address<span>: <span class="td-kw">bigint</span></span></span></span>)<span>: <span class="td-kw">string</span></span> </span>
+      </code><div class="space-y-7" id=""><div class="markdown"><p>Builds the reverse DNS pointer name of an IPv6 address.</p>
+<p>All 32 nibbles of the expanded address are written in reverse order,
+one per label, under <code>ip6.arpa</code>, as RFC 3596 §2.5 specifies. Nothing is
+compressed and no leading zero is elided — the name always has 34 labels.</p>
+<p>The name is <strong>relative</strong> — it carries no trailing dot. Append <code>&quot;.&quot;</code> if a
+resolver requires an absolute name.</p>
+<p>An IPv4-mapped address reaches this function only when the caller holds it
+as a <code>bigint</code>, in which case it gets the <code>ip6.arpa</code> name of its 128-bit
+value. ipToArpa never sees one, since parseIp unwraps
+mapped addresses to IPv4 (see ADR 0004).</p>
 </div><section class="section"  id="examples"><div>
       <h2 class="anchorable mb-1"><a href="#examples" class="anchor" aria-label="Anchor" tabIndex="-1"><svg
   width="16"
@@ -215,20 +221,32 @@ Examples</h2></div><div class="space-y-8"><div class="anchorable"><a href="#exam
   </defs>
 </svg>
 </a>
-<h3 class="example-header"><div class="markdown"><p>Basic CIDR parsing</p>
+<h3 class="example-header"><div class="markdown"><p>Building the name</p>
 </div></h3>
   <div><div class="markdown"><pre class="highlight"><code class="language-ts">import { assertEquals } from &quot;@std/assert&quot;;
-import { parseCidrv6 } from &quot;@hertzg/ip/cidrv6&quot;;
+import { ipv6ToArpa } from &quot;@hertzg/ip/arpav6&quot;;
+import { parseIpv6 } from &quot;@hertzg/ip/ipv6&quot;;
 
-const cidr = parseCidrv6(&quot;2001:db8::/32&quot;);
-assertEquals(cidr.address, 42540766411282592856903984951653826560n);
-assertEquals(cidr.prefixLength, 32);
+assertEquals(
+  ipv6ToArpa(parseIpv6(&quot;2001:db8::1&quot;)),
+  &quot;1.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.8.b.d.0.1.0.0.2.ip6.arpa&quot;,
+);
+assertEquals(
+  ipv6ToArpa(parseIpv6(&quot;::&quot;)),
+  &quot;0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.ip6.arpa&quot;,
+);
 </code><button class="copyButton" data-copy="import { assertEquals } from &quot;@std/assert&quot;;
-import { parseCidrv6 } from &quot;@hertzg/ip/cidrv6&quot;;
+import { ipv6ToArpa } from &quot;@hertzg/ip/arpav6&quot;;
+import { parseIpv6 } from &quot;@hertzg/ip/ipv6&quot;;
 
-const cidr = parseCidrv6(&quot;2001:db8::/32&quot;);
-assertEquals(cidr.address, 42540766411282592856903984951653826560n);
-assertEquals(cidr.prefixLength, 32);
+assertEquals(
+  ipv6ToArpa(parseIpv6(&quot;2001:db8::1&quot;)),
+  &quot;1.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.8.b.d.0.1.0.0.2.ip6.arpa&quot;,
+);
+assertEquals(
+  ipv6ToArpa(parseIpv6(&quot;::&quot;)),
+  &quot;0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.ip6.arpa&quot;,
+);
 "><svg
   class="copy"
   width="15"
@@ -284,22 +302,24 @@ assertEquals(cidr.prefixLength, 32);
   </defs>
 </svg>
 </a>
-<h3 class="example-header"><div class="markdown"><p>Error handling</p>
+<h3 class="example-header"><div class="markdown"><p>An IPv4-mapped address held as a bigint keeps its ip6.arpa name</p>
 </div></h3>
-  <div><div class="markdown"><pre class="highlight"><code class="language-ts">import { assertThrows } from &quot;@std/assert&quot;;
-import { parseCidrv6 } from &quot;@hertzg/ip/cidrv6&quot;;
+  <div><div class="markdown"><pre class="highlight"><code class="language-ts">import { assertEquals } from &quot;@std/assert&quot;;
+import { ipv6ToArpa } from &quot;@hertzg/ip/arpav6&quot;;
+import { parseIpv6 } from &quot;@hertzg/ip/ipv6&quot;;
 
-assertThrows(() =&gt; parseCidrv6(&quot;2001:db8::&quot;), TypeError);
-assertThrows(() =&gt; parseCidrv6(&quot;2001:db8::/&quot;), TypeError);
-assertThrows(() =&gt; parseCidrv6(&quot;2001:db8::/129&quot;), RangeError);
-assertThrows(() =&gt; parseCidrv6(&quot;2001:db8::/032&quot;), TypeError);
-</code><button class="copyButton" data-copy="import { assertThrows } from &quot;@std/assert&quot;;
-import { parseCidrv6 } from &quot;@hertzg/ip/cidrv6&quot;;
+assertEquals(
+  ipv6ToArpa(parseIpv6(&quot;::ffff:192.168.0.1&quot;)),
+  &quot;1.0.0.0.8.a.0.c.f.f.f.f.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.ip6.arpa&quot;,
+);
+</code><button class="copyButton" data-copy="import { assertEquals } from &quot;@std/assert&quot;;
+import { ipv6ToArpa } from &quot;@hertzg/ip/arpav6&quot;;
+import { parseIpv6 } from &quot;@hertzg/ip/ipv6&quot;;
 
-assertThrows(() =&gt; parseCidrv6(&quot;2001:db8::&quot;), TypeError);
-assertThrows(() =&gt; parseCidrv6(&quot;2001:db8::/&quot;), TypeError);
-assertThrows(() =&gt; parseCidrv6(&quot;2001:db8::/129&quot;), RangeError);
-assertThrows(() =&gt; parseCidrv6(&quot;2001:db8::/032&quot;), TypeError);
+assertEquals(
+  ipv6ToArpa(parseIpv6(&quot;::ffff:192.168.0.1&quot;)),
+  &quot;1.0.0.0.8.a.0.c.f.f.f.f.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.ip6.arpa&quot;,
+);
 "><svg
   class="copy"
   width="15"
@@ -357,10 +377,10 @@ assertThrows(() =&gt; parseCidrv6(&quot;2001:db8::/032&quot;), TypeError);
   </defs>
 </svg>
 </a>
-Parameters</h2></div><div class="space-y-8"><div class="anchorable docEntry" id="function_parsecidrv6_0_parameter_cidr">
+Parameters</h2></div><div class="space-y-8"><div class="anchorable docEntry" id="function_ipv6toarpa_0_parameter_address">
 
   <div class="docEntryHeader">
-    <div><code><a href="#function_parsecidrv6_0_parameter_cidr" class="anchor" aria-label="Anchor" tabIndex="-1"><svg
+    <div><code><a href="#function_ipv6toarpa_0_parameter_address" class="anchor" aria-label="Anchor" tabIndex="-1"><svg
   width="16"
   height="16"
   viewBox="0 0 14 14"
@@ -382,11 +402,11 @@ Parameters</h2></div><div class="space-y-8"><div class="anchorable docEntry" id=
   </defs>
 </svg>
 </a>
-<span class="font-bold font-lg">cidr</span><span class="font-medium text-stone-500 dark:text-stone-200"><span>: <span class="td-kw">string</span></span></span>
+<span class="font-bold font-lg">address</span><span class="font-medium text-stone-500 dark:text-stone-200"><span>: <span class="td-kw">bigint</span></span></span>
       </code>
     </div><a
   class="sourceButton"
-  href="file:&#x2F;&#x2F;&#x2F;home&#x2F;runner&#x2F;work&#x2F;jsr-monorepo&#x2F;jsr-monorepo&#x2F;packages&#x2F;@hertzg&#x2F;ip&#x2F;cidrv6.ts"><svg
+  href="file:&#x2F;&#x2F;&#x2F;home&#x2F;runner&#x2F;work&#x2F;jsr-monorepo&#x2F;jsr-monorepo&#x2F;packages&#x2F;@hertzg&#x2F;ip&#x2F;arpav6.ts"><svg
   width="14"
   height="14"
   viewBox="0 0 14 14"
@@ -409,7 +429,7 @@ Parameters</h2></div><div class="space-y-8"><div class="anchorable docEntry" id=
   />
 </svg>
 </a>
-</div><div class="max-w-[75ch]"><div class="markdown"><p>The CIDR notation string (e.g., &quot;2001:db8::/32&quot;)</p>
+</div><div class="max-w-[75ch]"><div class="markdown"><p>The address as a 128-bit bigint</p>
 </div></div></div>
 </div></section>
 <section class="section"  id="return-type"><div>
@@ -435,14 +455,14 @@ Parameters</h2></div><div class="space-y-8"><div class="anchorable docEntry" id=
   </defs>
 </svg>
 </a>
-Return Type</h2></div><div class="space-y-8"><div class=" docEntry" id="function_parsecidrv6_0_return">
+Return Type</h2></div><div class="space-y-8"><div class=" docEntry" id="function_ipv6toarpa_0_return">
 
   <div class="docEntryHeader">
-    <div><code><span class="font-medium text-stone-500 dark:text-stone-200"><a href="../.././mod.ts/~/Cidrv6.html" class="link td-ref">Cidrv6</a></span>
+    <div><code><span class="font-medium text-stone-500 dark:text-stone-200"><span class="td-kw">string</span></span>
       </code>
     </div><a
   class="sourceButton"
-  href="file:&#x2F;&#x2F;&#x2F;home&#x2F;runner&#x2F;work&#x2F;jsr-monorepo&#x2F;jsr-monorepo&#x2F;packages&#x2F;@hertzg&#x2F;ip&#x2F;cidrv6.ts"><svg
+  href="file:&#x2F;&#x2F;&#x2F;home&#x2F;runner&#x2F;work&#x2F;jsr-monorepo&#x2F;jsr-monorepo&#x2F;packages&#x2F;@hertzg&#x2F;ip&#x2F;arpav6.ts"><svg
   width="14"
   height="14"
   viewBox="0 0 14 14"
@@ -465,7 +485,7 @@ Return Type</h2></div><div class="space-y-8"><div class=" docEntry" id="function
   />
 </svg>
 </a>
-</div><div class="max-w-[75ch]"><div class="markdown"><p>A Cidrv6 object containing the parsed address and prefix length</p>
+</div><div class="max-w-[75ch]"><div class="markdown"><p>The <code>ip6.arpa</code> name, without a trailing dot</p>
 </div></div></div>
 </div></section>
 <section class="section"  id="throws"><div>
@@ -491,47 +511,14 @@ Return Type</h2></div><div class="space-y-8"><div class=" docEntry" id="function
   </defs>
 </svg>
 </a>
-Throws</h2></div><div class="space-y-8"><div class=" docEntry" id="function_parsecidrv6_0_throws_0">
-
-  <div class="docEntryHeader">
-    <div><code><span class="font-medium text-stone-500 dark:text-stone-200">TypeError</span>
-      </code>
-    </div><a
-  class="sourceButton"
-  href="file:&#x2F;&#x2F;&#x2F;home&#x2F;runner&#x2F;work&#x2F;jsr-monorepo&#x2F;jsr-monorepo&#x2F;packages&#x2F;@hertzg&#x2F;ip&#x2F;cidrv6.ts"><svg
-  width="14"
-  height="14"
-  viewBox="0 0 14 14"
-  fill="none"
-  xmlns="http://www.w3.org/2000/svg"
->
-  <path
-    d="M3.16675 12.6667H11.3334C11.6428 12.6667 11.9396 12.5438 12.1584 12.325C12.3772 12.1062 12.5001 11.8094 12.5001 11.5V4.20834L9.29175 1H4.33342C4.024 1 3.72725 1.12292 3.50846 1.34171C3.28966 1.5605 3.16675 1.85725 3.16675 2.16667V4.5"
-    stroke="currentColor"
-    stroke-width="1.4"
-    stroke-linecap="round"
-    stroke-linejoin="round"
-  />
-  <path
-    d="M6.08334 10.3333L7.83334 8.58334L6.08334 6.83334M3.75 6.83334L2 8.58334L3.75 10.3333M9.00001 1V4.5H12.5L9.00001 1Z"
-    stroke="currentColor"
-    stroke-width="1.4"
-    stroke-linecap="round"
-    stroke-linejoin="round"
-  />
-</svg>
-</a>
-</div><div class="max-w-[75ch]"><div class="markdown"><p>If the format is invalid, including a prefix length
-with leading zeros, whitespace or trailing text</p>
-</div></div></div>
-<div class=" docEntry" id="function_parsecidrv6_0_throws_1">
+Throws</h2></div><div class="space-y-8"><div class=" docEntry" id="function_ipv6toarpa_0_throws_0">
 
   <div class="docEntryHeader">
     <div><code><span class="font-medium text-stone-500 dark:text-stone-200">RangeError</span>
       </code>
     </div><a
   class="sourceButton"
-  href="file:&#x2F;&#x2F;&#x2F;home&#x2F;runner&#x2F;work&#x2F;jsr-monorepo&#x2F;jsr-monorepo&#x2F;packages&#x2F;@hertzg&#x2F;ip&#x2F;cidrv6.ts"><svg
+  href="file:&#x2F;&#x2F;&#x2F;home&#x2F;runner&#x2F;work&#x2F;jsr-monorepo&#x2F;jsr-monorepo&#x2F;packages&#x2F;@hertzg&#x2F;ip&#x2F;arpav6.ts"><svg
   width="14"
   height="14"
   viewBox="0 0 14 14"
@@ -554,39 +541,7 @@ with leading zeros, whitespace or trailing text</p>
   />
 </svg>
 </a>
-</div><div class="max-w-[75ch]"><div class="markdown"><p>If the prefix length is out of range (not 0-128)</p>
-</div></div></div>
-<div class=" docEntry" id="function_parsecidrv6_0_throws_2">
-
-  <div class="docEntryHeader">
-    <div><code><span class="font-medium text-stone-500 dark:text-stone-200"></span>
-      </code>
-    </div><a
-  class="sourceButton"
-  href="file:&#x2F;&#x2F;&#x2F;home&#x2F;runner&#x2F;work&#x2F;jsr-monorepo&#x2F;jsr-monorepo&#x2F;packages&#x2F;@hertzg&#x2F;ip&#x2F;cidrv6.ts"><svg
-  width="14"
-  height="14"
-  viewBox="0 0 14 14"
-  fill="none"
-  xmlns="http://www.w3.org/2000/svg"
->
-  <path
-    d="M3.16675 12.6667H11.3334C11.6428 12.6667 11.9396 12.5438 12.1584 12.325C12.3772 12.1062 12.5001 11.8094 12.5001 11.5V4.20834L9.29175 1H4.33342C4.024 1 3.72725 1.12292 3.50846 1.34171C3.28966 1.5605 3.16675 1.85725 3.16675 2.16667V4.5"
-    stroke="currentColor"
-    stroke-width="1.4"
-    stroke-linecap="round"
-    stroke-linejoin="round"
-  />
-  <path
-    d="M6.08334 10.3333L7.83334 8.58334L6.08334 6.83334M3.75 6.83334L2 8.58334L3.75 10.3333M9.00001 1V4.5H12.5L9.00001 1Z"
-    stroke="currentColor"
-    stroke-width="1.4"
-    stroke-linecap="round"
-    stroke-linejoin="round"
-  />
-</svg>
-</a>
-</div><div class="max-w-[75ch]"><div class="markdown"><p>Propagates errors from parseIpv6 if the address part is invalid</p>
+</div><div class="max-w-[75ch]"><div class="markdown"><p>If the address is negative or greater than 2^128-1</p>
 </div></div></div>
 </div></section>
 </div>
@@ -595,8 +550,8 @@ with leading zeros, whitespace or trailing text</p>
     </article></main>
 <div class="toc">
     <div><div class="usageContent">
-    <h3>Usage</h3><div class="markdown"><pre class="highlight"><code class="language-typescript">import { parseCidrv6 } from &quot;mod.ts&quot;;
-</code><button class="copyButton" data-copy="import { parseCidrv6 } from &quot;mod.ts&quot;;
+    <h3>Usage</h3><div class="markdown"><pre class="highlight"><code class="language-typescript">import { ipv6ToArpa } from &quot;arpav6.ts&quot;;
+</code><button class="copyButton" data-copy="import { ipv6ToArpa } from &quot;arpav6.ts&quot;;
 "><svg
   class="copy"
   width="15"
@@ -629,7 +584,7 @@ with leading zeros, whitespace or trailing text</p>
 </svg>
 </button><code></code></pre>
 </div></div><nav class="documentNavigation">
-          <h3>Document Navigation</h3><ul><li><a href="#examples" title="Examples">Examples</a></li><li><ul><li><a href="#example_0" title="Basic CIDR parsing">Basic CIDR parsing</a></li><li><a href="#example_1" title="Error handling">Error handling</a></li></ul></li><li><a href="#parameters" title="Parameters">Parameters</a></li><li><ul><li><a href="#function_parsecidrv6_0_parameter_cidr" title="cidr">cidr</a></li></ul></li><li><a href="#return-type" title="Return Type">Return Type</a></li><li><a href="#throws" title="Throws">Throws</a></li></ul></nav></div>
+          <h3>Document Navigation</h3><ul><li><a href="#examples" title="Examples">Examples</a></li><li><ul><li><a href="#example_0" title="Building the name">Building the name</a></li><li><a href="#example_1" title="An IPv4-mapped address held as a bigint keeps its ip6.arpa name">An IPv4-mapped address held as a bigint keeps its ip6.arpa name</a></li></ul></li><li><a href="#parameters" title="Parameters">Parameters</a></li><li><ul><li><a href="#function_ipv6toarpa_0_parameter_address" title="address">address</a></li></ul></li><li><a href="#return-type" title="Return Type">Return Type</a></li><li><a href="#throws" title="Throws">Throws</a></li></ul></nav></div>
   </div></div>
 </div>
 </div>
