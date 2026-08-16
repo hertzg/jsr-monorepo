@@ -167,7 +167,9 @@
 </a>
 <span class="font-bold">expandIpv6</span><span class="font-medium">(<span><span>address<span>: <span class="td-kw">string</span></span></span></span>)<span>: <span class="td-kw">string</span></span> </span>
       </code><div class="space-y-7" id=""><div class="markdown"><p>Expands an IPv6 address to its full uncompressed form.</p>
-<p>Returns the address with all 8 groups fully specified with 4 hex digits each.</p>
+<p>Returns the address with all 8 groups fully specified with 4 hex digits each.
+This is equivalent to parsing the address and re-stringifying it with
+<a href="../.././mod.ts/~/stringifyIpv6Expanded.html">stringifyIpv6Expanded</a>.</p>
 </div><section class="section"  id="examples"><div>
       <h2 class="anchorable mb-1"><a href="#examples" class="anchor" aria-label="Anchor" tabIndex="-1"><svg
   width="16"
