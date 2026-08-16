@@ -8,8 +8,8 @@
  * nibbles reversed under `ip6.arpa` (RFC 3596 §2.5).
  *
  * For version-specific functions, see:
- * - [`ipv4`](https://jsr.io/@hertzg/ip/doc/ipv4): {@link ipv4ToArpa}
- * - [`ipv6`](https://jsr.io/@hertzg/ip/doc/ipv6): {@link ipv6ToArpa}
+ * - [`arpav4`](https://jsr.io/@hertzg/ip/doc/arpav4): {@link ipv4ToArpa}
+ * - [`arpav6`](https://jsr.io/@hertzg/ip/doc/arpav6): {@link ipv6ToArpa}
  *
  * ## The names are relative
  *
@@ -44,8 +44,8 @@
  */
 
 import type { Address } from "./ip.ts";
-import { ipv4ToArpa } from "./ipv4.ts";
-import { ipv6ToArpa } from "./ipv6.ts";
+import { ipv4ToArpa } from "./arpav4.ts";
+import { ipv6ToArpa } from "./arpav6.ts";
 
 /**
  * Builds the reverse DNS pointer name of an IP address of either version.

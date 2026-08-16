@@ -61,14 +61,17 @@ formatting cells filled:
 
 ## Decision
 
-**Three functions, addresses only, each beside its own version.**
-`ipv4ToArpa` lives in `ipv4.ts` and `ipv6ToArpa` in `ipv6.ts`, next to the
-stringifiers each one builds on; `arpa.ts` holds only the universal
-`ipToArpa` and is exported as `./arpa`. The `To<TargetForm>` shape is
-`ipv4ToBytes` / `ipv6ToBytes` / `ipToBytes`, which is the closest existing
-precedent, and this is the layout that precedent actually has: a
-version-specific function sits with its version, and the universal arm gets
-the module of its own that dispatch needs.
+**Three functions, addresses only, in a module trio of their own.**
+`arpa.ts` holds the universal `ipToArpa`, `arpav4.ts` holds `ipv4ToArpa` and
+`arpav6.ts` holds `ipv6ToArpa`, exported as `./arpa`, `./arpav4` and
+`./arpav6`. The `To<TargetForm>` shape is `ipv4ToBytes` / `ipv6ToBytes` /
+`ipToBytes`, which is the closest existing precedent, and the trio is the
+layout that precedent has: `bytes` / `bytesv4` / `bytesv6`, like
+`classify` / `classifyv4` / `classifyv6` and `validate` / `validatev4` /
+`validatev6`. Reverse naming is a derived concern, so it gets its own
+modules rather than being mixed into `ipv4.ts` / `ipv6.ts`, which carry the
+core address operations -- parsing, stringifying and comparison. This is
+ADR 0012's reasoning that a concern is what a reader navigates by.
 
 **No prefix or zone form.** Not because Python's is broken, but because
 no caller has asked for one. If it is ever wanted it takes its own name
@@ -139,9 +142,9 @@ genuinely varies across the arms.
 ## References
 
 - `arpa.ts` — `ipToArpa`
-- `ipv4.ts` — `ipv4ToArpa`, `stringifyIpv4`
-- `ipv6.ts` — `ipv6ToArpa`, `stringifyIpv6Expanded`, `expandIpv6`,
-  `compressIpv6`
+- `arpav4.ts` — `ipv4ToArpa`
+- `arpav6.ts` — `ipv6ToArpa`
+- `ipv6.ts` — `stringifyIpv6Expanded`, `expandIpv6`, `compressIpv6`
 - RFC 1035 §3.5 — `in-addr.arpa`
 - RFC 3596 §2.5 — `ip6.arpa`
 - RFC 2317 — classless `in-addr.arpa` delegation, the construct Python

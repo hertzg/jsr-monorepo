@@ -292,7 +292,6 @@
  * ### IPv4
  * - {@link parseIpv4}: Parse dotted decimal notation to number
  * - {@link stringifyIpv4}: Convert number to dotted decimal notation
- * - {@link ipv4ToArpa}: Build the `in-addr.arpa` reverse DNS pointer name
  * - {@link compareIpv4}: Compare two IPv4 addresses for sorting
  * - {@link isValidIpv4}: Check if a string is a valid IPv4 address
  *
@@ -327,7 +326,6 @@
  * - {@link stringifyIpv6Expanded}: Convert bigint to full uncompressed colon-hexadecimal
  * - {@link expandIpv6}: Expand to full uncompressed form
  * - {@link compressIpv6}: Compress to canonical shortest form
- * - {@link ipv6ToArpa}: Build the `ip6.arpa` reverse DNS pointer name
  * - {@link compareIpv6}: Compare two IPv6 addresses for sorting
  * - {@link isValidIpv6}: Check if a string is a valid IPv6 address
  *
@@ -399,8 +397,14 @@
  * - {@link ipv6FromBytes}: Read a 16-byte IPv6 address from a buffer
  * - {@link ipv6ToBytes}: Write a 16-byte IPv6 address to a buffer
  *
- * ### Reverse DNS Pointer Names (arpa)
+ * ### Universal Reverse DNS Pointer Names (arpa)
  * - {@link ipToArpa}: Build the pointer name of an address of either version
+ *
+ * ### IPv4 Reverse DNS Pointer Names (arpav4)
+ * - {@link ipv4ToArpa}: Build the `in-addr.arpa` pointer name of an IPv4 address
+ *
+ * ### IPv6 Reverse DNS Pointer Names (arpav6)
+ * - {@link ipv6ToArpa}: Build the `ip6.arpa` pointer name of an IPv6 address
  *
  * ### Submodules
  * - [`ip`](https://jsr.io/@hertzg/ip/doc/ip): Universal IP parsing via {@link parseIp}, {@link stringifyIp}, {@link compareIp}
@@ -419,6 +423,8 @@
  * - [`bytesv4`](https://jsr.io/@hertzg/ip/doc/bytesv4): IPv4 wire byte conversion via {@link ipv4FromBytes}, {@link ipv4ToBytes}
  * - [`bytesv6`](https://jsr.io/@hertzg/ip/doc/bytesv6): IPv6 wire byte conversion via {@link ipv6FromBytes}, {@link ipv6ToBytes}
  * - [`arpa`](https://jsr.io/@hertzg/ip/doc/arpa): Universal reverse DNS pointer names via {@link ipToArpa}
+ * - [`arpav4`](https://jsr.io/@hertzg/ip/doc/arpav4): IPv4 reverse DNS pointer names via {@link ipv4ToArpa}
+ * - [`arpav6`](https://jsr.io/@hertzg/ip/doc/arpav6): IPv6 reverse DNS pointer names via {@link ipv6ToArpa}
  *
  * @module
  */
@@ -596,8 +602,6 @@ export {
 export {
   /** Compare two IPv4 addresses for sorting. */
   compareIpv4,
-  /** Build the `in-addr.arpa` reverse DNS pointer name of an IPv4 address. */
-  ipv4ToArpa,
   /** Parse dotted decimal notation to number. */
   parseIpv4,
   /** Convert number to dotted decimal notation. */
@@ -693,8 +697,6 @@ export {
   compressIpv6,
   /** Expand to full uncompressed form. */
   expandIpv6,
-  /** Build the `ip6.arpa` reverse DNS pointer name of an IPv6 address. */
-  ipv6ToArpa,
   /** Parse colon-hexadecimal notation to bigint. */
   parseIpv6,
   /** Convert bigint to compressed colon-hexadecimal. */
@@ -813,3 +815,11 @@ export {
   /** Build the reverse DNS pointer name of an address of either version. */
   ipToArpa,
 } from "./arpa.ts";
+export {
+  /** Build the `in-addr.arpa` pointer name of an IPv4 address. */
+  ipv4ToArpa,
+} from "./arpav4.ts";
+export {
+  /** Build the `ip6.arpa` pointer name of an IPv6 address. */
+  ipv6ToArpa,
+} from "./arpav6.ts";

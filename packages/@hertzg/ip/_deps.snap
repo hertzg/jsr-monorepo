@@ -19,6 +19,8 @@
     "./bytes": [],
     "./bytesv4": [],
     "./bytesv6": [],
-    "./arpa": []
+    "./arpa": [],
+    "./arpav4": [],
+    "./arpav6": []
   }
 }

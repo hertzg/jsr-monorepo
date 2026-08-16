@@ -20,7 +20,9 @@
     "./bytes": "./bytes.ts",
     "./bytesv4": "./bytesv4.ts",
     "./bytesv6": "./bytesv6.ts",
-    "./arpa": "./arpa.ts"
+    "./arpa": "./arpa.ts",
+    "./arpav4": "./arpav4.ts",
+    "./arpav6": "./arpav6.ts"
   },
   "tasks": {
     "bench:ecosystem": "deno bench --allow-all _bench/"

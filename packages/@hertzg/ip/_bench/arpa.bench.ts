@@ -16,8 +16,8 @@
 
 import { Address4, Address6 } from "npm:ip-address@^10.5.0";
 
-import { ipv4ToArpa } from "../ipv4.ts";
-import { ipv6ToArpa } from "../ipv6.ts";
+import { ipv4ToArpa } from "../arpav4.ts";
+import { ipv6ToArpa } from "../arpav6.ts";
 
 const IPV4 = "192.168.0.1";
 const IPV4_NUMBER = 3232235521;
