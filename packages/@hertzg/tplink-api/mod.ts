@@ -69,33 +69,38 @@
  *
  * ## Supported Models
  *
+ * Speaking the {@link gdprText} dialect, which is the default — nothing needs
+ * to be selected for them:
+ *
  * - TL-MR6400
  * - Archer VR900v
  * - TL-MR6500v
  * - Archer MR600 v2
  * - Other EU/GDPR TP-Link routers with similar firmware
  *
- * These all speak the {@link gdprText} dialect, which is the default — nothing
- * needs to be selected for them.
+ * Speaking the {@link gdprJson} dialect, which has to be passed explicitly:
  *
- * ## Experimental: unconfirmed on hardware
+ * - EX220
+ *
+ * ## Unconfirmed on hardware
  *
  * The {@link gdprJson} dialect describes a second protocol shape seen on newer
- * 5G modems: a JSON payload posted to `/cgi_gdpr?9`. It is built from that
+ * firmware: a JSON payload posted to `/cgi_gdpr?9`. It is built from that
  * firmware's own JavaScript, recovered from the capture attached to
  * [issue #82](https://github.com/hertzg/jsr-monorepo/issues/82) — so the
  * endpoint, the operation vocabulary and the payload shape come from the
- * vendor's source rather than from guesswork.
+ * vendor's source rather than from guesswork. An EX220 owner then ran it
+ * unmodified and both the login and a read worked
+ * ([issue #254](https://github.com/hertzg/jsr-monorepo/issues/254)).
  *
- * It nonetheless **has never been run against a device**, and its tests assert
- * the wire format only. The two dialects carry opposite kinds of confidence:
- * {@link gdprText} has no recovered source but years of use against real
- * hardware, while {@link gdprJson} has the source and no hardware.
- *
- * It is believed to cover:
+ * The models it was reconstructed from are the ones still nobody has run it
+ * against:
  *
  * - TP-LINK NE200 5G
  * - VX800v (reported as "seems identical", zero captures)
+ *
+ * Only reads and the login call have ever been observed on this wire format, so
+ * write actions have no mapping and throw.
  *
  * If you own one of these, pass `dialect: gdprJson` and please report what
  * happens on issue #82 — confirming it is what moves these models onto the
