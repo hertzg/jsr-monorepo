@@ -2,11 +2,16 @@
  * The `gdprJson` dialect: EU/GDPR firmware speaking a JSON payload format over
  * `/cgi_gdpr?9`.
  *
- * **Experimental — never run against real hardware.** The protocol here was
- * reconstructed from a partially-redacted HAR capture and a reporter's
- * reverse-engineered reference implementation attached to
- * [issue #82](https://github.com/hertzg/jsr-monorepo/issues/82). Its tests
- * assert the wire format only; nothing here has been confirmed by a device.
+ * The protocol here was reconstructed from a partially-redacted HAR capture and
+ * a reporter's reverse-engineered reference implementation attached to
+ * [issue #82](https://github.com/hertzg/jsr-monorepo/issues/82) (NE200).
+ *
+ * **Confirmed on a TP-Link EX220.** A field report on
+ * [issue #254](https://github.com/hertzg/jsr-monorepo/issues/254) ran this
+ * dialect unmodified against the device: the `cgi` login succeeded, and a
+ * `[ACT.GET, "DEV2_DEV_INFO"]` read came back decoded. The same reporter's
+ * independent implementation ran `gl` against the same device. Write operations
+ * remain unmapped and still throw.
  *
  * The cipher, the signature rule, the session order and the session transport
  * are identical to `gdprText` — that is what makes this a dialect rather than a
@@ -29,6 +34,11 @@ import { envelopeBody, rootHref } from "../client/request.ts";
 
 /**
  * Operation names observed in the NE200's web UI traffic.
+ *
+ * `go` for {@linkcode ACT}.GET is the one an independent EX220 implementation
+ * spelled `get`; a run against that device
+ * ([issue #254](https://github.com/hertzg/jsr-monorepo/issues/254)) answered a
+ * `go` read normally, so there is no per-model variance to carry here.
  *
  * Only reads have ever been captured. Write action types are deliberately
  * absent so that {@linkcode gdprJson}'s `encodeCommands` throws instead of
@@ -131,6 +141,23 @@ export function encodeAction(action: Action): string {
   });
 }
 
+/**
+ * Envelope shape that `go` and `gl` operations answer with.
+ *
+ * The error field is lowercase `errorcode`, not `errorCode`. A raw EX220
+ * failure pasted on
+ * [issue #254](https://github.com/hertzg/jsr-monorepo/issues/254) settles it:
+ *
+ * ```json
+ * {
+ *   "data": [],
+ *   "operation": "gl",
+ *   "oid": "DEV2_WIFI_APDEV_ETHASSOCDEV_…",
+ *   "success": false,
+ *   "errorcode": 9804
+ * }
+ * ```
+ */
 interface JsonResponse {
   success?: boolean;
   errorcode?: unknown;
@@ -192,9 +219,11 @@ function errorCode(value: unknown): number {
 /**
  * EU/GDPR firmware speaking a JSON payload format over `/cgi_gdpr?9`.
  *
- * **Experimental — believed to cover the TP-LINK NE200 5G modem and probably
- * the VX800v, but unconfirmed on hardware.** See
- * [issue #82](https://github.com/hertzg/jsr-monorepo/issues/82).
+ * Confirmed on a TP-Link EX220
+ * ([issue #254](https://github.com/hertzg/jsr-monorepo/issues/254)). Also
+ * believed to cover the TP-LINK NE200 5G modem, from whose capture it was
+ * built, and probably the VX800v — neither confirmed
+ * ([issue #82](https://github.com/hertzg/jsr-monorepo/issues/82)).
  *
  * Differences from `gdprText`, all measured from the NE200 capture:
  *
@@ -282,6 +311,10 @@ export const gdprJson: Dialect = {
    * in the login page's `adminType`, so a caller that reads the info step can
    * do better than this constant — a device with a provisioned admin account
    * reports `"admin"`, for which this default is wrong.
+   *
+   * `"user"` is what an EX220 logs in as
+   * ([issue #254](https://github.com/hertzg/jsr-monorepo/issues/254)); its web
+   * UI asks for a password only and never shows the account name.
    */
   defaultUsername: "user",
 

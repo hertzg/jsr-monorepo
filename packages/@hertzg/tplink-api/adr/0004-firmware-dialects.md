@@ -1,6 +1,7 @@
 # ADR 0004 — Firmware variants are `Dialect` values: pure request/parse tables consumed by orchestrators that never branch
 
-**Status:** Accepted (supersedes ADR 0003)
+**Status:** Accepted (supersedes ADR 0003) — see the field report below, which
+settles two of the uncertainties this ADR recorded
 
 ## Context
 
@@ -85,7 +86,8 @@ Nothing that diverges touches I/O, sequencing, or crypto.
   Spread composition supplies defaults instead.
 
 - **`gdprJson` ships documented as experimental and unconfirmed on hardware.**
-  NE200 and VX800v are deliberately _not_ added to the supported-models list;
+  (Amended by the field report below.) NE200 and VX800v are deliberately _not_
+  added to the supported-models list;
   `mod.ts` carries a separate, clearly-labelled experimental section pointing at
   issue #82. Its tests assert the wire format only, never that a device accepts
   it.
@@ -146,9 +148,44 @@ Nothing that diverges touches I/O, sequencing, or crypto.
 - **The `gdprJson` details carry real uncertainty, each contained in one
   member.** The `?9` suffix is unexplained; the per-operation stack defaults
   come from a single sample; the error field name in a failing JSON response is
-  unverified, so an unrecognizable failure decodes to `-1`; and the NE200 login
+  unverified (since settled — see the field report below), so an unrecognizable
+  failure decodes to `-1`; and the NE200 login
   page is never scraped because its structure is unknown and nothing in that
   flow consumes it.
+
+## Field report — EX220 (issue #254)
+
+The `gdprJson` dialect was written without a device. An EX220 owner, who had
+independently forked this package to reach the same firmware, ran the shipped
+dialect against their router and reported back on
+[issue #254](https://github.com/hertzg/jsr-monorepo/issues/254). What that
+changes:
+
+- **`gdprJson` is no longer documented as experimental, and EX220 is on the
+  supported-models list.** Login through the `cgi` operation and a
+  `[ACT.GET, "DEV2_DEV_INFO"]` read both worked unmodified. NE200 and VX800v
+  stay off the list — they are still the models nobody has run it against,
+  which inverts the original wording: the dialect is confirmed on a device it
+  was not built from.
+
+- **The error field name is settled: lowercase `errorcode`.** A raw failing
+  response (`"success": false, "errorcode": 9804`) matches what `decodeCommand`
+  already reads, so the `-1` fallback is now a fallback rather than the likely
+  path.
+
+- **`go` is the GET operation, with no per-model variance.** The reporter's own
+  implementation spelled it `get`; their EX220 answered a `go` read from this
+  package normally, so that spelling was an unused path in the fork rather than
+  firmware divergence, and `OPERATIONS` stays a single table.
+
+- **`defaultUsername: "user"` is right for this firmware.** The EX220 web UI
+  asks for a password only and never names the account; `user` is what it logs
+  in as. The `adminType` scrape stays the better source, since it is what a
+  provisioned-admin device would report differently.
+
+Still open, unchanged by this report: the `?9` suffix is unexplained, write
+operations have no observed mapping and still throw, and no NE200 or VX800v has
+ever been tested.
 
 ## References
 
@@ -166,3 +203,5 @@ Nothing that diverges touches I/O, sequencing, or crypto.
 - `authenticate.ts`, `execute.ts` — the dialect-driven orchestrators
 - Issue [#82](https://github.com/hertzg/jsr-monorepo/issues/82) — NE200 request,
   protocol diff, HAR capture, and reference implementation
+- Issue [#254](https://github.com/hertzg/jsr-monorepo/issues/254) — EX220 field
+  report: the first run of `gdprJson` against real hardware

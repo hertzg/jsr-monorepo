@@ -249,6 +249,48 @@ Deno.test("decodeCommand surfaces the router error code", () => {
   assertEquals(decoded.results, [null]);
 });
 
+/**
+ * A failing `gl` response, verbatim from a TP-Link EX220 — the first real
+ * hardware this dialect has been run against
+ * ([issue #254](https://github.com/hertzg/jsr-monorepo/issues/254)). Two things
+ * matter here that the hand-built fixtures above do not show: the field is
+ * lowercase `errorcode`, and a failure still carries an empty `data`.
+ */
+Deno.test("decodeCommand reads a real EX220 failure", () => {
+  const decoded = gdprJson.decodeCommand(
+    '{"data":[],"operation":"gl","oid":"DEV2_WIFI_APDEV_ETHASSOCDEV",' +
+      '"success":false,"errorcode":9804}',
+    { payload: "", indices: [0] },
+  );
+
+  assertEquals(decoded.error, 9804);
+  assertEquals(decoded.results, [[]]);
+});
+
+/**
+ * Fields an EX220 returned for `[ACT.GET, "DEV2_DEV_INFO"]`, wrapped in the
+ * envelope `go` answers with. The device reports its own `stack` as an ordinary
+ * data field, which must survive decoding rather than being mistaken for the
+ * request's instance path.
+ */
+Deno.test("decodeCommand keeps a device-reported stack as data", () => {
+  const decoded = gdprJson.decodeCommand(
+    '{"success":true,"data":{"X_TP_PlatformCodeName":"Volcano",' +
+      '"X_TP_BuildSpec":"WISP","X_TP_Zone":"EU","X_TP_MaxAuthTimes":"5",' +
+      '"stack":"0,0,0,0,0,0"}}',
+    { payload: "", indices: [0] },
+  );
+
+  assertEquals(decoded.error, null);
+  assertEquals(decoded.results, [{
+    X_TP_PlatformCodeName: "Volcano",
+    X_TP_BuildSpec: "WISP",
+    X_TP_Zone: "EU",
+    X_TP_MaxAuthTimes: "5",
+    stack: "0,0,0,0,0,0",
+  }]);
+});
+
 Deno.test("decodeCommand reads the plain-text reply of a cgi operation", () => {
   for (
     const body of ["$.ret=0", "$.ret=0;", "$.ret=0;\n", "\r\n$.ret=0;\r\n"]

@@ -12,7 +12,7 @@
  * | Dialect | Wire shape | Models |
  * |---|---|---|
  * | {@linkcode gdprText} | text blocks over `/cgi_gdpr` | TL-MR6400, Archer VR900v, TL-MR6500v, Archer MR600 v2 |
- * | {@linkcode gdprJson} | JSON over `/cgi_gdpr?9` | TP-LINK NE200, probably VX800v — **unconfirmed on hardware** |
+ * | {@linkcode gdprJson} | JSON over `/cgi_gdpr?9` | EX220 — also TP-LINK NE200 and probably VX800v, both **unconfirmed on hardware** |
  *
  * Dialects are named by protocol shape, never by model, and there is no runtime
  * model registry — a registry is exactly what a third party could not extend
