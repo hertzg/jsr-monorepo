@@ -54,7 +54,6 @@
 /** Character codes the octet scanner compares against. */
 const CHAR_ZERO = 0x30;
 const CHAR_NINE = 0x39;
-const CHAR_MINUS = 0x2d;
 const CHAR_DOT = 0x2e;
 
 /** The text of the octet starting at `from`, for an error message. */
@@ -90,17 +89,14 @@ function failIpv4(address: string, error: TypeError | RangeError): never {
  * Parses an IPv4 address in dotted decimal notation to a number.
  *
  * An octet is decimal digits and nothing else: no leading zeros (except "0"
- * itself), no surrounding or embedded whitespace, no sign other than a
- * leading `-`, no radix prefix, and no trailing text. A leading `-` is read
- * rather than rejected outright, so a negative octet is reported as out of
- * range instead of as a malformed one -- `"-0"` included.
+ * itself), no surrounding or embedded whitespace, no sign, no radix prefix,
+ * and no trailing text.
  *
  * @param address The address string in dotted decimal notation
  * @returns The IPv4 address as a 32-bit unsigned integer
  * @throws {TypeError} If the format is invalid -- wrong number of octets, a
- *   non-decimal octet, leading zeros, whitespace, or trailing text
- * @throws {RangeError} If any octet is out of range (not 0-255), including
- *   any negative octet
+ *   non-decimal octet, leading zeros, a sign, whitespace, or trailing text
+ * @throws {RangeError} If an octet is a well-formed number greater than 255
  *
  * @example Basic parsing
  * ```ts
@@ -134,12 +130,6 @@ export function parseIpv4(address: string): number {
     const octetStart = index;
     let code = address.charCodeAt(index);
 
-    // A leading "-" is read rather than rejected, so the octet is reported as
-    // out of range instead of as a malformed one.
-    const negative = code === CHAR_MINUS;
-    if (negative) code = address.charCodeAt(++index);
-
-    const digitStart = index;
     let octet = 0;
     while (code >= CHAR_ZERO && code <= CHAR_NINE) {
       octet = octet * 10 + (code - CHAR_ZERO);
@@ -154,8 +144,8 @@ export function parseIpv4(address: string): number {
     // on the whole octet rather than on the digits scanned: "0a" is a leading
     // zero, not a stray letter.
     if (
-      address.charCodeAt(digitStart) === CHAR_ZERO &&
-      !(index - digitStart === 1 && ended)
+      address.charCodeAt(octetStart) === CHAR_ZERO &&
+      !(index - octetStart === 1 && ended)
     ) {
       failIpv4(
         address,
@@ -165,7 +155,10 @@ export function parseIpv4(address: string): number {
       );
     }
 
-    if (index === digitStart || !ended) {
+    // "-" is not a digit, so a signed octet fails here like any other stray
+    // character. RangeError is left to mean a well-formed number that is too
+    // large, which is the only way an octet can be numerically wrong.
+    if (index === octetStart || !ended) {
       failIpv4(
         address,
         new TypeError(
@@ -176,14 +169,10 @@ export function parseIpv4(address: string): number {
       );
     }
 
-    if (negative || octet > 255) {
+    if (octet > 255) {
       failIpv4(
         address,
-        new RangeError(
-          `IPv4 octet out of range: ${
-            negative ? "-" : ""
-          }${octet} (must be 0-255)`,
-        ),
+        new RangeError(`IPv4 octet out of range: ${octet} (must be 0-255)`),
       );
     }
 

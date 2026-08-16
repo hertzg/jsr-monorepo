@@ -276,44 +276,34 @@ export function cidrv6MaskToPrefixLength(mask: string | bigint): number {
 /** Character codes the prefix-length scanner compares against. */
 const CHAR_ZERO = 0x30;
 const CHAR_NINE = 0x39;
-const CHAR_MINUS = 0x2d;
 
 /**
- * Reads a prefix length: decimal digits with no leading zero, and an optional
- * leading `-` so that a negative is reported as out of range rather than as a
- * shape error.
+ * Reads a prefix length: decimal digits with no leading zero.
  *
- * A negative is rejected here rather than left to `cidrv6Mask`, because `-0`
- * is numerically `0` and would otherwise pass that range check and reach the
- * caller as a `Cidrv6` holding a negative zero.
+ * `-` is not a digit, so a signed prefix length is a shape error here rather
+ * than a range error from `cidrv6Mask`. That keeps the sign out of the
+ * returned value, which is what let `"/-0"` through: `-0` is numerically `0`,
+ * so it passes any range check and reaches the caller as a `Cidrv6` holding a
+ * negative zero.
  */
 function parsePrefixLength(part: string): number {
-  const negative = part.charCodeAt(0) === CHAR_MINUS;
-  let index = negative ? 1 : 0;
-
-  if (index === part.length) {
-    throw new TypeError(`CIDR prefix length must be a number, got '${part}'`);
+  if (part.length === 0) {
+    throw new TypeError("CIDR prefix length must be a number, got ''");
   }
 
-  if (part.length - index > 1 && part.charCodeAt(index) === CHAR_ZERO) {
+  if (part.length > 1 && part.charCodeAt(0) === CHAR_ZERO) {
     throw new TypeError(
       `CIDR prefix length cannot have leading zeros, got '${part}'`,
     );
   }
 
   let prefixLength = 0;
-  for (; index < part.length; index++) {
+  for (let index = 0; index < part.length; index++) {
     const code = part.charCodeAt(index);
     if (code < CHAR_ZERO || code > CHAR_NINE) {
       throw new TypeError(`CIDR prefix length must be a number, got '${part}'`);
     }
     prefixLength = prefixLength * 10 + (code - CHAR_ZERO);
-  }
-
-  if (negative) {
-    throw new RangeError(
-      `CIDR prefix length must be 0-128, got -${prefixLength}`,
-    );
   }
 
   return prefixLength;
@@ -325,7 +315,7 @@ function parsePrefixLength(part: string): number {
  * Returns only the parsed values (address and prefix length).
  *
  * The prefix length is decimal digits and nothing else: no leading zeros, no
- * whitespace, no sign other than a leading `-`, and no trailing text.
+ * whitespace, no sign, and no trailing text.
  *
  * @param cidr The CIDR notation string (e.g., "2001:db8::/32")
  * @returns A Cidrv6 object containing the parsed address and prefix length

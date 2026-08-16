@@ -163,6 +163,16 @@ Deno.test("parseIpv6", async (t) => {
     );
   });
 
+  await t.step("never returns a negative, whatever the sign looks like", () => {
+    // A hex group was read with parseInt, which accepts a sign, and nothing
+    // range-checked the result -- so these returned values outside the
+    // 0 .. 2^128-1 the type is documented to hold. "-" is not a hex digit.
+    assertThrows(() => parseIpv6("::-1"), TypeError);
+    assertThrows(() => parseIpv6("::-0"), TypeError);
+    assertThrows(() => parseIpv6("-1::"), TypeError);
+    assertThrows(() => parseIpv6("1:2:3:4:5:6:7:-8"), TypeError);
+  });
+
   await t.step("RangeError only from the embedded IPv4 form", () => {
     // A hex group cannot be numerically out of range -- 4 digits cannot
     // exceed ffff -- so an over-long group is a TypeError, not a RangeError.

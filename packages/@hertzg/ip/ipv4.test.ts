@@ -90,24 +90,38 @@ Deno.test("parseIpv4", async (t) => {
     assertThrows(() => parseIpv4("1.2.3.0x4"), TypeError);
   });
 
-  await t.step(
-    "still reads a leading '-', so a negative is a RangeError",
-    () => {
-      assertThrows(
-        () => parseIpv4("-1.2.3.4"),
-        RangeError,
-        "IPv4 octet out of range: -1 (must be 0-255)",
-      );
+  await t.step("rejects a signed octet as a malformed one", () => {
+    // "-" is in no part of the grammar, so it is a shape error wherever it
+    // appears -- not a negative number that happens to be out of range.
+    assertThrows(
+      () => parseIpv4("-1.2.3.4"),
+      TypeError,
+      "IPv4 address octets must be decimal numbers, got '-1'",
+    );
+    assertThrows(
+      () => parseIpv4("1.-2.3.4"),
+      TypeError,
+      "IPv4 address octets must be decimal numbers, got '-2'",
+    );
 
-      // -0 is numerically 0, so a range check on the returned value alone
-      // cannot see the sign. It is still a signed octet and still rejected.
-      assertThrows(
-        () => parseIpv4("-0.1.2.3"),
-        RangeError,
-        "IPv4 octet out of range: -0 (must be 0-255)",
-      );
-    },
-  );
+    // "-0" is the case a range check cannot catch on its own: -0 is
+    // numerically 0, so `octet < 0` is false and it would parse as "0".
+    assertThrows(
+      () => parseIpv4("-0.1.2.3"),
+      TypeError,
+      "IPv4 address octets must be decimal numbers, got '-0'",
+    );
+    assertThrows(
+      () => parseIpv4("1.2.3.-0"),
+      TypeError,
+      "IPv4 address octets must be decimal numbers, got '-0'",
+    );
+  });
+
+  await t.step("RangeError means a well-formed number that is too big", () => {
+    assertThrows(() => parseIpv4("256.1.2.3"), RangeError);
+    assertThrows(() => parseIpv4("1.2.3.999"), RangeError);
+  });
 
   await t.step("never reads a non-numeric octet as a number", () => {
     // Number("NaN") is NaN and String(NaN) is "NaN", so validating an octet

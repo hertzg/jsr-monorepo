@@ -249,11 +249,6 @@ Deno.test("parseCidrv4", async (t) => {
       "CIDR prefix length must be 0-32",
     );
     assertThrows(
-      () => parseCidrv4("192.168.1.0/-1"),
-      RangeError,
-      "CIDR prefix length must be 0-32",
-    );
-    assertThrows(
       () => parseCidrv4("192.168.1.0/abc"),
       TypeError,
       "CIDR prefix length must be a number",
@@ -267,13 +262,22 @@ Deno.test("parseCidrv4", async (t) => {
     assertThrows(() => parseCidrv4("10.0.0.0/ 8"), TypeError);
     assertThrows(() => parseCidrv4("10.0.0.0/8\n"), TypeError);
     assertThrows(() => parseCidrv4("10.0.0.0/+8"), TypeError);
+  });
 
-    // -0 is numerically 0, so it would pass cidrv4Mask's range check and
-    // reach the caller as a Cidrv4 holding a negative zero.
+  await t.step("rejects a signed prefix length as a malformed one", () => {
+    assertThrows(
+      () => parseCidrv4("192.168.1.0/-1"),
+      TypeError,
+      "CIDR prefix length must be a number, got '-1'",
+    );
+
+    // "-0" is the case a range check cannot catch on its own: -0 is
+    // numerically 0, so it passes `0-32` and reaches the caller as a Cidrv4
+    // whose prefixLength is a negative zero, which stringifies back to "/0".
     assertThrows(
       () => parseCidrv4("10.0.0.0/-0"),
-      RangeError,
-      "CIDR prefix length must be 0-32, got -0",
+      TypeError,
+      "CIDR prefix length must be a number, got '-0'",
     );
   });
 
