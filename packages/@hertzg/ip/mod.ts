@@ -16,6 +16,7 @@
  * - **IPv4-Mapped Conversion**: Convert between IPv4 and IPv4-mapped IPv6 addresses and CIDRs
  * - **Validation**: Non-throwing validity checks for IP addresses and CIDR notation
  * - **Wire Bytes**: Read and write addresses directly in packet buffers, no string round-trip
+ * - **Reverse DNS**: Build the `in-addr.arpa` / `ip6.arpa` pointer name of an address
  *
  * ## Dual-Stack Server
  *
@@ -238,6 +239,23 @@
  * assertEquals(stringifyIpv4(ipv4FromBytes(packet, 16)), "10.0.0.1");
  * ```
  *
+ * ## Reverse DNS
+ *
+ * The names are relative -- no trailing dot. Append `"."` if a resolver
+ * requires an absolute name.
+ *
+ * @example Build the name a PTR record lives at
+ * ```ts
+ * import { assertEquals } from "@std/assert";
+ * import { ipToArpa, parseIp } from "@hertzg/ip";
+ *
+ * assertEquals(ipToArpa(parseIp("192.168.0.1")), "1.0.168.192.in-addr.arpa");
+ * assertEquals(
+ *   ipToArpa(parseIp("2001:db8::1")),
+ *   "1.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.8.b.d.0.1.0.0.2.ip6.arpa",
+ * );
+ * ```
+ *
  * ## API Reference
  *
  * ### Universal (auto-detect IPv4/IPv6)
@@ -305,6 +323,7 @@
  * ### IPv6
  * - {@link parseIpv6}: Parse colon-hexadecimal notation to bigint
  * - {@link stringifyIpv6}: Convert bigint to compressed colon-hexadecimal
+ * - {@link stringifyIpv6Expanded}: Convert bigint to full uncompressed colon-hexadecimal
  * - {@link expandIpv6}: Expand to full uncompressed form
  * - {@link compressIpv6}: Compress to canonical shortest form
  * - {@link compareIpv6}: Compare two IPv6 addresses for sorting
@@ -378,6 +397,15 @@
  * - {@link ipv6FromBytes}: Read a 16-byte IPv6 address from a buffer
  * - {@link ipv6ToBytes}: Write a 16-byte IPv6 address to a buffer
  *
+ * ### Universal Reverse DNS Pointer Names (arpa)
+ * - {@link ipToArpa}: Build the pointer name of an address of either version
+ *
+ * ### IPv4 Reverse DNS Pointer Names (arpav4)
+ * - {@link ipv4ToArpa}: Build the `in-addr.arpa` pointer name of an IPv4 address
+ *
+ * ### IPv6 Reverse DNS Pointer Names (arpav6)
+ * - {@link ipv6ToArpa}: Build the `ip6.arpa` pointer name of an IPv6 address
+ *
  * ### Submodules
  * - [`ip`](https://jsr.io/@hertzg/ip/doc/ip): Universal IP parsing via {@link parseIp}, {@link stringifyIp}, {@link compareIp}
  * - [`cidr`](https://jsr.io/@hertzg/ip/doc/cidr): Universal CIDR parsing via {@link parseCidr}, {@link stringifyCidr}, {@link compareCidr}
@@ -394,6 +422,9 @@
  * - [`bytes`](https://jsr.io/@hertzg/ip/doc/bytes): Universal wire byte conversion via {@link ipFromBytes}, {@link ipToBytes}
  * - [`bytesv4`](https://jsr.io/@hertzg/ip/doc/bytesv4): IPv4 wire byte conversion via {@link ipv4FromBytes}, {@link ipv4ToBytes}
  * - [`bytesv6`](https://jsr.io/@hertzg/ip/doc/bytesv6): IPv6 wire byte conversion via {@link ipv6FromBytes}, {@link ipv6ToBytes}
+ * - [`arpa`](https://jsr.io/@hertzg/ip/doc/arpa): Universal reverse DNS pointer names via {@link ipToArpa}
+ * - [`arpav4`](https://jsr.io/@hertzg/ip/doc/arpav4): IPv4 reverse DNS pointer names via {@link ipv4ToArpa}
+ * - [`arpav6`](https://jsr.io/@hertzg/ip/doc/arpav6): IPv6 reverse DNS pointer names via {@link ipv6ToArpa}
  *
  * @module
  */
@@ -670,6 +701,8 @@ export {
   parseIpv6,
   /** Convert bigint to compressed colon-hexadecimal. */
   stringifyIpv6,
+  /** Convert bigint to full uncompressed colon-hexadecimal. */
+  stringifyIpv6Expanded,
 } from "./ipv6.ts";
 export {
   /** Check if a string is valid IPv6 CIDR notation. */
@@ -775,3 +808,18 @@ export {
   /** Write a 16-byte IPv6 address to a buffer. */
   ipv6ToBytes,
 } from "./bytesv6.ts";
+
+// --- Reverse DNS pointer names ---
+
+export {
+  /** Build the reverse DNS pointer name of an address of either version. */
+  ipToArpa,
+} from "./arpa.ts";
+export {
+  /** Build the `in-addr.arpa` pointer name of an IPv4 address. */
+  ipv4ToArpa,
+} from "./arpav4.ts";
+export {
+  /** Build the `ip6.arpa` pointer name of an IPv6 address. */
+  ipv6ToArpa,
+} from "./arpav6.ts";

@@ -5,6 +5,7 @@ import {
   expandIpv6,
   parseIpv6,
   stringifyIpv6,
+  stringifyIpv6Expanded,
 } from "./ipv6.ts";
 import { isValidIpv6 } from "./validatev6.ts";
 
@@ -267,6 +268,51 @@ Deno.test("stringifyIpv6", async (t) => {
       () => stringifyIpv6(340282366920938463463374607431768211456n),
       RangeError,
       "IPv6 value out of range",
+    );
+  });
+});
+
+Deno.test("stringifyIpv6Expanded", async (t) => {
+  await t.step("zero address", () => {
+    assertEquals(
+      stringifyIpv6Expanded(0n),
+      "0000:0000:0000:0000:0000:0000:0000:0000",
+    );
+  });
+
+  await t.step("loopback", () => {
+    assertEquals(
+      stringifyIpv6Expanded(1n),
+      "0000:0000:0000:0000:0000:0000:0000:0001",
+    );
+  });
+
+  await t.step("every group padded to four hex digits", () => {
+    assertEquals(
+      stringifyIpv6Expanded(0x20010db8000000000000000000000001n),
+      "2001:0db8:0000:0000:0000:0000:0000:0001",
+    );
+  });
+
+  await t.step("never compresses a zero run", () => {
+    assertEquals(
+      stringifyIpv6Expanded(0x00010000000000000001000000000001n),
+      "0001:0000:0000:0000:0001:0000:0000:0001",
+    );
+  });
+
+  await t.step("max address", () => {
+    assertEquals(
+      stringifyIpv6Expanded(340282366920938463463374607431768211455n),
+      "ffff:ffff:ffff:ffff:ffff:ffff:ffff:ffff",
+    );
+  });
+
+  await t.step("out of range values", () => {
+    assertThrows(() => stringifyIpv6Expanded(-1n), RangeError);
+    assertThrows(
+      () => stringifyIpv6Expanded(340282366920938463463374607431768211456n),
+      RangeError,
     );
   });
 });
