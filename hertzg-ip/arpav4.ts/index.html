@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>validate.ts - @hertzg&#x2F;ip documentation</title>
+  <title>arpav4.ts - @hertzg&#x2F;ip documentation</title>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="doc-current-file" content="">
@@ -32,7 +32,7 @@
     fill="currentColor"
   />
 </svg>
-</span>validate.ts</ul>
+</span>arpav4.ts</ul>
 </div>
 
     <div class="flex items-center gap-2">
@@ -98,15 +98,15 @@
 </nav>
 <div id="searchResults"></div><div id="content">
     <main><section>
-  <div class="space-y-2 flex-1"><div class="space-y-7" id="module_doc"><div class="markdown"><p>Universal IP address and CIDR validation utilities.</p>
-<p>This module provides <a href=".././validate.ts/~/isValidIp.html">isValidIp</a> to check if a string is a valid
-plain IP address (IPv4 or IPv6), and <a href=".././validate.ts/~/isValidCidr.html">isValidCidr</a> to check if a
-string is valid CIDR notation.</p>
-<p>For version-specific validators, see:</p>
+  <div class="space-y-2 flex-1"><div class="space-y-7" id="module_doc"><div class="markdown"><p>IPv4 reverse DNS pointer names.</p>
+<p>This module provides <a href=".././arpav4.ts/~/ipv4ToArpa.html">ipv4ToArpa</a>, which builds the <code>in-addr.arpa</code>
+name a <code>PTR</code> record for an IPv4 address lives at (RFC 1035 §3.5).</p>
+<p>For the IPv6 and universal forms, see:</p>
 <ul>
-<li><a href="https://jsr.io/@hertzg/ip/doc/validatev4"><code>validatev4</code></a>: isValidIpv4, <a href=".././validatev4.ts/~/isValidCidrv4.html">isValidCidrv4</a></li>
-<li><a href="https://jsr.io/@hertzg/ip/doc/validatev6"><code>validatev6</code></a>: isValidIpv6, <a href=".././validatev6.ts/~/isValidCidrv6.html">isValidCidrv6</a></li>
+<li><a href="https://jsr.io/@hertzg/ip/doc/arpav6"><code>arpav6</code></a>: ipv6ToArpa</li>
+<li><a href="https://jsr.io/@hertzg/ip/doc/arpa"><code>arpa</code></a>: ipToArpa</li>
 </ul>
+<p>The name is relative -- no trailing dot. See ADR 0014.</p>
 </div><section class="section"  id="examples"><div>
       <h2 class="anchorable mb-1"><a href="#examples" class="anchor" aria-label="Anchor" tabIndex="-1"><svg
   width="16"
@@ -152,30 +152,18 @@ Examples</h2></div><div class="space-y-8"><div class="anchorable"><a href="#exam
   </defs>
 </svg>
 </a>
-<h3 class="example-header"><div class="markdown"><p>Universal validation</p>
+<h3 class="example-header"><div class="markdown"><p>Build the name a PTR record lives at</p>
 </div></h3>
-  <div><div class="markdown"><pre class="highlight"><code class="language-ts">import { assert, assertEquals } from &quot;@std/assert&quot;;
-import { isValidCidr, isValidIp } from &quot;@hertzg/ip/validate&quot;;
+  <div><div class="markdown"><pre class="highlight"><code class="language-ts">import { assertEquals } from &quot;@std/assert&quot;;
+import { ipv4ToArpa } from &quot;@hertzg/ip/arpav4&quot;;
+import { parseIpv4 } from &quot;@hertzg/ip/ipv4&quot;;
 
-assert(isValidIp(&quot;192.168.1.1&quot;));
-assert(isValidIp(&quot;::1&quot;));
-assertEquals(isValidIp(&quot;10.0.0.0/8&quot;), false);
-assertEquals(isValidIp(&quot;garbage&quot;), false);
+assertEquals(ipv4ToArpa(parseIpv4(&quot;192.168.0.1&quot;)), &quot;1.0.168.192.in-addr.arpa&quot;);
+</code><button class="copyButton" data-copy="import { assertEquals } from &quot;@std/assert&quot;;
+import { ipv4ToArpa } from &quot;@hertzg/ip/arpav4&quot;;
+import { parseIpv4 } from &quot;@hertzg/ip/ipv4&quot;;
 
-assert(isValidCidr(&quot;10.0.0.0/8&quot;));
-assert(isValidCidr(&quot;2001:db8::/32&quot;));
-assertEquals(isValidCidr(&quot;192.168.1.1&quot;), false);
-</code><button class="copyButton" data-copy="import { assert, assertEquals } from &quot;@std/assert&quot;;
-import { isValidCidr, isValidIp } from &quot;@hertzg/ip/validate&quot;;
-
-assert(isValidIp(&quot;192.168.1.1&quot;));
-assert(isValidIp(&quot;::1&quot;));
-assertEquals(isValidIp(&quot;10.0.0.0/8&quot;), false);
-assertEquals(isValidIp(&quot;garbage&quot;), false);
-
-assert(isValidCidr(&quot;10.0.0.0/8&quot;));
-assert(isValidCidr(&quot;2001:db8::/32&quot;));
-assertEquals(isValidCidr(&quot;192.168.1.1&quot;), false);
+assertEquals(ipv4ToArpa(parseIpv4(&quot;192.168.0.1&quot;)), &quot;1.0.168.192.in-addr.arpa&quot;);
 "><svg
   class="copy"
   width="15"
@@ -210,8 +198,8 @@ assertEquals(isValidCidr(&quot;192.168.1.1&quot;), false);
 </div></div>
 </div>
 </div></section>
-<section class="section"  id="validate_ts_functions"><div>
-      <h2 class="anchorable mb-1"><a href="#validate_ts_functions" class="anchor" aria-label="Anchor" tabIndex="-1"><svg
+<section class="section"  id="arpav4_ts_functions"><div>
+      <h2 class="anchorable mb-1"><a href="#arpav4_ts_functions" class="anchor" aria-label="Anchor" tabIndex="-1"><svg
   width="16"
   height="16"
   viewBox="0 0 14 14"
@@ -233,15 +221,10 @@ assertEquals(isValidCidr(&quot;192.168.1.1&quot;), false);
   </defs>
 </svg>
 </a>
-Functions</h2></div><div class="namespaceSection"><div id="namespace_isvalidcidr" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-Function bg-Function/15 dark:text-FunctionDark dark:bg-FunctionDark/15" title="Function">f</div></div>
+Functions</h2></div><div class="namespaceSection"><div id="namespace_ipv4toarpa" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-Function bg-Function/15 dark:text-FunctionDark dark:bg-FunctionDark/15" title="Function">f</div></div>
 <div class="namespaceItemContent">
-		    <a href="..&#x2F;.&#x2F;validate.ts&#x2F;~&#x2F;isValidCidr.html" title="isValidCidr">
-			    <span>isValidCidr</span><span>(<span><span>cidr<span>: <span class="td-kw">string</span></span></span></span>)<span>: <span class="td-kw">boolean</span></span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Checks if a string is valid IPv4 or IPv6 CIDR notation.</p>
-</div></div></div>
-    </div><div id="namespace_isvalidip" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-Function bg-Function/15 dark:text-FunctionDark dark:bg-FunctionDark/15" title="Function">f</div></div>
-<div class="namespaceItemContent">
-		    <a href="..&#x2F;.&#x2F;validate.ts&#x2F;~&#x2F;isValidIp.html" title="isValidIp">
-			    <span>isValidIp</span><span>(<span><span>address<span>: <span class="td-kw">string</span></span></span></span>)<span>: <span class="td-kw">boolean</span></span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Checks if a string is a valid plain IP address (IPv4 or IPv6).</p>
+		    <a href="..&#x2F;.&#x2F;arpav4.ts&#x2F;~&#x2F;ipv4ToArpa.html" title="ipv4ToArpa">
+			    <span>ipv4ToArpa</span><span>(<span><span>address<span>: <span class="td-kw">number</span></span></span></span>)<span>: <span class="td-kw">string</span></span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Builds the reverse DNS pointer name of an IPv4 address.</p>
 </div></div></div>
     </div></div>
 </section>
@@ -250,8 +233,8 @@ Functions</h2></div><div class="namespaceSection"><div id="namespace_isvalidcidr
 </section>
 </main><div class="toc">
     <div><div class="usageContent">
-    <h3>Usage</h3><div class="markdown"><pre class="highlight"><code class="language-typescript">import * as mod from &quot;validate.ts&quot;;
-</code><button class="copyButton" data-copy="import * as mod from &quot;validate.ts&quot;;
+    <h3>Usage</h3><div class="markdown"><pre class="highlight"><code class="language-typescript">import * as mod from &quot;arpav4.ts&quot;;
+</code><button class="copyButton" data-copy="import * as mod from &quot;arpav4.ts&quot;;
 "><svg
   class="copy"
   width="15"
@@ -331,7 +314,7 @@ Functions</h2></div><div class="namespaceSection"><div id="namespace_isvalidcidr
   />
 </svg>
 </a></nav><nav class="documentNavigation">
-          <h3>Document Navigation</h3><ul><li><a href="#examples" title="Examples">Examples</a></li><li><ul><li><a href="#example_0" title="Universal validation">Universal validation</a></li></ul></li><li><a href="#validate_ts_functions" title="Functions">Functions</a></li><li><ul><li><a href="#namespace_isvalidcidr" title="isValidCidr">isValidCidr</a></li><li><a href="#namespace_isvalidip" title="isValidIp">isValidIp</a></li></ul></li></ul></nav></div>
+          <h3>Document Navigation</h3><ul><li><a href="#examples" title="Examples">Examples</a></li><li><ul><li><a href="#example_0" title="Build the name a PTR record lives at">Build the name a PTR record lives at</a></li></ul></li><li><a href="#arpav4_ts_functions" title="Functions">Functions</a></li><li><ul><li><a href="#namespace_ipv4toarpa" title="ipv4ToArpa">ipv4ToArpa</a></li></ul></li></ul></nav></div>
   </div></div>
 </div>
 </div>
