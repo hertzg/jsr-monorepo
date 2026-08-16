@@ -119,7 +119,7 @@
             <span class="text-Function">function</span>&nbsp;<span class="font-bold">ipv6ToArpa</span>
           </div></div><a
   class="sourceButton"
-  href="file:&#x2F;&#x2F;&#x2F;home&#x2F;runner&#x2F;work&#x2F;jsr-monorepo&#x2F;jsr-monorepo&#x2F;packages&#x2F;@hertzg&#x2F;ip&#x2F;ipv6.ts"><svg
+  href="file:&#x2F;&#x2F;&#x2F;home&#x2F;runner&#x2F;work&#x2F;jsr-monorepo&#x2F;jsr-monorepo&#x2F;packages&#x2F;@hertzg&#x2F;ip&#x2F;arpav6.ts"><svg
   width="14"
   height="14"
   viewBox="0 0 14 14"
@@ -169,15 +169,13 @@
       </code><div class="space-y-7" id=""><div class="markdown"><p>Builds the reverse DNS pointer name of an IPv6 address.</p>
 <p>All 32 nibbles of the expanded address are written in reverse order,
 one per label, under <code>ip6.arpa</code>, as RFC 3596 §2.5 specifies. Nothing is
-compressed and no leading zero is elided — the name always has 34 labels.
-For the IPv4 counterpart see <code>ipv4ToArpa</code>, and for one that takes either
-version see <code>ipToArpa</code>.</p>
+compressed and no leading zero is elided — the name always has 34 labels.</p>
 <p>The name is <strong>relative</strong> — it carries no trailing dot. Append <code>&quot;.&quot;</code> if a
 resolver requires an absolute name.</p>
 <p>An IPv4-mapped address reaches this function only when the caller holds it
 as a <code>bigint</code>, in which case it gets the <code>ip6.arpa</code> name of its 128-bit
-value. <code>ipToArpa</code> never sees one, since <code>parseIp</code> unwraps mapped addresses
-to IPv4 (see ADR 0004).</p>
+value. <a href="../.././mod.ts/~/ipToArpa.html">ipToArpa</a> never sees one, since <a href="../.././mod.ts/~/parseIp.html">parseIp</a> unwraps
+mapped addresses to IPv4 (see ADR 0004).</p>
 </div><section class="section"  id="examples"><div>
       <h2 class="anchorable mb-1"><a href="#examples" class="anchor" aria-label="Anchor" tabIndex="-1"><svg
   width="16"
@@ -226,7 +224,8 @@ Examples</h2></div><div class="space-y-8"><div class="anchorable"><a href="#exam
 <h3 class="example-header"><div class="markdown"><p>Building the name</p>
 </div></h3>
   <div><div class="markdown"><pre class="highlight"><code class="language-ts">import { assertEquals } from &quot;@std/assert&quot;;
-import { ipv6ToArpa, parseIpv6 } from &quot;@hertzg/ip/ipv6&quot;;
+import { ipv6ToArpa } from &quot;@hertzg/ip/arpav6&quot;;
+import { parseIpv6 } from &quot;@hertzg/ip/ipv6&quot;;
 
 assertEquals(
   ipv6ToArpa(parseIpv6(&quot;2001:db8::1&quot;)),
@@ -237,7 +236,8 @@ assertEquals(
   &quot;0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.ip6.arpa&quot;,
 );
 </code><button class="copyButton" data-copy="import { assertEquals } from &quot;@std/assert&quot;;
-import { ipv6ToArpa, parseIpv6 } from &quot;@hertzg/ip/ipv6&quot;;
+import { ipv6ToArpa } from &quot;@hertzg/ip/arpav6&quot;;
+import { parseIpv6 } from &quot;@hertzg/ip/ipv6&quot;;
 
 assertEquals(
   ipv6ToArpa(parseIpv6(&quot;2001:db8::1&quot;)),
@@ -305,14 +305,16 @@ assertEquals(
 <h3 class="example-header"><div class="markdown"><p>An IPv4-mapped address held as a bigint keeps its ip6.arpa name</p>
 </div></h3>
   <div><div class="markdown"><pre class="highlight"><code class="language-ts">import { assertEquals } from &quot;@std/assert&quot;;
-import { ipv6ToArpa, parseIpv6 } from &quot;@hertzg/ip/ipv6&quot;;
+import { ipv6ToArpa } from &quot;@hertzg/ip/arpav6&quot;;
+import { parseIpv6 } from &quot;@hertzg/ip/ipv6&quot;;
 
 assertEquals(
   ipv6ToArpa(parseIpv6(&quot;::ffff:192.168.0.1&quot;)),
   &quot;1.0.0.0.8.a.0.c.f.f.f.f.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.ip6.arpa&quot;,
 );
 </code><button class="copyButton" data-copy="import { assertEquals } from &quot;@std/assert&quot;;
-import { ipv6ToArpa, parseIpv6 } from &quot;@hertzg/ip/ipv6&quot;;
+import { ipv6ToArpa } from &quot;@hertzg/ip/arpav6&quot;;
+import { parseIpv6 } from &quot;@hertzg/ip/ipv6&quot;;
 
 assertEquals(
   ipv6ToArpa(parseIpv6(&quot;::ffff:192.168.0.1&quot;)),
@@ -404,7 +406,7 @@ Parameters</h2></div><div class="space-y-8"><div class="anchorable docEntry" id=
       </code>
     </div><a
   class="sourceButton"
-  href="file:&#x2F;&#x2F;&#x2F;home&#x2F;runner&#x2F;work&#x2F;jsr-monorepo&#x2F;jsr-monorepo&#x2F;packages&#x2F;@hertzg&#x2F;ip&#x2F;ipv6.ts"><svg
+  href="file:&#x2F;&#x2F;&#x2F;home&#x2F;runner&#x2F;work&#x2F;jsr-monorepo&#x2F;jsr-monorepo&#x2F;packages&#x2F;@hertzg&#x2F;ip&#x2F;arpav6.ts"><svg
   width="14"
   height="14"
   viewBox="0 0 14 14"
@@ -460,7 +462,7 @@ Return Type</h2></div><div class="space-y-8"><div class=" docEntry" id="function
       </code>
     </div><a
   class="sourceButton"
-  href="file:&#x2F;&#x2F;&#x2F;home&#x2F;runner&#x2F;work&#x2F;jsr-monorepo&#x2F;jsr-monorepo&#x2F;packages&#x2F;@hertzg&#x2F;ip&#x2F;ipv6.ts"><svg
+  href="file:&#x2F;&#x2F;&#x2F;home&#x2F;runner&#x2F;work&#x2F;jsr-monorepo&#x2F;jsr-monorepo&#x2F;packages&#x2F;@hertzg&#x2F;ip&#x2F;arpav6.ts"><svg
   width="14"
   height="14"
   viewBox="0 0 14 14"
@@ -516,7 +518,7 @@ Throws</h2></div><div class="space-y-8"><div class=" docEntry" id="function_ipv6
       </code>
     </div><a
   class="sourceButton"
-  href="file:&#x2F;&#x2F;&#x2F;home&#x2F;runner&#x2F;work&#x2F;jsr-monorepo&#x2F;jsr-monorepo&#x2F;packages&#x2F;@hertzg&#x2F;ip&#x2F;ipv6.ts"><svg
+  href="file:&#x2F;&#x2F;&#x2F;home&#x2F;runner&#x2F;work&#x2F;jsr-monorepo&#x2F;jsr-monorepo&#x2F;packages&#x2F;@hertzg&#x2F;ip&#x2F;arpav6.ts"><svg
   width="14"
   height="14"
   viewBox="0 0 14 14"

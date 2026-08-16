@@ -169,14 +169,14 @@
       </code><div class="space-y-7" id=""><div class="markdown"><p>Builds the reverse DNS pointer name of an IP address of either version.</p>
 <p>Picks the version from the type of the address — <code>number</code> for IPv4,
 <code>bigint</code> for IPv6 — the same <code>typeof</code> dispatch stringifyIp and
-ipToBytes use, and delegates to <a href="../.././ipv4.ts/~/ipv4ToArpa.html">ipv4ToArpa</a> or
-<a href="../.././ipv6.ts/~/ipv6ToArpa.html">ipv6ToArpa</a>.</p>
+ipToBytes use, and delegates to <a href="../.././arpav4.ts/~/ipv4ToArpa.html">ipv4ToArpa</a> or
+<a href="../.././arpav6.ts/~/ipv6ToArpa.html">ipv6ToArpa</a>.</p>
 <p>The name is <strong>relative</strong> — it carries no trailing dot. Append <code>&quot;.&quot;</code> if a
 resolver requires an absolute name.</p>
 <p>An address that came from parseIp as <code>::ffff:x.x.x.x</code> arrives here
 already unwrapped to IPv4 (ADR 0004), so it gets an <code>in-addr.arpa</code> name.
 Callers wanting the <code>ip6.arpa</code> name of a mapped address hold the <code>bigint</code>
-from parseIpv6 and call <a href="../.././ipv6.ts/~/ipv6ToArpa.html">ipv6ToArpa</a>.</p>
+from parseIpv6 and call <a href="../.././arpav6.ts/~/ipv6ToArpa.html">ipv6ToArpa</a>.</p>
 </div><section class="section"  id="examples"><div>
       <h2 class="anchorable mb-1"><a href="#examples" class="anchor" aria-label="Anchor" tabIndex="-1"><svg
   width="16"
