@@ -1,5 +1,33 @@
 # Changelog
 
+## [5.0.0](https://github.com/hertzg/jsr-monorepo/compare/@hertzg/ip-v4.2.0...@hertzg/ip-v5.0.0) (2026-08-17)
+
+
+### ⚠ BREAKING CHANGES
+
+* **@hertzg/ip:** `parseAddress*` return `{ address, zoneId? }` and `parseCidr*` return `Cidr & { zoneId? }` instead of the bare value. `parseAddress` and `parseCidr` take a second `options` argument, so `.map(parseCidr)` becomes `.map((s) => parseCidr(s))`. `expandIpv6` and `compressIpv6` are removed. `parseAddressv6("fe80::1%")`, `"fe80::1%eth0%1"`, `parseCidrv6("fe80::/64%eth0")` and `"fe80::%/64"` now throw; `parseAddressv4("192.168.1.1%eth0")` and `parseCidr("10.0.0.0/255.0.0.0")` now parse.
+* **@hertzg/ip:** `Cidrv4` and `Cidrv6` are unions; `.prefixLength` is no longer a property of every block, read it with `cidrv4PrefixLength(cidr)` or narrow with `"prefixLength" in cidr`. The universal `cidrContainsCidr`, `cidrOverlaps`, `cidrIntersect` and `cidrSubtract` are overloaded per version instead of generic over one CIDR type.
+* **@hertzg/ip:** every Ip-named export is renamed to its Address counterpart, the ./ip, ./ipv4, ./ipv6 and ./4to6 entrypoints are replaced by ./address, ./addressv4, ./addressv6, and the root parse / stringify / AddressOrCidr are removed.
+* **@hertzg/ip:** parseIpv4, parseIpv6, parseCidrv4 and parseCidrv6 now reject input the RFC grammar does not allow. Sixteen IPv6 forms that previously parsed now throw TypeError, including "1:2:3:4:5:6:7:8::", "0x12::1" and "::1 ". parseIpv6("::-1") returned -1n and now throws. Prefix lengths no longer accept leading zeros. isValidIpv4 and isValidIpv6 return false for all of these.
+
+### Features
+
+* **@hertzg/ip:** add cidrContains ([#269](https://github.com/hertzg/jsr-monorepo/issues/269)) ([31a3403](https://github.com/hertzg/jsr-monorepo/commit/31a34039b556910d07516676d912c30686a1b5cf)), closes [#263](https://github.com/hertzg/jsr-monorepo/issues/263)
+* **@hertzg/ip:** add cidrv4MaskToPrefixLength and cidrv6MaskToPrefixLength ([98df515](https://github.com/hertzg/jsr-monorepo/commit/98df5151a4cd99bbe293f1325db8ebde6ba4e21a)), closes [#264](https://github.com/hertzg/jsr-monorepo/issues/264)
+* **@hertzg/ip:** add compareIp and compareCidr ([#273](https://github.com/hertzg/jsr-monorepo/issues/273)) ([1d0c6f6](https://github.com/hertzg/jsr-monorepo/commit/1d0c6f6fc336ee3b24a2ae29c9227f8d61c9212e)), closes [#266](https://github.com/hertzg/jsr-monorepo/issues/266)
+* **@hertzg/ip:** add IPv4 usable-address helpers and universal block bounds ([4d9861f](https://github.com/hertzg/jsr-monorepo/commit/4d9861fbbc70e99163ecd9e4f0ad849e613b5e72)), closes [#268](https://github.com/hertzg/jsr-monorepo/issues/268)
+* **@hertzg/ip:** add ipVersion and cidrVersion ([#274](https://github.com/hertzg/jsr-monorepo/issues/274)) ([c2ff649](https://github.com/hertzg/jsr-monorepo/commit/c2ff64907aa3299f1277559ca1f073dbcab8b9a2))
+* **@hertzg/ip:** add reverse DNS pointer names (in-addr.arpa / ip6.arpa) ([#287](https://github.com/hertzg/jsr-monorepo/issues/287)) ([5fd4362](https://github.com/hertzg/jsr-monorepo/commit/5fd4362df99e20cfba15b617871302e9aade5a5c)), closes [#277](https://github.com/hertzg/jsr-monorepo/issues/277)
+* **@hertzg/ip:** layered notation parser with zone IDs and mask dialect ([#295](https://github.com/hertzg/jsr-monorepo/issues/295)) ([dafadec](https://github.com/hertzg/jsr-monorepo/commit/dafadecf397fb527a45a5af22021048b76353e66))
+* **@hertzg/ip:** precompute IPv6 mask and size tables ([#279](https://github.com/hertzg/jsr-monorepo/issues/279)) ([0aa06e5](https://github.com/hertzg/jsr-monorepo/commit/0aa06e516555b3d8c3c0a89060e53a311a60206a))
+* **@hertzg/ip:** rename Ip-named values to Address ([#293](https://github.com/hertzg/jsr-monorepo/issues/293)) ([5833a75](https://github.com/hertzg/jsr-monorepo/commit/5833a756410408e5ca867d183d2e5bc4ea823885))
+* **@hertzg/ip:** store CIDR masks as a second dialect of Cidr ([#294](https://github.com/hertzg/jsr-monorepo/issues/294)) ([3ac4636](https://github.com/hertzg/jsr-monorepo/commit/3ac4636b88443732d4b745128f53422d359b75f4))
+
+
+### Bug Fixes
+
+* **@hertzg/ip:** reject addresses outside the RFC 4291 grammar; single-pass IPv6 scan ([#288](https://github.com/hertzg/jsr-monorepo/issues/288)) ([12003fc](https://github.com/hertzg/jsr-monorepo/commit/12003fc158f3cc8440de29d964c51c4f4598c9d3))
+
 ## [4.2.0](https://github.com/hertzg/jsr-monorepo/compare/@hertzg/ip-v4.1.1...@hertzg/ip-v4.2.0) (2026-08-13)
 
 

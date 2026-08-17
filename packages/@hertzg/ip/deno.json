@@ -1,6 +1,6 @@
 {
   "name": "@hertzg/ip",
-  "version": "4.2.0",
+  "version": "5.0.0",
   "exports": {
     ".": "./mod.ts",
     "./notation": "./notation.ts",

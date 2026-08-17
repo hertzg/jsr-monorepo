@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.4.0](https://github.com/hertzg/jsr-monorepo/compare/@hertzg/tplink-api-v1.3.0...@hertzg/tplink-api-v1.4.0) (2026-08-17)
+
+
+### Features
+
+* **@hertzg/tplink-api:** confirm the gdprJson dialect on a TP-Link EX220 ([#289](https://github.com/hertzg/jsr-monorepo/issues/289)) ([47c12ac](https://github.com/hertzg/jsr-monorepo/commit/47c12ac7df7c5edf280c84281f914db3d62cc795))
+
 ## [1.3.0](https://github.com/hertzg/jsr-monorepo/compare/@hertzg/tplink-api-v1.2.0...@hertzg/tplink-api-v1.3.0) (2026-08-02)
 
 
