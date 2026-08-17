@@ -7,15 +7,18 @@ import {
   cidrv6Intersect,
   cidrv6LastAddress,
   cidrv6Mask,
-  cidrv6MaskToPrefixLength,
   cidrv6Merge,
   cidrv6Overlaps,
+  cidrv6PrefixLength,
   cidrv6Subtract,
   compareCidrv6,
+  mapFromCidrv4,
   parseCidrv6,
   stringifyCidrv6,
+  unmapToCidrv4,
 } from "./cidrv6.ts";
-import { parseIpv6, stringifyIpv6 } from "./ipv6.ts";
+import { parseCidrv4, stringifyCidrv4 } from "./cidrv4.ts";
+import { parseAddressv6, stringifyAddressv6 } from "./addressv6.ts";
 import { isValidCidrv6 } from "./validatev6.ts";
 
 Deno.test("cidrv6Mask", async (t) => {
@@ -75,56 +78,56 @@ Deno.test("cidrv6Mask", async (t) => {
   });
 });
 
-Deno.test("cidrv6MaskToPrefixLength", async (t) => {
+Deno.test("cidrv6PrefixLength", async (t) => {
   await t.step("common masks", () => {
     assertEquals(
-      cidrv6MaskToPrefixLength(0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFn),
+      cidrv6PrefixLength(0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFn),
       128,
     );
     assertEquals(
-      cidrv6MaskToPrefixLength(0xFFFFFFFFFFFFFFFF0000000000000000n),
+      cidrv6PrefixLength(0xFFFFFFFFFFFFFFFF0000000000000000n),
       64,
     );
     assertEquals(
-      cidrv6MaskToPrefixLength(0xFFFFFFFFFFFF00000000000000000000n),
+      cidrv6PrefixLength(0xFFFFFFFFFFFF00000000000000000000n),
       48,
     );
     assertEquals(
-      cidrv6MaskToPrefixLength(0xFFFFFFFF000000000000000000000000n),
+      cidrv6PrefixLength(0xFFFFFFFF000000000000000000000000n),
       32,
     );
   });
 
   await t.step("edge cases", () => {
-    assertEquals(cidrv6MaskToPrefixLength(0n), 0);
+    assertEquals(cidrv6PrefixLength(0n), 0);
     assertEquals(
-      cidrv6MaskToPrefixLength(0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFn),
+      cidrv6PrefixLength(0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFn),
       128,
     );
   });
 
   await t.step("various masks", () => {
     assertEquals(
-      cidrv6MaskToPrefixLength(0x80000000000000000000000000000000n),
+      cidrv6PrefixLength(0x80000000000000000000000000000000n),
       1,
     );
     assertEquals(
-      cidrv6MaskToPrefixLength(0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF00n),
+      cidrv6PrefixLength(0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF00n),
       120,
     );
     assertEquals(
-      cidrv6MaskToPrefixLength(0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFEn),
+      cidrv6PrefixLength(0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFEn),
       127,
     );
   });
 
   await t.step("accepts colon-hexadecimal notation", () => {
-    assertEquals(cidrv6MaskToPrefixLength("ffff:ffff:ffff:ffff::"), 64);
-    assertEquals(cidrv6MaskToPrefixLength("ffff:ffff::"), 32);
-    assertEquals(cidrv6MaskToPrefixLength("ffff:ffff:ffff::"), 48);
-    assertEquals(cidrv6MaskToPrefixLength("::"), 0);
+    assertEquals(cidrv6PrefixLength("ffff:ffff:ffff:ffff::"), 64);
+    assertEquals(cidrv6PrefixLength("ffff:ffff::"), 32);
+    assertEquals(cidrv6PrefixLength("ffff:ffff:ffff::"), 48);
+    assertEquals(cidrv6PrefixLength("::"), 0);
     assertEquals(
-      cidrv6MaskToPrefixLength("ffff:ffff:ffff:ffff:ffff:ffff:ffff:ffff"),
+      cidrv6PrefixLength("ffff:ffff:ffff:ffff:ffff:ffff:ffff:ffff"),
       128,
     );
   });
@@ -133,35 +136,35 @@ Deno.test("cidrv6MaskToPrefixLength", async (t) => {
     for (let prefixLength = 0; prefixLength <= 128; prefixLength++) {
       const mask = cidrv6Mask(prefixLength);
       assertEquals(
-        cidrv6MaskToPrefixLength(stringifyIpv6(mask)),
-        cidrv6MaskToPrefixLength(mask),
+        cidrv6PrefixLength(stringifyAddressv6(mask)),
+        cidrv6PrefixLength(mask),
       );
     }
   });
 
   await t.step("non-contiguous colon-hexadecimal throws", () => {
     assertThrows(
-      () => cidrv6MaskToPrefixLength("ffff:0:ffff::"),
+      () => cidrv6PrefixLength("ffff:0:ffff::"),
       TypeError,
       "IPv6 mask is not contiguous: 0xffff0000ffff00000000000000000000",
     );
-    assertThrows(() => cidrv6MaskToPrefixLength("::ffff:ffff"), TypeError);
-    assertThrows(() => cidrv6MaskToPrefixLength("::1"), TypeError);
+    assertThrows(() => cidrv6PrefixLength("::ffff:ffff"), TypeError);
+    assertThrows(() => cidrv6PrefixLength("::1"), TypeError);
   });
 
-  await t.step("malformed notation propagates parseIpv6's errors", () => {
+  await t.step("malformed notation propagates parseAddressv6's errors", () => {
     assertThrows(
-      () => cidrv6MaskToPrefixLength("gggg::"),
+      () => cidrv6PrefixLength("gggg::"),
       TypeError,
       "Invalid IPv6 group",
     );
-    assertThrows(() => cidrv6MaskToPrefixLength("fffff::"), TypeError);
-    assertThrows(() => cidrv6MaskToPrefixLength(""), TypeError);
+    assertThrows(() => cidrv6PrefixLength("fffff::"), TypeError);
+    assertThrows(() => cidrv6PrefixLength(""), TypeError);
 
-    // The only RangeError parseIpv6 can raise comes from the embedded
+    // The only RangeError parseAddressv6 can raise comes from the embedded
     // IPv4 form; an over-long hex group is a TypeError, not this.
     assertThrows(
-      () => cidrv6MaskToPrefixLength("::1.2.3.256"),
+      () => cidrv6PrefixLength("::1.2.3.256"),
       RangeError,
       "IPv4 octet out of range",
     );
@@ -169,28 +172,28 @@ Deno.test("cidrv6MaskToPrefixLength", async (t) => {
 
   await t.step("non-contiguous masks throw", () => {
     assertThrows(
-      () => cidrv6MaskToPrefixLength(0xFFFF0000FFFF00000000000000000000n),
+      () => cidrv6PrefixLength(0xFFFF0000FFFF00000000000000000000n),
       TypeError,
       "IPv6 mask is not contiguous: 0xffff0000ffff00000000000000000000",
     );
     assertThrows(
-      () => cidrv6MaskToPrefixLength(0xFFFFFFFFFFFFFFFF0000000000000001n),
+      () => cidrv6PrefixLength(0xFFFFFFFFFFFFFFFF0000000000000001n),
       TypeError,
     );
     assertThrows(
-      () => cidrv6MaskToPrefixLength(0x7FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFn),
+      () => cidrv6PrefixLength(0x7FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFn),
       TypeError,
     );
   });
 
   await t.step("wildcard (host) masks throw", () => {
     assertThrows(
-      () => cidrv6MaskToPrefixLength(0x0000000000000000FFFFFFFFFFFFFFFFn),
+      () => cidrv6PrefixLength(0x0000000000000000FFFFFFFFFFFFFFFFn),
       TypeError,
       "IPv6 mask is not contiguous: 0x0000000000000000ffffffffffffffff",
     );
     assertThrows(
-      () => cidrv6MaskToPrefixLength(0x000000000000000000000000000000FFn),
+      () => cidrv6PrefixLength(0x000000000000000000000000000000FFn),
       TypeError,
     );
   });
@@ -198,11 +201,11 @@ Deno.test("cidrv6MaskToPrefixLength", async (t) => {
   await t.step("counts leading ones, not set bits", () => {
     // 64 set bits, but the run is split -- not a /64 mask.
     assertThrows(
-      () => cidrv6MaskToPrefixLength(0xFFFFFFFF00000000FFFFFFFF00000000n),
+      () => cidrv6PrefixLength(0xFFFFFFFF00000000FFFFFFFF00000000n),
       TypeError,
     );
     assertEquals(
-      cidrv6MaskToPrefixLength(0xFFFFFFFFFFFFFFFF0000000000000000n),
+      cidrv6PrefixLength(0xFFFFFFFFFFFFFFFF0000000000000000n),
       64,
     );
   });
@@ -210,7 +213,7 @@ Deno.test("cidrv6MaskToPrefixLength", async (t) => {
   await t.step("round-trips with cidrv6Mask for every prefix length", () => {
     for (let prefixLength = 0; prefixLength <= 128; prefixLength++) {
       assertEquals(
-        cidrv6MaskToPrefixLength(cidrv6Mask(prefixLength)),
+        cidrv6PrefixLength(cidrv6Mask(prefixLength)),
         prefixLength,
       );
     }
@@ -223,7 +226,7 @@ Deno.test("cidrv6MaskToPrefixLength", async (t) => {
       // Clear the most significant bit of an otherwise valid mask.
       const punctured = cidrv6Mask(prefixLength) &
         ~(1n << 127n) & 0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFn;
-      assertThrows(() => cidrv6MaskToPrefixLength(punctured), TypeError);
+      assertThrows(() => cidrv6PrefixLength(punctured), TypeError);
     }
   });
 
@@ -231,18 +234,18 @@ Deno.test("cidrv6MaskToPrefixLength", async (t) => {
     for (let prefixLength = 0; prefixLength < 127; prefixLength++) {
       // Set the least significant bit of an otherwise valid mask.
       const polluted = cidrv6Mask(prefixLength) | 1n;
-      assertThrows(() => cidrv6MaskToPrefixLength(polluted), TypeError);
+      assertThrows(() => cidrv6PrefixLength(polluted), TypeError);
     }
   });
 
   await t.step("out of range masks throw", () => {
     assertThrows(
-      () => cidrv6MaskToPrefixLength(-1n),
+      () => cidrv6PrefixLength(-1n),
       RangeError,
       "IPv6 mask must be a 128-bit unsigned integer, got -1",
     );
     assertThrows(
-      () => cidrv6MaskToPrefixLength(1n << 128n),
+      () => cidrv6PrefixLength(1n << 128n),
       RangeError,
       "IPv6 mask must be a 128-bit unsigned integer",
     );
@@ -252,27 +255,27 @@ Deno.test("cidrv6MaskToPrefixLength", async (t) => {
 Deno.test("parseCidrv6", async (t) => {
   await t.step("valid CIDR notation", () => {
     const cidr = parseCidrv6("2001:db8::/32");
-    assertEquals(cidr.address, parseIpv6("2001:db8::"));
+    assertEquals(cidr.address, parseAddressv6("2001:db8::"));
     assertEquals(cidr.prefixLength, 32);
   });
 
   await t.step("various prefix lengths", () => {
     const cidrv64 = parseCidrv6("2001:db8::/64");
-    assertEquals(cidrv64.address, parseIpv6("2001:db8::"));
+    assertEquals(cidrv64.address, parseAddressv6("2001:db8::"));
     assertEquals(cidrv64.prefixLength, 64);
 
     const cidr48 = parseCidrv6("2001:db8::/48");
-    assertEquals(cidr48.address, parseIpv6("2001:db8::"));
+    assertEquals(cidr48.address, parseAddressv6("2001:db8::"));
     assertEquals(cidr48.prefixLength, 48);
 
     const cidr128 = parseCidrv6("2001:db8::1/128");
-    assertEquals(cidr128.address, parseIpv6("2001:db8::1"));
+    assertEquals(cidr128.address, parseAddressv6("2001:db8::1"));
     assertEquals(cidr128.prefixLength, 128);
   });
 
   await t.step("preserves original address", () => {
     const cidr = parseCidrv6("2001:db8::100/64");
-    assertEquals(cidr.address, parseIpv6("2001:db8::100"));
+    assertEquals(cidr.address, parseAddressv6("2001:db8::100"));
     assertEquals(cidr.prefixLength, 64);
   });
 
@@ -364,11 +367,14 @@ Deno.test("cidrv6Contains", async (t) => {
   await t.step("IP in range", () => {
     const cidr = parseCidrv6("2001:db8::/32");
 
-    assertEquals(cidrv6Contains(cidr, parseIpv6("2001:db8::")), true);
-    assertEquals(cidrv6Contains(cidr, parseIpv6("2001:db8::1")), true);
-    assertEquals(cidrv6Contains(cidr, parseIpv6("2001:db8:ffff::")), true);
+    assertEquals(cidrv6Contains(cidr, parseAddressv6("2001:db8::")), true);
+    assertEquals(cidrv6Contains(cidr, parseAddressv6("2001:db8::1")), true);
+    assertEquals(cidrv6Contains(cidr, parseAddressv6("2001:db8:ffff::")), true);
     assertEquals(
-      cidrv6Contains(cidr, parseIpv6("2001:db8:ffff:ffff:ffff:ffff:ffff:ffff")),
+      cidrv6Contains(
+        cidr,
+        parseAddressv6("2001:db8:ffff:ffff:ffff:ffff:ffff:ffff"),
+      ),
       true,
     );
   });
@@ -376,28 +382,28 @@ Deno.test("cidrv6Contains", async (t) => {
   await t.step("IP out of range", () => {
     const cidr = parseCidrv6("2001:db8::/32");
 
-    assertEquals(cidrv6Contains(cidr, parseIpv6("2001:db7::")), false);
-    assertEquals(cidrv6Contains(cidr, parseIpv6("2001:db9::")), false);
-    assertEquals(cidrv6Contains(cidr, parseIpv6("fe80::1")), false);
+    assertEquals(cidrv6Contains(cidr, parseAddressv6("2001:db7::")), false);
+    assertEquals(cidrv6Contains(cidr, parseAddressv6("2001:db9::")), false);
+    assertEquals(cidrv6Contains(cidr, parseAddressv6("fe80::1")), false);
   });
 
   await t.step("edge cases - /128 (single IP)", () => {
     const cidr = parseCidrv6("2001:db8::1/128");
 
-    assertEquals(cidrv6Contains(cidr, parseIpv6("2001:db8::1")), true);
-    assertEquals(cidrv6Contains(cidr, parseIpv6("2001:db8::")), false);
-    assertEquals(cidrv6Contains(cidr, parseIpv6("2001:db8::2")), false);
+    assertEquals(cidrv6Contains(cidr, parseAddressv6("2001:db8::1")), true);
+    assertEquals(cidrv6Contains(cidr, parseAddressv6("2001:db8::")), false);
+    assertEquals(cidrv6Contains(cidr, parseAddressv6("2001:db8::2")), false);
   });
 
   await t.step("edge cases - /0 (all IPs)", () => {
     const cidr = parseCidrv6("::/0");
 
-    assertEquals(cidrv6Contains(cidr, parseIpv6("::")), true);
-    assertEquals(cidrv6Contains(cidr, parseIpv6("2001:db8::1")), true);
+    assertEquals(cidrv6Contains(cidr, parseAddressv6("::")), true);
+    assertEquals(cidrv6Contains(cidr, parseAddressv6("2001:db8::1")), true);
     assertEquals(
       cidrv6Contains(
         cidr,
-        parseIpv6("ffff:ffff:ffff:ffff:ffff:ffff:ffff:ffff"),
+        parseAddressv6("ffff:ffff:ffff:ffff:ffff:ffff:ffff:ffff"),
       ),
       true,
     );
@@ -407,21 +413,21 @@ Deno.test("cidrv6Contains", async (t) => {
 Deno.test("cidrv6FirstAddress", async (t) => {
   await t.step("returns first address", () => {
     const cidr = parseCidrv6("2001:db8::/32");
-    assertEquals(cidrv6FirstAddress(cidr), parseIpv6("2001:db8::"));
+    assertEquals(cidrv6FirstAddress(cidr), parseAddressv6("2001:db8::"));
   });
 
   await t.step("various CIDRs", () => {
     assertEquals(
       cidrv6FirstAddress(parseCidrv6("fd00::/8")),
-      parseIpv6("fd00::"),
+      parseAddressv6("fd00::"),
     );
     assertEquals(
       cidrv6FirstAddress(parseCidrv6("2001:db8:abcd::/48")),
-      parseIpv6("2001:db8:abcd::"),
+      parseAddressv6("2001:db8:abcd::"),
     );
     assertEquals(
       cidrv6FirstAddress(parseCidrv6("2001:db8::100/64")),
-      parseIpv6("2001:db8::"),
+      parseAddressv6("2001:db8::"),
     );
   });
 });
@@ -429,17 +435,17 @@ Deno.test("cidrv6FirstAddress", async (t) => {
 Deno.test("cidrv6LastAddress", async (t) => {
   await t.step("returns last address in range", () => {
     const cidr = parseCidrv6("fd00::/120");
-    assertEquals(cidrv6LastAddress(cidr), parseIpv6("fd00::ff"));
+    assertEquals(cidrv6LastAddress(cidr), parseAddressv6("fd00::ff"));
   });
 
   await t.step("various CIDRs", () => {
     assertEquals(
       cidrv6LastAddress(parseCidrv6("2001:db8::/125")),
-      parseIpv6("2001:db8::7"),
+      parseAddressv6("2001:db8::7"),
     );
     assertEquals(
       cidrv6LastAddress(parseCidrv6("2001:db8::1/128")),
-      parseIpv6("2001:db8::1"),
+      parseAddressv6("2001:db8::1"),
     );
   });
 });
@@ -456,7 +462,7 @@ Deno.test("IP assignment workflow", async (t) => {
 
     while (currentIp < lastAddr) {
       assertEquals(cidrv6Contains(cidr, currentIp), true);
-      assigned.push(stringifyIpv6(currentIp));
+      assigned.push(stringifyAddressv6(currentIp));
       currentIp = currentIp + 1n;
     }
 
@@ -478,15 +484,15 @@ Deno.test("IP assignment workflow", async (t) => {
   });
 
   await t.step("arithmetic operations on IPs", () => {
-    const ip = parseIpv6("2001:db8::a");
+    const ip = parseAddressv6("2001:db8::a");
 
-    assertEquals(stringifyIpv6(ip + 1n), "2001:db8::b");
-    assertEquals(stringifyIpv6(ip - 1n), "2001:db8::9");
-    assertEquals(stringifyIpv6(ip + 10n), "2001:db8::14");
+    assertEquals(stringifyAddressv6(ip + 1n), "2001:db8::b");
+    assertEquals(stringifyAddressv6(ip - 1n), "2001:db8::9");
+    assertEquals(stringifyAddressv6(ip + 10n), "2001:db8::14");
 
     // Crossing group boundary
     assertEquals(
-      stringifyIpv6(parseIpv6("2001:db8::ffff") + 1n),
+      stringifyAddressv6(parseAddressv6("2001:db8::ffff") + 1n),
       "2001:db8::1:0",
     );
   });
@@ -499,7 +505,7 @@ Deno.test("cidrv6Addresses", async (t) => {
     // Default: offset=0, no count limit, step=1
     const all = Array.from(cidrv6Addresses(cidr));
 
-    assertEquals(all.map(stringifyIpv6), [
+    assertEquals(all.map(stringifyAddressv6), [
       "fd00::",
       "fd00::1",
       "fd00::2",
@@ -518,8 +524,8 @@ Deno.test("cidrv6Addresses", async (t) => {
     const usable = Array.from(cidrv6Addresses(cidr, { offset: 1 }));
 
     assertEquals(usable.length, 7);
-    assertEquals(usable[0], parseIpv6("fd00::1"));
-    assertEquals(usable[6], parseIpv6("fd00::7"));
+    assertEquals(usable[0], parseAddressv6("fd00::1"));
+    assertEquals(usable[6], parseAddressv6("fd00::7"));
   });
 
   await t.step("generates addresses from network address", () => {
@@ -530,9 +536,9 @@ Deno.test("cidrv6Addresses", async (t) => {
     );
 
     assertEquals(addresses, [
-      parseIpv6("2001:db8::0"),
-      parseIpv6("2001:db8::1"),
-      parseIpv6("2001:db8::2"),
+      parseAddressv6("2001:db8::0"),
+      parseAddressv6("2001:db8::1"),
+      parseAddressv6("2001:db8::2"),
     ]);
   });
 
@@ -544,11 +550,11 @@ Deno.test("cidrv6Addresses", async (t) => {
     );
 
     assertEquals(addresses, [
-      parseIpv6("2001:db8::a"),
-      parseIpv6("2001:db8::b"),
-      parseIpv6("2001:db8::c"),
-      parseIpv6("2001:db8::d"),
-      parseIpv6("2001:db8::e"),
+      parseAddressv6("2001:db8::a"),
+      parseAddressv6("2001:db8::b"),
+      parseAddressv6("2001:db8::c"),
+      parseAddressv6("2001:db8::d"),
+      parseAddressv6("2001:db8::e"),
     ]);
   });
 
@@ -569,7 +575,7 @@ Deno.test("cidrv6Addresses", async (t) => {
       cidrv6Addresses(cidr, { offset: 100, count: 1, step: 1 }),
     );
 
-    assertEquals(addresses, [parseIpv6("2001:db8::64")]);
+    assertEquals(addresses, [parseAddressv6("2001:db8::64")]);
   });
 
   await t.step("accepts bigint parameters", () => {
@@ -580,9 +586,9 @@ Deno.test("cidrv6Addresses", async (t) => {
     );
 
     assertEquals(addresses, [
-      parseIpv6("2001:db8::5"),
-      parseIpv6("2001:db8::6"),
-      parseIpv6("2001:db8::7"),
+      parseAddressv6("2001:db8::5"),
+      parseAddressv6("2001:db8::6"),
+      parseAddressv6("2001:db8::7"),
     ]);
   });
 
@@ -594,11 +600,11 @@ Deno.test("cidrv6Addresses", async (t) => {
     );
 
     assertEquals(evenIps, [
-      parseIpv6("fd00::0"),
-      parseIpv6("fd00::2"),
-      parseIpv6("fd00::4"),
-      parseIpv6("fd00::6"),
-      parseIpv6("fd00::8"),
+      parseAddressv6("fd00::0"),
+      parseAddressv6("fd00::2"),
+      parseAddressv6("fd00::4"),
+      parseAddressv6("fd00::6"),
+      parseAddressv6("fd00::8"),
     ]);
   });
 
@@ -610,11 +616,11 @@ Deno.test("cidrv6Addresses", async (t) => {
     );
 
     assertEquals(oddIps, [
-      parseIpv6("fd00::1"),
-      parseIpv6("fd00::3"),
-      parseIpv6("fd00::5"),
-      parseIpv6("fd00::7"),
-      parseIpv6("fd00::9"),
+      parseAddressv6("fd00::1"),
+      parseAddressv6("fd00::3"),
+      parseAddressv6("fd00::5"),
+      parseAddressv6("fd00::7"),
+      parseAddressv6("fd00::9"),
     ]);
   });
 
@@ -626,11 +632,11 @@ Deno.test("cidrv6Addresses", async (t) => {
     );
 
     assertEquals(backwards, [
-      parseIpv6("fd00::a"),
-      parseIpv6("fd00::9"),
-      parseIpv6("fd00::8"),
-      parseIpv6("fd00::7"),
-      parseIpv6("fd00::6"),
+      parseAddressv6("fd00::a"),
+      parseAddressv6("fd00::9"),
+      parseAddressv6("fd00::8"),
+      parseAddressv6("fd00::7"),
+      parseAddressv6("fd00::6"),
     ]);
   });
 
@@ -643,9 +649,9 @@ Deno.test("cidrv6Addresses", async (t) => {
 
     assertEquals(ips.length, 3);
     assertEquals(ips, [
-      parseIpv6("fd00::5"),
-      parseIpv6("fd00::6"),
-      parseIpv6("fd00::7"),
+      parseAddressv6("fd00::5"),
+      parseAddressv6("fd00::6"),
+      parseAddressv6("fd00::7"),
     ]);
   });
 
@@ -658,10 +664,10 @@ Deno.test("cidrv6Addresses", async (t) => {
 
     assertEquals(ips.length, 4);
     assertEquals(ips, [
-      parseIpv6("fd00::3"),
-      parseIpv6("fd00::2"),
-      parseIpv6("fd00::1"),
-      parseIpv6("fd00::0"),
+      parseAddressv6("fd00::3"),
+      parseAddressv6("fd00::2"),
+      parseAddressv6("fd00::1"),
+      parseAddressv6("fd00::0"),
     ]);
   });
 
@@ -681,11 +687,11 @@ Deno.test("cidrv6Addresses", async (t) => {
     const gen = cidrv6Addresses(cidr, { offset: 0, count: 5, step: 1 });
 
     const first = gen.next();
-    assertEquals(first.value, parseIpv6("2001:db8::"));
+    assertEquals(first.value, parseAddressv6("2001:db8::"));
     assertEquals(first.done, false);
 
     const second = gen.next();
-    assertEquals(second.value, parseIpv6("2001:db8::1"));
+    assertEquals(second.value, parseAddressv6("2001:db8::1"));
     assertEquals(second.done, false);
   });
 });
@@ -699,16 +705,16 @@ Deno.test("WireGuard IPv6 use cases", async (t) => {
     );
 
     assertEquals(peers.length, 10);
-    assertEquals(stringifyIpv6(peers[0]), "fd00::1");
-    assertEquals(stringifyIpv6(peers[9]), "fd00::a");
+    assertEquals(stringifyAddressv6(peers[0]), "fd00::1");
+    assertEquals(stringifyAddressv6(peers[9]), "fd00::a");
   });
 
   await t.step("link-local scope", () => {
     const cidr = parseCidrv6("fe80::/10");
 
-    assertEquals(cidrv6Contains(cidr, parseIpv6("fe80::1")), true);
-    assertEquals(cidrv6Contains(cidr, parseIpv6("febf::ffff")), true);
-    assertEquals(cidrv6Contains(cidr, parseIpv6("fec0::")), false);
+    assertEquals(cidrv6Contains(cidr, parseAddressv6("fe80::1")), true);
+    assertEquals(cidrv6Contains(cidr, parseAddressv6("febf::ffff")), true);
+    assertEquals(cidrv6Contains(cidr, parseAddressv6("fec0::")), false);
   });
 
   await t.step("verify peer addresses in mesh", () => {
@@ -723,10 +729,13 @@ Deno.test("WireGuard IPv6 use cases", async (t) => {
     ];
 
     for (const addr of peerAddresses) {
-      assertEquals(cidrv6Contains(meshCidr, parseIpv6(addr)), true);
+      assertEquals(cidrv6Contains(meshCidr, parseAddressv6(addr)), true);
     }
 
-    assertEquals(cidrv6Contains(meshCidr, parseIpv6("fd00:abcd::100")), false);
+    assertEquals(
+      cidrv6Contains(meshCidr, parseAddressv6("fd00:abcd::100")),
+      false,
+    );
   });
 });
 
@@ -1198,5 +1207,98 @@ Deno.test("compareCidrv6", async (t) => {
       "2001:db8::/48",
       "2001:db8:1::/48",
     ]);
+  });
+});
+
+Deno.test("mapFromCidrv4", async (t) => {
+  await t.step("converts prefix length by adding 96", () => {
+    const cidr = mapFromCidrv4(parseCidrv4("10.0.0.0/8"));
+    assertEquals(cidr.prefixLength, 104);
+
+    const cidr24 = mapFromCidrv4(parseCidrv4("192.168.1.0/24"));
+    assertEquals(cidr24.prefixLength, 120);
+  });
+
+  await t.step("converts address to mapped", () => {
+    const cidr = mapFromCidrv4(parseCidrv4("10.0.0.0/8"));
+    assertEquals(cidr.address, parseAddressv6("::ffff:10.0.0.0"));
+  });
+
+  await t.step("stringifies correctly", () => {
+    assertEquals(
+      stringifyCidrv6(mapFromCidrv4(parseCidrv4("10.0.0.0/8"))),
+      "::ffff:a00:0/104",
+    );
+    assertEquals(
+      stringifyCidrv6(mapFromCidrv4(parseCidrv4("192.168.1.0/24"))),
+      "::ffff:c0a8:100/120",
+    );
+  });
+
+  await t.step("edge cases", () => {
+    const all = mapFromCidrv4(parseCidrv4("0.0.0.0/0"));
+    assertEquals(all.prefixLength, 96);
+    assertEquals(stringifyCidrv6(all), "::ffff:0:0/96");
+
+    const single = mapFromCidrv4(parseCidrv4("192.168.1.1/32"));
+    assertEquals(single.prefixLength, 128);
+  });
+});
+
+Deno.test("unmapToCidrv4", async (t) => {
+  await t.step("converts prefix length by subtracting 96", () => {
+    const cidr = unmapToCidrv4(parseCidrv6("::ffff:10.0.0.0/104"));
+    assertEquals(cidr.prefixLength, 8);
+    assertEquals(stringifyCidrv4(cidr), "10.0.0.0/8");
+  });
+
+  await t.step("various prefix lengths", () => {
+    assertEquals(
+      stringifyCidrv4(
+        unmapToCidrv4(parseCidrv6("::ffff:192.168.1.0/120")),
+      ),
+      "192.168.1.0/24",
+    );
+    assertEquals(
+      stringifyCidrv4(
+        unmapToCidrv4(parseCidrv6("::ffff:0.0.0.0/96")),
+      ),
+      "0.0.0.0/0",
+    );
+    assertEquals(
+      stringifyCidrv4(
+        unmapToCidrv4(parseCidrv6("::ffff:192.168.1.1/128")),
+      ),
+      "192.168.1.1/32",
+    );
+  });
+
+  await t.step("throws for prefix length less than 96", () => {
+    assertThrows(
+      () => unmapToCidrv4(parseCidrv6("::ffff:0:0/64")),
+      RangeError,
+    );
+    assertThrows(
+      () => unmapToCidrv4(parseCidrv6("2001:db8::/32")),
+      RangeError,
+    );
+    assertThrows(
+      () => unmapToCidrv4(parseCidrv6("::/0")),
+      RangeError,
+    );
+  });
+
+  await t.step("round-trip with mapFromCidrv4", () => {
+    const cidrs = [
+      "10.0.0.0/8",
+      "192.168.1.0/24",
+      "172.16.0.0/12",
+      "0.0.0.0/0",
+      "10.0.0.1/32",
+    ];
+    for (const cidr of cidrs) {
+      const v4 = parseCidrv4(cidr);
+      assertEquals(unmapToCidrv4(mapFromCidrv4(v4)), v4);
+    }
   });
 });

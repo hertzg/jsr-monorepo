@@ -8,10 +8,10 @@ import {
   cidrv4Intersect,
   cidrv4LastUsableAddress,
   cidrv4Mask,
-  cidrv4MaskToPrefixLength,
   cidrv4Merge,
   cidrv4NetworkAddress,
   cidrv4Overlaps,
+  cidrv4PrefixLength,
   cidrv4Size,
   cidrv4Subtract,
   cidrv4UsableAddresses,
@@ -20,7 +20,7 @@ import {
   parseCidrv4,
   stringifyCidrv4,
 } from "./cidrv4.ts";
-import { parseIpv4, stringifyIpv4 } from "./ipv4.ts";
+import { parseAddressv4, stringifyAddressv4 } from "./addressv4.ts";
 import { isValidCidrv4 } from "./validatev4.ts";
 
 Deno.test("cidrv4Mask", async (t) => {
@@ -55,101 +55,101 @@ Deno.test("cidrv4Mask", async (t) => {
   });
 });
 
-Deno.test("cidrv4MaskToPrefixLength", async (t) => {
+Deno.test("cidrv4PrefixLength", async (t) => {
   await t.step("common masks", () => {
-    assertEquals(cidrv4MaskToPrefixLength(0xFFFFFF00), 24);
-    assertEquals(cidrv4MaskToPrefixLength(0xFFFF0000), 16);
-    assertEquals(cidrv4MaskToPrefixLength(0xFF000000), 8);
+    assertEquals(cidrv4PrefixLength(0xFFFFFF00), 24);
+    assertEquals(cidrv4PrefixLength(0xFFFF0000), 16);
+    assertEquals(cidrv4PrefixLength(0xFF000000), 8);
   });
 
   await t.step("edge cases", () => {
-    assertEquals(cidrv4MaskToPrefixLength(0), 0);
-    assertEquals(cidrv4MaskToPrefixLength(0xFFFFFFFF), 32);
+    assertEquals(cidrv4PrefixLength(0), 0);
+    assertEquals(cidrv4PrefixLength(0xFFFFFFFF), 32);
   });
 
   await t.step("various masks", () => {
-    assertEquals(cidrv4MaskToPrefixLength(0x80000000), 1);
-    assertEquals(cidrv4MaskToPrefixLength(0xFFFFFFFC), 30);
-    assertEquals(cidrv4MaskToPrefixLength(0xFFFFFFFE), 31);
+    assertEquals(cidrv4PrefixLength(0x80000000), 1);
+    assertEquals(cidrv4PrefixLength(0xFFFFFFFC), 30);
+    assertEquals(cidrv4PrefixLength(0xFFFFFFFE), 31);
   });
 
   await t.step("accepts dotted decimal notation", () => {
-    assertEquals(cidrv4MaskToPrefixLength("255.255.255.0"), 24);
-    assertEquals(cidrv4MaskToPrefixLength("255.255.0.0"), 16);
-    assertEquals(cidrv4MaskToPrefixLength("255.0.0.0"), 8);
-    assertEquals(cidrv4MaskToPrefixLength("255.255.255.252"), 30);
-    assertEquals(cidrv4MaskToPrefixLength("0.0.0.0"), 0);
-    assertEquals(cidrv4MaskToPrefixLength("255.255.255.255"), 32);
+    assertEquals(cidrv4PrefixLength("255.255.255.0"), 24);
+    assertEquals(cidrv4PrefixLength("255.255.0.0"), 16);
+    assertEquals(cidrv4PrefixLength("255.0.0.0"), 8);
+    assertEquals(cidrv4PrefixLength("255.255.255.252"), 30);
+    assertEquals(cidrv4PrefixLength("0.0.0.0"), 0);
+    assertEquals(cidrv4PrefixLength("255.255.255.255"), 32);
   });
 
   await t.step("both forms agree for every prefix length", () => {
     for (let prefixLength = 0; prefixLength <= 32; prefixLength++) {
       const mask = cidrv4Mask(prefixLength);
       assertEquals(
-        cidrv4MaskToPrefixLength(stringifyIpv4(mask)),
-        cidrv4MaskToPrefixLength(mask),
+        cidrv4PrefixLength(stringifyAddressv4(mask)),
+        cidrv4PrefixLength(mask),
       );
     }
   });
 
   await t.step("non-contiguous dotted decimal throws", () => {
     assertThrows(
-      () => cidrv4MaskToPrefixLength("255.0.255.0"),
+      () => cidrv4PrefixLength("255.0.255.0"),
       TypeError,
       "IPv4 mask is not contiguous: 0xff00ff00",
     );
-    assertThrows(() => cidrv4MaskToPrefixLength("0.0.0.255"), TypeError);
-    assertThrows(() => cidrv4MaskToPrefixLength("255.255.255.1"), TypeError);
+    assertThrows(() => cidrv4PrefixLength("0.0.0.255"), TypeError);
+    assertThrows(() => cidrv4PrefixLength("255.255.255.1"), TypeError);
   });
 
-  await t.step("malformed notation propagates parseIpv4's errors", () => {
+  await t.step("malformed notation propagates parseAddressv4's errors", () => {
     assertThrows(
-      () => cidrv4MaskToPrefixLength("255.255.255"),
+      () => cidrv4PrefixLength("255.255.255"),
       TypeError,
       "IPv4 address must have exactly 4 octets",
     );
     assertThrows(
-      () => cidrv4MaskToPrefixLength("255.255.255.256"),
+      () => cidrv4PrefixLength("255.255.255.256"),
       RangeError,
       "IPv4 octet out of range",
     );
-    assertThrows(() => cidrv4MaskToPrefixLength("255.255.255.01"), TypeError);
-    assertThrows(() => cidrv4MaskToPrefixLength(""), TypeError);
+    assertThrows(() => cidrv4PrefixLength("255.255.255.01"), TypeError);
+    assertThrows(() => cidrv4PrefixLength(""), TypeError);
 
-    // The string overload reaches parseIpv4, so a mask with surrounding
+    // The string overload reaches parseAddressv4, so a mask with surrounding
     // whitespace is malformed notation rather than a silent 24.
-    assertThrows(() => cidrv4MaskToPrefixLength(" 255.255.255.0"), TypeError);
+    assertThrows(() => cidrv4PrefixLength(" 255.255.255.0"), TypeError);
   });
 
   await t.step("non-contiguous masks throw", () => {
     assertThrows(
-      () => cidrv4MaskToPrefixLength(0xFF00FF00),
+      () => cidrv4PrefixLength(0xFF00FF00),
       TypeError,
       "IPv4 mask is not contiguous: 0xff00ff00",
     );
-    assertThrows(() => cidrv4MaskToPrefixLength(0xFFFFFF01), TypeError);
-    assertThrows(() => cidrv4MaskToPrefixLength(0x7FFFFFFF), TypeError);
+    assertThrows(() => cidrv4PrefixLength(0xFFFFFF01), TypeError);
+    assertThrows(() => cidrv4PrefixLength(0x7FFFFFFF), TypeError);
   });
 
   await t.step("wildcard (host) masks throw", () => {
     assertThrows(
-      () => cidrv4MaskToPrefixLength(0x000000FF),
+      () => cidrv4PrefixLength(0x000000FF),
       TypeError,
       "IPv4 mask is not contiguous: 0x000000ff",
     );
-    assertThrows(() => cidrv4MaskToPrefixLength(0x0000FFFF), TypeError);
+    assertThrows(() => cidrv4PrefixLength(0x0000FFFF), TypeError);
   });
 
   await t.step("counts leading ones, not set bits", () => {
     // node-ip's bug: 0xFF00FF00 has 16 set bits but is not a /16 mask.
-    assertThrows(() => cidrv4MaskToPrefixLength(0xFF00FF00), TypeError);
-    assertEquals(cidrv4MaskToPrefixLength(0xFFFF0000), 16);
+    assertThrows(() => cidrv4PrefixLength(0xFF00FF00), TypeError);
+    assertEquals(cidrv4PrefixLength(0xFFFF0000), 16);
   });
 
   await t.step("round-trips with cidrv4Mask for every prefix length", () => {
     for (let prefixLength = 0; prefixLength <= 32; prefixLength++) {
       assertEquals(
-        cidrv4MaskToPrefixLength(cidrv4Mask(prefixLength)),
+        cidrv4PrefixLength(cidrv4Mask(prefixLength)),
         prefixLength,
       );
     }
@@ -166,7 +166,7 @@ Deno.test("cidrv4MaskToPrefixLength", async (t) => {
       const mask = (0xFFFF0000 | low) >>> 0;
       let threw = false;
       try {
-        cidrv4MaskToPrefixLength(mask);
+        cidrv4PrefixLength(mask);
       } catch {
         threw = true;
       }
@@ -176,12 +176,12 @@ Deno.test("cidrv4MaskToPrefixLength", async (t) => {
 
   await t.step("out of range masks throw", () => {
     assertThrows(
-      () => cidrv4MaskToPrefixLength(-1),
+      () => cidrv4PrefixLength(-1),
       RangeError,
       "IPv4 mask must be a 32-bit unsigned integer, got -1",
     );
     assertThrows(
-      () => cidrv4MaskToPrefixLength(0x100000000),
+      () => cidrv4PrefixLength(0x100000000),
       RangeError,
       "IPv4 mask must be a 32-bit unsigned integer, got 4294967296",
     );
@@ -189,12 +189,12 @@ Deno.test("cidrv4MaskToPrefixLength", async (t) => {
 
   await t.step("non-integer masks throw", () => {
     assertThrows(
-      () => cidrv4MaskToPrefixLength(1.5),
+      () => cidrv4PrefixLength(1.5),
       RangeError,
       "IPv4 mask must be a 32-bit unsigned integer, got 1.5",
     );
     assertThrows(
-      () => cidrv4MaskToPrefixLength(NaN),
+      () => cidrv4PrefixLength(NaN),
       RangeError,
       "IPv4 mask must be a 32-bit unsigned integer, got NaN",
     );
@@ -204,28 +204,28 @@ Deno.test("cidrv4MaskToPrefixLength", async (t) => {
 Deno.test("parseCidrv4", async (t) => {
   await t.step("valid CIDR notation", () => {
     const cidr = parseCidrv4("192.168.1.0/24");
-    assertEquals(cidr.address, parseIpv4("192.168.1.0"));
+    assertEquals(cidr.address, parseAddressv4("192.168.1.0"));
     assertEquals(cidr.prefixLength, 24);
   });
 
   await t.step("various prefix lengths", () => {
     const cidr8 = parseCidrv4("10.0.0.0/8");
-    assertEquals(cidr8.address, parseIpv4("10.0.0.0"));
+    assertEquals(cidr8.address, parseAddressv4("10.0.0.0"));
     assertEquals(cidr8.prefixLength, 8);
 
     const cidr16 = parseCidrv4("172.16.0.0/16");
-    assertEquals(cidr16.address, parseIpv4("172.16.0.0"));
+    assertEquals(cidr16.address, parseAddressv4("172.16.0.0"));
     assertEquals(cidr16.prefixLength, 16);
 
     const cidr32 = parseCidrv4("192.168.1.1/32");
-    assertEquals(cidr32.address, parseIpv4("192.168.1.1"));
+    assertEquals(cidr32.address, parseAddressv4("192.168.1.1"));
     assertEquals(cidr32.prefixLength, 32);
   });
 
   await t.step("preserves original address", () => {
     // Address is preserved as-is, even if it doesn't match the network address
     const cidr = parseCidrv4("192.168.1.100/24");
-    assertEquals(cidr.address, parseIpv4("192.168.1.100"));
+    assertEquals(cidr.address, parseAddressv4("192.168.1.100"));
     assertEquals(cidr.prefixLength, 24);
   });
 
@@ -324,55 +324,55 @@ Deno.test("cidrv4Contains", async (t) => {
   await t.step("IP in range", () => {
     const cidr = parseCidrv4("192.168.1.0/24");
 
-    assertEquals(cidrv4Contains(cidr, parseIpv4("192.168.1.0")), true);
-    assertEquals(cidrv4Contains(cidr, parseIpv4("192.168.1.1")), true);
-    assertEquals(cidrv4Contains(cidr, parseIpv4("192.168.1.100")), true);
-    assertEquals(cidrv4Contains(cidr, parseIpv4("192.168.1.255")), true);
+    assertEquals(cidrv4Contains(cidr, parseAddressv4("192.168.1.0")), true);
+    assertEquals(cidrv4Contains(cidr, parseAddressv4("192.168.1.1")), true);
+    assertEquals(cidrv4Contains(cidr, parseAddressv4("192.168.1.100")), true);
+    assertEquals(cidrv4Contains(cidr, parseAddressv4("192.168.1.255")), true);
   });
 
   await t.step("IP out of range", () => {
     const cidr = parseCidrv4("192.168.1.0/24");
 
-    assertEquals(cidrv4Contains(cidr, parseIpv4("192.168.0.255")), false);
-    assertEquals(cidrv4Contains(cidr, parseIpv4("192.168.2.0")), false);
-    assertEquals(cidrv4Contains(cidr, parseIpv4("10.0.0.1")), false);
+    assertEquals(cidrv4Contains(cidr, parseAddressv4("192.168.0.255")), false);
+    assertEquals(cidrv4Contains(cidr, parseAddressv4("192.168.2.0")), false);
+    assertEquals(cidrv4Contains(cidr, parseAddressv4("10.0.0.1")), false);
   });
 
   await t.step("edge cases - /32 (single IP)", () => {
     const cidr = parseCidrv4("192.168.1.1/32");
 
-    assertEquals(cidrv4Contains(cidr, parseIpv4("192.168.1.1")), true);
-    assertEquals(cidrv4Contains(cidr, parseIpv4("192.168.1.0")), false);
-    assertEquals(cidrv4Contains(cidr, parseIpv4("192.168.1.2")), false);
+    assertEquals(cidrv4Contains(cidr, parseAddressv4("192.168.1.1")), true);
+    assertEquals(cidrv4Contains(cidr, parseAddressv4("192.168.1.0")), false);
+    assertEquals(cidrv4Contains(cidr, parseAddressv4("192.168.1.2")), false);
   });
 
   await t.step("edge cases - /0 (all IPs)", () => {
     const cidr = parseCidrv4("0.0.0.0/0");
 
-    assertEquals(cidrv4Contains(cidr, parseIpv4("0.0.0.0")), true);
-    assertEquals(cidrv4Contains(cidr, parseIpv4("192.168.1.1")), true);
-    assertEquals(cidrv4Contains(cidr, parseIpv4("255.255.255.255")), true);
+    assertEquals(cidrv4Contains(cidr, parseAddressv4("0.0.0.0")), true);
+    assertEquals(cidrv4Contains(cidr, parseAddressv4("192.168.1.1")), true);
+    assertEquals(cidrv4Contains(cidr, parseAddressv4("255.255.255.255")), true);
   });
 });
 
 Deno.test("cidrv4NetworkAddress", async (t) => {
   await t.step("returns network address", () => {
     const cidr = parseCidrv4("192.168.1.0/24");
-    assertEquals(cidrv4NetworkAddress(cidr), parseIpv4("192.168.1.0"));
+    assertEquals(cidrv4NetworkAddress(cidr), parseAddressv4("192.168.1.0"));
   });
 
   await t.step("various CIDRs", () => {
     assertEquals(
       cidrv4NetworkAddress(parseCidrv4("10.0.0.0/8")),
-      parseIpv4("10.0.0.0"),
+      parseAddressv4("10.0.0.0"),
     );
     assertEquals(
       cidrv4NetworkAddress(parseCidrv4("172.16.0.0/16")),
-      parseIpv4("172.16.0.0"),
+      parseAddressv4("172.16.0.0"),
     );
     assertEquals(
       cidrv4NetworkAddress(parseCidrv4("192.168.1.100/24")),
-      parseIpv4("192.168.1.0"),
+      parseAddressv4("192.168.1.0"),
     );
   });
 });
@@ -380,21 +380,21 @@ Deno.test("cidrv4NetworkAddress", async (t) => {
 Deno.test("cidrv4BroadcastAddress", async (t) => {
   await t.step("returns broadcast address", () => {
     const cidr = parseCidrv4("192.168.1.0/24");
-    assertEquals(cidrv4BroadcastAddress(cidr), parseIpv4("192.168.1.255"));
+    assertEquals(cidrv4BroadcastAddress(cidr), parseAddressv4("192.168.1.255"));
   });
 
   await t.step("various CIDRs", () => {
     assertEquals(
       cidrv4BroadcastAddress(parseCidrv4("10.0.0.0/8")),
-      parseIpv4("10.255.255.255"),
+      parseAddressv4("10.255.255.255"),
     );
     assertEquals(
       cidrv4BroadcastAddress(parseCidrv4("172.16.0.0/16")),
-      parseIpv4("172.16.255.255"),
+      parseAddressv4("172.16.255.255"),
     );
     assertEquals(
       cidrv4BroadcastAddress(parseCidrv4("192.168.1.1/32")),
-      parseIpv4("192.168.1.1"),
+      parseAddressv4("192.168.1.1"),
     );
   });
 });
@@ -413,7 +413,7 @@ Deno.test("IP assignment workflow", async (t) => {
     // Assign IPs until broadcast (exclusive)
     while (currentIp < broadcastAddr) {
       assertEquals(cidrv4Contains(cidr, currentIp), true);
-      assigned.push(stringifyIpv4(currentIp));
+      assigned.push(stringifyAddressv4(currentIp));
       currentIp = currentIp + 1;
     }
 
@@ -439,19 +439,22 @@ Deno.test("IP assignment workflow", async (t) => {
   });
 
   await t.step("arithmetic operations on IPs", () => {
-    const ip = parseIpv4("192.168.1.10");
+    const ip = parseAddressv4("192.168.1.10");
 
     // Next IP
-    assertEquals(stringifyIpv4(ip + 1), "192.168.1.11");
+    assertEquals(stringifyAddressv4(ip + 1), "192.168.1.11");
 
     // Previous IP
-    assertEquals(stringifyIpv4(ip - 1), "192.168.1.9");
+    assertEquals(stringifyAddressv4(ip - 1), "192.168.1.9");
 
     // Add offset
-    assertEquals(stringifyIpv4(ip + 10), "192.168.1.20");
+    assertEquals(stringifyAddressv4(ip + 10), "192.168.1.20");
 
     // Crossing octet boundary
-    assertEquals(stringifyIpv4(parseIpv4("192.168.1.255") + 1), "192.168.2.0");
+    assertEquals(
+      stringifyAddressv4(parseAddressv4("192.168.1.255") + 1),
+      "192.168.2.0",
+    );
   });
 });
 
@@ -462,7 +465,7 @@ Deno.test("cidrv4Addresses", async (t) => {
     // Default: offset=0, no count limit, step=1
     const all = Array.from(cidrv4Addresses(cidr));
 
-    assertEquals(all.map(stringifyIpv4), [
+    assertEquals(all.map(stringifyAddressv4), [
       "10.0.0.0",
       "10.0.0.1",
       "10.0.0.2",
@@ -481,8 +484,8 @@ Deno.test("cidrv4Addresses", async (t) => {
     const usable = Array.from(cidrv4Addresses(cidr, { offset: 1 }));
 
     assertEquals(usable.length, 7);
-    assertEquals(usable[0], parseIpv4("10.0.0.1"));
-    assertEquals(usable[6], parseIpv4("10.0.0.7"));
+    assertEquals(usable[0], parseAddressv4("10.0.0.1"));
+    assertEquals(usable[6], parseAddressv4("10.0.0.7"));
   });
 
   await t.step("generates addresses from network address", () => {
@@ -493,9 +496,9 @@ Deno.test("cidrv4Addresses", async (t) => {
     );
 
     assertEquals(addresses, [
-      parseIpv4("192.168.1.0"),
-      parseIpv4("192.168.1.1"),
-      parseIpv4("192.168.1.2"),
+      parseAddressv4("192.168.1.0"),
+      parseAddressv4("192.168.1.1"),
+      parseAddressv4("192.168.1.2"),
     ]);
   });
 
@@ -507,11 +510,11 @@ Deno.test("cidrv4Addresses", async (t) => {
     );
 
     assertEquals(addresses, [
-      parseIpv4("192.168.1.10"),
-      parseIpv4("192.168.1.11"),
-      parseIpv4("192.168.1.12"),
-      parseIpv4("192.168.1.13"),
-      parseIpv4("192.168.1.14"),
+      parseAddressv4("192.168.1.10"),
+      parseAddressv4("192.168.1.11"),
+      parseAddressv4("192.168.1.12"),
+      parseAddressv4("192.168.1.13"),
+      parseAddressv4("192.168.1.14"),
     ]);
   });
 
@@ -523,7 +526,7 @@ Deno.test("cidrv4Addresses", async (t) => {
       cidrv4Addresses(cidr, { offset: 1, count: 6, step: 1 }),
     );
 
-    assertEquals(usableIps.map(stringifyIpv4), [
+    assertEquals(usableIps.map(stringifyAddressv4), [
       "10.0.0.1",
       "10.0.0.2",
       "10.0.0.3",
@@ -550,7 +553,7 @@ Deno.test("cidrv4Addresses", async (t) => {
       cidrv4Addresses(cidr, { offset: 100, count: 1, step: 1 }),
     );
 
-    assertEquals(addresses, [parseIpv4("192.168.1.100")]);
+    assertEquals(addresses, [parseAddressv4("192.168.1.100")]);
   });
 
   await t.step("works with different CIDR sizes", () => {
@@ -560,15 +563,15 @@ Deno.test("cidrv4Addresses", async (t) => {
 
     assertEquals(
       Array.from(cidrv4Addresses(cidr8, { offset: 0, count: 2, step: 1 }))[0],
-      parseIpv4("10.0.0.0"),
+      parseAddressv4("10.0.0.0"),
     );
     assertEquals(
       Array.from(cidrv4Addresses(cidr16, { offset: 0, count: 2, step: 1 }))[0],
-      parseIpv4("172.16.0.0"),
+      parseAddressv4("172.16.0.0"),
     );
     assertEquals(
       Array.from(cidrv4Addresses(cidr32, { offset: 0, count: 1, step: 1 }))[0],
-      parseIpv4("192.168.1.1"),
+      parseAddressv4("192.168.1.1"),
     );
   });
 
@@ -580,9 +583,9 @@ Deno.test("cidrv4Addresses", async (t) => {
     );
 
     assertEquals(addresses, [
-      parseIpv4("192.168.1.5"),
-      parseIpv4("192.168.1.6"),
-      parseIpv4("192.168.1.7"),
+      parseAddressv4("192.168.1.5"),
+      parseAddressv4("192.168.1.6"),
+      parseAddressv4("192.168.1.7"),
     ]);
   });
 
@@ -603,14 +606,14 @@ Deno.test("cidrv4Addresses", async (t) => {
     assertEquals(batch2.length, 10);
     assertEquals(batch3.length, 10);
 
-    assertEquals(batch1[0], parseIpv4("172.16.0.1"));
-    assertEquals(batch1[9], parseIpv4("172.16.0.10"));
+    assertEquals(batch1[0], parseAddressv4("172.16.0.1"));
+    assertEquals(batch1[9], parseAddressv4("172.16.0.10"));
 
-    assertEquals(batch2[0], parseIpv4("172.16.0.11"));
-    assertEquals(batch2[9], parseIpv4("172.16.0.20"));
+    assertEquals(batch2[0], parseAddressv4("172.16.0.11"));
+    assertEquals(batch2[9], parseAddressv4("172.16.0.20"));
 
-    assertEquals(batch3[0], parseIpv4("172.16.0.21"));
-    assertEquals(batch3[9], parseIpv4("172.16.0.30"));
+    assertEquals(batch3[0], parseAddressv4("172.16.0.21"));
+    assertEquals(batch3[9], parseAddressv4("172.16.0.30"));
   });
 
   await t.step("large offset and count", () => {
@@ -620,8 +623,8 @@ Deno.test("cidrv4Addresses", async (t) => {
       cidrv4Addresses(cidr, { offset: 1000, count: 5, step: 1 }),
     );
 
-    assertEquals(addresses[0], parseIpv4("10.0.3.232")); // 10.0.0.0 + 1000
-    assertEquals(addresses[4], parseIpv4("10.0.3.236")); // 10.0.0.0 + 1004
+    assertEquals(addresses[0], parseAddressv4("10.0.3.232")); // 10.0.0.0 + 1000
+    assertEquals(addresses[4], parseAddressv4("10.0.3.236")); // 10.0.0.0 + 1004
   });
 
   await t.step("preserves non-aligned CIDR address", () => {
@@ -633,9 +636,9 @@ Deno.test("cidrv4Addresses", async (t) => {
     );
 
     assertEquals(addresses, [
-      parseIpv4("192.168.1.0"),
-      parseIpv4("192.168.1.1"),
-      parseIpv4("192.168.1.2"),
+      parseAddressv4("192.168.1.0"),
+      parseAddressv4("192.168.1.1"),
+      parseAddressv4("192.168.1.2"),
     ]);
   });
 
@@ -647,11 +650,11 @@ Deno.test("cidrv4Addresses", async (t) => {
     );
 
     assertEquals(evenIps, [
-      parseIpv4("192.168.1.0"),
-      parseIpv4("192.168.1.2"),
-      parseIpv4("192.168.1.4"),
-      parseIpv4("192.168.1.6"),
-      parseIpv4("192.168.1.8"),
+      parseAddressv4("192.168.1.0"),
+      parseAddressv4("192.168.1.2"),
+      parseAddressv4("192.168.1.4"),
+      parseAddressv4("192.168.1.6"),
+      parseAddressv4("192.168.1.8"),
     ]);
   });
 
@@ -663,11 +666,11 @@ Deno.test("cidrv4Addresses", async (t) => {
     );
 
     assertEquals(oddIps, [
-      parseIpv4("192.168.1.1"),
-      parseIpv4("192.168.1.3"),
-      parseIpv4("192.168.1.5"),
-      parseIpv4("192.168.1.7"),
-      parseIpv4("192.168.1.9"),
+      parseAddressv4("192.168.1.1"),
+      parseAddressv4("192.168.1.3"),
+      parseAddressv4("192.168.1.5"),
+      parseAddressv4("192.168.1.7"),
+      parseAddressv4("192.168.1.9"),
     ]);
   });
 
@@ -679,11 +682,11 @@ Deno.test("cidrv4Addresses", async (t) => {
     );
 
     assertEquals(ips, [
-      parseIpv4("10.0.0.0"),
-      parseIpv4("10.0.0.10"),
-      parseIpv4("10.0.0.20"),
-      parseIpv4("10.0.0.30"),
-      parseIpv4("10.0.0.40"),
+      parseAddressv4("10.0.0.0"),
+      parseAddressv4("10.0.0.10"),
+      parseAddressv4("10.0.0.20"),
+      parseAddressv4("10.0.0.30"),
+      parseAddressv4("10.0.0.40"),
     ]);
   });
 
@@ -695,11 +698,11 @@ Deno.test("cidrv4Addresses", async (t) => {
     );
 
     assertEquals(backwards, [
-      parseIpv4("192.168.1.10"),
-      parseIpv4("192.168.1.9"),
-      parseIpv4("192.168.1.8"),
-      parseIpv4("192.168.1.7"),
-      parseIpv4("192.168.1.6"),
+      parseAddressv4("192.168.1.10"),
+      parseAddressv4("192.168.1.9"),
+      parseAddressv4("192.168.1.8"),
+      parseAddressv4("192.168.1.7"),
+      parseAddressv4("192.168.1.6"),
     ]);
   });
 
@@ -711,10 +714,10 @@ Deno.test("cidrv4Addresses", async (t) => {
     );
 
     assertEquals(backwards, [
-      parseIpv4("10.0.0.7"),
-      parseIpv4("10.0.0.5"),
-      parseIpv4("10.0.0.3"),
-      parseIpv4("10.0.0.1"),
+      parseAddressv4("10.0.0.7"),
+      parseAddressv4("10.0.0.5"),
+      parseAddressv4("10.0.0.3"),
+      parseAddressv4("10.0.0.1"),
     ]);
   });
 
@@ -728,9 +731,9 @@ Deno.test("cidrv4Addresses", async (t) => {
 
     assertEquals(ips.length, 3);
     assertEquals(ips, [
-      parseIpv4("192.168.1.5"),
-      parseIpv4("192.168.1.6"),
-      parseIpv4("192.168.1.7"),
+      parseAddressv4("192.168.1.5"),
+      parseAddressv4("192.168.1.6"),
+      parseAddressv4("192.168.1.7"),
     ]);
   });
 
@@ -744,10 +747,10 @@ Deno.test("cidrv4Addresses", async (t) => {
 
     assertEquals(ips.length, 4);
     assertEquals(ips, [
-      parseIpv4("192.168.1.3"),
-      parseIpv4("192.168.1.2"),
-      parseIpv4("192.168.1.1"),
-      parseIpv4("192.168.1.0"),
+      parseAddressv4("192.168.1.3"),
+      parseAddressv4("192.168.1.2"),
+      parseAddressv4("192.168.1.1"),
+      parseAddressv4("192.168.1.0"),
     ]);
   });
 
@@ -761,9 +764,9 @@ Deno.test("cidrv4Addresses", async (t) => {
 
     assertEquals(ips.length, 3);
     assertEquals(ips, [
-      parseIpv4("10.0.0.5"),
-      parseIpv4("10.0.0.10"),
-      parseIpv4("10.0.0.15"),
+      parseAddressv4("10.0.0.5"),
+      parseAddressv4("10.0.0.10"),
+      parseAddressv4("10.0.0.15"),
     ]);
   });
 
@@ -797,11 +800,11 @@ Deno.test("cidrv4Addresses", async (t) => {
 
     // Manually iterate to verify it's a generator
     const first = gen.next();
-    assertEquals(first.value, parseIpv4("192.168.1.0"));
+    assertEquals(first.value, parseAddressv4("192.168.1.0"));
     assertEquals(first.done, false);
 
     const second = gen.next();
-    assertEquals(second.value, parseIpv4("192.168.1.1"));
+    assertEquals(second.value, parseAddressv4("192.168.1.1"));
     assertEquals(second.done, false);
   });
 });
@@ -1330,39 +1333,43 @@ Deno.test("compareCidrv4", async (t) => {
 Deno.test("cidrv4FirstUsableAddress", async (t) => {
   await t.step("skips the network address", () => {
     assertEquals(
-      stringifyIpv4(cidrv4FirstUsableAddress(parseCidrv4("192.168.1.0/24"))),
+      stringifyAddressv4(
+        cidrv4FirstUsableAddress(parseCidrv4("192.168.1.0/24")),
+      ),
       "192.168.1.1",
     );
     assertEquals(
-      stringifyIpv4(cidrv4FirstUsableAddress(parseCidrv4("10.0.0.0/30"))),
+      stringifyAddressv4(cidrv4FirstUsableAddress(parseCidrv4("10.0.0.0/30"))),
       "10.0.0.1",
     );
   });
 
   await t.step("/31 keeps the network address (RFC 3021)", () => {
     assertEquals(
-      stringifyIpv4(cidrv4FirstUsableAddress(parseCidrv4("10.0.0.0/31"))),
+      stringifyAddressv4(cidrv4FirstUsableAddress(parseCidrv4("10.0.0.0/31"))),
       "10.0.0.0",
     );
   });
 
   await t.step("/32 is the address itself", () => {
     assertEquals(
-      stringifyIpv4(cidrv4FirstUsableAddress(parseCidrv4("10.0.0.7/32"))),
+      stringifyAddressv4(cidrv4FirstUsableAddress(parseCidrv4("10.0.0.7/32"))),
       "10.0.0.7",
     );
   });
 
   await t.step("/0 starts at 0.0.0.1", () => {
     assertEquals(
-      stringifyIpv4(cidrv4FirstUsableAddress(parseCidrv4("0.0.0.0/0"))),
+      stringifyAddressv4(cidrv4FirstUsableAddress(parseCidrv4("0.0.0.0/0"))),
       "0.0.0.1",
     );
   });
 
   await t.step("non-canonical address is masked to the network first", () => {
     assertEquals(
-      stringifyIpv4(cidrv4FirstUsableAddress(parseCidrv4("192.168.1.77/24"))),
+      stringifyAddressv4(
+        cidrv4FirstUsableAddress(parseCidrv4("192.168.1.77/24")),
+      ),
       "192.168.1.1",
     );
   });
@@ -1378,39 +1385,43 @@ Deno.test("cidrv4FirstUsableAddress", async (t) => {
 Deno.test("cidrv4LastUsableAddress", async (t) => {
   await t.step("skips the broadcast address", () => {
     assertEquals(
-      stringifyIpv4(cidrv4LastUsableAddress(parseCidrv4("192.168.1.0/24"))),
+      stringifyAddressv4(
+        cidrv4LastUsableAddress(parseCidrv4("192.168.1.0/24")),
+      ),
       "192.168.1.254",
     );
     assertEquals(
-      stringifyIpv4(cidrv4LastUsableAddress(parseCidrv4("10.0.0.0/30"))),
+      stringifyAddressv4(cidrv4LastUsableAddress(parseCidrv4("10.0.0.0/30"))),
       "10.0.0.2",
     );
   });
 
   await t.step("/31 keeps the broadcast address (RFC 3021)", () => {
     assertEquals(
-      stringifyIpv4(cidrv4LastUsableAddress(parseCidrv4("10.0.0.0/31"))),
+      stringifyAddressv4(cidrv4LastUsableAddress(parseCidrv4("10.0.0.0/31"))),
       "10.0.0.1",
     );
   });
 
   await t.step("/32 is the address itself", () => {
     assertEquals(
-      stringifyIpv4(cidrv4LastUsableAddress(parseCidrv4("10.0.0.7/32"))),
+      stringifyAddressv4(cidrv4LastUsableAddress(parseCidrv4("10.0.0.7/32"))),
       "10.0.0.7",
     );
   });
 
   await t.step("/0 ends at 255.255.255.254", () => {
     assertEquals(
-      stringifyIpv4(cidrv4LastUsableAddress(parseCidrv4("0.0.0.0/0"))),
+      stringifyAddressv4(cidrv4LastUsableAddress(parseCidrv4("0.0.0.0/0"))),
       "255.255.255.254",
     );
   });
 
   await t.step("non-canonical address is masked to the network first", () => {
     assertEquals(
-      stringifyIpv4(cidrv4LastUsableAddress(parseCidrv4("192.168.1.77/24"))),
+      stringifyAddressv4(
+        cidrv4LastUsableAddress(parseCidrv4("192.168.1.77/24")),
+      ),
       "192.168.1.254",
     );
   });
@@ -1483,21 +1494,21 @@ Deno.test("cidrv4UsableAddresses", async (t) => {
     const addresses = Array.from(
       cidrv4UsableAddresses(parseCidrv4("10.0.0.0/30")),
     );
-    assertEquals(addresses.map(stringifyIpv4), ["10.0.0.1", "10.0.0.2"]);
+    assertEquals(addresses.map(stringifyAddressv4), ["10.0.0.1", "10.0.0.2"]);
   });
 
   await t.step("/31 yields both addresses (RFC 3021)", () => {
     const addresses = Array.from(
       cidrv4UsableAddresses(parseCidrv4("10.0.0.0/31")),
     );
-    assertEquals(addresses.map(stringifyIpv4), ["10.0.0.0", "10.0.0.1"]);
+    assertEquals(addresses.map(stringifyAddressv4), ["10.0.0.0", "10.0.0.1"]);
   });
 
   await t.step("/32 yields the single address", () => {
     const addresses = Array.from(
       cidrv4UsableAddresses(parseCidrv4("10.0.0.7/32")),
     );
-    assertEquals(addresses.map(stringifyIpv4), ["10.0.0.7"]);
+    assertEquals(addresses.map(stringifyAddressv4), ["10.0.0.7"]);
   });
 
   await t.step("non-canonical address is masked to the network first", () => {
@@ -1505,7 +1516,7 @@ Deno.test("cidrv4UsableAddresses", async (t) => {
       cidrv4UsableAddresses(parseCidrv4("10.0.1.5/29")),
     );
     assertEquals(addresses.length, 6);
-    assertEquals(stringifyIpv4(addresses[0]), "10.0.1.1");
+    assertEquals(stringifyAddressv4(addresses[0]), "10.0.1.1");
   });
 
   await t.step("count matches cidrv4UsableSize", () => {
@@ -1536,8 +1547,14 @@ Deno.test("cidrv4UsableAddresses", async (t) => {
 
   await t.step("is lazy — a /0 costs nothing until iterated", () => {
     const addresses = cidrv4UsableAddresses(parseCidrv4("0.0.0.0/0"));
-    assertEquals(stringifyIpv4(addresses.next().value as number), "0.0.0.1");
-    assertEquals(stringifyIpv4(addresses.next().value as number), "0.0.0.2");
+    assertEquals(
+      stringifyAddressv4(addresses.next().value as number),
+      "0.0.0.1",
+    );
+    assertEquals(
+      stringifyAddressv4(addresses.next().value as number),
+      "0.0.0.2",
+    );
     addresses.return(undefined);
   });
 

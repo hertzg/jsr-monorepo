@@ -1,6 +1,6 @@
 import { assertEquals } from "@std/assert";
 import { refine } from "@hertzg/binstruct";
-import { parseIpv4, stringifyIpv4 } from "@hertzg/ip/ipv4";
+import { parseAddressv4, stringifyAddressv4 } from "@hertzg/ip/addressv4";
 import { parse as parseMac, stringify as stringifyMac } from "@hertzg/mac";
 import {
   ARP_ETHERNET_IPV4_SIZE,
@@ -50,8 +50,8 @@ Deno.test("arp — decode known request bytes", () => {
   assertEquals(packet.operation, ARP_OPCODE.REQUEST);
   assertEquals(stringifyMac(packet.senderHardwareAddress), "00:11:22:33:44:55");
   assertEquals(stringifyMac(packet.targetHardwareAddress), "00:00:00:00:00:00");
-  assertEquals(stringifyIpv4(packet.senderProtocolAddress), "192.168.1.1");
-  assertEquals(stringifyIpv4(packet.targetProtocolAddress), "192.168.1.2");
+  assertEquals(stringifyAddressv4(packet.senderProtocolAddress), "192.168.1.1");
+  assertEquals(stringifyAddressv4(packet.targetProtocolAddress), "192.168.1.2");
 });
 
 Deno.test("arp — decode known reply bytes", () => {
@@ -61,8 +61,8 @@ Deno.test("arp — decode known reply bytes", () => {
   assertEquals(packet.operation, ARP_OPCODE.REPLY);
   assertEquals(stringifyMac(packet.senderHardwareAddress), "aa:bb:cc:dd:ee:ff");
   assertEquals(stringifyMac(packet.targetHardwareAddress), "00:11:22:33:44:55");
-  assertEquals(stringifyIpv4(packet.senderProtocolAddress), "192.168.1.2");
-  assertEquals(stringifyIpv4(packet.targetProtocolAddress), "192.168.1.1");
+  assertEquals(stringifyAddressv4(packet.senderProtocolAddress), "192.168.1.2");
+  assertEquals(stringifyAddressv4(packet.targetProtocolAddress), "192.168.1.1");
 });
 
 Deno.test("arp — encode produces expected wire bytes", () => {
@@ -74,9 +74,9 @@ Deno.test("arp — encode produces expected wire bytes", () => {
     protocolAddressLength: ARP_PROTO_LEN_IPV4,
     operation: ARP_OPCODE.REQUEST,
     senderHardwareAddress: parseMac("00:11:22:33:44:55"),
-    senderProtocolAddress: parseIpv4("192.168.1.1"),
+    senderProtocolAddress: parseAddressv4("192.168.1.1"),
     targetHardwareAddress: new Uint8Array(ARP_HW_LEN_ETHERNET),
-    targetProtocolAddress: parseIpv4("192.168.1.2"),
+    targetProtocolAddress: parseAddressv4("192.168.1.2"),
   };
 
   const buffer = new Uint8Array(ARP_ETHERNET_IPV4_SIZE);
@@ -96,9 +96,9 @@ Deno.test("arp — round-trip request and reply", () => {
       protocolAddressLength: ARP_PROTO_LEN_IPV4,
       operation: ARP_OPCODE.REQUEST,
       senderHardwareAddress: parseMac("00:11:22:33:44:55"),
-      senderProtocolAddress: parseIpv4("10.0.0.1"),
+      senderProtocolAddress: parseAddressv4("10.0.0.1"),
       targetHardwareAddress: new Uint8Array(ARP_HW_LEN_ETHERNET),
-      targetProtocolAddress: parseIpv4("10.0.0.42"),
+      targetProtocolAddress: parseAddressv4("10.0.0.42"),
     },
     {
       hardwareType: ARP_HARDWARE_TYPE.ETHERNET,
@@ -107,9 +107,9 @@ Deno.test("arp — round-trip request and reply", () => {
       protocolAddressLength: ARP_PROTO_LEN_IPV4,
       operation: ARP_OPCODE.REPLY,
       senderHardwareAddress: parseMac("aa:bb:cc:dd:ee:ff"),
-      senderProtocolAddress: parseIpv4("10.0.0.42"),
+      senderProtocolAddress: parseAddressv4("10.0.0.42"),
       targetHardwareAddress: parseMac("00:11:22:33:44:55"),
-      targetProtocolAddress: parseIpv4("10.0.0.1"),
+      targetProtocolAddress: parseAddressv4("10.0.0.1"),
     },
   ];
 
@@ -149,8 +149,8 @@ Deno.test("arp — composes with refine for human-readable form", () => {
       operation: raw.operation,
       senderHardwareAddress: stringifyMac(raw.senderHardwareAddress),
       targetHardwareAddress: stringifyMac(raw.targetHardwareAddress),
-      senderProtocolAddress: stringifyIpv4(raw.senderProtocolAddress),
-      targetProtocolAddress: stringifyIpv4(raw.targetProtocolAddress),
+      senderProtocolAddress: stringifyAddressv4(raw.senderProtocolAddress),
+      targetProtocolAddress: stringifyAddressv4(raw.targetProtocolAddress),
     }),
     unrefine: (refined: RefinedArp): ArpData => ({
       hardwareType: refined.hardwareType,
@@ -160,8 +160,8 @@ Deno.test("arp — composes with refine for human-readable form", () => {
       operation: refined.operation,
       senderHardwareAddress: parseMac(refined.senderHardwareAddress),
       targetHardwareAddress: parseMac(refined.targetHardwareAddress),
-      senderProtocolAddress: parseIpv4(refined.senderProtocolAddress),
-      targetProtocolAddress: parseIpv4(refined.targetProtocolAddress),
+      senderProtocolAddress: parseAddressv4(refined.senderProtocolAddress),
+      targetProtocolAddress: parseAddressv4(refined.targetProtocolAddress),
     }),
   });
 

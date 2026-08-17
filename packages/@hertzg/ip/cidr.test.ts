@@ -14,9 +14,9 @@ import {
   parseCidr,
   stringifyCidr,
 } from "./cidr.ts";
-import { parseIp, stringifyIp } from "./ip.ts";
+import { parseAddress, stringifyAddress } from "./address.ts";
 import { isValidCidr } from "./validate.ts";
-import { parseIpv6 } from "./ipv6.ts";
+import { parseAddressv6 } from "./addressv6.ts";
 import { type Cidrv4, parseCidrv4 } from "./cidrv4.ts";
 import { type Cidrv6, parseCidrv6 } from "./cidrv6.ts";
 
@@ -137,54 +137,69 @@ Deno.test("isValidCidr", async (t) => {
 
 Deno.test("cidrContains", async (t) => {
   await t.step("delegates to IPv4", () => {
-    assert(cidrContains(parseCidr("10.0.0.0/8"), parseIp("10.1.2.3")));
+    assert(cidrContains(parseCidr("10.0.0.0/8"), parseAddress("10.1.2.3")));
     assertEquals(
-      cidrContains(parseCidr("10.0.0.0/8"), parseIp("11.0.0.1")),
+      cidrContains(parseCidr("10.0.0.0/8"), parseAddress("11.0.0.1")),
       false,
     );
   });
 
   await t.step("delegates to IPv6", () => {
-    assert(cidrContains(parseCidr("2001:db8::/32"), parseIp("2001:db8::1")));
+    assert(
+      cidrContains(parseCidr("2001:db8::/32"), parseAddress("2001:db8::1")),
+    );
     assertEquals(
-      cidrContains(parseCidr("2001:db8::/32"), parseIp("2001:db9::1")),
+      cidrContains(parseCidr("2001:db8::/32"), parseAddress("2001:db9::1")),
       false,
     );
   });
 
   await t.step("non-canonical CIDRs are masked to their network", () => {
-    assert(cidrContains(parseCidr("10.1.2.3/8"), parseIp("10.9.9.9")));
-    assert(cidrContains(parseCidr("2001:db8:1::5/32"), parseIp("2001:db8::1")));
+    assert(cidrContains(parseCidr("10.1.2.3/8"), parseAddress("10.9.9.9")));
+    assert(
+      cidrContains(parseCidr("2001:db8:1::5/32"), parseAddress("2001:db8::1")),
+    );
   });
 
   await t.step("mixed v4/v6 returns false instead of throwing", () => {
     assertEquals(
-      cidrContains(parseCidr("10.0.0.0/8"), parseIp("2001:db8::1")),
+      cidrContains(parseCidr("10.0.0.0/8"), parseAddress("2001:db8::1")),
       false,
     );
     assertEquals(
-      cidrContains(parseCidr("2001:db8::/32"), parseIp("10.1.2.3")),
+      cidrContains(parseCidr("2001:db8::/32"), parseAddress("10.1.2.3")),
       false,
     );
-    assertEquals(cidrContains(parseCidr("::/0"), parseIp("10.1.2.3")), false);
     assertEquals(
-      cidrContains(parseCidr("0.0.0.0/0"), parseIp("2001:db8::1")),
+      cidrContains(parseCidr("::/0"), parseAddress("10.1.2.3")),
+      false,
+    );
+    assertEquals(
+      cidrContains(parseCidr("0.0.0.0/0"), parseAddress("2001:db8::1")),
       false,
     );
   });
 
-  await t.step("IPv4-mapped address from parseIp matches an IPv4 CIDR", () => {
-    assert(cidrContains(parseCidr("10.0.0.0/8"), parseIp("::ffff:10.1.2.3")));
-  });
+  await t.step(
+    "IPv4-mapped address from parseAddress matches an IPv4 CIDR",
+    () => {
+      assert(
+        cidrContains(parseCidr("10.0.0.0/8"), parseAddress("::ffff:10.1.2.3")),
+      );
+    },
+  );
 
-  await t.step("IPv4-mapped address from parseIpv6 stays IPv6", () => {
+  await t.step("IPv4-mapped address from parseAddressv6 stays IPv6", () => {
     assertEquals(
-      cidrContains(parseCidr("10.0.0.0/8"), parseIpv6("::ffff:10.1.2.3")),
+      cidrContains(parseCidr("10.0.0.0/8"), parseAddressv6("::ffff:10.1.2.3")),
       false,
     );
     // parseCidr would unwrap the mapped prefix to 0.0.0.0/0; parseCidrv6 keeps it IPv6
     assert(
-      cidrContains(parseCidrv6("::ffff:0:0/96"), parseIpv6("::ffff:10.1.2.3")),
+      cidrContains(
+        parseCidrv6("::ffff:0:0/96"),
+        parseAddressv6("::ffff:10.1.2.3"),
+      ),
     );
   });
 });
@@ -473,22 +488,22 @@ Deno.test("cidrFirstAddress", async (t) => {
   await t.step("returns number for IPv4", () => {
     const address = cidrFirstAddress(parseCidr("192.168.1.0/24"));
     assertEquals(typeof address, "number");
-    assertEquals(stringifyIp(address), "192.168.1.0");
+    assertEquals(stringifyAddress(address), "192.168.1.0");
   });
 
   await t.step("returns bigint for IPv6", () => {
     const address = cidrFirstAddress(parseCidr("2001:db8::/32"));
     assertEquals(typeof address, "bigint");
-    assertEquals(stringifyIp(address), "2001:db8::");
+    assertEquals(stringifyAddress(address), "2001:db8::");
   });
 
   await t.step("masks a non-canonical block of either version", () => {
     assertEquals(
-      stringifyIp(cidrFirstAddress(parseCidr("192.168.1.77/24"))),
+      stringifyAddress(cidrFirstAddress(parseCidr("192.168.1.77/24"))),
       "192.168.1.0",
     );
     assertEquals(
-      stringifyIp(cidrFirstAddress(parseCidr("2001:db8::dead/32"))),
+      stringifyAddress(cidrFirstAddress(parseCidr("2001:db8::dead/32"))),
       "2001:db8::",
     );
   });
@@ -498,22 +513,22 @@ Deno.test("cidrLastAddress", async (t) => {
   await t.step("returns number for IPv4", () => {
     const address = cidrLastAddress(parseCidr("192.168.1.0/24"));
     assertEquals(typeof address, "number");
-    assertEquals(stringifyIp(address), "192.168.1.255");
+    assertEquals(stringifyAddress(address), "192.168.1.255");
   });
 
   await t.step("returns bigint for IPv6", () => {
     const address = cidrLastAddress(parseCidr("2001:db8::/120"));
     assertEquals(typeof address, "bigint");
-    assertEquals(stringifyIp(address), "2001:db8::ff");
+    assertEquals(stringifyAddress(address), "2001:db8::ff");
   });
 
   await t.step("masks a non-canonical block of either version", () => {
     assertEquals(
-      stringifyIp(cidrLastAddress(parseCidr("192.168.1.77/24"))),
+      stringifyAddress(cidrLastAddress(parseCidr("192.168.1.77/24"))),
       "192.168.1.255",
     );
     assertEquals(
-      stringifyIp(cidrLastAddress(parseCidr("2001:db8::dead/112"))),
+      stringifyAddress(cidrLastAddress(parseCidr("2001:db8::dead/112"))),
       "2001:db8::ffff",
     );
   });

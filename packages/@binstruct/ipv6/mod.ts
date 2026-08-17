@@ -49,8 +49,8 @@
  * of this package that adds it.
  *
  * `sourceAddress` / `destinationAddress` are raw 16-byte slices, not
- * `bigint`. Pair this with `@hertzg/ip`'s `stringifyIpv6` /
- * `parseIpv6` for human-readable conversion — those work over `bigint`, so
+ * `bigint`. Pair this with `@hertzg/ip`'s `stringifyAddressv6` /
+ * `parseAddressv6` for human-readable conversion — those work over `bigint`, so
  * bytes need `Array.from(...).reduce()`-style conversion, left to the
  * caller to keep this package free of that dependency.
  *

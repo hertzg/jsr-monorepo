@@ -5,15 +5,15 @@
  * and IPv4 CIDR notation strings.
  *
  * For universal validation, see:
- * - [`validate`](https://jsr.io/@hertzg/ip/doc/validate): {@link isValidIp}, {@link isValidCidr}
+ * - [`validate`](https://jsr.io/@hertzg/ip/doc/validate): {@link isValidAddress}, {@link isValidCidr}
  *
  * @example
  * ```ts
  * import { assert, assertEquals } from "@std/assert";
- * import { isValidCidrv4, isValidIpv4 } from "@hertzg/ip";
+ * import { isValidCidrv4, isValidAddressv4 } from "@hertzg/ip";
  *
- * assert(isValidIpv4("192.168.1.1"));
- * assertEquals(isValidIpv4("::1"), false);
+ * assert(isValidAddressv4("192.168.1.1"));
+ * assertEquals(isValidAddressv4("::1"), false);
  *
  * assert(isValidCidrv4("10.0.0.0/8"));
  * assertEquals(isValidCidrv4("10.0.0.0/33"), false);
@@ -22,7 +22,7 @@
  * @module
  */
 
-import { parseIpv4 } from "./ipv4.ts";
+import { parseAddressv4 } from "./addressv4.ts";
 import { parseCidrv4 } from "./cidrv4.ts";
 
 /**
@@ -34,28 +34,28 @@ import { parseCidrv4 } from "./cidrv4.ts";
  * @example Valid addresses
  * ```ts
  * import { assert } from "@std/assert";
- * import { isValidIpv4 } from "@hertzg/ip";
+ * import { isValidAddressv4 } from "@hertzg/ip";
  *
- * assert(isValidIpv4("0.0.0.0"));
- * assert(isValidIpv4("192.168.1.1"));
- * assert(isValidIpv4("255.255.255.255"));
+ * assert(isValidAddressv4("0.0.0.0"));
+ * assert(isValidAddressv4("192.168.1.1"));
+ * assert(isValidAddressv4("255.255.255.255"));
  * ```
  *
  * @example Invalid addresses
  * ```ts
  * import { assertEquals } from "@std/assert";
- * import { isValidIpv4 } from "@hertzg/ip";
+ * import { isValidAddressv4 } from "@hertzg/ip";
  *
- * assertEquals(isValidIpv4(""), false);
- * assertEquals(isValidIpv4("256.0.0.1"), false);
- * assertEquals(isValidIpv4("1.2.3"), false);
- * assertEquals(isValidIpv4("01.02.03.04"), false);
- * assertEquals(isValidIpv4("::1"), false);
+ * assertEquals(isValidAddressv4(""), false);
+ * assertEquals(isValidAddressv4("256.0.0.1"), false);
+ * assertEquals(isValidAddressv4("1.2.3"), false);
+ * assertEquals(isValidAddressv4("01.02.03.04"), false);
+ * assertEquals(isValidAddressv4("::1"), false);
  * ```
  */
-export function isValidIpv4(address: string): boolean {
+export function isValidAddressv4(address: string): boolean {
   try {
-    parseIpv4(address);
+    parseAddressv4(address);
     return true;
   } catch {
     return false;

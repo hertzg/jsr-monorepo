@@ -50,7 +50,7 @@
  * @example Round-trip a UDP-over-IPv4-over-Ethernet frame
  * ```ts
  * import { assert, assertEquals } from "@std/assert";
- * import { parseIpv4 } from "@hertzg/ip/ipv4";
+ * import { parseAddressv4 } from "@hertzg/ip/addressv4";
  * import { ETHERTYPE_IPV4 } from "@binstruct/ipv4";
  * import { IP_PROTOCOL_UDP } from "@binstruct/udp";
  * import { inetFrame } from "@binstruct/inet";
@@ -68,8 +68,8 @@
  *     timeToLive: 64,
  *     protocol: IP_PROTOCOL_UDP,
  *     headerChecksum: 0,
- *     sourceAddress: parseIpv4("192.0.2.1"),
- *     destinationAddress: parseIpv4("192.0.2.2"),
+ *     sourceAddress: parseAddressv4("192.0.2.1"),
+ *     destinationAddress: parseAddressv4("192.0.2.2"),
  *     options: new Uint8Array(0),
  *     payload: {
  *       srcPort: 53,

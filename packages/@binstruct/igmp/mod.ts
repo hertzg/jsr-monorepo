@@ -20,7 +20,7 @@
  *
  * IPv4 addresses are surfaced as raw 32-bit unsigned integers, mirroring how
  * `@binstruct/ipv4` and `@binstruct/arp` expose the same field. Use
- * {@link https://jsr.io/@hertzg/ip @hertzg/ip}'s `parseIpv4` / `stringifyIpv4`
+ * {@link https://jsr.io/@hertzg/ip @hertzg/ip}'s `parseAddressv4` / `stringifyAddressv4`
  * for human-readable conversion.
  *
  * Per the binstruct philosophy, encoding does **not** auto-compute the

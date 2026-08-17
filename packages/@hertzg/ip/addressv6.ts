@@ -8,13 +8,13 @@
  * @example Basic IPv6 operations
  * ```ts
  * import { assertEquals } from "@std/assert";
- * import { parseIpv6, stringifyIpv6 } from "@hertzg/ip/ipv6";
+ * import { parseAddressv6, stringifyAddressv6 } from "@hertzg/ip/addressv6";
  *
- * const ip = parseIpv6("2001:db8::1");
+ * const ip = parseAddressv6("2001:db8::1");
  * assertEquals(ip, 42540766411282592856903984951653826561n);
  *
  * const next = ip + 1n;
- * assertEquals(stringifyIpv6(next), "2001:db8::2");
+ * assertEquals(stringifyAddressv6(next), "2001:db8::2");
  * ```
  *
  * @example Bitwise operations on IPv6 addresses
@@ -25,33 +25,33 @@
  *
  * ```ts
  * import { assertEquals } from "@std/assert";
- * import { parseIpv6, stringifyIpv6 } from "@hertzg/ip/ipv6";
+ * import { parseAddressv6, stringifyAddressv6 } from "@hertzg/ip/addressv6";
  *
- * const ip = parseIpv6("2001:db8::1");
+ * const ip = parseAddressv6("2001:db8::1");
  * const MAX_IPV6 = (1n << 128n) - 1n;
  *
  * // Bitwise NOT (invert all bits, mask to 128 bits)
  * const inverted = ~ip & MAX_IPV6;
- * assertEquals(stringifyIpv6(inverted), "dffe:f247:ffff:ffff:ffff:ffff:ffff:fffe");
+ * assertEquals(stringifyAddressv6(inverted), "dffe:f247:ffff:ffff:ffff:ffff:ffff:fffe");
  *
  * // Bitwise AND (apply network mask to get network address)
  * const mask = (MAX_IPV6 << 96n) & MAX_IPV6; // /32 mask
  * const network = ip & mask;
- * assertEquals(stringifyIpv6(network), "2001:db8::");
+ * assertEquals(stringifyAddressv6(network), "2001:db8::");
  *
  * // Bitwise OR (set host bits)
  * const result = network | 0xFFn;
- * assertEquals(stringifyIpv6(result), "2001:db8::ff");
+ * assertEquals(stringifyAddressv6(result), "2001:db8::ff");
  *
  * // Direct comparison (no isEqual() needed)
- * assertEquals(parseIpv6("::1") === parseIpv6("::1"), true);
- * assertEquals(parseIpv6("::1") === parseIpv6("::2"), false);
+ * assertEquals(parseAddressv6("::1") === parseAddressv6("::1"), true);
+ * assertEquals(parseAddressv6("::1") === parseAddressv6("::2"), false);
  * ```
  *
  * @module
  */
 
-import { parseIpv4 } from "./ipv4.ts";
+import { parseAddressv4 } from "./addressv4.ts";
 
 /** Character codes the address scanner compares against. */
 const CHAR_COLON = 0x3a;
@@ -92,45 +92,45 @@ function hexDigit(code: number): number {
  * @example Basic parsing
  * ```ts
  * import { assertEquals } from "@std/assert";
- * import { parseIpv6 } from "@hertzg/ip/ipv6";
+ * import { parseAddressv6 } from "@hertzg/ip/addressv6";
  *
- * assertEquals(parseIpv6("::"), 0n);
- * assertEquals(parseIpv6("::1"), 1n);
- * assertEquals(parseIpv6("2001:db8::1"), 42540766411282592856903984951653826561n);
- * assertEquals(parseIpv6("ffff:ffff:ffff:ffff:ffff:ffff:ffff:ffff"), 340282366920938463463374607431768211455n);
+ * assertEquals(parseAddressv6("::"), 0n);
+ * assertEquals(parseAddressv6("::1"), 1n);
+ * assertEquals(parseAddressv6("2001:db8::1"), 42540766411282592856903984951653826561n);
+ * assertEquals(parseAddressv6("ffff:ffff:ffff:ffff:ffff:ffff:ffff:ffff"), 340282366920938463463374607431768211455n);
  * ```
  *
  * @example Compressed forms
  * ```ts
  * import { assertEquals } from "@std/assert";
- * import { parseIpv6 } from "@hertzg/ip/ipv6";
+ * import { parseAddressv6 } from "@hertzg/ip/addressv6";
  *
- * assertEquals(parseIpv6("2001:db8::"), parseIpv6("2001:0db8:0000:0000:0000:0000:0000:0000"));
- * assertEquals(parseIpv6("::ffff:192.168.1.1"), parseIpv6("0:0:0:0:0:ffff:c0a8:0101"));
+ * assertEquals(parseAddressv6("2001:db8::"), parseAddressv6("2001:0db8:0000:0000:0000:0000:0000:0000"));
+ * assertEquals(parseAddressv6("::ffff:192.168.1.1"), parseAddressv6("0:0:0:0:0:ffff:c0a8:0101"));
  * ```
  *
  * @example Zone ID handling
  * ```ts
  * import { assertEquals } from "@std/assert";
- * import { parseIpv6 } from "@hertzg/ip/ipv6";
+ * import { parseAddressv6 } from "@hertzg/ip/addressv6";
  *
- * assertEquals(parseIpv6("fe80::1%eth0"), parseIpv6("fe80::1"));
+ * assertEquals(parseAddressv6("fe80::1%eth0"), parseAddressv6("fe80::1"));
  * ```
  *
  * @example Error handling
  * ```ts
  * import { assertThrows } from "@std/assert";
- * import { parseIpv6 } from "@hertzg/ip/ipv6";
+ * import { parseAddressv6 } from "@hertzg/ip/addressv6";
  *
- * assertThrows(() => parseIpv6("192.168.1.1"), TypeError);
- * assertThrows(() => parseIpv6("2001:db8:::1"), TypeError);
- * assertThrows(() => parseIpv6("2001:db8::1::1"), TypeError);
- * assertThrows(() => parseIpv6("2001:gggg::1"), TypeError);
- * assertThrows(() => parseIpv6("1:2:3:4:5:6:7:8::"), TypeError);
- * assertThrows(() => parseIpv6("::1 "), TypeError);
+ * assertThrows(() => parseAddressv6("192.168.1.1"), TypeError);
+ * assertThrows(() => parseAddressv6("2001:db8:::1"), TypeError);
+ * assertThrows(() => parseAddressv6("2001:db8::1::1"), TypeError);
+ * assertThrows(() => parseAddressv6("2001:gggg::1"), TypeError);
+ * assertThrows(() => parseAddressv6("1:2:3:4:5:6:7:8::"), TypeError);
+ * assertThrows(() => parseAddressv6("::1 "), TypeError);
  * ```
  */
-export function parseIpv6(address: string): bigint {
+export function parseAddressv6(address: string): bigint {
   // The zone ID is stripped without being examined; its grammar (RFC 6874)
   // is deliberately not enforced here.
   const zoneIndex = address.indexOf("%");
@@ -166,13 +166,14 @@ export function parseIpv6(address: string): bigint {
     }
 
     // A "." in the final field means the embedded IPv4 tail, which is handed
-    // to parseIpv4 whole -- including any over-long run of digits before it,
+    // to parseAddressv4 whole -- including any over-long run of digits before it,
     // which is an octet rather than a hex group. A dotted field with a group
     // still to come is not a tail, and falls through to the group error.
     if (index < end && address.charCodeAt(index) === CHAR_DOT) {
       const nextColon = address.indexOf(":", index);
       if (nextColon === -1 || nextColon > end) {
-        packed = (packed << 32n) | BigInt(parseIpv4(address.slice(start, end)));
+        packed = (packed << 32n) |
+          BigInt(parseAddressv4(address.slice(start, end)));
         groups += 2;
         break;
       }
@@ -249,33 +250,33 @@ export function parseIpv6(address: string): bigint {
  * @example Basic stringifying
  * ```ts
  * import { assertEquals } from "@std/assert";
- * import { stringifyIpv6 } from "@hertzg/ip/ipv6";
+ * import { stringifyAddressv6 } from "@hertzg/ip/addressv6";
  *
- * assertEquals(stringifyIpv6(0n), "::");
- * assertEquals(stringifyIpv6(1n), "::1");
- * assertEquals(stringifyIpv6(42540766411282592856903984951653826561n), "2001:db8::1");
+ * assertEquals(stringifyAddressv6(0n), "::");
+ * assertEquals(stringifyAddressv6(1n), "::1");
+ * assertEquals(stringifyAddressv6(42540766411282592856903984951653826561n), "2001:db8::1");
  * ```
  *
  * @example Compression rules
  * ```ts
  * import { assertEquals } from "@std/assert";
- * import { stringifyIpv6 } from "@hertzg/ip/ipv6";
+ * import { stringifyAddressv6 } from "@hertzg/ip/addressv6";
  *
- * assertEquals(stringifyIpv6(0x20010db8000000000000000000000001n), "2001:db8::1");
- * assertEquals(stringifyIpv6(0x20010db800000000000000000000abcdn), "2001:db8::abcd");
- * assertEquals(stringifyIpv6(0x00010000000000000001000000000001n), "1::1:0:0:1");
+ * assertEquals(stringifyAddressv6(0x20010db8000000000000000000000001n), "2001:db8::1");
+ * assertEquals(stringifyAddressv6(0x20010db800000000000000000000abcdn), "2001:db8::abcd");
+ * assertEquals(stringifyAddressv6(0x00010000000000000001000000000001n), "1::1:0:0:1");
  * ```
  *
  * @example Error handling
  * ```ts
  * import { assertThrows } from "@std/assert";
- * import { stringifyIpv6 } from "@hertzg/ip/ipv6";
+ * import { stringifyAddressv6 } from "@hertzg/ip/addressv6";
  *
- * assertThrows(() => stringifyIpv6(-1n), RangeError);
- * assertThrows(() => stringifyIpv6(340282366920938463463374607431768211456n), RangeError);
+ * assertThrows(() => stringifyAddressv6(-1n), RangeError);
+ * assertThrows(() => stringifyAddressv6(340282366920938463463374607431768211456n), RangeError);
  * ```
  */
-export function stringifyIpv6(address: bigint): string {
+export function stringifyAddressv6(address: bigint): string {
   if (address < 0n || address > 0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFn) {
     throw new RangeError(
       `IPv6 value out of range: ${address} (must be 0 to 2^128-1)`,
@@ -348,7 +349,7 @@ export function stringifyIpv6(address: bigint): string {
  *
  * Every one of the 8 groups is written with all 4 hex digits, and no run of
  * zero groups is replaced with `::`. This is the counterpart of
- * {@link stringifyIpv6}, which produces the canonical compressed form, and
+ * {@link stringifyAddressv6}, which produces the canonical compressed form, and
  * the bigint-taking counterpart of {@link expandIpv6}, which takes a string.
  *
  * @param address The address as a 128-bit bigint
@@ -358,33 +359,33 @@ export function stringifyIpv6(address: bigint): string {
  * @example Basic stringifying
  * ```ts
  * import { assertEquals } from "@std/assert";
- * import { stringifyIpv6Expanded } from "@hertzg/ip/ipv6";
+ * import { stringifyAddressv6Expanded } from "@hertzg/ip/addressv6";
  *
- * assertEquals(stringifyIpv6Expanded(0n), "0000:0000:0000:0000:0000:0000:0000:0000");
- * assertEquals(stringifyIpv6Expanded(1n), "0000:0000:0000:0000:0000:0000:0000:0001");
- * assertEquals(stringifyIpv6Expanded(42540766411282592856903984951653826561n), "2001:0db8:0000:0000:0000:0000:0000:0001");
+ * assertEquals(stringifyAddressv6Expanded(0n), "0000:0000:0000:0000:0000:0000:0000:0000");
+ * assertEquals(stringifyAddressv6Expanded(1n), "0000:0000:0000:0000:0000:0000:0000:0001");
+ * assertEquals(stringifyAddressv6Expanded(42540766411282592856903984951653826561n), "2001:0db8:0000:0000:0000:0000:0000:0001");
  * ```
  *
  * @example Nothing is compressed or elided
  * ```ts
  * import { assertEquals } from "@std/assert";
- * import { parseIpv6, stringifyIpv6, stringifyIpv6Expanded } from "@hertzg/ip/ipv6";
+ * import { parseAddressv6, stringifyAddressv6, stringifyAddressv6Expanded } from "@hertzg/ip/addressv6";
  *
- * const address = parseIpv6("2001:db8::1");
- * assertEquals(stringifyIpv6(address), "2001:db8::1");
- * assertEquals(stringifyIpv6Expanded(address), "2001:0db8:0000:0000:0000:0000:0000:0001");
+ * const address = parseAddressv6("2001:db8::1");
+ * assertEquals(stringifyAddressv6(address), "2001:db8::1");
+ * assertEquals(stringifyAddressv6Expanded(address), "2001:0db8:0000:0000:0000:0000:0000:0001");
  * ```
  *
  * @example Error handling
  * ```ts
  * import { assertThrows } from "@std/assert";
- * import { stringifyIpv6Expanded } from "@hertzg/ip/ipv6";
+ * import { stringifyAddressv6Expanded } from "@hertzg/ip/addressv6";
  *
- * assertThrows(() => stringifyIpv6Expanded(-1n), RangeError);
- * assertThrows(() => stringifyIpv6Expanded(340282366920938463463374607431768211456n), RangeError);
+ * assertThrows(() => stringifyAddressv6Expanded(-1n), RangeError);
+ * assertThrows(() => stringifyAddressv6Expanded(340282366920938463463374607431768211456n), RangeError);
  * ```
  */
-export function stringifyIpv6Expanded(address: bigint): string {
+export function stringifyAddressv6Expanded(address: bigint): string {
   if (address < 0n || address > 0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFn) {
     throw new RangeError(
       `IPv6 value out of range: ${address} (must be 0 to 2^128-1)`,
@@ -405,16 +406,16 @@ export function stringifyIpv6Expanded(address: bigint): string {
  *
  * Returns the address with all 8 groups fully specified with 4 hex digits each.
  * This is equivalent to parsing the address and re-stringifying it with
- * {@link stringifyIpv6Expanded}.
+ * {@link stringifyAddressv6Expanded}.
  *
  * @param address The address string (can be compressed)
  * @returns The fully expanded IPv6 address string
- * @throws Propagates errors from parseIpv6 if the input is invalid
+ * @throws Propagates errors from parseAddressv6 if the input is invalid
  *
  * @example Expanding addresses
  * ```ts
  * import { assertEquals } from "@std/assert";
- * import { expandIpv6 } from "@hertzg/ip/ipv6";
+ * import { expandIpv6 } from "@hertzg/ip/addressv6";
  *
  * assertEquals(expandIpv6("::"), "0000:0000:0000:0000:0000:0000:0000:0000");
  * assertEquals(expandIpv6("::1"), "0000:0000:0000:0000:0000:0000:0000:0001");
@@ -423,7 +424,7 @@ export function stringifyIpv6Expanded(address: bigint): string {
  * ```
  */
 export function expandIpv6(address: string): string {
-  return stringifyIpv6Expanded(parseIpv6(address));
+  return stringifyAddressv6Expanded(parseAddressv6(address));
 }
 
 /**
@@ -434,12 +435,12 @@ export function expandIpv6(address: string): string {
  *
  * @param address The address string
  * @returns The compressed IPv6 address string
- * @throws Propagates errors from parseIpv6 if the input is invalid
+ * @throws Propagates errors from parseAddressv6 if the input is invalid
  *
  * @example Compressing addresses
  * ```ts
  * import { assertEquals } from "@std/assert";
- * import { compressIpv6 } from "@hertzg/ip/ipv6";
+ * import { compressIpv6 } from "@hertzg/ip/addressv6";
  *
  * assertEquals(compressIpv6("0000:0000:0000:0000:0000:0000:0000:0000"), "::");
  * assertEquals(compressIpv6("0000:0000:0000:0000:0000:0000:0000:0001"), "::1");
@@ -448,14 +449,14 @@ export function expandIpv6(address: string): string {
  * ```
  */
 export function compressIpv6(address: string): string {
-  return stringifyIpv6(parseIpv6(address));
+  return stringifyAddressv6(parseAddressv6(address));
 }
 
 /**
  * Compares two IPv6 addresses for sorting, numerically ascending.
  *
  * Suitable as an `Array.prototype.sort` / `toSorted` comparator. For a
- * comparator that also accepts IPv4 addresses, see {@link compareIp}, which
+ * comparator that also accepts IPv4 addresses, see {@link compareAddress}, which
  * sorts every IPv4 address before every IPv6 one.
  *
  * IPv4-mapped addresses (`::ffff:x.x.x.x`) are ordinary IPv6 values here —
@@ -468,11 +469,11 @@ export function compressIpv6(address: string): string {
  * @example Sort addresses numerically, not lexicographically
  * ```ts
  * import { assertEquals } from "@std/assert";
- * import { compareIpv6, parseIpv6, stringifyIpv6 } from "@hertzg/ip/ipv6";
+ * import { compareAddressv6, parseAddressv6, stringifyAddressv6 } from "@hertzg/ip/addressv6";
  *
- * const addresses = ["2001:db8::9", "2001:db8::10", "2001:db8::2"].map(parseIpv6);
+ * const addresses = ["2001:db8::9", "2001:db8::10", "2001:db8::2"].map(parseAddressv6);
  *
- * assertEquals(addresses.toSorted(compareIpv6).map(stringifyIpv6), [
+ * assertEquals(addresses.toSorted(compareAddressv6).map(stringifyAddressv6), [
  *   "2001:db8::2",
  *   "2001:db8::9",
  *   "2001:db8::10",
@@ -482,15 +483,93 @@ export function compressIpv6(address: string): string {
  * @example The three possible results
  * ```ts
  * import { assertEquals } from "@std/assert";
- * import { compareIpv6, parseIpv6 } from "@hertzg/ip/ipv6";
+ * import { compareAddressv6, parseAddressv6 } from "@hertzg/ip/addressv6";
  *
- * assertEquals(compareIpv6(parseIpv6("::1"), parseIpv6("::2")), -1);
- * assertEquals(compareIpv6(parseIpv6("::2"), parseIpv6("::1")), 1);
- * assertEquals(compareIpv6(parseIpv6("::1"), parseIpv6("::1")), 0);
+ * assertEquals(compareAddressv6(parseAddressv6("::1"), parseAddressv6("::2")), -1);
+ * assertEquals(compareAddressv6(parseAddressv6("::2"), parseAddressv6("::1")), 1);
+ * assertEquals(compareAddressv6(parseAddressv6("::1"), parseAddressv6("::1")), 0);
  * ```
  */
-export function compareIpv6(a: bigint, b: bigint): -1 | 0 | 1 {
+export function compareAddressv6(a: bigint, b: bigint): -1 | 0 | 1 {
   if (a < b) return -1;
   if (a > b) return 1;
   return 0;
+}
+
+/**
+ * The well-known prefix for IPv4-mapped IPv6 addresses (`::ffff:0:0/96`).
+ *
+ * Upper 96 bits: `0x0000_0000_0000_0000_0000_FFFF`, lower 32 bits: IPv4 address.
+ */
+const IPV4_MAPPED_PREFIX = 0xFFFF_0000_0000n;
+
+/** Mask for extracting the lower 32 bits (IPv4 portion). */
+const IPV4_MASK = 0xFFFF_FFFFn;
+
+/**
+ * Converts an IPv4 address to its IPv4-mapped IPv6 representation.
+ *
+ * Embeds the 32-bit IPv4 address into the `::ffff:0:0/96` prefix, producing
+ * the 128-bit IPv4-mapped IPv6 address defined in
+ * {@link https://www.rfc-editor.org/rfc/rfc4291#section-2.5.5.2 | RFC 4291 Section 2.5.5.2}.
+ *
+ * @param address The address as a 32-bit unsigned integer
+ * @returns The IPv4-mapped IPv6 address as a 128-bit bigint
+ *
+ * @example
+ * ```ts
+ * import { assertEquals } from "@std/assert";
+ * import { mapFromAddressv4, stringifyAddressv6 } from "@hertzg/ip/addressv6";
+ * import { parseAddressv4 } from "@hertzg/ip/addressv4";
+ *
+ * assertEquals(
+ *   stringifyAddressv6(mapFromAddressv4(parseAddressv4("192.168.1.1"))),
+ *   "::ffff:c0a8:101",
+ * );
+ * assertEquals(
+ *   stringifyAddressv6(mapFromAddressv4(parseAddressv4("127.0.0.1"))),
+ *   "::ffff:7f00:1",
+ * );
+ * assertEquals(
+ *   stringifyAddressv6(mapFromAddressv4(parseAddressv4("0.0.0.0"))),
+ *   "::ffff:0:0",
+ * );
+ * ```
+ */
+export function mapFromAddressv4(address: number): bigint {
+  return IPV4_MAPPED_PREFIX | BigInt(address);
+}
+
+/**
+ * Extracts the IPv4 address from an IPv4-mapped IPv6 address.
+ *
+ * Takes a 128-bit IPv4-mapped IPv6 address (`::ffff:x.x.x.x`) and returns
+ * the embedded 32-bit IPv4 address as defined in
+ * {@link https://www.rfc-editor.org/rfc/rfc4291#section-2.5.5.2 | RFC 4291 Section 2.5.5.2}.
+ *
+ * @param address The IPv4-mapped address as a 128-bit bigint
+ * @returns The extracted IPv4 address as a 32-bit unsigned integer
+ *
+ * @example
+ * ```ts
+ * import { assertEquals } from "@std/assert";
+ * import { parseAddressv6, unmapToAddressv4 } from "@hertzg/ip/addressv6";
+ * import { stringifyAddressv4 } from "@hertzg/ip/addressv4";
+ *
+ * assertEquals(
+ *   stringifyAddressv4(unmapToAddressv4(parseAddressv6("::ffff:192.168.1.1"))),
+ *   "192.168.1.1",
+ * );
+ * assertEquals(
+ *   stringifyAddressv4(unmapToAddressv4(parseAddressv6("::ffff:c0a8:101"))),
+ *   "192.168.1.1",
+ * );
+ * assertEquals(
+ *   stringifyAddressv4(unmapToAddressv4(parseAddressv6("::ffff:0.0.0.0"))),
+ *   "0.0.0.0",
+ * );
+ * ```
+ */
+export function unmapToAddressv4(address: bigint): number {
+  return Number(address & IPV4_MASK);
 }

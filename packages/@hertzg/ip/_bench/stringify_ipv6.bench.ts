@@ -12,7 +12,7 @@
 import ipaddr from "npm:ipaddr.js@^2.5.0";
 import { Address6 } from "npm:ip-address@^10.5.0";
 
-import { stringifyIpv6 } from "../ipv6.ts";
+import { stringifyAddressv6 } from "../addressv6.ts";
 
 const IPV6 = "2001:db8:85a3::8a2e:370:7334";
 const IPV6_BIGINT = 42540766452641154071740215577757643572n;
@@ -20,11 +20,11 @@ const IPV6_BIGINT = 42540766452641154071740215577757643572n;
 const ipaddrIpv6 = ipaddr.IPv6.parse(IPV6);
 const ipAddressIpv6 = new Address6(IPV6);
 
-Deno.bench("@hertzg/ip stringifyIpv6", {
+Deno.bench("@hertzg/ip stringifyAddressv6", {
   group: "stringify ipv6",
   baseline: true,
 }, () => {
-  stringifyIpv6(IPV6_BIGINT);
+  stringifyAddressv6(IPV6_BIGINT);
 });
 
 Deno.bench("ipaddr.js toString", { group: "stringify ipv6" }, () => {

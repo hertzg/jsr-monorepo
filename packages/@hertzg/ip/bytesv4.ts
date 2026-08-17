@@ -3,8 +3,8 @@
  *
  * This module reads an address straight out of a packet buffer and writes it
  * straight back into one, with no string round-trip. It is the byte-form
- * counterpart of the `ipv4` submodule: {@link ipv4FromBytes} is to
- * {@link parseIpv4} what {@link ipv4ToBytes} is to {@link stringifyIpv4}.
+ * counterpart of the `ipv4` submodule: {@link addressv4FromBytes} is to
+ * {@link parseAddressv4} what {@link addressv4ToBytes} is to {@link stringifyAddressv4}.
  *
  * Addresses keep the numeric representation of the rest of the package — a
  * `number` holding a 32-bit unsigned integer. Bytes are a conversion, not a
@@ -28,8 +28,8 @@
  * @example Decode both addresses out of an IPv4 header
  * ```ts
  * import { assertEquals } from "@std/assert";
- * import { ipv4FromBytes } from "@hertzg/ip/bytesv4";
- * import { stringifyIpv4 } from "@hertzg/ip/ipv4";
+ * import { addressv4FromBytes } from "@hertzg/ip/bytesv4";
+ * import { stringifyAddressv4 } from "@hertzg/ip/addressv4";
  *
  * // deno-fmt-ignore
  * const packet = new Uint8Array([
@@ -39,19 +39,19 @@
  *   192, 168, 1, 1,
  * ]);
  *
- * assertEquals(stringifyIpv4(ipv4FromBytes(packet, 12)), "10.0.0.1");
- * assertEquals(stringifyIpv4(ipv4FromBytes(packet, 16)), "192.168.1.1");
+ * assertEquals(stringifyAddressv4(addressv4FromBytes(packet, 12)), "10.0.0.1");
+ * assertEquals(stringifyAddressv4(addressv4FromBytes(packet, 16)), "192.168.1.1");
  * ```
  *
  * @example Assemble an IPv4 header in place
  * ```ts
  * import { assertEquals } from "@std/assert";
- * import { ipv4ToBytes } from "@hertzg/ip/bytesv4";
- * import { parseIpv4 } from "@hertzg/ip/ipv4";
+ * import { addressv4ToBytes } from "@hertzg/ip/bytesv4";
+ * import { parseAddressv4 } from "@hertzg/ip/addressv4";
  *
  * const frame = new Uint8Array(20);
- * ipv4ToBytes(parseIpv4("10.0.0.1"), frame, 12);
- * ipv4ToBytes(parseIpv4("192.168.1.1"), frame, 16);
+ * addressv4ToBytes(parseAddressv4("10.0.0.1"), frame, 12);
+ * addressv4ToBytes(parseAddressv4("192.168.1.1"), frame, 16);
  *
  * assertEquals(frame.slice(12), new Uint8Array([10, 0, 0, 1, 192, 168, 1, 1]));
  * ```
@@ -99,12 +99,12 @@ function writeUint32(address: number, into: Uint8Array, offset: number): void {
  * @example Read an address out of a packet
  * ```ts
  * import { assertEquals } from "@std/assert";
- * import { ipv4FromBytes } from "@hertzg/ip/bytesv4";
- * import { stringifyIpv4 } from "@hertzg/ip/ipv4";
+ * import { addressv4FromBytes } from "@hertzg/ip/bytesv4";
+ * import { stringifyAddressv4 } from "@hertzg/ip/addressv4";
  *
- * assertEquals(ipv4FromBytes(new Uint8Array([10, 0, 0, 1])), 167772161);
+ * assertEquals(addressv4FromBytes(new Uint8Array([10, 0, 0, 1])), 167772161);
  * assertEquals(
- *   stringifyIpv4(ipv4FromBytes(new Uint8Array([0xaa, 0xaa, 192, 168, 1, 1]), 2)),
+ *   stringifyAddressv4(addressv4FromBytes(new Uint8Array([0xaa, 0xaa, 192, 168, 1, 1]), 2)),
  *   "192.168.1.1",
  * );
  * ```
@@ -112,21 +112,21 @@ function writeUint32(address: number, into: Uint8Array, offset: number): void {
  * @example The high bit does not produce a negative number
  * ```ts
  * import { assertEquals } from "@std/assert";
- * import { ipv4FromBytes } from "@hertzg/ip/bytesv4";
+ * import { addressv4FromBytes } from "@hertzg/ip/bytesv4";
  *
- * assertEquals(ipv4FromBytes(new Uint8Array([255, 255, 255, 255])), 4294967295);
+ * assertEquals(addressv4FromBytes(new Uint8Array([255, 255, 255, 255])), 4294967295);
  * ```
  *
  * @example A span that runs off the end throws
  * ```ts
  * import { assertThrows } from "@std/assert";
- * import { ipv4FromBytes } from "@hertzg/ip/bytesv4";
+ * import { addressv4FromBytes } from "@hertzg/ip/bytesv4";
  *
- * assertThrows(() => ipv4FromBytes(new Uint8Array([1, 2, 3])), RangeError);
- * assertThrows(() => ipv4FromBytes(new Uint8Array([1, 2, 3, 4]), 1), RangeError);
+ * assertThrows(() => addressv4FromBytes(new Uint8Array([1, 2, 3])), RangeError);
+ * assertThrows(() => addressv4FromBytes(new Uint8Array([1, 2, 3, 4]), 1), RangeError);
  * ```
  */
-export function ipv4FromBytes(bytes: Uint8Array, offset = 0): number {
+export function addressv4FromBytes(bytes: Uint8Array, offset = 0): number {
   if (offset < 0 || offset + IPV4_BYTE_LENGTH > bytes.length) {
     throw new RangeError(
       `IPv4 needs ${IPV4_BYTE_LENGTH} bytes at offset ${offset} of a ${bytes.length}-byte buffer`,
@@ -158,20 +158,20 @@ export function ipv4FromBytes(bytes: Uint8Array, offset = 0): number {
  * @example Allocate
  * ```ts
  * import { assertEquals } from "@std/assert";
- * import { ipv4ToBytes } from "@hertzg/ip/bytesv4";
- * import { parseIpv4 } from "@hertzg/ip/ipv4";
+ * import { addressv4ToBytes } from "@hertzg/ip/bytesv4";
+ * import { parseAddressv4 } from "@hertzg/ip/addressv4";
  *
- * assertEquals(ipv4ToBytes(parseIpv4("10.0.0.1")), new Uint8Array([10, 0, 0, 1]));
+ * assertEquals(addressv4ToBytes(parseAddressv4("10.0.0.1")), new Uint8Array([10, 0, 0, 1]));
  * ```
  *
  * @example Write into an existing frame, and get back only what was written
  * ```ts
  * import { assertEquals } from "@std/assert";
- * import { ipv4ToBytes } from "@hertzg/ip/bytesv4";
- * import { parseIpv4 } from "@hertzg/ip/ipv4";
+ * import { addressv4ToBytes } from "@hertzg/ip/bytesv4";
+ * import { parseAddressv4 } from "@hertzg/ip/addressv4";
  *
  * const frame = new Uint8Array(20).fill(0xaa);
- * const written = ipv4ToBytes(parseIpv4("192.168.1.1"), frame, 6);
+ * const written = addressv4ToBytes(parseAddressv4("192.168.1.1"), frame, 6);
  *
  * assertEquals(written, new Uint8Array([192, 168, 1, 1]));
  * assertEquals(frame.slice(4, 12), new Uint8Array([0xaa, 0xaa, 192, 168, 1, 1, 0xaa, 0xaa]));
@@ -180,16 +180,16 @@ export function ipv4FromBytes(bytes: Uint8Array, offset = 0): number {
  * @example The returned view aliases the buffer it was written into
  * ```ts
  * import { assertEquals } from "@std/assert";
- * import { ipv4ToBytes } from "@hertzg/ip/bytesv4";
+ * import { addressv4ToBytes } from "@hertzg/ip/bytesv4";
  *
  * const frame = new Uint8Array(8);
- * const written = ipv4ToBytes(167772161, frame, 4);
+ * const written = addressv4ToBytes(167772161, frame, 4);
  * written[3] = 9;
  *
  * assertEquals(frame[7], 9);
  * ```
  */
-export function ipv4ToBytes(
+export function addressv4ToBytes(
   address: number,
   into?: Uint8Array,
   offset = 0,

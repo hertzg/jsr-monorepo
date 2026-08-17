@@ -3,8 +3,8 @@
  *
  * This module reads an address straight out of a packet buffer and writes it
  * straight back into one, with no string round-trip. It is the byte-form
- * counterpart of the `ipv6` submodule: {@link ipv6FromBytes} is to
- * {@link parseIpv6} what {@link ipv6ToBytes} is to {@link stringifyIpv6}.
+ * counterpart of the `ipv6` submodule: {@link addressv6FromBytes} is to
+ * {@link parseAddressv6} what {@link addressv6ToBytes} is to {@link stringifyAddressv6}.
  *
  * Addresses keep the numeric representation of the rest of the package — a
  * `bigint` holding a 128-bit unsigned integer. Bytes are a conversion, not a
@@ -31,8 +31,8 @@
  * @example Decode an address out of an IPv6 header
  * ```ts
  * import { assertEquals } from "@std/assert";
- * import { ipv6FromBytes } from "@hertzg/ip/bytesv6";
- * import { stringifyIpv6 } from "@hertzg/ip/ipv6";
+ * import { addressv6FromBytes } from "@hertzg/ip/bytesv6";
+ * import { stringifyAddressv6 } from "@hertzg/ip/addressv6";
  *
  * // deno-fmt-ignore
  * const packet = new Uint8Array([
@@ -41,20 +41,20 @@
  *   0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x01,
  * ]);
  *
- * assertEquals(stringifyIpv6(ipv6FromBytes(packet, 8)), "2001:db8::1");
+ * assertEquals(stringifyAddressv6(addressv6FromBytes(packet, 8)), "2001:db8::1");
  * ```
  *
  * @example Assemble an IPv6 header in place
  * ```ts
  * import { assertEquals } from "@std/assert";
- * import { ipv6FromBytes, ipv6ToBytes } from "@hertzg/ip/bytesv6";
- * import { parseIpv6 } from "@hertzg/ip/ipv6";
+ * import { addressv6FromBytes, addressv6ToBytes } from "@hertzg/ip/bytesv6";
+ * import { parseAddressv6 } from "@hertzg/ip/addressv6";
  *
  * const frame = new Uint8Array(40);
- * ipv6ToBytes(parseIpv6("2001:db8::1"), frame, 8);
- * ipv6ToBytes(parseIpv6("2001:db8::2"), frame, 24);
+ * addressv6ToBytes(parseAddressv6("2001:db8::1"), frame, 8);
+ * addressv6ToBytes(parseAddressv6("2001:db8::2"), frame, 24);
  *
- * assertEquals(ipv6FromBytes(frame, 24), parseIpv6("2001:db8::2"));
+ * assertEquals(addressv6FromBytes(frame, 24), parseAddressv6("2001:db8::2"));
  * ```
  *
  * @module
@@ -72,7 +72,7 @@ const IPV6_MAX = 0xFFFF_FFFF_FFFF_FFFF_FFFF_FFFF_FFFF_FFFFn;
 // Three shapes here look like tidy-ups and all measured slower, 1.5x to 5.8x
 // on the read, so do not re-derive them.
 //
-//   - Keep the two 64-bit halves in `ipv6FromBytes` inline. Extracting them
+//   - Keep the two 64-bit halves in `addressv6FromBytes` inline. Extracting them
 //     into a `readUint64` is slower, because a `bigint` crossing a function
 //     boundary has to be materialized on the heap. That is also why the
 //     helpers below are 32-bit while the algorithm works in halves — they
@@ -128,8 +128,8 @@ function writeUint32(value: number, into: Uint8Array, offset: number): void {
  * @example Read an address out of a packet
  * ```ts
  * import { assertEquals } from "@std/assert";
- * import { ipv6FromBytes } from "@hertzg/ip/bytesv6";
- * import { stringifyIpv6 } from "@hertzg/ip/ipv6";
+ * import { addressv6FromBytes } from "@hertzg/ip/bytesv6";
+ * import { stringifyAddressv6 } from "@hertzg/ip/addressv6";
  *
  * // deno-fmt-ignore
  * const bytes = new Uint8Array([
@@ -137,14 +137,14 @@ function writeUint32(value: number, into: Uint8Array, offset: number): void {
  *   0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x01,
  * ]);
  *
- * assertEquals(stringifyIpv6(ipv6FromBytes(bytes)), "2001:db8::1");
+ * assertEquals(stringifyAddressv6(addressv6FromBytes(bytes)), "2001:db8::1");
  * ```
  *
  * @example IPv4-mapped bytes stay a 128-bit value
  * ```ts
  * import { assertEquals } from "@std/assert";
- * import { ipv6FromBytes } from "@hertzg/ip/bytesv6";
- * import { stringifyIpv6 } from "@hertzg/ip/ipv6";
+ * import { addressv6FromBytes } from "@hertzg/ip/bytesv6";
+ * import { stringifyAddressv6 } from "@hertzg/ip/addressv6";
  *
  * // deno-fmt-ignore
  * const bytes = new Uint8Array([
@@ -152,19 +152,19 @@ function writeUint32(value: number, into: Uint8Array, offset: number): void {
  *   0, 0, 0xff, 0xff, 192, 168, 1, 1,
  * ]);
  *
- * assertEquals(stringifyIpv6(ipv6FromBytes(bytes)), "::ffff:c0a8:101");
+ * assertEquals(stringifyAddressv6(addressv6FromBytes(bytes)), "::ffff:c0a8:101");
  * ```
  *
  * @example A span that runs off the end throws
  * ```ts
  * import { assertThrows } from "@std/assert";
- * import { ipv6FromBytes } from "@hertzg/ip/bytesv6";
+ * import { addressv6FromBytes } from "@hertzg/ip/bytesv6";
  *
- * assertThrows(() => ipv6FromBytes(new Uint8Array(15)), RangeError);
- * assertThrows(() => ipv6FromBytes(new Uint8Array(16), 1), RangeError);
+ * assertThrows(() => addressv6FromBytes(new Uint8Array(15)), RangeError);
+ * assertThrows(() => addressv6FromBytes(new Uint8Array(16), 1), RangeError);
  * ```
  */
-export function ipv6FromBytes(bytes: Uint8Array, offset = 0): bigint {
+export function addressv6FromBytes(bytes: Uint8Array, offset = 0): bigint {
   if (offset < 0 || offset + IPV6_BYTE_LENGTH > bytes.length) {
     throw new RangeError(
       `IPv6 needs ${IPV6_BYTE_LENGTH} bytes at offset ${offset} of a ${bytes.length}-byte buffer`,
@@ -198,11 +198,11 @@ export function ipv6FromBytes(bytes: Uint8Array, offset = 0): bigint {
  * @example Allocate
  * ```ts
  * import { assertEquals } from "@std/assert";
- * import { ipv6ToBytes } from "@hertzg/ip/bytesv6";
- * import { parseIpv6 } from "@hertzg/ip/ipv6";
+ * import { addressv6ToBytes } from "@hertzg/ip/bytesv6";
+ * import { parseAddressv6 } from "@hertzg/ip/addressv6";
  *
  * // deno-fmt-ignore
- * assertEquals(ipv6ToBytes(parseIpv6("2001:db8::1")), new Uint8Array([
+ * assertEquals(addressv6ToBytes(parseAddressv6("2001:db8::1")), new Uint8Array([
  *   0x20, 0x01, 0x0d, 0xb8, 0x00, 0x00, 0x00, 0x00,
  *   0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x01,
  * ]));
@@ -211,17 +211,17 @@ export function ipv6FromBytes(bytes: Uint8Array, offset = 0): bigint {
  * @example Write into an existing frame
  * ```ts
  * import { assertEquals } from "@std/assert";
- * import { ipv6ToBytes } from "@hertzg/ip/bytesv6";
- * import { parseIpv6 } from "@hertzg/ip/ipv6";
+ * import { addressv6ToBytes } from "@hertzg/ip/bytesv6";
+ * import { parseAddressv6 } from "@hertzg/ip/addressv6";
  *
  * const frame = new Uint8Array(40);
- * const written = ipv6ToBytes(parseIpv6("::1"), frame, 8);
+ * const written = addressv6ToBytes(parseAddressv6("::1"), frame, 8);
  *
  * assertEquals(written.length, 16);
  * assertEquals(frame[23], 1);
  * ```
  */
-export function ipv6ToBytes(
+export function addressv6ToBytes(
   address: bigint,
   into?: Uint8Array,
   offset = 0,

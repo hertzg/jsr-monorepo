@@ -1,7 +1,7 @@
 /**
  * IP version detection for address and CIDR strings.
  *
- * This module provides {@link ipVersion} and {@link cidrVersion}, which report
+ * This module provides {@link addressVersion} and {@link cidrVersion}, which report
  * whether a string is written as IPv4 or IPv6, or `undefined` when it is
  * neither. They answer in one call what would otherwise take two
  * version-specific validity checks before picking a parser.
@@ -9,16 +9,16 @@
  * @example Dispatching on the IP version
  * ```ts
  * import { assertEquals } from "@std/assert";
- * import { ipVersion } from "@hertzg/ip/version";
- * import { parseIpv4 } from "@hertzg/ip/ipv4";
- * import { parseIpv6 } from "@hertzg/ip/ipv6";
+ * import { addressVersion } from "@hertzg/ip/version";
+ * import { parseAddressv4 } from "@hertzg/ip/addressv4";
+ * import { parseAddressv6 } from "@hertzg/ip/addressv6";
  *
  * const describe = (input: string): string => {
- *   switch (ipVersion(input)) {
+ *   switch (addressVersion(input)) {
  *     case 4:
- *       return `v4:${parseIpv4(input)}`;
+ *       return `v4:${parseAddressv4(input)}`;
  *     case 6:
- *       return `v6:${parseIpv6(input)}`;
+ *       return `v6:${parseAddressv6(input)}`;
  *     default:
  *       return "not an address";
  *   }
@@ -32,13 +32,13 @@
  * @module
  */
 
-import { isValidCidrv4, isValidIpv4 } from "./validatev4.ts";
-import { isValidCidrv6, isValidIpv6 } from "./validatev6.ts";
+import { isValidAddressv4, isValidCidrv4 } from "./validatev4.ts";
+import { isValidAddressv6, isValidCidrv6 } from "./validatev6.ts";
 
 /**
  * An IP version number: `4` for IPv4, `6` for IPv6.
  *
- * Returned by {@link ipVersion} and {@link cidrVersion}, which widen it with
+ * Returned by {@link addressVersion} and {@link cidrVersion}, which widen it with
  * `undefined` for input that is not an address or CIDR block at all.
  */
 export type IpVersion = 4 | 6;
@@ -52,18 +52,18 @@ export type IpVersion = 4 | 6;
  *
  * The answer describes the **string**, not the value it would parse to. An
  * IPv4-mapped IPv6 address such as `::ffff:10.1.2.3` is written as IPv6 and
- * reports `6`, even though {@link parseIp} unwraps it to an IPv4 `number`.
- * Version `n` always means "{@link parseIpv4} / {@link parseIpv6} for that
+ * reports `6`, even though {@link parseAddress} unwraps it to an IPv4 `number`.
+ * Version `n` always means "{@link parseAddressv4} / {@link parseAddressv6} for that
  * version accepts this string". To get the version of an already parsed
  * value, use `typeof` — `number` is IPv4, `bigint` is IPv6.
  *
  * CIDR notation is not an address — use {@link cidrVersion} for that.
  *
- * What counts as valid is exactly what {@link isValidIpv4} and
- * {@link isValidIpv6} accept, which is the grammar each address RFC
+ * What counts as valid is exactly what {@link isValidAddressv4} and
+ * {@link isValidAddressv6} accept, which is the grammar each address RFC
  * publishes and nothing else (see ADR 0003). Surrounding whitespace and
- * trailing text are not part of either grammar, so `ipVersion(" 10.1.2.3")`
- * and `ipVersion("1.2.3.4abc")` are both `undefined`.
+ * trailing text are not part of either grammar, so `addressVersion(" 10.1.2.3")`
+ * and `addressVersion("1.2.3.4abc")` are both `undefined`.
  *
  * @param address The address string to inspect
  * @returns `4`, `6`, or `undefined` if the string is not a plain IP address
@@ -71,34 +71,34 @@ export type IpVersion = 4 | 6;
  * @example Both versions and the reject case
  * ```ts
  * import { assertEquals } from "@std/assert";
- * import { ipVersion } from "@hertzg/ip/version";
+ * import { addressVersion } from "@hertzg/ip/version";
  *
- * assertEquals(ipVersion("10.1.2.3"), 4);
- * assertEquals(ipVersion("::1"), 6);
- * assertEquals(ipVersion("fe80::1%eth0"), 6);
- * assertEquals(ipVersion("notanip"), undefined);
- * assertEquals(ipVersion("10.0.0.0/8"), undefined);
+ * assertEquals(addressVersion("10.1.2.3"), 4);
+ * assertEquals(addressVersion("::1"), 6);
+ * assertEquals(addressVersion("fe80::1%eth0"), 6);
+ * assertEquals(addressVersion("notanip"), undefined);
+ * assertEquals(addressVersion("10.0.0.0/8"), undefined);
  * ```
  *
  * @example IPv4-mapped IPv6 is written as IPv6
  * ```ts
  * import { assertEquals } from "@std/assert";
- * import { ipVersion } from "@hertzg/ip/version";
- * import { parseIp } from "@hertzg/ip/ip";
+ * import { addressVersion } from "@hertzg/ip/version";
+ * import { parseAddress } from "@hertzg/ip/address";
  *
- * assertEquals(ipVersion("::ffff:10.1.2.3"), 6);
- * assertEquals(typeof parseIp("::ffff:10.1.2.3"), "number");
+ * assertEquals(addressVersion("::ffff:10.1.2.3"), 6);
+ * assertEquals(typeof parseAddress("::ffff:10.1.2.3"), "number");
  * ```
  */
-export function ipVersion(address: string): IpVersion | undefined {
-  if (address.includes(":")) return isValidIpv6(address) ? 6 : undefined;
-  return isValidIpv4(address) ? 4 : undefined;
+export function addressVersion(address: string): IpVersion | undefined {
+  if (address.includes(":")) return isValidAddressv6(address) ? 6 : undefined;
+  return isValidAddressv4(address) ? 4 : undefined;
 }
 
 /**
  * Reports which IP version a CIDR notation string is written in.
  *
- * The CIDR counterpart of {@link ipVersion}, with the same contract: `4`,
+ * The CIDR counterpart of {@link addressVersion}, with the same contract: `4`,
  * `6`, or `undefined`, describing the string rather than the parsed value.
  * A plain address without a prefix length is not CIDR notation.
  *

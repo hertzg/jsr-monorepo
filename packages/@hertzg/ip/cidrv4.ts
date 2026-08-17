@@ -9,12 +9,12 @@
  * ```ts
  * import { assert, assertEquals } from "@std/assert";
  * import { cidrv4Contains, parseCidrv4 } from "@hertzg/ip/cidrv4";
- * import { parseIpv4 } from "@hertzg/ip/ipv4";
+ * import { parseAddressv4 } from "@hertzg/ip/addressv4";
  *
  * const cidr = parseCidrv4("192.168.1.0/24");
  *
- * assert(cidrv4Contains(cidr, parseIpv4("192.168.1.1")));
- * assertEquals(cidrv4Contains(cidr, parseIpv4("192.168.2.1")), false);
+ * assert(cidrv4Contains(cidr, parseAddressv4("192.168.1.1")));
+ * assertEquals(cidrv4Contains(cidr, parseAddressv4("192.168.2.1")), false);
  * ```
  *
  * @example Handing out assignable addresses
@@ -25,10 +25,10 @@
  *   cidrv4UsableSize,
  *   parseCidrv4,
  * } from "@hertzg/ip/cidrv4";
- * import { stringifyIpv4 } from "@hertzg/ip/ipv4";
+ * import { stringifyAddressv4 } from "@hertzg/ip/addressv4";
  *
  * const pool = parseCidrv4("192.168.1.0/24");
- * const assigned = Array.from(cidrv4UsableAddresses(pool), stringifyIpv4);
+ * const assigned = Array.from(cidrv4UsableAddresses(pool), stringifyAddressv4);
  *
  * assertEquals(assigned.length, cidrv4UsableSize(pool));
  * assertEquals(assigned[0], "192.168.1.1");
@@ -38,7 +38,11 @@
  * @module
  */
 
-import { compareIpv4, parseIpv4, stringifyIpv4 } from "./ipv4.ts";
+import {
+  compareAddressv4,
+  parseAddressv4,
+  stringifyAddressv4,
+} from "./addressv4.ts";
 
 /**
  * Represents an IPv4 CIDR block.
@@ -110,21 +114,21 @@ export function cidrv4Mask(prefixLength: number): number {
  * @example Recovering prefix lengths from numbers
  * ```ts
  * import { assertEquals } from "@std/assert";
- * import { cidrv4MaskToPrefixLength } from "@hertzg/ip/cidrv4";
+ * import { cidrv4PrefixLength } from "@hertzg/ip/cidrv4";
  *
- * assertEquals(cidrv4MaskToPrefixLength(0xFFFFFF00), 24);
- * assertEquals(cidrv4MaskToPrefixLength(0xFFFF0000), 16);
- * assertEquals(cidrv4MaskToPrefixLength(0xFF000000), 8);
- * assertEquals(cidrv4MaskToPrefixLength(0xFFFFFFFF), 32);
- * assertEquals(cidrv4MaskToPrefixLength(0), 0);
+ * assertEquals(cidrv4PrefixLength(0xFFFFFF00), 24);
+ * assertEquals(cidrv4PrefixLength(0xFFFF0000), 16);
+ * assertEquals(cidrv4PrefixLength(0xFF000000), 8);
+ * assertEquals(cidrv4PrefixLength(0xFFFFFFFF), 32);
+ * assertEquals(cidrv4PrefixLength(0), 0);
  * ```
  */
-export function cidrv4MaskToPrefixLength(mask: number): number;
+export function cidrv4PrefixLength(mask: number): number;
 /**
  * Recovers the prefix length from an IPv4 network mask given in dotted
  * decimal notation.
  *
- * The string is parsed with the same rules as {@link parseIpv4} -- four
+ * The string is parsed with the same rules as {@link parseAddressv4} -- four
  * octets, each 0-255, no leading zeros -- and then interpreted as a mask
  * rather than an address.
  *
@@ -137,33 +141,33 @@ export function cidrv4MaskToPrefixLength(mask: number): number;
  * @example Recovering prefix lengths from dotted decimal
  * ```ts
  * import { assertEquals } from "@std/assert";
- * import { cidrv4MaskToPrefixLength } from "@hertzg/ip/cidrv4";
+ * import { cidrv4PrefixLength } from "@hertzg/ip/cidrv4";
  *
- * assertEquals(cidrv4MaskToPrefixLength("255.255.255.0"), 24);
- * assertEquals(cidrv4MaskToPrefixLength("255.255.0.0"), 16);
- * assertEquals(cidrv4MaskToPrefixLength("255.255.255.252"), 30);
- * assertEquals(cidrv4MaskToPrefixLength("0.0.0.0"), 0);
- * assertEquals(cidrv4MaskToPrefixLength("255.255.255.255"), 32);
+ * assertEquals(cidrv4PrefixLength("255.255.255.0"), 24);
+ * assertEquals(cidrv4PrefixLength("255.255.0.0"), 16);
+ * assertEquals(cidrv4PrefixLength("255.255.255.252"), 30);
+ * assertEquals(cidrv4PrefixLength("0.0.0.0"), 0);
+ * assertEquals(cidrv4PrefixLength("255.255.255.255"), 32);
  * ```
  *
  * @example Building a CIDR from an interface netmask
  * ```ts
  * import { assertEquals } from "@std/assert";
- * import { cidrv4MaskToPrefixLength, stringifyCidrv4 } from "@hertzg/ip/cidrv4";
- * import { parseIpv4 } from "@hertzg/ip/ipv4";
+ * import { cidrv4PrefixLength, stringifyCidrv4 } from "@hertzg/ip/cidrv4";
+ * import { parseAddressv4 } from "@hertzg/ip/addressv4";
  *
  * const { address, netmask } = { address: "192.168.1.42", netmask: "255.255.255.0" };
  *
  * assertEquals(
  *   stringifyCidrv4({
- *     address: parseIpv4(address),
- *     prefixLength: cidrv4MaskToPrefixLength(netmask),
+ *     address: parseAddressv4(address),
+ *     prefixLength: cidrv4PrefixLength(netmask),
  *   }),
  *   "192.168.1.42/24",
  * );
  * ```
  */
-export function cidrv4MaskToPrefixLength(mask: string): number;
+export function cidrv4PrefixLength(mask: string): number;
 /**
  * Recovers the prefix length from an IPv4 network mask.
  *
@@ -183,55 +187,55 @@ export function cidrv4MaskToPrefixLength(mask: string): number;
  * @example Both forms agree
  * ```ts
  * import { assertEquals } from "@std/assert";
- * import { cidrv4MaskToPrefixLength } from "@hertzg/ip/cidrv4";
+ * import { cidrv4PrefixLength } from "@hertzg/ip/cidrv4";
  *
- * assertEquals(cidrv4MaskToPrefixLength("255.255.255.0"), 24);
- * assertEquals(cidrv4MaskToPrefixLength(0xFFFFFF00), 24);
+ * assertEquals(cidrv4PrefixLength("255.255.255.0"), 24);
+ * assertEquals(cidrv4PrefixLength(0xFFFFFF00), 24);
  * ```
  *
  * @example Non-contiguous masks throw, in either form
  * ```ts
  * import { assertThrows } from "@std/assert";
- * import { cidrv4MaskToPrefixLength } from "@hertzg/ip/cidrv4";
+ * import { cidrv4PrefixLength } from "@hertzg/ip/cidrv4";
  *
- * assertThrows(() => cidrv4MaskToPrefixLength(0xFF00FF00), TypeError);
- * assertThrows(() => cidrv4MaskToPrefixLength("255.0.255.0"), TypeError);
- * assertThrows(() => cidrv4MaskToPrefixLength("0.0.0.255"), TypeError);
+ * assertThrows(() => cidrv4PrefixLength(0xFF00FF00), TypeError);
+ * assertThrows(() => cidrv4PrefixLength("255.0.255.0"), TypeError);
+ * assertThrows(() => cidrv4PrefixLength("0.0.0.255"), TypeError);
  * ```
  *
  * @example Round-trips with cidrv4Mask
  * ```ts
  * import { assertEquals } from "@std/assert";
- * import { cidrv4Mask, cidrv4MaskToPrefixLength } from "@hertzg/ip/cidrv4";
+ * import { cidrv4Mask, cidrv4PrefixLength } from "@hertzg/ip/cidrv4";
  *
  * for (let prefixLength = 0; prefixLength <= 32; prefixLength++) {
- *   assertEquals(cidrv4MaskToPrefixLength(cidrv4Mask(prefixLength)), prefixLength);
+ *   assertEquals(cidrv4PrefixLength(cidrv4Mask(prefixLength)), prefixLength);
  * }
  * ```
  *
  * @example Error handling
  * ```ts
  * import { assertThrows } from "@std/assert";
- * import { cidrv4MaskToPrefixLength } from "@hertzg/ip/cidrv4";
+ * import { cidrv4PrefixLength } from "@hertzg/ip/cidrv4";
  *
  * // Wrong shape -- in range, but not a mask
- * assertThrows(() => cidrv4MaskToPrefixLength(0xFF00FF00), TypeError);
- * assertThrows(() => cidrv4MaskToPrefixLength("255.0.255.0"), TypeError);
+ * assertThrows(() => cidrv4PrefixLength(0xFF00FF00), TypeError);
+ * assertThrows(() => cidrv4PrefixLength("255.0.255.0"), TypeError);
  *
  * // Malformed notation
- * assertThrows(() => cidrv4MaskToPrefixLength("255.255.255"), TypeError);
- * assertThrows(() => cidrv4MaskToPrefixLength("255.255.255.256"), RangeError);
+ * assertThrows(() => cidrv4PrefixLength("255.255.255"), TypeError);
+ * assertThrows(() => cidrv4PrefixLength("255.255.255.256"), RangeError);
  *
  * // Wrong range -- not a 32-bit unsigned integer at all
- * assertThrows(() => cidrv4MaskToPrefixLength(-1), RangeError);
- * assertThrows(() => cidrv4MaskToPrefixLength(0x100000000), RangeError);
- * assertThrows(() => cidrv4MaskToPrefixLength(1.5), RangeError);
+ * assertThrows(() => cidrv4PrefixLength(-1), RangeError);
+ * assertThrows(() => cidrv4PrefixLength(0x100000000), RangeError);
+ * assertThrows(() => cidrv4PrefixLength(1.5), RangeError);
  * ```
  */
-export function cidrv4MaskToPrefixLength(mask: string | number): number;
+export function cidrv4PrefixLength(mask: string | number): number;
 /** Recovers the prefix length from an IPv4 network mask. */
-export function cidrv4MaskToPrefixLength(mask: string | number): number {
-  const value = typeof mask === "string" ? parseIpv4(mask) : mask;
+export function cidrv4PrefixLength(mask: string | number): number {
+  const value = typeof mask === "string" ? parseAddressv4(mask) : mask;
 
   if (value < 0 || value > 0xFFFFFFFF || !Number.isInteger(value)) {
     throw new RangeError(
@@ -302,7 +306,7 @@ function parsePrefixLength(part: string): number {
  * @throws {TypeError} If the format is invalid, including a prefix length
  *   with leading zeros, whitespace or trailing text
  * @throws {RangeError} If the prefix length is out of range (not 0-32)
- * @throws Propagates errors from parseIpv4 if the address part is invalid
+ * @throws Propagates errors from parseAddressv4 if the address part is invalid
  *
  * @example Basic CIDR parsing
  * ```ts
@@ -335,7 +339,7 @@ export function parseCidrv4(cidr: string): Cidrv4 {
     );
   }
 
-  const address = parseIpv4(parts[0]);
+  const address = parseAddressv4(parts[0]);
   const prefixLength = parsePrefixLength(parts[1]);
 
   // Validate prefix length
@@ -363,7 +367,7 @@ export function parseCidrv4(cidr: string): Cidrv4 {
  * ```
  */
 export function stringifyCidrv4(cidr: Cidrv4): string {
-  return `${stringifyIpv4(cidr.address)}/${cidr.prefixLength}`;
+  return `${stringifyAddressv4(cidr.address)}/${cidr.prefixLength}`;
 }
 
 /**
@@ -377,15 +381,15 @@ export function stringifyCidrv4(cidr: Cidrv4): string {
  * ```ts
  * import { assert, assertEquals } from "@std/assert";
  * import { cidrv4Contains, parseCidrv4 } from "@hertzg/ip/cidrv4";
- * import { parseIpv4 } from "@hertzg/ip/ipv4";
+ * import { parseAddressv4 } from "@hertzg/ip/addressv4";
  *
  * const cidr = parseCidrv4("192.168.1.0/24");
  *
- * assert(cidrv4Contains(cidr, parseIpv4("192.168.1.0")));
- * assert(cidrv4Contains(cidr, parseIpv4("192.168.1.100")));
- * assert(cidrv4Contains(cidr, parseIpv4("192.168.1.255")));
- * assertEquals(cidrv4Contains(cidr, parseIpv4("192.168.2.1")), false);
- * assertEquals(cidrv4Contains(cidr, parseIpv4("192.168.0.255")), false);
+ * assert(cidrv4Contains(cidr, parseAddressv4("192.168.1.0")));
+ * assert(cidrv4Contains(cidr, parseAddressv4("192.168.1.100")));
+ * assert(cidrv4Contains(cidr, parseAddressv4("192.168.1.255")));
+ * assertEquals(cidrv4Contains(cidr, parseAddressv4("192.168.2.1")), false);
+ * assertEquals(cidrv4Contains(cidr, parseAddressv4("192.168.0.255")), false);
  * ```
  *
  * @example IP assignment workflow
@@ -425,10 +429,10 @@ export function cidrv4Contains(cidr: Cidrv4, address: number): boolean {
  * ```ts
  * import { assertEquals } from "@std/assert";
  * import { cidrv4FirstAddress, parseCidrv4 } from "@hertzg/ip/cidrv4";
- * import { parseIpv4 } from "@hertzg/ip/ipv4";
+ * import { parseAddressv4 } from "@hertzg/ip/addressv4";
  *
  * const cidr = parseCidrv4("192.168.1.0/24");
- * assertEquals(cidrv4FirstAddress(cidr), parseIpv4("192.168.1.0"));
+ * assertEquals(cidrv4FirstAddress(cidr), parseAddressv4("192.168.1.0"));
  * ```
  */
 export function cidrv4FirstAddress(cidr: Cidrv4): number {
@@ -456,10 +460,10 @@ export function cidrv4FirstAddress(cidr: Cidrv4): number {
  * ```ts
  * import { assertEquals } from "@std/assert";
  * import { cidrv4NetworkAddress, parseCidrv4 } from "@hertzg/ip/cidrv4";
- * import { parseIpv4 } from "@hertzg/ip/ipv4";
+ * import { parseAddressv4 } from "@hertzg/ip/addressv4";
  *
  * const cidr = parseCidrv4("192.168.1.0/24");
- * assertEquals(cidrv4NetworkAddress(cidr), parseIpv4("192.168.1.0"));
+ * assertEquals(cidrv4NetworkAddress(cidr), parseAddressv4("192.168.1.0"));
  * ```
  *
  * @example The network address is not assignable, the next one is
@@ -470,11 +474,11 @@ export function cidrv4FirstAddress(cidr: Cidrv4): number {
  *   cidrv4NetworkAddress,
  *   parseCidrv4,
  * } from "@hertzg/ip/cidrv4";
- * import { stringifyIpv4 } from "@hertzg/ip/ipv4";
+ * import { stringifyAddressv4 } from "@hertzg/ip/addressv4";
  *
  * const cidr = parseCidrv4("10.0.0.0/24");
- * assertEquals(stringifyIpv4(cidrv4NetworkAddress(cidr)), "10.0.0.0");
- * assertEquals(stringifyIpv4(cidrv4FirstUsableAddress(cidr)), "10.0.0.1");
+ * assertEquals(stringifyAddressv4(cidrv4NetworkAddress(cidr)), "10.0.0.0");
+ * assertEquals(stringifyAddressv4(cidrv4FirstUsableAddress(cidr)), "10.0.0.1");
  * ```
  */
 export const cidrv4NetworkAddress: typeof cidrv4FirstAddress =
@@ -490,10 +494,10 @@ export const cidrv4NetworkAddress: typeof cidrv4FirstAddress =
  * ```ts
  * import { assertEquals } from "@std/assert";
  * import { cidrv4LastAddress, parseCidrv4 } from "@hertzg/ip/cidrv4";
- * import { parseIpv4 } from "@hertzg/ip/ipv4";
+ * import { parseAddressv4 } from "@hertzg/ip/addressv4";
  *
  * const cidr = parseCidrv4("192.168.1.0/24");
- * assertEquals(cidrv4LastAddress(cidr), parseIpv4("192.168.1.255"));
+ * assertEquals(cidrv4LastAddress(cidr), parseAddressv4("192.168.1.255"));
  * ```
  */
 export function cidrv4LastAddress(cidr: Cidrv4): number {
@@ -522,10 +526,10 @@ export function cidrv4LastAddress(cidr: Cidrv4): number {
  * ```ts
  * import { assertEquals } from "@std/assert";
  * import { cidrv4BroadcastAddress, parseCidrv4 } from "@hertzg/ip/cidrv4";
- * import { parseIpv4 } from "@hertzg/ip/ipv4";
+ * import { parseAddressv4 } from "@hertzg/ip/addressv4";
  *
  * const cidr = parseCidrv4("192.168.1.0/24");
- * assertEquals(cidrv4BroadcastAddress(cidr), parseIpv4("192.168.1.255"));
+ * assertEquals(cidrv4BroadcastAddress(cidr), parseAddressv4("192.168.1.255"));
  * ```
  *
  * @example The broadcast address is not assignable, the one before it is
@@ -536,11 +540,11 @@ export function cidrv4LastAddress(cidr: Cidrv4): number {
  *   cidrv4LastUsableAddress,
  *   parseCidrv4,
  * } from "@hertzg/ip/cidrv4";
- * import { stringifyIpv4 } from "@hertzg/ip/ipv4";
+ * import { stringifyAddressv4 } from "@hertzg/ip/addressv4";
  *
  * const cidr = parseCidrv4("10.0.0.0/24");
- * assertEquals(stringifyIpv4(cidrv4BroadcastAddress(cidr)), "10.0.0.255");
- * assertEquals(stringifyIpv4(cidrv4LastUsableAddress(cidr)), "10.0.0.254");
+ * assertEquals(stringifyAddressv4(cidrv4BroadcastAddress(cidr)), "10.0.0.255");
+ * assertEquals(stringifyAddressv4(cidrv4LastUsableAddress(cidr)), "10.0.0.254");
  * ```
  */
 export const cidrv4BroadcastAddress: typeof cidrv4LastAddress =
@@ -583,24 +587,24 @@ function cidrv4IsFullyUsable(prefixLength: number): boolean {
  * ```ts
  * import { assertEquals } from "@std/assert";
  * import { cidrv4FirstUsableAddress, parseCidrv4 } from "@hertzg/ip/cidrv4";
- * import { stringifyIpv4 } from "@hertzg/ip/ipv4";
+ * import { stringifyAddressv4 } from "@hertzg/ip/addressv4";
  *
  * const gateway = cidrv4FirstUsableAddress(parseCidrv4("192.168.1.0/24"));
- * assertEquals(stringifyIpv4(gateway), "192.168.1.1");
+ * assertEquals(stringifyAddressv4(gateway), "192.168.1.1");
  * ```
  *
  * @example RFC 3021 /31 and /32 keep the network address
  * ```ts
  * import { assertEquals } from "@std/assert";
  * import { cidrv4FirstUsableAddress, parseCidrv4 } from "@hertzg/ip/cidrv4";
- * import { stringifyIpv4 } from "@hertzg/ip/ipv4";
+ * import { stringifyAddressv4 } from "@hertzg/ip/addressv4";
  *
  * assertEquals(
- *   stringifyIpv4(cidrv4FirstUsableAddress(parseCidrv4("10.0.0.0/31"))),
+ *   stringifyAddressv4(cidrv4FirstUsableAddress(parseCidrv4("10.0.0.0/31"))),
  *   "10.0.0.0",
  * );
  * assertEquals(
- *   stringifyIpv4(cidrv4FirstUsableAddress(parseCidrv4("10.0.0.7/32"))),
+ *   stringifyAddressv4(cidrv4FirstUsableAddress(parseCidrv4("10.0.0.7/32"))),
  *   "10.0.0.7",
  * );
  * ```
@@ -631,24 +635,24 @@ export function cidrv4FirstUsableAddress(cidr: Cidrv4): number {
  * ```ts
  * import { assertEquals } from "@std/assert";
  * import { cidrv4LastUsableAddress, parseCidrv4 } from "@hertzg/ip/cidrv4";
- * import { stringifyIpv4 } from "@hertzg/ip/ipv4";
+ * import { stringifyAddressv4 } from "@hertzg/ip/addressv4";
  *
  * const last = cidrv4LastUsableAddress(parseCidrv4("192.168.1.0/24"));
- * assertEquals(stringifyIpv4(last), "192.168.1.254");
+ * assertEquals(stringifyAddressv4(last), "192.168.1.254");
  * ```
  *
  * @example RFC 3021 /31 and /32 keep the broadcast address
  * ```ts
  * import { assertEquals } from "@std/assert";
  * import { cidrv4LastUsableAddress, parseCidrv4 } from "@hertzg/ip/cidrv4";
- * import { stringifyIpv4 } from "@hertzg/ip/ipv4";
+ * import { stringifyAddressv4 } from "@hertzg/ip/addressv4";
  *
  * assertEquals(
- *   stringifyIpv4(cidrv4LastUsableAddress(parseCidrv4("10.0.0.0/31"))),
+ *   stringifyAddressv4(cidrv4LastUsableAddress(parseCidrv4("10.0.0.0/31"))),
  *   "10.0.0.1",
  * );
  * assertEquals(
- *   stringifyIpv4(cidrv4LastUsableAddress(parseCidrv4("10.0.0.7/32"))),
+ *   stringifyAddressv4(cidrv4LastUsableAddress(parseCidrv4("10.0.0.7/32"))),
  *   "10.0.0.7",
  * );
  * ```
@@ -1038,13 +1042,13 @@ export function cidrv4Subtract(a: Cidrv4, b: Cidrv4): Cidrv4[] {
  * ```ts
  * import { assertEquals } from "@std/assert";
  * import { cidrv4Addresses, parseCidrv4 } from "@hertzg/ip/cidrv4";
- * import { stringifyIpv4 } from "@hertzg/ip/ipv4";
+ * import { stringifyAddressv4 } from "@hertzg/ip/addressv4";
  *
  * const cidr = parseCidrv4("10.0.0.0/29"); // 8 IPs: .0 to .7
  *
  * // By default, iterates from offset 0 (network address) to CIDR boundary
  * const all = Array.from(cidrv4Addresses(cidr));
- * assertEquals(all.map(stringifyIpv4), [
+ * assertEquals(all.map(stringifyAddressv4), [
  *   "10.0.0.0", "10.0.0.1", "10.0.0.2", "10.0.0.3",
  *   "10.0.0.4", "10.0.0.5", "10.0.0.6", "10.0.0.7",
  * ]);
@@ -1059,64 +1063,64 @@ export function cidrv4Subtract(a: Cidrv4, b: Cidrv4): Cidrv4[] {
  * ```ts
  * import { assertEquals } from "@std/assert";
  * import { cidrv4Addresses, parseCidrv4 } from "@hertzg/ip/cidrv4";
- * import { parseIpv4 } from "@hertzg/ip/ipv4";
+ * import { parseAddressv4 } from "@hertzg/ip/addressv4";
  *
  * const cidr = parseCidrv4("192.168.1.0/24");
  *
  * // Get first 3 IPs starting at network address
  * const first3 = Array.from(cidrv4Addresses(cidr, { offset: 0, count: 3 }));
  * assertEquals(first3, [
- *   parseIpv4("192.168.1.0"),
- *   parseIpv4("192.168.1.1"),
- *   parseIpv4("192.168.1.2"),
+ *   parseAddressv4("192.168.1.0"),
+ *   parseAddressv4("192.168.1.1"),
+ *   parseAddressv4("192.168.1.2"),
  * ]);
  *
  * // Get 5 IPs starting at offset 10
  * const offset10 = Array.from(cidrv4Addresses(cidr, { offset: 10, count: 5 }));
- * assertEquals(offset10[0], parseIpv4("192.168.1.10"));
- * assertEquals(offset10[4], parseIpv4("192.168.1.14"));
+ * assertEquals(offset10[0], parseAddressv4("192.168.1.10"));
+ * assertEquals(offset10[4], parseAddressv4("192.168.1.14"));
  * ```
  *
  * @example Custom step for even/odd IPs
  * ```ts
  * import { assertEquals } from "@std/assert";
  * import { cidrv4Addresses, parseCidrv4 } from "@hertzg/ip/cidrv4";
- * import { parseIpv4 } from "@hertzg/ip/ipv4";
+ * import { parseAddressv4 } from "@hertzg/ip/addressv4";
  *
  * const cidr = parseCidrv4("192.168.1.0/24");
  *
  * // Get every other IP (even addresses)
  * const evenIps = Array.from(cidrv4Addresses(cidr, { offset: 0, count: 5, step: 2 }));
  * assertEquals(evenIps, [
- *   parseIpv4("192.168.1.0"),
- *   parseIpv4("192.168.1.2"),
- *   parseIpv4("192.168.1.4"),
- *   parseIpv4("192.168.1.6"),
- *   parseIpv4("192.168.1.8"),
+ *   parseAddressv4("192.168.1.0"),
+ *   parseAddressv4("192.168.1.2"),
+ *   parseAddressv4("192.168.1.4"),
+ *   parseAddressv4("192.168.1.6"),
+ *   parseAddressv4("192.168.1.8"),
  * ]);
  *
  * // Get odd addresses
  * const oddIps = Array.from(cidrv4Addresses(cidr, { offset: 1, count: 5, step: 2 }));
- * assertEquals(oddIps[0], parseIpv4("192.168.1.1"));
- * assertEquals(oddIps[1], parseIpv4("192.168.1.3"));
+ * assertEquals(oddIps[0], parseAddressv4("192.168.1.1"));
+ * assertEquals(oddIps[1], parseAddressv4("192.168.1.3"));
  * ```
  *
  * @example Negative step for reverse iteration
  * ```ts
  * import { assertEquals } from "@std/assert";
  * import { cidrv4Addresses, parseCidrv4 } from "@hertzg/ip/cidrv4";
- * import { parseIpv4 } from "@hertzg/ip/ipv4";
+ * import { parseAddressv4 } from "@hertzg/ip/addressv4";
  *
  * const cidr = parseCidrv4("192.168.1.0/24");
  *
  * // Get 5 IPs counting backwards from offset 10
  * const backwards = Array.from(cidrv4Addresses(cidr, { offset: 10, count: 5, step: -1 }));
  * assertEquals(backwards, [
- *   parseIpv4("192.168.1.10"),
- *   parseIpv4("192.168.1.9"),
- *   parseIpv4("192.168.1.8"),
- *   parseIpv4("192.168.1.7"),
- *   parseIpv4("192.168.1.6"),
+ *   parseAddressv4("192.168.1.10"),
+ *   parseAddressv4("192.168.1.9"),
+ *   parseAddressv4("192.168.1.8"),
+ *   parseAddressv4("192.168.1.7"),
+ *   parseAddressv4("192.168.1.6"),
  * ]);
  * ```
  *
@@ -1182,10 +1186,10 @@ export function* cidrv4Addresses(
  * ```ts
  * import { assertEquals } from "@std/assert";
  * import { cidrv4UsableAddresses, parseCidrv4 } from "@hertzg/ip/cidrv4";
- * import { stringifyIpv4 } from "@hertzg/ip/ipv4";
+ * import { stringifyAddressv4 } from "@hertzg/ip/addressv4";
  *
  * const pool = Array.from(cidrv4UsableAddresses(parseCidrv4("10.0.1.0/29")));
- * assertEquals(pool.map(stringifyIpv4), [
+ * assertEquals(pool.map(stringifyAddressv4), [
  *   "10.0.1.1",
  *   "10.0.1.2",
  *   "10.0.1.3",
@@ -1199,23 +1203,23 @@ export function* cidrv4Addresses(
  * ```ts
  * import { assertEquals } from "@std/assert";
  * import { cidrv4UsableAddresses, parseCidrv4 } from "@hertzg/ip/cidrv4";
- * import { stringifyIpv4 } from "@hertzg/ip/ipv4";
+ * import { stringifyAddressv4 } from "@hertzg/ip/addressv4";
  *
  * const link = Array.from(cidrv4UsableAddresses(parseCidrv4("10.0.0.0/31")));
- * assertEquals(link.map(stringifyIpv4), ["10.0.0.0", "10.0.0.1"]);
+ * assertEquals(link.map(stringifyAddressv4), ["10.0.0.0", "10.0.0.1"]);
  *
  * const route = Array.from(cidrv4UsableAddresses(parseCidrv4("10.0.0.7/32")));
- * assertEquals(route.map(stringifyIpv4), ["10.0.0.7"]);
+ * assertEquals(route.map(stringifyAddressv4), ["10.0.0.7"]);
  * ```
  *
  * @example Lazy — a /8 costs nothing until iterated
  * ```ts
  * import { assertEquals } from "@std/assert";
  * import { cidrv4UsableAddresses, parseCidrv4 } from "@hertzg/ip/cidrv4";
- * import { stringifyIpv4 } from "@hertzg/ip/ipv4";
+ * import { stringifyAddressv4 } from "@hertzg/ip/addressv4";
  *
  * const addresses = cidrv4UsableAddresses(parseCidrv4("10.0.0.0/8"));
- * assertEquals(stringifyIpv4(addresses.next().value as number), "10.0.0.1");
+ * assertEquals(stringifyAddressv4(addresses.next().value as number), "10.0.0.1");
  * addresses.return(undefined);
  * ```
  */
@@ -1375,7 +1379,7 @@ export function cidrv4Merge(cidrs: readonly Cidrv4[]): Cidrv4[] {
  * ```
  */
 export function compareCidrv4(a: Cidrv4, b: Cidrv4): -1 | 0 | 1 {
-  const byAddress = compareIpv4(a.address, b.address);
+  const byAddress = compareAddressv4(a.address, b.address);
   if (byAddress !== 0) return byAddress;
   if (a.prefixLength < b.prefixLength) return -1;
   if (a.prefixLength > b.prefixLength) return 1;

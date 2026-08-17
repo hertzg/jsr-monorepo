@@ -15,7 +15,7 @@ import { Address4 } from "npm:ip-address@^10.5.0";
 import { Netmask } from "npm:netmask@^2.1.1";
 import { containsCidr } from "npm:cidr-tools@^12.1.3";
 
-import { parseIpv4 } from "../ipv4.ts";
+import { parseAddressv4 } from "../addressv4.ts";
 import { cidrv4Contains, parseCidrv4 } from "../cidrv4.ts";
 
 const IPV4 = "192.168.1.100";
@@ -23,7 +23,7 @@ const CIDR_V4 = "192.168.1.0/24";
 const CIDR_V4_WIDE = "10.0.0.0/16";
 
 const oursCidr = parseCidrv4(CIDR_V4);
-const oursAddress = parseIpv4(IPV4);
+const oursAddress = parseAddressv4(IPV4);
 
 const ipaddrIpv4 = ipaddr.IPv4.parse(IPV4);
 const ipaddrCidrV4 = ipaddr.IPv4.parseCIDR(CIDR_V4);

@@ -5,15 +5,15 @@
  * and IPv6 CIDR notation strings.
  *
  * For universal validation, see:
- * - [`validate`](https://jsr.io/@hertzg/ip/doc/validate): {@link isValidIp}, {@link isValidCidr}
+ * - [`validate`](https://jsr.io/@hertzg/ip/doc/validate): {@link isValidAddress}, {@link isValidCidr}
  *
  * @example
  * ```ts
  * import { assert, assertEquals } from "@std/assert";
- * import { isValidCidrv6, isValidIpv6 } from "@hertzg/ip";
+ * import { isValidCidrv6, isValidAddressv6 } from "@hertzg/ip";
  *
- * assert(isValidIpv6("::1"));
- * assertEquals(isValidIpv6("192.168.1.1"), false);
+ * assert(isValidAddressv6("::1"));
+ * assertEquals(isValidAddressv6("192.168.1.1"), false);
  *
  * assert(isValidCidrv6("2001:db8::/32"));
  * assertEquals(isValidCidrv6("2001:db8::/129"), false);
@@ -22,7 +22,7 @@
  * @module
  */
 
-import { parseIpv6 } from "./ipv6.ts";
+import { parseAddressv6 } from "./addressv6.ts";
 import { parseCidrv6 } from "./cidrv6.ts";
 
 /**
@@ -37,29 +37,29 @@ import { parseCidrv6 } from "./cidrv6.ts";
  * @example Valid addresses
  * ```ts
  * import { assert } from "@std/assert";
- * import { isValidIpv6 } from "@hertzg/ip";
+ * import { isValidAddressv6 } from "@hertzg/ip";
  *
- * assert(isValidIpv6("::"));
- * assert(isValidIpv6("::1"));
- * assert(isValidIpv6("2001:db8::1"));
- * assert(isValidIpv6("::ffff:192.168.1.1"));
- * assert(isValidIpv6("fe80::1%eth0"));
+ * assert(isValidAddressv6("::"));
+ * assert(isValidAddressv6("::1"));
+ * assert(isValidAddressv6("2001:db8::1"));
+ * assert(isValidAddressv6("::ffff:192.168.1.1"));
+ * assert(isValidAddressv6("fe80::1%eth0"));
  * ```
  *
  * @example Invalid addresses
  * ```ts
  * import { assertEquals } from "@std/assert";
- * import { isValidIpv6 } from "@hertzg/ip";
+ * import { isValidAddressv6 } from "@hertzg/ip";
  *
- * assertEquals(isValidIpv6(""), false);
- * assertEquals(isValidIpv6("192.168.1.1"), false);
- * assertEquals(isValidIpv6("2001:db8:::1"), false);
- * assertEquals(isValidIpv6("gggg::1"), false);
+ * assertEquals(isValidAddressv6(""), false);
+ * assertEquals(isValidAddressv6("192.168.1.1"), false);
+ * assertEquals(isValidAddressv6("2001:db8:::1"), false);
+ * assertEquals(isValidAddressv6("gggg::1"), false);
  * ```
  */
-export function isValidIpv6(address: string): boolean {
+export function isValidAddressv6(address: string): boolean {
   try {
-    parseIpv6(address);
+    parseAddressv6(address);
     return true;
   } catch {
     return false;
