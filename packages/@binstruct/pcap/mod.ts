@@ -129,7 +129,7 @@
  * import { LINKTYPE, PCAP_MAGIC_MICROS, pcapFile } from "@binstruct/pcap";
  * import { ipv4Packet } from "@binstruct/ipv4";
  * import { udpPacket } from "@binstruct/udp";
- * import { parseIpv4 } from "@hertzg/ip/ipv4";
+ * import { parseAddressv4 } from "@hertzg/ip/addressv4";
  *
  * const ip = ipv4Packet();
  * const udp = udpPacket();
@@ -159,8 +159,8 @@
  *   timeToLive: 64,
  *   protocol: 17,
  *   headerChecksum: 0,
- *   sourceAddress: parseIpv4("192.0.2.1"),
- *   destinationAddress: parseIpv4("192.0.2.2"),
+ *   sourceAddress: parseAddressv4("192.0.2.1"),
+ *   destinationAddress: parseAddressv4("192.0.2.2"),
  *   options: new Uint8Array(0),
  *   payload: udpBytes,
  * }, packet);
@@ -191,7 +191,7 @@
  * const [parsedIp] = ip.decode(records[0].data);
  * const [parsedUdp] = udp.decode(parsedIp.payload);
  *
- * assertEquals(parsedIp.sourceAddress, parseIpv4("192.0.2.1"));
+ * assertEquals(parsedIp.sourceAddress, parseAddressv4("192.0.2.1"));
  * assertEquals(parsedUdp.srcPort, 53);
  * assertEquals(parsedUdp.payload, new Uint8Array([0xde, 0xad, 0xbe, 0xef]));
  * ```
@@ -203,7 +203,7 @@
  * import { inetFrame } from "@binstruct/inet";
  * import { ETHERTYPE_IPV4 } from "@binstruct/ipv4";
  * import { IP_PROTOCOL_UDP } from "@binstruct/udp";
- * import { parseIpv4 } from "@hertzg/ip/ipv4";
+ * import { parseAddressv4 } from "@hertzg/ip/addressv4";
  *
  * const inet = inetFrame();
  *
@@ -222,8 +222,8 @@
  *     timeToLive: 64,
  *     protocol: IP_PROTOCOL_UDP,
  *     headerChecksum: 0,
- *     sourceAddress: parseIpv4("192.0.2.1"),
- *     destinationAddress: parseIpv4("192.0.2.2"),
+ *     sourceAddress: parseAddressv4("192.0.2.1"),
+ *     destinationAddress: parseAddressv4("192.0.2.2"),
  *     options: new Uint8Array(0),
  *     payload: {
  *       srcPort: 53,
@@ -262,7 +262,7 @@
  *
  * assert(!(decoded.payload instanceof Uint8Array));
  * assert("protocol" in decoded.payload);
- * assertEquals(decoded.payload.sourceAddress, parseIpv4("192.0.2.1"));
+ * assertEquals(decoded.payload.sourceAddress, parseAddressv4("192.0.2.1"));
  * assert(!(decoded.payload.payload instanceof Uint8Array));
  * assert("srcPort" in decoded.payload.payload);
  * assertEquals(decoded.payload.payload.srcPort, 53);

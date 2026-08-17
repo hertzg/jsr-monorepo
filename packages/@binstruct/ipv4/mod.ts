@@ -31,7 +31,7 @@
  *
  * IPv4 addresses are surfaced as raw 32-bit unsigned integers, mirroring how
  * ARP exposes the same field. Use
- * {@link https://jsr.io/@hertzg/ip @hertzg/ip}'s `parseIpv4` / `stringifyIpv4`
+ * {@link https://jsr.io/@hertzg/ip @hertzg/ip}'s `parseAddressv4` / `stringifyAddressv4`
  * for human-readable conversion.
  *
  * Design notes:
@@ -50,7 +50,7 @@
  * @example Round-trip a minimal IPv4 datagram (no options, empty payload)
  * ```ts
  * import { assertEquals } from "@std/assert";
- * import { parseIpv4 } from "@hertzg/ip/ipv4";
+ * import { parseAddressv4 } from "@hertzg/ip/addressv4";
  * import { ipv4Packet } from "@binstruct/ipv4";
  *
  * const coder = ipv4Packet();
@@ -68,8 +68,8 @@
  *   timeToLive: 64,
  *   protocol: 6,
  *   headerChecksum: 0,
- *   sourceAddress: parseIpv4("192.168.1.100"),
- *   destinationAddress: parseIpv4("10.0.0.50"),
+ *   sourceAddress: parseAddressv4("192.168.1.100"),
+ *   destinationAddress: parseAddressv4("10.0.0.50"),
  *   options: new Uint8Array(0),
  *   payload: new Uint8Array(0),
  * };
@@ -80,8 +80,8 @@
  *
  * assertEquals(bytesWritten, 20);
  * assertEquals(bytesRead, 20);
- * assertEquals(decoded.sourceAddress, parseIpv4("192.168.1.100"));
- * assertEquals(decoded.destinationAddress, parseIpv4("10.0.0.50"));
+ * assertEquals(decoded.sourceAddress, parseAddressv4("192.168.1.100"));
+ * assertEquals(decoded.destinationAddress, parseAddressv4("10.0.0.50"));
  * assertEquals(decoded.flagsFragmentOffset.dontFragment, 1);
  * ```
  *
@@ -112,7 +112,7 @@ export const ETHERTYPE_IPV4 = 0x0800;
  *
  * IPv4 addresses (`sourceAddress` / `destinationAddress`) are surfaced as
  * 32-bit unsigned integers, the same on-wire form ARP uses. Use
- * `@hertzg/ip/ipv4`'s `parseIpv4` / `stringifyIpv4` for human-readable
+ * `@hertzg/ip/ipv4`'s `parseAddressv4` / `stringifyAddressv4` for human-readable
  * conversion.
  *
  * The `options` length is derived from `versionIhl.ihl` (`(ihl - 5) * 4`); the
@@ -153,7 +153,7 @@ export interface Ipv4Packet {
  * @example Round-trip a UDP-bearing datagram
  * ```ts
  * import { assertEquals } from "@std/assert";
- * import { parseIpv4 } from "@hertzg/ip/ipv4";
+ * import { parseAddressv4 } from "@hertzg/ip/addressv4";
  * import { ipv4Packet } from "@binstruct/ipv4";
  *
  * const coder = ipv4Packet();
@@ -166,8 +166,8 @@ export interface Ipv4Packet {
  *   timeToLive: 64,
  *   protocol: 17,
  *   headerChecksum: 0,
- *   sourceAddress: parseIpv4("192.0.2.1"),
- *   destinationAddress: parseIpv4("192.0.2.2"),
+ *   sourceAddress: parseAddressv4("192.0.2.1"),
+ *   destinationAddress: parseAddressv4("192.0.2.2"),
  *   options: new Uint8Array(0),
  *   payload: new Uint8Array([0xde, 0xad, 0xbe, 0xef]),
  * };
