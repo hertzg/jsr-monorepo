@@ -168,6 +168,8 @@
 <span class="font-bold">parseCidrv4</span><span class="font-medium">(<span><span>cidr<span>: <span class="td-kw">string</span></span></span></span>)<span>: <a href="../.././cidrv4.ts/~/Cidrv4.html" class="link td-ref">Cidrv4</a></span> </span>
       </code><div class="space-y-7" id=""><div class="markdown"><p>Parses an IPv4 CIDR notation string to a Cidrv4 object.</p>
 <p>Returns only the parsed values (address and prefix length).</p>
+<p>The prefix length is decimal digits and nothing else: no leading zeros, no
+whitespace, no sign, and no trailing text.</p>
 </div><section class="section"  id="examples"><div>
       <h2 class="anchorable mb-1"><a href="#examples" class="anchor" aria-label="Anchor" tabIndex="-1"><svg
   width="16"
@@ -291,6 +293,7 @@ assertThrows(() =&gt; parseCidrv4(&quot;192.168.1.0&quot;), TypeError);
 assertThrows(() =&gt; parseCidrv4(&quot;192.168.1.0/&quot;), TypeError);
 assertThrows(() =&gt; parseCidrv4(&quot;192.168.1.0/33&quot;), RangeError);
 assertThrows(() =&gt; parseCidrv4(&quot;256.0.0.0/24&quot;), RangeError);
+assertThrows(() =&gt; parseCidrv4(&quot;192.168.1.0/024&quot;), TypeError);
 </code><button class="copyButton" data-copy="import { assertThrows } from &quot;@std/assert&quot;;
 import { parseCidrv4 } from &quot;@hertzg/ip/cidrv4&quot;;
 
@@ -298,6 +301,7 @@ assertThrows(() =&gt; parseCidrv4(&quot;192.168.1.0&quot;), TypeError);
 assertThrows(() =&gt; parseCidrv4(&quot;192.168.1.0/&quot;), TypeError);
 assertThrows(() =&gt; parseCidrv4(&quot;192.168.1.0/33&quot;), RangeError);
 assertThrows(() =&gt; parseCidrv4(&quot;256.0.0.0/24&quot;), RangeError);
+assertThrows(() =&gt; parseCidrv4(&quot;192.168.1.0/024&quot;), TypeError);
 "><svg
   class="copy"
   width="15"
@@ -519,7 +523,8 @@ Throws</h2></div><div class="space-y-8"><div class=" docEntry" id="function_pars
   />
 </svg>
 </a>
-</div><div class="max-w-[75ch]"><div class="markdown"><p>If the format is invalid</p>
+</div><div class="max-w-[75ch]"><div class="markdown"><p>If the format is invalid, including a prefix length
+with leading zeros, whitespace or trailing text</p>
 </div></div></div>
 <div class=" docEntry" id="function_parsecidrv4_0_throws_1">
 
