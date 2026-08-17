@@ -93,9 +93,8 @@ export type MaskedCidrv6 = {
  * result that has a dialect matches the input, and mixed inputs give the
  * mask form (ADR 0006).
  *
- * The union keeps an object literal from carrying both keys. If a
- * hand-built value does carry both, `mask` wins, because the mask is the
- * form the operations compute on; nothing checks for the case.
+ * If a hand-built value carries both keys, `mask` wins, because the mask
+ * is the form the operations compute on; nothing checks for the case.
  *
  * @example The two dialects describe the same block
  * ```ts
@@ -116,25 +115,8 @@ export type Cidrv6 = PrefixedCidrv6 | MaskedCidrv6;
 /** All 128 bits set: the `/128` mask, and the modulus of every bit operation here. */
 const MASK_ALL_V6 = 0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFn;
 
-/**
- * Builds a block in the requested dialect from a network address and a
- * contiguous mask.
- *
- * `masked` is decided by the caller from its inputs: any masked input gives
- * a masked result, otherwise the result is prefixed. The mask is always one
- * the caller derived from contiguous masks by shifting, so converting it
- * back cannot throw.
- *
- * @param address The network address
- * @param mask The block's mask, contiguous
- * @param masked Whether to emit the mask dialect
- * @returns The block, in the requested dialect
- */
-function cidrv6Block(address: bigint, mask: Maskv6, masked: boolean): Cidrv6 {
-  return masked
-    ? { address, mask }
-    : { address, prefixLength: cidrv6PrefixLength(mask) };
-}
+/** The top bit alone: the `/1` mask. */
+const MASK_TOP_BIT_V6 = 1n << 127n;
 
 /**
  * Every IPv6 network mask, indexed by prefix length.
@@ -161,8 +143,7 @@ const MASKS_V6: readonly bigint[] = Array.from(
   (_, prefixLength) =>
     prefixLength === 0
       ? 0n
-      : (0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFn << BigInt(128 - prefixLength)) &
-        0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFn,
+      : (MASK_ALL_V6 << BigInt(128 - prefixLength)) & MASK_ALL_V6,
 );
 
 /**
@@ -211,9 +192,9 @@ export function cidrv6Mask(prefixLength: PrefixLengthv6): Maskv6;
  * Returns the network mask of an IPv6 CIDR block.
  *
  * A {@link MaskedCidrv6} gives back the mask it stores, as is; a
- * {@link PrefixedCidrv6} has its prefix length looked up. This is the
- * accessor every `cidrv6*` operation goes through, so it is what makes
- * both dialects behave the same.
+ * {@link PrefixedCidrv6} has its prefix length looked up. Total over every
+ * block, which is what lets every `cidrv6*` operation go through it; the
+ * inverse, {@link cidrv6PrefixLength}, is the partial one.
  *
  * @param cidr The CIDR block
  * @returns The network mask as a bigint
@@ -241,10 +222,6 @@ export function cidrv6Mask(prefixLength: PrefixLengthv6): Maskv6;
 export function cidrv6Mask(cidr: Cidrv6): Maskv6;
 /**
  * Returns the network mask of an IPv6 CIDR block or prefix length.
- *
- * Total over every {@link Cidrv6}: the mask dialect is read, the prefix
- * dialect is looked up. The inverse, {@link cidrv6PrefixLength}, is the
- * partial one.
  *
  * @param cidrOrPrefixLength A Cidrv6 block or a prefix length (0-128)
  * @returns The network mask as a bigint
@@ -465,10 +442,17 @@ export function cidrv6PrefixLength(
     );
   }
 
-  // hostBits + 1n is therefore an exact power of two, whose binary
-  // length is the host bit count plus one.
-  const hostBitCount = (hostBits + 1n).toString(2).length - 1;
-  return 128 - hostBitCount;
+  // The mask is contiguous, so it is one of the 129 table entries, which
+  // are strictly increasing in prefix length: a binary search finds it
+  // without formatting the bigint into a string.
+  let low = 0;
+  let high = 128;
+  while (low < high) {
+    const middle = (low + high) >>> 1;
+    if (MASKS_V6[middle] < value) low = middle + 1;
+    else high = middle;
+  }
+  return low;
 }
 
 /** Character codes the prefix-length scanner compares against. */
@@ -780,16 +764,20 @@ export function cidrv6Size(cidr: Cidrv6): bigint;
  * assertThrows(() => cidrv6Size(129), RangeError);
  * ```
  */
-export function cidrv6Size(prefixLength: number): bigint;
+export function cidrv6Size(prefixLength: PrefixLengthv6): bigint;
 /**
  * Returns the total number of IP addresses for either a CIDR block or a prefix length.
  *
  * @param cidrOrPrefixLength A Cidrv6 block or a prefix length (0-128)
  * @returns The total number of addresses as a bigint
  */
-export function cidrv6Size(cidrOrPrefixLength: Cidrv6 | number): bigint;
+export function cidrv6Size(
+  cidrOrPrefixLength: Cidrv6 | PrefixLengthv6,
+): bigint;
 /** Returns the total number of IP addresses for either a CIDR block or a prefix length. */
-export function cidrv6Size(cidrOrPrefixLength: Cidrv6 | number): bigint {
+export function cidrv6Size(
+  cidrOrPrefixLength: Cidrv6 | PrefixLengthv6,
+): bigint {
   let prefixLength: PrefixLengthv6;
   if (typeof cidrOrPrefixLength === "number") {
     prefixLength = cidrOrPrefixLength;
@@ -919,12 +907,18 @@ function cidrv6SplitHalves(cidr: Cidrv6): [Cidrv6, Cidrv6] {
   const mask = cidrv6Mask(cidr);
   const network = cidr.address & mask;
   // The next longer prefix: one more leading one bit.
-  const childMask = (mask >> 1n) | (1n << 127n);
-  const upperBit = childMask & ~mask;
-  const masked = "mask" in cidr;
+  const childMask = (mask >> 1n) | MASK_TOP_BIT_V6;
+  const upper = network | (childMask ^ mask);
+  if ("mask" in cidr) {
+    return [
+      { address: network, mask: childMask },
+      { address: upper, mask: childMask },
+    ];
+  }
+  const prefixLength = cidr.prefixLength + 1;
   return [
-    cidrv6Block(network, childMask, masked),
-    cidrv6Block(network | upperBit, childMask, masked),
+    { address: network, prefixLength },
+    { address: upper, prefixLength },
   ];
 }
 
@@ -979,18 +973,14 @@ function cidrv6SplitHalves(cidr: Cidrv6): [Cidrv6, Cidrv6] {
  * ```
  */
 export function cidrv6Intersect(a: Cidrv6, b: Cidrv6): Cidrv6 | null {
+  if (!cidrv6Overlaps(a, b)) return null;
   const aMask = cidrv6Mask(a);
   const bMask = cidrv6Mask(b);
-  const overlapMask = aMask & bMask;
-  if ((a.address & overlapMask) !== (b.address & overlapMask)) return null;
   // The more specific block is the one whose mask covers the other's.
-  const inner = overlapMask === bMask ? a : b;
-  const innerMask = overlapMask === bMask ? aMask : bMask;
-  return cidrv6Block(
-    inner.address & innerMask,
-    innerMask,
-    "mask" in a || "mask" in b,
-  );
+  const [inner, mask] = (aMask & bMask) === bMask ? [a, aMask] : [b, bMask];
+  const address = inner.address & mask;
+  if ("mask" in a || "mask" in b) return { address, mask };
+  return { address, prefixLength: cidrv6PrefixLength(inner) };
 }
 
 /**
@@ -1268,8 +1258,11 @@ export function cidrv6Merge(cidrs: readonly Cidrv6[]): Cidrv6[] {
   if (cidrs.length === 0) return [];
 
   // Step 1: Normalize - apply mask to get canonical network addresses, and
-  // work in the mask dialect from here on
+  // work in the mask dialect from here on. Any masked input makes the
+  // result masked too.
+  let masked = false;
   let list: MaskedCidrv6[] = cidrs.map((cidr) => {
+    if ("mask" in cidr) masked = true;
     const mask = cidrv6Mask(cidr);
     return { address: cidr.address & mask, mask };
   });
@@ -1312,9 +1305,12 @@ export function cidrv6Merge(cidrs: readonly Cidrv6[]): Cidrv6[] {
     list = merged;
   }
 
-  // Step 5: Return in the input dialect; any masked input makes it the mask
-  const masked = cidrs.some((cidr) => "mask" in cidr);
-  return list.map(({ address, mask }) => cidrv6Block(address, mask, masked));
+  // Step 5: Return in the input dialect
+  if (masked) return list;
+  return list.map(({ address, mask }) => ({
+    address,
+    prefixLength: cidrv6PrefixLength(mask),
+  }));
 }
 
 /**
@@ -1383,6 +1379,13 @@ export function cidrv6Merge(cidrs: readonly Cidrv6[]): Cidrv6[] {
 export function compareCidrv6(a: Cidrv6, b: Cidrv6): -1 | 0 | 1 {
   const byAddress = compareAddressv6(a.address, b.address);
   if (byAddress !== 0) return byAddress;
+  // Two prefixed blocks compare as numbers; the mask order is the same, but
+  // costs a bigint comparison, so a sort of parsed blocks skips it.
+  if (!("mask" in a) && !("mask" in b)) {
+    if (a.prefixLength < b.prefixLength) return -1;
+    if (a.prefixLength > b.prefixLength) return 1;
+    return 0;
+  }
   const aMask = cidrv6Mask(a);
   const bMask = cidrv6Mask(b);
   if (aMask < bMask) return -1;
@@ -1394,7 +1397,7 @@ export function compareCidrv6(a: Cidrv6, b: Cidrv6): -1 | 0 | 1 {
 const IPV4_MAPPED_PREFIX_LENGTH = 96;
 
 /** The mask of the IPv4-mapped prefix itself: the high 96 bits. */
-const IPV4_MAPPED_PREFIX_MASK = 0xFFFFFFFFFFFFFFFFFFFFFFFF00000000n;
+const IPV4_MAPPED_PREFIX_MASK = cidrv6Mask(IPV4_MAPPED_PREFIX_LENGTH);
 
 /**
  * Converts an IPv4 CIDR block with a prefix length to its IPv4-mapped

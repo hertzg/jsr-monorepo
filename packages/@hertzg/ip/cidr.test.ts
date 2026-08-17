@@ -552,11 +552,14 @@ Deno.test("mask dialect", async (t) => {
     mask: 0xFFFFFFFF000000000000000000000000n,
   };
 
-  await t.step("isCidrv4 and isCidrv6 accept masked blocks", () => {
+  await t.step("isCidrv4 accepts a masked block", () => {
     assert(isCidrv4(v4Masked));
-    assertEquals(isCidrv6(v4Masked), false);
-    assert(isCidrv6(v6Masked));
     assertEquals(isCidrv4(v6Masked), false);
+  });
+
+  await t.step("isCidrv6 accepts a masked block", () => {
+    assert(isCidrv6(v6Masked));
+    assertEquals(isCidrv6(v4Masked), false);
   });
 
   await t.step("stringifyCidr writes the mask back", () => {
@@ -570,10 +573,13 @@ Deno.test("mask dialect", async (t) => {
     assertEquals(cidrContains(v4Masked, parseAddress("2001:db8::1")), false);
   });
 
-  await t.step("cidrContainsCidr and cidrOverlaps across dialects", () => {
+  await t.step("cidrContainsCidr across dialects", () => {
     assert(cidrContainsCidr(v4Masked, parseCidr("10.1.0.0/16")));
-    assert(cidrOverlaps(parseCidr("2001:db8:1::/48"), v6Masked));
     assertThrows(() => cidrContainsCidr(v4Masked, v6Masked), TypeError);
+  });
+
+  await t.step("cidrOverlaps across dialects", () => {
+    assert(cidrOverlaps(parseCidr("2001:db8:1::/48"), v6Masked));
   });
 
   await t.step("cidrIntersect of mixed dialects is masked", () => {
@@ -583,37 +589,37 @@ Deno.test("mask dialect", async (t) => {
     );
   });
 
-  await t.step(
-    "cidrSubtract and cidrMerge of masked blocks stay masked",
-    () => {
-      assertEquals(
-        cidrSubtract(v6Masked, parseCidr("2001:db8::/33")).map(stringifyCidr),
-        ["2001:db8:8000::/ffff:ffff:8000::"],
-      );
-      assertEquals(
-        cidrMerge([v4Masked, parseCidr("11.0.0.0/8")]).map(stringifyCidr),
-        ["10.0.0.0/254.0.0.0"],
-      );
-    },
-  );
+  await t.step("cidrSubtract of mixed dialects is masked", () => {
+    assertEquals(
+      cidrSubtract(v6Masked, parseCidr("2001:db8::/33")).map(stringifyCidr),
+      ["2001:db8:8000::/ffff:ffff:8000::"],
+    );
+  });
 
-  await t.step(
-    "cidrSize, cidrFirstAddress, cidrLastAddress with masked blocks",
-    () => {
-      assertEquals(cidrSize(v4Masked), 16777216);
-      assertEquals(cidrSize(v6Masked), 1n << 96n);
-      assertEquals(stringifyAddress(cidrFirstAddress(v4Masked)), "10.0.0.0");
-      assertEquals(
-        stringifyAddress(cidrLastAddress(v4Masked)),
-        "10.255.255.255",
-      );
-      assertEquals(stringifyAddress(cidrFirstAddress(v6Masked)), "2001:db8::");
-      assertEquals(
-        stringifyAddress(cidrLastAddress(v6Masked)),
-        "2001:db8:ffff:ffff:ffff:ffff:ffff:ffff",
-      );
-    },
-  );
+  await t.step("cidrMerge of mixed dialects is masked", () => {
+    assertEquals(
+      cidrMerge([v4Masked, parseCidr("11.0.0.0/8")]).map(stringifyCidr),
+      ["10.0.0.0/254.0.0.0"],
+    );
+  });
+
+  await t.step("cidrSize with masked blocks", () => {
+    assertEquals(cidrSize(v4Masked), 16777216);
+    assertEquals(cidrSize(v6Masked), 1n << 96n);
+  });
+
+  await t.step("cidrFirstAddress with masked blocks", () => {
+    assertEquals(stringifyAddress(cidrFirstAddress(v4Masked)), "10.0.0.0");
+    assertEquals(stringifyAddress(cidrFirstAddress(v6Masked)), "2001:db8::");
+  });
+
+  await t.step("cidrLastAddress with masked blocks", () => {
+    assertEquals(stringifyAddress(cidrLastAddress(v4Masked)), "10.255.255.255");
+    assertEquals(
+      stringifyAddress(cidrLastAddress(v6Masked)),
+      "2001:db8:ffff:ffff:ffff:ffff:ffff:ffff",
+    );
+  });
 
   await t.step("cidrAddresses with a masked block", () => {
     assertEquals(
