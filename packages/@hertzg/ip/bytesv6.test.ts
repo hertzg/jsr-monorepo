@@ -11,7 +11,10 @@ Deno.test("addressv6FromBytes", async (t) => {
       0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x01,
     ]);
 
-    assertEquals(addressv6FromBytes(bytes), parseAddressv6("2001:db8::1"));
+    assertEquals(
+      addressv6FromBytes(bytes),
+      parseAddressv6("2001:db8::1").address,
+    );
   });
 
   await t.step("edge cases", () => {
@@ -39,7 +42,7 @@ Deno.test("addressv6FromBytes", async (t) => {
 
     assertEquals(
       addressv6FromBytes(bytes),
-      parseAddressv6("ff00:0:ff00:0:ff00:0:ff00:0"),
+      parseAddressv6("ff00:0:ff00:0:ff00:0:ff00:0").address,
     );
   });
 
@@ -53,8 +56,14 @@ Deno.test("addressv6FromBytes", async (t) => {
       0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02,
     ]);
 
-    assertEquals(addressv6FromBytes(packet, 8), parseAddressv6("fe80::1"));
-    assertEquals(addressv6FromBytes(packet, 24), parseAddressv6("2001:db8::2"));
+    assertEquals(
+      addressv6FromBytes(packet, 8),
+      parseAddressv6("fe80::1").address,
+    );
+    assertEquals(
+      addressv6FromBytes(packet, 24),
+      parseAddressv6("2001:db8::2").address,
+    );
   });
 
   await t.step("IPv4-mapped bytes stay a 128-bit value", () => {
@@ -66,7 +75,7 @@ Deno.test("addressv6FromBytes", async (t) => {
 
     assertEquals(
       addressv6FromBytes(mapped),
-      mapFromAddressv4(parseAddressv4("192.168.1.1")),
+      mapFromAddressv4(parseAddressv4("192.168.1.1").address),
     );
   });
 
@@ -93,7 +102,7 @@ Deno.test("addressv6ToBytes", async (t) => {
     "allocates sixteen bytes in network order when into is omitted",
     () => {
       // deno-fmt-ignore
-      assertEquals(addressv6ToBytes(parseAddressv6("2001:db8::1")), new Uint8Array([
+      assertEquals(addressv6ToBytes(parseAddressv6("2001:db8::1").address), new Uint8Array([
       0x20, 0x01, 0x0d, 0xb8, 0x00, 0x00, 0x00, 0x00,
       0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x01,
     ]));
@@ -107,7 +116,7 @@ Deno.test("addressv6ToBytes", async (t) => {
 
   await t.step("writes into an existing buffer at an offset", () => {
     const frame = new Uint8Array(40);
-    addressv6ToBytes(parseAddressv6("::1"), frame, 8);
+    addressv6ToBytes(parseAddressv6("::1").address, frame, 8);
 
     assertEquals(frame[23], 1);
     assertEquals(frame.slice(0, 8), new Uint8Array(8));
@@ -116,7 +125,11 @@ Deno.test("addressv6ToBytes", async (t) => {
 
   await t.step("returns only the written span, not the whole buffer", () => {
     const frame = new Uint8Array(40).fill(0xaa);
-    const written = addressv6ToBytes(parseAddressv6("fe80::1"), frame, 8);
+    const written = addressv6ToBytes(
+      parseAddressv6("fe80::1").address,
+      frame,
+      8,
+    );
 
     // deno-fmt-ignore
     assertEquals(written, new Uint8Array([
@@ -127,7 +140,11 @@ Deno.test("addressv6ToBytes", async (t) => {
 
   await t.step("the returned span is a view aliasing the target buffer", () => {
     const frame = new Uint8Array(32);
-    const written = addressv6ToBytes(parseAddressv6("2001:db8::2"), frame, 16);
+    const written = addressv6ToBytes(
+      parseAddressv6("2001:db8::2").address,
+      frame,
+      16,
+    );
     written[15] = 9;
 
     assertEquals(frame[31], 9);
@@ -161,7 +178,7 @@ Deno.test("addressv6ToBytes", async (t) => {
 
   await t.step("round-trips with addressv6FromBytes", () => {
     for (const notation of ["::", "::1", "2001:db8::1", "fe80::dead:beef"]) {
-      const address = parseAddressv6(notation);
+      const address = parseAddressv6(notation).address;
       assertEquals(addressv6FromBytes(addressv6ToBytes(address)), address);
     }
     const max = 0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFn;

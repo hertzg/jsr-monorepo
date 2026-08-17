@@ -16,9 +16,9 @@
  * const describe = (input: string): string => {
  *   switch (addressVersion(input)) {
  *     case 4:
- *       return `v4:${parseAddressv4(input)}`;
+ *       return `v4:${parseAddressv4(input).address}`;
  *     case 6:
- *       return `v6:${parseAddressv6(input)}`;
+ *       return `v6:${parseAddressv6(input).address}`;
  *     default:
  *       return "not an address";
  *   }
@@ -87,7 +87,7 @@ export type IpVersion = 4 | 6;
  * import { parseAddress } from "@hertzg/ip/address";
  *
  * assertEquals(addressVersion("::ffff:10.1.2.3"), 6);
- * assertEquals(typeof parseAddress("::ffff:10.1.2.3"), "number");
+ * assertEquals(typeof parseAddress("::ffff:10.1.2.3").address, "number");
  * ```
  */
 export function addressVersion(address: string): IpVersion | undefined {
@@ -111,7 +111,9 @@ export function addressVersion(address: string): IpVersion | undefined {
  * import { cidrVersion } from "@hertzg/ip/version";
  *
  * assertEquals(cidrVersion("10.0.0.0/8"), 4);
+ * assertEquals(cidrVersion("10.0.0.0/255.0.0.0"), 4);
  * assertEquals(cidrVersion("2001:db8::/32"), 6);
+ * assertEquals(cidrVersion("fe80::%ether1/64"), 6);
  * assertEquals(cidrVersion("10.0.0.0"), undefined);
  * assertEquals(cidrVersion("10.0.0.0/33"), undefined);
  * assertEquals(cidrVersion("garbage/24"), undefined);

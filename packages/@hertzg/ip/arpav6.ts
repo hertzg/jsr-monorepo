@@ -17,7 +17,7 @@
  * import { parseAddressv6 } from "@hertzg/ip/addressv6";
  *
  * assertEquals(
- *   addressv6ToArpa(parseAddressv6("2001:db8::1")),
+ *   addressv6ToArpa(parseAddressv6("2001:db8::1").address),
  *   "1.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.8.b.d.0.1.0.0.2.ip6.arpa",
  * );
  * ```
@@ -53,11 +53,11 @@ import { stringifyAddressv6Expanded } from "./addressv6.ts";
  * import { parseAddressv6 } from "@hertzg/ip/addressv6";
  *
  * assertEquals(
- *   addressv6ToArpa(parseAddressv6("2001:db8::1")),
+ *   addressv6ToArpa(parseAddressv6("2001:db8::1").address),
  *   "1.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.8.b.d.0.1.0.0.2.ip6.arpa",
  * );
  * assertEquals(
- *   addressv6ToArpa(parseAddressv6("::")),
+ *   addressv6ToArpa(parseAddressv6("::").address),
  *   "0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.ip6.arpa",
  * );
  * ```
@@ -69,7 +69,7 @@ import { stringifyAddressv6Expanded } from "./addressv6.ts";
  * import { parseAddressv6 } from "@hertzg/ip/addressv6";
  *
  * assertEquals(
- *   addressv6ToArpa(parseAddressv6("::ffff:192.168.0.1")),
+ *   addressv6ToArpa(parseAddressv6("::ffff:192.168.0.1").address),
  *   "1.0.0.0.8.a.0.c.f.f.f.f.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.ip6.arpa",
  * );
  * ```

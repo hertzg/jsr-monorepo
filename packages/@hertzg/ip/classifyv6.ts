@@ -11,10 +11,10 @@
  * import { classifyAddressv6 } from "@hertzg/ip/classifyv6";
  * import { parseAddressv6 } from "@hertzg/ip/addressv6";
  *
- * assertEquals(classifyAddressv6(parseAddressv6("::1")), "loopback");
- * assertEquals(classifyAddressv6(parseAddressv6("2001:db8::1")), "documentation");
- * assertEquals(classifyAddressv6(parseAddressv6("fe80::1")), "link-local");
- * assertEquals(classifyAddressv6(parseAddressv6("2607:f8b0:4004:800::200e")), "global-unicast");
+ * assertEquals(classifyAddressv6(parseAddressv6("::1").address), "loopback");
+ * assertEquals(classifyAddressv6(parseAddressv6("2001:db8::1").address), "documentation");
+ * assertEquals(classifyAddressv6(parseAddressv6("fe80::1").address), "link-local");
+ * assertEquals(classifyAddressv6(parseAddressv6("2607:f8b0:4004:800::200e").address), "global-unicast");
  * ```
  *
  * @example Check specific ranges
@@ -23,9 +23,9 @@
  * import { isAddressv6Loopback, isAddressv6UniqueLocal } from "@hertzg/ip/classifyv6";
  * import { parseAddressv6 } from "@hertzg/ip/addressv6";
  *
- * assert(isAddressv6Loopback(parseAddressv6("::1")));
- * assert(isAddressv6UniqueLocal(parseAddressv6("fd00::1")));
- * assertEquals(isAddressv6Loopback(parseAddressv6("::2")), false);
+ * assert(isAddressv6Loopback(parseAddressv6("::1").address));
+ * assert(isAddressv6UniqueLocal(parseAddressv6("fd00::1").address));
+ * assertEquals(isAddressv6Loopback(parseAddressv6("::2").address), false);
  * ```
  *
  * @module
@@ -82,9 +82,9 @@ export type Classificationv6 =
  * import { isAddressv6Loopback } from "@hertzg/ip/classifyv6";
  * import { parseAddressv6 } from "@hertzg/ip/addressv6";
  *
- * assert(isAddressv6Loopback(parseAddressv6("::1")));
- * assertEquals(isAddressv6Loopback(parseAddressv6("::")), false);
- * assertEquals(isAddressv6Loopback(parseAddressv6("::2")), false);
+ * assert(isAddressv6Loopback(parseAddressv6("::1").address));
+ * assertEquals(isAddressv6Loopback(parseAddressv6("::").address), false);
+ * assertEquals(isAddressv6Loopback(parseAddressv6("::2").address), false);
  * ```
  */
 export function isAddressv6Loopback(address: bigint): boolean {
@@ -105,8 +105,8 @@ export function isAddressv6Loopback(address: bigint): boolean {
  * import { isAddressv6Unspecified } from "@hertzg/ip/classifyv6";
  * import { parseAddressv6 } from "@hertzg/ip/addressv6";
  *
- * assert(isAddressv6Unspecified(parseAddressv6("::")));
- * assertEquals(isAddressv6Unspecified(parseAddressv6("::1")), false);
+ * assert(isAddressv6Unspecified(parseAddressv6("::").address));
+ * assertEquals(isAddressv6Unspecified(parseAddressv6("::1").address), false);
  * ```
  */
 export function isAddressv6Unspecified(address: bigint): boolean {
@@ -127,9 +127,9 @@ export function isAddressv6Unspecified(address: bigint): boolean {
  * import { isAddressv6LinkLocal } from "@hertzg/ip/classifyv6";
  * import { parseAddressv6 } from "@hertzg/ip/addressv6";
  *
- * assert(isAddressv6LinkLocal(parseAddressv6("fe80::1")));
- * assert(isAddressv6LinkLocal(parseAddressv6("fe80::")));
- * assertEquals(isAddressv6LinkLocal(parseAddressv6("fec0::1")), false);
+ * assert(isAddressv6LinkLocal(parseAddressv6("fe80::1").address));
+ * assert(isAddressv6LinkLocal(parseAddressv6("fe80::").address));
+ * assertEquals(isAddressv6LinkLocal(parseAddressv6("fec0::1").address), false);
  * ```
  */
 export function isAddressv6LinkLocal(address: bigint): boolean {
@@ -150,9 +150,9 @@ export function isAddressv6LinkLocal(address: bigint): boolean {
  * import { isAddressv6Multicast } from "@hertzg/ip/classifyv6";
  * import { parseAddressv6 } from "@hertzg/ip/addressv6";
  *
- * assert(isAddressv6Multicast(parseAddressv6("ff02::1")));
- * assert(isAddressv6Multicast(parseAddressv6("ff00::")));
- * assertEquals(isAddressv6Multicast(parseAddressv6("fe80::1")), false);
+ * assert(isAddressv6Multicast(parseAddressv6("ff02::1").address));
+ * assert(isAddressv6Multicast(parseAddressv6("ff00::").address));
+ * assertEquals(isAddressv6Multicast(parseAddressv6("fe80::1").address), false);
  * ```
  */
 export function isAddressv6Multicast(address: bigint): boolean {
@@ -175,9 +175,9 @@ export function isAddressv6Multicast(address: bigint): boolean {
  * import { isAddressv6UniqueLocal } from "@hertzg/ip/classifyv6";
  * import { parseAddressv6 } from "@hertzg/ip/addressv6";
  *
- * assert(isAddressv6UniqueLocal(parseAddressv6("fc00::1")));
- * assert(isAddressv6UniqueLocal(parseAddressv6("fd00::1")));
- * assertEquals(isAddressv6UniqueLocal(parseAddressv6("fe00::1")), false);
+ * assert(isAddressv6UniqueLocal(parseAddressv6("fc00::1").address));
+ * assert(isAddressv6UniqueLocal(parseAddressv6("fd00::1").address));
+ * assertEquals(isAddressv6UniqueLocal(parseAddressv6("fe00::1").address), false);
  * ```
  */
 export function isAddressv6UniqueLocal(address: bigint): boolean {
@@ -202,9 +202,9 @@ export function isAddressv6UniqueLocal(address: bigint): boolean {
  * import { isAddressv6GlobalUnicast } from "@hertzg/ip/classifyv6";
  * import { parseAddressv6 } from "@hertzg/ip/addressv6";
  *
- * assert(isAddressv6GlobalUnicast(parseAddressv6("2607:f8b0:4004:800::200e")));
- * assert(isAddressv6GlobalUnicast(parseAddressv6("2001:db8::1"))); // also documentation
- * assertEquals(isAddressv6GlobalUnicast(parseAddressv6("fe80::1")), false);
+ * assert(isAddressv6GlobalUnicast(parseAddressv6("2607:f8b0:4004:800::200e").address));
+ * assert(isAddressv6GlobalUnicast(parseAddressv6("2001:db8::1").address)); // also documentation
+ * assertEquals(isAddressv6GlobalUnicast(parseAddressv6("fe80::1").address), false);
  * ```
  */
 export function isAddressv6GlobalUnicast(address: bigint): boolean {
@@ -225,9 +225,9 @@ export function isAddressv6GlobalUnicast(address: bigint): boolean {
  * import { isAddressv6Mapped } from "@hertzg/ip/classifyv6";
  * import { parseAddressv6 } from "@hertzg/ip/addressv6";
  *
- * assert(isAddressv6Mapped(parseAddressv6("::ffff:192.168.1.1")));
- * assert(isAddressv6Mapped(parseAddressv6("::ffff:c0a8:101")));
- * assertEquals(isAddressv6Mapped(parseAddressv6("::1")), false);
+ * assert(isAddressv6Mapped(parseAddressv6("::ffff:192.168.1.1").address));
+ * assert(isAddressv6Mapped(parseAddressv6("::ffff:c0a8:101").address));
+ * assertEquals(isAddressv6Mapped(parseAddressv6("::1").address), false);
  * ```
  */
 export function isAddressv6Mapped(address: bigint): boolean {
@@ -250,9 +250,9 @@ export function isAddressv6Mapped(address: bigint): boolean {
  * import { isAddressv6Translated } from "@hertzg/ip/classifyv6";
  * import { parseAddressv6 } from "@hertzg/ip/addressv6";
  *
- * assert(isAddressv6Translated(parseAddressv6("64:ff9b::1")));
- * assert(isAddressv6Translated(parseAddressv6("64:ff9b::")));
- * assertEquals(isAddressv6Translated(parseAddressv6("64:ff9a::1")), false);
+ * assert(isAddressv6Translated(parseAddressv6("64:ff9b::1").address));
+ * assert(isAddressv6Translated(parseAddressv6("64:ff9b::").address));
+ * assertEquals(isAddressv6Translated(parseAddressv6("64:ff9a::1").address), false);
  * ```
  */
 export function isAddressv6Translated(address: bigint): boolean {
@@ -273,9 +273,9 @@ export function isAddressv6Translated(address: bigint): boolean {
  * import { isAddressv6Documentation } from "@hertzg/ip/classifyv6";
  * import { parseAddressv6 } from "@hertzg/ip/addressv6";
  *
- * assert(isAddressv6Documentation(parseAddressv6("2001:db8::1")));
- * assert(isAddressv6Documentation(parseAddressv6("2001:db8:ffff:ffff:ffff:ffff:ffff:ffff")));
- * assertEquals(isAddressv6Documentation(parseAddressv6("2001:db9::1")), false);
+ * assert(isAddressv6Documentation(parseAddressv6("2001:db8::1").address));
+ * assert(isAddressv6Documentation(parseAddressv6("2001:db8:ffff:ffff:ffff:ffff:ffff:ffff").address));
+ * assertEquals(isAddressv6Documentation(parseAddressv6("2001:db9::1").address), false);
  * ```
  */
 export function isAddressv6Documentation(address: bigint): boolean {
@@ -300,9 +300,9 @@ export function isAddressv6Documentation(address: bigint): boolean {
  * import { isAddressv6Teredo } from "@hertzg/ip/classifyv6";
  * import { parseAddressv6 } from "@hertzg/ip/addressv6";
  *
- * assert(isAddressv6Teredo(parseAddressv6("2001::1")));
- * assert(isAddressv6Teredo(parseAddressv6("2001:0:ffff:ffff:ffff:ffff:ffff:ffff")));
- * assertEquals(isAddressv6Teredo(parseAddressv6("2002::1")), false);
+ * assert(isAddressv6Teredo(parseAddressv6("2001::1").address));
+ * assert(isAddressv6Teredo(parseAddressv6("2001:0:ffff:ffff:ffff:ffff:ffff:ffff").address));
+ * assertEquals(isAddressv6Teredo(parseAddressv6("2002::1").address), false);
  * ```
  */
 export function isAddressv6Teredo(address: bigint): boolean {
@@ -323,8 +323,8 @@ export function isAddressv6Teredo(address: bigint): boolean {
  * import { isAddressv6Benchmarking } from "@hertzg/ip/classifyv6";
  * import { parseAddressv6 } from "@hertzg/ip/addressv6";
  *
- * assert(isAddressv6Benchmarking(parseAddressv6("2001:2::1")));
- * assertEquals(isAddressv6Benchmarking(parseAddressv6("2001:3::1")), false);
+ * assert(isAddressv6Benchmarking(parseAddressv6("2001:2::1").address));
+ * assertEquals(isAddressv6Benchmarking(parseAddressv6("2001:3::1").address), false);
  * ```
  */
 export function isAddressv6Benchmarking(address: bigint): boolean {
@@ -345,9 +345,9 @@ export function isAddressv6Benchmarking(address: bigint): boolean {
  * import { isAddressv6Orchidv2 } from "@hertzg/ip/classifyv6";
  * import { parseAddressv6 } from "@hertzg/ip/addressv6";
  *
- * assert(isAddressv6Orchidv2(parseAddressv6("2001:20::1")));
- * assert(isAddressv6Orchidv2(parseAddressv6("2001:2f:ffff:ffff:ffff:ffff:ffff:ffff")));
- * assertEquals(isAddressv6Orchidv2(parseAddressv6("2001:30::1")), false);
+ * assert(isAddressv6Orchidv2(parseAddressv6("2001:20::1").address));
+ * assert(isAddressv6Orchidv2(parseAddressv6("2001:2f:ffff:ffff:ffff:ffff:ffff:ffff").address));
+ * assertEquals(isAddressv6Orchidv2(parseAddressv6("2001:30::1").address), false);
  * ```
  */
 export function isAddressv6Orchidv2(address: bigint): boolean {
@@ -370,18 +370,18 @@ export function isAddressv6Orchidv2(address: bigint): boolean {
  * import { classifyAddressv6 } from "@hertzg/ip/classifyv6";
  * import { parseAddressv6 } from "@hertzg/ip/addressv6";
  *
- * assertEquals(classifyAddressv6(parseAddressv6("::1")), "loopback");
- * assertEquals(classifyAddressv6(parseAddressv6("::")), "unspecified");
- * assertEquals(classifyAddressv6(parseAddressv6("fe80::1")), "link-local");
- * assertEquals(classifyAddressv6(parseAddressv6("ff02::1")), "multicast");
- * assertEquals(classifyAddressv6(parseAddressv6("fd00::1")), "unique-local");
- * assertEquals(classifyAddressv6(parseAddressv6("2001:db8::1")), "documentation");
- * assertEquals(classifyAddressv6(parseAddressv6("2001:2::1")), "benchmarking");
- * assertEquals(classifyAddressv6(parseAddressv6("2001:20::1")), "orchidv2");
- * assertEquals(classifyAddressv6(parseAddressv6("2001::1")), "teredo");
- * assertEquals(classifyAddressv6(parseAddressv6("::ffff:192.168.1.1")), "ipv4-mapped");
- * assertEquals(classifyAddressv6(parseAddressv6("64:ff9b::1")), "ipv4-translated");
- * assertEquals(classifyAddressv6(parseAddressv6("2607:f8b0:4004:800::200e")), "global-unicast");
+ * assertEquals(classifyAddressv6(parseAddressv6("::1").address), "loopback");
+ * assertEquals(classifyAddressv6(parseAddressv6("::").address), "unspecified");
+ * assertEquals(classifyAddressv6(parseAddressv6("fe80::1").address), "link-local");
+ * assertEquals(classifyAddressv6(parseAddressv6("ff02::1").address), "multicast");
+ * assertEquals(classifyAddressv6(parseAddressv6("fd00::1").address), "unique-local");
+ * assertEquals(classifyAddressv6(parseAddressv6("2001:db8::1").address), "documentation");
+ * assertEquals(classifyAddressv6(parseAddressv6("2001:2::1").address), "benchmarking");
+ * assertEquals(classifyAddressv6(parseAddressv6("2001:20::1").address), "orchidv2");
+ * assertEquals(classifyAddressv6(parseAddressv6("2001::1").address), "teredo");
+ * assertEquals(classifyAddressv6(parseAddressv6("::ffff:192.168.1.1").address), "ipv4-mapped");
+ * assertEquals(classifyAddressv6(parseAddressv6("64:ff9b::1").address), "ipv4-translated");
+ * assertEquals(classifyAddressv6(parseAddressv6("2607:f8b0:4004:800::200e").address), "global-unicast");
  * ```
  */
 export function classifyAddressv6(address: bigint): Classificationv6 {

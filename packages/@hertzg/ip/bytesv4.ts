@@ -50,8 +50,8 @@
  * import { parseAddressv4 } from "@hertzg/ip/addressv4";
  *
  * const frame = new Uint8Array(20);
- * addressv4ToBytes(parseAddressv4("10.0.0.1"), frame, 12);
- * addressv4ToBytes(parseAddressv4("192.168.1.1"), frame, 16);
+ * addressv4ToBytes(parseAddressv4("10.0.0.1").address, frame, 12);
+ * addressv4ToBytes(parseAddressv4("192.168.1.1").address, frame, 16);
  *
  * assertEquals(frame.slice(12), new Uint8Array([10, 0, 0, 1, 192, 168, 1, 1]));
  * ```
@@ -161,7 +161,7 @@ export function addressv4FromBytes(bytes: Uint8Array, offset = 0): number {
  * import { addressv4ToBytes } from "@hertzg/ip/bytesv4";
  * import { parseAddressv4 } from "@hertzg/ip/addressv4";
  *
- * assertEquals(addressv4ToBytes(parseAddressv4("10.0.0.1")), new Uint8Array([10, 0, 0, 1]));
+ * assertEquals(addressv4ToBytes(parseAddressv4("10.0.0.1").address), new Uint8Array([10, 0, 0, 1]));
  * ```
  *
  * @example Write into an existing frame, and get back only what was written
@@ -171,7 +171,7 @@ export function addressv4FromBytes(bytes: Uint8Array, offset = 0): number {
  * import { parseAddressv4 } from "@hertzg/ip/addressv4";
  *
  * const frame = new Uint8Array(20).fill(0xaa);
- * const written = addressv4ToBytes(parseAddressv4("192.168.1.1"), frame, 6);
+ * const written = addressv4ToBytes(parseAddressv4("192.168.1.1").address, frame, 6);
  *
  * assertEquals(written, new Uint8Array([192, 168, 1, 1]));
  * assertEquals(frame.slice(4, 12), new Uint8Array([0xaa, 0xaa, 192, 168, 1, 1, 0xaa, 0xaa]));

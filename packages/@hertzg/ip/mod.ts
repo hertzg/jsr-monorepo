@@ -7,6 +7,7 @@
  *
  * ## Features
  *
+ * - **One Notation Grammar**: `address[%zoneId][/prefix]`, every parser a narrowing of it; zone IDs carried verbatim, masks accepted as a second CIDR dialect
  * - **Dual-Stack Support**: Auto-unwrap IPv4-mapped IPv6 addresses from dual-stack sockets
  * - **IP Classification**: Identify private, loopback, multicast, public, and other well-known ranges
  * - **CIDR Support**: Parse CIDR notation, check containment, compute network boundaries; blocks carry a prefix length or a mask
@@ -27,11 +28,11 @@
  *
  * // Dual-stack servers (Deno, Node) report IPv4 clients as ::ffff:x.x.x.x
  * // parseAddress auto-unwraps mapped addresses to their IPv4 form
- * const remote1 = parseAddress("::ffff:192.168.1.50");
+ * const remote1 = parseAddress("::ffff:192.168.1.50").address;
  * assertEquals(stringifyAddress(remote1), "192.168.1.50");
  *
  * // Native IPv6 clients pass through unchanged
- * const remote2 = parseAddress("2001:db8::1");
+ * const remote2 = parseAddress("2001:db8::1").address;
  * assertEquals(stringifyAddress(remote2), "2001:db8::1");
  *
  * // Classification works on both
@@ -53,10 +54,10 @@
  *   "172.16.0.0/12",
  *   "192.168.0.0/16",
  *   "fd00::/8",
- * ].map(parseCidr);
+ * ].map((s) => parseCidr(s));
  *
  * function isTrusted(ip: string): boolean {
- *   const address = parseAddress(ip);
+ *   const address = parseAddress(ip).address;
  *   return trustedRanges.some((cidr) => cidrContains(cidr, address));
  * }
  *
@@ -122,7 +123,7 @@
  * import { compareCidr, compareAddress, parseCidr, parseAddress, stringifyAddress, stringifyCidr } from "@hertzg/ip";
  *
  * // All IPv4 sorts before all IPv6, numerically ascending within each version
- * const clients = ["2001:db8::1", "10.0.0.10", "::1", "10.0.0.2"].map(parseAddress);
+ * const clients = ["2001:db8::1", "10.0.0.10", "::1", "10.0.0.2"].map((s) => parseAddress(s).address);
  * assertEquals(clients.toSorted(compareAddress).map(stringifyAddress), [
  *   "10.0.0.2",
  *   "10.0.0.10",
@@ -131,7 +132,7 @@
  * ]);
  *
  * // CIDR blocks tie-break on prefix length: the larger block comes first
- * const ranges = ["10.0.0.0/16", "2001:db8::/32", "10.0.0.0/8"].map(parseCidr);
+ * const ranges = ["10.0.0.0/16", "2001:db8::/32", "10.0.0.0/8"].map((s) => parseCidr(s));
  * assertEquals(ranges.toSorted(compareCidr).map(stringifyCidr), [
  *   "10.0.0.0/8",
  *   "10.0.0.0/16",
@@ -147,13 +148,13 @@
  * import { parseAddressv4, parseAddressv6, stringifyAddressv4, stringifyAddressv6 } from "@hertzg/ip";
  *
  * // IPv4: string <-> 32-bit number
- * const v4 = parseAddressv4("192.168.1.1");
+ * const v4 = parseAddressv4("192.168.1.1").address;
  * assertEquals(v4, 3232235777);
  * assertEquals(stringifyAddressv4(v4), "192.168.1.1");
  * assertEquals(stringifyAddressv4(v4 + 1), "192.168.1.2");
  *
  * // IPv6: string <-> 128-bit bigint
- * const v6 = parseAddressv6("2001:db8::1");
+ * const v6 = parseAddressv6("2001:db8::1").address;
  * assertEquals(v6, 42540766411282592856903984951653826561n);
  * assertEquals(stringifyAddressv6(v6), "2001:db8::1");
  * assertEquals(stringifyAddressv6(v6 + 1n), "2001:db8::2");
@@ -188,9 +189,9 @@
  *
  * const cidr = parseCidrv4("10.0.0.0/8");
  *
- * assert(cidrv4Contains(cidr, parseAddressv4("10.0.0.1")));
- * assert(cidrv4Contains(cidr, parseAddressv4("10.255.255.255")));
- * assertEquals(cidrv4Contains(cidr, parseAddressv4("11.0.0.0")), false);
+ * assert(cidrv4Contains(cidr, parseAddressv4("10.0.0.1").address));
+ * assert(cidrv4Contains(cidr, parseAddressv4("10.255.255.255").address));
+ * assertEquals(cidrv4Contains(cidr, parseAddressv4("11.0.0.0").address), false);
  * ```
  *
  * ## Address Enumeration
@@ -249,9 +250,9 @@
  * import { assertEquals } from "@std/assert";
  * import { addressToArpa, parseAddress } from "@hertzg/ip";
  *
- * assertEquals(addressToArpa(parseAddress("192.168.0.1")), "1.0.168.192.in-addr.arpa");
+ * assertEquals(addressToArpa(parseAddress("192.168.0.1").address), "1.0.168.192.in-addr.arpa");
  * assertEquals(
- *   addressToArpa(parseAddress("2001:db8::1")),
+ *   addressToArpa(parseAddress("2001:db8::1").address),
  *   "1.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.8.b.d.0.1.0.0.2.ip6.arpa",
  * );
  * ```
@@ -260,13 +261,16 @@
  *
  * ### Universal (auto-detect IPv4/IPv6)
  * - {@link Address}: An IP address of either version (`number` or `bigint`)
- * - {@link parseAddress}: Parse any IP address string to number (IPv4) or bigint (IPv6)
- * - {@link stringifyAddress}: Convert number or bigint to IP address string
+ * - {@link ParsedAddress}: What `parseAddress` returns, the address plus an optional zone ID
+ * - {@link ParseOptions}: Options for the universal parsers, `unmapToV4`
+ * - {@link parseAddress}: Parse any IP address string, with an optional zone ID, to number (IPv4) or bigint (IPv6)
+ * - {@link stringifyAddress}: Convert an address, bare or parsed, to IP address string
  * - {@link Cidr}: A CIDR block of either version, in either dialect (prefix length or mask)
+ * - {@link ParsedCidr}: What `parseCidr` returns, the block plus an optional zone ID
  * - {@link Mask}: A network mask of either version (`number` or `bigint`)
  * - {@link PrefixLength}: A prefix length of either version
- * - {@link parseCidr}: Parse any CIDR notation string to Cidrv4 or Cidrv6
- * - {@link stringifyCidr}: Convert Cidrv4 or Cidrv6 to CIDR notation string, in the dialect it stores
+ * - {@link parseCidr}: Parse any CIDR notation string, in either dialect and with an optional zone ID
+ * - {@link stringifyCidr}: Convert a Cidr, parse result or address to CIDR notation string, in the dialect it stores
  * - {@link cidrSize}: Get total number of addresses in a CIDR block
  * - {@link cidrFirstAddress}: Get the first address of a CIDR block
  * - {@link cidrLastAddress}: Get the last address of a CIDR block
@@ -289,9 +293,16 @@
  * - {@link ClassifiedAddressv4}: Result type for IPv4 classification
  * - {@link ClassifiedAddressv6}: Result type for IPv6 classification
  *
+ * ### Notation
+ * - {@link splitNotation}: Split `address[%zoneId][/prefix]` into its three slots without reading them
+ * - {@link Notation}: The three slots as slices
+ * - {@link ZoneId}: The zone ID after `%`, a string
+ *
  * ### IPv4
- * - {@link parseAddressv4}: Parse dotted decimal notation to number
- * - {@link stringifyAddressv4}: Convert number to dotted decimal notation
+ * - {@link Addressv4}: An IPv4 address as a 32-bit unsigned integer
+ * - {@link ParsedAddressv4}: What `parseAddressv4` returns, the address plus an optional zone ID
+ * - {@link parseAddressv4}: Parse dotted decimal notation, with an optional zone ID, to number
+ * - {@link stringifyAddressv4}: Convert an IPv4 address, bare or parsed, to dotted decimal notation
  * - {@link compareAddressv4}: Compare two IPv4 addresses for sorting
  * - {@link isValidAddressv4}: Check if a string is a valid IPv4 address
  *
@@ -299,8 +310,9 @@
  * - {@link Cidrv4}: Type representing an IPv4 CIDR block, {@link PrefixedCidrv4} or {@link MaskedCidrv4}
  * - {@link Maskv4}: An IPv4 network mask as a 32-bit unsigned integer
  * - {@link PrefixLengthv4}: An IPv4 prefix length, 0 to 32
- * - {@link parseCidrv4}: Parse CIDR notation string to Cidrv4
- * - {@link stringifyCidrv4}: Convert Cidrv4 to CIDR notation string, in the dialect it stores
+ * - {@link ParsedCidrv4}: What `parseCidrv4` returns, the block plus an optional zone ID
+ * - {@link parseCidrv4}: Parse IPv4 CIDR notation, in either dialect and with an optional zone ID
+ * - {@link stringifyCidrv4}: Convert a Cidrv4, parse result or address to CIDR notation string, in the dialect it stores
  * - {@link cidrv4Mask}: Get the network mask of a CIDR block or prefix length (0-32)
  * - {@link cidrv4PrefixLength}: Get the prefix length of a CIDR block or network mask, as a number or notation string
  * - {@link cidrv4Contains}: Check if IP is within CIDR block
@@ -323,11 +335,11 @@
  * - {@link isValidCidrv4}: Check if a string is valid IPv4 CIDR notation
  *
  * ### IPv6
- * - {@link parseAddressv6}: Parse colon-hexadecimal notation to bigint
- * - {@link stringifyAddressv6}: Convert bigint to compressed colon-hexadecimal
- * - {@link stringifyAddressv6Expanded}: Convert bigint to full uncompressed colon-hexadecimal
- * - {@link expandIpv6}: Expand to full uncompressed form
- * - {@link compressIpv6}: Compress to canonical shortest form
+ * - {@link Addressv6}: An IPv6 address as a 128-bit unsigned bigint
+ * - {@link ParsedAddressv6}: What `parseAddressv6` returns, the address plus an optional zone ID
+ * - {@link parseAddressv6}: Parse colon-hexadecimal notation, with an optional zone ID, to bigint
+ * - {@link stringifyAddressv6}: Convert an IPv6 address, bare or parsed, to compressed colon-hexadecimal
+ * - {@link stringifyAddressv6Expanded}: Convert an IPv6 address, bare or parsed, to full uncompressed colon-hexadecimal
  * - {@link compareAddressv6}: Compare two IPv6 addresses for sorting
  * - {@link isValidAddressv6}: Check if a string is a valid IPv6 address
  *
@@ -335,8 +347,10 @@
  * - {@link Cidrv6}: Type representing an IPv6 CIDR block, {@link PrefixedCidrv6} or {@link MaskedCidrv6}
  * - {@link Maskv6}: An IPv6 network mask as a 128-bit unsigned bigint
  * - {@link PrefixLengthv6}: An IPv6 prefix length, 0 to 128
- * - {@link parseCidrv6}: Parse CIDR notation string to Cidrv6
- * - {@link stringifyCidrv6}: Convert Cidrv6 to CIDR notation string, in the dialect it stores
+ * - {@link ParsedCidrv6}: What `parseCidrv6` returns, the block plus an optional zone ID
+ * - {@link parseCidrv6}: Parse IPv6 CIDR notation, in either dialect and with an optional zone ID
+ * - {@link stringifyCidrv6}: Convert a Cidrv6, parse result or address to CIDR notation string, compressed, in the dialect it stores
+ * - {@link stringifyCidrv6Expanded}: The same with the address written in full
  * - {@link cidrv6Mask}: Get the network mask of a CIDR block or prefix length (0-128)
  * - {@link cidrv6PrefixLength}: Get the prefix length of a CIDR block or network mask, as a bigint or notation string
  * - {@link cidrv6Contains}: Check if IP is within CIDR block
@@ -411,6 +425,7 @@
  * - {@link addressv6ToArpa}: Build the `ip6.arpa` pointer name of an IPv6 address
  *
  * ### Submodules
+ * - [`notation`](https://jsr.io/@hertzg/ip/doc/notation): The structural layer of notation via {@link splitNotation}
  * - [`address`](https://jsr.io/@hertzg/ip/doc/address): Universal IP parsing via {@link parseAddress}, {@link stringifyAddress}, {@link compareAddress}
  * - [`cidr`](https://jsr.io/@hertzg/ip/doc/cidr): Universal CIDR parsing via {@link parseCidr}, {@link stringifyCidr}, {@link compareCidr}
  * - [`addressv4`](https://jsr.io/@hertzg/ip/doc/addressv4): IPv4 parsing, sorting, and validation
@@ -439,11 +454,23 @@ export {
   type Address,
   /** Compare two IP addresses of either version for sorting. */
   compareAddress,
-  /** Parse any IP address string to number (IPv4) or bigint (IPv6). */
+  /** What parseAddress returns: the address and an optional zone ID. */
+  type ParsedAddress,
+  /** Options for the universal parsers: unmapToV4. */
+  type ParseOptions,
+  /** Parse any IP address string, with an optional zone ID, to number (IPv4) or bigint (IPv6). */
   parseAddress,
-  /** Convert number or bigint to IP address string. */
+  /** Convert an address, bare or parsed, to IP address string. */
   stringifyAddress,
 } from "./address.ts";
+export {
+  /** The three notation slots as slices of the string. */
+  type Notation,
+  /** Split notation into address, zone ID and prefix slots. */
+  splitNotation,
+  /** The zone ID after `%`, a string. */
+  type ZoneId,
+} from "./notation.ts";
 export {
   /** A CIDR block of either IP version. */
   type Cidr,
@@ -475,11 +502,13 @@ export {
   isCidrv6,
   /** A network mask of either IP version. */
   type Mask,
-  /** Parse any CIDR notation string to Cidrv4 or Cidrv6. */
+  /** Parse any CIDR notation string, in either dialect and with an optional zone ID. */
   parseCidr,
+  /** What parseCidr returns: a Cidr in its written dialect and an optional zone ID. */
+  type ParsedCidr,
   /** A prefix length of either IP version. */
   type PrefixLength,
-  /** Convert Cidrv4 or Cidrv6 to CIDR notation string. */
+  /** Convert a Cidr, parse result or address to CIDR notation string. */
   stringifyCidr,
 } from "./cidr.ts";
 
@@ -515,11 +544,15 @@ export {
 // --- IPv4 ---
 
 export {
+  /** An IPv4 address as a 32-bit unsigned integer. */
+  type Addressv4,
   /** Compare two IPv4 addresses for sorting. */
   compareAddressv4,
-  /** Parse dotted decimal notation to number. */
+  /** Parse dotted decimal notation, with an optional zone ID, to number. */
   parseAddressv4,
-  /** Convert number to dotted decimal notation. */
+  /** What parseAddressv4 returns: the address and an optional zone ID. */
+  type ParsedAddressv4,
+  /** Convert an IPv4 address, bare or parsed, to dotted decimal notation. */
   stringifyAddressv4,
 } from "./addressv4.ts";
 export {
@@ -574,13 +607,15 @@ export {
   type MaskedCidrv4,
   /** An IPv4 network mask as a 32-bit unsigned integer. */
   type Maskv4,
-  /** Parse CIDR notation string to Cidrv4. */
+  /** Parse IPv4 CIDR notation, in either dialect and with an optional zone ID. */
   parseCidrv4,
+  /** What parseCidrv4 returns: a Cidrv4 in its written dialect and an optional zone ID. */
+  type ParsedCidrv4,
   /** An IPv4 CIDR block written with a prefix length. */
   type PrefixedCidrv4,
   /** An IPv4 prefix length, 0 to 32. */
   type PrefixLengthv4,
-  /** Convert Cidrv4 to CIDR notation string. */
+  /** Convert a Cidrv4, parse result or IPv4 address to CIDR notation string. */
   stringifyCidrv4,
 } from "./cidrv4.ts";
 
@@ -614,19 +649,19 @@ export {
 // --- IPv6 ---
 
 export {
+  /** An IPv6 address as a 128-bit unsigned bigint. */
+  type Addressv6,
   /** Compare two IPv6 addresses for sorting. */
   compareAddressv6,
-  /** Compress to canonical shortest form. */
-  compressIpv6,
-  /** Expand to full uncompressed form. */
-  expandIpv6,
   /** Convert IPv4 number to IPv4-mapped IPv6 bigint. */
   mapFromAddressv4,
-  /** Parse colon-hexadecimal notation to bigint. */
+  /** Parse colon-hexadecimal notation, with an optional zone ID, to bigint. */
   parseAddressv6,
-  /** Convert bigint to compressed colon-hexadecimal. */
+  /** What parseAddressv6 returns: the address and an optional zone ID. */
+  type ParsedAddressv6,
+  /** Convert an IPv6 address, bare or parsed, to compressed colon-hexadecimal. */
   stringifyAddressv6,
-  /** Convert bigint to full uncompressed colon-hexadecimal. */
+  /** Convert an IPv6 address, bare or parsed, to full uncompressed colon-hexadecimal. */
   stringifyAddressv6Expanded,
   /** Extract IPv4 number from IPv4-mapped IPv6 bigint. */
   unmapToAddressv4,
@@ -673,14 +708,18 @@ export {
   type MaskedCidrv6,
   /** An IPv6 network mask as a 128-bit unsigned bigint. */
   type Maskv6,
-  /** Parse CIDR notation string to Cidrv6. */
+  /** Parse IPv6 CIDR notation, in either dialect and with an optional zone ID. */
   parseCidrv6,
+  /** What parseCidrv6 returns: a Cidrv6 in its written dialect and an optional zone ID. */
+  type ParsedCidrv6,
   /** An IPv6 CIDR block written with a prefix length. */
   type PrefixedCidrv6,
   /** An IPv6 prefix length, 0 to 128. */
   type PrefixLengthv6,
-  /** Convert Cidrv6 to CIDR notation string. */
+  /** Convert a Cidrv6, parse result or IPv6 address to CIDR notation string, compressed. */
   stringifyCidrv6,
+  /** Convert a Cidrv6, parse result or IPv6 address to CIDR notation string, expanded. */
+  stringifyCidrv6Expanded,
   /** Convert IPv4-mapped IPv6 CIDR to IPv4 CIDR. */
   unmapToCidrv4,
 } from "./cidrv6.ts";

@@ -92,7 +92,7 @@ Deno.test("addressv4ToBytes", async (t) => {
     "allocates four bytes in network order when into is omitted",
     () => {
       assertEquals(
-        addressv4ToBytes(parseAddressv4("192.168.1.1")),
+        addressv4ToBytes(parseAddressv4("192.168.1.1").address),
         new Uint8Array([192, 168, 1, 1]),
       );
       assertEquals(addressv4ToBytes(0), new Uint8Array([0, 0, 0, 0]));
@@ -113,7 +113,7 @@ Deno.test("addressv4ToBytes", async (t) => {
 
   await t.step("writes into an existing buffer at an offset", () => {
     const frame = new Uint8Array(20).fill(0xaa);
-    addressv4ToBytes(parseAddressv4("192.168.1.1"), frame, 6);
+    addressv4ToBytes(parseAddressv4("192.168.1.1").address, frame, 6);
 
     assertEquals(
       frame.slice(4, 12),
@@ -123,14 +123,22 @@ Deno.test("addressv4ToBytes", async (t) => {
 
   await t.step("returns only the written span, not the whole buffer", () => {
     const frame = new Uint8Array(20).fill(0xaa);
-    const written = addressv4ToBytes(parseAddressv4("203.0.113.7"), frame, 6);
+    const written = addressv4ToBytes(
+      parseAddressv4("203.0.113.7").address,
+      frame,
+      6,
+    );
 
     assertEquals(written, new Uint8Array([203, 0, 113, 7]));
   });
 
   await t.step("the returned span is a view aliasing the target buffer", () => {
     const frame = new Uint8Array(8);
-    const written = addressv4ToBytes(parseAddressv4("198.51.100.42"), frame, 4);
+    const written = addressv4ToBytes(
+      parseAddressv4("198.51.100.42").address,
+      frame,
+      4,
+    );
     written[3] = 9;
 
     assertEquals(frame[7], 9);
@@ -139,7 +147,7 @@ Deno.test("addressv4ToBytes", async (t) => {
   await t.step("writes through a subarray view", () => {
     const frame = new Uint8Array(12).fill(0xcc);
     const window = frame.subarray(4, 8);
-    addressv4ToBytes(parseAddressv4("10.0.0.1"), window);
+    addressv4ToBytes(parseAddressv4("10.0.0.1").address, window);
 
     assertEquals(frame.slice(3, 9), new Uint8Array([0xcc, 10, 0, 0, 1, 0xcc]));
   });
@@ -147,8 +155,8 @@ Deno.test("addressv4ToBytes", async (t) => {
   await t.step("defaults to offset 0", () => {
     const explicit = new Uint8Array(6).fill(0xaa);
     const implicit = new Uint8Array(6).fill(0xaa);
-    addressv4ToBytes(parseAddressv4("10.0.0.1"), explicit, 0);
-    addressv4ToBytes(parseAddressv4("10.0.0.1"), implicit);
+    addressv4ToBytes(parseAddressv4("10.0.0.1").address, explicit, 0);
+    addressv4ToBytes(parseAddressv4("10.0.0.1").address, implicit);
 
     assertEquals(implicit, explicit);
   });
@@ -188,7 +196,7 @@ Deno.test("addressv4ToBytes", async (t) => {
 
   await t.step("round-trips with addressv4FromBytes", () => {
     for (const notation of ["0.0.0.0", "10.0.0.1", "255.255.255.255"]) {
-      const address = parseAddressv4(notation);
+      const address = parseAddressv4(notation).address;
       assertEquals(addressv4FromBytes(addressv4ToBytes(address)), address);
     }
   });

@@ -78,7 +78,7 @@ Deno.test("addressFromBytes", async (t) => {
     assertEquals(typeof address, "bigint");
     assertEquals(
       unmapToAddressv4(address as bigint),
-      parseAddressv4("192.168.1.1"),
+      parseAddressv4("192.168.1.1").address,
     );
   });
 });
@@ -86,13 +86,13 @@ Deno.test("addressFromBytes", async (t) => {
 Deno.test("addressToBytes", async (t) => {
   await t.step("a number writes four bytes", () => {
     assertEquals(
-      addressToBytes(parseAddressv4("192.168.1.1")),
+      addressToBytes(parseAddressv4("192.168.1.1").address),
       new Uint8Array([192, 168, 1, 1]),
     );
   });
 
   await t.step("a bigint writes sixteen bytes", () => {
-    const written = addressToBytes(parseAddressv6("::1"));
+    const written = addressToBytes(parseAddressv6("::1").address);
 
     assertEquals(written.length, 16);
     assertEquals(written[15], 1);
@@ -100,8 +100,8 @@ Deno.test("addressToBytes", async (t) => {
 
   await t.step("writes into an existing buffer at an offset", () => {
     const frame = new Uint8Array(40).fill(0xaa);
-    addressToBytes(parseAddressv4("10.0.0.1"), frame, 0);
-    addressToBytes(parseAddressv6("2001:db8::1"), frame, 8);
+    addressToBytes(parseAddressv4("10.0.0.1").address, frame, 0);
+    addressToBytes(parseAddressv6("2001:db8::1").address, frame, 8);
 
     assertEquals(frame.slice(0, 4), new Uint8Array([10, 0, 0, 1]));
     // deno-fmt-ignore
@@ -115,11 +115,11 @@ Deno.test("addressToBytes", async (t) => {
     const frame = new Uint8Array(40).fill(0xaa);
 
     assertEquals(
-      addressToBytes(parseAddressv4("203.0.113.7"), frame, 20),
+      addressToBytes(parseAddressv4("203.0.113.7").address, frame, 20),
       new Uint8Array([203, 0, 113, 7]),
     );
     // deno-fmt-ignore
-    assertEquals(addressToBytes(parseAddressv6("fe80::1"), frame, 20), new Uint8Array([
+    assertEquals(addressToBytes(parseAddressv6("fe80::1").address, frame, 20), new Uint8Array([
       0xfe, 0x80, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
       0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x01,
     ]));

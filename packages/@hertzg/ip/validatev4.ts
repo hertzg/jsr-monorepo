@@ -28,6 +28,9 @@ import { parseCidrv4 } from "./cidrv4.ts";
 /**
  * Checks if a string is a valid IPv4 address in dotted decimal notation.
  *
+ * Accepts exactly what {@link parseAddressv4} accepts: four decimal octets
+ * and an optional `%zoneId`, no prefix.
+ *
  * @param address The address string to validate
  * @returns `true` if the string is a valid IPv4 address
  *
@@ -39,6 +42,7 @@ import { parseCidrv4 } from "./cidrv4.ts";
  * assert(isValidAddressv4("0.0.0.0"));
  * assert(isValidAddressv4("192.168.1.1"));
  * assert(isValidAddressv4("255.255.255.255"));
+ * assert(isValidAddressv4("192.168.1.1%ether1"));
  * ```
  *
  * @example Invalid addresses
@@ -51,6 +55,8 @@ import { parseCidrv4 } from "./cidrv4.ts";
  * assertEquals(isValidAddressv4("1.2.3"), false);
  * assertEquals(isValidAddressv4("01.02.03.04"), false);
  * assertEquals(isValidAddressv4("::1"), false);
+ * assertEquals(isValidAddressv4("192.168.1.1%"), false);
+ * assertEquals(isValidAddressv4("192.168.1.0/24"), false);
  * ```
  */
 export function isValidAddressv4(address: string): boolean {
@@ -65,6 +71,10 @@ export function isValidAddressv4(address: string): boolean {
 /**
  * Checks if a string is valid IPv4 CIDR notation.
  *
+ * Accepts exactly what {@link parseCidrv4} accepts: an address, an optional
+ * `%zoneId`, then `/` and a prefix length of 0 to 32 or a dotted decimal
+ * mask.
+ *
  * @param cidr The CIDR string to validate
  * @returns `true` if the string is valid IPv4 CIDR notation
  *
@@ -76,6 +86,8 @@ export function isValidAddressv4(address: string): boolean {
  * assert(isValidCidrv4("0.0.0.0/0"));
  * assert(isValidCidrv4("192.168.1.0/24"));
  * assert(isValidCidrv4("10.0.0.1/32"));
+ * assert(isValidCidrv4("10.0.0.0/255.0.0.0"));
+ * assert(isValidCidrv4("10.0.0.0%ether1/8"));
  * ```
  *
  * @example Invalid CIDR
@@ -88,6 +100,8 @@ export function isValidAddressv4(address: string): boolean {
  * assertEquals(isValidCidrv4("192.168.1.0/33"), false);
  * assertEquals(isValidCidrv4("192.168.1.0/-1"), false);
  * assertEquals(isValidCidrv4("2001:db8::/32"), false);
+ * assertEquals(isValidCidrv4("10.0.0.0/ffff:ff00::"), false);
+ * assertEquals(isValidCidrv4("10.0.0.0/8%ether1"), false);
  * ```
  */
 export function isValidCidrv4(cidr: string): boolean {

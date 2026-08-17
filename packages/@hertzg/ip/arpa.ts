@@ -33,9 +33,9 @@
  * import { addressToArpa } from "@hertzg/ip/arpa";
  * import { parseAddress } from "@hertzg/ip/address";
  *
- * assertEquals(addressToArpa(parseAddress("8.8.8.8")), "8.8.8.8.in-addr.arpa");
+ * assertEquals(addressToArpa(parseAddress("8.8.8.8").address), "8.8.8.8.in-addr.arpa");
  * assertEquals(
- *   addressToArpa(parseAddress("2001:4860:4860::8888")),
+ *   addressToArpa(parseAddress("2001:4860:4860::8888").address),
  *   "8.8.8.8.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.6.8.4.0.6.8.4.1.0.0.2.ip6.arpa",
  * );
  * ```
@@ -73,9 +73,9 @@ import { addressv6ToArpa } from "./arpav6.ts";
  * import { addressToArpa } from "@hertzg/ip/arpa";
  * import { parseAddress } from "@hertzg/ip/address";
  *
- * assertEquals(addressToArpa(parseAddress("192.168.0.1")), "1.0.168.192.in-addr.arpa");
+ * assertEquals(addressToArpa(parseAddress("192.168.0.1").address), "1.0.168.192.in-addr.arpa");
  * assertEquals(
- *   addressToArpa(parseAddress("2001:db8::1")),
+ *   addressToArpa(parseAddress("2001:db8::1").address),
  *   "1.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.8.b.d.0.1.0.0.2.ip6.arpa",
  * );
  * ```
@@ -86,7 +86,7 @@ import { addressv6ToArpa } from "./arpav6.ts";
  * import { addressToArpa } from "@hertzg/ip/arpa";
  * import { parseAddress } from "@hertzg/ip/address";
  *
- * assertEquals(addressToArpa(parseAddress("::ffff:192.168.0.1")), "1.0.168.192.in-addr.arpa");
+ * assertEquals(addressToArpa(parseAddress("::ffff:192.168.0.1").address), "1.0.168.192.in-addr.arpa");
  * ```
  */
 export function addressToArpa(address: Address): string {

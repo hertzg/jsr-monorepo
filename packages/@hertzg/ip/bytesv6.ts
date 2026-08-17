@@ -51,10 +51,10 @@
  * import { parseAddressv6 } from "@hertzg/ip/addressv6";
  *
  * const frame = new Uint8Array(40);
- * addressv6ToBytes(parseAddressv6("2001:db8::1"), frame, 8);
- * addressv6ToBytes(parseAddressv6("2001:db8::2"), frame, 24);
+ * addressv6ToBytes(parseAddressv6("2001:db8::1").address, frame, 8);
+ * addressv6ToBytes(parseAddressv6("2001:db8::2").address, frame, 24);
  *
- * assertEquals(addressv6FromBytes(frame, 24), parseAddressv6("2001:db8::2"));
+ * assertEquals(addressv6FromBytes(frame, 24), parseAddressv6("2001:db8::2").address);
  * ```
  *
  * @module
@@ -202,7 +202,7 @@ export function addressv6FromBytes(bytes: Uint8Array, offset = 0): bigint {
  * import { parseAddressv6 } from "@hertzg/ip/addressv6";
  *
  * // deno-fmt-ignore
- * assertEquals(addressv6ToBytes(parseAddressv6("2001:db8::1")), new Uint8Array([
+ * assertEquals(addressv6ToBytes(parseAddressv6("2001:db8::1").address), new Uint8Array([
  *   0x20, 0x01, 0x0d, 0xb8, 0x00, 0x00, 0x00, 0x00,
  *   0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x01,
  * ]));
@@ -215,7 +215,7 @@ export function addressv6FromBytes(bytes: Uint8Array, offset = 0): bigint {
  * import { parseAddressv6 } from "@hertzg/ip/addressv6";
  *
  * const frame = new Uint8Array(40);
- * const written = addressv6ToBytes(parseAddressv6("::1"), frame, 8);
+ * const written = addressv6ToBytes(parseAddressv6("::1").address, frame, 8);
  *
  * assertEquals(written.length, 16);
  * assertEquals(frame[23], 1);

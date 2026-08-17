@@ -2,15 +2,14 @@
  * Universal CIDR notation parsing, stringifying, and validation.
  *
  * This module provides {@link parseCidr}, {@link stringifyCidr},
- * {@link isValidCidr}, {@link cidrContains},
- * {@link cidrContainsCidr}, {@link cidrOverlaps},
+ * {@link cidrContains}, {@link cidrContainsCidr}, {@link cidrOverlaps},
  * {@link cidrIntersect}, {@link cidrSubtract}, {@link cidrMerge},
  * {@link cidrSize}, {@link cidrFirstAddress}, {@link cidrLastAddress},
  * {@link cidrAddresses}, and {@link compareCidr} that auto-detect IPv4 vs
- * IPv6 and delegate to the appropriate version-specific
- * function. The {@link Cidr}
- * type alias and {@link isCidrv4}/{@link isCidrv6} type guards are also
- * exported for working with version-polymorphic CIDR values.
+ * IPv6 and delegate to the appropriate version-specific function. The
+ * {@link Cidr} and {@link ParsedCidr} type aliases and the
+ * {@link isCidrv4}/{@link isCidrv6} type guards are also exported for
+ * working with version-polymorphic CIDR values.
  *
  * For version-specific functions, see:
  * - [`cidrv4`](https://jsr.io/@hertzg/ip/doc/cidrv4): {@link parseCidrv4}, {@link stringifyCidrv4}, {@link isValidCidrv4}, {@link compareCidrv4}
@@ -23,13 +22,18 @@
  *
  * // IPv4
  * const v4 = parseCidr("192.168.1.0/24");
- * assertEquals(v4.prefixLength, 24);
+ * assertEquals(v4, { address: 3232235776, prefixLength: 24 });
  * assertEquals(stringifyCidr(v4), "192.168.1.0/24");
  *
- * // IPv6
- * const v6 = parseCidr("2001:db8::/32");
- * assertEquals(v6.prefixLength, 32);
- * assertEquals(stringifyCidr(v6), "2001:db8::/32");
+ * // IPv6, with a zone ID
+ * const v6 = parseCidr("fe80::%ether1/64");
+ * assertEquals(v6, { address: 0xfe80n << 112n, prefixLength: 64, zoneId: "ether1" });
+ * assertEquals(stringifyCidr(v6), "fe80::%ether1/64");
+ *
+ * // The mask dialect is kept as written
+ * const masked = parseCidr("10.0.0.0/255.0.0.0");
+ * assertEquals(masked, { address: 167772160, mask: 0xFF000000 });
+ * assertEquals(stringifyCidr(masked), "10.0.0.0/255.0.0.0");
  * ```
  *
  * @module
@@ -50,6 +54,7 @@ import {
   cidrv4Subtract,
   compareCidrv4,
   parseCidrv4,
+  type ParsedCidrv4,
   stringifyCidrv4,
 } from "./cidrv4.ts";
 import {
@@ -66,16 +71,28 @@ import {
   cidrv6Subtract,
   compareCidrv6,
   parseCidrv6,
+  type ParsedCidrv6,
   stringifyCidrv6,
   unmapToCidrv4,
 } from "./cidrv6.ts";
-import type { Address } from "./address.ts";
-import type { Maskv4, PrefixedCidrv4 } from "./cidrv4.ts";
-import type { Maskv6, PrefixedCidrv6 } from "./cidrv6.ts";
+import type {
+  Address,
+  ParsedAddress,
+  ParsedAddressv4,
+  ParsedAddressv6,
+  ParseOptions,
+} from "./address.ts";
+import type { Maskv4 } from "./cidrv4.ts";
+import type { Maskv6 } from "./cidrv6.ts";
+import { splitNotation } from "./notation.ts";
 
 export type {
   /** A plain IP address of either IP version. */
   Address,
+  /** What parseAddress returns: the address and an optional zone ID. */
+  ParsedAddress,
+  /** Options for the universal parsers. */
+  ParseOptions,
 } from "./address.ts";
 export type {
   /** Type representing an IPv4 CIDR block, in either dialect. */
@@ -84,6 +101,8 @@ export type {
   MaskedCidrv4,
   /** An IPv4 network mask as a 32-bit unsigned integer. */
   Maskv4,
+  /** What parseCidrv4 returns: a Cidrv4 and an optional zone ID. */
+  ParsedCidrv4,
   /** An IPv4 CIDR block written with a prefix length. */
   PrefixedCidrv4,
   /** An IPv4 prefix length, 0 to 32. */
@@ -96,6 +115,8 @@ export type {
   MaskedCidrv6,
   /** An IPv6 network mask as a 128-bit unsigned bigint. */
   Maskv6,
+  /** What parseCidrv6 returns: a Cidrv6 and an optional zone ID. */
+  ParsedCidrv6,
   /** An IPv6 CIDR block written with a prefix length. */
   PrefixedCidrv6,
   /** An IPv6 prefix length, 0 to 128. */
@@ -112,6 +133,15 @@ export type {
  * has four shapes and every operation here accepts all of them.
  */
 export type Cidr = Cidrv4 | Cidrv6;
+
+/**
+ * What {@link parseCidr} returns and what {@link stringifyCidr} accepts: a
+ * {@link ParsedCidrv4} or a {@link ParsedCidrv6}, the block in the dialect
+ * it was written in plus an optional zone ID. Assignable to {@link Cidr},
+ * so a parse result goes straight into every `cidr*` operation; none of
+ * them reads the zone.
+ */
+export type ParsedCidr = ParsedCidrv4 | ParsedCidrv6;
 
 /**
  * A network mask of either IP version: a `number` for IPv4, a `bigint`
@@ -169,58 +199,109 @@ export function isCidrv6(cidr: Cidr): cidr is Cidrv6 {
   return typeof cidr.address === "bigint";
 }
 
+/** The mask of the IPv4-mapped prefix itself: the high 96 bits. */
+const IPV4_MAPPED_PREFIX_MASK = 0xFFFFFFFFFFFFFFFFFFFFFFFF00000000n;
+
 /**
- * Parses an IPv4 or IPv6 CIDR notation string.
+ * Parses IPv4 or IPv6 CIDR notation, in either dialect and with an
+ * optional zone ID.
  *
- * Detects the IP version by checking for `:` in the input — if present,
- * the CIDR is parsed as IPv6 (returning {@link Cidrv6}), otherwise as IPv4
- * (returning {@link Cidrv4}). IPv4-mapped IPv6 CIDRs with prefix length >= 96
- * (e.g., `::ffff:192.168.1.0/120`) are automatically unwrapped to their
- * IPv4 CIDR representation.
+ * Detects the IP version from the address slot -- a `:` means IPv6,
+ * otherwise IPv4 -- and hands the string to {@link parseCidrv6} or
+ * {@link parseCidrv4}, so the accepted grammar is exactly theirs: an
+ * address, an optional `%zoneId` carried verbatim, then `/` and a prefix
+ * length or a mask of the same version.
  *
- * To preserve the full IPv6 CIDR for mapped addresses, use
- * {@link parseCidrv6} directly instead.
+ * An IPv4-mapped IPv6 block is unmapped to an IPv4 block by default
+ * (ADR 0004), but only when the whole `::ffff:0:0/96` prefix is fixed: a
+ * prefix length of 96 or longer, or a mask whose high 96 bits are all ones.
+ * The dialect is kept, the prefix length is reduced by 96 and a mask keeps
+ * its low 32 bits, so `::ffff:192.168.1.0/120` becomes `192.168.1.0/24`.
+ * `::ffff:1.2.3.4/64` is an IPv6 block that happens to start in the mapped
+ * range and stays IPv6. Pass `{ unmapToV4: false }` to keep every IPv6
+ * block, or use {@link parseCidrv6}, which never unmaps. The zone ID, if
+ * any, is carried either way.
  *
- * @param cidr The CIDR notation string (e.g., "192.168.1.0/24" or "2001:db8::/32")
- * @returns The parsed CIDR as a `PrefixedCidrv4` or `PrefixedCidrv6`; the
- *   parser writes the prefix length dialect only
- * @throws {TypeError} If the format is invalid
- * @throws {RangeError} If values are out of range
+ * @param cidr The CIDR notation string, e.g. `"192.168.1.0/24"`, `"2001:db8::/32"`, `"fe80::%ether1/64"`, `"10.0.0.0/255.0.0.0"`
+ * @param options `unmapToV4`, default `true`
+ * @returns The parsed CIDR as a {@link ParsedCidrv4} or {@link ParsedCidrv6}
+ * @throws {TypeError} If the format is invalid, including a missing prefix and a mask of the other version
+ * @throws {RangeError} If a well-formed number is out of range
  *
- * @example
+ * @example Both versions and both dialects
  * ```ts
  * import { assertEquals } from "@std/assert";
  * import { parseCidr } from "@hertzg/ip/cidr";
  *
- * const v4 = parseCidr("10.0.0.0/8");
- * assertEquals(v4.prefixLength, 8);
+ * assertEquals(parseCidr("10.0.0.0/8"), { address: 167772160, prefixLength: 8 });
+ * assertEquals(parseCidr("10.0.0.0/255.0.0.0"), { address: 167772160, mask: 0xFF000000 });
+ * assertEquals(parseCidr("fe80::/10"), { address: 0xfe80n << 112n, prefixLength: 10 });
+ * assertEquals(parseCidr("fe80::%ether1/64"), { address: 0xfe80n << 112n, prefixLength: 64, zoneId: "ether1" });
+ * ```
  *
- * const v6 = parseCidr("fe80::/10");
- * assertEquals(v6.prefixLength, 10);
+ * @example IPv4-mapped blocks unmap at /96 or longer
+ * ```ts
+ * import { assertEquals } from "@std/assert";
+ * import { parseCidr } from "@hertzg/ip/cidr";
  *
- * const mapped = parseCidr("::ffff:192.168.1.0/120");
- * assertEquals(mapped, { address: 3232235776, prefixLength: 24 });
+ * assertEquals(parseCidr("::ffff:192.168.1.0/120"), { address: 3232235776, prefixLength: 24 });
+ * assertEquals(parseCidr("::ffff:192.168.1.0/96"), { address: 3232235776, prefixLength: 0 });
+ * assertEquals(
+ *   parseCidr("::ffff:192.168.1.0/ffff:ffff:ffff:ffff:ffff:ffff:ffff:ff00"),
+ *   { address: 3232235776, mask: 0xFFFFFF00 },
+ * );
+ * assertEquals(parseCidr("::ffff:192.168.1.0/64"), { address: 0xffffc0a80100n, prefixLength: 64 });
+ * assertEquals(
+ *   parseCidr("::ffff:192.168.1.0/120", { unmapToV4: false }),
+ *   { address: 0xffffc0a80100n, prefixLength: 120 },
+ * );
+ * ```
+ *
+ * @example An address alone is not a CIDR block
+ * ```ts
+ * import { assertThrows } from "@std/assert";
+ * import { parseCidr } from "@hertzg/ip/cidr";
+ *
+ * assertThrows(() => parseCidr("10.0.0.1"), TypeError);
+ * assertThrows(() => parseCidr("fe80::1%eth0"), TypeError);
  * ```
  */
-export function parseCidr(cidr: string): PrefixedCidrv4 | PrefixedCidrv6 {
-  if (cidr.includes(":")) {
-    const v6 = parseCidrv6(cidr);
-    if (isAddressv6Mapped(v6.address) && v6.prefixLength >= 96) {
-      return unmapToCidrv4(v6);
-    }
-    return v6;
+export function parseCidr(cidr: string, options?: ParseOptions): ParsedCidr {
+  if (!splitNotation(cidr).address.includes(":")) {
+    return parseCidrv4(cidr);
   }
-  return parseCidrv4(cidr);
+  const parsed = parseCidrv6(cidr);
+  if (options?.unmapToV4 === false || !isAddressv6Mapped(parsed.address)) {
+    return parsed;
+  }
+  const fixesMappedPrefix = parsed.mask !== undefined
+    ? (parsed.mask & IPV4_MAPPED_PREFIX_MASK) === IPV4_MAPPED_PREFIX_MASK
+    : parsed.prefixLength >= 96;
+  if (!fixesMappedPrefix) {
+    return parsed;
+  }
+  const unmapped = unmapToCidrv4(parsed);
+  return parsed.zoneId === undefined
+    ? unmapped
+    : { ...unmapped, zoneId: parsed.zoneId };
 }
 
 /**
- * Stringifies a {@link Cidrv4} or {@link Cidrv6} to CIDR notation.
+ * Stringifies a CIDR block of either version, or an address, to CIDR
+ * notation.
  *
- * The dialect is preserved: a prefixed block is written as `/N`, a masked
- * block as `/mask` in the address notation of its version.
+ * Dispatches on the version of the address and hands the value to
+ * {@link stringifyCidrv4} or {@link stringifyCidrv6}, so their rules apply:
+ * the dialect is preserved (`/N` for a prefixed block, `/mask` in the
+ * address notation of its version for a masked one), a bare address gets
+ * the noun's default (`/32` or `/128`), and a truthy `zoneId` is written
+ * between the address and the `/`, so `stringifyCidr(parseCidr(s))` gives
+ * back `s` for every accepted `s` in canonical form. `zoneId` must not
+ * contain `%`, `/` or whitespace; see {@link stringifyCidrv6}.
  *
- * @param cidr The CIDR object
+ * @param cidr The CIDR block in either dialect, a parse result, or a bare or parsed address
  * @returns The CIDR notation string
+ * @throws {RangeError} If the address, or a mask, is out of range for its version
  *
  * @example
  * ```ts
@@ -229,6 +310,7 @@ export function parseCidr(cidr: string): PrefixedCidrv4 | PrefixedCidrv6 {
  *
  * assertEquals(stringifyCidr(parseCidr("192.168.1.0/24")), "192.168.1.0/24");
  * assertEquals(stringifyCidr(parseCidr("2001:db8::/32")), "2001:db8::/32");
+ * assertEquals(stringifyCidr(parseCidr("fe80::%ether1/64")), "fe80::%ether1/64");
  * ```
  *
  * @example Masked blocks are written with their mask
@@ -245,12 +327,30 @@ export function parseCidr(cidr: string): PrefixedCidrv4 | PrefixedCidrv6 {
  *   "fe80::/ffff:ffff::",
  * );
  * ```
+ *
+ * @example A bare address gets the noun's default
+ * ```ts
+ * import { assertEquals } from "@std/assert";
+ * import { stringifyCidr } from "@hertzg/ip/cidr";
+ *
+ * assertEquals(stringifyCidr(3232235777), "192.168.1.1/32");
+ * assertEquals(stringifyCidr(0xfe800000000000000000000000000001n), "fe80::1/128");
+ * assertEquals(
+ *   stringifyCidr({ address: 0xfe800000000000000000000000000001n, zoneId: "eth0" }),
+ *   "fe80::1%eth0/128",
+ * );
+ * ```
  */
-export function stringifyCidr(cidr: Cidr): string {
-  if (isCidrv6(cidr)) {
-    return stringifyCidrv6(cidr);
-  }
-  return stringifyCidrv4(cidr);
+export function stringifyCidr(
+  cidr: Address | ParsedAddress | ParsedCidr,
+): string {
+  if (typeof cidr === "number") return stringifyCidrv4(cidr);
+  if (typeof cidr === "bigint") return stringifyCidrv6(cidr);
+  // Narrowing a union by the type of one field is beyond `typeof`, hence
+  // the casts; the runtime check is the same one isCidrv6 makes.
+  return typeof cidr.address === "bigint"
+    ? stringifyCidrv6(cidr as ParsedAddressv6 | ParsedCidrv6)
+    : stringifyCidrv4(cidr as ParsedAddressv4 | ParsedCidrv4);
 }
 
 /**
@@ -277,11 +377,11 @@ export function stringifyCidr(cidr: Cidr): string {
  * import { cidrContains, parseCidr } from "@hertzg/ip/cidr";
  * import { parseAddress } from "@hertzg/ip/address";
  *
- * assert(cidrContains(parseCidr("10.0.0.0/8"), parseAddress("10.1.2.3")));
- * assertEquals(cidrContains(parseCidr("10.0.0.0/8"), parseAddress("11.0.0.1")), false);
+ * assert(cidrContains(parseCidr("10.0.0.0/8"), parseAddress("10.1.2.3").address));
+ * assertEquals(cidrContains(parseCidr("10.0.0.0/8"), parseAddress("11.0.0.1").address), false);
  *
- * assert(cidrContains(parseCidr("2001:db8::/32"), parseAddress("2001:db8::1")));
- * assertEquals(cidrContains(parseCidr("2001:db8::/32"), parseAddress("2001:db9::1")), false);
+ * assert(cidrContains(parseCidr("2001:db8::/32"), parseAddress("2001:db8::1").address));
+ * assertEquals(cidrContains(parseCidr("2001:db8::/32"), parseAddress("2001:db9::1").address), false);
  * ```
  *
  * @example Mixed versions return false instead of throwing
@@ -290,8 +390,8 @@ export function stringifyCidr(cidr: Cidr): string {
  * import { cidrContains, parseCidr } from "@hertzg/ip/cidr";
  * import { parseAddress } from "@hertzg/ip/address";
  *
- * assertEquals(cidrContains(parseCidr("10.0.0.0/8"), parseAddress("2001:db8::1")), false);
- * assertEquals(cidrContains(parseCidr("::/0"), parseAddress("10.1.2.3")), false);
+ * assertEquals(cidrContains(parseCidr("10.0.0.0/8"), parseAddress("2001:db8::1").address), false);
+ * assertEquals(cidrContains(parseCidr("::/0"), parseAddress("10.1.2.3").address), false);
  * ```
  *
  * @example IPv4-mapped IPv6 depends on which parser produced the address
@@ -301,9 +401,9 @@ export function stringifyCidr(cidr: Cidr): string {
  * import { parseAddress } from "@hertzg/ip/address";
  * import { parseAddressv6 } from "@hertzg/ip/addressv6";
  *
- * assert(cidrContains(parseCidr("10.0.0.0/8"), parseAddress("::ffff:10.1.2.3")));
+ * assert(cidrContains(parseCidr("10.0.0.0/8"), parseAddress("::ffff:10.1.2.3").address));
  * assertEquals(
- *   cidrContains(parseCidr("10.0.0.0/8"), parseAddressv6("::ffff:10.1.2.3")),
+ *   cidrContains(parseCidr("10.0.0.0/8"), parseAddressv6("::ffff:10.1.2.3").address),
  *   false,
  * );
  * ```
@@ -839,7 +939,7 @@ export function* cidrAddresses(
  *   "10.0.0.0/16",
  *   "fd00::/8",
  *   "10.0.0.0/8",
- * ].map(parseCidr);
+ * ].map((s) => parseCidr(s));
  *
  * assertEquals(allowlist.toSorted(compareCidr).map(stringifyCidr), [
  *   "10.0.0.0/8",

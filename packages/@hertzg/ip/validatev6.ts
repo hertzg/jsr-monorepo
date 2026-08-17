@@ -28,8 +28,9 @@ import { parseCidrv6 } from "./cidrv6.ts";
 /**
  * Checks if a string is a valid IPv6 address in colon-hexadecimal notation.
  *
- * Accepts full form, compressed form with `::`, IPv4-mapped addresses
- * (`::ffff:192.168.1.1`), and addresses with zone IDs (`fe80::1%eth0`).
+ * Accepts exactly what {@link parseAddressv6} accepts: full form,
+ * compressed form with `::`, IPv4-mapped addresses (`::ffff:192.168.1.1`),
+ * and an optional `%zoneId` (`fe80::1%eth0`), no prefix.
  *
  * @param address The address string to validate
  * @returns `true` if the string is a valid IPv6 address
@@ -55,6 +56,9 @@ import { parseCidrv6 } from "./cidrv6.ts";
  * assertEquals(isValidAddressv6("192.168.1.1"), false);
  * assertEquals(isValidAddressv6("2001:db8:::1"), false);
  * assertEquals(isValidAddressv6("gggg::1"), false);
+ * assertEquals(isValidAddressv6("fe80::1%"), false);
+ * assertEquals(isValidAddressv6("fe80::1%eth0%1"), false);
+ * assertEquals(isValidAddressv6("2001:db8::/32"), false);
  * ```
  */
 export function isValidAddressv6(address: string): boolean {
@@ -69,6 +73,10 @@ export function isValidAddressv6(address: string): boolean {
 /**
  * Checks if a string is valid IPv6 CIDR notation.
  *
+ * Accepts exactly what {@link parseCidrv6} accepts: an address, an optional
+ * `%zoneId`, then `/` and a prefix length of 0 to 128 or a
+ * colon-hexadecimal mask.
+ *
  * @param cidr The CIDR string to validate
  * @returns `true` if the string is valid IPv6 CIDR notation
  *
@@ -80,6 +88,8 @@ export function isValidAddressv6(address: string): boolean {
  * assert(isValidCidrv6("::/0"));
  * assert(isValidCidrv6("2001:db8::/32"));
  * assert(isValidCidrv6("::1/128"));
+ * assert(isValidCidrv6("fe80::/ffff:ffff::"));
+ * assert(isValidCidrv6("fe80::%ether1/64"));
  * ```
  *
  * @example Invalid CIDR
@@ -91,6 +101,8 @@ export function isValidAddressv6(address: string): boolean {
  * assertEquals(isValidCidrv6("2001:db8::1"), false);
  * assertEquals(isValidCidrv6("2001:db8::/129"), false);
  * assertEquals(isValidCidrv6("192.168.1.0/24"), false);
+ * assertEquals(isValidCidrv6("fe80::/255.0.0.0"), false);
+ * assertEquals(isValidCidrv6("fe80::/64%ether1"), false);
  * ```
  */
 export function isValidCidrv6(cidr: string): boolean {

@@ -26,7 +26,7 @@ Deno.test("addressVersion", async (t) => {
     () => {
       const mapped = "::ffff:10.1.2.3";
       assertEquals(addressVersion(mapped), 6);
-      assertEquals(typeof parseAddress(mapped), "number");
+      assertEquals(typeof parseAddress(mapped).address, "number");
     },
   );
 
@@ -41,6 +41,11 @@ Deno.test("addressVersion", async (t) => {
   await t.step("rejects CIDR notation", () => {
     assertEquals(addressVersion("10.0.0.0/8"), undefined);
     assertEquals(addressVersion("2001:db8::/32"), undefined);
+  });
+
+  await t.step("accepts a zone ID on either version", () => {
+    assertEquals(addressVersion("192.168.1.1%ether1"), 4);
+    assertEquals(addressVersion("fe80::1%"), undefined);
   });
 
   await t.step("rejects inet_aton short forms", () => {
@@ -77,6 +82,16 @@ Deno.test("cidrVersion", async (t) => {
     assertEquals(cidrVersion("10.0.0.0"), undefined);
     assertEquals(cidrVersion("::1"), undefined);
   });
+
+  await t.step(
+    "reports the mask dialect and zone IDs, as the parsers do",
+    () => {
+      assertEquals(cidrVersion("10.0.0.0/255.0.0.0"), 4);
+      assertEquals(cidrVersion("fe80::/ffff:ffff::"), 6);
+      assertEquals(cidrVersion("fe80::%ether1/64"), 6);
+      assertEquals(cidrVersion("10.0.0.0/ffff:ff00::"), undefined);
+    },
+  );
 
   await t.step("returns undefined for out-of-range prefix lengths", () => {
     assertEquals(cidrVersion("10.0.0.0/33"), undefined);

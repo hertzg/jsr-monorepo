@@ -186,8 +186,8 @@ export function addressFromBytes(bytes: Uint8Array): Address {
  * import { addressToBytes } from "@hertzg/ip/bytes";
  * import { parseAddress } from "@hertzg/ip/address";
  *
- * assertEquals(addressToBytes(parseAddress("10.0.0.1")), new Uint8Array([10, 0, 0, 1]));
- * assertEquals(addressToBytes(parseAddress("::1")).length, 16);
+ * assertEquals(addressToBytes(parseAddress("10.0.0.1").address), new Uint8Array([10, 0, 0, 1]));
+ * assertEquals(addressToBytes(parseAddress("::1").address).length, 16);
  * ```
  *
  * @example Round-tripping a packet field

@@ -7,6 +7,13 @@ Deno.test("isValidAddress", async (t) => {
     assert(isValidAddress("::1"));
     assert(isValidAddress("0.0.0.0"));
     assert(isValidAddress("fe80::1%eth0"));
+    assert(isValidAddress("192.168.1.1%ether1"));
+  });
+
+  await t.step("follows the parser on zone IDs", () => {
+    assertEquals(isValidAddress("fe80::1%"), false);
+    assertEquals(isValidAddress("fe80::1%eth0%1"), false);
+    assertEquals(isValidAddress("fe80::1% eth0"), false);
   });
 
   await t.step("rejects CIDR notation", () => {
@@ -29,6 +36,17 @@ Deno.test("isValidCidr", async (t) => {
     assert(isValidCidr("192.168.1.0/24"));
     assert(isValidCidr("::/0"));
   });
+
+  await t.step(
+    "accepts the mask dialect and zone IDs, as the parsers do",
+    () => {
+      assert(isValidCidr("10.0.0.0/255.0.0.0"));
+      assert(isValidCidr("fe80::/ffff:ffff::"));
+      assert(isValidCidr("fe80::%ether1/64"));
+      assertEquals(isValidCidr("10.0.0.0/ffff:ff00::"), false);
+      assertEquals(isValidCidr("fe80::/64%eth0"), false);
+    },
+  );
 
   await t.step("rejects plain IP addresses", () => {
     assertEquals(isValidCidr("192.168.1.1"), false);
