@@ -146,7 +146,7 @@ export type ArpOpcode = (typeof ARP_OPCODE)[keyof typeof ARP_OPCODE];
  * Hardware addresses (`senderHardwareAddress` / `targetHardwareAddress`) are
  * raw 6-byte arrays; IPv4 protocol addresses (`senderProtocolAddress` /
  * `targetProtocolAddress`) are 32-bit unsigned integers. Use `@hertzg/mac`
- * and `@hertzg/ip/ipv4` for human-readable conversion.
+ * and `@hertzg/ip/addressv4` for human-readable conversion.
  */
 export interface ArpData {
   hardwareType: number;

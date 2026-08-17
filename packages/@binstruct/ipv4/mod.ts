@@ -112,7 +112,7 @@ export const ETHERTYPE_IPV4 = 0x0800;
  *
  * IPv4 addresses (`sourceAddress` / `destinationAddress`) are surfaced as
  * 32-bit unsigned integers, the same on-wire form ARP uses. Use
- * `@hertzg/ip/ipv4`'s `parseAddressv4` / `stringifyAddressv4` for human-readable
+ * `@hertzg/ip/addressv4`'s `parseAddressv4` / `stringifyAddressv4` for human-readable
  * conversion.
  *
  * The `options` length is derived from `versionIhl.ihl` (`(ihl - 5) * 4`); the
