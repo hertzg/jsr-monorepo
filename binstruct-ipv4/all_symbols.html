@@ -151,7 +151,7 @@ Examples</h2></div><div class="space-y-8"><div class="anchorable"><a href="#exam
 <h3 class="example-header"><div class="markdown"><p>Round-trip a minimal IPv4 datagram (no options, empty payload)</p>
 </div></h3>
   <div><div class="markdown"><pre class="highlight"><code class="language-ts">import { assertEquals } from &quot;@std/assert&quot;;
-import { parseIpv4 } from &quot;@hertzg/ip/ipv4&quot;;
+import { parseAddressv4 } from &quot;@hertzg/ip/addressv4&quot;;
 import { ipv4Packet } from &quot;@binstruct/ipv4&quot;;
 
 const coder = ipv4Packet();
@@ -169,8 +169,8 @@ const datagram = {
   timeToLive: 64,
   protocol: 6,
   headerChecksum: 0,
-  sourceAddress: parseIpv4(&quot;192.168.1.100&quot;),
-  destinationAddress: parseIpv4(&quot;10.0.0.50&quot;),
+  sourceAddress: parseAddressv4(&quot;192.168.1.100&quot;),
+  destinationAddress: parseAddressv4(&quot;10.0.0.50&quot;),
   options: new Uint8Array(0),
   payload: new Uint8Array(0),
 };
@@ -181,11 +181,11 @@ const [decoded, bytesRead] = coder.decode(buffer);
 
 assertEquals(bytesWritten, 20);
 assertEquals(bytesRead, 20);
-assertEquals(decoded.sourceAddress, parseIpv4(&quot;192.168.1.100&quot;));
-assertEquals(decoded.destinationAddress, parseIpv4(&quot;10.0.0.50&quot;));
+assertEquals(decoded.sourceAddress, parseAddressv4(&quot;192.168.1.100&quot;));
+assertEquals(decoded.destinationAddress, parseAddressv4(&quot;10.0.0.50&quot;));
 assertEquals(decoded.flagsFragmentOffset.dontFragment, 1);
 </code><button class="copyButton" data-copy="import { assertEquals } from &quot;@std/assert&quot;;
-import { parseIpv4 } from &quot;@hertzg/ip/ipv4&quot;;
+import { parseAddressv4 } from &quot;@hertzg/ip/addressv4&quot;;
 import { ipv4Packet } from &quot;@binstruct/ipv4&quot;;
 
 const coder = ipv4Packet();
@@ -203,8 +203,8 @@ const datagram = {
   timeToLive: 64,
   protocol: 6,
   headerChecksum: 0,
-  sourceAddress: parseIpv4(&quot;192.168.1.100&quot;),
-  destinationAddress: parseIpv4(&quot;10.0.0.50&quot;),
+  sourceAddress: parseAddressv4(&quot;192.168.1.100&quot;),
+  destinationAddress: parseAddressv4(&quot;10.0.0.50&quot;),
   options: new Uint8Array(0),
   payload: new Uint8Array(0),
 };
@@ -215,8 +215,8 @@ const [decoded, bytesRead] = coder.decode(buffer);
 
 assertEquals(bytesWritten, 20);
 assertEquals(bytesRead, 20);
-assertEquals(decoded.sourceAddress, parseIpv4(&quot;192.168.1.100&quot;));
-assertEquals(decoded.destinationAddress, parseIpv4(&quot;10.0.0.50&quot;));
+assertEquals(decoded.sourceAddress, parseAddressv4(&quot;192.168.1.100&quot;));
+assertEquals(decoded.destinationAddress, parseAddressv4(&quot;10.0.0.50&quot;));
 assertEquals(decoded.flagsFragmentOffset.dontFragment, 1);
 "><svg
   class="copy"

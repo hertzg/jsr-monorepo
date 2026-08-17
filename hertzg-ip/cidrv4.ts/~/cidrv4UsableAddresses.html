@@ -225,10 +225,10 @@ Examples</h2></div><div class="space-y-8"><div class="anchorable"><a href="#exam
 </div></h3>
   <div><div class="markdown"><pre class="highlight"><code class="language-ts">import { assertEquals } from &quot;@std/assert&quot;;
 import { cidrv4UsableAddresses, parseCidrv4 } from &quot;@hertzg/ip/cidrv4&quot;;
-import { stringifyIpv4 } from &quot;@hertzg/ip/ipv4&quot;;
+import { stringifyAddressv4 } from &quot;@hertzg/ip/addressv4&quot;;
 
 const pool = Array.from(cidrv4UsableAddresses(parseCidrv4(&quot;10.0.1.0/29&quot;)));
-assertEquals(pool.map(stringifyIpv4), [
+assertEquals(pool.map(stringifyAddressv4), [
   &quot;10.0.1.1&quot;,
   &quot;10.0.1.2&quot;,
   &quot;10.0.1.3&quot;,
@@ -238,10 +238,10 @@ assertEquals(pool.map(stringifyIpv4), [
 ]);
 </code><button class="copyButton" data-copy="import { assertEquals } from &quot;@std/assert&quot;;
 import { cidrv4UsableAddresses, parseCidrv4 } from &quot;@hertzg/ip/cidrv4&quot;;
-import { stringifyIpv4 } from &quot;@hertzg/ip/ipv4&quot;;
+import { stringifyAddressv4 } from &quot;@hertzg/ip/addressv4&quot;;
 
 const pool = Array.from(cidrv4UsableAddresses(parseCidrv4(&quot;10.0.1.0/29&quot;)));
-assertEquals(pool.map(stringifyIpv4), [
+assertEquals(pool.map(stringifyAddressv4), [
   &quot;10.0.1.1&quot;,
   &quot;10.0.1.2&quot;,
   &quot;10.0.1.3&quot;,
@@ -308,22 +308,22 @@ assertEquals(pool.map(stringifyIpv4), [
 </div></h3>
   <div><div class="markdown"><pre class="highlight"><code class="language-ts">import { assertEquals } from &quot;@std/assert&quot;;
 import { cidrv4UsableAddresses, parseCidrv4 } from &quot;@hertzg/ip/cidrv4&quot;;
-import { stringifyIpv4 } from &quot;@hertzg/ip/ipv4&quot;;
+import { stringifyAddressv4 } from &quot;@hertzg/ip/addressv4&quot;;
 
 const link = Array.from(cidrv4UsableAddresses(parseCidrv4(&quot;10.0.0.0/31&quot;)));
-assertEquals(link.map(stringifyIpv4), [&quot;10.0.0.0&quot;, &quot;10.0.0.1&quot;]);
+assertEquals(link.map(stringifyAddressv4), [&quot;10.0.0.0&quot;, &quot;10.0.0.1&quot;]);
 
 const route = Array.from(cidrv4UsableAddresses(parseCidrv4(&quot;10.0.0.7/32&quot;)));
-assertEquals(route.map(stringifyIpv4), [&quot;10.0.0.7&quot;]);
+assertEquals(route.map(stringifyAddressv4), [&quot;10.0.0.7&quot;]);
 </code><button class="copyButton" data-copy="import { assertEquals } from &quot;@std/assert&quot;;
 import { cidrv4UsableAddresses, parseCidrv4 } from &quot;@hertzg/ip/cidrv4&quot;;
-import { stringifyIpv4 } from &quot;@hertzg/ip/ipv4&quot;;
+import { stringifyAddressv4 } from &quot;@hertzg/ip/addressv4&quot;;
 
 const link = Array.from(cidrv4UsableAddresses(parseCidrv4(&quot;10.0.0.0/31&quot;)));
-assertEquals(link.map(stringifyIpv4), [&quot;10.0.0.0&quot;, &quot;10.0.0.1&quot;]);
+assertEquals(link.map(stringifyAddressv4), [&quot;10.0.0.0&quot;, &quot;10.0.0.1&quot;]);
 
 const route = Array.from(cidrv4UsableAddresses(parseCidrv4(&quot;10.0.0.7/32&quot;)));
-assertEquals(route.map(stringifyIpv4), [&quot;10.0.0.7&quot;]);
+assertEquals(route.map(stringifyAddressv4), [&quot;10.0.0.7&quot;]);
 "><svg
   class="copy"
   width="15"
@@ -383,17 +383,17 @@ assertEquals(route.map(stringifyIpv4), [&quot;10.0.0.7&quot;]);
 </div></h3>
   <div><div class="markdown"><pre class="highlight"><code class="language-ts">import { assertEquals } from &quot;@std/assert&quot;;
 import { cidrv4UsableAddresses, parseCidrv4 } from &quot;@hertzg/ip/cidrv4&quot;;
-import { stringifyIpv4 } from &quot;@hertzg/ip/ipv4&quot;;
+import { stringifyAddressv4 } from &quot;@hertzg/ip/addressv4&quot;;
 
 const addresses = cidrv4UsableAddresses(parseCidrv4(&quot;10.0.0.0/8&quot;));
-assertEquals(stringifyIpv4(addresses.next().value as number), &quot;10.0.0.1&quot;);
+assertEquals(stringifyAddressv4(addresses.next().value as number), &quot;10.0.0.1&quot;);
 addresses.return(undefined);
 </code><button class="copyButton" data-copy="import { assertEquals } from &quot;@std/assert&quot;;
 import { cidrv4UsableAddresses, parseCidrv4 } from &quot;@hertzg/ip/cidrv4&quot;;
-import { stringifyIpv4 } from &quot;@hertzg/ip/ipv4&quot;;
+import { stringifyAddressv4 } from &quot;@hertzg/ip/addressv4&quot;;
 
 const addresses = cidrv4UsableAddresses(parseCidrv4(&quot;10.0.0.0/8&quot;));
-assertEquals(stringifyIpv4(addresses.next().value as number), &quot;10.0.0.1&quot;);
+assertEquals(stringifyAddressv4(addresses.next().value as number), &quot;10.0.0.1&quot;);
 addresses.return(undefined);
 "><svg
   class="copy"

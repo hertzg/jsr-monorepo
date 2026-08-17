@@ -101,8 +101,8 @@
   <div class="space-y-2 flex-1"><div class="space-y-7" id="module_doc"><div class="markdown"><p>Conversion between IPv6 addresses and their network-order wire bytes.</p>
 <p>This module reads an address straight out of a packet buffer and writes it
 straight back into one, with no string round-trip. It is the byte-form
-counterpart of the <code>ipv6</code> submodule: <a href=".././bytesv6.ts/~/ipv6FromBytes.html">ipv6FromBytes</a> is to
-parseIpv6 what <a href=".././bytesv6.ts/~/ipv6ToBytes.html">ipv6ToBytes</a> is to stringifyIpv6.</p>
+counterpart of the <code>ipv6</code> submodule: <a href=".././bytesv6.ts/~/addressv6FromBytes.html">addressv6FromBytes</a> is to
+parseAddressv6 what <a href=".././bytesv6.ts/~/addressv6ToBytes.html">addressv6ToBytes</a> is to stringifyAddressv6.</p>
 <p>Addresses keep the numeric representation of the rest of the package — a
 <code>bigint</code> holding a 128-bit unsigned integer. Bytes are a conversion, not a
 second representation.</p>
@@ -168,8 +168,8 @@ Examples</h2></div><div class="space-y-8"><div class="anchorable"><a href="#exam
 <h3 class="example-header"><div class="markdown"><p>Decode an address out of an IPv6 header</p>
 </div></h3>
   <div><div class="markdown"><pre class="highlight"><code class="language-ts">import { assertEquals } from &quot;@std/assert&quot;;
-import { ipv6FromBytes } from &quot;@hertzg/ip/bytesv6&quot;;
-import { stringifyIpv6 } from &quot;@hertzg/ip/ipv6&quot;;
+import { addressv6FromBytes } from &quot;@hertzg/ip/bytesv6&quot;;
+import { stringifyAddressv6 } from &quot;@hertzg/ip/addressv6&quot;;
 
 // deno-fmt-ignore
 const packet = new Uint8Array([
@@ -178,10 +178,10 @@ const packet = new Uint8Array([
   0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x01,
 ]);
 
-assertEquals(stringifyIpv6(ipv6FromBytes(packet, 8)), &quot;2001:db8::1&quot;);
+assertEquals(stringifyAddressv6(addressv6FromBytes(packet, 8)), &quot;2001:db8::1&quot;);
 </code><button class="copyButton" data-copy="import { assertEquals } from &quot;@std/assert&quot;;
-import { ipv6FromBytes } from &quot;@hertzg/ip/bytesv6&quot;;
-import { stringifyIpv6 } from &quot;@hertzg/ip/ipv6&quot;;
+import { addressv6FromBytes } from &quot;@hertzg/ip/bytesv6&quot;;
+import { stringifyAddressv6 } from &quot;@hertzg/ip/addressv6&quot;;
 
 // deno-fmt-ignore
 const packet = new Uint8Array([
@@ -190,7 +190,7 @@ const packet = new Uint8Array([
   0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x01,
 ]);
 
-assertEquals(stringifyIpv6(ipv6FromBytes(packet, 8)), &quot;2001:db8::1&quot;);
+assertEquals(stringifyAddressv6(addressv6FromBytes(packet, 8)), &quot;2001:db8::1&quot;);
 "><svg
   class="copy"
   width="15"
@@ -249,23 +249,23 @@ assertEquals(stringifyIpv6(ipv6FromBytes(packet, 8)), &quot;2001:db8::1&quot;);
 <h3 class="example-header"><div class="markdown"><p>Assemble an IPv6 header in place</p>
 </div></h3>
   <div><div class="markdown"><pre class="highlight"><code class="language-ts">import { assertEquals } from &quot;@std/assert&quot;;
-import { ipv6FromBytes, ipv6ToBytes } from &quot;@hertzg/ip/bytesv6&quot;;
-import { parseIpv6 } from &quot;@hertzg/ip/ipv6&quot;;
+import { addressv6FromBytes, addressv6ToBytes } from &quot;@hertzg/ip/bytesv6&quot;;
+import { parseAddressv6 } from &quot;@hertzg/ip/addressv6&quot;;
 
 const frame = new Uint8Array(40);
-ipv6ToBytes(parseIpv6(&quot;2001:db8::1&quot;), frame, 8);
-ipv6ToBytes(parseIpv6(&quot;2001:db8::2&quot;), frame, 24);
+addressv6ToBytes(parseAddressv6(&quot;2001:db8::1&quot;), frame, 8);
+addressv6ToBytes(parseAddressv6(&quot;2001:db8::2&quot;), frame, 24);
 
-assertEquals(ipv6FromBytes(frame, 24), parseIpv6(&quot;2001:db8::2&quot;));
+assertEquals(addressv6FromBytes(frame, 24), parseAddressv6(&quot;2001:db8::2&quot;));
 </code><button class="copyButton" data-copy="import { assertEquals } from &quot;@std/assert&quot;;
-import { ipv6FromBytes, ipv6ToBytes } from &quot;@hertzg/ip/bytesv6&quot;;
-import { parseIpv6 } from &quot;@hertzg/ip/ipv6&quot;;
+import { addressv6FromBytes, addressv6ToBytes } from &quot;@hertzg/ip/bytesv6&quot;;
+import { parseAddressv6 } from &quot;@hertzg/ip/addressv6&quot;;
 
 const frame = new Uint8Array(40);
-ipv6ToBytes(parseIpv6(&quot;2001:db8::1&quot;), frame, 8);
-ipv6ToBytes(parseIpv6(&quot;2001:db8::2&quot;), frame, 24);
+addressv6ToBytes(parseAddressv6(&quot;2001:db8::1&quot;), frame, 8);
+addressv6ToBytes(parseAddressv6(&quot;2001:db8::2&quot;), frame, 24);
 
-assertEquals(ipv6FromBytes(frame, 24), parseIpv6(&quot;2001:db8::2&quot;));
+assertEquals(addressv6FromBytes(frame, 24), parseAddressv6(&quot;2001:db8::2&quot;));
 "><svg
   class="copy"
   width="15"
@@ -323,15 +323,15 @@ assertEquals(ipv6FromBytes(frame, 24), parseIpv6(&quot;2001:db8::2&quot;));
   </defs>
 </svg>
 </a>
-Functions</h2></div><div class="namespaceSection"><div id="namespace_ipv6frombytes" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-Function bg-Function/15 dark:text-FunctionDark dark:bg-FunctionDark/15" title="Function">f</div></div>
+Functions</h2></div><div class="namespaceSection"><div id="namespace_addressv6frombytes" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-Function bg-Function/15 dark:text-FunctionDark dark:bg-FunctionDark/15" title="Function">f</div></div>
 <div class="namespaceItemContent">
-		    <a href="..&#x2F;.&#x2F;bytesv6.ts&#x2F;~&#x2F;ipv6FromBytes.html" title="ipv6FromBytes">
-			    <span>ipv6FromBytes</span><span>(<div class="ml-4"><div><span>bytes<span>: <span class="td-ref">Uint8Array</span></span></span>,</div><div><span>offset<span class="td-op">?</span><span>: <span class="td-kw">number</span></span></span></div></div>)<span>: <span class="td-kw">bigint</span></span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Reads a 16-byte IPv6 address from a buffer.</p>
+		    <a href="..&#x2F;.&#x2F;bytesv6.ts&#x2F;~&#x2F;addressv6FromBytes.html" title="addressv6FromBytes">
+			    <span>addressv6FromBytes</span><span>(<div class="ml-4"><div><span>bytes<span>: <span class="td-ref">Uint8Array</span></span></span>,</div><div><span>offset<span class="td-op">?</span><span>: <span class="td-kw">number</span></span></span></div></div>)<span>: <span class="td-kw">bigint</span></span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Reads a 16-byte IPv6 address from a buffer.</p>
 </div></div></div>
-    </div><div id="namespace_ipv6tobytes" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-Function bg-Function/15 dark:text-FunctionDark dark:bg-FunctionDark/15" title="Function">f</div></div>
+    </div><div id="namespace_addressv6tobytes" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-Function bg-Function/15 dark:text-FunctionDark dark:bg-FunctionDark/15" title="Function">f</div></div>
 <div class="namespaceItemContent">
-		    <a href="..&#x2F;.&#x2F;bytesv6.ts&#x2F;~&#x2F;ipv6ToBytes.html" title="ipv6ToBytes">
-			    <span>ipv6ToBytes</span><span>(<div class="ml-4"><div><span>address<span>: <span class="td-kw">bigint</span></span></span>,</div><div><span>into<span class="td-op">?</span><span>: <span class="td-ref">Uint8Array</span></span></span>,</div><div><span>offset<span class="td-op">?</span><span>: <span class="td-kw">number</span></span></span></div></div>)<span>: <span class="td-ref">Uint8Array</span></span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Writes a 16-byte IPv6 address, either into a fresh buffer or into one you
+		    <a href="..&#x2F;.&#x2F;bytesv6.ts&#x2F;~&#x2F;addressv6ToBytes.html" title="addressv6ToBytes">
+			    <span>addressv6ToBytes</span><span>(<div class="ml-4"><div><span>address<span>: <span class="td-kw">bigint</span></span></span>,</div><div><span>into<span class="td-op">?</span><span>: <span class="td-ref">Uint8Array</span></span></span>,</div><div><span>offset<span class="td-op">?</span><span>: <span class="td-kw">number</span></span></span></div></div>)<span>: <span class="td-ref">Uint8Array</span></span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Writes a 16-byte IPv6 address, either into a fresh buffer or into one you
 supply.</p>
 </div></div></div>
     </div></div>
@@ -377,37 +377,37 @@ supply.</p>
 </div></div><nav class="topSymbols">
           <h3>Symbols</h3>
           <ul><li>
-                <a href="..&#x2F;.&#x2F;ip.ts&#x2F;~&#x2F;Address.html" title="Address"><div class="docNodeKindIcon"><div class="text-TypeAlias bg-TypeAlias/15 dark:text-TypeAliasDark dark:bg-TypeAliasDark/15" title="Type Alias">T</div></div>
+                <a href="..&#x2F;.&#x2F;address.ts&#x2F;~&#x2F;Address.html" title="Address"><div class="docNodeKindIcon"><div class="text-TypeAlias bg-TypeAlias/15 dark:text-TypeAliasDark dark:bg-TypeAliasDark/15" title="Type Alias">T</div></div>
 <span class="hover:bg-TypeAlias/15 hover:bg-TypeAliasDark/15">
                     Address
                   </span>
                 </a>
               </li><li>
-                <a href="..&#x2F;.&#x2F;ip.ts&#x2F;~&#x2F;compareIp.html" title="compareIp"><div class="docNodeKindIcon"><div class="text-Function bg-Function/15 dark:text-FunctionDark dark:bg-FunctionDark/15" title="Function">f</div></div>
+                <a href="..&#x2F;.&#x2F;address.ts&#x2F;~&#x2F;compareAddress.html" title="compareAddress"><div class="docNodeKindIcon"><div class="text-Function bg-Function/15 dark:text-FunctionDark dark:bg-FunctionDark/15" title="Function">f</div></div>
 <span class="hover:bg-Function/15 hover:bg-FunctionDark/15">
-                    compareIp
+                    compareAddress
                   </span>
                 </a>
               </li><li>
-                <a href="..&#x2F;.&#x2F;ip.ts&#x2F;~&#x2F;parseIp.html" title="parseIp"><div class="docNodeKindIcon"><div class="text-Function bg-Function/15 dark:text-FunctionDark dark:bg-FunctionDark/15" title="Function">f</div></div>
+                <a href="..&#x2F;.&#x2F;address.ts&#x2F;~&#x2F;parseAddress.html" title="parseAddress"><div class="docNodeKindIcon"><div class="text-Function bg-Function/15 dark:text-FunctionDark dark:bg-FunctionDark/15" title="Function">f</div></div>
 <span class="hover:bg-Function/15 hover:bg-FunctionDark/15">
-                    parseIp
+                    parseAddress
                   </span>
                 </a>
               </li><li>
-                <a href="..&#x2F;.&#x2F;ip.ts&#x2F;~&#x2F;stringifyIp.html" title="stringifyIp"><div class="docNodeKindIcon"><div class="text-Function bg-Function/15 dark:text-FunctionDark dark:bg-FunctionDark/15" title="Function">f</div></div>
+                <a href="..&#x2F;.&#x2F;address.ts&#x2F;~&#x2F;stringifyAddress.html" title="stringifyAddress"><div class="docNodeKindIcon"><div class="text-Function bg-Function/15 dark:text-FunctionDark dark:bg-FunctionDark/15" title="Function">f</div></div>
 <span class="hover:bg-Function/15 hover:bg-FunctionDark/15">
-                    stringifyIp
+                    stringifyAddress
                   </span>
                 </a>
               </li><li>
-                <a href="..&#x2F;.&#x2F;ip.ts&#x2F;~&#x2F;stringifyIp.html" title="stringifyIp"><div class="docNodeKindIcon"><div class="text-Function bg-Function/15 dark:text-FunctionDark dark:bg-FunctionDark/15" title="Function">f</div></div>
+                <a href="..&#x2F;.&#x2F;address.ts&#x2F;~&#x2F;stringifyAddress.html" title="stringifyAddress"><div class="docNodeKindIcon"><div class="text-Function bg-Function/15 dark:text-FunctionDark dark:bg-FunctionDark/15" title="Function">f</div></div>
 <span class="hover:bg-Function/15 hover:bg-FunctionDark/15">
-                    stringifyIp
+                    stringifyAddress
                   </span>
                 </a>
               </li></ul><a class="flex items-center gap-0.5" href="..&#x2F;.&#x2F;all_symbols.html">
-              <span class="leading-none">view all 283 symbols</span><svg
+              <span class="leading-none">view all 279 symbols</span><svg
   width="16"
   height="16"
   viewBox="0 0 16 16"
@@ -422,7 +422,7 @@ supply.</p>
   />
 </svg>
 </a></nav><nav class="documentNavigation">
-          <h3>Document Navigation</h3><ul><li><ul><li><a href="#byte-order" title="Byte order">Byte order</a></li><li><a href="#widths-and-offsets" title="Widths and offsets">Widths and offsets</a></li></ul></li><li><a href="#examples" title="Examples">Examples</a></li><li><ul><li><a href="#example_0" title="Decode an address out of an IPv6 header">Decode an address out of an IPv6 header</a></li><li><a href="#example_1" title="Assemble an IPv6 header in place">Assemble an IPv6 header in place</a></li></ul></li><li><a href="#bytesv6_ts_functions" title="Functions">Functions</a></li><li><ul><li><a href="#namespace_ipv6frombytes" title="ipv6FromBytes">ipv6FromBytes</a></li><li><a href="#namespace_ipv6tobytes" title="ipv6ToBytes">ipv6ToBytes</a></li></ul></li></ul></nav></div>
+          <h3>Document Navigation</h3><ul><li><ul><li><a href="#byte-order" title="Byte order">Byte order</a></li><li><a href="#widths-and-offsets" title="Widths and offsets">Widths and offsets</a></li></ul></li><li><a href="#examples" title="Examples">Examples</a></li><li><ul><li><a href="#example_0" title="Decode an address out of an IPv6 header">Decode an address out of an IPv6 header</a></li><li><a href="#example_1" title="Assemble an IPv6 header in place">Assemble an IPv6 header in place</a></li></ul></li><li><a href="#bytesv6_ts_functions" title="Functions">Functions</a></li><li><ul><li><a href="#namespace_addressv6frombytes" title="addressv6FromBytes">addressv6FromBytes</a></li><li><a href="#namespace_addressv6tobytes" title="addressv6ToBytes">addressv6ToBytes</a></li></ul></li></ul></nav></div>
   </div></div>
 </div>
 </div>

@@ -157,7 +157,7 @@ are surfaced as 32-bit numbers.</p>
 <p>For human-readable conversion use the sister utility packages:</p>
 <ul>
 <li><a href="https://jsr.io/@hertzg/mac">@hertzg/mac</a> — <code>parse</code> / <code>stringify</code></li>
-<li><a href="https://jsr.io/@hertzg/ip">@hertzg/ip</a> — <code>parseIpv4</code> / <code>stringifyIpv4</code></li>
+<li><a href="https://jsr.io/@hertzg/ip">@hertzg/ip</a> — <code>parseAddressv4</code> / <code>stringifyAddressv4</code></li>
 </ul>
 </div><section class="section"  id="examples"><div>
       <h2 class="anchorable mb-1"><a href="#examples" class="anchor" aria-label="Anchor" tabIndex="-1"><svg
@@ -207,7 +207,7 @@ Examples</h2></div><div class="space-y-8"><div class="anchorable"><a href="#exam
 <h3 class="example-header"><div class="markdown"><p>Decode an Ethernet/IPv4 ARP request</p>
 </div></h3>
   <div><div class="markdown"><pre class="highlight"><code class="language-ts">import { assertEquals } from &quot;@std/assert&quot;;
-import { stringifyIpv4 } from &quot;@hertzg/ip/ipv4&quot;;
+import { stringifyAddressv4 } from &quot;@hertzg/ip/addressv4&quot;;
 import { stringify as stringifyMac } from &quot;@hertzg/mac&quot;;
 import {
   ARP_HARDWARE_TYPE,
@@ -236,10 +236,10 @@ assertEquals(packet.hardwareType, ARP_HARDWARE_TYPE.ETHERNET);
 assertEquals(packet.protocolType, ARP_PROTOCOL_TYPE.IPV4);
 assertEquals(packet.operation, ARP_OPCODE.REQUEST);
 assertEquals(stringifyMac(packet.senderHardwareAddress), &quot;00:11:22:33:44:55&quot;);
-assertEquals(stringifyIpv4(packet.senderProtocolAddress), &quot;192.168.1.1&quot;);
-assertEquals(stringifyIpv4(packet.targetProtocolAddress), &quot;192.168.1.2&quot;);
+assertEquals(stringifyAddressv4(packet.senderProtocolAddress), &quot;192.168.1.1&quot;);
+assertEquals(stringifyAddressv4(packet.targetProtocolAddress), &quot;192.168.1.2&quot;);
 </code><button class="copyButton" data-copy="import { assertEquals } from &quot;@std/assert&quot;;
-import { stringifyIpv4 } from &quot;@hertzg/ip/ipv4&quot;;
+import { stringifyAddressv4 } from &quot;@hertzg/ip/addressv4&quot;;
 import { stringify as stringifyMac } from &quot;@hertzg/mac&quot;;
 import {
   ARP_HARDWARE_TYPE,
@@ -268,8 +268,8 @@ assertEquals(packet.hardwareType, ARP_HARDWARE_TYPE.ETHERNET);
 assertEquals(packet.protocolType, ARP_PROTOCOL_TYPE.IPV4);
 assertEquals(packet.operation, ARP_OPCODE.REQUEST);
 assertEquals(stringifyMac(packet.senderHardwareAddress), &quot;00:11:22:33:44:55&quot;);
-assertEquals(stringifyIpv4(packet.senderProtocolAddress), &quot;192.168.1.1&quot;);
-assertEquals(stringifyIpv4(packet.targetProtocolAddress), &quot;192.168.1.2&quot;);
+assertEquals(stringifyAddressv4(packet.senderProtocolAddress), &quot;192.168.1.1&quot;);
+assertEquals(stringifyAddressv4(packet.targetProtocolAddress), &quot;192.168.1.2&quot;);
 "><svg
   class="copy"
   width="15"

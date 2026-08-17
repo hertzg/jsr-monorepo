@@ -215,7 +215,7 @@ Examples</h2></div><div class="space-y-8"><div class="anchorable"><a href="#exam
 <h3 class="example-header"><div class="markdown"><p>Round-trip encode and decode an ARP reply</p>
 </div></h3>
   <div><div class="markdown"><pre class="highlight"><code class="language-ts">import { assertEquals } from &quot;@std/assert&quot;;
-import { parseIpv4 } from &quot;@hertzg/ip/ipv4&quot;;
+import { parseAddressv4 } from &quot;@hertzg/ip/addressv4&quot;;
 import { parse as parseMac } from &quot;@hertzg/mac&quot;;
 import {
   ARP_ETHERNET_IPV4_SIZE,
@@ -235,9 +235,9 @@ const reply = {
   protocolAddressLength: ARP_PROTO_LEN_IPV4,
   operation: ARP_OPCODE.REPLY,
   senderHardwareAddress: parseMac(&quot;aa:bb:cc:dd:ee:ff&quot;),
-  senderProtocolAddress: parseIpv4(&quot;192.168.1.2&quot;),
+  senderProtocolAddress: parseAddressv4(&quot;192.168.1.2&quot;),
   targetHardwareAddress: parseMac(&quot;00:11:22:33:44:55&quot;),
-  targetProtocolAddress: parseIpv4(&quot;192.168.1.1&quot;),
+  targetProtocolAddress: parseAddressv4(&quot;192.168.1.1&quot;),
 };
 
 const buffer = new Uint8Array(ARP_ETHERNET_IPV4_SIZE);
@@ -248,7 +248,7 @@ assertEquals(bytesWritten, ARP_ETHERNET_IPV4_SIZE);
 assertEquals(bytesRead, ARP_ETHERNET_IPV4_SIZE);
 assertEquals(decoded, reply);
 </code><button class="copyButton" data-copy="import { assertEquals } from &quot;@std/assert&quot;;
-import { parseIpv4 } from &quot;@hertzg/ip/ipv4&quot;;
+import { parseAddressv4 } from &quot;@hertzg/ip/addressv4&quot;;
 import { parse as parseMac } from &quot;@hertzg/mac&quot;;
 import {
   ARP_ETHERNET_IPV4_SIZE,
@@ -268,9 +268,9 @@ const reply = {
   protocolAddressLength: ARP_PROTO_LEN_IPV4,
   operation: ARP_OPCODE.REPLY,
   senderHardwareAddress: parseMac(&quot;aa:bb:cc:dd:ee:ff&quot;),
-  senderProtocolAddress: parseIpv4(&quot;192.168.1.2&quot;),
+  senderProtocolAddress: parseAddressv4(&quot;192.168.1.2&quot;),
   targetHardwareAddress: parseMac(&quot;00:11:22:33:44:55&quot;),
-  targetProtocolAddress: parseIpv4(&quot;192.168.1.1&quot;),
+  targetProtocolAddress: parseAddressv4(&quot;192.168.1.1&quot;),
 };
 
 const buffer = new Uint8Array(ARP_ETHERNET_IPV4_SIZE);

@@ -200,16 +200,16 @@ Examples</h2></div><div class="space-y-8"><div class="anchorable"><a href="#exam
 </div></h3>
   <div><div class="markdown"><pre class="highlight"><code class="language-ts">import { assertEquals } from &quot;@std/assert&quot;;
 import { cidrv4NetworkAddress, parseCidrv4 } from &quot;@hertzg/ip/cidrv4&quot;;
-import { parseIpv4 } from &quot;@hertzg/ip/ipv4&quot;;
+import { parseAddressv4 } from &quot;@hertzg/ip/addressv4&quot;;
 
 const cidr = parseCidrv4(&quot;192.168.1.0/24&quot;);
-assertEquals(cidrv4NetworkAddress(cidr), parseIpv4(&quot;192.168.1.0&quot;));
+assertEquals(cidrv4NetworkAddress(cidr), parseAddressv4(&quot;192.168.1.0&quot;));
 </code><button class="copyButton" data-copy="import { assertEquals } from &quot;@std/assert&quot;;
 import { cidrv4NetworkAddress, parseCidrv4 } from &quot;@hertzg/ip/cidrv4&quot;;
-import { parseIpv4 } from &quot;@hertzg/ip/ipv4&quot;;
+import { parseAddressv4 } from &quot;@hertzg/ip/addressv4&quot;;
 
 const cidr = parseCidrv4(&quot;192.168.1.0/24&quot;);
-assertEquals(cidrv4NetworkAddress(cidr), parseIpv4(&quot;192.168.1.0&quot;));
+assertEquals(cidrv4NetworkAddress(cidr), parseAddressv4(&quot;192.168.1.0&quot;));
 "><svg
   class="copy"
   width="15"
@@ -273,22 +273,22 @@ import {
   cidrv4NetworkAddress,
   parseCidrv4,
 } from &quot;@hertzg/ip/cidrv4&quot;;
-import { stringifyIpv4 } from &quot;@hertzg/ip/ipv4&quot;;
+import { stringifyAddressv4 } from &quot;@hertzg/ip/addressv4&quot;;
 
 const cidr = parseCidrv4(&quot;10.0.0.0/24&quot;);
-assertEquals(stringifyIpv4(cidrv4NetworkAddress(cidr)), &quot;10.0.0.0&quot;);
-assertEquals(stringifyIpv4(cidrv4FirstUsableAddress(cidr)), &quot;10.0.0.1&quot;);
+assertEquals(stringifyAddressv4(cidrv4NetworkAddress(cidr)), &quot;10.0.0.0&quot;);
+assertEquals(stringifyAddressv4(cidrv4FirstUsableAddress(cidr)), &quot;10.0.0.1&quot;);
 </code><button class="copyButton" data-copy="import { assertEquals } from &quot;@std/assert&quot;;
 import {
   cidrv4FirstUsableAddress,
   cidrv4NetworkAddress,
   parseCidrv4,
 } from &quot;@hertzg/ip/cidrv4&quot;;
-import { stringifyIpv4 } from &quot;@hertzg/ip/ipv4&quot;;
+import { stringifyAddressv4 } from &quot;@hertzg/ip/addressv4&quot;;
 
 const cidr = parseCidrv4(&quot;10.0.0.0/24&quot;);
-assertEquals(stringifyIpv4(cidrv4NetworkAddress(cidr)), &quot;10.0.0.0&quot;);
-assertEquals(stringifyIpv4(cidrv4FirstUsableAddress(cidr)), &quot;10.0.0.1&quot;);
+assertEquals(stringifyAddressv4(cidrv4NetworkAddress(cidr)), &quot;10.0.0.0&quot;);
+assertEquals(stringifyAddressv4(cidrv4FirstUsableAddress(cidr)), &quot;10.0.0.1&quot;);
 "><svg
   class="copy"
   width="15"

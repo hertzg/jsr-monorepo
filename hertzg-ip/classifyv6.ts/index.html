@@ -150,21 +150,21 @@ Examples</h2></div><div class="space-y-8"><div class="anchorable"><a href="#exam
 <h3 class="example-header"><div class="markdown"><p>Classify an IPv6 address</p>
 </div></h3>
   <div><div class="markdown"><pre class="highlight"><code class="language-ts">import { assertEquals } from &quot;@std/assert&quot;;
-import { classifyIpv6 } from &quot;@hertzg/ip/classifyv6&quot;;
-import { parseIpv6 } from &quot;@hertzg/ip/ipv6&quot;;
+import { classifyAddressv6 } from &quot;@hertzg/ip/classifyv6&quot;;
+import { parseAddressv6 } from &quot;@hertzg/ip/addressv6&quot;;
 
-assertEquals(classifyIpv6(parseIpv6(&quot;::1&quot;)), &quot;loopback&quot;);
-assertEquals(classifyIpv6(parseIpv6(&quot;2001:db8::1&quot;)), &quot;documentation&quot;);
-assertEquals(classifyIpv6(parseIpv6(&quot;fe80::1&quot;)), &quot;link-local&quot;);
-assertEquals(classifyIpv6(parseIpv6(&quot;2607:f8b0:4004:800::200e&quot;)), &quot;global-unicast&quot;);
+assertEquals(classifyAddressv6(parseAddressv6(&quot;::1&quot;)), &quot;loopback&quot;);
+assertEquals(classifyAddressv6(parseAddressv6(&quot;2001:db8::1&quot;)), &quot;documentation&quot;);
+assertEquals(classifyAddressv6(parseAddressv6(&quot;fe80::1&quot;)), &quot;link-local&quot;);
+assertEquals(classifyAddressv6(parseAddressv6(&quot;2607:f8b0:4004:800::200e&quot;)), &quot;global-unicast&quot;);
 </code><button class="copyButton" data-copy="import { assertEquals } from &quot;@std/assert&quot;;
-import { classifyIpv6 } from &quot;@hertzg/ip/classifyv6&quot;;
-import { parseIpv6 } from &quot;@hertzg/ip/ipv6&quot;;
+import { classifyAddressv6 } from &quot;@hertzg/ip/classifyv6&quot;;
+import { parseAddressv6 } from &quot;@hertzg/ip/addressv6&quot;;
 
-assertEquals(classifyIpv6(parseIpv6(&quot;::1&quot;)), &quot;loopback&quot;);
-assertEquals(classifyIpv6(parseIpv6(&quot;2001:db8::1&quot;)), &quot;documentation&quot;);
-assertEquals(classifyIpv6(parseIpv6(&quot;fe80::1&quot;)), &quot;link-local&quot;);
-assertEquals(classifyIpv6(parseIpv6(&quot;2607:f8b0:4004:800::200e&quot;)), &quot;global-unicast&quot;);
+assertEquals(classifyAddressv6(parseAddressv6(&quot;::1&quot;)), &quot;loopback&quot;);
+assertEquals(classifyAddressv6(parseAddressv6(&quot;2001:db8::1&quot;)), &quot;documentation&quot;);
+assertEquals(classifyAddressv6(parseAddressv6(&quot;fe80::1&quot;)), &quot;link-local&quot;);
+assertEquals(classifyAddressv6(parseAddressv6(&quot;2607:f8b0:4004:800::200e&quot;)), &quot;global-unicast&quot;);
 "><svg
   class="copy"
   width="15"
@@ -223,19 +223,19 @@ assertEquals(classifyIpv6(parseIpv6(&quot;2607:f8b0:4004:800::200e&quot;)), &quo
 <h3 class="example-header"><div class="markdown"><p>Check specific ranges</p>
 </div></h3>
   <div><div class="markdown"><pre class="highlight"><code class="language-ts">import { assert, assertEquals } from &quot;@std/assert&quot;;
-import { isIpv6Loopback, isIpv6UniqueLocal } from &quot;@hertzg/ip/classifyv6&quot;;
-import { parseIpv6 } from &quot;@hertzg/ip/ipv6&quot;;
+import { isAddressv6Loopback, isAddressv6UniqueLocal } from &quot;@hertzg/ip/classifyv6&quot;;
+import { parseAddressv6 } from &quot;@hertzg/ip/addressv6&quot;;
 
-assert(isIpv6Loopback(parseIpv6(&quot;::1&quot;)));
-assert(isIpv6UniqueLocal(parseIpv6(&quot;fd00::1&quot;)));
-assertEquals(isIpv6Loopback(parseIpv6(&quot;::2&quot;)), false);
+assert(isAddressv6Loopback(parseAddressv6(&quot;::1&quot;)));
+assert(isAddressv6UniqueLocal(parseAddressv6(&quot;fd00::1&quot;)));
+assertEquals(isAddressv6Loopback(parseAddressv6(&quot;::2&quot;)), false);
 </code><button class="copyButton" data-copy="import { assert, assertEquals } from &quot;@std/assert&quot;;
-import { isIpv6Loopback, isIpv6UniqueLocal } from &quot;@hertzg/ip/classifyv6&quot;;
-import { parseIpv6 } from &quot;@hertzg/ip/ipv6&quot;;
+import { isAddressv6Loopback, isAddressv6UniqueLocal } from &quot;@hertzg/ip/classifyv6&quot;;
+import { parseAddressv6 } from &quot;@hertzg/ip/addressv6&quot;;
 
-assert(isIpv6Loopback(parseIpv6(&quot;::1&quot;)));
-assert(isIpv6UniqueLocal(parseIpv6(&quot;fd00::1&quot;)));
-assertEquals(isIpv6Loopback(parseIpv6(&quot;::2&quot;)), false);
+assert(isAddressv6Loopback(parseAddressv6(&quot;::1&quot;)));
+assert(isAddressv6UniqueLocal(parseAddressv6(&quot;fd00::1&quot;)));
+assertEquals(isAddressv6Loopback(parseAddressv6(&quot;::2&quot;)), false);
 "><svg
   class="copy"
   width="15"
@@ -293,70 +293,70 @@ assertEquals(isIpv6Loopback(parseIpv6(&quot;::2&quot;)), false);
   </defs>
 </svg>
 </a>
-Functions</h2></div><div class="namespaceSection"><div id="namespace_classifyipv6" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-Function bg-Function/15 dark:text-FunctionDark dark:bg-FunctionDark/15" title="Function">f</div></div>
+Functions</h2></div><div class="namespaceSection"><div id="namespace_classifyaddressv6" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-Function bg-Function/15 dark:text-FunctionDark dark:bg-FunctionDark/15" title="Function">f</div></div>
 <div class="namespaceItemContent">
-		    <a href="..&#x2F;.&#x2F;classifyv6.ts&#x2F;~&#x2F;classifyIpv6.html" title="classifyIpv6">
-			    <span>classifyIpv6</span><span>(<span><span>address<span>: <span class="td-kw">bigint</span></span></span></span>)<span>: <span class="td-ref">ClassificationIpv6</span></span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Classifies an IPv6 address into its well-known range.</p>
+		    <a href="..&#x2F;.&#x2F;classifyv6.ts&#x2F;~&#x2F;classifyAddressv6.html" title="classifyAddressv6">
+			    <span>classifyAddressv6</span><span>(<span><span>address<span>: <span class="td-kw">bigint</span></span></span></span>)<span>: <span class="td-ref">Classificationv6</span></span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Classifies an IPv6 address into its well-known range.</p>
 </div></div></div>
-    </div><div id="namespace_isipv6benchmarking" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-Function bg-Function/15 dark:text-FunctionDark dark:bg-FunctionDark/15" title="Function">f</div></div>
+    </div><div id="namespace_isaddressv6benchmarking" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-Function bg-Function/15 dark:text-FunctionDark dark:bg-FunctionDark/15" title="Function">f</div></div>
 <div class="namespaceItemContent">
-		    <a href="..&#x2F;.&#x2F;classifyv6.ts&#x2F;~&#x2F;isIpv6Benchmarking.html" title="isIpv6Benchmarking">
-			    <span>isIpv6Benchmarking</span><span>(<span><span>address<span>: <span class="td-kw">bigint</span></span></span></span>)<span>: <span class="td-kw">boolean</span></span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Checks if an IPv6 address is in the benchmarking range (RFC 5180).</p>
+		    <a href="..&#x2F;.&#x2F;classifyv6.ts&#x2F;~&#x2F;isAddressv6Benchmarking.html" title="isAddressv6Benchmarking">
+			    <span>isAddressv6Benchmarking</span><span>(<span><span>address<span>: <span class="td-kw">bigint</span></span></span></span>)<span>: <span class="td-kw">boolean</span></span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Checks if an IPv6 address is in the benchmarking range (RFC 5180).</p>
 </div></div></div>
-    </div><div id="namespace_isipv6documentation" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-Function bg-Function/15 dark:text-FunctionDark dark:bg-FunctionDark/15" title="Function">f</div></div>
+    </div><div id="namespace_isaddressv6documentation" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-Function bg-Function/15 dark:text-FunctionDark dark:bg-FunctionDark/15" title="Function">f</div></div>
 <div class="namespaceItemContent">
-		    <a href="..&#x2F;.&#x2F;classifyv6.ts&#x2F;~&#x2F;isIpv6Documentation.html" title="isIpv6Documentation">
-			    <span>isIpv6Documentation</span><span>(<span><span>address<span>: <span class="td-kw">bigint</span></span></span></span>)<span>: <span class="td-kw">boolean</span></span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Checks if an IPv6 address is in the documentation range (RFC 3849).</p>
+		    <a href="..&#x2F;.&#x2F;classifyv6.ts&#x2F;~&#x2F;isAddressv6Documentation.html" title="isAddressv6Documentation">
+			    <span>isAddressv6Documentation</span><span>(<span><span>address<span>: <span class="td-kw">bigint</span></span></span></span>)<span>: <span class="td-kw">boolean</span></span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Checks if an IPv6 address is in the documentation range (RFC 3849).</p>
 </div></div></div>
-    </div><div id="namespace_isipv6globalunicast" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-Function bg-Function/15 dark:text-FunctionDark dark:bg-FunctionDark/15" title="Function">f</div></div>
+    </div><div id="namespace_isaddressv6globalunicast" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-Function bg-Function/15 dark:text-FunctionDark dark:bg-FunctionDark/15" title="Function">f</div></div>
 <div class="namespaceItemContent">
-		    <a href="..&#x2F;.&#x2F;classifyv6.ts&#x2F;~&#x2F;isIpv6GlobalUnicast.html" title="isIpv6GlobalUnicast">
-			    <span>isIpv6GlobalUnicast</span><span>(<span><span>address<span>: <span class="td-kw">bigint</span></span></span></span>)<span>: <span class="td-kw">boolean</span></span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Checks if an IPv6 address is a global unicast address (RFC 4291).</p>
+		    <a href="..&#x2F;.&#x2F;classifyv6.ts&#x2F;~&#x2F;isAddressv6GlobalUnicast.html" title="isAddressv6GlobalUnicast">
+			    <span>isAddressv6GlobalUnicast</span><span>(<span><span>address<span>: <span class="td-kw">bigint</span></span></span></span>)<span>: <span class="td-kw">boolean</span></span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Checks if an IPv6 address is a global unicast address (RFC 4291).</p>
 </div></div></div>
-    </div><div id="namespace_isipv6ipv4mapped" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-Function bg-Function/15 dark:text-FunctionDark dark:bg-FunctionDark/15" title="Function">f</div></div>
+    </div><div id="namespace_isaddressv6linklocal" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-Function bg-Function/15 dark:text-FunctionDark dark:bg-FunctionDark/15" title="Function">f</div></div>
 <div class="namespaceItemContent">
-		    <a href="..&#x2F;.&#x2F;classifyv6.ts&#x2F;~&#x2F;isIpv6Ipv4Mapped.html" title="isIpv6Ipv4Mapped">
-			    <span>isIpv6Ipv4Mapped</span><span>(<span><span>address<span>: <span class="td-kw">bigint</span></span></span></span>)<span>: <span class="td-kw">boolean</span></span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Checks if an IPv6 address is an IPv4-mapped address (RFC 4291).</p>
+		    <a href="..&#x2F;.&#x2F;classifyv6.ts&#x2F;~&#x2F;isAddressv6LinkLocal.html" title="isAddressv6LinkLocal">
+			    <span>isAddressv6LinkLocal</span><span>(<span><span>address<span>: <span class="td-kw">bigint</span></span></span></span>)<span>: <span class="td-kw">boolean</span></span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Checks if an IPv6 address is a link-local address (RFC 4291).</p>
 </div></div></div>
-    </div><div id="namespace_isipv6ipv4translated" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-Function bg-Function/15 dark:text-FunctionDark dark:bg-FunctionDark/15" title="Function">f</div></div>
+    </div><div id="namespace_isaddressv6loopback" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-Function bg-Function/15 dark:text-FunctionDark dark:bg-FunctionDark/15" title="Function">f</div></div>
 <div class="namespaceItemContent">
-		    <a href="..&#x2F;.&#x2F;classifyv6.ts&#x2F;~&#x2F;isIpv6Ipv4Translated.html" title="isIpv6Ipv4Translated">
-			    <span>isIpv6Ipv4Translated</span><span>(<span><span>address<span>: <span class="td-kw">bigint</span></span></span></span>)<span>: <span class="td-kw">boolean</span></span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Checks if an IPv6 address is an IPv4-translated address (RFC 6052).</p>
+		    <a href="..&#x2F;.&#x2F;classifyv6.ts&#x2F;~&#x2F;isAddressv6Loopback.html" title="isAddressv6Loopback">
+			    <span>isAddressv6Loopback</span><span>(<span><span>address<span>: <span class="td-kw">bigint</span></span></span></span>)<span>: <span class="td-kw">boolean</span></span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Checks if an IPv6 address is the loopback address (RFC 4291).</p>
 </div></div></div>
-    </div><div id="namespace_isipv6linklocal" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-Function bg-Function/15 dark:text-FunctionDark dark:bg-FunctionDark/15" title="Function">f</div></div>
+    </div><div id="namespace_isaddressv6mapped" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-Function bg-Function/15 dark:text-FunctionDark dark:bg-FunctionDark/15" title="Function">f</div></div>
 <div class="namespaceItemContent">
-		    <a href="..&#x2F;.&#x2F;classifyv6.ts&#x2F;~&#x2F;isIpv6LinkLocal.html" title="isIpv6LinkLocal">
-			    <span>isIpv6LinkLocal</span><span>(<span><span>address<span>: <span class="td-kw">bigint</span></span></span></span>)<span>: <span class="td-kw">boolean</span></span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Checks if an IPv6 address is a link-local address (RFC 4291).</p>
+		    <a href="..&#x2F;.&#x2F;classifyv6.ts&#x2F;~&#x2F;isAddressv6Mapped.html" title="isAddressv6Mapped">
+			    <span>isAddressv6Mapped</span><span>(<span><span>address<span>: <span class="td-kw">bigint</span></span></span></span>)<span>: <span class="td-kw">boolean</span></span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Checks if an IPv6 address is an IPv4-mapped address (RFC 4291).</p>
 </div></div></div>
-    </div><div id="namespace_isipv6loopback" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-Function bg-Function/15 dark:text-FunctionDark dark:bg-FunctionDark/15" title="Function">f</div></div>
+    </div><div id="namespace_isaddressv6multicast" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-Function bg-Function/15 dark:text-FunctionDark dark:bg-FunctionDark/15" title="Function">f</div></div>
 <div class="namespaceItemContent">
-		    <a href="..&#x2F;.&#x2F;classifyv6.ts&#x2F;~&#x2F;isIpv6Loopback.html" title="isIpv6Loopback">
-			    <span>isIpv6Loopback</span><span>(<span><span>address<span>: <span class="td-kw">bigint</span></span></span></span>)<span>: <span class="td-kw">boolean</span></span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Checks if an IPv6 address is the loopback address (RFC 4291).</p>
+		    <a href="..&#x2F;.&#x2F;classifyv6.ts&#x2F;~&#x2F;isAddressv6Multicast.html" title="isAddressv6Multicast">
+			    <span>isAddressv6Multicast</span><span>(<span><span>address<span>: <span class="td-kw">bigint</span></span></span></span>)<span>: <span class="td-kw">boolean</span></span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Checks if an IPv6 address is a multicast address (RFC 4291).</p>
 </div></div></div>
-    </div><div id="namespace_isipv6multicast" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-Function bg-Function/15 dark:text-FunctionDark dark:bg-FunctionDark/15" title="Function">f</div></div>
+    </div><div id="namespace_isaddressv6orchidv2" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-Function bg-Function/15 dark:text-FunctionDark dark:bg-FunctionDark/15" title="Function">f</div></div>
 <div class="namespaceItemContent">
-		    <a href="..&#x2F;.&#x2F;classifyv6.ts&#x2F;~&#x2F;isIpv6Multicast.html" title="isIpv6Multicast">
-			    <span>isIpv6Multicast</span><span>(<span><span>address<span>: <span class="td-kw">bigint</span></span></span></span>)<span>: <span class="td-kw">boolean</span></span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Checks if an IPv6 address is a multicast address (RFC 4291).</p>
+		    <a href="..&#x2F;.&#x2F;classifyv6.ts&#x2F;~&#x2F;isAddressv6Orchidv2.html" title="isAddressv6Orchidv2">
+			    <span>isAddressv6Orchidv2</span><span>(<span><span>address<span>: <span class="td-kw">bigint</span></span></span></span>)<span>: <span class="td-kw">boolean</span></span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Checks if an IPv6 address is an ORCHIDv2 address (RFC 7343).</p>
 </div></div></div>
-    </div><div id="namespace_isipv6orchidv2" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-Function bg-Function/15 dark:text-FunctionDark dark:bg-FunctionDark/15" title="Function">f</div></div>
+    </div><div id="namespace_isaddressv6teredo" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-Function bg-Function/15 dark:text-FunctionDark dark:bg-FunctionDark/15" title="Function">f</div></div>
 <div class="namespaceItemContent">
-		    <a href="..&#x2F;.&#x2F;classifyv6.ts&#x2F;~&#x2F;isIpv6Orchidv2.html" title="isIpv6Orchidv2">
-			    <span>isIpv6Orchidv2</span><span>(<span><span>address<span>: <span class="td-kw">bigint</span></span></span></span>)<span>: <span class="td-kw">boolean</span></span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Checks if an IPv6 address is an ORCHIDv2 address (RFC 7343).</p>
+		    <a href="..&#x2F;.&#x2F;classifyv6.ts&#x2F;~&#x2F;isAddressv6Teredo.html" title="isAddressv6Teredo">
+			    <span>isAddressv6Teredo</span><span>(<span><span>address<span>: <span class="td-kw">bigint</span></span></span></span>)<span>: <span class="td-kw">boolean</span></span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Checks if an IPv6 address is a Teredo address (RFC 4380).</p>
 </div></div></div>
-    </div><div id="namespace_isipv6teredo" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-Function bg-Function/15 dark:text-FunctionDark dark:bg-FunctionDark/15" title="Function">f</div></div>
+    </div><div id="namespace_isaddressv6translated" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-Function bg-Function/15 dark:text-FunctionDark dark:bg-FunctionDark/15" title="Function">f</div></div>
 <div class="namespaceItemContent">
-		    <a href="..&#x2F;.&#x2F;classifyv6.ts&#x2F;~&#x2F;isIpv6Teredo.html" title="isIpv6Teredo">
-			    <span>isIpv6Teredo</span><span>(<span><span>address<span>: <span class="td-kw">bigint</span></span></span></span>)<span>: <span class="td-kw">boolean</span></span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Checks if an IPv6 address is a Teredo address (RFC 4380).</p>
+		    <a href="..&#x2F;.&#x2F;classifyv6.ts&#x2F;~&#x2F;isAddressv6Translated.html" title="isAddressv6Translated">
+			    <span>isAddressv6Translated</span><span>(<span><span>address<span>: <span class="td-kw">bigint</span></span></span></span>)<span>: <span class="td-kw">boolean</span></span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Checks if an IPv6 address is an IPv4-translated address (RFC 6052).</p>
 </div></div></div>
-    </div><div id="namespace_isipv6uniquelocal" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-Function bg-Function/15 dark:text-FunctionDark dark:bg-FunctionDark/15" title="Function">f</div></div>
+    </div><div id="namespace_isaddressv6uniquelocal" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-Function bg-Function/15 dark:text-FunctionDark dark:bg-FunctionDark/15" title="Function">f</div></div>
 <div class="namespaceItemContent">
-		    <a href="..&#x2F;.&#x2F;classifyv6.ts&#x2F;~&#x2F;isIpv6UniqueLocal.html" title="isIpv6UniqueLocal">
-			    <span>isIpv6UniqueLocal</span><span>(<span><span>address<span>: <span class="td-kw">bigint</span></span></span></span>)<span>: <span class="td-kw">boolean</span></span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Checks if an IPv6 address is a unique local address (RFC 4193).</p>
+		    <a href="..&#x2F;.&#x2F;classifyv6.ts&#x2F;~&#x2F;isAddressv6UniqueLocal.html" title="isAddressv6UniqueLocal">
+			    <span>isAddressv6UniqueLocal</span><span>(<span><span>address<span>: <span class="td-kw">bigint</span></span></span></span>)<span>: <span class="td-kw">boolean</span></span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Checks if an IPv6 address is a unique local address (RFC 4193).</p>
 </div></div></div>
-    </div><div id="namespace_isipv6unspecified" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-Function bg-Function/15 dark:text-FunctionDark dark:bg-FunctionDark/15" title="Function">f</div></div>
+    </div><div id="namespace_isaddressv6unspecified" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-Function bg-Function/15 dark:text-FunctionDark dark:bg-FunctionDark/15" title="Function">f</div></div>
 <div class="namespaceItemContent">
-		    <a href="..&#x2F;.&#x2F;classifyv6.ts&#x2F;~&#x2F;isIpv6Unspecified.html" title="isIpv6Unspecified">
-			    <span>isIpv6Unspecified</span><span>(<span><span>address<span>: <span class="td-kw">bigint</span></span></span></span>)<span>: <span class="td-kw">boolean</span></span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Checks if an IPv6 address is the unspecified address (RFC 4291).</p>
+		    <a href="..&#x2F;.&#x2F;classifyv6.ts&#x2F;~&#x2F;isAddressv6Unspecified.html" title="isAddressv6Unspecified">
+			    <span>isAddressv6Unspecified</span><span>(<span><span>address<span>: <span class="td-kw">bigint</span></span></span></span>)<span>: <span class="td-kw">boolean</span></span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Checks if an IPv6 address is the unspecified address (RFC 4291).</p>
 </div></div></div>
     </div></div>
 </section>
@@ -383,10 +383,10 @@ Functions</h2></div><div class="namespaceSection"><div id="namespace_classifyipv
   </defs>
 </svg>
 </a>
-Type Aliases</h2></div><div class="namespaceSection"><div id="namespace_classificationipv6" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-TypeAlias bg-TypeAlias/15 dark:text-TypeAliasDark dark:bg-TypeAliasDark/15" title="Type Alias">T</div></div>
+Type Aliases</h2></div><div class="namespaceSection"><div id="namespace_classificationv6" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-TypeAlias bg-TypeAlias/15 dark:text-TypeAliasDark dark:bg-TypeAliasDark/15" title="Type Alias">T</div></div>
 <div class="namespaceItemContent">
-		    <a href="..&#x2F;.&#x2F;classifyv6.ts&#x2F;~&#x2F;ClassificationIpv6.html" title="ClassificationIpv6">
-			    <span>ClassificationIpv6</span><span> = <div class="ml-indent"><span><span class="td-str">"loopback"</span></span><br /><span><span class="td-op"> | </span><span class="td-str">"unspecified"</span></span><br /><span><span class="td-op"> | </span><span class="td-str">"ipv4-mapped"</span></span><br /><span><span class="td-op"> | </span><span class="td-str">"ipv4-translated"</span></span><br /><span><span class="td-op"> | </span><span class="td-str">"documentation"</span></span><br /><span><span class="td-op"> | </span><span class="td-str">"benchmarking"</span></span><br /><span><span class="td-op"> | </span><span class="td-str">"orchidv2"</span></span><br /><span><span class="td-op"> | </span><span class="td-str">"teredo"</span></span><br /><span><span class="td-op"> | </span><span class="td-str">"link-local"</span></span><br /><span><span class="td-op"> | </span><span class="td-str">"multicast"</span></span><br /><span><span class="td-op"> | </span><span class="td-str">"unique-local"</span></span><br /><span><span class="td-op"> | </span><span class="td-str">"global-unicast"</span></span><br /><span><span class="td-op"> | </span><span class="td-str">"unassigned"</span></span></div></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>All possible IPv6 address classification labels.</p>
+		    <a href="..&#x2F;.&#x2F;classifyv6.ts&#x2F;~&#x2F;Classificationv6.html" title="Classificationv6">
+			    <span>Classificationv6</span><span> = <div class="ml-indent"><span><span class="td-str">"loopback"</span></span><br /><span><span class="td-op"> | </span><span class="td-str">"unspecified"</span></span><br /><span><span class="td-op"> | </span><span class="td-str">"ipv4-mapped"</span></span><br /><span><span class="td-op"> | </span><span class="td-str">"ipv4-translated"</span></span><br /><span><span class="td-op"> | </span><span class="td-str">"documentation"</span></span><br /><span><span class="td-op"> | </span><span class="td-str">"benchmarking"</span></span><br /><span><span class="td-op"> | </span><span class="td-str">"orchidv2"</span></span><br /><span><span class="td-op"> | </span><span class="td-str">"teredo"</span></span><br /><span><span class="td-op"> | </span><span class="td-str">"link-local"</span></span><br /><span><span class="td-op"> | </span><span class="td-str">"multicast"</span></span><br /><span><span class="td-op"> | </span><span class="td-str">"unique-local"</span></span><br /><span><span class="td-op"> | </span><span class="td-str">"global-unicast"</span></span><br /><span><span class="td-op"> | </span><span class="td-str">"unassigned"</span></span></div></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>All possible IPv6 address classification labels.</p>
 </div></div></div>
     </div></div>
 </section>
@@ -431,37 +431,37 @@ Type Aliases</h2></div><div class="namespaceSection"><div id="namespace_classifi
 </div></div><nav class="topSymbols">
           <h3>Symbols</h3>
           <ul><li>
-                <a href="..&#x2F;.&#x2F;ip.ts&#x2F;~&#x2F;Address.html" title="Address"><div class="docNodeKindIcon"><div class="text-TypeAlias bg-TypeAlias/15 dark:text-TypeAliasDark dark:bg-TypeAliasDark/15" title="Type Alias">T</div></div>
+                <a href="..&#x2F;.&#x2F;address.ts&#x2F;~&#x2F;Address.html" title="Address"><div class="docNodeKindIcon"><div class="text-TypeAlias bg-TypeAlias/15 dark:text-TypeAliasDark dark:bg-TypeAliasDark/15" title="Type Alias">T</div></div>
 <span class="hover:bg-TypeAlias/15 hover:bg-TypeAliasDark/15">
                     Address
                   </span>
                 </a>
               </li><li>
-                <a href="..&#x2F;.&#x2F;ip.ts&#x2F;~&#x2F;compareIp.html" title="compareIp"><div class="docNodeKindIcon"><div class="text-Function bg-Function/15 dark:text-FunctionDark dark:bg-FunctionDark/15" title="Function">f</div></div>
+                <a href="..&#x2F;.&#x2F;address.ts&#x2F;~&#x2F;compareAddress.html" title="compareAddress"><div class="docNodeKindIcon"><div class="text-Function bg-Function/15 dark:text-FunctionDark dark:bg-FunctionDark/15" title="Function">f</div></div>
 <span class="hover:bg-Function/15 hover:bg-FunctionDark/15">
-                    compareIp
+                    compareAddress
                   </span>
                 </a>
               </li><li>
-                <a href="..&#x2F;.&#x2F;ip.ts&#x2F;~&#x2F;parseIp.html" title="parseIp"><div class="docNodeKindIcon"><div class="text-Function bg-Function/15 dark:text-FunctionDark dark:bg-FunctionDark/15" title="Function">f</div></div>
+                <a href="..&#x2F;.&#x2F;address.ts&#x2F;~&#x2F;parseAddress.html" title="parseAddress"><div class="docNodeKindIcon"><div class="text-Function bg-Function/15 dark:text-FunctionDark dark:bg-FunctionDark/15" title="Function">f</div></div>
 <span class="hover:bg-Function/15 hover:bg-FunctionDark/15">
-                    parseIp
+                    parseAddress
                   </span>
                 </a>
               </li><li>
-                <a href="..&#x2F;.&#x2F;ip.ts&#x2F;~&#x2F;stringifyIp.html" title="stringifyIp"><div class="docNodeKindIcon"><div class="text-Function bg-Function/15 dark:text-FunctionDark dark:bg-FunctionDark/15" title="Function">f</div></div>
+                <a href="..&#x2F;.&#x2F;address.ts&#x2F;~&#x2F;stringifyAddress.html" title="stringifyAddress"><div class="docNodeKindIcon"><div class="text-Function bg-Function/15 dark:text-FunctionDark dark:bg-FunctionDark/15" title="Function">f</div></div>
 <span class="hover:bg-Function/15 hover:bg-FunctionDark/15">
-                    stringifyIp
+                    stringifyAddress
                   </span>
                 </a>
               </li><li>
-                <a href="..&#x2F;.&#x2F;ip.ts&#x2F;~&#x2F;stringifyIp.html" title="stringifyIp"><div class="docNodeKindIcon"><div class="text-Function bg-Function/15 dark:text-FunctionDark dark:bg-FunctionDark/15" title="Function">f</div></div>
+                <a href="..&#x2F;.&#x2F;address.ts&#x2F;~&#x2F;stringifyAddress.html" title="stringifyAddress"><div class="docNodeKindIcon"><div class="text-Function bg-Function/15 dark:text-FunctionDark dark:bg-FunctionDark/15" title="Function">f</div></div>
 <span class="hover:bg-Function/15 hover:bg-FunctionDark/15">
-                    stringifyIp
+                    stringifyAddress
                   </span>
                 </a>
               </li></ul><a class="flex items-center gap-0.5" href="..&#x2F;.&#x2F;all_symbols.html">
-              <span class="leading-none">view all 283 symbols</span><svg
+              <span class="leading-none">view all 279 symbols</span><svg
   width="16"
   height="16"
   viewBox="0 0 16 16"
@@ -476,7 +476,7 @@ Type Aliases</h2></div><div class="namespaceSection"><div id="namespace_classifi
   />
 </svg>
 </a></nav><nav class="documentNavigation">
-          <h3>Document Navigation</h3><ul><li><a href="#examples" title="Examples">Examples</a></li><li><ul><li><a href="#example_0" title="Classify an IPv6 address">Classify an IPv6 address</a></li><li><a href="#example_1" title="Check specific ranges">Check specific ranges</a></li></ul></li><li><a href="#classifyv6_ts_functions" title="Functions">Functions</a></li><li><ul><li><a href="#namespace_classifyipv6" title="classifyIpv6">classifyIpv6</a></li><li><a href="#namespace_isipv6benchmarking" title="isIpv6Benchmarking">isIpv6Benchmarking</a></li><li><a href="#namespace_isipv6documentation" title="isIpv6Documentation">isIpv6Documentation</a></li><li><a href="#namespace_isipv6globalunicast" title="isIpv6GlobalUnicast">isIpv6GlobalUnicast</a></li><li><a href="#namespace_isipv6ipv4mapped" title="isIpv6Ipv4Mapped">isIpv6Ipv4Mapped</a></li><li><a href="#namespace_isipv6ipv4translated" title="isIpv6Ipv4Translated">isIpv6Ipv4Translated</a></li><li><a href="#namespace_isipv6linklocal" title="isIpv6LinkLocal">isIpv6LinkLocal</a></li><li><a href="#namespace_isipv6loopback" title="isIpv6Loopback">isIpv6Loopback</a></li><li><a href="#namespace_isipv6multicast" title="isIpv6Multicast">isIpv6Multicast</a></li><li><a href="#namespace_isipv6orchidv2" title="isIpv6Orchidv2">isIpv6Orchidv2</a></li><li><a href="#namespace_isipv6teredo" title="isIpv6Teredo">isIpv6Teredo</a></li><li><a href="#namespace_isipv6uniquelocal" title="isIpv6UniqueLocal">isIpv6UniqueLocal</a></li><li><a href="#namespace_isipv6unspecified" title="isIpv6Unspecified">isIpv6Unspecified</a></li></ul></li><li><a href="#classifyv6_ts_type-aliases" title="Type Aliases">Type Aliases</a></li><li><ul><li><a href="#namespace_classificationipv6" title="ClassificationIpv6">ClassificationIpv6</a></li></ul></li></ul></nav></div>
+          <h3>Document Navigation</h3><ul><li><a href="#examples" title="Examples">Examples</a></li><li><ul><li><a href="#example_0" title="Classify an IPv6 address">Classify an IPv6 address</a></li><li><a href="#example_1" title="Check specific ranges">Check specific ranges</a></li></ul></li><li><a href="#classifyv6_ts_functions" title="Functions">Functions</a></li><li><ul><li><a href="#namespace_classifyaddressv6" title="classifyAddressv6">classifyAddressv6</a></li><li><a href="#namespace_isaddressv6benchmarking" title="isAddressv6Benchmarking">isAddressv6Benchmarking</a></li><li><a href="#namespace_isaddressv6documentation" title="isAddressv6Documentation">isAddressv6Documentation</a></li><li><a href="#namespace_isaddressv6globalunicast" title="isAddressv6GlobalUnicast">isAddressv6GlobalUnicast</a></li><li><a href="#namespace_isaddressv6linklocal" title="isAddressv6LinkLocal">isAddressv6LinkLocal</a></li><li><a href="#namespace_isaddressv6loopback" title="isAddressv6Loopback">isAddressv6Loopback</a></li><li><a href="#namespace_isaddressv6mapped" title="isAddressv6Mapped">isAddressv6Mapped</a></li><li><a href="#namespace_isaddressv6multicast" title="isAddressv6Multicast">isAddressv6Multicast</a></li><li><a href="#namespace_isaddressv6orchidv2" title="isAddressv6Orchidv2">isAddressv6Orchidv2</a></li><li><a href="#namespace_isaddressv6teredo" title="isAddressv6Teredo">isAddressv6Teredo</a></li><li><a href="#namespace_isaddressv6translated" title="isAddressv6Translated">isAddressv6Translated</a></li><li><a href="#namespace_isaddressv6uniquelocal" title="isAddressv6UniqueLocal">isAddressv6UniqueLocal</a></li><li><a href="#namespace_isaddressv6unspecified" title="isAddressv6Unspecified">isAddressv6Unspecified</a></li></ul></li><li><a href="#classifyv6_ts_type-aliases" title="Type Aliases">Type Aliases</a></li><li><ul><li><a href="#namespace_classificationv6" title="Classificationv6">Classificationv6</a></li></ul></li></ul></nav></div>
   </div></div>
 </div>
 </div>

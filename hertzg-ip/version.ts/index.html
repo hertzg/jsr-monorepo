@@ -99,7 +99,7 @@
 <div id="searchResults"></div><div id="content">
     <main><section>
   <div class="space-y-2 flex-1"><div class="space-y-7" id="module_doc"><div class="markdown"><p>IP version detection for address and CIDR strings.</p>
-<p>This module provides <a href=".././version.ts/~/ipVersion.html">ipVersion</a> and <a href=".././version.ts/~/cidrVersion.html">cidrVersion</a>, which report
+<p>This module provides <a href=".././version.ts/~/addressVersion.html">addressVersion</a> and <a href=".././version.ts/~/cidrVersion.html">cidrVersion</a>, which report
 whether a string is written as IPv4 or IPv6, or <code>undefined</code> when it is
 neither. They answer in one call what would otherwise take two
 version-specific validity checks before picking a parser.</p>
@@ -151,16 +151,16 @@ Examples</h2></div><div class="space-y-8"><div class="anchorable"><a href="#exam
 <h3 class="example-header"><div class="markdown"><p>Dispatching on the IP version</p>
 </div></h3>
   <div><div class="markdown"><pre class="highlight"><code class="language-ts">import { assertEquals } from &quot;@std/assert&quot;;
-import { ipVersion } from &quot;@hertzg/ip/version&quot;;
-import { parseIpv4 } from &quot;@hertzg/ip/ipv4&quot;;
-import { parseIpv6 } from &quot;@hertzg/ip/ipv6&quot;;
+import { addressVersion } from &quot;@hertzg/ip/version&quot;;
+import { parseAddressv4 } from &quot;@hertzg/ip/addressv4&quot;;
+import { parseAddressv6 } from &quot;@hertzg/ip/addressv6&quot;;
 
 const describe = (input: string): string =&gt; {
-  switch (ipVersion(input)) {
+  switch (addressVersion(input)) {
     case 4:
-      return `v4:${parseIpv4(input)}`;
+      return `v4:${parseAddressv4(input)}`;
     case 6:
-      return `v6:${parseIpv6(input)}`;
+      return `v6:${parseAddressv6(input)}`;
     default:
       return &quot;not an address&quot;;
   }
@@ -170,16 +170,16 @@ assertEquals(describe(&quot;10.0.0.1&quot;), &quot;v4:167772161&quot;);
 assertEquals(describe(&quot;::1&quot;), &quot;v6:1&quot;);
 assertEquals(describe(&quot;nonsense&quot;), &quot;not an address&quot;);
 </code><button class="copyButton" data-copy="import { assertEquals } from &quot;@std/assert&quot;;
-import { ipVersion } from &quot;@hertzg/ip/version&quot;;
-import { parseIpv4 } from &quot;@hertzg/ip/ipv4&quot;;
-import { parseIpv6 } from &quot;@hertzg/ip/ipv6&quot;;
+import { addressVersion } from &quot;@hertzg/ip/version&quot;;
+import { parseAddressv4 } from &quot;@hertzg/ip/addressv4&quot;;
+import { parseAddressv6 } from &quot;@hertzg/ip/addressv6&quot;;
 
 const describe = (input: string): string =&gt; {
-  switch (ipVersion(input)) {
+  switch (addressVersion(input)) {
     case 4:
-      return `v4:${parseIpv4(input)}`;
+      return `v4:${parseAddressv4(input)}`;
     case 6:
-      return `v6:${parseIpv6(input)}`;
+      return `v6:${parseAddressv6(input)}`;
     default:
       return &quot;not an address&quot;;
   }
@@ -245,15 +245,15 @@ assertEquals(describe(&quot;nonsense&quot;), &quot;not an address&quot;);
   </defs>
 </svg>
 </a>
-Functions</h2></div><div class="namespaceSection"><div id="namespace_cidrversion" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-Function bg-Function/15 dark:text-FunctionDark dark:bg-FunctionDark/15" title="Function">f</div></div>
+Functions</h2></div><div class="namespaceSection"><div id="namespace_addressversion" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-Function bg-Function/15 dark:text-FunctionDark dark:bg-FunctionDark/15" title="Function">f</div></div>
+<div class="namespaceItemContent">
+		    <a href="..&#x2F;.&#x2F;version.ts&#x2F;~&#x2F;addressVersion.html" title="addressVersion">
+			    <span>addressVersion</span><span>(<span><span>address<span>: <span class="td-kw">string</span></span></span></span>)<span>: <span><span class="td-ref">IpVersion</span><span class="td-op"> | </span><span class="td-kw">undefined</span></span></span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Reports which IP version a plain address string is written in.</p>
+</div></div></div>
+    </div><div id="namespace_cidrversion" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-Function bg-Function/15 dark:text-FunctionDark dark:bg-FunctionDark/15" title="Function">f</div></div>
 <div class="namespaceItemContent">
 		    <a href="..&#x2F;.&#x2F;version.ts&#x2F;~&#x2F;cidrVersion.html" title="cidrVersion">
 			    <span>cidrVersion</span><span>(<span><span>cidr<span>: <span class="td-kw">string</span></span></span></span>)<span>: <span><span class="td-ref">IpVersion</span><span class="td-op"> | </span><span class="td-kw">undefined</span></span></span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Reports which IP version a CIDR notation string is written in.</p>
-</div></div></div>
-    </div><div id="namespace_ipversion" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-Function bg-Function/15 dark:text-FunctionDark dark:bg-FunctionDark/15" title="Function">f</div></div>
-<div class="namespaceItemContent">
-		    <a href="..&#x2F;.&#x2F;version.ts&#x2F;~&#x2F;ipVersion.html" title="ipVersion">
-			    <span>ipVersion</span><span>(<span><span>address<span>: <span class="td-kw">string</span></span></span></span>)<span>: <span><span class="td-ref">IpVersion</span><span class="td-op"> | </span><span class="td-kw">undefined</span></span></span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Reports which IP version a plain address string is written in.</p>
 </div></div></div>
     </div></div>
 </section>
@@ -280,7 +280,7 @@ Functions</h2></div><div class="namespaceSection"><div id="namespace_cidrversion
   </defs>
 </svg>
 </a>
-Type Aliases</h2></div><div class="namespaceSection"><div id="namespace_ipversion-1" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-TypeAlias bg-TypeAlias/15 dark:text-TypeAliasDark dark:bg-TypeAliasDark/15" title="Type Alias">T</div></div>
+Type Aliases</h2></div><div class="namespaceSection"><div id="namespace_ipversion" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-TypeAlias bg-TypeAlias/15 dark:text-TypeAliasDark dark:bg-TypeAliasDark/15" title="Type Alias">T</div></div>
 <div class="namespaceItemContent">
 		    <a href="..&#x2F;.&#x2F;version.ts&#x2F;~&#x2F;IpVersion.html" title="IpVersion">
 			    <span>IpVersion</span><span> = <span><span class="td-lit">4</span><span class="td-op"> | </span><span class="td-lit">6</span></span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>An IP version number: <code>4</code> for IPv4, <code>6</code> for IPv6.</p>
@@ -328,37 +328,37 @@ Type Aliases</h2></div><div class="namespaceSection"><div id="namespace_ipversio
 </div></div><nav class="topSymbols">
           <h3>Symbols</h3>
           <ul><li>
-                <a href="..&#x2F;.&#x2F;ip.ts&#x2F;~&#x2F;Address.html" title="Address"><div class="docNodeKindIcon"><div class="text-TypeAlias bg-TypeAlias/15 dark:text-TypeAliasDark dark:bg-TypeAliasDark/15" title="Type Alias">T</div></div>
+                <a href="..&#x2F;.&#x2F;address.ts&#x2F;~&#x2F;Address.html" title="Address"><div class="docNodeKindIcon"><div class="text-TypeAlias bg-TypeAlias/15 dark:text-TypeAliasDark dark:bg-TypeAliasDark/15" title="Type Alias">T</div></div>
 <span class="hover:bg-TypeAlias/15 hover:bg-TypeAliasDark/15">
                     Address
                   </span>
                 </a>
               </li><li>
-                <a href="..&#x2F;.&#x2F;ip.ts&#x2F;~&#x2F;compareIp.html" title="compareIp"><div class="docNodeKindIcon"><div class="text-Function bg-Function/15 dark:text-FunctionDark dark:bg-FunctionDark/15" title="Function">f</div></div>
+                <a href="..&#x2F;.&#x2F;address.ts&#x2F;~&#x2F;compareAddress.html" title="compareAddress"><div class="docNodeKindIcon"><div class="text-Function bg-Function/15 dark:text-FunctionDark dark:bg-FunctionDark/15" title="Function">f</div></div>
 <span class="hover:bg-Function/15 hover:bg-FunctionDark/15">
-                    compareIp
+                    compareAddress
                   </span>
                 </a>
               </li><li>
-                <a href="..&#x2F;.&#x2F;ip.ts&#x2F;~&#x2F;parseIp.html" title="parseIp"><div class="docNodeKindIcon"><div class="text-Function bg-Function/15 dark:text-FunctionDark dark:bg-FunctionDark/15" title="Function">f</div></div>
+                <a href="..&#x2F;.&#x2F;address.ts&#x2F;~&#x2F;parseAddress.html" title="parseAddress"><div class="docNodeKindIcon"><div class="text-Function bg-Function/15 dark:text-FunctionDark dark:bg-FunctionDark/15" title="Function">f</div></div>
 <span class="hover:bg-Function/15 hover:bg-FunctionDark/15">
-                    parseIp
+                    parseAddress
                   </span>
                 </a>
               </li><li>
-                <a href="..&#x2F;.&#x2F;ip.ts&#x2F;~&#x2F;stringifyIp.html" title="stringifyIp"><div class="docNodeKindIcon"><div class="text-Function bg-Function/15 dark:text-FunctionDark dark:bg-FunctionDark/15" title="Function">f</div></div>
+                <a href="..&#x2F;.&#x2F;address.ts&#x2F;~&#x2F;stringifyAddress.html" title="stringifyAddress"><div class="docNodeKindIcon"><div class="text-Function bg-Function/15 dark:text-FunctionDark dark:bg-FunctionDark/15" title="Function">f</div></div>
 <span class="hover:bg-Function/15 hover:bg-FunctionDark/15">
-                    stringifyIp
+                    stringifyAddress
                   </span>
                 </a>
               </li><li>
-                <a href="..&#x2F;.&#x2F;ip.ts&#x2F;~&#x2F;stringifyIp.html" title="stringifyIp"><div class="docNodeKindIcon"><div class="text-Function bg-Function/15 dark:text-FunctionDark dark:bg-FunctionDark/15" title="Function">f</div></div>
+                <a href="..&#x2F;.&#x2F;address.ts&#x2F;~&#x2F;stringifyAddress.html" title="stringifyAddress"><div class="docNodeKindIcon"><div class="text-Function bg-Function/15 dark:text-FunctionDark dark:bg-FunctionDark/15" title="Function">f</div></div>
 <span class="hover:bg-Function/15 hover:bg-FunctionDark/15">
-                    stringifyIp
+                    stringifyAddress
                   </span>
                 </a>
               </li></ul><a class="flex items-center gap-0.5" href="..&#x2F;.&#x2F;all_symbols.html">
-              <span class="leading-none">view all 283 symbols</span><svg
+              <span class="leading-none">view all 279 symbols</span><svg
   width="16"
   height="16"
   viewBox="0 0 16 16"
@@ -373,7 +373,7 @@ Type Aliases</h2></div><div class="namespaceSection"><div id="namespace_ipversio
   />
 </svg>
 </a></nav><nav class="documentNavigation">
-          <h3>Document Navigation</h3><ul><li><a href="#examples" title="Examples">Examples</a></li><li><ul><li><a href="#example_0" title="Dispatching on the IP version">Dispatching on the IP version</a></li></ul></li><li><a href="#version_ts_functions" title="Functions">Functions</a></li><li><ul><li><a href="#namespace_cidrversion" title="cidrVersion">cidrVersion</a></li><li><a href="#namespace_ipversion" title="ipVersion">ipVersion</a></li></ul></li><li><a href="#version_ts_type-aliases" title="Type Aliases">Type Aliases</a></li><li><ul><li><a href="#namespace_ipversion-1" title="IpVersion">IpVersion</a></li></ul></li></ul></nav></div>
+          <h3>Document Navigation</h3><ul><li><a href="#examples" title="Examples">Examples</a></li><li><ul><li><a href="#example_0" title="Dispatching on the IP version">Dispatching on the IP version</a></li></ul></li><li><a href="#version_ts_functions" title="Functions">Functions</a></li><li><ul><li><a href="#namespace_addressversion" title="addressVersion">addressVersion</a></li><li><a href="#namespace_cidrversion" title="cidrVersion">cidrVersion</a></li></ul></li><li><a href="#version_ts_type-aliases" title="Type Aliases">Type Aliases</a></li><li><ul><li><a href="#namespace_ipversion" title="IpVersion">IpVersion</a></li></ul></li></ul></nav></div>
   </div></div>
 </div>
 </div>

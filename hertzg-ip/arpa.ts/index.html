@@ -99,15 +99,15 @@
 <div id="searchResults"></div><div id="content">
     <main><section>
   <div class="space-y-2 flex-1"><div class="space-y-7" id="module_doc"><div class="markdown"><p>Universal reverse DNS pointer names for IP addresses.</p>
-<p>This module provides <a href=".././arpa.ts/~/ipToArpa.html">ipToArpa</a>, which picks the IP version from the
+<p>This module provides <a href=".././arpa.ts/~/addressToArpa.html">addressToArpa</a>, which picks the IP version from the
 shape of its argument and delegates to the version-specific function. The
 name it builds is where a <code>PTR</code> record for the address lives: the four IPv4
 octets reversed under <code>in-addr.arpa</code> (RFC 1035 §3.5), or all 32 IPv6
 nibbles reversed under <code>ip6.arpa</code> (RFC 3596 §2.5).</p>
 <p>For version-specific functions, see:</p>
 <ul>
-<li><a href="https://jsr.io/@hertzg/ip/doc/arpav4"><code>arpav4</code></a>: <a href=".././arpav4.ts/~/ipv4ToArpa.html">ipv4ToArpa</a></li>
-<li><a href="https://jsr.io/@hertzg/ip/doc/arpav6"><code>arpav6</code></a>: <a href=".././arpav6.ts/~/ipv6ToArpa.html">ipv6ToArpa</a></li>
+<li><a href="https://jsr.io/@hertzg/ip/doc/arpav4"><code>arpav4</code></a>: <a href=".././arpav4.ts/~/addressv4ToArpa.html">addressv4ToArpa</a></li>
+<li><a href="https://jsr.io/@hertzg/ip/doc/arpav6"><code>arpav6</code></a>: <a href=".././arpav6.ts/~/addressv6ToArpa.html">addressv6ToArpa</a></li>
 </ul>
 <h2 id="the-names-are-relative">
 The names are relative</h2>
@@ -171,21 +171,21 @@ Examples</h2></div><div class="space-y-8"><div class="anchorable"><a href="#exam
 <h3 class="example-header"><div class="markdown"><p>Look up the PTR record of an address</p>
 </div></h3>
   <div><div class="markdown"><pre class="highlight"><code class="language-ts">import { assertEquals } from &quot;@std/assert&quot;;
-import { ipToArpa } from &quot;@hertzg/ip/arpa&quot;;
-import { parseIp } from &quot;@hertzg/ip/ip&quot;;
+import { addressToArpa } from &quot;@hertzg/ip/arpa&quot;;
+import { parseAddress } from &quot;@hertzg/ip/address&quot;;
 
-assertEquals(ipToArpa(parseIp(&quot;8.8.8.8&quot;)), &quot;8.8.8.8.in-addr.arpa&quot;);
+assertEquals(addressToArpa(parseAddress(&quot;8.8.8.8&quot;)), &quot;8.8.8.8.in-addr.arpa&quot;);
 assertEquals(
-  ipToArpa(parseIp(&quot;2001:4860:4860::8888&quot;)),
+  addressToArpa(parseAddress(&quot;2001:4860:4860::8888&quot;)),
   &quot;8.8.8.8.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.6.8.4.0.6.8.4.1.0.0.2.ip6.arpa&quot;,
 );
 </code><button class="copyButton" data-copy="import { assertEquals } from &quot;@std/assert&quot;;
-import { ipToArpa } from &quot;@hertzg/ip/arpa&quot;;
-import { parseIp } from &quot;@hertzg/ip/ip&quot;;
+import { addressToArpa } from &quot;@hertzg/ip/arpa&quot;;
+import { parseAddress } from &quot;@hertzg/ip/address&quot;;
 
-assertEquals(ipToArpa(parseIp(&quot;8.8.8.8&quot;)), &quot;8.8.8.8.in-addr.arpa&quot;);
+assertEquals(addressToArpa(parseAddress(&quot;8.8.8.8&quot;)), &quot;8.8.8.8.in-addr.arpa&quot;);
 assertEquals(
-  ipToArpa(parseIp(&quot;2001:4860:4860::8888&quot;)),
+  addressToArpa(parseAddress(&quot;2001:4860:4860::8888&quot;)),
   &quot;8.8.8.8.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.6.8.4.0.6.8.4.1.0.0.2.ip6.arpa&quot;,
 );
 "><svg
@@ -245,10 +245,10 @@ assertEquals(
   </defs>
 </svg>
 </a>
-Functions</h2></div><div class="namespaceSection"><div id="namespace_iptoarpa" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-Function bg-Function/15 dark:text-FunctionDark dark:bg-FunctionDark/15" title="Function">f</div></div>
+Functions</h2></div><div class="namespaceSection"><div id="namespace_addresstoarpa" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-Function bg-Function/15 dark:text-FunctionDark dark:bg-FunctionDark/15" title="Function">f</div></div>
 <div class="namespaceItemContent">
-		    <a href="..&#x2F;.&#x2F;arpa.ts&#x2F;~&#x2F;ipToArpa.html" title="ipToArpa">
-			    <span>ipToArpa</span><span>(<span><span>address<span>: <span class="td-ref">Address</span></span></span></span>)<span>: <span class="td-kw">string</span></span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Builds the reverse DNS pointer name of an IP address of either version.</p>
+		    <a href="..&#x2F;.&#x2F;arpa.ts&#x2F;~&#x2F;addressToArpa.html" title="addressToArpa">
+			    <span>addressToArpa</span><span>(<span><span>address<span>: <span class="td-ref">Address</span></span></span></span>)<span>: <span class="td-kw">string</span></span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Builds the reverse DNS pointer name of an IP address of either version.</p>
 </div></div></div>
     </div></div>
 </section>
@@ -293,37 +293,37 @@ Functions</h2></div><div class="namespaceSection"><div id="namespace_iptoarpa" c
 </div></div><nav class="topSymbols">
           <h3>Symbols</h3>
           <ul><li>
-                <a href="..&#x2F;.&#x2F;ip.ts&#x2F;~&#x2F;Address.html" title="Address"><div class="docNodeKindIcon"><div class="text-TypeAlias bg-TypeAlias/15 dark:text-TypeAliasDark dark:bg-TypeAliasDark/15" title="Type Alias">T</div></div>
+                <a href="..&#x2F;.&#x2F;address.ts&#x2F;~&#x2F;Address.html" title="Address"><div class="docNodeKindIcon"><div class="text-TypeAlias bg-TypeAlias/15 dark:text-TypeAliasDark dark:bg-TypeAliasDark/15" title="Type Alias">T</div></div>
 <span class="hover:bg-TypeAlias/15 hover:bg-TypeAliasDark/15">
                     Address
                   </span>
                 </a>
               </li><li>
-                <a href="..&#x2F;.&#x2F;ip.ts&#x2F;~&#x2F;compareIp.html" title="compareIp"><div class="docNodeKindIcon"><div class="text-Function bg-Function/15 dark:text-FunctionDark dark:bg-FunctionDark/15" title="Function">f</div></div>
+                <a href="..&#x2F;.&#x2F;address.ts&#x2F;~&#x2F;compareAddress.html" title="compareAddress"><div class="docNodeKindIcon"><div class="text-Function bg-Function/15 dark:text-FunctionDark dark:bg-FunctionDark/15" title="Function">f</div></div>
 <span class="hover:bg-Function/15 hover:bg-FunctionDark/15">
-                    compareIp
+                    compareAddress
                   </span>
                 </a>
               </li><li>
-                <a href="..&#x2F;.&#x2F;ip.ts&#x2F;~&#x2F;parseIp.html" title="parseIp"><div class="docNodeKindIcon"><div class="text-Function bg-Function/15 dark:text-FunctionDark dark:bg-FunctionDark/15" title="Function">f</div></div>
+                <a href="..&#x2F;.&#x2F;address.ts&#x2F;~&#x2F;parseAddress.html" title="parseAddress"><div class="docNodeKindIcon"><div class="text-Function bg-Function/15 dark:text-FunctionDark dark:bg-FunctionDark/15" title="Function">f</div></div>
 <span class="hover:bg-Function/15 hover:bg-FunctionDark/15">
-                    parseIp
+                    parseAddress
                   </span>
                 </a>
               </li><li>
-                <a href="..&#x2F;.&#x2F;ip.ts&#x2F;~&#x2F;stringifyIp.html" title="stringifyIp"><div class="docNodeKindIcon"><div class="text-Function bg-Function/15 dark:text-FunctionDark dark:bg-FunctionDark/15" title="Function">f</div></div>
+                <a href="..&#x2F;.&#x2F;address.ts&#x2F;~&#x2F;stringifyAddress.html" title="stringifyAddress"><div class="docNodeKindIcon"><div class="text-Function bg-Function/15 dark:text-FunctionDark dark:bg-FunctionDark/15" title="Function">f</div></div>
 <span class="hover:bg-Function/15 hover:bg-FunctionDark/15">
-                    stringifyIp
+                    stringifyAddress
                   </span>
                 </a>
               </li><li>
-                <a href="..&#x2F;.&#x2F;ip.ts&#x2F;~&#x2F;stringifyIp.html" title="stringifyIp"><div class="docNodeKindIcon"><div class="text-Function bg-Function/15 dark:text-FunctionDark dark:bg-FunctionDark/15" title="Function">f</div></div>
+                <a href="..&#x2F;.&#x2F;address.ts&#x2F;~&#x2F;stringifyAddress.html" title="stringifyAddress"><div class="docNodeKindIcon"><div class="text-Function bg-Function/15 dark:text-FunctionDark dark:bg-FunctionDark/15" title="Function">f</div></div>
 <span class="hover:bg-Function/15 hover:bg-FunctionDark/15">
-                    stringifyIp
+                    stringifyAddress
                   </span>
                 </a>
               </li></ul><a class="flex items-center gap-0.5" href="..&#x2F;.&#x2F;all_symbols.html">
-              <span class="leading-none">view all 283 symbols</span><svg
+              <span class="leading-none">view all 279 symbols</span><svg
   width="16"
   height="16"
   viewBox="0 0 16 16"
@@ -338,7 +338,7 @@ Functions</h2></div><div class="namespaceSection"><div id="namespace_iptoarpa" c
   />
 </svg>
 </a></nav><nav class="documentNavigation">
-          <h3>Document Navigation</h3><ul><li><ul><li><a href="#the-names-are-relative" title="The names are relative">The names are relative</a></li><li><a href="#addresses-only" title="Addresses only">Addresses only</a></li></ul></li><li><a href="#examples" title="Examples">Examples</a></li><li><ul><li><a href="#example_0" title="Look up the PTR record of an address">Look up the PTR record of an address</a></li></ul></li><li><a href="#arpa_ts_functions" title="Functions">Functions</a></li><li><ul><li><a href="#namespace_iptoarpa" title="ipToArpa">ipToArpa</a></li></ul></li></ul></nav></div>
+          <h3>Document Navigation</h3><ul><li><ul><li><a href="#the-names-are-relative" title="The names are relative">The names are relative</a></li><li><a href="#addresses-only" title="Addresses only">Addresses only</a></li></ul></li><li><a href="#examples" title="Examples">Examples</a></li><li><ul><li><a href="#example_0" title="Look up the PTR record of an address">Look up the PTR record of an address</a></li></ul></li><li><a href="#arpa_ts_functions" title="Functions">Functions</a></li><li><ul><li><a href="#namespace_addresstoarpa" title="addressToArpa">addressToArpa</a></li></ul></li></ul></nav></div>
   </div></div>
 </div>
 </div>

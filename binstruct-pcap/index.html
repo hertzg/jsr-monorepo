@@ -430,7 +430,7 @@ in the global header.</p>
 import { LINKTYPE, PCAP_MAGIC_MICROS, pcapFile } from &quot;@binstruct/pcap&quot;;
 import { ipv4Packet } from &quot;@binstruct/ipv4&quot;;
 import { udpPacket } from &quot;@binstruct/udp&quot;;
-import { parseIpv4 } from &quot;@hertzg/ip/ipv4&quot;;
+import { parseAddressv4 } from &quot;@hertzg/ip/addressv4&quot;;
 
 const ip = ipv4Packet();
 const udp = udpPacket();
@@ -460,8 +460,8 @@ ip.encode({
   timeToLive: 64,
   protocol: 17,
   headerChecksum: 0,
-  sourceAddress: parseIpv4(&quot;192.0.2.1&quot;),
-  destinationAddress: parseIpv4(&quot;192.0.2.2&quot;),
+  sourceAddress: parseAddressv4(&quot;192.0.2.1&quot;),
+  destinationAddress: parseAddressv4(&quot;192.0.2.2&quot;),
   options: new Uint8Array(0),
   payload: udpBytes,
 }, packet);
@@ -492,14 +492,14 @@ const [{ records }] = cap.decode(buf.subarray(0, written));
 const [parsedIp] = ip.decode(records[0].data);
 const [parsedUdp] = udp.decode(parsedIp.payload);
 
-assertEquals(parsedIp.sourceAddress, parseIpv4(&quot;192.0.2.1&quot;));
+assertEquals(parsedIp.sourceAddress, parseAddressv4(&quot;192.0.2.1&quot;));
 assertEquals(parsedUdp.srcPort, 53);
 assertEquals(parsedUdp.payload, new Uint8Array([0xde, 0xad, 0xbe, 0xef]));
 </code><button class="copyButton" data-copy="import { assertEquals } from &quot;@std/assert&quot;;
 import { LINKTYPE, PCAP_MAGIC_MICROS, pcapFile } from &quot;@binstruct/pcap&quot;;
 import { ipv4Packet } from &quot;@binstruct/ipv4&quot;;
 import { udpPacket } from &quot;@binstruct/udp&quot;;
-import { parseIpv4 } from &quot;@hertzg/ip/ipv4&quot;;
+import { parseAddressv4 } from &quot;@hertzg/ip/addressv4&quot;;
 
 const ip = ipv4Packet();
 const udp = udpPacket();
@@ -529,8 +529,8 @@ ip.encode({
   timeToLive: 64,
   protocol: 17,
   headerChecksum: 0,
-  sourceAddress: parseIpv4(&quot;192.0.2.1&quot;),
-  destinationAddress: parseIpv4(&quot;192.0.2.2&quot;),
+  sourceAddress: parseAddressv4(&quot;192.0.2.1&quot;),
+  destinationAddress: parseAddressv4(&quot;192.0.2.2&quot;),
   options: new Uint8Array(0),
   payload: udpBytes,
 }, packet);
@@ -561,7 +561,7 @@ const [{ records }] = cap.decode(buf.subarray(0, written));
 const [parsedIp] = ip.decode(records[0].data);
 const [parsedUdp] = udp.decode(parsedIp.payload);
 
-assertEquals(parsedIp.sourceAddress, parseIpv4(&quot;192.0.2.1&quot;));
+assertEquals(parsedIp.sourceAddress, parseAddressv4(&quot;192.0.2.1&quot;));
 assertEquals(parsedUdp.srcPort, 53);
 assertEquals(parsedUdp.payload, new Uint8Array([0xde, 0xad, 0xbe, 0xef]));
 "><svg
@@ -626,7 +626,7 @@ import { LINKTYPE, PCAP_MAGIC_MICROS, pcapFile } from &quot;@binstruct/pcap&quot
 import { inetFrame } from &quot;@binstruct/inet&quot;;
 import { ETHERTYPE_IPV4 } from &quot;@binstruct/ipv4&quot;;
 import { IP_PROTOCOL_UDP } from &quot;@binstruct/udp&quot;;
-import { parseIpv4 } from &quot;@hertzg/ip/ipv4&quot;;
+import { parseAddressv4 } from &quot;@hertzg/ip/addressv4&quot;;
 
 const inet = inetFrame();
 
@@ -645,8 +645,8 @@ inet.encode({
     timeToLive: 64,
     protocol: IP_PROTOCOL_UDP,
     headerChecksum: 0,
-    sourceAddress: parseIpv4(&quot;192.0.2.1&quot;),
-    destinationAddress: parseIpv4(&quot;192.0.2.2&quot;),
+    sourceAddress: parseAddressv4(&quot;192.0.2.1&quot;),
+    destinationAddress: parseAddressv4(&quot;192.0.2.2&quot;),
     options: new Uint8Array(0),
     payload: {
       srcPort: 53,
@@ -685,7 +685,7 @@ const [decoded] = inet.decode(records[0].data);
 
 assert(!(decoded.payload instanceof Uint8Array));
 assert(&quot;protocol&quot; in decoded.payload);
-assertEquals(decoded.payload.sourceAddress, parseIpv4(&quot;192.0.2.1&quot;));
+assertEquals(decoded.payload.sourceAddress, parseAddressv4(&quot;192.0.2.1&quot;));
 assert(!(decoded.payload.payload instanceof Uint8Array));
 assert(&quot;srcPort&quot; in decoded.payload.payload);
 assertEquals(decoded.payload.payload.srcPort, 53);
@@ -695,7 +695,7 @@ import { LINKTYPE, PCAP_MAGIC_MICROS, pcapFile } from &quot;@binstruct/pcap&quot
 import { inetFrame } from &quot;@binstruct/inet&quot;;
 import { ETHERTYPE_IPV4 } from &quot;@binstruct/ipv4&quot;;
 import { IP_PROTOCOL_UDP } from &quot;@binstruct/udp&quot;;
-import { parseIpv4 } from &quot;@hertzg/ip/ipv4&quot;;
+import { parseAddressv4 } from &quot;@hertzg/ip/addressv4&quot;;
 
 const inet = inetFrame();
 
@@ -714,8 +714,8 @@ inet.encode({
     timeToLive: 64,
     protocol: IP_PROTOCOL_UDP,
     headerChecksum: 0,
-    sourceAddress: parseIpv4(&quot;192.0.2.1&quot;),
-    destinationAddress: parseIpv4(&quot;192.0.2.2&quot;),
+    sourceAddress: parseAddressv4(&quot;192.0.2.1&quot;),
+    destinationAddress: parseAddressv4(&quot;192.0.2.2&quot;),
     options: new Uint8Array(0),
     payload: {
       srcPort: 53,
@@ -754,7 +754,7 @@ const [decoded] = inet.decode(records[0].data);
 
 assert(!(decoded.payload instanceof Uint8Array));
 assert(&quot;protocol&quot; in decoded.payload);
-assertEquals(decoded.payload.sourceAddress, parseIpv4(&quot;192.0.2.1&quot;));
+assertEquals(decoded.payload.sourceAddress, parseAddressv4(&quot;192.0.2.1&quot;));
 assert(!(decoded.payload.payload instanceof Uint8Array));
 assert(&quot;srcPort&quot; in decoded.payload.payload);
 assertEquals(decoded.payload.payload.srcPort, 53);

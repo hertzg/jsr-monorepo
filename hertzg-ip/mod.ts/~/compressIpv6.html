@@ -119,7 +119,7 @@
             <span class="text-Function">function</span>&nbsp;<span class="font-bold">compressIpv6</span>
           </div></div><a
   class="sourceButton"
-  href="file:&#x2F;&#x2F;&#x2F;home&#x2F;runner&#x2F;work&#x2F;jsr-monorepo&#x2F;jsr-monorepo&#x2F;packages&#x2F;@hertzg&#x2F;ip&#x2F;ipv6.ts"><svg
+  href="file:&#x2F;&#x2F;&#x2F;home&#x2F;runner&#x2F;work&#x2F;jsr-monorepo&#x2F;jsr-monorepo&#x2F;packages&#x2F;@hertzg&#x2F;ip&#x2F;addressv6.ts"><svg
   width="14"
   height="14"
   viewBox="0 0 14 14"
@@ -217,14 +217,14 @@ Examples</h2></div><div class="space-y-8"><div class="anchorable"><a href="#exam
 <h3 class="example-header"><div class="markdown"><p>Compressing addresses</p>
 </div></h3>
   <div><div class="markdown"><pre class="highlight"><code class="language-ts">import { assertEquals } from &quot;@std/assert&quot;;
-import { compressIpv6 } from &quot;@hertzg/ip/ipv6&quot;;
+import { compressIpv6 } from &quot;@hertzg/ip/addressv6&quot;;
 
 assertEquals(compressIpv6(&quot;0000:0000:0000:0000:0000:0000:0000:0000&quot;), &quot;::&quot;);
 assertEquals(compressIpv6(&quot;0000:0000:0000:0000:0000:0000:0000:0001&quot;), &quot;::1&quot;);
 assertEquals(compressIpv6(&quot;2001:0db8:0000:0000:0000:0000:0000:0001&quot;), &quot;2001:db8::1&quot;);
 assertEquals(compressIpv6(&quot;fe80:0000:0000:0000:0000:0000:0000:0001&quot;), &quot;fe80::1&quot;);
 </code><button class="copyButton" data-copy="import { assertEquals } from &quot;@std/assert&quot;;
-import { compressIpv6 } from &quot;@hertzg/ip/ipv6&quot;;
+import { compressIpv6 } from &quot;@hertzg/ip/addressv6&quot;;
 
 assertEquals(compressIpv6(&quot;0000:0000:0000:0000:0000:0000:0000:0000&quot;), &quot;::&quot;);
 assertEquals(compressIpv6(&quot;0000:0000:0000:0000:0000:0000:0000:0001&quot;), &quot;::1&quot;);
@@ -316,7 +316,7 @@ Parameters</h2></div><div class="space-y-8"><div class="anchorable docEntry" id=
       </code>
     </div><a
   class="sourceButton"
-  href="file:&#x2F;&#x2F;&#x2F;home&#x2F;runner&#x2F;work&#x2F;jsr-monorepo&#x2F;jsr-monorepo&#x2F;packages&#x2F;@hertzg&#x2F;ip&#x2F;ipv6.ts"><svg
+  href="file:&#x2F;&#x2F;&#x2F;home&#x2F;runner&#x2F;work&#x2F;jsr-monorepo&#x2F;jsr-monorepo&#x2F;packages&#x2F;@hertzg&#x2F;ip&#x2F;addressv6.ts"><svg
   width="14"
   height="14"
   viewBox="0 0 14 14"
@@ -372,7 +372,7 @@ Return Type</h2></div><div class="space-y-8"><div class=" docEntry" id="function
       </code>
     </div><a
   class="sourceButton"
-  href="file:&#x2F;&#x2F;&#x2F;home&#x2F;runner&#x2F;work&#x2F;jsr-monorepo&#x2F;jsr-monorepo&#x2F;packages&#x2F;@hertzg&#x2F;ip&#x2F;ipv6.ts"><svg
+  href="file:&#x2F;&#x2F;&#x2F;home&#x2F;runner&#x2F;work&#x2F;jsr-monorepo&#x2F;jsr-monorepo&#x2F;packages&#x2F;@hertzg&#x2F;ip&#x2F;addressv6.ts"><svg
   width="14"
   height="14"
   viewBox="0 0 14 14"
@@ -428,7 +428,7 @@ Throws</h2></div><div class="space-y-8"><div class=" docEntry" id="function_comp
       </code>
     </div><a
   class="sourceButton"
-  href="file:&#x2F;&#x2F;&#x2F;home&#x2F;runner&#x2F;work&#x2F;jsr-monorepo&#x2F;jsr-monorepo&#x2F;packages&#x2F;@hertzg&#x2F;ip&#x2F;ipv6.ts"><svg
+  href="file:&#x2F;&#x2F;&#x2F;home&#x2F;runner&#x2F;work&#x2F;jsr-monorepo&#x2F;jsr-monorepo&#x2F;packages&#x2F;@hertzg&#x2F;ip&#x2F;addressv6.ts"><svg
   width="14"
   height="14"
   viewBox="0 0 14 14"
@@ -451,7 +451,7 @@ Throws</h2></div><div class="space-y-8"><div class=" docEntry" id="function_comp
   />
 </svg>
 </a>
-</div><div class="max-w-[75ch]"><div class="markdown"><p>Propagates errors from parseIpv6 if the input is invalid</p>
+</div><div class="max-w-[75ch]"><div class="markdown"><p>Propagates errors from parseAddressv6 if the input is invalid</p>
 </div></div></div>
 </div></section>
 </div>

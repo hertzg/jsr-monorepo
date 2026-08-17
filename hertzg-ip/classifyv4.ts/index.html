@@ -150,21 +150,21 @@ Examples</h2></div><div class="space-y-8"><div class="anchorable"><a href="#exam
 <h3 class="example-header"><div class="markdown"><p>Classify an IPv4 address</p>
 </div></h3>
   <div><div class="markdown"><pre class="highlight"><code class="language-ts">import { assertEquals } from &quot;@std/assert&quot;;
-import { classifyIpv4 } from &quot;@hertzg/ip/classifyv4&quot;;
-import { parseIpv4 } from &quot;@hertzg/ip/ipv4&quot;;
+import { classifyAddressv4 } from &quot;@hertzg/ip/classifyv4&quot;;
+import { parseAddressv4 } from &quot;@hertzg/ip/addressv4&quot;;
 
-assertEquals(classifyIpv4(parseIpv4(&quot;192.168.1.1&quot;)), &quot;private&quot;);
-assertEquals(classifyIpv4(parseIpv4(&quot;8.8.8.8&quot;)), &quot;public&quot;);
-assertEquals(classifyIpv4(parseIpv4(&quot;127.0.0.1&quot;)), &quot;loopback&quot;);
-assertEquals(classifyIpv4(parseIpv4(&quot;224.0.0.1&quot;)), &quot;multicast&quot;);
+assertEquals(classifyAddressv4(parseAddressv4(&quot;192.168.1.1&quot;)), &quot;private&quot;);
+assertEquals(classifyAddressv4(parseAddressv4(&quot;8.8.8.8&quot;)), &quot;public&quot;);
+assertEquals(classifyAddressv4(parseAddressv4(&quot;127.0.0.1&quot;)), &quot;loopback&quot;);
+assertEquals(classifyAddressv4(parseAddressv4(&quot;224.0.0.1&quot;)), &quot;multicast&quot;);
 </code><button class="copyButton" data-copy="import { assertEquals } from &quot;@std/assert&quot;;
-import { classifyIpv4 } from &quot;@hertzg/ip/classifyv4&quot;;
-import { parseIpv4 } from &quot;@hertzg/ip/ipv4&quot;;
+import { classifyAddressv4 } from &quot;@hertzg/ip/classifyv4&quot;;
+import { parseAddressv4 } from &quot;@hertzg/ip/addressv4&quot;;
 
-assertEquals(classifyIpv4(parseIpv4(&quot;192.168.1.1&quot;)), &quot;private&quot;);
-assertEquals(classifyIpv4(parseIpv4(&quot;8.8.8.8&quot;)), &quot;public&quot;);
-assertEquals(classifyIpv4(parseIpv4(&quot;127.0.0.1&quot;)), &quot;loopback&quot;);
-assertEquals(classifyIpv4(parseIpv4(&quot;224.0.0.1&quot;)), &quot;multicast&quot;);
+assertEquals(classifyAddressv4(parseAddressv4(&quot;192.168.1.1&quot;)), &quot;private&quot;);
+assertEquals(classifyAddressv4(parseAddressv4(&quot;8.8.8.8&quot;)), &quot;public&quot;);
+assertEquals(classifyAddressv4(parseAddressv4(&quot;127.0.0.1&quot;)), &quot;loopback&quot;);
+assertEquals(classifyAddressv4(parseAddressv4(&quot;224.0.0.1&quot;)), &quot;multicast&quot;);
 "><svg
   class="copy"
   width="15"
@@ -223,21 +223,21 @@ assertEquals(classifyIpv4(parseIpv4(&quot;224.0.0.1&quot;)), &quot;multicast&quo
 <h3 class="example-header"><div class="markdown"><p>Check specific ranges</p>
 </div></h3>
   <div><div class="markdown"><pre class="highlight"><code class="language-ts">import { assert, assertEquals } from &quot;@std/assert&quot;;
-import { isIpv4Loopback, isIpv4Private, isIpv4Public } from &quot;@hertzg/ip/classifyv4&quot;;
-import { parseIpv4 } from &quot;@hertzg/ip/ipv4&quot;;
+import { isAddressv4Loopback, isAddressv4Private, isAddressv4Public } from &quot;@hertzg/ip/classifyv4&quot;;
+import { parseAddressv4 } from &quot;@hertzg/ip/addressv4&quot;;
 
-assert(isIpv4Loopback(parseIpv4(&quot;127.0.0.1&quot;)));
-assert(isIpv4Private(parseIpv4(&quot;10.0.0.1&quot;)));
-assertEquals(isIpv4Public(parseIpv4(&quot;10.0.0.1&quot;)), false);
-assert(isIpv4Public(parseIpv4(&quot;8.8.8.8&quot;)));
+assert(isAddressv4Loopback(parseAddressv4(&quot;127.0.0.1&quot;)));
+assert(isAddressv4Private(parseAddressv4(&quot;10.0.0.1&quot;)));
+assertEquals(isAddressv4Public(parseAddressv4(&quot;10.0.0.1&quot;)), false);
+assert(isAddressv4Public(parseAddressv4(&quot;8.8.8.8&quot;)));
 </code><button class="copyButton" data-copy="import { assert, assertEquals } from &quot;@std/assert&quot;;
-import { isIpv4Loopback, isIpv4Private, isIpv4Public } from &quot;@hertzg/ip/classifyv4&quot;;
-import { parseIpv4 } from &quot;@hertzg/ip/ipv4&quot;;
+import { isAddressv4Loopback, isAddressv4Private, isAddressv4Public } from &quot;@hertzg/ip/classifyv4&quot;;
+import { parseAddressv4 } from &quot;@hertzg/ip/addressv4&quot;;
 
-assert(isIpv4Loopback(parseIpv4(&quot;127.0.0.1&quot;)));
-assert(isIpv4Private(parseIpv4(&quot;10.0.0.1&quot;)));
-assertEquals(isIpv4Public(parseIpv4(&quot;10.0.0.1&quot;)), false);
-assert(isIpv4Public(parseIpv4(&quot;8.8.8.8&quot;)));
+assert(isAddressv4Loopback(parseAddressv4(&quot;127.0.0.1&quot;)));
+assert(isAddressv4Private(parseAddressv4(&quot;10.0.0.1&quot;)));
+assertEquals(isAddressv4Public(parseAddressv4(&quot;10.0.0.1&quot;)), false);
+assert(isAddressv4Public(parseAddressv4(&quot;8.8.8.8&quot;)));
 "><svg
   class="copy"
   width="15"
@@ -295,65 +295,65 @@ assert(isIpv4Public(parseIpv4(&quot;8.8.8.8&quot;)));
   </defs>
 </svg>
 </a>
-Functions</h2></div><div class="namespaceSection"><div id="namespace_classifyipv4" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-Function bg-Function/15 dark:text-FunctionDark dark:bg-FunctionDark/15" title="Function">f</div></div>
+Functions</h2></div><div class="namespaceSection"><div id="namespace_classifyaddressv4" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-Function bg-Function/15 dark:text-FunctionDark dark:bg-FunctionDark/15" title="Function">f</div></div>
 <div class="namespaceItemContent">
-		    <a href="..&#x2F;.&#x2F;classifyv4.ts&#x2F;~&#x2F;classifyIpv4.html" title="classifyIpv4">
-			    <span>classifyIpv4</span><span>(<span><span>address<span>: <span class="td-kw">number</span></span></span></span>)<span>: <span class="td-ref">ClassificationIpv4</span></span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Classifies an IPv4 address into its well-known range.</p>
+		    <a href="..&#x2F;.&#x2F;classifyv4.ts&#x2F;~&#x2F;classifyAddressv4.html" title="classifyAddressv4">
+			    <span>classifyAddressv4</span><span>(<span><span>address<span>: <span class="td-kw">number</span></span></span></span>)<span>: <span class="td-ref">Classificationv4</span></span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Classifies an IPv4 address into its well-known range.</p>
 </div></div></div>
-    </div><div id="namespace_isipv4benchmarking" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-Function bg-Function/15 dark:text-FunctionDark dark:bg-FunctionDark/15" title="Function">f</div></div>
+    </div><div id="namespace_isaddressv4benchmarking" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-Function bg-Function/15 dark:text-FunctionDark dark:bg-FunctionDark/15" title="Function">f</div></div>
 <div class="namespaceItemContent">
-		    <a href="..&#x2F;.&#x2F;classifyv4.ts&#x2F;~&#x2F;isIpv4Benchmarking.html" title="isIpv4Benchmarking">
-			    <span>isIpv4Benchmarking</span><span>(<span><span>address<span>: <span class="td-kw">number</span></span></span></span>)<span>: <span class="td-kw">boolean</span></span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Checks if an IPv4 address is in the benchmarking range (RFC 2544).</p>
+		    <a href="..&#x2F;.&#x2F;classifyv4.ts&#x2F;~&#x2F;isAddressv4Benchmarking.html" title="isAddressv4Benchmarking">
+			    <span>isAddressv4Benchmarking</span><span>(<span><span>address<span>: <span class="td-kw">number</span></span></span></span>)<span>: <span class="td-kw">boolean</span></span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Checks if an IPv4 address is in the benchmarking range (RFC 2544).</p>
 </div></div></div>
-    </div><div id="namespace_isipv4broadcast" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-Function bg-Function/15 dark:text-FunctionDark dark:bg-FunctionDark/15" title="Function">f</div></div>
+    </div><div id="namespace_isaddressv4broadcast" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-Function bg-Function/15 dark:text-FunctionDark dark:bg-FunctionDark/15" title="Function">f</div></div>
 <div class="namespaceItemContent">
-		    <a href="..&#x2F;.&#x2F;classifyv4.ts&#x2F;~&#x2F;isIpv4Broadcast.html" title="isIpv4Broadcast">
-			    <span>isIpv4Broadcast</span><span>(<span><span>address<span>: <span class="td-kw">number</span></span></span></span>)<span>: <span class="td-kw">boolean</span></span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Checks if an IPv4 address is the limited broadcast address.</p>
+		    <a href="..&#x2F;.&#x2F;classifyv4.ts&#x2F;~&#x2F;isAddressv4Broadcast.html" title="isAddressv4Broadcast">
+			    <span>isAddressv4Broadcast</span><span>(<span><span>address<span>: <span class="td-kw">number</span></span></span></span>)<span>: <span class="td-kw">boolean</span></span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Checks if an IPv4 address is the limited broadcast address.</p>
 </div></div></div>
-    </div><div id="namespace_isipv4cgnat" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-Function bg-Function/15 dark:text-FunctionDark dark:bg-FunctionDark/15" title="Function">f</div></div>
+    </div><div id="namespace_isaddressv4cgnat" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-Function bg-Function/15 dark:text-FunctionDark dark:bg-FunctionDark/15" title="Function">f</div></div>
 <div class="namespaceItemContent">
-		    <a href="..&#x2F;.&#x2F;classifyv4.ts&#x2F;~&#x2F;isIpv4CgNat.html" title="isIpv4CgNat">
-			    <span>isIpv4CgNat</span><span>(<span><span>address<span>: <span class="td-kw">number</span></span></span></span>)<span>: <span class="td-kw">boolean</span></span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Checks if an IPv4 address is in the Carrier-Grade NAT range (RFC 6598).</p>
+		    <a href="..&#x2F;.&#x2F;classifyv4.ts&#x2F;~&#x2F;isAddressv4CgNat.html" title="isAddressv4CgNat">
+			    <span>isAddressv4CgNat</span><span>(<span><span>address<span>: <span class="td-kw">number</span></span></span></span>)<span>: <span class="td-kw">boolean</span></span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Checks if an IPv4 address is in the Carrier-Grade NAT range (RFC 6598).</p>
 </div></div></div>
-    </div><div id="namespace_isipv4documentation" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-Function bg-Function/15 dark:text-FunctionDark dark:bg-FunctionDark/15" title="Function">f</div></div>
+    </div><div id="namespace_isaddressv4documentation" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-Function bg-Function/15 dark:text-FunctionDark dark:bg-FunctionDark/15" title="Function">f</div></div>
 <div class="namespaceItemContent">
-		    <a href="..&#x2F;.&#x2F;classifyv4.ts&#x2F;~&#x2F;isIpv4Documentation.html" title="isIpv4Documentation">
-			    <span>isIpv4Documentation</span><span>(<span><span>address<span>: <span class="td-kw">number</span></span></span></span>)<span>: <span class="td-kw">boolean</span></span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Checks if an IPv4 address is in a documentation range (RFC 5737).</p>
+		    <a href="..&#x2F;.&#x2F;classifyv4.ts&#x2F;~&#x2F;isAddressv4Documentation.html" title="isAddressv4Documentation">
+			    <span>isAddressv4Documentation</span><span>(<span><span>address<span>: <span class="td-kw">number</span></span></span></span>)<span>: <span class="td-kw">boolean</span></span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Checks if an IPv4 address is in a documentation range (RFC 5737).</p>
 </div></div></div>
-    </div><div id="namespace_isipv4linklocal" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-Function bg-Function/15 dark:text-FunctionDark dark:bg-FunctionDark/15" title="Function">f</div></div>
+    </div><div id="namespace_isaddressv4linklocal" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-Function bg-Function/15 dark:text-FunctionDark dark:bg-FunctionDark/15" title="Function">f</div></div>
 <div class="namespaceItemContent">
-		    <a href="..&#x2F;.&#x2F;classifyv4.ts&#x2F;~&#x2F;isIpv4LinkLocal.html" title="isIpv4LinkLocal">
-			    <span>isIpv4LinkLocal</span><span>(<span><span>address<span>: <span class="td-kw">number</span></span></span></span>)<span>: <span class="td-kw">boolean</span></span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Checks if an IPv4 address is a link-local address (RFC 3927).</p>
+		    <a href="..&#x2F;.&#x2F;classifyv4.ts&#x2F;~&#x2F;isAddressv4LinkLocal.html" title="isAddressv4LinkLocal">
+			    <span>isAddressv4LinkLocal</span><span>(<span><span>address<span>: <span class="td-kw">number</span></span></span></span>)<span>: <span class="td-kw">boolean</span></span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Checks if an IPv4 address is a link-local address (RFC 3927).</p>
 </div></div></div>
-    </div><div id="namespace_isipv4loopback" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-Function bg-Function/15 dark:text-FunctionDark dark:bg-FunctionDark/15" title="Function">f</div></div>
+    </div><div id="namespace_isaddressv4loopback" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-Function bg-Function/15 dark:text-FunctionDark dark:bg-FunctionDark/15" title="Function">f</div></div>
 <div class="namespaceItemContent">
-		    <a href="..&#x2F;.&#x2F;classifyv4.ts&#x2F;~&#x2F;isIpv4Loopback.html" title="isIpv4Loopback">
-			    <span>isIpv4Loopback</span><span>(<span><span>address<span>: <span class="td-kw">number</span></span></span></span>)<span>: <span class="td-kw">boolean</span></span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Checks if an IPv4 address is a loopback address (RFC 1122).</p>
+		    <a href="..&#x2F;.&#x2F;classifyv4.ts&#x2F;~&#x2F;isAddressv4Loopback.html" title="isAddressv4Loopback">
+			    <span>isAddressv4Loopback</span><span>(<span><span>address<span>: <span class="td-kw">number</span></span></span></span>)<span>: <span class="td-kw">boolean</span></span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Checks if an IPv4 address is a loopback address (RFC 1122).</p>
 </div></div></div>
-    </div><div id="namespace_isipv4multicast" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-Function bg-Function/15 dark:text-FunctionDark dark:bg-FunctionDark/15" title="Function">f</div></div>
+    </div><div id="namespace_isaddressv4multicast" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-Function bg-Function/15 dark:text-FunctionDark dark:bg-FunctionDark/15" title="Function">f</div></div>
 <div class="namespaceItemContent">
-		    <a href="..&#x2F;.&#x2F;classifyv4.ts&#x2F;~&#x2F;isIpv4Multicast.html" title="isIpv4Multicast">
-			    <span>isIpv4Multicast</span><span>(<span><span>address<span>: <span class="td-kw">number</span></span></span></span>)<span>: <span class="td-kw">boolean</span></span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Checks if an IPv4 address is a multicast address (RFC 5771).</p>
+		    <a href="..&#x2F;.&#x2F;classifyv4.ts&#x2F;~&#x2F;isAddressv4Multicast.html" title="isAddressv4Multicast">
+			    <span>isAddressv4Multicast</span><span>(<span><span>address<span>: <span class="td-kw">number</span></span></span></span>)<span>: <span class="td-kw">boolean</span></span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Checks if an IPv4 address is a multicast address (RFC 5771).</p>
 </div></div></div>
-    </div><div id="namespace_isipv4private" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-Function bg-Function/15 dark:text-FunctionDark dark:bg-FunctionDark/15" title="Function">f</div></div>
+    </div><div id="namespace_isaddressv4private" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-Function bg-Function/15 dark:text-FunctionDark dark:bg-FunctionDark/15" title="Function">f</div></div>
 <div class="namespaceItemContent">
-		    <a href="..&#x2F;.&#x2F;classifyv4.ts&#x2F;~&#x2F;isIpv4Private.html" title="isIpv4Private">
-			    <span>isIpv4Private</span><span>(<span><span>address<span>: <span class="td-kw">number</span></span></span></span>)<span>: <span class="td-kw">boolean</span></span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Checks if an IPv4 address is in a private range (RFC 1918).</p>
+		    <a href="..&#x2F;.&#x2F;classifyv4.ts&#x2F;~&#x2F;isAddressv4Private.html" title="isAddressv4Private">
+			    <span>isAddressv4Private</span><span>(<span><span>address<span>: <span class="td-kw">number</span></span></span></span>)<span>: <span class="td-kw">boolean</span></span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Checks if an IPv4 address is in a private range (RFC 1918).</p>
 </div></div></div>
-    </div><div id="namespace_isipv4public" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-Function bg-Function/15 dark:text-FunctionDark dark:bg-FunctionDark/15" title="Function">f</div></div>
+    </div><div id="namespace_isaddressv4public" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-Function bg-Function/15 dark:text-FunctionDark dark:bg-FunctionDark/15" title="Function">f</div></div>
 <div class="namespaceItemContent">
-		    <a href="..&#x2F;.&#x2F;classifyv4.ts&#x2F;~&#x2F;isIpv4Public.html" title="isIpv4Public">
-			    <span>isIpv4Public</span><span>(<span><span>address<span>: <span class="td-kw">number</span></span></span></span>)<span>: <span class="td-kw">boolean</span></span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Checks if an IPv4 address is a public (globally routable) address.</p>
+		    <a href="..&#x2F;.&#x2F;classifyv4.ts&#x2F;~&#x2F;isAddressv4Public.html" title="isAddressv4Public">
+			    <span>isAddressv4Public</span><span>(<span><span>address<span>: <span class="td-kw">number</span></span></span></span>)<span>: <span class="td-kw">boolean</span></span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Checks if an IPv4 address is a public (globally routable) address.</p>
 </div></div></div>
-    </div><div id="namespace_isipv4reserved" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-Function bg-Function/15 dark:text-FunctionDark dark:bg-FunctionDark/15" title="Function">f</div></div>
+    </div><div id="namespace_isaddressv4reserved" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-Function bg-Function/15 dark:text-FunctionDark dark:bg-FunctionDark/15" title="Function">f</div></div>
 <div class="namespaceItemContent">
-		    <a href="..&#x2F;.&#x2F;classifyv4.ts&#x2F;~&#x2F;isIpv4Reserved.html" title="isIpv4Reserved">
-			    <span>isIpv4Reserved</span><span>(<span><span>address<span>: <span class="td-kw">number</span></span></span></span>)<span>: <span class="td-kw">boolean</span></span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Checks if an IPv4 address is in the reserved range (RFC 1112).</p>
+		    <a href="..&#x2F;.&#x2F;classifyv4.ts&#x2F;~&#x2F;isAddressv4Reserved.html" title="isAddressv4Reserved">
+			    <span>isAddressv4Reserved</span><span>(<span><span>address<span>: <span class="td-kw">number</span></span></span></span>)<span>: <span class="td-kw">boolean</span></span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Checks if an IPv4 address is in the reserved range (RFC 1112).</p>
 </div></div></div>
-    </div><div id="namespace_isipv4thisnetwork" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-Function bg-Function/15 dark:text-FunctionDark dark:bg-FunctionDark/15" title="Function">f</div></div>
+    </div><div id="namespace_isaddressv4thisnetwork" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-Function bg-Function/15 dark:text-FunctionDark dark:bg-FunctionDark/15" title="Function">f</div></div>
 <div class="namespaceItemContent">
-		    <a href="..&#x2F;.&#x2F;classifyv4.ts&#x2F;~&#x2F;isIpv4ThisNetwork.html" title="isIpv4ThisNetwork">
-			    <span>isIpv4ThisNetwork</span><span>(<span><span>address<span>: <span class="td-kw">number</span></span></span></span>)<span>: <span class="td-kw">boolean</span></span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Checks if an IPv4 address is in the &quot;this network&quot; range (RFC 791).</p>
+		    <a href="..&#x2F;.&#x2F;classifyv4.ts&#x2F;~&#x2F;isAddressv4ThisNetwork.html" title="isAddressv4ThisNetwork">
+			    <span>isAddressv4ThisNetwork</span><span>(<span><span>address<span>: <span class="td-kw">number</span></span></span></span>)<span>: <span class="td-kw">boolean</span></span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Checks if an IPv4 address is in the &quot;this network&quot; range (RFC 791).</p>
 </div></div></div>
     </div></div>
 </section>
@@ -380,10 +380,10 @@ Functions</h2></div><div class="namespaceSection"><div id="namespace_classifyipv
   </defs>
 </svg>
 </a>
-Type Aliases</h2></div><div class="namespaceSection"><div id="namespace_classificationipv4" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-TypeAlias bg-TypeAlias/15 dark:text-TypeAliasDark dark:bg-TypeAliasDark/15" title="Type Alias">T</div></div>
+Type Aliases</h2></div><div class="namespaceSection"><div id="namespace_classificationv4" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-TypeAlias bg-TypeAlias/15 dark:text-TypeAliasDark dark:bg-TypeAliasDark/15" title="Type Alias">T</div></div>
 <div class="namespaceItemContent">
-		    <a href="..&#x2F;.&#x2F;classifyv4.ts&#x2F;~&#x2F;ClassificationIpv4.html" title="ClassificationIpv4">
-			    <span>ClassificationIpv4</span><span> = <div class="ml-indent"><span><span class="td-str">"broadcast"</span></span><br /><span><span class="td-op"> | </span><span class="td-str">"this-network"</span></span><br /><span><span class="td-op"> | </span><span class="td-str">"loopback"</span></span><br /><span><span class="td-op"> | </span><span class="td-str">"link-local"</span></span><br /><span><span class="td-op"> | </span><span class="td-str">"documentation"</span></span><br /><span><span class="td-op"> | </span><span class="td-str">"benchmarking"</span></span><br /><span><span class="td-op"> | </span><span class="td-str">"cg-nat"</span></span><br /><span><span class="td-op"> | </span><span class="td-str">"private"</span></span><br /><span><span class="td-op"> | </span><span class="td-str">"multicast"</span></span><br /><span><span class="td-op"> | </span><span class="td-str">"reserved"</span></span><br /><span><span class="td-op"> | </span><span class="td-str">"public"</span></span></div></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>All possible IPv4 address classification labels.</p>
+		    <a href="..&#x2F;.&#x2F;classifyv4.ts&#x2F;~&#x2F;Classificationv4.html" title="Classificationv4">
+			    <span>Classificationv4</span><span> = <div class="ml-indent"><span><span class="td-str">"broadcast"</span></span><br /><span><span class="td-op"> | </span><span class="td-str">"this-network"</span></span><br /><span><span class="td-op"> | </span><span class="td-str">"loopback"</span></span><br /><span><span class="td-op"> | </span><span class="td-str">"link-local"</span></span><br /><span><span class="td-op"> | </span><span class="td-str">"documentation"</span></span><br /><span><span class="td-op"> | </span><span class="td-str">"benchmarking"</span></span><br /><span><span class="td-op"> | </span><span class="td-str">"cg-nat"</span></span><br /><span><span class="td-op"> | </span><span class="td-str">"private"</span></span><br /><span><span class="td-op"> | </span><span class="td-str">"multicast"</span></span><br /><span><span class="td-op"> | </span><span class="td-str">"reserved"</span></span><br /><span><span class="td-op"> | </span><span class="td-str">"public"</span></span></div></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>All possible IPv4 address classification labels.</p>
 </div></div></div>
     </div></div>
 </section>
@@ -428,37 +428,37 @@ Type Aliases</h2></div><div class="namespaceSection"><div id="namespace_classifi
 </div></div><nav class="topSymbols">
           <h3>Symbols</h3>
           <ul><li>
-                <a href="..&#x2F;.&#x2F;ip.ts&#x2F;~&#x2F;Address.html" title="Address"><div class="docNodeKindIcon"><div class="text-TypeAlias bg-TypeAlias/15 dark:text-TypeAliasDark dark:bg-TypeAliasDark/15" title="Type Alias">T</div></div>
+                <a href="..&#x2F;.&#x2F;address.ts&#x2F;~&#x2F;Address.html" title="Address"><div class="docNodeKindIcon"><div class="text-TypeAlias bg-TypeAlias/15 dark:text-TypeAliasDark dark:bg-TypeAliasDark/15" title="Type Alias">T</div></div>
 <span class="hover:bg-TypeAlias/15 hover:bg-TypeAliasDark/15">
                     Address
                   </span>
                 </a>
               </li><li>
-                <a href="..&#x2F;.&#x2F;ip.ts&#x2F;~&#x2F;compareIp.html" title="compareIp"><div class="docNodeKindIcon"><div class="text-Function bg-Function/15 dark:text-FunctionDark dark:bg-FunctionDark/15" title="Function">f</div></div>
+                <a href="..&#x2F;.&#x2F;address.ts&#x2F;~&#x2F;compareAddress.html" title="compareAddress"><div class="docNodeKindIcon"><div class="text-Function bg-Function/15 dark:text-FunctionDark dark:bg-FunctionDark/15" title="Function">f</div></div>
 <span class="hover:bg-Function/15 hover:bg-FunctionDark/15">
-                    compareIp
+                    compareAddress
                   </span>
                 </a>
               </li><li>
-                <a href="..&#x2F;.&#x2F;ip.ts&#x2F;~&#x2F;parseIp.html" title="parseIp"><div class="docNodeKindIcon"><div class="text-Function bg-Function/15 dark:text-FunctionDark dark:bg-FunctionDark/15" title="Function">f</div></div>
+                <a href="..&#x2F;.&#x2F;address.ts&#x2F;~&#x2F;parseAddress.html" title="parseAddress"><div class="docNodeKindIcon"><div class="text-Function bg-Function/15 dark:text-FunctionDark dark:bg-FunctionDark/15" title="Function">f</div></div>
 <span class="hover:bg-Function/15 hover:bg-FunctionDark/15">
-                    parseIp
+                    parseAddress
                   </span>
                 </a>
               </li><li>
-                <a href="..&#x2F;.&#x2F;ip.ts&#x2F;~&#x2F;stringifyIp.html" title="stringifyIp"><div class="docNodeKindIcon"><div class="text-Function bg-Function/15 dark:text-FunctionDark dark:bg-FunctionDark/15" title="Function">f</div></div>
+                <a href="..&#x2F;.&#x2F;address.ts&#x2F;~&#x2F;stringifyAddress.html" title="stringifyAddress"><div class="docNodeKindIcon"><div class="text-Function bg-Function/15 dark:text-FunctionDark dark:bg-FunctionDark/15" title="Function">f</div></div>
 <span class="hover:bg-Function/15 hover:bg-FunctionDark/15">
-                    stringifyIp
+                    stringifyAddress
                   </span>
                 </a>
               </li><li>
-                <a href="..&#x2F;.&#x2F;ip.ts&#x2F;~&#x2F;stringifyIp.html" title="stringifyIp"><div class="docNodeKindIcon"><div class="text-Function bg-Function/15 dark:text-FunctionDark dark:bg-FunctionDark/15" title="Function">f</div></div>
+                <a href="..&#x2F;.&#x2F;address.ts&#x2F;~&#x2F;stringifyAddress.html" title="stringifyAddress"><div class="docNodeKindIcon"><div class="text-Function bg-Function/15 dark:text-FunctionDark dark:bg-FunctionDark/15" title="Function">f</div></div>
 <span class="hover:bg-Function/15 hover:bg-FunctionDark/15">
-                    stringifyIp
+                    stringifyAddress
                   </span>
                 </a>
               </li></ul><a class="flex items-center gap-0.5" href="..&#x2F;.&#x2F;all_symbols.html">
-              <span class="leading-none">view all 283 symbols</span><svg
+              <span class="leading-none">view all 279 symbols</span><svg
   width="16"
   height="16"
   viewBox="0 0 16 16"
@@ -473,7 +473,7 @@ Type Aliases</h2></div><div class="namespaceSection"><div id="namespace_classifi
   />
 </svg>
 </a></nav><nav class="documentNavigation">
-          <h3>Document Navigation</h3><ul><li><a href="#examples" title="Examples">Examples</a></li><li><ul><li><a href="#example_0" title="Classify an IPv4 address">Classify an IPv4 address</a></li><li><a href="#example_1" title="Check specific ranges">Check specific ranges</a></li></ul></li><li><a href="#classifyv4_ts_functions" title="Functions">Functions</a></li><li><ul><li><a href="#namespace_classifyipv4" title="classifyIpv4">classifyIpv4</a></li><li><a href="#namespace_isipv4benchmarking" title="isIpv4Benchmarking">isIpv4Benchmarking</a></li><li><a href="#namespace_isipv4broadcast" title="isIpv4Broadcast">isIpv4Broadcast</a></li><li><a href="#namespace_isipv4cgnat" title="isIpv4CgNat">isIpv4CgNat</a></li><li><a href="#namespace_isipv4documentation" title="isIpv4Documentation">isIpv4Documentation</a></li><li><a href="#namespace_isipv4linklocal" title="isIpv4LinkLocal">isIpv4LinkLocal</a></li><li><a href="#namespace_isipv4loopback" title="isIpv4Loopback">isIpv4Loopback</a></li><li><a href="#namespace_isipv4multicast" title="isIpv4Multicast">isIpv4Multicast</a></li><li><a href="#namespace_isipv4private" title="isIpv4Private">isIpv4Private</a></li><li><a href="#namespace_isipv4public" title="isIpv4Public">isIpv4Public</a></li><li><a href="#namespace_isipv4reserved" title="isIpv4Reserved">isIpv4Reserved</a></li><li><a href="#namespace_isipv4thisnetwork" title="isIpv4ThisNetwork">isIpv4ThisNetwork</a></li></ul></li><li><a href="#classifyv4_ts_type-aliases" title="Type Aliases">Type Aliases</a></li><li><ul><li><a href="#namespace_classificationipv4" title="ClassificationIpv4">ClassificationIpv4</a></li></ul></li></ul></nav></div>
+          <h3>Document Navigation</h3><ul><li><a href="#examples" title="Examples">Examples</a></li><li><ul><li><a href="#example_0" title="Classify an IPv4 address">Classify an IPv4 address</a></li><li><a href="#example_1" title="Check specific ranges">Check specific ranges</a></li></ul></li><li><a href="#classifyv4_ts_functions" title="Functions">Functions</a></li><li><ul><li><a href="#namespace_classifyaddressv4" title="classifyAddressv4">classifyAddressv4</a></li><li><a href="#namespace_isaddressv4benchmarking" title="isAddressv4Benchmarking">isAddressv4Benchmarking</a></li><li><a href="#namespace_isaddressv4broadcast" title="isAddressv4Broadcast">isAddressv4Broadcast</a></li><li><a href="#namespace_isaddressv4cgnat" title="isAddressv4CgNat">isAddressv4CgNat</a></li><li><a href="#namespace_isaddressv4documentation" title="isAddressv4Documentation">isAddressv4Documentation</a></li><li><a href="#namespace_isaddressv4linklocal" title="isAddressv4LinkLocal">isAddressv4LinkLocal</a></li><li><a href="#namespace_isaddressv4loopback" title="isAddressv4Loopback">isAddressv4Loopback</a></li><li><a href="#namespace_isaddressv4multicast" title="isAddressv4Multicast">isAddressv4Multicast</a></li><li><a href="#namespace_isaddressv4private" title="isAddressv4Private">isAddressv4Private</a></li><li><a href="#namespace_isaddressv4public" title="isAddressv4Public">isAddressv4Public</a></li><li><a href="#namespace_isaddressv4reserved" title="isAddressv4Reserved">isAddressv4Reserved</a></li><li><a href="#namespace_isaddressv4thisnetwork" title="isAddressv4ThisNetwork">isAddressv4ThisNetwork</a></li></ul></li><li><a href="#classifyv4_ts_type-aliases" title="Type Aliases">Type Aliases</a></li><li><ul><li><a href="#namespace_classificationv4" title="Classificationv4">Classificationv4</a></li></ul></li></ul></nav></div>
   </div></div>
 </div>
 </div>
