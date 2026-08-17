@@ -70,18 +70,36 @@ import {
   unmapToCidrv4,
 } from "./cidrv6.ts";
 import type { Address } from "./address.ts";
+import type { Maskv4, PrefixedCidrv4 } from "./cidrv4.ts";
+import type { Maskv6, PrefixedCidrv6 } from "./cidrv6.ts";
 
 export type {
   /** A plain IP address of either IP version. */
   Address,
 } from "./address.ts";
 export type {
-  /** Type representing an IPv4 CIDR block. */
+  /** Type representing an IPv4 CIDR block, in either dialect. */
   Cidrv4,
+  /** An IPv4 CIDR block written with a network mask. */
+  MaskedCidrv4,
+  /** An IPv4 network mask as a 32-bit unsigned integer. */
+  Maskv4,
+  /** An IPv4 CIDR block written with a prefix length. */
+  PrefixedCidrv4,
+  /** An IPv4 prefix length, 0 to 32. */
+  PrefixLengthv4,
 } from "./cidrv4.ts";
 export type {
-  /** Type representing an IPv6 CIDR block. */
+  /** Type representing an IPv6 CIDR block, in either dialect. */
   Cidrv6,
+  /** An IPv6 CIDR block written with a network mask. */
+  MaskedCidrv6,
+  /** An IPv6 network mask as a 128-bit unsigned bigint. */
+  Maskv6,
+  /** An IPv6 CIDR block written with a prefix length. */
+  PrefixedCidrv6,
+  /** An IPv6 prefix length, 0 to 128. */
+  PrefixLengthv6,
 } from "./cidrv6.ts";
 
 /**
@@ -89,12 +107,30 @@ export type {
  *
  * This is a union of {@link Cidrv4} and {@link Cidrv6}, useful for functions
  * that operate on CIDR blocks regardless of IP version. Use the
- * {@link isCidrv4} and {@link isCidrv6} type guards to narrow.
+ * {@link isCidrv4} and {@link isCidrv6} type guards to narrow. Each half
+ * is itself a union of the prefix-length and mask dialects, so a `Cidr`
+ * has four shapes and every operation here accepts all of them.
  */
 export type Cidr = Cidrv4 | Cidrv6;
 
 /**
+ * A network mask of either IP version: a `number` for IPv4, a `bigint`
+ * for IPv6, the same split as {@link Address}.
+ */
+export type Mask = Maskv4 | Maskv6;
+
+/**
+ * A prefix length of either IP version. Being a bare `number` it cannot
+ * say which version it belongs to, which is why there is no universal
+ * mask-from-prefix-length function: `24` is `/24` in both, and the masks
+ * differ.
+ */
+export type PrefixLength = number;
+
+/**
  * Type guard that checks whether a {@link Cidr} is an IPv4 CIDR block.
+ *
+ * Reads the version off the address, so both dialects pass.
  *
  * @param cidr The CIDR block to check
  * @returns `true` if the CIDR is a {@link Cidrv4}
@@ -105,6 +141,7 @@ export type Cidr = Cidrv4 | Cidrv6;
  * import { isCidrv4, parseCidr } from "@hertzg/ip/cidr";
  *
  * assert(isCidrv4(parseCidr("10.0.0.0/8")));
+ * assert(isCidrv4({ address: 167772160, mask: 0xFF000000 }));
  * ```
  */
 export function isCidrv4(cidr: Cidr): cidr is Cidrv4 {
@@ -113,6 +150,8 @@ export function isCidrv4(cidr: Cidr): cidr is Cidrv4 {
 
 /**
  * Type guard that checks whether a {@link Cidr} is an IPv6 CIDR block.
+ *
+ * Reads the version off the address, so both dialects pass.
  *
  * @param cidr The CIDR block to check
  * @returns `true` if the CIDR is a {@link Cidrv6}
@@ -123,6 +162,7 @@ export function isCidrv4(cidr: Cidr): cidr is Cidrv4 {
  * import { isCidrv6, parseCidr } from "@hertzg/ip/cidr";
  *
  * assert(isCidrv6(parseCidr("2001:db8::/32")));
+ * assert(isCidrv6({ address: 0x20010db8n << 96n, mask: 0xFFFFFFFF000000000000000000000000n }));
  * ```
  */
 export function isCidrv6(cidr: Cidr): cidr is Cidrv6 {
@@ -142,7 +182,8 @@ export function isCidrv6(cidr: Cidr): cidr is Cidrv6 {
  * {@link parseCidrv6} directly instead.
  *
  * @param cidr The CIDR notation string (e.g., "192.168.1.0/24" or "2001:db8::/32")
- * @returns The parsed CIDR as `Cidrv4` or `Cidrv6`
+ * @returns The parsed CIDR as a `PrefixedCidrv4` or `PrefixedCidrv6`; the
+ *   parser writes the prefix length dialect only
  * @throws {TypeError} If the format is invalid
  * @throws {RangeError} If values are out of range
  *
@@ -161,7 +202,7 @@ export function isCidrv6(cidr: Cidr): cidr is Cidrv6 {
  * assertEquals(mapped, { address: 3232235776, prefixLength: 24 });
  * ```
  */
-export function parseCidr(cidr: string): Cidr {
+export function parseCidr(cidr: string): PrefixedCidrv4 | PrefixedCidrv6 {
   if (cidr.includes(":")) {
     const v6 = parseCidrv6(cidr);
     if (isAddressv6Mapped(v6.address) && v6.prefixLength >= 96) {
@@ -175,6 +216,9 @@ export function parseCidr(cidr: string): Cidr {
 /**
  * Stringifies a {@link Cidrv4} or {@link Cidrv6} to CIDR notation.
  *
+ * The dialect is preserved: a prefixed block is written as `/N`, a masked
+ * block as `/mask` in the address notation of its version.
+ *
  * @param cidr The CIDR object
  * @returns The CIDR notation string
  *
@@ -185,6 +229,21 @@ export function parseCidr(cidr: string): Cidr {
  *
  * assertEquals(stringifyCidr(parseCidr("192.168.1.0/24")), "192.168.1.0/24");
  * assertEquals(stringifyCidr(parseCidr("2001:db8::/32")), "2001:db8::/32");
+ * ```
+ *
+ * @example Masked blocks are written with their mask
+ * ```ts
+ * import { assertEquals } from "@std/assert";
+ * import { stringifyCidr } from "@hertzg/ip/cidr";
+ *
+ * assertEquals(
+ *   stringifyCidr({ address: 167772160, mask: 0xFF000000 }),
+ *   "10.0.0.0/255.0.0.0",
+ * );
+ * assertEquals(
+ *   stringifyCidr({ address: 0xfe80n << 112n, mask: 0xFFFFFFFF000000000000000000000000n }),
+ *   "fe80::/ffff:ffff::",
+ * );
  * ```
  */
 export function stringifyCidr(cidr: Cidr): string {
@@ -303,7 +362,7 @@ export function cidrContains(cidr: Cidr, address: Address): boolean {
  */
 export function cidrContainsCidr<T extends Cidr>(
   outer: T,
-  inner: T,
+  inner: T extends Cidrv4 ? Cidrv4 : Cidrv6,
 ): boolean;
 /** Checks if one CIDR block fully contains another. */
 export function cidrContainsCidr(outer: Cidr, inner: Cidr): boolean {
@@ -365,7 +424,7 @@ export function cidrContainsCidr(outer: Cidr, inner: Cidr): boolean {
  */
 export function cidrOverlaps<T extends Cidr>(
   a: T,
-  b: T,
+  b: T extends Cidrv4 ? Cidrv4 : Cidrv6,
 ): boolean;
 /** Checks if two CIDR blocks overlap (share at least one address). */
 export function cidrOverlaps(a: Cidr, b: Cidr): boolean {
@@ -383,7 +442,8 @@ export function cidrOverlaps(a: Cidr, b: Cidr): boolean {
  *
  * Dispatches to {@link cidrv4Intersect} or {@link cidrv6Intersect}
  * based on the address type. Throws {@link TypeError} when mixing
- * IPv4 and IPv6 CIDRs.
+ * IPv4 and IPv6 CIDRs. The result matches the dialect of the inputs, and
+ * is masked when they disagree (ADR 0006).
  *
  * @param a The first CIDR block
  * @param b The second CIDR block
@@ -421,8 +481,8 @@ export function cidrOverlaps(a: Cidr, b: Cidr): boolean {
  */
 export function cidrIntersect<T extends Cidr>(
   a: T,
-  b: T,
-): T | null;
+  b: T extends Cidrv4 ? Cidrv4 : Cidrv6,
+): (T extends Cidrv4 ? Cidrv4 : Cidrv6) | null;
 /** Returns the intersection of two CIDR blocks. */
 export function cidrIntersect(a: Cidr, b: Cidr): Cidr | null {
   if (isCidrv6(a) && isCidrv6(b)) {
@@ -438,7 +498,8 @@ export function cidrIntersect(a: Cidr, b: Cidr): Cidr | null {
  *
  * Dispatches to {@link cidrv4Subtract} or {@link cidrv6Subtract}
  * based on the address type. Throws {@link TypeError} when mixing
- * IPv4 and IPv6 CIDRs.
+ * IPv4 and IPv6 CIDRs. The result matches the dialect of the inputs, and
+ * is masked when they disagree (ADR 0006).
  *
  * @param a The CIDR block to subtract from
  * @param b The CIDR block to subtract
@@ -476,8 +537,8 @@ export function cidrIntersect(a: Cidr, b: Cidr): Cidr | null {
  */
 export function cidrSubtract<T extends Cidr>(
   a: T,
-  b: T,
-): T[];
+  b: T extends Cidrv4 ? Cidrv4 : Cidrv6,
+): (T extends Cidrv4 ? Cidrv4 : Cidrv6)[];
 /** Subtracts one CIDR block from another. */
 export function cidrSubtract(a: Cidr, b: Cidr): Cidr[] {
   if (isCidrv6(a) && isCidrv6(b)) {
@@ -494,7 +555,8 @@ export function cidrSubtract(a: Cidr, b: Cidr): Cidr[] {
  *
  * Dispatches to {@link cidrv4Merge} or {@link cidrv6Merge} based on the
  * address type of the first element. All elements must be the same IP
- * version.
+ * version. The result matches the dialect of the inputs, and is masked
+ * when they disagree (ADR 0006).
  *
  * @param cidrs The CIDR blocks to merge
  * @returns Minimal set of non-overlapping CIDR blocks, sorted by address
@@ -759,7 +821,8 @@ export function* cidrAddresses(
  *
  * The block is ordered **as written**: the `address` field is compared as
  * stored, without applying the network mask first. See
- * {@link compareCidrv4} for what that means for blocks carrying host bits.
+ * {@link compareCidrv4} for what that means for blocks carrying host bits,
+ * and for why both dialects are compared by mask.
  *
  * @param a The first CIDR block
  * @param b The second CIDR block

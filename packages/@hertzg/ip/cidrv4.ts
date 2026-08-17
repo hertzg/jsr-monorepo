@@ -5,6 +5,10 @@
  * checking for IPv4 networks. Works with number representations to enable
  * efficient IP assignment workflows.
  *
+ * A {@link Cidrv4} stores whichever dialect it was written in, a prefix
+ * length (`10.0.0.0/8`) or a network mask (`10.0.0.0/255.0.0.0`), and every
+ * operation here accepts both.
+ *
  * @example CIDR operations
  * ```ts
  * import { assert, assertEquals } from "@std/assert";
@@ -45,16 +49,74 @@ import {
 } from "./addressv4.ts";
 
 /**
- * Represents an IPv4 CIDR block.
+ * An IPv4 network mask as a 32-bit unsigned integer, e.g. `0xFFFFFF00`
+ * for `/24`.
  *
- * Contains only the parsed values from the CIDR notation.
+ * A mask stored in a {@link MaskedCidrv4} is kept as given and is not
+ * required to be contiguous; only {@link cidrv4PrefixLength} insists on
+ * that, because it has no answer otherwise (ADR 0006).
  */
-export type Cidrv4 = {
+export type Maskv4 = number;
+
+/**
+ * An IPv4 prefix length, the `24` in `/24`. The range is 0 to 32; it is
+ * documented rather than encoded in the type, so `prefixLength + 1` stays
+ * a `PrefixLengthv4` (ADR 0002).
+ */
+export type PrefixLengthv4 = number;
+
+/**
+ * An IPv4 CIDR block written with a prefix length, as in `10.0.0.0/8`.
+ */
+export type PrefixedCidrv4 = {
   /** The IPv4 address from the CIDR notation */
   readonly address: number;
   /** The prefix length (0-32) */
-  readonly prefixLength: number;
+  readonly prefixLength: PrefixLengthv4;
+  /** Absent: the mask dialect is {@link MaskedCidrv4} */
+  readonly mask?: never;
 };
+
+/**
+ * An IPv4 CIDR block written with a network mask, as in
+ * `10.0.0.0/255.0.0.0`.
+ */
+export type MaskedCidrv4 = {
+  /** The IPv4 address from the CIDR notation */
+  readonly address: number;
+  /** The network mask, stored as given */
+  readonly mask: Maskv4;
+  /** Absent: the prefix length dialect is {@link PrefixedCidrv4} */
+  readonly prefixLength?: never;
+};
+
+/**
+ * Represents an IPv4 CIDR block.
+ *
+ * Contains only the parsed values from the CIDR notation, in whichever of
+ * the two dialects it was written: a prefix length
+ * ({@link PrefixedCidrv4}) or a network mask ({@link MaskedCidrv4}). Every
+ * `cidrv4*` operation accepts both and works on the mask internally; a
+ * result that has a dialect matches the input, and mixed inputs give the
+ * mask form (ADR 0006).
+ *
+ * The two branches exclude each other's key, so an object literal cannot
+ * carry both. If a value smuggled past the type checker does carry both,
+ * `mask` wins, because the mask is the form the operations compute on;
+ * nothing checks for the case at runtime.
+ *
+ * @example The two dialects describe the same block
+ * ```ts
+ * import { assertEquals } from "@std/assert";
+ * import { type Cidrv4, cidrv4Size, parseCidrv4 } from "@hertzg/ip/cidrv4";
+ *
+ * const prefixed: Cidrv4 = parseCidrv4("10.0.0.0/8");
+ * const masked: Cidrv4 = { address: prefixed.address, mask: 0xFF000000 };
+ *
+ * assertEquals(cidrv4Size(masked), cidrv4Size(prefixed));
+ * ```
+ */
+export type Cidrv4 = PrefixedCidrv4 | MaskedCidrv4;
 
 /**
  * Creates a network mask from an IPv4 prefix length.
@@ -86,7 +148,58 @@ export type Cidrv4 = {
  * assertThrows(() => cidrv4Mask(33), RangeError);
  * ```
  */
-export function cidrv4Mask(prefixLength: number): number {
+export function cidrv4Mask(prefixLength: PrefixLengthv4): Maskv4;
+/**
+ * Returns the network mask of an IPv4 CIDR block.
+ *
+ * A {@link MaskedCidrv4} gives back the mask it stores, as is; a
+ * {@link PrefixedCidrv4} has its prefix length shifted into one. Total over
+ * every block, which is what lets every `cidrv4*` operation go through it;
+ * the inverse, {@link cidrv4PrefixLength}, is the partial one.
+ *
+ * @param cidr The CIDR block
+ * @returns The network mask as a 32-bit unsigned integer
+ * @throws {RangeError} If a prefixed block's prefix length is out of range
+ *
+ * @example Both dialects yield the same mask
+ * ```ts
+ * import { assertEquals } from "@std/assert";
+ * import { cidrv4Mask, parseCidrv4 } from "@hertzg/ip/cidrv4";
+ *
+ * assertEquals(cidrv4Mask(parseCidrv4("192.168.1.0/24")), 0xFFFFFF00);
+ * assertEquals(cidrv4Mask({ address: 3232235776, mask: 0xFFFFFF00 }), 0xFFFFFF00);
+ * ```
+ *
+ * @example A stored mask comes back untouched, contiguous or not
+ * ```ts
+ * import { assertEquals } from "@std/assert";
+ * import { cidrv4Mask } from "@hertzg/ip/cidrv4";
+ *
+ * assertEquals(cidrv4Mask({ address: 0, mask: 0xFF00FF00 }), 0xFF00FF00);
+ * ```
+ */
+export function cidrv4Mask(cidr: Cidrv4): Maskv4;
+/**
+ * Returns the network mask of an IPv4 CIDR block or prefix length.
+ *
+ * @param cidrOrPrefixLength A Cidrv4 block or a prefix length (0-32)
+ * @returns The network mask as a 32-bit unsigned integer
+ * @throws {RangeError} If a prefix length is out of range
+ */
+export function cidrv4Mask(cidrOrPrefixLength: Cidrv4 | PrefixLengthv4): Maskv4;
+/** Returns the network mask of an IPv4 CIDR block or prefix length. */
+export function cidrv4Mask(
+  cidrOrPrefixLength: Cidrv4 | PrefixLengthv4,
+): Maskv4 {
+  let prefixLength: PrefixLengthv4;
+  if (typeof cidrOrPrefixLength === "number") {
+    prefixLength = cidrOrPrefixLength;
+  } else if (cidrOrPrefixLength.mask !== undefined) {
+    return cidrOrPrefixLength.mask;
+  } else {
+    prefixLength = cidrOrPrefixLength.prefixLength;
+  }
+
   if (
     prefixLength < 0 || prefixLength > 32 || !Number.isInteger(prefixLength)
   ) {
@@ -123,7 +236,38 @@ export function cidrv4Mask(prefixLength: number): number {
  * assertEquals(cidrv4PrefixLength(0), 0);
  * ```
  */
-export function cidrv4PrefixLength(mask: number): number;
+export function cidrv4PrefixLength(mask: Maskv4): PrefixLengthv4;
+/**
+ * Returns the prefix length of an IPv4 CIDR block.
+ *
+ * A {@link PrefixedCidrv4} gives back the prefix length it stores; a
+ * {@link MaskedCidrv4} has its mask converted, which is where this can
+ * throw: a mask such as `255.0.255.0` describes no prefix length, so a
+ * block storing one has no answer here (ADR 0006).
+ *
+ * @param cidr The CIDR block
+ * @returns The prefix length (0-32)
+ * @throws {TypeError} If a masked block's mask is not contiguous
+ * @throws {RangeError} If a masked block's mask is not a 32-bit unsigned integer
+ *
+ * @example Both dialects yield the same prefix length
+ * ```ts
+ * import { assertEquals } from "@std/assert";
+ * import { cidrv4PrefixLength, parseCidrv4 } from "@hertzg/ip/cidrv4";
+ *
+ * assertEquals(cidrv4PrefixLength(parseCidrv4("192.168.1.0/24")), 24);
+ * assertEquals(cidrv4PrefixLength({ address: 3232235776, mask: 0xFFFFFF00 }), 24);
+ * ```
+ *
+ * @example A non-contiguous mask has no prefix length
+ * ```ts
+ * import { assertThrows } from "@std/assert";
+ * import { cidrv4PrefixLength } from "@hertzg/ip/cidrv4";
+ *
+ * assertThrows(() => cidrv4PrefixLength({ address: 0, mask: 0xFF00FF00 }), TypeError);
+ * ```
+ */
+export function cidrv4PrefixLength(cidr: Cidrv4): PrefixLengthv4;
 /**
  * Recovers the prefix length from an IPv4 network mask given in dotted
  * decimal notation.
@@ -167,19 +311,21 @@ export function cidrv4PrefixLength(mask: number): number;
  * );
  * ```
  */
-export function cidrv4PrefixLength(mask: string): number;
+export function cidrv4PrefixLength(mask: string): PrefixLengthv4;
 /**
- * Recovers the prefix length from an IPv4 network mask.
+ * Recovers the prefix length from an IPv4 CIDR block or network mask.
  *
- * The inverse of {@link cidrv4Mask}. Accepts either a 32-bit unsigned
- * integer or dotted decimal notation.
+ * The inverse of {@link cidrv4Mask}. Accepts a {@link Cidrv4} in either
+ * dialect, a 32-bit unsigned integer, or dotted decimal notation.
  *
  * A CIDR mask is a run of one bits from the most significant end followed
  * by zeros; masks that do not have that shape (`0xFF00FF00`,
  * `"255.0.255.0"`) describe no prefix length at all and are rejected
- * rather than answered with a plausible-looking count of set bits.
+ * rather than answered with a plausible-looking count of set bits. This is
+ * the one place a stored mask is checked, because it is the one call that
+ * has no answer for it (ADR 0006).
  *
- * @param mask The network mask, as a 32-bit unsigned integer or dotted decimal
+ * @param cidrOrMask A Cidrv4 block, or the network mask as a 32-bit unsigned integer or dotted decimal
  * @returns The prefix length (0-32)
  * @throws {TypeError} If the mask is not contiguous, or the notation is malformed
  * @throws {RangeError} If the mask is out of range
@@ -232,10 +378,23 @@ export function cidrv4PrefixLength(mask: string): number;
  * assertThrows(() => cidrv4PrefixLength(1.5), RangeError);
  * ```
  */
-export function cidrv4PrefixLength(mask: string | number): number;
-/** Recovers the prefix length from an IPv4 network mask. */
-export function cidrv4PrefixLength(mask: string | number): number {
-  const value = typeof mask === "string" ? parseAddressv4(mask) : mask;
+export function cidrv4PrefixLength(
+  cidrOrMask: Cidrv4 | Maskv4 | string,
+): PrefixLengthv4;
+/** Recovers the prefix length from an IPv4 CIDR block or network mask. */
+export function cidrv4PrefixLength(
+  cidrOrMask: Cidrv4 | Maskv4 | string,
+): PrefixLengthv4 {
+  let value: Maskv4;
+  if (typeof cidrOrMask === "string") {
+    value = parseAddressv4(cidrOrMask);
+  } else if (typeof cidrOrMask === "number") {
+    value = cidrOrMask;
+  } else if (cidrOrMask.mask !== undefined) {
+    value = cidrOrMask.mask;
+  } else {
+    return cidrOrMask.prefixLength;
+  }
 
   if (value < 0 || value > 0xFFFFFFFF || !Number.isInteger(value)) {
     throw new RangeError(
@@ -302,7 +461,7 @@ function parsePrefixLength(part: string): number {
  * whitespace, no sign, and no trailing text.
  *
  * @param cidr The CIDR notation string (e.g., "192.168.1.0/24")
- * @returns A Cidrv4 object containing the parsed address and prefix length
+ * @returns A PrefixedCidrv4 object containing the parsed address and prefix length
  * @throws {TypeError} If the format is invalid, including a prefix length
  *   with leading zeros, whitespace or trailing text
  * @throws {RangeError} If the prefix length is out of range (not 0-32)
@@ -330,7 +489,7 @@ function parsePrefixLength(part: string): number {
  * assertThrows(() => parseCidrv4("192.168.1.0/024"), TypeError);
  * ```
  */
-export function parseCidrv4(cidr: string): Cidrv4 {
+export function parseCidrv4(cidr: string): PrefixedCidrv4 {
   const parts = cidr.split("/");
 
   if (parts.length !== 2) {
@@ -354,8 +513,13 @@ export function parseCidrv4(cidr: string): Cidrv4 {
 /**
  * Stringifies a Cidrv4 object to CIDR notation.
  *
+ * The dialect is preserved: a {@link PrefixedCidrv4} is written as
+ * `address/prefixLength`, a {@link MaskedCidrv4} as `address/mask` with the
+ * mask in dotted decimal. The address is written as stored, host bits
+ * included.
+ *
  * @param cidr The Cidrv4 object to stringify
- * @returns The CIDR notation string (e.g., "192.168.1.0/24")
+ * @returns The CIDR notation string (e.g., "192.168.1.0/24" or "192.168.1.0/255.255.255.0")
  *
  * @example Basic stringifying
  * ```ts
@@ -365,9 +529,23 @@ export function parseCidrv4(cidr: string): Cidrv4 {
  * const cidr = parseCidrv4("192.168.1.0/24");
  * assertEquals(stringifyCidrv4(cidr), "192.168.1.0/24");
  * ```
+ *
+ * @example A masked block is written with its mask
+ * ```ts
+ * import { assertEquals } from "@std/assert";
+ * import { stringifyCidrv4 } from "@hertzg/ip/cidrv4";
+ *
+ * assertEquals(
+ *   stringifyCidrv4({ address: 167772160, mask: 0xFF000000 }),
+ *   "10.0.0.0/255.0.0.0",
+ * );
+ * ```
  */
 export function stringifyCidrv4(cidr: Cidrv4): string {
-  return `${stringifyAddressv4(cidr.address)}/${cidr.prefixLength}`;
+  const address = stringifyAddressv4(cidr.address);
+  return cidr.mask !== undefined
+    ? `${address}/${stringifyAddressv4(cidr.mask)}`
+    : `${address}/${cidr.prefixLength}`;
 }
 
 /**
@@ -414,7 +592,7 @@ export function stringifyCidrv4(cidr: Cidrv4): string {
  * ```
  */
 export function cidrv4Contains(cidr: Cidrv4, address: number): boolean {
-  const mask = cidrv4Mask(cidr.prefixLength);
+  const mask = cidrv4Mask(cidr);
   const network = (cidr.address & mask) >>> 0;
   return ((address & mask) >>> 0) === network;
 }
@@ -436,7 +614,7 @@ export function cidrv4Contains(cidr: Cidrv4, address: number): boolean {
  * ```
  */
 export function cidrv4FirstAddress(cidr: Cidrv4): number {
-  const mask = cidrv4Mask(cidr.prefixLength);
+  const mask = cidrv4Mask(cidr);
   return (cidr.address & mask) >>> 0;
 }
 
@@ -501,7 +679,7 @@ export const cidrv4NetworkAddress: typeof cidrv4FirstAddress =
  * ```
  */
 export function cidrv4LastAddress(cidr: Cidrv4): number {
-  const mask = cidrv4Mask(cidr.prefixLength);
+  const mask = cidrv4Mask(cidr);
   const network = (cidr.address & mask) >>> 0;
   return (network | (~mask >>> 0)) >>> 0;
 }
@@ -555,13 +733,14 @@ export const cidrv4BroadcastAddress: typeof cidrv4LastAddress =
  *
  * True for `/31` (RFC 3021 point-to-point, both ends assignable) and `/32`
  * (a single host route). Both lack the reserved network and broadcast
- * addresses that shorter prefixes carve out.
+ * addresses that shorter prefixes carve out. In mask terms: at most the
+ * lowest bit is a host bit.
  *
- * @param prefixLength The CIDR prefix length (0-32)
+ * @param mask The block's network mask
  * @returns true if the block reserves neither a network nor a broadcast address
  */
-function cidrv4IsFullyUsable(prefixLength: number): boolean {
-  return prefixLength >= 31;
+function cidrv4IsFullyUsable(mask: Maskv4): boolean {
+  return (mask >>> 1) === 0x7FFFFFFF;
 }
 
 /**
@@ -610,8 +789,9 @@ function cidrv4IsFullyUsable(prefixLength: number): boolean {
  * ```
  */
 export function cidrv4FirstUsableAddress(cidr: Cidrv4): number {
-  const network = cidrv4FirstAddress(cidr);
-  return cidrv4IsFullyUsable(cidr.prefixLength) ? network : (network + 1) >>> 0;
+  const mask = cidrv4Mask(cidr);
+  const network = (cidr.address & mask) >>> 0;
+  return cidrv4IsFullyUsable(mask) ? network : (network + 1) >>> 0;
 }
 
 /**
@@ -658,10 +838,9 @@ export function cidrv4FirstUsableAddress(cidr: Cidrv4): number {
  * ```
  */
 export function cidrv4LastUsableAddress(cidr: Cidrv4): number {
-  const broadcast = cidrv4LastAddress(cidr);
-  return cidrv4IsFullyUsable(cidr.prefixLength)
-    ? broadcast
-    : (broadcast - 1) >>> 0;
+  const mask = cidrv4Mask(cidr);
+  const broadcast = (cidr.address | (~mask >>> 0)) >>> 0;
+  return cidrv4IsFullyUsable(mask) ? broadcast : (broadcast - 1) >>> 0;
 }
 
 /**
@@ -711,29 +890,24 @@ export function cidrv4Size(cidr: Cidrv4): number;
  * assertThrows(() => cidrv4Size(33), RangeError);
  * ```
  */
-export function cidrv4Size(prefixLength: number): number;
+export function cidrv4Size(prefixLength: PrefixLengthv4): number;
 /**
  * Returns the total number of IP addresses for either a CIDR block or a prefix length.
  *
  * @param cidrOrPrefixLength A Cidrv4 block or a prefix length (0-32)
  * @returns The total number of addresses
  */
-export function cidrv4Size(cidrOrPrefixLength: Cidrv4 | number): number;
+export function cidrv4Size(
+  cidrOrPrefixLength: Cidrv4 | PrefixLengthv4,
+): number;
 /** Returns the total number of IP addresses for either a CIDR block or a prefix length. */
-export function cidrv4Size(cidrOrPrefixLength: Cidrv4 | number): number {
-  const prefixLength = typeof cidrOrPrefixLength === "number"
-    ? cidrOrPrefixLength
-    : cidrOrPrefixLength.prefixLength;
-
-  if (
-    prefixLength < 0 || prefixLength > 32 || !Number.isInteger(prefixLength)
-  ) {
-    throw new RangeError(
-      `CIDR prefix length must be 0-32, got ${prefixLength}`,
-    );
-  }
-
-  return 2 ** (32 - prefixLength);
+export function cidrv4Size(
+  cidrOrPrefixLength: Cidrv4 | PrefixLengthv4,
+): number {
+  // The host bits of the mask, plus one. For a contiguous mask that is
+  // 2 ** (32 - prefixLength); for any other stored mask it is a number
+  // that means nothing, which is the caller's problem (ADR 0006).
+  return (~cidrv4Mask(cidrOrPrefixLength) >>> 0) + 1;
 }
 
 /**
@@ -790,22 +964,23 @@ export function cidrv4UsableSize(cidr: Cidrv4): number;
  * assertThrows(() => cidrv4UsableSize(33), RangeError);
  * ```
  */
-export function cidrv4UsableSize(prefixLength: number): number;
+export function cidrv4UsableSize(prefixLength: PrefixLengthv4): number;
 /**
  * Returns the number of assignable addresses for either a CIDR block or a prefix length.
  *
  * @param cidrOrPrefixLength A Cidrv4 block or a prefix length (0-32)
  * @returns The number of assignable addresses
  */
-export function cidrv4UsableSize(cidrOrPrefixLength: Cidrv4 | number): number;
+export function cidrv4UsableSize(
+  cidrOrPrefixLength: Cidrv4 | PrefixLengthv4,
+): number;
 /** Returns the number of assignable addresses for either a CIDR block or a prefix length. */
-export function cidrv4UsableSize(cidrOrPrefixLength: Cidrv4 | number): number {
-  const prefixLength = typeof cidrOrPrefixLength === "number"
-    ? cidrOrPrefixLength
-    : cidrOrPrefixLength.prefixLength;
-
-  const size = cidrv4Size(prefixLength);
-  return cidrv4IsFullyUsable(prefixLength) ? size : size - 2;
+export function cidrv4UsableSize(
+  cidrOrPrefixLength: Cidrv4 | PrefixLengthv4,
+): number {
+  const mask = cidrv4Mask(cidrOrPrefixLength);
+  const size = (~mask >>> 0) + 1;
+  return cidrv4IsFullyUsable(mask) ? size : size - 2;
 }
 
 /**
@@ -849,8 +1024,10 @@ export function cidrv4UsableSize(cidrOrPrefixLength: Cidrv4 | number): number {
  * ```
  */
 export function cidrv4ContainsCidr(outer: Cidrv4, inner: Cidrv4): boolean {
-  if (outer.prefixLength > inner.prefixLength) return false;
-  const outerMask = cidrv4Mask(outer.prefixLength);
+  const outerMask = cidrv4Mask(outer);
+  const innerMask = cidrv4Mask(inner);
+  // Every bit outer fixes, inner must fix too: the shorter-or-equal prefix.
+  if (((outerMask & innerMask) >>> 0) !== outerMask) return false;
   return ((outer.address & outerMask) >>> 0) ===
     ((inner.address & outerMask) >>> 0);
 }
@@ -896,26 +1073,36 @@ export function cidrv4ContainsCidr(outer: Cidrv4, inner: Cidrv4): boolean {
  * ```
  */
 export function cidrv4Overlaps(a: Cidrv4, b: Cidrv4): boolean {
-  const minPrefix = Math.min(a.prefixLength, b.prefixLength);
-  const mask = cidrv4Mask(minPrefix);
+  // The bits both blocks fix: the shorter prefix of the two.
+  const mask = (cidrv4Mask(a) & cidrv4Mask(b)) >>> 0;
   return ((a.address & mask) >>> 0) === ((b.address & mask) >>> 0);
 }
 
 /**
  * Splits an IPv4 CIDR block into its two half-sized children at prefix+1.
  *
+ * The children are in the same dialect as the parent.
+ *
  * @param cidr The CIDR block to split
  * @returns A tuple of the lower and upper halves
  */
 function cidrv4SplitHalves(cidr: Cidrv4): [Cidrv4, Cidrv4] {
-  const newPrefix = cidr.prefixLength + 1;
-  const network = cidrv4FirstAddress(cidr);
-  const lower: Cidrv4 = { address: network, prefixLength: newPrefix };
-  const upper: Cidrv4 = {
-    address: (network | (1 << (31 - cidr.prefixLength))) >>> 0,
-    prefixLength: newPrefix,
-  };
-  return [lower, upper];
+  const mask = cidrv4Mask(cidr);
+  const network = (cidr.address & mask) >>> 0;
+  // The next longer prefix: one more leading one bit.
+  const childMask = ((mask >>> 1) | 0x80000000) >>> 0;
+  const upper = (network | (childMask ^ mask)) >>> 0;
+  if (cidr.mask !== undefined) {
+    return [
+      { address: network, mask: childMask },
+      { address: upper, mask: childMask },
+    ];
+  }
+  const prefixLength = cidr.prefixLength + 1;
+  return [
+    { address: network, prefixLength },
+    { address: upper, prefixLength },
+  ];
 }
 
 /**
@@ -924,6 +1111,9 @@ function cidrv4SplitHalves(cidr: Cidrv4): [Cidrv4, Cidrv4] {
  * Since CIDR blocks are power-of-2-aligned, two overlapping blocks always
  * have a containment relationship -- the intersection is the more specific
  * (longer prefix) block with its canonical network address.
+ *
+ * The result matches the dialect of the inputs. When they disagree, it is
+ * a {@link MaskedCidrv4} (ADR 0006).
  *
  * @param a The first CIDR block
  * @param b The second CIDR block
@@ -951,13 +1141,30 @@ function cidrv4SplitHalves(cidr: Cidrv4): [Cidrv4, Cidrv4] {
  *   parseCidrv4("172.16.0.0/12"),
  * ), null);
  * ```
+ *
+ * @example Mixed dialects intersect to a masked block
+ * ```ts
+ * import { assertEquals } from "@std/assert";
+ * import { cidrv4Intersect, parseCidrv4 } from "@hertzg/ip/cidrv4";
+ *
+ * const result = cidrv4Intersect(
+ *   parseCidrv4("192.168.1.0/24"),
+ *   { address: 3232235776, mask: 0xFFFFFFF0 },
+ * );
+ * assertEquals(result, { address: 3232235776, mask: 0xFFFFFFF0 });
+ * ```
  */
 export function cidrv4Intersect(a: Cidrv4, b: Cidrv4): Cidrv4 | null {
   if (!cidrv4Overlaps(a, b)) return null;
-  if (a.prefixLength >= b.prefixLength) {
-    return { address: cidrv4FirstAddress(a), prefixLength: a.prefixLength };
-  }
-  return { address: cidrv4FirstAddress(b), prefixLength: b.prefixLength };
+  const aMask = cidrv4Mask(a);
+  const bMask = cidrv4Mask(b);
+  // The more specific block is the one whose mask covers the other's.
+  const [inner, mask] = ((aMask & bMask) >>> 0) === bMask
+    ? [a, aMask]
+    : [b, bMask];
+  const address = (inner.address & mask) >>> 0;
+  if (a.mask !== undefined || b.mask !== undefined) return { address, mask };
+  return { address, prefixLength: cidrv4PrefixLength(inner) };
 }
 
 /**
@@ -967,6 +1174,12 @@ export function cidrv4Intersect(a: Cidrv4, b: Cidrv4): Cidrv4 | null {
  * in `a` but not in `b`. The algorithm recursively splits `a` into two
  * halves at prefix+1, keeping the non-overlapping half and recursing
  * into the overlapping half.
+ *
+ * The result matches the dialect of the inputs. When they disagree, it is
+ * in {@link MaskedCidrv4} form (ADR 0006). A non-contiguous mask on `b`
+ * flows through unchecked (ADR 0006), and since no aligned block can then
+ * contain or avoid it short of a single address, the result is a list of
+ * up to one entry per address of `a`.
  *
  * @param a The CIDR block to subtract from
  * @param b The CIDR block to subtract
@@ -1012,8 +1225,25 @@ export function cidrv4Intersect(a: Cidrv4, b: Cidrv4): Cidrv4 | null {
  * );
  * assertEquals(result, []);
  * ```
+ *
+ * @example Mixed dialects subtract to masked blocks
+ * ```ts
+ * import { assertEquals } from "@std/assert";
+ * import { cidrv4Subtract, parseCidrv4, stringifyCidrv4 } from "@hertzg/ip/cidrv4";
+ *
+ * const result = cidrv4Subtract(
+ *   parseCidrv4("192.168.1.0/25"),
+ *   { address: 3232235776, mask: 0xFFFFFFC0 },
+ * );
+ * assertEquals(result.map(stringifyCidrv4), ["192.168.1.64/255.255.255.192"]);
+ * ```
  */
 export function cidrv4Subtract(a: Cidrv4, b: Cidrv4): Cidrv4[] {
+  // Every piece is carved from `a`, so `a` carries the output dialect. Move
+  // it to the mask form when `b` is masked and `a` is not.
+  if (a.mask === undefined && b.mask !== undefined) {
+    return cidrv4Subtract({ address: a.address, mask: cidrv4Mask(a) }, b);
+  }
   if (!cidrv4Overlaps(a, b)) return [a];
   if (cidrv4ContainsCidr(b, a)) return [];
   const [lower, upper] = cidrv4SplitHalves(a);
@@ -1225,7 +1455,7 @@ export function* cidrv4Addresses(
  */
 export function* cidrv4UsableAddresses(cidr: Cidrv4): Generator<number> {
   yield* cidrv4Addresses(cidr, {
-    offset: cidrv4IsFullyUsable(cidr.prefixLength) ? 0 : 1,
+    offset: cidrv4IsFullyUsable(cidrv4Mask(cidr)) ? 0 : 1,
     count: cidrv4UsableSize(cidr),
   });
 }
@@ -1237,9 +1467,9 @@ export function* cidrv4UsableAddresses(cidr: Cidrv4): Generator<number> {
  * @param b The second CIDR block
  * @returns true if a and b are siblings
  */
-function cidrv4AreSiblings(a: Cidrv4, b: Cidrv4): boolean {
-  if (a.prefixLength !== b.prefixLength || a.prefixLength === 0) return false;
-  const parentMask = cidrv4Mask(a.prefixLength - 1);
+function cidrv4AreSiblings(a: MaskedCidrv4, b: MaskedCidrv4): boolean {
+  if (a.mask !== b.mask || a.mask === 0) return false;
+  const parentMask = (a.mask << 1) >>> 0;
   return ((a.address & parentMask) >>> 0) === ((b.address & parentMask) >>> 0);
 }
 
@@ -1249,6 +1479,9 @@ function cidrv4AreSiblings(a: Cidrv4, b: Cidrv4): boolean {
  * Takes an array of possibly overlapping, adjacent, or redundant CIDR
  * blocks and returns the minimal set of non-overlapping CIDR prefix
  * blocks covering the exact same address space.
+ *
+ * The result matches the dialect of the inputs. When they disagree, it is
+ * in {@link MaskedCidrv4} form (ADR 0006).
  *
  * @param cidrs The CIDR blocks to merge
  * @returns Minimal set of non-overlapping CIDR blocks, sorted by address
@@ -1283,21 +1516,37 @@ function cidrv4AreSiblings(a: Cidrv4, b: Cidrv4): boolean {
  *   "203.0.113.0/24",
  * ]);
  * ```
+ *
+ * @example Masked blocks merge to masked blocks
+ * ```ts
+ * import { assertEquals } from "@std/assert";
+ * import { cidrv4Merge, stringifyCidrv4 } from "@hertzg/ip/cidrv4";
+ *
+ * const halves = [
+ *   { address: 167772160, mask: 0xFFFFFF80 },
+ *   { address: 167772288, mask: 0xFFFFFF80 },
+ * ];
+ * assertEquals(cidrv4Merge(halves).map(stringifyCidrv4), ["10.0.0.0/255.255.255.0"]);
+ * ```
  */
 export function cidrv4Merge(cidrs: readonly Cidrv4[]): Cidrv4[] {
   if (cidrs.length === 0) return [];
 
-  // Step 1: Normalize - apply mask to get canonical network addresses
-  let list: Cidrv4[] = cidrs.map((cidr) => ({
-    address: cidrv4FirstAddress(cidr),
-    prefixLength: cidr.prefixLength,
-  }));
+  // Step 1: Normalize - apply mask to get canonical network addresses, and
+  // work in the mask dialect from here on. Any masked input makes the
+  // result masked too.
+  let masked = false;
+  let list: MaskedCidrv4[] = cidrs.map((cidr) => {
+    if (cidr.mask !== undefined) masked = true;
+    const mask = cidrv4Mask(cidr);
+    return { address: (cidr.address & mask) >>> 0, mask };
+  });
 
   // Step 2: Sort so supernets precede their subnets
   list.sort(compareCidrv4);
 
   // Step 3: Remove contained blocks
-  const deduped: Cidrv4[] = [];
+  const deduped: MaskedCidrv4[] = [];
   let currentLast = -1;
   for (const cidr of list) {
     const last = cidrv4LastAddress(cidr);
@@ -1311,7 +1560,7 @@ export function cidrv4Merge(cidrs: readonly Cidrv4[]): Cidrv4[] {
   let changed = true;
   while (changed) {
     changed = false;
-    const merged: Cidrv4[] = [];
+    const merged: MaskedCidrv4[] = [];
     let i = 0;
     while (i < list.length) {
       if (
@@ -1319,7 +1568,7 @@ export function cidrv4Merge(cidrs: readonly Cidrv4[]): Cidrv4[] {
       ) {
         merged.push({
           address: list[i].address,
-          prefixLength: list[i].prefixLength - 1,
+          mask: (list[i].mask << 1) >>> 0,
         });
         i += 2;
         changed = true;
@@ -1331,7 +1580,12 @@ export function cidrv4Merge(cidrs: readonly Cidrv4[]): Cidrv4[] {
     list = merged;
   }
 
-  return list;
+  // Step 5: Return in the input dialect
+  if (masked) return list;
+  return list.map(({ address, mask }) => ({
+    address,
+    prefixLength: cidrv4PrefixLength(mask),
+  }));
 }
 
 /**
@@ -1349,6 +1603,12 @@ export function cidrv4Merge(cidrs: readonly Cidrv4[]): Cidrv4[] {
  * for it, and `10.0.0.5/24` does not compare equal to `10.0.0.0/24` even
  * though they cover the same addresses. Normalize with
  * {@link cidrv4NetworkAddress} first if that is the order you want.
+ *
+ * Both dialects are compared by mask, so `10.0.0.0/8` and
+ * `10.0.0.0/255.0.0.0` are equal, and the order is the same as by prefix
+ * length: `/8` is `0xFF000000`, `/9` is `0xFF800000`. Comparing masks
+ * rather than prefix lengths is what keeps a comparator total, since a
+ * mask always exists and a prefix length does not (ADR 0006).
  *
  * @param a The first CIDR block
  * @param b The second CIDR block
@@ -1377,11 +1637,32 @@ export function cidrv4Merge(cidrs: readonly Cidrv4[]): Cidrv4[] {
  * assertEquals(compareCidrv4(parseCidrv4("10.0.0.0/16"), parseCidrv4("10.0.0.0/8")), 1);
  * assertEquals(compareCidrv4(parseCidrv4("10.0.0.0/8"), parseCidrv4("10.0.0.0/8")), 0);
  * ```
+ *
+ * @example The dialect does not affect the order
+ * ```ts
+ * import { assertEquals } from "@std/assert";
+ * import { compareCidrv4, parseCidrv4 } from "@hertzg/ip/cidrv4";
+ *
+ * const prefixed = parseCidrv4("10.0.0.0/8");
+ * const masked = { address: prefixed.address, mask: 0xFF000000 };
+ *
+ * assertEquals(compareCidrv4(prefixed, masked), 0);
+ * assertEquals(compareCidrv4(masked, parseCidrv4("10.0.0.0/16")), -1);
+ * ```
  */
 export function compareCidrv4(a: Cidrv4, b: Cidrv4): -1 | 0 | 1 {
   const byAddress = compareAddressv4(a.address, b.address);
   if (byAddress !== 0) return byAddress;
-  if (a.prefixLength < b.prefixLength) return -1;
-  if (a.prefixLength > b.prefixLength) return 1;
+  // Two prefixed blocks compare as numbers: the mask order is the same, and
+  // skipping the mask keeps the comparator total over any prefix length.
+  if (a.mask === undefined && b.mask === undefined) {
+    if (a.prefixLength < b.prefixLength) return -1;
+    if (a.prefixLength > b.prefixLength) return 1;
+    return 0;
+  }
+  const aMask = cidrv4Mask(a);
+  const bMask = cidrv4Mask(b);
+  if (aMask < bMask) return -1;
+  if (aMask > bMask) return 1;
   return 0;
 }

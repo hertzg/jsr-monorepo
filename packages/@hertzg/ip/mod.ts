@@ -9,7 +9,7 @@
  *
  * - **Dual-Stack Support**: Auto-unwrap IPv4-mapped IPv6 addresses from dual-stack sockets
  * - **IP Classification**: Identify private, loopback, multicast, public, and other well-known ranges
- * - **CIDR Support**: Parse CIDR notation, check containment, compute network boundaries
+ * - **CIDR Support**: Parse CIDR notation, check containment, compute network boundaries; blocks carry a prefix length or a mask
  * - **Sorting**: Version-first comparators for addresses and CIDR blocks, mixed lists included
  * - **IPv4 & IPv6 Parsing**: Convert between standard notation and number/bigint for arithmetic
  * - **Address Generation**: Lazily enumerate addresses in CIDR blocks
@@ -262,8 +262,11 @@
  * - {@link Address}: An IP address of either version (`number` or `bigint`)
  * - {@link parseAddress}: Parse any IP address string to number (IPv4) or bigint (IPv6)
  * - {@link stringifyAddress}: Convert number or bigint to IP address string
+ * - {@link Cidr}: A CIDR block of either version, in either dialect (prefix length or mask)
+ * - {@link Mask}: A network mask of either version (`number` or `bigint`)
+ * - {@link PrefixLength}: A prefix length of either version
  * - {@link parseCidr}: Parse any CIDR notation string to Cidrv4 or Cidrv6
- * - {@link stringifyCidr}: Convert Cidrv4 or Cidrv6 to CIDR notation string
+ * - {@link stringifyCidr}: Convert Cidrv4 or Cidrv6 to CIDR notation string, in the dialect it stores
  * - {@link cidrSize}: Get total number of addresses in a CIDR block
  * - {@link cidrFirstAddress}: Get the first address of a CIDR block
  * - {@link cidrLastAddress}: Get the last address of a CIDR block
@@ -293,11 +296,13 @@
  * - {@link isValidAddressv4}: Check if a string is a valid IPv4 address
  *
  * ### IPv4 CIDR
- * - {@link Cidrv4}: Type representing an IPv4 CIDR block
+ * - {@link Cidrv4}: Type representing an IPv4 CIDR block, {@link PrefixedCidrv4} or {@link MaskedCidrv4}
+ * - {@link Maskv4}: An IPv4 network mask as a 32-bit unsigned integer
+ * - {@link PrefixLengthv4}: An IPv4 prefix length, 0 to 32
  * - {@link parseCidrv4}: Parse CIDR notation string to Cidrv4
- * - {@link stringifyCidrv4}: Convert Cidrv4 to CIDR notation string
- * - {@link cidrv4Mask}: Create network mask from prefix length (0-32)
- * - {@link cidrv4PrefixLength}: Recover prefix length from a network mask, as a number or notation string
+ * - {@link stringifyCidrv4}: Convert Cidrv4 to CIDR notation string, in the dialect it stores
+ * - {@link cidrv4Mask}: Get the network mask of a CIDR block or prefix length (0-32)
+ * - {@link cidrv4PrefixLength}: Get the prefix length of a CIDR block or network mask, as a number or notation string
  * - {@link cidrv4Contains}: Check if IP is within CIDR block
  * - {@link cidrv4ContainsCidr}: Check if one IPv4 CIDR fully contains another
  * - {@link cidrv4Overlaps}: Check if two IPv4 CIDRs share at least one address
@@ -327,11 +332,13 @@
  * - {@link isValidAddressv6}: Check if a string is a valid IPv6 address
  *
  * ### IPv6 CIDR
- * - {@link Cidrv6}: Type representing an IPv6 CIDR block
+ * - {@link Cidrv6}: Type representing an IPv6 CIDR block, {@link PrefixedCidrv6} or {@link MaskedCidrv6}
+ * - {@link Maskv6}: An IPv6 network mask as a 128-bit unsigned bigint
+ * - {@link PrefixLengthv6}: An IPv6 prefix length, 0 to 128
  * - {@link parseCidrv6}: Parse CIDR notation string to Cidrv6
- * - {@link stringifyCidrv6}: Convert Cidrv6 to CIDR notation string
- * - {@link cidrv6Mask}: Create network mask from prefix length (0-128)
- * - {@link cidrv6PrefixLength}: Recover prefix length from a network mask, as a bigint or notation string
+ * - {@link stringifyCidrv6}: Convert Cidrv6 to CIDR notation string, in the dialect it stores
+ * - {@link cidrv6Mask}: Get the network mask of a CIDR block or prefix length (0-128)
+ * - {@link cidrv6PrefixLength}: Get the prefix length of a CIDR block or network mask, as a bigint or notation string
  * - {@link cidrv6Contains}: Check if IP is within CIDR block
  * - {@link cidrv6ContainsCidr}: Check if one IPv6 CIDR fully contains another
  * - {@link cidrv6Overlaps}: Check if two IPv6 CIDRs share at least one address
@@ -466,8 +473,12 @@ export {
   isCidrv4,
   /** Type guard that checks whether a Cidr is an IPv6 CIDR block. */
   isCidrv6,
+  /** A network mask of either IP version. */
+  type Mask,
   /** Parse any CIDR notation string to Cidrv4 or Cidrv6. */
   parseCidr,
+  /** A prefix length of either IP version. */
+  type PrefixLength,
   /** Convert Cidrv4 or Cidrv6 to CIDR notation string. */
   stringifyCidr,
 } from "./cidr.ts";
@@ -539,7 +550,7 @@ export {
   cidrv4LastAddress,
   /** Get last assignable address in CIDR block (RFC 3021 aware). */
   cidrv4LastUsableAddress,
-  /** Create network mask from prefix length (0-32). */
+  /** Get the network mask of a CIDR block or prefix length (0-32). */
   cidrv4Mask,
   /** Merge IPv4 CIDR blocks into the minimal covering set. */
   cidrv4Merge,
@@ -547,7 +558,7 @@ export {
   cidrv4NetworkAddress,
   /** Check if two IPv4 CIDRs share at least one address. */
   cidrv4Overlaps,
-  /** Recover prefix length from a network mask, as a number or notation string. */
+  /** Get the prefix length of a CIDR block or network mask, as a number or notation string. */
   cidrv4PrefixLength,
   /** Get total number of addresses in CIDR block. */
   cidrv4Size,
@@ -559,8 +570,16 @@ export {
   cidrv4UsableSize,
   /** Compare two IPv4 CIDR blocks for sorting. */
   compareCidrv4,
+  /** An IPv4 CIDR block written with a network mask. */
+  type MaskedCidrv4,
+  /** An IPv4 network mask as a 32-bit unsigned integer. */
+  type Maskv4,
   /** Parse CIDR notation string to Cidrv4. */
   parseCidrv4,
+  /** An IPv4 CIDR block written with a prefix length. */
+  type PrefixedCidrv4,
+  /** An IPv4 prefix length, 0 to 32. */
+  type PrefixLengthv4,
   /** Convert Cidrv4 to CIDR notation string. */
   stringifyCidrv4,
 } from "./cidrv4.ts";
@@ -634,13 +653,13 @@ export {
   cidrv6Intersect,
   /** Get last address in CIDR block. */
   cidrv6LastAddress,
-  /** Create network mask from prefix length (0-128). */
+  /** Get the network mask of a CIDR block or prefix length (0-128). */
   cidrv6Mask,
   /** Merge IPv6 CIDR blocks into the minimal covering set. */
   cidrv6Merge,
   /** Check if two IPv6 CIDRs share at least one address. */
   cidrv6Overlaps,
-  /** Recover prefix length from a network mask, as a bigint or notation string. */
+  /** Get the prefix length of a CIDR block or network mask, as a bigint or notation string. */
   cidrv6PrefixLength,
   /** Get total number of addresses in CIDR block. */
   cidrv6Size,
@@ -650,8 +669,16 @@ export {
   compareCidrv6,
   /** Convert IPv4 CIDR to IPv4-mapped IPv6 CIDR. */
   mapFromCidrv4,
+  /** An IPv6 CIDR block written with a network mask. */
+  type MaskedCidrv6,
+  /** An IPv6 network mask as a 128-bit unsigned bigint. */
+  type Maskv6,
   /** Parse CIDR notation string to Cidrv6. */
   parseCidrv6,
+  /** An IPv6 CIDR block written with a prefix length. */
+  type PrefixedCidrv6,
+  /** An IPv6 prefix length, 0 to 128. */
+  type PrefixLengthv6,
   /** Convert Cidrv6 to CIDR notation string. */
   stringifyCidrv6,
   /** Convert IPv4-mapped IPv6 CIDR to IPv4 CIDR. */
