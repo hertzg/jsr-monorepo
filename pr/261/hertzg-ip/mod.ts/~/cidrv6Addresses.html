@@ -310,9 +310,9 @@ const cidr = parseCidrv6(&quot;fd00::/120&quot;);
 // Get first 3 IPs starting at network address
 const first3 = Array.from(cidrv6Addresses(cidr, { offset: 0, count: 3 }));
 assertEquals(first3, [
-  parseAddressv6(&quot;fd00::0&quot;),
-  parseAddressv6(&quot;fd00::1&quot;),
-  parseAddressv6(&quot;fd00::2&quot;),
+  parseAddressv6(&quot;fd00::0&quot;).address,
+  parseAddressv6(&quot;fd00::1&quot;).address,
+  parseAddressv6(&quot;fd00::2&quot;).address,
 ]);
 </code><button class="copyButton" data-copy="import { assertEquals } from &quot;@std/assert&quot;;
 import { cidrv6Addresses, parseCidrv6 } from &quot;@hertzg/ip/cidrv6&quot;;
@@ -323,9 +323,9 @@ const cidr = parseCidrv6(&quot;fd00::/120&quot;);
 // Get first 3 IPs starting at network address
 const first3 = Array.from(cidrv6Addresses(cidr, { offset: 0, count: 3 }));
 assertEquals(first3, [
-  parseAddressv6(&quot;fd00::0&quot;),
-  parseAddressv6(&quot;fd00::1&quot;),
-  parseAddressv6(&quot;fd00::2&quot;),
+  parseAddressv6(&quot;fd00::0&quot;).address,
+  parseAddressv6(&quot;fd00::1&quot;).address,
+  parseAddressv6(&quot;fd00::2&quot;).address,
 ]);
 "><svg
   class="copy"
@@ -393,11 +393,11 @@ const cidr = parseCidrv6(&quot;fd00::/120&quot;);
 // Get every other IP (even addresses)
 const evenIps = Array.from(cidrv6Addresses(cidr, { offset: 0, count: 5, step: 2 }));
 assertEquals(evenIps, [
-  parseAddressv6(&quot;fd00::0&quot;),
-  parseAddressv6(&quot;fd00::2&quot;),
-  parseAddressv6(&quot;fd00::4&quot;),
-  parseAddressv6(&quot;fd00::6&quot;),
-  parseAddressv6(&quot;fd00::8&quot;),
+  parseAddressv6(&quot;fd00::0&quot;).address,
+  parseAddressv6(&quot;fd00::2&quot;).address,
+  parseAddressv6(&quot;fd00::4&quot;).address,
+  parseAddressv6(&quot;fd00::6&quot;).address,
+  parseAddressv6(&quot;fd00::8&quot;).address,
 ]);
 </code><button class="copyButton" data-copy="import { assertEquals } from &quot;@std/assert&quot;;
 import { cidrv6Addresses, parseCidrv6 } from &quot;@hertzg/ip/cidrv6&quot;;
@@ -408,11 +408,11 @@ const cidr = parseCidrv6(&quot;fd00::/120&quot;);
 // Get every other IP (even addresses)
 const evenIps = Array.from(cidrv6Addresses(cidr, { offset: 0, count: 5, step: 2 }));
 assertEquals(evenIps, [
-  parseAddressv6(&quot;fd00::0&quot;),
-  parseAddressv6(&quot;fd00::2&quot;),
-  parseAddressv6(&quot;fd00::4&quot;),
-  parseAddressv6(&quot;fd00::6&quot;),
-  parseAddressv6(&quot;fd00::8&quot;),
+  parseAddressv6(&quot;fd00::0&quot;).address,
+  parseAddressv6(&quot;fd00::2&quot;).address,
+  parseAddressv6(&quot;fd00::4&quot;).address,
+  parseAddressv6(&quot;fd00::6&quot;).address,
+  parseAddressv6(&quot;fd00::8&quot;).address,
 ]);
 "><svg
   class="copy"
@@ -480,11 +480,11 @@ const cidr = parseCidrv6(&quot;fd00::/120&quot;);
 // Get 5 IPs counting backwards from offset 10
 const backwards = Array.from(cidrv6Addresses(cidr, { offset: 10, count: 5, step: -1 }));
 assertEquals(backwards, [
-  parseAddressv6(&quot;fd00::a&quot;),
-  parseAddressv6(&quot;fd00::9&quot;),
-  parseAddressv6(&quot;fd00::8&quot;),
-  parseAddressv6(&quot;fd00::7&quot;),
-  parseAddressv6(&quot;fd00::6&quot;),
+  parseAddressv6(&quot;fd00::a&quot;).address,
+  parseAddressv6(&quot;fd00::9&quot;).address,
+  parseAddressv6(&quot;fd00::8&quot;).address,
+  parseAddressv6(&quot;fd00::7&quot;).address,
+  parseAddressv6(&quot;fd00::6&quot;).address,
 ]);
 </code><button class="copyButton" data-copy="import { assertEquals } from &quot;@std/assert&quot;;
 import { cidrv6Addresses, parseCidrv6 } from &quot;@hertzg/ip/cidrv6&quot;;
@@ -495,11 +495,11 @@ const cidr = parseCidrv6(&quot;fd00::/120&quot;);
 // Get 5 IPs counting backwards from offset 10
 const backwards = Array.from(cidrv6Addresses(cidr, { offset: 10, count: 5, step: -1 }));
 assertEquals(backwards, [
-  parseAddressv6(&quot;fd00::a&quot;),
-  parseAddressv6(&quot;fd00::9&quot;),
-  parseAddressv6(&quot;fd00::8&quot;),
-  parseAddressv6(&quot;fd00::7&quot;),
-  parseAddressv6(&quot;fd00::6&quot;),
+  parseAddressv6(&quot;fd00::a&quot;).address,
+  parseAddressv6(&quot;fd00::9&quot;).address,
+  parseAddressv6(&quot;fd00::8&quot;).address,
+  parseAddressv6(&quot;fd00::7&quot;).address,
+  parseAddressv6(&quot;fd00::6&quot;).address,
 ]);
 "><svg
   class="copy"

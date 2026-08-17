@@ -320,15 +320,15 @@ const cidr = parseCidrv4(&quot;192.168.1.0/24&quot;);
 // Get first 3 IPs starting at network address
 const first3 = Array.from(cidrv4Addresses(cidr, { offset: 0, count: 3 }));
 assertEquals(first3, [
-  parseAddressv4(&quot;192.168.1.0&quot;),
-  parseAddressv4(&quot;192.168.1.1&quot;),
-  parseAddressv4(&quot;192.168.1.2&quot;),
+  parseAddressv4(&quot;192.168.1.0&quot;).address,
+  parseAddressv4(&quot;192.168.1.1&quot;).address,
+  parseAddressv4(&quot;192.168.1.2&quot;).address,
 ]);
 
 // Get 5 IPs starting at offset 10
 const offset10 = Array.from(cidrv4Addresses(cidr, { offset: 10, count: 5 }));
-assertEquals(offset10[0], parseAddressv4(&quot;192.168.1.10&quot;));
-assertEquals(offset10[4], parseAddressv4(&quot;192.168.1.14&quot;));
+assertEquals(offset10[0], parseAddressv4(&quot;192.168.1.10&quot;).address);
+assertEquals(offset10[4], parseAddressv4(&quot;192.168.1.14&quot;).address);
 </code><button class="copyButton" data-copy="import { assertEquals } from &quot;@std/assert&quot;;
 import { cidrv4Addresses, parseCidrv4 } from &quot;@hertzg/ip/cidrv4&quot;;
 import { parseAddressv4 } from &quot;@hertzg/ip/addressv4&quot;;
@@ -338,15 +338,15 @@ const cidr = parseCidrv4(&quot;192.168.1.0/24&quot;);
 // Get first 3 IPs starting at network address
 const first3 = Array.from(cidrv4Addresses(cidr, { offset: 0, count: 3 }));
 assertEquals(first3, [
-  parseAddressv4(&quot;192.168.1.0&quot;),
-  parseAddressv4(&quot;192.168.1.1&quot;),
-  parseAddressv4(&quot;192.168.1.2&quot;),
+  parseAddressv4(&quot;192.168.1.0&quot;).address,
+  parseAddressv4(&quot;192.168.1.1&quot;).address,
+  parseAddressv4(&quot;192.168.1.2&quot;).address,
 ]);
 
 // Get 5 IPs starting at offset 10
 const offset10 = Array.from(cidrv4Addresses(cidr, { offset: 10, count: 5 }));
-assertEquals(offset10[0], parseAddressv4(&quot;192.168.1.10&quot;));
-assertEquals(offset10[4], parseAddressv4(&quot;192.168.1.14&quot;));
+assertEquals(offset10[0], parseAddressv4(&quot;192.168.1.10&quot;).address);
+assertEquals(offset10[4], parseAddressv4(&quot;192.168.1.14&quot;).address);
 "><svg
   class="copy"
   width="15"
@@ -413,17 +413,17 @@ const cidr = parseCidrv4(&quot;192.168.1.0/24&quot;);
 // Get every other IP (even addresses)
 const evenIps = Array.from(cidrv4Addresses(cidr, { offset: 0, count: 5, step: 2 }));
 assertEquals(evenIps, [
-  parseAddressv4(&quot;192.168.1.0&quot;),
-  parseAddressv4(&quot;192.168.1.2&quot;),
-  parseAddressv4(&quot;192.168.1.4&quot;),
-  parseAddressv4(&quot;192.168.1.6&quot;),
-  parseAddressv4(&quot;192.168.1.8&quot;),
+  parseAddressv4(&quot;192.168.1.0&quot;).address,
+  parseAddressv4(&quot;192.168.1.2&quot;).address,
+  parseAddressv4(&quot;192.168.1.4&quot;).address,
+  parseAddressv4(&quot;192.168.1.6&quot;).address,
+  parseAddressv4(&quot;192.168.1.8&quot;).address,
 ]);
 
 // Get odd addresses
 const oddIps = Array.from(cidrv4Addresses(cidr, { offset: 1, count: 5, step: 2 }));
-assertEquals(oddIps[0], parseAddressv4(&quot;192.168.1.1&quot;));
-assertEquals(oddIps[1], parseAddressv4(&quot;192.168.1.3&quot;));
+assertEquals(oddIps[0], parseAddressv4(&quot;192.168.1.1&quot;).address);
+assertEquals(oddIps[1], parseAddressv4(&quot;192.168.1.3&quot;).address);
 </code><button class="copyButton" data-copy="import { assertEquals } from &quot;@std/assert&quot;;
 import { cidrv4Addresses, parseCidrv4 } from &quot;@hertzg/ip/cidrv4&quot;;
 import { parseAddressv4 } from &quot;@hertzg/ip/addressv4&quot;;
@@ -433,17 +433,17 @@ const cidr = parseCidrv4(&quot;192.168.1.0/24&quot;);
 // Get every other IP (even addresses)
 const evenIps = Array.from(cidrv4Addresses(cidr, { offset: 0, count: 5, step: 2 }));
 assertEquals(evenIps, [
-  parseAddressv4(&quot;192.168.1.0&quot;),
-  parseAddressv4(&quot;192.168.1.2&quot;),
-  parseAddressv4(&quot;192.168.1.4&quot;),
-  parseAddressv4(&quot;192.168.1.6&quot;),
-  parseAddressv4(&quot;192.168.1.8&quot;),
+  parseAddressv4(&quot;192.168.1.0&quot;).address,
+  parseAddressv4(&quot;192.168.1.2&quot;).address,
+  parseAddressv4(&quot;192.168.1.4&quot;).address,
+  parseAddressv4(&quot;192.168.1.6&quot;).address,
+  parseAddressv4(&quot;192.168.1.8&quot;).address,
 ]);
 
 // Get odd addresses
 const oddIps = Array.from(cidrv4Addresses(cidr, { offset: 1, count: 5, step: 2 }));
-assertEquals(oddIps[0], parseAddressv4(&quot;192.168.1.1&quot;));
-assertEquals(oddIps[1], parseAddressv4(&quot;192.168.1.3&quot;));
+assertEquals(oddIps[0], parseAddressv4(&quot;192.168.1.1&quot;).address);
+assertEquals(oddIps[1], parseAddressv4(&quot;192.168.1.3&quot;).address);
 "><svg
   class="copy"
   width="15"
@@ -510,11 +510,11 @@ const cidr = parseCidrv4(&quot;192.168.1.0/24&quot;);
 // Get 5 IPs counting backwards from offset 10
 const backwards = Array.from(cidrv4Addresses(cidr, { offset: 10, count: 5, step: -1 }));
 assertEquals(backwards, [
-  parseAddressv4(&quot;192.168.1.10&quot;),
-  parseAddressv4(&quot;192.168.1.9&quot;),
-  parseAddressv4(&quot;192.168.1.8&quot;),
-  parseAddressv4(&quot;192.168.1.7&quot;),
-  parseAddressv4(&quot;192.168.1.6&quot;),
+  parseAddressv4(&quot;192.168.1.10&quot;).address,
+  parseAddressv4(&quot;192.168.1.9&quot;).address,
+  parseAddressv4(&quot;192.168.1.8&quot;).address,
+  parseAddressv4(&quot;192.168.1.7&quot;).address,
+  parseAddressv4(&quot;192.168.1.6&quot;).address,
 ]);
 </code><button class="copyButton" data-copy="import { assertEquals } from &quot;@std/assert&quot;;
 import { cidrv4Addresses, parseCidrv4 } from &quot;@hertzg/ip/cidrv4&quot;;
@@ -525,11 +525,11 @@ const cidr = parseCidrv4(&quot;192.168.1.0/24&quot;);
 // Get 5 IPs counting backwards from offset 10
 const backwards = Array.from(cidrv4Addresses(cidr, { offset: 10, count: 5, step: -1 }));
 assertEquals(backwards, [
-  parseAddressv4(&quot;192.168.1.10&quot;),
-  parseAddressv4(&quot;192.168.1.9&quot;),
-  parseAddressv4(&quot;192.168.1.8&quot;),
-  parseAddressv4(&quot;192.168.1.7&quot;),
-  parseAddressv4(&quot;192.168.1.6&quot;),
+  parseAddressv4(&quot;192.168.1.10&quot;).address,
+  parseAddressv4(&quot;192.168.1.9&quot;).address,
+  parseAddressv4(&quot;192.168.1.8&quot;).address,
+  parseAddressv4(&quot;192.168.1.7&quot;).address,
+  parseAddressv4(&quot;192.168.1.6&quot;).address,
 ]);
 "><svg
   class="copy"

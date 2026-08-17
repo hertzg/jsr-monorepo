@@ -219,16 +219,16 @@ Examples</h2></div><div class="space-y-8"><div class="anchorable"><a href="#exam
 import { isAddressv6Orchidv2 } from &quot;@hertzg/ip/classifyv6&quot;;
 import { parseAddressv6 } from &quot;@hertzg/ip/addressv6&quot;;
 
-assert(isAddressv6Orchidv2(parseAddressv6(&quot;2001:20::1&quot;)));
-assert(isAddressv6Orchidv2(parseAddressv6(&quot;2001:2f:ffff:ffff:ffff:ffff:ffff:ffff&quot;)));
-assertEquals(isAddressv6Orchidv2(parseAddressv6(&quot;2001:30::1&quot;)), false);
+assert(isAddressv6Orchidv2(parseAddressv6(&quot;2001:20::1&quot;).address));
+assert(isAddressv6Orchidv2(parseAddressv6(&quot;2001:2f:ffff:ffff:ffff:ffff:ffff:ffff&quot;).address));
+assertEquals(isAddressv6Orchidv2(parseAddressv6(&quot;2001:30::1&quot;).address), false);
 </code><button class="copyButton" data-copy="import { assert, assertEquals } from &quot;@std/assert&quot;;
 import { isAddressv6Orchidv2 } from &quot;@hertzg/ip/classifyv6&quot;;
 import { parseAddressv6 } from &quot;@hertzg/ip/addressv6&quot;;
 
-assert(isAddressv6Orchidv2(parseAddressv6(&quot;2001:20::1&quot;)));
-assert(isAddressv6Orchidv2(parseAddressv6(&quot;2001:2f:ffff:ffff:ffff:ffff:ffff:ffff&quot;)));
-assertEquals(isAddressv6Orchidv2(parseAddressv6(&quot;2001:30::1&quot;)), false);
+assert(isAddressv6Orchidv2(parseAddressv6(&quot;2001:20::1&quot;).address));
+assert(isAddressv6Orchidv2(parseAddressv6(&quot;2001:2f:ffff:ffff:ffff:ffff:ffff:ffff&quot;).address));
+assertEquals(isAddressv6Orchidv2(parseAddressv6(&quot;2001:30::1&quot;).address), false);
 "><svg
   class="copy"
   width="15"

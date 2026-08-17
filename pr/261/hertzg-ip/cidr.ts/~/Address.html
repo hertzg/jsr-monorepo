@@ -143,10 +143,10 @@
 </svg>
 </a>
 </div><div><div class="space-y-7" id=""><div class="markdown"><p>A plain IP address of either IP version.</p>
-<p>This is a union of <code>number</code> (IPv4, 32-bit) and <code>bigint</code> (IPv6, 128-bit) —
-the JS primitive type is what carries the version. Useful for functions
-that operate on addresses regardless of IP version; narrow with a
-<code>typeof</code> check.</p>
+<p>This is a union of <a href="../.././cidr.ts/~/Addressv4.html">Addressv4</a> (<code>number</code>, 32-bit) and
+<a href="../.././cidr.ts/~/Addressv6.html">Addressv6</a> (<code>bigint</code>, 128-bit) -- the JS primitive type is what
+carries the version. Useful for functions that operate on addresses
+regardless of IP version; narrow with a <code>typeof</code> check.</p>
 </div><section class="section"  id="definition"><div>
       <h2 class="anchorable mb-1"><a href="#definition" class="anchor" aria-label="Anchor" tabIndex="-1"><svg
   width="16"
@@ -173,7 +173,7 @@ that operate on addresses regardless of IP version; narrow with a
 Definition</h2></div><div class="space-y-8"><div class=" docEntry" id="typealias_address">
 
   <div class="docEntryHeader">
-    <div><code><span class="font-medium text-stone-500 dark:text-stone-200"><span><span class="td-kw">number</span><span class="td-op"> | </span><span class="td-kw">bigint</span></span></span>
+    <div><code><span class="font-medium text-stone-500 dark:text-stone-200"><span><a href="../.././cidr.ts/~/Addressv4.html" class="link td-ref">Addressv4</a><span class="td-op"> | </span><a href="../.././cidr.ts/~/Addressv6.html" class="link td-ref">Addressv6</a></span></span>
       </code>
     </div><a
   class="sourceButton"

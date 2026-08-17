@@ -307,13 +307,13 @@ import { addressVersion } from &quot;@hertzg/ip/version&quot;;
 import { parseAddress } from &quot;@hertzg/ip/address&quot;;
 
 assertEquals(addressVersion(&quot;::ffff:10.1.2.3&quot;), 6);
-assertEquals(typeof parseAddress(&quot;::ffff:10.1.2.3&quot;), &quot;number&quot;);
+assertEquals(typeof parseAddress(&quot;::ffff:10.1.2.3&quot;).address, &quot;number&quot;);
 </code><button class="copyButton" data-copy="import { assertEquals } from &quot;@std/assert&quot;;
 import { addressVersion } from &quot;@hertzg/ip/version&quot;;
 import { parseAddress } from &quot;@hertzg/ip/address&quot;;
 
 assertEquals(addressVersion(&quot;::ffff:10.1.2.3&quot;), 6);
-assertEquals(typeof parseAddress(&quot;::ffff:10.1.2.3&quot;), &quot;number&quot;);
+assertEquals(typeof parseAddress(&quot;::ffff:10.1.2.3&quot;).address, &quot;number&quot;);
 "><svg
   class="copy"
   width="15"

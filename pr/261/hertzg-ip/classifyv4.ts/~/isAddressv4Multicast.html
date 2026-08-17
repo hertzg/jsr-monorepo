@@ -219,16 +219,16 @@ Examples</h2></div><div class="space-y-8"><div class="anchorable"><a href="#exam
 import { isAddressv4Multicast } from &quot;@hertzg/ip/classifyv4&quot;;
 import { parseAddressv4 } from &quot;@hertzg/ip/addressv4&quot;;
 
-assert(isAddressv4Multicast(parseAddressv4(&quot;224.0.0.1&quot;)));
-assert(isAddressv4Multicast(parseAddressv4(&quot;239.255.255.255&quot;)));
-assertEquals(isAddressv4Multicast(parseAddressv4(&quot;240.0.0.0&quot;)), false);
+assert(isAddressv4Multicast(parseAddressv4(&quot;224.0.0.1&quot;).address));
+assert(isAddressv4Multicast(parseAddressv4(&quot;239.255.255.255&quot;).address));
+assertEquals(isAddressv4Multicast(parseAddressv4(&quot;240.0.0.0&quot;).address), false);
 </code><button class="copyButton" data-copy="import { assert, assertEquals } from &quot;@std/assert&quot;;
 import { isAddressv4Multicast } from &quot;@hertzg/ip/classifyv4&quot;;
 import { parseAddressv4 } from &quot;@hertzg/ip/addressv4&quot;;
 
-assert(isAddressv4Multicast(parseAddressv4(&quot;224.0.0.1&quot;)));
-assert(isAddressv4Multicast(parseAddressv4(&quot;239.255.255.255&quot;)));
-assertEquals(isAddressv4Multicast(parseAddressv4(&quot;240.0.0.0&quot;)), false);
+assert(isAddressv4Multicast(parseAddressv4(&quot;224.0.0.1&quot;).address));
+assert(isAddressv4Multicast(parseAddressv4(&quot;239.255.255.255&quot;).address));
+assertEquals(isAddressv4Multicast(parseAddressv4(&quot;240.0.0.0&quot;).address), false);
 "><svg
   class="copy"
   width="15"

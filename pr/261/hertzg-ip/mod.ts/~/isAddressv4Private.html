@@ -224,18 +224,18 @@ Examples</h2></div><div class="space-y-8"><div class="anchorable"><a href="#exam
 import { isAddressv4Private } from &quot;@hertzg/ip/classifyv4&quot;;
 import { parseAddressv4 } from &quot;@hertzg/ip/addressv4&quot;;
 
-assert(isAddressv4Private(parseAddressv4(&quot;10.0.0.1&quot;)));
-assert(isAddressv4Private(parseAddressv4(&quot;172.16.0.1&quot;)));
-assert(isAddressv4Private(parseAddressv4(&quot;192.168.1.1&quot;)));
-assertEquals(isAddressv4Private(parseAddressv4(&quot;8.8.8.8&quot;)), false);
+assert(isAddressv4Private(parseAddressv4(&quot;10.0.0.1&quot;).address));
+assert(isAddressv4Private(parseAddressv4(&quot;172.16.0.1&quot;).address));
+assert(isAddressv4Private(parseAddressv4(&quot;192.168.1.1&quot;).address));
+assertEquals(isAddressv4Private(parseAddressv4(&quot;8.8.8.8&quot;).address), false);
 </code><button class="copyButton" data-copy="import { assert, assertEquals } from &quot;@std/assert&quot;;
 import { isAddressv4Private } from &quot;@hertzg/ip/classifyv4&quot;;
 import { parseAddressv4 } from &quot;@hertzg/ip/addressv4&quot;;
 
-assert(isAddressv4Private(parseAddressv4(&quot;10.0.0.1&quot;)));
-assert(isAddressv4Private(parseAddressv4(&quot;172.16.0.1&quot;)));
-assert(isAddressv4Private(parseAddressv4(&quot;192.168.1.1&quot;)));
-assertEquals(isAddressv4Private(parseAddressv4(&quot;8.8.8.8&quot;)), false);
+assert(isAddressv4Private(parseAddressv4(&quot;10.0.0.1&quot;).address));
+assert(isAddressv4Private(parseAddressv4(&quot;172.16.0.1&quot;).address));
+assert(isAddressv4Private(parseAddressv4(&quot;192.168.1.1&quot;).address));
+assertEquals(isAddressv4Private(parseAddressv4(&quot;8.8.8.8&quot;).address), false);
 "><svg
   class="copy"
   width="15"

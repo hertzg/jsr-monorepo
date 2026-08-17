@@ -223,12 +223,12 @@ Examples</h2></div><div class="space-y-8"><div class="anchorable"><a href="#exam
 import { addressv4ToBytes } from &quot;@hertzg/ip/bytesv4&quot;;
 import { parseAddressv4 } from &quot;@hertzg/ip/addressv4&quot;;
 
-assertEquals(addressv4ToBytes(parseAddressv4(&quot;10.0.0.1&quot;)), new Uint8Array([10, 0, 0, 1]));
+assertEquals(addressv4ToBytes(parseAddressv4(&quot;10.0.0.1&quot;).address), new Uint8Array([10, 0, 0, 1]));
 </code><button class="copyButton" data-copy="import { assertEquals } from &quot;@std/assert&quot;;
 import { addressv4ToBytes } from &quot;@hertzg/ip/bytesv4&quot;;
 import { parseAddressv4 } from &quot;@hertzg/ip/addressv4&quot;;
 
-assertEquals(addressv4ToBytes(parseAddressv4(&quot;10.0.0.1&quot;)), new Uint8Array([10, 0, 0, 1]));
+assertEquals(addressv4ToBytes(parseAddressv4(&quot;10.0.0.1&quot;).address), new Uint8Array([10, 0, 0, 1]));
 "><svg
   class="copy"
   width="15"
@@ -291,7 +291,7 @@ import { addressv4ToBytes } from &quot;@hertzg/ip/bytesv4&quot;;
 import { parseAddressv4 } from &quot;@hertzg/ip/addressv4&quot;;
 
 const frame = new Uint8Array(20).fill(0xaa);
-const written = addressv4ToBytes(parseAddressv4(&quot;192.168.1.1&quot;), frame, 6);
+const written = addressv4ToBytes(parseAddressv4(&quot;192.168.1.1&quot;).address, frame, 6);
 
 assertEquals(written, new Uint8Array([192, 168, 1, 1]));
 assertEquals(frame.slice(4, 12), new Uint8Array([0xaa, 0xaa, 192, 168, 1, 1, 0xaa, 0xaa]));
@@ -300,7 +300,7 @@ import { addressv4ToBytes } from &quot;@hertzg/ip/bytesv4&quot;;
 import { parseAddressv4 } from &quot;@hertzg/ip/addressv4&quot;;
 
 const frame = new Uint8Array(20).fill(0xaa);
-const written = addressv4ToBytes(parseAddressv4(&quot;192.168.1.1&quot;), frame, 6);
+const written = addressv4ToBytes(parseAddressv4(&quot;192.168.1.1&quot;).address, frame, 6);
 
 assertEquals(written, new Uint8Array([192, 168, 1, 1]));
 assertEquals(frame.slice(4, 12), new Uint8Array([0xaa, 0xaa, 192, 168, 1, 1, 0xaa, 0xaa]));

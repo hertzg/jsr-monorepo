@@ -222,16 +222,16 @@ Examples</h2></div><div class="space-y-8"><div class="anchorable"><a href="#exam
 import { addressv4ToArpa } from &quot;@hertzg/ip/arpav4&quot;;
 import { parseAddressv4 } from &quot;@hertzg/ip/addressv4&quot;;
 
-assertEquals(addressv4ToArpa(parseAddressv4(&quot;192.168.0.1&quot;)), &quot;1.0.168.192.in-addr.arpa&quot;);
-assertEquals(addressv4ToArpa(parseAddressv4(&quot;0.0.0.0&quot;)), &quot;0.0.0.0.in-addr.arpa&quot;);
-assertEquals(addressv4ToArpa(parseAddressv4(&quot;255.255.255.255&quot;)), &quot;255.255.255.255.in-addr.arpa&quot;);
+assertEquals(addressv4ToArpa(parseAddressv4(&quot;192.168.0.1&quot;).address), &quot;1.0.168.192.in-addr.arpa&quot;);
+assertEquals(addressv4ToArpa(parseAddressv4(&quot;0.0.0.0&quot;).address), &quot;0.0.0.0.in-addr.arpa&quot;);
+assertEquals(addressv4ToArpa(parseAddressv4(&quot;255.255.255.255&quot;).address), &quot;255.255.255.255.in-addr.arpa&quot;);
 </code><button class="copyButton" data-copy="import { assertEquals } from &quot;@std/assert&quot;;
 import { addressv4ToArpa } from &quot;@hertzg/ip/arpav4&quot;;
 import { parseAddressv4 } from &quot;@hertzg/ip/addressv4&quot;;
 
-assertEquals(addressv4ToArpa(parseAddressv4(&quot;192.168.0.1&quot;)), &quot;1.0.168.192.in-addr.arpa&quot;);
-assertEquals(addressv4ToArpa(parseAddressv4(&quot;0.0.0.0&quot;)), &quot;0.0.0.0.in-addr.arpa&quot;);
-assertEquals(addressv4ToArpa(parseAddressv4(&quot;255.255.255.255&quot;)), &quot;255.255.255.255.in-addr.arpa&quot;);
+assertEquals(addressv4ToArpa(parseAddressv4(&quot;192.168.0.1&quot;).address), &quot;1.0.168.192.in-addr.arpa&quot;);
+assertEquals(addressv4ToArpa(parseAddressv4(&quot;0.0.0.0&quot;).address), &quot;0.0.0.0.in-addr.arpa&quot;);
+assertEquals(addressv4ToArpa(parseAddressv4(&quot;255.255.255.255&quot;).address), &quot;255.255.255.255.in-addr.arpa&quot;);
 "><svg
   class="copy"
   width="15"
@@ -293,12 +293,12 @@ assertEquals(addressv4ToArpa(parseAddressv4(&quot;255.255.255.255&quot;)), &quot
 import { addressv4ToArpa } from &quot;@hertzg/ip/arpav4&quot;;
 import { parseAddressv4 } from &quot;@hertzg/ip/addressv4&quot;;
 
-assertEquals(addressv4ToArpa(parseAddressv4(&quot;8.8.8.8&quot;)) + &quot;.&quot;, &quot;8.8.8.8.in-addr.arpa.&quot;);
+assertEquals(addressv4ToArpa(parseAddressv4(&quot;8.8.8.8&quot;).address) + &quot;.&quot;, &quot;8.8.8.8.in-addr.arpa.&quot;);
 </code><button class="copyButton" data-copy="import { assertEquals } from &quot;@std/assert&quot;;
 import { addressv4ToArpa } from &quot;@hertzg/ip/arpav4&quot;;
 import { parseAddressv4 } from &quot;@hertzg/ip/addressv4&quot;;
 
-assertEquals(addressv4ToArpa(parseAddressv4(&quot;8.8.8.8&quot;)) + &quot;.&quot;, &quot;8.8.8.8.in-addr.arpa.&quot;);
+assertEquals(addressv4ToArpa(parseAddressv4(&quot;8.8.8.8&quot;).address) + &quot;.&quot;, &quot;8.8.8.8.in-addr.arpa.&quot;);
 "><svg
   class="copy"
   width="15"

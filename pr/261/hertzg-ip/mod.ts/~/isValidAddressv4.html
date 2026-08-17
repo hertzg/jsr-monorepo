@@ -167,6 +167,8 @@
 </a>
 <span class="font-bold">isValidAddressv4</span><span class="font-medium">(<span><span>address<span>: <span class="td-kw">string</span></span></span></span>)<span>: <span class="td-kw">boolean</span></span> </span>
       </code><div class="space-y-7" id=""><div class="markdown"><p>Checks if a string is a valid IPv4 address in dotted decimal notation.</p>
+<p>Accepts exactly what <a href="../.././mod.ts/~/parseAddressv4.html">parseAddressv4</a> accepts: four decimal octets
+and an optional <code>%zoneId</code>, no prefix.</p>
 </div><section class="section"  id="examples"><div>
       <h2 class="anchorable mb-1"><a href="#examples" class="anchor" aria-label="Anchor" tabIndex="-1"><svg
   width="16"
@@ -220,12 +222,14 @@ import { isValidAddressv4 } from &quot;@hertzg/ip&quot;;
 assert(isValidAddressv4(&quot;0.0.0.0&quot;));
 assert(isValidAddressv4(&quot;192.168.1.1&quot;));
 assert(isValidAddressv4(&quot;255.255.255.255&quot;));
+assert(isValidAddressv4(&quot;192.168.1.1%ether1&quot;));
 </code><button class="copyButton" data-copy="import { assert } from &quot;@std/assert&quot;;
 import { isValidAddressv4 } from &quot;@hertzg/ip&quot;;
 
 assert(isValidAddressv4(&quot;0.0.0.0&quot;));
 assert(isValidAddressv4(&quot;192.168.1.1&quot;));
 assert(isValidAddressv4(&quot;255.255.255.255&quot;));
+assert(isValidAddressv4(&quot;192.168.1.1%ether1&quot;));
 "><svg
   class="copy"
   width="15"
@@ -291,6 +295,8 @@ assertEquals(isValidAddressv4(&quot;256.0.0.1&quot;), false);
 assertEquals(isValidAddressv4(&quot;1.2.3&quot;), false);
 assertEquals(isValidAddressv4(&quot;01.02.03.04&quot;), false);
 assertEquals(isValidAddressv4(&quot;::1&quot;), false);
+assertEquals(isValidAddressv4(&quot;192.168.1.1%&quot;), false);
+assertEquals(isValidAddressv4(&quot;192.168.1.0/24&quot;), false);
 </code><button class="copyButton" data-copy="import { assertEquals } from &quot;@std/assert&quot;;
 import { isValidAddressv4 } from &quot;@hertzg/ip&quot;;
 
@@ -299,6 +305,8 @@ assertEquals(isValidAddressv4(&quot;256.0.0.1&quot;), false);
 assertEquals(isValidAddressv4(&quot;1.2.3&quot;), false);
 assertEquals(isValidAddressv4(&quot;01.02.03.04&quot;), false);
 assertEquals(isValidAddressv4(&quot;::1&quot;), false);
+assertEquals(isValidAddressv4(&quot;192.168.1.1%&quot;), false);
+assertEquals(isValidAddressv4(&quot;192.168.1.0/24&quot;), false);
 "><svg
   class="copy"
   width="15"

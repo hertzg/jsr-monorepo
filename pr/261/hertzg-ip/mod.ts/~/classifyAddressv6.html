@@ -221,34 +221,34 @@ Examples</h2></div><div class="space-y-8"><div class="anchorable"><a href="#exam
 import { classifyAddressv6 } from &quot;@hertzg/ip/classifyv6&quot;;
 import { parseAddressv6 } from &quot;@hertzg/ip/addressv6&quot;;
 
-assertEquals(classifyAddressv6(parseAddressv6(&quot;::1&quot;)), &quot;loopback&quot;);
-assertEquals(classifyAddressv6(parseAddressv6(&quot;::&quot;)), &quot;unspecified&quot;);
-assertEquals(classifyAddressv6(parseAddressv6(&quot;fe80::1&quot;)), &quot;link-local&quot;);
-assertEquals(classifyAddressv6(parseAddressv6(&quot;ff02::1&quot;)), &quot;multicast&quot;);
-assertEquals(classifyAddressv6(parseAddressv6(&quot;fd00::1&quot;)), &quot;unique-local&quot;);
-assertEquals(classifyAddressv6(parseAddressv6(&quot;2001:db8::1&quot;)), &quot;documentation&quot;);
-assertEquals(classifyAddressv6(parseAddressv6(&quot;2001:2::1&quot;)), &quot;benchmarking&quot;);
-assertEquals(classifyAddressv6(parseAddressv6(&quot;2001:20::1&quot;)), &quot;orchidv2&quot;);
-assertEquals(classifyAddressv6(parseAddressv6(&quot;2001::1&quot;)), &quot;teredo&quot;);
-assertEquals(classifyAddressv6(parseAddressv6(&quot;::ffff:192.168.1.1&quot;)), &quot;ipv4-mapped&quot;);
-assertEquals(classifyAddressv6(parseAddressv6(&quot;64:ff9b::1&quot;)), &quot;ipv4-translated&quot;);
-assertEquals(classifyAddressv6(parseAddressv6(&quot;2607:f8b0:4004:800::200e&quot;)), &quot;global-unicast&quot;);
+assertEquals(classifyAddressv6(parseAddressv6(&quot;::1&quot;).address), &quot;loopback&quot;);
+assertEquals(classifyAddressv6(parseAddressv6(&quot;::&quot;).address), &quot;unspecified&quot;);
+assertEquals(classifyAddressv6(parseAddressv6(&quot;fe80::1&quot;).address), &quot;link-local&quot;);
+assertEquals(classifyAddressv6(parseAddressv6(&quot;ff02::1&quot;).address), &quot;multicast&quot;);
+assertEquals(classifyAddressv6(parseAddressv6(&quot;fd00::1&quot;).address), &quot;unique-local&quot;);
+assertEquals(classifyAddressv6(parseAddressv6(&quot;2001:db8::1&quot;).address), &quot;documentation&quot;);
+assertEquals(classifyAddressv6(parseAddressv6(&quot;2001:2::1&quot;).address), &quot;benchmarking&quot;);
+assertEquals(classifyAddressv6(parseAddressv6(&quot;2001:20::1&quot;).address), &quot;orchidv2&quot;);
+assertEquals(classifyAddressv6(parseAddressv6(&quot;2001::1&quot;).address), &quot;teredo&quot;);
+assertEquals(classifyAddressv6(parseAddressv6(&quot;::ffff:192.168.1.1&quot;).address), &quot;ipv4-mapped&quot;);
+assertEquals(classifyAddressv6(parseAddressv6(&quot;64:ff9b::1&quot;).address), &quot;ipv4-translated&quot;);
+assertEquals(classifyAddressv6(parseAddressv6(&quot;2607:f8b0:4004:800::200e&quot;).address), &quot;global-unicast&quot;);
 </code><button class="copyButton" data-copy="import { assertEquals } from &quot;@std/assert&quot;;
 import { classifyAddressv6 } from &quot;@hertzg/ip/classifyv6&quot;;
 import { parseAddressv6 } from &quot;@hertzg/ip/addressv6&quot;;
 
-assertEquals(classifyAddressv6(parseAddressv6(&quot;::1&quot;)), &quot;loopback&quot;);
-assertEquals(classifyAddressv6(parseAddressv6(&quot;::&quot;)), &quot;unspecified&quot;);
-assertEquals(classifyAddressv6(parseAddressv6(&quot;fe80::1&quot;)), &quot;link-local&quot;);
-assertEquals(classifyAddressv6(parseAddressv6(&quot;ff02::1&quot;)), &quot;multicast&quot;);
-assertEquals(classifyAddressv6(parseAddressv6(&quot;fd00::1&quot;)), &quot;unique-local&quot;);
-assertEquals(classifyAddressv6(parseAddressv6(&quot;2001:db8::1&quot;)), &quot;documentation&quot;);
-assertEquals(classifyAddressv6(parseAddressv6(&quot;2001:2::1&quot;)), &quot;benchmarking&quot;);
-assertEquals(classifyAddressv6(parseAddressv6(&quot;2001:20::1&quot;)), &quot;orchidv2&quot;);
-assertEquals(classifyAddressv6(parseAddressv6(&quot;2001::1&quot;)), &quot;teredo&quot;);
-assertEquals(classifyAddressv6(parseAddressv6(&quot;::ffff:192.168.1.1&quot;)), &quot;ipv4-mapped&quot;);
-assertEquals(classifyAddressv6(parseAddressv6(&quot;64:ff9b::1&quot;)), &quot;ipv4-translated&quot;);
-assertEquals(classifyAddressv6(parseAddressv6(&quot;2607:f8b0:4004:800::200e&quot;)), &quot;global-unicast&quot;);
+assertEquals(classifyAddressv6(parseAddressv6(&quot;::1&quot;).address), &quot;loopback&quot;);
+assertEquals(classifyAddressv6(parseAddressv6(&quot;::&quot;).address), &quot;unspecified&quot;);
+assertEquals(classifyAddressv6(parseAddressv6(&quot;fe80::1&quot;).address), &quot;link-local&quot;);
+assertEquals(classifyAddressv6(parseAddressv6(&quot;ff02::1&quot;).address), &quot;multicast&quot;);
+assertEquals(classifyAddressv6(parseAddressv6(&quot;fd00::1&quot;).address), &quot;unique-local&quot;);
+assertEquals(classifyAddressv6(parseAddressv6(&quot;2001:db8::1&quot;).address), &quot;documentation&quot;);
+assertEquals(classifyAddressv6(parseAddressv6(&quot;2001:2::1&quot;).address), &quot;benchmarking&quot;);
+assertEquals(classifyAddressv6(parseAddressv6(&quot;2001:20::1&quot;).address), &quot;orchidv2&quot;);
+assertEquals(classifyAddressv6(parseAddressv6(&quot;2001::1&quot;).address), &quot;teredo&quot;);
+assertEquals(classifyAddressv6(parseAddressv6(&quot;::ffff:192.168.1.1&quot;).address), &quot;ipv4-mapped&quot;);
+assertEquals(classifyAddressv6(parseAddressv6(&quot;64:ff9b::1&quot;).address), &quot;ipv4-translated&quot;);
+assertEquals(classifyAddressv6(parseAddressv6(&quot;2607:f8b0:4004:800::200e&quot;).address), &quot;global-unicast&quot;);
 "><svg
   class="copy"
   width="15"

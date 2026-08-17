@@ -221,7 +221,9 @@ Examples</h2></div><div class="space-y-8"><div class="anchorable"><a href="#exam
 import { cidrVersion } from &quot;@hertzg/ip/version&quot;;
 
 assertEquals(cidrVersion(&quot;10.0.0.0/8&quot;), 4);
+assertEquals(cidrVersion(&quot;10.0.0.0/255.0.0.0&quot;), 4);
 assertEquals(cidrVersion(&quot;2001:db8::/32&quot;), 6);
+assertEquals(cidrVersion(&quot;fe80::%ether1/64&quot;), 6);
 assertEquals(cidrVersion(&quot;10.0.0.0&quot;), undefined);
 assertEquals(cidrVersion(&quot;10.0.0.0/33&quot;), undefined);
 assertEquals(cidrVersion(&quot;garbage/24&quot;), undefined);
@@ -229,7 +231,9 @@ assertEquals(cidrVersion(&quot;garbage/24&quot;), undefined);
 import { cidrVersion } from &quot;@hertzg/ip/version&quot;;
 
 assertEquals(cidrVersion(&quot;10.0.0.0/8&quot;), 4);
+assertEquals(cidrVersion(&quot;10.0.0.0/255.0.0.0&quot;), 4);
 assertEquals(cidrVersion(&quot;2001:db8::/32&quot;), 6);
+assertEquals(cidrVersion(&quot;fe80::%ether1/64&quot;), 6);
 assertEquals(cidrVersion(&quot;10.0.0.0&quot;), undefined);
 assertEquals(cidrVersion(&quot;10.0.0.0/33&quot;), undefined);
 assertEquals(cidrVersion(&quot;garbage/24&quot;), undefined);

@@ -235,9 +235,9 @@ const reply = {
   protocolAddressLength: ARP_PROTO_LEN_IPV4,
   operation: ARP_OPCODE.REPLY,
   senderHardwareAddress: parseMac(&quot;aa:bb:cc:dd:ee:ff&quot;),
-  senderProtocolAddress: parseAddressv4(&quot;192.168.1.2&quot;),
+  senderProtocolAddress: parseAddressv4(&quot;192.168.1.2&quot;).address,
   targetHardwareAddress: parseMac(&quot;00:11:22:33:44:55&quot;),
-  targetProtocolAddress: parseAddressv4(&quot;192.168.1.1&quot;),
+  targetProtocolAddress: parseAddressv4(&quot;192.168.1.1&quot;).address,
 };
 
 const buffer = new Uint8Array(ARP_ETHERNET_IPV4_SIZE);
@@ -268,9 +268,9 @@ const reply = {
   protocolAddressLength: ARP_PROTO_LEN_IPV4,
   operation: ARP_OPCODE.REPLY,
   senderHardwareAddress: parseMac(&quot;aa:bb:cc:dd:ee:ff&quot;),
-  senderProtocolAddress: parseAddressv4(&quot;192.168.1.2&quot;),
+  senderProtocolAddress: parseAddressv4(&quot;192.168.1.2&quot;).address,
   targetHardwareAddress: parseMac(&quot;00:11:22:33:44:55&quot;),
-  targetProtocolAddress: parseAddressv4(&quot;192.168.1.1&quot;),
+  targetProtocolAddress: parseAddressv4(&quot;192.168.1.1&quot;).address,
 };
 
 const buffer = new Uint8Array(ARP_ETHERNET_IPV4_SIZE);

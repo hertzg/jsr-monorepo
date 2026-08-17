@@ -196,14 +196,14 @@ Examples</h2></div><div class="space-y-8"><div class="anchorable"><a href="#exam
 import { classifyAddress } from &quot;@hertzg/ip/classify&quot;;
 import { parseAddressv6 } from &quot;@hertzg/ip/addressv6&quot;;
 
-const result = classifyAddress(parseAddressv6(&quot;fe80::1&quot;));
+const result = classifyAddress(parseAddressv6(&quot;fe80::1&quot;).address);
 assertEquals(result.kind, &quot;ipv6&quot;);
 assertEquals(result.classification, &quot;link-local&quot;);
 </code><button class="copyButton" data-copy="import { assertEquals } from &quot;@std/assert&quot;;
 import { classifyAddress } from &quot;@hertzg/ip/classify&quot;;
 import { parseAddressv6 } from &quot;@hertzg/ip/addressv6&quot;;
 
-const result = classifyAddress(parseAddressv6(&quot;fe80::1&quot;));
+const result = classifyAddress(parseAddressv6(&quot;fe80::1&quot;).address);
 assertEquals(result.kind, &quot;ipv6&quot;);
 assertEquals(result.classification, &quot;link-local&quot;);
 "><svg

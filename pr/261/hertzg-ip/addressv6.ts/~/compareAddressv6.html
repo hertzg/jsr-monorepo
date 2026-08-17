@@ -165,7 +165,7 @@
   </defs>
 </svg>
 </a>
-<span class="font-bold">compareAddressv6</span><span class="font-medium">(<div class="ml-4"><div><span>a<span>: <span class="td-kw">bigint</span></span></span>,</div><div><span>b<span>: <span class="td-kw">bigint</span></span></span></div></div>)<span>: <span><span class="td-lit">-1</span><span class="td-op"> | </span><span class="td-lit">0</span><span class="td-op"> | </span><span class="td-lit">1</span></span></span> </span>
+<span class="font-bold">compareAddressv6</span><span class="font-medium">(<div class="ml-4"><div><span>a<span>: <a href="../.././addressv6.ts/~/Addressv6.html" class="link td-ref">Addressv6</a></span></span>,</div><div><span>b<span>: <a href="../.././addressv6.ts/~/Addressv6.html" class="link td-ref">Addressv6</a></span></span></div></div>)<span>: <span><span class="td-lit">-1</span><span class="td-op"> | </span><span class="td-lit">0</span><span class="td-op"> | </span><span class="td-lit">1</span></span></span> </span>
       </code><div class="space-y-7" id=""><div class="markdown"><p>Compares two IPv6 addresses for sorting, numerically ascending.</p>
 <p>Suitable as an <code>Array.prototype.sort</code> / <code>toSorted</code> comparator. For a
 comparator that also accepts IPv4 addresses, see compareAddress, which
@@ -222,7 +222,7 @@ Examples</h2></div><div class="space-y-8"><div class="anchorable"><a href="#exam
   <div><div class="markdown"><pre class="highlight"><code class="language-ts">import { assertEquals } from &quot;@std/assert&quot;;
 import { compareAddressv6, parseAddressv6, stringifyAddressv6 } from &quot;@hertzg/ip/addressv6&quot;;
 
-const addresses = [&quot;2001:db8::9&quot;, &quot;2001:db8::10&quot;, &quot;2001:db8::2&quot;].map(parseAddressv6);
+const addresses = [&quot;2001:db8::9&quot;, &quot;2001:db8::10&quot;, &quot;2001:db8::2&quot;].map((s) =&gt; parseAddressv6(s).address);
 
 assertEquals(addresses.toSorted(compareAddressv6).map(stringifyAddressv6), [
   &quot;2001:db8::2&quot;,
@@ -232,7 +232,7 @@ assertEquals(addresses.toSorted(compareAddressv6).map(stringifyAddressv6), [
 </code><button class="copyButton" data-copy="import { assertEquals } from &quot;@std/assert&quot;;
 import { compareAddressv6, parseAddressv6, stringifyAddressv6 } from &quot;@hertzg/ip/addressv6&quot;;
 
-const addresses = [&quot;2001:db8::9&quot;, &quot;2001:db8::10&quot;, &quot;2001:db8::2&quot;].map(parseAddressv6);
+const addresses = [&quot;2001:db8::9&quot;, &quot;2001:db8::10&quot;, &quot;2001:db8::2&quot;].map((s) =&gt; parseAddressv6(s).address);
 
 assertEquals(addresses.toSorted(compareAddressv6).map(stringifyAddressv6), [
   &quot;2001:db8::2&quot;,
@@ -299,15 +299,15 @@ assertEquals(addresses.toSorted(compareAddressv6).map(stringifyAddressv6), [
   <div><div class="markdown"><pre class="highlight"><code class="language-ts">import { assertEquals } from &quot;@std/assert&quot;;
 import { compareAddressv6, parseAddressv6 } from &quot;@hertzg/ip/addressv6&quot;;
 
-assertEquals(compareAddressv6(parseAddressv6(&quot;::1&quot;), parseAddressv6(&quot;::2&quot;)), -1);
-assertEquals(compareAddressv6(parseAddressv6(&quot;::2&quot;), parseAddressv6(&quot;::1&quot;)), 1);
-assertEquals(compareAddressv6(parseAddressv6(&quot;::1&quot;), parseAddressv6(&quot;::1&quot;)), 0);
+assertEquals(compareAddressv6(parseAddressv6(&quot;::1&quot;).address, parseAddressv6(&quot;::2&quot;).address), -1);
+assertEquals(compareAddressv6(parseAddressv6(&quot;::2&quot;).address, parseAddressv6(&quot;::1&quot;).address), 1);
+assertEquals(compareAddressv6(parseAddressv6(&quot;::1&quot;).address, parseAddressv6(&quot;::1&quot;).address), 0);
 </code><button class="copyButton" data-copy="import { assertEquals } from &quot;@std/assert&quot;;
 import { compareAddressv6, parseAddressv6 } from &quot;@hertzg/ip/addressv6&quot;;
 
-assertEquals(compareAddressv6(parseAddressv6(&quot;::1&quot;), parseAddressv6(&quot;::2&quot;)), -1);
-assertEquals(compareAddressv6(parseAddressv6(&quot;::2&quot;), parseAddressv6(&quot;::1&quot;)), 1);
-assertEquals(compareAddressv6(parseAddressv6(&quot;::1&quot;), parseAddressv6(&quot;::1&quot;)), 0);
+assertEquals(compareAddressv6(parseAddressv6(&quot;::1&quot;).address, parseAddressv6(&quot;::2&quot;).address), -1);
+assertEquals(compareAddressv6(parseAddressv6(&quot;::2&quot;).address, parseAddressv6(&quot;::1&quot;).address), 1);
+assertEquals(compareAddressv6(parseAddressv6(&quot;::1&quot;).address, parseAddressv6(&quot;::1&quot;).address), 0);
 "><svg
   class="copy"
   width="15"
@@ -390,7 +390,7 @@ Parameters</h2></div><div class="space-y-8"><div class="anchorable docEntry" id=
   </defs>
 </svg>
 </a>
-<span class="font-bold font-lg">a</span><span class="font-medium text-stone-500 dark:text-stone-200"><span>: <span class="td-kw">bigint</span></span></span>
+<span class="font-bold font-lg">a</span><span class="font-medium text-stone-500 dark:text-stone-200"><span>: <a href="../.././addressv6.ts/~/Addressv6.html" class="link td-ref">Addressv6</a></span></span>
       </code>
     </div><a
   class="sourceButton"
@@ -444,7 +444,7 @@ Parameters</h2></div><div class="space-y-8"><div class="anchorable docEntry" id=
   </defs>
 </svg>
 </a>
-<span class="font-bold font-lg">b</span><span class="font-medium text-stone-500 dark:text-stone-200"><span>: <span class="td-kw">bigint</span></span></span>
+<span class="font-bold font-lg">b</span><span class="font-medium text-stone-500 dark:text-stone-200"><span>: <a href="../.././addressv6.ts/~/Addressv6.html" class="link td-ref">Addressv6</a></span></span>
       </code>
     </div><a
   class="sourceButton"

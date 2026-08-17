@@ -101,8 +101,9 @@
   <div class="space-y-2 flex-1"><div class="space-y-7" id="module_doc"><div class="markdown"><p>Universal IP address parsing and stringifying.</p>
 <p>This module provides <a href=".././address.ts/~/parseAddress.html">parseAddress</a>, <a href=".././address.ts/~/stringifyAddress.html">stringifyAddress</a> and
 <a href=".././address.ts/~/compareAddress.html">compareAddress</a> that auto-detect IPv4 vs IPv6 and delegate to the
-appropriate version-specific function. The <a href=".././address.ts/~/Address.html">Address</a> type alias is
-also exported for working with version-polymorphic address values.</p>
+appropriate version-specific function. The <a href=".././address.ts/~/Address.html">Address</a> and
+<a href=".././address.ts/~/ParsedAddress.html">ParsedAddress</a> type aliases are also exported for working with
+version-polymorphic address values.</p>
 <p>For version-specific functions, see:</p>
 <ul>
 <li><a href="https://jsr.io/@hertzg/ip/doc/addressv4"><code>addressv4</code></a>: <a href=".././addressv4.ts/~/parseAddressv4.html">parseAddressv4</a>, <a href=".././addressv4.ts/~/stringifyAddressv4.html">stringifyAddressv4</a>, <a href=".././addressv4.ts/~/compareAddressv4.html">compareAddressv4</a></li>
@@ -160,25 +161,35 @@ import { parseAddress, stringifyAddress } from &quot;@hertzg/ip/address&quot;;
 
 // IPv4
 const v4 = parseAddress(&quot;192.168.1.1&quot;);
-assertEquals(v4, 3232235777);
+assertEquals(v4, { address: 3232235777 });
 assertEquals(stringifyAddress(v4), &quot;192.168.1.1&quot;);
 
 // IPv6
 const v6 = parseAddress(&quot;2001:db8::1&quot;);
-assertEquals(v6, 42540766411282592856903984951653826561n);
+assertEquals(v6, { address: 42540766411282592856903984951653826561n });
 assertEquals(stringifyAddress(v6), &quot;2001:db8::1&quot;);
+
+// A zone ID rides along
+const linkLocal = parseAddress(&quot;fe80::1%eth0&quot;);
+assertEquals(linkLocal, { address: 0xfe800000000000000000000000000001n, zoneId: &quot;eth0&quot; });
+assertEquals(stringifyAddress(linkLocal), &quot;fe80::1%eth0&quot;);
 </code><button class="copyButton" data-copy="import { assertEquals } from &quot;@std/assert&quot;;
 import { parseAddress, stringifyAddress } from &quot;@hertzg/ip/address&quot;;
 
 // IPv4
 const v4 = parseAddress(&quot;192.168.1.1&quot;);
-assertEquals(v4, 3232235777);
+assertEquals(v4, { address: 3232235777 });
 assertEquals(stringifyAddress(v4), &quot;192.168.1.1&quot;);
 
 // IPv6
 const v6 = parseAddress(&quot;2001:db8::1&quot;);
-assertEquals(v6, 42540766411282592856903984951653826561n);
+assertEquals(v6, { address: 42540766411282592856903984951653826561n });
 assertEquals(stringifyAddress(v6), &quot;2001:db8::1&quot;);
+
+// A zone ID rides along
+const linkLocal = parseAddress(&quot;fe80::1%eth0&quot;);
+assertEquals(linkLocal, { address: 0xfe800000000000000000000000000001n, zoneId: &quot;eth0&quot; });
+assertEquals(stringifyAddress(linkLocal), &quot;fe80::1%eth0&quot;);
 "><svg
   class="copy"
   width="15"
@@ -244,13 +255,14 @@ Functions</h2></div><div class="namespaceSection"><div id="namespace_compareaddr
     </div><div id="namespace_parseaddress" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-Function bg-Function/15 dark:text-FunctionDark dark:bg-FunctionDark/15" title="Function">f</div></div>
 <div class="namespaceItemContent">
 		    <a href="..&#x2F;.&#x2F;address.ts&#x2F;~&#x2F;parseAddress.html" title="parseAddress">
-			    <span>parseAddress</span><span>(<span><span>address<span>: <span class="td-kw">string</span></span></span></span>)<span>: <span class="td-ref">Address</span></span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Parses an IPv4 or IPv6 address string to its numeric representation.</p>
+			    <span>parseAddress</span><span>(<div class="ml-4"><div><span>address<span>: <span class="td-kw">string</span></span></span>,</div><div><span>options<span class="td-op">?</span><span>: <span class="td-ref">ParseOptions</span></span></span></div></div>)<span>: <span class="td-ref">ParsedAddress</span></span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Parses an IPv4 or IPv6 address string, with an optional zone ID, to its
+numeric value.</p>
 </div></div></div>
     </div><div id="namespace_stringifyaddress" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-Function bg-Function/15 dark:text-FunctionDark dark:bg-FunctionDark/15" title="Function">f</div></div>
 <div class="namespaceItemContent">
 		    <a href="..&#x2F;.&#x2F;address.ts&#x2F;~&#x2F;stringifyAddress.html" title="stringifyAddress">
-			    <span>stringifyAddress</span><span>(<span><span>address<span>: <span class="td-ref">Address</span></span></span></span>)<span>: <span class="td-kw">string</span></span></span><div class="namespaceItemContentTypeInfo">3 overloads</div></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Stringifies an IPv4 (<code>number</code>) or IPv6 (<code>bigint</code>) address to its
-standard notation.</p>
+			    <span>stringifyAddress</span><span>(<span><span>address<span>: <span><span class="td-ref">Address</span><span class="td-op"> | </span><span class="td-ref">ParsedAddress</span></span></span></span></span>)<span>: <span class="td-kw">string</span></span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Stringifies an IPv4 (<code>number</code>) or IPv6 (<code>bigint</code>) address, bare or
+parsed, to its standard notation.</p>
 </div></div></div>
     </div></div>
 </section>
@@ -280,7 +292,77 @@ standard notation.</p>
 Type Aliases</h2></div><div class="namespaceSection"><div id="namespace_address" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-TypeAlias bg-TypeAlias/15 dark:text-TypeAliasDark dark:bg-TypeAliasDark/15" title="Type Alias">T</div></div>
 <div class="namespaceItemContent">
 		    <a href="..&#x2F;.&#x2F;address.ts&#x2F;~&#x2F;Address.html" title="Address">
-			    <span>Address</span><span> = <span><span class="td-kw">number</span><span class="td-op"> | </span><span class="td-kw">bigint</span></span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>A plain IP address of either IP version.</p>
+			    <span>Address</span><span> = <span><span class="td-ref">Addressv4</span><span class="td-op"> | </span><span class="td-ref">Addressv6</span></span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>A plain IP address of either IP version.</p>
+</div></div></div>
+    </div><div id="namespace_addressv4" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-TypeAlias bg-TypeAlias/15 dark:text-TypeAliasDark dark:bg-TypeAliasDark/15" title="Type Alias">T</div></div>
+<div class="namespaceItemContent">
+		    <a href="..&#x2F;.&#x2F;addressv4.ts&#x2F;~&#x2F;Addressv4.html" title="Addressv4">
+			    <span>Addressv4</span><span> = <span class="td-kw">number</span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>An IPv4 address as a 32-bit unsigned integer, <code>0</code> to <code>4294967295</code>. The
+primitive type is what carries the version: a <code>number</code> is IPv4, a
+<code>bigint</code> is IPv6 (ADR 0001).</p>
+</div></div></div>
+    </div><div id="namespace_addressv6" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-TypeAlias bg-TypeAlias/15 dark:text-TypeAliasDark dark:bg-TypeAliasDark/15" title="Type Alias">T</div></div>
+<div class="namespaceItemContent">
+		    <a href="..&#x2F;.&#x2F;addressv6.ts&#x2F;~&#x2F;Addressv6.html" title="Addressv6">
+			    <span>Addressv6</span><span> = <span class="td-kw">bigint</span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>An IPv6 address as a 128-bit unsigned bigint, <code>0n</code> to <code>2n ** 128n - 1n</code>.
+The primitive type is what carries the version: a <code>bigint</code> is IPv6, a
+<code>number</code> is IPv4 (ADR 0001).</p>
+</div></div></div>
+    </div><div id="namespace_parsedaddress" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-TypeAlias bg-TypeAlias/15 dark:text-TypeAliasDark dark:bg-TypeAliasDark/15" title="Type Alias">T</div></div>
+<div class="namespaceItemContent">
+		    <a href="..&#x2F;.&#x2F;address.ts&#x2F;~&#x2F;ParsedAddress.html" title="ParsedAddress">
+			    <span>ParsedAddress</span><span> = <span><span class="td-ref">ParsedAddressv4</span><span class="td-op"> | </span><span class="td-ref">ParsedAddressv6</span></span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>What <a href=".././address.ts/~/parseAddress.html">parseAddress</a> returns and what <a href=".././address.ts/~/stringifyAddress.html">stringifyAddress</a>
+accepts: a <a href=".././address.ts/~/ParsedAddressv4.html">ParsedAddressv4</a> or a <a href=".././address.ts/~/ParsedAddressv6.html">ParsedAddressv6</a>. Read
+<code>.address</code> for the bare <a href=".././address.ts/~/Address.html">Address</a> and narrow with <code>typeof</code>; the
+zone never touches the value, and no operation in this package reads it.</p>
+</div></div></div>
+    </div><div id="namespace_parsedaddressv4" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-TypeAlias bg-TypeAlias/15 dark:text-TypeAliasDark dark:bg-TypeAliasDark/15" title="Type Alias">T</div></div>
+<div class="namespaceItemContent">
+		    <a href="..&#x2F;.&#x2F;addressv4.ts&#x2F;~&#x2F;ParsedAddressv4.html" title="ParsedAddressv4">
+			    <span>ParsedAddressv4</span><span> = { <span class="td-kw">readonly </span>address<span>: <span class="td-ref">Addressv4</span></span>; <span class="td-kw">readonly </span>zoneId<span class="td-op">?</span><span>: <span class="td-ref">ZoneId</span></span>;  }</span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>What <a href=".././addressv4.ts/~/parseAddressv4.html">parseAddressv4</a> returns and what <a href=".././addressv4.ts/~/stringifyAddressv4.html">stringifyAddressv4</a>
+accepts: the address, plus the zone ID if the notation had one. Read
+<code>.address</code> for the bare <a href=".././address.ts/~/Addressv4.html">Addressv4</a>; the zone never touches the
+value, and no operation in this package reads it.</p>
+</div></div><ul class="namespaceItemContentSubItems"><li>
+                <a href="..&#x2F;.&#x2F;addressv4.ts&#x2F;~&#x2F;ParsedAddressv4.html#property_address">
+                  <span>address</span><span>: <span class="td-ref">Addressv4</span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>The address as a 32-bit unsigned integer</p>
+</div></div></li><li>
+                <a href="..&#x2F;.&#x2F;addressv4.ts&#x2F;~&#x2F;ParsedAddressv4.html#property_zoneid">
+                  <span>zoneId</span><span>: <span class="td-ref">ZoneId</span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>The zone ID after <code>%</code>, verbatim, when the notation had one</p>
+</div></div></li></ul></div>
+    </div><div id="namespace_parsedaddressv6" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-TypeAlias bg-TypeAlias/15 dark:text-TypeAliasDark dark:bg-TypeAliasDark/15" title="Type Alias">T</div></div>
+<div class="namespaceItemContent">
+		    <a href="..&#x2F;.&#x2F;addressv6.ts&#x2F;~&#x2F;ParsedAddressv6.html" title="ParsedAddressv6">
+			    <span>ParsedAddressv6</span><span> = { <span class="td-kw">readonly </span>address<span>: <span class="td-ref">Addressv6</span></span>; <span class="td-kw">readonly </span>zoneId<span class="td-op">?</span><span>: <span class="td-ref">ZoneId</span></span>;  }</span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>What <a href=".././addressv6.ts/~/parseAddressv6.html">parseAddressv6</a> returns and what <a href=".././addressv6.ts/~/stringifyAddressv6.html">stringifyAddressv6</a>
+accepts: the address, plus the zone ID if the notation had one. Read
+<code>.address</code> for the bare <a href=".././address.ts/~/Addressv6.html">Addressv6</a>; the zone never touches the
+value, and no operation in this package reads it.</p>
+</div></div><ul class="namespaceItemContentSubItems"><li>
+                <a href="..&#x2F;.&#x2F;addressv6.ts&#x2F;~&#x2F;ParsedAddressv6.html#property_address">
+                  <span>address</span><span>: <span class="td-ref">Addressv6</span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>The address as a 128-bit unsigned bigint</p>
+</div></div></li><li>
+                <a href="..&#x2F;.&#x2F;addressv6.ts&#x2F;~&#x2F;ParsedAddressv6.html#property_zoneid">
+                  <span>zoneId</span><span>: <span class="td-ref">ZoneId</span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>The zone ID after <code>%</code>, verbatim, when the notation had one</p>
+</div></div></li></ul></div>
+    </div><div id="namespace_parseoptions" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-TypeAlias bg-TypeAlias/15 dark:text-TypeAliasDark dark:bg-TypeAliasDark/15" title="Type Alias">T</div></div>
+<div class="namespaceItemContent">
+		    <a href="..&#x2F;.&#x2F;address.ts&#x2F;~&#x2F;ParseOptions.html" title="ParseOptions">
+			    <span>ParseOptions</span><span> = { <span class="td-kw">readonly </span>unmapToV4<span class="td-op">?</span><span>: <span class="td-kw">boolean</span></span>;  }</span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Options for the universal parsers, <a href=".././address.ts/~/parseAddress.html">parseAddress</a> and
+parseCidr. The version-specific parsers take none: they return
+their own version and nothing else.</p>
+</div></div><ul class="namespaceItemContentSubItems"><li>
+                <a href="..&#x2F;.&#x2F;address.ts&#x2F;~&#x2F;ParseOptions.html#property_unmaptov4">
+                  <span>unmapToV4</span><span>: <span class="td-kw">boolean</span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Whether an IPv4-mapped IPv6 address (<code>::ffff:a.b.c.d</code>) is returned as
+the IPv4 value it carries. Defaults to <code>true</code> (ADR 0004): dual-stack
+listeners report IPv4 clients in the mapped form, and almost every
+caller wants the IPv4 view. Set to <code>false</code> to keep the <code>bigint</code>.</p>
+</div></div></li></ul></div>
+    </div><div id="namespace_zoneid" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-TypeAlias bg-TypeAlias/15 dark:text-TypeAliasDark dark:bg-TypeAliasDark/15" title="Type Alias">T</div></div>
+<div class="namespaceItemContent">
+		    <a href="..&#x2F;.&#x2F;notation.ts&#x2F;~&#x2F;ZoneId.html" title="ZoneId">
+			    <span>ZoneId</span><span> = <span class="td-kw">string</span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>The zone ID of an address, the interface tail after <code>%</code> in
+<code>fe80::1%eth0</code> (RFC 4007 section 11). Carried verbatim by the <code>Parsed*</code>
+types; never percent-decoded, so <code>%25eth0</code> is the zone <code>25eth0</code>.</p>
 </div></div></div>
     </div></div>
 </section>
@@ -337,25 +419,25 @@ Type Aliases</h2></div><div class="namespaceSection"><div id="namespace_address"
                   </span>
                 </a>
               </li><li>
+                <a href="..&#x2F;.&#x2F;address.ts&#x2F;~&#x2F;ParsedAddress.html" title="ParsedAddress"><div class="docNodeKindIcon"><div class="text-TypeAlias bg-TypeAlias/15 dark:text-TypeAliasDark dark:bg-TypeAliasDark/15" title="Type Alias">T</div></div>
+<span class="hover:bg-TypeAlias/15 hover:bg-TypeAliasDark/15">
+                    ParsedAddress
+                  </span>
+                </a>
+              </li><li>
+                <a href="..&#x2F;.&#x2F;address.ts&#x2F;~&#x2F;ParseOptions.html" title="ParseOptions"><div class="docNodeKindIcon"><div class="text-TypeAlias bg-TypeAlias/15 dark:text-TypeAliasDark dark:bg-TypeAliasDark/15" title="Type Alias">T</div></div>
+<span class="hover:bg-TypeAlias/15 hover:bg-TypeAliasDark/15">
+                    ParseOptions
+                  </span>
+                </a>
+              </li><li>
                 <a href="..&#x2F;.&#x2F;address.ts&#x2F;~&#x2F;parseAddress.html" title="parseAddress"><div class="docNodeKindIcon"><div class="text-Function bg-Function/15 dark:text-FunctionDark dark:bg-FunctionDark/15" title="Function">f</div></div>
 <span class="hover:bg-Function/15 hover:bg-FunctionDark/15">
                     parseAddress
                   </span>
                 </a>
-              </li><li>
-                <a href="..&#x2F;.&#x2F;address.ts&#x2F;~&#x2F;stringifyAddress.html" title="stringifyAddress"><div class="docNodeKindIcon"><div class="text-Function bg-Function/15 dark:text-FunctionDark dark:bg-FunctionDark/15" title="Function">f</div></div>
-<span class="hover:bg-Function/15 hover:bg-FunctionDark/15">
-                    stringifyAddress
-                  </span>
-                </a>
-              </li><li>
-                <a href="..&#x2F;.&#x2F;address.ts&#x2F;~&#x2F;stringifyAddress.html" title="stringifyAddress"><div class="docNodeKindIcon"><div class="text-Function bg-Function/15 dark:text-FunctionDark dark:bg-FunctionDark/15" title="Function">f</div></div>
-<span class="hover:bg-Function/15 hover:bg-FunctionDark/15">
-                    stringifyAddress
-                  </span>
-                </a>
               </li></ul><a class="flex items-center gap-0.5" href="..&#x2F;.&#x2F;all_symbols.html">
-              <span class="leading-none">view all 321 symbols</span><svg
+              <span class="leading-none">view all 371 symbols</span><svg
   width="16"
   height="16"
   viewBox="0 0 16 16"
@@ -370,7 +452,7 @@ Type Aliases</h2></div><div class="namespaceSection"><div id="namespace_address"
   />
 </svg>
 </a></nav><nav class="documentNavigation">
-          <h3>Document Navigation</h3><ul><li><a href="#examples" title="Examples">Examples</a></li><li><ul><li><a href="#example_0" title="Parse and stringify any IP address">Parse and stringify any IP address</a></li></ul></li><li><a href="#address_ts_functions" title="Functions">Functions</a></li><li><ul><li><a href="#namespace_compareaddress" title="compareAddress">compareAddress</a></li><li><a href="#namespace_parseaddress" title="parseAddress">parseAddress</a></li><li><a href="#namespace_stringifyaddress" title="stringifyAddress">stringifyAddress</a></li></ul></li><li><a href="#address_ts_type-aliases" title="Type Aliases">Type Aliases</a></li><li><ul><li><a href="#namespace_address" title="Address">Address</a></li></ul></li></ul></nav></div>
+          <h3>Document Navigation</h3><ul><li><a href="#examples" title="Examples">Examples</a></li><li><ul><li><a href="#example_0" title="Parse and stringify any IP address">Parse and stringify any IP address</a></li></ul></li><li><a href="#address_ts_functions" title="Functions">Functions</a></li><li><ul><li><a href="#namespace_compareaddress" title="compareAddress">compareAddress</a></li><li><a href="#namespace_parseaddress" title="parseAddress">parseAddress</a></li><li><a href="#namespace_stringifyaddress" title="stringifyAddress">stringifyAddress</a></li></ul></li><li><a href="#address_ts_type-aliases" title="Type Aliases">Type Aliases</a></li><li><ul><li><a href="#namespace_address" title="Address">Address</a></li><li><a href="#namespace_addressv4" title="Addressv4">Addressv4</a></li><li><a href="#namespace_addressv6" title="Addressv6">Addressv6</a></li><li><a href="#namespace_parsedaddress" title="ParsedAddress">ParsedAddress</a></li><li><a href="#namespace_parsedaddressv4" title="ParsedAddressv4">ParsedAddressv4</a></li><li><a href="#namespace_parsedaddressv6" title="ParsedAddressv6">ParsedAddressv6</a></li><li><a href="#namespace_parseoptions" title="ParseOptions">ParseOptions</a></li><li><a href="#namespace_zoneid" title="ZoneId">ZoneId</a></li></ul></li></ul></nav></div>
   </div></div>
 </div>
 </div>

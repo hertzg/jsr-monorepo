@@ -165,19 +165,25 @@
   </defs>
 </svg>
 </a>
-<span class="font-bold">parseAddressv6</span><span class="font-medium">(<span><span>address<span>: <span class="td-kw">string</span></span></span></span>)<span>: <span class="td-kw">bigint</span></span> </span>
-      </code><div class="space-y-7" id=""><div class="markdown"><p>Parses an IPv6 address in colon-hexadecimal notation to a bigint.</p>
-<p>Supports standard IPv6 formats:</p>
+<span class="font-bold">parseAddressv6</span><span class="font-medium">(<span><span>address<span>: <span class="td-kw">string</span></span></span></span>)<span>: <a href="../.././mod.ts/~/ParsedAddressv6.html" class="link td-ref">ParsedAddressv6</a></span> </span>
+      </code><div class="space-y-7" id=""><div class="markdown"><p>Parses an IPv6 address in colon-hexadecimal notation, with an optional
+zone ID, to its numeric value.</p>
+<p>The notation is <code>address [ &quot;%&quot; zoneId ]</code> (ADR 0003). The address grammar
+is exactly RFC 4291 section 2.2 and nothing else:</p>
 <ul>
 <li>Full form: <code>2001:0db8:0000:0000:0000:0000:0000:0001</code></li>
 <li>Compressed form with <code>::</code>: <code>2001:db8::1</code></li>
-<li>Mixed IPv4 form: <code>::ffff:192.168.1.1</code></li>
-<li>Zone IDs are stripped: <code>fe80::1%eth0</code> becomes <code>fe80::1</code></li>
+<li>Mixed IPv4 form: <code>::ffff:192.168.1.1</code>, the dotted quad only as the last field</li>
 </ul>
-<p>The accepted grammar is exactly RFC 4291 section 2.2 and nothing else. A
-group is 1-4 hex digits, with no <code>0x</code>, no sign and no trailing text; <code>::</code>
-covers one or more groups, so at most seven may be written alongside it;
-and whitespace is accepted nowhere, including around the whole string.</p>
+<p>A group is 1-4 hex digits, with no <code>0x</code>, no sign and no trailing text;
+<code>::</code> covers one or more groups, so at most seven may be written alongside
+it; and whitespace is accepted nowhere, including around the whole
+string. The zone ID, when present, is carried verbatim: it may not
+contain <code>%</code>, <code>/</code> or whitespace, is never percent-decoded (<code>%25eth0</code> is the
+zone <code>25eth0</code>), and never touches the numeric value.</p>
+<p>A prefix is not accepted; that is <a href="../.././mod.ts/~/parseCidrv6.html">parseCidrv6</a>'s slot. An
+IPv4-mapped address stays a <code>bigint</code> here; <a href="../.././mod.ts/~/parseAddress.html">parseAddress</a> is the
+parser that unmaps it.</p>
 </div><section class="section"  id="examples"><div>
       <h2 class="anchorable mb-1"><a href="#examples" class="anchor" aria-label="Anchor" tabIndex="-1"><svg
   width="16"
@@ -228,17 +234,17 @@ Examples</h2></div><div class="space-y-8"><div class="anchorable"><a href="#exam
   <div><div class="markdown"><pre class="highlight"><code class="language-ts">import { assertEquals } from &quot;@std/assert&quot;;
 import { parseAddressv6 } from &quot;@hertzg/ip/addressv6&quot;;
 
-assertEquals(parseAddressv6(&quot;::&quot;), 0n);
-assertEquals(parseAddressv6(&quot;::1&quot;), 1n);
-assertEquals(parseAddressv6(&quot;2001:db8::1&quot;), 42540766411282592856903984951653826561n);
-assertEquals(parseAddressv6(&quot;ffff:ffff:ffff:ffff:ffff:ffff:ffff:ffff&quot;), 340282366920938463463374607431768211455n);
+assertEquals(parseAddressv6(&quot;::&quot;), { address: 0n });
+assertEquals(parseAddressv6(&quot;::1&quot;), { address: 1n });
+assertEquals(parseAddressv6(&quot;2001:db8::1&quot;), { address: 42540766411282592856903984951653826561n });
+assertEquals(parseAddressv6(&quot;ffff:ffff:ffff:ffff:ffff:ffff:ffff:ffff&quot;), { address: 340282366920938463463374607431768211455n });
 </code><button class="copyButton" data-copy="import { assertEquals } from &quot;@std/assert&quot;;
 import { parseAddressv6 } from &quot;@hertzg/ip/addressv6&quot;;
 
-assertEquals(parseAddressv6(&quot;::&quot;), 0n);
-assertEquals(parseAddressv6(&quot;::1&quot;), 1n);
-assertEquals(parseAddressv6(&quot;2001:db8::1&quot;), 42540766411282592856903984951653826561n);
-assertEquals(parseAddressv6(&quot;ffff:ffff:ffff:ffff:ffff:ffff:ffff:ffff&quot;), 340282366920938463463374607431768211455n);
+assertEquals(parseAddressv6(&quot;::&quot;), { address: 0n });
+assertEquals(parseAddressv6(&quot;::1&quot;), { address: 1n });
+assertEquals(parseAddressv6(&quot;2001:db8::1&quot;), { address: 42540766411282592856903984951653826561n });
+assertEquals(parseAddressv6(&quot;ffff:ffff:ffff:ffff:ffff:ffff:ffff:ffff&quot;), { address: 340282366920938463463374607431768211455n });
 "><svg
   class="copy"
   width="15"
@@ -361,16 +367,22 @@ assertEquals(parseAddressv6(&quot;::ffff:192.168.1.1&quot;), parseAddressv6(&quo
   </defs>
 </svg>
 </a>
-<h3 class="example-header"><div class="markdown"><p>Zone ID handling</p>
+<h3 class="example-header"><div class="markdown"><p>A zone ID is carried verbatim</p>
 </div></h3>
   <div><div class="markdown"><pre class="highlight"><code class="language-ts">import { assertEquals } from &quot;@std/assert&quot;;
 import { parseAddressv6 } from &quot;@hertzg/ip/addressv6&quot;;
 
-assertEquals(parseAddressv6(&quot;fe80::1%eth0&quot;), parseAddressv6(&quot;fe80::1&quot;));
+assertEquals(parseAddressv6(&quot;fe80::1%eth0&quot;), { address: 0xfe800000000000000000000000000001n, zoneId: &quot;eth0&quot; });
+assertEquals(parseAddressv6(&quot;fe80::1%12&quot;), { address: 0xfe800000000000000000000000000001n, zoneId: &quot;12&quot; });
+assertEquals(parseAddressv6(&quot;fe80::1%eth0.100&quot;), { address: 0xfe800000000000000000000000000001n, zoneId: &quot;eth0.100&quot; });
+assertEquals(parseAddressv6(&quot;fe80::1%25eth0&quot;), { address: 0xfe800000000000000000000000000001n, zoneId: &quot;25eth0&quot; });
 </code><button class="copyButton" data-copy="import { assertEquals } from &quot;@std/assert&quot;;
 import { parseAddressv6 } from &quot;@hertzg/ip/addressv6&quot;;
 
-assertEquals(parseAddressv6(&quot;fe80::1%eth0&quot;), parseAddressv6(&quot;fe80::1&quot;));
+assertEquals(parseAddressv6(&quot;fe80::1%eth0&quot;), { address: 0xfe800000000000000000000000000001n, zoneId: &quot;eth0&quot; });
+assertEquals(parseAddressv6(&quot;fe80::1%12&quot;), { address: 0xfe800000000000000000000000000001n, zoneId: &quot;12&quot; });
+assertEquals(parseAddressv6(&quot;fe80::1%eth0.100&quot;), { address: 0xfe800000000000000000000000000001n, zoneId: &quot;eth0.100&quot; });
+assertEquals(parseAddressv6(&quot;fe80::1%25eth0&quot;), { address: 0xfe800000000000000000000000000001n, zoneId: &quot;25eth0&quot; });
 "><svg
   class="copy"
   width="15"
@@ -437,6 +449,9 @@ assertThrows(() =&gt; parseAddressv6(&quot;2001:db8::1::1&quot;), TypeError);
 assertThrows(() =&gt; parseAddressv6(&quot;2001:gggg::1&quot;), TypeError);
 assertThrows(() =&gt; parseAddressv6(&quot;1:2:3:4:5:6:7:8::&quot;), TypeError);
 assertThrows(() =&gt; parseAddressv6(&quot;::1 &quot;), TypeError);
+assertThrows(() =&gt; parseAddressv6(&quot;fe80::1%&quot;), TypeError);
+assertThrows(() =&gt; parseAddressv6(&quot;fe80::1%eth0%1&quot;), TypeError);
+assertThrows(() =&gt; parseAddressv6(&quot;fe80::1/64&quot;), TypeError);
 </code><button class="copyButton" data-copy="import { assertThrows } from &quot;@std/assert&quot;;
 import { parseAddressv6 } from &quot;@hertzg/ip/addressv6&quot;;
 
@@ -446,6 +461,9 @@ assertThrows(() =&gt; parseAddressv6(&quot;2001:db8::1::1&quot;), TypeError);
 assertThrows(() =&gt; parseAddressv6(&quot;2001:gggg::1&quot;), TypeError);
 assertThrows(() =&gt; parseAddressv6(&quot;1:2:3:4:5:6:7:8::&quot;), TypeError);
 assertThrows(() =&gt; parseAddressv6(&quot;::1 &quot;), TypeError);
+assertThrows(() =&gt; parseAddressv6(&quot;fe80::1%&quot;), TypeError);
+assertThrows(() =&gt; parseAddressv6(&quot;fe80::1%eth0%1&quot;), TypeError);
+assertThrows(() =&gt; parseAddressv6(&quot;fe80::1/64&quot;), TypeError);
 "><svg
   class="copy"
   width="15"
@@ -555,7 +573,7 @@ Parameters</h2></div><div class="space-y-8"><div class="anchorable docEntry" id=
   />
 </svg>
 </a>
-</div><div class="max-w-[75ch]"><div class="markdown"><p>The address string in colon-hexadecimal notation</p>
+</div><div class="max-w-[75ch]"><div class="markdown"><p>The address string, colon-hexadecimal with an optional <code>%zoneId</code></p>
 </div></div></div>
 </div></section>
 <section class="section"  id="return-type"><div>
@@ -584,7 +602,7 @@ Parameters</h2></div><div class="space-y-8"><div class="anchorable docEntry" id=
 Return Type</h2></div><div class="space-y-8"><div class=" docEntry" id="function_parseaddressv6_0_return">
 
   <div class="docEntryHeader">
-    <div><code><span class="font-medium text-stone-500 dark:text-stone-200"><span class="td-kw">bigint</span></span>
+    <div><code><span class="font-medium text-stone-500 dark:text-stone-200"><a href="../.././mod.ts/~/ParsedAddressv6.html" class="link td-ref">ParsedAddressv6</a></span>
       </code>
     </div><a
   class="sourceButton"
@@ -611,7 +629,7 @@ Return Type</h2></div><div class="space-y-8"><div class=" docEntry" id="function
   />
 </svg>
 </a>
-</div><div class="max-w-[75ch]"><div class="markdown"><p>The IPv6 address as a 128-bit bigint</p>
+</div><div class="max-w-[75ch]"><div class="markdown"><p>The address as a 128-bit bigint, and the zone ID if there was one</p>
 </div></div></div>
 </div></section>
 <section class="section"  id="throws"><div>
@@ -669,7 +687,8 @@ Throws</h2></div><div class="space-y-8"><div class=" docEntry" id="function_pars
 </a>
 </div><div class="max-w-[75ch]"><div class="markdown"><p>If the format is invalid -- including a group that is
 not 1-4 hex digits, more than one <code>::</code>, a <code>::</code> covering no groups,
-whitespace, or the wrong number of groups</p>
+whitespace, the wrong number of groups, a prefix, an empty or malformed
+zone ID</p>
 </div></div></div>
 <div class=" docEntry" id="function_parseaddressv6_0_throws_1">
 
@@ -747,7 +766,7 @@ cannot exceed <code>ffff</code>.</p>
 </svg>
 </button><code></code></pre>
 </div></div><nav class="documentNavigation">
-          <h3>Document Navigation</h3><ul><li><a href="#examples" title="Examples">Examples</a></li><li><ul><li><a href="#example_0" title="Basic parsing">Basic parsing</a></li><li><a href="#example_1" title="Compressed forms">Compressed forms</a></li><li><a href="#example_2" title="Zone ID handling">Zone ID handling</a></li><li><a href="#example_3" title="Error handling">Error handling</a></li></ul></li><li><a href="#parameters" title="Parameters">Parameters</a></li><li><ul><li><a href="#function_parseaddressv6_0_parameter_address" title="address">address</a></li></ul></li><li><a href="#return-type" title="Return Type">Return Type</a></li><li><a href="#throws" title="Throws">Throws</a></li></ul></nav></div>
+          <h3>Document Navigation</h3><ul><li><a href="#examples" title="Examples">Examples</a></li><li><ul><li><a href="#example_0" title="Basic parsing">Basic parsing</a></li><li><a href="#example_1" title="Compressed forms">Compressed forms</a></li><li><a href="#example_2" title="A zone ID is carried verbatim">A zone ID is carried verbatim</a></li><li><a href="#example_3" title="Error handling">Error handling</a></li></ul></li><li><a href="#parameters" title="Parameters">Parameters</a></li><li><ul><li><a href="#function_parseaddressv6_0_parameter_address" title="address">address</a></li></ul></li><li><a href="#return-type" title="Return Type">Return Type</a></li><li><a href="#throws" title="Throws">Throws</a></li></ul></nav></div>
   </div></div>
 </div>
 </div>

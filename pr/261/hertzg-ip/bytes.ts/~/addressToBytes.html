@@ -225,14 +225,14 @@ Examples</h2></div><div class="space-y-8"><div class="anchorable"><a href="#exam
 import { addressToBytes } from &quot;@hertzg/ip/bytes&quot;;
 import { parseAddress } from &quot;@hertzg/ip/address&quot;;
 
-assertEquals(addressToBytes(parseAddress(&quot;10.0.0.1&quot;)), new Uint8Array([10, 0, 0, 1]));
-assertEquals(addressToBytes(parseAddress(&quot;::1&quot;)).length, 16);
+assertEquals(addressToBytes(parseAddress(&quot;10.0.0.1&quot;).address), new Uint8Array([10, 0, 0, 1]));
+assertEquals(addressToBytes(parseAddress(&quot;::1&quot;).address).length, 16);
 </code><button class="copyButton" data-copy="import { assertEquals } from &quot;@std/assert&quot;;
 import { addressToBytes } from &quot;@hertzg/ip/bytes&quot;;
 import { parseAddress } from &quot;@hertzg/ip/address&quot;;
 
-assertEquals(addressToBytes(parseAddress(&quot;10.0.0.1&quot;)), new Uint8Array([10, 0, 0, 1]));
-assertEquals(addressToBytes(parseAddress(&quot;::1&quot;)).length, 16);
+assertEquals(addressToBytes(parseAddress(&quot;10.0.0.1&quot;).address), new Uint8Array([10, 0, 0, 1]));
+assertEquals(addressToBytes(parseAddress(&quot;::1&quot;).address).length, 16);
 "><svg
   class="copy"
   width="15"

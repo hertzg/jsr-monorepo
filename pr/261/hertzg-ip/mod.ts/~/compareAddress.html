@@ -231,7 +231,7 @@ Examples</h2></div><div class="space-y-8"><div class="anchorable"><a href="#exam
   <div><div class="markdown"><pre class="highlight"><code class="language-ts">import { assertEquals } from &quot;@std/assert&quot;;
 import { compareAddress, parseAddress, stringifyAddress } from &quot;@hertzg/ip/address&quot;;
 
-const clients = [&quot;2001:db8::1&quot;, &quot;10.0.0.2&quot;, &quot;::1&quot;, &quot;10.0.0.1&quot;].map(parseAddress);
+const clients = [&quot;2001:db8::1&quot;, &quot;10.0.0.2&quot;, &quot;::1&quot;, &quot;10.0.0.1&quot;].map((s) =&gt; parseAddress(s).address);
 
 assertEquals(clients.toSorted(compareAddress).map(stringifyAddress), [
   &quot;10.0.0.1&quot;,
@@ -250,7 +250,7 @@ assertEquals(clients.toSorted((a, b) =&gt; compareAddress(b, a)).map(stringifyAd
 </code><button class="copyButton" data-copy="import { assertEquals } from &quot;@std/assert&quot;;
 import { compareAddress, parseAddress, stringifyAddress } from &quot;@hertzg/ip/address&quot;;
 
-const clients = [&quot;2001:db8::1&quot;, &quot;10.0.0.2&quot;, &quot;::1&quot;, &quot;10.0.0.1&quot;].map(parseAddress);
+const clients = [&quot;2001:db8::1&quot;, &quot;10.0.0.2&quot;, &quot;::1&quot;, &quot;10.0.0.1&quot;].map((s) =&gt; parseAddress(s).address);
 
 assertEquals(clients.toSorted(compareAddress).map(stringifyAddress), [
   &quot;10.0.0.1&quot;,
@@ -326,13 +326,13 @@ assertEquals(clients.toSorted((a, b) =&gt; compareAddress(b, a)).map(stringifyAd
   <div><div class="markdown"><pre class="highlight"><code class="language-ts">import { assertEquals } from &quot;@std/assert&quot;;
 import { compareAddress, parseAddress } from &quot;@hertzg/ip/address&quot;;
 
-assertEquals(compareAddress(parseAddress(&quot;255.255.255.255&quot;), parseAddress(&quot;::&quot;)), -1);
-assertEquals(compareAddress(parseAddress(&quot;::&quot;), parseAddress(&quot;0.0.0.0&quot;)), 1);
+assertEquals(compareAddress(parseAddress(&quot;255.255.255.255&quot;).address, parseAddress(&quot;::&quot;).address), -1);
+assertEquals(compareAddress(parseAddress(&quot;::&quot;).address, parseAddress(&quot;0.0.0.0&quot;).address), 1);
 </code><button class="copyButton" data-copy="import { assertEquals } from &quot;@std/assert&quot;;
 import { compareAddress, parseAddress } from &quot;@hertzg/ip/address&quot;;
 
-assertEquals(compareAddress(parseAddress(&quot;255.255.255.255&quot;), parseAddress(&quot;::&quot;)), -1);
-assertEquals(compareAddress(parseAddress(&quot;::&quot;), parseAddress(&quot;0.0.0.0&quot;)), 1);
+assertEquals(compareAddress(parseAddress(&quot;255.255.255.255&quot;).address, parseAddress(&quot;::&quot;).address), -1);
+assertEquals(compareAddress(parseAddress(&quot;::&quot;).address, parseAddress(&quot;0.0.0.0&quot;).address), 1);
 "><svg
   class="copy"
   width="15"
@@ -395,8 +395,8 @@ import { compareAddress } from &quot;@hertzg/ip/address&quot;;
 import { parseAddressv4 } from &quot;@hertzg/ip/addressv4&quot;;
 import { parseAddressv6 } from &quot;@hertzg/ip/addressv6&quot;;
 
-const mapped = parseAddressv6(&quot;::ffff:10.0.0.1&quot;);
-const plain = parseAddressv4(&quot;10.0.0.1&quot;);
+const mapped = parseAddressv6(&quot;::ffff:10.0.0.1&quot;).address;
+const plain = parseAddressv4(&quot;10.0.0.1&quot;).address;
 
 assertEquals(compareAddress(mapped, plain), 1);
 </code><button class="copyButton" data-copy="import { assertEquals } from &quot;@std/assert&quot;;
@@ -404,8 +404,8 @@ import { compareAddress } from &quot;@hertzg/ip/address&quot;;
 import { parseAddressv4 } from &quot;@hertzg/ip/addressv4&quot;;
 import { parseAddressv6 } from &quot;@hertzg/ip/addressv6&quot;;
 
-const mapped = parseAddressv6(&quot;::ffff:10.0.0.1&quot;);
-const plain = parseAddressv4(&quot;10.0.0.1&quot;);
+const mapped = parseAddressv6(&quot;::ffff:10.0.0.1&quot;).address;
+const plain = parseAddressv4(&quot;10.0.0.1&quot;).address;
 
 assertEquals(compareAddress(mapped, plain), 1);
 "><svg

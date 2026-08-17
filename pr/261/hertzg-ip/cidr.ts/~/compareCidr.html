@@ -234,7 +234,7 @@ const allowlist = [
   &quot;10.0.0.0/16&quot;,
   &quot;fd00::/8&quot;,
   &quot;10.0.0.0/8&quot;,
-].map(parseCidr);
+].map((s) =&gt; parseCidr(s));
 
 assertEquals(allowlist.toSorted(compareCidr).map(stringifyCidr), [
   &quot;10.0.0.0/8&quot;,
@@ -252,7 +252,7 @@ const allowlist = [
   &quot;10.0.0.0/16&quot;,
   &quot;fd00::/8&quot;,
   &quot;10.0.0.0/8&quot;,
-].map(parseCidr);
+].map((s) =&gt; parseCidr(s));
 
 assertEquals(allowlist.toSorted(compareCidr).map(stringifyCidr), [
   &quot;10.0.0.0/8&quot;,

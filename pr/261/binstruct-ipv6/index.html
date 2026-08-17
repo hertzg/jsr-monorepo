@@ -181,10 +181,10 @@ is handed back as opaque <code>payload</code> bytes. Callers who need to walk th
 extension header chain must do so themselves, or await a future version
 of this package that adds it.</p>
 <p><code>sourceAddress</code> / <code>destinationAddress</code> are raw 16-byte slices, not
-<code>bigint</code>. Pair this with <code>@hertzg/ip</code>'s <code>stringifyAddressv6</code> /
-<code>parseAddressv6</code> for human-readable conversion — those work over <code>bigint</code>, so
-bytes need <code>Array.from(...).reduce()</code>-style conversion, left to the
-caller to keep this package free of that dependency.</p>
+<code>bigint</code>. Pair this with <code>@hertzg/ip</code>'s <code>addressv6FromBytes</code> /
+<code>addressv6ToBytes</code> for the <code>bigint</code> view and <code>stringifyAddressv6</code> /
+<code>parseAddressv6(s).address</code> for the human-readable one; the conversion is
+left to the caller to keep this package free of that dependency.</p>
 </div><section class="section"  id="examples"><div>
       <h2 class="anchorable mb-1"><a href="#examples" class="anchor" aria-label="Anchor" tabIndex="-1"><svg
   width="16"
