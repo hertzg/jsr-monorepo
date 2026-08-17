@@ -229,13 +229,13 @@ import { cidrv6FirstAddress, parseCidrv6 } from &quot;@hertzg/ip/cidrv6&quot;;
 import { parseAddressv6 } from &quot;@hertzg/ip/addressv6&quot;;
 
 const cidr = parseCidrv6(&quot;2001:db8::/32&quot;);
-assertEquals(cidrv6FirstAddress(cidr), parseAddressv6(&quot;2001:db8::&quot;));
+assertEquals(cidrv6FirstAddress(cidr), parseAddressv6(&quot;2001:db8::&quot;).address);
 </code><button class="copyButton" data-copy="import { assertEquals } from &quot;@std/assert&quot;;
 import { cidrv6FirstAddress, parseCidrv6 } from &quot;@hertzg/ip/cidrv6&quot;;
 import { parseAddressv6 } from &quot;@hertzg/ip/addressv6&quot;;
 
 const cidr = parseCidrv6(&quot;2001:db8::/32&quot;);
-assertEquals(cidrv6FirstAddress(cidr), parseAddressv6(&quot;2001:db8::&quot;));
+assertEquals(cidrv6FirstAddress(cidr), parseAddressv6(&quot;2001:db8::&quot;).address);
 "><svg
   class="copy"
   width="15"

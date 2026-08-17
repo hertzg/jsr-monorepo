@@ -220,18 +220,18 @@ Examples</h2></div><div class="space-y-8"><div class="anchorable"><a href="#exam
 import { isAddressv4Reserved } from &quot;@hertzg/ip/classifyv4&quot;;
 import { parseAddressv4 } from &quot;@hertzg/ip/addressv4&quot;;
 
-assert(isAddressv4Reserved(parseAddressv4(&quot;240.0.0.0&quot;)));
-assert(isAddressv4Reserved(parseAddressv4(&quot;255.255.255.254&quot;)));
-assertEquals(isAddressv4Reserved(parseAddressv4(&quot;255.255.255.255&quot;)), false); // broadcast
-assertEquals(isAddressv4Reserved(parseAddressv4(&quot;239.255.255.255&quot;)), false); // multicast
+assert(isAddressv4Reserved(parseAddressv4(&quot;240.0.0.0&quot;).address));
+assert(isAddressv4Reserved(parseAddressv4(&quot;255.255.255.254&quot;).address));
+assertEquals(isAddressv4Reserved(parseAddressv4(&quot;255.255.255.255&quot;).address), false); // broadcast
+assertEquals(isAddressv4Reserved(parseAddressv4(&quot;239.255.255.255&quot;).address), false); // multicast
 </code><button class="copyButton" data-copy="import { assert, assertEquals } from &quot;@std/assert&quot;;
 import { isAddressv4Reserved } from &quot;@hertzg/ip/classifyv4&quot;;
 import { parseAddressv4 } from &quot;@hertzg/ip/addressv4&quot;;
 
-assert(isAddressv4Reserved(parseAddressv4(&quot;240.0.0.0&quot;)));
-assert(isAddressv4Reserved(parseAddressv4(&quot;255.255.255.254&quot;)));
-assertEquals(isAddressv4Reserved(parseAddressv4(&quot;255.255.255.255&quot;)), false); // broadcast
-assertEquals(isAddressv4Reserved(parseAddressv4(&quot;239.255.255.255&quot;)), false); // multicast
+assert(isAddressv4Reserved(parseAddressv4(&quot;240.0.0.0&quot;).address));
+assert(isAddressv4Reserved(parseAddressv4(&quot;255.255.255.254&quot;).address));
+assertEquals(isAddressv4Reserved(parseAddressv4(&quot;255.255.255.255&quot;).address), false); // broadcast
+assertEquals(isAddressv4Reserved(parseAddressv4(&quot;239.255.255.255&quot;).address), false); // multicast
 "><svg
   class="copy"
   width="15"

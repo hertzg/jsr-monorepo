@@ -165,7 +165,7 @@
   </defs>
 </svg>
 </a>
-<span class="font-bold">unmapToAddressv4</span><span class="font-medium">(<span><span>address<span>: <span class="td-kw">bigint</span></span></span></span>)<span>: <span class="td-kw">number</span></span> </span>
+<span class="font-bold">unmapToAddressv4</span><span class="font-medium">(<span><span>address<span>: <a href="../.././mod.ts/~/Addressv6.html" class="link td-ref">Addressv6</a></span></span></span>)<span>: <a href="../.././mod.ts/~/Addressv4.html" class="link td-ref">Addressv4</a></span> </span>
       </code><div class="space-y-7" id=""><div class="markdown"><p>Extracts the IPv4 address from an IPv4-mapped IPv6 address.</p>
 <p>Takes a 128-bit IPv4-mapped IPv6 address (<code>::ffff:x.x.x.x</code>) and returns
 the embedded 32-bit IPv4 address as defined in
@@ -222,15 +222,15 @@ import { parseAddressv6, unmapToAddressv4 } from &quot;@hertzg/ip/addressv6&quot
 import { stringifyAddressv4 } from &quot;@hertzg/ip/addressv4&quot;;
 
 assertEquals(
-  stringifyAddressv4(unmapToAddressv4(parseAddressv6(&quot;::ffff:192.168.1.1&quot;))),
+  stringifyAddressv4(unmapToAddressv4(parseAddressv6(&quot;::ffff:192.168.1.1&quot;).address)),
   &quot;192.168.1.1&quot;,
 );
 assertEquals(
-  stringifyAddressv4(unmapToAddressv4(parseAddressv6(&quot;::ffff:c0a8:101&quot;))),
+  stringifyAddressv4(unmapToAddressv4(parseAddressv6(&quot;::ffff:c0a8:101&quot;).address)),
   &quot;192.168.1.1&quot;,
 );
 assertEquals(
-  stringifyAddressv4(unmapToAddressv4(parseAddressv6(&quot;::ffff:0.0.0.0&quot;))),
+  stringifyAddressv4(unmapToAddressv4(parseAddressv6(&quot;::ffff:0.0.0.0&quot;).address)),
   &quot;0.0.0.0&quot;,
 );
 </code><button class="copyButton" data-copy="import { assertEquals } from &quot;@std/assert&quot;;
@@ -238,15 +238,15 @@ import { parseAddressv6, unmapToAddressv4 } from &quot;@hertzg/ip/addressv6&quot
 import { stringifyAddressv4 } from &quot;@hertzg/ip/addressv4&quot;;
 
 assertEquals(
-  stringifyAddressv4(unmapToAddressv4(parseAddressv6(&quot;::ffff:192.168.1.1&quot;))),
+  stringifyAddressv4(unmapToAddressv4(parseAddressv6(&quot;::ffff:192.168.1.1&quot;).address)),
   &quot;192.168.1.1&quot;,
 );
 assertEquals(
-  stringifyAddressv4(unmapToAddressv4(parseAddressv6(&quot;::ffff:c0a8:101&quot;))),
+  stringifyAddressv4(unmapToAddressv4(parseAddressv6(&quot;::ffff:c0a8:101&quot;).address)),
   &quot;192.168.1.1&quot;,
 );
 assertEquals(
-  stringifyAddressv4(unmapToAddressv4(parseAddressv6(&quot;::ffff:0.0.0.0&quot;))),
+  stringifyAddressv4(unmapToAddressv4(parseAddressv6(&quot;::ffff:0.0.0.0&quot;).address)),
   &quot;0.0.0.0&quot;,
 );
 "><svg
@@ -331,7 +331,7 @@ Parameters</h2></div><div class="space-y-8"><div class="anchorable docEntry" id=
   </defs>
 </svg>
 </a>
-<span class="font-bold font-lg">address</span><span class="font-medium text-stone-500 dark:text-stone-200"><span>: <span class="td-kw">bigint</span></span></span>
+<span class="font-bold font-lg">address</span><span class="font-medium text-stone-500 dark:text-stone-200"><span>: <a href="../.././mod.ts/~/Addressv6.html" class="link td-ref">Addressv6</a></span></span>
       </code>
     </div><a
   class="sourceButton"
@@ -387,7 +387,7 @@ Parameters</h2></div><div class="space-y-8"><div class="anchorable docEntry" id=
 Return Type</h2></div><div class="space-y-8"><div class=" docEntry" id="function_unmaptoaddressv4_0_return">
 
   <div class="docEntryHeader">
-    <div><code><span class="font-medium text-stone-500 dark:text-stone-200"><span class="td-kw">number</span></span>
+    <div><code><span class="font-medium text-stone-500 dark:text-stone-200"><a href="../.././mod.ts/~/Addressv4.html" class="link td-ref">Addressv4</a></span>
       </code>
     </div><a
   class="sourceButton"

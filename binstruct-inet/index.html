@@ -193,8 +193,8 @@ const value = {
     timeToLive: 64,
     protocol: IP_PROTOCOL_UDP,
     headerChecksum: 0,
-    sourceAddress: parseAddressv4(&quot;192.0.2.1&quot;),
-    destinationAddress: parseAddressv4(&quot;192.0.2.2&quot;),
+    sourceAddress: parseAddressv4(&quot;192.0.2.1&quot;).address,
+    destinationAddress: parseAddressv4(&quot;192.0.2.2&quot;).address,
     options: new Uint8Array(0),
     payload: {
       srcPort: 53,
@@ -235,8 +235,8 @@ const value = {
     timeToLive: 64,
     protocol: IP_PROTOCOL_UDP,
     headerChecksum: 0,
-    sourceAddress: parseAddressv4(&quot;192.0.2.1&quot;),
-    destinationAddress: parseAddressv4(&quot;192.0.2.2&quot;),
+    sourceAddress: parseAddressv4(&quot;192.0.2.1&quot;).address,
+    destinationAddress: parseAddressv4(&quot;192.0.2.2&quot;).address,
     options: new Uint8Array(0),
     payload: {
       srcPort: 53,

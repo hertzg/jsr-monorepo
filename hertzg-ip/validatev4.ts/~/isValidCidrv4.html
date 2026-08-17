@@ -167,6 +167,9 @@
 </a>
 <span class="font-bold">isValidCidrv4</span><span class="font-medium">(<span><span>cidr<span>: <span class="td-kw">string</span></span></span></span>)<span>: <span class="td-kw">boolean</span></span> </span>
       </code><div class="space-y-7" id=""><div class="markdown"><p>Checks if a string is valid IPv4 CIDR notation.</p>
+<p>Accepts exactly what <a href="../.././cidrv4.ts/~/parseCidrv4.html">parseCidrv4</a> accepts: an address, an optional
+<code>%zoneId</code>, then <code>/</code> and a prefix length of 0 to 32 or a dotted decimal
+mask.</p>
 </div><section class="section"  id="examples"><div>
       <h2 class="anchorable mb-1"><a href="#examples" class="anchor" aria-label="Anchor" tabIndex="-1"><svg
   width="16"
@@ -220,12 +223,16 @@ import { isValidCidrv4 } from &quot;@hertzg/ip&quot;;
 assert(isValidCidrv4(&quot;0.0.0.0/0&quot;));
 assert(isValidCidrv4(&quot;192.168.1.0/24&quot;));
 assert(isValidCidrv4(&quot;10.0.0.1/32&quot;));
+assert(isValidCidrv4(&quot;10.0.0.0/255.0.0.0&quot;));
+assert(isValidCidrv4(&quot;10.0.0.0%ether1/8&quot;));
 </code><button class="copyButton" data-copy="import { assert } from &quot;@std/assert&quot;;
 import { isValidCidrv4 } from &quot;@hertzg/ip&quot;;
 
 assert(isValidCidrv4(&quot;0.0.0.0/0&quot;));
 assert(isValidCidrv4(&quot;192.168.1.0/24&quot;));
 assert(isValidCidrv4(&quot;10.0.0.1/32&quot;));
+assert(isValidCidrv4(&quot;10.0.0.0/255.0.0.0&quot;));
+assert(isValidCidrv4(&quot;10.0.0.0%ether1/8&quot;));
 "><svg
   class="copy"
   width="15"
@@ -291,6 +298,8 @@ assertEquals(isValidCidrv4(&quot;192.168.1.0&quot;), false);
 assertEquals(isValidCidrv4(&quot;192.168.1.0/33&quot;), false);
 assertEquals(isValidCidrv4(&quot;192.168.1.0/-1&quot;), false);
 assertEquals(isValidCidrv4(&quot;2001:db8::/32&quot;), false);
+assertEquals(isValidCidrv4(&quot;10.0.0.0/ffff:ff00::&quot;), false);
+assertEquals(isValidCidrv4(&quot;10.0.0.0/8%ether1&quot;), false);
 </code><button class="copyButton" data-copy="import { assertEquals } from &quot;@std/assert&quot;;
 import { isValidCidrv4 } from &quot;@hertzg/ip&quot;;
 
@@ -299,6 +308,8 @@ assertEquals(isValidCidrv4(&quot;192.168.1.0&quot;), false);
 assertEquals(isValidCidrv4(&quot;192.168.1.0/33&quot;), false);
 assertEquals(isValidCidrv4(&quot;192.168.1.0/-1&quot;), false);
 assertEquals(isValidCidrv4(&quot;2001:db8::/32&quot;), false);
+assertEquals(isValidCidrv4(&quot;10.0.0.0/ffff:ff00::&quot;), false);
+assertEquals(isValidCidrv4(&quot;10.0.0.0/8%ether1&quot;), false);
 "><svg
   class="copy"
   width="15"

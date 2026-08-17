@@ -219,16 +219,16 @@ Examples</h2></div><div class="space-y-8"><div class="anchorable"><a href="#exam
 import { isAddressv6Multicast } from &quot;@hertzg/ip/classifyv6&quot;;
 import { parseAddressv6 } from &quot;@hertzg/ip/addressv6&quot;;
 
-assert(isAddressv6Multicast(parseAddressv6(&quot;ff02::1&quot;)));
-assert(isAddressv6Multicast(parseAddressv6(&quot;ff00::&quot;)));
-assertEquals(isAddressv6Multicast(parseAddressv6(&quot;fe80::1&quot;)), false);
+assert(isAddressv6Multicast(parseAddressv6(&quot;ff02::1&quot;).address));
+assert(isAddressv6Multicast(parseAddressv6(&quot;ff00::&quot;).address));
+assertEquals(isAddressv6Multicast(parseAddressv6(&quot;fe80::1&quot;).address), false);
 </code><button class="copyButton" data-copy="import { assert, assertEquals } from &quot;@std/assert&quot;;
 import { isAddressv6Multicast } from &quot;@hertzg/ip/classifyv6&quot;;
 import { parseAddressv6 } from &quot;@hertzg/ip/addressv6&quot;;
 
-assert(isAddressv6Multicast(parseAddressv6(&quot;ff02::1&quot;)));
-assert(isAddressv6Multicast(parseAddressv6(&quot;ff00::&quot;)));
-assertEquals(isAddressv6Multicast(parseAddressv6(&quot;fe80::1&quot;)), false);
+assert(isAddressv6Multicast(parseAddressv6(&quot;ff02::1&quot;).address));
+assert(isAddressv6Multicast(parseAddressv6(&quot;ff00::&quot;).address));
+assertEquals(isAddressv6Multicast(parseAddressv6(&quot;fe80::1&quot;).address), false);
 "><svg
   class="copy"
   width="15"

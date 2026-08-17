@@ -167,6 +167,9 @@
 </a>
 <span class="font-bold">isValidCidrv6</span><span class="font-medium">(<span><span>cidr<span>: <span class="td-kw">string</span></span></span></span>)<span>: <span class="td-kw">boolean</span></span> </span>
       </code><div class="space-y-7" id=""><div class="markdown"><p>Checks if a string is valid IPv6 CIDR notation.</p>
+<p>Accepts exactly what <a href="../.././cidrv6.ts/~/parseCidrv6.html">parseCidrv6</a> accepts: an address, an optional
+<code>%zoneId</code>, then <code>/</code> and a prefix length of 0 to 128 or a
+colon-hexadecimal mask.</p>
 </div><section class="section"  id="examples"><div>
       <h2 class="anchorable mb-1"><a href="#examples" class="anchor" aria-label="Anchor" tabIndex="-1"><svg
   width="16"
@@ -220,12 +223,16 @@ import { isValidCidrv6 } from &quot;@hertzg/ip&quot;;
 assert(isValidCidrv6(&quot;::/0&quot;));
 assert(isValidCidrv6(&quot;2001:db8::/32&quot;));
 assert(isValidCidrv6(&quot;::1/128&quot;));
+assert(isValidCidrv6(&quot;fe80::/ffff:ffff::&quot;));
+assert(isValidCidrv6(&quot;fe80::%ether1/64&quot;));
 </code><button class="copyButton" data-copy="import { assert } from &quot;@std/assert&quot;;
 import { isValidCidrv6 } from &quot;@hertzg/ip&quot;;
 
 assert(isValidCidrv6(&quot;::/0&quot;));
 assert(isValidCidrv6(&quot;2001:db8::/32&quot;));
 assert(isValidCidrv6(&quot;::1/128&quot;));
+assert(isValidCidrv6(&quot;fe80::/ffff:ffff::&quot;));
+assert(isValidCidrv6(&quot;fe80::%ether1/64&quot;));
 "><svg
   class="copy"
   width="15"
@@ -290,6 +297,8 @@ assertEquals(isValidCidrv6(&quot;&quot;), false);
 assertEquals(isValidCidrv6(&quot;2001:db8::1&quot;), false);
 assertEquals(isValidCidrv6(&quot;2001:db8::/129&quot;), false);
 assertEquals(isValidCidrv6(&quot;192.168.1.0/24&quot;), false);
+assertEquals(isValidCidrv6(&quot;fe80::/255.0.0.0&quot;), false);
+assertEquals(isValidCidrv6(&quot;fe80::/64%ether1&quot;), false);
 </code><button class="copyButton" data-copy="import { assertEquals } from &quot;@std/assert&quot;;
 import { isValidCidrv6 } from &quot;@hertzg/ip&quot;;
 
@@ -297,6 +306,8 @@ assertEquals(isValidCidrv6(&quot;&quot;), false);
 assertEquals(isValidCidrv6(&quot;2001:db8::1&quot;), false);
 assertEquals(isValidCidrv6(&quot;2001:db8::/129&quot;), false);
 assertEquals(isValidCidrv6(&quot;192.168.1.0/24&quot;), false);
+assertEquals(isValidCidrv6(&quot;fe80::/255.0.0.0&quot;), false);
+assertEquals(isValidCidrv6(&quot;fe80::/64%ether1&quot;), false);
 "><svg
   class="copy"
   width="15"

@@ -167,6 +167,8 @@
 </a>
 <span class="font-bold">isValidCidr</span><span class="font-medium">(<span><span>cidr<span>: <span class="td-kw">string</span></span></span></span>)<span>: <span class="td-kw">boolean</span></span> </span>
       </code><div class="space-y-7" id=""><div class="markdown"><p>Checks if a string is valid IPv4 or IPv6 CIDR notation.</p>
+<p>Accepts exactly what <a href="../.././cidr.ts/~/parseCidr.html">parseCidr</a> accepts: either dialect (<code>/8</code> or
+<code>/255.0.0.0</code>) and an optional <code>%zoneId</code> before the slash.</p>
 </div><section class="section"  id="examples"><div>
       <h2 class="anchorable mb-1"><a href="#examples" class="anchor" aria-label="Anchor" tabIndex="-1"><svg
   width="16"
@@ -219,15 +221,21 @@ import { isValidCidr } from &quot;@hertzg/ip/validate&quot;;
 
 assert(isValidCidr(&quot;10.0.0.0/8&quot;));
 assert(isValidCidr(&quot;2001:db8::/32&quot;));
+assert(isValidCidr(&quot;10.0.0.0/255.0.0.0&quot;));
+assert(isValidCidr(&quot;fe80::%ether1/64&quot;));
 assertEquals(isValidCidr(&quot;10.0.0.0&quot;), false);
 assertEquals(isValidCidr(&quot;garbage/24&quot;), false);
+assertEquals(isValidCidr(&quot;10.0.0.0/ffff:ff00::&quot;), false);
 </code><button class="copyButton" data-copy="import { assert, assertEquals } from &quot;@std/assert&quot;;
 import { isValidCidr } from &quot;@hertzg/ip/validate&quot;;
 
 assert(isValidCidr(&quot;10.0.0.0/8&quot;));
 assert(isValidCidr(&quot;2001:db8::/32&quot;));
+assert(isValidCidr(&quot;10.0.0.0/255.0.0.0&quot;));
+assert(isValidCidr(&quot;fe80::%ether1/64&quot;));
 assertEquals(isValidCidr(&quot;10.0.0.0&quot;), false);
 assertEquals(isValidCidr(&quot;garbage/24&quot;), false);
+assertEquals(isValidCidr(&quot;10.0.0.0/ffff:ff00::&quot;), false);
 "><svg
   class="copy"
   width="15"

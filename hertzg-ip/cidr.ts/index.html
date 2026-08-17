@@ -100,15 +100,14 @@
     <main><section>
   <div class="space-y-2 flex-1"><div class="space-y-7" id="module_doc"><div class="markdown"><p>Universal CIDR notation parsing, stringifying, and validation.</p>
 <p>This module provides <a href=".././cidr.ts/~/parseCidr.html">parseCidr</a>, <a href=".././cidr.ts/~/stringifyCidr.html">stringifyCidr</a>,
-isValidCidr, <a href=".././cidr.ts/~/cidrContains.html">cidrContains</a>,
-<a href=".././cidr.ts/~/cidrContainsCidr.html">cidrContainsCidr</a>, <a href=".././cidr.ts/~/cidrOverlaps.html">cidrOverlaps</a>,
+<a href=".././cidr.ts/~/cidrContains.html">cidrContains</a>, <a href=".././cidr.ts/~/cidrContainsCidr.html">cidrContainsCidr</a>, <a href=".././cidr.ts/~/cidrOverlaps.html">cidrOverlaps</a>,
 <a href=".././cidr.ts/~/cidrIntersect.html">cidrIntersect</a>, <a href=".././cidr.ts/~/cidrSubtract.html">cidrSubtract</a>, <a href=".././cidr.ts/~/cidrMerge.html">cidrMerge</a>,
 <a href=".././cidr.ts/~/cidrSize.html">cidrSize</a>, <a href=".././cidr.ts/~/cidrFirstAddress.html">cidrFirstAddress</a>, <a href=".././cidr.ts/~/cidrLastAddress.html">cidrLastAddress</a>,
 <a href=".././cidr.ts/~/cidrAddresses.html">cidrAddresses</a>, and <a href=".././cidr.ts/~/compareCidr.html">compareCidr</a> that auto-detect IPv4 vs
-IPv6 and delegate to the appropriate version-specific
-function. The <a href=".././cidr.ts/~/Cidr.html">Cidr</a>
-type alias and <a href=".././cidr.ts/~/isCidrv4.html">isCidrv4</a>/<a href=".././cidr.ts/~/isCidrv6.html">isCidrv6</a> type guards are also
-exported for working with version-polymorphic CIDR values.</p>
+IPv6 and delegate to the appropriate version-specific function. The
+<a href=".././cidr.ts/~/Cidr.html">Cidr</a> and <a href=".././cidr.ts/~/ParsedCidr.html">ParsedCidr</a> type aliases and the
+<a href=".././cidr.ts/~/isCidrv4.html">isCidrv4</a>/<a href=".././cidr.ts/~/isCidrv6.html">isCidrv6</a> type guards are also exported for
+working with version-polymorphic CIDR values.</p>
 <p>For version-specific functions, see:</p>
 <ul>
 <li><a href="https://jsr.io/@hertzg/ip/doc/cidrv4"><code>cidrv4</code></a>: <a href=".././cidrv4.ts/~/parseCidrv4.html">parseCidrv4</a>, <a href=".././cidrv4.ts/~/stringifyCidrv4.html">stringifyCidrv4</a>, isValidCidrv4, <a href=".././cidrv4.ts/~/compareCidrv4.html">compareCidrv4</a></li>
@@ -166,25 +165,35 @@ import { parseCidr, stringifyCidr } from &quot;@hertzg/ip/cidr&quot;;
 
 // IPv4
 const v4 = parseCidr(&quot;192.168.1.0/24&quot;);
-assertEquals(v4.prefixLength, 24);
+assertEquals(v4, { address: 3232235776, prefixLength: 24 });
 assertEquals(stringifyCidr(v4), &quot;192.168.1.0/24&quot;);
 
-// IPv6
-const v6 = parseCidr(&quot;2001:db8::/32&quot;);
-assertEquals(v6.prefixLength, 32);
-assertEquals(stringifyCidr(v6), &quot;2001:db8::/32&quot;);
+// IPv6, with a zone ID
+const v6 = parseCidr(&quot;fe80::%ether1/64&quot;);
+assertEquals(v6, { address: 0xfe80n &lt;&lt; 112n, prefixLength: 64, zoneId: &quot;ether1&quot; });
+assertEquals(stringifyCidr(v6), &quot;fe80::%ether1/64&quot;);
+
+// The mask dialect is kept as written
+const masked = parseCidr(&quot;10.0.0.0/255.0.0.0&quot;);
+assertEquals(masked, { address: 167772160, mask: 0xFF000000 });
+assertEquals(stringifyCidr(masked), &quot;10.0.0.0/255.0.0.0&quot;);
 </code><button class="copyButton" data-copy="import { assertEquals } from &quot;@std/assert&quot;;
 import { parseCidr, stringifyCidr } from &quot;@hertzg/ip/cidr&quot;;
 
 // IPv4
 const v4 = parseCidr(&quot;192.168.1.0/24&quot;);
-assertEquals(v4.prefixLength, 24);
+assertEquals(v4, { address: 3232235776, prefixLength: 24 });
 assertEquals(stringifyCidr(v4), &quot;192.168.1.0/24&quot;);
 
-// IPv6
-const v6 = parseCidr(&quot;2001:db8::/32&quot;);
-assertEquals(v6.prefixLength, 32);
-assertEquals(stringifyCidr(v6), &quot;2001:db8::/32&quot;);
+// IPv6, with a zone ID
+const v6 = parseCidr(&quot;fe80::%ether1/64&quot;);
+assertEquals(v6, { address: 0xfe80n &lt;&lt; 112n, prefixLength: 64, zoneId: &quot;ether1&quot; });
+assertEquals(stringifyCidr(v6), &quot;fe80::%ether1/64&quot;);
+
+// The mask dialect is kept as written
+const masked = parseCidr(&quot;10.0.0.0/255.0.0.0&quot;);
+assertEquals(masked, { address: 167772160, mask: 0xFF000000 });
+assertEquals(stringifyCidr(masked), &quot;10.0.0.0/255.0.0.0&quot;);
 "><svg
   class="copy"
   width="15"
@@ -310,12 +319,14 @@ Functions</h2></div><div class="namespaceSection"><div id="namespace_cidraddress
     </div><div id="namespace_parsecidr" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-Function bg-Function/15 dark:text-FunctionDark dark:bg-FunctionDark/15" title="Function">f</div></div>
 <div class="namespaceItemContent">
 		    <a href="..&#x2F;.&#x2F;cidr.ts&#x2F;~&#x2F;parseCidr.html" title="parseCidr">
-			    <span>parseCidr</span><span>(<span><span>cidr<span>: <span class="td-kw">string</span></span></span></span>)<span>: <span><span class="td-ref">PrefixedCidrv4</span><span class="td-op"> | </span><span class="td-ref">PrefixedCidrv6</span></span></span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Parses an IPv4 or IPv6 CIDR notation string.</p>
+			    <span>parseCidr</span><span>(<div class="ml-4"><div><span>cidr<span>: <span class="td-kw">string</span></span></span>,</div><div><span>options<span class="td-op">?</span><span>: <span class="td-ref">ParseOptions</span></span></span></div></div>)<span>: <span class="td-ref">ParsedCidr</span></span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Parses IPv4 or IPv6 CIDR notation, in either dialect and with an
+optional zone ID.</p>
 </div></div></div>
     </div><div id="namespace_stringifycidr" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-Function bg-Function/15 dark:text-FunctionDark dark:bg-FunctionDark/15" title="Function">f</div></div>
 <div class="namespaceItemContent">
 		    <a href="..&#x2F;.&#x2F;cidr.ts&#x2F;~&#x2F;stringifyCidr.html" title="stringifyCidr">
-			    <span>stringifyCidr</span><span>(<span><span>cidr<span>: <span class="td-ref">Cidr</span></span></span></span>)<span>: <span class="td-kw">string</span></span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Stringifies a <a href=".././cidr.ts/~/Cidrv4.html">Cidrv4</a> or <a href=".././cidr.ts/~/Cidrv6.html">Cidrv6</a> to CIDR notation.</p>
+			    <span>stringifyCidr</span><span>(<span><span>cidr<span>: <span><span class="td-ref">Address</span><span class="td-op"> | </span><span class="td-ref">ParsedAddress</span><span class="td-op"> | </span><span class="td-ref">ParsedCidr</span></span></span></span></span>)<span>: <span class="td-kw">string</span></span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Stringifies a CIDR block of either version, or an address, to CIDR
+notation.</p>
 </div></div></div>
     </div></div>
 </section>
@@ -345,7 +356,21 @@ Functions</h2></div><div class="namespaceSection"><div id="namespace_cidraddress
 Type Aliases</h2></div><div class="namespaceSection"><div id="namespace_address" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-TypeAlias bg-TypeAlias/15 dark:text-TypeAliasDark dark:bg-TypeAliasDark/15" title="Type Alias">T</div></div>
 <div class="namespaceItemContent">
 		    <a href="..&#x2F;.&#x2F;address.ts&#x2F;~&#x2F;Address.html" title="Address">
-			    <span>Address</span><span> = <span><span class="td-kw">number</span><span class="td-op"> | </span><span class="td-kw">bigint</span></span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>A plain IP address of either IP version.</p>
+			    <span>Address</span><span> = <span><span class="td-ref">Addressv4</span><span class="td-op"> | </span><span class="td-ref">Addressv6</span></span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>A plain IP address of either IP version.</p>
+</div></div></div>
+    </div><div id="namespace_addressv4" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-TypeAlias bg-TypeAlias/15 dark:text-TypeAliasDark dark:bg-TypeAliasDark/15" title="Type Alias">T</div></div>
+<div class="namespaceItemContent">
+		    <a href="..&#x2F;.&#x2F;addressv4.ts&#x2F;~&#x2F;Addressv4.html" title="Addressv4">
+			    <span>Addressv4</span><span> = <span class="td-kw">number</span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>An IPv4 address as a 32-bit unsigned integer, <code>0</code> to <code>4294967295</code>. The
+primitive type is what carries the version: a <code>number</code> is IPv4, a
+<code>bigint</code> is IPv6 (ADR 0001).</p>
+</div></div></div>
+    </div><div id="namespace_addressv6" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-TypeAlias bg-TypeAlias/15 dark:text-TypeAliasDark dark:bg-TypeAliasDark/15" title="Type Alias">T</div></div>
+<div class="namespaceItemContent">
+		    <a href="..&#x2F;.&#x2F;addressv6.ts&#x2F;~&#x2F;Addressv6.html" title="Addressv6">
+			    <span>Addressv6</span><span> = <span class="td-kw">bigint</span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>An IPv6 address as a 128-bit unsigned bigint, <code>0n</code> to <code>2n ** 128n - 1n</code>.
+The primitive type is what carries the version: a <code>bigint</code> is IPv6, a
+<code>number</code> is IPv4 (ADR 0001).</p>
 </div></div></div>
     </div><div id="namespace_cidr" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-TypeAlias bg-TypeAlias/15 dark:text-TypeAliasDark dark:bg-TypeAliasDark/15" title="Type Alias">T</div></div>
 <div class="namespaceItemContent">
@@ -371,11 +396,11 @@ for IPv6, the same split as <a href=".././cidr.ts/~/Address.html">Address</a>.</
     </div><div id="namespace_maskedcidrv4" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-TypeAlias bg-TypeAlias/15 dark:text-TypeAliasDark dark:bg-TypeAliasDark/15" title="Type Alias">T</div></div>
 <div class="namespaceItemContent">
 		    <a href="..&#x2F;.&#x2F;cidrv4.ts&#x2F;~&#x2F;MaskedCidrv4.html" title="MaskedCidrv4">
-			    <span>MaskedCidrv4</span><span> = { <span class="td-kw">readonly </span>address<span>: <span class="td-kw">number</span></span>; <span class="td-kw">readonly </span>mask<span>: <span class="td-ref">Maskv4</span></span>; <span class="td-kw">readonly </span>prefixLength<span class="td-op">?</span><span>: <span class="td-kw">never</span></span>;  }</span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>An IPv4 CIDR block written with a network mask, as in
+			    <span>MaskedCidrv4</span><span> = { <span class="td-kw">readonly </span>address<span>: <span class="td-ref">Addressv4</span></span>; <span class="td-kw">readonly </span>mask<span>: <span class="td-ref">Maskv4</span></span>; <span class="td-kw">readonly </span>prefixLength<span class="td-op">?</span><span>: <span class="td-kw">never</span></span>;  }</span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>An IPv4 CIDR block written with a network mask, as in
 <code>10.0.0.0/255.0.0.0</code>.</p>
 </div></div><ul class="namespaceItemContentSubItems"><li>
                 <a href="..&#x2F;.&#x2F;cidrv4.ts&#x2F;~&#x2F;MaskedCidrv4.html#property_address">
-                  <span>address</span><span>: <span class="td-kw">number</span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>The IPv4 address from the CIDR notation</p>
+                  <span>address</span><span>: <span class="td-ref">Addressv4</span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>The IPv4 address from the CIDR notation</p>
 </div></div></li><li>
                 <a href="..&#x2F;.&#x2F;cidrv4.ts&#x2F;~&#x2F;MaskedCidrv4.html#property_mask">
                   <span>mask</span><span>: <span class="td-ref">Maskv4</span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>The network mask, stored as given</p>
@@ -386,11 +411,11 @@ for IPv6, the same split as <a href=".././cidr.ts/~/Address.html">Address</a>.</
     </div><div id="namespace_maskedcidrv6" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-TypeAlias bg-TypeAlias/15 dark:text-TypeAliasDark dark:bg-TypeAliasDark/15" title="Type Alias">T</div></div>
 <div class="namespaceItemContent">
 		    <a href="..&#x2F;.&#x2F;cidrv6.ts&#x2F;~&#x2F;MaskedCidrv6.html" title="MaskedCidrv6">
-			    <span>MaskedCidrv6</span><span> = { <span class="td-kw">readonly </span>address<span>: <span class="td-kw">bigint</span></span>; <span class="td-kw">readonly </span>mask<span>: <span class="td-ref">Maskv6</span></span>; <span class="td-kw">readonly </span>prefixLength<span class="td-op">?</span><span>: <span class="td-kw">never</span></span>;  }</span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>An IPv6 CIDR block written with a network mask, as in
+			    <span>MaskedCidrv6</span><span> = { <span class="td-kw">readonly </span>address<span>: <span class="td-ref">Addressv6</span></span>; <span class="td-kw">readonly </span>mask<span>: <span class="td-ref">Maskv6</span></span>; <span class="td-kw">readonly </span>prefixLength<span class="td-op">?</span><span>: <span class="td-kw">never</span></span>;  }</span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>An IPv6 CIDR block written with a network mask, as in
 <code>2001:db8::/ffff:ffff::</code>.</p>
 </div></div><ul class="namespaceItemContentSubItems"><li>
                 <a href="..&#x2F;.&#x2F;cidrv6.ts&#x2F;~&#x2F;MaskedCidrv6.html#property_address">
-                  <span>address</span><span>: <span class="td-kw">bigint</span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>The IPv6 address from the CIDR notation</p>
+                  <span>address</span><span>: <span class="td-ref">Addressv6</span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>The IPv6 address from the CIDR notation</p>
 </div></div></li><li>
                 <a href="..&#x2F;.&#x2F;cidrv6.ts&#x2F;~&#x2F;MaskedCidrv6.html#property_mask">
                   <span>mask</span><span>: <span class="td-ref">Maskv6</span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>The network mask, stored as given</p>
@@ -410,13 +435,91 @@ for <code>/24</code>.</p>
 			    <span>Maskv6</span><span> = <span class="td-kw">bigint</span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>An IPv6 network mask as a 128-bit unsigned bigint, e.g.
 <code>0xFFFFFFFFFFFFFFFF0000000000000000n</code> for <code>/64</code>.</p>
 </div></div></div>
+    </div><div id="namespace_parsedaddress" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-TypeAlias bg-TypeAlias/15 dark:text-TypeAliasDark dark:bg-TypeAliasDark/15" title="Type Alias">T</div></div>
+<div class="namespaceItemContent">
+		    <a href="..&#x2F;.&#x2F;address.ts&#x2F;~&#x2F;ParsedAddress.html" title="ParsedAddress">
+			    <span>ParsedAddress</span><span> = <span><span class="td-ref">ParsedAddressv4</span><span class="td-op"> | </span><span class="td-ref">ParsedAddressv6</span></span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>What parseAddress returns and what stringifyAddress
+accepts: a <a href=".././cidr.ts/~/ParsedAddressv4.html">ParsedAddressv4</a> or a <a href=".././cidr.ts/~/ParsedAddressv6.html">ParsedAddressv6</a>. Read
+<code>.address</code> for the bare <a href=".././cidr.ts/~/Address.html">Address</a> and narrow with <code>typeof</code>; the
+zone never touches the value, and no operation in this package reads it.</p>
+</div></div></div>
+    </div><div id="namespace_parsedaddressv4" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-TypeAlias bg-TypeAlias/15 dark:text-TypeAliasDark dark:bg-TypeAliasDark/15" title="Type Alias">T</div></div>
+<div class="namespaceItemContent">
+		    <a href="..&#x2F;.&#x2F;addressv4.ts&#x2F;~&#x2F;ParsedAddressv4.html" title="ParsedAddressv4">
+			    <span>ParsedAddressv4</span><span> = { <span class="td-kw">readonly </span>address<span>: <span class="td-ref">Addressv4</span></span>; <span class="td-kw">readonly </span>zoneId<span class="td-op">?</span><span>: <span class="td-ref">ZoneId</span></span>;  }</span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>What parseAddressv4 returns and what stringifyAddressv4
+accepts: the address, plus the zone ID if the notation had one. Read
+<code>.address</code> for the bare <a href=".././cidr.ts/~/Addressv4.html">Addressv4</a>; the zone never touches the
+value, and no operation in this package reads it.</p>
+</div></div><ul class="namespaceItemContentSubItems"><li>
+                <a href="..&#x2F;.&#x2F;addressv4.ts&#x2F;~&#x2F;ParsedAddressv4.html#property_address">
+                  <span>address</span><span>: <span class="td-ref">Addressv4</span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>The address as a 32-bit unsigned integer</p>
+</div></div></li><li>
+                <a href="..&#x2F;.&#x2F;addressv4.ts&#x2F;~&#x2F;ParsedAddressv4.html#property_zoneid">
+                  <span>zoneId</span><span>: <span class="td-ref">ZoneId</span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>The zone ID after <code>%</code>, verbatim, when the notation had one</p>
+</div></div></li></ul></div>
+    </div><div id="namespace_parsedaddressv6" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-TypeAlias bg-TypeAlias/15 dark:text-TypeAliasDark dark:bg-TypeAliasDark/15" title="Type Alias">T</div></div>
+<div class="namespaceItemContent">
+		    <a href="..&#x2F;.&#x2F;addressv6.ts&#x2F;~&#x2F;ParsedAddressv6.html" title="ParsedAddressv6">
+			    <span>ParsedAddressv6</span><span> = { <span class="td-kw">readonly </span>address<span>: <span class="td-ref">Addressv6</span></span>; <span class="td-kw">readonly </span>zoneId<span class="td-op">?</span><span>: <span class="td-ref">ZoneId</span></span>;  }</span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>What parseAddressv6 returns and what stringifyAddressv6
+accepts: the address, plus the zone ID if the notation had one. Read
+<code>.address</code> for the bare <a href=".././cidr.ts/~/Addressv6.html">Addressv6</a>; the zone never touches the
+value, and no operation in this package reads it.</p>
+</div></div><ul class="namespaceItemContentSubItems"><li>
+                <a href="..&#x2F;.&#x2F;addressv6.ts&#x2F;~&#x2F;ParsedAddressv6.html#property_address">
+                  <span>address</span><span>: <span class="td-ref">Addressv6</span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>The address as a 128-bit unsigned bigint</p>
+</div></div></li><li>
+                <a href="..&#x2F;.&#x2F;addressv6.ts&#x2F;~&#x2F;ParsedAddressv6.html#property_zoneid">
+                  <span>zoneId</span><span>: <span class="td-ref">ZoneId</span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>The zone ID after <code>%</code>, verbatim, when the notation had one</p>
+</div></div></li></ul></div>
+    </div><div id="namespace_parsedcidr" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-TypeAlias bg-TypeAlias/15 dark:text-TypeAliasDark dark:bg-TypeAliasDark/15" title="Type Alias">T</div></div>
+<div class="namespaceItemContent">
+		    <a href="..&#x2F;.&#x2F;cidr.ts&#x2F;~&#x2F;ParsedCidr.html" title="ParsedCidr">
+			    <span>ParsedCidr</span><span> = <span><span class="td-ref">ParsedCidrv4</span><span class="td-op"> | </span><span class="td-ref">ParsedCidrv6</span></span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>What <a href=".././cidr.ts/~/parseCidr.html">parseCidr</a> returns and what <a href=".././cidr.ts/~/stringifyCidr.html">stringifyCidr</a> accepts: a
+<a href=".././cidr.ts/~/ParsedCidrv4.html">ParsedCidrv4</a> or a <a href=".././cidr.ts/~/ParsedCidrv6.html">ParsedCidrv6</a>, the block in the dialect
+it was written in plus an optional zone ID. Assignable to <a href=".././cidr.ts/~/Cidr.html">Cidr</a>,
+so a parse result goes straight into every <code>cidr*</code> operation; none of
+them reads the zone.</p>
+</div></div></div>
+    </div><div id="namespace_parsedcidrv4" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-TypeAlias bg-TypeAlias/15 dark:text-TypeAliasDark dark:bg-TypeAliasDark/15" title="Type Alias">T</div></div>
+<div class="namespaceItemContent">
+		    <a href="..&#x2F;.&#x2F;cidrv4.ts&#x2F;~&#x2F;ParsedCidrv4.html" title="ParsedCidrv4">
+			    <span>ParsedCidrv4</span><span> = <span><span class="td-ref">Cidrv4</span><span class="td-op"> & </span>{ <span class="td-kw">readonly </span>zoneId<span class="td-op">?</span><span>: <span class="td-ref">ZoneId</span></span>;  }</span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>What <a href=".././cidrv4.ts/~/parseCidrv4.html">parseCidrv4</a> returns and what <a href=".././cidrv4.ts/~/stringifyCidrv4.html">stringifyCidrv4</a>
+accepts: a <a href=".././cidr.ts/~/Cidrv4.html">Cidrv4</a> in the dialect it was written in, plus the zone
+ID if the notation had one (<code>fe80::%ether1/64</code> has one; RouterOS emits
+that form for connected routes). Assignable to <a href=".././cidr.ts/~/Cidrv4.html">Cidrv4</a>, so a parse
+result goes straight into every <code>cidrv4*</code> operation; none of them reads
+the zone.</p>
+</div></div></div>
+    </div><div id="namespace_parsedcidrv6" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-TypeAlias bg-TypeAlias/15 dark:text-TypeAliasDark dark:bg-TypeAliasDark/15" title="Type Alias">T</div></div>
+<div class="namespaceItemContent">
+		    <a href="..&#x2F;.&#x2F;cidrv6.ts&#x2F;~&#x2F;ParsedCidrv6.html" title="ParsedCidrv6">
+			    <span>ParsedCidrv6</span><span> = <span><span class="td-ref">Cidrv6</span><span class="td-op"> & </span>{ <span class="td-kw">readonly </span>zoneId<span class="td-op">?</span><span>: <span class="td-ref">ZoneId</span></span>;  }</span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>What <a href=".././cidrv6.ts/~/parseCidrv6.html">parseCidrv6</a> returns and what <a href=".././cidrv6.ts/~/stringifyCidrv6.html">stringifyCidrv6</a>
+accepts: a <a href=".././cidr.ts/~/Cidrv6.html">Cidrv6</a> in the dialect it was written in, plus the zone
+ID if the notation had one (<code>fe80::%ether1/64</code>, the form RouterOS and
+<code>netstat -rn</code> emit for link-local routes). Assignable to <a href=".././cidr.ts/~/Cidrv6.html">Cidrv6</a>,
+so a parse result goes straight into every <code>cidrv6*</code> operation; none of
+them reads the zone.</p>
+</div></div></div>
+    </div><div id="namespace_parseoptions" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-TypeAlias bg-TypeAlias/15 dark:text-TypeAliasDark dark:bg-TypeAliasDark/15" title="Type Alias">T</div></div>
+<div class="namespaceItemContent">
+		    <a href="..&#x2F;.&#x2F;address.ts&#x2F;~&#x2F;ParseOptions.html" title="ParseOptions">
+			    <span>ParseOptions</span><span> = { <span class="td-kw">readonly </span>unmapToV4<span class="td-op">?</span><span>: <span class="td-kw">boolean</span></span>;  }</span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Options for the universal parsers, parseAddress and
+<a href=".././cidr.ts/~/parseCidr.html">parseCidr</a>. The version-specific parsers take none: they return
+their own version and nothing else.</p>
+</div></div><ul class="namespaceItemContentSubItems"><li>
+                <a href="..&#x2F;.&#x2F;address.ts&#x2F;~&#x2F;ParseOptions.html#property_unmaptov4">
+                  <span>unmapToV4</span><span>: <span class="td-kw">boolean</span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Whether an IPv4-mapped IPv6 address (<code>::ffff:a.b.c.d</code>) is returned as
+the IPv4 value it carries. Defaults to <code>true</code> (ADR 0004): dual-stack
+listeners report IPv4 clients in the mapped form, and almost every
+caller wants the IPv4 view. Set to <code>false</code> to keep the <code>bigint</code>.</p>
+</div></div></li></ul></div>
     </div><div id="namespace_prefixedcidrv4" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-TypeAlias bg-TypeAlias/15 dark:text-TypeAliasDark dark:bg-TypeAliasDark/15" title="Type Alias">T</div></div>
 <div class="namespaceItemContent">
 		    <a href="..&#x2F;.&#x2F;cidrv4.ts&#x2F;~&#x2F;PrefixedCidrv4.html" title="PrefixedCidrv4">
-			    <span>PrefixedCidrv4</span><span> = { <span class="td-kw">readonly </span>address<span>: <span class="td-kw">number</span></span>; <span class="td-kw">readonly </span>prefixLength<span>: <span class="td-ref">PrefixLengthv4</span></span>; <span class="td-kw">readonly </span>mask<span class="td-op">?</span><span>: <span class="td-kw">never</span></span>;  }</span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>An IPv4 CIDR block written with a prefix length, as in <code>10.0.0.0/8</code>.</p>
+			    <span>PrefixedCidrv4</span><span> = { <span class="td-kw">readonly </span>address<span>: <span class="td-ref">Addressv4</span></span>; <span class="td-kw">readonly </span>prefixLength<span>: <span class="td-ref">PrefixLengthv4</span></span>; <span class="td-kw">readonly </span>mask<span class="td-op">?</span><span>: <span class="td-kw">never</span></span>;  }</span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>An IPv4 CIDR block written with a prefix length, as in <code>10.0.0.0/8</code>.</p>
 </div></div><ul class="namespaceItemContentSubItems"><li>
                 <a href="..&#x2F;.&#x2F;cidrv4.ts&#x2F;~&#x2F;PrefixedCidrv4.html#property_address">
-                  <span>address</span><span>: <span class="td-kw">number</span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>The IPv4 address from the CIDR notation</p>
+                  <span>address</span><span>: <span class="td-ref">Addressv4</span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>The IPv4 address from the CIDR notation</p>
 </div></div></li><li>
                 <a href="..&#x2F;.&#x2F;cidrv4.ts&#x2F;~&#x2F;PrefixedCidrv4.html#property_mask">
                   <span>mask</span><span>: <span class="td-kw">never</span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Absent: the mask dialect is <a href=".././cidr.ts/~/MaskedCidrv4.html">MaskedCidrv4</a></p>
@@ -427,10 +530,10 @@ for <code>/24</code>.</p>
     </div><div id="namespace_prefixedcidrv6" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-TypeAlias bg-TypeAlias/15 dark:text-TypeAliasDark dark:bg-TypeAliasDark/15" title="Type Alias">T</div></div>
 <div class="namespaceItemContent">
 		    <a href="..&#x2F;.&#x2F;cidrv6.ts&#x2F;~&#x2F;PrefixedCidrv6.html" title="PrefixedCidrv6">
-			    <span>PrefixedCidrv6</span><span> = { <span class="td-kw">readonly </span>address<span>: <span class="td-kw">bigint</span></span>; <span class="td-kw">readonly </span>prefixLength<span>: <span class="td-ref">PrefixLengthv6</span></span>; <span class="td-kw">readonly </span>mask<span class="td-op">?</span><span>: <span class="td-kw">never</span></span>;  }</span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>An IPv6 CIDR block written with a prefix length, as in <code>2001:db8::/32</code>.</p>
+			    <span>PrefixedCidrv6</span><span> = { <span class="td-kw">readonly </span>address<span>: <span class="td-ref">Addressv6</span></span>; <span class="td-kw">readonly </span>prefixLength<span>: <span class="td-ref">PrefixLengthv6</span></span>; <span class="td-kw">readonly </span>mask<span class="td-op">?</span><span>: <span class="td-kw">never</span></span>;  }</span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>An IPv6 CIDR block written with a prefix length, as in <code>2001:db8::/32</code>.</p>
 </div></div><ul class="namespaceItemContentSubItems"><li>
                 <a href="..&#x2F;.&#x2F;cidrv6.ts&#x2F;~&#x2F;PrefixedCidrv6.html#property_address">
-                  <span>address</span><span>: <span class="td-kw">bigint</span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>The IPv6 address from the CIDR notation</p>
+                  <span>address</span><span>: <span class="td-ref">Addressv6</span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>The IPv6 address from the CIDR notation</p>
 </div></div></li><li>
                 <a href="..&#x2F;.&#x2F;cidrv6.ts&#x2F;~&#x2F;PrefixedCidrv6.html#property_mask">
                   <span>mask</span><span>: <span class="td-kw">never</span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Absent: the mask dialect is <a href=".././cidr.ts/~/MaskedCidrv6.html">MaskedCidrv6</a></p>
@@ -459,6 +562,13 @@ a <code>PrefixLengthv4</code> (ADR 0002).</p>
 			    <span>PrefixLengthv6</span><span> = <span class="td-kw">number</span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>An IPv6 prefix length, the <code>64</code> in <code>/64</code>. The range is 0 to 128; it is
 documented rather than encoded in the type, so <code>prefixLength + 1</code> stays
 a <code>PrefixLengthv6</code> (ADR 0002).</p>
+</div></div></div>
+    </div><div id="namespace_zoneid" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-TypeAlias bg-TypeAlias/15 dark:text-TypeAliasDark dark:bg-TypeAliasDark/15" title="Type Alias">T</div></div>
+<div class="namespaceItemContent">
+		    <a href="..&#x2F;.&#x2F;notation.ts&#x2F;~&#x2F;ZoneId.html" title="ZoneId">
+			    <span>ZoneId</span><span> = <span class="td-kw">string</span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>The zone ID of an address, the interface tail after <code>%</code> in
+<code>fe80::1%eth0</code> (RFC 4007 section 11). Carried verbatim by the <code>Parsed*</code>
+types; never percent-decoded, so <code>%25eth0</code> is the zone <code>25eth0</code>.</p>
 </div></div></div>
     </div></div>
 </section>
@@ -515,25 +625,25 @@ a <code>PrefixLengthv6</code> (ADR 0002).</p>
                   </span>
                 </a>
               </li><li>
+                <a href="..&#x2F;.&#x2F;address.ts&#x2F;~&#x2F;ParsedAddress.html" title="ParsedAddress"><div class="docNodeKindIcon"><div class="text-TypeAlias bg-TypeAlias/15 dark:text-TypeAliasDark dark:bg-TypeAliasDark/15" title="Type Alias">T</div></div>
+<span class="hover:bg-TypeAlias/15 hover:bg-TypeAliasDark/15">
+                    ParsedAddress
+                  </span>
+                </a>
+              </li><li>
+                <a href="..&#x2F;.&#x2F;address.ts&#x2F;~&#x2F;ParseOptions.html" title="ParseOptions"><div class="docNodeKindIcon"><div class="text-TypeAlias bg-TypeAlias/15 dark:text-TypeAliasDark dark:bg-TypeAliasDark/15" title="Type Alias">T</div></div>
+<span class="hover:bg-TypeAlias/15 hover:bg-TypeAliasDark/15">
+                    ParseOptions
+                  </span>
+                </a>
+              </li><li>
                 <a href="..&#x2F;.&#x2F;address.ts&#x2F;~&#x2F;parseAddress.html" title="parseAddress"><div class="docNodeKindIcon"><div class="text-Function bg-Function/15 dark:text-FunctionDark dark:bg-FunctionDark/15" title="Function">f</div></div>
 <span class="hover:bg-Function/15 hover:bg-FunctionDark/15">
                     parseAddress
                   </span>
                 </a>
-              </li><li>
-                <a href="..&#x2F;.&#x2F;address.ts&#x2F;~&#x2F;stringifyAddress.html" title="stringifyAddress"><div class="docNodeKindIcon"><div class="text-Function bg-Function/15 dark:text-FunctionDark dark:bg-FunctionDark/15" title="Function">f</div></div>
-<span class="hover:bg-Function/15 hover:bg-FunctionDark/15">
-                    stringifyAddress
-                  </span>
-                </a>
-              </li><li>
-                <a href="..&#x2F;.&#x2F;address.ts&#x2F;~&#x2F;stringifyAddress.html" title="stringifyAddress"><div class="docNodeKindIcon"><div class="text-Function bg-Function/15 dark:text-FunctionDark dark:bg-FunctionDark/15" title="Function">f</div></div>
-<span class="hover:bg-Function/15 hover:bg-FunctionDark/15">
-                    stringifyAddress
-                  </span>
-                </a>
               </li></ul><a class="flex items-center gap-0.5" href="..&#x2F;.&#x2F;all_symbols.html">
-              <span class="leading-none">view all 321 symbols</span><svg
+              <span class="leading-none">view all 371 symbols</span><svg
   width="16"
   height="16"
   viewBox="0 0 16 16"
@@ -548,7 +658,7 @@ a <code>PrefixLengthv6</code> (ADR 0002).</p>
   />
 </svg>
 </a></nav><nav class="documentNavigation">
-          <h3>Document Navigation</h3><ul><li><a href="#examples" title="Examples">Examples</a></li><li><ul><li><a href="#example_0" title="Parse and stringify any CIDR block">Parse and stringify any CIDR block</a></li></ul></li><li><a href="#cidr_ts_functions" title="Functions">Functions</a></li><li><ul><li><a href="#namespace_cidraddresses" title="cidrAddresses">cidrAddresses</a></li><li><a href="#namespace_cidrcontains" title="cidrContains">cidrContains</a></li><li><a href="#namespace_cidrcontainscidr" title="cidrContainsCidr">cidrContainsCidr</a></li><li><a href="#namespace_cidrfirstaddress" title="cidrFirstAddress">cidrFirstAddress</a></li><li><a href="#namespace_cidrintersect" title="cidrIntersect">cidrIntersect</a></li><li><a href="#namespace_cidrlastaddress" title="cidrLastAddress">cidrLastAddress</a></li><li><a href="#namespace_cidrmerge" title="cidrMerge">cidrMerge</a></li><li><a href="#namespace_cidroverlaps" title="cidrOverlaps">cidrOverlaps</a></li><li><a href="#namespace_cidrsize" title="cidrSize">cidrSize</a></li><li><a href="#namespace_cidrsubtract" title="cidrSubtract">cidrSubtract</a></li><li><a href="#namespace_comparecidr" title="compareCidr">compareCidr</a></li><li><a href="#namespace_iscidrv4" title="isCidrv4">isCidrv4</a></li><li><a href="#namespace_iscidrv6" title="isCidrv6">isCidrv6</a></li><li><a href="#namespace_parsecidr" title="parseCidr">parseCidr</a></li><li><a href="#namespace_stringifycidr" title="stringifyCidr">stringifyCidr</a></li></ul></li><li><a href="#cidr_ts_type-aliases" title="Type Aliases">Type Aliases</a></li><li><ul><li><a href="#namespace_address" title="Address">Address</a></li><li><a href="#namespace_cidr" title="Cidr">Cidr</a></li><li><a href="#namespace_cidrv4" title="Cidrv4">Cidrv4</a></li><li><a href="#namespace_cidrv6" title="Cidrv6">Cidrv6</a></li><li><a href="#namespace_mask" title="Mask">Mask</a></li><li><a href="#namespace_maskedcidrv4" title="MaskedCidrv4">MaskedCidrv4</a></li><li><a href="#namespace_maskedcidrv6" title="MaskedCidrv6">MaskedCidrv6</a></li><li><a href="#namespace_maskv4" title="Maskv4">Maskv4</a></li><li><a href="#namespace_maskv6" title="Maskv6">Maskv6</a></li><li><a href="#namespace_prefixedcidrv4" title="PrefixedCidrv4">PrefixedCidrv4</a></li><li><a href="#namespace_prefixedcidrv6" title="PrefixedCidrv6">PrefixedCidrv6</a></li><li><a href="#namespace_prefixlength" title="PrefixLength">PrefixLength</a></li><li><a href="#namespace_prefixlengthv4" title="PrefixLengthv4">PrefixLengthv4</a></li><li><a href="#namespace_prefixlengthv6" title="PrefixLengthv6">PrefixLengthv6</a></li></ul></li></ul></nav></div>
+          <h3>Document Navigation</h3><ul><li><a href="#examples" title="Examples">Examples</a></li><li><ul><li><a href="#example_0" title="Parse and stringify any CIDR block">Parse and stringify any CIDR block</a></li></ul></li><li><a href="#cidr_ts_functions" title="Functions">Functions</a></li><li><ul><li><a href="#namespace_cidraddresses" title="cidrAddresses">cidrAddresses</a></li><li><a href="#namespace_cidrcontains" title="cidrContains">cidrContains</a></li><li><a href="#namespace_cidrcontainscidr" title="cidrContainsCidr">cidrContainsCidr</a></li><li><a href="#namespace_cidrfirstaddress" title="cidrFirstAddress">cidrFirstAddress</a></li><li><a href="#namespace_cidrintersect" title="cidrIntersect">cidrIntersect</a></li><li><a href="#namespace_cidrlastaddress" title="cidrLastAddress">cidrLastAddress</a></li><li><a href="#namespace_cidrmerge" title="cidrMerge">cidrMerge</a></li><li><a href="#namespace_cidroverlaps" title="cidrOverlaps">cidrOverlaps</a></li><li><a href="#namespace_cidrsize" title="cidrSize">cidrSize</a></li><li><a href="#namespace_cidrsubtract" title="cidrSubtract">cidrSubtract</a></li><li><a href="#namespace_comparecidr" title="compareCidr">compareCidr</a></li><li><a href="#namespace_iscidrv4" title="isCidrv4">isCidrv4</a></li><li><a href="#namespace_iscidrv6" title="isCidrv6">isCidrv6</a></li><li><a href="#namespace_parsecidr" title="parseCidr">parseCidr</a></li><li><a href="#namespace_stringifycidr" title="stringifyCidr">stringifyCidr</a></li></ul></li><li><a href="#cidr_ts_type-aliases" title="Type Aliases">Type Aliases</a></li><li><ul><li><a href="#namespace_address" title="Address">Address</a></li><li><a href="#namespace_addressv4" title="Addressv4">Addressv4</a></li><li><a href="#namespace_addressv6" title="Addressv6">Addressv6</a></li><li><a href="#namespace_cidr" title="Cidr">Cidr</a></li><li><a href="#namespace_cidrv4" title="Cidrv4">Cidrv4</a></li><li><a href="#namespace_cidrv6" title="Cidrv6">Cidrv6</a></li><li><a href="#namespace_mask" title="Mask">Mask</a></li><li><a href="#namespace_maskedcidrv4" title="MaskedCidrv4">MaskedCidrv4</a></li><li><a href="#namespace_maskedcidrv6" title="MaskedCidrv6">MaskedCidrv6</a></li><li><a href="#namespace_maskv4" title="Maskv4">Maskv4</a></li><li><a href="#namespace_maskv6" title="Maskv6">Maskv6</a></li><li><a href="#namespace_parsedaddress" title="ParsedAddress">ParsedAddress</a></li><li><a href="#namespace_parsedaddressv4" title="ParsedAddressv4">ParsedAddressv4</a></li><li><a href="#namespace_parsedaddressv6" title="ParsedAddressv6">ParsedAddressv6</a></li><li><a href="#namespace_parsedcidr" title="ParsedCidr">ParsedCidr</a></li><li><a href="#namespace_parsedcidrv4" title="ParsedCidrv4">ParsedCidrv4</a></li><li><a href="#namespace_parsedcidrv6" title="ParsedCidrv6">ParsedCidrv6</a></li><li><a href="#namespace_parseoptions" title="ParseOptions">ParseOptions</a></li><li><a href="#namespace_prefixedcidrv4" title="PrefixedCidrv4">PrefixedCidrv4</a></li><li><a href="#namespace_prefixedcidrv6" title="PrefixedCidrv6">PrefixedCidrv6</a></li><li><a href="#namespace_prefixlength" title="PrefixLength">PrefixLength</a></li><li><a href="#namespace_prefixlengthv4" title="PrefixLengthv4">PrefixLengthv4</a></li><li><a href="#namespace_prefixlengthv6" title="PrefixLengthv6">PrefixLengthv6</a></li><li><a href="#namespace_zoneid" title="ZoneId">ZoneId</a></li></ul></li></ul></nav></div>
   </div></div>
 </div>
 </div>

@@ -228,11 +228,11 @@ import { addressv6ToArpa } from &quot;@hertzg/ip/arpav6&quot;;
 import { parseAddressv6 } from &quot;@hertzg/ip/addressv6&quot;;
 
 assertEquals(
-  addressv6ToArpa(parseAddressv6(&quot;2001:db8::1&quot;)),
+  addressv6ToArpa(parseAddressv6(&quot;2001:db8::1&quot;).address),
   &quot;1.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.8.b.d.0.1.0.0.2.ip6.arpa&quot;,
 );
 assertEquals(
-  addressv6ToArpa(parseAddressv6(&quot;::&quot;)),
+  addressv6ToArpa(parseAddressv6(&quot;::&quot;).address),
   &quot;0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.ip6.arpa&quot;,
 );
 </code><button class="copyButton" data-copy="import { assertEquals } from &quot;@std/assert&quot;;
@@ -240,11 +240,11 @@ import { addressv6ToArpa } from &quot;@hertzg/ip/arpav6&quot;;
 import { parseAddressv6 } from &quot;@hertzg/ip/addressv6&quot;;
 
 assertEquals(
-  addressv6ToArpa(parseAddressv6(&quot;2001:db8::1&quot;)),
+  addressv6ToArpa(parseAddressv6(&quot;2001:db8::1&quot;).address),
   &quot;1.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.8.b.d.0.1.0.0.2.ip6.arpa&quot;,
 );
 assertEquals(
-  addressv6ToArpa(parseAddressv6(&quot;::&quot;)),
+  addressv6ToArpa(parseAddressv6(&quot;::&quot;).address),
   &quot;0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.ip6.arpa&quot;,
 );
 "><svg
@@ -309,7 +309,7 @@ import { addressv6ToArpa } from &quot;@hertzg/ip/arpav6&quot;;
 import { parseAddressv6 } from &quot;@hertzg/ip/addressv6&quot;;
 
 assertEquals(
-  addressv6ToArpa(parseAddressv6(&quot;::ffff:192.168.0.1&quot;)),
+  addressv6ToArpa(parseAddressv6(&quot;::ffff:192.168.0.1&quot;).address),
   &quot;1.0.0.0.8.a.0.c.f.f.f.f.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.ip6.arpa&quot;,
 );
 </code><button class="copyButton" data-copy="import { assertEquals } from &quot;@std/assert&quot;;
@@ -317,7 +317,7 @@ import { addressv6ToArpa } from &quot;@hertzg/ip/arpav6&quot;;
 import { parseAddressv6 } from &quot;@hertzg/ip/addressv6&quot;;
 
 assertEquals(
-  addressv6ToArpa(parseAddressv6(&quot;::ffff:192.168.0.1&quot;)),
+  addressv6ToArpa(parseAddressv6(&quot;::ffff:192.168.0.1&quot;).address),
   &quot;1.0.0.0.8.a.0.c.f.f.f.f.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.ip6.arpa&quot;,
 );
 "><svg

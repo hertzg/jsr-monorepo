@@ -255,8 +255,8 @@ import { addressv4ToBytes } from &quot;@hertzg/ip/bytesv4&quot;;
 import { parseAddressv4 } from &quot;@hertzg/ip/addressv4&quot;;
 
 const frame = new Uint8Array(20);
-addressv4ToBytes(parseAddressv4(&quot;10.0.0.1&quot;), frame, 12);
-addressv4ToBytes(parseAddressv4(&quot;192.168.1.1&quot;), frame, 16);
+addressv4ToBytes(parseAddressv4(&quot;10.0.0.1&quot;).address, frame, 12);
+addressv4ToBytes(parseAddressv4(&quot;192.168.1.1&quot;).address, frame, 16);
 
 assertEquals(frame.slice(12), new Uint8Array([10, 0, 0, 1, 192, 168, 1, 1]));
 </code><button class="copyButton" data-copy="import { assertEquals } from &quot;@std/assert&quot;;
@@ -264,8 +264,8 @@ import { addressv4ToBytes } from &quot;@hertzg/ip/bytesv4&quot;;
 import { parseAddressv4 } from &quot;@hertzg/ip/addressv4&quot;;
 
 const frame = new Uint8Array(20);
-addressv4ToBytes(parseAddressv4(&quot;10.0.0.1&quot;), frame, 12);
-addressv4ToBytes(parseAddressv4(&quot;192.168.1.1&quot;), frame, 16);
+addressv4ToBytes(parseAddressv4(&quot;10.0.0.1&quot;).address, frame, 12);
+addressv4ToBytes(parseAddressv4(&quot;192.168.1.1&quot;).address, frame, 16);
 
 assertEquals(frame.slice(12), new Uint8Array([10, 0, 0, 1, 192, 168, 1, 1]));
 "><svg
@@ -391,25 +391,25 @@ supply.</p>
                   </span>
                 </a>
               </li><li>
+                <a href="..&#x2F;.&#x2F;address.ts&#x2F;~&#x2F;ParsedAddress.html" title="ParsedAddress"><div class="docNodeKindIcon"><div class="text-TypeAlias bg-TypeAlias/15 dark:text-TypeAliasDark dark:bg-TypeAliasDark/15" title="Type Alias">T</div></div>
+<span class="hover:bg-TypeAlias/15 hover:bg-TypeAliasDark/15">
+                    ParsedAddress
+                  </span>
+                </a>
+              </li><li>
+                <a href="..&#x2F;.&#x2F;address.ts&#x2F;~&#x2F;ParseOptions.html" title="ParseOptions"><div class="docNodeKindIcon"><div class="text-TypeAlias bg-TypeAlias/15 dark:text-TypeAliasDark dark:bg-TypeAliasDark/15" title="Type Alias">T</div></div>
+<span class="hover:bg-TypeAlias/15 hover:bg-TypeAliasDark/15">
+                    ParseOptions
+                  </span>
+                </a>
+              </li><li>
                 <a href="..&#x2F;.&#x2F;address.ts&#x2F;~&#x2F;parseAddress.html" title="parseAddress"><div class="docNodeKindIcon"><div class="text-Function bg-Function/15 dark:text-FunctionDark dark:bg-FunctionDark/15" title="Function">f</div></div>
 <span class="hover:bg-Function/15 hover:bg-FunctionDark/15">
                     parseAddress
                   </span>
                 </a>
-              </li><li>
-                <a href="..&#x2F;.&#x2F;address.ts&#x2F;~&#x2F;stringifyAddress.html" title="stringifyAddress"><div class="docNodeKindIcon"><div class="text-Function bg-Function/15 dark:text-FunctionDark dark:bg-FunctionDark/15" title="Function">f</div></div>
-<span class="hover:bg-Function/15 hover:bg-FunctionDark/15">
-                    stringifyAddress
-                  </span>
-                </a>
-              </li><li>
-                <a href="..&#x2F;.&#x2F;address.ts&#x2F;~&#x2F;stringifyAddress.html" title="stringifyAddress"><div class="docNodeKindIcon"><div class="text-Function bg-Function/15 dark:text-FunctionDark dark:bg-FunctionDark/15" title="Function">f</div></div>
-<span class="hover:bg-Function/15 hover:bg-FunctionDark/15">
-                    stringifyAddress
-                  </span>
-                </a>
               </li></ul><a class="flex items-center gap-0.5" href="..&#x2F;.&#x2F;all_symbols.html">
-              <span class="leading-none">view all 321 symbols</span><svg
+              <span class="leading-none">view all 371 symbols</span><svg
   width="16"
   height="16"
   viewBox="0 0 16 16"

@@ -219,16 +219,16 @@ Examples</h2></div><div class="space-y-8"><div class="anchorable"><a href="#exam
 import { isAddressv6Loopback } from &quot;@hertzg/ip/classifyv6&quot;;
 import { parseAddressv6 } from &quot;@hertzg/ip/addressv6&quot;;
 
-assert(isAddressv6Loopback(parseAddressv6(&quot;::1&quot;)));
-assertEquals(isAddressv6Loopback(parseAddressv6(&quot;::&quot;)), false);
-assertEquals(isAddressv6Loopback(parseAddressv6(&quot;::2&quot;)), false);
+assert(isAddressv6Loopback(parseAddressv6(&quot;::1&quot;).address));
+assertEquals(isAddressv6Loopback(parseAddressv6(&quot;::&quot;).address), false);
+assertEquals(isAddressv6Loopback(parseAddressv6(&quot;::2&quot;).address), false);
 </code><button class="copyButton" data-copy="import { assert, assertEquals } from &quot;@std/assert&quot;;
 import { isAddressv6Loopback } from &quot;@hertzg/ip/classifyv6&quot;;
 import { parseAddressv6 } from &quot;@hertzg/ip/addressv6&quot;;
 
-assert(isAddressv6Loopback(parseAddressv6(&quot;::1&quot;)));
-assertEquals(isAddressv6Loopback(parseAddressv6(&quot;::&quot;)), false);
-assertEquals(isAddressv6Loopback(parseAddressv6(&quot;::2&quot;)), false);
+assert(isAddressv6Loopback(parseAddressv6(&quot;::1&quot;).address));
+assertEquals(isAddressv6Loopback(parseAddressv6(&quot;::&quot;).address), false);
+assertEquals(isAddressv6Loopback(parseAddressv6(&quot;::2&quot;).address), false);
 "><svg
   class="copy"
   width="15"

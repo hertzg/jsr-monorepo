@@ -169,8 +169,8 @@ const datagram = {
   timeToLive: 64,
   protocol: 6,
   headerChecksum: 0,
-  sourceAddress: parseAddressv4(&quot;192.168.1.100&quot;),
-  destinationAddress: parseAddressv4(&quot;10.0.0.50&quot;),
+  sourceAddress: parseAddressv4(&quot;192.168.1.100&quot;).address,
+  destinationAddress: parseAddressv4(&quot;10.0.0.50&quot;).address,
   options: new Uint8Array(0),
   payload: new Uint8Array(0),
 };
@@ -181,8 +181,8 @@ const [decoded, bytesRead] = coder.decode(buffer);
 
 assertEquals(bytesWritten, 20);
 assertEquals(bytesRead, 20);
-assertEquals(decoded.sourceAddress, parseAddressv4(&quot;192.168.1.100&quot;));
-assertEquals(decoded.destinationAddress, parseAddressv4(&quot;10.0.0.50&quot;));
+assertEquals(decoded.sourceAddress, parseAddressv4(&quot;192.168.1.100&quot;).address);
+assertEquals(decoded.destinationAddress, parseAddressv4(&quot;10.0.0.50&quot;).address);
 assertEquals(decoded.flagsFragmentOffset.dontFragment, 1);
 </code><button class="copyButton" data-copy="import { assertEquals } from &quot;@std/assert&quot;;
 import { parseAddressv4 } from &quot;@hertzg/ip/addressv4&quot;;
@@ -203,8 +203,8 @@ const datagram = {
   timeToLive: 64,
   protocol: 6,
   headerChecksum: 0,
-  sourceAddress: parseAddressv4(&quot;192.168.1.100&quot;),
-  destinationAddress: parseAddressv4(&quot;10.0.0.50&quot;),
+  sourceAddress: parseAddressv4(&quot;192.168.1.100&quot;).address,
+  destinationAddress: parseAddressv4(&quot;10.0.0.50&quot;).address,
   options: new Uint8Array(0),
   payload: new Uint8Array(0),
 };
@@ -215,8 +215,8 @@ const [decoded, bytesRead] = coder.decode(buffer);
 
 assertEquals(bytesWritten, 20);
 assertEquals(bytesRead, 20);
-assertEquals(decoded.sourceAddress, parseAddressv4(&quot;192.168.1.100&quot;));
-assertEquals(decoded.destinationAddress, parseAddressv4(&quot;10.0.0.50&quot;));
+assertEquals(decoded.sourceAddress, parseAddressv4(&quot;192.168.1.100&quot;).address);
+assertEquals(decoded.destinationAddress, parseAddressv4(&quot;10.0.0.50&quot;).address);
 assertEquals(decoded.flagsFragmentOffset.dontFragment, 1);
 "><svg
   class="copy"

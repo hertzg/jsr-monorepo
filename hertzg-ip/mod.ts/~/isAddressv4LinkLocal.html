@@ -219,14 +219,14 @@ Examples</h2></div><div class="space-y-8"><div class="anchorable"><a href="#exam
 import { isAddressv4LinkLocal } from &quot;@hertzg/ip/classifyv4&quot;;
 import { parseAddressv4 } from &quot;@hertzg/ip/addressv4&quot;;
 
-assert(isAddressv4LinkLocal(parseAddressv4(&quot;169.254.1.1&quot;)));
-assertEquals(isAddressv4LinkLocal(parseAddressv4(&quot;169.255.0.0&quot;)), false);
+assert(isAddressv4LinkLocal(parseAddressv4(&quot;169.254.1.1&quot;).address));
+assertEquals(isAddressv4LinkLocal(parseAddressv4(&quot;169.255.0.0&quot;).address), false);
 </code><button class="copyButton" data-copy="import { assert, assertEquals } from &quot;@std/assert&quot;;
 import { isAddressv4LinkLocal } from &quot;@hertzg/ip/classifyv4&quot;;
 import { parseAddressv4 } from &quot;@hertzg/ip/addressv4&quot;;
 
-assert(isAddressv4LinkLocal(parseAddressv4(&quot;169.254.1.1&quot;)));
-assertEquals(isAddressv4LinkLocal(parseAddressv4(&quot;169.255.0.0&quot;)), false);
+assert(isAddressv4LinkLocal(parseAddressv4(&quot;169.254.1.1&quot;).address));
+assertEquals(isAddressv4LinkLocal(parseAddressv4(&quot;169.255.0.0&quot;).address), false);
 "><svg
   class="copy"
   width="15"

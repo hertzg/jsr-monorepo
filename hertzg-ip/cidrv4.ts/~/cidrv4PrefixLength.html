@@ -1053,7 +1053,7 @@ const { address, netmask } = { address: &quot;192.168.1.42&quot;, netmask: &quot
 
 assertEquals(
   stringifyCidrv4({
-    address: parseAddressv4(address),
+    address: parseAddressv4(address).address,
     prefixLength: cidrv4PrefixLength(netmask),
   }),
   &quot;192.168.1.42/24&quot;,
@@ -1066,7 +1066,7 @@ const { address, netmask } = { address: &quot;192.168.1.42&quot;, netmask: &quot
 
 assertEquals(
   stringifyCidrv4({
-    address: parseAddressv4(address),
+    address: parseAddressv4(address).address,
     prefixLength: cidrv4PrefixLength(netmask),
   }),
   &quot;192.168.1.42/24&quot;,

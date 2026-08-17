@@ -225,7 +225,7 @@ import { addressv6ToBytes } from &quot;@hertzg/ip/bytesv6&quot;;
 import { parseAddressv6 } from &quot;@hertzg/ip/addressv6&quot;;
 
 // deno-fmt-ignore
-assertEquals(addressv6ToBytes(parseAddressv6(&quot;2001:db8::1&quot;)), new Uint8Array([
+assertEquals(addressv6ToBytes(parseAddressv6(&quot;2001:db8::1&quot;).address), new Uint8Array([
   0x20, 0x01, 0x0d, 0xb8, 0x00, 0x00, 0x00, 0x00,
   0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x01,
 ]));
@@ -234,7 +234,7 @@ import { addressv6ToBytes } from &quot;@hertzg/ip/bytesv6&quot;;
 import { parseAddressv6 } from &quot;@hertzg/ip/addressv6&quot;;
 
 // deno-fmt-ignore
-assertEquals(addressv6ToBytes(parseAddressv6(&quot;2001:db8::1&quot;)), new Uint8Array([
+assertEquals(addressv6ToBytes(parseAddressv6(&quot;2001:db8::1&quot;).address), new Uint8Array([
   0x20, 0x01, 0x0d, 0xb8, 0x00, 0x00, 0x00, 0x00,
   0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x01,
 ]));
@@ -300,7 +300,7 @@ import { addressv6ToBytes } from &quot;@hertzg/ip/bytesv6&quot;;
 import { parseAddressv6 } from &quot;@hertzg/ip/addressv6&quot;;
 
 const frame = new Uint8Array(40);
-const written = addressv6ToBytes(parseAddressv6(&quot;::1&quot;), frame, 8);
+const written = addressv6ToBytes(parseAddressv6(&quot;::1&quot;).address, frame, 8);
 
 assertEquals(written.length, 16);
 assertEquals(frame[23], 1);
@@ -309,7 +309,7 @@ import { addressv6ToBytes } from &quot;@hertzg/ip/bytesv6&quot;;
 import { parseAddressv6 } from &quot;@hertzg/ip/addressv6&quot;;
 
 const frame = new Uint8Array(40);
-const written = addressv6ToBytes(parseAddressv6(&quot;::1&quot;), frame, 8);
+const written = addressv6ToBytes(parseAddressv6(&quot;::1&quot;).address, frame, 8);
 
 assertEquals(written.length, 16);
 assertEquals(frame[23], 1);

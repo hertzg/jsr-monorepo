@@ -219,13 +219,13 @@ import { cidrv4FirstAddress, parseCidrv4 } from &quot;@hertzg/ip/cidrv4&quot;;
 import { parseAddressv4 } from &quot;@hertzg/ip/addressv4&quot;;
 
 const cidr = parseCidrv4(&quot;192.168.1.0/24&quot;);
-assertEquals(cidrv4FirstAddress(cidr), parseAddressv4(&quot;192.168.1.0&quot;));
+assertEquals(cidrv4FirstAddress(cidr), parseAddressv4(&quot;192.168.1.0&quot;).address);
 </code><button class="copyButton" data-copy="import { assertEquals } from &quot;@std/assert&quot;;
 import { cidrv4FirstAddress, parseCidrv4 } from &quot;@hertzg/ip/cidrv4&quot;;
 import { parseAddressv4 } from &quot;@hertzg/ip/addressv4&quot;;
 
 const cidr = parseCidrv4(&quot;192.168.1.0/24&quot;);
-assertEquals(cidrv4FirstAddress(cidr), parseAddressv4(&quot;192.168.1.0&quot;));
+assertEquals(cidrv4FirstAddress(cidr), parseAddressv4(&quot;192.168.1.0&quot;).address);
 "><svg
   class="copy"
   width="15"

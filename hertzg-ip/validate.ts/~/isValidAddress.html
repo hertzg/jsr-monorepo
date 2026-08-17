@@ -167,7 +167,9 @@
 </a>
 <span class="font-bold">isValidAddress</span><span class="font-medium">(<span><span>address<span>: <span class="td-kw">string</span></span></span></span>)<span>: <span class="td-kw">boolean</span></span> </span>
       </code><div class="space-y-7" id=""><div class="markdown"><p>Checks if a string is a valid plain IP address (IPv4 or IPv6).</p>
-<p>Does <strong>not</strong> accept CIDR notation — use <a href="../.././validate.ts/~/isValidCidr.html">isValidCidr</a> for that.</p>
+<p>Accepts exactly what <a href="../.././address.ts/~/parseAddress.html">parseAddress</a> accepts, an optional <code>%zoneId</code>
+included. Does <strong>not</strong> accept CIDR notation — use <a href="../.././validate.ts/~/isValidCidr.html">isValidCidr</a> for
+that.</p>
 </div><section class="section"  id="examples"><div>
       <h2 class="anchorable mb-1"><a href="#examples" class="anchor" aria-label="Anchor" tabIndex="-1"><svg
   width="16"
@@ -222,6 +224,7 @@ assert(isValidAddress(&quot;192.168.1.1&quot;));
 assert(isValidAddress(&quot;::1&quot;));
 assert(isValidAddress(&quot;0.0.0.0&quot;));
 assert(isValidAddress(&quot;fe80::1%eth0&quot;));
+assert(isValidAddress(&quot;192.168.1.1%ether1&quot;));
 </code><button class="copyButton" data-copy="import { assert } from &quot;@std/assert&quot;;
 import { isValidAddress } from &quot;@hertzg/ip/validate&quot;;
 
@@ -229,6 +232,7 @@ assert(isValidAddress(&quot;192.168.1.1&quot;));
 assert(isValidAddress(&quot;::1&quot;));
 assert(isValidAddress(&quot;0.0.0.0&quot;));
 assert(isValidAddress(&quot;fe80::1%eth0&quot;));
+assert(isValidAddress(&quot;192.168.1.1%ether1&quot;));
 "><svg
   class="copy"
   width="15"
@@ -294,6 +298,7 @@ assertEquals(isValidAddress(&quot;not an ip&quot;), false);
 assertEquals(isValidAddress(&quot;999.999.999.999&quot;), false);
 assertEquals(isValidAddress(&quot;10.0.0.0/8&quot;), false);
 assertEquals(isValidAddress(&quot;2001:db8::/32&quot;), false);
+assertEquals(isValidAddress(&quot;fe80::1%&quot;), false);
 </code><button class="copyButton" data-copy="import { assertEquals } from &quot;@std/assert&quot;;
 import { isValidAddress } from &quot;@hertzg/ip/validate&quot;;
 
@@ -302,6 +307,7 @@ assertEquals(isValidAddress(&quot;not an ip&quot;), false);
 assertEquals(isValidAddress(&quot;999.999.999.999&quot;), false);
 assertEquals(isValidAddress(&quot;10.0.0.0/8&quot;), false);
 assertEquals(isValidAddress(&quot;2001:db8::/32&quot;), false);
+assertEquals(isValidAddress(&quot;fe80::1%&quot;), false);
 "><svg
   class="copy"
   width="15"

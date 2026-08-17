@@ -220,32 +220,32 @@ Examples</h2></div><div class="space-y-8"><div class="anchorable"><a href="#exam
 import { classifyAddressv4 } from &quot;@hertzg/ip/classifyv4&quot;;
 import { parseAddressv4 } from &quot;@hertzg/ip/addressv4&quot;;
 
-assertEquals(classifyAddressv4(parseAddressv4(&quot;192.168.1.1&quot;)), &quot;private&quot;);
-assertEquals(classifyAddressv4(parseAddressv4(&quot;8.8.8.8&quot;)), &quot;public&quot;);
-assertEquals(classifyAddressv4(parseAddressv4(&quot;127.0.0.1&quot;)), &quot;loopback&quot;);
-assertEquals(classifyAddressv4(parseAddressv4(&quot;169.254.1.1&quot;)), &quot;link-local&quot;);
-assertEquals(classifyAddressv4(parseAddressv4(&quot;224.0.0.1&quot;)), &quot;multicast&quot;);
-assertEquals(classifyAddressv4(parseAddressv4(&quot;255.255.255.255&quot;)), &quot;broadcast&quot;);
-assertEquals(classifyAddressv4(parseAddressv4(&quot;0.0.0.0&quot;)), &quot;this-network&quot;);
-assertEquals(classifyAddressv4(parseAddressv4(&quot;100.64.0.1&quot;)), &quot;cg-nat&quot;);
-assertEquals(classifyAddressv4(parseAddressv4(&quot;198.18.0.1&quot;)), &quot;benchmarking&quot;);
-assertEquals(classifyAddressv4(parseAddressv4(&quot;192.0.2.1&quot;)), &quot;documentation&quot;);
-assertEquals(classifyAddressv4(parseAddressv4(&quot;240.0.0.0&quot;)), &quot;reserved&quot;);
+assertEquals(classifyAddressv4(parseAddressv4(&quot;192.168.1.1&quot;).address), &quot;private&quot;);
+assertEquals(classifyAddressv4(parseAddressv4(&quot;8.8.8.8&quot;).address), &quot;public&quot;);
+assertEquals(classifyAddressv4(parseAddressv4(&quot;127.0.0.1&quot;).address), &quot;loopback&quot;);
+assertEquals(classifyAddressv4(parseAddressv4(&quot;169.254.1.1&quot;).address), &quot;link-local&quot;);
+assertEquals(classifyAddressv4(parseAddressv4(&quot;224.0.0.1&quot;).address), &quot;multicast&quot;);
+assertEquals(classifyAddressv4(parseAddressv4(&quot;255.255.255.255&quot;).address), &quot;broadcast&quot;);
+assertEquals(classifyAddressv4(parseAddressv4(&quot;0.0.0.0&quot;).address), &quot;this-network&quot;);
+assertEquals(classifyAddressv4(parseAddressv4(&quot;100.64.0.1&quot;).address), &quot;cg-nat&quot;);
+assertEquals(classifyAddressv4(parseAddressv4(&quot;198.18.0.1&quot;).address), &quot;benchmarking&quot;);
+assertEquals(classifyAddressv4(parseAddressv4(&quot;192.0.2.1&quot;).address), &quot;documentation&quot;);
+assertEquals(classifyAddressv4(parseAddressv4(&quot;240.0.0.0&quot;).address), &quot;reserved&quot;);
 </code><button class="copyButton" data-copy="import { assertEquals } from &quot;@std/assert&quot;;
 import { classifyAddressv4 } from &quot;@hertzg/ip/classifyv4&quot;;
 import { parseAddressv4 } from &quot;@hertzg/ip/addressv4&quot;;
 
-assertEquals(classifyAddressv4(parseAddressv4(&quot;192.168.1.1&quot;)), &quot;private&quot;);
-assertEquals(classifyAddressv4(parseAddressv4(&quot;8.8.8.8&quot;)), &quot;public&quot;);
-assertEquals(classifyAddressv4(parseAddressv4(&quot;127.0.0.1&quot;)), &quot;loopback&quot;);
-assertEquals(classifyAddressv4(parseAddressv4(&quot;169.254.1.1&quot;)), &quot;link-local&quot;);
-assertEquals(classifyAddressv4(parseAddressv4(&quot;224.0.0.1&quot;)), &quot;multicast&quot;);
-assertEquals(classifyAddressv4(parseAddressv4(&quot;255.255.255.255&quot;)), &quot;broadcast&quot;);
-assertEquals(classifyAddressv4(parseAddressv4(&quot;0.0.0.0&quot;)), &quot;this-network&quot;);
-assertEquals(classifyAddressv4(parseAddressv4(&quot;100.64.0.1&quot;)), &quot;cg-nat&quot;);
-assertEquals(classifyAddressv4(parseAddressv4(&quot;198.18.0.1&quot;)), &quot;benchmarking&quot;);
-assertEquals(classifyAddressv4(parseAddressv4(&quot;192.0.2.1&quot;)), &quot;documentation&quot;);
-assertEquals(classifyAddressv4(parseAddressv4(&quot;240.0.0.0&quot;)), &quot;reserved&quot;);
+assertEquals(classifyAddressv4(parseAddressv4(&quot;192.168.1.1&quot;).address), &quot;private&quot;);
+assertEquals(classifyAddressv4(parseAddressv4(&quot;8.8.8.8&quot;).address), &quot;public&quot;);
+assertEquals(classifyAddressv4(parseAddressv4(&quot;127.0.0.1&quot;).address), &quot;loopback&quot;);
+assertEquals(classifyAddressv4(parseAddressv4(&quot;169.254.1.1&quot;).address), &quot;link-local&quot;);
+assertEquals(classifyAddressv4(parseAddressv4(&quot;224.0.0.1&quot;).address), &quot;multicast&quot;);
+assertEquals(classifyAddressv4(parseAddressv4(&quot;255.255.255.255&quot;).address), &quot;broadcast&quot;);
+assertEquals(classifyAddressv4(parseAddressv4(&quot;0.0.0.0&quot;).address), &quot;this-network&quot;);
+assertEquals(classifyAddressv4(parseAddressv4(&quot;100.64.0.1&quot;).address), &quot;cg-nat&quot;);
+assertEquals(classifyAddressv4(parseAddressv4(&quot;198.18.0.1&quot;).address), &quot;benchmarking&quot;);
+assertEquals(classifyAddressv4(parseAddressv4(&quot;192.0.2.1&quot;).address), &quot;documentation&quot;);
+assertEquals(classifyAddressv4(parseAddressv4(&quot;240.0.0.0&quot;).address), &quot;reserved&quot;);
 "><svg
   class="copy"
   width="15"

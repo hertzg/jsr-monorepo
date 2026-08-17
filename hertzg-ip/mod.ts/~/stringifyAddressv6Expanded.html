@@ -165,13 +165,16 @@
   </defs>
 </svg>
 </a>
-<span class="font-bold">stringifyAddressv6Expanded</span><span class="font-medium">(<span><span>address<span>: <span class="td-kw">bigint</span></span></span></span>)<span>: <span class="td-kw">string</span></span> </span>
-      </code><div class="space-y-7" id=""><div class="markdown"><p>Stringifies a bigint to an IPv6 address in full uncompressed
-colon-hexadecimal notation.</p>
+<span class="font-bold">stringifyAddressv6Expanded</span><span class="font-medium">(<span><span>address<span>: <span><a href="../.././mod.ts/~/Addressv6.html" class="link td-ref">Addressv6</a><span class="td-op"> | </span><a href="../.././mod.ts/~/ParsedAddressv6.html" class="link td-ref">ParsedAddressv6</a></span></span></span></span>)<span>: <span class="td-kw">string</span></span> </span>
+      </code><div class="space-y-7" id=""><div class="markdown"><p>Stringifies an IPv6 address to full uncompressed colon-hexadecimal
+notation.</p>
 <p>Every one of the 8 groups is written with all 4 hex digits, and no run of
 zero groups is replaced with <code>::</code>. This is the counterpart of
-<a href="../.././mod.ts/~/stringifyAddressv6.html">stringifyAddressv6</a>, which produces the canonical compressed form, and
-the bigint-taking counterpart of <a href="../.././mod.ts/~/expandIpv6.html">expandIpv6</a>, which takes a string.</p>
+<a href="../.././mod.ts/~/stringifyAddressv6.html">stringifyAddressv6</a>, which produces the canonical compressed form.
+To expand a string, parse it first: <code>stringifyAddressv6Expanded(parseAddressv6(s))</code>.</p>
+<p>Takes either the bare 128-bit bigint or a <a href="../.././mod.ts/~/ParsedAddressv6.html">ParsedAddressv6</a>; given
+the latter, a truthy <code>zoneId</code> is appended after <code>%</code>. The zone constraint
+of <a href="../.././mod.ts/~/stringifyAddressv6.html">stringifyAddressv6</a> applies: no <code>%</code>, <code>/</code> or whitespace.</p>
 </div><section class="section"  id="examples"><div>
       <h2 class="anchorable mb-1"><a href="#examples" class="anchor" aria-label="Anchor" tabIndex="-1"><svg
   width="16"
@@ -286,7 +289,7 @@ assertEquals(stringifyAddressv6Expanded(42540766411282592856903984951653826561n)
   </defs>
 </svg>
 </a>
-<h3 class="example-header"><div class="markdown"><p>Nothing is compressed or elided</p>
+<h3 class="example-header"><div class="markdown"><p>Expanding a string, zone included</p>
 </div></h3>
   <div><div class="markdown"><pre class="highlight"><code class="language-ts">import { assertEquals } from &quot;@std/assert&quot;;
 import { parseAddressv6, stringifyAddressv6, stringifyAddressv6Expanded } from &quot;@hertzg/ip/addressv6&quot;;
@@ -294,12 +297,20 @@ import { parseAddressv6, stringifyAddressv6, stringifyAddressv6Expanded } from &
 const address = parseAddressv6(&quot;2001:db8::1&quot;);
 assertEquals(stringifyAddressv6(address), &quot;2001:db8::1&quot;);
 assertEquals(stringifyAddressv6Expanded(address), &quot;2001:0db8:0000:0000:0000:0000:0000:0001&quot;);
+assertEquals(
+  stringifyAddressv6Expanded(parseAddressv6(&quot;fe80::1%eth0&quot;)),
+  &quot;fe80:0000:0000:0000:0000:0000:0000:0001%eth0&quot;,
+);
 </code><button class="copyButton" data-copy="import { assertEquals } from &quot;@std/assert&quot;;
 import { parseAddressv6, stringifyAddressv6, stringifyAddressv6Expanded } from &quot;@hertzg/ip/addressv6&quot;;
 
 const address = parseAddressv6(&quot;2001:db8::1&quot;);
 assertEquals(stringifyAddressv6(address), &quot;2001:db8::1&quot;);
 assertEquals(stringifyAddressv6Expanded(address), &quot;2001:0db8:0000:0000:0000:0000:0000:0001&quot;);
+assertEquals(
+  stringifyAddressv6Expanded(parseAddressv6(&quot;fe80::1%eth0&quot;)),
+  &quot;fe80:0000:0000:0000:0000:0000:0000:0001%eth0&quot;,
+);
 "><svg
   class="copy"
   width="15"
@@ -449,7 +460,7 @@ Parameters</h2></div><div class="space-y-8"><div class="anchorable docEntry" id=
   </defs>
 </svg>
 </a>
-<span class="font-bold font-lg">address</span><span class="font-medium text-stone-500 dark:text-stone-200"><span>: <span class="td-kw">bigint</span></span></span>
+<span class="font-bold font-lg">address</span><span class="font-medium text-stone-500 dark:text-stone-200"><span>: <span><a href="../.././mod.ts/~/Addressv6.html" class="link td-ref">Addressv6</a><span class="td-op"> | </span><a href="../.././mod.ts/~/ParsedAddressv6.html" class="link td-ref">ParsedAddressv6</a></span></span></span>
       </code>
     </div><a
   class="sourceButton"
@@ -476,7 +487,7 @@ Parameters</h2></div><div class="space-y-8"><div class="anchorable docEntry" id=
   />
 </svg>
 </a>
-</div><div class="max-w-[75ch]"><div class="markdown"><p>The address as a 128-bit bigint</p>
+</div><div class="max-w-[75ch]"><div class="markdown"><p>The address as a 128-bit bigint, or a parse result</p>
 </div></div></div>
 </div></section>
 <section class="section"  id="return-type"><div>
@@ -532,7 +543,7 @@ Return Type</h2></div><div class="space-y-8"><div class=" docEntry" id="function
   />
 </svg>
 </a>
-</div><div class="max-w-[75ch]"><div class="markdown"><p>The IPv6 address string with all 8 groups written in full</p>
+</div><div class="max-w-[75ch]"><div class="markdown"><p>The IPv6 address string with all 8 groups written in full, <code>%zoneId</code> appended when there is one</p>
 </div></div></div>
 </div></section>
 <section class="section"  id="throws"><div>
@@ -631,7 +642,7 @@ Throws</h2></div><div class="space-y-8"><div class=" docEntry" id="function_stri
 </svg>
 </button><code></code></pre>
 </div></div><nav class="documentNavigation">
-          <h3>Document Navigation</h3><ul><li><a href="#examples" title="Examples">Examples</a></li><li><ul><li><a href="#example_0" title="Basic stringifying">Basic stringifying</a></li><li><a href="#example_1" title="Nothing is compressed or elided">Nothing is compressed or elided</a></li><li><a href="#example_2" title="Error handling">Error handling</a></li></ul></li><li><a href="#parameters" title="Parameters">Parameters</a></li><li><ul><li><a href="#function_stringifyaddressv6expanded_0_parameter_address" title="address">address</a></li></ul></li><li><a href="#return-type" title="Return Type">Return Type</a></li><li><a href="#throws" title="Throws">Throws</a></li></ul></nav></div>
+          <h3>Document Navigation</h3><ul><li><a href="#examples" title="Examples">Examples</a></li><li><ul><li><a href="#example_0" title="Basic stringifying">Basic stringifying</a></li><li><a href="#example_1" title="Expanding a string, zone included">Expanding a string, zone included</a></li><li><a href="#example_2" title="Error handling">Error handling</a></li></ul></li><li><a href="#parameters" title="Parameters">Parameters</a></li><li><ul><li><a href="#function_stringifyaddressv6expanded_0_parameter_address" title="address">address</a></li></ul></li><li><a href="#return-type" title="Return Type">Return Type</a></li><li><a href="#throws" title="Throws">Throws</a></li></ul></nav></div>
   </div></div>
 </div>
 </div>

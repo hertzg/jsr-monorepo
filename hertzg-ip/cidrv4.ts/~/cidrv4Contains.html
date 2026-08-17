@@ -220,22 +220,22 @@ import { parseAddressv4 } from &quot;@hertzg/ip/addressv4&quot;;
 
 const cidr = parseCidrv4(&quot;192.168.1.0/24&quot;);
 
-assert(cidrv4Contains(cidr, parseAddressv4(&quot;192.168.1.0&quot;)));
-assert(cidrv4Contains(cidr, parseAddressv4(&quot;192.168.1.100&quot;)));
-assert(cidrv4Contains(cidr, parseAddressv4(&quot;192.168.1.255&quot;)));
-assertEquals(cidrv4Contains(cidr, parseAddressv4(&quot;192.168.2.1&quot;)), false);
-assertEquals(cidrv4Contains(cidr, parseAddressv4(&quot;192.168.0.255&quot;)), false);
+assert(cidrv4Contains(cidr, parseAddressv4(&quot;192.168.1.0&quot;).address));
+assert(cidrv4Contains(cidr, parseAddressv4(&quot;192.168.1.100&quot;).address));
+assert(cidrv4Contains(cidr, parseAddressv4(&quot;192.168.1.255&quot;).address));
+assertEquals(cidrv4Contains(cidr, parseAddressv4(&quot;192.168.2.1&quot;).address), false);
+assertEquals(cidrv4Contains(cidr, parseAddressv4(&quot;192.168.0.255&quot;).address), false);
 </code><button class="copyButton" data-copy="import { assert, assertEquals } from &quot;@std/assert&quot;;
 import { cidrv4Contains, parseCidrv4 } from &quot;@hertzg/ip/cidrv4&quot;;
 import { parseAddressv4 } from &quot;@hertzg/ip/addressv4&quot;;
 
 const cidr = parseCidrv4(&quot;192.168.1.0/24&quot;);
 
-assert(cidrv4Contains(cidr, parseAddressv4(&quot;192.168.1.0&quot;)));
-assert(cidrv4Contains(cidr, parseAddressv4(&quot;192.168.1.100&quot;)));
-assert(cidrv4Contains(cidr, parseAddressv4(&quot;192.168.1.255&quot;)));
-assertEquals(cidrv4Contains(cidr, parseAddressv4(&quot;192.168.2.1&quot;)), false);
-assertEquals(cidrv4Contains(cidr, parseAddressv4(&quot;192.168.0.255&quot;)), false);
+assert(cidrv4Contains(cidr, parseAddressv4(&quot;192.168.1.0&quot;).address));
+assert(cidrv4Contains(cidr, parseAddressv4(&quot;192.168.1.100&quot;).address));
+assert(cidrv4Contains(cidr, parseAddressv4(&quot;192.168.1.255&quot;).address));
+assertEquals(cidrv4Contains(cidr, parseAddressv4(&quot;192.168.2.1&quot;).address), false);
+assertEquals(cidrv4Contains(cidr, parseAddressv4(&quot;192.168.0.255&quot;).address), false);
 "><svg
   class="copy"
   width="15"

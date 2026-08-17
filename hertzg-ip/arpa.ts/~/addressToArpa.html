@@ -228,18 +228,18 @@ Examples</h2></div><div class="space-y-8"><div class="anchorable"><a href="#exam
 import { addressToArpa } from &quot;@hertzg/ip/arpa&quot;;
 import { parseAddress } from &quot;@hertzg/ip/address&quot;;
 
-assertEquals(addressToArpa(parseAddress(&quot;192.168.0.1&quot;)), &quot;1.0.168.192.in-addr.arpa&quot;);
+assertEquals(addressToArpa(parseAddress(&quot;192.168.0.1&quot;).address), &quot;1.0.168.192.in-addr.arpa&quot;);
 assertEquals(
-  addressToArpa(parseAddress(&quot;2001:db8::1&quot;)),
+  addressToArpa(parseAddress(&quot;2001:db8::1&quot;).address),
   &quot;1.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.8.b.d.0.1.0.0.2.ip6.arpa&quot;,
 );
 </code><button class="copyButton" data-copy="import { assertEquals } from &quot;@std/assert&quot;;
 import { addressToArpa } from &quot;@hertzg/ip/arpa&quot;;
 import { parseAddress } from &quot;@hertzg/ip/address&quot;;
 
-assertEquals(addressToArpa(parseAddress(&quot;192.168.0.1&quot;)), &quot;1.0.168.192.in-addr.arpa&quot;);
+assertEquals(addressToArpa(parseAddress(&quot;192.168.0.1&quot;).address), &quot;1.0.168.192.in-addr.arpa&quot;);
 assertEquals(
-  addressToArpa(parseAddress(&quot;2001:db8::1&quot;)),
+  addressToArpa(parseAddress(&quot;2001:db8::1&quot;).address),
   &quot;1.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.8.b.d.0.1.0.0.2.ip6.arpa&quot;,
 );
 "><svg
@@ -303,12 +303,12 @@ assertEquals(
 import { addressToArpa } from &quot;@hertzg/ip/arpa&quot;;
 import { parseAddress } from &quot;@hertzg/ip/address&quot;;
 
-assertEquals(addressToArpa(parseAddress(&quot;::ffff:192.168.0.1&quot;)), &quot;1.0.168.192.in-addr.arpa&quot;);
+assertEquals(addressToArpa(parseAddress(&quot;::ffff:192.168.0.1&quot;).address), &quot;1.0.168.192.in-addr.arpa&quot;);
 </code><button class="copyButton" data-copy="import { assertEquals } from &quot;@std/assert&quot;;
 import { addressToArpa } from &quot;@hertzg/ip/arpa&quot;;
 import { parseAddress } from &quot;@hertzg/ip/address&quot;;
 
-assertEquals(addressToArpa(parseAddress(&quot;::ffff:192.168.0.1&quot;)), &quot;1.0.168.192.in-addr.arpa&quot;);
+assertEquals(addressToArpa(parseAddress(&quot;::ffff:192.168.0.1&quot;).address), &quot;1.0.168.192.in-addr.arpa&quot;);
 "><svg
   class="copy"
   width="15"
