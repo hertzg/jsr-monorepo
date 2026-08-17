@@ -39,7 +39,6 @@
  * @module
  */
 
-import { isAddressv6Mapped } from "./classifyv6.ts";
 import {
   type Cidrv4,
   cidrv4Addresses,
@@ -199,8 +198,11 @@ export function isCidrv6(cidr: Cidr): cidr is Cidrv6 {
   return typeof cidr.address === "bigint";
 }
 
-/** The mask of the IPv4-mapped prefix itself: the high 96 bits. */
-const IPV4_MAPPED_PREFIX_MASK = 0xFFFFFFFFFFFFFFFFFFFFFFFF00000000n;
+/** The IPv4-mapped block, `::ffff:0:0/96` (RFC 4291 section 2.5.5.2). */
+const CIDR_IPV4_MAPPED: Cidrv6 = {
+  address: 0xFFFF_0000_0000n,
+  prefixLength: 96,
+};
 
 /**
  * Parses IPv4 or IPv6 CIDR notation, in either dialect and with an
@@ -270,14 +272,13 @@ export function parseCidr(cidr: string, options?: ParseOptions): ParsedCidr {
   if (!splitNotation(cidr).address.includes(":")) {
     return parseCidrv4(cidr);
   }
+  // A block unmaps only when it lies inside the mapped /96 (ADR 0004): a
+  // prefix length of 96 or longer, or a mask whose high 96 bits are ones.
   const parsed = parseCidrv6(cidr);
-  if (options?.unmapToV4 === false || !isAddressv6Mapped(parsed.address)) {
-    return parsed;
-  }
-  const fixesMappedPrefix = parsed.mask !== undefined
-    ? (parsed.mask & IPV4_MAPPED_PREFIX_MASK) === IPV4_MAPPED_PREFIX_MASK
-    : parsed.prefixLength >= 96;
-  if (!fixesMappedPrefix) {
+  if (
+    options?.unmapToV4 === false ||
+    !cidrv6ContainsCidr(CIDR_IPV4_MAPPED, parsed)
+  ) {
     return parsed;
   }
   const unmapped = unmapToCidrv4(parsed);

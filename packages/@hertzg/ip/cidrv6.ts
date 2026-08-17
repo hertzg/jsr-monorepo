@@ -443,7 +443,14 @@ export function cidrv6PrefixLength(
 ): PrefixLengthv6 {
   let value: Maskv6;
   if (typeof cidrOrMask === "string") {
-    value = parseAddressv6(cidrOrMask).address;
+    // A mask is an address slot, not a notation: no zone rides in on it.
+    const mask = parseAddressv6(cidrOrMask);
+    if (mask.zoneId !== undefined) {
+      throw new TypeError(
+        `IPv6 mask must not have a zone ID, got '${cidrOrMask}'`,
+      );
+    }
+    value = mask.address;
   } else if (typeof cidrOrMask === "bigint") {
     value = cidrOrMask;
   } else if (cidrOrMask.mask !== undefined) {

@@ -416,7 +416,14 @@ export function cidrv4PrefixLength(
 ): PrefixLengthv4 {
   let value: Maskv4;
   if (typeof cidrOrMask === "string") {
-    value = parseAddressv4(cidrOrMask).address;
+    // A mask is an address slot, not a notation: no zone rides in on it.
+    const mask = parseAddressv4(cidrOrMask);
+    if (mask.zoneId !== undefined) {
+      throw new TypeError(
+        `IPv4 mask must not have a zone ID, got '${cidrOrMask}'`,
+      );
+    }
+    value = mask.address;
   } else if (typeof cidrOrMask === "number") {
     value = cidrOrMask;
   } else if (cidrOrMask.mask !== undefined) {

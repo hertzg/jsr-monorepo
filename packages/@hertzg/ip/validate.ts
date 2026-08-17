@@ -28,8 +28,7 @@
  */
 
 import { parseAddress } from "./address.ts";
-import { isValidCidrv4 } from "./validatev4.ts";
-import { isValidCidrv6 } from "./validatev6.ts";
+import { parseCidr } from "./cidr.ts";
 
 /**
  * Checks if a string is a valid plain IP address (IPv4 or IPv6).
@@ -99,5 +98,10 @@ export function isValidAddress(address: string): boolean {
  * ```
  */
 export function isValidCidr(cidr: string): boolean {
-  return isValidCidrv4(cidr) || isValidCidrv6(cidr);
+  try {
+    parseCidr(cidr);
+    return true;
+  } catch {
+    return false;
+  }
 }

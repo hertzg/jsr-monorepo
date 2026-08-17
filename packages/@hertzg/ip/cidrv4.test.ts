@@ -121,6 +121,14 @@ Deno.test("cidrv4PrefixLength", async (t) => {
     assertThrows(() => cidrv4PrefixLength(" 255.255.255.0"), TypeError);
   });
 
+  await t.step("a mask string is an address slot: no zone ID", () => {
+    assertThrows(
+      () => cidrv4PrefixLength("255.255.255.0%eth0"),
+      TypeError,
+      "IPv4 mask must not have a zone ID, got '255.255.255.0%eth0'",
+    );
+  });
+
   await t.step("non-contiguous masks throw", () => {
     assertThrows(
       () => cidrv4PrefixLength(0xFF00FF00),

@@ -172,6 +172,14 @@ Deno.test("cidrv6PrefixLength", async (t) => {
     );
   });
 
+  await t.step("a mask string is an address slot: no zone ID", () => {
+    assertThrows(
+      () => cidrv6PrefixLength("ffff:ffff::%eth0"),
+      TypeError,
+      "IPv6 mask must not have a zone ID, got 'ffff:ffff::%eth0'",
+    );
+  });
+
   await t.step("non-contiguous masks throw", () => {
     assertThrows(
       () => cidrv6PrefixLength(0xFFFF0000FFFF00000000000000000000n),
