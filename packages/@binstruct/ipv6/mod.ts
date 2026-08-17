@@ -49,10 +49,10 @@
  * of this package that adds it.
  *
  * `sourceAddress` / `destinationAddress` are raw 16-byte slices, not
- * `bigint`. Pair this with `@hertzg/ip`'s `stringifyAddressv6` /
- * `parseAddressv6` for human-readable conversion — those work over `bigint`, so
- * bytes need `Array.from(...).reduce()`-style conversion, left to the
- * caller to keep this package free of that dependency.
+ * `bigint`. Pair this with `@hertzg/ip`'s `addressv6FromBytes` /
+ * `addressv6ToBytes` for the `bigint` view and `stringifyAddressv6` /
+ * `parseAddressv6(s).address` for the human-readable one; the conversion is
+ * left to the caller to keep this package free of that dependency.
  *
  * @example Round-trip a minimal IPv6 packet (no payload)
  * ```ts
