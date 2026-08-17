@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.5.0](https://github.com/hertzg/jsr-monorepo/compare/@binstruct/png-v0.4.0...@binstruct/png-v0.5.0) (2026-08-17)
+
+
+### Features
+
+* **@binstruct/pcap, @binstruct/png, @binstruct/cli:** make every coder factory callable with no arguments ([#260](https://github.com/hertzg/jsr-monorepo/issues/260)) ([f9f0322](https://github.com/hertzg/jsr-monorepo/commit/f9f0322f66d49f2314ac23cf56344f44e7c8595d))
+
 ## [0.4.0](https://github.com/hertzg/jsr-monorepo/compare/@binstruct/png-v0.3.3...@binstruct/png-v0.4.0) (2026-04-03)
 
 
