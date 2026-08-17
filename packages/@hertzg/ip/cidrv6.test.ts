@@ -10,6 +10,7 @@ import {
   cidrv6Merge,
   cidrv6Overlaps,
   cidrv6PrefixLength,
+  cidrv6Size,
   cidrv6Subtract,
   compareCidrv6,
   mapFromCidrv4,
@@ -1301,4 +1302,314 @@ Deno.test("unmapToCidrv4", async (t) => {
       assertEquals(unmapToCidrv4(mapFromCidrv4(v4)), v4);
     }
   });
+});
+
+Deno.test("mask dialect", async (t) => {
+  const MASK_32 = 0xFFFFFFFF000000000000000000000000n;
+  const MASK_48 = 0xFFFFFFFFFFFF00000000000000000000n;
+  const MASK_ODD = 0xFFFF0000FFFF00000000000000000000n;
+
+  await t.step("cidrv6Mask reads a stored mask as is", () => {
+    assertEquals(cidrv6Mask({ address: 0n, mask: MASK_32 }), MASK_32);
+    assertEquals(cidrv6Mask({ address: 0n, mask: MASK_ODD }), MASK_ODD);
+  });
+
+  await t.step("cidrv6Mask looks up a prefixed block", () => {
+    assertEquals(cidrv6Mask(parseCidrv6("2001:db8::/32")), MASK_32);
+  });
+
+  await t.step("cidrv6PrefixLength reads a prefixed block as is", () => {
+    assertEquals(cidrv6PrefixLength(parseCidrv6("2001:db8::/32")), 32);
+  });
+
+  await t.step("cidrv6PrefixLength converts a contiguous stored mask", () => {
+    assertEquals(cidrv6PrefixLength({ address: 0n, mask: MASK_48 }), 48);
+  });
+
+  await t.step(
+    "cidrv6PrefixLength throws on a non-contiguous stored mask",
+    () => {
+      assertThrows(
+        () => cidrv6PrefixLength({ address: 0n, mask: MASK_ODD }),
+        TypeError,
+        "IPv6 mask is not contiguous: 0xffff0000ffff00000000000000000000",
+      );
+    },
+  );
+
+  await t.step(
+    "stringifyCidrv6 writes the mask back in colon-hexadecimal",
+    () => {
+      assertEquals(
+        stringifyCidrv6({ address: parseAddressv6("fe80::"), mask: MASK_32 }),
+        "fe80::/ffff:ffff::",
+      );
+    },
+  );
+
+  await t.step(
+    "stringifyCidrv6 keeps host bits and a non-contiguous mask",
+    () => {
+      assertEquals(
+        stringifyCidrv6({
+          address: parseAddressv6("2001:db8::1"),
+          mask: MASK_ODD,
+        }),
+        "2001:db8::1/ffff:0:ffff::",
+      );
+    },
+  );
+
+  await t.step("cidrv6Contains with a masked block", () => {
+    const cidr = { address: parseAddressv6("2001:db8::"), mask: MASK_32 };
+    assert(cidrv6Contains(cidr, parseAddressv6("2001:db8:1::1")));
+    assertEquals(cidrv6Contains(cidr, parseAddressv6("2001:db9::1")), false);
+  });
+
+  await t.step("a non-contiguous mask flows through cidrv6Contains", () => {
+    const cidr = { address: parseAddressv6("2001:0:db8::"), mask: MASK_ODD };
+    assert(cidrv6Contains(cidr, parseAddressv6("2001:ffff:db8::1")));
+    assertEquals(cidrv6Contains(cidr, parseAddressv6("2001:0:db9::1")), false);
+  });
+
+  await t.step("bounds and size of a masked block", () => {
+    const cidr = { address: parseAddressv6("2001:db8::1"), mask: MASK_32 };
+    assertEquals(stringifyAddressv6(cidrv6FirstAddress(cidr)), "2001:db8::");
+    assertEquals(
+      stringifyAddressv6(cidrv6LastAddress(cidr)),
+      "2001:db8:ffff:ffff:ffff:ffff:ffff:ffff",
+    );
+    assertEquals(cidrv6Size(cidr), 1n << 96n);
+  });
+
+  await t.step(
+    "cidrv6Size of a non-contiguous mask is the host-bit count plus one",
+    () => {
+      assertEquals(
+        cidrv6Size({ address: 0n, mask: MASK_ODD }),
+        0xFFFF000100000000000000000000n,
+      );
+    },
+  );
+
+  await t.step("cidrv6Addresses with a masked block", () => {
+    const cidr = {
+      address: parseAddressv6("fd00::"),
+      mask: 0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF8n,
+    };
+    assertEquals(
+      Array.from(cidrv6Addresses(cidr, { count: 3 })).map(stringifyAddressv6),
+      ["fd00::", "fd00::1", "fd00::2"],
+    );
+  });
+
+  await t.step("cidrv6ContainsCidr across dialects", () => {
+    const outer = { address: parseAddressv6("2001:db8::"), mask: MASK_32 };
+    assert(cidrv6ContainsCidr(outer, parseCidrv6("2001:db8:1::/48")));
+    assert(
+      cidrv6ContainsCidr(parseCidrv6("2001:db8::/32"), {
+        address: parseAddressv6("2001:db8:1::"),
+        mask: MASK_48,
+      }),
+    );
+    assertEquals(
+      cidrv6ContainsCidr(parseCidrv6("2001:db8:1::/48"), outer),
+      false,
+    );
+  });
+
+  await t.step("cidrv6Overlaps across dialects", () => {
+    const a = { address: parseAddressv6("2001:db8::"), mask: MASK_32 };
+    assert(cidrv6Overlaps(a, parseCidrv6("2001:db8:1::/48")));
+    assert(cidrv6Overlaps(parseCidrv6("2001:db8:1::/48"), a));
+    assertEquals(cidrv6Overlaps(a, parseCidrv6("2001:db9::/32")), false);
+  });
+
+  await t.step("cidrv6Intersect matches the input dialect", () => {
+    const masked = cidrv6Intersect(
+      { address: parseAddressv6("2001:db8::"), mask: MASK_32 },
+      { address: parseAddressv6("2001:db8::"), mask: MASK_48 },
+    );
+    assertEquals(masked, {
+      address: parseAddressv6("2001:db8::"),
+      mask: MASK_48,
+    });
+
+    const prefixed = cidrv6Intersect(
+      parseCidrv6("2001:db8::/32"),
+      parseCidrv6("2001:db8::/48"),
+    );
+    assertEquals(prefixed, {
+      address: parseAddressv6("2001:db8::"),
+      prefixLength: 48,
+    });
+  });
+
+  await t.step("cidrv6Intersect of mixed dialects is masked", () => {
+    const result = cidrv6Intersect(
+      parseCidrv6("2001:db8::/48"),
+      { address: parseAddressv6("2001:db8::"), mask: MASK_32 },
+    );
+    assertEquals(result, {
+      address: parseAddressv6("2001:db8::"),
+      mask: MASK_48,
+    });
+  });
+
+  await t.step("cidrv6Subtract matches the input dialect", () => {
+    const result = cidrv6Subtract(
+      { address: parseAddressv6("2001:db8::"), mask: MASK_32 },
+      {
+        address: parseAddressv6("2001:db8::"),
+        mask: 0xFFFFFFFFC00000000000000000000000n,
+      },
+    );
+    assertEquals(result.map(stringifyCidrv6), [
+      "2001:db8:8000::/ffff:ffff:8000::",
+      "2001:db8:4000::/ffff:ffff:c000::",
+    ]);
+  });
+
+  await t.step("cidrv6Subtract of mixed dialects is masked", () => {
+    const disjoint = cidrv6Subtract(
+      parseCidrv6("2001:db8::/32"),
+      { address: parseAddressv6("2001:db9::"), mask: MASK_32 },
+    );
+    assertEquals(disjoint, [{
+      address: parseAddressv6("2001:db8::"),
+      mask: MASK_32,
+    }]);
+
+    const carved = cidrv6Subtract(
+      { address: parseAddressv6("2001:db8::"), mask: MASK_32 },
+      parseCidrv6("2001:db8::/33"),
+    );
+    assertEquals(carved.map(stringifyCidrv6), [
+      "2001:db8:8000::/ffff:ffff:8000::",
+    ]);
+  });
+
+  await t.step("cidrv6Merge matches the input dialect", () => {
+    const halfMask = 0xFFFFFFFF800000000000000000000000n;
+    const merged = cidrv6Merge([
+      { address: parseAddressv6("2001:db8:8000::"), mask: halfMask },
+      { address: parseAddressv6("2001:db8::"), mask: halfMask },
+    ]);
+    assertEquals(merged, [{
+      address: parseAddressv6("2001:db8::"),
+      mask: MASK_32,
+    }]);
+  });
+
+  await t.step("cidrv6Merge of mixed dialects is masked", () => {
+    const merged = cidrv6Merge([
+      parseCidrv6("2001:db8:8000::/33"),
+      {
+        address: parseAddressv6("2001:db8::"),
+        mask: 0xFFFFFFFF800000000000000000000000n,
+      },
+    ]);
+    assertEquals(merged.map(stringifyCidrv6), ["2001:db8::/ffff:ffff::"]);
+  });
+
+  await t.step("compareCidrv6 orders by mask, dialect aside", () => {
+    const masked = { address: parseAddressv6("2001:db8::"), mask: MASK_32 };
+    assertEquals(compareCidrv6(masked, parseCidrv6("2001:db8::/32")), 0);
+    assertEquals(compareCidrv6(masked, parseCidrv6("2001:db8::/48")), -1);
+    assertEquals(compareCidrv6(parseCidrv6("2001:db8::/48"), masked), 1);
+  });
+
+  await t.step("compareCidrv6 is total over a non-contiguous mask", () => {
+    const odd = { address: parseAddressv6("2001:db8::"), mask: MASK_ODD };
+    assertEquals(compareCidrv6(odd, parseCidrv6("2001:db8::/16")), 1);
+    assertEquals(compareCidrv6(odd, odd), 0);
+  });
+
+  await t.step("mapFromCidrv4 keeps the mask dialect", () => {
+    assertEquals(
+      mapFromCidrv4({ address: 3232235776, mask: 0xFFFFFF00 }),
+      {
+        address: parseAddressv6("::ffff:192.168.1.0"),
+        mask: 0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF00n,
+      },
+    );
+  });
+
+  await t.step("unmapToCidrv4 keeps the mask dialect", () => {
+    assertEquals(
+      unmapToCidrv4({
+        address: parseAddressv6("::ffff:192.168.1.0"),
+        mask: 0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF00n,
+      }),
+      { address: 3232235776, mask: 0xFFFFFF00 },
+    );
+  });
+
+  await t.step("unmapToCidrv4 keeps a non-contiguous low half", () => {
+    assertEquals(
+      unmapToCidrv4({
+        address: parseAddressv6("::ffff:10.0.0.0"),
+        mask: 0xFFFFFFFFFFFFFFFFFFFFFFFFFF00FF00n,
+      }),
+      { address: 167772160, mask: 0xFF00FF00 },
+    );
+  });
+
+  await t.step(
+    "unmapToCidrv4 throws when the mask leaves the /96 prefix open",
+    () => {
+      assertThrows(
+        () =>
+          unmapToCidrv4({
+            address: parseAddressv6("::ffff:10.0.0.0"),
+            mask: 0xFFFFFFFFFFFFFFFF0000000000000000n,
+          }),
+        RangeError,
+        "does not fix the 96-bit IPv4-mapped prefix",
+      );
+    },
+  );
+
+  await t.step(
+    "every operation agrees across dialects for every contiguous mask",
+    () => {
+      const address = parseAddressv6("2001:db8:85a3::8a2e:370:7334");
+      const probe = parseAddressv6("2001:db8:85a3::1");
+      const other = parseCidrv6("2001:db8:85a3::/48");
+      for (let prefixLength = 0; prefixLength <= 128; prefixLength++) {
+        const prefixed = { address, prefixLength };
+        const masked = { address, mask: cidrv6Mask(prefixLength) };
+        assertEquals(cidrv6PrefixLength(masked), prefixLength);
+        assertEquals(
+          cidrv6Contains(masked, probe),
+          cidrv6Contains(prefixed, probe),
+        );
+        assertEquals(cidrv6FirstAddress(masked), cidrv6FirstAddress(prefixed));
+        assertEquals(cidrv6LastAddress(masked), cidrv6LastAddress(prefixed));
+        assertEquals(cidrv6Size(masked), cidrv6Size(prefixed));
+        assertEquals(
+          cidrv6ContainsCidr(masked, other),
+          cidrv6ContainsCidr(prefixed, other),
+        );
+        assertEquals(
+          cidrv6ContainsCidr(other, masked),
+          cidrv6ContainsCidr(other, prefixed),
+        );
+        assertEquals(
+          cidrv6Overlaps(masked, other),
+          cidrv6Overlaps(prefixed, other),
+        );
+        assertEquals(
+          compareCidrv6(masked, other),
+          compareCidrv6(prefixed, other),
+        );
+        const intersection = cidrv6Intersect(prefixed, other);
+        assertEquals(
+          cidrv6Intersect(masked, other),
+          intersection &&
+            { address: intersection.address, mask: cidrv6Mask(intersection) },
+        );
+      }
+    },
+  );
 });

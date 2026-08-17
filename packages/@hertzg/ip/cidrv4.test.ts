@@ -1576,3 +1576,306 @@ Deno.test("cidrv4UsableAddresses", async (t) => {
     assertEquals(Array.from(cidrv4UsableAddresses(cidr)).length, 1);
   });
 });
+
+Deno.test("mask dialect", async (t) => {
+  await t.step("cidrv4Mask reads a stored mask as is", () => {
+    assertEquals(cidrv4Mask({ address: 0, mask: 0xFFFFFF00 }), 0xFFFFFF00);
+    assertEquals(cidrv4Mask({ address: 0, mask: 0xFF00FF00 }), 0xFF00FF00);
+  });
+
+  await t.step("cidrv4Mask shifts a prefixed block", () => {
+    assertEquals(cidrv4Mask(parseCidrv4("10.0.0.0/8")), 0xFF000000);
+  });
+
+  await t.step("cidrv4PrefixLength reads a prefixed block as is", () => {
+    assertEquals(cidrv4PrefixLength(parseCidrv4("10.0.0.0/8")), 8);
+  });
+
+  await t.step("cidrv4PrefixLength converts a contiguous stored mask", () => {
+    assertEquals(cidrv4PrefixLength({ address: 0, mask: 0xFFFFFF00 }), 24);
+  });
+
+  await t.step(
+    "cidrv4PrefixLength throws on a non-contiguous stored mask",
+    () => {
+      assertThrows(
+        () => cidrv4PrefixLength({ address: 0, mask: 0xFF00FF00 }),
+        TypeError,
+        "IPv4 mask is not contiguous: 0xff00ff00",
+      );
+    },
+  );
+
+  await t.step("stringifyCidrv4 writes the mask back in dotted decimal", () => {
+    assertEquals(
+      stringifyCidrv4({
+        address: parseAddressv4("10.0.0.0"),
+        mask: 0xFF000000,
+      }),
+      "10.0.0.0/255.0.0.0",
+    );
+  });
+
+  await t.step(
+    "stringifyCidrv4 keeps host bits and a non-contiguous mask",
+    () => {
+      assertEquals(
+        stringifyCidrv4({
+          address: parseAddressv4("10.1.2.3"),
+          mask: 0xFF00FF00,
+        }),
+        "10.1.2.3/255.0.255.0",
+      );
+    },
+  );
+
+  await t.step("cidrv4Contains with a masked block", () => {
+    const cidr = { address: parseAddressv4("192.168.1.0"), mask: 0xFFFFFF00 };
+    assert(cidrv4Contains(cidr, parseAddressv4("192.168.1.77")));
+    assertEquals(cidrv4Contains(cidr, parseAddressv4("192.168.2.1")), false);
+  });
+
+  await t.step("a non-contiguous mask flows through cidrv4Contains", () => {
+    const cidr = { address: parseAddressv4("10.0.0.0"), mask: 0xFF00FF00 };
+    assert(cidrv4Contains(cidr, parseAddressv4("10.200.0.7")));
+    assertEquals(cidrv4Contains(cidr, parseAddressv4("10.0.1.0")), false);
+  });
+
+  await t.step("bounds of a masked block", () => {
+    const cidr = { address: parseAddressv4("192.168.1.77"), mask: 0xFFFFFF00 };
+    assertEquals(
+      stringifyAddressv4(cidrv4NetworkAddress(cidr)),
+      "192.168.1.0",
+    );
+    assertEquals(
+      stringifyAddressv4(cidrv4BroadcastAddress(cidr)),
+      "192.168.1.255",
+    );
+    assertEquals(
+      stringifyAddressv4(cidrv4FirstUsableAddress(cidr)),
+      "192.168.1.1",
+    );
+    assertEquals(
+      stringifyAddressv4(cidrv4LastUsableAddress(cidr)),
+      "192.168.1.254",
+    );
+  });
+
+  await t.step("a masked /31 is fully usable", () => {
+    const cidr = { address: parseAddressv4("10.0.0.0"), mask: 0xFFFFFFFE };
+    assertEquals(
+      stringifyAddressv4(cidrv4FirstUsableAddress(cidr)),
+      "10.0.0.0",
+    );
+    assertEquals(stringifyAddressv4(cidrv4LastUsableAddress(cidr)), "10.0.0.1");
+    assertEquals(cidrv4UsableSize(cidr), 2);
+  });
+
+  await t.step("cidrv4Size and cidrv4UsableSize with a masked block", () => {
+    const cidr = { address: parseAddressv4("192.168.1.0"), mask: 0xFFFFFF00 };
+    assertEquals(cidrv4Size(cidr), 256);
+    assertEquals(cidrv4UsableSize(cidr), 254);
+  });
+
+  await t.step(
+    "cidrv4Size of a non-contiguous mask is the host-bit count plus one",
+    () => {
+      assertEquals(cidrv4Size({ address: 0, mask: 0xFF00FF00 }), 16711936);
+    },
+  );
+
+  await t.step(
+    "cidrv4Addresses and cidrv4UsableAddresses with a masked block",
+    () => {
+      const cidr = { address: parseAddressv4("10.0.0.0"), mask: 0xFFFFFFF8 };
+      assertEquals(
+        Array.from(cidrv4Addresses(cidr, { count: 3 })).map(stringifyAddressv4),
+        ["10.0.0.0", "10.0.0.1", "10.0.0.2"],
+      );
+      assertEquals(
+        Array.from(cidrv4UsableAddresses(cidr)).map(stringifyAddressv4),
+        [
+          "10.0.0.1",
+          "10.0.0.2",
+          "10.0.0.3",
+          "10.0.0.4",
+          "10.0.0.5",
+          "10.0.0.6",
+        ],
+      );
+    },
+  );
+
+  await t.step("cidrv4ContainsCidr across dialects", () => {
+    const outer = { address: parseAddressv4("10.0.0.0"), mask: 0xFF000000 };
+    assert(cidrv4ContainsCidr(outer, parseCidrv4("10.1.0.0/16")));
+    assert(
+      cidrv4ContainsCidr(parseCidrv4("10.0.0.0/8"), {
+        address: parseAddressv4("10.1.0.0"),
+        mask: 0xFFFF0000,
+      }),
+    );
+    assertEquals(cidrv4ContainsCidr(parseCidrv4("10.1.0.0/16"), outer), false);
+  });
+
+  await t.step("cidrv4Overlaps across dialects", () => {
+    const a = { address: parseAddressv4("10.0.0.0"), mask: 0xFF000000 };
+    assert(cidrv4Overlaps(a, parseCidrv4("10.1.0.0/16")));
+    assert(cidrv4Overlaps(parseCidrv4("10.1.0.0/16"), a));
+    assertEquals(cidrv4Overlaps(a, parseCidrv4("172.16.0.0/12")), false);
+  });
+
+  await t.step("cidrv4Intersect matches the input dialect", () => {
+    const masked = cidrv4Intersect(
+      { address: parseAddressv4("192.168.1.0"), mask: 0xFFFFFF00 },
+      { address: parseAddressv4("192.168.1.0"), mask: 0xFFFFFFF0 },
+    );
+    assertEquals(masked, {
+      address: parseAddressv4("192.168.1.0"),
+      mask: 0xFFFFFFF0,
+    });
+
+    const prefixed = cidrv4Intersect(
+      parseCidrv4("192.168.1.0/24"),
+      parseCidrv4("192.168.1.0/28"),
+    );
+    assertEquals(prefixed, {
+      address: parseAddressv4("192.168.1.0"),
+      prefixLength: 28,
+    });
+  });
+
+  await t.step("cidrv4Intersect of mixed dialects is masked", () => {
+    const result = cidrv4Intersect(
+      parseCidrv4("192.168.1.0/28"),
+      { address: parseAddressv4("192.168.1.0"), mask: 0xFFFFFF00 },
+    );
+    assertEquals(result, {
+      address: parseAddressv4("192.168.1.0"),
+      mask: 0xFFFFFFF0,
+    });
+  });
+
+  await t.step("cidrv4Subtract matches the input dialect", () => {
+    const result = cidrv4Subtract(
+      { address: parseAddressv4("192.168.1.0"), mask: 0xFFFFFF00 },
+      { address: parseAddressv4("192.168.1.0"), mask: 0xFFFFFFF0 },
+    );
+    assertEquals(result.map(stringifyCidrv4), [
+      "192.168.1.128/255.255.255.128",
+      "192.168.1.64/255.255.255.192",
+      "192.168.1.32/255.255.255.224",
+      "192.168.1.16/255.255.255.240",
+    ]);
+  });
+
+  await t.step("cidrv4Subtract of mixed dialects is masked", () => {
+    const disjoint = cidrv4Subtract(
+      parseCidrv4("10.0.0.0/24"),
+      { address: parseAddressv4("172.16.0.0"), mask: 0xFFFFFF00 },
+    );
+    assertEquals(disjoint, [{
+      address: parseAddressv4("10.0.0.0"),
+      mask: 0xFFFFFF00,
+    }]);
+
+    const carved = cidrv4Subtract(
+      { address: parseAddressv4("192.168.1.0"), mask: 0xFFFFFF80 },
+      parseCidrv4("192.168.1.0/26"),
+    );
+    assertEquals(carved.map(stringifyCidrv4), ["192.168.1.64/255.255.255.192"]);
+  });
+
+  await t.step("cidrv4Merge matches the input dialect", () => {
+    const merged = cidrv4Merge([
+      { address: parseAddressv4("10.0.1.0"), mask: 0xFFFFFF00 },
+      { address: parseAddressv4("10.0.0.0"), mask: 0xFFFFFF00 },
+      { address: parseAddressv4("10.0.0.128"), mask: 0xFFFFFF80 },
+    ]);
+    assertEquals(merged, [{
+      address: parseAddressv4("10.0.0.0"),
+      mask: 0xFFFFFE00,
+    }]);
+  });
+
+  await t.step("cidrv4Merge of mixed dialects is masked", () => {
+    const merged = cidrv4Merge([
+      parseCidrv4("10.0.1.0/24"),
+      { address: parseAddressv4("10.0.0.0"), mask: 0xFFFFFF00 },
+    ]);
+    assertEquals(merged.map(stringifyCidrv4), ["10.0.0.0/255.255.254.0"]);
+  });
+
+  await t.step("compareCidrv4 orders by mask, dialect aside", () => {
+    const masked = { address: parseAddressv4("10.0.0.0"), mask: 0xFF000000 };
+    assertEquals(compareCidrv4(masked, parseCidrv4("10.0.0.0/8")), 0);
+    assertEquals(compareCidrv4(masked, parseCidrv4("10.0.0.0/16")), -1);
+    assertEquals(compareCidrv4(parseCidrv4("10.0.0.0/16"), masked), 1);
+  });
+
+  await t.step("compareCidrv4 is total over a non-contiguous mask", () => {
+    const odd = { address: parseAddressv4("10.0.0.0"), mask: 0xFF00FF00 };
+    assertEquals(compareCidrv4(odd, parseCidrv4("10.0.0.0/8")), 1);
+    assertEquals(compareCidrv4(odd, odd), 0);
+  });
+
+  await t.step(
+    "every operation agrees across dialects for every contiguous mask",
+    () => {
+      const address = parseAddressv4("203.0.113.77");
+      const probe = parseAddressv4("203.0.113.200");
+      const other = parseCidrv4("203.0.113.64/26");
+      for (let prefixLength = 0; prefixLength <= 32; prefixLength++) {
+        const prefixed = { address, prefixLength };
+        const masked = { address, mask: cidrv4Mask(prefixLength) };
+        assertEquals(cidrv4PrefixLength(masked), prefixLength);
+        assertEquals(
+          cidrv4Contains(masked, probe),
+          cidrv4Contains(prefixed, probe),
+        );
+        assertEquals(
+          cidrv4NetworkAddress(masked),
+          cidrv4NetworkAddress(prefixed),
+        );
+        assertEquals(
+          cidrv4BroadcastAddress(masked),
+          cidrv4BroadcastAddress(prefixed),
+        );
+        assertEquals(
+          cidrv4FirstUsableAddress(masked),
+          cidrv4FirstUsableAddress(prefixed),
+        );
+        assertEquals(
+          cidrv4LastUsableAddress(masked),
+          cidrv4LastUsableAddress(prefixed),
+        );
+        assertEquals(cidrv4Size(masked), cidrv4Size(prefixed));
+        assertEquals(cidrv4UsableSize(masked), cidrv4UsableSize(prefixed));
+        assertEquals(
+          cidrv4ContainsCidr(masked, other),
+          cidrv4ContainsCidr(prefixed, other),
+        );
+        assertEquals(
+          cidrv4ContainsCidr(other, masked),
+          cidrv4ContainsCidr(other, prefixed),
+        );
+        assertEquals(
+          cidrv4Overlaps(masked, other),
+          cidrv4Overlaps(prefixed, other),
+        );
+        assertEquals(
+          compareCidrv4(masked, other),
+          compareCidrv4(prefixed, other),
+        );
+        const intersection = cidrv4Intersect(prefixed, other);
+        assertEquals(
+          cidrv4Intersect(masked, other),
+          intersection && {
+            address: intersection.address,
+            mask: cidrv4Mask(intersection),
+          },
+        );
+      }
+    },
+  );
+});

@@ -11,41 +11,44 @@ import {
   cidrSize,
   cidrSubtract,
   compareCidr,
+  isCidrv4,
+  isCidrv6,
   parseCidr,
   stringifyCidr,
 } from "./cidr.ts";
 import { parseAddress, stringifyAddress } from "./address.ts";
 import { isValidCidr } from "./validate.ts";
+import { parseAddressv4 } from "./addressv4.ts";
 import { parseAddressv6 } from "./addressv6.ts";
-import { type Cidrv4, parseCidrv4 } from "./cidrv4.ts";
-import { type Cidrv6, parseCidrv6 } from "./cidrv6.ts";
+import { type Cidrv4, parseCidrv4, type PrefixedCidrv4 } from "./cidrv4.ts";
+import { type Cidrv6, parseCidrv6, type PrefixedCidrv6 } from "./cidrv6.ts";
 
 Deno.test("parseCidr", async (t) => {
   await t.step("parses IPv4 CIDR", () => {
-    const cidr = parseCidr("192.168.1.0/24") as Cidrv4;
+    const cidr = parseCidr("192.168.1.0/24") as PrefixedCidrv4;
     assertEquals(typeof cidr.address, "number");
     assertEquals(cidr.prefixLength, 24);
   });
 
   await t.step("parses IPv6 CIDR", () => {
-    const cidr = parseCidr("2001:db8::/32") as Cidrv6;
+    const cidr = parseCidr("2001:db8::/32") as PrefixedCidrv6;
     assertEquals(typeof cidr.address, "bigint");
     assertEquals(cidr.prefixLength, 32);
   });
 
   await t.step("parses various IPv4 CIDRs", () => {
-    const cidr = parseCidr("10.0.0.0/8") as Cidrv4;
+    const cidr = parseCidr("10.0.0.0/8") as PrefixedCidrv4;
     assertEquals(cidr.prefixLength, 8);
 
-    const cidr2 = parseCidr("172.16.0.0/12") as Cidrv4;
+    const cidr2 = parseCidr("172.16.0.0/12") as PrefixedCidrv4;
     assertEquals(cidr2.prefixLength, 12);
   });
 
   await t.step("parses various IPv6 CIDRs", () => {
-    const cidr = parseCidr("fe80::/10") as Cidrv6;
+    const cidr = parseCidr("fe80::/10") as PrefixedCidrv6;
     assertEquals(cidr.prefixLength, 10);
 
-    const cidr2 = parseCidr("::1/128") as Cidrv6;
+    const cidr2 = parseCidr("::1/128") as PrefixedCidrv6;
     assertEquals(cidr2.prefixLength, 128);
   });
 
@@ -539,5 +542,98 @@ Deno.test("cidrLastAddress", async (t) => {
 
     const v6 = parseCidrv6("fd00::/120");
     assertEquals(cidrLastAddress(v6) - cidrFirstAddress(v6) + 1n, cidrSize(v6));
+  });
+});
+
+Deno.test("mask dialect", async (t) => {
+  const v4Masked = { address: parseAddressv4("10.0.0.0"), mask: 0xFF000000 };
+  const v6Masked = {
+    address: parseAddressv6("2001:db8::"),
+    mask: 0xFFFFFFFF000000000000000000000000n,
+  };
+
+  await t.step("isCidrv4 and isCidrv6 accept masked blocks", () => {
+    assert(isCidrv4(v4Masked));
+    assertEquals(isCidrv6(v4Masked), false);
+    assert(isCidrv6(v6Masked));
+    assertEquals(isCidrv4(v6Masked), false);
+  });
+
+  await t.step("stringifyCidr writes the mask back", () => {
+    assertEquals(stringifyCidr(v4Masked), "10.0.0.0/255.0.0.0");
+    assertEquals(stringifyCidr(v6Masked), "2001:db8::/ffff:ffff::");
+  });
+
+  await t.step("cidrContains with masked blocks", () => {
+    assert(cidrContains(v4Masked, parseAddress("10.1.2.3")));
+    assert(cidrContains(v6Masked, parseAddress("2001:db8::1")));
+    assertEquals(cidrContains(v4Masked, parseAddress("2001:db8::1")), false);
+  });
+
+  await t.step("cidrContainsCidr and cidrOverlaps across dialects", () => {
+    assert(cidrContainsCidr(v4Masked, parseCidr("10.1.0.0/16")));
+    assert(cidrOverlaps(parseCidr("2001:db8:1::/48"), v6Masked));
+    assertThrows(() => cidrContainsCidr(v4Masked, v6Masked), TypeError);
+  });
+
+  await t.step("cidrIntersect of mixed dialects is masked", () => {
+    assertEquals(
+      cidrIntersect(v4Masked, parseCidr("10.1.0.0/16")),
+      { address: parseAddressv4("10.1.0.0"), mask: 0xFFFF0000 },
+    );
+  });
+
+  await t.step(
+    "cidrSubtract and cidrMerge of masked blocks stay masked",
+    () => {
+      assertEquals(
+        cidrSubtract(v6Masked, parseCidr("2001:db8::/33")).map(stringifyCidr),
+        ["2001:db8:8000::/ffff:ffff:8000::"],
+      );
+      assertEquals(
+        cidrMerge([v4Masked, parseCidr("11.0.0.0/8")]).map(stringifyCidr),
+        ["10.0.0.0/254.0.0.0"],
+      );
+    },
+  );
+
+  await t.step(
+    "cidrSize, cidrFirstAddress, cidrLastAddress with masked blocks",
+    () => {
+      assertEquals(cidrSize(v4Masked), 16777216);
+      assertEquals(cidrSize(v6Masked), 1n << 96n);
+      assertEquals(stringifyAddress(cidrFirstAddress(v4Masked)), "10.0.0.0");
+      assertEquals(
+        stringifyAddress(cidrLastAddress(v4Masked)),
+        "10.255.255.255",
+      );
+      assertEquals(stringifyAddress(cidrFirstAddress(v6Masked)), "2001:db8::");
+      assertEquals(
+        stringifyAddress(cidrLastAddress(v6Masked)),
+        "2001:db8:ffff:ffff:ffff:ffff:ffff:ffff",
+      );
+    },
+  );
+
+  await t.step("cidrAddresses with a masked block", () => {
+    assertEquals(
+      Array.from(cidrAddresses(v4Masked, { count: 2 })).map(stringifyAddress),
+      ["10.0.0.0", "10.0.0.1"],
+    );
+  });
+
+  await t.step("compareCidr orders masked blocks with prefixed ones", () => {
+    const list = [
+      parseCidr("2001:db8::/48"),
+      v6Masked,
+      parseCidr("10.0.0.0/16"),
+      v4Masked,
+    ];
+    assertEquals(list.toSorted(compareCidr).map(stringifyCidr), [
+      "10.0.0.0/255.0.0.0",
+      "10.0.0.0/16",
+      "2001:db8::/ffff:ffff::",
+      "2001:db8::/48",
+    ]);
   });
 });
