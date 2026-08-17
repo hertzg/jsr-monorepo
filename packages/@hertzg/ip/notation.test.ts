@@ -511,8 +511,11 @@ Deno.test("stringify(parse(s)) === s for every canonical accepted form", async (
   });
 
   await t.step("IPv6", () => {
-    for (const s of [...addresses, "::ffff:c0a8:101%z"]) {
-      if (!s.includes(":")) continue;
+    for (
+      const s of [...addresses, "::ffff:c0a8:101%z"].filter((s) =>
+        s.includes(":")
+      )
+    ) {
       assertEquals(stringifyAddressv6(parseAddressv6(s)), s);
     }
     for (const s of cidrs.filter((s) => s.includes(":"))) {

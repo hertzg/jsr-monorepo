@@ -64,6 +64,11 @@
 
 import { splitNotation, type ZoneId } from "./notation.ts";
 
+export type {
+  /** The zone ID after `%`, a string. */
+  ZoneId,
+} from "./notation.ts";
+
 /**
  * An IPv4 address as a 32-bit unsigned integer, `0` to `4294967295`. The
  * primitive type is what carries the version: a `number` is IPv4, a

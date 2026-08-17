@@ -65,6 +65,15 @@
 import { type Addressv4, parseAddressv4 } from "./addressv4.ts";
 import { splitNotation, type ZoneId } from "./notation.ts";
 
+export type {
+  /** An IPv4 address as a 32-bit unsigned integer. */
+  Addressv4,
+} from "./addressv4.ts";
+export type {
+  /** The zone ID after `%`, a string. */
+  ZoneId,
+} from "./notation.ts";
+
 /**
  * An IPv6 address as a 128-bit unsigned bigint, `0n` to `2n ** 128n - 1n`.
  * The primitive type is what carries the version: a `bigint` is IPv6, a

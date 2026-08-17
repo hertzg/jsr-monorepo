@@ -88,11 +88,23 @@ import { splitNotation } from "./notation.ts";
 export type {
   /** A plain IP address of either IP version. */
   Address,
+  /** An IPv4 address as a 32-bit unsigned integer. */
+  Addressv4,
+  /** An IPv6 address as a 128-bit unsigned bigint. */
+  Addressv6,
   /** What parseAddress returns: the address and an optional zone ID. */
   ParsedAddress,
+  /** What parseAddressv4 returns: the address and an optional zone ID. */
+  ParsedAddressv4,
+  /** What parseAddressv6 returns: the address and an optional zone ID. */
+  ParsedAddressv6,
   /** Options for the universal parsers. */
   ParseOptions,
 } from "./address.ts";
+export type {
+  /** The zone ID after `%`, a string. */
+  ZoneId,
+} from "./notation.ts";
 export type {
   /** Type representing an IPv4 CIDR block, in either dialect. */
   Cidrv4,

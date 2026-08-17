@@ -48,6 +48,15 @@ Deno.test("addressVersion", async (t) => {
     assertEquals(addressVersion("fe80::1%"), undefined);
   });
 
+  await t.step(
+    "reads the version off the address slot, as the parsers do",
+    () => {
+      assertEquals(addressVersion("10.0.0.1%eth0:1"), 4);
+      assertEquals(cidrVersion("10.0.0.0%eth0:1/8"), 4);
+      assertEquals(cidrVersion("10.0.0.0/ffff:ff00::"), undefined);
+    },
+  );
+
   await t.step("rejects inet_aton short forms", () => {
     assertEquals(addressVersion("1"), undefined);
     assertEquals(addressVersion("192.168.1"), undefined);

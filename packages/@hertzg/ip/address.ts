@@ -65,6 +65,10 @@ export type {
   /** What parseAddressv6 returns: the address and an optional zone ID. */
   ParsedAddressv6,
 } from "./addressv6.ts";
+export type {
+  /** The zone ID after `%`, a string. */
+  ZoneId,
+} from "./notation.ts";
 
 /**
  * A plain IP address of either IP version.
@@ -161,10 +165,7 @@ export function parseAddress(
   if (options?.unmapToV4 === false || !isAddressv6Mapped(parsed.address)) {
     return parsed;
   }
-  const unmapped = unmapToAddressv4(parsed.address);
-  return parsed.zoneId === undefined
-    ? { address: unmapped }
-    : { address: unmapped, zoneId: parsed.zoneId };
+  return { ...parsed, address: unmapToAddressv4(parsed.address) };
 }
 
 /**

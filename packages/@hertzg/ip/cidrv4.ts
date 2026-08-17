@@ -64,6 +64,17 @@ import {
 } from "./addressv4.ts";
 import { splitNotation, type ZoneId } from "./notation.ts";
 
+export type {
+  /** An IPv4 address as a 32-bit unsigned integer. */
+  Addressv4,
+  /** What parseAddressv4 returns: the address and an optional zone ID. */
+  ParsedAddressv4,
+} from "./addressv4.ts";
+export type {
+  /** The zone ID after `%`, a string. */
+  ZoneId,
+} from "./notation.ts";
+
 /**
  * An IPv4 network mask as a 32-bit unsigned integer, e.g. `0xFFFFFF00`
  * for `/24`.

@@ -162,7 +162,7 @@ export function splitNotation(notation: string): Notation {
     );
   }
 
-  const slots: { address: string; zoneId?: ZoneId; prefix?: string } = {
+  const slots: { -readonly [K in keyof Notation]: Notation[K] } = {
     address: notation.slice(0, addressEnd),
   };
 

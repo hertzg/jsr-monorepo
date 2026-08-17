@@ -46,6 +46,13 @@ import { type Classificationv4, classifyAddressv4 } from "./classifyv4.ts";
 import { type Classificationv6, classifyAddressv6 } from "./classifyv6.ts";
 
 export type {
+  /** An IPv4 address as a 32-bit unsigned integer. */
+  Addressv4,
+  /** An IPv6 address as a 128-bit unsigned bigint. */
+  Addressv6,
+} from "./address.ts";
+
+export type {
   /** A plain IP address of either IP version. */
   Address,
   /** Type for all IPv4 classification labels. */

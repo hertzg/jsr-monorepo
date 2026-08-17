@@ -62,6 +62,33 @@ import {
 import type { Cidrv4, MaskedCidrv4, PrefixedCidrv4 } from "./cidrv4.ts";
 import { splitNotation, type ZoneId } from "./notation.ts";
 
+export type {
+  /** An IPv6 address as a 128-bit unsigned bigint. */
+  Addressv6,
+  /** What parseAddressv6 returns: the address and an optional zone ID. */
+  ParsedAddressv6,
+} from "./addressv6.ts";
+export type {
+  /** An IPv4 address as a 32-bit unsigned integer. */
+  Addressv4,
+} from "./addressv4.ts";
+export type {
+  /** Type representing an IPv4 CIDR block, in either dialect. */
+  Cidrv4,
+  /** An IPv4 CIDR block written with a network mask. */
+  MaskedCidrv4,
+  /** An IPv4 network mask as a 32-bit unsigned integer. */
+  Maskv4,
+  /** An IPv4 CIDR block written with a prefix length. */
+  PrefixedCidrv4,
+  /** An IPv4 prefix length, 0 to 32. */
+  PrefixLengthv4,
+} from "./cidrv4.ts";
+export type {
+  /** The zone ID after `%`, a string. */
+  ZoneId,
+} from "./notation.ts";
+
 /**
  * An IPv6 network mask as a 128-bit unsigned bigint, e.g.
  * `0xFFFFFFFFFFFFFFFF0000000000000000n` for `/64`.
@@ -697,17 +724,7 @@ export function parseCidrv6(cidr: string): ParsedCidrv6 {
 export function stringifyCidrv6(
   cidr: Addressv6 | ParsedAddressv6 | ParsedCidrv6,
 ): string {
-  if (typeof cidr === "bigint") {
-    return `${stringifyAddressv6(cidr)}/128`;
-  }
-  const address = stringifyAddressv6(cidr);
-  if ("mask" in cidr && cidr.mask !== undefined) {
-    return `${address}/${stringifyAddressv6(cidr.mask)}`;
-  }
-  if ("prefixLength" in cidr && cidr.prefixLength !== undefined) {
-    return `${address}/${cidr.prefixLength}`;
-  }
-  return `${address}/128`;
+  return writeCidrv6(cidr, stringifyAddressv6);
 }
 
 /**
@@ -746,12 +763,24 @@ export function stringifyCidrv6(
 export function stringifyCidrv6Expanded(
   cidr: Addressv6 | ParsedAddressv6 | ParsedCidrv6,
 ): string {
+  return writeCidrv6(cidr, stringifyAddressv6Expanded);
+}
+
+/**
+ * The body shared by {@link stringifyCidrv6} and
+ * {@link stringifyCidrv6Expanded}: dialect, default and zone rules, with
+ * the address form supplied by the caller.
+ */
+function writeCidrv6(
+  cidr: Addressv6 | ParsedAddressv6 | ParsedCidrv6,
+  stringify: (address: Addressv6 | ParsedAddressv6) => string,
+): string {
   if (typeof cidr === "bigint") {
-    return `${stringifyAddressv6Expanded(cidr)}/128`;
+    return `${stringify(cidr)}/128`;
   }
-  const address = stringifyAddressv6Expanded(cidr);
+  const address = stringify(cidr);
   if ("mask" in cidr && cidr.mask !== undefined) {
-    return `${address}/${stringifyAddressv6Expanded(cidr.mask)}`;
+    return `${address}/${stringify(cidr.mask)}`;
   }
   if ("prefixLength" in cidr && cidr.prefixLength !== undefined) {
     return `${address}/${cidr.prefixLength}`;
