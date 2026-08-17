@@ -168,6 +168,8 @@
 <span class="font-bold">parseCidrv6</span><span class="font-medium">(<span><span>cidr<span>: <span class="td-kw">string</span></span></span></span>)<span>: <a href="../.././cidrv6.ts/~/Cidrv6.html" class="link td-ref">Cidrv6</a></span> </span>
       </code><div class="space-y-7" id=""><div class="markdown"><p>Parses an IPv6 CIDR notation string to a Cidrv6 object.</p>
 <p>Returns only the parsed values (address and prefix length).</p>
+<p>The prefix length is decimal digits and nothing else: no leading zeros, no
+whitespace, no sign, and no trailing text.</p>
 </div><section class="section"  id="examples"><div>
       <h2 class="anchorable mb-1"><a href="#examples" class="anchor" aria-label="Anchor" tabIndex="-1"><svg
   width="16"
@@ -290,12 +292,14 @@ import { parseCidrv6 } from &quot;@hertzg/ip/cidrv6&quot;;
 assertThrows(() =&gt; parseCidrv6(&quot;2001:db8::&quot;), TypeError);
 assertThrows(() =&gt; parseCidrv6(&quot;2001:db8::/&quot;), TypeError);
 assertThrows(() =&gt; parseCidrv6(&quot;2001:db8::/129&quot;), RangeError);
+assertThrows(() =&gt; parseCidrv6(&quot;2001:db8::/032&quot;), TypeError);
 </code><button class="copyButton" data-copy="import { assertThrows } from &quot;@std/assert&quot;;
 import { parseCidrv6 } from &quot;@hertzg/ip/cidrv6&quot;;
 
 assertThrows(() =&gt; parseCidrv6(&quot;2001:db8::&quot;), TypeError);
 assertThrows(() =&gt; parseCidrv6(&quot;2001:db8::/&quot;), TypeError);
 assertThrows(() =&gt; parseCidrv6(&quot;2001:db8::/129&quot;), RangeError);
+assertThrows(() =&gt; parseCidrv6(&quot;2001:db8::/032&quot;), TypeError);
 "><svg
   class="copy"
   width="15"
@@ -517,7 +521,8 @@ Throws</h2></div><div class="space-y-8"><div class=" docEntry" id="function_pars
   />
 </svg>
 </a>
-</div><div class="max-w-[75ch]"><div class="markdown"><p>If the format is invalid</p>
+</div><div class="max-w-[75ch]"><div class="markdown"><p>If the format is invalid, including a prefix length
+with leading zeros, whitespace or trailing text</p>
 </div></div></div>
 <div class=" docEntry" id="function_parsecidrv6_0_throws_1">
 
