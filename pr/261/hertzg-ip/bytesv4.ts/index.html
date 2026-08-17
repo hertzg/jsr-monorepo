@@ -101,8 +101,8 @@
   <div class="space-y-2 flex-1"><div class="space-y-7" id="module_doc"><div class="markdown"><p>Conversion between IPv4 addresses and their network-order wire bytes.</p>
 <p>This module reads an address straight out of a packet buffer and writes it
 straight back into one, with no string round-trip. It is the byte-form
-counterpart of the <code>ipv4</code> submodule: <a href=".././bytesv4.ts/~/ipv4FromBytes.html">ipv4FromBytes</a> is to
-parseIpv4 what <a href=".././bytesv4.ts/~/ipv4ToBytes.html">ipv4ToBytes</a> is to stringifyIpv4.</p>
+counterpart of the <code>ipv4</code> submodule: <a href=".././bytesv4.ts/~/addressv4FromBytes.html">addressv4FromBytes</a> is to
+parseAddressv4 what <a href=".././bytesv4.ts/~/addressv4ToBytes.html">addressv4ToBytes</a> is to stringifyAddressv4.</p>
 <p>Addresses keep the numeric representation of the rest of the package — a
 <code>number</code> holding a 32-bit unsigned integer. Bytes are a conversion, not a
 second representation.</p>
@@ -166,8 +166,8 @@ Examples</h2></div><div class="space-y-8"><div class="anchorable"><a href="#exam
 <h3 class="example-header"><div class="markdown"><p>Decode both addresses out of an IPv4 header</p>
 </div></h3>
   <div><div class="markdown"><pre class="highlight"><code class="language-ts">import { assertEquals } from &quot;@std/assert&quot;;
-import { ipv4FromBytes } from &quot;@hertzg/ip/bytesv4&quot;;
-import { stringifyIpv4 } from &quot;@hertzg/ip/ipv4&quot;;
+import { addressv4FromBytes } from &quot;@hertzg/ip/bytesv4&quot;;
+import { stringifyAddressv4 } from &quot;@hertzg/ip/addressv4&quot;;
 
 // deno-fmt-ignore
 const packet = new Uint8Array([
@@ -177,11 +177,11 @@ const packet = new Uint8Array([
   192, 168, 1, 1,
 ]);
 
-assertEquals(stringifyIpv4(ipv4FromBytes(packet, 12)), &quot;10.0.0.1&quot;);
-assertEquals(stringifyIpv4(ipv4FromBytes(packet, 16)), &quot;192.168.1.1&quot;);
+assertEquals(stringifyAddressv4(addressv4FromBytes(packet, 12)), &quot;10.0.0.1&quot;);
+assertEquals(stringifyAddressv4(addressv4FromBytes(packet, 16)), &quot;192.168.1.1&quot;);
 </code><button class="copyButton" data-copy="import { assertEquals } from &quot;@std/assert&quot;;
-import { ipv4FromBytes } from &quot;@hertzg/ip/bytesv4&quot;;
-import { stringifyIpv4 } from &quot;@hertzg/ip/ipv4&quot;;
+import { addressv4FromBytes } from &quot;@hertzg/ip/bytesv4&quot;;
+import { stringifyAddressv4 } from &quot;@hertzg/ip/addressv4&quot;;
 
 // deno-fmt-ignore
 const packet = new Uint8Array([
@@ -191,8 +191,8 @@ const packet = new Uint8Array([
   192, 168, 1, 1,
 ]);
 
-assertEquals(stringifyIpv4(ipv4FromBytes(packet, 12)), &quot;10.0.0.1&quot;);
-assertEquals(stringifyIpv4(ipv4FromBytes(packet, 16)), &quot;192.168.1.1&quot;);
+assertEquals(stringifyAddressv4(addressv4FromBytes(packet, 12)), &quot;10.0.0.1&quot;);
+assertEquals(stringifyAddressv4(addressv4FromBytes(packet, 16)), &quot;192.168.1.1&quot;);
 "><svg
   class="copy"
   width="15"
@@ -251,21 +251,21 @@ assertEquals(stringifyIpv4(ipv4FromBytes(packet, 16)), &quot;192.168.1.1&quot;);
 <h3 class="example-header"><div class="markdown"><p>Assemble an IPv4 header in place</p>
 </div></h3>
   <div><div class="markdown"><pre class="highlight"><code class="language-ts">import { assertEquals } from &quot;@std/assert&quot;;
-import { ipv4ToBytes } from &quot;@hertzg/ip/bytesv4&quot;;
-import { parseIpv4 } from &quot;@hertzg/ip/ipv4&quot;;
+import { addressv4ToBytes } from &quot;@hertzg/ip/bytesv4&quot;;
+import { parseAddressv4 } from &quot;@hertzg/ip/addressv4&quot;;
 
 const frame = new Uint8Array(20);
-ipv4ToBytes(parseIpv4(&quot;10.0.0.1&quot;), frame, 12);
-ipv4ToBytes(parseIpv4(&quot;192.168.1.1&quot;), frame, 16);
+addressv4ToBytes(parseAddressv4(&quot;10.0.0.1&quot;), frame, 12);
+addressv4ToBytes(parseAddressv4(&quot;192.168.1.1&quot;), frame, 16);
 
 assertEquals(frame.slice(12), new Uint8Array([10, 0, 0, 1, 192, 168, 1, 1]));
 </code><button class="copyButton" data-copy="import { assertEquals } from &quot;@std/assert&quot;;
-import { ipv4ToBytes } from &quot;@hertzg/ip/bytesv4&quot;;
-import { parseIpv4 } from &quot;@hertzg/ip/ipv4&quot;;
+import { addressv4ToBytes } from &quot;@hertzg/ip/bytesv4&quot;;
+import { parseAddressv4 } from &quot;@hertzg/ip/addressv4&quot;;
 
 const frame = new Uint8Array(20);
-ipv4ToBytes(parseIpv4(&quot;10.0.0.1&quot;), frame, 12);
-ipv4ToBytes(parseIpv4(&quot;192.168.1.1&quot;), frame, 16);
+addressv4ToBytes(parseAddressv4(&quot;10.0.0.1&quot;), frame, 12);
+addressv4ToBytes(parseAddressv4(&quot;192.168.1.1&quot;), frame, 16);
 
 assertEquals(frame.slice(12), new Uint8Array([10, 0, 0, 1, 192, 168, 1, 1]));
 "><svg
@@ -325,15 +325,15 @@ assertEquals(frame.slice(12), new Uint8Array([10, 0, 0, 1, 192, 168, 1, 1]));
   </defs>
 </svg>
 </a>
-Functions</h2></div><div class="namespaceSection"><div id="namespace_ipv4frombytes" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-Function bg-Function/15 dark:text-FunctionDark dark:bg-FunctionDark/15" title="Function">f</div></div>
+Functions</h2></div><div class="namespaceSection"><div id="namespace_addressv4frombytes" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-Function bg-Function/15 dark:text-FunctionDark dark:bg-FunctionDark/15" title="Function">f</div></div>
 <div class="namespaceItemContent">
-		    <a href="..&#x2F;.&#x2F;bytesv4.ts&#x2F;~&#x2F;ipv4FromBytes.html" title="ipv4FromBytes">
-			    <span>ipv4FromBytes</span><span>(<div class="ml-4"><div><span>bytes<span>: <span class="td-ref">Uint8Array</span></span></span>,</div><div><span>offset<span class="td-op">?</span><span>: <span class="td-kw">number</span></span></span></div></div>)<span>: <span class="td-kw">number</span></span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Reads a 4-byte IPv4 address from a buffer.</p>
+		    <a href="..&#x2F;.&#x2F;bytesv4.ts&#x2F;~&#x2F;addressv4FromBytes.html" title="addressv4FromBytes">
+			    <span>addressv4FromBytes</span><span>(<div class="ml-4"><div><span>bytes<span>: <span class="td-ref">Uint8Array</span></span></span>,</div><div><span>offset<span class="td-op">?</span><span>: <span class="td-kw">number</span></span></span></div></div>)<span>: <span class="td-kw">number</span></span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Reads a 4-byte IPv4 address from a buffer.</p>
 </div></div></div>
-    </div><div id="namespace_ipv4tobytes" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-Function bg-Function/15 dark:text-FunctionDark dark:bg-FunctionDark/15" title="Function">f</div></div>
+    </div><div id="namespace_addressv4tobytes" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-Function bg-Function/15 dark:text-FunctionDark dark:bg-FunctionDark/15" title="Function">f</div></div>
 <div class="namespaceItemContent">
-		    <a href="..&#x2F;.&#x2F;bytesv4.ts&#x2F;~&#x2F;ipv4ToBytes.html" title="ipv4ToBytes">
-			    <span>ipv4ToBytes</span><span>(<div class="ml-4"><div><span>address<span>: <span class="td-kw">number</span></span></span>,</div><div><span>into<span class="td-op">?</span><span>: <span class="td-ref">Uint8Array</span></span></span>,</div><div><span>offset<span class="td-op">?</span><span>: <span class="td-kw">number</span></span></span></div></div>)<span>: <span class="td-ref">Uint8Array</span></span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Writes a 4-byte IPv4 address, either into a fresh buffer or into one you
+		    <a href="..&#x2F;.&#x2F;bytesv4.ts&#x2F;~&#x2F;addressv4ToBytes.html" title="addressv4ToBytes">
+			    <span>addressv4ToBytes</span><span>(<div class="ml-4"><div><span>address<span>: <span class="td-kw">number</span></span></span>,</div><div><span>into<span class="td-op">?</span><span>: <span class="td-ref">Uint8Array</span></span></span>,</div><div><span>offset<span class="td-op">?</span><span>: <span class="td-kw">number</span></span></span></div></div>)<span>: <span class="td-ref">Uint8Array</span></span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Writes a 4-byte IPv4 address, either into a fresh buffer or into one you
 supply.</p>
 </div></div></div>
     </div></div>
@@ -379,37 +379,37 @@ supply.</p>
 </div></div><nav class="topSymbols">
           <h3>Symbols</h3>
           <ul><li>
-                <a href="..&#x2F;.&#x2F;ip.ts&#x2F;~&#x2F;Address.html" title="Address"><div class="docNodeKindIcon"><div class="text-TypeAlias bg-TypeAlias/15 dark:text-TypeAliasDark dark:bg-TypeAliasDark/15" title="Type Alias">T</div></div>
+                <a href="..&#x2F;.&#x2F;address.ts&#x2F;~&#x2F;Address.html" title="Address"><div class="docNodeKindIcon"><div class="text-TypeAlias bg-TypeAlias/15 dark:text-TypeAliasDark dark:bg-TypeAliasDark/15" title="Type Alias">T</div></div>
 <span class="hover:bg-TypeAlias/15 hover:bg-TypeAliasDark/15">
                     Address
                   </span>
                 </a>
               </li><li>
-                <a href="..&#x2F;.&#x2F;ip.ts&#x2F;~&#x2F;compareIp.html" title="compareIp"><div class="docNodeKindIcon"><div class="text-Function bg-Function/15 dark:text-FunctionDark dark:bg-FunctionDark/15" title="Function">f</div></div>
+                <a href="..&#x2F;.&#x2F;address.ts&#x2F;~&#x2F;compareAddress.html" title="compareAddress"><div class="docNodeKindIcon"><div class="text-Function bg-Function/15 dark:text-FunctionDark dark:bg-FunctionDark/15" title="Function">f</div></div>
 <span class="hover:bg-Function/15 hover:bg-FunctionDark/15">
-                    compareIp
+                    compareAddress
                   </span>
                 </a>
               </li><li>
-                <a href="..&#x2F;.&#x2F;ip.ts&#x2F;~&#x2F;parseIp.html" title="parseIp"><div class="docNodeKindIcon"><div class="text-Function bg-Function/15 dark:text-FunctionDark dark:bg-FunctionDark/15" title="Function">f</div></div>
+                <a href="..&#x2F;.&#x2F;address.ts&#x2F;~&#x2F;parseAddress.html" title="parseAddress"><div class="docNodeKindIcon"><div class="text-Function bg-Function/15 dark:text-FunctionDark dark:bg-FunctionDark/15" title="Function">f</div></div>
 <span class="hover:bg-Function/15 hover:bg-FunctionDark/15">
-                    parseIp
+                    parseAddress
                   </span>
                 </a>
               </li><li>
-                <a href="..&#x2F;.&#x2F;ip.ts&#x2F;~&#x2F;stringifyIp.html" title="stringifyIp"><div class="docNodeKindIcon"><div class="text-Function bg-Function/15 dark:text-FunctionDark dark:bg-FunctionDark/15" title="Function">f</div></div>
+                <a href="..&#x2F;.&#x2F;address.ts&#x2F;~&#x2F;stringifyAddress.html" title="stringifyAddress"><div class="docNodeKindIcon"><div class="text-Function bg-Function/15 dark:text-FunctionDark dark:bg-FunctionDark/15" title="Function">f</div></div>
 <span class="hover:bg-Function/15 hover:bg-FunctionDark/15">
-                    stringifyIp
+                    stringifyAddress
                   </span>
                 </a>
               </li><li>
-                <a href="..&#x2F;.&#x2F;ip.ts&#x2F;~&#x2F;stringifyIp.html" title="stringifyIp"><div class="docNodeKindIcon"><div class="text-Function bg-Function/15 dark:text-FunctionDark dark:bg-FunctionDark/15" title="Function">f</div></div>
+                <a href="..&#x2F;.&#x2F;address.ts&#x2F;~&#x2F;stringifyAddress.html" title="stringifyAddress"><div class="docNodeKindIcon"><div class="text-Function bg-Function/15 dark:text-FunctionDark dark:bg-FunctionDark/15" title="Function">f</div></div>
 <span class="hover:bg-Function/15 hover:bg-FunctionDark/15">
-                    stringifyIp
+                    stringifyAddress
                   </span>
                 </a>
               </li></ul><a class="flex items-center gap-0.5" href="..&#x2F;.&#x2F;all_symbols.html">
-              <span class="leading-none">view all 283 symbols</span><svg
+              <span class="leading-none">view all 279 symbols</span><svg
   width="16"
   height="16"
   viewBox="0 0 16 16"
@@ -424,7 +424,7 @@ supply.</p>
   />
 </svg>
 </a></nav><nav class="documentNavigation">
-          <h3>Document Navigation</h3><ul><li><ul><li><a href="#byte-order" title="Byte order">Byte order</a></li><li><a href="#widths-and-offsets" title="Widths and offsets">Widths and offsets</a></li></ul></li><li><a href="#examples" title="Examples">Examples</a></li><li><ul><li><a href="#example_0" title="Decode both addresses out of an IPv4 header">Decode both addresses out of an IPv4 header</a></li><li><a href="#example_1" title="Assemble an IPv4 header in place">Assemble an IPv4 header in place</a></li></ul></li><li><a href="#bytesv4_ts_functions" title="Functions">Functions</a></li><li><ul><li><a href="#namespace_ipv4frombytes" title="ipv4FromBytes">ipv4FromBytes</a></li><li><a href="#namespace_ipv4tobytes" title="ipv4ToBytes">ipv4ToBytes</a></li></ul></li></ul></nav></div>
+          <h3>Document Navigation</h3><ul><li><ul><li><a href="#byte-order" title="Byte order">Byte order</a></li><li><a href="#widths-and-offsets" title="Widths and offsets">Widths and offsets</a></li></ul></li><li><a href="#examples" title="Examples">Examples</a></li><li><ul><li><a href="#example_0" title="Decode both addresses out of an IPv4 header">Decode both addresses out of an IPv4 header</a></li><li><a href="#example_1" title="Assemble an IPv4 header in place">Assemble an IPv4 header in place</a></li></ul></li><li><a href="#bytesv4_ts_functions" title="Functions">Functions</a></li><li><ul><li><a href="#namespace_addressv4frombytes" title="addressv4FromBytes">addressv4FromBytes</a></li><li><a href="#namespace_addressv4tobytes" title="addressv4ToBytes">addressv4ToBytes</a></li></ul></li></ul></nav></div>
   </div></div>
 </div>
 </div>

@@ -173,9 +173,9 @@ throw — an IPv6 address is not contained in an IPv4 CIDR block, and the
 reverse, so both return <code>false</code>. The address usually arrives from the
 network while the CIDR comes from configuration, which makes a mismatch
 ordinary traffic on a dual-stack listener rather than a caller mistake.</p>
-<p>IPv4-mapped IPv6 addresses are not converted here. <a href="../.././mod.ts/~/parseIp.html">parseIp</a> already
-unwraps them, so an address from <code>parseIp</code> matches an IPv4 CIDR; one from
-<a href="../.././mod.ts/~/parseIpv6.html">parseIpv6</a> stays a <code>bigint</code> and does not.</p>
+<p>IPv4-mapped IPv6 addresses are not converted here. <a href="../.././mod.ts/~/parseAddress.html">parseAddress</a> already
+unwraps them, so an address from <code>parseAddress</code> matches an IPv4 CIDR; one from
+<a href="../.././mod.ts/~/parseAddressv6.html">parseAddressv6</a> stays a <code>bigint</code> and does not.</p>
 </div><section class="section"  id="examples"><div>
       <h2 class="anchorable mb-1"><a href="#examples" class="anchor" aria-label="Anchor" tabIndex="-1"><svg
   width="16"
@@ -225,22 +225,22 @@ Examples</h2></div><div class="space-y-8"><div class="anchorable"><a href="#exam
 </div></h3>
   <div><div class="markdown"><pre class="highlight"><code class="language-ts">import { assert, assertEquals } from &quot;@std/assert&quot;;
 import { cidrContains, parseCidr } from &quot;@hertzg/ip/cidr&quot;;
-import { parseIp } from &quot;@hertzg/ip/ip&quot;;
+import { parseAddress } from &quot;@hertzg/ip/address&quot;;
 
-assert(cidrContains(parseCidr(&quot;10.0.0.0/8&quot;), parseIp(&quot;10.1.2.3&quot;)));
-assertEquals(cidrContains(parseCidr(&quot;10.0.0.0/8&quot;), parseIp(&quot;11.0.0.1&quot;)), false);
+assert(cidrContains(parseCidr(&quot;10.0.0.0/8&quot;), parseAddress(&quot;10.1.2.3&quot;)));
+assertEquals(cidrContains(parseCidr(&quot;10.0.0.0/8&quot;), parseAddress(&quot;11.0.0.1&quot;)), false);
 
-assert(cidrContains(parseCidr(&quot;2001:db8::/32&quot;), parseIp(&quot;2001:db8::1&quot;)));
-assertEquals(cidrContains(parseCidr(&quot;2001:db8::/32&quot;), parseIp(&quot;2001:db9::1&quot;)), false);
+assert(cidrContains(parseCidr(&quot;2001:db8::/32&quot;), parseAddress(&quot;2001:db8::1&quot;)));
+assertEquals(cidrContains(parseCidr(&quot;2001:db8::/32&quot;), parseAddress(&quot;2001:db9::1&quot;)), false);
 </code><button class="copyButton" data-copy="import { assert, assertEquals } from &quot;@std/assert&quot;;
 import { cidrContains, parseCidr } from &quot;@hertzg/ip/cidr&quot;;
-import { parseIp } from &quot;@hertzg/ip/ip&quot;;
+import { parseAddress } from &quot;@hertzg/ip/address&quot;;
 
-assert(cidrContains(parseCidr(&quot;10.0.0.0/8&quot;), parseIp(&quot;10.1.2.3&quot;)));
-assertEquals(cidrContains(parseCidr(&quot;10.0.0.0/8&quot;), parseIp(&quot;11.0.0.1&quot;)), false);
+assert(cidrContains(parseCidr(&quot;10.0.0.0/8&quot;), parseAddress(&quot;10.1.2.3&quot;)));
+assertEquals(cidrContains(parseCidr(&quot;10.0.0.0/8&quot;), parseAddress(&quot;11.0.0.1&quot;)), false);
 
-assert(cidrContains(parseCidr(&quot;2001:db8::/32&quot;), parseIp(&quot;2001:db8::1&quot;)));
-assertEquals(cidrContains(parseCidr(&quot;2001:db8::/32&quot;), parseIp(&quot;2001:db9::1&quot;)), false);
+assert(cidrContains(parseCidr(&quot;2001:db8::/32&quot;), parseAddress(&quot;2001:db8::1&quot;)));
+assertEquals(cidrContains(parseCidr(&quot;2001:db8::/32&quot;), parseAddress(&quot;2001:db9::1&quot;)), false);
 "><svg
   class="copy"
   width="15"
@@ -300,16 +300,16 @@ assertEquals(cidrContains(parseCidr(&quot;2001:db8::/32&quot;), parseIp(&quot;20
 </div></h3>
   <div><div class="markdown"><pre class="highlight"><code class="language-ts">import { assertEquals } from &quot;@std/assert&quot;;
 import { cidrContains, parseCidr } from &quot;@hertzg/ip/cidr&quot;;
-import { parseIp } from &quot;@hertzg/ip/ip&quot;;
+import { parseAddress } from &quot;@hertzg/ip/address&quot;;
 
-assertEquals(cidrContains(parseCidr(&quot;10.0.0.0/8&quot;), parseIp(&quot;2001:db8::1&quot;)), false);
-assertEquals(cidrContains(parseCidr(&quot;::/0&quot;), parseIp(&quot;10.1.2.3&quot;)), false);
+assertEquals(cidrContains(parseCidr(&quot;10.0.0.0/8&quot;), parseAddress(&quot;2001:db8::1&quot;)), false);
+assertEquals(cidrContains(parseCidr(&quot;::/0&quot;), parseAddress(&quot;10.1.2.3&quot;)), false);
 </code><button class="copyButton" data-copy="import { assertEquals } from &quot;@std/assert&quot;;
 import { cidrContains, parseCidr } from &quot;@hertzg/ip/cidr&quot;;
-import { parseIp } from &quot;@hertzg/ip/ip&quot;;
+import { parseAddress } from &quot;@hertzg/ip/address&quot;;
 
-assertEquals(cidrContains(parseCidr(&quot;10.0.0.0/8&quot;), parseIp(&quot;2001:db8::1&quot;)), false);
-assertEquals(cidrContains(parseCidr(&quot;::/0&quot;), parseIp(&quot;10.1.2.3&quot;)), false);
+assertEquals(cidrContains(parseCidr(&quot;10.0.0.0/8&quot;), parseAddress(&quot;2001:db8::1&quot;)), false);
+assertEquals(cidrContains(parseCidr(&quot;::/0&quot;), parseAddress(&quot;10.1.2.3&quot;)), false);
 "><svg
   class="copy"
   width="15"
@@ -369,22 +369,22 @@ assertEquals(cidrContains(parseCidr(&quot;::/0&quot;), parseIp(&quot;10.1.2.3&qu
 </div></h3>
   <div><div class="markdown"><pre class="highlight"><code class="language-ts">import { assert, assertEquals } from &quot;@std/assert&quot;;
 import { cidrContains, parseCidr } from &quot;@hertzg/ip/cidr&quot;;
-import { parseIp } from &quot;@hertzg/ip/ip&quot;;
-import { parseIpv6 } from &quot;@hertzg/ip/ipv6&quot;;
+import { parseAddress } from &quot;@hertzg/ip/address&quot;;
+import { parseAddressv6 } from &quot;@hertzg/ip/addressv6&quot;;
 
-assert(cidrContains(parseCidr(&quot;10.0.0.0/8&quot;), parseIp(&quot;::ffff:10.1.2.3&quot;)));
+assert(cidrContains(parseCidr(&quot;10.0.0.0/8&quot;), parseAddress(&quot;::ffff:10.1.2.3&quot;)));
 assertEquals(
-  cidrContains(parseCidr(&quot;10.0.0.0/8&quot;), parseIpv6(&quot;::ffff:10.1.2.3&quot;)),
+  cidrContains(parseCidr(&quot;10.0.0.0/8&quot;), parseAddressv6(&quot;::ffff:10.1.2.3&quot;)),
   false,
 );
 </code><button class="copyButton" data-copy="import { assert, assertEquals } from &quot;@std/assert&quot;;
 import { cidrContains, parseCidr } from &quot;@hertzg/ip/cidr&quot;;
-import { parseIp } from &quot;@hertzg/ip/ip&quot;;
-import { parseIpv6 } from &quot;@hertzg/ip/ipv6&quot;;
+import { parseAddress } from &quot;@hertzg/ip/address&quot;;
+import { parseAddressv6 } from &quot;@hertzg/ip/addressv6&quot;;
 
-assert(cidrContains(parseCidr(&quot;10.0.0.0/8&quot;), parseIp(&quot;::ffff:10.1.2.3&quot;)));
+assert(cidrContains(parseCidr(&quot;10.0.0.0/8&quot;), parseAddress(&quot;::ffff:10.1.2.3&quot;)));
 assertEquals(
-  cidrContains(parseCidr(&quot;10.0.0.0/8&quot;), parseIpv6(&quot;::ffff:10.1.2.3&quot;)),
+  cidrContains(parseCidr(&quot;10.0.0.0/8&quot;), parseAddressv6(&quot;::ffff:10.1.2.3&quot;)),
   false,
 );
 "><svg

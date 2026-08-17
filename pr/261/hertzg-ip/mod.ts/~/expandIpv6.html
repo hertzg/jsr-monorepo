@@ -119,7 +119,7 @@
             <span class="text-Function">function</span>&nbsp;<span class="font-bold">expandIpv6</span>
           </div></div><a
   class="sourceButton"
-  href="file:&#x2F;&#x2F;&#x2F;home&#x2F;runner&#x2F;work&#x2F;jsr-monorepo&#x2F;jsr-monorepo&#x2F;packages&#x2F;@hertzg&#x2F;ip&#x2F;ipv6.ts"><svg
+  href="file:&#x2F;&#x2F;&#x2F;home&#x2F;runner&#x2F;work&#x2F;jsr-monorepo&#x2F;jsr-monorepo&#x2F;packages&#x2F;@hertzg&#x2F;ip&#x2F;addressv6.ts"><svg
   width="14"
   height="14"
   viewBox="0 0 14 14"
@@ -169,7 +169,7 @@
       </code><div class="space-y-7" id=""><div class="markdown"><p>Expands an IPv6 address to its full uncompressed form.</p>
 <p>Returns the address with all 8 groups fully specified with 4 hex digits each.
 This is equivalent to parsing the address and re-stringifying it with
-<a href="../.././mod.ts/~/stringifyIpv6Expanded.html">stringifyIpv6Expanded</a>.</p>
+<a href="../.././mod.ts/~/stringifyAddressv6Expanded.html">stringifyAddressv6Expanded</a>.</p>
 </div><section class="section"  id="examples"><div>
       <h2 class="anchorable mb-1"><a href="#examples" class="anchor" aria-label="Anchor" tabIndex="-1"><svg
   width="16"
@@ -218,14 +218,14 @@ Examples</h2></div><div class="space-y-8"><div class="anchorable"><a href="#exam
 <h3 class="example-header"><div class="markdown"><p>Expanding addresses</p>
 </div></h3>
   <div><div class="markdown"><pre class="highlight"><code class="language-ts">import { assertEquals } from &quot;@std/assert&quot;;
-import { expandIpv6 } from &quot;@hertzg/ip/ipv6&quot;;
+import { expandIpv6 } from &quot;@hertzg/ip/addressv6&quot;;
 
 assertEquals(expandIpv6(&quot;::&quot;), &quot;0000:0000:0000:0000:0000:0000:0000:0000&quot;);
 assertEquals(expandIpv6(&quot;::1&quot;), &quot;0000:0000:0000:0000:0000:0000:0000:0001&quot;);
 assertEquals(expandIpv6(&quot;2001:db8::1&quot;), &quot;2001:0db8:0000:0000:0000:0000:0000:0001&quot;);
 assertEquals(expandIpv6(&quot;fe80::1%eth0&quot;), &quot;fe80:0000:0000:0000:0000:0000:0000:0001&quot;);
 </code><button class="copyButton" data-copy="import { assertEquals } from &quot;@std/assert&quot;;
-import { expandIpv6 } from &quot;@hertzg/ip/ipv6&quot;;
+import { expandIpv6 } from &quot;@hertzg/ip/addressv6&quot;;
 
 assertEquals(expandIpv6(&quot;::&quot;), &quot;0000:0000:0000:0000:0000:0000:0000:0000&quot;);
 assertEquals(expandIpv6(&quot;::1&quot;), &quot;0000:0000:0000:0000:0000:0000:0000:0001&quot;);
@@ -317,7 +317,7 @@ Parameters</h2></div><div class="space-y-8"><div class="anchorable docEntry" id=
       </code>
     </div><a
   class="sourceButton"
-  href="file:&#x2F;&#x2F;&#x2F;home&#x2F;runner&#x2F;work&#x2F;jsr-monorepo&#x2F;jsr-monorepo&#x2F;packages&#x2F;@hertzg&#x2F;ip&#x2F;ipv6.ts"><svg
+  href="file:&#x2F;&#x2F;&#x2F;home&#x2F;runner&#x2F;work&#x2F;jsr-monorepo&#x2F;jsr-monorepo&#x2F;packages&#x2F;@hertzg&#x2F;ip&#x2F;addressv6.ts"><svg
   width="14"
   height="14"
   viewBox="0 0 14 14"
@@ -373,7 +373,7 @@ Return Type</h2></div><div class="space-y-8"><div class=" docEntry" id="function
       </code>
     </div><a
   class="sourceButton"
-  href="file:&#x2F;&#x2F;&#x2F;home&#x2F;runner&#x2F;work&#x2F;jsr-monorepo&#x2F;jsr-monorepo&#x2F;packages&#x2F;@hertzg&#x2F;ip&#x2F;ipv6.ts"><svg
+  href="file:&#x2F;&#x2F;&#x2F;home&#x2F;runner&#x2F;work&#x2F;jsr-monorepo&#x2F;jsr-monorepo&#x2F;packages&#x2F;@hertzg&#x2F;ip&#x2F;addressv6.ts"><svg
   width="14"
   height="14"
   viewBox="0 0 14 14"
@@ -429,7 +429,7 @@ Throws</h2></div><div class="space-y-8"><div class=" docEntry" id="function_expa
       </code>
     </div><a
   class="sourceButton"
-  href="file:&#x2F;&#x2F;&#x2F;home&#x2F;runner&#x2F;work&#x2F;jsr-monorepo&#x2F;jsr-monorepo&#x2F;packages&#x2F;@hertzg&#x2F;ip&#x2F;ipv6.ts"><svg
+  href="file:&#x2F;&#x2F;&#x2F;home&#x2F;runner&#x2F;work&#x2F;jsr-monorepo&#x2F;jsr-monorepo&#x2F;packages&#x2F;@hertzg&#x2F;ip&#x2F;addressv6.ts"><svg
   width="14"
   height="14"
   viewBox="0 0 14 14"
@@ -452,7 +452,7 @@ Throws</h2></div><div class="space-y-8"><div class=" docEntry" id="function_expa
   />
 </svg>
 </a>
-</div><div class="max-w-[75ch]"><div class="markdown"><p>Propagates errors from parseIpv6 if the input is invalid</p>
+</div><div class="max-w-[75ch]"><div class="markdown"><p>Propagates errors from parseAddressv6 if the input is invalid</p>
 </div></div></div>
 </div></section>
 </div>

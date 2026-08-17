@@ -136,7 +136,7 @@ trailer:</p>
 being queried/reported/left otherwise.</p>
 <p>IPv4 addresses are surfaced as raw 32-bit unsigned integers, mirroring how
 <code>@binstruct/ipv4</code> and <code>@binstruct/arp</code> expose the same field. Use
-<a href="https://jsr.io/@hertzg/ip">@hertzg/ip</a>'s <code>parseIpv4</code> / <code>stringifyIpv4</code>
+<a href="https://jsr.io/@hertzg/ip">@hertzg/ip</a>'s <code>parseAddressv4</code> / <code>stringifyAddressv4</code>
 for human-readable conversion.</p>
 <p>Per the binstruct philosophy, encoding does <strong>not</strong> auto-compute the
 checksum. Use <code>internetChecksum</code> from <code>@binstruct/inet</code> after encoding

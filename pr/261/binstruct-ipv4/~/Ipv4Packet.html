@@ -146,7 +146,7 @@
 raw transport-layer payload.</p>
 <p>IPv4 addresses (<code>sourceAddress</code> / <code>destinationAddress</code>) are surfaced as
 32-bit unsigned integers, the same on-wire form ARP uses. Use
-<code>@hertzg/ip/ipv4</code>'s <code>parseIpv4</code> / <code>stringifyIpv4</code> for human-readable
+<code>@hertzg/ip/addressv4</code>'s <code>parseAddressv4</code> / <code>stringifyAddressv4</code> for human-readable
 conversion.</p>
 <p>The <code>options</code> length is derived from <code>versionIhl.ihl</code> (<code>(ihl - 5) * 4</code>); the
 <code>payload</code> length is derived from <code>totalLength - versionIhl.ihl * 4</code>.</p>

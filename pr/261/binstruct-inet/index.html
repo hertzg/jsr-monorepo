@@ -175,7 +175,7 @@ Examples</h2></div><div class="space-y-8"><div class="anchorable"><a href="#exam
 <h3 class="example-header"><div class="markdown"><p>Round-trip a UDP-over-IPv4-over-Ethernet frame</p>
 </div></h3>
   <div><div class="markdown"><pre class="highlight"><code class="language-ts">import { assert, assertEquals } from &quot;@std/assert&quot;;
-import { parseIpv4 } from &quot;@hertzg/ip/ipv4&quot;;
+import { parseAddressv4 } from &quot;@hertzg/ip/addressv4&quot;;
 import { ETHERTYPE_IPV4 } from &quot;@binstruct/ipv4&quot;;
 import { IP_PROTOCOL_UDP } from &quot;@binstruct/udp&quot;;
 import { inetFrame } from &quot;@binstruct/inet&quot;;
@@ -193,8 +193,8 @@ const value = {
     timeToLive: 64,
     protocol: IP_PROTOCOL_UDP,
     headerChecksum: 0,
-    sourceAddress: parseIpv4(&quot;192.0.2.1&quot;),
-    destinationAddress: parseIpv4(&quot;192.0.2.2&quot;),
+    sourceAddress: parseAddressv4(&quot;192.0.2.1&quot;),
+    destinationAddress: parseAddressv4(&quot;192.0.2.2&quot;),
     options: new Uint8Array(0),
     payload: {
       srcPort: 53,
@@ -217,7 +217,7 @@ assert(!(decoded.payload.payload instanceof Uint8Array));
 assert(&quot;srcPort&quot; in decoded.payload.payload);
 assertEquals(decoded.payload.payload.payload, new Uint8Array([0xde, 0xad, 0xbe, 0xef]));
 </code><button class="copyButton" data-copy="import { assert, assertEquals } from &quot;@std/assert&quot;;
-import { parseIpv4 } from &quot;@hertzg/ip/ipv4&quot;;
+import { parseAddressv4 } from &quot;@hertzg/ip/addressv4&quot;;
 import { ETHERTYPE_IPV4 } from &quot;@binstruct/ipv4&quot;;
 import { IP_PROTOCOL_UDP } from &quot;@binstruct/udp&quot;;
 import { inetFrame } from &quot;@binstruct/inet&quot;;
@@ -235,8 +235,8 @@ const value = {
     timeToLive: 64,
     protocol: IP_PROTOCOL_UDP,
     headerChecksum: 0,
-    sourceAddress: parseIpv4(&quot;192.0.2.1&quot;),
-    destinationAddress: parseIpv4(&quot;192.0.2.2&quot;),
+    sourceAddress: parseAddressv4(&quot;192.0.2.1&quot;),
+    destinationAddress: parseAddressv4(&quot;192.0.2.2&quot;),
     options: new Uint8Array(0),
     payload: {
       srcPort: 53,

@@ -642,18 +642,18 @@ Examples</h2></div><div class="space-y-8"><div class="anchorable"><a href="#exam
 </div></h3>
   <div><div class="markdown"><pre class="highlight"><code class="language-ts">import { assertEquals } from &quot;@std/assert&quot;;
 import { cidrAddresses, parseCidr } from &quot;@hertzg/ip/cidr&quot;;
-import { stringifyIp } from &quot;@hertzg/ip/ip&quot;;
+import { stringifyAddress } from &quot;@hertzg/ip/address&quot;;
 
 const first3 = Array.from(cidrAddresses(parseCidr(&quot;10.0.0.0/29&quot;), { count: 3 }));
-assertEquals(first3.map(stringifyIp), [
+assertEquals(first3.map(stringifyAddress), [
   &quot;10.0.0.0&quot;, &quot;10.0.0.1&quot;, &quot;10.0.0.2&quot;,
 ]);
 </code><button class="copyButton" data-copy="import { assertEquals } from &quot;@std/assert&quot;;
 import { cidrAddresses, parseCidr } from &quot;@hertzg/ip/cidr&quot;;
-import { stringifyIp } from &quot;@hertzg/ip/ip&quot;;
+import { stringifyAddress } from &quot;@hertzg/ip/address&quot;;
 
 const first3 = Array.from(cidrAddresses(parseCidr(&quot;10.0.0.0/29&quot;), { count: 3 }));
-assertEquals(first3.map(stringifyIp), [
+assertEquals(first3.map(stringifyAddress), [
   &quot;10.0.0.0&quot;, &quot;10.0.0.1&quot;, &quot;10.0.0.2&quot;,
 ]);
 "><svg

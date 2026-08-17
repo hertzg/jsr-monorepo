@@ -103,7 +103,7 @@
 and IPv6 CIDR notation strings.</p>
 <p>For universal validation, see:</p>
 <ul>
-<li><a href="https://jsr.io/@hertzg/ip/doc/validate"><code>validate</code></a>: isValidIp, isValidCidr</li>
+<li><a href="https://jsr.io/@hertzg/ip/doc/validate"><code>validate</code></a>: isValidAddress, isValidCidr</li>
 </ul>
 </div><section class="section"  id="examples"><div>
       <h2 class="anchorable mb-1"><a href="#examples" class="anchor" aria-label="Anchor" tabIndex="-1"><svg
@@ -153,18 +153,18 @@ Examples</h2></div><div class="space-y-8"><div class="anchorable"><a href="#exam
 <h3 class="example-header"><div class="markdown"><p>Example 1</p>
 </div></h3>
   <div><div class="markdown"><pre class="highlight"><code class="language-ts">import { assert, assertEquals } from &quot;@std/assert&quot;;
-import { isValidCidrv6, isValidIpv6 } from &quot;@hertzg/ip&quot;;
+import { isValidCidrv6, isValidAddressv6 } from &quot;@hertzg/ip&quot;;
 
-assert(isValidIpv6(&quot;::1&quot;));
-assertEquals(isValidIpv6(&quot;192.168.1.1&quot;), false);
+assert(isValidAddressv6(&quot;::1&quot;));
+assertEquals(isValidAddressv6(&quot;192.168.1.1&quot;), false);
 
 assert(isValidCidrv6(&quot;2001:db8::/32&quot;));
 assertEquals(isValidCidrv6(&quot;2001:db8::/129&quot;), false);
 </code><button class="copyButton" data-copy="import { assert, assertEquals } from &quot;@std/assert&quot;;
-import { isValidCidrv6, isValidIpv6 } from &quot;@hertzg/ip&quot;;
+import { isValidCidrv6, isValidAddressv6 } from &quot;@hertzg/ip&quot;;
 
-assert(isValidIpv6(&quot;::1&quot;));
-assertEquals(isValidIpv6(&quot;192.168.1.1&quot;), false);
+assert(isValidAddressv6(&quot;::1&quot;));
+assertEquals(isValidAddressv6(&quot;192.168.1.1&quot;), false);
 
 assert(isValidCidrv6(&quot;2001:db8::/32&quot;));
 assertEquals(isValidCidrv6(&quot;2001:db8::/129&quot;), false);
@@ -225,15 +225,15 @@ assertEquals(isValidCidrv6(&quot;2001:db8::/129&quot;), false);
   </defs>
 </svg>
 </a>
-Functions</h2></div><div class="namespaceSection"><div id="namespace_isvalidcidrv6" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-Function bg-Function/15 dark:text-FunctionDark dark:bg-FunctionDark/15" title="Function">f</div></div>
+Functions</h2></div><div class="namespaceSection"><div id="namespace_isvalidaddressv6" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-Function bg-Function/15 dark:text-FunctionDark dark:bg-FunctionDark/15" title="Function">f</div></div>
+<div class="namespaceItemContent">
+		    <a href="..&#x2F;.&#x2F;validatev6.ts&#x2F;~&#x2F;isValidAddressv6.html" title="isValidAddressv6">
+			    <span>isValidAddressv6</span><span>(<span><span>address<span>: <span class="td-kw">string</span></span></span></span>)<span>: <span class="td-kw">boolean</span></span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Checks if a string is a valid IPv6 address in colon-hexadecimal notation.</p>
+</div></div></div>
+    </div><div id="namespace_isvalidcidrv6" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-Function bg-Function/15 dark:text-FunctionDark dark:bg-FunctionDark/15" title="Function">f</div></div>
 <div class="namespaceItemContent">
 		    <a href="..&#x2F;.&#x2F;validatev6.ts&#x2F;~&#x2F;isValidCidrv6.html" title="isValidCidrv6">
 			    <span>isValidCidrv6</span><span>(<span><span>cidr<span>: <span class="td-kw">string</span></span></span></span>)<span>: <span class="td-kw">boolean</span></span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Checks if a string is valid IPv6 CIDR notation.</p>
-</div></div></div>
-    </div><div id="namespace_isvalidipv6" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-Function bg-Function/15 dark:text-FunctionDark dark:bg-FunctionDark/15" title="Function">f</div></div>
-<div class="namespaceItemContent">
-		    <a href="..&#x2F;.&#x2F;validatev6.ts&#x2F;~&#x2F;isValidIpv6.html" title="isValidIpv6">
-			    <span>isValidIpv6</span><span>(<span><span>address<span>: <span class="td-kw">string</span></span></span></span>)<span>: <span class="td-kw">boolean</span></span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Checks if a string is a valid IPv6 address in colon-hexadecimal notation.</p>
 </div></div></div>
     </div></div>
 </section>
@@ -278,37 +278,37 @@ Functions</h2></div><div class="namespaceSection"><div id="namespace_isvalidcidr
 </div></div><nav class="topSymbols">
           <h3>Symbols</h3>
           <ul><li>
-                <a href="..&#x2F;.&#x2F;ip.ts&#x2F;~&#x2F;Address.html" title="Address"><div class="docNodeKindIcon"><div class="text-TypeAlias bg-TypeAlias/15 dark:text-TypeAliasDark dark:bg-TypeAliasDark/15" title="Type Alias">T</div></div>
+                <a href="..&#x2F;.&#x2F;address.ts&#x2F;~&#x2F;Address.html" title="Address"><div class="docNodeKindIcon"><div class="text-TypeAlias bg-TypeAlias/15 dark:text-TypeAliasDark dark:bg-TypeAliasDark/15" title="Type Alias">T</div></div>
 <span class="hover:bg-TypeAlias/15 hover:bg-TypeAliasDark/15">
                     Address
                   </span>
                 </a>
               </li><li>
-                <a href="..&#x2F;.&#x2F;ip.ts&#x2F;~&#x2F;compareIp.html" title="compareIp"><div class="docNodeKindIcon"><div class="text-Function bg-Function/15 dark:text-FunctionDark dark:bg-FunctionDark/15" title="Function">f</div></div>
+                <a href="..&#x2F;.&#x2F;address.ts&#x2F;~&#x2F;compareAddress.html" title="compareAddress"><div class="docNodeKindIcon"><div class="text-Function bg-Function/15 dark:text-FunctionDark dark:bg-FunctionDark/15" title="Function">f</div></div>
 <span class="hover:bg-Function/15 hover:bg-FunctionDark/15">
-                    compareIp
+                    compareAddress
                   </span>
                 </a>
               </li><li>
-                <a href="..&#x2F;.&#x2F;ip.ts&#x2F;~&#x2F;parseIp.html" title="parseIp"><div class="docNodeKindIcon"><div class="text-Function bg-Function/15 dark:text-FunctionDark dark:bg-FunctionDark/15" title="Function">f</div></div>
+                <a href="..&#x2F;.&#x2F;address.ts&#x2F;~&#x2F;parseAddress.html" title="parseAddress"><div class="docNodeKindIcon"><div class="text-Function bg-Function/15 dark:text-FunctionDark dark:bg-FunctionDark/15" title="Function">f</div></div>
 <span class="hover:bg-Function/15 hover:bg-FunctionDark/15">
-                    parseIp
+                    parseAddress
                   </span>
                 </a>
               </li><li>
-                <a href="..&#x2F;.&#x2F;ip.ts&#x2F;~&#x2F;stringifyIp.html" title="stringifyIp"><div class="docNodeKindIcon"><div class="text-Function bg-Function/15 dark:text-FunctionDark dark:bg-FunctionDark/15" title="Function">f</div></div>
+                <a href="..&#x2F;.&#x2F;address.ts&#x2F;~&#x2F;stringifyAddress.html" title="stringifyAddress"><div class="docNodeKindIcon"><div class="text-Function bg-Function/15 dark:text-FunctionDark dark:bg-FunctionDark/15" title="Function">f</div></div>
 <span class="hover:bg-Function/15 hover:bg-FunctionDark/15">
-                    stringifyIp
+                    stringifyAddress
                   </span>
                 </a>
               </li><li>
-                <a href="..&#x2F;.&#x2F;ip.ts&#x2F;~&#x2F;stringifyIp.html" title="stringifyIp"><div class="docNodeKindIcon"><div class="text-Function bg-Function/15 dark:text-FunctionDark dark:bg-FunctionDark/15" title="Function">f</div></div>
+                <a href="..&#x2F;.&#x2F;address.ts&#x2F;~&#x2F;stringifyAddress.html" title="stringifyAddress"><div class="docNodeKindIcon"><div class="text-Function bg-Function/15 dark:text-FunctionDark dark:bg-FunctionDark/15" title="Function">f</div></div>
 <span class="hover:bg-Function/15 hover:bg-FunctionDark/15">
-                    stringifyIp
+                    stringifyAddress
                   </span>
                 </a>
               </li></ul><a class="flex items-center gap-0.5" href="..&#x2F;.&#x2F;all_symbols.html">
-              <span class="leading-none">view all 283 symbols</span><svg
+              <span class="leading-none">view all 279 symbols</span><svg
   width="16"
   height="16"
   viewBox="0 0 16 16"
@@ -323,7 +323,7 @@ Functions</h2></div><div class="namespaceSection"><div id="namespace_isvalidcidr
   />
 </svg>
 </a></nav><nav class="documentNavigation">
-          <h3>Document Navigation</h3><ul><li><a href="#examples" title="Examples">Examples</a></li><li><ul><li><a href="#example_0" title="Example 1">Example 1</a></li></ul></li><li><a href="#validatev6_ts_functions" title="Functions">Functions</a></li><li><ul><li><a href="#namespace_isvalidcidrv6" title="isValidCidrv6">isValidCidrv6</a></li><li><a href="#namespace_isvalidipv6" title="isValidIpv6">isValidIpv6</a></li></ul></li></ul></nav></div>
+          <h3>Document Navigation</h3><ul><li><a href="#examples" title="Examples">Examples</a></li><li><ul><li><a href="#example_0" title="Example 1">Example 1</a></li></ul></li><li><a href="#validatev6_ts_functions" title="Functions">Functions</a></li><li><ul><li><a href="#namespace_isvalidaddressv6" title="isValidAddressv6">isValidAddressv6</a></li><li><a href="#namespace_isvalidcidrv6" title="isValidCidrv6">isValidCidrv6</a></li></ul></li></ul></nav></div>
   </div></div>
 </div>
 </div>

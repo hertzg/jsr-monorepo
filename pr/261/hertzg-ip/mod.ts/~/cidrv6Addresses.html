@@ -224,24 +224,24 @@ Examples</h2></div><div class="space-y-8"><div class="anchorable"><a href="#exam
 </div></h3>
   <div><div class="markdown"><pre class="highlight"><code class="language-ts">import { assertEquals } from &quot;@std/assert&quot;;
 import { cidrv6Addresses, parseCidrv6 } from &quot;@hertzg/ip/cidrv6&quot;;
-import { stringifyIpv6 } from &quot;@hertzg/ip/ipv6&quot;;
+import { stringifyAddressv6 } from &quot;@hertzg/ip/addressv6&quot;;
 
 const cidr = parseCidrv6(&quot;fd00::/120&quot;); // 256 IPs: ::0 to ::ff
 
 // Get first 5 IPs (offset=0 by default, starts at network address)
 const first5 = Array.from(cidrv6Addresses(cidr, { count: 5 }));
-assertEquals(first5.map(stringifyIpv6), [
+assertEquals(first5.map(stringifyAddressv6), [
   &quot;fd00::&quot;, &quot;fd00::1&quot;, &quot;fd00::2&quot;, &quot;fd00::3&quot;, &quot;fd00::4&quot;,
 ]);
 </code><button class="copyButton" data-copy="import { assertEquals } from &quot;@std/assert&quot;;
 import { cidrv6Addresses, parseCidrv6 } from &quot;@hertzg/ip/cidrv6&quot;;
-import { stringifyIpv6 } from &quot;@hertzg/ip/ipv6&quot;;
+import { stringifyAddressv6 } from &quot;@hertzg/ip/addressv6&quot;;
 
 const cidr = parseCidrv6(&quot;fd00::/120&quot;); // 256 IPs: ::0 to ::ff
 
 // Get first 5 IPs (offset=0 by default, starts at network address)
 const first5 = Array.from(cidrv6Addresses(cidr, { count: 5 }));
-assertEquals(first5.map(stringifyIpv6), [
+assertEquals(first5.map(stringifyAddressv6), [
   &quot;fd00::&quot;, &quot;fd00::1&quot;, &quot;fd00::2&quot;, &quot;fd00::3&quot;, &quot;fd00::4&quot;,
 ]);
 "><svg
@@ -303,29 +303,29 @@ assertEquals(first5.map(stringifyIpv6), [
 </div></h3>
   <div><div class="markdown"><pre class="highlight"><code class="language-ts">import { assertEquals } from &quot;@std/assert&quot;;
 import { cidrv6Addresses, parseCidrv6 } from &quot;@hertzg/ip/cidrv6&quot;;
-import { parseIpv6 } from &quot;@hertzg/ip/ipv6&quot;;
+import { parseAddressv6 } from &quot;@hertzg/ip/addressv6&quot;;
 
 const cidr = parseCidrv6(&quot;fd00::/120&quot;);
 
 // Get first 3 IPs starting at network address
 const first3 = Array.from(cidrv6Addresses(cidr, { offset: 0, count: 3 }));
 assertEquals(first3, [
-  parseIpv6(&quot;fd00::0&quot;),
-  parseIpv6(&quot;fd00::1&quot;),
-  parseIpv6(&quot;fd00::2&quot;),
+  parseAddressv6(&quot;fd00::0&quot;),
+  parseAddressv6(&quot;fd00::1&quot;),
+  parseAddressv6(&quot;fd00::2&quot;),
 ]);
 </code><button class="copyButton" data-copy="import { assertEquals } from &quot;@std/assert&quot;;
 import { cidrv6Addresses, parseCidrv6 } from &quot;@hertzg/ip/cidrv6&quot;;
-import { parseIpv6 } from &quot;@hertzg/ip/ipv6&quot;;
+import { parseAddressv6 } from &quot;@hertzg/ip/addressv6&quot;;
 
 const cidr = parseCidrv6(&quot;fd00::/120&quot;);
 
 // Get first 3 IPs starting at network address
 const first3 = Array.from(cidrv6Addresses(cidr, { offset: 0, count: 3 }));
 assertEquals(first3, [
-  parseIpv6(&quot;fd00::0&quot;),
-  parseIpv6(&quot;fd00::1&quot;),
-  parseIpv6(&quot;fd00::2&quot;),
+  parseAddressv6(&quot;fd00::0&quot;),
+  parseAddressv6(&quot;fd00::1&quot;),
+  parseAddressv6(&quot;fd00::2&quot;),
 ]);
 "><svg
   class="copy"
@@ -386,33 +386,33 @@ assertEquals(first3, [
 </div></h3>
   <div><div class="markdown"><pre class="highlight"><code class="language-ts">import { assertEquals } from &quot;@std/assert&quot;;
 import { cidrv6Addresses, parseCidrv6 } from &quot;@hertzg/ip/cidrv6&quot;;
-import { parseIpv6 } from &quot;@hertzg/ip/ipv6&quot;;
+import { parseAddressv6 } from &quot;@hertzg/ip/addressv6&quot;;
 
 const cidr = parseCidrv6(&quot;fd00::/120&quot;);
 
 // Get every other IP (even addresses)
 const evenIps = Array.from(cidrv6Addresses(cidr, { offset: 0, count: 5, step: 2 }));
 assertEquals(evenIps, [
-  parseIpv6(&quot;fd00::0&quot;),
-  parseIpv6(&quot;fd00::2&quot;),
-  parseIpv6(&quot;fd00::4&quot;),
-  parseIpv6(&quot;fd00::6&quot;),
-  parseIpv6(&quot;fd00::8&quot;),
+  parseAddressv6(&quot;fd00::0&quot;),
+  parseAddressv6(&quot;fd00::2&quot;),
+  parseAddressv6(&quot;fd00::4&quot;),
+  parseAddressv6(&quot;fd00::6&quot;),
+  parseAddressv6(&quot;fd00::8&quot;),
 ]);
 </code><button class="copyButton" data-copy="import { assertEquals } from &quot;@std/assert&quot;;
 import { cidrv6Addresses, parseCidrv6 } from &quot;@hertzg/ip/cidrv6&quot;;
-import { parseIpv6 } from &quot;@hertzg/ip/ipv6&quot;;
+import { parseAddressv6 } from &quot;@hertzg/ip/addressv6&quot;;
 
 const cidr = parseCidrv6(&quot;fd00::/120&quot;);
 
 // Get every other IP (even addresses)
 const evenIps = Array.from(cidrv6Addresses(cidr, { offset: 0, count: 5, step: 2 }));
 assertEquals(evenIps, [
-  parseIpv6(&quot;fd00::0&quot;),
-  parseIpv6(&quot;fd00::2&quot;),
-  parseIpv6(&quot;fd00::4&quot;),
-  parseIpv6(&quot;fd00::6&quot;),
-  parseIpv6(&quot;fd00::8&quot;),
+  parseAddressv6(&quot;fd00::0&quot;),
+  parseAddressv6(&quot;fd00::2&quot;),
+  parseAddressv6(&quot;fd00::4&quot;),
+  parseAddressv6(&quot;fd00::6&quot;),
+  parseAddressv6(&quot;fd00::8&quot;),
 ]);
 "><svg
   class="copy"
@@ -473,33 +473,33 @@ assertEquals(evenIps, [
 </div></h3>
   <div><div class="markdown"><pre class="highlight"><code class="language-ts">import { assertEquals } from &quot;@std/assert&quot;;
 import { cidrv6Addresses, parseCidrv6 } from &quot;@hertzg/ip/cidrv6&quot;;
-import { parseIpv6 } from &quot;@hertzg/ip/ipv6&quot;;
+import { parseAddressv6 } from &quot;@hertzg/ip/addressv6&quot;;
 
 const cidr = parseCidrv6(&quot;fd00::/120&quot;);
 
 // Get 5 IPs counting backwards from offset 10
 const backwards = Array.from(cidrv6Addresses(cidr, { offset: 10, count: 5, step: -1 }));
 assertEquals(backwards, [
-  parseIpv6(&quot;fd00::a&quot;),
-  parseIpv6(&quot;fd00::9&quot;),
-  parseIpv6(&quot;fd00::8&quot;),
-  parseIpv6(&quot;fd00::7&quot;),
-  parseIpv6(&quot;fd00::6&quot;),
+  parseAddressv6(&quot;fd00::a&quot;),
+  parseAddressv6(&quot;fd00::9&quot;),
+  parseAddressv6(&quot;fd00::8&quot;),
+  parseAddressv6(&quot;fd00::7&quot;),
+  parseAddressv6(&quot;fd00::6&quot;),
 ]);
 </code><button class="copyButton" data-copy="import { assertEquals } from &quot;@std/assert&quot;;
 import { cidrv6Addresses, parseCidrv6 } from &quot;@hertzg/ip/cidrv6&quot;;
-import { parseIpv6 } from &quot;@hertzg/ip/ipv6&quot;;
+import { parseAddressv6 } from &quot;@hertzg/ip/addressv6&quot;;
 
 const cidr = parseCidrv6(&quot;fd00::/120&quot;);
 
 // Get 5 IPs counting backwards from offset 10
 const backwards = Array.from(cidrv6Addresses(cidr, { offset: 10, count: 5, step: -1 }));
 assertEquals(backwards, [
-  parseIpv6(&quot;fd00::a&quot;),
-  parseIpv6(&quot;fd00::9&quot;),
-  parseIpv6(&quot;fd00::8&quot;),
-  parseIpv6(&quot;fd00::7&quot;),
-  parseIpv6(&quot;fd00::6&quot;),
+  parseAddressv6(&quot;fd00::a&quot;),
+  parseAddressv6(&quot;fd00::9&quot;),
+  parseAddressv6(&quot;fd00::8&quot;),
+  parseAddressv6(&quot;fd00::7&quot;),
+  parseAddressv6(&quot;fd00::6&quot;),
 ]);
 "><svg
   class="copy"

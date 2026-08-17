@@ -156,19 +156,19 @@ import {
   cidrv6LastAddress,
   parseCidrv6,
 } from &quot;@hertzg/ip/cidrv6&quot;;
-import { parseIpv6, stringifyIpv6 } from &quot;@hertzg/ip/ipv6&quot;;
+import { parseAddressv6, stringifyAddressv6 } from &quot;@hertzg/ip/addressv6&quot;;
 
 const cidr = parseCidrv6(&quot;2001:db8:ffff:ffff:ffff:ffff::/120&quot;);
 let currentIp = cidrv6FirstAddress(cidr) + 1n;
 
 while (cidrv6Contains(cidr, currentIp)) {
-  const assigned = stringifyIpv6(currentIp);
+  const assigned = stringifyAddressv6(currentIp);
   currentIp = currentIp + 1n;
   if (currentIp &gt; cidrv6LastAddress(cidr)) break;
 }
 
-assert(cidrv6Contains(cidr, parseIpv6(&quot;2001:db8:ffff:ffff:ffff:ffff::1&quot;)));
-assertEquals(cidrv6Contains(cidr, parseIpv6(&quot;2001:db9::1&quot;)), false);
+assert(cidrv6Contains(cidr, parseAddressv6(&quot;2001:db8:ffff:ffff:ffff:ffff::1&quot;)));
+assertEquals(cidrv6Contains(cidr, parseAddressv6(&quot;2001:db9::1&quot;)), false);
 </code><button class="copyButton" data-copy="import { assert, assertEquals } from &quot;@std/assert&quot;;
 import {
   cidrv6Contains,
@@ -176,19 +176,19 @@ import {
   cidrv6LastAddress,
   parseCidrv6,
 } from &quot;@hertzg/ip/cidrv6&quot;;
-import { parseIpv6, stringifyIpv6 } from &quot;@hertzg/ip/ipv6&quot;;
+import { parseAddressv6, stringifyAddressv6 } from &quot;@hertzg/ip/addressv6&quot;;
 
 const cidr = parseCidrv6(&quot;2001:db8:ffff:ffff:ffff:ffff::/120&quot;);
 let currentIp = cidrv6FirstAddress(cidr) + 1n;
 
 while (cidrv6Contains(cidr, currentIp)) {
-  const assigned = stringifyIpv6(currentIp);
+  const assigned = stringifyAddressv6(currentIp);
   currentIp = currentIp + 1n;
   if (currentIp &gt; cidrv6LastAddress(cidr)) break;
 }
 
-assert(cidrv6Contains(cidr, parseIpv6(&quot;2001:db8:ffff:ffff:ffff:ffff::1&quot;)));
-assertEquals(cidrv6Contains(cidr, parseIpv6(&quot;2001:db9::1&quot;)), false);
+assert(cidrv6Contains(cidr, parseAddressv6(&quot;2001:db8:ffff:ffff:ffff:ffff::1&quot;)));
+assertEquals(cidrv6Contains(cidr, parseAddressv6(&quot;2001:db9::1&quot;)), false);
 "><svg
   class="copy"
   width="15"
@@ -281,11 +281,6 @@ Functions</h2></div><div class="namespaceSection"><div id="namespace_cidrv6addre
 		    <a href="..&#x2F;.&#x2F;cidrv6.ts&#x2F;~&#x2F;cidrv6Mask.html" title="cidrv6Mask">
 			    <span>cidrv6Mask</span><span>(<span><span>prefixLength<span>: <span class="td-kw">number</span></span></span></span>)<span>: <span class="td-kw">bigint</span></span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Creates a network mask from an IPv6 prefix length.</p>
 </div></div></div>
-    </div><div id="namespace_cidrv6masktoprefixlength" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-Function bg-Function/15 dark:text-FunctionDark dark:bg-FunctionDark/15" title="Function">f</div></div>
-<div class="namespaceItemContent">
-		    <a href="..&#x2F;.&#x2F;cidrv6.ts&#x2F;~&#x2F;cidrv6MaskToPrefixLength.html" title="cidrv6MaskToPrefixLength">
-			    <span>cidrv6MaskToPrefixLength</span><span>(<span><span>mask<span>: <span><span class="td-kw">string</span><span class="td-op"> | </span><span class="td-kw">bigint</span></span></span></span></span>)<span>: <span class="td-kw">number</span></span></span><div class="namespaceItemContentTypeInfo">3 overloads</div></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Recovers the prefix length from an IPv6 network mask given as a bigint.</p>
-</div></div></div>
     </div><div id="namespace_cidrv6merge" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-Function bg-Function/15 dark:text-FunctionDark dark:bg-FunctionDark/15" title="Function">f</div></div>
 <div class="namespaceItemContent">
 		    <a href="..&#x2F;.&#x2F;cidrv6.ts&#x2F;~&#x2F;cidrv6Merge.html" title="cidrv6Merge">
@@ -295,6 +290,11 @@ Functions</h2></div><div class="namespaceSection"><div id="namespace_cidrv6addre
 <div class="namespaceItemContent">
 		    <a href="..&#x2F;.&#x2F;cidrv6.ts&#x2F;~&#x2F;cidrv6Overlaps.html" title="cidrv6Overlaps">
 			    <span>cidrv6Overlaps</span><span>(<div class="ml-4"><div><span>a<span>: <span class="td-ref">Cidrv6</span></span></span>,</div><div><span>b<span>: <span class="td-ref">Cidrv6</span></span></span></div></div>)<span>: <span class="td-kw">boolean</span></span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Checks if two IPv6 CIDR blocks overlap (share at least one address).</p>
+</div></div></div>
+    </div><div id="namespace_cidrv6prefixlength" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-Function bg-Function/15 dark:text-FunctionDark dark:bg-FunctionDark/15" title="Function">f</div></div>
+<div class="namespaceItemContent">
+		    <a href="..&#x2F;.&#x2F;cidrv6.ts&#x2F;~&#x2F;cidrv6PrefixLength.html" title="cidrv6PrefixLength">
+			    <span>cidrv6PrefixLength</span><span>(<span><span>mask<span>: <span><span class="td-kw">string</span><span class="td-op"> | </span><span class="td-kw">bigint</span></span></span></span></span>)<span>: <span class="td-kw">number</span></span></span><div class="namespaceItemContentTypeInfo">3 overloads</div></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Recovers the prefix length from an IPv6 network mask given as a bigint.</p>
 </div></div></div>
     </div><div id="namespace_cidrv6size" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-Function bg-Function/15 dark:text-FunctionDark dark:bg-FunctionDark/15" title="Function">f</div></div>
 <div class="namespaceItemContent">
@@ -311,6 +311,11 @@ Functions</h2></div><div class="namespaceSection"><div id="namespace_cidrv6addre
 		    <a href="..&#x2F;.&#x2F;cidrv6.ts&#x2F;~&#x2F;compareCidrv6.html" title="compareCidrv6">
 			    <span>compareCidrv6</span><span>(<div class="ml-4"><div><span>a<span>: <span class="td-ref">Cidrv6</span></span></span>,</div><div><span>b<span>: <span class="td-ref">Cidrv6</span></span></span></div></div>)<span>: <span><span class="td-lit">-1</span><span class="td-op"> | </span><span class="td-lit">0</span><span class="td-op"> | </span><span class="td-lit">1</span></span></span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Compares two IPv6 CIDR blocks for sorting.</p>
 </div></div></div>
+    </div><div id="namespace_mapfromcidrv4" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-Function bg-Function/15 dark:text-FunctionDark dark:bg-FunctionDark/15" title="Function">f</div></div>
+<div class="namespaceItemContent">
+		    <a href="..&#x2F;.&#x2F;cidrv6.ts&#x2F;~&#x2F;mapFromCidrv4.html" title="mapFromCidrv4">
+			    <span>mapFromCidrv4</span><span>(<span><span>cidr<span>: <span class="td-ref">Cidrv4</span></span></span></span>)<span>: <span class="td-ref">Cidrv6</span></span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Converts an IPv4 CIDR block to its IPv4-mapped IPv6 CIDR representation.</p>
+</div></div></div>
     </div><div id="namespace_parsecidrv6" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-Function bg-Function/15 dark:text-FunctionDark dark:bg-FunctionDark/15" title="Function">f</div></div>
 <div class="namespaceItemContent">
 		    <a href="..&#x2F;.&#x2F;cidrv6.ts&#x2F;~&#x2F;parseCidrv6.html" title="parseCidrv6">
@@ -320,6 +325,11 @@ Functions</h2></div><div class="namespaceSection"><div id="namespace_cidrv6addre
 <div class="namespaceItemContent">
 		    <a href="..&#x2F;.&#x2F;cidrv6.ts&#x2F;~&#x2F;stringifyCidrv6.html" title="stringifyCidrv6">
 			    <span>stringifyCidrv6</span><span>(<span><span>cidr<span>: <span class="td-ref">Cidrv6</span></span></span></span>)<span>: <span class="td-kw">string</span></span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Stringifies a Cidrv6 object to CIDR notation.</p>
+</div></div></div>
+    </div><div id="namespace_unmaptocidrv4" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-Function bg-Function/15 dark:text-FunctionDark dark:bg-FunctionDark/15" title="Function">f</div></div>
+<div class="namespaceItemContent">
+		    <a href="..&#x2F;.&#x2F;cidrv6.ts&#x2F;~&#x2F;unmapToCidrv4.html" title="unmapToCidrv4">
+			    <span>unmapToCidrv4</span><span>(<span><span>cidr<span>: <span class="td-ref">Cidrv6</span></span></span></span>)<span>: <span class="td-ref">Cidrv4</span></span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Converts an IPv4-mapped IPv6 CIDR block to its IPv4 CIDR representation.</p>
 </div></div></div>
     </div></div>
 </section>
@@ -400,37 +410,37 @@ Type Aliases</h2></div><div class="namespaceSection"><div id="namespace_cidrv6" 
 </div></div><nav class="topSymbols">
           <h3>Symbols</h3>
           <ul><li>
-                <a href="..&#x2F;.&#x2F;ip.ts&#x2F;~&#x2F;Address.html" title="Address"><div class="docNodeKindIcon"><div class="text-TypeAlias bg-TypeAlias/15 dark:text-TypeAliasDark dark:bg-TypeAliasDark/15" title="Type Alias">T</div></div>
+                <a href="..&#x2F;.&#x2F;address.ts&#x2F;~&#x2F;Address.html" title="Address"><div class="docNodeKindIcon"><div class="text-TypeAlias bg-TypeAlias/15 dark:text-TypeAliasDark dark:bg-TypeAliasDark/15" title="Type Alias">T</div></div>
 <span class="hover:bg-TypeAlias/15 hover:bg-TypeAliasDark/15">
                     Address
                   </span>
                 </a>
               </li><li>
-                <a href="..&#x2F;.&#x2F;ip.ts&#x2F;~&#x2F;compareIp.html" title="compareIp"><div class="docNodeKindIcon"><div class="text-Function bg-Function/15 dark:text-FunctionDark dark:bg-FunctionDark/15" title="Function">f</div></div>
+                <a href="..&#x2F;.&#x2F;address.ts&#x2F;~&#x2F;compareAddress.html" title="compareAddress"><div class="docNodeKindIcon"><div class="text-Function bg-Function/15 dark:text-FunctionDark dark:bg-FunctionDark/15" title="Function">f</div></div>
 <span class="hover:bg-Function/15 hover:bg-FunctionDark/15">
-                    compareIp
+                    compareAddress
                   </span>
                 </a>
               </li><li>
-                <a href="..&#x2F;.&#x2F;ip.ts&#x2F;~&#x2F;parseIp.html" title="parseIp"><div class="docNodeKindIcon"><div class="text-Function bg-Function/15 dark:text-FunctionDark dark:bg-FunctionDark/15" title="Function">f</div></div>
+                <a href="..&#x2F;.&#x2F;address.ts&#x2F;~&#x2F;parseAddress.html" title="parseAddress"><div class="docNodeKindIcon"><div class="text-Function bg-Function/15 dark:text-FunctionDark dark:bg-FunctionDark/15" title="Function">f</div></div>
 <span class="hover:bg-Function/15 hover:bg-FunctionDark/15">
-                    parseIp
+                    parseAddress
                   </span>
                 </a>
               </li><li>
-                <a href="..&#x2F;.&#x2F;ip.ts&#x2F;~&#x2F;stringifyIp.html" title="stringifyIp"><div class="docNodeKindIcon"><div class="text-Function bg-Function/15 dark:text-FunctionDark dark:bg-FunctionDark/15" title="Function">f</div></div>
+                <a href="..&#x2F;.&#x2F;address.ts&#x2F;~&#x2F;stringifyAddress.html" title="stringifyAddress"><div class="docNodeKindIcon"><div class="text-Function bg-Function/15 dark:text-FunctionDark dark:bg-FunctionDark/15" title="Function">f</div></div>
 <span class="hover:bg-Function/15 hover:bg-FunctionDark/15">
-                    stringifyIp
+                    stringifyAddress
                   </span>
                 </a>
               </li><li>
-                <a href="..&#x2F;.&#x2F;ip.ts&#x2F;~&#x2F;stringifyIp.html" title="stringifyIp"><div class="docNodeKindIcon"><div class="text-Function bg-Function/15 dark:text-FunctionDark dark:bg-FunctionDark/15" title="Function">f</div></div>
+                <a href="..&#x2F;.&#x2F;address.ts&#x2F;~&#x2F;stringifyAddress.html" title="stringifyAddress"><div class="docNodeKindIcon"><div class="text-Function bg-Function/15 dark:text-FunctionDark dark:bg-FunctionDark/15" title="Function">f</div></div>
 <span class="hover:bg-Function/15 hover:bg-FunctionDark/15">
-                    stringifyIp
+                    stringifyAddress
                   </span>
                 </a>
               </li></ul><a class="flex items-center gap-0.5" href="..&#x2F;.&#x2F;all_symbols.html">
-              <span class="leading-none">view all 283 symbols</span><svg
+              <span class="leading-none">view all 279 symbols</span><svg
   width="16"
   height="16"
   viewBox="0 0 16 16"
@@ -445,7 +455,7 @@ Type Aliases</h2></div><div class="namespaceSection"><div id="namespace_cidrv6" 
   />
 </svg>
 </a></nav><nav class="documentNavigation">
-          <h3>Document Navigation</h3><ul><li><a href="#examples" title="Examples">Examples</a></li><li><ul><li><a href="#example_0" title="CIDR operations">CIDR operations</a></li></ul></li><li><a href="#cidrv6_ts_functions" title="Functions">Functions</a></li><li><ul><li><a href="#namespace_cidrv6addresses" title="cidrv6Addresses">cidrv6Addresses</a></li><li><a href="#namespace_cidrv6contains" title="cidrv6Contains">cidrv6Contains</a></li><li><a href="#namespace_cidrv6containscidr" title="cidrv6ContainsCidr">cidrv6ContainsCidr</a></li><li><a href="#namespace_cidrv6firstaddress" title="cidrv6FirstAddress">cidrv6FirstAddress</a></li><li><a href="#namespace_cidrv6intersect" title="cidrv6Intersect">cidrv6Intersect</a></li><li><a href="#namespace_cidrv6lastaddress" title="cidrv6LastAddress">cidrv6LastAddress</a></li><li><a href="#namespace_cidrv6mask" title="cidrv6Mask">cidrv6Mask</a></li><li><a href="#namespace_cidrv6masktoprefixlength" title="cidrv6MaskToPrefixLength">cidrv6MaskToPrefixLength</a></li><li><a href="#namespace_cidrv6merge" title="cidrv6Merge">cidrv6Merge</a></li><li><a href="#namespace_cidrv6overlaps" title="cidrv6Overlaps">cidrv6Overlaps</a></li><li><a href="#namespace_cidrv6size" title="cidrv6Size">cidrv6Size</a></li><li><a href="#namespace_cidrv6subtract" title="cidrv6Subtract">cidrv6Subtract</a></li><li><a href="#namespace_comparecidrv6" title="compareCidrv6">compareCidrv6</a></li><li><a href="#namespace_parsecidrv6" title="parseCidrv6">parseCidrv6</a></li><li><a href="#namespace_stringifycidrv6" title="stringifyCidrv6">stringifyCidrv6</a></li></ul></li><li><a href="#cidrv6_ts_type-aliases" title="Type Aliases">Type Aliases</a></li><li><ul><li><a href="#namespace_cidrv6" title="Cidrv6">Cidrv6</a></li></ul></li></ul></nav></div>
+          <h3>Document Navigation</h3><ul><li><a href="#examples" title="Examples">Examples</a></li><li><ul><li><a href="#example_0" title="CIDR operations">CIDR operations</a></li></ul></li><li><a href="#cidrv6_ts_functions" title="Functions">Functions</a></li><li><ul><li><a href="#namespace_cidrv6addresses" title="cidrv6Addresses">cidrv6Addresses</a></li><li><a href="#namespace_cidrv6contains" title="cidrv6Contains">cidrv6Contains</a></li><li><a href="#namespace_cidrv6containscidr" title="cidrv6ContainsCidr">cidrv6ContainsCidr</a></li><li><a href="#namespace_cidrv6firstaddress" title="cidrv6FirstAddress">cidrv6FirstAddress</a></li><li><a href="#namespace_cidrv6intersect" title="cidrv6Intersect">cidrv6Intersect</a></li><li><a href="#namespace_cidrv6lastaddress" title="cidrv6LastAddress">cidrv6LastAddress</a></li><li><a href="#namespace_cidrv6mask" title="cidrv6Mask">cidrv6Mask</a></li><li><a href="#namespace_cidrv6merge" title="cidrv6Merge">cidrv6Merge</a></li><li><a href="#namespace_cidrv6overlaps" title="cidrv6Overlaps">cidrv6Overlaps</a></li><li><a href="#namespace_cidrv6prefixlength" title="cidrv6PrefixLength">cidrv6PrefixLength</a></li><li><a href="#namespace_cidrv6size" title="cidrv6Size">cidrv6Size</a></li><li><a href="#namespace_cidrv6subtract" title="cidrv6Subtract">cidrv6Subtract</a></li><li><a href="#namespace_comparecidrv6" title="compareCidrv6">compareCidrv6</a></li><li><a href="#namespace_mapfromcidrv4" title="mapFromCidrv4">mapFromCidrv4</a></li><li><a href="#namespace_parsecidrv6" title="parseCidrv6">parseCidrv6</a></li><li><a href="#namespace_stringifycidrv6" title="stringifyCidrv6">stringifyCidrv6</a></li><li><a href="#namespace_unmaptocidrv4" title="unmapToCidrv4">unmapToCidrv4</a></li></ul></li><li><a href="#cidrv6_ts_type-aliases" title="Type Aliases">Type Aliases</a></li><li><ul><li><a href="#namespace_cidrv6" title="Cidrv6">Cidrv6</a></li></ul></li></ul></nav></div>
   </div></div>
 </div>
 </div>

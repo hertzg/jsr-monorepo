@@ -224,16 +224,16 @@ Examples</h2></div><div class="space-y-8"><div class="anchorable"><a href="#exam
 </div></h3>
   <div><div class="markdown"><pre class="highlight"><code class="language-ts">import { assertEquals } from &quot;@std/assert&quot;;
 import { cidrLastAddress, parseCidr } from &quot;@hertzg/ip/cidr&quot;;
-import { stringifyIp } from &quot;@hertzg/ip/ip&quot;;
+import { stringifyAddress } from &quot;@hertzg/ip/address&quot;;
 
-assertEquals(stringifyIp(cidrLastAddress(parseCidr(&quot;192.168.1.0/24&quot;))), &quot;192.168.1.255&quot;);
-assertEquals(stringifyIp(cidrLastAddress(parseCidr(&quot;2001:db8::/120&quot;))), &quot;2001:db8::ff&quot;);
+assertEquals(stringifyAddress(cidrLastAddress(parseCidr(&quot;192.168.1.0/24&quot;))), &quot;192.168.1.255&quot;);
+assertEquals(stringifyAddress(cidrLastAddress(parseCidr(&quot;2001:db8::/120&quot;))), &quot;2001:db8::ff&quot;);
 </code><button class="copyButton" data-copy="import { assertEquals } from &quot;@std/assert&quot;;
 import { cidrLastAddress, parseCidr } from &quot;@hertzg/ip/cidr&quot;;
-import { stringifyIp } from &quot;@hertzg/ip/ip&quot;;
+import { stringifyAddress } from &quot;@hertzg/ip/address&quot;;
 
-assertEquals(stringifyIp(cidrLastAddress(parseCidr(&quot;192.168.1.0/24&quot;))), &quot;192.168.1.255&quot;);
-assertEquals(stringifyIp(cidrLastAddress(parseCidr(&quot;2001:db8::/120&quot;))), &quot;2001:db8::ff&quot;);
+assertEquals(stringifyAddress(cidrLastAddress(parseCidr(&quot;192.168.1.0/24&quot;))), &quot;192.168.1.255&quot;);
+assertEquals(stringifyAddress(cidrLastAddress(parseCidr(&quot;2001:db8::/120&quot;))), &quot;2001:db8::ff&quot;);
 "><svg
   class="copy"
   width="15"
@@ -293,26 +293,26 @@ assertEquals(stringifyIp(cidrLastAddress(parseCidr(&quot;2001:db8::/120&quot;)))
 </div></h3>
   <div><div class="markdown"><pre class="highlight"><code class="language-ts">import { assertEquals } from &quot;@std/assert&quot;;
 import { cidrFirstAddress, cidrLastAddress, parseCidr } from &quot;@hertzg/ip/cidr&quot;;
-import { stringifyIp } from &quot;@hertzg/ip/ip&quot;;
+import { stringifyAddress } from &quot;@hertzg/ip/address&quot;;
 
 const v4 = parseCidr(&quot;10.0.0.0/29&quot;);
-assertEquals(stringifyIp(cidrFirstAddress(v4)), &quot;10.0.0.0&quot;);
-assertEquals(stringifyIp(cidrLastAddress(v4)), &quot;10.0.0.7&quot;);
+assertEquals(stringifyAddress(cidrFirstAddress(v4)), &quot;10.0.0.0&quot;);
+assertEquals(stringifyAddress(cidrLastAddress(v4)), &quot;10.0.0.7&quot;);
 
 const v6 = parseCidr(&quot;fd00::/125&quot;);
-assertEquals(stringifyIp(cidrFirstAddress(v6)), &quot;fd00::&quot;);
-assertEquals(stringifyIp(cidrLastAddress(v6)), &quot;fd00::7&quot;);
+assertEquals(stringifyAddress(cidrFirstAddress(v6)), &quot;fd00::&quot;);
+assertEquals(stringifyAddress(cidrLastAddress(v6)), &quot;fd00::7&quot;);
 </code><button class="copyButton" data-copy="import { assertEquals } from &quot;@std/assert&quot;;
 import { cidrFirstAddress, cidrLastAddress, parseCidr } from &quot;@hertzg/ip/cidr&quot;;
-import { stringifyIp } from &quot;@hertzg/ip/ip&quot;;
+import { stringifyAddress } from &quot;@hertzg/ip/address&quot;;
 
 const v4 = parseCidr(&quot;10.0.0.0/29&quot;);
-assertEquals(stringifyIp(cidrFirstAddress(v4)), &quot;10.0.0.0&quot;);
-assertEquals(stringifyIp(cidrLastAddress(v4)), &quot;10.0.0.7&quot;);
+assertEquals(stringifyAddress(cidrFirstAddress(v4)), &quot;10.0.0.0&quot;);
+assertEquals(stringifyAddress(cidrLastAddress(v4)), &quot;10.0.0.7&quot;);
 
 const v6 = parseCidr(&quot;fd00::/125&quot;);
-assertEquals(stringifyIp(cidrFirstAddress(v6)), &quot;fd00::&quot;);
-assertEquals(stringifyIp(cidrLastAddress(v6)), &quot;fd00::7&quot;);
+assertEquals(stringifyAddress(cidrFirstAddress(v6)), &quot;fd00::&quot;);
+assertEquals(stringifyAddress(cidrLastAddress(v6)), &quot;fd00::7&quot;);
 "><svg
   class="copy"
   width="15"

@@ -216,26 +216,26 @@ Examples</h2></div><div class="space-y-8"><div class="anchorable"><a href="#exam
 </div></h3>
   <div><div class="markdown"><pre class="highlight"><code class="language-ts">import { assert, assertEquals } from &quot;@std/assert&quot;;
 import { cidrv6Contains, parseCidrv6 } from &quot;@hertzg/ip/cidrv6&quot;;
-import { parseIpv6 } from &quot;@hertzg/ip/ipv6&quot;;
+import { parseAddressv6 } from &quot;@hertzg/ip/addressv6&quot;;
 
 const cidr = parseCidrv6(&quot;2001:db8::/32&quot;);
 
-assert(cidrv6Contains(cidr, parseIpv6(&quot;2001:db8::&quot;)));
-assert(cidrv6Contains(cidr, parseIpv6(&quot;2001:db8::1&quot;)));
-assert(cidrv6Contains(cidr, parseIpv6(&quot;2001:db8:ffff:ffff:ffff:ffff:ffff:ffff&quot;)));
-assertEquals(cidrv6Contains(cidr, parseIpv6(&quot;2001:db9::1&quot;)), false);
-assertEquals(cidrv6Contains(cidr, parseIpv6(&quot;2001:db7:ffff:ffff:ffff:ffff:ffff:ffff&quot;)), false);
+assert(cidrv6Contains(cidr, parseAddressv6(&quot;2001:db8::&quot;)));
+assert(cidrv6Contains(cidr, parseAddressv6(&quot;2001:db8::1&quot;)));
+assert(cidrv6Contains(cidr, parseAddressv6(&quot;2001:db8:ffff:ffff:ffff:ffff:ffff:ffff&quot;)));
+assertEquals(cidrv6Contains(cidr, parseAddressv6(&quot;2001:db9::1&quot;)), false);
+assertEquals(cidrv6Contains(cidr, parseAddressv6(&quot;2001:db7:ffff:ffff:ffff:ffff:ffff:ffff&quot;)), false);
 </code><button class="copyButton" data-copy="import { assert, assertEquals } from &quot;@std/assert&quot;;
 import { cidrv6Contains, parseCidrv6 } from &quot;@hertzg/ip/cidrv6&quot;;
-import { parseIpv6 } from &quot;@hertzg/ip/ipv6&quot;;
+import { parseAddressv6 } from &quot;@hertzg/ip/addressv6&quot;;
 
 const cidr = parseCidrv6(&quot;2001:db8::/32&quot;);
 
-assert(cidrv6Contains(cidr, parseIpv6(&quot;2001:db8::&quot;)));
-assert(cidrv6Contains(cidr, parseIpv6(&quot;2001:db8::1&quot;)));
-assert(cidrv6Contains(cidr, parseIpv6(&quot;2001:db8:ffff:ffff:ffff:ffff:ffff:ffff&quot;)));
-assertEquals(cidrv6Contains(cidr, parseIpv6(&quot;2001:db9::1&quot;)), false);
-assertEquals(cidrv6Contains(cidr, parseIpv6(&quot;2001:db7:ffff:ffff:ffff:ffff:ffff:ffff&quot;)), false);
+assert(cidrv6Contains(cidr, parseAddressv6(&quot;2001:db8::&quot;)));
+assert(cidrv6Contains(cidr, parseAddressv6(&quot;2001:db8::1&quot;)));
+assert(cidrv6Contains(cidr, parseAddressv6(&quot;2001:db8:ffff:ffff:ffff:ffff:ffff:ffff&quot;)));
+assertEquals(cidrv6Contains(cidr, parseAddressv6(&quot;2001:db9::1&quot;)), false);
+assertEquals(cidrv6Contains(cidr, parseAddressv6(&quot;2001:db7:ffff:ffff:ffff:ffff:ffff:ffff&quot;)), false);
 "><svg
   class="copy"
   width="15"

@@ -181,8 +181,8 @@ is handed back as opaque <code>payload</code> bytes. Callers who need to walk th
 extension header chain must do so themselves, or await a future version
 of this package that adds it.</p>
 <p><code>sourceAddress</code> / <code>destinationAddress</code> are raw 16-byte slices, not
-<code>bigint</code>. Pair this with <code>@hertzg/ip</code>'s <code>stringifyIpv6</code> /
-<code>parseIpv6</code> for human-readable conversion — those work over <code>bigint</code>, so
+<code>bigint</code>. Pair this with <code>@hertzg/ip</code>'s <code>stringifyAddressv6</code> /
+<code>parseAddressv6</code> for human-readable conversion — those work over <code>bigint</code>, so
 bytes need <code>Array.from(...).reduce()</code>-style conversion, left to the
 caller to keep this package free of that dependency.</p>
 </div><section class="section"  id="examples"><div>
