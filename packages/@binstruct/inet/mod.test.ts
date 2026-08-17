@@ -111,8 +111,8 @@ Deno.test("inetFrame: round-trips ethernet → ipv4 → udp", () => {
       timeToLive: 64,
       protocol: IP_PROTOCOL_UDP,
       headerChecksum: 0,
-      sourceAddress: parseAddressv4("192.0.2.1"),
-      destinationAddress: parseAddressv4("192.0.2.2"),
+      sourceAddress: parseAddressv4("192.0.2.1").address,
+      destinationAddress: parseAddressv4("192.0.2.2").address,
       options: new Uint8Array(0),
       payload: {
         srcPort: 53,
@@ -131,7 +131,10 @@ Deno.test("inetFrame: round-trips ethernet → ipv4 → udp", () => {
   assertEquals(decoded.etherType, ETHERTYPE_IPV4);
   assert(!(decoded.payload instanceof Uint8Array));
   assert("protocol" in decoded.payload);
-  assertEquals(decoded.payload.sourceAddress, parseAddressv4("192.0.2.1"));
+  assertEquals(
+    decoded.payload.sourceAddress,
+    parseAddressv4("192.0.2.1").address,
+  );
   assertEquals(decoded.payload.protocol, IP_PROTOCOL_UDP);
   assert(!(decoded.payload.payload instanceof Uint8Array));
   assert("srcPort" in decoded.payload.payload);
@@ -163,8 +166,8 @@ Deno.test("inetFrame: round-trips ethernet → ipv4 → tcp", () => {
       timeToLive: 64,
       protocol: IP_PROTOCOL_TCP,
       headerChecksum: 0,
-      sourceAddress: parseAddressv4("192.0.2.1"),
-      destinationAddress: parseAddressv4("192.0.2.2"),
+      sourceAddress: parseAddressv4("192.0.2.1").address,
+      destinationAddress: parseAddressv4("192.0.2.2").address,
       options: new Uint8Array(0),
       payload: {
         sourcePort: 49152,
@@ -234,8 +237,8 @@ Deno.test("inetFrame: round-trips ethernet → ipv4 → icmp", () => {
       timeToLive: 64,
       protocol: IP_PROTOCOL_ICMP,
       headerChecksum: 0,
-      sourceAddress: parseAddressv4("10.0.0.1"),
-      destinationAddress: parseAddressv4("10.0.0.2"),
+      sourceAddress: parseAddressv4("10.0.0.1").address,
+      destinationAddress: parseAddressv4("10.0.0.2").address,
       options: new Uint8Array(0),
       payload: {
         type: 8,
@@ -328,8 +331,8 @@ Deno.test("inetFrame: unknown IPv4 protocol surfaces as a raw Uint8Array", () =>
       timeToLive: 64,
       protocol: 253, // Reserved for experimentation (RFC 3692) — no coder for it.
       headerChecksum: 0,
-      sourceAddress: parseAddressv4("10.0.0.1"),
-      destinationAddress: parseAddressv4("10.0.0.2"),
+      sourceAddress: parseAddressv4("10.0.0.1").address,
+      destinationAddress: parseAddressv4("10.0.0.2").address,
       options: new Uint8Array(0),
       payload: innerBytes,
     },
@@ -370,8 +373,8 @@ Deno.test("inetFrame: round-trips ethernet → vlan → ipv4 → udp", () => {
         timeToLive: 64,
         protocol: IP_PROTOCOL_UDP,
         headerChecksum: 0,
-        sourceAddress: parseAddressv4("10.0.0.1"),
-        destinationAddress: parseAddressv4("10.0.0.2"),
+        sourceAddress: parseAddressv4("10.0.0.1").address,
+        destinationAddress: parseAddressv4("10.0.0.2").address,
         options: new Uint8Array(0),
         payload: {
           srcPort: 1111,
@@ -424,8 +427,8 @@ Deno.test("inetFrame: round-trips ethernet → vlan → vlan → ipv4 (QinQ)", (
           timeToLive: 64,
           protocol: 253, // reserved for experimentation — no coder for it
           headerChecksum: 0,
-          sourceAddress: parseAddressv4("10.0.0.1"),
-          destinationAddress: parseAddressv4("10.0.0.2"),
+          sourceAddress: parseAddressv4("10.0.0.1").address,
+          destinationAddress: parseAddressv4("10.0.0.2").address,
           options: new Uint8Array(0),
           payload: new Uint8Array(0),
         },
@@ -508,8 +511,8 @@ Deno.test("inetFrame: round-trips ethernet → pppoe-session → ppp(ipv4) → t
           timeToLive: 64,
           protocol: IP_PROTOCOL_TCP,
           headerChecksum: 0,
-          sourceAddress: parseAddressv4("192.0.2.1"),
-          destinationAddress: parseAddressv4("192.0.2.2"),
+          sourceAddress: parseAddressv4("192.0.2.1").address,
+          destinationAddress: parseAddressv4("192.0.2.2").address,
           options: new Uint8Array(0),
           payload: {
             sourcePort: 49152,
@@ -775,8 +778,8 @@ Deno.test("inetFrame: round-trips ethernet → ipv4 → igmp", () => {
       timeToLive: 1,
       protocol: IP_PROTOCOL_IGMP,
       headerChecksum: 0,
-      sourceAddress: parseAddressv4("10.0.0.5"),
-      destinationAddress: parseAddressv4("224.0.0.1"),
+      sourceAddress: parseAddressv4("10.0.0.5").address,
+      destinationAddress: parseAddressv4("224.0.0.1").address,
       options: new Uint8Array(0),
       payload: {
         type: IGMP_TYPE.V2_MEMBERSHIP_REPORT,
@@ -818,8 +821,8 @@ Deno.test("inetFrame: round-trips ethernet → ipv4 → esp", () => {
       timeToLive: 64,
       protocol: IP_PROTOCOL_ESP,
       headerChecksum: 0,
-      sourceAddress: parseAddressv4("10.0.0.1"),
-      destinationAddress: parseAddressv4("10.0.0.2"),
+      sourceAddress: parseAddressv4("10.0.0.1").address,
+      destinationAddress: parseAddressv4("10.0.0.2").address,
       options: new Uint8Array(0),
       payload: {
         spi: 0x12345678,
@@ -865,8 +868,8 @@ Deno.test("inetFrame: round-trips a full VXLAN tunnel (udp:4789 → vxlan → et
     timeToLive: 64,
     protocol: IP_PROTOCOL_UDP,
     headerChecksum: 0,
-    sourceAddress: parseAddressv4("192.168.1.1"),
-    destinationAddress: parseAddressv4("192.168.1.2"),
+    sourceAddress: parseAddressv4("192.168.1.1").address,
+    destinationAddress: parseAddressv4("192.168.1.2").address,
     options: new Uint8Array(0),
     payload: innerUdp,
   };
@@ -911,8 +914,8 @@ Deno.test("inetFrame: round-trips a full VXLAN tunnel (udp:4789 → vxlan → et
       timeToLive: 64,
       protocol: IP_PROTOCOL_UDP,
       headerChecksum: 0,
-      sourceAddress: parseAddressv4("10.1.1.1"),
-      destinationAddress: parseAddressv4("10.1.1.2"),
+      sourceAddress: parseAddressv4("10.1.1.1").address,
+      destinationAddress: parseAddressv4("10.1.1.2").address,
       options: new Uint8Array(0),
       payload: outerUdp,
     },
@@ -1069,8 +1072,8 @@ Deno.test("inetFrame: UDP port ambiguity — destination port wins over source p
       timeToLive: 255,
       protocol: IP_PROTOCOL_UDP,
       headerChecksum: 0,
-      sourceAddress: parseAddressv4("10.0.0.1"),
-      destinationAddress: parseAddressv4("10.0.0.2"),
+      sourceAddress: parseAddressv4("10.0.0.1").address,
+      destinationAddress: parseAddressv4("10.0.0.2").address,
       options: new Uint8Array(0),
       payload: {
         // srcPort matches NTP, dstPort matches BFD — dstPort must win.
@@ -1132,8 +1135,8 @@ Deno.test("inetFrame: unknown UDP port stays a plain UdpPacket", () => {
       timeToLive: 64,
       protocol: IP_PROTOCOL_UDP,
       headerChecksum: 0,
-      sourceAddress: parseAddressv4("10.0.0.1"),
-      destinationAddress: parseAddressv4("10.0.0.2"),
+      sourceAddress: parseAddressv4("10.0.0.1").address,
+      destinationAddress: parseAddressv4("10.0.0.2").address,
       options: new Uint8Array(0),
       payload: {
         srcPort: 40000,
@@ -1214,8 +1217,8 @@ Deno.test("sllInetFrame: round-trips sll → ipv4 → udp", () => {
       timeToLive: 64,
       protocol: IP_PROTOCOL_UDP,
       headerChecksum: 0,
-      sourceAddress: parseAddressv4("10.0.0.1"),
-      destinationAddress: parseAddressv4("10.0.0.2"),
+      sourceAddress: parseAddressv4("10.0.0.1").address,
+      destinationAddress: parseAddressv4("10.0.0.2").address,
       options: new Uint8Array(0),
       payload: {
         srcPort: 1234,
@@ -1314,8 +1317,8 @@ Deno.test("sllInetFrame: round-trips sll → vlan → ipv4 → udp", () => {
         timeToLive: 64,
         protocol: IP_PROTOCOL_UDP,
         headerChecksum: 0,
-        sourceAddress: parseAddressv4("10.0.0.1"),
-        destinationAddress: parseAddressv4("10.0.0.2"),
+        sourceAddress: parseAddressv4("10.0.0.1").address,
+        destinationAddress: parseAddressv4("10.0.0.2").address,
         options: new Uint8Array(0),
         payload: {
           srcPort: 1111,

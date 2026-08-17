@@ -159,8 +159,8 @@
  *   timeToLive: 64,
  *   protocol: 17,
  *   headerChecksum: 0,
- *   sourceAddress: parseAddressv4("192.0.2.1"),
- *   destinationAddress: parseAddressv4("192.0.2.2"),
+ *   sourceAddress: parseAddressv4("192.0.2.1").address,
+ *   destinationAddress: parseAddressv4("192.0.2.2").address,
  *   options: new Uint8Array(0),
  *   payload: udpBytes,
  * }, packet);
@@ -191,7 +191,7 @@
  * const [parsedIp] = ip.decode(records[0].data);
  * const [parsedUdp] = udp.decode(parsedIp.payload);
  *
- * assertEquals(parsedIp.sourceAddress, parseAddressv4("192.0.2.1"));
+ * assertEquals(parsedIp.sourceAddress, parseAddressv4("192.0.2.1").address);
  * assertEquals(parsedUdp.srcPort, 53);
  * assertEquals(parsedUdp.payload, new Uint8Array([0xde, 0xad, 0xbe, 0xef]));
  * ```
@@ -222,8 +222,8 @@
  *     timeToLive: 64,
  *     protocol: IP_PROTOCOL_UDP,
  *     headerChecksum: 0,
- *     sourceAddress: parseAddressv4("192.0.2.1"),
- *     destinationAddress: parseAddressv4("192.0.2.2"),
+ *     sourceAddress: parseAddressv4("192.0.2.1").address,
+ *     destinationAddress: parseAddressv4("192.0.2.2").address,
  *     options: new Uint8Array(0),
  *     payload: {
  *       srcPort: 53,
@@ -262,7 +262,7 @@
  *
  * assert(!(decoded.payload instanceof Uint8Array));
  * assert("protocol" in decoded.payload);
- * assertEquals(decoded.payload.sourceAddress, parseAddressv4("192.0.2.1"));
+ * assertEquals(decoded.payload.sourceAddress, parseAddressv4("192.0.2.1").address);
  * assert(!(decoded.payload.payload instanceof Uint8Array));
  * assert("srcPort" in decoded.payload.payload);
  * assertEquals(decoded.payload.payload.srcPort, 53);

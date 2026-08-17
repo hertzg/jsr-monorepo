@@ -68,8 +68,8 @@
  *     timeToLive: 64,
  *     protocol: IP_PROTOCOL_UDP,
  *     headerChecksum: 0,
- *     sourceAddress: parseAddressv4("192.0.2.1"),
- *     destinationAddress: parseAddressv4("192.0.2.2"),
+ *     sourceAddress: parseAddressv4("192.0.2.1").address,
+ *     destinationAddress: parseAddressv4("192.0.2.2").address,
  *     options: new Uint8Array(0),
  *     payload: {
  *       srcPort: 53,

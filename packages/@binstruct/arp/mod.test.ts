@@ -74,9 +74,9 @@ Deno.test("arp — encode produces expected wire bytes", () => {
     protocolAddressLength: ARP_PROTO_LEN_IPV4,
     operation: ARP_OPCODE.REQUEST,
     senderHardwareAddress: parseMac("00:11:22:33:44:55"),
-    senderProtocolAddress: parseAddressv4("192.168.1.1"),
+    senderProtocolAddress: parseAddressv4("192.168.1.1").address,
     targetHardwareAddress: new Uint8Array(ARP_HW_LEN_ETHERNET),
-    targetProtocolAddress: parseAddressv4("192.168.1.2"),
+    targetProtocolAddress: parseAddressv4("192.168.1.2").address,
   };
 
   const buffer = new Uint8Array(ARP_ETHERNET_IPV4_SIZE);
@@ -96,9 +96,9 @@ Deno.test("arp — round-trip request and reply", () => {
       protocolAddressLength: ARP_PROTO_LEN_IPV4,
       operation: ARP_OPCODE.REQUEST,
       senderHardwareAddress: parseMac("00:11:22:33:44:55"),
-      senderProtocolAddress: parseAddressv4("10.0.0.1"),
+      senderProtocolAddress: parseAddressv4("10.0.0.1").address,
       targetHardwareAddress: new Uint8Array(ARP_HW_LEN_ETHERNET),
-      targetProtocolAddress: parseAddressv4("10.0.0.42"),
+      targetProtocolAddress: parseAddressv4("10.0.0.42").address,
     },
     {
       hardwareType: ARP_HARDWARE_TYPE.ETHERNET,
@@ -107,9 +107,9 @@ Deno.test("arp — round-trip request and reply", () => {
       protocolAddressLength: ARP_PROTO_LEN_IPV4,
       operation: ARP_OPCODE.REPLY,
       senderHardwareAddress: parseMac("aa:bb:cc:dd:ee:ff"),
-      senderProtocolAddress: parseAddressv4("10.0.0.42"),
+      senderProtocolAddress: parseAddressv4("10.0.0.42").address,
       targetHardwareAddress: parseMac("00:11:22:33:44:55"),
-      targetProtocolAddress: parseAddressv4("10.0.0.1"),
+      targetProtocolAddress: parseAddressv4("10.0.0.1").address,
     },
   ];
 
@@ -160,8 +160,10 @@ Deno.test("arp — composes with refine for human-readable form", () => {
       operation: refined.operation,
       senderHardwareAddress: parseMac(refined.senderHardwareAddress),
       targetHardwareAddress: parseMac(refined.targetHardwareAddress),
-      senderProtocolAddress: parseAddressv4(refined.senderProtocolAddress),
-      targetProtocolAddress: parseAddressv4(refined.targetProtocolAddress),
+      senderProtocolAddress:
+        parseAddressv4(refined.senderProtocolAddress).address,
+      targetProtocolAddress:
+        parseAddressv4(refined.targetProtocolAddress).address,
     }),
   });
 
