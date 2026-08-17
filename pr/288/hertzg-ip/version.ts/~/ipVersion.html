@@ -179,7 +179,7 @@ value, use <code>typeof</code> — <code>number</code> is IPv4, <code>bigint</co
 <p>CIDR notation is not an address — use <a href="../.././version.ts/~/cidrVersion.html">cidrVersion</a> for that.</p>
 <p>What counts as valid is exactly what <a href="../.././validatev4.ts/~/isValidIpv4.html">isValidIpv4</a> and
 <a href="../.././validatev6.ts/~/isValidIpv6.html">isValidIpv6</a> accept, which is the grammar each address RFC
-publishes and nothing else (see ADR 0015). Surrounding whitespace and
+publishes and nothing else (see ADR 0003). Surrounding whitespace and
 trailing text are not part of either grammar, so <code>ipVersion(&quot; 10.1.2.3&quot;)</code>
 and <code>ipVersion(&quot;1.2.3.4abc&quot;)</code> are both <code>undefined</code>.</p>
 </div><section class="section"  id="examples"><div>

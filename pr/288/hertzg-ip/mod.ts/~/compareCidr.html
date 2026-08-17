@@ -173,7 +173,7 @@ ascending, then by prefix length ascending — the shorter prefix (the
 larger block) first. Mixed-version arguments are not an error: unlike the
 other universal CIDR operations in this module, this function never
 throws, because sorting a mixed list is the reason it exists. Ordering a
-disjoint union needs no cross-version conversion — see ADR 0011.</p>
+disjoint union needs no cross-version conversion — see ADR 0005.</p>
 <p>The block is ordered <strong>as written</strong>: the <code>address</code> field is compared as
 stored, without applying the network mask first. See
 <a href="../.././mod.ts/~/compareCidrv4.html">compareCidrv4</a> for what that means for blocks carrying host bits.</p>
