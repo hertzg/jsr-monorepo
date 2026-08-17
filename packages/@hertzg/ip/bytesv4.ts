@@ -71,7 +71,7 @@ const IPV4_MAX = 4294967295;
  *
  * Index arithmetic rather than a `DataView`: the view would have to be built
  * per call, since the buffer differs per call, and that constructor is the
- * whole cost. See ADR 0012.
+ * whole cost. See ADR 0008.
  *
  * @param address The address as a 32-bit unsigned integer
  * @param into The buffer to write into

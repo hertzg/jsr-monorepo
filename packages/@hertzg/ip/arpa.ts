@@ -17,7 +17,7 @@
  * `1.0.168.192.in-addr.arpa.` — the dot is DNS wire-format framing, and
  * every other stringifier in this package emits a bare canonical form
  * without it. Callers handing the name to a resolver that requires an
- * absolute name append `"."` themselves. See ADR 0014.
+ * absolute name append `"."` themselves. See ADR 0009.
  *
  * ## Addresses only
  *

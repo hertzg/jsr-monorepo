@@ -767,7 +767,7 @@ export function* cidrAddresses(
  * larger block) first. Mixed-version arguments are not an error: unlike the
  * other universal CIDR operations in this module, this function never
  * throws, because sorting a mixed list is the reason it exists. Ordering a
- * disjoint union needs no cross-version conversion — see ADR 0011.
+ * disjoint union needs no cross-version conversion — see ADR 0005.
  *
  * The block is ordered **as written**: the `address` field is compared as
  * stored, without applying the network mask first. See

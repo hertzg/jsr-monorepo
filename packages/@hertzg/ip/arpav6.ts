@@ -8,7 +8,7 @@
  * - [`arpav4`](https://jsr.io/@hertzg/ip/doc/arpav4): {@link ipv4ToArpa}
  * - [`arpa`](https://jsr.io/@hertzg/ip/doc/arpa): {@link ipToArpa}
  *
- * The name is relative -- no trailing dot. See ADR 0014.
+ * The name is relative -- no trailing dot. See ADR 0009.
  *
  * @example Build the name a PTR record lives at
  * ```ts

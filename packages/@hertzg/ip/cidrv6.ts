@@ -56,7 +56,7 @@ export type Cidrv6 = {
  * {@link cidrv6Mask}, so a CIDR list scanned per request would otherwise
  * repeat that work for every entry. The domain is 129 values known at
  * author time, which is what makes a plain array the right cache — see
- * ADR 0006 for the same reasoning applied to the classifier ranges.
+ * ADR 0007 for the same reasoning applied to the classifier ranges.
  *
  * Deliberately left extensible. Making an array non-extensible moves it out
  * of `PACKED_ELEMENTS` into the sealed/frozen elements kinds, which are not
