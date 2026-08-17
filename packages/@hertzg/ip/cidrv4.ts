@@ -73,6 +73,8 @@ export type PrefixedCidrv4 = {
   readonly address: number;
   /** The prefix length (0-32) */
   readonly prefixLength: PrefixLengthv4;
+  /** Absent: the mask dialect is {@link MaskedCidrv4} */
+  readonly mask?: never;
 };
 
 /**
@@ -84,6 +86,8 @@ export type MaskedCidrv4 = {
   readonly address: number;
   /** The network mask, stored as given */
   readonly mask: Maskv4;
+  /** Absent: the prefix length dialect is {@link PrefixedCidrv4} */
+  readonly prefixLength?: never;
 };
 
 /**
@@ -96,8 +100,10 @@ export type MaskedCidrv4 = {
  * result that has a dialect matches the input, and mixed inputs give the
  * mask form (ADR 0006).
  *
- * If a hand-built value carries both keys, `mask` wins, because the mask
- * is the form the operations compute on; nothing checks for the case.
+ * The two branches exclude each other's key, so an object literal cannot
+ * carry both. If a value smuggled past the type checker does carry both,
+ * `mask` wins, because the mask is the form the operations compute on;
+ * nothing checks for the case at runtime.
  *
  * @example The two dialects describe the same block
  * ```ts
@@ -188,7 +194,7 @@ export function cidrv4Mask(
   let prefixLength: PrefixLengthv4;
   if (typeof cidrOrPrefixLength === "number") {
     prefixLength = cidrOrPrefixLength;
-  } else if ("mask" in cidrOrPrefixLength) {
+  } else if (cidrOrPrefixLength.mask !== undefined) {
     return cidrOrPrefixLength.mask;
   } else {
     prefixLength = cidrOrPrefixLength.prefixLength;
@@ -384,7 +390,7 @@ export function cidrv4PrefixLength(
     value = parseAddressv4(cidrOrMask);
   } else if (typeof cidrOrMask === "number") {
     value = cidrOrMask;
-  } else if ("mask" in cidrOrMask) {
+  } else if (cidrOrMask.mask !== undefined) {
     value = cidrOrMask.mask;
   } else {
     return cidrOrMask.prefixLength;
@@ -455,7 +461,7 @@ function parsePrefixLength(part: string): number {
  * whitespace, no sign, and no trailing text.
  *
  * @param cidr The CIDR notation string (e.g., "192.168.1.0/24")
- * @returns A Cidrv4 object containing the parsed address and prefix length
+ * @returns A PrefixedCidrv4 object containing the parsed address and prefix length
  * @throws {TypeError} If the format is invalid, including a prefix length
  *   with leading zeros, whitespace or trailing text
  * @throws {RangeError} If the prefix length is out of range (not 0-32)
@@ -537,7 +543,7 @@ export function parseCidrv4(cidr: string): PrefixedCidrv4 {
  */
 export function stringifyCidrv4(cidr: Cidrv4): string {
   const address = stringifyAddressv4(cidr.address);
-  return "mask" in cidr
+  return cidr.mask !== undefined
     ? `${address}/${stringifyAddressv4(cidr.mask)}`
     : `${address}/${cidr.prefixLength}`;
 }
@@ -1086,7 +1092,7 @@ function cidrv4SplitHalves(cidr: Cidrv4): [Cidrv4, Cidrv4] {
   // The next longer prefix: one more leading one bit.
   const childMask = ((mask >>> 1) | 0x80000000) >>> 0;
   const upper = (network | (childMask ^ mask)) >>> 0;
-  if ("mask" in cidr) {
+  if (cidr.mask !== undefined) {
     return [
       { address: network, mask: childMask },
       { address: upper, mask: childMask },
@@ -1157,7 +1163,7 @@ export function cidrv4Intersect(a: Cidrv4, b: Cidrv4): Cidrv4 | null {
     ? [a, aMask]
     : [b, bMask];
   const address = (inner.address & mask) >>> 0;
-  if ("mask" in a || "mask" in b) return { address, mask };
+  if (a.mask !== undefined || b.mask !== undefined) return { address, mask };
   return { address, prefixLength: cidrv4PrefixLength(inner) };
 }
 
@@ -1170,7 +1176,10 @@ export function cidrv4Intersect(a: Cidrv4, b: Cidrv4): Cidrv4 | null {
  * into the overlapping half.
  *
  * The result matches the dialect of the inputs. When they disagree, it is
- * in {@link MaskedCidrv4} form (ADR 0006).
+ * in {@link MaskedCidrv4} form (ADR 0006). A non-contiguous mask on `b`
+ * flows through unchecked (ADR 0006), and since no aligned block can then
+ * contain or avoid it short of a single address, the result is a list of
+ * up to one entry per address of `a`.
  *
  * @param a The CIDR block to subtract from
  * @param b The CIDR block to subtract
@@ -1232,7 +1241,7 @@ export function cidrv4Intersect(a: Cidrv4, b: Cidrv4): Cidrv4 | null {
 export function cidrv4Subtract(a: Cidrv4, b: Cidrv4): Cidrv4[] {
   // Every piece is carved from `a`, so `a` carries the output dialect. Move
   // it to the mask form when `b` is masked and `a` is not.
-  if (!("mask" in a) && "mask" in b) {
+  if (a.mask === undefined && b.mask !== undefined) {
     return cidrv4Subtract({ address: a.address, mask: cidrv4Mask(a) }, b);
   }
   if (!cidrv4Overlaps(a, b)) return [a];
@@ -1528,7 +1537,7 @@ export function cidrv4Merge(cidrs: readonly Cidrv4[]): Cidrv4[] {
   // result masked too.
   let masked = false;
   let list: MaskedCidrv4[] = cidrs.map((cidr) => {
-    if ("mask" in cidr) masked = true;
+    if (cidr.mask !== undefined) masked = true;
     const mask = cidrv4Mask(cidr);
     return { address: (cidr.address & mask) >>> 0, mask };
   });
@@ -1644,6 +1653,13 @@ export function cidrv4Merge(cidrs: readonly Cidrv4[]): Cidrv4[] {
 export function compareCidrv4(a: Cidrv4, b: Cidrv4): -1 | 0 | 1 {
   const byAddress = compareAddressv4(a.address, b.address);
   if (byAddress !== 0) return byAddress;
+  // Two prefixed blocks compare as numbers: the mask order is the same, and
+  // skipping the mask keeps the comparator total over any prefix length.
+  if (a.mask === undefined && b.mask === undefined) {
+    if (a.prefixLength < b.prefixLength) return -1;
+    if (a.prefixLength > b.prefixLength) return 1;
+    return 0;
+  }
   const aMask = cidrv4Mask(a);
   const bMask = cidrv4Mask(b);
   if (aMask < bMask) return -1;

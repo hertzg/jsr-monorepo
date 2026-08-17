@@ -182,7 +182,8 @@ export function isCidrv6(cidr: Cidr): cidr is Cidrv6 {
  * {@link parseCidrv6} directly instead.
  *
  * @param cidr The CIDR notation string (e.g., "192.168.1.0/24" or "2001:db8::/32")
- * @returns The parsed CIDR as `Cidrv4` or `Cidrv6`
+ * @returns The parsed CIDR as a `PrefixedCidrv4` or `PrefixedCidrv6`; the
+ *   parser writes the prefix length dialect only
  * @throws {TypeError} If the format is invalid
  * @throws {RangeError} If values are out of range
  *
@@ -359,6 +360,11 @@ export function cidrContains(cidr: Cidr, address: Address): boolean {
  * );
  * ```
  */
+export function cidrContainsCidr<T extends Cidr>(
+  outer: T,
+  inner: T extends Cidrv4 ? Cidrv4 : Cidrv6,
+): boolean;
+/** Checks if one CIDR block fully contains another. */
 export function cidrContainsCidr(outer: Cidr, inner: Cidr): boolean {
   if (isCidrv6(outer) && isCidrv6(inner)) {
     return cidrv6ContainsCidr(outer, inner);
@@ -416,6 +422,11 @@ export function cidrContainsCidr(outer: Cidr, inner: Cidr): boolean {
  * );
  * ```
  */
+export function cidrOverlaps<T extends Cidr>(
+  a: T,
+  b: T extends Cidrv4 ? Cidrv4 : Cidrv6,
+): boolean;
+/** Checks if two CIDR blocks overlap (share at least one address). */
 export function cidrOverlaps(a: Cidr, b: Cidr): boolean {
   if (isCidrv6(a) && isCidrv6(b)) {
     return cidrv6Overlaps(a, b);
@@ -468,11 +479,10 @@ export function cidrOverlaps(a: Cidr, b: Cidr): boolean {
  * );
  * ```
  */
-export function cidrIntersect(a: Cidrv4, b: Cidrv4): Cidrv4 | null;
-/** Returns the intersection of two IPv6 CIDR blocks. */
-export function cidrIntersect(a: Cidrv6, b: Cidrv6): Cidrv6 | null;
-/** Returns the intersection of two CIDR blocks. */
-export function cidrIntersect(a: Cidr, b: Cidr): Cidr | null;
+export function cidrIntersect<T extends Cidr>(
+  a: T,
+  b: T extends Cidrv4 ? Cidrv4 : Cidrv6,
+): (T extends Cidrv4 ? Cidrv4 : Cidrv6) | null;
 /** Returns the intersection of two CIDR blocks. */
 export function cidrIntersect(a: Cidr, b: Cidr): Cidr | null {
   if (isCidrv6(a) && isCidrv6(b)) {
@@ -525,11 +535,10 @@ export function cidrIntersect(a: Cidr, b: Cidr): Cidr | null {
  * );
  * ```
  */
-export function cidrSubtract(a: Cidrv4, b: Cidrv4): Cidrv4[];
-/** Subtracts one IPv6 CIDR block from another. */
-export function cidrSubtract(a: Cidrv6, b: Cidrv6): Cidrv6[];
-/** Subtracts one CIDR block from another. */
-export function cidrSubtract(a: Cidr, b: Cidr): Cidr[];
+export function cidrSubtract<T extends Cidr>(
+  a: T,
+  b: T extends Cidrv4 ? Cidrv4 : Cidrv6,
+): (T extends Cidrv4 ? Cidrv4 : Cidrv6)[];
 /** Subtracts one CIDR block from another. */
 export function cidrSubtract(a: Cidr, b: Cidr): Cidr[] {
   if (isCidrv6(a) && isCidrv6(b)) {

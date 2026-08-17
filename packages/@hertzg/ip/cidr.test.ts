@@ -1,5 +1,6 @@
 import { assert, assertEquals, assertThrows } from "@std/assert";
 import {
+  type Cidr,
   cidrAddresses,
   cidrContains,
   cidrContainsCidr,
@@ -574,24 +575,27 @@ Deno.test("mask dialect", async (t) => {
   });
 
   await t.step("cidrContainsCidr across dialects", () => {
-    assert(cidrContainsCidr(v4Masked, parseCidr("10.1.0.0/16")));
-    assertThrows(() => cidrContainsCidr(v4Masked, v6Masked), TypeError);
+    assert(cidrContainsCidr(v4Masked, parseCidrv4("10.1.0.0/16")));
+    assertThrows(
+      () => cidrContainsCidr<Cidr>(v4Masked, v6Masked),
+      TypeError,
+    );
   });
 
   await t.step("cidrOverlaps across dialects", () => {
-    assert(cidrOverlaps(parseCidr("2001:db8:1::/48"), v6Masked));
+    assert(cidrOverlaps(parseCidrv6("2001:db8:1::/48"), v6Masked));
   });
 
   await t.step("cidrIntersect of mixed dialects is masked", () => {
     assertEquals(
-      cidrIntersect(v4Masked, parseCidr("10.1.0.0/16")),
+      cidrIntersect(v4Masked, parseCidrv4("10.1.0.0/16")),
       { address: parseAddressv4("10.1.0.0"), mask: 0xFFFF0000 },
     );
   });
 
   await t.step("cidrSubtract of mixed dialects is masked", () => {
     assertEquals(
-      cidrSubtract(v6Masked, parseCidr("2001:db8::/33")).map(stringifyCidr),
+      cidrSubtract(v6Masked, parseCidrv6("2001:db8::/33")).map(stringifyCidr),
       ["2001:db8:8000::/ffff:ffff:8000::"],
     );
   });

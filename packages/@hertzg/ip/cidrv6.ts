@@ -70,6 +70,8 @@ export type PrefixedCidrv6 = {
   readonly address: bigint;
   /** The prefix length (0-128) */
   readonly prefixLength: PrefixLengthv6;
+  /** Absent: the mask dialect is {@link MaskedCidrv6} */
+  readonly mask?: never;
 };
 
 /**
@@ -81,6 +83,8 @@ export type MaskedCidrv6 = {
   readonly address: bigint;
   /** The network mask, stored as given */
   readonly mask: Maskv6;
+  /** Absent: the prefix length dialect is {@link PrefixedCidrv6} */
+  readonly prefixLength?: never;
 };
 
 /**
@@ -93,8 +97,10 @@ export type MaskedCidrv6 = {
  * result that has a dialect matches the input, and mixed inputs give the
  * mask form (ADR 0006).
  *
- * If a hand-built value carries both keys, `mask` wins, because the mask
- * is the form the operations compute on; nothing checks for the case.
+ * The two branches exclude each other's key, so an object literal cannot
+ * carry both. If a value smuggled past the type checker does carry both,
+ * `mask` wins, because the mask is the form the operations compute on;
+ * nothing checks for the case at runtime.
  *
  * @example The two dialects describe the same block
  * ```ts
@@ -144,17 +150,6 @@ const MASKS_V6: readonly bigint[] = Array.from(
     prefixLength === 0
       ? 0n
       : (MASK_ALL_V6 << BigInt(128 - prefixLength)) & MASK_ALL_V6,
-);
-
-/**
- * Every IPv6 CIDR block size, indexed by prefix length.
- *
- * Hoisted for the same reason as {@link MASKS_V6}: `2n ** BigInt(128 - n)`
- * over a domain of 129 known values.
- */
-const SIZES_V6: readonly bigint[] = Array.from(
-  { length: 129 },
-  (_, prefixLength) => 2n ** BigInt(128 - prefixLength),
 );
 
 /**
@@ -235,7 +230,7 @@ export function cidrv6Mask(
   let prefixLength: PrefixLengthv6;
   if (typeof cidrOrPrefixLength === "number") {
     prefixLength = cidrOrPrefixLength;
-  } else if ("mask" in cidrOrPrefixLength) {
+  } else if (cidrOrPrefixLength.mask !== undefined) {
     return cidrOrPrefixLength.mask;
   } else {
     prefixLength = cidrOrPrefixLength.prefixLength;
@@ -421,7 +416,7 @@ export function cidrv6PrefixLength(
     value = parseAddressv6(cidrOrMask);
   } else if (typeof cidrOrMask === "bigint") {
     value = cidrOrMask;
-  } else if ("mask" in cidrOrMask) {
+  } else if (cidrOrMask.mask !== undefined) {
     value = cidrOrMask.mask;
   } else {
     return cidrOrMask.prefixLength;
@@ -500,7 +495,7 @@ function parsePrefixLength(part: string): number {
  * whitespace, no sign, and no trailing text.
  *
  * @param cidr The CIDR notation string (e.g., "2001:db8::/32")
- * @returns A Cidrv6 object containing the parsed address and prefix length
+ * @returns A PrefixedCidrv6 object containing the parsed address and prefix length
  * @throws {TypeError} If the format is invalid, including a prefix length
  *   with leading zeros, whitespace or trailing text
  * @throws {RangeError} If the prefix length is out of range (not 0-128)
@@ -588,7 +583,7 @@ export function parseCidrv6(cidr: string): PrefixedCidrv6 {
  */
 export function stringifyCidrv6(cidr: Cidrv6): string {
   const address = stringifyAddressv6(cidr.address);
-  return "mask" in cidr
+  return cidr.mask !== undefined
     ? `${address}/${stringifyAddressv6(cidr.mask)}`
     : `${address}/${cidr.prefixLength}`;
 }
@@ -778,27 +773,10 @@ export function cidrv6Size(
 export function cidrv6Size(
   cidrOrPrefixLength: Cidrv6 | PrefixLengthv6,
 ): bigint {
-  let prefixLength: PrefixLengthv6;
-  if (typeof cidrOrPrefixLength === "number") {
-    prefixLength = cidrOrPrefixLength;
-  } else if ("mask" in cidrOrPrefixLength) {
-    // The host bits of the mask, plus one. For a contiguous mask that is
-    // 2 ** (128 - prefixLength); for any other stored mask it is a number
-    // that means nothing, which is the caller's problem (ADR 0006).
-    return (~cidrOrPrefixLength.mask & MASK_ALL_V6) + 1n;
-  } else {
-    prefixLength = cidrOrPrefixLength.prefixLength;
-  }
-
-  // As in cidrv6Mask, the table doubles as the range check.
-  const size = SIZES_V6[prefixLength];
-  if (size === undefined) {
-    throw new RangeError(
-      `CIDR prefix length must be 0-128, got ${prefixLength}`,
-    );
-  }
-
-  return size;
+  // The host bits of the mask, plus one. For a contiguous mask that is
+  // 2 ** (128 - prefixLength); for any other stored mask it is a number
+  // that means nothing, which is the caller's problem (ADR 0006).
+  return (~cidrv6Mask(cidrOrPrefixLength) & MASK_ALL_V6) + 1n;
 }
 
 /**
@@ -909,7 +887,7 @@ function cidrv6SplitHalves(cidr: Cidrv6): [Cidrv6, Cidrv6] {
   // The next longer prefix: one more leading one bit.
   const childMask = (mask >> 1n) | MASK_TOP_BIT_V6;
   const upper = network | (childMask ^ mask);
-  if ("mask" in cidr) {
+  if (cidr.mask !== undefined) {
     return [
       { address: network, mask: childMask },
       { address: upper, mask: childMask },
@@ -979,7 +957,7 @@ export function cidrv6Intersect(a: Cidrv6, b: Cidrv6): Cidrv6 | null {
   // The more specific block is the one whose mask covers the other's.
   const [inner, mask] = (aMask & bMask) === bMask ? [a, aMask] : [b, bMask];
   const address = inner.address & mask;
-  if ("mask" in a || "mask" in b) return { address, mask };
+  if (a.mask !== undefined || b.mask !== undefined) return { address, mask };
   return { address, prefixLength: cidrv6PrefixLength(inner) };
 }
 
@@ -992,7 +970,10 @@ export function cidrv6Intersect(a: Cidrv6, b: Cidrv6): Cidrv6 | null {
  * into the overlapping half.
  *
  * The result matches the dialect of the inputs. When they disagree, it is
- * in {@link MaskedCidrv6} form (ADR 0006).
+ * in {@link MaskedCidrv6} form (ADR 0006). A non-contiguous mask on `b`
+ * flows through unchecked (ADR 0006), and since no aligned block can then
+ * contain or avoid it short of a single address, the result is a list of
+ * up to one entry per address of `a`.
  *
  * @param a The CIDR block to subtract from
  * @param b The CIDR block to subtract
@@ -1050,7 +1031,7 @@ export function cidrv6Intersect(a: Cidrv6, b: Cidrv6): Cidrv6 | null {
 export function cidrv6Subtract(a: Cidrv6, b: Cidrv6): Cidrv6[] {
   // Every piece is carved from `a`, so `a` carries the output dialect. Move
   // it to the mask form when `b` is masked and `a` is not.
-  if (!("mask" in a) && "mask" in b) {
+  if (a.mask === undefined && b.mask !== undefined) {
     return cidrv6Subtract({ address: a.address, mask: cidrv6Mask(a) }, b);
   }
   if (!cidrv6Overlaps(a, b)) return [a];
@@ -1262,7 +1243,7 @@ export function cidrv6Merge(cidrs: readonly Cidrv6[]): Cidrv6[] {
   // result masked too.
   let masked = false;
   let list: MaskedCidrv6[] = cidrs.map((cidr) => {
-    if ("mask" in cidr) masked = true;
+    if (cidr.mask !== undefined) masked = true;
     const mask = cidrv6Mask(cidr);
     return { address: cidr.address & mask, mask };
   });
@@ -1381,7 +1362,7 @@ export function compareCidrv6(a: Cidrv6, b: Cidrv6): -1 | 0 | 1 {
   if (byAddress !== 0) return byAddress;
   // Two prefixed blocks compare as numbers; the mask order is the same, but
   // costs a bigint comparison, so a sort of parsed blocks skips it.
-  if (!("mask" in a) && !("mask" in b)) {
+  if (a.mask === undefined && b.mask === undefined) {
     if (a.prefixLength < b.prefixLength) return -1;
     if (a.prefixLength > b.prefixLength) return 1;
     return 0;
@@ -1461,8 +1442,11 @@ export function mapFromCidrv4(cidr: Cidrv4): Cidrv6;
 /** Converts an IPv4 CIDR block to its IPv4-mapped IPv6 CIDR representation. */
 export function mapFromCidrv4(cidr: Cidrv4): Cidrv6 {
   const address = mapFromAddressv4(cidr.address);
-  if ("mask" in cidr) {
-    return { address, mask: IPV4_MAPPED_PREFIX_MASK | BigInt(cidr.mask) };
+  if (cidr.mask !== undefined) {
+    return {
+      address,
+      mask: IPV4_MAPPED_PREFIX_MASK | BigInt(cidr.mask >>> 0),
+    };
   }
   return {
     address,
@@ -1554,7 +1538,7 @@ export function unmapToCidrv4(cidr: MaskedCidrv6): MaskedCidrv4;
 export function unmapToCidrv4(cidr: Cidrv6): Cidrv4;
 /** Converts an IPv4-mapped IPv6 CIDR block to its IPv4 CIDR representation. */
 export function unmapToCidrv4(cidr: Cidrv6): Cidrv4 {
-  if ("mask" in cidr) {
+  if (cidr.mask !== undefined) {
     if ((cidr.mask & IPV4_MAPPED_PREFIX_MASK) !== IPV4_MAPPED_PREFIX_MASK) {
       throw new RangeError(
         `Mask 0x${
