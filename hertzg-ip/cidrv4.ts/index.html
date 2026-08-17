@@ -102,6 +102,9 @@
 <p>This module provides CIDR parsing, network calculations, and IP range
 checking for IPv4 networks. Works with number representations to enable
 efficient IP assignment workflows.</p>
+<p>A <a href=".././cidrv4.ts/~/Cidrv4.html">Cidrv4</a> stores whichever dialect it was written in, a prefix
+length (<code>10.0.0.0/8</code>) or a network mask (<code>10.0.0.0/255.0.0.0</code>), and every
+operation here accepts both.</p>
 </div><section class="section"  id="examples"><div>
       <h2 class="anchorable mb-1"><a href="#examples" class="anchor" aria-label="Anchor" tabIndex="-1"><svg
   width="16"
@@ -350,7 +353,7 @@ Functions</h2></div><div class="namespaceSection"><div id="namespace_cidrv4addre
     </div><div id="namespace_cidrv4mask" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-Function bg-Function/15 dark:text-FunctionDark dark:bg-FunctionDark/15" title="Function">f</div></div>
 <div class="namespaceItemContent">
 		    <a href="..&#x2F;.&#x2F;cidrv4.ts&#x2F;~&#x2F;cidrv4Mask.html" title="cidrv4Mask">
-			    <span>cidrv4Mask</span><span>(<span><span>prefixLength<span>: <span class="td-kw">number</span></span></span></span>)<span>: <span class="td-kw">number</span></span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Creates a network mask from an IPv4 prefix length.</p>
+			    <span>cidrv4Mask</span><span>(<span><span>cidrOrPrefixLength<span>: <span><span class="td-ref">Cidrv4</span><span class="td-op"> | </span><span class="td-ref">PrefixLengthv4</span></span></span></span></span>)<span>: <span class="td-ref">Maskv4</span></span></span><div class="namespaceItemContentTypeInfo">3 overloads</div></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Creates a network mask from an IPv4 prefix length.</p>
 </div></div></div>
     </div><div id="namespace_cidrv4merge" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-Function bg-Function/15 dark:text-FunctionDark dark:bg-FunctionDark/15" title="Function">f</div></div>
 <div class="namespaceItemContent">
@@ -365,13 +368,13 @@ Functions</h2></div><div class="namespaceSection"><div id="namespace_cidrv4addre
     </div><div id="namespace_cidrv4prefixlength" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-Function bg-Function/15 dark:text-FunctionDark dark:bg-FunctionDark/15" title="Function">f</div></div>
 <div class="namespaceItemContent">
 		    <a href="..&#x2F;.&#x2F;cidrv4.ts&#x2F;~&#x2F;cidrv4PrefixLength.html" title="cidrv4PrefixLength">
-			    <span>cidrv4PrefixLength</span><span>(<span><span>mask<span>: <span><span class="td-kw">string</span><span class="td-op"> | </span><span class="td-kw">number</span></span></span></span></span>)<span>: <span class="td-kw">number</span></span></span><div class="namespaceItemContentTypeInfo">3 overloads</div></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Recovers the prefix length from an IPv4 network mask given as a
+			    <span>cidrv4PrefixLength</span><span>(<span><span>cidrOrMask<span>: <span><span class="td-ref">Cidrv4</span><span class="td-op"> | </span><span class="td-ref">Maskv4</span><span class="td-op"> | </span><span class="td-kw">string</span></span></span></span></span>)<span>: <span class="td-ref">PrefixLengthv4</span></span></span><div class="namespaceItemContentTypeInfo">4 overloads</div></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Recovers the prefix length from an IPv4 network mask given as a
 32-bit unsigned integer.</p>
 </div></div></div>
     </div><div id="namespace_cidrv4size" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-Function bg-Function/15 dark:text-FunctionDark dark:bg-FunctionDark/15" title="Function">f</div></div>
 <div class="namespaceItemContent">
 		    <a href="..&#x2F;.&#x2F;cidrv4.ts&#x2F;~&#x2F;cidrv4Size.html" title="cidrv4Size">
-			    <span>cidrv4Size</span><span>(<span><span>cidrOrPrefixLength<span>: <span><span class="td-ref">Cidrv4</span><span class="td-op"> | </span><span class="td-kw">number</span></span></span></span></span>)<span>: <span class="td-kw">number</span></span></span><div class="namespaceItemContentTypeInfo">3 overloads</div></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Returns the total number of IP addresses in a CIDR block.</p>
+			    <span>cidrv4Size</span><span>(<span><span>cidrOrPrefixLength<span>: <span><span class="td-ref">Cidrv4</span><span class="td-op"> | </span><span class="td-ref">PrefixLengthv4</span></span></span></span></span>)<span>: <span class="td-kw">number</span></span></span><div class="namespaceItemContentTypeInfo">3 overloads</div></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Returns the total number of IP addresses in a CIDR block.</p>
 </div></div></div>
     </div><div id="namespace_cidrv4subtract" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-Function bg-Function/15 dark:text-FunctionDark dark:bg-FunctionDark/15" title="Function">f</div></div>
 <div class="namespaceItemContent">
@@ -386,7 +389,7 @@ Functions</h2></div><div class="namespaceSection"><div id="namespace_cidrv4addre
     </div><div id="namespace_cidrv4usablesize" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-Function bg-Function/15 dark:text-FunctionDark dark:bg-FunctionDark/15" title="Function">f</div></div>
 <div class="namespaceItemContent">
 		    <a href="..&#x2F;.&#x2F;cidrv4.ts&#x2F;~&#x2F;cidrv4UsableSize.html" title="cidrv4UsableSize">
-			    <span>cidrv4UsableSize</span><span>(<span><span>cidrOrPrefixLength<span>: <span><span class="td-ref">Cidrv4</span><span class="td-op"> | </span><span class="td-kw">number</span></span></span></span></span>)<span>: <span class="td-kw">number</span></span></span><div class="namespaceItemContentTypeInfo">3 overloads</div></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Returns the number of assignable addresses in a CIDR block.</p>
+			    <span>cidrv4UsableSize</span><span>(<span><span>cidrOrPrefixLength<span>: <span><span class="td-ref">Cidrv4</span><span class="td-op"> | </span><span class="td-ref">PrefixLengthv4</span></span></span></span></span>)<span>: <span class="td-kw">number</span></span></span><div class="namespaceItemContentTypeInfo">3 overloads</div></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Returns the number of assignable addresses in a CIDR block.</p>
 </div></div></div>
     </div><div id="namespace_comparecidrv4" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-Function bg-Function/15 dark:text-FunctionDark dark:bg-FunctionDark/15" title="Function">f</div></div>
 <div class="namespaceItemContent">
@@ -396,7 +399,7 @@ Functions</h2></div><div class="namespaceSection"><div id="namespace_cidrv4addre
     </div><div id="namespace_parsecidrv4" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-Function bg-Function/15 dark:text-FunctionDark dark:bg-FunctionDark/15" title="Function">f</div></div>
 <div class="namespaceItemContent">
 		    <a href="..&#x2F;.&#x2F;cidrv4.ts&#x2F;~&#x2F;parseCidrv4.html" title="parseCidrv4">
-			    <span>parseCidrv4</span><span>(<span><span>cidr<span>: <span class="td-kw">string</span></span></span></span>)<span>: <span class="td-ref">Cidrv4</span></span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Parses an IPv4 CIDR notation string to a Cidrv4 object.</p>
+			    <span>parseCidrv4</span><span>(<span><span>cidr<span>: <span class="td-kw">string</span></span></span></span>)<span>: <span class="td-ref">PrefixedCidrv4</span></span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Parses an IPv4 CIDR notation string to a Cidrv4 object.</p>
 </div></div></div>
     </div><div id="namespace_stringifycidrv4" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-Function bg-Function/15 dark:text-FunctionDark dark:bg-FunctionDark/15" title="Function">f</div></div>
 <div class="namespaceItemContent">
@@ -431,14 +434,50 @@ Functions</h2></div><div class="namespaceSection"><div id="namespace_cidrv4addre
 Type Aliases</h2></div><div class="namespaceSection"><div id="namespace_cidrv4" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-TypeAlias bg-TypeAlias/15 dark:text-TypeAliasDark dark:bg-TypeAliasDark/15" title="Type Alias">T</div></div>
 <div class="namespaceItemContent">
 		    <a href="..&#x2F;.&#x2F;cidrv4.ts&#x2F;~&#x2F;Cidrv4.html" title="Cidrv4">
-			    <span>Cidrv4</span><span> = { <span class="td-kw">readonly </span>address<span>: <span class="td-kw">number</span></span>; <span class="td-kw">readonly </span>prefixLength<span>: <span class="td-kw">number</span></span>;  }</span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Represents an IPv4 CIDR block.</p>
+			    <span>Cidrv4</span><span> = <span><span class="td-ref">PrefixedCidrv4</span><span class="td-op"> | </span><span class="td-ref">MaskedCidrv4</span></span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Represents an IPv4 CIDR block.</p>
+</div></div></div>
+    </div><div id="namespace_maskedcidrv4" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-TypeAlias bg-TypeAlias/15 dark:text-TypeAliasDark dark:bg-TypeAliasDark/15" title="Type Alias">T</div></div>
+<div class="namespaceItemContent">
+		    <a href="..&#x2F;.&#x2F;cidrv4.ts&#x2F;~&#x2F;MaskedCidrv4.html" title="MaskedCidrv4">
+			    <span>MaskedCidrv4</span><span> = { <span class="td-kw">readonly </span>address<span>: <span class="td-kw">number</span></span>; <span class="td-kw">readonly </span>mask<span>: <span class="td-ref">Maskv4</span></span>; <span class="td-kw">readonly </span>prefixLength<span class="td-op">?</span><span>: <span class="td-kw">never</span></span>;  }</span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>An IPv4 CIDR block written with a network mask, as in
+<code>10.0.0.0/255.0.0.0</code>.</p>
 </div></div><ul class="namespaceItemContentSubItems"><li>
-                <a href="..&#x2F;.&#x2F;cidrv4.ts&#x2F;~&#x2F;Cidrv4.html#property_address">
+                <a href="..&#x2F;.&#x2F;cidrv4.ts&#x2F;~&#x2F;MaskedCidrv4.html#property_address">
                   <span>address</span><span>: <span class="td-kw">number</span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>The IPv4 address from the CIDR notation</p>
 </div></div></li><li>
-                <a href="..&#x2F;.&#x2F;cidrv4.ts&#x2F;~&#x2F;Cidrv4.html#property_prefixlength">
-                  <span>prefixLength</span><span>: <span class="td-kw">number</span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>The prefix length (0-32)</p>
+                <a href="..&#x2F;.&#x2F;cidrv4.ts&#x2F;~&#x2F;MaskedCidrv4.html#property_mask">
+                  <span>mask</span><span>: <span class="td-ref">Maskv4</span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>The network mask, stored as given</p>
+</div></div></li><li>
+                <a href="..&#x2F;.&#x2F;cidrv4.ts&#x2F;~&#x2F;MaskedCidrv4.html#property_prefixlength">
+                  <span>prefixLength</span><span>: <span class="td-kw">never</span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Absent: the prefix length dialect is <a href=".././cidrv4.ts/~/PrefixedCidrv4.html">PrefixedCidrv4</a></p>
 </div></div></li></ul></div>
+    </div><div id="namespace_maskv4" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-TypeAlias bg-TypeAlias/15 dark:text-TypeAliasDark dark:bg-TypeAliasDark/15" title="Type Alias">T</div></div>
+<div class="namespaceItemContent">
+		    <a href="..&#x2F;.&#x2F;cidrv4.ts&#x2F;~&#x2F;Maskv4.html" title="Maskv4">
+			    <span>Maskv4</span><span> = <span class="td-kw">number</span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>An IPv4 network mask as a 32-bit unsigned integer, e.g. <code>0xFFFFFF00</code>
+for <code>/24</code>.</p>
+</div></div></div>
+    </div><div id="namespace_prefixedcidrv4" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-TypeAlias bg-TypeAlias/15 dark:text-TypeAliasDark dark:bg-TypeAliasDark/15" title="Type Alias">T</div></div>
+<div class="namespaceItemContent">
+		    <a href="..&#x2F;.&#x2F;cidrv4.ts&#x2F;~&#x2F;PrefixedCidrv4.html" title="PrefixedCidrv4">
+			    <span>PrefixedCidrv4</span><span> = { <span class="td-kw">readonly </span>address<span>: <span class="td-kw">number</span></span>; <span class="td-kw">readonly </span>prefixLength<span>: <span class="td-ref">PrefixLengthv4</span></span>; <span class="td-kw">readonly </span>mask<span class="td-op">?</span><span>: <span class="td-kw">never</span></span>;  }</span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>An IPv4 CIDR block written with a prefix length, as in <code>10.0.0.0/8</code>.</p>
+</div></div><ul class="namespaceItemContentSubItems"><li>
+                <a href="..&#x2F;.&#x2F;cidrv4.ts&#x2F;~&#x2F;PrefixedCidrv4.html#property_address">
+                  <span>address</span><span>: <span class="td-kw">number</span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>The IPv4 address from the CIDR notation</p>
+</div></div></li><li>
+                <a href="..&#x2F;.&#x2F;cidrv4.ts&#x2F;~&#x2F;PrefixedCidrv4.html#property_mask">
+                  <span>mask</span><span>: <span class="td-kw">never</span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Absent: the mask dialect is <a href=".././cidrv4.ts/~/MaskedCidrv4.html">MaskedCidrv4</a></p>
+</div></div></li><li>
+                <a href="..&#x2F;.&#x2F;cidrv4.ts&#x2F;~&#x2F;PrefixedCidrv4.html#property_prefixlength">
+                  <span>prefixLength</span><span>: <span class="td-ref">PrefixLengthv4</span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>The prefix length (0-32)</p>
+</div></div></li></ul></div>
+    </div><div id="namespace_prefixlengthv4" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-TypeAlias bg-TypeAlias/15 dark:text-TypeAliasDark dark:bg-TypeAliasDark/15" title="Type Alias">T</div></div>
+<div class="namespaceItemContent">
+		    <a href="..&#x2F;.&#x2F;cidrv4.ts&#x2F;~&#x2F;PrefixLengthv4.html" title="PrefixLengthv4">
+			    <span>PrefixLengthv4</span><span> = <span class="td-kw">number</span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>An IPv4 prefix length, the <code>24</code> in <code>/24</code>. The range is 0 to 32; it is
+documented rather than encoded in the type, so <code>prefixLength + 1</code> stays
+a <code>PrefixLengthv4</code> (ADR 0002).</p>
+</div></div></div>
     </div></div>
 </section>
 <section class="section"  id="cidrv4_ts_variables"><div>
@@ -547,7 +586,7 @@ Variables</h2></div><div class="namespaceSection"><div id="namespace_cidrv4broad
                   </span>
                 </a>
               </li></ul><a class="flex items-center gap-0.5" href="..&#x2F;.&#x2F;all_symbols.html">
-              <span class="leading-none">view all 279 symbols</span><svg
+              <span class="leading-none">view all 321 symbols</span><svg
   width="16"
   height="16"
   viewBox="0 0 16 16"
@@ -562,7 +601,7 @@ Variables</h2></div><div class="namespaceSection"><div id="namespace_cidrv4broad
   />
 </svg>
 </a></nav><nav class="documentNavigation">
-          <h3>Document Navigation</h3><ul><li><a href="#examples" title="Examples">Examples</a></li><li><ul><li><a href="#example_0" title="CIDR operations">CIDR operations</a></li><li><a href="#example_1" title="Handing out assignable addresses">Handing out assignable addresses</a></li></ul></li><li><a href="#cidrv4_ts_functions" title="Functions">Functions</a></li><li><ul><li><a href="#namespace_cidrv4addresses" title="cidrv4Addresses">cidrv4Addresses</a></li><li><a href="#namespace_cidrv4contains" title="cidrv4Contains">cidrv4Contains</a></li><li><a href="#namespace_cidrv4containscidr" title="cidrv4ContainsCidr">cidrv4ContainsCidr</a></li><li><a href="#namespace_cidrv4firstaddress" title="cidrv4FirstAddress">cidrv4FirstAddress</a></li><li><a href="#namespace_cidrv4firstusableaddress" title="cidrv4FirstUsableAddress">cidrv4FirstUsableAddress</a></li><li><a href="#namespace_cidrv4intersect" title="cidrv4Intersect">cidrv4Intersect</a></li><li><a href="#namespace_cidrv4lastaddress" title="cidrv4LastAddress">cidrv4LastAddress</a></li><li><a href="#namespace_cidrv4lastusableaddress" title="cidrv4LastUsableAddress">cidrv4LastUsableAddress</a></li><li><a href="#namespace_cidrv4mask" title="cidrv4Mask">cidrv4Mask</a></li><li><a href="#namespace_cidrv4merge" title="cidrv4Merge">cidrv4Merge</a></li><li><a href="#namespace_cidrv4overlaps" title="cidrv4Overlaps">cidrv4Overlaps</a></li><li><a href="#namespace_cidrv4prefixlength" title="cidrv4PrefixLength">cidrv4PrefixLength</a></li><li><a href="#namespace_cidrv4size" title="cidrv4Size">cidrv4Size</a></li><li><a href="#namespace_cidrv4subtract" title="cidrv4Subtract">cidrv4Subtract</a></li><li><a href="#namespace_cidrv4usableaddresses" title="cidrv4UsableAddresses">cidrv4UsableAddresses</a></li><li><a href="#namespace_cidrv4usablesize" title="cidrv4UsableSize">cidrv4UsableSize</a></li><li><a href="#namespace_comparecidrv4" title="compareCidrv4">compareCidrv4</a></li><li><a href="#namespace_parsecidrv4" title="parseCidrv4">parseCidrv4</a></li><li><a href="#namespace_stringifycidrv4" title="stringifyCidrv4">stringifyCidrv4</a></li></ul></li><li><a href="#cidrv4_ts_type-aliases" title="Type Aliases">Type Aliases</a></li><li><ul><li><a href="#namespace_cidrv4" title="Cidrv4">Cidrv4</a></li></ul></li><li><a href="#cidrv4_ts_variables" title="Variables">Variables</a></li><li><ul><li><a href="#namespace_cidrv4broadcastaddress" title="cidrv4BroadcastAddress">cidrv4BroadcastAddress</a></li><li><a href="#namespace_cidrv4networkaddress" title="cidrv4NetworkAddress">cidrv4NetworkAddress</a></li></ul></li></ul></nav></div>
+          <h3>Document Navigation</h3><ul><li><a href="#examples" title="Examples">Examples</a></li><li><ul><li><a href="#example_0" title="CIDR operations">CIDR operations</a></li><li><a href="#example_1" title="Handing out assignable addresses">Handing out assignable addresses</a></li></ul></li><li><a href="#cidrv4_ts_functions" title="Functions">Functions</a></li><li><ul><li><a href="#namespace_cidrv4addresses" title="cidrv4Addresses">cidrv4Addresses</a></li><li><a href="#namespace_cidrv4contains" title="cidrv4Contains">cidrv4Contains</a></li><li><a href="#namespace_cidrv4containscidr" title="cidrv4ContainsCidr">cidrv4ContainsCidr</a></li><li><a href="#namespace_cidrv4firstaddress" title="cidrv4FirstAddress">cidrv4FirstAddress</a></li><li><a href="#namespace_cidrv4firstusableaddress" title="cidrv4FirstUsableAddress">cidrv4FirstUsableAddress</a></li><li><a href="#namespace_cidrv4intersect" title="cidrv4Intersect">cidrv4Intersect</a></li><li><a href="#namespace_cidrv4lastaddress" title="cidrv4LastAddress">cidrv4LastAddress</a></li><li><a href="#namespace_cidrv4lastusableaddress" title="cidrv4LastUsableAddress">cidrv4LastUsableAddress</a></li><li><a href="#namespace_cidrv4mask" title="cidrv4Mask">cidrv4Mask</a></li><li><a href="#namespace_cidrv4merge" title="cidrv4Merge">cidrv4Merge</a></li><li><a href="#namespace_cidrv4overlaps" title="cidrv4Overlaps">cidrv4Overlaps</a></li><li><a href="#namespace_cidrv4prefixlength" title="cidrv4PrefixLength">cidrv4PrefixLength</a></li><li><a href="#namespace_cidrv4size" title="cidrv4Size">cidrv4Size</a></li><li><a href="#namespace_cidrv4subtract" title="cidrv4Subtract">cidrv4Subtract</a></li><li><a href="#namespace_cidrv4usableaddresses" title="cidrv4UsableAddresses">cidrv4UsableAddresses</a></li><li><a href="#namespace_cidrv4usablesize" title="cidrv4UsableSize">cidrv4UsableSize</a></li><li><a href="#namespace_comparecidrv4" title="compareCidrv4">compareCidrv4</a></li><li><a href="#namespace_parsecidrv4" title="parseCidrv4">parseCidrv4</a></li><li><a href="#namespace_stringifycidrv4" title="stringifyCidrv4">stringifyCidrv4</a></li></ul></li><li><a href="#cidrv4_ts_type-aliases" title="Type Aliases">Type Aliases</a></li><li><ul><li><a href="#namespace_cidrv4" title="Cidrv4">Cidrv4</a></li><li><a href="#namespace_maskedcidrv4" title="MaskedCidrv4">MaskedCidrv4</a></li><li><a href="#namespace_maskv4" title="Maskv4">Maskv4</a></li><li><a href="#namespace_prefixedcidrv4" title="PrefixedCidrv4">PrefixedCidrv4</a></li><li><a href="#namespace_prefixlengthv4" title="PrefixLengthv4">PrefixLengthv4</a></li></ul></li><li><a href="#cidrv4_ts_variables" title="Variables">Variables</a></li><li><ul><li><a href="#namespace_cidrv4broadcastaddress" title="cidrv4BroadcastAddress">cidrv4BroadcastAddress</a></li><li><a href="#namespace_cidrv4networkaddress" title="cidrv4NetworkAddress">cidrv4NetworkAddress</a></li></ul></li></ul></nav></div>
   </div></div>
 </div>
 </div>

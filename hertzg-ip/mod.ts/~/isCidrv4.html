@@ -167,6 +167,7 @@
 </a>
 <span class="font-bold">isCidrv4</span><span class="font-medium">(<span><span>cidr<span>: <a href="../.././mod.ts/~/Cidr.html" class="link td-ref">Cidr</a></span></span></span>)<span>: cidr <span class="td-kw">is</span> <a href="../.././mod.ts/~/Cidrv4.html" class="link td-ref">Cidrv4</a></span> </span>
       </code><div class="space-y-7" id=""><div class="markdown"><p>Type guard that checks whether a <a href="../.././mod.ts/~/Cidr.html">Cidr</a> is an IPv4 CIDR block.</p>
+<p>Reads the version off the address, so both dialects pass.</p>
 </div><section class="section"  id="examples"><div>
       <h2 class="anchorable mb-1"><a href="#examples" class="anchor" aria-label="Anchor" tabIndex="-1"><svg
   width="16"
@@ -218,10 +219,12 @@ Examples</h2></div><div class="space-y-8"><div class="anchorable"><a href="#exam
 import { isCidrv4, parseCidr } from &quot;@hertzg/ip/cidr&quot;;
 
 assert(isCidrv4(parseCidr(&quot;10.0.0.0/8&quot;)));
+assert(isCidrv4({ address: 167772160, mask: 0xFF000000 }));
 </code><button class="copyButton" data-copy="import { assert } from &quot;@std/assert&quot;;
 import { isCidrv4, parseCidr } from &quot;@hertzg/ip/cidr&quot;;
 
 assert(isCidrv4(parseCidr(&quot;10.0.0.0/8&quot;)));
+assert(isCidrv4({ address: 167772160, mask: 0xFF000000 }));
 "><svg
   class="copy"
   width="15"

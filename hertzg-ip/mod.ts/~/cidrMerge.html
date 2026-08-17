@@ -169,7 +169,8 @@
       </code><div class="space-y-7" id=""><div class="markdown"><p>Merges CIDR blocks into the minimal covering set.</p>
 <p>Dispatches to <a href="../.././mod.ts/~/cidrv4Merge.html">cidrv4Merge</a> or <a href="../.././mod.ts/~/cidrv6Merge.html">cidrv6Merge</a> based on the
 address type of the first element. All elements must be the same IP
-version.</p>
+version. The result matches the dialect of the inputs, and is masked
+when they disagree (ADR 0006).</p>
 </div><section class="section"  id="examples"><div>
       <h2 class="anchorable mb-1"><a href="#examples" class="anchor" aria-label="Anchor" tabIndex="-1"><svg
   width="16"
