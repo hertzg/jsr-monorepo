@@ -8,13 +8,13 @@
  * @example Basic IPv4 operations
  * ```ts
  * import { assertEquals } from "@std/assert";
- * import { parseIpv4, stringifyIpv4 } from "@hertzg/ip/ipv4";
+ * import { parseAddressv4, stringifyAddressv4 } from "@hertzg/ip/addressv4";
  *
- * const ip = parseIpv4("192.168.1.1");
+ * const ip = parseAddressv4("192.168.1.1");
  * assertEquals(ip, 3232235777);
  *
  * const next = ip + 1;
- * assertEquals(stringifyIpv4(next), "192.168.1.2");
+ * assertEquals(stringifyAddressv4(next), "192.168.1.2");
  * ```
  *
  * @example Bitwise operations on IPv4 addresses
@@ -25,27 +25,27 @@
  *
  * ```ts
  * import { assertEquals } from "@std/assert";
- * import { parseIpv4, stringifyIpv4 } from "@hertzg/ip/ipv4";
+ * import { parseAddressv4, stringifyAddressv4 } from "@hertzg/ip/addressv4";
  * import { cidrv4Mask } from "@hertzg/ip/cidrv4";
  *
- * const ip = parseIpv4("192.168.1.100");
+ * const ip = parseAddressv4("192.168.1.100");
  * const mask = cidrv4Mask(24);
  *
  * // Bitwise NOT (invert all bits)
  * const inverted = (~ip >>> 0);
- * assertEquals(stringifyIpv4(inverted), "63.87.254.155");
+ * assertEquals(stringifyAddressv4(inverted), "63.87.254.155");
  *
  * // Bitwise AND (apply network mask to get network address)
  * const network = ((ip & mask) >>> 0);
- * assertEquals(stringifyIpv4(network), "192.168.1.0");
+ * assertEquals(stringifyAddressv4(network), "192.168.1.0");
  *
  * // Bitwise OR (combine network with host bits for broadcast)
  * const broadcast = ((network | (~mask >>> 0)) >>> 0);
- * assertEquals(stringifyIpv4(broadcast), "192.168.1.255");
+ * assertEquals(stringifyAddressv4(broadcast), "192.168.1.255");
  *
  * // Direct comparison (no isEqual() needed)
- * assertEquals(parseIpv4("10.0.0.1") === parseIpv4("10.0.0.1"), true);
- * assertEquals(parseIpv4("10.0.0.1") === parseIpv4("10.0.0.2"), false);
+ * assertEquals(parseAddressv4("10.0.0.1") === parseAddressv4("10.0.0.1"), true);
+ * assertEquals(parseAddressv4("10.0.0.1") === parseAddressv4("10.0.0.2"), false);
  * ```
  *
  * @module
@@ -101,27 +101,27 @@ function failIpv4(address: string, error: TypeError | RangeError): never {
  * @example Basic parsing
  * ```ts
  * import { assertEquals } from "@std/assert";
- * import { parseIpv4 } from "@hertzg/ip/ipv4";
+ * import { parseAddressv4 } from "@hertzg/ip/addressv4";
  *
- * assertEquals(parseIpv4("192.168.1.1"), 3232235777);
- * assertEquals(parseIpv4("10.0.0.1"), 167772161);
- * assertEquals(parseIpv4("0.0.0.0"), 0);
- * assertEquals(parseIpv4("255.255.255.255"), 4294967295);
+ * assertEquals(parseAddressv4("192.168.1.1"), 3232235777);
+ * assertEquals(parseAddressv4("10.0.0.1"), 167772161);
+ * assertEquals(parseAddressv4("0.0.0.0"), 0);
+ * assertEquals(parseAddressv4("255.255.255.255"), 4294967295);
  * ```
  *
  * @example Error handling
  * ```ts
  * import { assertThrows } from "@std/assert";
- * import { parseIpv4 } from "@hertzg/ip/ipv4";
+ * import { parseAddressv4 } from "@hertzg/ip/addressv4";
  *
- * assertThrows(() => parseIpv4("192.168.1"), TypeError);
- * assertThrows(() => parseIpv4("192.168.1.256"), RangeError);
- * assertThrows(() => parseIpv4("192.168.01.1"), TypeError);
- * assertThrows(() => parseIpv4(" 192.168.1.1"), TypeError);
- * assertThrows(() => parseIpv4("192.168.1.1abc"), TypeError);
+ * assertThrows(() => parseAddressv4("192.168.1"), TypeError);
+ * assertThrows(() => parseAddressv4("192.168.1.256"), RangeError);
+ * assertThrows(() => parseAddressv4("192.168.01.1"), TypeError);
+ * assertThrows(() => parseAddressv4(" 192.168.1.1"), TypeError);
+ * assertThrows(() => parseAddressv4("192.168.1.1abc"), TypeError);
  * ```
  */
-export function parseIpv4(address: string): number {
+export function parseAddressv4(address: string): number {
   const length = address.length;
   let value = 0;
   let index = 0;
@@ -195,24 +195,24 @@ export function parseIpv4(address: string): number {
  * @example Basic stringifying
  * ```ts
  * import { assertEquals } from "@std/assert";
- * import { stringifyIpv4 } from "@hertzg/ip/ipv4";
+ * import { stringifyAddressv4 } from "@hertzg/ip/addressv4";
  *
- * assertEquals(stringifyIpv4(3232235777), "192.168.1.1");
- * assertEquals(stringifyIpv4(167772161), "10.0.0.1");
- * assertEquals(stringifyIpv4(0), "0.0.0.0");
- * assertEquals(stringifyIpv4(4294967295), "255.255.255.255");
+ * assertEquals(stringifyAddressv4(3232235777), "192.168.1.1");
+ * assertEquals(stringifyAddressv4(167772161), "10.0.0.1");
+ * assertEquals(stringifyAddressv4(0), "0.0.0.0");
+ * assertEquals(stringifyAddressv4(4294967295), "255.255.255.255");
  * ```
  *
  * @example Error handling
  * ```ts
  * import { assertThrows } from "@std/assert";
- * import { stringifyIpv4 } from "@hertzg/ip/ipv4";
+ * import { stringifyAddressv4 } from "@hertzg/ip/addressv4";
  *
- * assertThrows(() => stringifyIpv4(-1), RangeError);
- * assertThrows(() => stringifyIpv4(4294967296), RangeError);
+ * assertThrows(() => stringifyAddressv4(-1), RangeError);
+ * assertThrows(() => stringifyAddressv4(4294967296), RangeError);
  * ```
  */
-export function stringifyIpv4(address: number): string {
+export function stringifyAddressv4(address: number): string {
   if (address < 0 || address > 4294967295 || !Number.isInteger(address)) {
     throw new RangeError(
       `IPv4 value out of range: ${address} (must be 0 to 4294967295)`,
@@ -231,7 +231,7 @@ export function stringifyIpv4(address: number): string {
  * Compares two IPv4 addresses for sorting, numerically ascending.
  *
  * Suitable as an `Array.prototype.sort` / `toSorted` comparator. For a
- * comparator that also accepts IPv6 addresses, see {@link compareIp}, which
+ * comparator that also accepts IPv6 addresses, see {@link compareAddress}, which
  * sorts every IPv4 address before every IPv6 one.
  *
  * @param a The first address
@@ -241,11 +241,11 @@ export function stringifyIpv4(address: number): string {
  * @example Sort addresses numerically, not lexicographically
  * ```ts
  * import { assertEquals } from "@std/assert";
- * import { compareIpv4, parseIpv4, stringifyIpv4 } from "@hertzg/ip/ipv4";
+ * import { compareAddressv4, parseAddressv4, stringifyAddressv4 } from "@hertzg/ip/addressv4";
  *
- * const addresses = ["10.0.0.9", "10.0.0.10", "10.0.0.2"].map(parseIpv4);
+ * const addresses = ["10.0.0.9", "10.0.0.10", "10.0.0.2"].map(parseAddressv4);
  *
- * assertEquals(addresses.toSorted(compareIpv4).map(stringifyIpv4), [
+ * assertEquals(addresses.toSorted(compareAddressv4).map(stringifyAddressv4), [
  *   "10.0.0.2",
  *   "10.0.0.9",
  *   "10.0.0.10",
@@ -255,14 +255,14 @@ export function stringifyIpv4(address: number): string {
  * @example The three possible results
  * ```ts
  * import { assertEquals } from "@std/assert";
- * import { compareIpv4, parseIpv4 } from "@hertzg/ip/ipv4";
+ * import { compareAddressv4, parseAddressv4 } from "@hertzg/ip/addressv4";
  *
- * assertEquals(compareIpv4(parseIpv4("10.0.0.1"), parseIpv4("10.0.0.2")), -1);
- * assertEquals(compareIpv4(parseIpv4("10.0.0.2"), parseIpv4("10.0.0.1")), 1);
- * assertEquals(compareIpv4(parseIpv4("10.0.0.1"), parseIpv4("10.0.0.1")), 0);
+ * assertEquals(compareAddressv4(parseAddressv4("10.0.0.1"), parseAddressv4("10.0.0.2")), -1);
+ * assertEquals(compareAddressv4(parseAddressv4("10.0.0.2"), parseAddressv4("10.0.0.1")), 1);
+ * assertEquals(compareAddressv4(parseAddressv4("10.0.0.1"), parseAddressv4("10.0.0.1")), 0);
  * ```
  */
-export function compareIpv4(a: number, b: number): -1 | 0 | 1 {
+export function compareAddressv4(a: number, b: number): -1 | 0 | 1 {
   if (a < b) return -1;
   if (a > b) return 1;
   return 0;

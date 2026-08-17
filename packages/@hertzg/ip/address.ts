@@ -1,38 +1,46 @@
 /**
  * Universal IP address parsing and stringifying.
  *
- * This module provides {@link parseIp}, {@link stringifyIp} and
- * {@link compareIp} that auto-detect IPv4 vs IPv6 and delegate to the
+ * This module provides {@link parseAddress}, {@link stringifyAddress} and
+ * {@link compareAddress} that auto-detect IPv4 vs IPv6 and delegate to the
  * appropriate version-specific function. The {@link Address} type alias is
  * also exported for working with version-polymorphic address values.
  *
  * For version-specific functions, see:
- * - [`ipv4`](https://jsr.io/@hertzg/ip/doc/ipv4): {@link parseIpv4}, {@link stringifyIpv4}, {@link compareIpv4}
- * - [`ipv6`](https://jsr.io/@hertzg/ip/doc/ipv6): {@link parseIpv6}, {@link stringifyIpv6}, {@link compareIpv6}
+ * - [`ipv4`](https://jsr.io/@hertzg/ip/doc/addressv4): {@link parseAddressv4}, {@link stringifyAddressv4}, {@link compareAddressv4}
+ * - [`ipv6`](https://jsr.io/@hertzg/ip/doc/addressv6): {@link parseAddressv6}, {@link stringifyAddressv6}, {@link compareAddressv6}
  *
  * @example Parse and stringify any IP address
  * ```ts
  * import { assertEquals } from "@std/assert";
- * import { parseIp, stringifyIp } from "@hertzg/ip/ip";
+ * import { parseAddress, stringifyAddress } from "@hertzg/ip/address";
  *
  * // IPv4
- * const v4 = parseIp("192.168.1.1");
+ * const v4 = parseAddress("192.168.1.1");
  * assertEquals(v4, 3232235777);
- * assertEquals(stringifyIp(v4), "192.168.1.1");
+ * assertEquals(stringifyAddress(v4), "192.168.1.1");
  *
  * // IPv6
- * const v6 = parseIp("2001:db8::1");
+ * const v6 = parseAddress("2001:db8::1");
  * assertEquals(v6, 42540766411282592856903984951653826561n);
- * assertEquals(stringifyIp(v6), "2001:db8::1");
+ * assertEquals(stringifyAddress(v6), "2001:db8::1");
  * ```
  *
  * @module
  */
 
-import { ipv4From64Mapped } from "./4to6.ts";
-import { isIpv6Ipv4Mapped } from "./classifyv6.ts";
-import { compareIpv4, parseIpv4, stringifyIpv4 } from "./ipv4.ts";
-import { compareIpv6, parseIpv6, stringifyIpv6 } from "./ipv6.ts";
+import { isAddressv6Mapped } from "./classifyv6.ts";
+import {
+  compareAddressv4,
+  parseAddressv4,
+  stringifyAddressv4,
+} from "./addressv4.ts";
+import {
+  compareAddressv6,
+  parseAddressv6,
+  stringifyAddressv6,
+  unmapToAddressv4,
+} from "./addressv6.ts";
 
 /**
  * A plain IP address of either IP version.
@@ -53,7 +61,7 @@ export type Address = number | bigint;
  * automatically unwrapped to their IPv4 number representation.
  *
  * To preserve the full IPv6 bigint for mapped addresses, use
- * {@link parseIpv6} directly instead.
+ * {@link parseAddressv6} directly instead.
  *
  * @param address The address string in dotted decimal or colon-hexadecimal notation
  * @returns The parsed address as `number` (IPv4) or `bigint` (IPv6)
@@ -63,22 +71,22 @@ export type Address = number | bigint;
  * @example
  * ```ts
  * import { assertEquals } from "@std/assert";
- * import { parseIp } from "@hertzg/ip/ip";
+ * import { parseAddress } from "@hertzg/ip/address";
  *
- * assertEquals(parseIp("10.0.0.1"), 167772161);
- * assertEquals(parseIp("::1"), 1n);
- * assertEquals(parseIp("::ffff:192.168.1.1"), 3232235777);
+ * assertEquals(parseAddress("10.0.0.1"), 167772161);
+ * assertEquals(parseAddress("::1"), 1n);
+ * assertEquals(parseAddress("::ffff:192.168.1.1"), 3232235777);
  * ```
  */
-export function parseIp(address: string): Address {
+export function parseAddress(address: string): Address {
   if (address.includes(":")) {
-    const ipv6 = parseIpv6(address);
-    if (isIpv6Ipv4Mapped(ipv6)) {
-      return ipv4From64Mapped(ipv6);
+    const ipv6 = parseAddressv6(address);
+    if (isAddressv6Mapped(ipv6)) {
+      return unmapToAddressv4(ipv6);
     }
     return ipv6;
   }
-  return parseIpv4(address);
+  return parseAddressv4(address);
 }
 
 /**
@@ -86,12 +94,12 @@ export function parseIp(address: string): Address {
  * standard notation.
  *
  * IPv4 addresses (numbers) are always stringified as dotted decimal.
- * Since {@link parseIp} unwraps IPv4-mapped IPv6 addresses to numbers,
- * round-tripping a mapped address through `parseIp`/`stringifyIp`
+ * Since {@link parseAddress} unwraps IPv4-mapped IPv6 addresses to numbers,
+ * round-tripping a mapped address through `parseAddress`/`stringifyAddress`
  * produces the IPv4 form (e.g. `"192.168.1.1"`, not `"::ffff:c0a8:101"`).
  *
- * To produce the mapped IPv6 representation, use {@link ipv4To64Mapped}
- * with {@link stringifyIpv6}:
+ * To produce the mapped IPv6 representation, use {@link mapFromAddressv4}
+ * with {@link stringifyAddressv6}:
  *
  * @param address The address as a `number` (IPv4) or `bigint` (IPv6)
  * @returns The address string in dotted decimal or compressed colon-hexadecimal notation
@@ -100,35 +108,34 @@ export function parseIp(address: string): Address {
  * @example
  * ```ts
  * import { assertEquals } from "@std/assert";
- * import { stringifyIp } from "@hertzg/ip/ip";
+ * import { stringifyAddress } from "@hertzg/ip/address";
  *
- * assertEquals(stringifyIp(167772161), "10.0.0.1");
- * assertEquals(stringifyIp(1n), "::1");
+ * assertEquals(stringifyAddress(167772161), "10.0.0.1");
+ * assertEquals(stringifyAddress(1n), "::1");
  * ```
  *
  * @example Producing the mapped IPv6 representation
  * ```ts
  * import { assertEquals } from "@std/assert";
- * import { parseIp, stringifyIp } from "@hertzg/ip/ip";
- * import { ipv4To64Mapped } from "@hertzg/ip/4to6";
- * import { stringifyIpv6 } from "@hertzg/ip/ipv6";
+ * import { parseAddress, stringifyAddress } from "@hertzg/ip/address";
+ * import { mapFromAddressv4, stringifyAddressv6 } from "@hertzg/ip/addressv6";
  *
- * const ip = parseIp("::ffff:192.168.1.1");
- * assertEquals(stringifyIp(ip), "192.168.1.1");
- * assertEquals(stringifyIpv6(ipv4To64Mapped(ip as number)), "::ffff:c0a8:101");
+ * const ip = parseAddress("::ffff:192.168.1.1");
+ * assertEquals(stringifyAddress(ip), "192.168.1.1");
+ * assertEquals(stringifyAddressv6(mapFromAddressv4(ip as number)), "::ffff:c0a8:101");
  * ```
  */
-export function stringifyIp(address: number): string;
+export function stringifyAddress(address: number): string;
 /** Stringifies an IPv6 (`bigint`) address to compressed colon-hexadecimal notation. */
-export function stringifyIp(address: bigint): string;
+export function stringifyAddress(address: bigint): string;
 /** Stringifies an IPv4 or IPv6 address to its standard notation. */
-export function stringifyIp(address: Address): string;
+export function stringifyAddress(address: Address): string;
 /** Stringifies an IPv4 or IPv6 address to its standard notation. */
-export function stringifyIp(address: Address): string {
+export function stringifyAddress(address: Address): string {
   if (typeof address === "bigint") {
-    return stringifyIpv6(address);
+    return stringifyAddressv6(address);
   }
-  return stringifyIpv4(address);
+  return stringifyAddressv4(address);
 }
 
 /**
@@ -146,9 +153,9 @@ export function stringifyIp(address: Address): string {
  * magnitude: the two address spaces are disjoint and nothing is converted
  * between them. An IPv4-mapped address held as a `bigint` is an IPv6 value
  * and sorts in the IPv6 half — see the example below. In practice
- * {@link parseIp} already unwraps mapped addresses to their IPv4 `number`
+ * {@link parseAddress} already unwraps mapped addresses to their IPv4 `number`
  * form, so a mapped `bigint` only reaches this function via
- * {@link parseIpv6}.
+ * {@link parseAddressv6}.
  *
  * @param a The first address
  * @param b The second address
@@ -157,11 +164,11 @@ export function stringifyIp(address: Address): string {
  * @example Sort a mixed dual-stack list, ascending or descending
  * ```ts
  * import { assertEquals } from "@std/assert";
- * import { compareIp, parseIp, stringifyIp } from "@hertzg/ip/ip";
+ * import { compareAddress, parseAddress, stringifyAddress } from "@hertzg/ip/address";
  *
- * const clients = ["2001:db8::1", "10.0.0.2", "::1", "10.0.0.1"].map(parseIp);
+ * const clients = ["2001:db8::1", "10.0.0.2", "::1", "10.0.0.1"].map(parseAddress);
  *
- * assertEquals(clients.toSorted(compareIp).map(stringifyIp), [
+ * assertEquals(clients.toSorted(compareAddress).map(stringifyAddress), [
  *   "10.0.0.1",
  *   "10.0.0.2",
  *   "::1",
@@ -169,7 +176,7 @@ export function stringifyIp(address: Address): string {
  * ]);
  *
  * // Descending: swap the arguments
- * assertEquals(clients.toSorted((a, b) => compareIp(b, a)).map(stringifyIp), [
+ * assertEquals(clients.toSorted((a, b) => compareAddress(b, a)).map(stringifyAddress), [
  *   "2001:db8::1",
  *   "::1",
  *   "10.0.0.2",
@@ -180,28 +187,28 @@ export function stringifyIp(address: Address): string {
  * @example Every IPv4 address sorts before every IPv6 address
  * ```ts
  * import { assertEquals } from "@std/assert";
- * import { compareIp, parseIp } from "@hertzg/ip/ip";
+ * import { compareAddress, parseAddress } from "@hertzg/ip/address";
  *
- * assertEquals(compareIp(parseIp("255.255.255.255"), parseIp("::")), -1);
- * assertEquals(compareIp(parseIp("::"), parseIp("0.0.0.0")), 1);
+ * assertEquals(compareAddress(parseAddress("255.255.255.255"), parseAddress("::")), -1);
+ * assertEquals(compareAddress(parseAddress("::"), parseAddress("0.0.0.0")), 1);
  * ```
  *
  * @example An IPv4-mapped bigint is an IPv6 value, not its IPv4 twin
  * ```ts
  * import { assertEquals } from "@std/assert";
- * import { compareIp } from "@hertzg/ip/ip";
- * import { parseIpv4 } from "@hertzg/ip/ipv4";
- * import { parseIpv6 } from "@hertzg/ip/ipv6";
+ * import { compareAddress } from "@hertzg/ip/address";
+ * import { parseAddressv4 } from "@hertzg/ip/addressv4";
+ * import { parseAddressv6 } from "@hertzg/ip/addressv6";
  *
- * const mapped = parseIpv6("::ffff:10.0.0.1");
- * const plain = parseIpv4("10.0.0.1");
+ * const mapped = parseAddressv6("::ffff:10.0.0.1");
+ * const plain = parseAddressv4("10.0.0.1");
  *
- * assertEquals(compareIp(mapped, plain), 1);
+ * assertEquals(compareAddress(mapped, plain), 1);
  * ```
  */
-export function compareIp(a: Address, b: Address): -1 | 0 | 1 {
+export function compareAddress(a: Address, b: Address): -1 | 0 | 1 {
   if (typeof a === "number") {
-    return typeof b === "number" ? compareIpv4(a, b) : -1;
+    return typeof b === "number" ? compareAddressv4(a, b) : -1;
   }
-  return typeof b === "bigint" ? compareIpv6(a, b) : 1;
+  return typeof b === "bigint" ? compareAddressv6(a, b) : 1;
 }

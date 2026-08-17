@@ -11,7 +11,7 @@ import ipaddr from "npm:ipaddr.js@^2.5.0";
 import { Address6 } from "npm:ip-address@^10.5.0";
 import ipRegex from "npm:ip-regex@^5.0.0";
 
-import { isValidIp } from "../validate.ts";
+import { isValidAddress } from "../validate.ts";
 
 const IPV6 = "2001:db8:85a3::8a2e:370:7334";
 
@@ -20,11 +20,11 @@ const IPV6 = "2001:db8:85a3::8a2e:370:7334";
 // flag means no `lastIndex` state to share.
 const ipRegexV6 = ipRegex.v6({ exact: true });
 
-Deno.bench("@hertzg/ip isValidIp", {
+Deno.bench("@hertzg/ip isValidAddress", {
   group: "validate ipv6",
   baseline: true,
 }, () => {
-  isValidIp(IPV6);
+  isValidAddress(IPV6);
 });
 
 Deno.bench("ipaddr.js isValid", { group: "validate ipv6" }, () => {

@@ -1,28 +1,32 @@
 import { assert, assertEquals, assertThrows } from "@std/assert";
-import { compareIpv4, parseIpv4, stringifyIpv4 } from "./ipv4.ts";
-import { isValidIpv4 } from "./validatev4.ts";
+import {
+  compareAddressv4,
+  parseAddressv4,
+  stringifyAddressv4,
+} from "./addressv4.ts";
+import { isValidAddressv4 } from "./validatev4.ts";
 
-Deno.test("parseIpv4", async (t) => {
+Deno.test("parseAddressv4", async (t) => {
   await t.step("valid addresses", () => {
-    assertEquals(parseIpv4("192.168.1.1"), 3232235777);
-    assertEquals(parseIpv4("10.0.0.1"), 167772161);
-    assertEquals(parseIpv4("172.16.0.1"), 2886729729);
-    assertEquals(parseIpv4("127.0.0.1"), 2130706433);
+    assertEquals(parseAddressv4("192.168.1.1"), 3232235777);
+    assertEquals(parseAddressv4("10.0.0.1"), 167772161);
+    assertEquals(parseAddressv4("172.16.0.1"), 2886729729);
+    assertEquals(parseAddressv4("127.0.0.1"), 2130706433);
   });
 
   await t.step("edge cases", () => {
-    assertEquals(parseIpv4("0.0.0.0"), 0);
-    assertEquals(parseIpv4("255.255.255.255"), 4294967295);
+    assertEquals(parseAddressv4("0.0.0.0"), 0);
+    assertEquals(parseAddressv4("255.255.255.255"), 4294967295);
   });
 
   await t.step("invalid format - wrong number of octets", () => {
     assertThrows(
-      () => parseIpv4("192.168.1"),
+      () => parseAddressv4("192.168.1"),
       TypeError,
       "IPv4 address must have exactly 4 octets, got 3",
     );
     assertThrows(
-      () => parseIpv4("192.168.1.1.1"),
+      () => parseAddressv4("192.168.1.1.1"),
       TypeError,
       "IPv4 address must have exactly 4 octets, got 5",
     );
@@ -30,12 +34,12 @@ Deno.test("parseIpv4", async (t) => {
 
   await t.step("invalid format - leading zeros", () => {
     assertThrows(
-      () => parseIpv4("192.168.01.1"),
+      () => parseAddressv4("192.168.01.1"),
       TypeError,
       "IPv4 octets cannot have leading zeros except '0' itself",
     );
     assertThrows(
-      () => parseIpv4("01.0.0.1"),
+      () => parseAddressv4("01.0.0.1"),
       TypeError,
       "IPv4 octets cannot have leading zeros except '0' itself",
     );
@@ -43,12 +47,12 @@ Deno.test("parseIpv4", async (t) => {
 
   await t.step("invalid format - non-numeric", () => {
     assertThrows(
-      () => parseIpv4("a.b.c.d"),
+      () => parseAddressv4("a.b.c.d"),
       TypeError,
       "IPv4 address octets must be decimal numbers",
     );
     assertThrows(
-      () => parseIpv4("192.168.x.1"),
+      () => parseAddressv4("192.168.x.1"),
       TypeError,
       "IPv4 address octets must be decimal numbers",
     );
@@ -56,50 +60,50 @@ Deno.test("parseIpv4", async (t) => {
 
   await t.step("out of range octets", () => {
     assertThrows(
-      () => parseIpv4("256.0.0.1"),
+      () => parseAddressv4("256.0.0.1"),
       RangeError,
       "IPv4 octet out of range: 256 (must be 0-255)",
     );
     assertThrows(
-      () => parseIpv4("192.168.1.256"),
+      () => parseAddressv4("192.168.1.256"),
       RangeError,
       "IPv4 octet out of range: 256 (must be 0-255)",
     );
     assertThrows(
-      () => parseIpv4("192.168.1.300"),
+      () => parseAddressv4("192.168.1.300"),
       RangeError,
       "IPv4 octet out of range: 300 (must be 0-255)",
     );
   });
 
   await t.step("rejects whitespace anywhere", () => {
-    assertThrows(() => parseIpv4(" 10.1.2.3"), TypeError);
-    assertThrows(() => parseIpv4("10.1.2.3 "), TypeError);
-    assertThrows(() => parseIpv4("1.2.3.4\n"), TypeError);
-    assertThrows(() => parseIpv4("1.2. 3.4"), TypeError);
+    assertThrows(() => parseAddressv4(" 10.1.2.3"), TypeError);
+    assertThrows(() => parseAddressv4("10.1.2.3 "), TypeError);
+    assertThrows(() => parseAddressv4("1.2.3.4\n"), TypeError);
+    assertThrows(() => parseAddressv4("1.2. 3.4"), TypeError);
   });
 
   await t.step("rejects trailing text after an octet", () => {
-    assertThrows(() => parseIpv4("1.2.3.4abc"), TypeError);
+    assertThrows(() => parseAddressv4("1.2.3.4abc"), TypeError);
   });
 
   await t.step("rejects a sign or radix prefix on an octet", () => {
-    assertThrows(() => parseIpv4("1.2.3.+4"), TypeError);
-    assertThrows(() => parseIpv4("+1.2.3.4"), TypeError);
-    assertThrows(() => parseIpv4("0x1.2.3.4"), TypeError);
-    assertThrows(() => parseIpv4("1.2.3.0x4"), TypeError);
+    assertThrows(() => parseAddressv4("1.2.3.+4"), TypeError);
+    assertThrows(() => parseAddressv4("+1.2.3.4"), TypeError);
+    assertThrows(() => parseAddressv4("0x1.2.3.4"), TypeError);
+    assertThrows(() => parseAddressv4("1.2.3.0x4"), TypeError);
   });
 
   await t.step("rejects a signed octet as a malformed one", () => {
     // "-" is in no part of the grammar, so it is a shape error wherever it
     // appears -- not a negative number that happens to be out of range.
     assertThrows(
-      () => parseIpv4("-1.2.3.4"),
+      () => parseAddressv4("-1.2.3.4"),
       TypeError,
       "IPv4 address octets must be decimal numbers, got '-1'",
     );
     assertThrows(
-      () => parseIpv4("1.-2.3.4"),
+      () => parseAddressv4("1.-2.3.4"),
       TypeError,
       "IPv4 address octets must be decimal numbers, got '-2'",
     );
@@ -107,12 +111,12 @@ Deno.test("parseIpv4", async (t) => {
     // "-0" is the case a range check cannot catch on its own: -0 is
     // numerically 0, so `octet < 0` is false and it would parse as "0".
     assertThrows(
-      () => parseIpv4("-0.1.2.3"),
+      () => parseAddressv4("-0.1.2.3"),
       TypeError,
       "IPv4 address octets must be decimal numbers, got '-0'",
     );
     assertThrows(
-      () => parseIpv4("1.2.3.-0"),
+      () => parseAddressv4("1.2.3.-0"),
       TypeError,
       "IPv4 address octets must be decimal numbers, got '-0'",
     );
@@ -121,31 +125,31 @@ Deno.test("parseIpv4", async (t) => {
   await t.step("never reads a non-numeric octet as a number", () => {
     // Number("NaN") is NaN and String(NaN) is "NaN", so validating an octet
     // by that round-trip would accept this and return 16909056.
-    assertThrows(() => parseIpv4("1.2.3.NaN"), TypeError);
+    assertThrows(() => parseAddressv4("1.2.3.NaN"), TypeError);
   });
 });
 
-Deno.test("stringifyIpv4", async (t) => {
+Deno.test("stringifyAddressv4", async (t) => {
   await t.step("valid values", () => {
-    assertEquals(stringifyIpv4(3232235777), "192.168.1.1");
-    assertEquals(stringifyIpv4(167772161), "10.0.0.1");
-    assertEquals(stringifyIpv4(2886729729), "172.16.0.1");
-    assertEquals(stringifyIpv4(2130706433), "127.0.0.1");
+    assertEquals(stringifyAddressv4(3232235777), "192.168.1.1");
+    assertEquals(stringifyAddressv4(167772161), "10.0.0.1");
+    assertEquals(stringifyAddressv4(2886729729), "172.16.0.1");
+    assertEquals(stringifyAddressv4(2130706433), "127.0.0.1");
   });
 
   await t.step("edge cases", () => {
-    assertEquals(stringifyIpv4(0), "0.0.0.0");
-    assertEquals(stringifyIpv4(4294967295), "255.255.255.255");
+    assertEquals(stringifyAddressv4(0), "0.0.0.0");
+    assertEquals(stringifyAddressv4(4294967295), "255.255.255.255");
   });
 
   await t.step("out of range values", () => {
     assertThrows(
-      () => stringifyIpv4(-1),
+      () => stringifyAddressv4(-1),
       RangeError,
       "IPv4 value out of range: -1 (must be 0 to 4294967295)",
     );
     assertThrows(
-      () => stringifyIpv4(4294967296),
+      () => stringifyAddressv4(4294967296),
       RangeError,
       "IPv4 value out of range: 4294967296 (must be 0 to 4294967295)",
     );
@@ -164,7 +168,7 @@ Deno.test("IPv4 round-trip", async (t) => {
     ];
 
     for (const addr of addresses) {
-      assertEquals(stringifyIpv4(parseIpv4(addr)), addr);
+      assertEquals(stringifyAddressv4(parseAddressv4(addr)), addr);
     }
   });
 
@@ -179,53 +183,68 @@ Deno.test("IPv4 round-trip", async (t) => {
     ];
 
     for (const val of values) {
-      assertEquals(parseIpv4(stringifyIpv4(val)), val);
+      assertEquals(parseAddressv4(stringifyAddressv4(val)), val);
     }
   });
 });
 
-Deno.test("isValidIpv4", async (t) => {
+Deno.test("isValidAddressv4", async (t) => {
   await t.step("valid addresses", () => {
-    assert(isValidIpv4("0.0.0.0"));
-    assert(isValidIpv4("192.168.1.1"));
-    assert(isValidIpv4("255.255.255.255"));
-    assert(isValidIpv4("10.0.0.1"));
-    assert(isValidIpv4("172.16.0.1"));
+    assert(isValidAddressv4("0.0.0.0"));
+    assert(isValidAddressv4("192.168.1.1"));
+    assert(isValidAddressv4("255.255.255.255"));
+    assert(isValidAddressv4("10.0.0.1"));
+    assert(isValidAddressv4("172.16.0.1"));
   });
 
   await t.step("invalid addresses", () => {
-    assertEquals(isValidIpv4(""), false);
-    assertEquals(isValidIpv4("256.0.0.1"), false);
-    assertEquals(isValidIpv4("1.2.3"), false);
-    assertEquals(isValidIpv4("1.2.3.4.5"), false);
-    assertEquals(isValidIpv4("01.02.03.04"), false);
-    assertEquals(isValidIpv4("abc"), false);
-    assertEquals(isValidIpv4("::1"), false);
-    assertEquals(isValidIpv4("192.168.1.0/24"), false);
+    assertEquals(isValidAddressv4(""), false);
+    assertEquals(isValidAddressv4("256.0.0.1"), false);
+    assertEquals(isValidAddressv4("1.2.3"), false);
+    assertEquals(isValidAddressv4("1.2.3.4.5"), false);
+    assertEquals(isValidAddressv4("01.02.03.04"), false);
+    assertEquals(isValidAddressv4("abc"), false);
+    assertEquals(isValidAddressv4("::1"), false);
+    assertEquals(isValidAddressv4("192.168.1.0/24"), false);
   });
 });
 
-Deno.test("compareIpv4", async (t) => {
+Deno.test("compareAddressv4", async (t) => {
   await t.step("orders numerically ascending", () => {
-    assertEquals(compareIpv4(parseIpv4("10.0.0.1"), parseIpv4("10.0.0.2")), -1);
-    assertEquals(compareIpv4(parseIpv4("10.0.0.2"), parseIpv4("10.0.0.1")), 1);
-    assertEquals(compareIpv4(parseIpv4("10.0.0.1"), parseIpv4("10.0.0.1")), 0);
+    assertEquals(
+      compareAddressv4(parseAddressv4("10.0.0.1"), parseAddressv4("10.0.0.2")),
+      -1,
+    );
+    assertEquals(
+      compareAddressv4(parseAddressv4("10.0.0.2"), parseAddressv4("10.0.0.1")),
+      1,
+    );
+    assertEquals(
+      compareAddressv4(parseAddressv4("10.0.0.1"), parseAddressv4("10.0.0.1")),
+      0,
+    );
   });
 
   await t.step("returns only -1, 0 or 1, never a magnitude", () => {
     assertEquals(
-      compareIpv4(parseIpv4("0.0.0.0"), parseIpv4("255.255.255.255")),
+      compareAddressv4(
+        parseAddressv4("0.0.0.0"),
+        parseAddressv4("255.255.255.255"),
+      ),
       -1,
     );
     assertEquals(
-      compareIpv4(parseIpv4("255.255.255.255"), parseIpv4("0.0.0.0")),
+      compareAddressv4(
+        parseAddressv4("255.255.255.255"),
+        parseAddressv4("0.0.0.0"),
+      ),
       1,
     );
   });
 
   await t.step("sorts numerically, not lexicographically", () => {
-    const addresses = ["10.0.0.9", "10.0.0.10", "10.0.0.2"].map(parseIpv4);
-    assertEquals(addresses.toSorted(compareIpv4).map(stringifyIpv4), [
+    const addresses = ["10.0.0.9", "10.0.0.10", "10.0.0.2"].map(parseAddressv4);
+    assertEquals(addresses.toSorted(compareAddressv4).map(stringifyAddressv4), [
       "10.0.0.2",
       "10.0.0.9",
       "10.0.0.10",

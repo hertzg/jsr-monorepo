@@ -10,9 +10,7 @@
  * IPv6 and delegate to the appropriate version-specific
  * function. The {@link Cidr}
  * type alias and {@link isCidrv4}/{@link isCidrv6} type guards are also
- * exported for working with version-polymorphic CIDR values, along with the
- * {@link AddressOrCidr} union used by the universal `parse` and `stringify`
- * at the package root.
+ * exported for working with version-polymorphic CIDR values.
  *
  * For version-specific functions, see:
  * - [`cidrv4`](https://jsr.io/@hertzg/ip/doc/cidrv4): {@link parseCidrv4}, {@link stringifyCidrv4}, {@link isValidCidrv4}, {@link compareCidrv4}
@@ -37,8 +35,7 @@
  * @module
  */
 
-import { cidrv4FromCidrv64Mapped } from "./4to6.ts";
-import { isIpv6Ipv4Mapped } from "./classifyv6.ts";
+import { isAddressv6Mapped } from "./classifyv6.ts";
 import {
   type Cidrv4,
   cidrv4Addresses,
@@ -70,13 +67,14 @@ import {
   compareCidrv6,
   parseCidrv6,
   stringifyCidrv6,
+  unmapToCidrv4,
 } from "./cidrv6.ts";
-import type { Address } from "./ip.ts";
+import type { Address } from "./address.ts";
 
 export type {
   /** A plain IP address of either IP version. */
   Address,
-} from "./ip.ts";
+} from "./address.ts";
 export type {
   /** Type representing an IPv4 CIDR block. */
   Cidrv4,
@@ -94,16 +92,6 @@ export type {
  * {@link isCidrv4} and {@link isCidrv6} type guards to narrow.
  */
 export type Cidr = Cidrv4 | Cidrv6;
-
-/**
- * An IP address or a CIDR block, of either IP version.
- *
- * This is a union of {@link Address} and {@link Cidr} — everything the
- * universal `parse` and `stringify` from `@hertzg/ip` accept and return.
- * Narrow with a `typeof` check to split the address half from the CIDR half,
- * then use {@link isCidrv4} and {@link isCidrv6} on the latter.
- */
-export type AddressOrCidr = Address | Cidr;
 
 /**
  * Type guard that checks whether a {@link Cidr} is an IPv4 CIDR block.
@@ -176,8 +164,8 @@ export function isCidrv6(cidr: Cidr): cidr is Cidrv6 {
 export function parseCidr(cidr: string): Cidr {
   if (cidr.includes(":")) {
     const v6 = parseCidrv6(cidr);
-    if (isIpv6Ipv4Mapped(v6.address) && v6.prefixLength >= 96) {
-      return cidrv4FromCidrv64Mapped(v6);
+    if (isAddressv6Mapped(v6.address) && v6.prefixLength >= 96) {
+      return unmapToCidrv4(v6);
     }
     return v6;
   }
@@ -216,9 +204,9 @@ export function stringifyCidr(cidr: Cidr): string {
  * network while the CIDR comes from configuration, which makes a mismatch
  * ordinary traffic on a dual-stack listener rather than a caller mistake.
  *
- * IPv4-mapped IPv6 addresses are not converted here. {@link parseIp} already
- * unwraps them, so an address from `parseIp` matches an IPv4 CIDR; one from
- * {@link parseIpv6} stays a `bigint` and does not.
+ * IPv4-mapped IPv6 addresses are not converted here. {@link parseAddress} already
+ * unwraps them, so an address from `parseAddress` matches an IPv4 CIDR; one from
+ * {@link parseAddressv6} stays a `bigint` and does not.
  *
  * @param cidr The CIDR block that may contain the address
  * @param address The address to test for membership
@@ -228,35 +216,35 @@ export function stringifyCidr(cidr: Cidr): string {
  * ```ts
  * import { assert, assertEquals } from "@std/assert";
  * import { cidrContains, parseCidr } from "@hertzg/ip/cidr";
- * import { parseIp } from "@hertzg/ip/ip";
+ * import { parseAddress } from "@hertzg/ip/address";
  *
- * assert(cidrContains(parseCidr("10.0.0.0/8"), parseIp("10.1.2.3")));
- * assertEquals(cidrContains(parseCidr("10.0.0.0/8"), parseIp("11.0.0.1")), false);
+ * assert(cidrContains(parseCidr("10.0.0.0/8"), parseAddress("10.1.2.3")));
+ * assertEquals(cidrContains(parseCidr("10.0.0.0/8"), parseAddress("11.0.0.1")), false);
  *
- * assert(cidrContains(parseCidr("2001:db8::/32"), parseIp("2001:db8::1")));
- * assertEquals(cidrContains(parseCidr("2001:db8::/32"), parseIp("2001:db9::1")), false);
+ * assert(cidrContains(parseCidr("2001:db8::/32"), parseAddress("2001:db8::1")));
+ * assertEquals(cidrContains(parseCidr("2001:db8::/32"), parseAddress("2001:db9::1")), false);
  * ```
  *
  * @example Mixed versions return false instead of throwing
  * ```ts
  * import { assertEquals } from "@std/assert";
  * import { cidrContains, parseCidr } from "@hertzg/ip/cidr";
- * import { parseIp } from "@hertzg/ip/ip";
+ * import { parseAddress } from "@hertzg/ip/address";
  *
- * assertEquals(cidrContains(parseCidr("10.0.0.0/8"), parseIp("2001:db8::1")), false);
- * assertEquals(cidrContains(parseCidr("::/0"), parseIp("10.1.2.3")), false);
+ * assertEquals(cidrContains(parseCidr("10.0.0.0/8"), parseAddress("2001:db8::1")), false);
+ * assertEquals(cidrContains(parseCidr("::/0"), parseAddress("10.1.2.3")), false);
  * ```
  *
  * @example IPv4-mapped IPv6 depends on which parser produced the address
  * ```ts
  * import { assert, assertEquals } from "@std/assert";
  * import { cidrContains, parseCidr } from "@hertzg/ip/cidr";
- * import { parseIp } from "@hertzg/ip/ip";
- * import { parseIpv6 } from "@hertzg/ip/ipv6";
+ * import { parseAddress } from "@hertzg/ip/address";
+ * import { parseAddressv6 } from "@hertzg/ip/addressv6";
  *
- * assert(cidrContains(parseCidr("10.0.0.0/8"), parseIp("::ffff:10.1.2.3")));
+ * assert(cidrContains(parseCidr("10.0.0.0/8"), parseAddress("::ffff:10.1.2.3")));
  * assertEquals(
- *   cidrContains(parseCidr("10.0.0.0/8"), parseIpv6("::ffff:10.1.2.3")),
+ *   cidrContains(parseCidr("10.0.0.0/8"), parseAddressv6("::ffff:10.1.2.3")),
  *   false,
  * );
  * ```
@@ -603,10 +591,10 @@ export function cidrSize(cidr: Cidr): number | bigint {
  * ```ts
  * import { assertEquals } from "@std/assert";
  * import { cidrFirstAddress, parseCidr } from "@hertzg/ip/cidr";
- * import { stringifyIp } from "@hertzg/ip/ip";
+ * import { stringifyAddress } from "@hertzg/ip/address";
  *
- * assertEquals(stringifyIp(cidrFirstAddress(parseCidr("192.168.1.0/24"))), "192.168.1.0");
- * assertEquals(stringifyIp(cidrFirstAddress(parseCidr("2001:db8::/32"))), "2001:db8::");
+ * assertEquals(stringifyAddress(cidrFirstAddress(parseCidr("192.168.1.0/24"))), "192.168.1.0");
+ * assertEquals(stringifyAddress(cidrFirstAddress(parseCidr("2001:db8::/32"))), "2001:db8::");
  * ```
  *
  * @example Sorting blocks by their first address
@@ -659,25 +647,25 @@ export function cidrFirstAddress(cidr: Cidr): Address {
  * ```ts
  * import { assertEquals } from "@std/assert";
  * import { cidrLastAddress, parseCidr } from "@hertzg/ip/cidr";
- * import { stringifyIp } from "@hertzg/ip/ip";
+ * import { stringifyAddress } from "@hertzg/ip/address";
  *
- * assertEquals(stringifyIp(cidrLastAddress(parseCidr("192.168.1.0/24"))), "192.168.1.255");
- * assertEquals(stringifyIp(cidrLastAddress(parseCidr("2001:db8::/120"))), "2001:db8::ff");
+ * assertEquals(stringifyAddress(cidrLastAddress(parseCidr("192.168.1.0/24"))), "192.168.1.255");
+ * assertEquals(stringifyAddress(cidrLastAddress(parseCidr("2001:db8::/120"))), "2001:db8::ff");
  * ```
  *
  * @example The bounds of a block, without knowing its version
  * ```ts
  * import { assertEquals } from "@std/assert";
  * import { cidrFirstAddress, cidrLastAddress, parseCidr } from "@hertzg/ip/cidr";
- * import { stringifyIp } from "@hertzg/ip/ip";
+ * import { stringifyAddress } from "@hertzg/ip/address";
  *
  * const v4 = parseCidr("10.0.0.0/29");
- * assertEquals(stringifyIp(cidrFirstAddress(v4)), "10.0.0.0");
- * assertEquals(stringifyIp(cidrLastAddress(v4)), "10.0.0.7");
+ * assertEquals(stringifyAddress(cidrFirstAddress(v4)), "10.0.0.0");
+ * assertEquals(stringifyAddress(cidrLastAddress(v4)), "10.0.0.7");
  *
  * const v6 = parseCidr("fd00::/125");
- * assertEquals(stringifyIp(cidrFirstAddress(v6)), "fd00::");
- * assertEquals(stringifyIp(cidrLastAddress(v6)), "fd00::7");
+ * assertEquals(stringifyAddress(cidrFirstAddress(v6)), "fd00::");
+ * assertEquals(stringifyAddress(cidrLastAddress(v6)), "fd00::7");
  * ```
  */
 export function cidrLastAddress<T extends Cidr>(
@@ -719,10 +707,10 @@ export function cidrAddresses(
  * ```ts
  * import { assertEquals } from "@std/assert";
  * import { cidrAddresses, parseCidr } from "@hertzg/ip/cidr";
- * import { stringifyIp } from "@hertzg/ip/ip";
+ * import { stringifyAddress } from "@hertzg/ip/address";
  *
  * const first3 = Array.from(cidrAddresses(parseCidr("10.0.0.0/29"), { count: 3 }));
- * assertEquals(first3.map(stringifyIp), [
+ * assertEquals(first3.map(stringifyAddress), [
  *   "10.0.0.0", "10.0.0.1", "10.0.0.2",
  * ]);
  * ```

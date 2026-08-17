@@ -14,25 +14,32 @@
  *   cidrv6LastAddress,
  *   parseCidrv6,
  * } from "@hertzg/ip/cidrv6";
- * import { parseIpv6, stringifyIpv6 } from "@hertzg/ip/ipv6";
+ * import { parseAddressv6, stringifyAddressv6 } from "@hertzg/ip/addressv6";
  *
  * const cidr = parseCidrv6("2001:db8:ffff:ffff:ffff:ffff::/120");
  * let currentIp = cidrv6FirstAddress(cidr) + 1n;
  *
  * while (cidrv6Contains(cidr, currentIp)) {
- *   const assigned = stringifyIpv6(currentIp);
+ *   const assigned = stringifyAddressv6(currentIp);
  *   currentIp = currentIp + 1n;
  *   if (currentIp > cidrv6LastAddress(cidr)) break;
  * }
  *
- * assert(cidrv6Contains(cidr, parseIpv6("2001:db8:ffff:ffff:ffff:ffff::1")));
- * assertEquals(cidrv6Contains(cidr, parseIpv6("2001:db9::1")), false);
+ * assert(cidrv6Contains(cidr, parseAddressv6("2001:db8:ffff:ffff:ffff:ffff::1")));
+ * assertEquals(cidrv6Contains(cidr, parseAddressv6("2001:db9::1")), false);
  * ```
  *
  * @module
  */
 
-import { compareIpv6, parseIpv6, stringifyIpv6 } from "./ipv6.ts";
+import {
+  compareAddressv6,
+  mapFromAddressv4,
+  parseAddressv6,
+  stringifyAddressv6,
+  unmapToAddressv4,
+} from "./addressv6.ts";
+import type { Cidrv4 } from "./cidrv4.ts";
 
 /**
  * Represents an IPv6 CIDR block.
@@ -140,21 +147,21 @@ export function cidrv6Mask(prefixLength: number): bigint {
  * @example Recovering prefix lengths from bigints
  * ```ts
  * import { assertEquals } from "@std/assert";
- * import { cidrv6MaskToPrefixLength } from "@hertzg/ip/cidrv6";
+ * import { cidrv6PrefixLength } from "@hertzg/ip/cidrv6";
  *
- * assertEquals(cidrv6MaskToPrefixLength(0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFn), 128);
- * assertEquals(cidrv6MaskToPrefixLength(0xFFFFFFFFFFFFFFFF0000000000000000n), 64);
- * assertEquals(cidrv6MaskToPrefixLength(0xFFFFFFFFFFFF00000000000000000000n), 48);
- * assertEquals(cidrv6MaskToPrefixLength(0xFFFFFFFF000000000000000000000000n), 32);
- * assertEquals(cidrv6MaskToPrefixLength(0n), 0);
+ * assertEquals(cidrv6PrefixLength(0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFn), 128);
+ * assertEquals(cidrv6PrefixLength(0xFFFFFFFFFFFFFFFF0000000000000000n), 64);
+ * assertEquals(cidrv6PrefixLength(0xFFFFFFFFFFFF00000000000000000000n), 48);
+ * assertEquals(cidrv6PrefixLength(0xFFFFFFFF000000000000000000000000n), 32);
+ * assertEquals(cidrv6PrefixLength(0n), 0);
  * ```
  */
-export function cidrv6MaskToPrefixLength(mask: bigint): number;
+export function cidrv6PrefixLength(mask: bigint): number;
 /**
  * Recovers the prefix length from an IPv6 network mask given in
  * colon-hexadecimal notation.
  *
- * The string is parsed with the same rules as {@link parseIpv6} and then
+ * The string is parsed with the same rules as {@link parseAddressv6} and then
  * interpreted as a mask rather than an address.
  *
  * Note that IPv6 has no standard netmask notation. RFC 4291 section 2.3
@@ -177,14 +184,14 @@ export function cidrv6MaskToPrefixLength(mask: bigint): number;
  * @example Recovering prefix lengths from colon-hexadecimal
  * ```ts
  * import { assertEquals } from "@std/assert";
- * import { cidrv6MaskToPrefixLength } from "@hertzg/ip/cidrv6";
+ * import { cidrv6PrefixLength } from "@hertzg/ip/cidrv6";
  *
- * assertEquals(cidrv6MaskToPrefixLength("ffff:ffff:ffff:ffff::"), 64);
- * assertEquals(cidrv6MaskToPrefixLength("ffff:ffff::"), 32);
- * assertEquals(cidrv6MaskToPrefixLength("::"), 0);
+ * assertEquals(cidrv6PrefixLength("ffff:ffff:ffff:ffff::"), 64);
+ * assertEquals(cidrv6PrefixLength("ffff:ffff::"), 32);
+ * assertEquals(cidrv6PrefixLength("::"), 0);
  * ```
  */
-export function cidrv6MaskToPrefixLength(mask: string): number;
+export function cidrv6PrefixLength(mask: string): number;
 /**
  * Recovers the prefix length from an IPv6 network mask.
  *
@@ -204,53 +211,53 @@ export function cidrv6MaskToPrefixLength(mask: string): number;
  * @example Both forms agree
  * ```ts
  * import { assertEquals } from "@std/assert";
- * import { cidrv6MaskToPrefixLength } from "@hertzg/ip/cidrv6";
+ * import { cidrv6PrefixLength } from "@hertzg/ip/cidrv6";
  *
- * assertEquals(cidrv6MaskToPrefixLength("ffff:ffff:ffff:ffff::"), 64);
- * assertEquals(cidrv6MaskToPrefixLength(0xFFFFFFFFFFFFFFFF0000000000000000n), 64);
+ * assertEquals(cidrv6PrefixLength("ffff:ffff:ffff:ffff::"), 64);
+ * assertEquals(cidrv6PrefixLength(0xFFFFFFFFFFFFFFFF0000000000000000n), 64);
  * ```
  *
  * @example Non-contiguous masks throw, in either form
  * ```ts
  * import { assertThrows } from "@std/assert";
- * import { cidrv6MaskToPrefixLength } from "@hertzg/ip/cidrv6";
+ * import { cidrv6PrefixLength } from "@hertzg/ip/cidrv6";
  *
- * assertThrows(() => cidrv6MaskToPrefixLength(0xFFFF0000FFFF00000000000000000000n), TypeError);
- * assertThrows(() => cidrv6MaskToPrefixLength("ffff:0:ffff::"), TypeError);
- * assertThrows(() => cidrv6MaskToPrefixLength("::ffff:ffff"), TypeError);
+ * assertThrows(() => cidrv6PrefixLength(0xFFFF0000FFFF00000000000000000000n), TypeError);
+ * assertThrows(() => cidrv6PrefixLength("ffff:0:ffff::"), TypeError);
+ * assertThrows(() => cidrv6PrefixLength("::ffff:ffff"), TypeError);
  * ```
  *
  * @example Round-trips with cidrv6Mask
  * ```ts
  * import { assertEquals } from "@std/assert";
- * import { cidrv6Mask, cidrv6MaskToPrefixLength } from "@hertzg/ip/cidrv6";
+ * import { cidrv6Mask, cidrv6PrefixLength } from "@hertzg/ip/cidrv6";
  *
  * for (let prefixLength = 0; prefixLength <= 128; prefixLength++) {
- *   assertEquals(cidrv6MaskToPrefixLength(cidrv6Mask(prefixLength)), prefixLength);
+ *   assertEquals(cidrv6PrefixLength(cidrv6Mask(prefixLength)), prefixLength);
  * }
  * ```
  *
  * @example Error handling
  * ```ts
  * import { assertThrows } from "@std/assert";
- * import { cidrv6MaskToPrefixLength } from "@hertzg/ip/cidrv6";
+ * import { cidrv6PrefixLength } from "@hertzg/ip/cidrv6";
  *
  * // Wrong shape -- in range, but not a mask
- * assertThrows(() => cidrv6MaskToPrefixLength(0xFFFF0000FFFF00000000000000000000n), TypeError);
- * assertThrows(() => cidrv6MaskToPrefixLength("ffff:0:ffff::"), TypeError);
+ * assertThrows(() => cidrv6PrefixLength(0xFFFF0000FFFF00000000000000000000n), TypeError);
+ * assertThrows(() => cidrv6PrefixLength("ffff:0:ffff::"), TypeError);
  *
  * // Malformed notation
- * assertThrows(() => cidrv6MaskToPrefixLength("gggg::"), TypeError);
+ * assertThrows(() => cidrv6PrefixLength("gggg::"), TypeError);
  *
  * // Wrong range -- not a 128-bit unsigned integer at all
- * assertThrows(() => cidrv6MaskToPrefixLength(-1n), RangeError);
- * assertThrows(() => cidrv6MaskToPrefixLength(1n << 128n), RangeError);
+ * assertThrows(() => cidrv6PrefixLength(-1n), RangeError);
+ * assertThrows(() => cidrv6PrefixLength(1n << 128n), RangeError);
  * ```
  */
-export function cidrv6MaskToPrefixLength(mask: string | bigint): number;
+export function cidrv6PrefixLength(mask: string | bigint): number;
 /** Recovers the prefix length from an IPv6 network mask. */
-export function cidrv6MaskToPrefixLength(mask: string | bigint): number {
-  const value = typeof mask === "string" ? parseIpv6(mask) : mask;
+export function cidrv6PrefixLength(mask: string | bigint): number {
+  const value = typeof mask === "string" ? parseAddressv6(mask) : mask;
 
   if (value < 0n || value > 0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFn) {
     throw new RangeError(
@@ -322,7 +329,7 @@ function parsePrefixLength(part: string): number {
  * @throws {TypeError} If the format is invalid, including a prefix length
  *   with leading zeros, whitespace or trailing text
  * @throws {RangeError} If the prefix length is out of range (not 0-128)
- * @throws Propagates errors from parseIpv6 if the address part is invalid
+ * @throws Propagates errors from parseAddressv6 if the address part is invalid
  *
  * @example Basic CIDR parsing
  * ```ts
@@ -361,7 +368,7 @@ export function parseCidrv6(cidr: string): Cidrv6 {
     throw new TypeError("CIDR prefix length must be specified");
   }
 
-  const address = parseIpv6(addressPart);
+  const address = parseAddressv6(addressPart);
   const prefixLength = parsePrefixLength(prefixPart);
 
   // Validate prefix length
@@ -389,7 +396,7 @@ export function parseCidrv6(cidr: string): Cidrv6 {
  * ```
  */
 export function stringifyCidrv6(cidr: Cidrv6): string {
-  return `${stringifyIpv6(cidr.address)}/${cidr.prefixLength}`;
+  return `${stringifyAddressv6(cidr.address)}/${cidr.prefixLength}`;
 }
 
 /**
@@ -403,15 +410,15 @@ export function stringifyCidrv6(cidr: Cidrv6): string {
  * ```ts
  * import { assert, assertEquals } from "@std/assert";
  * import { cidrv6Contains, parseCidrv6 } from "@hertzg/ip/cidrv6";
- * import { parseIpv6 } from "@hertzg/ip/ipv6";
+ * import { parseAddressv6 } from "@hertzg/ip/addressv6";
  *
  * const cidr = parseCidrv6("2001:db8::/32");
  *
- * assert(cidrv6Contains(cidr, parseIpv6("2001:db8::")));
- * assert(cidrv6Contains(cidr, parseIpv6("2001:db8::1")));
- * assert(cidrv6Contains(cidr, parseIpv6("2001:db8:ffff:ffff:ffff:ffff:ffff:ffff")));
- * assertEquals(cidrv6Contains(cidr, parseIpv6("2001:db9::1")), false);
- * assertEquals(cidrv6Contains(cidr, parseIpv6("2001:db7:ffff:ffff:ffff:ffff:ffff:ffff")), false);
+ * assert(cidrv6Contains(cidr, parseAddressv6("2001:db8::")));
+ * assert(cidrv6Contains(cidr, parseAddressv6("2001:db8::1")));
+ * assert(cidrv6Contains(cidr, parseAddressv6("2001:db8:ffff:ffff:ffff:ffff:ffff:ffff")));
+ * assertEquals(cidrv6Contains(cidr, parseAddressv6("2001:db9::1")), false);
+ * assertEquals(cidrv6Contains(cidr, parseAddressv6("2001:db7:ffff:ffff:ffff:ffff:ffff:ffff")), false);
  * ```
  *
  * @example IP assignment workflow
@@ -463,21 +470,21 @@ export function cidrv6Contains(cidr: Cidrv6, address: bigint): boolean {
  * ```ts
  * import { assertEquals } from "@std/assert";
  * import { cidrv6FirstAddress, parseCidrv6 } from "@hertzg/ip/cidrv6";
- * import { parseIpv6 } from "@hertzg/ip/ipv6";
+ * import { parseAddressv6 } from "@hertzg/ip/addressv6";
  *
  * const cidr = parseCidrv6("2001:db8::/32");
- * assertEquals(cidrv6FirstAddress(cidr), parseIpv6("2001:db8::"));
+ * assertEquals(cidrv6FirstAddress(cidr), parseAddressv6("2001:db8::"));
  * ```
  *
  * @example Skipping the Subnet-Router anycast on a link that reserves it
  * ```ts
  * import { assertEquals } from "@std/assert";
  * import { cidrv6Addresses, parseCidrv6 } from "@hertzg/ip/cidrv6";
- * import { stringifyIpv6 } from "@hertzg/ip/ipv6";
+ * import { stringifyAddressv6 } from "@hertzg/ip/addressv6";
  *
  * const cidr = parseCidrv6("2001:db8::/126");
  * const assignable = Array.from(cidrv6Addresses(cidr, { offset: 1n }));
- * assertEquals(assignable.map(stringifyIpv6), [
+ * assertEquals(assignable.map(stringifyAddressv6), [
  *   "2001:db8::1",
  *   "2001:db8::2",
  *   "2001:db8::3",
@@ -504,10 +511,10 @@ export function cidrv6FirstAddress(cidr: Cidrv6): bigint {
  * ```ts
  * import { assertEquals } from "@std/assert";
  * import { cidrv6LastAddress, parseCidrv6 } from "@hertzg/ip/cidrv6";
- * import { parseIpv6 } from "@hertzg/ip/ipv6";
+ * import { parseAddressv6 } from "@hertzg/ip/addressv6";
  *
  * const cidr = parseCidrv6("2001:db8::/120");
- * assertEquals(cidrv6LastAddress(cidr), parseIpv6("2001:db8::ff"));
+ * assertEquals(cidrv6LastAddress(cidr), parseAddressv6("2001:db8::ff"));
  * ```
  */
 export function cidrv6LastAddress(cidr: Cidrv6): bigint {
@@ -820,13 +827,13 @@ export function cidrv6Subtract(a: Cidrv6, b: Cidrv6): Cidrv6[] {
  * ```ts
  * import { assertEquals } from "@std/assert";
  * import { cidrv6Addresses, parseCidrv6 } from "@hertzg/ip/cidrv6";
- * import { stringifyIpv6 } from "@hertzg/ip/ipv6";
+ * import { stringifyAddressv6 } from "@hertzg/ip/addressv6";
  *
  * const cidr = parseCidrv6("fd00::/120"); // 256 IPs: ::0 to ::ff
  *
  * // Get first 5 IPs (offset=0 by default, starts at network address)
  * const first5 = Array.from(cidrv6Addresses(cidr, { count: 5 }));
- * assertEquals(first5.map(stringifyIpv6), [
+ * assertEquals(first5.map(stringifyAddressv6), [
  *   "fd00::", "fd00::1", "fd00::2", "fd00::3", "fd00::4",
  * ]);
  * ```
@@ -835,16 +842,16 @@ export function cidrv6Subtract(a: Cidrv6, b: Cidrv6): Cidrv6[] {
  * ```ts
  * import { assertEquals } from "@std/assert";
  * import { cidrv6Addresses, parseCidrv6 } from "@hertzg/ip/cidrv6";
- * import { parseIpv6 } from "@hertzg/ip/ipv6";
+ * import { parseAddressv6 } from "@hertzg/ip/addressv6";
  *
  * const cidr = parseCidrv6("fd00::/120");
  *
  * // Get first 3 IPs starting at network address
  * const first3 = Array.from(cidrv6Addresses(cidr, { offset: 0, count: 3 }));
  * assertEquals(first3, [
- *   parseIpv6("fd00::0"),
- *   parseIpv6("fd00::1"),
- *   parseIpv6("fd00::2"),
+ *   parseAddressv6("fd00::0"),
+ *   parseAddressv6("fd00::1"),
+ *   parseAddressv6("fd00::2"),
  * ]);
  * ```
  *
@@ -852,18 +859,18 @@ export function cidrv6Subtract(a: Cidrv6, b: Cidrv6): Cidrv6[] {
  * ```ts
  * import { assertEquals } from "@std/assert";
  * import { cidrv6Addresses, parseCidrv6 } from "@hertzg/ip/cidrv6";
- * import { parseIpv6 } from "@hertzg/ip/ipv6";
+ * import { parseAddressv6 } from "@hertzg/ip/addressv6";
  *
  * const cidr = parseCidrv6("fd00::/120");
  *
  * // Get every other IP (even addresses)
  * const evenIps = Array.from(cidrv6Addresses(cidr, { offset: 0, count: 5, step: 2 }));
  * assertEquals(evenIps, [
- *   parseIpv6("fd00::0"),
- *   parseIpv6("fd00::2"),
- *   parseIpv6("fd00::4"),
- *   parseIpv6("fd00::6"),
- *   parseIpv6("fd00::8"),
+ *   parseAddressv6("fd00::0"),
+ *   parseAddressv6("fd00::2"),
+ *   parseAddressv6("fd00::4"),
+ *   parseAddressv6("fd00::6"),
+ *   parseAddressv6("fd00::8"),
  * ]);
  * ```
  *
@@ -871,18 +878,18 @@ export function cidrv6Subtract(a: Cidrv6, b: Cidrv6): Cidrv6[] {
  * ```ts
  * import { assertEquals } from "@std/assert";
  * import { cidrv6Addresses, parseCidrv6 } from "@hertzg/ip/cidrv6";
- * import { parseIpv6 } from "@hertzg/ip/ipv6";
+ * import { parseAddressv6 } from "@hertzg/ip/addressv6";
  *
  * const cidr = parseCidrv6("fd00::/120");
  *
  * // Get 5 IPs counting backwards from offset 10
  * const backwards = Array.from(cidrv6Addresses(cidr, { offset: 10, count: 5, step: -1 }));
  * assertEquals(backwards, [
- *   parseIpv6("fd00::a"),
- *   parseIpv6("fd00::9"),
- *   parseIpv6("fd00::8"),
- *   parseIpv6("fd00::7"),
- *   parseIpv6("fd00::6"),
+ *   parseAddressv6("fd00::a"),
+ *   parseAddressv6("fd00::9"),
+ *   parseAddressv6("fd00::8"),
+ *   parseAddressv6("fd00::7"),
+ *   parseAddressv6("fd00::6"),
  * ]);
  * ```
  *
@@ -1069,9 +1076,99 @@ export function cidrv6Merge(cidrs: readonly Cidrv6[]): Cidrv6[] {
  * ```
  */
 export function compareCidrv6(a: Cidrv6, b: Cidrv6): -1 | 0 | 1 {
-  const byAddress = compareIpv6(a.address, b.address);
+  const byAddress = compareAddressv6(a.address, b.address);
   if (byAddress !== 0) return byAddress;
   if (a.prefixLength < b.prefixLength) return -1;
   if (a.prefixLength > b.prefixLength) return 1;
   return 0;
+}
+
+/** The number of prefix bits occupied by the IPv4-mapped prefix (`::ffff:0:0/96`). */
+const IPV4_MAPPED_PREFIX_LENGTH = 96;
+
+/**
+ * Converts an IPv4 CIDR block to its IPv4-mapped IPv6 CIDR representation.
+ *
+ * The address is embedded into the `::ffff:0:0/96` prefix and the prefix
+ * length is offset by 96: an IPv4 `/8` becomes an IPv6 `/104`.
+ *
+ * @param cidr The IPv4 CIDR block
+ * @returns The equivalent IPv4-mapped IPv6 CIDR block
+ *
+ * @example
+ * ```ts
+ * import { assertEquals } from "@std/assert";
+ * import { mapFromCidrv4, stringifyCidrv6 } from "@hertzg/ip/cidrv6";
+ * import { parseCidrv4 } from "@hertzg/ip/cidrv4";
+ *
+ * assertEquals(
+ *   stringifyCidrv6(mapFromCidrv4(parseCidrv4("10.0.0.0/8"))),
+ *   "::ffff:a00:0/104",
+ * );
+ * assertEquals(
+ *   stringifyCidrv6(mapFromCidrv4(parseCidrv4("192.168.1.0/24"))),
+ *   "::ffff:c0a8:100/120",
+ * );
+ * assertEquals(
+ *   stringifyCidrv6(mapFromCidrv4(parseCidrv4("0.0.0.0/0"))),
+ *   "::ffff:0:0/96",
+ * );
+ * ```
+ */
+export function mapFromCidrv4(cidr: Cidrv4): Cidrv6 {
+  return {
+    address: mapFromAddressv4(cidr.address),
+    prefixLength: cidr.prefixLength + IPV4_MAPPED_PREFIX_LENGTH,
+  };
+}
+
+/**
+ * Converts an IPv4-mapped IPv6 CIDR block to its IPv4 CIDR representation.
+ *
+ * The IPv4 address is extracted from the `::ffff:0:0/96` prefix and the
+ * prefix length is reduced by 96: an IPv6 `/104` becomes an IPv4 `/8`.
+ *
+ * @param cidr The IPv6 CIDR block (must have prefix length >= 96)
+ * @returns The equivalent IPv4 CIDR block
+ * @throws {RangeError} If prefix length is less than 96
+ *
+ * @example
+ * ```ts
+ * import { assertEquals } from "@std/assert";
+ * import { parseCidrv6, unmapToCidrv4 } from "@hertzg/ip/cidrv6";
+ * import { stringifyCidrv4 } from "@hertzg/ip/cidrv4";
+ *
+ * assertEquals(
+ *   stringifyCidrv4(unmapToCidrv4(parseCidrv6("::ffff:10.0.0.0/104"))),
+ *   "10.0.0.0/8",
+ * );
+ * assertEquals(
+ *   stringifyCidrv4(unmapToCidrv4(parseCidrv6("::ffff:192.168.1.0/120"))),
+ *   "192.168.1.0/24",
+ * );
+ * assertEquals(
+ *   stringifyCidrv4(unmapToCidrv4(parseCidrv6("::ffff:0.0.0.0/96"))),
+ *   "0.0.0.0/0",
+ * );
+ * ```
+ *
+ * @example Throws for prefix length less than 96
+ * ```ts
+ * import { assertThrows } from "@std/assert";
+ * import { parseCidrv6, unmapToCidrv4 } from "@hertzg/ip/cidrv6";
+ *
+ * assertThrows(() => unmapToCidrv4(parseCidrv6("::ffff:0:0/64")), RangeError);
+ * assertThrows(() => unmapToCidrv4(parseCidrv6("2001:db8::/32")), RangeError);
+ * ```
+ */
+export function unmapToCidrv4(cidr: Cidrv6): Cidrv4 {
+  if (cidr.prefixLength < IPV4_MAPPED_PREFIX_LENGTH) {
+    throw new RangeError(
+      `Prefix length ${cidr.prefixLength} is less than ${IPV4_MAPPED_PREFIX_LENGTH}`,
+    );
+  }
+  return {
+    address: unmapToAddressv4(cidr.address),
+    prefixLength: cidr.prefixLength - IPV4_MAPPED_PREFIX_LENGTH,
+  };
 }

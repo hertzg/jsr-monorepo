@@ -1,23 +1,23 @@
 /**
  * IPv6 reverse DNS pointer names.
  *
- * This module provides {@link ipv6ToArpa}, which builds the `ip6.arpa` name a
+ * This module provides {@link addressv6ToArpa}, which builds the `ip6.arpa` name a
  * `PTR` record for an IPv6 address lives at (RFC 3596 §2.5).
  *
  * For the IPv4 and universal forms, see:
- * - [`arpav4`](https://jsr.io/@hertzg/ip/doc/arpav4): {@link ipv4ToArpa}
- * - [`arpa`](https://jsr.io/@hertzg/ip/doc/arpa): {@link ipToArpa}
+ * - [`arpav4`](https://jsr.io/@hertzg/ip/doc/arpav4): {@link addressv4ToArpa}
+ * - [`arpa`](https://jsr.io/@hertzg/ip/doc/arpa): {@link addressToArpa}
  *
  * The name is relative -- no trailing dot. See ADR 0009.
  *
  * @example Build the name a PTR record lives at
  * ```ts
  * import { assertEquals } from "@std/assert";
- * import { ipv6ToArpa } from "@hertzg/ip/arpav6";
- * import { parseIpv6 } from "@hertzg/ip/ipv6";
+ * import { addressv6ToArpa } from "@hertzg/ip/arpav6";
+ * import { parseAddressv6 } from "@hertzg/ip/addressv6";
  *
  * assertEquals(
- *   ipv6ToArpa(parseIpv6("2001:db8::1")),
+ *   addressv6ToArpa(parseAddressv6("2001:db8::1")),
  *   "1.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.8.b.d.0.1.0.0.2.ip6.arpa",
  * );
  * ```
@@ -25,7 +25,7 @@
  * @module
  */
 
-import { stringifyIpv6Expanded } from "./ipv6.ts";
+import { stringifyAddressv6Expanded } from "./addressv6.ts";
 
 /**
  * Builds the reverse DNS pointer name of an IPv6 address.
@@ -39,7 +39,7 @@ import { stringifyIpv6Expanded } from "./ipv6.ts";
  *
  * An IPv4-mapped address reaches this function only when the caller holds it
  * as a `bigint`, in which case it gets the `ip6.arpa` name of its 128-bit
- * value. {@link ipToArpa} never sees one, since {@link parseIp} unwraps
+ * value. {@link addressToArpa} never sees one, since {@link parseAddress} unwraps
  * mapped addresses to IPv4 (see ADR 0004).
  *
  * @param address The address as a 128-bit bigint
@@ -49,15 +49,15 @@ import { stringifyIpv6Expanded } from "./ipv6.ts";
  * @example Building the name
  * ```ts
  * import { assertEquals } from "@std/assert";
- * import { ipv6ToArpa } from "@hertzg/ip/arpav6";
- * import { parseIpv6 } from "@hertzg/ip/ipv6";
+ * import { addressv6ToArpa } from "@hertzg/ip/arpav6";
+ * import { parseAddressv6 } from "@hertzg/ip/addressv6";
  *
  * assertEquals(
- *   ipv6ToArpa(parseIpv6("2001:db8::1")),
+ *   addressv6ToArpa(parseAddressv6("2001:db8::1")),
  *   "1.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.8.b.d.0.1.0.0.2.ip6.arpa",
  * );
  * assertEquals(
- *   ipv6ToArpa(parseIpv6("::")),
+ *   addressv6ToArpa(parseAddressv6("::")),
  *   "0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.ip6.arpa",
  * );
  * ```
@@ -65,17 +65,17 @@ import { stringifyIpv6Expanded } from "./ipv6.ts";
  * @example An IPv4-mapped address held as a bigint keeps its ip6.arpa name
  * ```ts
  * import { assertEquals } from "@std/assert";
- * import { ipv6ToArpa } from "@hertzg/ip/arpav6";
- * import { parseIpv6 } from "@hertzg/ip/ipv6";
+ * import { addressv6ToArpa } from "@hertzg/ip/arpav6";
+ * import { parseAddressv6 } from "@hertzg/ip/addressv6";
  *
  * assertEquals(
- *   ipv6ToArpa(parseIpv6("::ffff:192.168.0.1")),
+ *   addressv6ToArpa(parseAddressv6("::ffff:192.168.0.1")),
  *   "1.0.0.0.8.a.0.c.f.f.f.f.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.ip6.arpa",
  * );
  * ```
  */
-export function ipv6ToArpa(address: bigint): string {
-  const expanded = stringifyIpv6Expanded(address);
+export function addressv6ToArpa(address: bigint): string {
+  const expanded = stringifyAddressv6Expanded(address);
 
   const nibbles: string[] = [];
   for (let i = expanded.length - 1; i >= 0; i--) {

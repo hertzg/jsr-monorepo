@@ -12,7 +12,7 @@ import ipaddr from "npm:ipaddr.js@^2.5.0";
 import { Address4 } from "npm:ip-address@^10.5.0";
 import ipRegex from "npm:ip-regex@^5.0.0";
 
-import { isValidIp } from "../validate.ts";
+import { isValidAddress } from "../validate.ts";
 
 const IPV4 = "192.168.1.100";
 
@@ -21,11 +21,11 @@ const IPV4 = "192.168.1.100";
 // flag means no `lastIndex` state to share.
 const ipRegexV4 = ipRegex.v4({ exact: true });
 
-Deno.bench("@hertzg/ip isValidIp", {
+Deno.bench("@hertzg/ip isValidAddress", {
   group: "validate ipv4",
   baseline: true,
 }, () => {
-  isValidIp(IPV4);
+  isValidAddress(IPV4);
 });
 
 // `ipaddr.IPv4.isValid` also accepts inet_aton short forms such as

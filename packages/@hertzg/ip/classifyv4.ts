@@ -8,25 +8,25 @@
  * @example Classify an IPv4 address
  * ```ts
  * import { assertEquals } from "@std/assert";
- * import { classifyIpv4 } from "@hertzg/ip/classifyv4";
- * import { parseIpv4 } from "@hertzg/ip/ipv4";
+ * import { classifyAddressv4 } from "@hertzg/ip/classifyv4";
+ * import { parseAddressv4 } from "@hertzg/ip/addressv4";
  *
- * assertEquals(classifyIpv4(parseIpv4("192.168.1.1")), "private");
- * assertEquals(classifyIpv4(parseIpv4("8.8.8.8")), "public");
- * assertEquals(classifyIpv4(parseIpv4("127.0.0.1")), "loopback");
- * assertEquals(classifyIpv4(parseIpv4("224.0.0.1")), "multicast");
+ * assertEquals(classifyAddressv4(parseAddressv4("192.168.1.1")), "private");
+ * assertEquals(classifyAddressv4(parseAddressv4("8.8.8.8")), "public");
+ * assertEquals(classifyAddressv4(parseAddressv4("127.0.0.1")), "loopback");
+ * assertEquals(classifyAddressv4(parseAddressv4("224.0.0.1")), "multicast");
  * ```
  *
  * @example Check specific ranges
  * ```ts
  * import { assert, assertEquals } from "@std/assert";
- * import { isIpv4Loopback, isIpv4Private, isIpv4Public } from "@hertzg/ip/classifyv4";
- * import { parseIpv4 } from "@hertzg/ip/ipv4";
+ * import { isAddressv4Loopback, isAddressv4Private, isAddressv4Public } from "@hertzg/ip/classifyv4";
+ * import { parseAddressv4 } from "@hertzg/ip/addressv4";
  *
- * assert(isIpv4Loopback(parseIpv4("127.0.0.1")));
- * assert(isIpv4Private(parseIpv4("10.0.0.1")));
- * assertEquals(isIpv4Public(parseIpv4("10.0.0.1")), false);
- * assert(isIpv4Public(parseIpv4("8.8.8.8")));
+ * assert(isAddressv4Loopback(parseAddressv4("127.0.0.1")));
+ * assert(isAddressv4Private(parseAddressv4("10.0.0.1")));
+ * assertEquals(isAddressv4Public(parseAddressv4("10.0.0.1")), false);
+ * assert(isAddressv4Public(parseAddressv4("8.8.8.8")));
  * ```
  *
  * @module
@@ -53,10 +53,10 @@ const CIDR_BROADCAST: Cidrv4 = parseCidrv4("255.255.255.255/32");
 /**
  * All possible IPv4 address classification labels.
  *
- * Returned by {@link classifyIpv4} to identify which well-known range
+ * Returned by {@link classifyAddressv4} to identify which well-known range
  * an IPv4 address belongs to.
  */
-export type ClassificationIpv4 =
+export type Classificationv4 =
   | "broadcast"
   | "this-network"
   | "loopback"
@@ -83,16 +83,16 @@ export type ClassificationIpv4 =
  * @example
  * ```ts
  * import { assert, assertEquals } from "@std/assert";
- * import { isIpv4Private } from "@hertzg/ip/classifyv4";
- * import { parseIpv4 } from "@hertzg/ip/ipv4";
+ * import { isAddressv4Private } from "@hertzg/ip/classifyv4";
+ * import { parseAddressv4 } from "@hertzg/ip/addressv4";
  *
- * assert(isIpv4Private(parseIpv4("10.0.0.1")));
- * assert(isIpv4Private(parseIpv4("172.16.0.1")));
- * assert(isIpv4Private(parseIpv4("192.168.1.1")));
- * assertEquals(isIpv4Private(parseIpv4("8.8.8.8")), false);
+ * assert(isAddressv4Private(parseAddressv4("10.0.0.1")));
+ * assert(isAddressv4Private(parseAddressv4("172.16.0.1")));
+ * assert(isAddressv4Private(parseAddressv4("192.168.1.1")));
+ * assertEquals(isAddressv4Private(parseAddressv4("8.8.8.8")), false);
  * ```
  */
-export function isIpv4Private(address: number): boolean {
+export function isAddressv4Private(address: number): boolean {
   return cidrv4Contains(CIDR_PRIVATE_10, address) ||
     cidrv4Contains(CIDR_PRIVATE_172, address) ||
     cidrv4Contains(CIDR_PRIVATE_192, address);
@@ -109,15 +109,15 @@ export function isIpv4Private(address: number): boolean {
  * @example
  * ```ts
  * import { assert, assertEquals } from "@std/assert";
- * import { isIpv4Loopback } from "@hertzg/ip/classifyv4";
- * import { parseIpv4 } from "@hertzg/ip/ipv4";
+ * import { isAddressv4Loopback } from "@hertzg/ip/classifyv4";
+ * import { parseAddressv4 } from "@hertzg/ip/addressv4";
  *
- * assert(isIpv4Loopback(parseIpv4("127.0.0.1")));
- * assert(isIpv4Loopback(parseIpv4("127.255.255.255")));
- * assertEquals(isIpv4Loopback(parseIpv4("128.0.0.1")), false);
+ * assert(isAddressv4Loopback(parseAddressv4("127.0.0.1")));
+ * assert(isAddressv4Loopback(parseAddressv4("127.255.255.255")));
+ * assertEquals(isAddressv4Loopback(parseAddressv4("128.0.0.1")), false);
  * ```
  */
-export function isIpv4Loopback(address: number): boolean {
+export function isAddressv4Loopback(address: number): boolean {
   return cidrv4Contains(CIDR_LOOPBACK, address);
 }
 
@@ -132,14 +132,14 @@ export function isIpv4Loopback(address: number): boolean {
  * @example
  * ```ts
  * import { assert, assertEquals } from "@std/assert";
- * import { isIpv4LinkLocal } from "@hertzg/ip/classifyv4";
- * import { parseIpv4 } from "@hertzg/ip/ipv4";
+ * import { isAddressv4LinkLocal } from "@hertzg/ip/classifyv4";
+ * import { parseAddressv4 } from "@hertzg/ip/addressv4";
  *
- * assert(isIpv4LinkLocal(parseIpv4("169.254.1.1")));
- * assertEquals(isIpv4LinkLocal(parseIpv4("169.255.0.0")), false);
+ * assert(isAddressv4LinkLocal(parseAddressv4("169.254.1.1")));
+ * assertEquals(isAddressv4LinkLocal(parseAddressv4("169.255.0.0")), false);
  * ```
  */
-export function isIpv4LinkLocal(address: number): boolean {
+export function isAddressv4LinkLocal(address: number): boolean {
   return cidrv4Contains(CIDR_LINK_LOCAL, address);
 }
 
@@ -154,15 +154,15 @@ export function isIpv4LinkLocal(address: number): boolean {
  * @example
  * ```ts
  * import { assert, assertEquals } from "@std/assert";
- * import { isIpv4Multicast } from "@hertzg/ip/classifyv4";
- * import { parseIpv4 } from "@hertzg/ip/ipv4";
+ * import { isAddressv4Multicast } from "@hertzg/ip/classifyv4";
+ * import { parseAddressv4 } from "@hertzg/ip/addressv4";
  *
- * assert(isIpv4Multicast(parseIpv4("224.0.0.1")));
- * assert(isIpv4Multicast(parseIpv4("239.255.255.255")));
- * assertEquals(isIpv4Multicast(parseIpv4("240.0.0.0")), false);
+ * assert(isAddressv4Multicast(parseAddressv4("224.0.0.1")));
+ * assert(isAddressv4Multicast(parseAddressv4("239.255.255.255")));
+ * assertEquals(isAddressv4Multicast(parseAddressv4("240.0.0.0")), false);
  * ```
  */
-export function isIpv4Multicast(address: number): boolean {
+export function isAddressv4Multicast(address: number): boolean {
   return cidrv4Contains(CIDR_MULTICAST, address);
 }
 
@@ -178,16 +178,16 @@ export function isIpv4Multicast(address: number): boolean {
  * @example
  * ```ts
  * import { assert, assertEquals } from "@std/assert";
- * import { isIpv4Reserved } from "@hertzg/ip/classifyv4";
- * import { parseIpv4 } from "@hertzg/ip/ipv4";
+ * import { isAddressv4Reserved } from "@hertzg/ip/classifyv4";
+ * import { parseAddressv4 } from "@hertzg/ip/addressv4";
  *
- * assert(isIpv4Reserved(parseIpv4("240.0.0.0")));
- * assert(isIpv4Reserved(parseIpv4("255.255.255.254")));
- * assertEquals(isIpv4Reserved(parseIpv4("255.255.255.255")), false); // broadcast
- * assertEquals(isIpv4Reserved(parseIpv4("239.255.255.255")), false); // multicast
+ * assert(isAddressv4Reserved(parseAddressv4("240.0.0.0")));
+ * assert(isAddressv4Reserved(parseAddressv4("255.255.255.254")));
+ * assertEquals(isAddressv4Reserved(parseAddressv4("255.255.255.255")), false); // broadcast
+ * assertEquals(isAddressv4Reserved(parseAddressv4("239.255.255.255")), false); // multicast
  * ```
  */
-export function isIpv4Reserved(address: number): boolean {
+export function isAddressv4Reserved(address: number): boolean {
   return cidrv4Contains(CIDR_RESERVED, address) &&
     !cidrv4Contains(CIDR_BROADCAST, address);
 }
@@ -203,14 +203,14 @@ export function isIpv4Reserved(address: number): boolean {
  * @example
  * ```ts
  * import { assert, assertEquals } from "@std/assert";
- * import { isIpv4Broadcast } from "@hertzg/ip/classifyv4";
- * import { parseIpv4 } from "@hertzg/ip/ipv4";
+ * import { isAddressv4Broadcast } from "@hertzg/ip/classifyv4";
+ * import { parseAddressv4 } from "@hertzg/ip/addressv4";
  *
- * assert(isIpv4Broadcast(parseIpv4("255.255.255.255")));
- * assertEquals(isIpv4Broadcast(parseIpv4("255.255.255.254")), false);
+ * assert(isAddressv4Broadcast(parseAddressv4("255.255.255.255")));
+ * assertEquals(isAddressv4Broadcast(parseAddressv4("255.255.255.254")), false);
  * ```
  */
-export function isIpv4Broadcast(address: number): boolean {
+export function isAddressv4Broadcast(address: number): boolean {
   return cidrv4Contains(CIDR_BROADCAST, address);
 }
 
@@ -225,15 +225,15 @@ export function isIpv4Broadcast(address: number): boolean {
  * @example
  * ```ts
  * import { assert, assertEquals } from "@std/assert";
- * import { isIpv4ThisNetwork } from "@hertzg/ip/classifyv4";
- * import { parseIpv4 } from "@hertzg/ip/ipv4";
+ * import { isAddressv4ThisNetwork } from "@hertzg/ip/classifyv4";
+ * import { parseAddressv4 } from "@hertzg/ip/addressv4";
  *
- * assert(isIpv4ThisNetwork(parseIpv4("0.0.0.0")));
- * assert(isIpv4ThisNetwork(parseIpv4("0.255.255.255")));
- * assertEquals(isIpv4ThisNetwork(parseIpv4("1.0.0.0")), false);
+ * assert(isAddressv4ThisNetwork(parseAddressv4("0.0.0.0")));
+ * assert(isAddressv4ThisNetwork(parseAddressv4("0.255.255.255")));
+ * assertEquals(isAddressv4ThisNetwork(parseAddressv4("1.0.0.0")), false);
  * ```
  */
-export function isIpv4ThisNetwork(address: number): boolean {
+export function isAddressv4ThisNetwork(address: number): boolean {
   return cidrv4Contains(CIDR_THIS_NETWORK, address);
 }
 
@@ -248,15 +248,15 @@ export function isIpv4ThisNetwork(address: number): boolean {
  * @example
  * ```ts
  * import { assert, assertEquals } from "@std/assert";
- * import { isIpv4CgNat } from "@hertzg/ip/classifyv4";
- * import { parseIpv4 } from "@hertzg/ip/ipv4";
+ * import { isAddressv4CgNat } from "@hertzg/ip/classifyv4";
+ * import { parseAddressv4 } from "@hertzg/ip/addressv4";
  *
- * assert(isIpv4CgNat(parseIpv4("100.64.0.0")));
- * assert(isIpv4CgNat(parseIpv4("100.127.255.255")));
- * assertEquals(isIpv4CgNat(parseIpv4("100.128.0.0")), false);
+ * assert(isAddressv4CgNat(parseAddressv4("100.64.0.0")));
+ * assert(isAddressv4CgNat(parseAddressv4("100.127.255.255")));
+ * assertEquals(isAddressv4CgNat(parseAddressv4("100.128.0.0")), false);
  * ```
  */
-export function isIpv4CgNat(address: number): boolean {
+export function isAddressv4CgNat(address: number): boolean {
   return cidrv4Contains(CIDR_CG_NAT, address);
 }
 
@@ -271,15 +271,15 @@ export function isIpv4CgNat(address: number): boolean {
  * @example
  * ```ts
  * import { assert, assertEquals } from "@std/assert";
- * import { isIpv4Benchmarking } from "@hertzg/ip/classifyv4";
- * import { parseIpv4 } from "@hertzg/ip/ipv4";
+ * import { isAddressv4Benchmarking } from "@hertzg/ip/classifyv4";
+ * import { parseAddressv4 } from "@hertzg/ip/addressv4";
  *
- * assert(isIpv4Benchmarking(parseIpv4("198.18.0.0")));
- * assert(isIpv4Benchmarking(parseIpv4("198.19.255.255")));
- * assertEquals(isIpv4Benchmarking(parseIpv4("198.20.0.0")), false);
+ * assert(isAddressv4Benchmarking(parseAddressv4("198.18.0.0")));
+ * assert(isAddressv4Benchmarking(parseAddressv4("198.19.255.255")));
+ * assertEquals(isAddressv4Benchmarking(parseAddressv4("198.20.0.0")), false);
  * ```
  */
-export function isIpv4Benchmarking(address: number): boolean {
+export function isAddressv4Benchmarking(address: number): boolean {
   return cidrv4Contains(CIDR_BENCHMARKING, address);
 }
 
@@ -297,16 +297,16 @@ export function isIpv4Benchmarking(address: number): boolean {
  * @example
  * ```ts
  * import { assert, assertEquals } from "@std/assert";
- * import { isIpv4Documentation } from "@hertzg/ip/classifyv4";
- * import { parseIpv4 } from "@hertzg/ip/ipv4";
+ * import { isAddressv4Documentation } from "@hertzg/ip/classifyv4";
+ * import { parseAddressv4 } from "@hertzg/ip/addressv4";
  *
- * assert(isIpv4Documentation(parseIpv4("192.0.2.1")));
- * assert(isIpv4Documentation(parseIpv4("198.51.100.1")));
- * assert(isIpv4Documentation(parseIpv4("203.0.113.1")));
- * assertEquals(isIpv4Documentation(parseIpv4("192.0.3.0")), false);
+ * assert(isAddressv4Documentation(parseAddressv4("192.0.2.1")));
+ * assert(isAddressv4Documentation(parseAddressv4("198.51.100.1")));
+ * assert(isAddressv4Documentation(parseAddressv4("203.0.113.1")));
+ * assertEquals(isAddressv4Documentation(parseAddressv4("192.0.3.0")), false);
  * ```
  */
-export function isIpv4Documentation(address: number): boolean {
+export function isAddressv4Documentation(address: number): boolean {
   return cidrv4Contains(CIDR_DOC_1, address) ||
     cidrv4Contains(CIDR_DOC_2, address) ||
     cidrv4Contains(CIDR_DOC_3, address);
@@ -325,21 +325,21 @@ export function isIpv4Documentation(address: number): boolean {
  * @example
  * ```ts
  * import { assert, assertEquals } from "@std/assert";
- * import { isIpv4Public } from "@hertzg/ip/classifyv4";
- * import { parseIpv4 } from "@hertzg/ip/ipv4";
+ * import { isAddressv4Public } from "@hertzg/ip/classifyv4";
+ * import { parseAddressv4 } from "@hertzg/ip/addressv4";
  *
- * assert(isIpv4Public(parseIpv4("8.8.8.8")));
- * assert(isIpv4Public(parseIpv4("1.1.1.1")));
- * assertEquals(isIpv4Public(parseIpv4("10.0.0.1")), false);
- * assertEquals(isIpv4Public(parseIpv4("127.0.0.1")), false);
+ * assert(isAddressv4Public(parseAddressv4("8.8.8.8")));
+ * assert(isAddressv4Public(parseAddressv4("1.1.1.1")));
+ * assertEquals(isAddressv4Public(parseAddressv4("10.0.0.1")), false);
+ * assertEquals(isAddressv4Public(parseAddressv4("127.0.0.1")), false);
  * ```
  */
-export function isIpv4Public(address: number): boolean {
-  return !isIpv4Private(address) && !isIpv4Loopback(address) &&
-    !isIpv4LinkLocal(address) && !isIpv4Multicast(address) &&
-    !isIpv4Reserved(address) && !isIpv4Broadcast(address) &&
-    !isIpv4ThisNetwork(address) && !isIpv4CgNat(address) &&
-    !isIpv4Benchmarking(address) && !isIpv4Documentation(address);
+export function isAddressv4Public(address: number): boolean {
+  return !isAddressv4Private(address) && !isAddressv4Loopback(address) &&
+    !isAddressv4LinkLocal(address) && !isAddressv4Multicast(address) &&
+    !isAddressv4Reserved(address) && !isAddressv4Broadcast(address) &&
+    !isAddressv4ThisNetwork(address) && !isAddressv4CgNat(address) &&
+    !isAddressv4Benchmarking(address) && !isAddressv4Documentation(address);
 }
 
 /**
@@ -354,43 +354,43 @@ export function isIpv4Public(address: number): boolean {
  * @example
  * ```ts
  * import { assertEquals } from "@std/assert";
- * import { classifyIpv4 } from "@hertzg/ip/classifyv4";
- * import { parseIpv4 } from "@hertzg/ip/ipv4";
+ * import { classifyAddressv4 } from "@hertzg/ip/classifyv4";
+ * import { parseAddressv4 } from "@hertzg/ip/addressv4";
  *
- * assertEquals(classifyIpv4(parseIpv4("192.168.1.1")), "private");
- * assertEquals(classifyIpv4(parseIpv4("8.8.8.8")), "public");
- * assertEquals(classifyIpv4(parseIpv4("127.0.0.1")), "loopback");
- * assertEquals(classifyIpv4(parseIpv4("169.254.1.1")), "link-local");
- * assertEquals(classifyIpv4(parseIpv4("224.0.0.1")), "multicast");
- * assertEquals(classifyIpv4(parseIpv4("255.255.255.255")), "broadcast");
- * assertEquals(classifyIpv4(parseIpv4("0.0.0.0")), "this-network");
- * assertEquals(classifyIpv4(parseIpv4("100.64.0.1")), "cg-nat");
- * assertEquals(classifyIpv4(parseIpv4("198.18.0.1")), "benchmarking");
- * assertEquals(classifyIpv4(parseIpv4("192.0.2.1")), "documentation");
- * assertEquals(classifyIpv4(parseIpv4("240.0.0.0")), "reserved");
+ * assertEquals(classifyAddressv4(parseAddressv4("192.168.1.1")), "private");
+ * assertEquals(classifyAddressv4(parseAddressv4("8.8.8.8")), "public");
+ * assertEquals(classifyAddressv4(parseAddressv4("127.0.0.1")), "loopback");
+ * assertEquals(classifyAddressv4(parseAddressv4("169.254.1.1")), "link-local");
+ * assertEquals(classifyAddressv4(parseAddressv4("224.0.0.1")), "multicast");
+ * assertEquals(classifyAddressv4(parseAddressv4("255.255.255.255")), "broadcast");
+ * assertEquals(classifyAddressv4(parseAddressv4("0.0.0.0")), "this-network");
+ * assertEquals(classifyAddressv4(parseAddressv4("100.64.0.1")), "cg-nat");
+ * assertEquals(classifyAddressv4(parseAddressv4("198.18.0.1")), "benchmarking");
+ * assertEquals(classifyAddressv4(parseAddressv4("192.0.2.1")), "documentation");
+ * assertEquals(classifyAddressv4(parseAddressv4("240.0.0.0")), "reserved");
  * ```
  */
-export function classifyIpv4(address: number): ClassificationIpv4 {
+export function classifyAddressv4(address: number): Classificationv4 {
   switch (true) {
-    case isIpv4Broadcast(address):
+    case isAddressv4Broadcast(address):
       return "broadcast";
-    case isIpv4ThisNetwork(address):
+    case isAddressv4ThisNetwork(address):
       return "this-network";
-    case isIpv4Loopback(address):
+    case isAddressv4Loopback(address):
       return "loopback";
-    case isIpv4LinkLocal(address):
+    case isAddressv4LinkLocal(address):
       return "link-local";
-    case isIpv4Documentation(address):
+    case isAddressv4Documentation(address):
       return "documentation";
-    case isIpv4Benchmarking(address):
+    case isAddressv4Benchmarking(address):
       return "benchmarking";
-    case isIpv4CgNat(address):
+    case isAddressv4CgNat(address):
       return "cg-nat";
-    case isIpv4Private(address):
+    case isAddressv4Private(address):
       return "private";
-    case isIpv4Multicast(address):
+    case isAddressv4Multicast(address):
       return "multicast";
-    case isIpv4Reserved(address):
+    case isAddressv4Reserved(address):
       return "reserved";
     default:
       return "public";

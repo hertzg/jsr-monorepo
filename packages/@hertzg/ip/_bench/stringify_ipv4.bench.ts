@@ -9,7 +9,7 @@ import ipaddr from "npm:ipaddr.js@^2.5.0";
 import { Address4 } from "npm:ip-address@^10.5.0";
 import { long2ip } from "npm:netmask@^2.1.1";
 
-import { stringifyIpv4 } from "../ipv4.ts";
+import { stringifyAddressv4 } from "../addressv4.ts";
 
 const IPV4 = "192.168.1.100";
 const IPV4_NUMBER = 3232235876;
@@ -17,11 +17,11 @@ const IPV4_NUMBER = 3232235876;
 const ipaddrIpv4 = ipaddr.IPv4.parse(IPV4);
 const ipAddressIpv4 = new Address4(IPV4);
 
-Deno.bench("@hertzg/ip stringifyIpv4", {
+Deno.bench("@hertzg/ip stringifyAddressv4", {
   group: "stringify ipv4",
   baseline: true,
 }, () => {
-  stringifyIpv4(IPV4_NUMBER);
+  stringifyAddressv4(IPV4_NUMBER);
 });
 
 Deno.bench("ipaddr.js toString", { group: "stringify ipv4" }, () => {

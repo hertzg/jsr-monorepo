@@ -8,24 +8,24 @@
  * @example Classify an IPv6 address
  * ```ts
  * import { assertEquals } from "@std/assert";
- * import { classifyIpv6 } from "@hertzg/ip/classifyv6";
- * import { parseIpv6 } from "@hertzg/ip/ipv6";
+ * import { classifyAddressv6 } from "@hertzg/ip/classifyv6";
+ * import { parseAddressv6 } from "@hertzg/ip/addressv6";
  *
- * assertEquals(classifyIpv6(parseIpv6("::1")), "loopback");
- * assertEquals(classifyIpv6(parseIpv6("2001:db8::1")), "documentation");
- * assertEquals(classifyIpv6(parseIpv6("fe80::1")), "link-local");
- * assertEquals(classifyIpv6(parseIpv6("2607:f8b0:4004:800::200e")), "global-unicast");
+ * assertEquals(classifyAddressv6(parseAddressv6("::1")), "loopback");
+ * assertEquals(classifyAddressv6(parseAddressv6("2001:db8::1")), "documentation");
+ * assertEquals(classifyAddressv6(parseAddressv6("fe80::1")), "link-local");
+ * assertEquals(classifyAddressv6(parseAddressv6("2607:f8b0:4004:800::200e")), "global-unicast");
  * ```
  *
  * @example Check specific ranges
  * ```ts
  * import { assert, assertEquals } from "@std/assert";
- * import { isIpv6Loopback, isIpv6UniqueLocal } from "@hertzg/ip/classifyv6";
- * import { parseIpv6 } from "@hertzg/ip/ipv6";
+ * import { isAddressv6Loopback, isAddressv6UniqueLocal } from "@hertzg/ip/classifyv6";
+ * import { parseAddressv6 } from "@hertzg/ip/addressv6";
  *
- * assert(isIpv6Loopback(parseIpv6("::1")));
- * assert(isIpv6UniqueLocal(parseIpv6("fd00::1")));
- * assertEquals(isIpv6Loopback(parseIpv6("::2")), false);
+ * assert(isAddressv6Loopback(parseAddressv6("::1")));
+ * assert(isAddressv6UniqueLocal(parseAddressv6("fd00::1")));
+ * assertEquals(isAddressv6Loopback(parseAddressv6("::2")), false);
  * ```
  *
  * @module
@@ -50,10 +50,10 @@ const CIDR_IPV4_TRANSLATED: Cidrv6 = parseCidrv6("64:ff9b::/96");
 /**
  * All possible IPv6 address classification labels.
  *
- * Returned by {@link classifyIpv6} to identify which well-known range
+ * Returned by {@link classifyAddressv6} to identify which well-known range
  * an IPv6 address belongs to.
  */
-export type ClassificationIpv6 =
+export type Classificationv6 =
   | "loopback"
   | "unspecified"
   | "ipv4-mapped"
@@ -79,15 +79,15 @@ export type ClassificationIpv6 =
  * @example
  * ```ts
  * import { assert, assertEquals } from "@std/assert";
- * import { isIpv6Loopback } from "@hertzg/ip/classifyv6";
- * import { parseIpv6 } from "@hertzg/ip/ipv6";
+ * import { isAddressv6Loopback } from "@hertzg/ip/classifyv6";
+ * import { parseAddressv6 } from "@hertzg/ip/addressv6";
  *
- * assert(isIpv6Loopback(parseIpv6("::1")));
- * assertEquals(isIpv6Loopback(parseIpv6("::")), false);
- * assertEquals(isIpv6Loopback(parseIpv6("::2")), false);
+ * assert(isAddressv6Loopback(parseAddressv6("::1")));
+ * assertEquals(isAddressv6Loopback(parseAddressv6("::")), false);
+ * assertEquals(isAddressv6Loopback(parseAddressv6("::2")), false);
  * ```
  */
-export function isIpv6Loopback(address: bigint): boolean {
+export function isAddressv6Loopback(address: bigint): boolean {
   return cidrv6Contains(CIDR_LOOPBACK, address);
 }
 
@@ -102,14 +102,14 @@ export function isIpv6Loopback(address: bigint): boolean {
  * @example
  * ```ts
  * import { assert, assertEquals } from "@std/assert";
- * import { isIpv6Unspecified } from "@hertzg/ip/classifyv6";
- * import { parseIpv6 } from "@hertzg/ip/ipv6";
+ * import { isAddressv6Unspecified } from "@hertzg/ip/classifyv6";
+ * import { parseAddressv6 } from "@hertzg/ip/addressv6";
  *
- * assert(isIpv6Unspecified(parseIpv6("::")));
- * assertEquals(isIpv6Unspecified(parseIpv6("::1")), false);
+ * assert(isAddressv6Unspecified(parseAddressv6("::")));
+ * assertEquals(isAddressv6Unspecified(parseAddressv6("::1")), false);
  * ```
  */
-export function isIpv6Unspecified(address: bigint): boolean {
+export function isAddressv6Unspecified(address: bigint): boolean {
   return cidrv6Contains(CIDR_UNSPECIFIED, address);
 }
 
@@ -124,15 +124,15 @@ export function isIpv6Unspecified(address: bigint): boolean {
  * @example
  * ```ts
  * import { assert, assertEquals } from "@std/assert";
- * import { isIpv6LinkLocal } from "@hertzg/ip/classifyv6";
- * import { parseIpv6 } from "@hertzg/ip/ipv6";
+ * import { isAddressv6LinkLocal } from "@hertzg/ip/classifyv6";
+ * import { parseAddressv6 } from "@hertzg/ip/addressv6";
  *
- * assert(isIpv6LinkLocal(parseIpv6("fe80::1")));
- * assert(isIpv6LinkLocal(parseIpv6("fe80::")));
- * assertEquals(isIpv6LinkLocal(parseIpv6("fec0::1")), false);
+ * assert(isAddressv6LinkLocal(parseAddressv6("fe80::1")));
+ * assert(isAddressv6LinkLocal(parseAddressv6("fe80::")));
+ * assertEquals(isAddressv6LinkLocal(parseAddressv6("fec0::1")), false);
  * ```
  */
-export function isIpv6LinkLocal(address: bigint): boolean {
+export function isAddressv6LinkLocal(address: bigint): boolean {
   return cidrv6Contains(CIDR_LINK_LOCAL, address);
 }
 
@@ -147,15 +147,15 @@ export function isIpv6LinkLocal(address: bigint): boolean {
  * @example
  * ```ts
  * import { assert, assertEquals } from "@std/assert";
- * import { isIpv6Multicast } from "@hertzg/ip/classifyv6";
- * import { parseIpv6 } from "@hertzg/ip/ipv6";
+ * import { isAddressv6Multicast } from "@hertzg/ip/classifyv6";
+ * import { parseAddressv6 } from "@hertzg/ip/addressv6";
  *
- * assert(isIpv6Multicast(parseIpv6("ff02::1")));
- * assert(isIpv6Multicast(parseIpv6("ff00::")));
- * assertEquals(isIpv6Multicast(parseIpv6("fe80::1")), false);
+ * assert(isAddressv6Multicast(parseAddressv6("ff02::1")));
+ * assert(isAddressv6Multicast(parseAddressv6("ff00::")));
+ * assertEquals(isAddressv6Multicast(parseAddressv6("fe80::1")), false);
  * ```
  */
-export function isIpv6Multicast(address: bigint): boolean {
+export function isAddressv6Multicast(address: bigint): boolean {
   return cidrv6Contains(CIDR_MULTICAST, address);
 }
 
@@ -172,15 +172,15 @@ export function isIpv6Multicast(address: bigint): boolean {
  * @example
  * ```ts
  * import { assert, assertEquals } from "@std/assert";
- * import { isIpv6UniqueLocal } from "@hertzg/ip/classifyv6";
- * import { parseIpv6 } from "@hertzg/ip/ipv6";
+ * import { isAddressv6UniqueLocal } from "@hertzg/ip/classifyv6";
+ * import { parseAddressv6 } from "@hertzg/ip/addressv6";
  *
- * assert(isIpv6UniqueLocal(parseIpv6("fc00::1")));
- * assert(isIpv6UniqueLocal(parseIpv6("fd00::1")));
- * assertEquals(isIpv6UniqueLocal(parseIpv6("fe00::1")), false);
+ * assert(isAddressv6UniqueLocal(parseAddressv6("fc00::1")));
+ * assert(isAddressv6UniqueLocal(parseAddressv6("fd00::1")));
+ * assertEquals(isAddressv6UniqueLocal(parseAddressv6("fe00::1")), false);
  * ```
  */
-export function isIpv6UniqueLocal(address: bigint): boolean {
+export function isAddressv6UniqueLocal(address: bigint): boolean {
   return cidrv6Contains(CIDR_UNIQUE_LOCAL, address);
 }
 
@@ -191,7 +191,7 @@ export function isIpv6UniqueLocal(address: bigint): boolean {
  *
  * Note: This includes sub-ranges like documentation (`2001:db8::/32`),
  * Teredo (`2001::/32`), and benchmarking (`2001:2::/48`). Use the more
- * specific classifiers or {@link classifyIpv6} to distinguish them.
+ * specific classifiers or {@link classifyAddressv6} to distinguish them.
  *
  * @param address The address as a 128-bit bigint
  * @returns `true` if the address is in the global unicast range
@@ -199,15 +199,15 @@ export function isIpv6UniqueLocal(address: bigint): boolean {
  * @example
  * ```ts
  * import { assert, assertEquals } from "@std/assert";
- * import { isIpv6GlobalUnicast } from "@hertzg/ip/classifyv6";
- * import { parseIpv6 } from "@hertzg/ip/ipv6";
+ * import { isAddressv6GlobalUnicast } from "@hertzg/ip/classifyv6";
+ * import { parseAddressv6 } from "@hertzg/ip/addressv6";
  *
- * assert(isIpv6GlobalUnicast(parseIpv6("2607:f8b0:4004:800::200e")));
- * assert(isIpv6GlobalUnicast(parseIpv6("2001:db8::1"))); // also documentation
- * assertEquals(isIpv6GlobalUnicast(parseIpv6("fe80::1")), false);
+ * assert(isAddressv6GlobalUnicast(parseAddressv6("2607:f8b0:4004:800::200e")));
+ * assert(isAddressv6GlobalUnicast(parseAddressv6("2001:db8::1"))); // also documentation
+ * assertEquals(isAddressv6GlobalUnicast(parseAddressv6("fe80::1")), false);
  * ```
  */
-export function isIpv6GlobalUnicast(address: bigint): boolean {
+export function isAddressv6GlobalUnicast(address: bigint): boolean {
   return cidrv6Contains(CIDR_GLOBAL_UNICAST, address);
 }
 
@@ -222,15 +222,15 @@ export function isIpv6GlobalUnicast(address: bigint): boolean {
  * @example
  * ```ts
  * import { assert, assertEquals } from "@std/assert";
- * import { isIpv6Ipv4Mapped } from "@hertzg/ip/classifyv6";
- * import { parseIpv6 } from "@hertzg/ip/ipv6";
+ * import { isAddressv6Mapped } from "@hertzg/ip/classifyv6";
+ * import { parseAddressv6 } from "@hertzg/ip/addressv6";
  *
- * assert(isIpv6Ipv4Mapped(parseIpv6("::ffff:192.168.1.1")));
- * assert(isIpv6Ipv4Mapped(parseIpv6("::ffff:c0a8:101")));
- * assertEquals(isIpv6Ipv4Mapped(parseIpv6("::1")), false);
+ * assert(isAddressv6Mapped(parseAddressv6("::ffff:192.168.1.1")));
+ * assert(isAddressv6Mapped(parseAddressv6("::ffff:c0a8:101")));
+ * assertEquals(isAddressv6Mapped(parseAddressv6("::1")), false);
  * ```
  */
-export function isIpv6Ipv4Mapped(address: bigint): boolean {
+export function isAddressv6Mapped(address: bigint): boolean {
   return cidrv6Contains(CIDR_IPV4_MAPPED, address);
 }
 
@@ -247,15 +247,15 @@ export function isIpv6Ipv4Mapped(address: bigint): boolean {
  * @example
  * ```ts
  * import { assert, assertEquals } from "@std/assert";
- * import { isIpv6Ipv4Translated } from "@hertzg/ip/classifyv6";
- * import { parseIpv6 } from "@hertzg/ip/ipv6";
+ * import { isAddressv6Translated } from "@hertzg/ip/classifyv6";
+ * import { parseAddressv6 } from "@hertzg/ip/addressv6";
  *
- * assert(isIpv6Ipv4Translated(parseIpv6("64:ff9b::1")));
- * assert(isIpv6Ipv4Translated(parseIpv6("64:ff9b::")));
- * assertEquals(isIpv6Ipv4Translated(parseIpv6("64:ff9a::1")), false);
+ * assert(isAddressv6Translated(parseAddressv6("64:ff9b::1")));
+ * assert(isAddressv6Translated(parseAddressv6("64:ff9b::")));
+ * assertEquals(isAddressv6Translated(parseAddressv6("64:ff9a::1")), false);
  * ```
  */
-export function isIpv6Ipv4Translated(address: bigint): boolean {
+export function isAddressv6Translated(address: bigint): boolean {
   return cidrv6Contains(CIDR_IPV4_TRANSLATED, address);
 }
 
@@ -270,15 +270,15 @@ export function isIpv6Ipv4Translated(address: bigint): boolean {
  * @example
  * ```ts
  * import { assert, assertEquals } from "@std/assert";
- * import { isIpv6Documentation } from "@hertzg/ip/classifyv6";
- * import { parseIpv6 } from "@hertzg/ip/ipv6";
+ * import { isAddressv6Documentation } from "@hertzg/ip/classifyv6";
+ * import { parseAddressv6 } from "@hertzg/ip/addressv6";
  *
- * assert(isIpv6Documentation(parseIpv6("2001:db8::1")));
- * assert(isIpv6Documentation(parseIpv6("2001:db8:ffff:ffff:ffff:ffff:ffff:ffff")));
- * assertEquals(isIpv6Documentation(parseIpv6("2001:db9::1")), false);
+ * assert(isAddressv6Documentation(parseAddressv6("2001:db8::1")));
+ * assert(isAddressv6Documentation(parseAddressv6("2001:db8:ffff:ffff:ffff:ffff:ffff:ffff")));
+ * assertEquals(isAddressv6Documentation(parseAddressv6("2001:db9::1")), false);
  * ```
  */
-export function isIpv6Documentation(address: bigint): boolean {
+export function isAddressv6Documentation(address: bigint): boolean {
   return cidrv6Contains(CIDR_DOCUMENTATION, address);
 }
 
@@ -289,7 +289,7 @@ export function isIpv6Documentation(address: bigint): boolean {
  *
  * Note: This overlaps with documentation (`2001:db8::/32`), benchmarking
  * (`2001:2::/48`), and ORCHIDv2 (`2001:20::/28`) ranges. Use
- * {@link classifyIpv6} for the most specific classification.
+ * {@link classifyAddressv6} for the most specific classification.
  *
  * @param address The address as a 128-bit bigint
  * @returns `true` if the address is in the Teredo range
@@ -297,15 +297,15 @@ export function isIpv6Documentation(address: bigint): boolean {
  * @example
  * ```ts
  * import { assert, assertEquals } from "@std/assert";
- * import { isIpv6Teredo } from "@hertzg/ip/classifyv6";
- * import { parseIpv6 } from "@hertzg/ip/ipv6";
+ * import { isAddressv6Teredo } from "@hertzg/ip/classifyv6";
+ * import { parseAddressv6 } from "@hertzg/ip/addressv6";
  *
- * assert(isIpv6Teredo(parseIpv6("2001::1")));
- * assert(isIpv6Teredo(parseIpv6("2001:0:ffff:ffff:ffff:ffff:ffff:ffff")));
- * assertEquals(isIpv6Teredo(parseIpv6("2002::1")), false);
+ * assert(isAddressv6Teredo(parseAddressv6("2001::1")));
+ * assert(isAddressv6Teredo(parseAddressv6("2001:0:ffff:ffff:ffff:ffff:ffff:ffff")));
+ * assertEquals(isAddressv6Teredo(parseAddressv6("2002::1")), false);
  * ```
  */
-export function isIpv6Teredo(address: bigint): boolean {
+export function isAddressv6Teredo(address: bigint): boolean {
   return cidrv6Contains(CIDR_TEREDO, address);
 }
 
@@ -320,14 +320,14 @@ export function isIpv6Teredo(address: bigint): boolean {
  * @example
  * ```ts
  * import { assert, assertEquals } from "@std/assert";
- * import { isIpv6Benchmarking } from "@hertzg/ip/classifyv6";
- * import { parseIpv6 } from "@hertzg/ip/ipv6";
+ * import { isAddressv6Benchmarking } from "@hertzg/ip/classifyv6";
+ * import { parseAddressv6 } from "@hertzg/ip/addressv6";
  *
- * assert(isIpv6Benchmarking(parseIpv6("2001:2::1")));
- * assertEquals(isIpv6Benchmarking(parseIpv6("2001:3::1")), false);
+ * assert(isAddressv6Benchmarking(parseAddressv6("2001:2::1")));
+ * assertEquals(isAddressv6Benchmarking(parseAddressv6("2001:3::1")), false);
  * ```
  */
-export function isIpv6Benchmarking(address: bigint): boolean {
+export function isAddressv6Benchmarking(address: bigint): boolean {
   return cidrv6Contains(CIDR_BENCHMARKING, address);
 }
 
@@ -342,15 +342,15 @@ export function isIpv6Benchmarking(address: bigint): boolean {
  * @example
  * ```ts
  * import { assert, assertEquals } from "@std/assert";
- * import { isIpv6Orchidv2 } from "@hertzg/ip/classifyv6";
- * import { parseIpv6 } from "@hertzg/ip/ipv6";
+ * import { isAddressv6Orchidv2 } from "@hertzg/ip/classifyv6";
+ * import { parseAddressv6 } from "@hertzg/ip/addressv6";
  *
- * assert(isIpv6Orchidv2(parseIpv6("2001:20::1")));
- * assert(isIpv6Orchidv2(parseIpv6("2001:2f:ffff:ffff:ffff:ffff:ffff:ffff")));
- * assertEquals(isIpv6Orchidv2(parseIpv6("2001:30::1")), false);
+ * assert(isAddressv6Orchidv2(parseAddressv6("2001:20::1")));
+ * assert(isAddressv6Orchidv2(parseAddressv6("2001:2f:ffff:ffff:ffff:ffff:ffff:ffff")));
+ * assertEquals(isAddressv6Orchidv2(parseAddressv6("2001:30::1")), false);
  * ```
  */
-export function isIpv6Orchidv2(address: bigint): boolean {
+export function isAddressv6Orchidv2(address: bigint): boolean {
   return cidrv6Contains(CIDR_ORCHIDV2, address);
 }
 
@@ -367,48 +367,48 @@ export function isIpv6Orchidv2(address: bigint): boolean {
  * @example
  * ```ts
  * import { assertEquals } from "@std/assert";
- * import { classifyIpv6 } from "@hertzg/ip/classifyv6";
- * import { parseIpv6 } from "@hertzg/ip/ipv6";
+ * import { classifyAddressv6 } from "@hertzg/ip/classifyv6";
+ * import { parseAddressv6 } from "@hertzg/ip/addressv6";
  *
- * assertEquals(classifyIpv6(parseIpv6("::1")), "loopback");
- * assertEquals(classifyIpv6(parseIpv6("::")), "unspecified");
- * assertEquals(classifyIpv6(parseIpv6("fe80::1")), "link-local");
- * assertEquals(classifyIpv6(parseIpv6("ff02::1")), "multicast");
- * assertEquals(classifyIpv6(parseIpv6("fd00::1")), "unique-local");
- * assertEquals(classifyIpv6(parseIpv6("2001:db8::1")), "documentation");
- * assertEquals(classifyIpv6(parseIpv6("2001:2::1")), "benchmarking");
- * assertEquals(classifyIpv6(parseIpv6("2001:20::1")), "orchidv2");
- * assertEquals(classifyIpv6(parseIpv6("2001::1")), "teredo");
- * assertEquals(classifyIpv6(parseIpv6("::ffff:192.168.1.1")), "ipv4-mapped");
- * assertEquals(classifyIpv6(parseIpv6("64:ff9b::1")), "ipv4-translated");
- * assertEquals(classifyIpv6(parseIpv6("2607:f8b0:4004:800::200e")), "global-unicast");
+ * assertEquals(classifyAddressv6(parseAddressv6("::1")), "loopback");
+ * assertEquals(classifyAddressv6(parseAddressv6("::")), "unspecified");
+ * assertEquals(classifyAddressv6(parseAddressv6("fe80::1")), "link-local");
+ * assertEquals(classifyAddressv6(parseAddressv6("ff02::1")), "multicast");
+ * assertEquals(classifyAddressv6(parseAddressv6("fd00::1")), "unique-local");
+ * assertEquals(classifyAddressv6(parseAddressv6("2001:db8::1")), "documentation");
+ * assertEquals(classifyAddressv6(parseAddressv6("2001:2::1")), "benchmarking");
+ * assertEquals(classifyAddressv6(parseAddressv6("2001:20::1")), "orchidv2");
+ * assertEquals(classifyAddressv6(parseAddressv6("2001::1")), "teredo");
+ * assertEquals(classifyAddressv6(parseAddressv6("::ffff:192.168.1.1")), "ipv4-mapped");
+ * assertEquals(classifyAddressv6(parseAddressv6("64:ff9b::1")), "ipv4-translated");
+ * assertEquals(classifyAddressv6(parseAddressv6("2607:f8b0:4004:800::200e")), "global-unicast");
  * ```
  */
-export function classifyIpv6(address: bigint): ClassificationIpv6 {
+export function classifyAddressv6(address: bigint): Classificationv6 {
   switch (true) {
-    case isIpv6Loopback(address):
+    case isAddressv6Loopback(address):
       return "loopback";
-    case isIpv6Unspecified(address):
+    case isAddressv6Unspecified(address):
       return "unspecified";
-    case isIpv6Ipv4Mapped(address):
+    case isAddressv6Mapped(address):
       return "ipv4-mapped";
-    case isIpv6Ipv4Translated(address):
+    case isAddressv6Translated(address):
       return "ipv4-translated";
-    case isIpv6Documentation(address):
+    case isAddressv6Documentation(address):
       return "documentation";
-    case isIpv6Benchmarking(address):
+    case isAddressv6Benchmarking(address):
       return "benchmarking";
-    case isIpv6Orchidv2(address):
+    case isAddressv6Orchidv2(address):
       return "orchidv2";
-    case isIpv6Teredo(address):
+    case isAddressv6Teredo(address):
       return "teredo";
-    case isIpv6LinkLocal(address):
+    case isAddressv6LinkLocal(address):
       return "link-local";
-    case isIpv6Multicast(address):
+    case isAddressv6Multicast(address):
       return "multicast";
-    case isIpv6UniqueLocal(address):
+    case isAddressv6UniqueLocal(address):
       return "unique-local";
-    case isIpv6GlobalUnicast(address):
+    case isAddressv6GlobalUnicast(address):
       return "global-unicast";
     default:
       return "unassigned";
