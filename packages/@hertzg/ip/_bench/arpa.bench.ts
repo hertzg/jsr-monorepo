@@ -12,7 +12,8 @@
 // no call reproduces the relative-with-suffix form.
 //
 // The routes weighed for where `ipv6ToArpa` gets its nibbles are not benched
-// here: that was a one-time comparison and ADR 0014 records its table.
+// here: that was a one-time comparison, and reading the nibbles back off
+// `stringifyIpv6Expanded` was chosen at 1.38x the fastest route (ADR 0009).
 
 import { Address4, Address6 } from "npm:ip-address@^10.5.0";
 
