@@ -5,31 +5,34 @@ import { parseAddressv4 } from "./addressv4.ts";
 Deno.test("addressv4ToArpa", async (t) => {
   await t.step("reverses the four octets under in-addr.arpa", () => {
     assertEquals(
-      addressv4ToArpa(parseAddressv4("192.168.0.1")),
+      addressv4ToArpa(parseAddressv4("192.168.0.1").address),
       "1.0.168.192.in-addr.arpa",
     );
     assertEquals(
-      addressv4ToArpa(parseAddressv4("8.8.8.8")),
+      addressv4ToArpa(parseAddressv4("8.8.8.8").address),
       "8.8.8.8.in-addr.arpa",
     );
   });
 
   await t.step("all-zero address", () => {
     assertEquals(
-      addressv4ToArpa(parseAddressv4("0.0.0.0")),
+      addressv4ToArpa(parseAddressv4("0.0.0.0").address),
       "0.0.0.0.in-addr.arpa",
     );
   });
 
   await t.step("all-ff address", () => {
     assertEquals(
-      addressv4ToArpa(parseAddressv4("255.255.255.255")),
+      addressv4ToArpa(parseAddressv4("255.255.255.255").address),
       "255.255.255.255.in-addr.arpa",
     );
   });
 
   await t.step("the name is relative -- no trailing dot", () => {
-    assertNotMatch(addressv4ToArpa(parseAddressv4("192.168.0.1")), /\.$/);
+    assertNotMatch(
+      addressv4ToArpa(parseAddressv4("192.168.0.1").address),
+      /\.$/,
+    );
   });
 
   await t.step("an address outside the IPv4 range", () => {

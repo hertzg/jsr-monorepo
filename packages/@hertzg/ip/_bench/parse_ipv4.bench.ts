@@ -2,10 +2,10 @@
 // deliberately not in import_map.json: they are not dependencies of anything
 // this repo publishes, only of this on-demand comparison.
 
-// NOT apples-to-apples. `parseAddressv4` returns a `number`; ipaddr.js, ip-address
-// and ip-num return objects that validate more, retain the original text, and
-// carry a large method surface. They are doing more work because they offer
-// more. Read this group as "cost of getting an address into memory in each
+// NOT apples-to-apples. `parseAddressv4` returns a `number` in a two-field
+// object; ipaddr.js, ip-address and ip-num return objects that validate more,
+// retain the original text, and carry a large method surface. They are doing
+// more work because they offer more. Read this group as "cost of getting an address into memory in each
 // library's own idiom", not as a like-for-like algorithm comparison.
 
 import ipaddr from "npm:ipaddr.js@^2.5.0";

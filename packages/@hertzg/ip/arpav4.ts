@@ -16,7 +16,7 @@
  * import { addressv4ToArpa } from "@hertzg/ip/arpav4";
  * import { parseAddressv4 } from "@hertzg/ip/addressv4";
  *
- * assertEquals(addressv4ToArpa(parseAddressv4("192.168.0.1")), "1.0.168.192.in-addr.arpa");
+ * assertEquals(addressv4ToArpa(parseAddressv4("192.168.0.1").address), "1.0.168.192.in-addr.arpa");
  * ```
  *
  * @module
@@ -44,9 +44,9 @@ import { stringifyAddressv4 } from "./addressv4.ts";
  * import { addressv4ToArpa } from "@hertzg/ip/arpav4";
  * import { parseAddressv4 } from "@hertzg/ip/addressv4";
  *
- * assertEquals(addressv4ToArpa(parseAddressv4("192.168.0.1")), "1.0.168.192.in-addr.arpa");
- * assertEquals(addressv4ToArpa(parseAddressv4("0.0.0.0")), "0.0.0.0.in-addr.arpa");
- * assertEquals(addressv4ToArpa(parseAddressv4("255.255.255.255")), "255.255.255.255.in-addr.arpa");
+ * assertEquals(addressv4ToArpa(parseAddressv4("192.168.0.1").address), "1.0.168.192.in-addr.arpa");
+ * assertEquals(addressv4ToArpa(parseAddressv4("0.0.0.0").address), "0.0.0.0.in-addr.arpa");
+ * assertEquals(addressv4ToArpa(parseAddressv4("255.255.255.255").address), "255.255.255.255.in-addr.arpa");
  * ```
  *
  * @example The name is relative, so make it absolute yourself
@@ -55,7 +55,7 @@ import { stringifyAddressv4 } from "./addressv4.ts";
  * import { addressv4ToArpa } from "@hertzg/ip/arpav4";
  * import { parseAddressv4 } from "@hertzg/ip/addressv4";
  *
- * assertEquals(addressv4ToArpa(parseAddressv4("8.8.8.8")) + ".", "8.8.8.8.in-addr.arpa.");
+ * assertEquals(addressv4ToArpa(parseAddressv4("8.8.8.8").address) + ".", "8.8.8.8.in-addr.arpa.");
  * ```
  */
 export function addressv4ToArpa(address: number): string {

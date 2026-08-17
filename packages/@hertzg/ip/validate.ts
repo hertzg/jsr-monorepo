@@ -28,13 +28,14 @@
  */
 
 import { parseAddress } from "./address.ts";
-import { isValidCidrv4 } from "./validatev4.ts";
-import { isValidCidrv6 } from "./validatev6.ts";
+import { parseCidr } from "./cidr.ts";
 
 /**
  * Checks if a string is a valid plain IP address (IPv4 or IPv6).
  *
- * Does **not** accept CIDR notation — use {@link isValidCidr} for that.
+ * Accepts exactly what {@link parseAddress} accepts, an optional `%zoneId`
+ * included. Does **not** accept CIDR notation — use {@link isValidCidr} for
+ * that.
  *
  * @param address The address string to validate
  * @returns `true` if the string is a valid IPv4 or IPv6 address
@@ -48,6 +49,7 @@ import { isValidCidrv6 } from "./validatev6.ts";
  * assert(isValidAddress("::1"));
  * assert(isValidAddress("0.0.0.0"));
  * assert(isValidAddress("fe80::1%eth0"));
+ * assert(isValidAddress("192.168.1.1%ether1"));
  * ```
  *
  * @example Invalid inputs
@@ -60,6 +62,7 @@ import { isValidCidrv6 } from "./validatev6.ts";
  * assertEquals(isValidAddress("999.999.999.999"), false);
  * assertEquals(isValidAddress("10.0.0.0/8"), false);
  * assertEquals(isValidAddress("2001:db8::/32"), false);
+ * assertEquals(isValidAddress("fe80::1%"), false);
  * ```
  */
 export function isValidAddress(address: string): boolean {
@@ -74,6 +77,9 @@ export function isValidAddress(address: string): boolean {
 /**
  * Checks if a string is valid IPv4 or IPv6 CIDR notation.
  *
+ * Accepts exactly what {@link parseCidr} accepts: either dialect (`/8` or
+ * `/255.0.0.0`) and an optional `%zoneId` before the slash.
+ *
  * @param cidr The CIDR string to validate
  * @returns `true` if the string is valid CIDR notation
  *
@@ -84,10 +90,18 @@ export function isValidAddress(address: string): boolean {
  *
  * assert(isValidCidr("10.0.0.0/8"));
  * assert(isValidCidr("2001:db8::/32"));
+ * assert(isValidCidr("10.0.0.0/255.0.0.0"));
+ * assert(isValidCidr("fe80::%ether1/64"));
  * assertEquals(isValidCidr("10.0.0.0"), false);
  * assertEquals(isValidCidr("garbage/24"), false);
+ * assertEquals(isValidCidr("10.0.0.0/ffff:ff00::"), false);
  * ```
  */
 export function isValidCidr(cidr: string): boolean {
-  return isValidCidrv4(cidr) || isValidCidrv6(cidr);
+  try {
+    parseCidr(cidr);
+    return true;
+  } catch {
+    return false;
+  }
 }

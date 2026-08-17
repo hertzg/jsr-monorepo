@@ -11,10 +11,10 @@
  * import { classifyAddressv4 } from "@hertzg/ip/classifyv4";
  * import { parseAddressv4 } from "@hertzg/ip/addressv4";
  *
- * assertEquals(classifyAddressv4(parseAddressv4("192.168.1.1")), "private");
- * assertEquals(classifyAddressv4(parseAddressv4("8.8.8.8")), "public");
- * assertEquals(classifyAddressv4(parseAddressv4("127.0.0.1")), "loopback");
- * assertEquals(classifyAddressv4(parseAddressv4("224.0.0.1")), "multicast");
+ * assertEquals(classifyAddressv4(parseAddressv4("192.168.1.1").address), "private");
+ * assertEquals(classifyAddressv4(parseAddressv4("8.8.8.8").address), "public");
+ * assertEquals(classifyAddressv4(parseAddressv4("127.0.0.1").address), "loopback");
+ * assertEquals(classifyAddressv4(parseAddressv4("224.0.0.1").address), "multicast");
  * ```
  *
  * @example Check specific ranges
@@ -23,10 +23,10 @@
  * import { isAddressv4Loopback, isAddressv4Private, isAddressv4Public } from "@hertzg/ip/classifyv4";
  * import { parseAddressv4 } from "@hertzg/ip/addressv4";
  *
- * assert(isAddressv4Loopback(parseAddressv4("127.0.0.1")));
- * assert(isAddressv4Private(parseAddressv4("10.0.0.1")));
- * assertEquals(isAddressv4Public(parseAddressv4("10.0.0.1")), false);
- * assert(isAddressv4Public(parseAddressv4("8.8.8.8")));
+ * assert(isAddressv4Loopback(parseAddressv4("127.0.0.1").address));
+ * assert(isAddressv4Private(parseAddressv4("10.0.0.1").address));
+ * assertEquals(isAddressv4Public(parseAddressv4("10.0.0.1").address), false);
+ * assert(isAddressv4Public(parseAddressv4("8.8.8.8").address));
  * ```
  *
  * @module
@@ -86,10 +86,10 @@ export type Classificationv4 =
  * import { isAddressv4Private } from "@hertzg/ip/classifyv4";
  * import { parseAddressv4 } from "@hertzg/ip/addressv4";
  *
- * assert(isAddressv4Private(parseAddressv4("10.0.0.1")));
- * assert(isAddressv4Private(parseAddressv4("172.16.0.1")));
- * assert(isAddressv4Private(parseAddressv4("192.168.1.1")));
- * assertEquals(isAddressv4Private(parseAddressv4("8.8.8.8")), false);
+ * assert(isAddressv4Private(parseAddressv4("10.0.0.1").address));
+ * assert(isAddressv4Private(parseAddressv4("172.16.0.1").address));
+ * assert(isAddressv4Private(parseAddressv4("192.168.1.1").address));
+ * assertEquals(isAddressv4Private(parseAddressv4("8.8.8.8").address), false);
  * ```
  */
 export function isAddressv4Private(address: number): boolean {
@@ -112,9 +112,9 @@ export function isAddressv4Private(address: number): boolean {
  * import { isAddressv4Loopback } from "@hertzg/ip/classifyv4";
  * import { parseAddressv4 } from "@hertzg/ip/addressv4";
  *
- * assert(isAddressv4Loopback(parseAddressv4("127.0.0.1")));
- * assert(isAddressv4Loopback(parseAddressv4("127.255.255.255")));
- * assertEquals(isAddressv4Loopback(parseAddressv4("128.0.0.1")), false);
+ * assert(isAddressv4Loopback(parseAddressv4("127.0.0.1").address));
+ * assert(isAddressv4Loopback(parseAddressv4("127.255.255.255").address));
+ * assertEquals(isAddressv4Loopback(parseAddressv4("128.0.0.1").address), false);
  * ```
  */
 export function isAddressv4Loopback(address: number): boolean {
@@ -135,8 +135,8 @@ export function isAddressv4Loopback(address: number): boolean {
  * import { isAddressv4LinkLocal } from "@hertzg/ip/classifyv4";
  * import { parseAddressv4 } from "@hertzg/ip/addressv4";
  *
- * assert(isAddressv4LinkLocal(parseAddressv4("169.254.1.1")));
- * assertEquals(isAddressv4LinkLocal(parseAddressv4("169.255.0.0")), false);
+ * assert(isAddressv4LinkLocal(parseAddressv4("169.254.1.1").address));
+ * assertEquals(isAddressv4LinkLocal(parseAddressv4("169.255.0.0").address), false);
  * ```
  */
 export function isAddressv4LinkLocal(address: number): boolean {
@@ -157,9 +157,9 @@ export function isAddressv4LinkLocal(address: number): boolean {
  * import { isAddressv4Multicast } from "@hertzg/ip/classifyv4";
  * import { parseAddressv4 } from "@hertzg/ip/addressv4";
  *
- * assert(isAddressv4Multicast(parseAddressv4("224.0.0.1")));
- * assert(isAddressv4Multicast(parseAddressv4("239.255.255.255")));
- * assertEquals(isAddressv4Multicast(parseAddressv4("240.0.0.0")), false);
+ * assert(isAddressv4Multicast(parseAddressv4("224.0.0.1").address));
+ * assert(isAddressv4Multicast(parseAddressv4("239.255.255.255").address));
+ * assertEquals(isAddressv4Multicast(parseAddressv4("240.0.0.0").address), false);
  * ```
  */
 export function isAddressv4Multicast(address: number): boolean {
@@ -181,10 +181,10 @@ export function isAddressv4Multicast(address: number): boolean {
  * import { isAddressv4Reserved } from "@hertzg/ip/classifyv4";
  * import { parseAddressv4 } from "@hertzg/ip/addressv4";
  *
- * assert(isAddressv4Reserved(parseAddressv4("240.0.0.0")));
- * assert(isAddressv4Reserved(parseAddressv4("255.255.255.254")));
- * assertEquals(isAddressv4Reserved(parseAddressv4("255.255.255.255")), false); // broadcast
- * assertEquals(isAddressv4Reserved(parseAddressv4("239.255.255.255")), false); // multicast
+ * assert(isAddressv4Reserved(parseAddressv4("240.0.0.0").address));
+ * assert(isAddressv4Reserved(parseAddressv4("255.255.255.254").address));
+ * assertEquals(isAddressv4Reserved(parseAddressv4("255.255.255.255").address), false); // broadcast
+ * assertEquals(isAddressv4Reserved(parseAddressv4("239.255.255.255").address), false); // multicast
  * ```
  */
 export function isAddressv4Reserved(address: number): boolean {
@@ -206,8 +206,8 @@ export function isAddressv4Reserved(address: number): boolean {
  * import { isAddressv4Broadcast } from "@hertzg/ip/classifyv4";
  * import { parseAddressv4 } from "@hertzg/ip/addressv4";
  *
- * assert(isAddressv4Broadcast(parseAddressv4("255.255.255.255")));
- * assertEquals(isAddressv4Broadcast(parseAddressv4("255.255.255.254")), false);
+ * assert(isAddressv4Broadcast(parseAddressv4("255.255.255.255").address));
+ * assertEquals(isAddressv4Broadcast(parseAddressv4("255.255.255.254").address), false);
  * ```
  */
 export function isAddressv4Broadcast(address: number): boolean {
@@ -228,9 +228,9 @@ export function isAddressv4Broadcast(address: number): boolean {
  * import { isAddressv4ThisNetwork } from "@hertzg/ip/classifyv4";
  * import { parseAddressv4 } from "@hertzg/ip/addressv4";
  *
- * assert(isAddressv4ThisNetwork(parseAddressv4("0.0.0.0")));
- * assert(isAddressv4ThisNetwork(parseAddressv4("0.255.255.255")));
- * assertEquals(isAddressv4ThisNetwork(parseAddressv4("1.0.0.0")), false);
+ * assert(isAddressv4ThisNetwork(parseAddressv4("0.0.0.0").address));
+ * assert(isAddressv4ThisNetwork(parseAddressv4("0.255.255.255").address));
+ * assertEquals(isAddressv4ThisNetwork(parseAddressv4("1.0.0.0").address), false);
  * ```
  */
 export function isAddressv4ThisNetwork(address: number): boolean {
@@ -251,9 +251,9 @@ export function isAddressv4ThisNetwork(address: number): boolean {
  * import { isAddressv4CgNat } from "@hertzg/ip/classifyv4";
  * import { parseAddressv4 } from "@hertzg/ip/addressv4";
  *
- * assert(isAddressv4CgNat(parseAddressv4("100.64.0.0")));
- * assert(isAddressv4CgNat(parseAddressv4("100.127.255.255")));
- * assertEquals(isAddressv4CgNat(parseAddressv4("100.128.0.0")), false);
+ * assert(isAddressv4CgNat(parseAddressv4("100.64.0.0").address));
+ * assert(isAddressv4CgNat(parseAddressv4("100.127.255.255").address));
+ * assertEquals(isAddressv4CgNat(parseAddressv4("100.128.0.0").address), false);
  * ```
  */
 export function isAddressv4CgNat(address: number): boolean {
@@ -274,9 +274,9 @@ export function isAddressv4CgNat(address: number): boolean {
  * import { isAddressv4Benchmarking } from "@hertzg/ip/classifyv4";
  * import { parseAddressv4 } from "@hertzg/ip/addressv4";
  *
- * assert(isAddressv4Benchmarking(parseAddressv4("198.18.0.0")));
- * assert(isAddressv4Benchmarking(parseAddressv4("198.19.255.255")));
- * assertEquals(isAddressv4Benchmarking(parseAddressv4("198.20.0.0")), false);
+ * assert(isAddressv4Benchmarking(parseAddressv4("198.18.0.0").address));
+ * assert(isAddressv4Benchmarking(parseAddressv4("198.19.255.255").address));
+ * assertEquals(isAddressv4Benchmarking(parseAddressv4("198.20.0.0").address), false);
  * ```
  */
 export function isAddressv4Benchmarking(address: number): boolean {
@@ -300,10 +300,10 @@ export function isAddressv4Benchmarking(address: number): boolean {
  * import { isAddressv4Documentation } from "@hertzg/ip/classifyv4";
  * import { parseAddressv4 } from "@hertzg/ip/addressv4";
  *
- * assert(isAddressv4Documentation(parseAddressv4("192.0.2.1")));
- * assert(isAddressv4Documentation(parseAddressv4("198.51.100.1")));
- * assert(isAddressv4Documentation(parseAddressv4("203.0.113.1")));
- * assertEquals(isAddressv4Documentation(parseAddressv4("192.0.3.0")), false);
+ * assert(isAddressv4Documentation(parseAddressv4("192.0.2.1").address));
+ * assert(isAddressv4Documentation(parseAddressv4("198.51.100.1").address));
+ * assert(isAddressv4Documentation(parseAddressv4("203.0.113.1").address));
+ * assertEquals(isAddressv4Documentation(parseAddressv4("192.0.3.0").address), false);
  * ```
  */
 export function isAddressv4Documentation(address: number): boolean {
@@ -328,10 +328,10 @@ export function isAddressv4Documentation(address: number): boolean {
  * import { isAddressv4Public } from "@hertzg/ip/classifyv4";
  * import { parseAddressv4 } from "@hertzg/ip/addressv4";
  *
- * assert(isAddressv4Public(parseAddressv4("8.8.8.8")));
- * assert(isAddressv4Public(parseAddressv4("1.1.1.1")));
- * assertEquals(isAddressv4Public(parseAddressv4("10.0.0.1")), false);
- * assertEquals(isAddressv4Public(parseAddressv4("127.0.0.1")), false);
+ * assert(isAddressv4Public(parseAddressv4("8.8.8.8").address));
+ * assert(isAddressv4Public(parseAddressv4("1.1.1.1").address));
+ * assertEquals(isAddressv4Public(parseAddressv4("10.0.0.1").address), false);
+ * assertEquals(isAddressv4Public(parseAddressv4("127.0.0.1").address), false);
  * ```
  */
 export function isAddressv4Public(address: number): boolean {
@@ -357,17 +357,17 @@ export function isAddressv4Public(address: number): boolean {
  * import { classifyAddressv4 } from "@hertzg/ip/classifyv4";
  * import { parseAddressv4 } from "@hertzg/ip/addressv4";
  *
- * assertEquals(classifyAddressv4(parseAddressv4("192.168.1.1")), "private");
- * assertEquals(classifyAddressv4(parseAddressv4("8.8.8.8")), "public");
- * assertEquals(classifyAddressv4(parseAddressv4("127.0.0.1")), "loopback");
- * assertEquals(classifyAddressv4(parseAddressv4("169.254.1.1")), "link-local");
- * assertEquals(classifyAddressv4(parseAddressv4("224.0.0.1")), "multicast");
- * assertEquals(classifyAddressv4(parseAddressv4("255.255.255.255")), "broadcast");
- * assertEquals(classifyAddressv4(parseAddressv4("0.0.0.0")), "this-network");
- * assertEquals(classifyAddressv4(parseAddressv4("100.64.0.1")), "cg-nat");
- * assertEquals(classifyAddressv4(parseAddressv4("198.18.0.1")), "benchmarking");
- * assertEquals(classifyAddressv4(parseAddressv4("192.0.2.1")), "documentation");
- * assertEquals(classifyAddressv4(parseAddressv4("240.0.0.0")), "reserved");
+ * assertEquals(classifyAddressv4(parseAddressv4("192.168.1.1").address), "private");
+ * assertEquals(classifyAddressv4(parseAddressv4("8.8.8.8").address), "public");
+ * assertEquals(classifyAddressv4(parseAddressv4("127.0.0.1").address), "loopback");
+ * assertEquals(classifyAddressv4(parseAddressv4("169.254.1.1").address), "link-local");
+ * assertEquals(classifyAddressv4(parseAddressv4("224.0.0.1").address), "multicast");
+ * assertEquals(classifyAddressv4(parseAddressv4("255.255.255.255").address), "broadcast");
+ * assertEquals(classifyAddressv4(parseAddressv4("0.0.0.0").address), "this-network");
+ * assertEquals(classifyAddressv4(parseAddressv4("100.64.0.1").address), "cg-nat");
+ * assertEquals(classifyAddressv4(parseAddressv4("198.18.0.1").address), "benchmarking");
+ * assertEquals(classifyAddressv4(parseAddressv4("192.0.2.1").address), "documentation");
+ * assertEquals(classifyAddressv4(parseAddressv4("240.0.0.0").address), "reserved");
  * ```
  */
 export function classifyAddressv4(address: number): Classificationv4 {

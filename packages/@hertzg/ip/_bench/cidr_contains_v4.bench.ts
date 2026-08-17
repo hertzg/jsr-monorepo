@@ -23,7 +23,7 @@ const CIDR_V4 = "192.168.1.0/24";
 const CIDR_V4_WIDE = "10.0.0.0/16";
 
 const oursCidr = parseCidrv4(CIDR_V4);
-const oursAddress = parseAddressv4(IPV4);
+const oursAddress = parseAddressv4(IPV4).address;
 
 const ipaddrIpv4 = ipaddr.IPv4.parse(IPV4);
 const ipaddrCidrV4 = ipaddr.IPv4.parseCIDR(CIDR_V4);

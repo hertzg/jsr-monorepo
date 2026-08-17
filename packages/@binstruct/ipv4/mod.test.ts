@@ -21,8 +21,8 @@ Deno.test("ipv4Packet: round-trips a minimal datagram (no options, empty payload
     timeToLive: 64,
     protocol: 6,
     headerChecksum: 0xb1e6,
-    sourceAddress: parseAddressv4("192.168.1.100"),
-    destinationAddress: parseAddressv4("10.0.0.50"),
+    sourceAddress: parseAddressv4("192.168.1.100").address,
+    destinationAddress: parseAddressv4("10.0.0.50").address,
     options: new Uint8Array(0),
     payload: new Uint8Array(0),
   };
@@ -90,8 +90,8 @@ Deno.test("ipv4Packet: round-trips fragmented packet flags", () => {
       timeToLive: 64,
       protocol: 6,
       headerChecksum: 0,
-      sourceAddress: parseAddressv4("10.0.0.1"),
-      destinationAddress: parseAddressv4("10.0.0.2"),
+      sourceAddress: parseAddressv4("10.0.0.1").address,
+      destinationAddress: parseAddressv4("10.0.0.2").address,
       options: new Uint8Array(0),
       payload: new Uint8Array(0),
     };
@@ -126,8 +126,8 @@ Deno.test("ipv4Packet: options length tracks IHL", () => {
     timeToLive: 64,
     protocol: 1,
     headerChecksum: 0,
-    sourceAddress: parseAddressv4("192.0.2.1"),
-    destinationAddress: parseAddressv4("192.0.2.2"),
+    sourceAddress: parseAddressv4("192.0.2.1").address,
+    destinationAddress: parseAddressv4("192.0.2.2").address,
     options,
     payload: new Uint8Array(0),
   };
@@ -170,8 +170,11 @@ Deno.test("ipv4Packet: decodes a real captured ICMP echo request", () => {
   assertEquals(decoded.timeToLive, 64);
   assertEquals(decoded.protocol, 1); // ICMP
   assertEquals(decoded.headerChecksum, 0xb1e6);
-  assertEquals(decoded.sourceAddress, parseAddressv4("192.168.1.100"));
-  assertEquals(decoded.destinationAddress, parseAddressv4("192.168.1.1"));
+  assertEquals(decoded.sourceAddress, parseAddressv4("192.168.1.100").address);
+  assertEquals(
+    decoded.destinationAddress,
+    parseAddressv4("192.168.1.1").address,
+  );
   assertEquals(decoded.options.length, 0);
   assertEquals(decoded.payload.length, 0);
 
@@ -205,8 +208,8 @@ Deno.test("ipv4Packet: round-trips edge-case addresses", () => {
       timeToLive: 1,
       protocol: 0,
       headerChecksum: 0,
-      sourceAddress: parseAddressv4(src),
-      destinationAddress: parseAddressv4(dst),
+      sourceAddress: parseAddressv4(src).address,
+      destinationAddress: parseAddressv4(dst).address,
       options: new Uint8Array(0),
       payload: new Uint8Array(0),
     };
@@ -215,8 +218,8 @@ Deno.test("ipv4Packet: round-trips edge-case addresses", () => {
     coder.encode(datagram, buffer);
     const [decoded] = coder.decode(buffer);
 
-    assertEquals(decoded.sourceAddress, parseAddressv4(src));
-    assertEquals(decoded.destinationAddress, parseAddressv4(dst));
+    assertEquals(decoded.sourceAddress, parseAddressv4(src).address);
+    assertEquals(decoded.destinationAddress, parseAddressv4(dst).address);
   }
 });
 
@@ -237,8 +240,8 @@ Deno.test("ipv4Packet: round-trips a datagram with payload bytes", () => {
     timeToLive: 64,
     protocol: 17,
     headerChecksum: 0,
-    sourceAddress: parseAddressv4("10.0.0.1"),
-    destinationAddress: parseAddressv4("10.0.0.2"),
+    sourceAddress: parseAddressv4("10.0.0.1").address,
+    destinationAddress: parseAddressv4("10.0.0.2").address,
     options: new Uint8Array(0),
     payload,
   };

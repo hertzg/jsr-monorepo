@@ -26,7 +26,7 @@ const MERGE_BLOCKS = [
   "10.1.0.0/16",
 ];
 
-const oursMergeBlocks = MERGE_BLOCKS.map(parseCidr);
+const oursMergeBlocks = MERGE_BLOCKS.map((s) => parseCidr(s));
 const ipNumMergeBlocks = MERGE_BLOCKS.map((block) =>
   IPv4CidrRange.fromCidr(block)
 );

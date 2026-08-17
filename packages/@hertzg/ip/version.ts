@@ -16,9 +16,9 @@
  * const describe = (input: string): string => {
  *   switch (addressVersion(input)) {
  *     case 4:
- *       return `v4:${parseAddressv4(input)}`;
+ *       return `v4:${parseAddressv4(input).address}`;
  *     case 6:
- *       return `v6:${parseAddressv6(input)}`;
+ *       return `v6:${parseAddressv6(input).address}`;
  *     default:
  *       return "not an address";
  *   }
@@ -32,8 +32,22 @@
  * @module
  */
 
+import { splitNotation } from "./notation.ts";
 import { isValidAddressv4, isValidCidrv4 } from "./validatev4.ts";
 import { isValidAddressv6, isValidCidrv6 } from "./validatev6.ts";
+
+/**
+ * Whether the address slot of a notation string is written as IPv6, the
+ * same test the universal parsers dispatch on. A string layer 1 rejects
+ * is neither version.
+ */
+function isWrittenAsV6(notation: string): boolean | undefined {
+  try {
+    return splitNotation(notation).address.includes(":");
+  } catch {
+    return undefined;
+  }
+}
 
 /**
  * An IP version number: `4` for IPv4, `6` for IPv6.
@@ -87,12 +101,18 @@ export type IpVersion = 4 | 6;
  * import { parseAddress } from "@hertzg/ip/address";
  *
  * assertEquals(addressVersion("::ffff:10.1.2.3"), 6);
- * assertEquals(typeof parseAddress("::ffff:10.1.2.3"), "number");
+ * assertEquals(typeof parseAddress("::ffff:10.1.2.3").address, "number");
  * ```
  */
 export function addressVersion(address: string): IpVersion | undefined {
-  if (address.includes(":")) return isValidAddressv6(address) ? 6 : undefined;
-  return isValidAddressv4(address) ? 4 : undefined;
+  switch (isWrittenAsV6(address)) {
+    case true:
+      return isValidAddressv6(address) ? 6 : undefined;
+    case false:
+      return isValidAddressv4(address) ? 4 : undefined;
+    default:
+      return undefined;
+  }
 }
 
 /**
@@ -111,13 +131,21 @@ export function addressVersion(address: string): IpVersion | undefined {
  * import { cidrVersion } from "@hertzg/ip/version";
  *
  * assertEquals(cidrVersion("10.0.0.0/8"), 4);
+ * assertEquals(cidrVersion("10.0.0.0/255.0.0.0"), 4);
  * assertEquals(cidrVersion("2001:db8::/32"), 6);
+ * assertEquals(cidrVersion("fe80::%ether1/64"), 6);
  * assertEquals(cidrVersion("10.0.0.0"), undefined);
  * assertEquals(cidrVersion("10.0.0.0/33"), undefined);
  * assertEquals(cidrVersion("garbage/24"), undefined);
  * ```
  */
 export function cidrVersion(cidr: string): IpVersion | undefined {
-  if (cidr.includes(":")) return isValidCidrv6(cidr) ? 6 : undefined;
-  return isValidCidrv4(cidr) ? 4 : undefined;
+  switch (isWrittenAsV6(cidr)) {
+    case true:
+      return isValidCidrv6(cidr) ? 6 : undefined;
+    case false:
+      return isValidCidrv4(cidr) ? 4 : undefined;
+    default:
+      return undefined;
+  }
 }

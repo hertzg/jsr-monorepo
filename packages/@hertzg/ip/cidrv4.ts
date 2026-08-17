@@ -9,6 +9,19 @@
  * length (`10.0.0.0/8`) or a network mask (`10.0.0.0/255.0.0.0`), and every
  * operation here accepts both.
  *
+ * @example Both dialects parse, and write back the way they came
+ * ```ts
+ * import { assertEquals } from "@std/assert";
+ * import { cidrv4Size, parseCidrv4, stringifyCidrv4 } from "@hertzg/ip/cidrv4";
+ *
+ * const prefixed = parseCidrv4("10.0.0.0/8");
+ * const masked = parseCidrv4("10.0.0.0/255.0.0.0");
+ *
+ * assertEquals(cidrv4Size(prefixed), cidrv4Size(masked));
+ * assertEquals(stringifyCidrv4(prefixed), "10.0.0.0/8");
+ * assertEquals(stringifyCidrv4(masked), "10.0.0.0/255.0.0.0");
+ * ```
+ *
  * @example CIDR operations
  * ```ts
  * import { assert, assertEquals } from "@std/assert";
@@ -17,8 +30,8 @@
  *
  * const cidr = parseCidrv4("192.168.1.0/24");
  *
- * assert(cidrv4Contains(cidr, parseAddressv4("192.168.1.1")));
- * assertEquals(cidrv4Contains(cidr, parseAddressv4("192.168.2.1")), false);
+ * assert(cidrv4Contains(cidr, parseAddressv4("192.168.1.1").address));
+ * assertEquals(cidrv4Contains(cidr, parseAddressv4("192.168.2.1").address), false);
  * ```
  *
  * @example Handing out assignable addresses
@@ -43,10 +56,24 @@
  */
 
 import {
+  type Addressv4,
   compareAddressv4,
   parseAddressv4,
+  type ParsedAddressv4,
   stringifyAddressv4,
 } from "./addressv4.ts";
+import { splitNotation, type ZoneId } from "./notation.ts";
+
+export type {
+  /** An IPv4 address as a 32-bit unsigned integer. */
+  Addressv4,
+  /** What parseAddressv4 returns: the address and an optional zone ID. */
+  ParsedAddressv4,
+} from "./addressv4.ts";
+export type {
+  /** The zone ID after `%`, a string. */
+  ZoneId,
+} from "./notation.ts";
 
 /**
  * An IPv4 network mask as a 32-bit unsigned integer, e.g. `0xFFFFFF00`
@@ -70,7 +97,7 @@ export type PrefixLengthv4 = number;
  */
 export type PrefixedCidrv4 = {
   /** The IPv4 address from the CIDR notation */
-  readonly address: number;
+  readonly address: Addressv4;
   /** The prefix length (0-32) */
   readonly prefixLength: PrefixLengthv4;
   /** Absent: the mask dialect is {@link MaskedCidrv4} */
@@ -83,7 +110,7 @@ export type PrefixedCidrv4 = {
  */
 export type MaskedCidrv4 = {
   /** The IPv4 address from the CIDR notation */
-  readonly address: number;
+  readonly address: Addressv4;
   /** The network mask, stored as given */
   readonly mask: Maskv4;
   /** Absent: the prefix length dialect is {@link PrefixedCidrv4} */
@@ -117,6 +144,19 @@ export type MaskedCidrv4 = {
  * ```
  */
 export type Cidrv4 = PrefixedCidrv4 | MaskedCidrv4;
+
+/**
+ * What {@link parseCidrv4} returns and what {@link stringifyCidrv4}
+ * accepts: a {@link Cidrv4} in the dialect it was written in, plus the zone
+ * ID if the notation had one (`fe80::%ether1/64` has one; RouterOS emits
+ * that form for connected routes). Assignable to {@link Cidrv4}, so a parse
+ * result goes straight into every `cidrv4*` operation; none of them reads
+ * the zone.
+ */
+export type ParsedCidrv4 = Cidrv4 & {
+  /** The zone ID after `%`, verbatim, when the notation had one */
+  readonly zoneId?: ZoneId;
+};
 
 /**
  * Creates a network mask from an IPv4 prefix length.
@@ -304,7 +344,7 @@ export function cidrv4PrefixLength(cidr: Cidrv4): PrefixLengthv4;
  *
  * assertEquals(
  *   stringifyCidrv4({
- *     address: parseAddressv4(address),
+ *     address: parseAddressv4(address).address,
  *     prefixLength: cidrv4PrefixLength(netmask),
  *   }),
  *   "192.168.1.42/24",
@@ -387,7 +427,14 @@ export function cidrv4PrefixLength(
 ): PrefixLengthv4 {
   let value: Maskv4;
   if (typeof cidrOrMask === "string") {
-    value = parseAddressv4(cidrOrMask);
+    // A mask is an address slot, not a notation: no zone rides in on it.
+    const mask = parseAddressv4(cidrOrMask);
+    if (mask.zoneId !== undefined) {
+      throw new TypeError(
+        `IPv4 mask must not have a zone ID, got '${cidrOrMask}'`,
+      );
+    }
+    value = mask.address;
   } else if (typeof cidrOrMask === "number") {
     value = cidrOrMask;
   } else if (cidrOrMask.mask !== undefined) {
@@ -421,19 +468,16 @@ const CHAR_ZERO = 0x30;
 const CHAR_NINE = 0x39;
 
 /**
- * Reads a prefix length: decimal digits with no leading zero.
+ * Reads a prefix length: decimal digits with no leading zero. The slice is
+ * non-empty ({@link splitNotation} rejects an empty prefix) and the range
+ * is checked by the caller, which knows the address version.
  *
  * `-` is not a digit, so a signed prefix length is a shape error here rather
- * than a range error from `cidrv4Mask`. That keeps the sign out of the
- * returned value, which is what let `"/-0"` through: `-0` is numerically `0`,
- * so it passes any range check and reaches the caller as a `Cidrv4` holding a
- * negative zero.
+ * than a range error. That keeps the sign out of the returned value, which
+ * is what let `"/-0"` through: `-0` is numerically `0`, so it passes any
+ * range check and reaches the caller as a `Cidrv4` holding a negative zero.
  */
 function parsePrefixLength(part: string): number {
-  if (part.length === 0) {
-    throw new TypeError("CIDR prefix length must be a number, got ''");
-  }
-
   if (part.length > 1 && part.charCodeAt(0) === CHAR_ZERO) {
     throw new TypeError(
       `CIDR prefix length cannot have leading zeros, got '${part}'`,
@@ -453,28 +497,54 @@ function parsePrefixLength(part: string): number {
 }
 
 /**
- * Parses an IPv4 CIDR notation string to a Cidrv4 object.
+ * Parses IPv4 CIDR notation, in either dialect and with an optional zone
+ * ID, to a {@link ParsedCidrv4}.
  *
- * Returns only the parsed values (address and prefix length).
+ * The notation is `address [ "%" zoneId ] "/" prefix` (ADR 0003). The
+ * address is parsed as {@link parseAddressv4} does, zone included. The
+ * prefix is a prefix length when it is decimal digits (no leading zero, no
+ * sign, no whitespace, no trailing text; 0 to 32), and a network mask when
+ * it contains a `.`, parsed with the same rules as an address. A mask is
+ * stored as given and is not required to be contiguous (ADR 0006):
+ * `10.0.0.0/255.0.0.255` parses, and only {@link cidrv4PrefixLength}
+ * rejects it, because that is the call with no answer. An IPv6 mask on an
+ * IPv4 address (`10.0.0.0/ffff:ff00::`) is rejected.
  *
- * The prefix length is decimal digits and nothing else: no leading zeros, no
- * whitespace, no sign, and no trailing text.
- *
- * @param cidr The CIDR notation string (e.g., "192.168.1.0/24")
- * @returns A PrefixedCidrv4 object containing the parsed address and prefix length
- * @throws {TypeError} If the format is invalid, including a prefix length
- *   with leading zeros, whitespace or trailing text
- * @throws {RangeError} If the prefix length is out of range (not 0-32)
- * @throws Propagates errors from parseAddressv4 if the address part is invalid
+ * @param cidr The CIDR notation string, e.g. `"192.168.1.0/24"`, `"10.0.0.0/255.0.0.0"`, `"10.0.0.1%ether1/32"`
+ * @returns The address and prefix length or mask as written, and the zone ID if there was one
+ * @throws {TypeError} If the format is invalid: no prefix, a malformed
+ *   address, prefix length or mask, a mask of the other version, an empty
+ *   or malformed zone ID
+ * @throws {RangeError} If a prefix length is a well-formed number outside 0
+ *   to 32, or an octet is greater than 255
  *
  * @example Basic CIDR parsing
  * ```ts
  * import { assertEquals } from "@std/assert";
  * import { parseCidrv4 } from "@hertzg/ip/cidrv4";
  *
- * const cidr = parseCidrv4("192.168.1.0/24");
- * assertEquals(cidr.address, 3232235776);
- * assertEquals(cidr.prefixLength, 24);
+ * assertEquals(parseCidrv4("192.168.1.0/24"), { address: 3232235776, prefixLength: 24 });
+ * ```
+ *
+ * @example The mask dialect is stored as a mask
+ * ```ts
+ * import { assertEquals } from "@std/assert";
+ * import { parseCidrv4 } from "@hertzg/ip/cidrv4";
+ *
+ * assertEquals(parseCidrv4("192.168.1.0/255.255.255.0"), { address: 3232235776, mask: 0xFFFFFF00 });
+ * assertEquals(parseCidrv4("10.0.0.0/255.0.0.255"), { address: 167772160, mask: 0xFF0000FF });
+ * ```
+ *
+ * @example A zone ID is carried verbatim
+ * ```ts
+ * import { assertEquals } from "@std/assert";
+ * import { parseCidrv4 } from "@hertzg/ip/cidrv4";
+ *
+ * assertEquals(parseCidrv4("10.155.101.0%ether1/24"), {
+ *   address: 177956096,
+ *   prefixLength: 24,
+ *   zoneId: "ether1",
+ * });
  * ```
  *
  * @example Error handling
@@ -487,47 +557,83 @@ function parsePrefixLength(part: string): number {
  * assertThrows(() => parseCidrv4("192.168.1.0/33"), RangeError);
  * assertThrows(() => parseCidrv4("256.0.0.0/24"), RangeError);
  * assertThrows(() => parseCidrv4("192.168.1.0/024"), TypeError);
+ * assertThrows(() => parseCidrv4("192.168.1.0/ffff:ff00::"), TypeError);
+ * assertThrows(() => parseCidrv4("192.168.1.0/24%ether1"), TypeError);
+ * assertThrows(() => parseCidrv4("2001:db8::/32"), TypeError);
  * ```
  */
-export function parseCidrv4(cidr: string): PrefixedCidrv4 {
-  const parts = cidr.split("/");
+export function parseCidrv4(cidr: string): ParsedCidrv4 {
+  const slots = splitNotation(cidr);
 
-  if (parts.length !== 2) {
+  if (slots.prefix === undefined) {
     throw new TypeError(
-      `CIDR notation must be in format '<address>/<prefix>', got ${parts.length} parts`,
+      `CIDR notation must be in format '<address>/<prefix>', got '${cidr}'`,
     );
   }
 
-  const address = parseAddressv4(parts[0]);
-  const prefixLength = parsePrefixLength(parts[1]);
+  const address = parseAddressv4(slots.address).address;
 
-  // Validate prefix length
-  cidrv4Mask(prefixLength);
+  // A prefix with a "." or ":" is a mask, scanned as an address; the ":"
+  // case is a mask of the other version, which cannot agree with an IPv4
+  // address, so it is rejected before any scanning (ADR 0003, rule 3).
+  let block: Cidrv4;
+  if (slots.prefix.includes(":")) {
+    throw new TypeError(
+      `IPv4 CIDR mask must be an IPv4 address, got '${slots.prefix}'`,
+    );
+  } else if (slots.prefix.includes(".")) {
+    block = { address, mask: parseAddressv4(slots.prefix).address };
+  } else {
+    const prefixLength = parsePrefixLength(slots.prefix);
+    if (prefixLength > 32) {
+      throw new RangeError(
+        `CIDR prefix length must be 0-32, got ${prefixLength}`,
+      );
+    }
+    block = { address, prefixLength };
+  }
 
-  return {
-    address,
-    prefixLength,
-  };
+  if (slots.zoneId === undefined) {
+    return block;
+  }
+  if (/\s/.test(slots.zoneId)) {
+    throw new TypeError(
+      `Zone ID must not contain whitespace, got '${slots.zoneId}'`,
+    );
+  }
+  return { ...block, zoneId: slots.zoneId };
 }
 
 /**
- * Stringifies a Cidrv4 object to CIDR notation.
+ * Stringifies an IPv4 CIDR block, or an address, to CIDR notation.
  *
  * The dialect is preserved: a {@link PrefixedCidrv4} is written as
  * `address/prefixLength`, a {@link MaskedCidrv4} as `address/mask` with the
  * mask in dotted decimal. The address is written as stored, host bits
- * included.
+ * included. A bare {@link Addressv4}, or a {@link ParsedAddressv4} with no
+ * prefix length or mask, gets the noun's default, `/32`.
  *
- * @param cidr The Cidrv4 object to stringify
- * @returns The CIDR notation string (e.g., "192.168.1.0/24" or "192.168.1.0/255.255.255.0")
+ * Given a {@link ParsedCidrv4} (or parsed address), a truthy `zoneId` is
+ * written between the address and the `/`, so
+ * `stringifyCidrv4(parseCidrv4(s))` gives back `s` for every accepted `s` in
+ * canonical form. `zoneId` must not contain `%`, `/` or whitespace: a zone
+ * containing any of them cannot be written in RFC 4007 textual form at all,
+ * because `%` is the delimiter, and the result would not re-parse. If you
+ * are producing a URI, percent-encode it there (RFC 9844); this package
+ * does not apply that transform, since `%25` is also a valid interface
+ * index 25.
+ *
+ * @param cidr The CIDR block in either dialect, a parse result, or a bare address
+ * @returns The CIDR notation string, e.g. `"192.168.1.0/24"`, `"192.168.1.0/255.255.255.0"`, `"10.0.0.1%ether1/32"`
+ * @throws {RangeError} If the address, or a mask, is not a 32-bit unsigned integer
  *
  * @example Basic stringifying
  * ```ts
  * import { assertEquals } from "@std/assert";
  * import { parseCidrv4, stringifyCidrv4 } from "@hertzg/ip/cidrv4";
  *
- * const cidr = parseCidrv4("192.168.1.0/24");
- * assertEquals(stringifyCidrv4(cidr), "192.168.1.0/24");
+ * assertEquals(stringifyCidrv4(parseCidrv4("192.168.1.0/24")), "192.168.1.0/24");
+ * assertEquals(stringifyCidrv4({ address: 3232235777, prefixLength: 24 }), "192.168.1.1/24");
  * ```
  *
  * @example A masked block is written with its mask
@@ -540,12 +646,34 @@ export function parseCidrv4(cidr: string): PrefixedCidrv4 {
  *   "10.0.0.0/255.0.0.0",
  * );
  * ```
+ *
+ * @example A bare address is a /32, and a zone goes before the slash
+ * ```ts
+ * import { assertEquals } from "@std/assert";
+ * import { stringifyCidrv4 } from "@hertzg/ip/cidrv4";
+ *
+ * assertEquals(stringifyCidrv4(3232235777), "192.168.1.1/32");
+ * assertEquals(stringifyCidrv4({ address: 3232235777, zoneId: "ether1" }), "192.168.1.1%ether1/32");
+ * assertEquals(
+ *   stringifyCidrv4({ address: 3232235777, zoneId: "ether1", prefixLength: 24 }),
+ *   "192.168.1.1%ether1/24",
+ * );
+ * ```
  */
-export function stringifyCidrv4(cidr: Cidrv4): string {
-  const address = stringifyAddressv4(cidr.address);
-  return cidr.mask !== undefined
-    ? `${address}/${stringifyAddressv4(cidr.mask)}`
-    : `${address}/${cidr.prefixLength}`;
+export function stringifyCidrv4(
+  cidr: Addressv4 | ParsedAddressv4 | ParsedCidrv4,
+): string {
+  if (typeof cidr === "number") {
+    return `${stringifyAddressv4(cidr)}/32`;
+  }
+  const address = stringifyAddressv4(cidr);
+  if ("mask" in cidr && cidr.mask !== undefined) {
+    return `${address}/${stringifyAddressv4(cidr.mask)}`;
+  }
+  if ("prefixLength" in cidr && cidr.prefixLength !== undefined) {
+    return `${address}/${cidr.prefixLength}`;
+  }
+  return `${address}/32`;
 }
 
 /**
@@ -563,11 +691,11 @@ export function stringifyCidrv4(cidr: Cidrv4): string {
  *
  * const cidr = parseCidrv4("192.168.1.0/24");
  *
- * assert(cidrv4Contains(cidr, parseAddressv4("192.168.1.0")));
- * assert(cidrv4Contains(cidr, parseAddressv4("192.168.1.100")));
- * assert(cidrv4Contains(cidr, parseAddressv4("192.168.1.255")));
- * assertEquals(cidrv4Contains(cidr, parseAddressv4("192.168.2.1")), false);
- * assertEquals(cidrv4Contains(cidr, parseAddressv4("192.168.0.255")), false);
+ * assert(cidrv4Contains(cidr, parseAddressv4("192.168.1.0").address));
+ * assert(cidrv4Contains(cidr, parseAddressv4("192.168.1.100").address));
+ * assert(cidrv4Contains(cidr, parseAddressv4("192.168.1.255").address));
+ * assertEquals(cidrv4Contains(cidr, parseAddressv4("192.168.2.1").address), false);
+ * assertEquals(cidrv4Contains(cidr, parseAddressv4("192.168.0.255").address), false);
  * ```
  *
  * @example IP assignment workflow
@@ -610,7 +738,7 @@ export function cidrv4Contains(cidr: Cidrv4, address: number): boolean {
  * import { parseAddressv4 } from "@hertzg/ip/addressv4";
  *
  * const cidr = parseCidrv4("192.168.1.0/24");
- * assertEquals(cidrv4FirstAddress(cidr), parseAddressv4("192.168.1.0"));
+ * assertEquals(cidrv4FirstAddress(cidr), parseAddressv4("192.168.1.0").address);
  * ```
  */
 export function cidrv4FirstAddress(cidr: Cidrv4): number {
@@ -641,7 +769,7 @@ export function cidrv4FirstAddress(cidr: Cidrv4): number {
  * import { parseAddressv4 } from "@hertzg/ip/addressv4";
  *
  * const cidr = parseCidrv4("192.168.1.0/24");
- * assertEquals(cidrv4NetworkAddress(cidr), parseAddressv4("192.168.1.0"));
+ * assertEquals(cidrv4NetworkAddress(cidr), parseAddressv4("192.168.1.0").address);
  * ```
  *
  * @example The network address is not assignable, the next one is
@@ -675,7 +803,7 @@ export const cidrv4NetworkAddress: typeof cidrv4FirstAddress =
  * import { parseAddressv4 } from "@hertzg/ip/addressv4";
  *
  * const cidr = parseCidrv4("192.168.1.0/24");
- * assertEquals(cidrv4LastAddress(cidr), parseAddressv4("192.168.1.255"));
+ * assertEquals(cidrv4LastAddress(cidr), parseAddressv4("192.168.1.255").address);
  * ```
  */
 export function cidrv4LastAddress(cidr: Cidrv4): number {
@@ -707,7 +835,7 @@ export function cidrv4LastAddress(cidr: Cidrv4): number {
  * import { parseAddressv4 } from "@hertzg/ip/addressv4";
  *
  * const cidr = parseCidrv4("192.168.1.0/24");
- * assertEquals(cidrv4BroadcastAddress(cidr), parseAddressv4("192.168.1.255"));
+ * assertEquals(cidrv4BroadcastAddress(cidr), parseAddressv4("192.168.1.255").address);
  * ```
  *
  * @example The broadcast address is not assignable, the one before it is
@@ -1300,15 +1428,15 @@ export function cidrv4Subtract(a: Cidrv4, b: Cidrv4): Cidrv4[] {
  * // Get first 3 IPs starting at network address
  * const first3 = Array.from(cidrv4Addresses(cidr, { offset: 0, count: 3 }));
  * assertEquals(first3, [
- *   parseAddressv4("192.168.1.0"),
- *   parseAddressv4("192.168.1.1"),
- *   parseAddressv4("192.168.1.2"),
+ *   parseAddressv4("192.168.1.0").address,
+ *   parseAddressv4("192.168.1.1").address,
+ *   parseAddressv4("192.168.1.2").address,
  * ]);
  *
  * // Get 5 IPs starting at offset 10
  * const offset10 = Array.from(cidrv4Addresses(cidr, { offset: 10, count: 5 }));
- * assertEquals(offset10[0], parseAddressv4("192.168.1.10"));
- * assertEquals(offset10[4], parseAddressv4("192.168.1.14"));
+ * assertEquals(offset10[0], parseAddressv4("192.168.1.10").address);
+ * assertEquals(offset10[4], parseAddressv4("192.168.1.14").address);
  * ```
  *
  * @example Custom step for even/odd IPs
@@ -1322,17 +1450,17 @@ export function cidrv4Subtract(a: Cidrv4, b: Cidrv4): Cidrv4[] {
  * // Get every other IP (even addresses)
  * const evenIps = Array.from(cidrv4Addresses(cidr, { offset: 0, count: 5, step: 2 }));
  * assertEquals(evenIps, [
- *   parseAddressv4("192.168.1.0"),
- *   parseAddressv4("192.168.1.2"),
- *   parseAddressv4("192.168.1.4"),
- *   parseAddressv4("192.168.1.6"),
- *   parseAddressv4("192.168.1.8"),
+ *   parseAddressv4("192.168.1.0").address,
+ *   parseAddressv4("192.168.1.2").address,
+ *   parseAddressv4("192.168.1.4").address,
+ *   parseAddressv4("192.168.1.6").address,
+ *   parseAddressv4("192.168.1.8").address,
  * ]);
  *
  * // Get odd addresses
  * const oddIps = Array.from(cidrv4Addresses(cidr, { offset: 1, count: 5, step: 2 }));
- * assertEquals(oddIps[0], parseAddressv4("192.168.1.1"));
- * assertEquals(oddIps[1], parseAddressv4("192.168.1.3"));
+ * assertEquals(oddIps[0], parseAddressv4("192.168.1.1").address);
+ * assertEquals(oddIps[1], parseAddressv4("192.168.1.3").address);
  * ```
  *
  * @example Negative step for reverse iteration
@@ -1346,11 +1474,11 @@ export function cidrv4Subtract(a: Cidrv4, b: Cidrv4): Cidrv4[] {
  * // Get 5 IPs counting backwards from offset 10
  * const backwards = Array.from(cidrv4Addresses(cidr, { offset: 10, count: 5, step: -1 }));
  * assertEquals(backwards, [
- *   parseAddressv4("192.168.1.10"),
- *   parseAddressv4("192.168.1.9"),
- *   parseAddressv4("192.168.1.8"),
- *   parseAddressv4("192.168.1.7"),
- *   parseAddressv4("192.168.1.6"),
+ *   parseAddressv4("192.168.1.10").address,
+ *   parseAddressv4("192.168.1.9").address,
+ *   parseAddressv4("192.168.1.8").address,
+ *   parseAddressv4("192.168.1.7").address,
+ *   parseAddressv4("192.168.1.6").address,
  * ]);
  * ```
  *

@@ -17,13 +17,13 @@
  * import { parseAddressv6 } from "@hertzg/ip/addressv6";
  *
  * // IPv4 from parsed value
- * const v4 = classifyAddress(parseAddressv4("192.168.1.1"));
+ * const v4 = classifyAddress(parseAddressv4("192.168.1.1").address);
  * assertEquals(v4.kind, "ipv4");
  * assertEquals(v4.value, 3232235777);
  * assertEquals(v4.classification, "private");
  *
  * // IPv6 from parsed value
- * const v6 = classifyAddress(parseAddressv6("::1"));
+ * const v6 = classifyAddress(parseAddressv6("::1").address);
  * assertEquals(v6.kind, "ipv6");
  * assertEquals(v6.value, 1n);
  * assertEquals(v6.classification, "loopback");
@@ -46,6 +46,13 @@ import { type Classificationv4, classifyAddressv4 } from "./classifyv4.ts";
 import { type Classificationv6, classifyAddressv6 } from "./classifyv6.ts";
 
 export type {
+  /** An IPv4 address as a 32-bit unsigned integer. */
+  Addressv4,
+  /** An IPv6 address as a 128-bit unsigned bigint. */
+  Addressv6,
+} from "./address.ts";
+
+export type {
   /** A plain IP address of either IP version. */
   Address,
   /** Type for all IPv4 classification labels. */
@@ -66,7 +73,7 @@ export type {
  * import { classifyAddress } from "@hertzg/ip/classify";
  * import { parseAddressv4 } from "@hertzg/ip/addressv4";
  *
- * const result = classifyAddress(parseAddressv4("10.0.0.1"));
+ * const result = classifyAddress(parseAddressv4("10.0.0.1").address);
  * assertEquals(result.kind, "ipv4");
  * assertEquals(result.classification, "private");
  * ```
@@ -89,7 +96,7 @@ export type ClassifiedAddressv4 = {
  * import { classifyAddress } from "@hertzg/ip/classify";
  * import { parseAddressv6 } from "@hertzg/ip/addressv6";
  *
- * const result = classifyAddress(parseAddressv6("fe80::1"));
+ * const result = classifyAddress(parseAddressv6("fe80::1").address);
  * assertEquals(result.kind, "ipv6");
  * assertEquals(result.classification, "link-local");
  * ```
@@ -137,7 +144,7 @@ export type ClassifiedAddress =
  * import { classifyAddress } from "@hertzg/ip/classify";
  * import { parseAddressv4 } from "@hertzg/ip/addressv4";
  *
- * const result = classifyAddress(parseAddressv4("192.168.1.1"));
+ * const result = classifyAddress(parseAddressv4("192.168.1.1").address);
  * assertEquals(result.kind, "ipv4");
  * assertEquals(result.value, 3232235777);
  * assertEquals(result.classification, "private");
@@ -156,7 +163,7 @@ export function classifyAddress(address: number): ClassifiedAddressv4;
  * import { classifyAddress } from "@hertzg/ip/classify";
  * import { parseAddressv6 } from "@hertzg/ip/addressv6";
  *
- * const result = classifyAddress(parseAddressv6("fd00::1"));
+ * const result = classifyAddress(parseAddressv6("fd00::1").address);
  * assertEquals(result.kind, "ipv6");
  * assertEquals(result.classification, "unique-local");
  * ```
@@ -204,7 +211,7 @@ export function classifyAddress(address: string): ClassifiedAddress;
  * import { classifyAddress } from "@hertzg/ip/classify";
  * import { parseAddress } from "@hertzg/ip/address";
  *
- * const result = classifyAddress(parseAddress("127.0.0.1"));
+ * const result = classifyAddress(parseAddress("127.0.0.1").address);
  * assertEquals(result.kind, "ipv4");
  * assertEquals(result.classification, "loopback");
  * ```
@@ -213,7 +220,7 @@ export function classifyAddress(address: Address): ClassifiedAddress;
 /** Classifies an IPv4 or IPv6 address, or parses and classifies an IP address string. */
 export function classifyAddress(address: Address | string): ClassifiedAddress {
   if (typeof address === "string") {
-    return classifyAddress(parseAddress(address));
+    return classifyAddress(parseAddress(address).address);
   }
   if (typeof address === "bigint") {
     return {

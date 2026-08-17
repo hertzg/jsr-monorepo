@@ -9,6 +9,19 @@
  * length (`fe80::/10`) or a network mask (`fe80::/ffc0::`), and every
  * operation here accepts both.
  *
+ * @example Both dialects parse, a zone rides along, and each writes back as it came
+ * ```ts
+ * import { assertEquals } from "@std/assert";
+ * import { cidrv6Size, parseCidrv6, stringifyCidrv6 } from "@hertzg/ip/cidrv6";
+ *
+ * const prefixed = parseCidrv6("fe80::%ether1/64");
+ * const masked = parseCidrv6("fe80::/ffff:ffff:ffff:ffff::");
+ *
+ * assertEquals(cidrv6Size(prefixed), cidrv6Size(masked));
+ * assertEquals(stringifyCidrv6(prefixed), "fe80::%ether1/64");
+ * assertEquals(stringifyCidrv6(masked), "fe80::/ffff:ffff:ffff:ffff::");
+ * ```
+ *
  * @example CIDR operations
  * ```ts
  * import { assert, assertEquals } from "@std/assert";
@@ -29,21 +42,52 @@
  *   if (currentIp > cidrv6LastAddress(cidr)) break;
  * }
  *
- * assert(cidrv6Contains(cidr, parseAddressv6("2001:db8:ffff:ffff:ffff:ffff::1")));
- * assertEquals(cidrv6Contains(cidr, parseAddressv6("2001:db9::1")), false);
+ * assert(cidrv6Contains(cidr, parseAddressv6("2001:db8:ffff:ffff:ffff:ffff::1").address));
+ * assertEquals(cidrv6Contains(cidr, parseAddressv6("2001:db9::1").address), false);
  * ```
  *
  * @module
  */
 
 import {
+  type Addressv6,
   compareAddressv6,
   mapFromAddressv4,
   parseAddressv6,
+  type ParsedAddressv6,
   stringifyAddressv6,
+  stringifyAddressv6Expanded,
   unmapToAddressv4,
 } from "./addressv6.ts";
 import type { Cidrv4, MaskedCidrv4, PrefixedCidrv4 } from "./cidrv4.ts";
+import { splitNotation, type ZoneId } from "./notation.ts";
+
+export type {
+  /** An IPv6 address as a 128-bit unsigned bigint. */
+  Addressv6,
+  /** What parseAddressv6 returns: the address and an optional zone ID. */
+  ParsedAddressv6,
+} from "./addressv6.ts";
+export type {
+  /** An IPv4 address as a 32-bit unsigned integer. */
+  Addressv4,
+} from "./addressv4.ts";
+export type {
+  /** Type representing an IPv4 CIDR block, in either dialect. */
+  Cidrv4,
+  /** An IPv4 CIDR block written with a network mask. */
+  MaskedCidrv4,
+  /** An IPv4 network mask as a 32-bit unsigned integer. */
+  Maskv4,
+  /** An IPv4 CIDR block written with a prefix length. */
+  PrefixedCidrv4,
+  /** An IPv4 prefix length, 0 to 32. */
+  PrefixLengthv4,
+} from "./cidrv4.ts";
+export type {
+  /** The zone ID after `%`, a string. */
+  ZoneId,
+} from "./notation.ts";
 
 /**
  * An IPv6 network mask as a 128-bit unsigned bigint, e.g.
@@ -67,7 +111,7 @@ export type PrefixLengthv6 = number;
  */
 export type PrefixedCidrv6 = {
   /** The IPv6 address from the CIDR notation */
-  readonly address: bigint;
+  readonly address: Addressv6;
   /** The prefix length (0-128) */
   readonly prefixLength: PrefixLengthv6;
   /** Absent: the mask dialect is {@link MaskedCidrv6} */
@@ -80,7 +124,7 @@ export type PrefixedCidrv6 = {
  */
 export type MaskedCidrv6 = {
   /** The IPv6 address from the CIDR notation */
-  readonly address: bigint;
+  readonly address: Addressv6;
   /** The network mask, stored as given */
   readonly mask: Maskv6;
   /** Absent: the prefix length dialect is {@link PrefixedCidrv6} */
@@ -117,6 +161,19 @@ export type MaskedCidrv6 = {
  * ```
  */
 export type Cidrv6 = PrefixedCidrv6 | MaskedCidrv6;
+
+/**
+ * What {@link parseCidrv6} returns and what {@link stringifyCidrv6}
+ * accepts: a {@link Cidrv6} in the dialect it was written in, plus the zone
+ * ID if the notation had one (`fe80::%ether1/64`, the form RouterOS and
+ * `netstat -rn` emit for link-local routes). Assignable to {@link Cidrv6},
+ * so a parse result goes straight into every `cidrv6*` operation; none of
+ * them reads the zone.
+ */
+export type ParsedCidrv6 = Cidrv6 & {
+  /** The zone ID after `%`, verbatim, when the notation had one */
+  readonly zoneId?: ZoneId;
+};
 
 /** All 128 bits set: the `/128` mask, and the modulus of every bit operation here. */
 const MASK_ALL_V6 = 0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFn;
@@ -413,7 +470,14 @@ export function cidrv6PrefixLength(
 ): PrefixLengthv6 {
   let value: Maskv6;
   if (typeof cidrOrMask === "string") {
-    value = parseAddressv6(cidrOrMask);
+    // A mask is an address slot, not a notation: no zone rides in on it.
+    const mask = parseAddressv6(cidrOrMask);
+    if (mask.zoneId !== undefined) {
+      throw new TypeError(
+        `IPv6 mask must not have a zone ID, got '${cidrOrMask}'`,
+      );
+    }
+    value = mask.address;
   } else if (typeof cidrOrMask === "bigint") {
     value = cidrOrMask;
   } else if (cidrOrMask.mask !== undefined) {
@@ -455,19 +519,16 @@ const CHAR_ZERO = 0x30;
 const CHAR_NINE = 0x39;
 
 /**
- * Reads a prefix length: decimal digits with no leading zero.
+ * Reads a prefix length: decimal digits with no leading zero. The slice is
+ * non-empty ({@link splitNotation} rejects an empty prefix) and the range
+ * is checked by the caller, which knows the address version.
  *
  * `-` is not a digit, so a signed prefix length is a shape error here rather
- * than a range error from `cidrv6Mask`. That keeps the sign out of the
- * returned value, which is what let `"/-0"` through: `-0` is numerically `0`,
- * so it passes any range check and reaches the caller as a `Cidrv6` holding a
- * negative zero.
+ * than a range error. That keeps the sign out of the returned value, which
+ * is what let `"/-0"` through: `-0` is numerically `0`, so it passes any
+ * range check and reaches the caller as a `Cidrv6` holding a negative zero.
  */
 function parsePrefixLength(part: string): number {
-  if (part.length === 0) {
-    throw new TypeError("CIDR prefix length must be a number, got ''");
-  }
-
   if (part.length > 1 && part.charCodeAt(0) === CHAR_ZERO) {
     throw new TypeError(
       `CIDR prefix length cannot have leading zeros, got '${part}'`,
@@ -487,28 +548,62 @@ function parsePrefixLength(part: string): number {
 }
 
 /**
- * Parses an IPv6 CIDR notation string to a Cidrv6 object.
+ * Parses IPv6 CIDR notation, in either dialect and with an optional zone
+ * ID, to a {@link ParsedCidrv6}.
  *
- * Returns only the parsed values (address and prefix length).
+ * The notation is `address [ "%" zoneId ] "/" prefix` (ADR 0003). The
+ * address is parsed as {@link parseAddressv6} does, zone included. The
+ * prefix is a prefix length when it is decimal digits (no leading zero, no
+ * sign, no whitespace, no trailing text; 0 to 128), and a network mask when
+ * it contains a `:`, parsed with the same rules as an address. A mask is
+ * stored as given and is not required to be contiguous (ADR 0006):
+ * `fe80::/ffff::ffff` parses, and only {@link cidrv6PrefixLength} rejects
+ * it, because that is the call with no answer. An IPv4 mask on an IPv6
+ * address (`fe80::/255.0.0.0`) is rejected.
  *
- * The prefix length is decimal digits and nothing else: no leading zeros, no
- * whitespace, no sign, and no trailing text.
+ * An IPv4-mapped block stays IPv6 here; {@link parseCidr} is the parser
+ * that unmaps it.
  *
- * @param cidr The CIDR notation string (e.g., "2001:db8::/32")
- * @returns A PrefixedCidrv6 object containing the parsed address and prefix length
- * @throws {TypeError} If the format is invalid, including a prefix length
- *   with leading zeros, whitespace or trailing text
- * @throws {RangeError} If the prefix length is out of range (not 0-128)
- * @throws Propagates errors from parseAddressv6 if the address part is invalid
+ * @param cidr The CIDR notation string, e.g. `"2001:db8::/32"`, `"fe80::/ffff:ffff::"`, `"fe80::%ether1/64"`
+ * @returns The address and prefix length or mask as written, and the zone ID if there was one
+ * @throws {TypeError} If the format is invalid: no prefix, a malformed
+ *   address, prefix length or mask, a mask of the other version, an empty
+ *   or malformed zone ID
+ * @throws {RangeError} If a prefix length is a well-formed number outside 0
+ *   to 128, or an embedded IPv4 octet is greater than 255
  *
  * @example Basic CIDR parsing
  * ```ts
  * import { assertEquals } from "@std/assert";
  * import { parseCidrv6 } from "@hertzg/ip/cidrv6";
  *
- * const cidr = parseCidrv6("2001:db8::/32");
- * assertEquals(cidr.address, 42540766411282592856903984951653826560n);
- * assertEquals(cidr.prefixLength, 32);
+ * assertEquals(parseCidrv6("2001:db8::/32"), {
+ *   address: 42540766411282592856903984951653826560n,
+ *   prefixLength: 32,
+ * });
+ * ```
+ *
+ * @example The mask dialect is stored as a mask
+ * ```ts
+ * import { assertEquals } from "@std/assert";
+ * import { parseCidrv6 } from "@hertzg/ip/cidrv6";
+ *
+ * assertEquals(parseCidrv6("fe80::/ffff:ffff::"), {
+ *   address: 0xfe80n << 112n,
+ *   mask: 0xFFFFFFFF000000000000000000000000n,
+ * });
+ * ```
+ *
+ * @example A zone ID is carried verbatim
+ * ```ts
+ * import { assertEquals } from "@std/assert";
+ * import { parseCidrv6 } from "@hertzg/ip/cidrv6";
+ *
+ * assertEquals(parseCidrv6("fe80::%ether1/64"), {
+ *   address: 0xfe80n << 112n,
+ *   prefixLength: 64,
+ *   zoneId: "ether1",
+ * });
  * ```
  *
  * @example Error handling
@@ -520,54 +615,87 @@ function parsePrefixLength(part: string): number {
  * assertThrows(() => parseCidrv6("2001:db8::/"), TypeError);
  * assertThrows(() => parseCidrv6("2001:db8::/129"), RangeError);
  * assertThrows(() => parseCidrv6("2001:db8::/032"), TypeError);
+ * assertThrows(() => parseCidrv6("fe80::/255.0.0.0"), TypeError);
+ * assertThrows(() => parseCidrv6("fe80::/64%eth0"), TypeError);
+ * assertThrows(() => parseCidrv6("fe80::%/64"), TypeError);
+ * assertThrows(() => parseCidrv6("192.168.1.0/24"), TypeError);
  * ```
  */
-export function parseCidrv6(cidr: string): PrefixedCidrv6 {
-  const slashIndex = cidr.lastIndexOf("/");
+export function parseCidrv6(cidr: string): ParsedCidrv6 {
+  const slots = splitNotation(cidr);
 
-  if (slashIndex === -1) {
+  if (slots.prefix === undefined) {
     throw new TypeError(
-      `CIDR notation must be in format '<address>/<prefix>'`,
+      `CIDR notation must be in format '<address>/<prefix>', got '${cidr}'`,
     );
   }
 
-  const addressPart = cidr.slice(0, slashIndex);
-  const prefixPart = cidr.slice(slashIndex + 1);
+  const address = parseAddressv6(slots.address).address;
 
-  if (prefixPart === "") {
-    throw new TypeError("CIDR prefix length must be specified");
+  // A prefix with a "." or ":" is a mask, scanned as an address. One with a
+  // "." and no ":" is an IPv4 mask, which cannot agree with an IPv6 address,
+  // so it is rejected before any scanning (ADR 0003, rule 3).
+  let block: Cidrv6;
+  if (slots.prefix.includes(":")) {
+    block = { address, mask: parseAddressv6(slots.prefix).address };
+  } else if (slots.prefix.includes(".")) {
+    throw new TypeError(
+      `IPv6 CIDR mask must be an IPv6 address, got '${slots.prefix}'`,
+    );
+  } else {
+    const prefixLength = parsePrefixLength(slots.prefix);
+    if (prefixLength > 128) {
+      throw new RangeError(
+        `CIDR prefix length must be 0-128, got ${prefixLength}`,
+      );
+    }
+    block = { address, prefixLength };
   }
 
-  const address = parseAddressv6(addressPart);
-  const prefixLength = parsePrefixLength(prefixPart);
-
-  // Validate prefix length
-  cidrv6Mask(prefixLength);
-
-  return {
-    address,
-    prefixLength,
-  };
+  if (slots.zoneId === undefined) {
+    return block;
+  }
+  if (/\s/.test(slots.zoneId)) {
+    throw new TypeError(
+      `Zone ID must not contain whitespace, got '${slots.zoneId}'`,
+    );
+  }
+  return { ...block, zoneId: slots.zoneId };
 }
 
 /**
- * Stringifies a Cidrv6 object to CIDR notation.
+ * Stringifies an IPv6 CIDR block, or an address, to CIDR notation with the
+ * address compressed.
  *
  * The dialect is preserved: a {@link PrefixedCidrv6} is written as
  * `address/prefixLength`, a {@link MaskedCidrv6} as `address/mask` with the
  * mask in compressed colon-hexadecimal. The address is written as stored,
- * host bits included.
+ * host bits included. A bare {@link Addressv6}, or a {@link ParsedAddressv6}
+ * with no prefix length or mask, gets the noun's default, `/128`. Nothing
+ * is mapped: an IPv4 `number` is a type error here, and
+ * {@link mapFromAddressv4} is the deliberate step.
  *
- * @param cidr The Cidrv6 object to stringify
- * @returns The CIDR notation string (e.g., "2001:db8::/32" or "2001:db8::/ffff:ffff::")
+ * Given a {@link ParsedCidrv6} (or parsed address), a truthy `zoneId` is
+ * written between the address and the `/`, so
+ * `stringifyCidrv6(parseCidrv6(s))` gives back `s` for every accepted `s` in
+ * canonical form. `zoneId` must not contain `%`, `/` or whitespace: a zone
+ * containing any of them cannot be written in RFC 4007 textual form at all,
+ * because `%` is the delimiter, and the result would not re-parse. If you
+ * are producing a URI, percent-encode it there (RFC 9844); this package
+ * does not apply that transform, since `%25` is also a valid interface
+ * index 25.
+ *
+ * @param cidr The CIDR block in either dialect, a parse result, or a bare address
+ * @returns The CIDR notation string, e.g. `"2001:db8::/32"`, `"2001:db8::/ffff:ffff::"`, `"fe80::%ether1/64"`
+ * @throws {RangeError} If the address, or a mask, is not a 128-bit unsigned integer
  *
  * @example Basic stringifying
  * ```ts
  * import { assertEquals } from "@std/assert";
  * import { parseCidrv6, stringifyCidrv6 } from "@hertzg/ip/cidrv6";
  *
- * const cidr = parseCidrv6("2001:db8::/32");
- * assertEquals(stringifyCidrv6(cidr), "2001:db8::/32");
+ * assertEquals(stringifyCidrv6(parseCidrv6("2001:db8::/32")), "2001:db8::/32");
+ * assertEquals(stringifyCidrv6(parseCidrv6("fe80::%ether1/64")), "fe80::%ether1/64");
  * ```
  *
  * @example A masked block is written with its mask
@@ -580,12 +708,84 @@ export function parseCidrv6(cidr: string): PrefixedCidrv6 {
  *   "fe80::/ffff:ffff::",
  * );
  * ```
+ *
+ * @example A bare address is a /128, and a zone goes before the slash
+ * ```ts
+ * import { assertEquals } from "@std/assert";
+ * import { stringifyCidrv6 } from "@hertzg/ip/cidrv6";
+ *
+ * assertEquals(stringifyCidrv6(1n), "::1/128");
+ * assertEquals(
+ *   stringifyCidrv6({ address: 0xfe800000000000000000000000000001n, zoneId: "eth0" }),
+ *   "fe80::1%eth0/128",
+ * );
+ * ```
  */
-export function stringifyCidrv6(cidr: Cidrv6): string {
-  const address = stringifyAddressv6(cidr.address);
-  return cidr.mask !== undefined
-    ? `${address}/${stringifyAddressv6(cidr.mask)}`
-    : `${address}/${cidr.prefixLength}`;
+export function stringifyCidrv6(
+  cidr: Addressv6 | ParsedAddressv6 | ParsedCidrv6,
+): string {
+  return writeCidrv6(cidr, stringifyAddressv6);
+}
+
+/**
+ * Stringifies an IPv6 CIDR block, or an address, to CIDR notation with the
+ * address written in full uncompressed colon-hexadecimal.
+ *
+ * The expanded counterpart of {@link stringifyCidrv6}, with the same
+ * dialect, default and zone rules: `/prefixLength` or `/mask` as stored,
+ * `/128` for a bare address, `%zoneId` before the slash when there is one.
+ * A mask is written expanded too, so both halves line up.
+ *
+ * @param cidr The CIDR block in either dialect, a parse result, or a bare address
+ * @returns The CIDR notation string with all 8 groups of the address written in full
+ * @throws {RangeError} If the address, or a mask, is not a 128-bit unsigned integer
+ *
+ * @example
+ * ```ts
+ * import { assertEquals } from "@std/assert";
+ * import { parseCidrv6, stringifyCidrv6Expanded } from "@hertzg/ip/cidrv6";
+ *
+ * assertEquals(
+ *   stringifyCidrv6Expanded(parseCidrv6("2001:db8::/32")),
+ *   "2001:0db8:0000:0000:0000:0000:0000:0000/32",
+ * );
+ * assertEquals(
+ *   stringifyCidrv6Expanded(parseCidrv6("fe80::%ether1/64")),
+ *   "fe80:0000:0000:0000:0000:0000:0000:0000%ether1/64",
+ * );
+ * assertEquals(
+ *   stringifyCidrv6Expanded(parseCidrv6("fe80::/ffff:ffff::")),
+ *   "fe80:0000:0000:0000:0000:0000:0000:0000/ffff:ffff:0000:0000:0000:0000:0000:0000",
+ * );
+ * assertEquals(stringifyCidrv6Expanded(1n), "0000:0000:0000:0000:0000:0000:0000:0001/128");
+ * ```
+ */
+export function stringifyCidrv6Expanded(
+  cidr: Addressv6 | ParsedAddressv6 | ParsedCidrv6,
+): string {
+  return writeCidrv6(cidr, stringifyAddressv6Expanded);
+}
+
+/**
+ * The body shared by {@link stringifyCidrv6} and
+ * {@link stringifyCidrv6Expanded}: dialect, default and zone rules, with
+ * the address form supplied by the caller.
+ */
+function writeCidrv6(
+  cidr: Addressv6 | ParsedAddressv6 | ParsedCidrv6,
+  stringify: (address: Addressv6 | ParsedAddressv6) => string,
+): string {
+  if (typeof cidr === "bigint") {
+    return `${stringify(cidr)}/128`;
+  }
+  const address = stringify(cidr);
+  if ("mask" in cidr && cidr.mask !== undefined) {
+    return `${address}/${stringify(cidr.mask)}`;
+  }
+  if ("prefixLength" in cidr && cidr.prefixLength !== undefined) {
+    return `${address}/${cidr.prefixLength}`;
+  }
+  return `${address}/128`;
 }
 
 /**
@@ -603,11 +803,11 @@ export function stringifyCidrv6(cidr: Cidrv6): string {
  *
  * const cidr = parseCidrv6("2001:db8::/32");
  *
- * assert(cidrv6Contains(cidr, parseAddressv6("2001:db8::")));
- * assert(cidrv6Contains(cidr, parseAddressv6("2001:db8::1")));
- * assert(cidrv6Contains(cidr, parseAddressv6("2001:db8:ffff:ffff:ffff:ffff:ffff:ffff")));
- * assertEquals(cidrv6Contains(cidr, parseAddressv6("2001:db9::1")), false);
- * assertEquals(cidrv6Contains(cidr, parseAddressv6("2001:db7:ffff:ffff:ffff:ffff:ffff:ffff")), false);
+ * assert(cidrv6Contains(cidr, parseAddressv6("2001:db8::").address));
+ * assert(cidrv6Contains(cidr, parseAddressv6("2001:db8::1").address));
+ * assert(cidrv6Contains(cidr, parseAddressv6("2001:db8:ffff:ffff:ffff:ffff:ffff:ffff").address));
+ * assertEquals(cidrv6Contains(cidr, parseAddressv6("2001:db9::1").address), false);
+ * assertEquals(cidrv6Contains(cidr, parseAddressv6("2001:db7:ffff:ffff:ffff:ffff:ffff:ffff").address), false);
  * ```
  *
  * @example IP assignment workflow
@@ -662,7 +862,7 @@ export function cidrv6Contains(cidr: Cidrv6, address: bigint): boolean {
  * import { parseAddressv6 } from "@hertzg/ip/addressv6";
  *
  * const cidr = parseCidrv6("2001:db8::/32");
- * assertEquals(cidrv6FirstAddress(cidr), parseAddressv6("2001:db8::"));
+ * assertEquals(cidrv6FirstAddress(cidr), parseAddressv6("2001:db8::").address);
  * ```
  *
  * @example Skipping the Subnet-Router anycast on a link that reserves it
@@ -703,7 +903,7 @@ export function cidrv6FirstAddress(cidr: Cidrv6): bigint {
  * import { parseAddressv6 } from "@hertzg/ip/addressv6";
  *
  * const cidr = parseCidrv6("2001:db8::/120");
- * assertEquals(cidrv6LastAddress(cidr), parseAddressv6("2001:db8::ff"));
+ * assertEquals(cidrv6LastAddress(cidr), parseAddressv6("2001:db8::ff").address);
  * ```
  */
 export function cidrv6LastAddress(cidr: Cidrv6): bigint {
@@ -1087,9 +1287,9 @@ export function cidrv6Subtract(a: Cidrv6, b: Cidrv6): Cidrv6[] {
  * // Get first 3 IPs starting at network address
  * const first3 = Array.from(cidrv6Addresses(cidr, { offset: 0, count: 3 }));
  * assertEquals(first3, [
- *   parseAddressv6("fd00::0"),
- *   parseAddressv6("fd00::1"),
- *   parseAddressv6("fd00::2"),
+ *   parseAddressv6("fd00::0").address,
+ *   parseAddressv6("fd00::1").address,
+ *   parseAddressv6("fd00::2").address,
  * ]);
  * ```
  *
@@ -1104,11 +1304,11 @@ export function cidrv6Subtract(a: Cidrv6, b: Cidrv6): Cidrv6[] {
  * // Get every other IP (even addresses)
  * const evenIps = Array.from(cidrv6Addresses(cidr, { offset: 0, count: 5, step: 2 }));
  * assertEquals(evenIps, [
- *   parseAddressv6("fd00::0"),
- *   parseAddressv6("fd00::2"),
- *   parseAddressv6("fd00::4"),
- *   parseAddressv6("fd00::6"),
- *   parseAddressv6("fd00::8"),
+ *   parseAddressv6("fd00::0").address,
+ *   parseAddressv6("fd00::2").address,
+ *   parseAddressv6("fd00::4").address,
+ *   parseAddressv6("fd00::6").address,
+ *   parseAddressv6("fd00::8").address,
  * ]);
  * ```
  *
@@ -1123,11 +1323,11 @@ export function cidrv6Subtract(a: Cidrv6, b: Cidrv6): Cidrv6[] {
  * // Get 5 IPs counting backwards from offset 10
  * const backwards = Array.from(cidrv6Addresses(cidr, { offset: 10, count: 5, step: -1 }));
  * assertEquals(backwards, [
- *   parseAddressv6("fd00::a"),
- *   parseAddressv6("fd00::9"),
- *   parseAddressv6("fd00::8"),
- *   parseAddressv6("fd00::7"),
- *   parseAddressv6("fd00::6"),
+ *   parseAddressv6("fd00::a").address,
+ *   parseAddressv6("fd00::9").address,
+ *   parseAddressv6("fd00::8").address,
+ *   parseAddressv6("fd00::7").address,
+ *   parseAddressv6("fd00::6").address,
  * ]);
  * ```
  *

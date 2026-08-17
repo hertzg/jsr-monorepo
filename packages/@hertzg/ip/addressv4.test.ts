@@ -8,15 +8,15 @@ import { isValidAddressv4 } from "./validatev4.ts";
 
 Deno.test("parseAddressv4", async (t) => {
   await t.step("valid addresses", () => {
-    assertEquals(parseAddressv4("192.168.1.1"), 3232235777);
-    assertEquals(parseAddressv4("10.0.0.1"), 167772161);
-    assertEquals(parseAddressv4("172.16.0.1"), 2886729729);
-    assertEquals(parseAddressv4("127.0.0.1"), 2130706433);
+    assertEquals(parseAddressv4("192.168.1.1"), { address: 3232235777 });
+    assertEquals(parseAddressv4("10.0.0.1"), { address: 167772161 });
+    assertEquals(parseAddressv4("172.16.0.1"), { address: 2886729729 });
+    assertEquals(parseAddressv4("127.0.0.1"), { address: 2130706433 });
   });
 
   await t.step("edge cases", () => {
-    assertEquals(parseAddressv4("0.0.0.0"), 0);
-    assertEquals(parseAddressv4("255.255.255.255"), 4294967295);
+    assertEquals(parseAddressv4("0.0.0.0"), { address: 0 });
+    assertEquals(parseAddressv4("255.255.255.255"), { address: 4294967295 });
   });
 
   await t.step("invalid format - wrong number of octets", () => {
@@ -127,6 +127,66 @@ Deno.test("parseAddressv4", async (t) => {
     // by that round-trip would accept this and return 16909056.
     assertThrows(() => parseAddressv4("1.2.3.NaN"), TypeError);
   });
+
+  await t.step("carries a zone ID verbatim", () => {
+    // RouterOS: gateway=10.155.101.1%ether1
+    assertEquals(parseAddressv4("10.155.101.1%ether1"), {
+      address: 177956097,
+      zoneId: "ether1",
+    });
+    assertEquals(parseAddressv4("192.168.1.1%12"), {
+      address: 3232235777,
+      zoneId: "12",
+    });
+    assertEquals(parseAddressv4("192.168.1.1%eth0.100"), {
+      address: 3232235777,
+      zoneId: "eth0.100",
+    });
+    assertEquals(parseAddressv4("192.168.1.1%sfp-sfpplus2@myVrf"), {
+      address: 3232235777,
+      zoneId: "sfp-sfpplus2@myVrf",
+    });
+  });
+
+  await t.step("never percent-decodes the zone ID", () => {
+    assertEquals(parseAddressv4("192.168.1.1%25eth0"), {
+      address: 3232235777,
+      zoneId: "25eth0",
+    });
+  });
+
+  await t.step("has no zoneId key when there is no zone", () => {
+    assertEquals(Object.keys(parseAddressv4("192.168.1.1")), ["address"]);
+  });
+
+  await t.step("rejects a malformed zone ID as a shape error", () => {
+    assertThrows(() => parseAddressv4("192.168.1.1%"), TypeError);
+    assertThrows(() => parseAddressv4("%eth0"), TypeError);
+    assertThrows(() => parseAddressv4("192.168.1.1%eth0%1"), TypeError);
+    assertThrows(
+      () => parseAddressv4("192.168.1.1% eth0"),
+      TypeError,
+      "Zone ID must not contain whitespace, got ' eth0'",
+    );
+    assertThrows(() => parseAddressv4("192.168.1.1%eth0 "), TypeError);
+    assertThrows(() => parseAddressv4("192.168.1.1%eth\t0"), TypeError);
+  });
+
+  await t.step("rejects a prefix: that slot belongs to parseCidrv4", () => {
+    assertThrows(
+      () => parseAddressv4("192.168.1.0/24"),
+      TypeError,
+      "IPv4 address must not have a prefix, got '/24'",
+    );
+    assertThrows(() => parseAddressv4("192.168.1.0/255.255.255.0"), TypeError);
+    assertThrows(() => parseAddressv4("192.168.1.1%eth0/24"), TypeError);
+    assertThrows(() => parseAddressv4("192.168.1.0/"), TypeError);
+  });
+
+  await t.step("rejects IPv6 notation, mapped or not", () => {
+    assertThrows(() => parseAddressv4("::ffff:192.168.1.1"), TypeError);
+    assertThrows(() => parseAddressv4("::1"), TypeError);
+  });
 });
 
 Deno.test("stringifyAddressv4", async (t) => {
@@ -135,6 +195,28 @@ Deno.test("stringifyAddressv4", async (t) => {
     assertEquals(stringifyAddressv4(167772161), "10.0.0.1");
     assertEquals(stringifyAddressv4(2886729729), "172.16.0.1");
     assertEquals(stringifyAddressv4(2130706433), "127.0.0.1");
+  });
+
+  await t.step("a parse result, with and without a zone ID", () => {
+    assertEquals(stringifyAddressv4({ address: 3232235777 }), "192.168.1.1");
+    assertEquals(
+      stringifyAddressv4({ address: 3232235777, zoneId: "ether1" }),
+      "192.168.1.1%ether1",
+    );
+  });
+
+  await t.step("an empty zone ID writes no %", () => {
+    assertEquals(
+      stringifyAddressv4({ address: 3232235777, zoneId: "" }),
+      "192.168.1.1",
+    );
+  });
+
+  await t.step("a hand-built zone ID is written as given", () => {
+    // Garbage in, garbage out: parseAddressv4 rejects the result.
+    const written = stringifyAddressv4({ address: 1, zoneId: "eth0%1" });
+    assertEquals(written, "0.0.0.1%eth0%1");
+    assertThrows(() => parseAddressv4(written), TypeError);
   });
 
   await t.step("edge cases", () => {
@@ -165,6 +247,9 @@ Deno.test("IPv4 round-trip", async (t) => {
       "127.0.0.1",
       "0.0.0.0",
       "255.255.255.255",
+      "192.168.1.1%ether1",
+      "10.155.101.1%sfp-sfpplus2@myVrf",
+      "192.168.1.1%25",
     ];
 
     for (const addr of addresses) {
@@ -183,7 +268,7 @@ Deno.test("IPv4 round-trip", async (t) => {
     ];
 
     for (const val of values) {
-      assertEquals(parseAddressv4(stringifyAddressv4(val)), val);
+      assertEquals(parseAddressv4(stringifyAddressv4(val)), { address: val });
     }
   });
 });
@@ -197,8 +282,14 @@ Deno.test("isValidAddressv4", async (t) => {
     assert(isValidAddressv4("172.16.0.1"));
   });
 
+  await t.step("accepts a zone ID, as the parser does", () => {
+    assert(isValidAddressv4("192.168.1.1%ether1"));
+  });
+
   await t.step("invalid addresses", () => {
     assertEquals(isValidAddressv4(""), false);
+    assertEquals(isValidAddressv4("192.168.1.1%"), false);
+    assertEquals(isValidAddressv4("192.168.1.1% eth0"), false);
     assertEquals(isValidAddressv4("256.0.0.1"), false);
     assertEquals(isValidAddressv4("1.2.3"), false);
     assertEquals(isValidAddressv4("1.2.3.4.5"), false);
@@ -212,15 +303,24 @@ Deno.test("isValidAddressv4", async (t) => {
 Deno.test("compareAddressv4", async (t) => {
   await t.step("orders numerically ascending", () => {
     assertEquals(
-      compareAddressv4(parseAddressv4("10.0.0.1"), parseAddressv4("10.0.0.2")),
+      compareAddressv4(
+        parseAddressv4("10.0.0.1").address,
+        parseAddressv4("10.0.0.2").address,
+      ),
       -1,
     );
     assertEquals(
-      compareAddressv4(parseAddressv4("10.0.0.2"), parseAddressv4("10.0.0.1")),
+      compareAddressv4(
+        parseAddressv4("10.0.0.2").address,
+        parseAddressv4("10.0.0.1").address,
+      ),
       1,
     );
     assertEquals(
-      compareAddressv4(parseAddressv4("10.0.0.1"), parseAddressv4("10.0.0.1")),
+      compareAddressv4(
+        parseAddressv4("10.0.0.1").address,
+        parseAddressv4("10.0.0.1").address,
+      ),
       0,
     );
   });
@@ -228,22 +328,24 @@ Deno.test("compareAddressv4", async (t) => {
   await t.step("returns only -1, 0 or 1, never a magnitude", () => {
     assertEquals(
       compareAddressv4(
-        parseAddressv4("0.0.0.0"),
-        parseAddressv4("255.255.255.255"),
+        parseAddressv4("0.0.0.0").address,
+        parseAddressv4("255.255.255.255").address,
       ),
       -1,
     );
     assertEquals(
       compareAddressv4(
-        parseAddressv4("255.255.255.255"),
-        parseAddressv4("0.0.0.0"),
+        parseAddressv4("255.255.255.255").address,
+        parseAddressv4("0.0.0.0").address,
       ),
       1,
     );
   });
 
   await t.step("sorts numerically, not lexicographically", () => {
-    const addresses = ["10.0.0.9", "10.0.0.10", "10.0.0.2"].map(parseAddressv4);
+    const addresses = ["10.0.0.9", "10.0.0.10", "10.0.0.2"].map(
+      (s) => parseAddressv4(s).address,
+    );
     assertEquals(addresses.toSorted(compareAddressv4).map(stringifyAddressv4), [
       "10.0.0.2",
       "10.0.0.9",

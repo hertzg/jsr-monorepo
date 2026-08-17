@@ -10,11 +10,22 @@
  * import { assertEquals } from "@std/assert";
  * import { parseAddressv4, stringifyAddressv4 } from "@hertzg/ip/addressv4";
  *
- * const ip = parseAddressv4("192.168.1.1");
- * assertEquals(ip, 3232235777);
+ * const { address } = parseAddressv4("192.168.1.1");
+ * assertEquals(address, 3232235777);
  *
- * const next = ip + 1;
+ * const next = address + 1;
  * assertEquals(stringifyAddressv4(next), "192.168.1.2");
+ * ```
+ *
+ * @example Zone IDs are carried, not applied
+ * ```ts
+ * import { assertEquals } from "@std/assert";
+ * import { parseAddressv4, stringifyAddressv4 } from "@hertzg/ip/addressv4";
+ *
+ * const gateway = parseAddressv4("10.155.101.1%ether1");
+ * assertEquals(gateway, { address: 177956097, zoneId: "ether1" });
+ * assertEquals(stringifyAddressv4(gateway), "10.155.101.1%ether1");
+ * assertEquals(stringifyAddressv4(gateway.address), "10.155.101.1");
  * ```
  *
  * @example Bitwise operations on IPv4 addresses
@@ -28,7 +39,7 @@
  * import { parseAddressv4, stringifyAddressv4 } from "@hertzg/ip/addressv4";
  * import { cidrv4Mask } from "@hertzg/ip/cidrv4";
  *
- * const ip = parseAddressv4("192.168.1.100");
+ * const ip = parseAddressv4("192.168.1.100").address;
  * const mask = cidrv4Mask(24);
  *
  * // Bitwise NOT (invert all bits)
@@ -44,12 +55,39 @@
  * assertEquals(stringifyAddressv4(broadcast), "192.168.1.255");
  *
  * // Direct comparison (no isEqual() needed)
- * assertEquals(parseAddressv4("10.0.0.1") === parseAddressv4("10.0.0.1"), true);
- * assertEquals(parseAddressv4("10.0.0.1") === parseAddressv4("10.0.0.2"), false);
+ * assertEquals(parseAddressv4("10.0.0.1").address === parseAddressv4("10.0.0.1").address, true);
+ * assertEquals(parseAddressv4("10.0.0.1").address === parseAddressv4("10.0.0.2").address, false);
  * ```
  *
  * @module
  */
+
+import { splitNotation, type ZoneId } from "./notation.ts";
+
+export type {
+  /** The zone ID after `%`, a string. */
+  ZoneId,
+} from "./notation.ts";
+
+/**
+ * An IPv4 address as a 32-bit unsigned integer, `0` to `4294967295`. The
+ * primitive type is what carries the version: a `number` is IPv4, a
+ * `bigint` is IPv6 (ADR 0001).
+ */
+export type Addressv4 = number;
+
+/**
+ * What {@link parseAddressv4} returns and what {@link stringifyAddressv4}
+ * accepts: the address, plus the zone ID if the notation had one. Read
+ * `.address` for the bare {@link Addressv4}; the zone never touches the
+ * value, and no operation in this package reads it.
+ */
+export type ParsedAddressv4 = {
+  /** The address as a 32-bit unsigned integer */
+  readonly address: Addressv4;
+  /** The zone ID after `%`, verbatim, when the notation had one */
+  readonly zoneId?: ZoneId;
+};
 
 /** Character codes the octet scanner compares against. */
 const CHAR_ZERO = 0x30;
@@ -86,42 +124,10 @@ function failIpv4(address: string, error: TypeError | RangeError): never {
 }
 
 /**
- * Parses an IPv4 address in dotted decimal notation to a number.
- *
- * An octet is decimal digits and nothing else: no leading zeros (except "0"
- * itself), no surrounding or embedded whitespace, no sign, no radix prefix,
- * and no trailing text.
- *
- * @param address The address string in dotted decimal notation
- * @returns The IPv4 address as a 32-bit unsigned integer
- * @throws {TypeError} If the format is invalid -- wrong number of octets, a
- *   non-decimal octet, leading zeros, a sign, whitespace, or trailing text
- * @throws {RangeError} If an octet is a well-formed number greater than 255
- *
- * @example Basic parsing
- * ```ts
- * import { assertEquals } from "@std/assert";
- * import { parseAddressv4 } from "@hertzg/ip/addressv4";
- *
- * assertEquals(parseAddressv4("192.168.1.1"), 3232235777);
- * assertEquals(parseAddressv4("10.0.0.1"), 167772161);
- * assertEquals(parseAddressv4("0.0.0.0"), 0);
- * assertEquals(parseAddressv4("255.255.255.255"), 4294967295);
- * ```
- *
- * @example Error handling
- * ```ts
- * import { assertThrows } from "@std/assert";
- * import { parseAddressv4 } from "@hertzg/ip/addressv4";
- *
- * assertThrows(() => parseAddressv4("192.168.1"), TypeError);
- * assertThrows(() => parseAddressv4("192.168.1.256"), RangeError);
- * assertThrows(() => parseAddressv4("192.168.01.1"), TypeError);
- * assertThrows(() => parseAddressv4(" 192.168.1.1"), TypeError);
- * assertThrows(() => parseAddressv4("192.168.1.1abc"), TypeError);
- * ```
+ * Reads a bare IPv4 address slice, the layer-2 scanner of ADR 0003. The
+ * slice holds neither `%` nor `/`; {@link splitNotation} took those off.
  */
-export function parseAddressv4(address: string): number {
+function scanAddressv4(address: string): Addressv4 {
   const length = address.length;
   let value = 0;
   let index = 0;
@@ -184,12 +190,107 @@ export function parseAddressv4(address: string): number {
 }
 
 /**
- * Stringifies a number to an IPv4 address in dotted decimal notation.
+ * Parses an IPv4 address in dotted decimal notation, with an optional zone
+ * ID, to its numeric value.
  *
- * The number must represent a valid 32-bit unsigned integer (0 to 4294967295).
+ * The notation is `address [ "%" zoneId ]` (ADR 0003). An octet is decimal
+ * digits and nothing else: no leading zeros (except "0" itself), no
+ * surrounding or embedded whitespace, no sign, no radix prefix, and no
+ * trailing text. The zone ID, when present, is carried verbatim: it may
+ * not contain `%`, `/` or whitespace, is never percent-decoded, and never
+ * touches the numeric value. RouterOS writes `gateway=10.155.101.1%ether1`,
+ * so IPv4 zones are accepted on the same terms as IPv6 ones.
  *
- * @param address The address as a 32-bit unsigned integer
- * @returns The IPv4 address string in dotted decimal notation
+ * A prefix is not accepted; that is {@link parseCidrv4}'s slot. An
+ * IPv4-mapped IPv6 address such as `::ffff:1.2.3.4` is IPv6 notation and is
+ * rejected here; {@link parseAddress} unmaps it.
+ *
+ * @param address The address string, dotted decimal with an optional `%zoneId`
+ * @returns The address as a 32-bit unsigned integer, and the zone ID if there was one
+ * @throws {TypeError} If the format is invalid -- wrong number of octets, a
+ *   non-decimal octet, leading zeros, a sign, whitespace, trailing text, a
+ *   prefix, an empty or malformed zone ID
+ * @throws {RangeError} If an octet is a well-formed number greater than 255
+ *
+ * @example Basic parsing
+ * ```ts
+ * import { assertEquals } from "@std/assert";
+ * import { parseAddressv4 } from "@hertzg/ip/addressv4";
+ *
+ * assertEquals(parseAddressv4("192.168.1.1"), { address: 3232235777 });
+ * assertEquals(parseAddressv4("10.0.0.1"), { address: 167772161 });
+ * assertEquals(parseAddressv4("0.0.0.0"), { address: 0 });
+ * assertEquals(parseAddressv4("255.255.255.255"), { address: 4294967295 });
+ * ```
+ *
+ * @example A zone ID is carried verbatim
+ * ```ts
+ * import { assertEquals } from "@std/assert";
+ * import { parseAddressv4 } from "@hertzg/ip/addressv4";
+ *
+ * assertEquals(parseAddressv4("192.168.1.1%ether1"), {
+ *   address: 3232235777,
+ *   zoneId: "ether1",
+ * });
+ * assertEquals(parseAddressv4("192.168.1.1%25"), {
+ *   address: 3232235777,
+ *   zoneId: "25",
+ * });
+ * ```
+ *
+ * @example Error handling
+ * ```ts
+ * import { assertThrows } from "@std/assert";
+ * import { parseAddressv4 } from "@hertzg/ip/addressv4";
+ *
+ * assertThrows(() => parseAddressv4("192.168.1"), TypeError);
+ * assertThrows(() => parseAddressv4("192.168.1.256"), RangeError);
+ * assertThrows(() => parseAddressv4("192.168.01.1"), TypeError);
+ * assertThrows(() => parseAddressv4(" 192.168.1.1"), TypeError);
+ * assertThrows(() => parseAddressv4("192.168.1.1abc"), TypeError);
+ * assertThrows(() => parseAddressv4("192.168.1.1/24"), TypeError);
+ * assertThrows(() => parseAddressv4("192.168.1.1%"), TypeError);
+ * assertThrows(() => parseAddressv4("192.168.1.1% eth0"), TypeError);
+ * assertThrows(() => parseAddressv4("::ffff:192.168.1.1"), TypeError);
+ * ```
+ */
+export function parseAddressv4(address: string): ParsedAddressv4 {
+  const slots = splitNotation(address);
+
+  if (slots.prefix !== undefined) {
+    throw new TypeError(
+      `IPv4 address must not have a prefix, got '/${slots.prefix}'`,
+    );
+  }
+
+  const value = scanAddressv4(slots.address);
+
+  if (slots.zoneId === undefined) {
+    return { address: value };
+  }
+  if (/\s/.test(slots.zoneId)) {
+    throw new TypeError(
+      `Zone ID must not contain whitespace, got '${slots.zoneId}'`,
+    );
+  }
+  return { address: value, zoneId: slots.zoneId };
+}
+
+/**
+ * Stringifies an IPv4 address to dotted decimal notation.
+ *
+ * Takes either the bare 32-bit unsigned integer or a {@link ParsedAddressv4};
+ * given the latter, a truthy `zoneId` is appended after `%`, so
+ * `stringifyAddressv4(parseAddressv4(s))` gives back `s` for every accepted
+ * `s` in canonical form. `zoneId` must not contain `%`, `/` or whitespace:
+ * a zone containing any of them cannot be written in RFC 4007 textual form
+ * at all, because `%` is the delimiter, and the result would not re-parse.
+ * If you are producing a URI, percent-encode it there (RFC 9844,
+ * `[fe80::1%25eth0]`); this package does not apply that transform, since
+ * `%25` is also a valid interface index 25.
+ *
+ * @param address The address as a 32-bit unsigned integer, or a parse result
+ * @returns The IPv4 address string in dotted decimal notation, `%zoneId` appended when there is one
  * @throws {RangeError} If the address is negative or greater than 2^32-1
  *
  * @example Basic stringifying
@@ -203,6 +304,16 @@ export function parseAddressv4(address: string): number {
  * assertEquals(stringifyAddressv4(4294967295), "255.255.255.255");
  * ```
  *
+ * @example A parse result round-trips, zone included
+ * ```ts
+ * import { assertEquals } from "@std/assert";
+ * import { parseAddressv4, stringifyAddressv4 } from "@hertzg/ip/addressv4";
+ *
+ * assertEquals(stringifyAddressv4(parseAddressv4("192.168.1.1%ether1")), "192.168.1.1%ether1");
+ * assertEquals(stringifyAddressv4({ address: 3232235777 }), "192.168.1.1");
+ * assertEquals(stringifyAddressv4({ address: 3232235777, zoneId: "" }), "192.168.1.1");
+ * ```
+ *
  * @example Error handling
  * ```ts
  * import { assertThrows } from "@std/assert";
@@ -212,7 +323,14 @@ export function parseAddressv4(address: string): number {
  * assertThrows(() => stringifyAddressv4(4294967296), RangeError);
  * ```
  */
-export function stringifyAddressv4(address: number): string {
+export function stringifyAddressv4(
+  address: Addressv4 | ParsedAddressv4,
+): string {
+  if (typeof address === "object") {
+    const text = stringifyAddressv4(address.address);
+    return address.zoneId ? `${text}%${address.zoneId}` : text;
+  }
+
   if (address < 0 || address > 4294967295 || !Number.isInteger(address)) {
     throw new RangeError(
       `IPv4 value out of range: ${address} (must be 0 to 4294967295)`,
@@ -243,7 +361,7 @@ export function stringifyAddressv4(address: number): string {
  * import { assertEquals } from "@std/assert";
  * import { compareAddressv4, parseAddressv4, stringifyAddressv4 } from "@hertzg/ip/addressv4";
  *
- * const addresses = ["10.0.0.9", "10.0.0.10", "10.0.0.2"].map(parseAddressv4);
+ * const addresses = ["10.0.0.9", "10.0.0.10", "10.0.0.2"].map((s) => parseAddressv4(s).address);
  *
  * assertEquals(addresses.toSorted(compareAddressv4).map(stringifyAddressv4), [
  *   "10.0.0.2",
@@ -257,12 +375,12 @@ export function stringifyAddressv4(address: number): string {
  * import { assertEquals } from "@std/assert";
  * import { compareAddressv4, parseAddressv4 } from "@hertzg/ip/addressv4";
  *
- * assertEquals(compareAddressv4(parseAddressv4("10.0.0.1"), parseAddressv4("10.0.0.2")), -1);
- * assertEquals(compareAddressv4(parseAddressv4("10.0.0.2"), parseAddressv4("10.0.0.1")), 1);
- * assertEquals(compareAddressv4(parseAddressv4("10.0.0.1"), parseAddressv4("10.0.0.1")), 0);
+ * assertEquals(compareAddressv4(parseAddressv4("10.0.0.1").address, parseAddressv4("10.0.0.2").address), -1);
+ * assertEquals(compareAddressv4(parseAddressv4("10.0.0.2").address, parseAddressv4("10.0.0.1").address), 1);
+ * assertEquals(compareAddressv4(parseAddressv4("10.0.0.1").address, parseAddressv4("10.0.0.1").address), 0);
  * ```
  */
-export function compareAddressv4(a: number, b: number): -1 | 0 | 1 {
+export function compareAddressv4(a: Addressv4, b: Addressv4): -1 | 0 | 1 {
   if (a < b) return -1;
   if (a > b) return 1;
   return 0;

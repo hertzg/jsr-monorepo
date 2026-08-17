@@ -68,8 +68,8 @@
  *   timeToLive: 64,
  *   protocol: 6,
  *   headerChecksum: 0,
- *   sourceAddress: parseAddressv4("192.168.1.100"),
- *   destinationAddress: parseAddressv4("10.0.0.50"),
+ *   sourceAddress: parseAddressv4("192.168.1.100").address,
+ *   destinationAddress: parseAddressv4("10.0.0.50").address,
  *   options: new Uint8Array(0),
  *   payload: new Uint8Array(0),
  * };
@@ -80,8 +80,8 @@
  *
  * assertEquals(bytesWritten, 20);
  * assertEquals(bytesRead, 20);
- * assertEquals(decoded.sourceAddress, parseAddressv4("192.168.1.100"));
- * assertEquals(decoded.destinationAddress, parseAddressv4("10.0.0.50"));
+ * assertEquals(decoded.sourceAddress, parseAddressv4("192.168.1.100").address);
+ * assertEquals(decoded.destinationAddress, parseAddressv4("10.0.0.50").address);
  * assertEquals(decoded.flagsFragmentOffset.dontFragment, 1);
  * ```
  *
@@ -166,8 +166,8 @@ export interface Ipv4Packet {
  *   timeToLive: 64,
  *   protocol: 17,
  *   headerChecksum: 0,
- *   sourceAddress: parseAddressv4("192.0.2.1"),
- *   destinationAddress: parseAddressv4("192.0.2.2"),
+ *   sourceAddress: parseAddressv4("192.0.2.1").address,
+ *   destinationAddress: parseAddressv4("192.0.2.2").address,
  *   options: new Uint8Array(0),
  *   payload: new Uint8Array([0xde, 0xad, 0xbe, 0xef]),
  * };

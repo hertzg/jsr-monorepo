@@ -188,9 +188,9 @@ export interface ArpData {
  *   protocolAddressLength: ARP_PROTO_LEN_IPV4,
  *   operation: ARP_OPCODE.REPLY,
  *   senderHardwareAddress: parseMac("aa:bb:cc:dd:ee:ff"),
- *   senderProtocolAddress: parseAddressv4("192.168.1.2"),
+ *   senderProtocolAddress: parseAddressv4("192.168.1.2").address,
  *   targetHardwareAddress: parseMac("00:11:22:33:44:55"),
- *   targetProtocolAddress: parseAddressv4("192.168.1.1"),
+ *   targetProtocolAddress: parseAddressv4("192.168.1.1").address,
  * };
  *
  * const buffer = new Uint8Array(ARP_ETHERNET_IPV4_SIZE);

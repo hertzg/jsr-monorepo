@@ -3,6 +3,7 @@
   "version": "4.2.0",
   "exports": {
     ".": "./mod.ts",
+    "./notation": "./notation.ts",
     "./address": "./address.ts",
     "./addressv4": "./addressv4.ts",
     "./cidr": "./cidr.ts",
