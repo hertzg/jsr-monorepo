@@ -165,7 +165,7 @@
   </defs>
 </svg>
 </a>
-<span class="font-bold">parseCidr</span><span class="font-medium">(<span><span>cidr<span>: <span class="td-kw">string</span></span></span></span>)<span>: <a href="../.././cidr.ts/~/Cidr.html" class="link td-ref">Cidr</a></span> </span>
+<span class="font-bold">parseCidr</span><span class="font-medium">(<span><span>cidr<span>: <span class="td-kw">string</span></span></span></span>)<span>: <span><a href="../.././cidr.ts/~/PrefixedCidrv4.html" class="link td-ref">PrefixedCidrv4</a><span class="td-op"> | </span><a href="../.././cidr.ts/~/PrefixedCidrv6.html" class="link td-ref">PrefixedCidrv6</a></span></span> </span>
       </code><div class="space-y-7" id=""><div class="markdown"><p>Parses an IPv4 or IPv6 CIDR notation string.</p>
 <p>Detects the IP version by checking for <code>:</code> in the input — if present,
 the CIDR is parsed as IPv6 (returning <a href="../.././cidr.ts/~/Cidrv6.html">Cidrv6</a>), otherwise as IPv4
@@ -381,7 +381,7 @@ Parameters</h2></div><div class="space-y-8"><div class="anchorable docEntry" id=
 Return Type</h2></div><div class="space-y-8"><div class=" docEntry" id="function_parsecidr_0_return">
 
   <div class="docEntryHeader">
-    <div><code><span class="font-medium text-stone-500 dark:text-stone-200"><a href="../.././cidr.ts/~/Cidr.html" class="link td-ref">Cidr</a></span>
+    <div><code><span class="font-medium text-stone-500 dark:text-stone-200"><span><a href="../.././cidr.ts/~/PrefixedCidrv4.html" class="link td-ref">PrefixedCidrv4</a><span class="td-op"> | </span><a href="../.././cidr.ts/~/PrefixedCidrv6.html" class="link td-ref">PrefixedCidrv6</a></span></span>
       </code>
     </div><a
   class="sourceButton"
@@ -408,7 +408,8 @@ Return Type</h2></div><div class="space-y-8"><div class=" docEntry" id="function
   />
 </svg>
 </a>
-</div><div class="max-w-[75ch]"><div class="markdown"><p>The parsed CIDR as <code>Cidrv4</code> or <code>Cidrv6</code></p>
+</div><div class="max-w-[75ch]"><div class="markdown"><p>The parsed CIDR as a <code>PrefixedCidrv4</code> or <code>PrefixedCidrv6</code>; the
+parser writes the prefix length dialect only</p>
 </div></div></div>
 </div></section>
 <section class="section"  id="throws"><div>

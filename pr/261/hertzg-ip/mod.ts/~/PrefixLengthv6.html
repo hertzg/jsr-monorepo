@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>Cidrv6.address - mod.ts - @hertzg&#x2F;ip documentation</title>
+  <title>PrefixLengthv6 - mod.ts - @hertzg&#x2F;ip documentation</title>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="doc-current-file" content="mod.ts">
@@ -48,8 +48,7 @@
 </svg>
 </span>
 
-    <ul><li><span>.</span>
-            <a href="..&#x2F;..&#x2F;.&#x2F;mod.ts&#x2F;~&#x2F;Cidrv6.html" class="contextLink">Cidrv6</a></li><li>address</li></ul></ul>
+    <ul><li>PrefixLengthv6</li></ul></ul>
 </div>
 
     <div class="flex items-center gap-2">
@@ -113,11 +112,11 @@
     </div>
   </div>
 </nav>
-<div id="searchResults"></div><div id="content"><main class="symbolGroup" id="symbol_Cidrv6.address"><article>
+<div id="searchResults"></div><div id="content"><main class="symbolGroup" id="symbol_PrefixLengthv6"><article>
       <div class="symbolTitle">
         <div>
           <div class="text-2xl leading-none break-all">
-            <span class="text-Property">property</span>&nbsp;<span class="font-bold">Cidrv6.address</span>
+            <span class="text-TypeAlias">type alias</span>&nbsp;<span class="font-bold">PrefixLengthv6</span>
           </div></div><a
   class="sourceButton"
   href="file:&#x2F;&#x2F;&#x2F;home&#x2F;runner&#x2F;work&#x2F;jsr-monorepo&#x2F;jsr-monorepo&#x2F;packages&#x2F;@hertzg&#x2F;ip&#x2F;cidrv6.ts"><svg
@@ -143,9 +142,11 @@
   />
 </svg>
 </a>
-</div><div><div class="space-y-7" id=""><div class="markdown"><p>The IPv6 address from the CIDR notation</p>
-</div><section class="section"  id="type"><div>
-      <h2 class="anchorable mb-1"><a href="#type" class="anchor" aria-label="Anchor" tabIndex="-1"><svg
+</div><div><div class="space-y-7" id=""><div class="markdown"><p>An IPv6 prefix length, the <code>64</code> in <code>/64</code>. The range is 0 to 128; it is
+documented rather than encoded in the type, so <code>prefixLength + 1</code> stays
+a <code>PrefixLengthv6</code> (ADR 0002).</p>
+</div><section class="section"  id="definition"><div>
+      <h2 class="anchorable mb-1"><a href="#definition" class="anchor" aria-label="Anchor" tabIndex="-1"><svg
   width="16"
   height="16"
   viewBox="0 0 14 14"
@@ -167,10 +168,10 @@
   </defs>
 </svg>
 </a>
-Type</h2></div><div class="space-y-8"><div class=" docEntry" id="variable_cidrv6_address">
+Definition</h2></div><div class="space-y-8"><div class=" docEntry" id="typealias_prefixlengthv6">
 
   <div class="docEntryHeader">
-    <div><code><span class="font-medium text-stone-500 dark:text-stone-200"><span class="td-kw">bigint</span></span>
+    <div><code><span class="font-medium text-stone-500 dark:text-stone-200"><span class="td-kw">number</span></span>
       </code>
     </div><a
   class="sourceButton"
@@ -204,8 +205,8 @@ Type</h2></div><div class="space-y-8"><div class=" docEntry" id="variable_cidrv6
     </article></main>
 <div class="toc">
     <div><div class="usageContent">
-    <h3>Usage</h3><div class="markdown"><pre class="highlight"><code class="language-typescript">import { type Cidrv6 } from &quot;mod.ts&quot;;
-</code><button class="copyButton" data-copy="import { type Cidrv6 } from &quot;mod.ts&quot;;
+    <h3>Usage</h3><div class="markdown"><pre class="highlight"><code class="language-typescript">import { type PrefixLengthv6 } from &quot;mod.ts&quot;;
+</code><button class="copyButton" data-copy="import { type PrefixLengthv6 } from &quot;mod.ts&quot;;
 "><svg
   class="copy"
   width="15"
@@ -238,7 +239,7 @@ Type</h2></div><div class="space-y-8"><div class=" docEntry" id="variable_cidrv6
 </svg>
 </button><code></code></pre>
 </div></div><nav class="documentNavigation">
-          <h3>Document Navigation</h3><ul><li><a href="#type" title="Type">Type</a></li></ul></nav></div>
+          <h3>Document Navigation</h3><ul><li><a href="#definition" title="Definition">Definition</a></li></ul></nav></div>
   </div></div>
 </div>
 </div>

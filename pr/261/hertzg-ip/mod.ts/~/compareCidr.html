@@ -176,7 +176,8 @@ throws, because sorting a mixed list is the reason it exists. Ordering a
 disjoint union needs no cross-version conversion — see ADR 0005.</p>
 <p>The block is ordered <strong>as written</strong>: the <code>address</code> field is compared as
 stored, without applying the network mask first. See
-<a href="../.././mod.ts/~/compareCidrv4.html">compareCidrv4</a> for what that means for blocks carrying host bits.</p>
+<a href="../.././mod.ts/~/compareCidrv4.html">compareCidrv4</a> for what that means for blocks carrying host bits,
+and for why both dialects are compared by mask.</p>
 </div><section class="section"  id="examples"><div>
       <h2 class="anchorable mb-1"><a href="#examples" class="anchor" aria-label="Anchor" tabIndex="-1"><svg
   width="16"

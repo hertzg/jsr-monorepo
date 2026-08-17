@@ -167,6 +167,7 @@
 </a>
 <span class="font-bold">isCidrv6</span><span class="font-medium">(<span><span>cidr<span>: <a href="../.././mod.ts/~/Cidr.html" class="link td-ref">Cidr</a></span></span></span>)<span>: cidr <span class="td-kw">is</span> <a href="../.././mod.ts/~/Cidrv6.html" class="link td-ref">Cidrv6</a></span> </span>
       </code><div class="space-y-7" id=""><div class="markdown"><p>Type guard that checks whether a <a href="../.././mod.ts/~/Cidr.html">Cidr</a> is an IPv6 CIDR block.</p>
+<p>Reads the version off the address, so both dialects pass.</p>
 </div><section class="section"  id="examples"><div>
       <h2 class="anchorable mb-1"><a href="#examples" class="anchor" aria-label="Anchor" tabIndex="-1"><svg
   width="16"
@@ -218,10 +219,12 @@ Examples</h2></div><div class="space-y-8"><div class="anchorable"><a href="#exam
 import { isCidrv6, parseCidr } from &quot;@hertzg/ip/cidr&quot;;
 
 assert(isCidrv6(parseCidr(&quot;2001:db8::/32&quot;)));
+assert(isCidrv6({ address: 0x20010db8n &lt;&lt; 96n, mask: 0xFFFFFFFF000000000000000000000000n }));
 </code><button class="copyButton" data-copy="import { assert } from &quot;@std/assert&quot;;
 import { isCidrv6, parseCidr } from &quot;@hertzg/ip/cidr&quot;;
 
 assert(isCidrv6(parseCidr(&quot;2001:db8::/32&quot;)));
+assert(isCidrv6({ address: 0x20010db8n &lt;&lt; 96n, mask: 0xFFFFFFFF000000000000000000000000n }));
 "><svg
   class="copy"
   width="15"

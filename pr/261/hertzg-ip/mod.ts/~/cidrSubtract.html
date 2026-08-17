@@ -165,11 +165,12 @@
   </defs>
 </svg>
 </a>
-<span class="font-bold">cidrSubtract</span><span class="font-medium"><span>&lt;<span><span class="td-tp">T</span><span><span class="td-kw"> extends </span><a href="../.././mod.ts/~/Cidr.html" class="link td-ref">Cidr</a></span></span>&gt;</span>(<div class="ml-4"><div><span>a<span>: <a href="../.././mod.ts/~/cidrSubtract.html#type_param_t" class="link td-ref">T</a></span></span>,</div><div><span>b<span>: <a href="../.././mod.ts/~/cidrSubtract.html#type_param_t" class="link td-ref">T</a></span></span></div></div>)<span>: <a href="../.././mod.ts/~/cidrSubtract.html#type_param_t" class="link td-ref">T</a>[]</span> </span>
+<span class="font-bold">cidrSubtract</span><span class="font-medium"><span>&lt;<span><span class="td-tp">T</span><span><span class="td-kw"> extends </span><a href="../.././mod.ts/~/Cidr.html" class="link td-ref">Cidr</a></span></span>&gt;</span>(<div class="ml-4"><div><span>a<span>: <a href="../.././mod.ts/~/cidrSubtract.html#type_param_t" class="link td-ref">T</a></span></span>,</div><div><span>b<span>: <a href="../.././mod.ts/~/cidrSubtract.html#type_param_t" class="link td-ref">T</a> <span class="td-kw">extends</span> <a href="../.././mod.ts/~/Cidrv4.html" class="link td-ref">Cidrv4</a> <span class="td-op">?</span> <a href="../.././mod.ts/~/Cidrv4.html" class="link td-ref">Cidrv4</a> <span class="td-op">:</span> <a href="../.././mod.ts/~/Cidrv6.html" class="link td-ref">Cidrv6</a></span></span></div></div>)<span>: (<a href="../.././mod.ts/~/cidrSubtract.html#type_param_t" class="link td-ref">T</a> <span class="td-kw">extends</span> <a href="../.././mod.ts/~/Cidrv4.html" class="link td-ref">Cidrv4</a> <span class="td-op">?</span> <a href="../.././mod.ts/~/Cidrv4.html" class="link td-ref">Cidrv4</a> <span class="td-op">:</span> <a href="../.././mod.ts/~/Cidrv6.html" class="link td-ref">Cidrv6</a>)[]</span> </span>
       </code><div class="space-y-7" id=""><div class="markdown"><p>Subtracts one CIDR block from another.</p>
 <p>Dispatches to <a href="../.././mod.ts/~/cidrv4Subtract.html">cidrv4Subtract</a> or <a href="../.././mod.ts/~/cidrv6Subtract.html">cidrv6Subtract</a>
 based on the address type. Throws TypeError when mixing
-IPv4 and IPv6 CIDRs.</p>
+IPv4 and IPv6 CIDRs. The result matches the dialect of the inputs, and
+is masked when they disagree (ADR 0006).</p>
 </div><section class="section"  id="examples"><div>
       <h2 class="anchorable mb-1"><a href="#examples" class="anchor" aria-label="Anchor" tabIndex="-1"><svg
   width="16"
@@ -578,7 +579,7 @@ Parameters</h2></div><div class="space-y-8"><div class="anchorable docEntry" id=
   </defs>
 </svg>
 </a>
-<span class="font-bold font-lg">b</span><span class="font-medium text-stone-500 dark:text-stone-200"><span>: <a href="#type_param_t" class="link td-ref">T</a></span></span>
+<span class="font-bold font-lg">b</span><span class="font-medium text-stone-500 dark:text-stone-200"><span>: <a href="#type_param_t" class="link td-ref">T</a> <span class="td-kw">extends</span> <a href="../.././mod.ts/~/Cidrv4.html" class="link td-ref">Cidrv4</a> <span class="td-op">?</span> <a href="../.././mod.ts/~/Cidrv4.html" class="link td-ref">Cidrv4</a> <span class="td-op">:</span> <a href="../.././mod.ts/~/Cidrv6.html" class="link td-ref">Cidrv6</a></span></span>
       </code>
     </div><a
   class="sourceButton"
@@ -634,7 +635,7 @@ Parameters</h2></div><div class="space-y-8"><div class="anchorable docEntry" id=
 Return Type</h2></div><div class="space-y-8"><div class=" docEntry" id="function_cidrsubtract_0_return">
 
   <div class="docEntryHeader">
-    <div><code><span class="font-medium text-stone-500 dark:text-stone-200"><a href="#type_param_t" class="link td-ref">T</a>[]</span>
+    <div><code><span class="font-medium text-stone-500 dark:text-stone-200">(<a href="#type_param_t" class="link td-ref">T</a> <span class="td-kw">extends</span> <a href="../.././mod.ts/~/Cidrv4.html" class="link td-ref">Cidrv4</a> <span class="td-op">?</span> <a href="../.././mod.ts/~/Cidrv4.html" class="link td-ref">Cidrv4</a> <span class="td-op">:</span> <a href="../.././mod.ts/~/Cidrv6.html" class="link td-ref">Cidrv6</a>)[]</span>
       </code>
     </div><a
   class="sourceButton"

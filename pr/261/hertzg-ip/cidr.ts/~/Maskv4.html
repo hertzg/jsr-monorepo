@@ -1,10 +1,10 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>Cidrv4.prefixLength - cidrv4.ts - @hertzg&#x2F;ip documentation</title>
+  <title>Maskv4 - cidr.ts - @hertzg&#x2F;ip documentation</title>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="doc-current-file" content="cidrv4.ts">
+  <meta name="doc-current-file" content="cidr.ts">
   <link rel="stylesheet" href="..&#x2F;..&#x2F;styles.css">
   <link rel="stylesheet" href="..&#x2F;..&#x2F;page.css">
   <link id="ddocResetStylesheet" rel="stylesheet" href="..&#x2F;..&#x2F;reset.css"><link href="../../comrak.css" rel="stylesheet" /><link href="../../prism.css" rel="stylesheet" /><script src="../../prism.js"></script><script src="..&#x2F;..&#x2F;script.js" defer></script>
@@ -32,7 +32,7 @@
     fill="currentColor"
   />
 </svg>
-</span><a href="..&#x2F;..&#x2F;.&#x2F;cidrv4.ts&#x2F;index.html" class="contextLink">cidrv4.ts</a><span class="text-black dark:text-white"><svg
+</span><a href="..&#x2F;..&#x2F;.&#x2F;cidr.ts&#x2F;index.html" class="contextLink">cidr.ts</a><span class="text-black dark:text-white"><svg
   width="16"
   height="16"
   viewBox="0 0 16 16"
@@ -48,8 +48,7 @@
 </svg>
 </span>
 
-    <ul><li><span>.</span>
-            <a href="..&#x2F;..&#x2F;.&#x2F;cidrv4.ts&#x2F;~&#x2F;Cidrv4.html" class="contextLink">Cidrv4</a></li><li>prefixLength</li></ul></ul>
+    <ul><li>Maskv4</li></ul></ul>
 </div>
 
     <div class="flex items-center gap-2">
@@ -113,11 +112,11 @@
     </div>
   </div>
 </nav>
-<div id="searchResults"></div><div id="content"><main class="symbolGroup" id="symbol_Cidrv4.prefixLength"><article>
+<div id="searchResults"></div><div id="content"><main class="symbolGroup" id="symbol_Maskv4"><article>
       <div class="symbolTitle">
         <div>
           <div class="text-2xl leading-none break-all">
-            <span class="text-Property">property</span>&nbsp;<span class="font-bold">Cidrv4.prefixLength</span>
+            <span class="text-TypeAlias">type alias</span>&nbsp;<span class="font-bold">Maskv4</span>
           </div></div><a
   class="sourceButton"
   href="file:&#x2F;&#x2F;&#x2F;home&#x2F;runner&#x2F;work&#x2F;jsr-monorepo&#x2F;jsr-monorepo&#x2F;packages&#x2F;@hertzg&#x2F;ip&#x2F;cidrv4.ts"><svg
@@ -143,9 +142,13 @@
   />
 </svg>
 </a>
-</div><div><div class="space-y-7" id=""><div class="markdown"><p>The prefix length (0-32)</p>
-</div><section class="section"  id="type"><div>
-      <h2 class="anchorable mb-1"><a href="#type" class="anchor" aria-label="Anchor" tabIndex="-1"><svg
+</div><div><div class="space-y-7" id=""><div class="markdown"><p>An IPv4 network mask as a 32-bit unsigned integer, e.g. <code>0xFFFFFF00</code>
+for <code>/24</code>.</p>
+<p>A mask stored in a <a href="../.././cidr.ts/~/MaskedCidrv4.html">MaskedCidrv4</a> is kept as given and is not
+required to be contiguous; only cidrv4PrefixLength insists on
+that, because it has no answer otherwise (ADR 0006).</p>
+</div><section class="section"  id="definition"><div>
+      <h2 class="anchorable mb-1"><a href="#definition" class="anchor" aria-label="Anchor" tabIndex="-1"><svg
   width="16"
   height="16"
   viewBox="0 0 14 14"
@@ -167,7 +170,7 @@
   </defs>
 </svg>
 </a>
-Type</h2></div><div class="space-y-8"><div class=" docEntry" id="variable_cidrv4_prefixlength">
+Definition</h2></div><div class="space-y-8"><div class=" docEntry" id="typealias_maskv4">
 
   <div class="docEntryHeader">
     <div><code><span class="font-medium text-stone-500 dark:text-stone-200"><span class="td-kw">number</span></span>
@@ -204,8 +207,8 @@ Type</h2></div><div class="space-y-8"><div class=" docEntry" id="variable_cidrv4
     </article></main>
 <div class="toc">
     <div><div class="usageContent">
-    <h3>Usage</h3><div class="markdown"><pre class="highlight"><code class="language-typescript">import { type Cidrv4 } from &quot;cidrv4.ts&quot;;
-</code><button class="copyButton" data-copy="import { type Cidrv4 } from &quot;cidrv4.ts&quot;;
+    <h3>Usage</h3><div class="markdown"><pre class="highlight"><code class="language-typescript">import { type Maskv4 } from &quot;cidr.ts&quot;;
+</code><button class="copyButton" data-copy="import { type Maskv4 } from &quot;cidr.ts&quot;;
 "><svg
   class="copy"
   width="15"
@@ -238,7 +241,7 @@ Type</h2></div><div class="space-y-8"><div class=" docEntry" id="variable_cidrv4
 </svg>
 </button><code></code></pre>
 </div></div><nav class="documentNavigation">
-          <h3>Document Navigation</h3><ul><li><a href="#type" title="Type">Type</a></li></ul></nav></div>
+          <h3>Document Navigation</h3><ul><li><a href="#definition" title="Definition">Definition</a></li></ul></nav></div>
   </div></div>
 </div>
 </div>
