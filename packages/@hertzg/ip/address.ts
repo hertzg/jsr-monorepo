@@ -7,8 +7,8 @@
  * also exported for working with version-polymorphic address values.
  *
  * For version-specific functions, see:
- * - [`ipv4`](https://jsr.io/@hertzg/ip/doc/addressv4): {@link parseAddressv4}, {@link stringifyAddressv4}, {@link compareAddressv4}
- * - [`ipv6`](https://jsr.io/@hertzg/ip/doc/addressv6): {@link parseAddressv6}, {@link stringifyAddressv6}, {@link compareAddressv6}
+ * - [`addressv4`](https://jsr.io/@hertzg/ip/doc/addressv4): {@link parseAddressv4}, {@link stringifyAddressv4}, {@link compareAddressv4}
+ * - [`addressv6`](https://jsr.io/@hertzg/ip/doc/addressv6): {@link parseAddressv6}, {@link stringifyAddressv6}, {@link compareAddressv6}
  *
  * @example Parse and stringify any IP address
  * ```ts
