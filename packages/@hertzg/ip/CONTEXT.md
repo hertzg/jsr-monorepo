@@ -35,9 +35,9 @@ the bare type, so a parse result goes straight into math.
 numeric ascending, then prefix length ascending. Returns `-1 | 0 | 1`.
 
 **Span**: a fixed-width window of bytes, 4 or 16, in a `Uint8Array`.
-Buffers are `bytes` (read from) and `into` (written to). A byte `offset`
-locates the span; an address `offset` in `cidr*Addresses` counts
-addresses into the block. Nothing takes both.
+Readers take `bytes`, a view of exactly the span. Writers take `into` and
+a byte `offset` saying where in it to begin. The address `offset` in
+`cidr*Addresses` counts addresses into the block; nothing takes both.
 
 ## Notation
 
