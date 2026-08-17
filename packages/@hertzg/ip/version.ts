@@ -60,9 +60,10 @@ export type IpVersion = 4 | 6;
  * CIDR notation is not an address — use {@link cidrVersion} for that.
  *
  * What counts as valid is exactly what {@link isValidIpv4} and
- * {@link isValidIpv6} accept, which is looser than some other libraries:
- * surrounding whitespace and trailing text are tolerated by the parsers
- * underneath, so `ipVersion(" 10.1.2.3")` is `4`.
+ * {@link isValidIpv6} accept, which is the grammar each address RFC
+ * publishes and nothing else (see ADR 0003). Surrounding whitespace and
+ * trailing text are not part of either grammar, so `ipVersion(" 10.1.2.3")`
+ * and `ipVersion("1.2.3.4abc")` are both `undefined`.
  *
  * @param address The address string to inspect
  * @returns `4`, `6`, or `undefined` if the string is not a plain IP address

@@ -51,16 +51,52 @@
  * @module
  */
 
+/** Character codes the octet scanner compares against. */
+const CHAR_ZERO = 0x30;
+const CHAR_NINE = 0x39;
+const CHAR_DOT = 0x2e;
+
+/** The text of the octet starting at `from`, for an error message. */
+function octetText(address: string, from: number): string {
+  const dot = address.indexOf(".", from);
+  return address.slice(from, dot === -1 ? address.length : dot);
+}
+
+/**
+ * Reports a malformed octet, unless the address does not have four of them --
+ * the octet count is the coarser complaint and is made first, as it was when
+ * the address was read by splitting on ".".
+ *
+ * Counting is done here rather than up front so that the scan itself never
+ * pays for it; only the failing call does.
+ */
+function failIpv4(address: string, error: TypeError | RangeError): never {
+  let octets = 1;
+  for (let index = 0; index < address.length; index++) {
+    if (address.charCodeAt(index) === CHAR_DOT) octets++;
+  }
+
+  if (octets !== 4) {
+    throw new TypeError(
+      `IPv4 address must have exactly 4 octets, got ${octets}`,
+    );
+  }
+
+  throw error;
+}
+
 /**
  * Parses an IPv4 address in dotted decimal notation to a number.
  *
- * The function validates the format and range of each octet. Leading zeros
- * are not allowed (except for "0" itself).
+ * An octet is decimal digits and nothing else: no leading zeros (except "0"
+ * itself), no surrounding or embedded whitespace, no sign, no radix prefix,
+ * and no trailing text.
  *
  * @param address The address string in dotted decimal notation
  * @returns The IPv4 address as a 32-bit unsigned integer
- * @throws {TypeError} If the format is invalid (wrong number of octets, non-numeric, leading zeros)
- * @throws {RangeError} If any octet is out of range (not 0-255)
+ * @throws {TypeError} If the format is invalid -- wrong number of octets, a
+ *   non-decimal octet, leading zeros, a sign, whitespace, or trailing text
+ * @throws {RangeError} If an octet is a well-formed number greater than 255
  *
  * @example Basic parsing
  * ```ts
@@ -81,47 +117,68 @@
  * assertThrows(() => parseIpv4("192.168.1"), TypeError);
  * assertThrows(() => parseIpv4("192.168.1.256"), RangeError);
  * assertThrows(() => parseIpv4("192.168.01.1"), TypeError);
+ * assertThrows(() => parseIpv4(" 192.168.1.1"), TypeError);
+ * assertThrows(() => parseIpv4("192.168.1.1abc"), TypeError);
  * ```
  */
 export function parseIpv4(address: string): number {
-  const parts = address.split(".");
+  const length = address.length;
+  let value = 0;
+  let index = 0;
 
-  if (parts.length !== 4) {
-    throw new TypeError(
-      `IPv4 address must have exactly 4 octets, got ${parts.length}`,
-    );
-  }
+  for (let octetIndex = 0; octetIndex < 4; octetIndex++) {
+    const octetStart = index;
+    let code = address.charCodeAt(index);
 
-  const octets: number[] = [];
+    let octet = 0;
+    while (code >= CHAR_ZERO && code <= CHAR_NINE) {
+      octet = octet * 10 + (code - CHAR_ZERO);
+      code = address.charCodeAt(++index); // NaN past the end ends the loop
+    }
 
-  for (let i = 0; i < 4; i++) {
-    const part = parts[i];
+    // The octet runs to the "." before the next one, or to the end of the
+    // string for the last one. Anything else left over is trailing text.
+    const ended = octetIndex === 3 ? index === length : code === CHAR_DOT;
 
-    // Check for leading zeros (except "0" itself)
-    if (part.length > 1 && part[0] === "0") {
-      throw new TypeError(
-        "IPv4 octets cannot have leading zeros except '0' itself",
+    // "0" alone is the only octet that may start with a zero, so the check is
+    // on the whole octet rather than on the digits scanned: "0a" is a leading
+    // zero, not a stray letter.
+    if (
+      address.charCodeAt(octetStart) === CHAR_ZERO &&
+      !(index - octetStart === 1 && ended)
+    ) {
+      failIpv4(
+        address,
+        new TypeError(
+          "IPv4 octets cannot have leading zeros except '0' itself",
+        ),
       );
     }
 
-    const octet = parseInt(part, 10);
-
-    if (Number.isNaN(octet)) {
-      throw new TypeError("IPv4 address octets must be decimal numbers");
-    }
-
-    if (octet < 0 || octet > 255) {
-      throw new RangeError(
-        `IPv4 octet out of range: ${octet} (must be 0-255)`,
+    // "-" is not a digit, so a signed octet fails here like any other stray
+    // character. RangeError is left to mean a well-formed number that is too
+    // large, which is the only way an octet can be numerically wrong.
+    if (index === octetStart || !ended) {
+      failIpv4(
+        address,
+        new TypeError(
+          `IPv4 address octets must be decimal numbers, got '${
+            octetText(address, octetStart)
+          }'`,
+        ),
       );
     }
 
-    octets.push(octet);
-  }
+    if (octet > 255) {
+      failIpv4(
+        address,
+        new RangeError(`IPv4 octet out of range: ${octet} (must be 0-255)`),
+      );
+    }
 
-  // Compute the 32-bit value
-  const value = (octets[0] << 24) | (octets[1] << 16) | (octets[2] << 8) |
-    octets[3];
+    index++; // the "." that ended the octet, or one past the end of the string
+    value = (value << 8) | octet;
+  }
 
   return value >>> 0; // Unsigned 32-bit
 }

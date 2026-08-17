@@ -296,14 +296,35 @@ Deno.test("parseCidrv6", async (t) => {
       "CIDR prefix length must be 0-128",
     );
     assertThrows(
-      () => parseCidrv6("2001:db8::/-1"),
-      RangeError,
-      "CIDR prefix length must be 0-128",
-    );
-    assertThrows(
       () => parseCidrv6("2001:db8::/abc"),
       TypeError,
       "CIDR prefix length must be a number",
+    );
+  });
+
+  await t.step("prefix length is digits with no leading zero", () => {
+    assertThrows(() => parseCidrv6("::/08"), TypeError);
+    assertThrows(() => parseCidrv6("::/008"), TypeError);
+    assertThrows(() => parseCidrv6("::/8x"), TypeError);
+    assertThrows(() => parseCidrv6("::/ 8"), TypeError);
+    assertThrows(() => parseCidrv6("::/8\n"), TypeError);
+    assertThrows(() => parseCidrv6("::/+8"), TypeError);
+  });
+
+  await t.step("rejects a signed prefix length as a malformed one", () => {
+    assertThrows(
+      () => parseCidrv6("2001:db8::/-1"),
+      TypeError,
+      "CIDR prefix length must be a number, got '-1'",
+    );
+
+    // "-0" is the case a range check cannot catch on its own: -0 is
+    // numerically 0, so it passes `0-128` and reaches the caller as a Cidrv6
+    // whose prefixLength is a negative zero, which stringifies back to "/0".
+    assertThrows(
+      () => parseCidrv6("::/-0"),
+      TypeError,
+      "CIDR prefix length must be a number, got '-0'",
     );
   });
 

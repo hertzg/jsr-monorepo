@@ -71,6 +71,58 @@ Deno.test("parseIpv4", async (t) => {
       "IPv4 octet out of range: 300 (must be 0-255)",
     );
   });
+
+  await t.step("rejects whitespace anywhere", () => {
+    assertThrows(() => parseIpv4(" 10.1.2.3"), TypeError);
+    assertThrows(() => parseIpv4("10.1.2.3 "), TypeError);
+    assertThrows(() => parseIpv4("1.2.3.4\n"), TypeError);
+    assertThrows(() => parseIpv4("1.2. 3.4"), TypeError);
+  });
+
+  await t.step("rejects trailing text after an octet", () => {
+    assertThrows(() => parseIpv4("1.2.3.4abc"), TypeError);
+  });
+
+  await t.step("rejects a sign or radix prefix on an octet", () => {
+    assertThrows(() => parseIpv4("1.2.3.+4"), TypeError);
+    assertThrows(() => parseIpv4("+1.2.3.4"), TypeError);
+    assertThrows(() => parseIpv4("0x1.2.3.4"), TypeError);
+    assertThrows(() => parseIpv4("1.2.3.0x4"), TypeError);
+  });
+
+  await t.step("rejects a signed octet as a malformed one", () => {
+    // "-" is in no part of the grammar, so it is a shape error wherever it
+    // appears -- not a negative number that happens to be out of range.
+    assertThrows(
+      () => parseIpv4("-1.2.3.4"),
+      TypeError,
+      "IPv4 address octets must be decimal numbers, got '-1'",
+    );
+    assertThrows(
+      () => parseIpv4("1.-2.3.4"),
+      TypeError,
+      "IPv4 address octets must be decimal numbers, got '-2'",
+    );
+
+    // "-0" is the case a range check cannot catch on its own: -0 is
+    // numerically 0, so `octet < 0` is false and it would parse as "0".
+    assertThrows(
+      () => parseIpv4("-0.1.2.3"),
+      TypeError,
+      "IPv4 address octets must be decimal numbers, got '-0'",
+    );
+    assertThrows(
+      () => parseIpv4("1.2.3.-0"),
+      TypeError,
+      "IPv4 address octets must be decimal numbers, got '-0'",
+    );
+  });
+
+  await t.step("never reads a non-numeric octet as a number", () => {
+    // Number("NaN") is NaN and String(NaN) is "NaN", so validating an octet
+    // by that round-trip would accept this and return 16909056.
+    assertThrows(() => parseIpv4("1.2.3.NaN"), TypeError);
+  });
 });
 
 Deno.test("stringifyIpv4", async (t) => {
