@@ -19,25 +19,28 @@
  * - **Wire Bytes**: Read and write addresses directly in packet buffers, no string round-trip
  * - **Reverse DNS**: Build the `in-addr.arpa` / `ip6.arpa` pointer name of an address
  *
- * ## Dual-Stack Server
+ * ## SSRF Guard
  *
- * @example Normalize client addresses from a dual-stack server
+ * @example Reject a fetch target that resolves inside your own network
  * ```ts
  * import { assertEquals } from "@std/assert";
- * import { classifyAddress, parseAddress, stringifyAddress } from "@hertzg/ip";
+ * import { classifyAddress } from "@hertzg/ip";
  *
- * // Dual-stack servers (Deno, Node) report IPv4 clients as ::ffff:x.x.x.x
- * // parseAddress auto-unwraps mapped addresses to their IPv4 form
- * const remote1 = parseAddress("::ffff:192.168.1.50").address;
- * assertEquals(stringifyAddress(remote1), "192.168.1.50");
+ * // A guard that only checks loopback and link-local misses private, CGNAT,
+ * // and multicast ranges; classification is one label from a closed set, so
+ * // there's no list of booleans to keep in sync
+ * function isSafeToFetch(host: string): boolean {
+ *   const { classification } = classifyAddress(host); // v4, v6, or mapped, one call
+ *   return classification === "public" || classification === "global-unicast";
+ * }
  *
- * // Native IPv6 clients pass through unchanged
- * const remote2 = parseAddress("2001:db8::1").address;
- * assertEquals(stringifyAddress(remote2), "2001:db8::1");
+ * assertEquals(isSafeToFetch("8.8.8.8"), true);
+ * assertEquals(isSafeToFetch("2001:4860:4860::8888"), true);
  *
- * // Classification works on both
- * assertEquals(classifyAddress(remote1).classification, "private");
- * assertEquals(classifyAddress(remote2).classification, "documentation");
+ * assertEquals(isSafeToFetch("127.0.0.1"), false);
+ * assertEquals(isSafeToFetch("10.0.0.1"), false);
+ * assertEquals(isSafeToFetch("169.254.169.254"), false); // cloud metadata endpoint
+ * assertEquals(isSafeToFetch("::ffff:127.0.0.1"), false); // mapped, unwrapped first
  * ```
  *
  * ## Trusted Network Allowlist
@@ -68,6 +71,27 @@
  *
  * assertEquals(isTrusted("8.8.8.8"), false);
  * assertEquals(isTrusted("2001:db8::1"), false);
+ * ```
+ *
+ * ## Dual-Stack Server
+ *
+ * @example Normalize client addresses from a dual-stack server
+ * ```ts
+ * import { assertEquals } from "@std/assert";
+ * import { classifyAddress, parseAddress, stringifyAddress } from "@hertzg/ip";
+ *
+ * // Dual-stack servers (Deno, Node) report IPv4 clients as ::ffff:x.x.x.x
+ * // parseAddress auto-unwraps mapped addresses to their IPv4 form
+ * const remote1 = parseAddress("::ffff:192.168.1.50").address;
+ * assertEquals(stringifyAddress(remote1), "192.168.1.50");
+ *
+ * // Native IPv6 clients pass through unchanged
+ * const remote2 = parseAddress("2001:db8::1").address;
+ * assertEquals(stringifyAddress(remote2), "2001:db8::1");
+ *
+ * // Classification works on both
+ * assertEquals(classifyAddress(remote1).classification, "private");
+ * assertEquals(classifyAddress(remote2).classification, "documentation");
  * ```
  *
  * ## IP Classification
