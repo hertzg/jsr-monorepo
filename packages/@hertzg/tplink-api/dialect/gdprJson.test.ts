@@ -1,4 +1,4 @@
-import { assertEquals, assertStringIncludes, assertThrows } from "@std/assert";
+import { assertEquals } from "@std/assert";
 import { ACT, type Action } from "./dialect.ts";
 import { encodeAction, gdprJson } from "./gdprJson.ts";
 import { gdprText } from "./gdprText.ts";
@@ -160,17 +160,77 @@ Deno.test("encodeAction honours explicit stack and pStack", () => {
   );
 });
 
-Deno.test("encodeAction throws for every unmapped write operation", () => {
-  const unmapped = [ACT.SET, ACT.ADD, ACT.DEL, ACT.GS, ACT.OP] as const;
+Deno.test("encodeAction serializes a gs read", () => {
+  assertEquals(
+    encodeAction([ACT.GS, "DEV2_WLAN"]),
+    '{"data":{"stack":"0,0,0,0,0,0","pstack":"0,0,0,0,0,0"},' +
+      '"operation":"gs","oid":"DEV2_WLAN"}',
+  );
+});
 
-  for (const type of unmapped) {
-    const error = assertThrows(
-      () => encodeAction([type, "DEV2_WLAN", { ssid: "x" }]),
-      Error,
-    );
-    assertStringIncludes(error.message, "no observed wire mapping");
-    assertStringIncludes(error.message, String(type));
-  }
+Deno.test("encodeAction serializes a so write with isuseractive", () => {
+  assertEquals(
+    encodeAction([
+      ACT.SET,
+      "DEV2_ADT_WIFI_COMMON",
+      {
+        guestDNSEnable: "0",
+        guestDNS: "",
+        guestTCEnable: "0",
+        guestIsolationEnable: "1",
+        guestLANAccessEnable: "0",
+        guestUSBAccessEnable: "0",
+      },
+      "1,0,0,0,0,0",
+    ]),
+    '{"data":{"guestDNSEnable":"0","guestDNS":"","guestTCEnable":"0",' +
+      '"guestIsolationEnable":"1","guestLANAccessEnable":"0",' +
+      '"guestUSBAccessEnable":"0","stack":"1,0,0,0,0,0","pstack":"0,0,0,0,0,0"},' +
+      '"operation":"so","oid":"DEV2_ADT_WIFI_COMMON","isuseractive":true}',
+  );
+});
+
+Deno.test("encodeAction serializes an ao write with isuseractive", () => {
+  assertEquals(
+    encodeAction([
+      ACT.ADD,
+      "DEV2_PORTMAPPING",
+      {
+        enable: "1",
+        X_TP_ConnName: "pppoe_911_0",
+        protocol: "TCP",
+        X_TP_ServiceName: "POP3",
+        X_TP_AddrType: "0",
+        internalClient: "192.168.0.200",
+        externalPort: "110",
+        externalPortEndRange: "110",
+        X_TP_InternalPortEndRange: "110",
+        internalPort: "110",
+      },
+    ]),
+    '{"data":{"enable":"1","X_TP_ConnName":"pppoe_911_0","protocol":"TCP",' +
+      '"X_TP_ServiceName":"POP3","X_TP_AddrType":"0",' +
+      '"internalClient":"192.168.0.200","externalPort":"110",' +
+      '"externalPortEndRange":"110","X_TP_InternalPortEndRange":"110",' +
+      '"internalPort":"110","stack":"0,0,0,0,0,0","pstack":"0,0,0,0,0,0"},' +
+      '"operation":"ao","oid":"DEV2_PORTMAPPING","isuseractive":true}',
+  );
+});
+
+Deno.test("encodeAction serializes a do write with isuseractive", () => {
+  assertEquals(
+    encodeAction([ACT.DEL, "DEV2_PORTMAPPING", [], "8,0,0,0,0,0"]),
+    '{"data":{"stack":"8,0,0,0,0,0","pstack":"0,0,0,0,0,0"},' +
+      '"operation":"do","oid":"DEV2_PORTMAPPING","isuseractive":true}',
+  );
+});
+
+Deno.test("encodeAction serializes an op write with isuseractive", () => {
+  assertEquals(
+    encodeAction([ACT.OP, "ACT_NTP_REQUEST"]),
+    '{"data":{"stack":"0,0,0,0,0,0","pstack":"0,0,0,0,0,0"},' +
+      '"operation":"op","oid":"ACT_NTP_REQUEST","isuseractive":true}',
+  );
 });
 
 Deno.test("encodeCommands emits one batch per action", () => {

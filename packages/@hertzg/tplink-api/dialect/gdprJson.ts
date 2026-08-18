@@ -2,16 +2,10 @@
  * The `gdprJson` dialect: EU/GDPR firmware speaking a JSON payload format over
  * `/cgi_gdpr?9`.
  *
- * The protocol here was reconstructed from a partially-redacted HAR capture and
- * a reporter's reverse-engineered reference implementation attached to
- * [issue #82](https://github.com/hertzg/jsr-monorepo/issues/82) (NE200).
- *
- * **Confirmed on a TP-Link EX220.** A field report on
- * [issue #254](https://github.com/hertzg/jsr-monorepo/issues/254) ran this
- * dialect unmodified against the device: the `cgi` login succeeded, and a
- * `[ACT.GET, "DEV2_DEV_INFO"]` read came back decoded. The same reporter's
- * independent implementation ran `gl` against the same device. Write operations
- * remain unmapped and still throw.
+ * Confirmed on a TP-Link EX220: login, a `go` read and a `gl` read all work.
+ * The operation table is confirmed from the NE200's own client library
+ * (`js/gdprProxy.js`); write *requests* (`so`/`ao`/`do`/`op`) are confirmed
+ * shaped correctly, their *responses* are not yet observed.
  *
  * The cipher, the signature rule, the session order and the session transport
  * are identical to `gdprText` — that is what makes this a dialect rather than a
@@ -33,22 +27,30 @@ import { gdprText } from "./gdprText.ts";
 import { envelopeBody, rootHref } from "../client/request.ts";
 
 /**
- * Operation names observed in the NE200's web UI traffic.
- *
- * `go` for {@linkcode ACT}.GET is the one an independent EX220 implementation
- * spelled `get`; a run against that device
- * ([issue #254](https://github.com/hertzg/jsr-monorepo/issues/254)) answered a
- * `go` read normally, so there is no per-model variance to carry here.
- *
- * Only reads have ever been captured. Write action types are deliberately
- * absent so that {@linkcode gdprJson}'s `encodeCommands` throws instead of
- * inventing a mapping.
+ * Wire operation name for every {@linkcode ActionType}, from the NE200's own
+ * client library (`js/gdprProxy.js`).
  */
-const OPERATIONS: Partial<Record<ActionType, string>> = {
+const OPERATIONS: Record<ActionType, string> = {
   [ACT.GET]: "go",
+  [ACT.SET]: "so",
+  [ACT.ADD]: "ao",
+  [ACT.DEL]: "do",
   [ACT.GL]: "gl",
+  [ACT.GS]: "gs",
+  [ACT.OP]: "op",
   [ACT.CGI]: "cgi",
 };
+
+/**
+ * Action types whose request always carries `isuseractive: true`, matching
+ * the browser: a write can't fire there without a click first.
+ */
+const WRITE_TYPES: ReadonlySet<ActionType> = new Set([
+  ACT.SET,
+  ACT.ADD,
+  ACT.DEL,
+  ACT.OP,
+]);
 
 /**
  * Instance path used when the caller supplies none.
@@ -93,8 +95,6 @@ function attributeFields(
  *
  * @param action Action to serialize
  * @returns JSON payload string ready for encryption and transmission
- * @throws {Error} When the action type has no observed JSON mapping — every
- * write operation, as of the only capture that exists
  *
  * @example Serialize a read of a single object
  * ```ts
@@ -109,26 +109,22 @@ function attributeFields(
  * );
  * ```
  *
- * @example Write operations have no observed mapping and throw
+ * @example Serialize a write
  * ```ts
- * import { assertThrows } from "@std/assert";
+ * import { assertEquals } from "@std/assert";
  * import { ACT } from "./dialect.ts";
  * import { encodeAction } from "./gdprJson.ts";
  *
- * assertThrows(() => encodeAction([ACT.SET, "DEV2_WLAN", { ssid: "x" }]), Error);
+ * assertEquals(
+ *   encodeAction([ACT.SET, "DEV2_ADT_WIFI_COMMON", { guestDNSEnable: "0" }]),
+ *   '{"data":{"guestDNSEnable":"0","stack":"0,0,0,0,0,0",' +
+ *     '"pstack":"0,0,0,0,0,0"},"operation":"so","oid":"DEV2_ADT_WIFI_COMMON",' +
+ *     '"isuseractive":true}',
+ * );
  * ```
  */
 export function encodeAction(action: Action): string {
   const [type, oid, attributes = [], stack, pStack = DEFAULT_STACK] = action;
-  const operation = OPERATIONS[type];
-
-  if (!operation) {
-    throw new Error(
-      `gdprJson has no observed wire mapping for action type ${type}; ` +
-        `only ACT.GET, ACT.GL and ACT.CGI have ever been captured ` +
-        `(see https://github.com/hertzg/jsr-monorepo/issues/82)`,
-    );
-  }
 
   return JSON.stringify({
     data: {
@@ -136,27 +132,15 @@ export function encodeAction(action: Action): string {
       stack: stack ?? DEFAULT_STACK,
       pstack: pStack,
     },
-    operation,
+    operation: OPERATIONS[type],
     oid,
+    ...(WRITE_TYPES.has(type) ? { isuseractive: true } : {}),
   });
 }
 
 /**
- * Envelope shape that `go` and `gl` operations answer with.
- *
- * The error field is lowercase `errorcode`, not `errorCode`. A raw EX220
- * failure pasted on
- * [issue #254](https://github.com/hertzg/jsr-monorepo/issues/254) settles it:
- *
- * ```json
- * {
- *   "data": [],
- *   "operation": "gl",
- *   "oid": "DEV2_WIFI_APDEV_ETHASSOCDEV_…",
- *   "success": false,
- *   "errorcode": 9804
- * }
- * ```
+ * Envelope shape that `go` and `gl` operations answer with. The error field
+ * is lowercase `errorcode`, not `errorCode`.
  */
 interface JsonResponse {
   success?: boolean;
@@ -219,13 +203,7 @@ function errorCode(value: unknown): number {
 /**
  * EU/GDPR firmware speaking a JSON payload format over `/cgi_gdpr?9`.
  *
- * Confirmed on a TP-Link EX220
- * ([issue #254](https://github.com/hertzg/jsr-monorepo/issues/254)). Also
- * believed to cover the TP-LINK NE200 5G modem, from whose capture it was
- * built, and probably the VX800v — neither confirmed
- * ([issue #82](https://github.com/hertzg/jsr-monorepo/issues/82)).
- *
- * Differences from `gdprText`, all measured from the NE200 capture:
+ * Differences from `gdprText`:
  *
  * | Concern | `gdprText` | `gdprJson` |
  * |---|---|---|
@@ -235,14 +213,14 @@ function errorCode(value: unknown): number {
  * | Default username | `admin` | `user` |
  * | Credentials | `username\npassword` | base64 fields inside JSON |
  * | Payload | bracketed text blocks | JSON envelope |
- * | Operations | `1`, `2`, … | `go`, `gl`, `cgi` |
+ * | Operations | `1`, `2`, … | `go`, `gl`, `gs`, `so`, `ao`, `do`, `op`, `cgi` |
  * | Stack default | `0,0,0,0,0,0` | `0,0,0,0,0,0` |
  * | Batching | N actions per request | one action per request |
  * | Session cookie | `loginErrorShow` + `JSESSIONID` | `JSESSIONID` only |
  *
  * Responses come in two shapes: `go` and `gl` answer with a JSON envelope,
- * while `cgi` operations answer with the plain-text `$.ret=<code>` form that the
- * captured login response uses. `decodeCommand` handles both.
+ * `cgi` answers with the plain-text `$.ret=<code>` form. `decodeCommand`
+ * handles both and assumes writes answer with one of the two as well.
  *
  * @example Encode a login payload
  * ```ts
@@ -307,14 +285,9 @@ export const gdprJson: Dialect = {
   id: "gdprJson",
 
   /**
-   * Last-resort fallback only. This firmware states which account it expects
-   * in the login page's `adminType`, so a caller that reads the info step can
-   * do better than this constant — a device with a provisioned admin account
-   * reports `"admin"`, for which this default is wrong.
-   *
-   * `"user"` is what an EX220 logs in as
-   * ([issue #254](https://github.com/hertzg/jsr-monorepo/issues/254)); its web
-   * UI asks for a password only and never shows the account name.
+   * Last-resort fallback only. The login page's `adminType` states which
+   * account the firmware actually expects, and a device with a provisioned
+   * admin account reports `"admin"`, for which this default is wrong.
    */
   defaultUsername: "user",
 
