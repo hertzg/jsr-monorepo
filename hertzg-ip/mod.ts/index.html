@@ -117,8 +117,8 @@ Features</h2>
 <li><strong>Wire Bytes</strong>: Read and write addresses directly in packet buffers, no string round-trip</li>
 <li><strong>Reverse DNS</strong>: Build the <code>in-addr.arpa</code> / <code>ip6.arpa</code> pointer name of an address</li>
 </ul>
-<h2 id="dual-stack-server">
-Dual-Stack Server</h2>
+<h2 id="ssrf-guard">
+SSRF Guard</h2>
 </div><section class="section"  id="examples"><div>
       <h2 class="anchorable mb-1"><a href="#examples" class="anchor" aria-label="Anchor" tabIndex="-1"><svg
   width="16"
@@ -164,38 +164,44 @@ Examples</h2></div><div class="space-y-8"><div class="anchorable"><a href="#exam
   </defs>
 </svg>
 </a>
-<h3 class="example-header"><div class="markdown"><p>Normalize client addresses from a dual-stack server</p>
+<h3 class="example-header"><div class="markdown"><p>Reject a fetch target that resolves inside your own network</p>
 </div></h3>
   <div><div class="markdown"><pre class="highlight"><code class="language-ts">import { assertEquals } from &quot;@std/assert&quot;;
-import { classifyAddress, parseAddress, stringifyAddress } from &quot;@hertzg/ip&quot;;
+import { classifyAddress } from &quot;@hertzg/ip&quot;;
 
-// Dual-stack servers (Deno, Node) report IPv4 clients as ::ffff:x.x.x.x
-// parseAddress auto-unwraps mapped addresses to their IPv4 form
-const remote1 = parseAddress(&quot;::ffff:192.168.1.50&quot;).address;
-assertEquals(stringifyAddress(remote1), &quot;192.168.1.50&quot;);
+// A guard that only checks loopback and link-local misses private, CGNAT,
+// and multicast ranges; classification is one label from a closed set, so
+// there's no list of booleans to keep in sync
+function isSafeToFetch(host: string): boolean {
+  const { classification } = classifyAddress(host); // v4, v6, or mapped, one call
+  return classification === &quot;public&quot; || classification === &quot;global-unicast&quot;;
+}
 
-// Native IPv6 clients pass through unchanged
-const remote2 = parseAddress(&quot;2001:db8::1&quot;).address;
-assertEquals(stringifyAddress(remote2), &quot;2001:db8::1&quot;);
+assertEquals(isSafeToFetch(&quot;8.8.8.8&quot;), true);
+assertEquals(isSafeToFetch(&quot;2001:4860:4860::8888&quot;), true);
 
-// Classification works on both
-assertEquals(classifyAddress(remote1).classification, &quot;private&quot;);
-assertEquals(classifyAddress(remote2).classification, &quot;documentation&quot;);
+assertEquals(isSafeToFetch(&quot;127.0.0.1&quot;), false);
+assertEquals(isSafeToFetch(&quot;10.0.0.1&quot;), false);
+assertEquals(isSafeToFetch(&quot;169.254.169.254&quot;), false); // cloud metadata endpoint
+assertEquals(isSafeToFetch(&quot;::ffff:127.0.0.1&quot;), false); // mapped, unwrapped first
 </code><button class="copyButton" data-copy="import { assertEquals } from &quot;@std/assert&quot;;
-import { classifyAddress, parseAddress, stringifyAddress } from &quot;@hertzg/ip&quot;;
+import { classifyAddress } from &quot;@hertzg/ip&quot;;
 
-// Dual-stack servers (Deno, Node) report IPv4 clients as ::ffff:x.x.x.x
-// parseAddress auto-unwraps mapped addresses to their IPv4 form
-const remote1 = parseAddress(&quot;::ffff:192.168.1.50&quot;).address;
-assertEquals(stringifyAddress(remote1), &quot;192.168.1.50&quot;);
+// A guard that only checks loopback and link-local misses private, CGNAT,
+// and multicast ranges; classification is one label from a closed set, so
+// there's no list of booleans to keep in sync
+function isSafeToFetch(host: string): boolean {
+  const { classification } = classifyAddress(host); // v4, v6, or mapped, one call
+  return classification === &quot;public&quot; || classification === &quot;global-unicast&quot;;
+}
 
-// Native IPv6 clients pass through unchanged
-const remote2 = parseAddress(&quot;2001:db8::1&quot;).address;
-assertEquals(stringifyAddress(remote2), &quot;2001:db8::1&quot;);
+assertEquals(isSafeToFetch(&quot;8.8.8.8&quot;), true);
+assertEquals(isSafeToFetch(&quot;2001:4860:4860::8888&quot;), true);
 
-// Classification works on both
-assertEquals(classifyAddress(remote1).classification, &quot;private&quot;);
-assertEquals(classifyAddress(remote2).classification, &quot;documentation&quot;);
+assertEquals(isSafeToFetch(&quot;127.0.0.1&quot;), false);
+assertEquals(isSafeToFetch(&quot;10.0.0.1&quot;), false);
+assertEquals(isSafeToFetch(&quot;169.254.169.254&quot;), false); // cloud metadata endpoint
+assertEquals(isSafeToFetch(&quot;::ffff:127.0.0.1&quot;), false); // mapped, unwrapped first
 "><svg
   class="copy"
   width="15"
@@ -334,11 +340,100 @@ assertEquals(isTrusted(&quot;2001:db8::1&quot;), false);
   <path d="M5 12l5 5l10 -10" />
 </svg>
 </button><code></code></pre>
+<h2 id="dual-stack-server">
+Dual-Stack Server</h2>
+</div></div>
+</div>
+<div class="border-b border-gray-300 dark:border-gray-700"></div><div class="anchorable"><a href="#example_2" class="anchor" aria-label="Anchor" tabIndex="-1"><svg
+  width="16"
+  height="16"
+  viewBox="0 0 14 14"
+  fill="none"
+  xmlns="http://www.w3.org/2000/svg"
+>
+  <g clip-path="url(#clip0_1081_1237)">
+    <path
+      fill-rule="evenodd"
+      clip-rule="evenodd"
+      d="M6.80328 2.8656C6.68736 2.99 6.62425 3.15454 6.62725 3.32456C6.63025 3.49457 6.69913 3.65678 6.81936 3.77702C6.9396 3.89725 7.10181 3.96613 7.27182 3.96913C7.44184 3.97213 7.60638 3.90902 7.73078 3.7931L8.82453 2.69935C8.98712 2.53676 9.18015 2.40778 9.39259 2.31978C9.60503 2.23179 9.83272 2.1865 10.0627 2.1865C10.2926 2.1865 10.5203 2.23179 10.7327 2.31978C10.9452 2.40778 11.1382 2.53676 11.3008 2.69935C11.4634 2.86194 11.5923 3.05497 11.6803 3.2674C11.7683 3.47984 11.8136 3.70753 11.8136 3.93747C11.8136 4.16741 11.7683 4.3951 11.6803 4.60754C11.5923 4.81998 11.4634 5.013 11.3008 5.1756L9.11328 7.3631C8.95075 7.52581 8.75775 7.65488 8.5453 7.74295C8.33285 7.83102 8.10513 7.87635 7.87516 7.87635C7.64518 7.87635 7.41746 7.83102 7.20501 7.74295C6.99256 7.65488 6.79956 7.52581 6.63703 7.3631C6.51263 7.24718 6.34809 7.18407 6.17807 7.18707C6.00806 7.19007 5.84585 7.25894 5.72561 7.37918C5.60538 7.49942 5.5365 7.66163 5.5335 7.83164C5.5305 8.00165 5.59361 8.1662 5.70953 8.2906C5.99391 8.57501 6.33154 8.80062 6.70312 8.95455C7.0747 9.10847 7.47296 9.18769 7.87516 9.18769C8.27736 9.18769 8.67562 9.10847 9.0472 8.95455C9.41878 8.80062 9.7564 8.57501 10.0408 8.2906L12.2283 6.1031C12.8026 5.52874 13.1253 4.74974 13.1253 3.93747C13.1253 3.12521 12.8026 2.34621 12.2283 1.77185C11.6539 1.19749 10.8749 0.874817 10.0627 0.874817C9.25039 0.874817 8.47139 1.19749 7.89703 1.77185L6.80328 2.8656ZM2.69953 11.3006C2.53682 11.1381 2.40774 10.9451 2.31968 10.7326C2.23161 10.5202 2.18628 10.2924 2.18628 10.0625C2.18628 9.8325 2.23161 9.60477 2.31968 9.39233C2.40774 9.17988 2.53682 8.98688 2.69953 8.82435L4.88703 6.63685C5.04956 6.47414 5.24256 6.34506 5.45501 6.25699C5.66746 6.16893 5.89518 6.1236 6.12516 6.1236C6.35513 6.1236 6.58285 6.16893 6.7953 6.25699C7.00775 6.34506 7.20075 6.47414 7.36328 6.63685C7.48768 6.75277 7.65223 6.81588 7.82224 6.81288C7.99225 6.80988 8.15446 6.741 8.2747 6.62077C8.39494 6.50053 8.46381 6.33832 8.46681 6.1683C8.46981 5.99829 8.4067 5.83375 8.29078 5.70935C8.0064 5.42494 7.66878 5.19933 7.2972 5.0454C6.92562 4.89148 6.52736 4.81225 6.12516 4.81225C5.72296 4.81225 5.3247 4.89148 4.95312 5.0454C4.58154 5.19933 4.24391 5.42494 3.95953 5.70935L1.77203 7.89685C1.19767 8.47121 0.875 9.25021 0.875 10.0625C0.875 10.8747 1.19767 11.6537 1.77203 12.2281C2.34639 12.8025 3.12539 13.1251 3.93766 13.1251C4.74992 13.1251 5.52892 12.8025 6.10328 12.2281L7.19703 11.1343C7.31295 11.0099 7.37606 10.8454 7.37306 10.6754C7.37006 10.5054 7.30119 10.3432 7.18095 10.2229C7.06071 10.1027 6.8985 10.0338 6.72849 10.0308C6.55848 10.0278 6.39393 10.0909 6.26953 10.2068L5.17578 11.3006C5.01325 11.4633 4.82025 11.5924 4.6078 11.6805C4.39535 11.7685 4.16763 11.8138 3.93766 11.8138C3.70768 11.8138 3.47996 11.7685 3.26751 11.6805C3.05506 11.5924 2.86206 11.4633 2.69953 11.3006Z"
+      fill="currentColor"
+    />
+  </g>
+  <defs>
+    <clipPath id="clip0_1081_1237">
+      <rect width="14" height="14" fill="white" />
+    </clipPath>
+  </defs>
+</svg>
+</a>
+<h3 class="example-header"><div class="markdown"><p>Normalize client addresses from a dual-stack server</p>
+</div></h3>
+  <div><div class="markdown"><pre class="highlight"><code class="language-ts">import { assertEquals } from &quot;@std/assert&quot;;
+import { classifyAddress, parseAddress, stringifyAddress } from &quot;@hertzg/ip&quot;;
+
+// Dual-stack servers (Deno, Node) report IPv4 clients as ::ffff:x.x.x.x
+// parseAddress auto-unwraps mapped addresses to their IPv4 form
+const remote1 = parseAddress(&quot;::ffff:192.168.1.50&quot;).address;
+assertEquals(stringifyAddress(remote1), &quot;192.168.1.50&quot;);
+
+// Native IPv6 clients pass through unchanged
+const remote2 = parseAddress(&quot;2001:db8::1&quot;).address;
+assertEquals(stringifyAddress(remote2), &quot;2001:db8::1&quot;);
+
+// Classification works on both
+assertEquals(classifyAddress(remote1).classification, &quot;private&quot;);
+assertEquals(classifyAddress(remote2).classification, &quot;documentation&quot;);
+</code><button class="copyButton" data-copy="import { assertEquals } from &quot;@std/assert&quot;;
+import { classifyAddress, parseAddress, stringifyAddress } from &quot;@hertzg/ip&quot;;
+
+// Dual-stack servers (Deno, Node) report IPv4 clients as ::ffff:x.x.x.x
+// parseAddress auto-unwraps mapped addresses to their IPv4 form
+const remote1 = parseAddress(&quot;::ffff:192.168.1.50&quot;).address;
+assertEquals(stringifyAddress(remote1), &quot;192.168.1.50&quot;);
+
+// Native IPv6 clients pass through unchanged
+const remote2 = parseAddress(&quot;2001:db8::1&quot;).address;
+assertEquals(stringifyAddress(remote2), &quot;2001:db8::1&quot;);
+
+// Classification works on both
+assertEquals(classifyAddress(remote1).classification, &quot;private&quot;);
+assertEquals(classifyAddress(remote2).classification, &quot;documentation&quot;);
+"><svg
+  class="copy"
+  width="15"
+  height="15"
+  viewBox="0 0 15 15"
+  fill="none"
+  xmlns="http://www.w3.org/2000/svg"
+>
+  <rect x="2" y="2" width="7" height="7" fill="none" />
+  <rect x="6" y="6" width="7" height="7" fill="none" />
+  <path
+    d="M1.55566 2.7C1.55566 2.03726 2.09292 1.5 2.75566 1.5H8.75566C9.41841 1.5 9.95566 2.03726 9.95566 2.7V5.1H12.3557C13.0184 5.1 13.5557 5.63726 13.5557 6.3V12.3C13.5557 12.9627 13.0184 13.5 12.3557 13.5H6.35566C5.69292 13.5 5.15566 12.9627 5.15566 12.3V9.9H2.75566C2.09292 9.9 1.55566 9.36274 1.55566 8.7V2.7ZM6.35566 9.9V12.3H12.3557V6.3H9.95566V8.7C9.95566 9.36274 9.41841 9.9 8.75566 9.9H6.35566ZM8.75566 8.7V2.7H2.75566V8.7H8.75566Z"
+    fill="currentColor"
+  />
+</svg>
+<svg
+  class="check"
+  width="15"
+  height="15"
+  viewBox="0 0 24 24"
+  stroke-width="2"
+  stroke="currentColor"
+  fill="none"
+  stroke-linecap="round"
+  stroke-linejoin="round"
+  xmlns="http://www.w3.org/2000/svg"
+>
+  <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+  <path d="M5 12l5 5l10 -10" />
+</svg>
+</button><code></code></pre>
 <h2 id="ip-classification">
 IP Classification</h2>
 </div></div>
 </div>
-<div class="border-b border-gray-300 dark:border-gray-700"></div><div class="anchorable"><a href="#example_2" class="anchor" aria-label="Anchor" tabIndex="-1"><svg
+<div class="border-b border-gray-300 dark:border-gray-700"></div><div class="anchorable"><a href="#example_3" class="anchor" aria-label="Anchor" tabIndex="-1"><svg
   width="16"
   height="16"
   viewBox="0 0 14 14"
@@ -475,7 +570,7 @@ assertEquals(classifyAddress(&quot;fd00::1&quot;).classification, &quot;unique-l
 Sorting</h2>
 </div></div>
 </div>
-<div class="border-b border-gray-300 dark:border-gray-700"></div><div class="anchorable"><a href="#example_3" class="anchor" aria-label="Anchor" tabIndex="-1"><svg
+<div class="border-b border-gray-300 dark:border-gray-700"></div><div class="anchorable"><a href="#example_4" class="anchor" aria-label="Anchor" tabIndex="-1"><svg
   width="16"
   height="16"
   viewBox="0 0 14 14"
@@ -572,7 +667,7 @@ assertEquals(ranges.toSorted(compareCidr).map(stringifyCidr), [
 Parsing and Stringifying</h2>
 </div></div>
 </div>
-<div class="border-b border-gray-300 dark:border-gray-700"></div><div class="anchorable"><a href="#example_4" class="anchor" aria-label="Anchor" tabIndex="-1"><svg
+<div class="border-b border-gray-300 dark:border-gray-700"></div><div class="anchorable"><a href="#example_5" class="anchor" aria-label="Anchor" tabIndex="-1"><svg
   width="16"
   height="16"
   viewBox="0 0 14 14"
@@ -659,7 +754,7 @@ assertEquals(stringifyAddressv6(v6 + 1n), &quot;2001:db8::2&quot;);
 CIDR Network Boundaries</h2>
 </div></div>
 </div>
-<div class="border-b border-gray-300 dark:border-gray-700"></div><div class="anchorable"><a href="#example_5" class="anchor" aria-label="Anchor" tabIndex="-1"><svg
+<div class="border-b border-gray-300 dark:border-gray-700"></div><div class="anchorable"><a href="#example_6" class="anchor" aria-label="Anchor" tabIndex="-1"><svg
   width="16"
   height="16"
   viewBox="0 0 14 14"
@@ -746,7 +841,7 @@ assertEquals(cidrv4Size(cidr), 256);
 Containment Checking</h2>
 </div></div>
 </div>
-<div class="border-b border-gray-300 dark:border-gray-700"></div><div class="anchorable"><a href="#example_6" class="anchor" aria-label="Anchor" tabIndex="-1"><svg
+<div class="border-b border-gray-300 dark:border-gray-700"></div><div class="anchorable"><a href="#example_7" class="anchor" aria-label="Anchor" tabIndex="-1"><svg
   width="16"
   height="16"
   viewBox="0 0 14 14"
@@ -821,7 +916,7 @@ assertEquals(cidrv4Contains(cidr, parseAddressv4(&quot;11.0.0.0&quot;).address),
 Address Enumeration</h2>
 </div></div>
 </div>
-<div class="border-b border-gray-300 dark:border-gray-700"></div><div class="anchorable"><a href="#example_7" class="anchor" aria-label="Anchor" tabIndex="-1"><svg
+<div class="border-b border-gray-300 dark:border-gray-700"></div><div class="anchorable"><a href="#example_8" class="anchor" aria-label="Anchor" tabIndex="-1"><svg
   width="16"
   height="16"
   viewBox="0 0 14 14"
@@ -910,7 +1005,7 @@ assertEquals(usable.map(stringifyAddressv4), [&quot;10.0.0.1&quot;, &quot;10.0.0
 Wire Bytes</h2>
 </div></div>
 </div>
-<div class="border-b border-gray-300 dark:border-gray-700"></div><div class="anchorable"><a href="#example_8" class="anchor" aria-label="Anchor" tabIndex="-1"><svg
+<div class="border-b border-gray-300 dark:border-gray-700"></div><div class="anchorable"><a href="#example_9" class="anchor" aria-label="Anchor" tabIndex="-1"><svg
   width="16"
   height="16"
   viewBox="0 0 14 14"
@@ -1009,7 +1104,7 @@ Reverse DNS</h2>
 requires an absolute name.</p>
 </div></div>
 </div>
-<div class="border-b border-gray-300 dark:border-gray-700"></div><div class="anchorable"><a href="#example_9" class="anchor" aria-label="Anchor" tabIndex="-1"><svg
+<div class="border-b border-gray-300 dark:border-gray-700"></div><div class="anchorable"><a href="#example_10" class="anchor" aria-label="Anchor" tabIndex="-1"><svg
   width="16"
   height="16"
   viewBox="0 0 14 14"
@@ -2536,7 +2631,7 @@ Variables</h2></div><div class="namespaceSection"><div id="namespace_cidrv4broad
   />
 </svg>
 </a></nav><nav class="documentNavigation">
-          <h3>Document Navigation</h3><ul><li><ul><li><a href="#features" title="Features">Features</a></li><li><a href="#dual-stack-server" title="Dual-Stack Server">Dual-Stack Server</a></li></ul></li><li><a href="#examples" title="Examples">Examples</a></li><li><ul><li><a href="#example_0" title="Normalize client addresses from a dual-stack server">Normalize client addresses from a dual-stack server</a></li><li><a href="#example_1" title="Check if a client IP is in a set of trusted CIDR blocks">Check if a client IP is in a set of trusted CIDR blocks</a></li><li><a href="#example_2" title="Classify addresses for logging, analytics, or input validation">Classify addresses for logging, analytics, or input validation</a></li><li><a href="#example_3" title="Sort a mixed dual-stack list of addresses and CIDR blocks">Sort a mixed dual-stack list of addresses and CIDR blocks</a></li><li><a href="#example_4" title="Parse and stringify IPv4 and IPv6 addresses">Parse and stringify IPv4 and IPv6 addresses</a></li><li><a href="#example_5" title="Compute network and broadcast addresses from CIDR">Compute network and broadcast addresses from CIDR</a></li><li><a href="#example_6" title="Check if IPs fall within a CIDR block">Check if IPs fall within a CIDR block</a></li><li><a href="#example_7" title="Generate addresses in a CIDR block">Generate addresses in a CIDR block</a></li><li><a href="#example_8" title="Decode addresses straight out of a packet buffer">Decode addresses straight out of a packet buffer</a></li><li><a href="#example_9" title="Build the name a PTR record lives at">Build the name a PTR record lives at</a></li></ul></li><li><a href="#mod_ts_functions" title="Functions">Functions</a></li><li><ul><li><a href="#namespace_addressfrombytes" title="addressFromBytes">addressFromBytes</a></li><li><a href="#namespace_addresstoarpa" title="addressToArpa">addressToArpa</a></li><li><a href="#namespace_addresstobytes" title="addressToBytes">addressToBytes</a></li><li><a href="#namespace_addressv4frombytes" title="addressv4FromBytes">addressv4FromBytes</a></li><li><a href="#namespace_addressv4toarpa" title="addressv4ToArpa">addressv4ToArpa</a></li><li><a href="#namespace_addressv4tobytes" title="addressv4ToBytes">addressv4ToBytes</a></li><li><a href="#namespace_addressv6frombytes" title="addressv6FromBytes">addressv6FromBytes</a></li><li><a href="#namespace_addressv6toarpa" title="addressv6ToArpa">addressv6ToArpa</a></li><li><a href="#namespace_addressv6tobytes" title="addressv6ToBytes">addressv6ToBytes</a></li><li><a href="#namespace_addressversion" title="addressVersion">addressVersion</a></li><li><a href="#namespace_cidraddresses" title="cidrAddresses">cidrAddresses</a></li><li><a href="#namespace_cidrcontains" title="cidrContains">cidrContains</a></li><li><a href="#namespace_cidrcontainscidr" title="cidrContainsCidr">cidrContainsCidr</a></li><li><a href="#namespace_cidrfirstaddress" title="cidrFirstAddress">cidrFirstAddress</a></li><li><a href="#namespace_cidrintersect" title="cidrIntersect">cidrIntersect</a></li><li><a href="#namespace_cidrlastaddress" title="cidrLastAddress">cidrLastAddress</a></li><li><a href="#namespace_cidrmerge" title="cidrMerge">cidrMerge</a></li><li><a href="#namespace_cidroverlaps" title="cidrOverlaps">cidrOverlaps</a></li><li><a href="#namespace_cidrsize" title="cidrSize">cidrSize</a></li><li><a href="#namespace_cidrsubtract" title="cidrSubtract">cidrSubtract</a></li><li><a href="#namespace_cidrv4addresses" title="cidrv4Addresses">cidrv4Addresses</a></li><li><a href="#namespace_cidrv4contains" title="cidrv4Contains">cidrv4Contains</a></li><li><a href="#namespace_cidrv4containscidr" title="cidrv4ContainsCidr">cidrv4ContainsCidr</a></li><li><a href="#namespace_cidrv4firstaddress" title="cidrv4FirstAddress">cidrv4FirstAddress</a></li><li><a href="#namespace_cidrv4firstusableaddress" title="cidrv4FirstUsableAddress">cidrv4FirstUsableAddress</a></li><li><a href="#namespace_cidrv4intersect" title="cidrv4Intersect">cidrv4Intersect</a></li><li><a href="#namespace_cidrv4lastaddress" title="cidrv4LastAddress">cidrv4LastAddress</a></li><li><a href="#namespace_cidrv4lastusableaddress" title="cidrv4LastUsableAddress">cidrv4LastUsableAddress</a></li><li><a href="#namespace_cidrv4mask" title="cidrv4Mask">cidrv4Mask</a></li><li><a href="#namespace_cidrv4merge" title="cidrv4Merge">cidrv4Merge</a></li><li><a href="#namespace_cidrv4overlaps" title="cidrv4Overlaps">cidrv4Overlaps</a></li><li><a href="#namespace_cidrv4prefixlength" title="cidrv4PrefixLength">cidrv4PrefixLength</a></li><li><a href="#namespace_cidrv4size" title="cidrv4Size">cidrv4Size</a></li><li><a href="#namespace_cidrv4subtract" title="cidrv4Subtract">cidrv4Subtract</a></li><li><a href="#namespace_cidrv4usableaddresses" title="cidrv4UsableAddresses">cidrv4UsableAddresses</a></li><li><a href="#namespace_cidrv4usablesize" title="cidrv4UsableSize">cidrv4UsableSize</a></li><li><a href="#namespace_cidrv6addresses" title="cidrv6Addresses">cidrv6Addresses</a></li><li><a href="#namespace_cidrv6contains" title="cidrv6Contains">cidrv6Contains</a></li><li><a href="#namespace_cidrv6containscidr" title="cidrv6ContainsCidr">cidrv6ContainsCidr</a></li><li><a href="#namespace_cidrv6firstaddress" title="cidrv6FirstAddress">cidrv6FirstAddress</a></li><li><a href="#namespace_cidrv6intersect" title="cidrv6Intersect">cidrv6Intersect</a></li><li><a href="#namespace_cidrv6lastaddress" title="cidrv6LastAddress">cidrv6LastAddress</a></li><li><a href="#namespace_cidrv6mask" title="cidrv6Mask">cidrv6Mask</a></li><li><a href="#namespace_cidrv6merge" title="cidrv6Merge">cidrv6Merge</a></li><li><a href="#namespace_cidrv6overlaps" title="cidrv6Overlaps">cidrv6Overlaps</a></li><li><a href="#namespace_cidrv6prefixlength" title="cidrv6PrefixLength">cidrv6PrefixLength</a></li><li><a href="#namespace_cidrv6size" title="cidrv6Size">cidrv6Size</a></li><li><a href="#namespace_cidrv6subtract" title="cidrv6Subtract">cidrv6Subtract</a></li><li><a href="#namespace_cidrversion" title="cidrVersion">cidrVersion</a></li><li><a href="#namespace_classifyaddress" title="classifyAddress">classifyAddress</a></li><li><a href="#namespace_classifyaddressv4" title="classifyAddressv4">classifyAddressv4</a></li><li><a href="#namespace_classifyaddressv6" title="classifyAddressv6">classifyAddressv6</a></li><li><a href="#namespace_compareaddress" title="compareAddress">compareAddress</a></li><li><a href="#namespace_compareaddressv4" title="compareAddressv4">compareAddressv4</a></li><li><a href="#namespace_compareaddressv6" title="compareAddressv6">compareAddressv6</a></li><li><a href="#namespace_comparecidr" title="compareCidr">compareCidr</a></li><li><a href="#namespace_comparecidrv4" title="compareCidrv4">compareCidrv4</a></li><li><a href="#namespace_comparecidrv6" title="compareCidrv6">compareCidrv6</a></li><li><a href="#namespace_isaddressv4benchmarking" title="isAddressv4Benchmarking">isAddressv4Benchmarking</a></li><li><a href="#namespace_isaddressv4broadcast" title="isAddressv4Broadcast">isAddressv4Broadcast</a></li><li><a href="#namespace_isaddressv4cgnat" title="isAddressv4CgNat">isAddressv4CgNat</a></li><li><a href="#namespace_isaddressv4documentation" title="isAddressv4Documentation">isAddressv4Documentation</a></li><li><a href="#namespace_isaddressv4linklocal" title="isAddressv4LinkLocal">isAddressv4LinkLocal</a></li><li><a href="#namespace_isaddressv4loopback" title="isAddressv4Loopback">isAddressv4Loopback</a></li><li><a href="#namespace_isaddressv4multicast" title="isAddressv4Multicast">isAddressv4Multicast</a></li><li><a href="#namespace_isaddressv4private" title="isAddressv4Private">isAddressv4Private</a></li><li><a href="#namespace_isaddressv4public" title="isAddressv4Public">isAddressv4Public</a></li><li><a href="#namespace_isaddressv4reserved" title="isAddressv4Reserved">isAddressv4Reserved</a></li><li><a href="#namespace_isaddressv4thisnetwork" title="isAddressv4ThisNetwork">isAddressv4ThisNetwork</a></li><li><a href="#namespace_isaddressv6benchmarking" title="isAddressv6Benchmarking">isAddressv6Benchmarking</a></li><li><a href="#namespace_isaddressv6documentation" title="isAddressv6Documentation">isAddressv6Documentation</a></li><li><a href="#namespace_isaddressv6globalunicast" title="isAddressv6GlobalUnicast">isAddressv6GlobalUnicast</a></li><li><a href="#namespace_isaddressv6linklocal" title="isAddressv6LinkLocal">isAddressv6LinkLocal</a></li><li><a href="#namespace_isaddressv6loopback" title="isAddressv6Loopback">isAddressv6Loopback</a></li><li><a href="#namespace_isaddressv6mapped" title="isAddressv6Mapped">isAddressv6Mapped</a></li><li><a href="#namespace_isaddressv6multicast" title="isAddressv6Multicast">isAddressv6Multicast</a></li><li><a href="#namespace_isaddressv6orchidv2" title="isAddressv6Orchidv2">isAddressv6Orchidv2</a></li><li><a href="#namespace_isaddressv6teredo" title="isAddressv6Teredo">isAddressv6Teredo</a></li><li><a href="#namespace_isaddressv6translated" title="isAddressv6Translated">isAddressv6Translated</a></li><li><a href="#namespace_isaddressv6uniquelocal" title="isAddressv6UniqueLocal">isAddressv6UniqueLocal</a></li><li><a href="#namespace_isaddressv6unspecified" title="isAddressv6Unspecified">isAddressv6Unspecified</a></li><li><a href="#namespace_iscidrv4" title="isCidrv4">isCidrv4</a></li><li><a href="#namespace_iscidrv6" title="isCidrv6">isCidrv6</a></li><li><a href="#namespace_isvalidaddress" title="isValidAddress">isValidAddress</a></li><li><a href="#namespace_isvalidaddressv4" title="isValidAddressv4">isValidAddressv4</a></li><li><a href="#namespace_isvalidaddressv6" title="isValidAddressv6">isValidAddressv6</a></li><li><a href="#namespace_isvalidcidr" title="isValidCidr">isValidCidr</a></li><li><a href="#namespace_isvalidcidrv4" title="isValidCidrv4">isValidCidrv4</a></li><li><a href="#namespace_isvalidcidrv6" title="isValidCidrv6">isValidCidrv6</a></li><li><a href="#namespace_mapfromaddressv4" title="mapFromAddressv4">mapFromAddressv4</a></li><li><a href="#namespace_mapfromcidrv4" title="mapFromCidrv4">mapFromCidrv4</a></li><li><a href="#namespace_parseaddress" title="parseAddress">parseAddress</a></li><li><a href="#namespace_parseaddressv4" title="parseAddressv4">parseAddressv4</a></li><li><a href="#namespace_parseaddressv6" title="parseAddressv6">parseAddressv6</a></li><li><a href="#namespace_parsecidr" title="parseCidr">parseCidr</a></li><li><a href="#namespace_parsecidrv4" title="parseCidrv4">parseCidrv4</a></li><li><a href="#namespace_parsecidrv6" title="parseCidrv6">parseCidrv6</a></li><li><a href="#namespace_splitnotation" title="splitNotation">splitNotation</a></li><li><a href="#namespace_stringifyaddress" title="stringifyAddress">stringifyAddress</a></li><li><a href="#namespace_stringifyaddressv4" title="stringifyAddressv4">stringifyAddressv4</a></li><li><a href="#namespace_stringifyaddressv6" title="stringifyAddressv6">stringifyAddressv6</a></li><li><a href="#namespace_stringifyaddressv6expanded" title="stringifyAddressv6Expanded">stringifyAddressv6Expanded</a></li><li><a href="#namespace_stringifycidr" title="stringifyCidr">stringifyCidr</a></li><li><a href="#namespace_stringifycidrv4" title="stringifyCidrv4">stringifyCidrv4</a></li><li><a href="#namespace_stringifycidrv6" title="stringifyCidrv6">stringifyCidrv6</a></li><li><a href="#namespace_stringifycidrv6expanded" title="stringifyCidrv6Expanded">stringifyCidrv6Expanded</a></li><li><a href="#namespace_unmaptoaddressv4" title="unmapToAddressv4">unmapToAddressv4</a></li><li><a href="#namespace_unmaptocidrv4" title="unmapToCidrv4">unmapToCidrv4</a></li></ul></li><li><a href="#mod_ts_type-aliases" title="Type Aliases">Type Aliases</a></li><li><ul><li><a href="#namespace_address" title="Address">Address</a></li><li><a href="#namespace_addressv4" title="Addressv4">Addressv4</a></li><li><a href="#namespace_addressv6" title="Addressv6">Addressv6</a></li><li><a href="#namespace_cidr" title="Cidr">Cidr</a></li><li><a href="#namespace_cidrv4" title="Cidrv4">Cidrv4</a></li><li><a href="#namespace_cidrv6" title="Cidrv6">Cidrv6</a></li><li><a href="#namespace_classificationv4" title="Classificationv4">Classificationv4</a></li><li><a href="#namespace_classificationv6" title="Classificationv6">Classificationv6</a></li><li><a href="#namespace_classifiedaddress" title="ClassifiedAddress">ClassifiedAddress</a></li><li><a href="#namespace_classifiedaddressv4" title="ClassifiedAddressv4">ClassifiedAddressv4</a></li><li><a href="#namespace_classifiedaddressv6" title="ClassifiedAddressv6">ClassifiedAddressv6</a></li><li><a href="#namespace_ipversion" title="IpVersion">IpVersion</a></li><li><a href="#namespace_mask" title="Mask">Mask</a></li><li><a href="#namespace_maskedcidrv4" title="MaskedCidrv4">MaskedCidrv4</a></li><li><a href="#namespace_maskedcidrv6" title="MaskedCidrv6">MaskedCidrv6</a></li><li><a href="#namespace_maskv4" title="Maskv4">Maskv4</a></li><li><a href="#namespace_maskv6" title="Maskv6">Maskv6</a></li><li><a href="#namespace_notation" title="Notation">Notation</a></li><li><a href="#namespace_parsedaddress" title="ParsedAddress">ParsedAddress</a></li><li><a href="#namespace_parsedaddressv4" title="ParsedAddressv4">ParsedAddressv4</a></li><li><a href="#namespace_parsedaddressv6" title="ParsedAddressv6">ParsedAddressv6</a></li><li><a href="#namespace_parsedcidr" title="ParsedCidr">ParsedCidr</a></li><li><a href="#namespace_parsedcidrv4" title="ParsedCidrv4">ParsedCidrv4</a></li><li><a href="#namespace_parsedcidrv6" title="ParsedCidrv6">ParsedCidrv6</a></li><li><a href="#namespace_parseoptions" title="ParseOptions">ParseOptions</a></li><li><a href="#namespace_prefixedcidrv4" title="PrefixedCidrv4">PrefixedCidrv4</a></li><li><a href="#namespace_prefixedcidrv6" title="PrefixedCidrv6">PrefixedCidrv6</a></li><li><a href="#namespace_prefixlength" title="PrefixLength">PrefixLength</a></li><li><a href="#namespace_prefixlengthv4" title="PrefixLengthv4">PrefixLengthv4</a></li><li><a href="#namespace_prefixlengthv6" title="PrefixLengthv6">PrefixLengthv6</a></li><li><a href="#namespace_zoneid" title="ZoneId">ZoneId</a></li></ul></li><li><a href="#mod_ts_variables" title="Variables">Variables</a></li><li><ul><li><a href="#namespace_cidrv4broadcastaddress" title="cidrv4BroadcastAddress">cidrv4BroadcastAddress</a></li><li><a href="#namespace_cidrv4networkaddress" title="cidrv4NetworkAddress">cidrv4NetworkAddress</a></li></ul></li></ul></nav></div>
+          <h3>Document Navigation</h3><ul><li><ul><li><a href="#features" title="Features">Features</a></li><li><a href="#ssrf-guard" title="SSRF Guard">SSRF Guard</a></li></ul></li><li><a href="#examples" title="Examples">Examples</a></li><li><ul><li><a href="#example_0" title="Reject a fetch target that resolves inside your own network">Reject a fetch target that resolves inside your own network</a></li><li><a href="#example_1" title="Check if a client IP is in a set of trusted CIDR blocks">Check if a client IP is in a set of trusted CIDR blocks</a></li><li><a href="#example_2" title="Normalize client addresses from a dual-stack server">Normalize client addresses from a dual-stack server</a></li><li><a href="#example_3" title="Classify addresses for logging, analytics, or input validation">Classify addresses for logging, analytics, or input validation</a></li><li><a href="#example_4" title="Sort a mixed dual-stack list of addresses and CIDR blocks">Sort a mixed dual-stack list of addresses and CIDR blocks</a></li><li><a href="#example_5" title="Parse and stringify IPv4 and IPv6 addresses">Parse and stringify IPv4 and IPv6 addresses</a></li><li><a href="#example_6" title="Compute network and broadcast addresses from CIDR">Compute network and broadcast addresses from CIDR</a></li><li><a href="#example_7" title="Check if IPs fall within a CIDR block">Check if IPs fall within a CIDR block</a></li><li><a href="#example_8" title="Generate addresses in a CIDR block">Generate addresses in a CIDR block</a></li><li><a href="#example_9" title="Decode addresses straight out of a packet buffer">Decode addresses straight out of a packet buffer</a></li><li><a href="#example_10" title="Build the name a PTR record lives at">Build the name a PTR record lives at</a></li></ul></li><li><a href="#mod_ts_functions" title="Functions">Functions</a></li><li><ul><li><a href="#namespace_addressfrombytes" title="addressFromBytes">addressFromBytes</a></li><li><a href="#namespace_addresstoarpa" title="addressToArpa">addressToArpa</a></li><li><a href="#namespace_addresstobytes" title="addressToBytes">addressToBytes</a></li><li><a href="#namespace_addressv4frombytes" title="addressv4FromBytes">addressv4FromBytes</a></li><li><a href="#namespace_addressv4toarpa" title="addressv4ToArpa">addressv4ToArpa</a></li><li><a href="#namespace_addressv4tobytes" title="addressv4ToBytes">addressv4ToBytes</a></li><li><a href="#namespace_addressv6frombytes" title="addressv6FromBytes">addressv6FromBytes</a></li><li><a href="#namespace_addressv6toarpa" title="addressv6ToArpa">addressv6ToArpa</a></li><li><a href="#namespace_addressv6tobytes" title="addressv6ToBytes">addressv6ToBytes</a></li><li><a href="#namespace_addressversion" title="addressVersion">addressVersion</a></li><li><a href="#namespace_cidraddresses" title="cidrAddresses">cidrAddresses</a></li><li><a href="#namespace_cidrcontains" title="cidrContains">cidrContains</a></li><li><a href="#namespace_cidrcontainscidr" title="cidrContainsCidr">cidrContainsCidr</a></li><li><a href="#namespace_cidrfirstaddress" title="cidrFirstAddress">cidrFirstAddress</a></li><li><a href="#namespace_cidrintersect" title="cidrIntersect">cidrIntersect</a></li><li><a href="#namespace_cidrlastaddress" title="cidrLastAddress">cidrLastAddress</a></li><li><a href="#namespace_cidrmerge" title="cidrMerge">cidrMerge</a></li><li><a href="#namespace_cidroverlaps" title="cidrOverlaps">cidrOverlaps</a></li><li><a href="#namespace_cidrsize" title="cidrSize">cidrSize</a></li><li><a href="#namespace_cidrsubtract" title="cidrSubtract">cidrSubtract</a></li><li><a href="#namespace_cidrv4addresses" title="cidrv4Addresses">cidrv4Addresses</a></li><li><a href="#namespace_cidrv4contains" title="cidrv4Contains">cidrv4Contains</a></li><li><a href="#namespace_cidrv4containscidr" title="cidrv4ContainsCidr">cidrv4ContainsCidr</a></li><li><a href="#namespace_cidrv4firstaddress" title="cidrv4FirstAddress">cidrv4FirstAddress</a></li><li><a href="#namespace_cidrv4firstusableaddress" title="cidrv4FirstUsableAddress">cidrv4FirstUsableAddress</a></li><li><a href="#namespace_cidrv4intersect" title="cidrv4Intersect">cidrv4Intersect</a></li><li><a href="#namespace_cidrv4lastaddress" title="cidrv4LastAddress">cidrv4LastAddress</a></li><li><a href="#namespace_cidrv4lastusableaddress" title="cidrv4LastUsableAddress">cidrv4LastUsableAddress</a></li><li><a href="#namespace_cidrv4mask" title="cidrv4Mask">cidrv4Mask</a></li><li><a href="#namespace_cidrv4merge" title="cidrv4Merge">cidrv4Merge</a></li><li><a href="#namespace_cidrv4overlaps" title="cidrv4Overlaps">cidrv4Overlaps</a></li><li><a href="#namespace_cidrv4prefixlength" title="cidrv4PrefixLength">cidrv4PrefixLength</a></li><li><a href="#namespace_cidrv4size" title="cidrv4Size">cidrv4Size</a></li><li><a href="#namespace_cidrv4subtract" title="cidrv4Subtract">cidrv4Subtract</a></li><li><a href="#namespace_cidrv4usableaddresses" title="cidrv4UsableAddresses">cidrv4UsableAddresses</a></li><li><a href="#namespace_cidrv4usablesize" title="cidrv4UsableSize">cidrv4UsableSize</a></li><li><a href="#namespace_cidrv6addresses" title="cidrv6Addresses">cidrv6Addresses</a></li><li><a href="#namespace_cidrv6contains" title="cidrv6Contains">cidrv6Contains</a></li><li><a href="#namespace_cidrv6containscidr" title="cidrv6ContainsCidr">cidrv6ContainsCidr</a></li><li><a href="#namespace_cidrv6firstaddress" title="cidrv6FirstAddress">cidrv6FirstAddress</a></li><li><a href="#namespace_cidrv6intersect" title="cidrv6Intersect">cidrv6Intersect</a></li><li><a href="#namespace_cidrv6lastaddress" title="cidrv6LastAddress">cidrv6LastAddress</a></li><li><a href="#namespace_cidrv6mask" title="cidrv6Mask">cidrv6Mask</a></li><li><a href="#namespace_cidrv6merge" title="cidrv6Merge">cidrv6Merge</a></li><li><a href="#namespace_cidrv6overlaps" title="cidrv6Overlaps">cidrv6Overlaps</a></li><li><a href="#namespace_cidrv6prefixlength" title="cidrv6PrefixLength">cidrv6PrefixLength</a></li><li><a href="#namespace_cidrv6size" title="cidrv6Size">cidrv6Size</a></li><li><a href="#namespace_cidrv6subtract" title="cidrv6Subtract">cidrv6Subtract</a></li><li><a href="#namespace_cidrversion" title="cidrVersion">cidrVersion</a></li><li><a href="#namespace_classifyaddress" title="classifyAddress">classifyAddress</a></li><li><a href="#namespace_classifyaddressv4" title="classifyAddressv4">classifyAddressv4</a></li><li><a href="#namespace_classifyaddressv6" title="classifyAddressv6">classifyAddressv6</a></li><li><a href="#namespace_compareaddress" title="compareAddress">compareAddress</a></li><li><a href="#namespace_compareaddressv4" title="compareAddressv4">compareAddressv4</a></li><li><a href="#namespace_compareaddressv6" title="compareAddressv6">compareAddressv6</a></li><li><a href="#namespace_comparecidr" title="compareCidr">compareCidr</a></li><li><a href="#namespace_comparecidrv4" title="compareCidrv4">compareCidrv4</a></li><li><a href="#namespace_comparecidrv6" title="compareCidrv6">compareCidrv6</a></li><li><a href="#namespace_isaddressv4benchmarking" title="isAddressv4Benchmarking">isAddressv4Benchmarking</a></li><li><a href="#namespace_isaddressv4broadcast" title="isAddressv4Broadcast">isAddressv4Broadcast</a></li><li><a href="#namespace_isaddressv4cgnat" title="isAddressv4CgNat">isAddressv4CgNat</a></li><li><a href="#namespace_isaddressv4documentation" title="isAddressv4Documentation">isAddressv4Documentation</a></li><li><a href="#namespace_isaddressv4linklocal" title="isAddressv4LinkLocal">isAddressv4LinkLocal</a></li><li><a href="#namespace_isaddressv4loopback" title="isAddressv4Loopback">isAddressv4Loopback</a></li><li><a href="#namespace_isaddressv4multicast" title="isAddressv4Multicast">isAddressv4Multicast</a></li><li><a href="#namespace_isaddressv4private" title="isAddressv4Private">isAddressv4Private</a></li><li><a href="#namespace_isaddressv4public" title="isAddressv4Public">isAddressv4Public</a></li><li><a href="#namespace_isaddressv4reserved" title="isAddressv4Reserved">isAddressv4Reserved</a></li><li><a href="#namespace_isaddressv4thisnetwork" title="isAddressv4ThisNetwork">isAddressv4ThisNetwork</a></li><li><a href="#namespace_isaddressv6benchmarking" title="isAddressv6Benchmarking">isAddressv6Benchmarking</a></li><li><a href="#namespace_isaddressv6documentation" title="isAddressv6Documentation">isAddressv6Documentation</a></li><li><a href="#namespace_isaddressv6globalunicast" title="isAddressv6GlobalUnicast">isAddressv6GlobalUnicast</a></li><li><a href="#namespace_isaddressv6linklocal" title="isAddressv6LinkLocal">isAddressv6LinkLocal</a></li><li><a href="#namespace_isaddressv6loopback" title="isAddressv6Loopback">isAddressv6Loopback</a></li><li><a href="#namespace_isaddressv6mapped" title="isAddressv6Mapped">isAddressv6Mapped</a></li><li><a href="#namespace_isaddressv6multicast" title="isAddressv6Multicast">isAddressv6Multicast</a></li><li><a href="#namespace_isaddressv6orchidv2" title="isAddressv6Orchidv2">isAddressv6Orchidv2</a></li><li><a href="#namespace_isaddressv6teredo" title="isAddressv6Teredo">isAddressv6Teredo</a></li><li><a href="#namespace_isaddressv6translated" title="isAddressv6Translated">isAddressv6Translated</a></li><li><a href="#namespace_isaddressv6uniquelocal" title="isAddressv6UniqueLocal">isAddressv6UniqueLocal</a></li><li><a href="#namespace_isaddressv6unspecified" title="isAddressv6Unspecified">isAddressv6Unspecified</a></li><li><a href="#namespace_iscidrv4" title="isCidrv4">isCidrv4</a></li><li><a href="#namespace_iscidrv6" title="isCidrv6">isCidrv6</a></li><li><a href="#namespace_isvalidaddress" title="isValidAddress">isValidAddress</a></li><li><a href="#namespace_isvalidaddressv4" title="isValidAddressv4">isValidAddressv4</a></li><li><a href="#namespace_isvalidaddressv6" title="isValidAddressv6">isValidAddressv6</a></li><li><a href="#namespace_isvalidcidr" title="isValidCidr">isValidCidr</a></li><li><a href="#namespace_isvalidcidrv4" title="isValidCidrv4">isValidCidrv4</a></li><li><a href="#namespace_isvalidcidrv6" title="isValidCidrv6">isValidCidrv6</a></li><li><a href="#namespace_mapfromaddressv4" title="mapFromAddressv4">mapFromAddressv4</a></li><li><a href="#namespace_mapfromcidrv4" title="mapFromCidrv4">mapFromCidrv4</a></li><li><a href="#namespace_parseaddress" title="parseAddress">parseAddress</a></li><li><a href="#namespace_parseaddressv4" title="parseAddressv4">parseAddressv4</a></li><li><a href="#namespace_parseaddressv6" title="parseAddressv6">parseAddressv6</a></li><li><a href="#namespace_parsecidr" title="parseCidr">parseCidr</a></li><li><a href="#namespace_parsecidrv4" title="parseCidrv4">parseCidrv4</a></li><li><a href="#namespace_parsecidrv6" title="parseCidrv6">parseCidrv6</a></li><li><a href="#namespace_splitnotation" title="splitNotation">splitNotation</a></li><li><a href="#namespace_stringifyaddress" title="stringifyAddress">stringifyAddress</a></li><li><a href="#namespace_stringifyaddressv4" title="stringifyAddressv4">stringifyAddressv4</a></li><li><a href="#namespace_stringifyaddressv6" title="stringifyAddressv6">stringifyAddressv6</a></li><li><a href="#namespace_stringifyaddressv6expanded" title="stringifyAddressv6Expanded">stringifyAddressv6Expanded</a></li><li><a href="#namespace_stringifycidr" title="stringifyCidr">stringifyCidr</a></li><li><a href="#namespace_stringifycidrv4" title="stringifyCidrv4">stringifyCidrv4</a></li><li><a href="#namespace_stringifycidrv6" title="stringifyCidrv6">stringifyCidrv6</a></li><li><a href="#namespace_stringifycidrv6expanded" title="stringifyCidrv6Expanded">stringifyCidrv6Expanded</a></li><li><a href="#namespace_unmaptoaddressv4" title="unmapToAddressv4">unmapToAddressv4</a></li><li><a href="#namespace_unmaptocidrv4" title="unmapToCidrv4">unmapToCidrv4</a></li></ul></li><li><a href="#mod_ts_type-aliases" title="Type Aliases">Type Aliases</a></li><li><ul><li><a href="#namespace_address" title="Address">Address</a></li><li><a href="#namespace_addressv4" title="Addressv4">Addressv4</a></li><li><a href="#namespace_addressv6" title="Addressv6">Addressv6</a></li><li><a href="#namespace_cidr" title="Cidr">Cidr</a></li><li><a href="#namespace_cidrv4" title="Cidrv4">Cidrv4</a></li><li><a href="#namespace_cidrv6" title="Cidrv6">Cidrv6</a></li><li><a href="#namespace_classificationv4" title="Classificationv4">Classificationv4</a></li><li><a href="#namespace_classificationv6" title="Classificationv6">Classificationv6</a></li><li><a href="#namespace_classifiedaddress" title="ClassifiedAddress">ClassifiedAddress</a></li><li><a href="#namespace_classifiedaddressv4" title="ClassifiedAddressv4">ClassifiedAddressv4</a></li><li><a href="#namespace_classifiedaddressv6" title="ClassifiedAddressv6">ClassifiedAddressv6</a></li><li><a href="#namespace_ipversion" title="IpVersion">IpVersion</a></li><li><a href="#namespace_mask" title="Mask">Mask</a></li><li><a href="#namespace_maskedcidrv4" title="MaskedCidrv4">MaskedCidrv4</a></li><li><a href="#namespace_maskedcidrv6" title="MaskedCidrv6">MaskedCidrv6</a></li><li><a href="#namespace_maskv4" title="Maskv4">Maskv4</a></li><li><a href="#namespace_maskv6" title="Maskv6">Maskv6</a></li><li><a href="#namespace_notation" title="Notation">Notation</a></li><li><a href="#namespace_parsedaddress" title="ParsedAddress">ParsedAddress</a></li><li><a href="#namespace_parsedaddressv4" title="ParsedAddressv4">ParsedAddressv4</a></li><li><a href="#namespace_parsedaddressv6" title="ParsedAddressv6">ParsedAddressv6</a></li><li><a href="#namespace_parsedcidr" title="ParsedCidr">ParsedCidr</a></li><li><a href="#namespace_parsedcidrv4" title="ParsedCidrv4">ParsedCidrv4</a></li><li><a href="#namespace_parsedcidrv6" title="ParsedCidrv6">ParsedCidrv6</a></li><li><a href="#namespace_parseoptions" title="ParseOptions">ParseOptions</a></li><li><a href="#namespace_prefixedcidrv4" title="PrefixedCidrv4">PrefixedCidrv4</a></li><li><a href="#namespace_prefixedcidrv6" title="PrefixedCidrv6">PrefixedCidrv6</a></li><li><a href="#namespace_prefixlength" title="PrefixLength">PrefixLength</a></li><li><a href="#namespace_prefixlengthv4" title="PrefixLengthv4">PrefixLengthv4</a></li><li><a href="#namespace_prefixlengthv6" title="PrefixLengthv6">PrefixLengthv6</a></li><li><a href="#namespace_zoneid" title="ZoneId">ZoneId</a></li></ul></li><li><a href="#mod_ts_variables" title="Variables">Variables</a></li><li><ul><li><a href="#namespace_cidrv4broadcastaddress" title="cidrv4BroadcastAddress">cidrv4BroadcastAddress</a></li><li><a href="#namespace_cidrv4networkaddress" title="cidrv4NetworkAddress">cidrv4NetworkAddress</a></li></ul></li></ul></nav></div>
   </div></div>
 </div>
 </div>
