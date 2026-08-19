@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.5.0](https://github.com/hertzg/jsr-monorepo/compare/@hertzg/tplink-api-v1.4.0...@hertzg/tplink-api-v1.5.0) (2026-08-19)
+
+
+### Features
+
+* **@hertzg/tplink-api:** support gdprJson write operations ([#297](https://github.com/hertzg/jsr-monorepo/issues/297)) ([114ad4e](https://github.com/hertzg/jsr-monorepo/commit/114ad4e922c8e6b55eda0e29dbb68b571d09cf8a))
+
 ## [1.4.0](https://github.com/hertzg/jsr-monorepo/compare/@hertzg/tplink-api-v1.3.0...@hertzg/tplink-api-v1.4.0) (2026-08-17)
 
 
