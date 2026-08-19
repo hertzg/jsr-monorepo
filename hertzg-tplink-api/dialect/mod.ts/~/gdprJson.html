@@ -143,12 +143,7 @@
 </svg>
 </a>
 </div><div><div class="space-y-7" id=""><div class="markdown"><p>EU/GDPR firmware speaking a JSON payload format over <code>/cgi_gdpr?9</code>.</p>
-<p>Confirmed on a TP-Link EX220
-(<a href="https://github.com/hertzg/jsr-monorepo/issues/254">issue #254</a>). Also
-believed to cover the TP-LINK NE200 5G modem, from whose capture it was
-built, and probably the VX800v — neither confirmed
-(<a href="https://github.com/hertzg/jsr-monorepo/issues/82">issue #82</a>).</p>
-<p>Differences from <code>gdprText</code>, all measured from the NE200 capture:</p>
+<p>Differences from <code>gdprText</code>:</p>
 <table>
 <thead>
 <tr>
@@ -191,7 +186,7 @@ built, and probably the VX800v — neither confirmed
 <tr>
 <td>Operations</td>
 <td><code>1</code>, <code>2</code>, …</td>
-<td><code>go</code>, <code>gl</code>, <code>cgi</code></td>
+<td><code>go</code>, <code>gl</code>, <code>gs</code>, <code>so</code>, <code>ao</code>, <code>do</code>, <code>op</code>, <code>cgi</code></td>
 </tr>
 <tr>
 <td>Stack default</td>
@@ -211,8 +206,8 @@ built, and probably the VX800v — neither confirmed
 </tbody>
 </table>
 <p>Responses come in two shapes: <code>go</code> and <code>gl</code> answer with a JSON envelope,
-while <code>cgi</code> operations answer with the plain-text <code>$.ret=&lt;code&gt;</code> form that the
-captured login response uses. <code>decodeCommand</code> handles both.</p>
+<code>cgi</code> answers with the plain-text <code>$.ret=&lt;code&gt;</code> form. <code>decodeCommand</code>
+handles both and assumes writes answer with one of the two as well.</p>
 </div><section class="section"  id="examples"><div>
       <h2 class="anchorable mb-1"><a href="#examples" class="anchor" aria-label="Anchor" tabIndex="-1"><svg
   width="16"
