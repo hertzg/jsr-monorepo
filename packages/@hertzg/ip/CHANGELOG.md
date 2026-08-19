@@ -1,5 +1,12 @@
 # Changelog
 
+## [5.0.1](https://github.com/hertzg/jsr-monorepo/compare/@hertzg/ip-v5.0.0...@hertzg/ip-v5.0.1) (2026-08-19)
+
+
+### Bug Fixes
+
+* **@hertzg/ip:** lead docs with the SSRF-guard use case ([#298](https://github.com/hertzg/jsr-monorepo/issues/298)) ([df93e4a](https://github.com/hertzg/jsr-monorepo/commit/df93e4a3dd7654ed897eb393af70a53dfcdb5453))
+
 ## [5.0.0](https://github.com/hertzg/jsr-monorepo/compare/@hertzg/ip-v4.2.0...@hertzg/ip-v5.0.0) (2026-08-17)
 
 
