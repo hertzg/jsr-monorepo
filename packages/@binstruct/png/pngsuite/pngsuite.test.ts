@@ -1,20 +1,23 @@
-import { createAssertSnapshot } from "@std/testing/snapshot";
 import { pngFile } from "../mod.ts";
 import { assertEquals, assertExists } from "@std/assert";
 import { basename, join } from "node:path";
 
-const assertSnapshot = createAssertSnapshot({
-  serializer: (value) =>
-    JSON.stringify(value, (_key, val) => {
-      // Simplify Uint8Array representation in snapshots
-      if (val instanceof Uint8Array) {
-        return `[Uint8Array length=${val.length} ${
-          Array.from(val).map((n) => n.toString(16).padStart(2, "0")).join("")
-        }]`;
-      }
-      return val;
-    }, 0),
-});
+function assertSnapshot(t: Deno.TestContext, value: unknown): Promise<void> {
+  return t.assertSnapshot(value, {
+    serializer: (value) =>
+      JSON.stringify(value, (_key, val) => {
+        // Simplify Uint8Array representation in snapshots
+        if (val instanceof Uint8Array) {
+          return `[Uint8Array length=${val.length} ${
+            Array.from(val).map((n) => n.toString(16).padStart(2, "0")).join(
+              "",
+            )
+          }]`;
+        }
+        return val;
+      }, 0),
+  });
+}
 
 const PNGSUITE_DIR = new URL(".", import.meta.url).pathname;
 
