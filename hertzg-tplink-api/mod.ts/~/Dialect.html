@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>Dialect - mod.ts - @hertzg&#x2F;tplink-api documentation</title>
+  <title>Dialect - mod.ts - @hertzg/tplink-api documentation</title>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="doc-current-file" content="mod.ts">
@@ -144,11 +144,31 @@
 </a>
 </div><div><div class="space-y-7" id=""><div class="markdown"><p>A firmware family's wire protocol, expressed as pure functions and data.</p>
 <p>Every member is pure: no I/O, no state, no time or randomness. Request
-builders return a <a href="https://deno.land/api@v2.9.5?s=Request"><code>Request</code></a> that the orchestrator hands to <code>fetch</code>;
+builders return a <a href="https://deno.land/api@v2.9.7?s=Request"><code>Request</code></a> that the orchestrator hands to <code>fetch</code>;
 parsers take the response text or headers. Because of that, every claim about
 a firmware's protocol is a string-in/string-out unit test needing no device.</p>
-<h2 id="authoring-a-dialect">
-Authoring a dialect</h2>
+<h2 id="authoring-a-dialect" class="anchorable"><a href="#authoring-a-dialect" class="anchor" aria-label="Anchor" tabindex="-1"><svg
+  width="16"
+  height="16"
+  viewBox="0 0 14 14"
+  fill="none"
+  xmlns="http://www.w3.org/2000/svg"
+>
+  <g clip-path="url(#clip0_1081_1237)">
+    <path
+      fill-rule="evenodd"
+      clip-rule="evenodd"
+      d="M6.80328 2.8656C6.68736 2.99 6.62425 3.15454 6.62725 3.32456C6.63025 3.49457 6.69913 3.65678 6.81936 3.77702C6.9396 3.89725 7.10181 3.96613 7.27182 3.96913C7.44184 3.97213 7.60638 3.90902 7.73078 3.7931L8.82453 2.69935C8.98712 2.53676 9.18015 2.40778 9.39259 2.31978C9.60503 2.23179 9.83272 2.1865 10.0627 2.1865C10.2926 2.1865 10.5203 2.23179 10.7327 2.31978C10.9452 2.40778 11.1382 2.53676 11.3008 2.69935C11.4634 2.86194 11.5923 3.05497 11.6803 3.2674C11.7683 3.47984 11.8136 3.70753 11.8136 3.93747C11.8136 4.16741 11.7683 4.3951 11.6803 4.60754C11.5923 4.81998 11.4634 5.013 11.3008 5.1756L9.11328 7.3631C8.95075 7.52581 8.75775 7.65488 8.5453 7.74295C8.33285 7.83102 8.10513 7.87635 7.87516 7.87635C7.64518 7.87635 7.41746 7.83102 7.20501 7.74295C6.99256 7.65488 6.79956 7.52581 6.63703 7.3631C6.51263 7.24718 6.34809 7.18407 6.17807 7.18707C6.00806 7.19007 5.84585 7.25894 5.72561 7.37918C5.60538 7.49942 5.5365 7.66163 5.5335 7.83164C5.5305 8.00165 5.59361 8.1662 5.70953 8.2906C5.99391 8.57501 6.33154 8.80062 6.70312 8.95455C7.0747 9.10847 7.47296 9.18769 7.87516 9.18769C8.27736 9.18769 8.67562 9.10847 9.0472 8.95455C9.41878 8.80062 9.7564 8.57501 10.0408 8.2906L12.2283 6.1031C12.8026 5.52874 13.1253 4.74974 13.1253 3.93747C13.1253 3.12521 12.8026 2.34621 12.2283 1.77185C11.6539 1.19749 10.8749 0.874817 10.0627 0.874817C9.25039 0.874817 8.47139 1.19749 7.89703 1.77185L6.80328 2.8656ZM2.69953 11.3006C2.53682 11.1381 2.40774 10.9451 2.31968 10.7326C2.23161 10.5202 2.18628 10.2924 2.18628 10.0625C2.18628 9.8325 2.23161 9.60477 2.31968 9.39233C2.40774 9.17988 2.53682 8.98688 2.69953 8.82435L4.88703 6.63685C5.04956 6.47414 5.24256 6.34506 5.45501 6.25699C5.66746 6.16893 5.89518 6.1236 6.12516 6.1236C6.35513 6.1236 6.58285 6.16893 6.7953 6.25699C7.00775 6.34506 7.20075 6.47414 7.36328 6.63685C7.48768 6.75277 7.65223 6.81588 7.82224 6.81288C7.99225 6.80988 8.15446 6.741 8.2747 6.62077C8.39494 6.50053 8.46381 6.33832 8.46681 6.1683C8.46981 5.99829 8.4067 5.83375 8.29078 5.70935C8.0064 5.42494 7.66878 5.19933 7.2972 5.0454C6.92562 4.89148 6.52736 4.81225 6.12516 4.81225C5.72296 4.81225 5.3247 4.89148 4.95312 5.0454C4.58154 5.19933 4.24391 5.42494 3.95953 5.70935L1.77203 7.89685C1.19767 8.47121 0.875 9.25021 0.875 10.0625C0.875 10.8747 1.19767 11.6537 1.77203 12.2281C2.34639 12.8025 3.12539 13.1251 3.93766 13.1251C4.74992 13.1251 5.52892 12.8025 6.10328 12.2281L7.19703 11.1343C7.31295 11.0099 7.37606 10.8454 7.37306 10.6754C7.37006 10.5054 7.30119 10.3432 7.18095 10.2229C7.06071 10.1027 6.8985 10.0338 6.72849 10.0308C6.55848 10.0278 6.39393 10.0909 6.26953 10.2068L5.17578 11.3006C5.01325 11.4633 4.82025 11.5924 4.6078 11.6805C4.39535 11.7685 4.16763 11.8138 3.93766 11.8138C3.70768 11.8138 3.47996 11.7685 3.26751 11.6805C3.05506 11.5924 2.86206 11.4633 2.69953 11.3006Z"
+      fill="currentColor"
+    />
+  </g>
+  <defs>
+    <clipPath id="clip0_1081_1237">
+      <rect width="14" height="14" fill="white" />
+    </clipPath>
+  </defs>
+</svg>
+</a>Authoring a dialect</h2>
 <p>Dialects are authored by <strong>spreading an existing dialect</strong> and overriding only
 what differs. The interface deliberately has no optional members: optionality
 would force <code>dialect.x ?? fallback</code> at every call site, which is the pile of
@@ -180,7 +200,7 @@ scratch — so spreading is the sanctioned style.</p>
   </defs>
 </svg>
 </a>
-Examples</h2></div><div class="space-y-8"><div class="anchorable"><a href="#example_0" class="anchor" aria-label="Anchor" tabIndex="-1"><svg
+Examples</h2></div><div class="space-y-8"><div class="anchorable" id="example_0"><a href="#example_0" class="anchor" aria-label="Anchor" tabIndex="-1"><svg
   width="16"
   height="16"
   viewBox="0 0 14 14"
@@ -472,7 +492,7 @@ Methods</h2></div><div class="space-y-8"><div class="anchorable docEntry" id="me
   </defs>
 </svg>
 </a>
-<a class="font-bold font-lg link" href="..&#x2F;..&#x2F;.&#x2F;mod.ts&#x2F;~&#x2F;Dialect.infoRequest.html">infoRequest</a><span class="font-medium text-stone-500 dark:text-stone-200">(<span><span>baseUrl<span>: <span class="td-kw">string</span></span></span></span>)<span>: <a href="https://deno.land/api@v2.9.5?s=Request" class="link td-ref">Request</a></span></span>
+<a class="font-bold font-lg link" href="..&#x2F;..&#x2F;.&#x2F;mod.ts&#x2F;~&#x2F;Dialect.infoRequest.html">infoRequest</a><span class="font-medium text-stone-500 dark:text-stone-200">(<span><span>baseUrl<span>: <span class="td-kw">string</span></span></span></span>)<span>: <a href="https://deno.land/api@v2.9.7?s=Request" class="link td-ref">Request</a></span></span>
       </code>
     </div><a
   class="sourceButton"
@@ -502,10 +522,10 @@ Methods</h2></div><div class="space-y-8"><div class="anchorable docEntry" id="me
 </div><div class="max-w-[75ch]"><div class="markdown"><p>Builds the request for the login page, whose inline script carries
 <code>authTimes</code> and friends.</p>
 </div></div></div>
-<div class="anchorable docEntry" id="method_parseinfo_1">
+<div class="anchorable docEntry" id="method_parseinfo_0">
 
   <div class="docEntryHeader">
-    <div><code><a href="#method_parseinfo_1" class="anchor" aria-label="Anchor" tabIndex="-1"><svg
+    <div><code><a href="#method_parseinfo_0" class="anchor" aria-label="Anchor" tabIndex="-1"><svg
   width="16"
   height="16"
   viewBox="0 0 14 14"
@@ -556,10 +576,10 @@ Methods</h2></div><div class="space-y-8"><div class="anchorable docEntry" id="me
 </a>
 </div><div class="max-w-[75ch]"><div class="markdown"><p>Scrapes router variables out of the login page.</p>
 </div></div></div>
-<div class="anchorable docEntry" id="method_publickeyrequest_2">
+<div class="anchorable docEntry" id="method_publickeyrequest_0">
 
   <div class="docEntryHeader">
-    <div><code><a href="#method_publickeyrequest_2" class="anchor" aria-label="Anchor" tabIndex="-1"><svg
+    <div><code><a href="#method_publickeyrequest_0" class="anchor" aria-label="Anchor" tabIndex="-1"><svg
   width="16"
   height="16"
   viewBox="0 0 14 14"
@@ -581,7 +601,7 @@ Methods</h2></div><div class="space-y-8"><div class="anchorable docEntry" id="me
   </defs>
 </svg>
 </a>
-<a class="font-bold font-lg link" href="..&#x2F;..&#x2F;.&#x2F;mod.ts&#x2F;~&#x2F;Dialect.publicKeyRequest.html">publicKeyRequest</a><span class="font-medium text-stone-500 dark:text-stone-200">(<span><span>baseUrl<span>: <span class="td-kw">string</span></span></span></span>)<span>: <a href="https://deno.land/api@v2.9.5?s=Request" class="link td-ref">Request</a></span></span>
+<a class="font-bold font-lg link" href="..&#x2F;..&#x2F;.&#x2F;mod.ts&#x2F;~&#x2F;Dialect.publicKeyRequest.html">publicKeyRequest</a><span class="font-medium text-stone-500 dark:text-stone-200">(<span><span>baseUrl<span>: <span class="td-kw">string</span></span></span></span>)<span>: <a href="https://deno.land/api@v2.9.7?s=Request" class="link td-ref">Request</a></span></span>
       </code>
     </div><a
   class="sourceButton"
@@ -610,10 +630,10 @@ Methods</h2></div><div class="space-y-8"><div class="anchorable docEntry" id="me
 </a>
 </div><div class="max-w-[75ch]"><div class="markdown"><p>Builds the request for the RSA public key and sequence base.</p>
 </div></div></div>
-<div class="anchorable docEntry" id="method_parsepublickey_3">
+<div class="anchorable docEntry" id="method_parsepublickey_0">
 
   <div class="docEntryHeader">
-    <div><code><a href="#method_parsepublickey_3" class="anchor" aria-label="Anchor" tabIndex="-1"><svg
+    <div><code><a href="#method_parsepublickey_0" class="anchor" aria-label="Anchor" tabIndex="-1"><svg
   width="16"
   height="16"
   viewBox="0 0 14 14"
@@ -664,10 +684,10 @@ Methods</h2></div><div class="space-y-8"><div class="anchorable docEntry" id="me
 </a>
 </div><div class="max-w-[75ch]"><div class="markdown"><p>Extracts RSA parameters from the public key response.</p>
 </div></div></div>
-<div class="anchorable docEntry" id="method_busyrequest_4">
+<div class="anchorable docEntry" id="method_busyrequest_0">
 
   <div class="docEntryHeader">
-    <div><code><a href="#method_busyrequest_4" class="anchor" aria-label="Anchor" tabIndex="-1"><svg
+    <div><code><a href="#method_busyrequest_0" class="anchor" aria-label="Anchor" tabIndex="-1"><svg
   width="16"
   height="16"
   viewBox="0 0 14 14"
@@ -689,7 +709,7 @@ Methods</h2></div><div class="space-y-8"><div class="anchorable docEntry" id="me
   </defs>
 </svg>
 </a>
-<a class="font-bold font-lg link" href="..&#x2F;..&#x2F;.&#x2F;mod.ts&#x2F;~&#x2F;Dialect.busyRequest.html">busyRequest</a><span class="font-medium text-stone-500 dark:text-stone-200">(<span><span>baseUrl<span>: <span class="td-kw">string</span></span></span></span>)<span>: <a href="https://deno.land/api@v2.9.5?s=Request" class="link td-ref">Request</a></span></span>
+<a class="font-bold font-lg link" href="..&#x2F;..&#x2F;.&#x2F;mod.ts&#x2F;~&#x2F;Dialect.busyRequest.html">busyRequest</a><span class="font-medium text-stone-500 dark:text-stone-200">(<span><span>baseUrl<span>: <span class="td-kw">string</span></span></span></span>)<span>: <a href="https://deno.land/api@v2.9.7?s=Request" class="link td-ref">Request</a></span></span>
       </code>
     </div><a
   class="sourceButton"
@@ -718,10 +738,10 @@ Methods</h2></div><div class="space-y-8"><div class="anchorable docEntry" id="me
 </a>
 </div><div class="max-w-[75ch]"><div class="markdown"><p>Builds the request that reports whether a session is already established.</p>
 </div></div></div>
-<div class="anchorable docEntry" id="method_parsebusy_5">
+<div class="anchorable docEntry" id="method_parsebusy_0">
 
   <div class="docEntryHeader">
-    <div><code><a href="#method_parsebusy_5" class="anchor" aria-label="Anchor" tabIndex="-1"><svg
+    <div><code><a href="#method_parsebusy_0" class="anchor" aria-label="Anchor" tabIndex="-1"><svg
   width="16"
   height="16"
   viewBox="0 0 14 14"
@@ -772,10 +792,10 @@ Methods</h2></div><div class="space-y-8"><div class="anchorable docEntry" id="me
 </a>
 </div><div class="max-w-[75ch]"><div class="markdown"><p>Extracts login and busy flags from the busy response.</p>
 </div></div></div>
-<div class="anchorable docEntry" id="method_encodelogin_6">
+<div class="anchorable docEntry" id="method_encodelogin_0">
 
   <div class="docEntryHeader">
-    <div><code><a href="#method_encodelogin_6" class="anchor" aria-label="Anchor" tabIndex="-1"><svg
+    <div><code><a href="#method_encodelogin_0" class="anchor" aria-label="Anchor" tabIndex="-1"><svg
   width="16"
   height="16"
   viewBox="0 0 14 14"
@@ -826,10 +846,10 @@ Methods</h2></div><div class="space-y-8"><div class="anchorable docEntry" id="me
 </a>
 </div><div class="max-w-[75ch]"><div class="markdown"><p>Encodes credentials into the plaintext login payload, pre-encryption.</p>
 </div></div></div>
-<div class="anchorable docEntry" id="method_loginrequest_7">
+<div class="anchorable docEntry" id="method_loginrequest_0">
 
   <div class="docEntryHeader">
-    <div><code><a href="#method_loginrequest_7" class="anchor" aria-label="Anchor" tabIndex="-1"><svg
+    <div><code><a href="#method_loginrequest_0" class="anchor" aria-label="Anchor" tabIndex="-1"><svg
   width="16"
   height="16"
   viewBox="0 0 14 14"
@@ -851,7 +871,7 @@ Methods</h2></div><div class="space-y-8"><div class="anchorable docEntry" id="me
   </defs>
 </svg>
 </a>
-<a class="font-bold font-lg link" href="..&#x2F;..&#x2F;.&#x2F;mod.ts&#x2F;~&#x2F;Dialect.loginRequest.html">loginRequest</a><span class="font-medium text-stone-500 dark:text-stone-200">(<div class="ml-4"><div><span>baseUrl<span>: <span class="td-kw">string</span></span></span>,</div><div><span>envelope<span>: <a href="../.././mod.ts/~/Envelope.html" class="link td-ref">Envelope</a></span></span></div></div>)<span>: <a href="https://deno.land/api@v2.9.5?s=Request" class="link td-ref">Request</a></span></span>
+<a class="font-bold font-lg link" href="..&#x2F;..&#x2F;.&#x2F;mod.ts&#x2F;~&#x2F;Dialect.loginRequest.html">loginRequest</a><span class="font-medium text-stone-500 dark:text-stone-200">(<div class="ml-4"><div><span>baseUrl<span>: <span class="td-kw">string</span></span></span>,</div><div><span>envelope<span>: <a href="../.././mod.ts/~/Envelope.html" class="link td-ref">Envelope</a></span></span></div></div>)<span>: <a href="https://deno.land/api@v2.9.7?s=Request" class="link td-ref">Request</a></span></span>
       </code>
     </div><a
   class="sourceButton"
@@ -881,10 +901,10 @@ Methods</h2></div><div class="space-y-8"><div class="anchorable docEntry" id="me
 </div><div class="max-w-[75ch]"><div class="markdown"><p>Builds the login request. Owns where the envelope rides — query string,
 request body, or anywhere else the firmware expects it.</p>
 </div></div></div>
-<div class="anchorable docEntry" id="method_parsesessionid_8">
+<div class="anchorable docEntry" id="method_parsesessionid_0">
 
   <div class="docEntryHeader">
-    <div><code><a href="#method_parsesessionid_8" class="anchor" aria-label="Anchor" tabIndex="-1"><svg
+    <div><code><a href="#method_parsesessionid_0" class="anchor" aria-label="Anchor" tabIndex="-1"><svg
   width="16"
   height="16"
   viewBox="0 0 14 14"
@@ -906,7 +926,7 @@ request body, or anywhere else the firmware expects it.</p>
   </defs>
 </svg>
 </a>
-<a class="font-bold font-lg link" href="..&#x2F;..&#x2F;.&#x2F;mod.ts&#x2F;~&#x2F;Dialect.parseSessionId.html">parseSessionId</a><span class="font-medium text-stone-500 dark:text-stone-200">(<span><span>headers<span>: <a href="https://deno.land/api@v2.9.5?s=Headers" class="link td-ref">Headers</a></span></span></span>)<span>: <span><span class="td-kw">string</span><span class="td-op"> | </span><span class="td-kw">null</span></span></span></span>
+<a class="font-bold font-lg link" href="..&#x2F;..&#x2F;.&#x2F;mod.ts&#x2F;~&#x2F;Dialect.parseSessionId.html">parseSessionId</a><span class="font-medium text-stone-500 dark:text-stone-200">(<span><span>headers<span>: <a href="https://deno.land/api@v2.9.7?s=Headers" class="link td-ref">Headers</a></span></span></span>)<span>: <span><span class="td-kw">string</span><span class="td-op"> | </span><span class="td-kw">null</span></span></span></span>
       </code>
     </div><a
   class="sourceButton"
@@ -935,10 +955,10 @@ request body, or anywhere else the firmware expects it.</p>
 </a>
 </div><div class="max-w-[75ch]"><div class="markdown"><p>Extracts the session id from the login response headers.</p>
 </div></div></div>
-<div class="anchorable docEntry" id="method_tokenrequest_9">
+<div class="anchorable docEntry" id="method_tokenrequest_0">
 
   <div class="docEntryHeader">
-    <div><code><a href="#method_tokenrequest_9" class="anchor" aria-label="Anchor" tabIndex="-1"><svg
+    <div><code><a href="#method_tokenrequest_0" class="anchor" aria-label="Anchor" tabIndex="-1"><svg
   width="16"
   height="16"
   viewBox="0 0 14 14"
@@ -960,7 +980,7 @@ request body, or anywhere else the firmware expects it.</p>
   </defs>
 </svg>
 </a>
-<a class="font-bold font-lg link" href="..&#x2F;..&#x2F;.&#x2F;mod.ts&#x2F;~&#x2F;Dialect.tokenRequest.html">tokenRequest</a><span class="font-medium text-stone-500 dark:text-stone-200">(<div class="ml-4"><div><span>baseUrl<span>: <span class="td-kw">string</span></span></span>,</div><div><span>session<span>: <span class="td-ref">Pick</span>&lt;<a href="../.././mod.ts/~/SessionContext.html" class="link td-ref">SessionContext</a><span>, </span><span><span class="td-str">"sessionId"</span><span class="td-op"> | </span><span class="td-str">"authTimes"</span></span>&gt;</span></span></div></div>)<span>: <a href="https://deno.land/api@v2.9.5?s=Request" class="link td-ref">Request</a></span></span>
+<a class="font-bold font-lg link" href="..&#x2F;..&#x2F;.&#x2F;mod.ts&#x2F;~&#x2F;Dialect.tokenRequest.html">tokenRequest</a><span class="font-medium text-stone-500 dark:text-stone-200">(<div class="ml-4"><div><span>baseUrl<span>: <span class="td-kw">string</span></span></span>,</div><div><span>session<span>: <span class="td-ref">Pick</span>&lt;<a href="../.././mod.ts/~/SessionContext.html" class="link td-ref">SessionContext</a><span>, </span><span><span class="td-str">"sessionId"</span><span class="td-op"> | </span><span class="td-str">"authTimes"</span></span>&gt;</span></span></div></div>)<span>: <a href="https://deno.land/api@v2.9.7?s=Request" class="link td-ref">Request</a></span></span>
       </code>
     </div><a
   class="sourceButton"
@@ -989,10 +1009,10 @@ request body, or anywhere else the firmware expects it.</p>
 </a>
 </div><div class="max-w-[75ch]"><div class="markdown"><p>Builds the request for the authenticated page carrying the security token.</p>
 </div></div></div>
-<div class="anchorable docEntry" id="method_parsetokenid_10">
+<div class="anchorable docEntry" id="method_parsetokenid_0">
 
   <div class="docEntryHeader">
-    <div><code><a href="#method_parsetokenid_10" class="anchor" aria-label="Anchor" tabIndex="-1"><svg
+    <div><code><a href="#method_parsetokenid_0" class="anchor" aria-label="Anchor" tabIndex="-1"><svg
   width="16"
   height="16"
   viewBox="0 0 14 14"
@@ -1043,10 +1063,10 @@ request body, or anywhere else the firmware expects it.</p>
 </a>
 </div><div class="max-w-[75ch]"><div class="markdown"><p>Extracts the security token from the authenticated page.</p>
 </div></div></div>
-<div class="anchorable docEntry" id="method_encodecommands_11">
+<div class="anchorable docEntry" id="method_encodecommands_0">
 
   <div class="docEntryHeader">
-    <div><code><a href="#method_encodecommands_11" class="anchor" aria-label="Anchor" tabIndex="-1"><svg
+    <div><code><a href="#method_encodecommands_0" class="anchor" aria-label="Anchor" tabIndex="-1"><svg
   width="16"
   height="16"
   viewBox="0 0 14 14"
@@ -1098,10 +1118,10 @@ request body, or anywhere else the firmware expects it.</p>
 </div><div class="max-w-[75ch]"><div class="markdown"><p>Splits actions into round trips and serializes each. Owns the operation
 vocabulary, stack defaults, and batching.</p>
 </div></div></div>
-<div class="anchorable docEntry" id="method_commandrequest_12">
+<div class="anchorable docEntry" id="method_commandrequest_0">
 
   <div class="docEntryHeader">
-    <div><code><a href="#method_commandrequest_12" class="anchor" aria-label="Anchor" tabIndex="-1"><svg
+    <div><code><a href="#method_commandrequest_0" class="anchor" aria-label="Anchor" tabIndex="-1"><svg
   width="16"
   height="16"
   viewBox="0 0 14 14"
@@ -1123,7 +1143,7 @@ vocabulary, stack defaults, and batching.</p>
   </defs>
 </svg>
 </a>
-<a class="font-bold font-lg link" href="..&#x2F;..&#x2F;.&#x2F;mod.ts&#x2F;~&#x2F;Dialect.commandRequest.html">commandRequest</a><span class="font-medium text-stone-500 dark:text-stone-200">(<div class="ml-4"><div><span>baseUrl<span>: <span class="td-kw">string</span></span></span>,</div><div><span>envelope<span>: <a href="../.././mod.ts/~/Envelope.html" class="link td-ref">Envelope</a></span></span>,</div><div><span>session<span>: <a href="../.././mod.ts/~/SessionContext.html" class="link td-ref">SessionContext</a></span></span></div></div>)<span>: <a href="https://deno.land/api@v2.9.5?s=Request" class="link td-ref">Request</a></span></span>
+<a class="font-bold font-lg link" href="..&#x2F;..&#x2F;.&#x2F;mod.ts&#x2F;~&#x2F;Dialect.commandRequest.html">commandRequest</a><span class="font-medium text-stone-500 dark:text-stone-200">(<div class="ml-4"><div><span>baseUrl<span>: <span class="td-kw">string</span></span></span>,</div><div><span>envelope<span>: <a href="../.././mod.ts/~/Envelope.html" class="link td-ref">Envelope</a></span></span>,</div><div><span>session<span>: <a href="../.././mod.ts/~/SessionContext.html" class="link td-ref">SessionContext</a></span></span></div></div>)<span>: <a href="https://deno.land/api@v2.9.7?s=Request" class="link td-ref">Request</a></span></span>
       </code>
     </div><a
   class="sourceButton"
@@ -1152,10 +1172,10 @@ vocabulary, stack defaults, and batching.</p>
 </a>
 </div><div class="max-w-[75ch]"><div class="markdown"><p>Builds a command request for one batch's envelope.</p>
 </div></div></div>
-<div class="anchorable docEntry" id="method_decodecommand_13">
+<div class="anchorable docEntry" id="method_decodecommand_0">
 
   <div class="docEntryHeader">
-    <div><code><a href="#method_decodecommand_13" class="anchor" aria-label="Anchor" tabIndex="-1"><svg
+    <div><code><a href="#method_decodecommand_0" class="anchor" aria-label="Anchor" tabIndex="-1"><svg
   width="16"
   height="16"
   viewBox="0 0 14 14"
@@ -1246,7 +1266,7 @@ vocabulary, stack defaults, and batching.</p>
 </svg>
 </button><code></code></pre>
 </div></div><nav class="documentNavigation">
-          <h3>Document Navigation</h3><ul><li><ul><li><a href="#authoring-a-dialect" title="Authoring a dialect">Authoring a dialect</a></li></ul></li><li><a href="#examples" title="Examples">Examples</a></li><li><ul><li><a href="#example_0" title="Author a dialect by spreading an existing one">Author a dialect by spreading an existing one</a></li></ul></li><li><a href="#properties" title="Properties">Properties</a></li><li><ul><li><a href="#property_id" title="id">id</a></li><li><a href="#property_defaultusername" title="defaultUsername">defaultUsername</a></li></ul></li><li><a href="#methods" title="Methods">Methods</a></li><li><ul><li><a href="#method_inforequest_0" title="infoRequest">infoRequest</a></li><li><a href="#method_parseinfo_1" title="parseInfo">parseInfo</a></li><li><a href="#method_publickeyrequest_2" title="publicKeyRequest">publicKeyRequest</a></li><li><a href="#method_parsepublickey_3" title="parsePublicKey">parsePublicKey</a></li><li><a href="#method_busyrequest_4" title="busyRequest">busyRequest</a></li><li><a href="#method_parsebusy_5" title="parseBusy">parseBusy</a></li><li><a href="#method_encodelogin_6" title="encodeLogin">encodeLogin</a></li><li><a href="#method_loginrequest_7" title="loginRequest">loginRequest</a></li><li><a href="#method_parsesessionid_8" title="parseSessionId">parseSessionId</a></li><li><a href="#method_tokenrequest_9" title="tokenRequest">tokenRequest</a></li><li><a href="#method_parsetokenid_10" title="parseTokenId">parseTokenId</a></li><li><a href="#method_encodecommands_11" title="encodeCommands">encodeCommands</a></li><li><a href="#method_commandrequest_12" title="commandRequest">commandRequest</a></li><li><a href="#method_decodecommand_13" title="decodeCommand">decodeCommand</a></li></ul></li></ul></nav></div>
+          <h3>Document Navigation</h3><ul><li><ul><li><a href="#authoring-a-dialect" title="Authoring a dialect">Authoring a dialect</a></li></ul></li><li><a href="#examples" title="Examples">Examples</a></li><li><ul><li><a href="#example_0" title="Author a dialect by spreading an existing one">Author a dialect by spreading an existing one</a></li></ul></li><li><a href="#properties" title="Properties">Properties</a></li><li><ul><li><a href="#property_id" title="id">id</a></li><li><a href="#property_defaultusername" title="defaultUsername">defaultUsername</a></li></ul></li><li><a href="#methods" title="Methods">Methods</a></li><li><ul><li><a href="#method_inforequest_0" title="infoRequest">infoRequest</a></li><li><a href="#method_parseinfo_0" title="parseInfo">parseInfo</a></li><li><a href="#method_publickeyrequest_0" title="publicKeyRequest">publicKeyRequest</a></li><li><a href="#method_parsepublickey_0" title="parsePublicKey">parsePublicKey</a></li><li><a href="#method_busyrequest_0" title="busyRequest">busyRequest</a></li><li><a href="#method_parsebusy_0" title="parseBusy">parseBusy</a></li><li><a href="#method_encodelogin_0" title="encodeLogin">encodeLogin</a></li><li><a href="#method_loginrequest_0" title="loginRequest">loginRequest</a></li><li><a href="#method_parsesessionid_0" title="parseSessionId">parseSessionId</a></li><li><a href="#method_tokenrequest_0" title="tokenRequest">tokenRequest</a></li><li><a href="#method_parsetokenid_0" title="parseTokenId">parseTokenId</a></li><li><a href="#method_encodecommands_0" title="encodeCommands">encodeCommands</a></li><li><a href="#method_commandrequest_0" title="commandRequest">commandRequest</a></li><li><a href="#method_decodecommand_0" title="decodeCommand">decodeCommand</a></li></ul></li></ul></nav></div>
   </div></div>
 </div>
 </div>
