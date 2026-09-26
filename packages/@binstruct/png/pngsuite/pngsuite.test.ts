@@ -1,5 +1,5 @@
 import { pngFile } from "../mod.ts";
-import { assertEquals, assertExists } from "@std/assert";
+import { assert, assertEquals, assertExists } from "@std/assert";
 import { basename, join } from "node:path";
 
 function assertSnapshot(t: Deno.TestContext, value: unknown): Promise<void> {
@@ -110,9 +110,9 @@ Deno.test(`compression`, async (t) => {
 
       await t.step(`IDAT zlibHeader fLevel`, () => {
         const idat = decoded.chunks.find((c) => c.type === "IDAT");
-        assertExists(idat), "IDAT chunk not found";
+        assertExists(idat, "IDAT chunk not found");
 
-        const actualLevel = idat.data.header.compressionLevel;
+        const actualLevel = idat.data.header.flevel;
         assertEquals(
           actualLevel,
           expectedLevel,
@@ -128,98 +128,136 @@ Deno.test(`compression`, async (t) => {
 });
 
 Deno.test(`transparency (tRNS)`, async (t) => {
-  await t.step(`basn3p08-trns.png - indexed color with transparency`, async (t) => {
-    const bytes = await Deno.readFile(
-      join(PNGSUITE_DIR, "./fixtures/basn3p08-trns.png"),
-    );
-    const [decoded] = pngFile().decode(bytes);
-
-    await t.step(`IHDR chunk`, () => {
-      const ihdr = decoded.chunks.find((c) => c.type === "IHDR");
-      assertExists(ihdr, "IHDR chunk not found");
-      assertEquals(ihdr.data.colorType, 3, "Expected indexed color type");
-      assertEquals(ihdr.data.bitDepth, 8, "Expected 8-bit depth");
-    });
-
-    await t.step(`tRNS chunk exists`, () => {
-      const trns = decoded.chunks.find((c) => c.type === "tRNS");
-      assertExists(trns, "tRNS chunk not found");
-      assertEquals(trns.type, "tRNS", "Chunk type should be tRNS");
-    });
-
-    await t.step(`tRNS chunk has alpha values`, () => {
-      const trns = decoded.chunks.find((c) => c.type === "tRNS");
-      assertExists(trns);
-      assertEquals(trns.data.values.length, 173, "Expected 173 alpha values");
-      assertEquals(Array.isArray(trns.data.values), true, "Values should be an array");
-    });
-
-    await t.step(`tRNS comes after PLTE and before IDAT`, () => {
-      const plteIndex = decoded.chunks.findIndex((c) => c.type === "PLTE");
-      const trnsIndex = decoded.chunks.findIndex((c) => c.type === "tRNS");
-      const idatIndex = decoded.chunks.findIndex((c) => c.type === "IDAT");
-
-      assertExists(plteIndex >= 0, "PLTE chunk should exist");
-      assertExists(trnsIndex >= 0, "tRNS chunk should exist");
-      assertExists(idatIndex >= 0, "IDAT chunk should exist");
-
-      assertEquals(
-        trnsIndex > plteIndex,
-        true,
-        "tRNS should come after PLTE",
+  await t.step(
+    `basn3p08-trns.png - indexed color with transparency`,
+    async (t) => {
+      const bytes = await Deno.readFile(
+        join(PNGSUITE_DIR, "./fixtures/basn3p08-trns.png"),
       );
-      assertEquals(
-        trnsIndex < idatIndex,
-        true,
-        "tRNS should come before IDAT",
-      );
-    });
-
-    await t.step(`snapshot`, async () => {
-      await assertSnapshot(t, decoded);
-    });
-  });
-});
-
-Deno.test(`background (bKGD)`, async (t) => {
-  for (
-    const { file, colorType, bitDepth, expectedValues } of [
-      { file: "./fixtures/bgbn4a08.png", colorType: 4, bitDepth: 8, expectedValues: [0, 0] }, // Grayscale black
-      { file: "./fixtures/bggn4a16.png", colorType: 4, bitDepth: 16, expectedValues: [171, 132] }, // Grayscale gray
-      { file: "./fixtures/bgwn6a08.png", colorType: 6, bitDepth: 8, expectedValues: [0, 255, 0, 255, 0, 255] }, // RGB white
-      { file: "./fixtures/bgyn6a16.png", colorType: 6, bitDepth: 16, expectedValues: [255, 255, 255, 255, 0, 0] }, // RGB yellow
-    ]
-  ) {
-    await t.step(`${basename(file)} - color:${colorType}, bits:${bitDepth}`, async (t) => {
-      const bytes = await Deno.readFile(join(PNGSUITE_DIR, file));
       const [decoded] = pngFile().decode(bytes);
 
       await t.step(`IHDR chunk`, () => {
         const ihdr = decoded.chunks.find((c) => c.type === "IHDR");
         assertExists(ihdr, "IHDR chunk not found");
-        assertEquals(ihdr.data.colorType, colorType, "Unexpected color type");
-        assertEquals(ihdr.data.bitDepth, bitDepth, "Unexpected bit depth");
+        assertEquals(ihdr.data.colorType, 3, "Expected indexed color type");
+        assertEquals(ihdr.data.bitDepth, 8, "Expected 8-bit depth");
       });
 
-      await t.step(`bKGD chunk`, () => {
-        const bkgd = decoded.chunks.find((c) => c.type === "bKGD");
-        assertExists(bkgd, "bKGD chunk not found");
-        assertEquals(bkgd.type, "bKGD", "Chunk type should be bKGD");
-        assertEquals(bkgd.data.values, expectedValues, "Unexpected background color values");
+      await t.step(`tRNS chunk exists`, () => {
+        const trns = decoded.chunks.find((c) => c.type === "tRNS");
+        assertExists(trns, "tRNS chunk not found");
+        assertEquals(trns.type, "tRNS", "Chunk type should be tRNS");
       });
 
-      await t.step(`bKGD comes before IDAT`, () => {
-        const bkgdIndex = decoded.chunks.findIndex((c) => c.type === "bKGD");
+      await t.step(`tRNS chunk has alpha values`, () => {
+        const trns = decoded.chunks.find((c) => c.type === "tRNS");
+        assertExists(trns);
+        assertEquals(trns.data.values.length, 173, "Expected 173 alpha values");
+        assertEquals(
+          Array.isArray(trns.data.values),
+          true,
+          "Values should be an array",
+        );
+      });
+
+      await t.step(`tRNS comes after PLTE and before IDAT`, () => {
+        const plteIndex = decoded.chunks.findIndex((c) => c.type === "PLTE");
+        const trnsIndex = decoded.chunks.findIndex((c) => c.type === "tRNS");
         const idatIndex = decoded.chunks.findIndex((c) => c.type === "IDAT");
 
-        assertExists(bkgdIndex >= 0, "bKGD chunk should exist");
-        assertExists(idatIndex >= 0, "IDAT chunk should exist");
-        assertEquals(bkgdIndex < idatIndex, true, "bKGD should come before IDAT");
+        assert(plteIndex >= 0, "PLTE chunk should exist");
+        assert(trnsIndex >= 0, "tRNS chunk should exist");
+        assert(idatIndex >= 0, "IDAT chunk should exist");
+
+        assertEquals(
+          trnsIndex > plteIndex,
+          true,
+          "tRNS should come after PLTE",
+        );
+        assertEquals(
+          trnsIndex < idatIndex,
+          true,
+          "tRNS should come before IDAT",
+        );
       });
 
       await t.step(`snapshot`, async () => {
         await assertSnapshot(t, decoded);
       });
-    });
+    },
+  );
+});
+
+Deno.test(`background (bKGD)`, async (t) => {
+  for (
+    const { file, colorType, bitDepth, expectedValues } of [
+      {
+        file: "./fixtures/bgbn4a08.png",
+        colorType: 4,
+        bitDepth: 8,
+        expectedValues: [0, 0],
+      }, // Grayscale black
+      {
+        file: "./fixtures/bggn4a16.png",
+        colorType: 4,
+        bitDepth: 16,
+        expectedValues: [171, 132],
+      }, // Grayscale gray
+      {
+        file: "./fixtures/bgwn6a08.png",
+        colorType: 6,
+        bitDepth: 8,
+        expectedValues: [0, 255, 0, 255, 0, 255],
+      }, // RGB white
+      {
+        file: "./fixtures/bgyn6a16.png",
+        colorType: 6,
+        bitDepth: 16,
+        expectedValues: [255, 255, 255, 255, 0, 0],
+      }, // RGB yellow
+    ]
+  ) {
+    await t.step(
+      `${basename(file)} - color:${colorType}, bits:${bitDepth}`,
+      async (t) => {
+        const bytes = await Deno.readFile(join(PNGSUITE_DIR, file));
+        const [decoded] = pngFile().decode(bytes);
+
+        await t.step(`IHDR chunk`, () => {
+          const ihdr = decoded.chunks.find((c) => c.type === "IHDR");
+          assertExists(ihdr, "IHDR chunk not found");
+          assertEquals(ihdr.data.colorType, colorType, "Unexpected color type");
+          assertEquals(ihdr.data.bitDepth, bitDepth, "Unexpected bit depth");
+        });
+
+        await t.step(`bKGD chunk`, () => {
+          const bkgd = decoded.chunks.find((c) => c.type === "bKGD");
+          assertExists(bkgd, "bKGD chunk not found");
+          assertEquals(bkgd.type, "bKGD", "Chunk type should be bKGD");
+          assertEquals(
+            bkgd.data.values,
+            expectedValues,
+            "Unexpected background color values",
+          );
+        });
+
+        await t.step(`bKGD comes before IDAT`, () => {
+          const bkgdIndex = decoded.chunks.findIndex((c) => c.type === "bKGD");
+          const idatIndex = decoded.chunks.findIndex((c) => c.type === "IDAT");
+
+          assert(bkgdIndex >= 0, "bKGD chunk should exist");
+          assert(idatIndex >= 0, "IDAT chunk should exist");
+          assertEquals(
+            bkgdIndex < idatIndex,
+            true,
+            "bKGD should come before IDAT",
+          );
+        });
+
+        await t.step(`snapshot`, async () => {
+          await assertSnapshot(t, decoded);
+        });
+      },
+    );
   }
 });
