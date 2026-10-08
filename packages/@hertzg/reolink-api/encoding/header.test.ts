@@ -9,7 +9,7 @@ Deno.test("baichuanHeader encodes the 20-byte nonce request", () => {
     bodyLength: 0,
     channelId: 250,
     messageId: 1,
-    code: 0xdc12,
+    encryption: 0xdc12,
     messageClass: 0x1465,
   });
 
@@ -22,7 +22,7 @@ Deno.test("baichuanHeader encodes the 24-byte subscribe request", () => {
     bodyLength: 0,
     channelId: 251,
     messageId: 3,
-    code: 0,
+    status: 0,
     messageClass: 0x1464,
     payloadOffset: 0,
   });
@@ -43,7 +43,7 @@ Deno.test("baichuanHeader decodes a 24-byte reply with a status code", () => {
     bodyLength: 272,
     channelId: 251,
     messageId: 0x123456,
-    code: 200,
+    status: 200,
     messageClass: 0x1464,
     payloadOffset: 160,
   });
@@ -60,7 +60,7 @@ Deno.test("baichuanHeader decodes a 20-byte reply without a payload offset", () 
     bodyLength: 64,
     channelId: 250,
     messageId: 1,
-    code: 0xdd01,
+    encryption: 0xdd01,
     messageClass: 0x1466,
   });
   assertEquals(bytesRead, 20);
@@ -72,7 +72,7 @@ Deno.test("baichuanHeader round-trips the largest message id", () => {
     bodyLength: 0,
     channelId: 250,
     messageId: 0xffffff,
-    code: 0,
+    status: 0,
     messageClass: 0x1464,
     payloadOffset: 0,
   };

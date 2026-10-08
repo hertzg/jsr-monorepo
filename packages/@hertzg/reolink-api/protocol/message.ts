@@ -7,16 +7,24 @@
  * @example Build a subscribe request and read its header
  * ```ts
  * import { assertEquals } from "@std/assert";
- * import { createMessage } from "@hertzg/reolink-api/protocol/message";
+ * import {
+ *   BAICHUAN_CHANNEL,
+ *   BAICHUAN_CMD,
+ *   createMessage,
+ * } from "@hertzg/reolink-api/protocol/message";
  *
- * const message = createMessage({ cmdId: 31, channelId: 251, messageId: 3 });
+ * const message = createMessage({
+ *   cmdId: BAICHUAN_CMD.SUBSCRIBE,
+ *   channelId: BAICHUAN_CHANNEL.PUSH,
+ *   messageId: 3,
+ * });
  *
  * assertEquals(message.header, {
  *   cmdId: 31,
  *   bodyLength: 0,
  *   channelId: 251,
  *   messageId: 3,
- *   code: 0,
+ *   status: 0,
  *   messageClass: 0x1464,
  *   payloadOffset: 0,
  * });
@@ -26,7 +34,52 @@
  */
 
 import { aesCfbDecrypt, xorCipher } from "../encoding/cipher.ts";
-import { type BaichuanHeader, headerLength } from "../encoding/header.ts";
+import {
+  BAICHUAN_MESSAGE_CLASS,
+  type BaichuanHeader,
+} from "../encoding/header.ts";
+
+/**
+ * Command ids (the header's `cmdId`) this package sends or reads.
+ *
+ * @example Check what a push is
+ * ```ts
+ * import { assertEquals } from "@std/assert";
+ * import { BAICHUAN_CMD } from "@hertzg/reolink-api/protocol/message";
+ *
+ * assertEquals(BAICHUAN_CMD.ALARM_EVENT, 33);
+ * ```
+ */
+export const BAICHUAN_CMD = {
+  /** Nonce request and login, both on the host channel. */
+  LOGIN: 1,
+  /** Subscribe to alarm pushes. */
+  SUBSCRIBE: 31,
+  /** An alarm push: motion, doorbell, tamper or AI state. */
+  ALARM_EVENT: 33,
+  /** Ping, answered by the camera; keeps an idle connection open. */
+  PING: 93,
+} as const;
+
+/**
+ * Channel ids (the header's `channelId`) for requests that address the
+ * device rather than one camera channel. Camera channels are `1`-`100`, the
+ * channel number plus one.
+ *
+ * @example Address the device itself
+ * ```ts
+ * import { assertEquals } from "@std/assert";
+ * import { BAICHUAN_CHANNEL } from "@hertzg/reolink-api/protocol/message";
+ *
+ * assertEquals(BAICHUAN_CHANNEL.HOST, 250);
+ * ```
+ */
+export const BAICHUAN_CHANNEL = {
+  /** The device itself: login, ping. */
+  HOST: 250,
+  /** The push channel: subscribe and alarm pushes. */
+  PUSH: 251,
+} as const;
 
 /** A Baichuan message: header, body (usually XML) and binary payload. */
 export type BaichuanMessage = {
@@ -40,14 +93,16 @@ export type BaichuanMessage = {
 
 /** Fields for {@link createMessage}. */
 export type CreateMessageOptions = {
-  /** Command id. */
+  /** Command id, such as one of {@link BAICHUAN_CMD}. */
   cmdId: number;
-  /** Channel id: `250` for the host, `251` for push. */
+  /** Channel id, such as one of {@link BAICHUAN_CHANNEL}. */
   channelId: number;
   /** Message id the reply will echo. */
   messageId: number;
-  /** `0x1465` only for the nonce request, `0x1464` otherwise. Defaults to `0x1464`. */
-  messageClass?: 0x1464 | 0x1465;
+  /** `LEGACY` only for the nonce request. Defaults to `MODERN_WITH_OFFSET`. */
+  messageClass?:
+    | typeof BAICHUAN_MESSAGE_CLASS.LEGACY
+    | typeof BAICHUAN_MESSAGE_CLASS.MODERN_WITH_OFFSET;
   /** The already encrypted body. Defaults to empty. */
   body?: Uint8Array;
 };
@@ -55,8 +110,8 @@ export type CreateMessageOptions = {
 /**
  * Builds a request message, filling in the header from the options.
  *
- * Class `0x1465` gets the `12 dc` encryption marker and the 20-byte header.
- * Class `0x1464` gets status `0` and a payload offset of `0`.
+ * Class `LEGACY` gets the `12 dc` encryption marker and the 20-byte header.
+ * Class `MODERN_WITH_OFFSET` gets status `0` and a payload offset of `0`.
  *
  * @param options The command, ids, class and encrypted body.
  * @returns A message ready for the encode stream.
@@ -64,16 +119,21 @@ export type CreateMessageOptions = {
  * @example Build the nonce request
  * ```ts
  * import { assertEquals } from "@std/assert";
- * import { createMessage } from "@hertzg/reolink-api/protocol/message";
+ * import { BAICHUAN_MESSAGE_CLASS } from "@hertzg/reolink-api/encoding/header";
+ * import {
+ *   BAICHUAN_CHANNEL,
+ *   BAICHUAN_CMD,
+ *   createMessage,
+ * } from "@hertzg/reolink-api/protocol/message";
  *
  * const message = createMessage({
- *   cmdId: 1,
- *   channelId: 250,
+ *   cmdId: BAICHUAN_CMD.LOGIN,
+ *   channelId: BAICHUAN_CHANNEL.HOST,
  *   messageId: 1,
- *   messageClass: 0x1465,
+ *   messageClass: BAICHUAN_MESSAGE_CLASS.LEGACY,
  * });
  *
- * assertEquals(message.header.code, 0xdc12);
+ * assertEquals(message.header.encryption, 0xdc12);
  * assertEquals(message.header.payloadOffset, undefined);
  * ```
  */
@@ -82,24 +142,24 @@ export function createMessage(options: CreateMessageOptions): BaichuanMessage {
     cmdId,
     channelId,
     messageId,
-    messageClass = 0x1464,
+    messageClass = BAICHUAN_MESSAGE_CLASS.MODERN_WITH_OFFSET,
     body = new Uint8Array(0),
   } = options;
   const common = { cmdId, bodyLength: body.length, channelId, messageId };
-  const header: BaichuanHeader = messageClass === 0x1465
-    ? { ...common, messageClass, code: 0xdc12 }
-    : { ...common, messageClass, code: 0, payloadOffset: 0 };
+  const header: BaichuanHeader = messageClass === BAICHUAN_MESSAGE_CLASS.LEGACY
+    ? { ...common, messageClass, encryption: 0xdc12 }
+    : { ...common, messageClass, status: 0, payloadOffset: 0 };
   return { header, body, payload: new Uint8Array(0) };
 }
 
 /**
  * Decrypts a received body into XML text.
  *
- * A 20-byte header names the cipher in its low code byte: `0x01` or `0x12`
- * XOR, `0x02` or `0x03` AES, `0x00` none. A 24-byte header names none, so
- * AES (when a key is given), XOR and plain text are tried in that order. The
- * first result that starts with `<?xml` wins, which is how reolink_aio
- * decides too.
+ * A 20-byte header names the cipher in the low byte of `encryption`: `0x01`
+ * or `0x12` XOR, `0x02` or `0x03` AES, `0x00` none. A 24-byte header names
+ * none, so AES (when a key is given), XOR and plain text are tried in that
+ * order. The first result that starts with `<?xml` wins, which is how
+ * reolink_aio decides too.
  *
  * @param message The received message.
  * @param aesKey The session key from login, if logged in.
@@ -121,7 +181,7 @@ export function createMessage(options: CreateMessageOptions): BaichuanMessage {
  *     bodyLength: body.length,
  *     channelId: 250,
  *     messageId: 1,
- *     code: 0xdd01,
+ *     encryption: 0xdd01,
  *     messageClass: 0x1466,
  *   },
  *   body,
@@ -152,9 +212,9 @@ export function decryptBody(
     0x02: "aes",
     0x03: "aes",
   };
-  const first: keyof typeof ciphers = headerLength(header.messageClass) === 24
+  const first: keyof typeof ciphers = header.encryption === undefined
     ? "aes"
-    : markers[header.code & 0xff] ?? "plain";
+    : markers[header.encryption & 0xff] ?? "plain";
 
   const decoder = new TextDecoder();
   for (const name of new Set([first, "aes", "xor", "plain"] as const)) {

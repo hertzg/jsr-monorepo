@@ -16,7 +16,7 @@
  *
  * assertEquals(messages.length, 1);
  * assertEquals(messages[0].header.cmdId, 31);
- * assertEquals(messages[0].header.code, 200);
+ * assertEquals(messages[0].header.status, 200);
  * ```
  *
  * @module

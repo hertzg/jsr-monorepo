@@ -24,10 +24,12 @@
  */
 
 import { xorCipher } from "./encoding/cipher.ts";
-import { headerLength } from "./encoding/header.ts";
+import { BAICHUAN_MESSAGE_CLASS } from "./encoding/header.ts";
 import { type AlarmEvent, parseAlarmEvents } from "./protocol/event.ts";
 import { loginCredentials, loginXml, parseNonce } from "./protocol/login.ts";
 import {
+  BAICHUAN_CHANNEL,
+  BAICHUAN_CMD,
   type BaichuanMessage,
   createMessage,
   type CreateMessageOptions,
@@ -158,23 +160,21 @@ export function createClient(options: ClientOptions): Client {
   const fail = (error: unknown) => shutdown(error, "error");
 
   const onMessage = (message: BaichuanMessage) => {
-    const { cmdId, channelId, messageId, code, messageClass } = message.header;
+    const { cmdId, channelId, messageId, status } = message.header;
     const key = keyOf(cmdId, channelId, messageId);
     const request = pending.get(key);
     if (request !== undefined) {
       pending.delete(key);
-      if (
-        headerLength(messageClass) === 24 && ![200, 201, 300].includes(code)
-      ) {
+      if (status !== undefined && ![200, 201, 300].includes(status)) {
         request.reject(
-          new Error(`Baichuan cmd ${cmdId} failed with status ${code}`),
+          new Error(`Baichuan cmd ${cmdId} failed with status ${status}`),
         );
       } else {
         request.resolve(message);
       }
       return;
     }
-    if (cmdId === 33 && subscription !== undefined) {
+    if (cmdId === BAICHUAN_CMD.ALARM_EVENT && subscription !== undefined) {
       subscription.sawEvent = true;
       for (const event of parseAlarmEvents(decryptBody(message, aesKey))) {
         subscription.events.enqueue(event);
@@ -232,8 +232,8 @@ export function createClient(options: ClientOptions): Client {
       pingSentAt = Date.now();
       send(
         current.sawEvent
-          ? { cmdId: 93, channelId: 250 }
-          : { cmdId: 31, channelId: 251 },
+          ? { cmdId: BAICHUAN_CMD.PING, channelId: BAICHUAN_CHANNEL.HOST }
+          : { cmdId: BAICHUAN_CMD.SUBSCRIBE, channelId: BAICHUAN_CHANNEL.PUSH },
       ).catch(() => {});
       current.keepAlive = setTimeout(tick, interval);
     };
@@ -243,9 +243,9 @@ export function createClient(options: ClientOptions): Client {
   return {
     login: async ({ username, password }) => {
       const nonceReply = await send({
-        cmdId: 1,
-        channelId: 250,
-        messageClass: 0x1465,
+        cmdId: BAICHUAN_CMD.LOGIN,
+        channelId: BAICHUAN_CHANNEL.HOST,
+        messageClass: BAICHUAN_MESSAGE_CLASS.LEGACY,
       });
       const credentials = loginCredentials({
         username,
@@ -253,9 +253,12 @@ export function createClient(options: ClientOptions): Client {
         nonce: parseNonce(decryptBody(nonceReply)),
       });
       await send({
-        cmdId: 1,
-        channelId: 250,
-        body: xorCipher(new TextEncoder().encode(loginXml(credentials)), 250),
+        cmdId: BAICHUAN_CMD.LOGIN,
+        channelId: BAICHUAN_CHANNEL.HOST,
+        body: xorCipher(
+          new TextEncoder().encode(loginXml(credentials)),
+          BAICHUAN_CHANNEL.HOST,
+        ),
       });
       aesKey = credentials.aesKey;
     },
@@ -272,7 +275,10 @@ export function createClient(options: ClientOptions): Client {
         cancel: unsubscribe,
       });
       try {
-        await send({ cmdId: 31, channelId: 251 });
+        await send({
+          cmdId: BAICHUAN_CMD.SUBSCRIBE,
+          channelId: BAICHUAN_CHANNEL.PUSH,
+        });
       } catch (error) {
         unsubscribe();
         throw error;
