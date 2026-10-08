@@ -82,6 +82,7 @@ the JSR coordinate. Two scopes:
 - `ip` - IPv4/IPv6/CIDR utilities
 - `mac` - EUI-48 MAC address parse/stringify
 - `mymagti-api` - MyMagti API client
+- `reolink-client` - Reolink camera client (Baichuan push events)
 - `routeros-api` - MikroTik RouterOS API client
 - `tplink-api` - TP-Link Router API client
 - `wg-conf` - WireGuard configuration handling
@@ -439,6 +440,7 @@ both tiresome and error-prone.
 - `@hertzg/ip`
 - `@hertzg/mac`
 - `@hertzg/crc`
+- `@hertzg/reolink-client`
 - `@hertzg/routeros-api`
 - `@hertzg/tplink-api`
 - `@hertzg/xhb`

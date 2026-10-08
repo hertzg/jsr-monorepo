@@ -112,6 +112,9 @@
 "@hertzg/mymagti-api":
   - changed-files:
       - any-glob-to-any-file: packages/@hertzg/mymagti-api/**
+"@hertzg/reolink-client":
+  - changed-files:
+      - any-glob-to-any-file: packages/@hertzg/reolink-client/**
 "@hertzg/routeros-api":
   - changed-files:
       - any-glob-to-any-file: packages/@hertzg/routeros-api/**

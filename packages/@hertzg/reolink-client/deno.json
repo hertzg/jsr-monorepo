@@ -1,0 +1,22 @@
+{
+  "name": "@hertzg/reolink-client",
+  "version": "0.0.1",
+  "exports": {
+    ".": "./mod.ts",
+    "./encoding/header": "./encoding/header.ts",
+    "./encoding/cipher": "./encoding/cipher.ts",
+    "./protocol/message": "./protocol/message.ts",
+    "./protocol/login": "./protocol/login.ts",
+    "./protocol/event": "./protocol/event.ts",
+    "./streams/encode": "./streams/encode.ts",
+    "./streams/decode": "./streams/decode.ts",
+    "./client": "./client.ts"
+  },
+  "publish": {
+    "exclude": [
+      "**/*.test.ts",
+      "**/*.md",
+      "adr"
+    ]
+  }
+}
