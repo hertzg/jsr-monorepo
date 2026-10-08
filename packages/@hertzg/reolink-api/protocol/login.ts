@@ -39,7 +39,7 @@
  * @module
  */
 
-import { md5 } from "@noble/hashes/legacy.js";
+import { createHash } from "node:crypto";
 import { isElement, isText, parse, type XmlElement } from "@std/xml";
 
 /**
@@ -58,10 +58,8 @@ import { isElement, isText, parse, type XmlElement } from "@std/xml";
  * ```
  */
 export function md5Modern(text: string): string {
-  const digest = md5(new TextEncoder().encode(text));
-  const hex = Array.from(digest, (byte) => byte.toString(16).padStart(2, "0"))
-    .join("");
-  return hex.slice(0, 31).toUpperCase();
+  return createHash("md5").update(text, "utf8").digest("hex").slice(0, 31)
+    .toUpperCase();
 }
 
 /** What the login needs: the user's credentials and the camera's nonce. */
