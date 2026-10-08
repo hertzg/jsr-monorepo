@@ -2,8 +2,13 @@ import { assertEquals, assertRejects } from "@std/assert";
 import { assertSpyCalls, spy } from "@std/testing/mock";
 import { FakeTime } from "@std/testing/time";
 import { createClient } from "./client.ts";
-import { aesCfbEncrypt, xorCipher } from "./encoding/cipher.ts";
+import { aesCfbDecrypt, aesCfbEncrypt, xorCipher } from "./encoding/cipher.ts";
 import { loginCredentials, loginXml } from "./protocol/login.ts";
+import { extensionXml } from "./protocol/message.ts";
+import { privacyModeXml } from "./protocol/privacy.ts";
+import { PTZ_COMMAND, ptzControlXml, ptzPresetXml } from "./protocol/ptz.ts";
+import { sirenXml } from "./protocol/siren.ts";
+import { snapshotXml } from "./protocol/snapshot.ts";
 import { createBaichuanDecodeStream } from "./streams/decode.ts";
 import { createBaichuanEncodeStream } from "./streams/encode.ts";
 
@@ -20,6 +25,52 @@ function cameraLink() {
       .getReader(),
     camera: encoder.writable.getWriter(),
   };
+}
+
+/**
+ * A cameraLink whose client has logged in as admin/hunter2 with nonce
+ * NONCE-0123, which makes the session key "08822D7143979103". The next
+ * request gets message id 3.
+ */
+async function loggedIn() {
+  const { connection, requests, camera } = cameraLink();
+  const client = createClient(connection);
+  const login = client.login({ username: "admin", password: "hunter2" });
+  await requests.read();
+  const nonceBody = xorCipher(
+    new TextEncoder().encode(
+      '<?xml version="1.0" ?><body><nonce>NONCE-0123</nonce></body>',
+    ),
+    250,
+  );
+  await camera.write({
+    header: {
+      cmdId: 1,
+      bodyLength: nonceBody.length,
+      channelId: 250,
+      messageId: 1,
+      encryption: 0xdd01,
+      messageClass: 0x1466,
+    },
+    body: nonceBody,
+    payload: new Uint8Array(0),
+  });
+  await requests.read();
+  await camera.write({
+    header: {
+      cmdId: 1,
+      bodyLength: 0,
+      channelId: 250,
+      messageId: 2,
+      status: 200,
+      messageClass: 0x1464,
+      payloadOffset: 0,
+    },
+    body: new Uint8Array(0),
+    payload: new Uint8Array(0),
+  });
+  await login;
+  return { client, requests, camera };
 }
 
 Deno.test("login sends the nonce request, then the XOR-encrypted login", async () => {
@@ -545,4 +596,394 @@ Deno.test("close ends the event stream and the connection's writable", async () 
 
   assertEquals((await events.read()).done, true);
   assertEquals((await requests.read()).done, true);
+});
+
+Deno.test("channel requests reject before login", async () => {
+  const { connection } = cameraLink();
+  const client = createClient(connection);
+
+  await assertRejects(() => client.snapshot(), Error, "not logged in");
+  await client.close();
+});
+
+Deno.test("playSiren sends cmd 263 with the channel extension and the siren body, both AES-encrypted", async () => {
+  const { client, requests, camera } = await loggedIn();
+  const aesKey = new TextEncoder().encode("08822D7143979103");
+
+  const play = client.playSiren({ channel: 0, times: 2 });
+  const { value: request } = await requests.read();
+  await camera.write({
+    header: {
+      cmdId: 263,
+      bodyLength: 0,
+      channelId: 1,
+      messageId: 3,
+      status: 200,
+      messageClass: 0x1464,
+      payloadOffset: 0,
+    },
+    body: new Uint8Array(0),
+    payload: new Uint8Array(0),
+  });
+  await play;
+
+  assertEquals(request?.header.cmdId, 263);
+  assertEquals(request?.header.channelId, 1);
+  assertEquals(
+    new TextDecoder().decode(aesCfbDecrypt(aesKey, request!.body)),
+    extensionXml(0),
+  );
+  assertEquals(
+    new TextDecoder().decode(aesCfbDecrypt(aesKey, request!.payload)),
+    sirenXml({ channel: 0, times: 2 }),
+  );
+  await client.close();
+});
+
+Deno.test("stopSiren during a timed play starts manual play before stopping", async () => {
+  const { client, requests, camera } = await loggedIn();
+  const aesKey = new TextEncoder().encode("08822D7143979103");
+  const ack = (messageId: number) =>
+    camera.write({
+      header: {
+        cmdId: 263,
+        bodyLength: 0,
+        channelId: 1,
+        messageId,
+        status: 200,
+        messageClass: 0x1464,
+        payloadOffset: 0,
+      },
+      body: new Uint8Array(0),
+      payload: new Uint8Array(0),
+    });
+
+  const play = client.playSiren({ times: 3 });
+  await requests.read();
+  await ack(3);
+  await play;
+  const stop = client.stopSiren();
+  const { value: first } = await requests.read();
+  await ack(4);
+  const { value: second } = await requests.read();
+  await ack(5);
+  await stop;
+
+  assertEquals(
+    new TextDecoder().decode(aesCfbDecrypt(aesKey, first!.payload)),
+    sirenXml({ channel: 0, on: true }),
+  );
+  assertEquals(
+    new TextDecoder().decode(aesCfbDecrypt(aesKey, second!.payload)),
+    sirenXml({ channel: 0, on: false }),
+  );
+  await client.close();
+});
+
+Deno.test("stopSiren with nothing playing only sends the stop", async () => {
+  const { client, requests, camera } = await loggedIn();
+  const aesKey = new TextEncoder().encode("08822D7143979103");
+
+  const stop = client.stopSiren();
+  const { value: request } = await requests.read();
+  await camera.write({
+    header: {
+      cmdId: 263,
+      bodyLength: 0,
+      channelId: 1,
+      messageId: 3,
+      status: 200,
+      messageClass: 0x1464,
+      payloadOffset: 0,
+    },
+    body: new Uint8Array(0),
+    payload: new Uint8Array(0),
+  });
+  await stop;
+
+  assertEquals(
+    new TextDecoder().decode(aesCfbDecrypt(aesKey, request!.payload)),
+    sirenXml({ channel: 0, on: false }),
+  );
+  await client.close();
+});
+
+Deno.test("setPrivacyMode sends cmd 575 with the sleep body", async () => {
+  const { client, requests, camera } = await loggedIn();
+  const aesKey = new TextEncoder().encode("08822D7143979103");
+
+  const set = client.setPrivacyMode({ enabled: true });
+  const { value: request } = await requests.read();
+  await camera.write({
+    header: {
+      cmdId: 575,
+      bodyLength: 0,
+      channelId: 1,
+      messageId: 3,
+      status: 200,
+      messageClass: 0x1464,
+      payloadOffset: 0,
+    },
+    body: new Uint8Array(0),
+    payload: new Uint8Array(0),
+  });
+  await set;
+
+  assertEquals(request?.header.cmdId, 575);
+  assertEquals(
+    new TextDecoder().decode(aesCfbDecrypt(aesKey, request!.payload)),
+    privacyModeXml(true),
+  );
+  await client.close();
+});
+
+Deno.test("privacyMode sends cmd 574 without a body and reads sleep from the reply", async () => {
+  const { client, requests, camera } = await loggedIn();
+  const aesKey = new TextEncoder().encode("08822D7143979103");
+
+  const state = client.privacyMode({ channel: 2 });
+  const { value: request } = await requests.read();
+  const body = aesCfbEncrypt(
+    aesKey,
+    new TextEncoder().encode(
+      '<?xml version="1.0" encoding="UTF-8" ?>\n' +
+        '<body><sleepState version="1.1"><sleep>1</sleep></sleepState></body>',
+    ),
+  );
+  await camera.write({
+    header: {
+      cmdId: 574,
+      bodyLength: body.length,
+      channelId: 3,
+      messageId: 3,
+      status: 200,
+      messageClass: 0x1464,
+      payloadOffset: 0,
+    },
+    body,
+    payload: new Uint8Array(0),
+  });
+
+  assertEquals(await state, true);
+  assertEquals(request?.header.channelId, 3);
+  assertEquals(request?.payload, new Uint8Array(0));
+  await client.close();
+});
+
+Deno.test("snapshot collects the payload chunks that follow the reply", async () => {
+  const { client, requests, camera } = await loggedIn();
+  const aesKey = new TextEncoder().encode("08822D7143979103");
+  const xml = (text: string) =>
+    aesCfbEncrypt(
+      aesKey,
+      new TextEncoder().encode('<?xml version="1.0" ?>' + text),
+    );
+
+  const snapshot = client.snapshot();
+  const { value: request } = await requests.read();
+  const reply = xml("<body><Snap><pictureSize>6</pictureSize></Snap></body>");
+  await camera.write({
+    header: {
+      cmdId: 109,
+      bodyLength: reply.length,
+      channelId: 1,
+      messageId: 3,
+      status: 200,
+      messageClass: 0x1464,
+      payloadOffset: 0,
+    },
+    body: reply,
+    payload: new Uint8Array(0),
+  });
+  const firstBody = xml(
+    "<body><binaryData><encryptLen>4</encryptLen></binaryData></body>",
+  );
+  const firstPayload = aesCfbEncrypt(
+    aesKey,
+    Uint8Array.of(0xff, 0xd8, 0xff, 0xe0),
+  );
+  await camera.write({
+    header: {
+      cmdId: 109,
+      bodyLength: firstBody.length + firstPayload.length,
+      channelId: 1,
+      messageId: 3,
+      status: 200,
+      messageClass: 0x1464,
+      payloadOffset: firstBody.length,
+    },
+    body: firstBody,
+    payload: firstPayload,
+  });
+  const secondBody = xml("<body><binaryData /></body>");
+  await camera.write({
+    header: {
+      cmdId: 109,
+      bodyLength: secondBody.length + 2,
+      channelId: 1,
+      messageId: 3,
+      status: 200,
+      messageClass: 0x1464,
+      payloadOffset: secondBody.length,
+    },
+    body: secondBody,
+    payload: Uint8Array.of(0xff, 0xd9),
+  });
+  await camera.write({
+    header: {
+      cmdId: 109,
+      bodyLength: 0,
+      channelId: 1,
+      messageId: 3,
+      status: 200,
+      messageClass: 0x1464,
+      payloadOffset: 0,
+    },
+    body: new Uint8Array(0),
+    payload: new Uint8Array(0),
+  });
+
+  assertEquals(
+    await snapshot,
+    Uint8Array.of(0xff, 0xd8, 0xff, 0xe0, 0xff, 0xd9),
+  );
+  assertEquals(
+    new TextDecoder().decode(aesCfbDecrypt(aesKey, request!.payload)),
+    snapshotXml({ channel: 0, stream: "main" }),
+  );
+  await client.close();
+});
+
+Deno.test("snapshot rejects an image of a different size than announced", async () => {
+  const { client, requests, camera } = await loggedIn();
+  const aesKey = new TextEncoder().encode("08822D7143979103");
+
+  const snapshot = client.snapshot({ stream: "sub" });
+  await requests.read();
+  const reply = aesCfbEncrypt(
+    aesKey,
+    new TextEncoder().encode(
+      '<?xml version="1.0" ?><body><Snap><pictureSize>10</pictureSize></Snap></body>',
+    ),
+  );
+  await camera.write({
+    header: {
+      cmdId: 109,
+      bodyLength: reply.length,
+      channelId: 1,
+      messageId: 3,
+      status: 200,
+      messageClass: 0x1464,
+      payloadOffset: 0,
+    },
+    body: reply,
+    payload: new Uint8Array(0),
+  });
+  await camera.write({
+    header: {
+      cmdId: 109,
+      bodyLength: 0,
+      channelId: 1,
+      messageId: 3,
+      status: 200,
+      messageClass: 0x1464,
+      payloadOffset: 0,
+    },
+    body: new Uint8Array(0),
+    payload: new Uint8Array(0),
+  });
+
+  await assertRejects(() => snapshot, Error, "announced 10 bytes but sent 0");
+  await client.close();
+});
+
+Deno.test("ptz sends cmd 18 with the command and speed", async () => {
+  const { client, requests, camera } = await loggedIn();
+  const aesKey = new TextEncoder().encode("08822D7143979103");
+
+  const move = client.ptz({ command: PTZ_COMMAND.LEFT, speed: 32 });
+  const { value: request } = await requests.read();
+  await camera.write({
+    header: {
+      cmdId: 18,
+      bodyLength: 0,
+      channelId: 1,
+      messageId: 3,
+      status: 200,
+      messageClass: 0x1464,
+      payloadOffset: 0,
+    },
+    body: new Uint8Array(0),
+    payload: new Uint8Array(0),
+  });
+  await move;
+
+  assertEquals(request?.header.cmdId, 18);
+  assertEquals(
+    new TextDecoder().decode(aesCfbDecrypt(aesKey, request!.payload)),
+    ptzControlXml({ channel: 0, command: "Left", speed: 32 }),
+  );
+  await client.close();
+});
+
+Deno.test("ptzPresets sends cmd 190 and lists the named presets", async () => {
+  const { client, requests, camera } = await loggedIn();
+  const aesKey = new TextEncoder().encode("08822D7143979103");
+
+  const presets = client.ptzPresets();
+  const { value: request } = await requests.read();
+  const body = aesCfbEncrypt(
+    aesKey,
+    new TextEncoder().encode(
+      '<?xml version="1.0" ?><body><PtzPreset><presetList>' +
+        "<preset><id>1</id><name>gate</name></preset>" +
+        "</presetList></PtzPreset></body>",
+    ),
+  );
+  await camera.write({
+    header: {
+      cmdId: 190,
+      bodyLength: body.length,
+      channelId: 1,
+      messageId: 3,
+      status: 200,
+      messageClass: 0x1464,
+      payloadOffset: 0,
+    },
+    body,
+    payload: new Uint8Array(0),
+  });
+
+  assertEquals(await presets, [{ id: 1, name: "gate" }]);
+  assertEquals(request?.header.cmdId, 190);
+  await client.close();
+});
+
+Deno.test("ptzGoToPreset sends cmd 19 with the preset id", async () => {
+  const { client, requests, camera } = await loggedIn();
+  const aesKey = new TextEncoder().encode("08822D7143979103");
+
+  const go = client.ptzGoToPreset({ id: 1 });
+  const { value: request } = await requests.read();
+  await camera.write({
+    header: {
+      cmdId: 19,
+      bodyLength: 0,
+      channelId: 1,
+      messageId: 3,
+      status: 200,
+      messageClass: 0x1464,
+      payloadOffset: 0,
+    },
+    body: new Uint8Array(0),
+    payload: new Uint8Array(0),
+  });
+  await go;
+
+  assertEquals(request?.header.cmdId, 19);
+  assertEquals(
+    new TextDecoder().decode(aesCfbDecrypt(aesKey, request!.payload)),
+    ptzPresetXml({ channel: 0, id: 1 }),
+  );
+  await client.close();
 });

@@ -23,7 +23,8 @@
  * @module
  */
 
-import { xorCipher } from "./encoding/cipher.ts";
+import { concat } from "@std/bytes";
+import { aesCfbEncrypt, xorCipher } from "./encoding/cipher.ts";
 import { BAICHUAN_MESSAGE_CLASS } from "./encoding/header.ts";
 import { type AlarmEvent, parseAlarmEvents } from "./protocol/event.ts";
 import { loginCredentials, loginXml, parseNonce } from "./protocol/login.ts";
@@ -34,7 +35,19 @@ import {
   createMessage,
   type CreateMessageOptions,
   decryptBody,
+  decryptPayload,
+  extensionXml,
 } from "./protocol/message.ts";
+import { parsePrivacyMode, privacyModeXml } from "./protocol/privacy.ts";
+import {
+  parsePtzPresets,
+  type PtzCommand,
+  ptzControlXml,
+  type PtzPreset,
+  ptzPresetXml,
+} from "./protocol/ptz.ts";
+import { sirenXml } from "./protocol/siren.ts";
+import { parseSnapshotSize, snapshotXml } from "./protocol/snapshot.ts";
 import { createBaichuanDecodeStream } from "./streams/decode.ts";
 import { createBaichuanEncodeStream } from "./streams/encode.ts";
 
@@ -64,6 +77,12 @@ export type SubscribeOptions = {
   keepAliveMs?: number;
 };
 
+/** Which camera a request is about. */
+export type ChannelOptions = {
+  /** The zero-based channel number. A standalone camera is `0`, the default. */
+  channel?: number;
+};
+
 /** A Baichuan client bound to one connection. */
 export type Client = {
   /**
@@ -87,6 +106,70 @@ export type Client = {
   subscribe: (
     options?: SubscribeOptions,
   ) => Promise<ReadableStream<AlarmEvent>>;
+  /**
+   * Plays the siren a number of times, about 5 seconds each. Needs a login.
+   *
+   * @throws {Error} When the camera rejects the request.
+   */
+  playSiren: (options?: ChannelOptions & { times?: number }) => Promise<void>;
+  /**
+   * Starts the siren until {@link Client.stopSiren}. Needs a login.
+   *
+   * @throws {Error} When the camera rejects the request.
+   */
+  startSiren: (options?: ChannelOptions) => Promise<void>;
+  /**
+   * Stops the siren, whether started or played a number of times. Needs a
+   * login.
+   *
+   * @throws {Error} When the camera rejects the request.
+   */
+  stopSiren: (options?: ChannelOptions) => Promise<void>;
+  /**
+   * Reads whether privacy mode (sleep) is on. Needs a login.
+   *
+   * @throws {Error} When the camera rejects the request.
+   */
+  privacyMode: (options?: ChannelOptions) => Promise<boolean>;
+  /**
+   * Turns privacy mode (sleep) on or off. Needs a login.
+   *
+   * @throws {Error} When the camera rejects the request.
+   */
+  setPrivacyMode: (
+    options: ChannelOptions & { enabled: boolean },
+  ) => Promise<void>;
+  /**
+   * Takes a JPEG snapshot of the `main` (default) or `sub` stream. Needs a
+   * login.
+   *
+   * @throws {Error} When the camera rejects the request, or when the image
+   *   that arrives is not the size the camera announced.
+   */
+  snapshot: (
+    options?: ChannelOptions & { stream?: "main" | "sub" },
+  ) => Promise<Uint8Array>;
+  /**
+   * Starts a PTZ move or zoom, which keeps going until `PTZ_COMMAND.STOP`.
+   * Needs a login.
+   *
+   * @throws {Error} When the camera rejects the request.
+   */
+  ptz: (
+    options: ChannelOptions & { command: PtzCommand; speed?: number },
+  ) => Promise<void>;
+  /**
+   * Lists the saved PTZ presets. Needs a login.
+   *
+   * @throws {Error} When the camera rejects the request.
+   */
+  ptzPresets: (options?: ChannelOptions) => Promise<PtzPreset[]>;
+  /**
+   * Moves to a saved PTZ preset by its id. Needs a login.
+   *
+   * @throws {Error} When the camera rejects the request.
+   */
+  ptzGoToPreset: (options: ChannelOptions & { id: number }) => Promise<void>;
   /**
    * Stops the keepalive, ends the event stream and closes the writable. The
    * caller still closes the socket.
@@ -127,7 +210,9 @@ export type Client = {
 export function createClient(options: ClientOptions): Client {
   const encoder = createBaichuanEncodeStream();
   const writer = encoder.writable.getWriter();
-  const pending = new Map<string, PromiseWithResolvers<BaichuanMessage>>();
+  const pending = new Map<string, Pending>();
+  const downloads = new Map<string, Download>();
+  const sirenPlayingUntil = new Map<number, number>();
 
   let messageId = 0;
   let aesKey: Uint8Array | undefined;
@@ -145,10 +230,15 @@ export function createClient(options: ClientOptions): Client {
 
   const shutdown = (reason: unknown, events: "close" | "error") => {
     ended ??= reason;
-    for (const request of pending.values()) {
-      request.reject(reason);
+    for (const { reply, download } of pending.values()) {
+      reply.reject(reason);
+      download?.done.reject(reason);
     }
     pending.clear();
+    for (const download of downloads.values()) {
+      download.done.reject(reason);
+    }
+    downloads.clear();
     if (events === "error") {
       subscription?.events.error(reason);
     } else {
@@ -166,11 +256,31 @@ export function createClient(options: ClientOptions): Client {
     if (request !== undefined) {
       pending.delete(key);
       if (status !== undefined && ![200, 201, 300].includes(status)) {
-        request.reject(
-          new Error(`Baichuan cmd ${cmdId} failed with status ${status}`),
+        const error = new Error(
+          `Baichuan cmd ${cmdId} failed with status ${status}`,
         );
+        request.reply.reject(error);
+        request.download?.done.reject(error);
       } else {
-        request.resolve(message);
+        if (request.download !== undefined) {
+          downloads.set(key, request.download);
+        }
+        request.reply.resolve(message);
+      }
+      return;
+    }
+    const download = downloads.get(key);
+    if (download !== undefined) {
+      try {
+        if (message.payload.length === 0) {
+          downloads.delete(key);
+          download.done.resolve(concat(download.chunks));
+        } else {
+          download.chunks.push(decryptPayload(message, download.aesKey));
+        }
+      } catch (error) {
+        downloads.delete(key);
+        download.done.reject(error);
       }
       return;
     }
@@ -196,6 +306,7 @@ export function createClient(options: ClientOptions): Client {
 
   const send = async (
     request: Omit<CreateMessageOptions, "messageId">,
+    download?: Download,
   ): Promise<BaichuanMessage> => {
     if (ended !== undefined) {
       throw ended;
@@ -205,15 +316,49 @@ export function createClient(options: ClientOptions): Client {
     const reply = Promise.withResolvers<BaichuanMessage>();
     // shutdown() can reject this while the write below is still queued.
     reply.promise.catch(() => {});
-    pending.set(key, reply);
+    pending.set(key, { reply, download });
     try {
       await writer.write(createMessage({ ...request, messageId }));
     } catch (error) {
       pending.delete(key);
+      download?.done.reject(error);
       throw error;
     }
     return reply.promise;
   };
+
+  /**
+   * Sends an AES-encrypted request about one channel. With `image`, the
+   * payload that follows the reply is collected into it.
+   */
+  const request = async (
+    cmdId: number,
+    channel: number,
+    xml?: string,
+    image?: PromiseWithResolvers<Uint8Array>,
+  ): Promise<BaichuanMessage> => {
+    const key = aesKey;
+    if (key === undefined) {
+      throw new Error("Baichuan client is not logged in");
+    }
+    const encrypt = (text: string) =>
+      aesCfbEncrypt(key, new TextEncoder().encode(text));
+    image?.promise.catch(() => {});
+    return await send(
+      {
+        cmdId,
+        channelId: channel + 1,
+        extension: encrypt(extensionXml(channel)),
+        body: xml === undefined ? undefined : encrypt(xml),
+      },
+      image === undefined
+        ? undefined
+        : { aesKey: key, chunks: [], done: image },
+    );
+  };
+
+  const siren = (channel: number, play: { times: number } | { on: boolean }) =>
+    request(BAICHUAN_CMD.SIREN, channel, sirenXml({ channel, ...play }));
 
   const keepAlive = (current: Subscription, interval: number) => {
     let pingSentAt: number | undefined;
@@ -286,12 +431,101 @@ export function createClient(options: ClientOptions): Client {
       return stream;
     },
 
+    playSiren: async ({ channel = 0, times = 1 } = {}) => {
+      await siren(channel, { times });
+      sirenPlayingUntil.set(channel, Date.now() + times * 5_000);
+    },
+
+    startSiren: async ({ channel = 0 } = {}) => {
+      await siren(channel, { on: true });
+      sirenPlayingUntil.delete(channel);
+    },
+
+    stopSiren: async ({ channel = 0 } = {}) => {
+      // Firmware ignores a stop during a timed play unless manual play
+      // started first, as reolink_aio found.
+      if (Date.now() < (sirenPlayingUntil.get(channel) ?? 0)) {
+        await siren(channel, { on: true }).catch(() => {});
+      }
+      sirenPlayingUntil.delete(channel);
+      await siren(channel, { on: false });
+    },
+
+    privacyMode: async ({ channel = 0 } = {}) =>
+      parsePrivacyMode(
+        decryptBody(
+          await request(BAICHUAN_CMD.PRIVACY_MODE, channel),
+          aesKey,
+        ),
+      ),
+
+    setPrivacyMode: async ({ channel = 0, enabled }) => {
+      await request(
+        BAICHUAN_CMD.SET_PRIVACY_MODE,
+        channel,
+        privacyModeXml(enabled),
+      );
+    },
+
+    snapshot: async ({ channel = 0, stream = "main" } = {}) => {
+      const image = Promise.withResolvers<Uint8Array>();
+      const reply = await request(
+        BAICHUAN_CMD.SNAPSHOT,
+        channel,
+        snapshotXml({ channel, stream }),
+        image,
+      );
+      const size = parseSnapshotSize(decryptBody(reply, aesKey));
+      const bytes = await image.promise;
+      if (bytes.length !== size) {
+        throw new Error(
+          `Baichuan snapshot announced ${size} bytes but sent ${bytes.length}`,
+        );
+      }
+      return bytes;
+    },
+
+    ptz: async ({ channel = 0, command, speed }) => {
+      await request(
+        BAICHUAN_CMD.PTZ_CONTROL,
+        channel,
+        ptzControlXml({ channel, command, speed }),
+      );
+    },
+
+    ptzPresets: async ({ channel = 0 } = {}) =>
+      parsePtzPresets(
+        decryptBody(await request(BAICHUAN_CMD.PTZ_PRESETS, channel), aesKey),
+      ),
+
+    ptzGoToPreset: async ({ channel = 0, id }) => {
+      await request(
+        BAICHUAN_CMD.PTZ_PRESET,
+        channel,
+        ptzPresetXml({ channel, id }),
+      );
+    },
+
     close: async () => {
       shutdown(new Error("Baichuan client is closed"), "close");
       await writer.close().catch(() => {});
     },
   };
 }
+
+/** A request waiting for its reply. */
+type Pending = {
+  reply: PromiseWithResolvers<BaichuanMessage>;
+  /** Set when the reply is followed by payload messages to collect. */
+  download?: Download;
+};
+
+/** Payload chunks arriving after a reply, such as a snapshot. */
+type Download = {
+  aesKey: Uint8Array;
+  chunks: Uint8Array[];
+  done: PromiseWithResolvers<Uint8Array>;
+};
 
 /** The open event stream and the keepalive that guards it. */
 type Subscription = {
