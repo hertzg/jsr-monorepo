@@ -3,20 +3,20 @@
   "deps": {
     ".": [
       "@hertzg/binstruct",
-      "jsr:@noble/ciphers@^2.1.1/aes.js",
       "jsr:@noble/hashes@^2.0.1/legacy.js",
       "jsr:@std/bytes@^1.0.6",
-      "jsr:@std/xml@^0.2.0"
+      "jsr:@std/xml@^0.2.0",
+      "node:crypto"
     ],
     "./encoding/header": [
       "@hertzg/binstruct"
     ],
     "./encoding/cipher": [
-      "jsr:@noble/ciphers@^2.1.1/aes.js"
+      "node:crypto"
     ],
     "./protocol/message": [
       "@hertzg/binstruct",
-      "jsr:@noble/ciphers@^2.1.1/aes.js"
+      "node:crypto"
     ],
     "./protocol/login": [
       "jsr:@noble/hashes@^2.0.1/legacy.js",
@@ -27,20 +27,20 @@
     ],
     "./streams/encode": [
       "@hertzg/binstruct",
-      "jsr:@noble/ciphers@^2.1.1/aes.js",
-      "jsr:@std/bytes@^1.0.6"
+      "jsr:@std/bytes@^1.0.6",
+      "node:crypto"
     ],
     "./streams/decode": [
       "@hertzg/binstruct",
-      "jsr:@noble/ciphers@^2.1.1/aes.js",
-      "jsr:@std/bytes@^1.0.6"
+      "jsr:@std/bytes@^1.0.6",
+      "node:crypto"
     ],
     "./client": [
       "@hertzg/binstruct",
-      "jsr:@noble/ciphers@^2.1.1/aes.js",
       "jsr:@noble/hashes@^2.0.1/legacy.js",
       "jsr:@std/bytes@^1.0.6",
-      "jsr:@std/xml@^0.2.0"
+      "jsr:@std/xml@^0.2.0",
+      "node:crypto"
     ]
   }
 }

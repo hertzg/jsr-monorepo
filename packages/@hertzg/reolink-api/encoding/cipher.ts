@@ -22,7 +22,7 @@
  * @module
  */
 
-import { cfb } from "@noble/ciphers/aes.js";
+import { createCipheriv } from "node:crypto";
 
 /**
  * Applies the Baichuan XOR cipher. The cipher is its own inverse, so the same
@@ -78,7 +78,7 @@ export function xorCipher(data: Uint8Array, offset: number): Uint8Array {
  * ```
  */
 export function aesCfbEncrypt(key: Uint8Array, data: Uint8Array): Uint8Array {
-  return cfb(key, new TextEncoder().encode("0123456789abcdef")).encrypt(data);
+  return aesCfb(key, data, "encrypt");
 }
 
 /**
@@ -101,5 +101,26 @@ export function aesCfbEncrypt(key: Uint8Array, data: Uint8Array): Uint8Array {
  * ```
  */
 export function aesCfbDecrypt(key: Uint8Array, data: Uint8Array): Uint8Array {
-  return cfb(key, new TextEncoder().encode("0123456789abcdef")).decrypt(data);
+  return aesCfb(key, data, "decrypt");
+}
+
+// Deno's node:crypto has no CFB mode and Web Crypto has neither CFB nor ECB,
+// so CFB is built here from single-block AES-ECB: each keystream block is the
+// encryption of the previous ciphertext block, starting from the IV.
+function aesCfb(
+  key: Uint8Array,
+  data: Uint8Array,
+  direction: "encrypt" | "decrypt",
+): Uint8Array {
+  const block = createCipheriv("aes-128-ecb", key, null).setAutoPadding(false);
+  const out = new Uint8Array(data.length);
+  let previous: Uint8Array = new TextEncoder().encode("0123456789abcdef");
+  for (let i = 0; i < data.length; i += 16) {
+    const keystream = block.update(previous);
+    const input = data.subarray(i, i + 16);
+    const output = input.map((byte, j) => byte ^ keystream[j]);
+    out.set(output, i);
+    previous = direction === "encrypt" ? output : input;
+  }
+  return out;
 }
