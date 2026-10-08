@@ -85,24 +85,10 @@ export function createMessage(options: CreateMessageOptions): BaichuanMessage {
     messageClass = 0x1464,
     body = new Uint8Array(0),
   } = options;
+  const common = { cmdId, bodyLength: body.length, channelId, messageId };
   const header: BaichuanHeader = messageClass === 0x1465
-    ? {
-      cmdId,
-      bodyLength: body.length,
-      channelId,
-      messageId,
-      code: 0xdc12,
-      messageClass,
-    }
-    : {
-      cmdId,
-      bodyLength: body.length,
-      channelId,
-      messageId,
-      code: 0,
-      messageClass,
-      payloadOffset: 0,
-    };
+    ? { ...common, messageClass, code: 0xdc12 }
+    : { ...common, messageClass, code: 0, payloadOffset: 0 };
   return { header, body, payload: new Uint8Array(0) };
 }
 
@@ -160,18 +146,18 @@ export function decryptBody(
     xor: (data: Uint8Array) => xorCipher(data, header.channelId),
     plain: (data: Uint8Array) => data,
   };
-  const marker = header.code & 0xff;
-  const order: (keyof typeof ciphers)[] = headerLength(header.messageClass) ===
-      24
-    ? ["aes", "xor", "plain"]
-    : marker === 0x01 || marker === 0x12
-    ? ["xor", "aes", "plain"]
-    : marker === 0x02 || marker === 0x03
-    ? ["aes", "xor", "plain"]
-    : ["plain", "aes", "xor"];
+  const markers: Record<number, keyof typeof ciphers> = {
+    0x01: "xor",
+    0x12: "xor",
+    0x02: "aes",
+    0x03: "aes",
+  };
+  const first: keyof typeof ciphers = headerLength(header.messageClass) === 24
+    ? "aes"
+    : markers[header.code & 0xff] ?? "plain";
 
   const decoder = new TextDecoder();
-  for (const name of order) {
+  for (const name of new Set([first, "aes", "xor", "plain"] as const)) {
     const decrypted = ciphers[name](body);
     if (decrypted === undefined) {
       continue;
