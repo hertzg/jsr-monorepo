@@ -186,7 +186,8 @@ export function createClient(options: ClientOptions): Client {
 
   (async () => {
     const messages = options.readable.pipeThrough(createBaichuanDecodeStream());
-    for await (const message of messages) {
+    // The socket is the caller's: a message that throws must not cancel it.
+    for await (const message of messages.values({ preventCancel: true })) {
       lastReceivedAt = Date.now();
       onMessage(message);
     }

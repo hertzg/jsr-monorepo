@@ -1,4 +1,5 @@
 import { assertEquals, assertRejects } from "@std/assert";
+import { assertSpyCalls, spy } from "@std/testing/mock";
 import { FakeTime } from "@std/testing/time";
 import { createClient } from "./client.ts";
 import { aesCfbEncrypt, xorCipher } from "./encoding/cipher.ts";
@@ -462,6 +463,61 @@ Deno.test("close rejects requests still queued behind a slow write", async () =>
 
   await Promise.all(logins);
   await closing;
+});
+
+Deno.test("a push that fails to decrypt leaves the connection's readable alone", async () => {
+  const { connection, requests, camera } = cameraLink();
+  const cancel = spy();
+  const source = connection.readable.getReader();
+  const client = createClient({
+    readable: new ReadableStream({
+      pull: async (controller) => {
+        const { value, done } = await source.read();
+        if (done) {
+          controller.close();
+        } else {
+          controller.enqueue(value);
+        }
+      },
+      cancel,
+    }),
+    writable: connection.writable,
+  });
+
+  const subscription = client.subscribe();
+  await requests.read();
+  await camera.write({
+    header: {
+      cmdId: 31,
+      bodyLength: 0,
+      channelId: 251,
+      messageId: 1,
+      code: 200,
+      messageClass: 0x1464,
+      payloadOffset: 0,
+    },
+    body: new Uint8Array(0),
+    payload: new Uint8Array(0),
+  });
+  const events = (await subscription).getReader();
+  await camera.write({
+    header: {
+      cmdId: 33,
+      bodyLength: 3,
+      channelId: 251,
+      messageId: 0,
+      code: 200,
+      messageClass: 0x1464,
+      payloadOffset: 0,
+    },
+    body: Uint8Array.of(1, 2, 3),
+    payload: new Uint8Array(0),
+  });
+
+  await assertRejects(() => events.read(), Error, "did not decrypt to XML");
+  assertSpyCalls(cancel, 0);
+  await client.close();
+  await camera.close();
 });
 
 Deno.test("close ends the event stream and the connection's writable", async () => {
