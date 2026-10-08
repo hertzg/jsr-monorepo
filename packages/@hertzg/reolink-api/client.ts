@@ -125,37 +125,34 @@ export type Client = {
 export function createClient(options: ClientOptions): Client {
   const encoder = createBaichuanEncodeStream();
   const writer = encoder.writable.getWriter();
-  const reader = options.readable
-    .pipeThrough(createBaichuanDecodeStream())
-    .getReader();
-
   const pending = new Map<string, PromiseWithResolvers<BaichuanMessage>>();
+
   let messageId = 0;
   let aesKey: Uint8Array | undefined;
   let lastReceivedAt = Date.now();
-  let events: ReadableStreamDefaultController<AlarmEvent> | undefined;
-  let eventsActive = false;
-  let stopKeepAlive = () => {};
-  let failure: unknown;
-  let closed = false;
+  let subscription: Subscription | undefined;
+  let ended: unknown;
 
   const keyOf = (cmdId: number, channelId: number, id: number) =>
     `${cmdId}/${channelId}/${id}`;
 
-  const settle = (error: unknown) => {
-    stopKeepAlive();
-    for (const request of pending.values()) {
-      request.reject(error);
-    }
-    pending.clear();
+  const unsubscribe = () => {
+    subscription?.stopKeepAlive();
+    subscription = undefined;
   };
 
-  const fail = (error: unknown) => {
-    failure ??= error;
-    settle(error);
-    events?.error(error);
-    events = undefined;
+  const shutdown = (reason: unknown) => {
+    ended ??= reason;
+    for (const request of pending.values()) {
+      request.reject(reason);
+    }
+    pending.clear();
+    const events = subscription?.events;
+    unsubscribe();
+    return events;
   };
+
+  const fail = (error: unknown) => shutdown(error)?.error(error);
 
   const onMessage = (message: BaichuanMessage) => {
     const { cmdId, channelId, messageId, code, messageClass } = message.header;
@@ -174,10 +171,10 @@ export function createClient(options: ClientOptions): Client {
       }
       return;
     }
-    if (cmdId === 33 && events !== undefined) {
-      eventsActive = true;
+    if (cmdId === 33 && subscription !== undefined) {
+      subscription.sawEvent = true;
       for (const event of parseAlarmEvents(decryptBody(message, aesKey))) {
-        events.enqueue(event);
+        subscription.events.enqueue(event);
       }
     }
   };
@@ -185,35 +182,26 @@ export function createClient(options: ClientOptions): Client {
   encoder.readable.pipeTo(options.writable).catch(fail);
 
   (async () => {
-    while (true) {
-      const { value, done } = await reader.read();
-      if (done) {
-        break;
-      }
+    const messages = options.readable.pipeThrough(createBaichuanDecodeStream());
+    for await (const message of messages) {
       lastReceivedAt = Date.now();
-      onMessage(value);
+      onMessage(message);
     }
-    settle(new Error("Baichuan connection closed"));
-    events?.close();
-    events = undefined;
+    shutdown(new Error("Baichuan connection closed"))?.close();
   })().catch(fail);
 
   const send = async (
     request: Omit<CreateMessageOptions, "messageId">,
   ): Promise<BaichuanMessage> => {
-    if (closed) {
-      throw new Error("Baichuan client is closed");
-    }
-    if (failure !== undefined) {
-      throw failure;
+    if (ended !== undefined) {
+      throw ended;
     }
     messageId = (messageId + 1) % 0x1000000;
-    const message = createMessage({ ...request, messageId });
     const key = keyOf(request.cmdId, request.channelId, messageId);
     const reply = Promise.withResolvers<BaichuanMessage>();
     pending.set(key, reply);
     try {
-      await writer.write(message);
+      await writer.write(createMessage({ ...request, messageId }));
     } catch (error) {
       pending.delete(key);
       throw error;
@@ -221,7 +209,7 @@ export function createClient(options: ClientOptions): Client {
     return reply.promise;
   };
 
-  const startKeepAlive = (interval: number) => {
+  const keepAlive = (current: Subscription, interval: number) => {
     let pingSentAt: number | undefined;
     let timer: ReturnType<typeof setTimeout>;
     const tick = () => {
@@ -238,14 +226,14 @@ export function createClient(options: ClientOptions): Client {
       }
       pingSentAt = Date.now();
       send(
-        eventsActive
+        current.sawEvent
           ? { cmdId: 93, channelId: 250 }
           : { cmdId: 31, channelId: 251 },
       ).catch(() => {});
       timer = setTimeout(tick, interval);
     };
     timer = setTimeout(tick, interval);
-    stopKeepAlive = () => clearTimeout(timer);
+    current.stopKeepAlive = () => clearTimeout(timer);
   };
 
   return {
@@ -269,39 +257,44 @@ export function createClient(options: ClientOptions): Client {
     },
 
     subscribe: async ({ keepAliveMs = 30_000 } = {}) => {
-      if (events !== undefined) {
+      if (subscription !== undefined) {
         throw new Error("Baichuan client is already subscribed");
       }
-      let controller!: ReadableStreamDefaultController<AlarmEvent>;
+      const started = Promise.withResolvers<
+        ReadableStreamDefaultController<AlarmEvent>
+      >();
       const stream = new ReadableStream<AlarmEvent>({
-        start: (c) => {
-          controller = c;
-        },
-        cancel: () => {
-          stopKeepAlive();
-          events = undefined;
-        },
+        start: started.resolve,
+        cancel: unsubscribe,
       });
-      events = controller;
+      const current: Subscription = {
+        events: await started.promise,
+        sawEvent: false,
+        stopKeepAlive: () => {},
+      };
+      subscription = current;
       try {
         await send({ cmdId: 31, channelId: 251 });
       } catch (error) {
-        events = undefined;
+        unsubscribe();
         throw error;
       }
-      startKeepAlive(keepAliveMs);
+      if (subscription === current) {
+        keepAlive(current, keepAliveMs);
+      }
       return stream;
     },
 
     close: async () => {
-      if (closed) {
-        return;
-      }
-      closed = true;
-      settle(new Error("Baichuan client is closed"));
-      events?.close();
-      events = undefined;
+      shutdown(new Error("Baichuan client is closed"))?.close();
       await writer.close().catch(() => {});
     },
   };
 }
+
+/** The open event stream and the keepalive that guards it. */
+type Subscription = {
+  events: ReadableStreamDefaultController<AlarmEvent>;
+  sawEvent: boolean;
+  stopKeepAlive: () => void;
+};
