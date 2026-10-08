@@ -137,22 +137,25 @@ export function createClient(options: ClientOptions): Client {
     `${cmdId}/${channelId}/${id}`;
 
   const unsubscribe = () => {
-    subscription?.stopKeepAlive();
+    clearTimeout(subscription?.keepAlive);
     subscription = undefined;
   };
 
-  const shutdown = (reason: unknown) => {
+  const shutdown = (reason: unknown, events: "close" | "error") => {
     ended ??= reason;
     for (const request of pending.values()) {
       request.reject(reason);
     }
     pending.clear();
-    const events = subscription?.events;
+    if (events === "error") {
+      subscription?.events.error(reason);
+    } else {
+      subscription?.events.close();
+    }
     unsubscribe();
-    return events;
   };
 
-  const fail = (error: unknown) => shutdown(error)?.error(error);
+  const fail = (error: unknown) => shutdown(error, "error");
 
   const onMessage = (message: BaichuanMessage) => {
     const { cmdId, channelId, messageId, code, messageClass } = message.header;
@@ -187,7 +190,7 @@ export function createClient(options: ClientOptions): Client {
       lastReceivedAt = Date.now();
       onMessage(message);
     }
-    shutdown(new Error("Baichuan connection closed"))?.close();
+    shutdown(new Error("Baichuan connection closed"), "close");
   })().catch(fail);
 
   const send = async (
@@ -211,11 +214,10 @@ export function createClient(options: ClientOptions): Client {
 
   const keepAlive = (current: Subscription, interval: number) => {
     let pingSentAt: number | undefined;
-    let timer: ReturnType<typeof setTimeout>;
     const tick = () => {
       const idle = Date.now() - lastReceivedAt;
       if (idle < interval) {
-        timer = setTimeout(tick, interval - idle);
+        current.keepAlive = setTimeout(tick, interval - idle);
         return;
       }
       if (pingSentAt !== undefined && lastReceivedAt < pingSentAt) {
@@ -230,10 +232,9 @@ export function createClient(options: ClientOptions): Client {
           ? { cmdId: 93, channelId: 250 }
           : { cmdId: 31, channelId: 251 },
       ).catch(() => {});
-      timer = setTimeout(tick, interval);
+      current.keepAlive = setTimeout(tick, interval);
     };
-    timer = setTimeout(tick, interval);
-    current.stopKeepAlive = () => clearTimeout(timer);
+    current.keepAlive = setTimeout(tick, interval);
   };
 
   return {
@@ -260,33 +261,24 @@ export function createClient(options: ClientOptions): Client {
       if (subscription !== undefined) {
         throw new Error("Baichuan client is already subscribed");
       }
-      const started = Promise.withResolvers<
-        ReadableStreamDefaultController<AlarmEvent>
-      >();
       const stream = new ReadableStream<AlarmEvent>({
-        start: started.resolve,
+        start: (events) => {
+          subscription = { events, sawEvent: false };
+          keepAlive(subscription, keepAliveMs);
+        },
         cancel: unsubscribe,
       });
-      const current: Subscription = {
-        events: await started.promise,
-        sawEvent: false,
-        stopKeepAlive: () => {},
-      };
-      subscription = current;
       try {
         await send({ cmdId: 31, channelId: 251 });
       } catch (error) {
         unsubscribe();
         throw error;
       }
-      if (subscription === current) {
-        keepAlive(current, keepAliveMs);
-      }
       return stream;
     },
 
     close: async () => {
-      shutdown(new Error("Baichuan client is closed"))?.close();
+      shutdown(new Error("Baichuan client is closed"), "close");
       await writer.close().catch(() => {});
     },
   };
@@ -296,5 +288,5 @@ export function createClient(options: ClientOptions): Client {
 type Subscription = {
   events: ReadableStreamDefaultController<AlarmEvent>;
   sawEvent: boolean;
-  stopKeepAlive: () => void;
+  keepAlive?: ReturnType<typeof setTimeout>;
 };

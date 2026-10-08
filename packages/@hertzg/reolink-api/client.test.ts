@@ -431,6 +431,17 @@ Deno.test("subscribe rejects a second subscription", async () => {
   await client.close();
 });
 
+Deno.test("subscribe rejects a second subscription made in the same tick", async () => {
+  const { connection } = cameraLink();
+  const client = createClient(connection);
+
+  const first = client.subscribe();
+
+  await assertRejects(() => client.subscribe(), Error, "already subscribed");
+  await client.close();
+  await assertRejects(() => first, Error, "closed");
+});
+
 Deno.test("close ends the event stream and the connection's writable", async () => {
   const { connection, requests, camera } = cameraLink();
   const client = createClient(connection);
