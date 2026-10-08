@@ -1,5 +1,10 @@
-import { assertEquals } from "@std/assert";
-import { parsePtzPresets, ptzControlXml, ptzPresetXml } from "./ptz.ts";
+import { assertEquals, assertThrows } from "@std/assert";
+import {
+  parsePtzPosition,
+  parsePtzPresets,
+  ptzControlXml,
+  ptzPresetXml,
+} from "./ptz.ts";
 
 Deno.test("ptzControlXml leaves out speed when not given", () => {
   assertEquals(
@@ -61,4 +66,24 @@ Deno.test("parsePtzPresets skips slots without a name", () => {
 
 Deno.test("parsePtzPresets returns nothing for an empty list", () => {
   assertEquals(parsePtzPresets("<body><PtzPreset /></body>"), []);
+});
+
+Deno.test("parsePtzPosition reads pPos and tPos from a ptzCurPos reply", () => {
+  assertEquals(
+    parsePtzPosition(
+      '<?xml version="1.0" encoding="UTF-8" ?>\n' +
+        '<body><ptzCurPos version="1.1"><pPos>1205</pPos><tPos>130</tPos>' +
+        "</ptzCurPos></body>",
+    ),
+    { pan: 1205, tilt: 130 },
+  );
+});
+
+Deno.test("parsePtzPosition throws without a tilt position", () => {
+  assertThrows(
+    () =>
+      parsePtzPosition("<body><ptzCurPos><pPos>1</pPos></ptzCurPos></body>"),
+    Error,
+    "<tPos>",
+  );
 });

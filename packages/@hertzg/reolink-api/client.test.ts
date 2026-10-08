@@ -987,3 +987,37 @@ Deno.test("ptzGoToPreset sends cmd 19 with the preset id", async () => {
   );
   await client.close();
 });
+
+Deno.test("ptzPosition sends cmd 433 without a body and reads pan and tilt", async () => {
+  const { client, requests, camera } = await loggedIn();
+  const aesKey = new TextEncoder().encode("08822D7143979103");
+
+  const position = client.ptzPosition();
+  const { value: request } = await requests.read();
+  const body = aesCfbEncrypt(
+    aesKey,
+    new TextEncoder().encode(
+      '<?xml version="1.0" encoding="UTF-8" ?>\n' +
+        '<body><ptzCurPos version="1.1"><pPos>510</pPos><tPos>130</tPos>' +
+        "</ptzCurPos></body>",
+    ),
+  );
+  await camera.write({
+    header: {
+      cmdId: 433,
+      bodyLength: body.length,
+      channelId: 1,
+      messageId: 3,
+      status: 200,
+      messageClass: 0x1464,
+      payloadOffset: 0,
+    },
+    body,
+    payload: new Uint8Array(0),
+  });
+
+  assertEquals(await position, { pan: 510, tilt: 130 });
+  assertEquals(request?.header.cmdId, 433);
+  assertEquals(request?.payload, new Uint8Array(0));
+  await client.close();
+});

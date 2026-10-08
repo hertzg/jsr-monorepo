@@ -40,9 +40,11 @@ import {
 } from "./protocol/message.ts";
 import { parsePrivacyMode, privacyModeXml } from "./protocol/privacy.ts";
 import {
+  parsePtzPosition,
   parsePtzPresets,
   type PtzCommand,
   ptzControlXml,
+  type PtzPosition,
   type PtzPreset,
   ptzPresetXml,
 } from "./protocol/ptz.ts";
@@ -170,6 +172,13 @@ export type Client = {
    * @throws {Error} When the camera rejects the request.
    */
   ptzGoToPreset: (options: ChannelOptions & { id: number }) => Promise<void>;
+  /**
+   * Reads where the camera points now. Poll it to tell when a move has
+   * finished on cameras that push no PTZ state. Needs a login.
+   *
+   * @throws {Error} When the camera rejects the request.
+   */
+  ptzPosition: (options?: ChannelOptions) => Promise<PtzPosition>;
   /**
    * Stops the keepalive, ends the event stream and closes the writable. The
    * caller still closes the socket.
@@ -505,6 +514,11 @@ export function createClient(options: ClientOptions): Client {
         ptzPresetXml({ channel, id }),
       );
     },
+
+    ptzPosition: async ({ channel = 0 } = {}) =>
+      parsePtzPosition(
+        decryptBody(await request(BAICHUAN_CMD.PTZ_POSITION, channel), aesKey),
+      ),
 
     close: async () => {
       shutdown(new Error("Baichuan client is closed"), "close");

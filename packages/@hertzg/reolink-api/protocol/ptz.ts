@@ -5,7 +5,11 @@
  * cmd 18,  ptzControlXml  ->  empty status-200 reply; moves until "Stop"
  * cmd 19,  ptzPresetXml   ->  empty status-200 reply
  * cmd 190, no body        ->  <PtzPreset><presetList><preset>...</preset>
+ * cmd 433, no body        ->  <ptzCurPos><pPos>...</pPos><tPos>...</tPos>
  * ```
+ *
+ * Cameras that push no PTZ state can only tell a move has finished by
+ * polling cmd 433 until the position stops changing.
  *
  * All three address the channel through the message extension.
  *
@@ -78,6 +82,14 @@ export type PtzControlRequest = {
   command: PtzCommand;
   /** Move speed. Leave it out for the camera's default. */
   speed?: number;
+};
+
+/** Where the camera points, in the camera's own motor units. */
+export type PtzPosition = {
+  /** Pan position (`pPos`). Wraps around on cameras that turn a full circle. */
+  pan: number;
+  /** Tilt position (`tPos`). */
+  tilt: number;
 };
 
 /** A saved PTZ position. */
@@ -183,6 +195,36 @@ export function parsePtzPresets(xml: string): PtzPreset[] {
   });
 }
 
+/**
+ * Reads the current position from the reply to a cmd 433 request.
+ *
+ * @param xml The decrypted reply body.
+ * @returns The pan and tilt position.
+ * @throws {Error} When the reply lacks `<pPos>` or `<tPos>`.
+ *
+ * @example Read a position
+ * ```ts
+ * import { assertEquals } from "@std/assert";
+ * import { parsePtzPosition } from "@hertzg/reolink-api/protocol/ptz";
+ *
+ * const position = parsePtzPosition(
+ *   "<body><ptzCurPos><channelId>0</channelId>" +
+ *     "<pPos>1520</pPos><tPos>310</tPos></ptzCurPos></body>",
+ * );
+ *
+ * assertEquals(position, { pan: 1520, tilt: 310 });
+ * ```
+ */
+export function parsePtzPosition(xml: string): PtzPosition {
+  const root = parse(xml).root;
+  const [pan] = findElements(root, "pPos");
+  const [tilt] = findElements(root, "tPos");
+  if (pan === undefined || tilt === undefined) {
+    throw new Error("Baichuan PTZ position reply lacks <pPos> or <tPos>");
+  }
+  return { pan: Number(textOf(pan)), tilt: Number(textOf(tilt)) };
+}
+
 function findElements(element: XmlElement, name: string): XmlElement[] {
   if (element.name.local === name) {
     return [element];
@@ -196,5 +238,9 @@ function childText(element: XmlElement, name: string): string | undefined {
   const child = element.children.filter(isElement).find((node) =>
     node.name.local === name
   );
-  return child?.children.filter(isText).map((node) => node.text).join("");
+  return child === undefined ? undefined : textOf(child);
+}
+
+function textOf(element: XmlElement): string {
+  return element.children.filter(isText).map((node) => node.text).join("");
 }

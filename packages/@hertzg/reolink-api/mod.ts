@@ -67,4 +67,4 @@ export type {
 } from "./client.ts";
 export type { AlarmEvent } from "./protocol/event.ts";
 export { PTZ_COMMAND } from "./protocol/ptz.ts";
-export type { PtzCommand, PtzPreset } from "./protocol/ptz.ts";
+export type { PtzCommand, PtzPosition, PtzPreset } from "./protocol/ptz.ts";

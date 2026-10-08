@@ -68,6 +68,8 @@ export const BAICHUAN_CMD = {
   SNAPSHOT: 109,
   /** List the saved PTZ presets. */
   PTZ_PRESETS: 190,
+  /** Read the current PTZ pan and tilt position. */
+  PTZ_POSITION: 433,
   /** Play or stop the siren. */
   SIREN: 263,
   /** Read the privacy mode (sleep) state. */
