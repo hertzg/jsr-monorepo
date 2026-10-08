@@ -42,12 +42,12 @@
  */
 
 import {
+  array,
   bytes,
   type Coder,
-  createContext,
-  kCoderKind,
+  computedRef,
+  ref,
   refine,
-  refSetValue,
   struct,
   u16be,
   u16le,
@@ -100,15 +100,12 @@ export function headerLength(messageClass: number): 20 | 24 {
   return messageClass === 0x1464 || messageClass === 0x0000 ? 24 : 20;
 }
 
-const kKindBaichuanHeader = Symbol("baichuanHeader");
-
 /**
  * Creates a coder for a {@link BaichuanHeader}.
  *
- * Decoding reads the message class at bytes 18-19 to choose between the 20-
- * and 24-byte layouts, and throws when the first four bytes are not the
- * magic. Encoding writes the magic and picks the layout from
- * `messageClass`.
+ * The trailing `payloadOffset` is read and written only when
+ * {@link headerLength} of `messageClass` is 24. Decoding throws when the
+ * first four bytes are not the magic, encoding always writes it.
  *
  * @returns A coder for a {@link BaichuanHeader}.
  *
@@ -133,37 +130,26 @@ export function baichuanHeader(): Coder<BaichuanHeader> {
     unrefine: (id: number) =>
       Uint8Array.of(id & 0xff, (id >>> 8) & 0xff, (id >>> 16) & 0xff),
   });
-  const fields = {
+  const messageClass = u16be();
+  const raw = struct({
     magic: u32le(),
     cmdId: u32le(),
     bodyLength: u32le(),
     channelId: u8(),
     messageId: messageId(),
     code: u16le(),
-    messageClass: u16be(),
-  };
-  const short = struct(fields);
-  const long = struct({ ...fields, payloadOffset: u32le() });
+    messageClass,
+    payloadOffset: array(
+      u32le(),
+      computedRef(
+        [ref(messageClass)],
+        (cls) => headerLength(cls) === 24 ? 1 : 0,
+      ),
+    ),
+  });
 
-  let self: Coder<BaichuanHeader>;
-  return self = {
-    [kCoderKind]: kKindBaichuanHeader,
-    encode: (decoded, target, context) => {
-      const ctx = context ?? createContext("encode");
-      const value = { magic: BAICHUAN_MAGIC, payloadOffset: 0, ...decoded };
-      const bytesWritten = headerLength(decoded.messageClass) === 24
-        ? long.encode(value, target, ctx)
-        : short.encode(value, target, ctx);
-      refSetValue(ctx, self, decoded);
-      return bytesWritten;
-    },
-    decode: (encoded, context) => {
-      const ctx = context ?? createContext("decode");
-      const messageClass = (encoded[18] << 8) | encoded[19];
-      const [{ magic, ...decoded }, bytesRead] =
-        headerLength(messageClass) === 24
-          ? long.decode(encoded, ctx)
-          : short.decode(encoded, ctx);
+  return refine(raw, {
+    refine: ({ magic, payloadOffset: [payloadOffset], ...header }) => {
       if (magic !== BAICHUAN_MAGIC) {
         throw new Error(
           `Baichuan header has no magic: got 0x${
@@ -171,8 +157,16 @@ export function baichuanHeader(): Coder<BaichuanHeader> {
           }`,
         );
       }
-      refSetValue(ctx, self, decoded);
-      return [decoded, bytesRead];
+      return payloadOffset === undefined
+        ? header
+        : { ...header, payloadOffset };
     },
-  };
+    unrefine: ({ payloadOffset = 0, ...header }: BaichuanHeader) => ({
+      magic: BAICHUAN_MAGIC,
+      ...header,
+      payloadOffset: headerLength(header.messageClass) === 24
+        ? [payloadOffset]
+        : [],
+    }),
+  })();
 }
