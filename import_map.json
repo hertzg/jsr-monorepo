@@ -23,7 +23,7 @@
     "@hertzg/mac": "jsr:@hertzg/mac@^0.2.0",
     "@hertzg/crc": "jsr:@hertzg/crc@^0.3.1",
     "@hertzg/mymagti-api": "jsr:@hertzg/mymagti-api@^0.1.2",
-    "@hertzg/reolink-client": "jsr:@hertzg/reolink-client@^0.0.1",
+    "@hertzg/reolink-api": "jsr:@hertzg/reolink-api@^0.0.1",
     "@hertzg/routeros-api": "jsr:@hertzg/routeros-api@^0.1.2",
     "@hertzg/tplink-api": "jsr:@hertzg/tplink-api@^1.5.0",
     "@hertzg/wg-keys": "jsr:@hertzg/wg-keys@^2.2.0",

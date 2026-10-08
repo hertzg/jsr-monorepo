@@ -305,10 +305,10 @@
         { "type": "json", "path": "deno.json", "jsonpath": "$.version" }
       ]
     },
-    "packages/@hertzg/reolink-client": {
+    "packages/@hertzg/reolink-api": {
       "release-type": "simple",
-      "package-name": "@hertzg/reolink-client",
-      "component": "@hertzg/reolink-client",
+      "package-name": "@hertzg/reolink-api",
+      "component": "@hertzg/reolink-api",
       "extra-files": [
         { "type": "json", "path": "deno.json", "jsonpath": "$.version" }
       ]

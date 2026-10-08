@@ -7,7 +7,7 @@
  *
  * @example Stream doorbell and motion events
  * ```ts ignore
- * import { createClient } from "@hertzg/reolink-client/client";
+ * import { createClient } from "@hertzg/reolink-api/client";
  *
  * const conn = await Deno.connect({ hostname: "192.168.1.10", port: 9000 });
  * const client = createClient({ readable: conn.readable, writable: conn.writable });
@@ -104,7 +104,7 @@ export type Client = {
  *
  * @example Log in and subscribe
  * ```ts ignore
- * import { createClient } from "@hertzg/reolink-client/client";
+ * import { createClient } from "@hertzg/reolink-api/client";
  *
  * const conn = await Deno.connect({ hostname: "192.168.1.10", port: 9000 });
  * const client = createClient({ readable: conn.readable, writable: conn.writable });

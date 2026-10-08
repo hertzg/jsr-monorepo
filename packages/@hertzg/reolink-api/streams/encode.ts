@@ -5,8 +5,8 @@
  * ```ts
  * import { assertEquals } from "@std/assert";
  * import { decodeHex } from "@std/encoding/hex";
- * import { createMessage } from "@hertzg/reolink-client/protocol/message";
- * import { createBaichuanEncodeStream } from "@hertzg/reolink-client/streams/encode";
+ * import { createMessage } from "@hertzg/reolink-api/protocol/message";
+ * import { createBaichuanEncodeStream } from "@hertzg/reolink-api/streams/encode";
  *
  * const chunks = await Array.fromAsync(
  *   ReadableStream.from([
@@ -35,7 +35,7 @@ import type { BaichuanMessage } from "../protocol/message.ts";
  * payload, in one chunk per message.
  *
  * The header is written as given: `bodyLength` is not recomputed. Build
- * requests with `createMessage` from `@hertzg/reolink-client/protocol/message`
+ * requests with `createMessage` from `@hertzg/reolink-api/protocol/message`
  * to get it right.
  *
  * @returns A TransformStream from messages to bytes.
@@ -43,8 +43,8 @@ import type { BaichuanMessage } from "../protocol/message.ts";
  * @example Encode a subscribe request
  * ```ts
  * import { assertEquals } from "@std/assert";
- * import { createMessage } from "@hertzg/reolink-client/protocol/message";
- * import { createBaichuanEncodeStream } from "@hertzg/reolink-client/streams/encode";
+ * import { createMessage } from "@hertzg/reolink-api/protocol/message";
+ * import { createBaichuanEncodeStream } from "@hertzg/reolink-api/streams/encode";
  *
  * const [bytes] = await Array.fromAsync(
  *   ReadableStream.from([

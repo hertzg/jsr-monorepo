@@ -5,7 +5,7 @@
  * ```ts
  * import { assertEquals } from "@std/assert";
  * import { decodeHex } from "@std/encoding/hex";
- * import { createBaichuanDecodeStream } from "@hertzg/reolink-client/streams/decode";
+ * import { createBaichuanDecodeStream } from "@hertzg/reolink-api/streams/decode";
  *
  * const bytes = decodeHex("f0debc0a1f00000000000000fb030000c800146400000000");
  *
@@ -33,7 +33,7 @@ import type { BaichuanMessage } from "../protocol/message.ts";
  * whole message is in. The body is split from the payload at
  * `header.payloadOffset`, where `0` or absent means the whole rest is body.
  * Bodies stay encrypted, see `decryptBody` in
- * `@hertzg/reolink-client/protocol/message`.
+ * `@hertzg/reolink-api/protocol/message`.
  *
  * The stream errors when a message does not start with the magic, and when
  * the input ends partway through a message.
@@ -44,7 +44,7 @@ import type { BaichuanMessage } from "../protocol/message.ts";
  * ```ts
  * import { assertEquals } from "@std/assert";
  * import { decodeHex } from "@std/encoding/hex";
- * import { createBaichuanDecodeStream } from "@hertzg/reolink-client/streams/decode";
+ * import { createBaichuanDecodeStream } from "@hertzg/reolink-api/streams/decode";
  *
  * const reply = decodeHex("f0debc0a1f00000000000000fb030000c800146400000000");
  *

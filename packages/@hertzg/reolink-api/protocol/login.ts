@@ -18,7 +18,7 @@
  *   loginCredentials,
  *   loginXml,
  *   parseNonce,
- * } from "@hertzg/reolink-client/protocol/login";
+ * } from "@hertzg/reolink-api/protocol/login";
  *
  * const nonce = parseNonce(
  *   "<body><Encryption><nonce>NONCE-0123</nonce></Encryption></body>",
@@ -52,7 +52,7 @@ import { isElement, isText, parse, type XmlElement } from "@std/xml";
  * @example Hash a string
  * ```ts
  * import { assertEquals } from "@std/assert";
- * import { md5Modern } from "@hertzg/reolink-client/protocol/login";
+ * import { md5Modern } from "@hertzg/reolink-api/protocol/login";
  *
  * assertEquals(md5Modern(""), "D41D8CD98F00B204E9800998ECF8427");
  * ```
@@ -93,7 +93,7 @@ export type LoginCredentials = {
  * @example Derive the session key
  * ```ts
  * import { assertEquals } from "@std/assert";
- * import { loginCredentials } from "@hertzg/reolink-client/protocol/login";
+ * import { loginCredentials } from "@hertzg/reolink-api/protocol/login";
  *
  * const { aesKey } = loginCredentials({
  *   username: "admin",
@@ -126,7 +126,7 @@ export function loginCredentials(
  * @example Build the login body
  * ```ts
  * import { assertStringIncludes } from "@std/assert";
- * import { loginXml } from "@hertzg/reolink-client/protocol/login";
+ * import { loginXml } from "@hertzg/reolink-api/protocol/login";
  *
  * const xml = loginXml({ userHash: "USER", passwordHash: "PASS" });
  *
@@ -161,7 +161,7 @@ export function loginXml(
  * @example Read the nonce
  * ```ts
  * import { assertEquals } from "@std/assert";
- * import { parseNonce } from "@hertzg/reolink-client/protocol/login";
+ * import { parseNonce } from "@hertzg/reolink-api/protocol/login";
  *
  * const xml = "<body><Encryption><nonce>abc</nonce></Encryption></body>";
  *

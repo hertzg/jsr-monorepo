@@ -7,7 +7,7 @@
  * @example Build a subscribe request and read its header
  * ```ts
  * import { assertEquals } from "@std/assert";
- * import { createMessage } from "@hertzg/reolink-client/protocol/message";
+ * import { createMessage } from "@hertzg/reolink-api/protocol/message";
  *
  * const message = createMessage({ cmdId: 31, channelId: 251, messageId: 3 });
  *
@@ -64,7 +64,7 @@ export type CreateMessageOptions = {
  * @example Build the nonce request
  * ```ts
  * import { assertEquals } from "@std/assert";
- * import { createMessage } from "@hertzg/reolink-client/protocol/message";
+ * import { createMessage } from "@hertzg/reolink-api/protocol/message";
  *
  * const message = createMessage({
  *   cmdId: 1,
@@ -123,8 +123,8 @@ export function createMessage(options: CreateMessageOptions): BaichuanMessage {
  * @example Decrypt an XOR-encrypted nonce reply
  * ```ts
  * import { assertEquals } from "@std/assert";
- * import { xorCipher } from "@hertzg/reolink-client/encoding/cipher";
- * import { decryptBody } from "@hertzg/reolink-client/protocol/message";
+ * import { xorCipher } from "@hertzg/reolink-api/encoding/cipher";
+ * import { decryptBody } from "@hertzg/reolink-api/protocol/message";
  *
  * const xml = "<?xml version=\"1.0\" ?><body><nonce>abc</nonce></body>";
  * const body = xorCipher(new TextEncoder().encode(xml), 250);

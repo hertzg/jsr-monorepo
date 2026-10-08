@@ -22,7 +22,7 @@
  * @example Parse a doorbell press
  * ```ts
  * import { assertEquals } from "@std/assert";
- * import { parseAlarmEvents } from "@hertzg/reolink-client/protocol/event";
+ * import { parseAlarmEvents } from "@hertzg/reolink-api/protocol/event";
  *
  * const events = parseAlarmEvents(
  *   "<body><AlarmEventList><AlarmEvent>" +
@@ -66,7 +66,7 @@ export type AlarmEvent = {
  * @example Parse a push with AI detections
  * ```ts
  * import { assertEquals } from "@std/assert";
- * import { parseAlarmEvents } from "@hertzg/reolink-client/protocol/event";
+ * import { parseAlarmEvents } from "@hertzg/reolink-api/protocol/event";
  *
  * const [event] = parseAlarmEvents(
  *   "<body><AlarmEventList><AlarmEvent>" +

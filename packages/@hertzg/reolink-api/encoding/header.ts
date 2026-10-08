@@ -21,7 +21,7 @@
  * ```ts
  * import { assertEquals } from "@std/assert";
  * import { decode, encode } from "@hertzg/binstruct";
- * import { baichuanHeader } from "@hertzg/reolink-client/encoding/header";
+ * import { baichuanHeader } from "@hertzg/reolink-api/encoding/header";
  *
  * const header = {
  *   cmdId: 1,
@@ -90,7 +90,7 @@ export type BaichuanHeader = {
  * @example Pick the header length for a class
  * ```ts
  * import { assertEquals } from "@std/assert";
- * import { headerLength } from "@hertzg/reolink-client/encoding/header";
+ * import { headerLength } from "@hertzg/reolink-api/encoding/header";
  *
  * assertEquals(headerLength(0x1464), 24);
  * assertEquals(headerLength(0x1466), 20);
@@ -116,7 +116,7 @@ const kKindBaichuanHeader = Symbol("baichuanHeader");
  * ```ts
  * import { assertEquals } from "@std/assert";
  * import { decodeHex } from "@std/encoding/hex";
- * import { baichuanHeader } from "@hertzg/reolink-client/encoding/header";
+ * import { baichuanHeader } from "@hertzg/reolink-api/encoding/header";
  *
  * const [header, bytesRead] = baichuanHeader().decode(
  *   decodeHex("f0debc0a1f00000000000000fb030000c800146400000000"),

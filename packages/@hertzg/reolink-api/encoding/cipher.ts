@@ -5,12 +5,12 @@
  *   nonce reply and the login request itself.
  * - {@link aesCfbEncrypt} / {@link aesCfbDecrypt}: AES-128-CFB with 128-bit
  *   segments and the fixed IV `"0123456789abcdef"`, used once logged in. The
- *   key comes from the login nonce, see `@hertzg/reolink-client/protocol/login`.
+ *   key comes from the login nonce, see `@hertzg/reolink-api/protocol/login`.
  *
  * @example Scramble and unscramble a body with the XOR cipher
  * ```ts
  * import { assertEquals } from "@std/assert";
- * import { xorCipher } from "@hertzg/reolink-client/encoding/cipher";
+ * import { xorCipher } from "@hertzg/reolink-api/encoding/cipher";
  *
  * const plain = new TextEncoder().encode("<?xml");
  * const scrambled = xorCipher(plain, 250);
@@ -38,7 +38,7 @@ import { cfb } from "@noble/ciphers/aes.js";
  * @example Decrypt with the channel id of the message header
  * ```ts
  * import { assertEquals } from "@std/assert";
- * import { xorCipher } from "@hertzg/reolink-client/encoding/cipher";
+ * import { xorCipher } from "@hertzg/reolink-api/encoding/cipher";
  *
  * const encrypted = Uint8Array.of(0xd1, 0xc3, 0xf1, 0xe7);
  *
@@ -67,7 +67,7 @@ export function xorCipher(data: Uint8Array, offset: number): Uint8Array {
  * import {
  *   aesCfbDecrypt,
  *   aesCfbEncrypt,
- * } from "@hertzg/reolink-client/encoding/cipher";
+ * } from "@hertzg/reolink-api/encoding/cipher";
  *
  * const key = new TextEncoder().encode("08822D7143979103");
  * const plain = new TextEncoder().encode("hello");
@@ -92,7 +92,7 @@ export function aesCfbEncrypt(key: Uint8Array, data: Uint8Array): Uint8Array {
  * @example Decrypt a body
  * ```ts
  * import { assertEquals } from "@std/assert";
- * import { aesCfbDecrypt } from "@hertzg/reolink-client/encoding/cipher";
+ * import { aesCfbDecrypt } from "@hertzg/reolink-api/encoding/cipher";
  *
  * const key = new TextEncoder().encode("08822D7143979103");
  * const encrypted = Uint8Array.of(0x06, 0x2c, 0x91, 0x2d, 0xd6);

@@ -1,5 +1,5 @@
 {
-  "name": "@hertzg/reolink-client",
+  "name": "@hertzg/reolink-api",
   "version": "0.0.1",
   "exports": {
     ".": "./mod.ts",
