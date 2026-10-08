@@ -202,6 +202,8 @@ export function createClient(options: ClientOptions): Client {
     messageId = (messageId + 1) % 0x1000000;
     const key = keyOf(request.cmdId, request.channelId, messageId);
     const reply = Promise.withResolvers<BaichuanMessage>();
+    // shutdown() can reject this while the write below is still queued.
+    reply.promise.catch(() => {});
     pending.set(key, reply);
     try {
       await writer.write(createMessage({ ...request, messageId }));

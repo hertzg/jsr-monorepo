@@ -442,6 +442,28 @@ Deno.test("subscribe rejects a second subscription made in the same tick", async
   await assertRejects(() => first, Error, "closed");
 });
 
+Deno.test("close rejects requests still queued behind a slow write", async () => {
+  const write = Promise.withResolvers<void>();
+  const client = createClient({
+    readable: new ReadableStream(),
+    writable: new WritableStream({ write: () => write.promise }),
+  });
+
+  const logins = [1, 2, 3, 4].map(() =>
+    assertRejects(
+      () => client.login({ username: "admin", password: "hunter2" }),
+      Error,
+      "closed",
+    )
+  );
+  const closing = client.close();
+  await new Promise((resolve) => setTimeout(resolve, 0));
+  write.resolve();
+
+  await Promise.all(logins);
+  await closing;
+});
+
 Deno.test("close ends the event stream and the connection's writable", async () => {
   const { connection, requests, camera } = cameraLink();
   const client = createClient(connection);
