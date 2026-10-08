@@ -33,6 +33,7 @@
  * @module
  */
 
+import { isElement, isText, parse, type XmlElement } from "@std/xml";
 import { aesCfbDecrypt, xorCipher } from "../encoding/cipher.ts";
 import {
   BAICHUAN_MESSAGE_CLASS,
@@ -59,6 +60,20 @@ export const BAICHUAN_CMD = {
   ALARM_EVENT: 33,
   /** Ping, answered by the camera; keeps an idle connection open. */
   PING: 93,
+  /** Move, zoom or stop a PTZ camera. */
+  PTZ_CONTROL: 18,
+  /** Move a PTZ camera to a saved preset. */
+  PTZ_PRESET: 19,
+  /** Take a JPEG snapshot, streamed back as payload. */
+  SNAPSHOT: 109,
+  /** List the saved PTZ presets. */
+  PTZ_PRESETS: 190,
+  /** Play or stop the siren. */
+  SIREN: 263,
+  /** Read the privacy mode (sleep) state. */
+  PRIVACY_MODE: 574,
+  /** Turn the privacy mode (sleep) on or off. */
+  SET_PRIVACY_MODE: 575,
 } as const;
 
 /**
@@ -81,13 +96,20 @@ export const BAICHUAN_CHANNEL = {
   PUSH: 251,
 } as const;
 
-/** A Baichuan message: header, body (usually XML) and binary payload. */
+/**
+ * A Baichuan message: a header and the bytes after it, split at
+ * `header.payloadOffset`.
+ *
+ * In a reply the split separates the XML body from binary data such as a
+ * snapshot. In a request it separates the channel extension from the
+ * command's XML. Each part is encrypted on its own.
+ */
 export type BaichuanMessage = {
   /** The decoded header. `bodyLength` covers `body` and `payload` together. */
   header: BaichuanHeader;
-  /** The body as sent on the wire, still encrypted. */
+  /** Bytes before `payloadOffset`, as sent on the wire, still encrypted. */
   body: Uint8Array;
-  /** Binary data after `header.payloadOffset`, empty for most messages. */
+  /** Bytes after `payloadOffset`, empty for most messages. */
   payload: Uint8Array;
 };
 
@@ -103,6 +125,11 @@ export type CreateMessageOptions = {
   messageClass?:
     | typeof BAICHUAN_MESSAGE_CLASS.LEGACY
     | typeof BAICHUAN_MESSAGE_CLASS.MODERN_WITH_OFFSET;
+  /**
+   * The already encrypted channel extension, from {@link extensionXml}. It
+   * goes before `body`, and `payloadOffset` points past it.
+   */
+  extension?: Uint8Array;
   /** The already encrypted body. Defaults to empty. */
   body?: Uint8Array;
 };
@@ -111,7 +138,8 @@ export type CreateMessageOptions = {
  * Builds a request message, filling in the header from the options.
  *
  * Class `LEGACY` gets the `12 dc` encryption marker and the 20-byte header.
- * Class `MODERN_WITH_OFFSET` gets status `0` and a payload offset of `0`.
+ * Class `MODERN_WITH_OFFSET` gets status `0` and a payload offset of the
+ * extension's length, `0` without one.
  *
  * @param options The command, ids, class and encrypted body.
  * @returns A message ready for the encode stream.
@@ -143,13 +171,46 @@ export function createMessage(options: CreateMessageOptions): BaichuanMessage {
     channelId,
     messageId,
     messageClass = BAICHUAN_MESSAGE_CLASS.MODERN_WITH_OFFSET,
+    extension,
     body = new Uint8Array(0),
   } = options;
-  const common = { cmdId, bodyLength: body.length, channelId, messageId };
+  const payloadOffset = extension?.length ?? 0;
+  const common = {
+    cmdId,
+    bodyLength: payloadOffset + body.length,
+    channelId,
+    messageId,
+  };
   const header: BaichuanHeader = messageClass === BAICHUAN_MESSAGE_CLASS.LEGACY
     ? { ...common, messageClass, encryption: 0xdc12 }
-    : { ...common, messageClass, status: 0, payloadOffset: 0 };
-  return { header, body, payload: new Uint8Array(0) };
+    : { ...common, messageClass, status: 0, payloadOffset };
+  return extension === undefined
+    ? { header, body, payload: new Uint8Array(0) }
+    : { header, body: extension, payload: body };
+}
+
+/**
+ * Builds the extension XML that addresses a request to one camera channel.
+ *
+ * Requests about a channel, such as a snapshot or PTZ move, carry it in front
+ * of their body, see the `extension` option of {@link createMessage}.
+ *
+ * @param channel The zero-based channel number.
+ * @returns The extension XML, ready to be encrypted.
+ *
+ * @example Address channel 0
+ * ```ts
+ * import { assertStringIncludes } from "@std/assert";
+ * import { extensionXml } from "@hertzg/reolink-api/protocol/message";
+ *
+ * assertStringIncludes(extensionXml(0), "<channelId>0</channelId>");
+ * ```
+ */
+export function extensionXml(channel: number): string {
+  return '<?xml version="1.0" encoding="UTF-8" ?>\n' +
+    '<Extension version="1.1">\n' +
+    `<channelId>${channel}</channelId>\n` +
+    "</Extension>\n";
 }
 
 /**
@@ -230,4 +291,68 @@ export function decryptBody(
   throw new Error(
     `Baichuan body of cmd ${header.cmdId} did not decrypt to XML`,
   );
+}
+
+/**
+ * Decrypts the binary payload of a received message, such as a snapshot
+ * chunk.
+ *
+ * When the body names an `<encryptLen>`, that many leading payload bytes are
+ * AES-encrypted and the rest is plain. Without one the payload is plain.
+ *
+ * @param message The received message.
+ * @param aesKey The session key from login.
+ * @returns The plain payload.
+ *
+ * @example Read a plain payload
+ * ```ts
+ * import { assertEquals } from "@std/assert";
+ * import { decryptPayload } from "@hertzg/reolink-api/protocol/message";
+ *
+ * const payload = decryptPayload({
+ *   header: {
+ *     cmdId: 109,
+ *     bodyLength: 3,
+ *     channelId: 1,
+ *     messageId: 7,
+ *     status: 200,
+ *     messageClass: 0x1464,
+ *     payloadOffset: 0,
+ *   },
+ *   body: new Uint8Array(0),
+ *   payload: Uint8Array.of(0xff, 0xd8, 0xff),
+ * }, new TextEncoder().encode("08822D7143979103"));
+ *
+ * assertEquals(payload, Uint8Array.of(0xff, 0xd8, 0xff));
+ * ```
+ */
+export function decryptPayload(
+  message: BaichuanMessage,
+  aesKey: Uint8Array,
+): Uint8Array {
+  const { payload } = message;
+  const xml = decryptBody(message, aesKey);
+  const encrypted = xml === "" ? undefined : findElement(parse(xml).root);
+  if (encrypted === undefined) {
+    return payload;
+  }
+  const length = Number(
+    encrypted.children.filter(isText).map((node) => node.text).join(""),
+  );
+  const out = payload.slice();
+  out.set(aesCfbDecrypt(aesKey, payload.subarray(0, length)));
+  return out;
+}
+
+function findElement(element: XmlElement): XmlElement | undefined {
+  if (element.name.local.toLowerCase() === "encryptlen") {
+    return element;
+  }
+  for (const child of element.children.filter(isElement)) {
+    const found = findElement(child);
+    if (found !== undefined) {
+      return found;
+    }
+  }
+  return undefined;
 }

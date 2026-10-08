@@ -1,6 +1,6 @@
 import { assertEquals, assertThrows } from "@std/assert";
 import { aesCfbEncrypt, xorCipher } from "../encoding/cipher.ts";
-import { createMessage, decryptBody } from "./message.ts";
+import { createMessage, decryptBody, decryptPayload } from "./message.ts";
 
 Deno.test("createMessage builds a 24-byte request by default", () => {
   const body = Uint8Array.of(1, 2, 3);
@@ -104,4 +104,63 @@ Deno.test("decryptBody throws when nothing yields XML", () => {
   });
 
   assertThrows(() => decryptBody(message), Error, "cmd 33");
+});
+
+Deno.test("createMessage puts the extension before the body and points payloadOffset past it", () => {
+  const extension = Uint8Array.of(1, 2, 3);
+  const body = Uint8Array.of(4, 5);
+
+  const message = createMessage({
+    cmdId: 109,
+    channelId: 1,
+    messageId: 7,
+    extension,
+    body,
+  });
+
+  assertEquals(message, {
+    header: {
+      cmdId: 109,
+      bodyLength: 5,
+      channelId: 1,
+      messageId: 7,
+      status: 0,
+      messageClass: 0x1464,
+      payloadOffset: 3,
+    },
+    body: Uint8Array.of(1, 2, 3),
+    payload: Uint8Array.of(4, 5),
+  });
+});
+
+Deno.test("decryptPayload AES-decrypts the first encryptLen bytes and keeps the rest", () => {
+  const aesKey = new TextEncoder().encode("08822D7143979103");
+  const body = aesCfbEncrypt(
+    aesKey,
+    new TextEncoder().encode(
+      '<?xml version="1.0" encoding="UTF-8" ?>\n' +
+        "<body><binaryData><encryptLen>4</encryptLen></binaryData></body>",
+    ),
+  );
+  const payload = new Uint8Array([
+    ...aesCfbEncrypt(aesKey, Uint8Array.of(0xff, 0xd8, 0xff, 0xe0)),
+    0x00,
+    0x10,
+  ]);
+
+  const plain = decryptPayload({
+    header: {
+      cmdId: 109,
+      bodyLength: body.length + payload.length,
+      channelId: 1,
+      messageId: 7,
+      status: 200,
+      messageClass: 0x1464,
+      payloadOffset: body.length,
+    },
+    body,
+    payload,
+  }, aesKey);
+
+  assertEquals(plain, Uint8Array.of(0xff, 0xd8, 0xff, 0xe0, 0x00, 0x10));
 });
