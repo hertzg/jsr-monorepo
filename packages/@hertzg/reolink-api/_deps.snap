@@ -15,6 +15,7 @@
     ],
     "./protocol/message": [
       "@hertzg/binstruct",
+      "jsr:@std/xml@^0.2.0",
       "node:crypto"
     ],
     "./protocol/login": [
@@ -24,14 +25,26 @@
     "./protocol/event": [
       "jsr:@std/xml@^0.2.0"
     ],
+    "./protocol/siren": [],
+    "./protocol/privacy": [
+      "jsr:@std/xml@^0.2.0"
+    ],
+    "./protocol/snapshot": [
+      "jsr:@std/xml@^0.2.0"
+    ],
+    "./protocol/ptz": [
+      "jsr:@std/xml@^0.2.0"
+    ],
     "./streams/encode": [
       "@hertzg/binstruct",
       "jsr:@std/bytes@^1.0.6",
+      "jsr:@std/xml@^0.2.0",
       "node:crypto"
     ],
     "./streams/decode": [
       "@hertzg/binstruct",
       "jsr:@std/bytes@^1.0.6",
+      "jsr:@std/xml@^0.2.0",
       "node:crypto"
     ],
     "./client": [

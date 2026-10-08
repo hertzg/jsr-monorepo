@@ -8,6 +8,10 @@
     "./protocol/message": "./protocol/message.ts",
     "./protocol/login": "./protocol/login.ts",
     "./protocol/event": "./protocol/event.ts",
+    "./protocol/siren": "./protocol/siren.ts",
+    "./protocol/privacy": "./protocol/privacy.ts",
+    "./protocol/snapshot": "./protocol/snapshot.ts",
+    "./protocol/ptz": "./protocol/ptz.ts",
     "./streams/encode": "./streams/encode.ts",
     "./streams/decode": "./streams/decode.ts",
     "./client": "./client.ts"
