@@ -1,0 +1,30 @@
+{
+  "name": "@hertzg/reolink-api",
+  "version": "0.0.1",
+  "exports": {
+    ".": "./mod.ts",
+    "./encoding/header": "./encoding/header.ts",
+    "./encoding/cipher": "./encoding/cipher.ts",
+    "./protocol/message": "./protocol/message.ts",
+    "./protocol/login": "./protocol/login.ts",
+    "./protocol/event": "./protocol/event.ts",
+    "./protocol/xml": "./protocol/xml.ts",
+    "./protocol/command": "./protocol/command.ts",
+    "./protocol/params": "./protocol/params/mod.ts",
+    "./protocol/commands": "./protocol/commands.ts",
+    "./protocol/siren": "./protocol/siren.ts",
+    "./protocol/privacy": "./protocol/privacy.ts",
+    "./protocol/snapshot": "./protocol/snapshot.ts",
+    "./protocol/ptz": "./protocol/ptz.ts",
+    "./streams/encode": "./streams/encode.ts",
+    "./streams/decode": "./streams/decode.ts",
+    "./client": "./client.ts"
+  },
+  "publish": {
+    "exclude": [
+      "**/*.test.ts",
+      "**/*.md",
+      "adr"
+    ]
+  }
+}
