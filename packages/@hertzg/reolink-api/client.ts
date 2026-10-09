@@ -26,6 +26,12 @@
 import { concat } from "@std/bytes";
 import { aesCfbEncrypt, xorCipher } from "./encoding/cipher.ts";
 import { BAICHUAN_MESSAGE_CLASS } from "./encoding/header.ts";
+import {
+  type Command,
+  type CommandBody,
+  decodeCommandBody,
+  encodeCommandBody,
+} from "./protocol/command.ts";
 import { type AlarmEvent, parseAlarmEvents } from "./protocol/event.ts";
 import { loginCredentials, loginXml, parseNonce } from "./protocol/login.ts";
 import {
@@ -83,6 +89,30 @@ export type SubscribeOptions = {
 export type ChannelOptions = {
   /** The zero-based channel number. A standalone camera is `0`, the default. */
   channel?: number;
+};
+
+/**
+ * Options for {@link Client.call}.
+ *
+ * @template C The command being called.
+ */
+export type CallOptions<C extends Command> = {
+  /** The zero-based channel to address. Leave it out to address the device. */
+  channel?: number;
+  /** The parameters to send, by element name. */
+  body?: CommandBody<C>;
+};
+
+/**
+ * The reply to {@link Client.call}.
+ *
+ * @template C The command that was called.
+ */
+export type CallReply<C extends Command> = {
+  /** The reply's parameters, by element name. */
+  body: CommandBody<C>;
+  /** Binary data after the XML, decrypted; empty for most commands. */
+  payload: Uint8Array;
 };
 
 /** A Baichuan client bound to one connection. */
@@ -179,6 +209,20 @@ export type Client = {
    * @throws {Error} When the camera rejects the request.
    */
   ptzPosition: (options?: ChannelOptions) => Promise<PtzPosition>;
+  /**
+   * Sends any {@link Command} and reads its reply. Needs a login.
+   *
+   * With `channel`, the request addresses that channel; without it, the
+   * device itself. `body` holds the parameters to send, by element name;
+   * leave it out for commands that only read.
+   *
+   * @throws {Error} When the camera rejects the request, or when the reply
+   *   misses a field the command's parameter codecs require.
+   */
+  call: <C extends Command>(
+    command: C,
+    options?: CallOptions<C>,
+  ) => Promise<CallReply<C>>;
   /**
    * Stops the keepalive, ends the event stream and closes the writable. The
    * caller still closes the socket.
@@ -340,9 +384,10 @@ export function createClient(options: ClientOptions): Client {
    * Sends an AES-encrypted request about one channel. With `image`, the
    * payload that follows the reply is collected into it.
    */
+  /** Sends an AES request to `channel`, or to the host when it is undefined. */
   const request = async (
     cmdId: number,
-    channel: number,
+    channel: number | undefined,
     xml?: string,
     image?: PromiseWithResolvers<Uint8Array>,
   ): Promise<BaichuanMessage> => {
@@ -356,9 +401,11 @@ export function createClient(options: ClientOptions): Client {
     return await send(
       {
         cmdId,
-        channelId: channel + 1,
-        extension: encrypt(extensionXml(channel)),
-        body: xml === undefined ? undefined : encrypt(xml),
+        channelId: channel === undefined ? BAICHUAN_CHANNEL.HOST : channel + 1,
+        extension: channel === undefined
+          ? undefined
+          : encrypt(extensionXml(channel)),
+        body: xml === undefined || xml === "" ? undefined : encrypt(xml),
       },
       image === undefined
         ? undefined
@@ -519,6 +566,20 @@ export function createClient(options: ClientOptions): Client {
       parsePtzPosition(
         decryptBody(await request(BAICHUAN_CMD.PTZ_POSITION, channel), aesKey),
       ),
+
+    call: async (command, { channel, body = {} } = {}) => {
+      const reply = await request(
+        command.id,
+        channel,
+        encodeCommandBody(command, body),
+      );
+      return {
+        body: decodeCommandBody(command, decryptBody(reply, aesKey)),
+        payload: reply.payload.length === 0
+          ? reply.payload
+          : decryptPayload(reply, aesKey!),
+      };
+    },
 
     close: async () => {
       shutdown(new Error("Baichuan client is closed"), "close");

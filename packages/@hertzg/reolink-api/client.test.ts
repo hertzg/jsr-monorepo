@@ -3,6 +3,7 @@ import { assertSpyCalls, spy } from "@std/testing/mock";
 import { FakeTime } from "@std/testing/time";
 import { createClient } from "./client.ts";
 import { aesCfbDecrypt, aesCfbEncrypt, xorCipher } from "./encoding/cipher.ts";
+import { command } from "./protocol/command.ts";
 import { loginCredentials, loginXml } from "./protocol/login.ts";
 import { extensionXml } from "./protocol/message.ts";
 import { privacyModeXml } from "./protocol/privacy.ts";
@@ -11,6 +12,7 @@ import { sirenXml } from "./protocol/siren.ts";
 import { snapshotXml } from "./protocol/snapshot.ts";
 import { createBaichuanDecodeStream } from "./streams/decode.ts";
 import { createBaichuanEncodeStream } from "./streams/encode.ts";
+import { int, xmlParam } from "./protocol/xml.ts";
 
 /** Wires a client to an in-memory camera speaking real Baichuan bytes. */
 function cameraLink() {
@@ -1019,5 +1021,110 @@ Deno.test("ptzPosition sends cmd 433 without a body and reads pan and tilt", asy
   assertEquals(await position, { pan: 510, tilt: 130 });
   assertEquals(request?.header.cmdId, 433);
   assertEquals(request?.payload, new Uint8Array(0));
+  await client.close();
+});
+
+Deno.test("call without a channel addresses the host with an empty body and reads the reply", async () => {
+  const { client, requests, camera } = await loggedIn();
+  const aesKey = new TextEncoder().encode("08822D7143979103");
+  const getPorts = command(37, "GET_NETPORT_CFG_V20", [
+    xmlParam("RtspPort", { rtspPort: int(), enable: int() }),
+  ]);
+
+  const reply = client.call(getPorts);
+  const { value: request } = await requests.read();
+  const body = aesCfbEncrypt(
+    aesKey,
+    new TextEncoder().encode(
+      '<?xml version="1.0" encoding="UTF-8" ?>\n<body>' +
+        '<RtspPort version="1.1"><rtspPort>554</rtspPort><enable>1</enable></RtspPort>' +
+        "</body>\n",
+    ),
+  );
+  await camera.write({
+    header: {
+      cmdId: 37,
+      bodyLength: body.length,
+      channelId: 250,
+      messageId: 3,
+      status: 200,
+      messageClass: 0x1464,
+      payloadOffset: 0,
+    },
+    body,
+    payload: new Uint8Array(0),
+  });
+
+  assertEquals(await reply, {
+    body: { RtspPort: { rtspPort: 554, enable: 1 } },
+    payload: new Uint8Array(0),
+  });
+  assertEquals(request?.header.channelId, 250);
+  assertEquals(request?.body, new Uint8Array(0));
+  await client.close();
+});
+
+Deno.test("call with a channel sends the extension and the encoded body", async () => {
+  const { client, requests, camera } = await loggedIn();
+  const aesKey = new TextEncoder().encode("08822D7143979103");
+  const setPorts = command(36, "SET_NETPORT_CFG_V20", [
+    xmlParam("RtspPort", { rtspPort: int(), enable: int() }),
+  ]);
+
+  const reply = client.call(setPorts, {
+    channel: 1,
+    body: { RtspPort: { rtspPort: 8554, enable: 0 } },
+  });
+  const { value: request } = await requests.read();
+  await camera.write({
+    header: {
+      cmdId: 36,
+      bodyLength: 0,
+      channelId: 2,
+      messageId: 3,
+      status: 200,
+      messageClass: 0x1464,
+      payloadOffset: 0,
+    },
+    body: new Uint8Array(0),
+    payload: new Uint8Array(0),
+  });
+  await reply;
+
+  assertEquals(request?.header.channelId, 2);
+  assertEquals(
+    new TextDecoder().decode(aesCfbDecrypt(aesKey, request!.body)),
+    extensionXml(1),
+  );
+  assertEquals(
+    new TextDecoder().decode(aesCfbDecrypt(aesKey, request!.payload)),
+    '<?xml version="1.0" encoding="UTF-8" ?>\n<body>' +
+      '<RtspPort version="1.1"><rtspPort>8554</rtspPort><enable>0</enable></RtspPort>' +
+      "</body>\n",
+  );
+  await client.close();
+});
+
+Deno.test("call rejects when the camera answers with an error status", async () => {
+  const { client, requests, camera } = await loggedIn();
+  const reboot = command(23, "REBOOT_V20", []);
+
+  const reply = client.call(reboot);
+  await requests.read();
+  await camera.write({
+    header: {
+      cmdId: 23,
+      bodyLength: 0,
+      channelId: 250,
+      messageId: 3,
+      status: 400,
+      messageClass: 0x1464,
+      payloadOffset: 0,
+    },
+    body: new Uint8Array(0),
+    payload: new Uint8Array(0),
+  });
+
+  await assertRejects(() => reply, Error, "status 400");
   await client.close();
 });

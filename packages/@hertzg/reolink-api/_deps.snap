@@ -25,6 +25,15 @@
     "./protocol/event": [
       "jsr:@std/xml@^0.2.0"
     ],
+    "./protocol/xml": [
+      "jsr:@std/xml@^0.2.0"
+    ],
+    "./protocol/command": [
+      "jsr:@std/xml@^0.2.0"
+    ],
+    "./protocol/params": [
+      "jsr:@std/xml@^0.2.0"
+    ],
     "./protocol/siren": [],
     "./protocol/privacy": [
       "jsr:@std/xml@^0.2.0"
