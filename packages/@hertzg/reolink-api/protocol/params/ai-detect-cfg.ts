@@ -43,8 +43,11 @@ import {
 export type AiDetectCfg = {
   /** Zero-based channel. */
   chn?: number;
-  /** The target type these settings apply to. */
-  type?: "people" | "vehicle" | "face" | "dog_cat" | "other";
+  /**
+   * The target type these settings apply to. `package` is Video Doorbell
+   * PoE only.
+   */
+  type?: "people" | "vehicle" | "face" | "dog_cat" | "other" | "package";
   /** Detection sensitivity. */
   sensitivity?: number;
   /** How long a target must stay before it triggers. */
@@ -89,7 +92,9 @@ export const aiDetectCfg: XmlParam<"AiDetectCfg", AiDetectCfg> = xmlParam(
   "AiDetectCfg",
   {
     chn: optional(int()),
-    type: optional(oneOf("people", "vehicle", "face", "dog_cat", "other")),
+    type: optional(
+      oneOf("people", "vehicle", "face", "dog_cat", "other", "package"),
+    ),
     sensitivity: optional(int()),
     stayTime: optional(int()),
     minTargetHeight: optional(float()),

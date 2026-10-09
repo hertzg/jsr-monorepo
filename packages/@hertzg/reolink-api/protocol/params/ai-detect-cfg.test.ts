@@ -65,3 +65,11 @@ Deno.test("aiDetectCfg rejects a target type the firmware does not map", () => {
 
   assertThrows(() => aiDetectCfg.decode(root), Error, "type");
 });
+
+Deno.test("aiDetectCfg reads the Video Doorbell PoE's package type", () => {
+  const root = parse(
+    '<AiDetectCfg version="1.1"><type>package</type></AiDetectCfg>',
+  ).root;
+
+  assertEquals(aiDetectCfg.decode(root).type, "package");
+});

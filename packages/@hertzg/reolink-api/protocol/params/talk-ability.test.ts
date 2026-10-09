@@ -68,3 +68,16 @@ Deno.test("talkAbility throws without duplexList, which the camera always writes
 
   assertThrows(() => talkAbility.decode(root), Error, "<duplexList>");
 });
+
+Deno.test("talkAbility reads the Video Doorbell PoE's mixAudioStream mode", () => {
+  const root = parse(
+    '<TalkAbility version="1.1">' +
+      "<duplexList><duplex>FDX</duplex></duplexList>" +
+      "<audioStreamModeList><audioStreamMode>mixAudioStream</audioStreamMode>" +
+      "</audioStreamModeList></TalkAbility>",
+  ).root;
+
+  assertEquals(talkAbility.decode(root).audioStreamModeList, [
+    "mixAudioStream",
+  ]);
+});

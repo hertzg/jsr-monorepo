@@ -31,14 +31,32 @@ export type Preview = {
   channelId?: number;
   /** Client-chosen stream handle. */
   handle?: number;
-  /** Which encoder stream to send. */
-  streamType?: "mainStream" | "subStream" | "mobileStream" | "externStream";
+  /**
+   * Which encoder stream to send. `aiYuvData` (raw frames for AI) is Video
+   * Doorbell PoE only.
+   */
+  streamType?:
+    | "mainStream"
+    | "subStream"
+    | "mobileStream"
+    | "externStream"
+    | "aiYuvData";
   /** Pre-record setting. */
   preRec?: number;
   /** Resolution selector. */
   resolution?: number;
   /** Frame rate. */
   fps?: number;
+  /** For `aiYuvData`: 1 to wrap frames in TLV records. Video Doorbell PoE only. */
+  needTLV?: number;
+  /** For `aiYuvData`: gap between frames, in milliseconds. Video Doorbell PoE only. */
+  gapms?: number;
+  /** For `aiYuvData`: frame width. Video Doorbell PoE only. */
+  resoWidth?: number;
+  /** For `aiYuvData`: frame height. Video Doorbell PoE only. */
+  resoHeight?: number;
+  /** For `aiYuvData`: algorithm selector; values not recovered. Video Doorbell PoE only. */
+  algorithm?: number;
 };
 
 /**
@@ -62,9 +80,20 @@ export const preview: XmlParam<"Preview", Preview> = xmlParam("Preview", {
   channelId: optional(int()),
   handle: optional(int()),
   streamType: optional(
-    oneOf("mainStream", "subStream", "mobileStream", "externStream"),
+    oneOf(
+      "mainStream",
+      "subStream",
+      "mobileStream",
+      "externStream",
+      "aiYuvData",
+    ),
   ),
   preRec: optional(int()),
   resolution: optional(int()),
   fps: optional(int()),
+  needTLV: optional(int()),
+  gapms: optional(int()),
+  resoWidth: optional(int()),
+  resoHeight: optional(int()),
+  algorithm: optional(int()),
 });

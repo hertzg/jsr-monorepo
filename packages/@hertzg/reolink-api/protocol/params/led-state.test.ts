@@ -43,3 +43,19 @@ Deno.test("ledState round-trips through encode and decode", () => {
 
   assertEquals(ledState.decode(parse(xml).root), value);
 });
+
+Deno.test("ledState reads the Video Doorbell PoE's doorbellLightState", () => {
+  const root = parse(
+    '<LedState version="1.1"><channelId>0</channelId><ledVersion>2</ledVersion>' +
+      "<state>auto</state><lightState>open</lightState>" +
+      "<doorbellLightState>keepOn</doorbellLightState></LedState>",
+  ).root;
+
+  assertEquals(ledState.decode(root), {
+    channelId: 0,
+    ledVersion: 2,
+    state: "auto",
+    lightState: "open",
+    doorbellLightState: "keepOn",
+  });
+});

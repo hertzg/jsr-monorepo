@@ -34,3 +34,18 @@ Deno.test("preview rejects a stream type the firmware does not name", () => {
 
   assertThrows(() => preview.decode(root), Error, "mainStream");
 });
+
+Deno.test("preview round-trips a Video Doorbell PoE aiYuvData request", () => {
+  const value = {
+    channelId: 0,
+    handle: 4,
+    streamType: "aiYuvData" as const,
+    needTLV: 1,
+    gapms: 200,
+    resoWidth: 640,
+    resoHeight: 360,
+    algorithm: 2,
+  };
+
+  assertEquals(preview.decode(parse(preview.encode(value)).root), value);
+});

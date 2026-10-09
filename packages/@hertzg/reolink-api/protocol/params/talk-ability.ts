@@ -38,8 +38,15 @@ import {
 export type TalkAbility = {
   /** Supported duplex modes: full (`FDX`) or half (`HDX`); up to eight. */
   duplexList: ("FDX" | "HDX")[];
-  /** Supported audio stream modes; up to eight. */
-  audioStreamModeList: ("followVideoStream" | "onlyAudioStream")[];
+  /**
+   * Supported audio stream modes; up to eight. `mixAudioStream` is Video
+   * Doorbell PoE only.
+   */
+  audioStreamModeList: (
+    | "followVideoStream"
+    | "onlyAudioStream"
+    | "mixAudioStream"
+  )[];
   /** Supported audio encodings; absent when none is set. */
   audioConfigList?: {
     /** Slot index, 0 to 31. */
@@ -79,7 +86,7 @@ export const talkAbility: XmlParam<"TalkAbility", TalkAbility> = xmlParam(
     duplexList: list("duplex", oneOf("FDX", "HDX")),
     audioStreamModeList: list(
       "audioStreamMode",
-      oneOf("followVideoStream", "onlyAudioStream"),
+      oneOf("followVideoStream", "onlyAudioStream", "mixAudioStream"),
     ),
     audioConfigList: optional(list(
       "audioConfig",

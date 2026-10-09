@@ -37,6 +37,11 @@ export type LedState = {
   state?: "auto" | "close" | "open";
   /** Status light on or off. */
   lightState?: "close" | "open";
+  /**
+   * The doorbell button's light. Video Doorbell PoE only: its
+   * `nets_led_state_s2x` writes it after `lightState`.
+   */
+  doorbellLightState?: "close" | "open" | "keepOff" | "keepOn";
 };
 
 /**
@@ -59,4 +64,5 @@ export const ledState: XmlParam<"LedState", LedState> = xmlParam("LedState", {
   ledVersion: optional(int()),
   state: optional(oneOf("auto", "close", "open")),
   lightState: optional(oneOf("close", "open")),
+  doorbellLightState: optional(oneOf("close", "open", "keepOff", "keepOn")),
 });

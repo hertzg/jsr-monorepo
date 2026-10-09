@@ -54,8 +54,11 @@ export type TalkAudioConfig = {
 export type TalkConfig = {
   /** Full or half duplex. */
   duplex?: "FDX" | "HDX";
-  /** Whether talk audio rides the video stream or its own stream. */
-  audioStreamMode?: "followVideoStream" | "onlyAudioStream";
+  /**
+   * Whether talk audio rides the video stream, its own stream, or a mix.
+   * `mixAudioStream` is Video Doorbell PoE only.
+   */
+  audioStreamMode?: "followVideoStream" | "onlyAudioStream" | "mixAudioStream";
   /** The audio format. */
   audioConfig?: TalkAudioConfig;
 };
@@ -80,7 +83,9 @@ export const talkConfig: XmlParam<"TalkConfig", TalkConfig> = xmlParam(
   "TalkConfig",
   {
     duplex: optional(oneOf("FDX", "HDX")),
-    audioStreamMode: optional(oneOf("followVideoStream", "onlyAudioStream")),
+    audioStreamMode: optional(
+      oneOf("followVideoStream", "onlyAudioStream", "mixAudioStream"),
+    ),
     audioConfig: optional(obj({
       priority: optional(int()),
       audioType: oneOf("adpcm", "g711"),
