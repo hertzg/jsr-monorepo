@@ -37,7 +37,7 @@
   "packages/@hertzg/wg-conf": "0.2.3",
   "packages/@hertzg/mymagti-api": "0.1.2",
   "packages/@hertzg/bx": "3.0.3",
-  "packages/@hertzg/reolink-api": "0.0.1",
+  "packages/@hertzg/reolink-api": "0.1.0",
   "packages/@hertzg/routeros-api": "0.1.2",
   "packages/@hertzg/tplink-api": "1.5.0",
   "packages/@hertzg/ip": "5.0.1",
