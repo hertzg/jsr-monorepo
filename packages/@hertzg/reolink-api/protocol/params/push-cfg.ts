@@ -27,6 +27,10 @@ import { int, optional, type XmlParam, xmlParam } from "../xml.ts";
 export type PushCfg = {
   /** Push interval, zero or more; the firmware does not name the unit. */
   interval?: number;
+  /** Rich (picture) notifications switch, by its name. Video Doorbell PoE only. */
+  richNotificationEnable?: number;
+  /** Push consent switch, by its name. Video Doorbell PoE only. */
+  consentAgreement?: number;
 };
 
 /**
@@ -45,4 +49,6 @@ export type PushCfg = {
  */
 export const pushCfg: XmlParam<"PushCfg", PushCfg> = xmlParam("PushCfg", {
   interval: optional(int()),
+  richNotificationEnable: optional(int()),
+  consentAgreement: optional(int()),
 });

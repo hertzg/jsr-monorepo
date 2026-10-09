@@ -22,3 +22,17 @@ Deno.test("pushCfg decodes an empty element", () => {
 
   assertEquals(pushCfg.decode(root), {});
 });
+
+Deno.test("pushCfg reads the Video Doorbell PoE's notification switches", () => {
+  const root = parse(
+    '<PushCfg version="1.1"><interval>30</interval>' +
+      "<richNotificationEnable>1</richNotificationEnable>" +
+      "<consentAgreement>0</consentAgreement></PushCfg>",
+  ).root;
+
+  assertEquals(pushCfg.decode(root), {
+    interval: 30,
+    richNotificationEnable: 1,
+    consentAgreement: 0,
+  });
+});

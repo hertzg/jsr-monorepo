@@ -35,6 +35,12 @@ export type RecordCfg = {
   channelId?: number;
   /** Loop recording; by its name, non-zero overwrites the oldest files. */
   cycle?: number;
+  /** Recording capability flags, as a number. Video Doorbell PoE only. */
+  recordAbility?: number;
+  /** Smart (event) recording switch, by its name. Video Doorbell PoE only. */
+  smartRecord?: number;
+  /** Talk audio recording switch, by its name. Video Doorbell PoE only. */
+  talkRecord?: number;
   /** Post-record time, by its name; units not recovered. */
   recordDelayTime?: number;
   /** Pre-record time, by its name; units not recovered. */
@@ -65,6 +71,9 @@ export const recordCfg: XmlParam<"RecordCfg", RecordCfg> = xmlParam(
   {
     channelId: optional(int()),
     cycle: optional(int()),
+    recordAbility: optional(int()),
+    smartRecord: optional(int()),
+    talkRecord: optional(int()),
     recordDelayTime: optional(int()),
     preRecordTime: optional(int()),
     packageTime: optional(int()),

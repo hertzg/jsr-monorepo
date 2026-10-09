@@ -51,3 +51,23 @@ Deno.test("recordCfg round-trips every field", () => {
 
   assertEquals(recordCfg.decode(parse(recordCfg.encode(value)).root), value);
 });
+
+Deno.test("recordCfg reads the Video Doorbell PoE's extra switches", () => {
+  const root = parse(
+    '<RecordCfg version="1.1"><channelId>0</channelId><cycle>1</cycle>' +
+      "<recordAbility>7</recordAbility><smartRecord>1</smartRecord>" +
+      "<talkRecord>0</talkRecord><recordDelayTime>30</recordDelayTime>" +
+      "<preRecordTime>5</preRecordTime><packageTime>60</packageTime></RecordCfg>",
+  ).root;
+
+  assertEquals(recordCfg.decode(root), {
+    channelId: 0,
+    cycle: 1,
+    recordAbility: 7,
+    smartRecord: 1,
+    talkRecord: 0,
+    recordDelayTime: 30,
+    preRecordTime: 5,
+    packageTime: 60,
+  });
+});

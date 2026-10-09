@@ -37,3 +37,12 @@ Deno.test("audioCfg decodes a set request that changes only the volume", () => {
 
   assertEquals(audioCfg.decode(root), { channelId: 0, volume: 40 });
 });
+
+Deno.test("audioCfg reads the Video Doorbell PoE's visitorLoudspeaker", () => {
+  const root = parse(
+    '<audioCfg version="1.1"><channelId>0</channelId>' +
+      "<visitorLoudspeaker>3</visitorLoudspeaker></audioCfg>",
+  ).root;
+
+  assertEquals(audioCfg.decode(root), { channelId: 0, visitorLoudspeaker: 3 });
+});

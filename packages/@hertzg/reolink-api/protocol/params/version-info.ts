@@ -51,6 +51,10 @@ export type VersionInfo = {
   IEClient: string;
   /** Upgrade package file suffix. */
   pakSuffix: string;
+  /** Product item number. Video Doorbell PoE only. */
+  itemNo?: string;
+  /** AI model version. Video Doorbell PoE only. */
+  aiVersion?: string;
   /** A second accepted upgrade package suffix; written only when set. */
   anotherPakSuffix?: string;
   /** Help document version; written only when the device has one. */
@@ -96,6 +100,8 @@ export const versionInfo: XmlParam<"VersionInfo", VersionInfo> = xmlParam(
     detail: text(),
     IEClient: text(),
     pakSuffix: text(),
+    itemNo: optional(text()),
+    aiVersion: optional(text()),
     anotherPakSuffix: optional(text()),
     helpVersion: optional(text()),
   },

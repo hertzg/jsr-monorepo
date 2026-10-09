@@ -38,6 +38,8 @@ export type AudioCfg = {
   volume?: number;
   /** Pre-alarm setting, as a number. */
   preAlarm?: number;
+  /** Visitor loudspeaker setting, by its name; values not recovered. Video Doorbell PoE only. */
+  visitorLoudspeaker?: number;
 };
 
 /**
@@ -65,4 +67,5 @@ export const audioCfg: XmlParam<"audioCfg", AudioCfg> = xmlParam("audioCfg", {
   audioSelect: optional(int()),
   volume: optional(int()),
   preAlarm: optional(int()),
+  visitorLoudspeaker: optional(int()),
 });

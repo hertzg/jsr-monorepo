@@ -69,3 +69,18 @@ Deno.test("versionInfo throws when an always-written field is missing", () => {
 
   assertThrows(() => versionInfo.decode(root), Error, "<type>");
 });
+
+Deno.test("versionInfo reads the Video Doorbell PoE's itemNo and aiVersion", () => {
+  const root = parse(
+    '<VersionInfo version="1.1"><name>Doorbell</name><type>IPC</type>' +
+      "<serialNumber>serial-db1</serialNumber><buildDay>build 2508071283</buildDay>" +
+      "<hardwareVersion>DB_566128M5MP_P</hardwareVersion><cfgVersion>v3.0.0.0</cfgVersion>" +
+      "<firmwareVersion>v3.0.0.4662_2508071283</firmwareVersion><detail>detail-db1</detail>" +
+      "<IEClient>ie-db1</IEClient><pakSuffix>pak</pakSuffix>" +
+      "<itemNo>item-db1</itemNo><aiVersion>ai-db1</aiVersion></VersionInfo>",
+  ).root;
+
+  const decoded = versionInfo.decode(root);
+
+  assertEquals([decoded.itemNo, decoded.aiVersion], ["item-db1", "ai-db1"]);
+});
