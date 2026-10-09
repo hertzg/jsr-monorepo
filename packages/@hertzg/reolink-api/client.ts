@@ -32,6 +32,7 @@ import {
   decodeCommandBody,
   encodeCommandBody,
 } from "./protocol/command.ts";
+import { PUSHES, type Pushes } from "./protocol/commands.ts";
 import { type AlarmEvent, parseAlarmEvents } from "./protocol/event.ts";
 import { loginCredentials, loginXml, parseNonce } from "./protocol/login.ts";
 import {
@@ -114,6 +115,32 @@ export type CallReply<C extends Command> = {
   /** Binary data after the XML, decrypted; empty for most commands. */
   payload: Uint8Array;
 };
+
+/**
+ * A message the camera sent unasked, from {@link Client.pushes}.
+ *
+ * Narrow on `name`: a known push carries its decoded `body`, an unknown one
+ * (`name: undefined`) its decrypted `xml`.
+ */
+export type Push =
+  | {
+    [K in keyof Pushes]: {
+      /** The {@link PUSHES} key. */
+      name: K;
+      /** The command id. */
+      id: number;
+      /** The decoded parameters. */
+      body: CommandBody<Pushes[K]>;
+    };
+  }[keyof Pushes]
+  | {
+    /** Not in the {@link PUSHES} table. */
+    name: undefined;
+    /** The command id. */
+    id: number;
+    /** The decrypted body. */
+    xml: string;
+  };
 
 /** A Baichuan client bound to one connection. */
 export type Client = {
@@ -224,6 +251,19 @@ export type Client = {
     options?: CallOptions<C>,
   ) => Promise<CallReply<C>>;
   /**
+   * Returns every message the camera sends unasked, alarm events included,
+   * decoded by the {@link PUSHES} table when its id is known and as raw XML
+   * otherwise. The camera pushes only after {@link Client.subscribe}.
+   *
+   * A push the table fails to read errors this stream only; the connection
+   * and the alarm event stream carry on. The stream ends with the
+   * connection.
+   *
+   * @throws {Error} When a push stream is already open, or the client has
+   *   ended.
+   */
+  pushes: () => ReadableStream<Push>;
+  /**
    * Stops the keepalive, ends the event stream and closes the writable. The
    * caller still closes the socket.
    */
@@ -276,6 +316,8 @@ export function createClient(options: ClientOptions): Client {
   const keyOf = (cmdId: number, channelId: number, id: number) =>
     `${cmdId}/${channelId}/${id}`;
 
+  let pushes: ReadableStreamDefaultController<Push> | undefined;
+
   const unsubscribe = () => {
     clearTimeout(subscription?.keepAlive);
     subscription = undefined;
@@ -294,9 +336,12 @@ export function createClient(options: ClientOptions): Client {
     downloads.clear();
     if (events === "error") {
       subscription?.events.error(reason);
+      pushes?.error(reason);
     } else {
       subscription?.events.close();
+      pushes?.close();
     }
+    pushes = undefined;
     unsubscribe();
   };
 
@@ -341,6 +386,16 @@ export function createClient(options: ClientOptions): Client {
       subscription.sawEvent = true;
       for (const event of parseAlarmEvents(decryptBody(message, aesKey))) {
         subscription.events.enqueue(event);
+      }
+    }
+    if (pushes !== undefined) {
+      // A push this table reads wrongly ends only the push stream, not the
+      // connection the alarm events also ride on.
+      try {
+        pushes.enqueue(decodePush(message, aesKey));
+      } catch (error) {
+        pushes.error(error);
+        pushes = undefined;
       }
     }
   };
@@ -581,11 +636,44 @@ export function createClient(options: ClientOptions): Client {
       };
     },
 
+    pushes: () => {
+      if (pushes !== undefined) {
+        throw new Error("Baichuan client already has a push stream");
+      }
+      if (ended !== undefined) {
+        throw ended;
+      }
+      return new ReadableStream<Push>({
+        start: (controller) => {
+          pushes = controller;
+        },
+        cancel: () => {
+          pushes = undefined;
+        },
+      });
+    },
+
     close: async () => {
       shutdown(new Error("Baichuan client is closed"), "close");
       await writer.close().catch(() => {});
     },
   };
+}
+
+/** Reads a push: by the {@link PUSHES} table when its id is known, raw otherwise. */
+function decodePush(message: BaichuanMessage, aesKey?: Uint8Array): Push {
+  const { cmdId } = message.header;
+  const xml = decryptBody(message, aesKey);
+  for (const [name, push] of Object.entries(PUSHES)) {
+    if (push.id === cmdId) {
+      return {
+        name,
+        id: cmdId,
+        body: decodeCommandBody(push, xml),
+      } as Push;
+    }
+  }
+  return { name: undefined, id: cmdId, xml };
 }
 
 /** A request waiting for its reply. */

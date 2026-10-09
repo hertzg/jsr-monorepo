@@ -13,12 +13,15 @@
  *           ─> subscribe (cmd 31) ─> cmd 33 pushes ─> AlarmEvent stream
  *           ─> siren (263), privacy mode (574/575), snapshot (109),
  *              PTZ (18, 19, 190)
+ *           ─> any of the firmware's 225 commands: client.call(COMMANDS.X)
+ *           ─> every push, typed by PUSHES: client.pushes()
  * ```
  *
  * Every layer is its own entry point: `encoding/header`, `encoding/cipher`,
  * `protocol/message`, `protocol/login`, `protocol/event`, `protocol/siren`,
- * `protocol/privacy`, `protocol/snapshot`, `protocol/ptz`, `streams/encode`,
- * `streams/decode` and `client`.
+ * `protocol/privacy`, `protocol/snapshot`, `protocol/ptz`, `protocol/xml`,
+ * `protocol/command`, `protocol/params`, `protocol/commands`,
+ * `streams/encode`, `streams/decode` and `client`.
  *
  * @example Stream doorbell and motion events
  * ```ts ignore
@@ -34,6 +37,21 @@
  *   // { channel: 0, motion: true, visitor: false, tamper: false, ai: ["people"] }
  *   console.log(event);
  * }
+ *
+ * await client.close();
+ * conn.close();
+ * ```
+ *
+ * @example Read a setting with any command
+ * ```ts ignore
+ * import { COMMANDS, createClient } from "@hertzg/reolink-api";
+ *
+ * const conn = await Deno.connect({ hostname: "192.168.1.10", port: 9000 });
+ * const client = createClient({ readable: conn.readable, writable: conn.writable });
+ *
+ * await client.login({ username: "admin", password: "secret" });
+ * const { body } = await client.call(COMMANDS.GET_NTPCFG_V20);
+ * console.log(body.Ntp);
  *
  * await client.close();
  * conn.close();
@@ -59,12 +77,18 @@
 
 export { createClient } from "./client.ts";
 export type {
+  CallOptions,
+  CallReply,
   ChannelOptions,
   Client,
   ClientOptions,
   LoginOptions,
+  Push,
   SubscribeOptions,
 } from "./client.ts";
+export { COMMANDS, PUSHES } from "./protocol/commands.ts";
+export type { Commands, Pushes } from "./protocol/commands.ts";
+export type { Command, CommandBody } from "./protocol/command.ts";
 export type { AlarmEvent } from "./protocol/event.ts";
 export { PTZ_COMMAND } from "./protocol/ptz.ts";
 export type { PtzCommand, PtzPosition, PtzPreset } from "./protocol/ptz.ts";

@@ -1,19 +1,67 @@
 /**
- * `<FloodlightStatusList>`: placeholder until its fields are recovered from firmware.
+ * `<FloodlightStatusList>`: which floodlights are on. The camera pushes it
+ * unasked as cmd 291 when a floodlight changes.
+ *
+ * Firmware: the cmd 291 report builder (`nets_floodlight_report`) writes
+ * one `<FloodlightStatus>` per channel that has a floodlight, directly
+ * under `<FloodlightStatusList>`, each with `channel` and `status`, always.
+ * Nothing parses it, so the item fields are required.
+ *
+ * @example Read the cmd 291 push
+ * ```ts
+ * import { assertEquals } from "@std/assert";
+ * import { parse } from "@std/xml";
+ * import { floodlightStatusList } from "@hertzg/reolink-api/protocol/params";
+ *
+ * const root = parse(
+ *   '<FloodlightStatusList version="1.1"><FloodlightStatus><channel>0</channel>' +
+ *     "<status>1</status></FloodlightStatus></FloodlightStatusList>",
+ * ).root;
+ *
+ * assertEquals(floodlightStatusList.decode(root).FloodlightStatus, [
+ *   { channel: 0, status: 1 },
+ * ]);
+ * ```
  *
  * @module
  */
 
-import { type XmlParam, xmlParam } from "../xml.ts";
+import { int, obj, repeated, type XmlParam, xmlParam } from "../xml.ts";
 
-/** The value of `<FloodlightStatusList>`. Placeholder: no fields yet. */
-export type FloodlightStatusList = Record<PropertyKey, never>;
+/** One floodlight in `<FloodlightStatusList>`. */
+export type FloodlightStatus = {
+  /** Zero-based channel. */
+  channel: number;
+  /** Floodlight state as a number. */
+  status: number;
+};
 
-/** Codec for `<FloodlightStatusList>`. Placeholder: no fields yet. */
+/** The floodlight states in `<FloodlightStatusList>`. */
+export type FloodlightStatusList = {
+  /** One entry per floodlight, as repeated `<FloodlightStatus>` elements. */
+  FloodlightStatus: FloodlightStatus[];
+};
+
+/**
+ * Codec for `<FloodlightStatusList>`.
+ *
+ * @example Build a `<FloodlightStatusList>` element
+ * ```ts
+ * import { assertEquals } from "@std/assert";
+ * import { floodlightStatusList } from "@hertzg/reolink-api/protocol/params";
+ *
+ * assertEquals(
+ *   floodlightStatusList.encode({
+ *     FloodlightStatus: [{ channel: 0, status: 0 }],
+ *   }),
+ *   '<FloodlightStatusList version="1.1"><FloodlightStatus><channel>0</channel>' +
+ *     "<status>0</status></FloodlightStatus></FloodlightStatusList>",
+ * );
+ * ```
+ */
 export const floodlightStatusList: XmlParam<
   "FloodlightStatusList",
   FloodlightStatusList
-> = xmlParam(
-  "FloodlightStatusList",
-  {},
-);
+> = xmlParam("FloodlightStatusList", {
+  FloodlightStatus: repeated(obj({ channel: int(), status: int() })),
+});

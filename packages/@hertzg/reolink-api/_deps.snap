@@ -34,6 +34,9 @@
     "./protocol/params": [
       "jsr:@std/xml@^0.2.0"
     ],
+    "./protocol/commands": [
+      "jsr:@std/xml@^0.2.0"
+    ],
     "./protocol/siren": [],
     "./protocol/privacy": [
       "jsr:@std/xml@^0.2.0"

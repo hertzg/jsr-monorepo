@@ -11,6 +11,7 @@
     "./protocol/xml": "./protocol/xml.ts",
     "./protocol/command": "./protocol/command.ts",
     "./protocol/params": "./protocol/params/mod.ts",
+    "./protocol/commands": "./protocol/commands.ts",
     "./protocol/siren": "./protocol/siren.ts",
     "./protocol/privacy": "./protocol/privacy.ts",
     "./protocol/snapshot": "./protocol/snapshot.ts",

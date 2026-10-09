@@ -59,7 +59,8 @@ export type XmlFieldValue<F> = F extends XmlField<infer T> ? T : never;
 // deno-lint-ignore no-explicit-any
 export type XmlFields = Record<string, XmlField<any>>;
 
-type OptionalKeys<F extends XmlFields> = {
+/** The keys of `F` whose codecs are marked {@link optional}. */
+export type OptionalKeys<F extends XmlFields> = {
   [K in keyof F]: F[K] extends { optional: true } ? K : never;
 }[keyof F];
 

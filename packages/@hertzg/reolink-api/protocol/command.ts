@@ -54,7 +54,20 @@ export type Command<P extends readonly AnyXmlParam[] = readonly AnyXmlParam[]> =
     name: string;
     /** The parameter elements the command's bodies may carry. */
     params: P;
+    /**
+     * The firmware builds known to register the command, empty when unknown.
+     * Registration does not promise that a given device answers it.
+     */
+    firmware: readonly Firmware[];
   };
+
+/**
+ * A firmware build whose command table this package was derived from.
+ *
+ * - `RLC-823A`: `IPC_523SD10.2898_23110119`, a PTZ camera.
+ * - `Video Doorbell PoE`: `DB_566128M5MP_P.4662_2508071283`.
+ */
+export type Firmware = "RLC-823A" | "Video Doorbell PoE";
 
 /**
  * The body of a {@link Command}, request or reply: each of its parameters by
@@ -72,6 +85,7 @@ export type CommandBody<C extends Command> = {
  * @param id The command id.
  * @param name The firmware's name for it.
  * @param params The parameter codecs its bodies carry.
+ * @param firmware The firmware builds known to register it; empty by default.
  * @returns The command.
  *
  * @example Declare a command without parameters
@@ -79,17 +93,19 @@ export type CommandBody<C extends Command> = {
  * import { assertEquals } from "@std/assert";
  * import { command } from "@hertzg/reolink-api/protocol/command";
  *
- * const reboot = command(23, "REBOOT_V20", []);
+ * const reboot = command(23, "REBOOT_V20", [], ["RLC-823A"]);
  *
  * assertEquals(reboot.id, 23);
+ * assertEquals(reboot.firmware, ["RLC-823A"]);
  * ```
  */
 export function command<const P extends readonly AnyXmlParam[]>(
   id: number,
   name: string,
   params: P,
+  firmware: readonly Firmware[] = [],
 ): Command<P> {
-  return { id, name, params };
+  return { id, name, params, firmware };
 }
 
 /**

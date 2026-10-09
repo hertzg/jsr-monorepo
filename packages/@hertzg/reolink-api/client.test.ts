@@ -1,4 +1,4 @@
-import { assertEquals, assertRejects } from "@std/assert";
+import { assertEquals, assertRejects, assertThrows } from "@std/assert";
 import { assertSpyCalls, spy } from "@std/testing/mock";
 import { FakeTime } from "@std/testing/time";
 import { createClient } from "./client.ts";
@@ -1127,4 +1127,143 @@ Deno.test("call rejects when the camera answers with an error status", async () 
 
   await assertRejects(() => reply, Error, "status 400");
   await client.close();
+});
+
+Deno.test("pushes decodes a known push by the PUSHES table", async () => {
+  const { client, camera } = await loggedIn();
+  const aesKey = new TextEncoder().encode("08822D7143979103");
+  const pushes = client.pushes().getReader();
+
+  const body = aesCfbEncrypt(
+    aesKey,
+    new TextEncoder().encode(
+      '<?xml version="1.0" encoding="UTF-8" ?>\n<body>\n' +
+        '<Serial version="1.1">\n<channelId>0</channelId>\n' +
+        "<baudRate>9600</baudRate>\n<dataBit>CS8</dataBit>\n" +
+        "<stopBit>1</stopBit>\n<parity>none</parity>\n" +
+        "<flowControl>none</flowControl>\n" +
+        "<controlProtocol>PELCO_D</controlProtocol>\n" +
+        "<controlAddress>1</controlAddress>\n</Serial>\n</body>\n",
+    ),
+  );
+  await camera.write({
+    header: {
+      cmdId: 79,
+      bodyLength: body.length,
+      channelId: 251,
+      messageId: 0,
+      status: 200,
+      messageClass: 0x1464,
+      payloadOffset: 0,
+    },
+    body,
+    payload: new Uint8Array(0),
+  });
+
+  assertEquals((await pushes.read()).value, {
+    name: "SERIAL_CHANGE_REPORT",
+    id: 79,
+    body: {
+      Serial: {
+        channelId: 0,
+        baudRate: 9600,
+        dataBit: "CS8",
+        stopBit: 1,
+        parity: "none",
+        flowControl: "none",
+        controlProtocol: "PELCO_D",
+        controlAddress: 1,
+      },
+    },
+  });
+  await client.close();
+});
+
+Deno.test("pushes passes an unknown push through as raw XML", async () => {
+  const { client, camera } = await loggedIn();
+  const aesKey = new TextEncoder().encode("08822D7143979103");
+  const pushes = client.pushes().getReader();
+  const xml = '<?xml version="1.0" encoding="UTF-8" ?>\n<body>\n' +
+    '<futureReport version="1.1">\n<level>3</level>\n</futureReport>\n</body>\n';
+
+  const body = aesCfbEncrypt(aesKey, new TextEncoder().encode(xml));
+  await camera.write({
+    header: {
+      cmdId: 999,
+      bodyLength: body.length,
+      channelId: 251,
+      messageId: 0,
+      status: 200,
+      messageClass: 0x1464,
+      payloadOffset: 0,
+    },
+    body,
+    payload: new Uint8Array(0),
+  });
+
+  assertEquals((await pushes.read()).value, { name: undefined, id: 999, xml });
+  await client.close();
+});
+
+Deno.test("a push the table cannot read errors the push stream but not the client", async () => {
+  const { client, requests, camera } = await loggedIn();
+  const aesKey = new TextEncoder().encode("08822D7143979103");
+  const pushes = client.pushes().getReader();
+
+  const broken = aesCfbEncrypt(
+    aesKey,
+    new TextEncoder().encode(
+      '<?xml version="1.0" encoding="UTF-8" ?>\n<body>' +
+        '<Serial version="1.1"><channelId>0</channelId></Serial></body>\n',
+    ),
+  );
+  await camera.write({
+    header: {
+      cmdId: 79,
+      bodyLength: broken.length,
+      channelId: 251,
+      messageId: 0,
+      status: 200,
+      messageClass: 0x1464,
+      payloadOffset: 0,
+    },
+    body: broken,
+    payload: new Uint8Array(0),
+  });
+  await assertRejects(() => pushes.read(), Error, "<Serial> has no <baudRate>");
+
+  const reply = client.call(command(23, "REBOOT_V20", []));
+  await requests.read();
+  await camera.write({
+    header: {
+      cmdId: 23,
+      bodyLength: 0,
+      channelId: 250,
+      messageId: 3,
+      status: 200,
+      messageClass: 0x1464,
+      payloadOffset: 0,
+    },
+    body: new Uint8Array(0),
+    payload: new Uint8Array(0),
+  });
+  assertEquals((await reply).body, {});
+  await client.close();
+});
+
+Deno.test("pushes rejects a second push stream", async () => {
+  const { client } = await loggedIn();
+  client.pushes();
+
+  assertThrows(() => client.pushes(), Error, "already has a push stream");
+  await client.close();
+});
+
+Deno.test("close ends the push stream", async () => {
+  const { client } = await loggedIn();
+  const pushes = client.pushes().getReader();
+
+  await client.close();
+
+  assertEquals((await pushes.read()).done, true);
 });

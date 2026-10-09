@@ -1,16 +1,48 @@
 /**
- * `<Gain>`: placeholder until its fields are recovered from firmware.
+ * `<Gain>`: the sensor gain level, the reply to cmd 160.
+ *
+ * Firmware: `nets_gain_s2x` writes `gainLevel`, always. The name is
+ * registered with the shared `nets_isp_advance_common_x2s` parser, which
+ * reads `<InputAdvanceCfg>` children and not this field, so this shape is
+ * reply-only.
+ *
+ * @example Read the cmd 160 reply
+ * ```ts
+ * import { assertEquals } from "@std/assert";
+ * import { parse } from "@std/xml";
+ * import { gain } from "@hertzg/reolink-api/protocol/params";
+ *
+ * const root = parse('<Gain version="1.1"><gainLevel>40</gainLevel></Gain>')
+ *   .root;
+ *
+ * assertEquals(gain.decode(root).gainLevel, 40);
+ * ```
  *
  * @module
  */
 
-import { type XmlParam, xmlParam } from "../xml.ts";
+import { int, type XmlParam, xmlParam } from "../xml.ts";
 
-/** The value of `<Gain>`. Placeholder: no fields yet. */
-export type Gain = Record<PropertyKey, never>;
+/** The gain setting in `<Gain>`. */
+export type Gain = {
+  /** Gain level; the `<InputAdvanceCfg>` parser accepts 0 to 100. */
+  gainLevel: number;
+};
 
-/** Codec for `<Gain>`. Placeholder: no fields yet. */
-export const gain: XmlParam<"Gain", Gain> = xmlParam(
-  "Gain",
-  {},
-);
+/**
+ * Codec for `<Gain>`.
+ *
+ * @example Build a `<Gain>` element
+ * ```ts
+ * import { assertEquals } from "@std/assert";
+ * import { gain } from "@hertzg/reolink-api/protocol/params";
+ *
+ * assertEquals(
+ *   gain.encode({ gainLevel: 75 }),
+ *   '<Gain version="1.1"><gainLevel>75</gainLevel></Gain>',
+ * );
+ * ```
+ */
+export const gain: XmlParam<"Gain", Gain> = xmlParam("Gain", {
+  gainLevel: int(),
+});

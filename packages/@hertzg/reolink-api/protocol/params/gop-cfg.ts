@@ -1,16 +1,58 @@
 /**
- * `<GopCfg>`: placeholder until its fields are recovered from firmware.
+ * `<GopCfg>`: the GOP (keyframe interval) for one stream. Written with
+ * cmd 284.
+ *
+ * Firmware: `nets_param_gop_cfg_x2s` reads `channel`, `streamType` and
+ * `gopTime`, skipping any that are missing, and rejects a negative
+ * `gopTime`. No serializer exists, so the field order follows the
+ * firmware's struct layout. Every field is optional.
+ *
+ * @example Read a `<GopCfg>` element
+ * ```ts
+ * import { assertEquals } from "@std/assert";
+ * import { parse } from "@std/xml";
+ * import { gopCfg } from "@hertzg/reolink-api/protocol/params";
+ *
+ * const root = parse(
+ *   '<GopCfg version="1.1"><channel>0</channel><streamType>0</streamType>' +
+ *     "<gopTime>2</gopTime></GopCfg>",
+ * ).root;
+ *
+ * assertEquals(gopCfg.decode(root).gopTime, 2);
+ * ```
  *
  * @module
  */
 
-import { type XmlParam, xmlParam } from "../xml.ts";
+import { int, optional, type XmlParam, xmlParam } from "../xml.ts";
 
-/** The value of `<GopCfg>`. Placeholder: no fields yet. */
-export type GopCfg = Record<PropertyKey, never>;
+/** The GOP setting in `<GopCfg>`. */
+export type GopCfg = {
+  /** Zero-based channel. */
+  channel?: number;
+  /** Stream as a number. */
+  streamType?: number;
+  /** GOP length; the firmware rejects a negative value. */
+  gopTime?: number;
+};
 
-/** Codec for `<GopCfg>`. Placeholder: no fields yet. */
-export const gopCfg: XmlParam<"GopCfg", GopCfg> = xmlParam(
-  "GopCfg",
-  {},
-);
+/**
+ * Codec for `<GopCfg>`.
+ *
+ * @example Set the main stream GOP
+ * ```ts
+ * import { assertEquals } from "@std/assert";
+ * import { gopCfg } from "@hertzg/reolink-api/protocol/params";
+ *
+ * assertEquals(
+ *   gopCfg.encode({ channel: 0, streamType: 0, gopTime: 4 }),
+ *   '<GopCfg version="1.1"><channel>0</channel><streamType>0</streamType>' +
+ *     "<gopTime>4</gopTime></GopCfg>",
+ * );
+ * ```
+ */
+export const gopCfg: XmlParam<"GopCfg", GopCfg> = xmlParam("GopCfg", {
+  channel: optional(int()),
+  streamType: optional(int()),
+  gopTime: optional(int()),
+});
