@@ -1,5 +1,5 @@
 import { assertEquals, assertRejects } from "@std/assert";
-import { resolvesNext, spy } from "@std/testing/mock";
+import { assertSpyCalls, resolvesNext, spy } from "@std/testing/mock";
 import { HttpError } from "../request.ts";
 import { IsapiError } from "../xml.ts";
 import { openAlertStream } from "./stream.ts";
@@ -160,4 +160,31 @@ Deno.test("openAlertStream throws when the reply is neither multipart nor a Resp
     Error,
     "not multipart",
   );
+});
+
+Deno.test("openAlertStream ends on abort even when fetch ignores the signal, and cancels the body", async () => {
+  const controller = new AbortController();
+  const cancelled = spy(() => {});
+  const fetch = spy((_url: string | URL | Request, _init?: RequestInit) => {
+    const body = new ReadableStream<Uint8Array>({
+      pull() {
+        return new Promise<void>(() => {});
+      },
+      cancel: cancelled,
+    });
+    return Promise.resolve(new Response(body, { headers: MULTIPART }));
+  });
+
+  const alerts = await openAlertStream({
+    ...OPTIONS,
+    fetch,
+    signal: controller.signal,
+  });
+  const reading = Array.fromAsync(alerts);
+  controller.abort();
+
+  assertEquals(await reading, []);
+  // Cancelling propagates back through the pipes over a few ticks.
+  await new Promise((resolve) => setTimeout(resolve, 10));
+  assertSpyCalls(cancelled, 1);
 });

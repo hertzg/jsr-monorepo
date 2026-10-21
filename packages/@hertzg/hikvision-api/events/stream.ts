@@ -131,6 +131,13 @@ export async function openAlertStream(
       }),
     )
     .getReader();
+  // The signal is also given to fetch, but the stream does not rely on
+  // fetch erroring the body: on abort it cancels its own reader, which
+  // resolves a pending read as done and cancels the response body, so the
+  // consumer's loop ends and the connection is dropped either way.
+  signal?.addEventListener("abort", () => {
+    reader.cancel(signal.reason).catch(() => {});
+  }, { once: true });
   return new ReadableStream<Alert>({
     async pull(controller) {
       try {
