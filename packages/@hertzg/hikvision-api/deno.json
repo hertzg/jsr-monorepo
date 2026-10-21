@@ -1,0 +1,25 @@
+{
+  "name": "@hertzg/hikvision-api",
+  "version": "0.0.1",
+  "exports": {
+    ".": "./mod.ts",
+    "./xml": "./xml.ts",
+    "./request": "./request.ts",
+    "./multipart/parts": "./multipart/parts.ts",
+    "./events/alert": "./events/alert.ts",
+    "./events/stream": "./events/stream.ts",
+    "./config/device-info": "./config/device-info.ts",
+    "./config/channels": "./config/channels.ts",
+    "./config/motion-detection": "./config/motion-detection.ts",
+    "./config/smart": "./config/smart.ts",
+    "./client": "./client.ts"
+  },
+  "publish": {
+    "exclude": [
+      "**/*.test.ts",
+      "**/*.md",
+      "adr",
+      "zz-*.ts"
+    ]
+  }
+}

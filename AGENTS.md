@@ -79,6 +79,8 @@ the JSR coordinate. Two scopes:
 - `binstruct` - Core binary structure encoding/decoding library
 - `bx` - Binary hex string utilities
 - `crc` - CRC checksum utilities
+- `hikvision-api` - Hikvision ISAPI client (alert stream, device info, channels,
+  motion grid, smart rules)
 - `ip` - IPv4/IPv6/CIDR utilities
 - `mac` - EUI-48 MAC address parse/stringify
 - `mymagti-api` - MyMagti API client
@@ -441,6 +443,7 @@ both tiresome and error-prone.
 - `@hertzg/ip`
 - `@hertzg/mac`
 - `@hertzg/crc`
+- `@hertzg/hikvision-api`
 - `@hertzg/reolink-api`
 - `@hertzg/routeros-api`
 - `@hertzg/tplink-api`

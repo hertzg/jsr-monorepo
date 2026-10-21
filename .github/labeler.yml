@@ -109,6 +109,9 @@
 "@hertzg/mac":
   - changed-files:
       - any-glob-to-any-file: packages/@hertzg/mac/**
+"@hertzg/hikvision-api":
+  - changed-files:
+      - any-glob-to-any-file: packages/@hertzg/hikvision-api/**
 "@hertzg/mymagti-api":
   - changed-files:
       - any-glob-to-any-file: packages/@hertzg/mymagti-api/**
