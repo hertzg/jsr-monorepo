@@ -1,12 +1,7 @@
 import { assertEquals, assertRejects } from "@std/assert";
 import { resolvesNext, spy } from "@std/testing/mock";
 import { document, text } from "./document.ts";
-import {
-  basicAuthorization,
-  readDocument,
-  request,
-  requestXml,
-} from "./request.ts";
+import { basicAuthorization, read, request, requestXml } from "./request.ts";
 import { IsapiError } from "./status.ts";
 
 Deno.test("basicAuthorization encodes username:password as base64", () => {
@@ -215,39 +210,40 @@ Deno.test("requestXml throws IsapiError on a 200 ResponseStatus with statusCode 
   );
 });
 
-Deno.test("readDocument decodes the reply with the codec", async () => {
+Deno.test("read decodes the reply with the resource's codec", async () => {
   const fetch = spy(resolvesNext([
     new Response("<DeviceInfo><model>DS-7608NI-Q2/8P</model></DeviceInfo>"),
   ]));
 
-  const info = await readDocument(
+  const info = await read(
     {
       baseUrl: "http://192.0.2.10",
       username: "admin",
       password: "hunter2",
       fetch,
     },
-    "/ISAPI/System/deviceInfo",
-    document({ model: text() }),
+    { path: "/ISAPI/System/deviceInfo", codec: document({ model: text() }) },
   );
 
   assertEquals(info, { model: "DS-7608NI-Q2/8P" });
 });
 
-Deno.test("readDocument rejects with the engine's missing-element message", async () => {
+Deno.test("read rejects with the engine's missing-element message", async () => {
   const fetch = spy(resolvesNext([new Response("<DeviceInfo/>")]));
 
   await assertRejects(
     () =>
-      readDocument(
+      read(
         {
           baseUrl: "http://192.0.2.10",
           username: "admin",
           password: "hunter2",
           fetch,
         },
-        "/ISAPI/System/deviceInfo",
-        document({ model: text() }),
+        {
+          path: "/ISAPI/System/deviceInfo",
+          codec: document({ model: text() }),
+        },
       ),
     Error,
     "ISAPI <DeviceInfo> has no <model>",

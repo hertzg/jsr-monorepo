@@ -33,9 +33,9 @@
  * @example Parse a channel status list
  * ```ts
  * import { assertEquals } from "@std/assert";
- * import { parseInputProxyChannelStatus } from "./channel-status.ts";
+ * import { inputProxyChannelStatus } from "./input-proxy-channel-status.ts";
  *
- * const status = parseInputProxyChannelStatus(
+ * const status = inputProxyChannelStatus.codec.parse(
  *   "<InputProxyChannelStatusList><InputProxyChannelStatus><id>1</id>" +
  *     "<sourceInputPortDescriptor><ipAddress>192.0.2.21</ipAddress>" +
  *     "</sourceInputPortDescriptor><online>true</online>" +
@@ -66,12 +66,8 @@ import {
   optional,
   repeated,
   text,
-} from "../isapi/document.ts";
-import { readDocument, type RequestOptions } from "../isapi/request.ts";
-
-/** The input proxy channel status path. */
-export const INPUT_PROXY_CHANNEL_STATUS_PATH =
-  "/ISAPI/ContentMgmt/InputProxy/channels/status";
+} from "../document.ts";
+import type { Resource } from "../request.ts";
 
 /** One `<InputProxyChannelStatus>`: the NVR's view of one IP camera. */
 export type InputProxyChannelStatus = {
@@ -133,86 +129,50 @@ const channelStatus = obj({
   streamingProxyChannelIdList: optional(list("streamingProxyChannelId", int())),
 });
 
-const channelStatusList = document({
-  InputProxyChannelStatus: repeated(channelStatus),
-});
-
 /**
- * Parses an `<InputProxyChannelStatusList>` document.
+ * The channel status list resource,
+ * `/ISAPI/ContentMgmt/InputProxy/channels/status`.
  *
- * @param xml The document text.
- * @returns The channel statuses in document order.
- * @throws {IsapiError} When the request fails: a status outside 2xx, or a failing `<ResponseStatus>` on any status.
- *
- * @example An offline channel without firmware extras
- * ```ts
- * import { assertEquals } from "@std/assert";
- * import { parseInputProxyChannelStatus } from "./channel-status.ts";
- *
- * const status = parseInputProxyChannelStatus(
- *   "<InputProxyChannelStatusList><InputProxyChannelStatus><id>3</id>" +
- *     "<online>false</online><chanDetectResult>netUnreachable</chanDetectResult>" +
- *     "</InputProxyChannelStatus></InputProxyChannelStatusList>",
- * );
- *
- * assertEquals(status, [{ id: 3, online: false, chanDetectResult: "netUnreachable" }]);
- * ```
- */
-export function parseInputProxyChannelStatus(
-  xml: string,
-): InputProxyChannelStatus[] {
-  return channelStatusList.parse(xml).InputProxyChannelStatus.map(
-    flattenGroups,
-  );
-}
-
-/**
- * Reads the channel status list from an NVR.
- *
- * @param options Where the NVR is and how to log in.
- * @returns The channel statuses in document order.
- * @throws {IsapiError} When the request fails: a status outside 2xx, or a failing `<ResponseStatus>` on any status.
+ * NVR only: a camera answers with a failing `<ResponseStatus>`, which reads
+ * as an `IsapiError`. The statuses come in document order.
  *
  * @example Read through a stubbed fetch
  * ```ts
  * import { assertEquals } from "@std/assert";
  * import { resolvesNext, spy } from "@std/testing/mock";
- * import { readInputProxyChannelStatus } from "./channel-status.ts";
+ * import { read } from "../request.ts";
+ * import { inputProxyChannelStatus } from "./input-proxy-channel-status.ts";
  *
  * const fetch = spy(resolvesNext([
  *   new Response(
- *     "<InputProxyChannelStatusList><InputProxyChannelStatus><id>1</id>" +
- *       "<online>true</online><chanDetectResult>connect</chanDetectResult>" +
+ *     "<InputProxyChannelStatusList><InputProxyChannelStatus><id>3</id>" +
+ *       "<online>false</online><chanDetectResult>netUnreachable</chanDetectResult>" +
  *       "</InputProxyChannelStatus></InputProxyChannelStatusList>",
  *   ),
  * ]));
  *
- * const status = await readInputProxyChannelStatus({
+ * const status = await read({
  *   baseUrl: "http://192.0.2.10",
  *   username: "admin",
  *   password: "hunter2",
  *   fetch,
- * });
+ * }, inputProxyChannelStatus);
  *
- * assertEquals(status.map((channel) => channel.online), [true]);
+ * assertEquals(status, [{ id: 3, online: false, chanDetectResult: "netUnreachable" }]);
  * assertEquals(
  *   fetch.calls[0].args[0],
  *   "http://192.0.2.10/ISAPI/ContentMgmt/InputProxy/channels/status",
  * );
  * ```
  */
-export async function readInputProxyChannelStatus(
-  options: RequestOptions,
-): Promise<InputProxyChannelStatus[]> {
-  const list = await readDocument(
-    options,
-    INPUT_PROXY_CHANNEL_STATUS_PATH,
-    channelStatusList,
-  );
-  return list.InputProxyChannelStatus.map(flattenGroups);
-}
+export const inputProxyChannelStatus: Resource<InputProxyChannelStatus[]> = {
+  path: "/ISAPI/ContentMgmt/InputProxy/channels/status",
+  codec: document({ InputProxyChannelStatus: repeated(channelStatus) }).map(
+    (list) => list.InputProxyChannelStatus.map(toInputProxyChannelStatus),
+  ),
+};
 
-function flattenGroups(
+function toInputProxyChannelStatus(
   {
     sourceInputPortDescriptor: source,
     SecurityStatus: security,

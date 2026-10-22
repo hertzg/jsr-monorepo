@@ -1,12 +1,9 @@
 import { assertEquals, assertThrows } from "@std/assert";
 import { resolvesNext, spy } from "@std/testing/mock";
-import {
-  parseDeviceTime,
-  parseTimeZoneOffset,
-  readDeviceTime,
-} from "./time.ts";
+import { read } from "../request.ts";
+import { deviceTime, parseTimeZoneOffset } from "./time.ts";
 
-Deno.test("parseDeviceTime reads an NTP-synced device document", () => {
+Deno.test("deviceTime.codec.parse reads an NTP-synced device document", () => {
   const xml = '<?xml version="1.0" encoding="UTF-8" ?>\n' +
     '<Time version="1.0" xmlns="http://www.hikvision.com/ver20/XMLSchema">\n' +
     "<timeMode>NTP</timeMode>\n" +
@@ -14,7 +11,7 @@ Deno.test("parseDeviceTime reads an NTP-synced device document", () => {
     "<timeZone>CST-4:00:00</timeZone>\n" +
     "</Time>\n";
 
-  assertEquals(parseDeviceTime(xml), {
+  assertEquals(deviceTime.codec.parse(xml), {
     timeMode: "NTP",
     localTime: "2026-10-22T11:33:52+04:00",
     timeZone: "CST-4:00:00",
@@ -22,14 +19,14 @@ Deno.test("parseDeviceTime reads an NTP-synced device document", () => {
   });
 });
 
-Deno.test("parseDeviceTime reads platformType from a platform-synced NVR", () => {
+Deno.test("deviceTime.codec.parse reads platformType from a platform-synced NVR", () => {
   const xml = "<Time><timeMode>platform</timeMode>" +
     "<platformType>EZVIZ</platformType>" +
     "<localTime>2026-10-22T11:33:52</localTime>" +
     "<timeZone>CST-1:00:00DST01:00:00,M3.5.0/02:00:00,M10.5.0/03:00:00</timeZone>" +
     "</Time>";
 
-  assertEquals(parseDeviceTime(xml), {
+  assertEquals(deviceTime.codec.parse(xml), {
     timeMode: "platform",
     localTime: "2026-10-22T11:33:52",
     timeZone: "CST-1:00:00DST01:00:00,M3.5.0/02:00:00,M10.5.0/03:00:00",
@@ -38,22 +35,22 @@ Deno.test("parseDeviceTime reads platformType from a platform-synced NVR", () =>
   });
 });
 
-Deno.test("parseDeviceTime leaves utcOffsetMinutes out when timeZone does not parse", () => {
+Deno.test("deviceTime.codec.parse leaves utcOffsetMinutes out when timeZone does not parse", () => {
   const xml = "<Time><timeMode>manual</timeMode>" +
     "<localTime>2026-10-22T11:33:52</localTime>" +
     "<timeZone>Asia/Tbilisi</timeZone></Time>";
 
-  assertEquals(parseDeviceTime(xml), {
+  assertEquals(deviceTime.codec.parse(xml), {
     timeMode: "manual",
     localTime: "2026-10-22T11:33:52",
     timeZone: "Asia/Tbilisi",
   });
 });
 
-Deno.test("parseDeviceTime throws when timeZone is missing", () => {
+Deno.test("deviceTime.codec.parse throws when timeZone is missing", () => {
   assertThrows(
     () =>
-      parseDeviceTime(
+      deviceTime.codec.parse(
         "<Time><timeMode>NTP</timeMode><localTime>2026-10-22T11:33:52</localTime></Time>",
       ),
     Error,
@@ -92,7 +89,7 @@ Deno.test("parseTimeZoneOffset returns undefined when there is no offset", () =>
   assertEquals(parseTimeZoneOffset("-4:00:00"), undefined);
 });
 
-Deno.test("readDeviceTime requests the time path", async () => {
+Deno.test("read(deviceTime) requests the time path", async () => {
   const fetch = spy(resolvesNext([
     new Response(
       "<Time><timeMode>NTP</timeMode><localTime>2026-10-22T11:33:52+04:00</localTime>" +
@@ -100,12 +97,12 @@ Deno.test("readDeviceTime requests the time path", async () => {
     ),
   ]));
 
-  const time = await readDeviceTime({
+  const time = await read({
     baseUrl: "http://192.0.2.21",
     username: "admin",
     password: "hunter2",
     fetch,
-  });
+  }, deviceTime);
 
   assertEquals(time.utcOffsetMinutes, 240);
   assertEquals(fetch.calls[0].args[0], "http://192.0.2.21/ISAPI/System/time");

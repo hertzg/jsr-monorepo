@@ -1,17 +1,10 @@
 import { assertEquals, assertThrows } from "@std/assert";
 import { resolvesNext, spy } from "@std/testing/mock";
-import { IsapiError } from "../isapi/status.ts";
-import {
-  fieldDetectionPath,
-  parseFieldDetection,
-  parseSmartRules,
-  readFieldDetection,
-  readSmartRules,
-  SMART_RULE_TYPES,
-  smartRulesPath,
-} from "./smart.ts";
+import { IsapiError } from "../status.ts";
+import { read } from "../request.ts";
+import { fieldDetection, SMART_RULE_TYPES, smartRules } from "./rules.ts";
 
-Deno.test("parseFieldDetection reads the channel, screen size and every region", () => {
+Deno.test("fieldDetection reads the channel, screen size and every region", () => {
   const xml = '<?xml version="1.0" encoding="UTF-8"?>\n' +
     '<FieldDetection version="2.0" xmlns="http://www.hikvision.com/ver20/XMLSchema">\n' +
     "<id>1</id>\n" +
@@ -55,7 +48,7 @@ Deno.test("parseFieldDetection reads the channel, screen size and every region",
     "<isSupportMultiScene>false</isSupportMultiScene>\n" +
     "</FieldDetection>\n";
 
-  assertEquals(parseFieldDetection(xml), {
+  assertEquals(fieldDetection().codec.parse(xml), {
     type: "FieldDetection",
     channel: 1,
     enabled: true,
@@ -89,7 +82,7 @@ Deno.test("parseFieldDetection reads the channel, screen size and every region",
   });
 });
 
-Deno.test("parseFieldDetection reads misinfo filters at the root and per region, and detectionTarget all", () => {
+Deno.test("fieldDetection reads misinfo filters at the root and per region, and detectionTarget all", () => {
   const xml = '<?xml version="1.0" encoding="UTF-8"?>\n' +
     '<FieldDetection version="2.0" xmlns="http://www.hikvision.com/ver20/XMLSchema">\n' +
     "<id>3</id>\n" +
@@ -123,7 +116,7 @@ Deno.test("parseFieldDetection reads misinfo filters at the root and per region,
     "<vehicleMisinfoFilterEnabled>true</vehicleMisinfoFilterEnabled>\n" +
     "</FieldDetection>\n";
 
-  assertEquals(parseFieldDetection(xml), {
+  assertEquals(fieldDetection().codec.parse(xml), {
     type: "FieldDetection",
     channel: 3,
     enabled: true,
@@ -145,7 +138,7 @@ Deno.test("parseFieldDetection reads misinfo filters at the root and per region,
   });
 });
 
-Deno.test("parseSmartRules finds a regionEntrance list and regions by the root name", () => {
+Deno.test("smartRules finds a regionEntrance list and regions by the root name", () => {
   const xml = '<?xml version="1.0" encoding="UTF-8"?>\n' +
     '<RegionEntrance version="2.0" xmlns="http://www.hikvision.com/ver20/XMLSchema">\n' +
     "<id>2</id>\n" +
@@ -180,47 +173,50 @@ Deno.test("parseSmartRules finds a regionEntrance list and regions by the root n
     "<isSupportMultiScene>false</isSupportMultiScene>\n" +
     "</RegionEntrance>\n";
 
-  assertEquals(parseSmartRules(xml), {
-    type: "RegionEntrance",
-    channel: 2,
-    enabled: false,
-    normalizedScreenSize: { width: 1000, height: 1000 },
-    regions: [
-      {
-        id: 1,
-        enabled: true,
-        sensitivityLevel: 50,
-        coordinates: [{ x: 120, y: 130 }, { x: 880, y: 130 }, {
-          x: 880,
-          y: 870,
-        }, { x: 120, y: 870 }],
-        detectionTarget: ["vehicle"],
-        alarmConfidence: "high",
-      },
-      {
-        id: 2,
-        enabled: false,
-        sensitivityLevel: 50,
-        coordinates: [],
-        detectionTarget: ["human", "vehicle"],
-      },
-    ],
-  });
+  assertEquals(
+    smartRules({ type: "regionEntrance", channel: 2 }).codec.parse(xml),
+    {
+      type: "RegionEntrance",
+      channel: 2,
+      enabled: false,
+      normalizedScreenSize: { width: 1000, height: 1000 },
+      regions: [
+        {
+          id: 1,
+          enabled: true,
+          sensitivityLevel: 50,
+          coordinates: [{ x: 120, y: 130 }, { x: 880, y: 130 }, {
+            x: 880,
+            y: 870,
+          }, { x: 120, y: 870 }],
+          detectionTarget: ["vehicle"],
+          alarmConfidence: "high",
+        },
+        {
+          id: 2,
+          enabled: false,
+          sensitivityLevel: 50,
+          coordinates: [],
+          detectionTarget: ["human", "vehicle"],
+        },
+      ],
+    },
+  );
 });
 
-Deno.test("parseSmartRules reads a document without regions", () => {
+Deno.test("smartRules reads a document without regions", () => {
   assertEquals(
-    parseSmartRules(
+    smartRules({ type: "loitering" }).codec.parse(
       "<Loitering><id>5</id><enabled>false</enabled></Loitering>",
     ),
     { type: "Loitering", channel: 5, enabled: false, regions: [] },
   );
 });
 
-Deno.test("parseFieldDetection throws IsapiError for a device without the feature", () => {
+Deno.test("fieldDetection throws IsapiError for a device without the feature", () => {
   assertThrows(
     () =>
-      parseFieldDetection(
+      fieldDetection().codec.parse(
         "<ResponseStatus><requestURL>/ISAPI/Smart/FieldDetection/1</requestURL>" +
           "<statusCode>4</statusCode><statusString>Invalid Operation</statusString>" +
           "<subStatusCode>notSupport</subStatusCode></ResponseStatus>",
@@ -230,21 +226,24 @@ Deno.test("parseFieldDetection throws IsapiError for a device without the featur
   );
 });
 
-Deno.test("smart rule paths put the type and the channel in the path", () => {
+Deno.test("smart rule resources put the type and the channel in the path", () => {
   assertEquals(
-    smartRulesPath({ type: "regionExiting", channel: 7 }),
+    smartRules({ type: "regionExiting", channel: 7 }).path,
     "/ISAPI/Smart/regionExiting/7",
   );
   assertEquals(
-    smartRulesPath({ type: "unattendedBaggage" }),
+    smartRules({ type: "unattendedBaggage" }).path,
     "/ISAPI/Smart/unattendedBaggage/1",
   );
   assertEquals(
-    smartRulesPath({ type: "FieldDetection", channel: 2 }),
+    smartRules({ type: "FieldDetection", channel: 2 }).path,
     "/ISAPI/Smart/FieldDetection/2",
   );
-  assertEquals(fieldDetectionPath(2), "/ISAPI/Smart/FieldDetection/2");
-  assertEquals(fieldDetectionPath(), "/ISAPI/Smart/FieldDetection/1");
+  assertEquals(
+    fieldDetection({ channel: 2 }).path,
+    "/ISAPI/Smart/FieldDetection/2",
+  );
+  assertEquals(fieldDetection().path, "/ISAPI/Smart/FieldDetection/1");
 });
 
 Deno.test("SMART_RULE_TYPES lowercases only the two detection event types", () => {
@@ -254,7 +253,7 @@ Deno.test("SMART_RULE_TYPES lowercases only the two detection event types", () =
   assertEquals(SMART_RULE_TYPES.attendedBaggage, "attendedBaggage");
 });
 
-Deno.test("readSmartRules and readFieldDetection request the channel they are given", async () => {
+Deno.test("read requests smartRules and fieldDetection resources for the channel they are given", async () => {
   const fetch = spy(resolvesNext([
     new Response("<Parking><id>4</id><enabled>true</enabled></Parking>"),
     new Response("<Loitering><id>1</id><enabled>true</enabled></Loitering>"),
@@ -269,12 +268,12 @@ Deno.test("readSmartRules and readFieldDetection request the channel they are gi
     fetch,
   };
 
-  const parking = await readSmartRules(options, {
-    type: "parking",
-    channel: 4,
-  });
-  const loitering = await readSmartRules(options, { type: "loitering" });
-  const field = await readFieldDetection(options, 2);
+  const parking = await read(
+    options,
+    smartRules({ type: "parking", channel: 4 }),
+  );
+  const loitering = await read(options, smartRules({ type: "loitering" }));
+  const field = await read(options, fieldDetection({ channel: 2 }));
 
   assertEquals(parking.type, "Parking");
   assertEquals(parking.channel, 4);

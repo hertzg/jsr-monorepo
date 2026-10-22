@@ -27,7 +27,7 @@
  *
  * @example Print motion alerts until Ctrl-C
  * ```ts ignore
- * import { openAlertStream } from "./stream.ts";
+ * import { openAlertStream } from "./alert-stream.ts";
  *
  * const controller = new AbortController();
  * process.on("SIGINT", () => controller.abort());
@@ -49,13 +49,9 @@
  * @module
  */
 
-import {
-  createPartsStream,
-  parseBoundary,
-  type Part,
-} from "../multipart/parts.ts";
-import { request, type RequestOptions } from "../isapi/request.ts";
-import { parseIsapi } from "../isapi/status.ts";
+import { createPartsStream, parseBoundary, type Part } from "./multipart.ts";
+import { request, type RequestOptions } from "../request.ts";
+import { parseIsapi } from "../status.ts";
 import { type Alert, parseAlert } from "./alert.ts";
 
 /** The alert stream path. */
@@ -82,7 +78,7 @@ export type AlertStreamOptions = RequestOptions & {
  * ```ts
  * import { assertEquals } from "@std/assert";
  * import { resolvesNext, spy } from "@std/testing/mock";
- * import { openAlertStream } from "./stream.ts";
+ * import { openAlertStream } from "./alert-stream.ts";
  *
  * const xml = "<EventNotificationAlert><dynChannelID>3</dynChannelID>" +
  *   "<dateTime>2026-10-21T20:44:39</dateTime><eventType>VMD</eventType>" +

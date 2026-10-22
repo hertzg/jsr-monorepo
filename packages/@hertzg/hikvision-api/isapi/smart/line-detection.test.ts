@@ -1,13 +1,10 @@
 import { assertEquals, assertThrows } from "@std/assert";
 import { resolvesNext, spy } from "@std/testing/mock";
-import { IsapiError } from "../isapi/status.ts";
-import {
-  lineDetectionPath,
-  parseLineDetection,
-  readLineDetection,
-} from "./line-detection.ts";
+import { IsapiError } from "../status.ts";
+import { read } from "../request.ts";
+import { lineDetection } from "./line-detection.ts";
 
-Deno.test("parseLineDetection reads a document without a namespace and its lines", () => {
+Deno.test("lineDetection reads a document without a namespace and its lines", () => {
   const xml = '<?xml version="1.0" encoding="UTF-8"?>\n' +
     "<LineDetection>\n" +
     "<id>1</id>\n" +
@@ -35,7 +32,7 @@ Deno.test("parseLineDetection reads a document without a namespace and its lines
     "<recogRuleType>vectorMode</recogRuleType>\n" +
     "</LineDetection>\n";
 
-  assertEquals(parseLineDetection(xml), {
+  assertEquals(lineDetection().codec.parse(xml), {
     channel: 1,
     enabled: true,
     normalizedScreenSize: { width: 1000, height: 1000 },
@@ -51,19 +48,19 @@ Deno.test("parseLineDetection reads a document without a namespace and its lines
   });
 });
 
-Deno.test("parseLineDetection reads a document without lines", () => {
+Deno.test("lineDetection reads a document without lines", () => {
   assertEquals(
-    parseLineDetection(
+    lineDetection().codec.parse(
       "<LineDetection><id>2</id><enabled>false</enabled></LineDetection>",
     ),
     { channel: 2, enabled: false, lines: [] },
   );
 });
 
-Deno.test("parseLineDetection throws IsapiError for a device without the feature", () => {
+Deno.test("lineDetection throws IsapiError for a device without the feature", () => {
   assertThrows(
     () =>
-      parseLineDetection(
+      lineDetection().codec.parse(
         "<ResponseStatus><requestURL>/ISAPI/Smart/LineDetection/1</requestURL>" +
           "<statusCode>4</statusCode><statusString>Invalid Operation</statusString>" +
           "<subStatusCode>notSupport</subStatusCode></ResponseStatus>",
@@ -73,24 +70,27 @@ Deno.test("parseLineDetection throws IsapiError for a device without the feature
   );
 });
 
-Deno.test("lineDetectionPath puts the channel in the path", () => {
-  assertEquals(lineDetectionPath(), "/ISAPI/Smart/LineDetection/1");
-  assertEquals(lineDetectionPath(3), "/ISAPI/Smart/LineDetection/3");
+Deno.test("lineDetection puts the channel in the path", () => {
+  assertEquals(lineDetection().path, "/ISAPI/Smart/LineDetection/1");
+  assertEquals(
+    lineDetection({ channel: 3 }).path,
+    "/ISAPI/Smart/LineDetection/3",
+  );
 });
 
-Deno.test("readLineDetection requests the channel it is given", async () => {
+Deno.test("read requests lineDetection for the channel it is given", async () => {
   const fetch = spy(resolvesNext([
     new Response(
       "<LineDetection><id>3</id><enabled>true</enabled></LineDetection>",
     ),
   ]));
 
-  const line = await readLineDetection({
+  const line = await read({
     baseUrl: "http://192.0.2.10",
     username: "admin",
     password: "hunter2",
     fetch,
-  }, 3);
+  }, lineDetection({ channel: 3 }));
 
   assertEquals(line, { channel: 3, enabled: true, lines: [] });
   assertEquals(

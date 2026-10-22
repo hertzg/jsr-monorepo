@@ -1,20 +1,24 @@
-# ADR 0003 - The package has one entry point
+# ADR 0003 - The package has one entry point and mirrors the ISAPI tree inside
 
 `deno.json` exports only `"."`. `mod.ts` holds `createClient`, the `Client`
-type, and re-exports the types and `parse*` functions a consumer may need.
-Everything else (`isapi/`, `multipart/`, `events/`, `config/`) is internal
-and may be renamed freely. JSDoc examples in internal modules import
-relatively.
+type, and re-exports the resources and types a consumer may need.
+Everything under `isapi/` is internal and may be renamed freely; JSDoc
+examples there import relatively.
 
-```jsonc
-// before: 16 sub-paths, 16 stability contracts
-"exports": { ".": "./mod.ts", "./events/alert": "./events/alert.ts", … }
-// after
-"exports": "./mod.ts"
+Inside, folders follow the URL tree, and every module is one resource:
+
+```
+isapi/system/device-info.ts              /ISAPI/System/deviceInfo
+isapi/content-mgmt/motion-detection.ts   /ISAPI/ContentMgmt/InputProxy/channels/{n}/video/motionDetection
+isapi/smart/rules.ts                     /ISAPI/Smart/{type}/{channel}
+isapi/event/alert-stream.ts              /ISAPI/Event/notification/alertStream
+export const deviceInfo: Resource<DeviceInfo> = { path, codec };
+export function motionDetection(target): Resource<MotionDetection>;
 ```
 
-Nobody imports those files directly. The multipart reader is how the stream
-arrives, not a feature.
+Sixteen sub-paths were sixteen stability contracts for files nobody imports
+directly, and a folder called `config` named what one consumer does with
+the documents, not what they are.
 
 Ruled out:
 

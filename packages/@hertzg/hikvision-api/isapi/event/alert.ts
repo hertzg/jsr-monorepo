@@ -28,7 +28,7 @@
  *   motion ends when the posts stop. How long to wait is the consumer's
  *   call; {@link Alert.at} is the arrival time to measure it from.
  * - Smart events (`fielddetection`, `linedetection` and the other rules in
- *   `config/smart`) do post `eventState inactive` on some firmware, and
+ *   `smart/rules.ts`) do post `eventState inactive` on some firmware, and
  *   carry the regions that fired in a `<DetectionRegionList>`.
  * - The heartbeat is `eventType videoloss`, `eventState inactive`, every
  *   10 seconds. An NVR goes quiet on heartbeats while alerts flow, so a
@@ -80,7 +80,7 @@ import {
   points,
   text,
   tokens,
-} from "../isapi/document.ts";
+} from "../document.ts";
 
 /**
  * Where a smart event saw its target, from `<TargetRect>`.
@@ -108,7 +108,7 @@ export type TargetRect = {
  * be empty, the `<TargetRect>` of what was seen and the `<detectionTarget>`.
  */
 export type AlertRegion = {
-  /** `<regionID>`, when present. Rules count from 0 here, from 1 in `config/smart`. */
+  /** `<regionID>`, when present. Rules count from 0 here, from 1 in `smart/rules.ts`. */
   id?: number;
   /** `<sensitivityLevel>`, when present. */
   sensitivityLevel?: number;

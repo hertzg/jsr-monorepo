@@ -24,9 +24,9 @@
  * @example Parse a channel list
  * ```ts
  * import { assertEquals } from "@std/assert";
- * import { parseInputProxyChannels } from "./channels.ts";
+ * import { inputProxyChannels } from "./input-proxy-channels.ts";
  *
- * const channels = parseInputProxyChannels(
+ * const channels = inputProxyChannels.codec.parse(
  *   "<InputProxyChannelList><InputProxyChannel><id>1</id><name>Camera 01</name>" +
  *     "<sourceInputPortDescriptor><proxyProtocol>HIKVISION</proxyProtocol>" +
  *     "<ipAddress>192.0.2.21</ipAddress><managePortNo>8000</managePortNo>" +
@@ -53,12 +53,8 @@ import {
   optional,
   repeated,
   text,
-} from "../isapi/document.ts";
-import { readDocument, type RequestOptions } from "../isapi/request.ts";
-
-/** The input proxy channel list path. */
-export const INPUT_PROXY_CHANNELS_PATH =
-  "/ISAPI/ContentMgmt/InputProxy/channels";
+} from "../document.ts";
+import type { Resource } from "../request.ts";
 
 /** One `<InputProxyChannel>`: an IP camera as the NVR sees it. */
 export type InputProxyChannel = {
@@ -87,75 +83,45 @@ const channel = obj({
   })),
 });
 
-const channelList = document({ InputProxyChannel: repeated(channel) });
-
 /**
- * Parses an `<InputProxyChannelList>` document.
+ * The channel list resource, `/ISAPI/ContentMgmt/InputProxy/channels`.
  *
- * @param xml The document text.
- * @returns The channels in document order.
- * @throws {IsapiError} When the request fails: a status outside 2xx, or a failing `<ResponseStatus>` on any status.
- *
- * @example A channel without a source descriptor
- * ```ts
- * import { assertEquals } from "@std/assert";
- * import { parseInputProxyChannels } from "./channels.ts";
- *
- * const channels = parseInputProxyChannels(
- *   "<InputProxyChannelList><InputProxyChannel><id>2</id><name>Camera 02</name>" +
- *     "</InputProxyChannel></InputProxyChannelList>",
- * );
- *
- * assertEquals(channels, [{ id: 2, name: "Camera 02" }]);
- * ```
- */
-export function parseInputProxyChannels(xml: string): InputProxyChannel[] {
-  return channelList.parse(xml).InputProxyChannel.map(flattenSource);
-}
-
-/**
- * Reads the channel list from an NVR.
- *
- * @param options Where the NVR is and how to log in.
- * @returns The channels in document order.
- * @throws {IsapiError} When the request fails: a status outside 2xx, or a failing `<ResponseStatus>` on any status.
+ * The channels come in document order; a channel without a source descriptor
+ * has only `id` and `name`.
  *
  * @example Read through a stubbed fetch
  * ```ts
  * import { assertEquals } from "@std/assert";
  * import { resolvesNext, spy } from "@std/testing/mock";
- * import { readInputProxyChannels } from "./channels.ts";
+ * import { read } from "../request.ts";
+ * import { inputProxyChannels } from "./input-proxy-channels.ts";
  *
  * const fetch = spy(resolvesNext([
  *   new Response(
- *     "<InputProxyChannelList><InputProxyChannel><id>1</id><name>Camera 01</name>" +
+ *     "<InputProxyChannelList><InputProxyChannel><id>2</id><name>Camera 02</name>" +
  *       "</InputProxyChannel></InputProxyChannelList>",
  *   ),
  * ]));
  *
- * const channels = await readInputProxyChannels({
+ * const channels = await read({
  *   baseUrl: "http://192.0.2.10",
  *   username: "admin",
  *   password: "hunter2",
  *   fetch,
- * });
+ * }, inputProxyChannels);
  *
- * assertEquals(channels.map((channel) => channel.name), ["Camera 01"]);
+ * assertEquals(channels, [{ id: 2, name: "Camera 02" }]);
  * assertEquals(fetch.calls[0].args[0], "http://192.0.2.10/ISAPI/ContentMgmt/InputProxy/channels");
  * ```
  */
-export async function readInputProxyChannels(
-  options: RequestOptions,
-): Promise<InputProxyChannel[]> {
-  const list = await readDocument(
-    options,
-    INPUT_PROXY_CHANNELS_PATH,
-    channelList,
-  );
-  return list.InputProxyChannel.map(flattenSource);
-}
+export const inputProxyChannels: Resource<InputProxyChannel[]> = {
+  path: "/ISAPI/ContentMgmt/InputProxy/channels",
+  codec: document({ InputProxyChannel: repeated(channel) }).map((list) =>
+    list.InputProxyChannel.map(toInputProxyChannel)
+  ),
+};
 
-function flattenSource(
+function toInputProxyChannel(
   { sourceInputPortDescriptor: source, ...fields }: FieldValue<typeof channel>,
 ): InputProxyChannel {
   return { ...fields, ...source };

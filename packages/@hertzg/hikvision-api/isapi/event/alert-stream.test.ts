@@ -1,7 +1,7 @@
 import { assertEquals, assertRejects } from "@std/assert";
 import { assertSpyCalls, resolvesNext, spy } from "@std/testing/mock";
-import { IsapiError } from "../isapi/status.ts";
-import { openAlertStream } from "./stream.ts";
+import { IsapiError } from "../status.ts";
+import { openAlertStream } from "./alert-stream.ts";
 
 const OPTIONS = {
   baseUrl: "http://192.0.2.10",

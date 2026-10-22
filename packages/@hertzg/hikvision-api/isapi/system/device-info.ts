@@ -17,9 +17,9 @@
  * @example Parse a device info document
  * ```ts
  * import { assertEquals } from "@std/assert";
- * import { parseDeviceInfo } from "./device-info.ts";
+ * import { deviceInfo } from "./device-info.ts";
  *
- * const info = parseDeviceInfo(
+ * const info = deviceInfo.codec.parse(
  *   "<DeviceInfo><deviceName>Embedded Net DVR</deviceName>" +
  *     "<model>DS-7608NI-Q2/8P</model><firmwareVersion>V4.75.207</firmwareVersion>" +
  *     "<deviceType>NVR</deviceType></DeviceInfo>",
@@ -36,11 +36,8 @@
  * @module
  */
 
-import { document, optional, text } from "../isapi/document.ts";
-import { readDocument, type RequestOptions } from "../isapi/request.ts";
-
-/** The device info path. */
-export const DEVICE_INFO_PATH = "/ISAPI/System/deviceInfo";
+import { document, optional, text } from "../document.ts";
+import type { Resource } from "../request.ts";
 
 /** The fields of `<DeviceInfo>`. */
 export type DeviceInfo = {
@@ -62,55 +59,19 @@ export type DeviceInfo = {
   deviceType: string;
 };
 
-const deviceInfo = document({
-  model: text(),
-  firmwareVersion: text(),
-  deviceType: text(),
-  deviceName: optional(text()),
-  deviceID: optional(text()),
-  serialNumber: optional(text()),
-  macAddress: optional(text()),
-  firmwareReleasedDate: optional(text()),
-});
-
 /**
- * Parses a `<DeviceInfo>` document.
+ * The device info resource, `/ISAPI/System/deviceInfo`.
  *
- * @param xml The document text.
- * @returns The device info; `model`, `firmwareVersion` and `deviceType` are
- *   always present.
- * @throws {IsapiError} When the request fails: a status outside 2xx, or a failing `<ResponseStatus>` on any status.
- * @throws {Error} When a required field is missing.
- *
- * @example Optional fields are left out when absent
- * ```ts
- * import { assertEquals } from "@std/assert";
- * import { parseDeviceInfo } from "./device-info.ts";
- *
- * const info = parseDeviceInfo(
- *   "<DeviceInfo><model>DS-2CD2043G2-I</model>" +
- *     "<firmwareVersion>V5.7.3</firmwareVersion><deviceType>IPCamera</deviceType></DeviceInfo>",
- * );
- *
- * assertEquals(info.serialNumber, undefined);
- * ```
- */
-export function parseDeviceInfo(xml: string): DeviceInfo {
-  return deviceInfo.parse(xml);
-}
-
-/**
- * Reads the device info from a device.
- *
- * @param options Where the device is and how to log in.
- * @returns The device info.
- * @throws {IsapiError} When the request fails: a status outside 2xx, or a failing `<ResponseStatus>` on any status.
+ * `model`, `firmwareVersion` and `deviceType` are always present; the rest are
+ * left out when the device does not send them. Parsing throws an `Error` when a
+ * required field is missing and an `IsapiError` on a failing `<ResponseStatus>`.
  *
  * @example Read through a stubbed fetch
  * ```ts
  * import { assertEquals } from "@std/assert";
  * import { resolvesNext, spy } from "@std/testing/mock";
- * import { readDeviceInfo } from "./device-info.ts";
+ * import { read } from "../request.ts";
+ * import { deviceInfo } from "./device-info.ts";
  *
  * const fetch = spy(resolvesNext([
  *   new Response(
@@ -119,17 +80,28 @@ export function parseDeviceInfo(xml: string): DeviceInfo {
  *   ),
  * ]));
  *
- * const info = await readDeviceInfo({
+ * const info = await read({
  *   baseUrl: "http://192.0.2.21",
  *   username: "admin",
  *   password: "hunter2",
  *   fetch,
- * });
+ * }, deviceInfo);
  *
  * assertEquals(info.deviceType, "IPCamera");
+ * assertEquals(info.serialNumber, undefined);
  * assertEquals(fetch.calls[0].args[0], "http://192.0.2.21/ISAPI/System/deviceInfo");
  * ```
  */
-export function readDeviceInfo(options: RequestOptions): Promise<DeviceInfo> {
-  return readDocument(options, DEVICE_INFO_PATH, deviceInfo);
-}
+export const deviceInfo: Resource<DeviceInfo> = {
+  path: "/ISAPI/System/deviceInfo",
+  codec: document({
+    model: text(),
+    firmwareVersion: text(),
+    deviceType: text(),
+    deviceName: optional(text()),
+    deviceID: optional(text()),
+    serialNumber: optional(text()),
+    macAddress: optional(text()),
+    firmwareReleasedDate: optional(text()),
+  }),
+};

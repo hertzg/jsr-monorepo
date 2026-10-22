@@ -1,9 +1,10 @@
 import { assertEquals, assertRejects, assertThrows } from "@std/assert";
 import { resolvesNext, spy } from "@std/testing/mock";
-import { IsapiError } from "../isapi/status.ts";
-import { parseDeviceInfo, readDeviceInfo } from "./device-info.ts";
+import { IsapiError } from "../status.ts";
+import { read } from "../request.ts";
+import { deviceInfo } from "./device-info.ts";
 
-Deno.test("parseDeviceInfo reads every field of an NVR document", () => {
+Deno.test("deviceInfo.codec.parse reads every field of an NVR document", () => {
   const xml = '<?xml version="1.0" encoding="UTF-8" ?>\n' +
     '<DeviceInfo version="2.0" xmlns="http://www.hikvision.com/ver20/XMLSchema">\n' +
     "<deviceName>Embedded Net DVR</deviceName>\n" +
@@ -17,7 +18,7 @@ Deno.test("parseDeviceInfo reads every field of an NVR document", () => {
     "<telecontrolID>88</telecontrolID>\n" +
     "</DeviceInfo>\n";
 
-  assertEquals(parseDeviceInfo(xml), {
+  assertEquals(deviceInfo.codec.parse(xml), {
     deviceName: "Embedded Net DVR",
     deviceID: "00000000-0000-0000-0000-000000000000",
     model: "DS-7608NI-Q2/8P",
@@ -29,10 +30,10 @@ Deno.test("parseDeviceInfo reads every field of an NVR document", () => {
   });
 });
 
-Deno.test("parseDeviceInfo throws when a required field is missing", () => {
+Deno.test("deviceInfo.codec.parse throws when a required field is missing", () => {
   assertThrows(
     () =>
-      parseDeviceInfo(
+      deviceInfo.codec.parse(
         "<DeviceInfo><model>X</model><deviceType>NVR</deviceType></DeviceInfo>",
       ),
     Error,
@@ -40,7 +41,7 @@ Deno.test("parseDeviceInfo throws when a required field is missing", () => {
   );
 });
 
-Deno.test("readDeviceInfo surfaces a ResponseStatus as IsapiError", async () => {
+Deno.test("read(deviceInfo) surfaces a ResponseStatus as IsapiError", async () => {
   const fetch = spy(resolvesNext([
     new Response(
       "<ResponseStatus><statusCode>3</statusCode><subStatusCode>deviceError</subStatusCode></ResponseStatus>",
@@ -49,12 +50,12 @@ Deno.test("readDeviceInfo surfaces a ResponseStatus as IsapiError", async () => 
 
   await assertRejects(
     () =>
-      readDeviceInfo({
+      read({
         baseUrl: "http://192.0.2.10",
         username: "admin",
         password: "hunter2",
         fetch,
-      }),
+      }, deviceInfo),
     IsapiError,
     "deviceError",
   );

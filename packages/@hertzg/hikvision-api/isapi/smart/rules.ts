@@ -6,8 +6,8 @@
  * is the video input channel: 1..N on an NVR, 1 on a camera. The region
  * rules share one document layout named after the type: a `<RegionEntrance>`
  * root holds a `<RegionEntranceRegionList>` of `<RegionEntranceRegion>`s,
- * and so on for each type, so {@link parseSmartRules} reads any of them.
- * Crossing lines use a different layout, read by `parseLineDetection` in
+ * and so on for each type, so {@link smartRules} reads any of them.
+ * Crossing lines use a different layout, read by `lineDetection` in
  * `line-detection.ts`. Every shape is drawn in a normalized screen space,
  * 1000 x 1000 by default. A device without the feature answers a
  * `<ResponseStatus>` with `subStatusCode notSupport`.
@@ -43,9 +43,9 @@
  * @example Parse an intrusion region
  * ```ts
  * import { assertEquals } from "@std/assert";
- * import { parseFieldDetection } from "./smart.ts";
+ * import { fieldDetection } from "./rules.ts";
  *
- * const field = parseFieldDetection(
+ * const field = fieldDetection().codec.parse(
  *   "<FieldDetection><id>1</id><enabled>true</enabled>" +
  *     "<FieldDetectionRegionList><FieldDetectionRegion><id>1</id><enabled>false</enabled>" +
  *     "<sensitivityLevel>45</sensitivityLevel><RegionCoordinatesList>" +
@@ -74,6 +74,7 @@ import {
   bool,
   type Decoded,
   decodeFields,
+  defineDocument,
   type Field,
   type FieldValue,
   int,
@@ -84,9 +85,8 @@ import {
   points,
   text,
   tokens,
-} from "../isapi/document.ts";
-import { type RequestOptions, requestXml } from "../isapi/request.ts";
-import { parseIsapi } from "../isapi/status.ts";
+} from "../document.ts";
+import type { Resource } from "../request.ts";
 
 /**
  * The smart rule types by path segment, each mapped to the `<eventType>`
@@ -94,12 +94,12 @@ import { parseIsapi } from "../isapi/status.ts";
  *
  * `FieldDetection` and `LineDetection` post all-lowercase event types; the
  * rest keep their camel case. Every type but `LineDetection` is a region
- * rule that {@link parseSmartRules} reads.
+ * rule that {@link smartRules} reads.
  *
  * @example Match an alert to its rule type
  * ```ts
  * import { assertEquals } from "@std/assert";
- * import { SMART_RULE_TYPES } from "./smart.ts";
+ * import { SMART_RULE_TYPES } from "./rules.ts";
  *
  * assertEquals(SMART_RULE_TYPES.FieldDetection, "fielddetection");
  * assertEquals(SMART_RULE_TYPES.regionEntrance, "regionEntrance");
@@ -190,8 +190,8 @@ export type FieldDetection = SmartRules;
  * @example Describe a crossing line with them
  * ```ts
  * import { assertEquals } from "@std/assert";
- * import { document, optional, text } from "../isapi/document.ts";
- * import { ruleFields } from "./smart.ts";
+ * import { document, optional, text } from "../document.ts";
+ * import { ruleFields } from "./rules.ts";
  *
  * const line = document({ ...ruleFields, directionSensitivity: optional(text()) });
  *
@@ -215,8 +215,8 @@ export const ruleFields = {
  * @example Read the flags of a root
  * ```ts
  * import { assertEquals } from "@std/assert";
- * import { document } from "../isapi/document.ts";
- * import { misinfoFilterFields } from "./smart.ts";
+ * import { document } from "../document.ts";
+ * import { misinfoFilterFields } from "./rules.ts";
  *
  * const flags = document(misinfoFilterFields);
  *
@@ -238,7 +238,7 @@ export const misinfoFilterFields = {
  * ```ts
  * import { assertEquals } from "@std/assert";
  * import { parse } from "@std/xml";
- * import { screenSize } from "./smart.ts";
+ * import { screenSize } from "./rules.ts";
  *
  * const root = parse(
  *   "<LineDetection><normalizedScreenSize>" +
@@ -271,9 +271,9 @@ export const screenSize: Field<NormalizedScreenSize> = {
  * @example Map a decoded line item
  * ```ts
  * import { assertEquals } from "@std/assert";
- * import { mapRule } from "./smart.ts";
+ * import { toRule } from "./rules.ts";
  *
- * const line = mapRule(
+ * const line = toRule(
  *   { id: 2, sensitivityLevel: 70, directionSensitivity: "any" },
  *   [{ x: 100, y: 500 }, { x: 900, y: 500 }],
  * );
@@ -288,7 +288,7 @@ export const screenSize: Field<NormalizedScreenSize> = {
  * });
  * ```
  */
-export function mapRule<F extends Decoded<typeof ruleFields>>(
+export function toRule<F extends Decoded<typeof ruleFields>>(
   fields: F,
   coordinates: Point[],
 ): F & SmartRule {
@@ -298,57 +298,26 @@ export function mapRule<F extends Decoded<typeof ruleFields>>(
 }
 
 /**
- * The path of a region rule document.
+ * The region rule document of one type and channel.
  *
  * @param rule The rule's path segment and video channel; the channel defaults to `1`.
- * @returns The ISAPI path.
+ * @returns The resource: its path and the codec that reads any region rule by its root name.
  *
  * @example Loitering on an NVR's third channel
  * ```ts
  * import { assertEquals } from "@std/assert";
- * import { smartRulesPath } from "./smart.ts";
+ * import { smartRules } from "./rules.ts";
  *
- * assertEquals(smartRulesPath({ type: "loitering", channel: 3 }), "/ISAPI/Smart/loitering/3");
- * assertEquals(smartRulesPath({ type: "FieldDetection" }), "/ISAPI/Smart/FieldDetection/1");
+ * assertEquals(smartRules({ type: "regionEntrance", channel: 2 }).path, "/ISAPI/Smart/regionEntrance/2");
+ * assertEquals(smartRules({ type: "FieldDetection" }).path, "/ISAPI/Smart/FieldDetection/1");
  * ```
- */
-export function smartRulesPath(
-  rule: { type: SmartRuleType; channel?: number },
-): string {
-  return `/ISAPI/Smart/${rule.type}/${rule.channel ?? 1}`;
-}
-
-/**
- * The path of a field detection document.
- *
- * @param channel The video channel. Defaults to `1`.
- * @returns The ISAPI path.
- *
- * @example The first channel
- * ```ts
- * import { assertEquals } from "@std/assert";
- * import { fieldDetectionPath } from "./smart.ts";
- *
- * assertEquals(fieldDetectionPath(), "/ISAPI/Smart/FieldDetection/1");
- * ```
- */
-export function fieldDetectionPath(channel = 1): string {
-  return smartRulesPath({ type: "FieldDetection", channel });
-}
-
-/**
- * Parses a region rule document of any type by its root name.
- *
- * @param xml The document text.
- * @returns The rule and its regions.
- * @throws {IsapiError} When the request fails: a status outside 2xx, or a failing `<ResponseStatus>` on any status.
  *
  * @example Parse a region entrance rule
  * ```ts
  * import { assertEquals } from "@std/assert";
- * import { parseSmartRules } from "./smart.ts";
+ * import { smartRules } from "./rules.ts";
  *
- * const rules = parseSmartRules(
+ * const rules = smartRules({ type: "regionEntrance", channel: 2 }).codec.parse(
  *   "<RegionEntrance><id>2</id><enabled>true</enabled>" +
  *     "<RegionEntranceRegionList><RegionEntranceRegion><id>1</id><enabled>true</enabled>" +
  *     "<sensitivityLevel>50</sensitivityLevel><RegionCoordinatesList>" +
@@ -372,27 +341,54 @@ export function fieldDetectionPath(channel = 1): string {
  *   }],
  * });
  * ```
+ *
+ * @example Read through a stubbed fetch
+ * ```ts
+ * import { assertEquals } from "@std/assert";
+ * import { resolvesNext, spy } from "@std/testing/mock";
+ * import { read } from "../request.ts";
+ * import { smartRules } from "./rules.ts";
+ *
+ * const fetch = spy(resolvesNext([
+ *   new Response("<Loitering><id>4</id><enabled>false</enabled></Loitering>"),
+ * ]));
+ *
+ * const rules = await read({
+ *   baseUrl: "http://192.0.2.10",
+ *   username: "admin",
+ *   password: "hunter2",
+ *   fetch,
+ * }, smartRules({ type: "loitering", channel: 4 }));
+ *
+ * assertEquals(rules, { type: "Loitering", channel: 4, enabled: false, regions: [] });
+ * assertEquals(fetch.calls[0].args[0], "http://192.0.2.10/ISAPI/Smart/loitering/4");
+ * ```
  */
-export function parseSmartRules(xml: string): SmartRules {
-  return decodeSmartRules(parseIsapi(xml));
+export function smartRules(
+  rule: { type: SmartRuleType; channel?: number },
+): Resource<SmartRules> {
+  return {
+    path: `/ISAPI/Smart/${rule.type}/${rule.channel ?? 1}`,
+    codec: smartRulesCodec,
+  };
 }
 
 /**
- * Parses a `<FieldDetection>` document.
+ * The field detection (intrusion) document of one channel.
  *
- * @param xml The document text.
- * @returns The rule and its regions.
- * @throws {IsapiError} When the request fails: a status outside 2xx, or a failing `<ResponseStatus>` on any status.
+ * @param options Which channel; defaults to `1`.
+ * @returns The resource: its path and the codec that reads it.
  *
  * @example A device without the feature
  * ```ts
- * import { assertThrows } from "@std/assert";
- * import { IsapiError } from "../isapi/status.ts";
- * import { parseFieldDetection } from "./smart.ts";
+ * import { assertEquals, assertThrows } from "@std/assert";
+ * import { IsapiError } from "../status.ts";
+ * import { fieldDetection } from "./rules.ts";
  *
+ * assertEquals(fieldDetection({ channel: 2 }).path, "/ISAPI/Smart/FieldDetection/2");
  * assertThrows(
  *   () =>
- *     parseFieldDetection(
+ *     fieldDetection().codec.parse(
  *       "<ResponseStatus><statusCode>4</statusCode>" +
  *         "<subStatusCode>notSupport</subStatusCode></ResponseStatus>",
  *     ),
@@ -400,80 +396,10 @@ export function parseSmartRules(xml: string): SmartRules {
  * );
  * ```
  */
-export function parseFieldDetection(xml: string): FieldDetection {
-  return parseSmartRules(xml);
-}
-
-/**
- * Reads a region rule document of any type from a device.
- *
- * @param options Where the device is and how to log in.
- * @param rule The rule's path segment and video channel; the channel defaults to `1`.
- * @returns The rule and its regions.
- * @throws {IsapiError} When the request fails: a status outside 2xx, or a failing `<ResponseStatus>` on any status.
- *
- * @example Read through a stubbed fetch
- * ```ts
- * import { assertEquals } from "@std/assert";
- * import { resolvesNext, spy } from "@std/testing/mock";
- * import { readSmartRules } from "./smart.ts";
- *
- * const fetch = spy(resolvesNext([
- *   new Response("<Loitering><id>4</id><enabled>false</enabled></Loitering>"),
- * ]));
- *
- * const rules = await readSmartRules({
- *   baseUrl: "http://192.0.2.10",
- *   username: "admin",
- *   password: "hunter2",
- *   fetch,
- * }, { type: "loitering", channel: 4 });
- *
- * assertEquals(rules, { type: "Loitering", channel: 4, enabled: false, regions: [] });
- * assertEquals(fetch.calls[0].args[0], "http://192.0.2.10/ISAPI/Smart/loitering/4");
- * ```
- */
-export async function readSmartRules(
-  options: RequestOptions,
-  rule: { type: SmartRuleType; channel?: number },
-): Promise<SmartRules> {
-  return decodeSmartRules(await requestXml(options, smartRulesPath(rule)));
-}
-
-/**
- * Reads a field detection document from a device.
- *
- * @param options Where the device is and how to log in.
- * @param channel The video channel. Defaults to `1`.
- * @returns The rule and its regions.
- * @throws {IsapiError} When the request fails: a status outside 2xx, or a failing `<ResponseStatus>` on any status.
- *
- * @example Read through a stubbed fetch
- * ```ts
- * import { assertEquals } from "@std/assert";
- * import { resolvesNext, spy } from "@std/testing/mock";
- * import { readFieldDetection } from "./smart.ts";
- *
- * const fetch = spy(resolvesNext([
- *   new Response("<FieldDetection><id>1</id><enabled>false</enabled></FieldDetection>"),
- * ]));
- *
- * const field = await readFieldDetection({
- *   baseUrl: "http://192.0.2.21",
- *   username: "admin",
- *   password: "hunter2",
- *   fetch,
- * });
- *
- * assertEquals(field, { type: "FieldDetection", channel: 1, enabled: false, regions: [] });
- * assertEquals(fetch.calls[0].args[0], "http://192.0.2.21/ISAPI/Smart/FieldDetection/1");
- * ```
- */
-export function readFieldDetection(
-  options: RequestOptions,
-  channel = 1,
-): Promise<FieldDetection> {
-  return readSmartRules(options, { type: "FieldDetection", channel });
+export function fieldDetection(
+  options: { channel?: number } = {},
+): Resource<FieldDetection> {
+  return smartRules({ type: "FieldDetection", ...options });
 }
 
 const rootFields = {
@@ -514,9 +440,12 @@ function mapRegion(
   }: FieldValue<typeof region>,
 ): SmartRegion {
   return {
-    ...mapRule(rule, RegionCoordinatesList),
+    ...toRule(rule, RegionCoordinatesList),
     ...(timeThreshold !== undefined && { timeThresholdSec: timeThreshold }),
     ...(objectOccupation !== undefined &&
       { objectOccupationPercent: objectOccupation }),
   };
 }
+
+// A stateless description, shared by every resource.
+const smartRulesCodec = defineDocument(decodeSmartRules);

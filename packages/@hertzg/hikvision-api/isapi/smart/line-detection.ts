@@ -3,7 +3,7 @@
  *
  * The document lives at `/ISAPI/Smart/LineDetection/<channel>`, where
  * `<channel>` is the video input channel: 1..N on an NVR, 1 on a camera.
- * Unlike the region rules in `smart.ts`, the root holds a `<LineItemList>`
+ * Unlike the region rules in `rules.ts`, the root holds a `<LineItemList>`
  * of `<LineItem>`s, each with a two-point `<CoordinatesList>` and a
  * `<directionSensitivity>`. The points are drawn in the same normalized
  * screen space, 1000 x 1000 by default. A device without the feature
@@ -39,9 +39,9 @@
  * @example Parse a crossing line
  * ```ts
  * import { assertEquals } from "@std/assert";
- * import { parseLineDetection } from "./line-detection.ts";
+ * import { lineDetection } from "./line-detection.ts";
  *
- * const line = parseLineDetection(
+ * const line = lineDetection().codec.parse(
  *   "<LineDetection><id>1</id><enabled>true</enabled><LineItemList size=\"1\" >" +
  *     "<LineItem><id>1</id><enabled>true</enabled><directionSensitivity>any</directionSensitivity>" +
  *     "<CoordinatesList>" +
@@ -74,15 +74,15 @@ import {
   optional,
   points,
   text,
-} from "../isapi/document.ts";
-import { readDocument, type RequestOptions } from "../isapi/request.ts";
+} from "../document.ts";
+import type { Resource } from "../request.ts";
 import {
-  mapRule,
   type NormalizedScreenSize,
   ruleFields,
   screenSize,
   type SmartRule,
-} from "./smart.ts";
+  toRule,
+} from "./rules.ts";
 
 /** One `<LineItem>`: a line whose crossing raises `linedetection`. */
 export type LineDetectionLine = SmartRule & {
@@ -103,40 +103,44 @@ export type LineDetection = {
 };
 
 /**
- * The path of a line detection document.
+ * The line crossing document of one channel.
  *
- * @param channel The video channel. Defaults to `1`.
- * @returns The ISAPI path.
+ * @param options Which channel; defaults to `1`.
+ * @returns The resource: its path and the codec that reads it.
  *
  * @example An NVR's second channel
  * ```ts
  * import { assertEquals } from "@std/assert";
- * import { lineDetectionPath } from "./line-detection.ts";
+ * import { resolvesNext, spy } from "@std/testing/mock";
+ * import { read } from "../request.ts";
+ * import { lineDetection } from "./line-detection.ts";
  *
- * assertEquals(lineDetectionPath(2), "/ISAPI/Smart/LineDetection/2");
- * assertEquals(lineDetectionPath(), "/ISAPI/Smart/LineDetection/1");
+ * assertEquals(lineDetection().path, "/ISAPI/Smart/LineDetection/1");
+ *
+ * const fetch = spy(resolvesNext([
+ *   new Response("<LineDetection><id>2</id><enabled>true</enabled></LineDetection>"),
+ * ]));
+ *
+ * const line = await read({
+ *   baseUrl: "http://192.0.2.21",
+ *   username: "admin",
+ *   password: "hunter2",
+ *   fetch,
+ * }, lineDetection({ channel: 2 }));
+ *
+ * assertEquals(line, { channel: 2, enabled: true, lines: [] });
+ * assertEquals(fetch.calls[0].args[0], "http://192.0.2.21/ISAPI/Smart/LineDetection/2");
  * ```
- */
-export function lineDetectionPath(channel = 1): string {
-  return `/ISAPI/Smart/LineDetection/${channel}`;
-}
-
-/**
- * Parses a `<LineDetection>` document.
- *
- * @param xml The document text.
- * @returns The rule and its lines.
- * @throws {IsapiError} When the request fails: a status outside 2xx, or a failing `<ResponseStatus>` on any status.
  *
  * @example A device without the feature
  * ```ts
  * import { assertThrows } from "@std/assert";
- * import { IsapiError } from "../isapi/status.ts";
- * import { parseLineDetection } from "./line-detection.ts";
+ * import { IsapiError } from "../status.ts";
+ * import { lineDetection } from "./line-detection.ts";
  *
  * assertThrows(
  *   () =>
- *     parseLineDetection(
+ *     lineDetection().codec.parse(
  *       "<ResponseStatus><statusCode>4</statusCode>" +
  *         "<subStatusCode>notSupport</subStatusCode></ResponseStatus>",
  *     ),
@@ -144,46 +148,13 @@ export function lineDetectionPath(channel = 1): string {
  * );
  * ```
  */
-export function parseLineDetection(xml: string): LineDetection {
-  return mapLineDetection(lineDetection.parse(xml));
-}
-
-/**
- * Reads a line detection document from a device.
- *
- * @param options Where the device is and how to log in.
- * @param channel The video channel. Defaults to `1`.
- * @returns The rule and its lines.
- * @throws {IsapiError} When the request fails: a status outside 2xx, or a failing `<ResponseStatus>` on any status.
- *
- * @example Read through a stubbed fetch
- * ```ts
- * import { assertEquals } from "@std/assert";
- * import { resolvesNext, spy } from "@std/testing/mock";
- * import { readLineDetection } from "./line-detection.ts";
- *
- * const fetch = spy(resolvesNext([
- *   new Response("<LineDetection><id>1</id><enabled>true</enabled></LineDetection>"),
- * ]));
- *
- * const line = await readLineDetection({
- *   baseUrl: "http://192.0.2.21",
- *   username: "admin",
- *   password: "hunter2",
- *   fetch,
- * });
- *
- * assertEquals(line, { channel: 1, enabled: true, lines: [] });
- * assertEquals(fetch.calls[0].args[0], "http://192.0.2.21/ISAPI/Smart/LineDetection/1");
- * ```
- */
-export async function readLineDetection(
-  options: RequestOptions,
-  channel = 1,
-): Promise<LineDetection> {
-  return mapLineDetection(
-    await readDocument(options, lineDetectionPath(channel), lineDetection),
-  );
+export function lineDetection(
+  options: { channel?: number } = {},
+): Resource<LineDetection> {
+  return {
+    path: `/ISAPI/Smart/LineDetection/${options.channel ?? 1}`,
+    codec: lineDetectionCodec,
+  };
 }
 
 const lineDetectionFields = {
@@ -200,9 +171,10 @@ const lineDetectionFields = {
   ),
 };
 
-const lineDetection = document(lineDetectionFields);
+// A stateless description, shared by every resource.
+const lineDetectionCodec = document(lineDetectionFields).map(toLineDetection);
 
-function mapLineDetection(
+function toLineDetection(
   { id, enabled = false, LineItemList, ...rest }: Decoded<
     typeof lineDetectionFields
   >,
@@ -212,7 +184,7 @@ function mapLineDetection(
     enabled,
     ...rest,
     lines: LineItemList.map(({ CoordinatesList = [], ...line }) =>
-      mapRule(line, CoordinatesList)
+      toRule(line, CoordinatesList)
     ),
   };
 }

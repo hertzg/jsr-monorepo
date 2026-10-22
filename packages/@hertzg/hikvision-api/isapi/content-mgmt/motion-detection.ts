@@ -42,14 +42,14 @@
  * `<gridMap>` is decoded with `decodeGridMap` from `grid-map.ts`, which also
  * explains the encoding. Region coordinates are in the device's normalized
  * 1000 x 1000 screen space. What a channel allows comes from
- * `motion-capabilities.ts`.
+ * `motion-detection-capabilities.ts`.
  *
  * @example Read a camera's drawn polygons
  * ```ts
  * import { assertEquals } from "@std/assert";
- * import { parseMotionDetection } from "./motion-detection.ts";
+ * import { motionDetection } from "./motion-detection.ts";
  *
- * const motion = parseMotionDetection(
+ * const motion = motionDetection({ channel: 1 }).codec.parse(
  *   "<MotionDetection><enabled>true</enabled><regionType>region</regionType>" +
  *     "<MotionDetectionLayout><layout><RegionList><Region><id>1</id>" +
  *     "<RegionCoordinatesList>" +
@@ -81,8 +81,8 @@ import {
   points,
   text,
   tokens,
-} from "../isapi/document.ts";
-import { readDocument, type RequestOptions } from "../isapi/request.ts";
+} from "../document.ts";
+import type { Resource } from "../request.ts";
 import { decodeGridMap } from "./grid-map.ts";
 
 /** Which motion detection document to read. */
@@ -134,9 +134,8 @@ export type MotionDetection = {
   targetType?: string[];
 };
 
-// The wire shape, keyed by element name. A description, not state: it holds
-// nothing, so one instance serves every call.
-const motionDetection = document({
+// The wire shape, keyed by element name.
+const motionDetectionWire = document({
   enabled: optional(bool()),
   enableHighlight: optional(bool()),
   samplingInterval: optional(int()),
@@ -157,82 +156,43 @@ const motionDetection = document({
   })),
 });
 
-type MotionDetectionWire = ReturnType<typeof motionDetection.parse>;
+type MotionDetectionWire = ReturnType<typeof motionDetectionWire.parse>;
+
+// a stateless description
+const codec = motionDetectionWire.map(toMotionDetection);
 
 /**
- * The path of a motion detection document.
+ * The motion detection resource of one channel.
+ *
+ * The path is the NVR's input proxy copy when `proxy` is set and the device's
+ * own video input otherwise. `grid` is set when the document has a
+ * `<gridMap>` and a `<Grid>` to size it, `regions` when its `<RegionList>`
+ * has entries.
  *
  * @param target Which channel, and whether through an NVR's input proxy.
- * @returns The ISAPI path.
+ * @returns The resource: its path, and a codec that decodes the grid.
  *
  * @example Both paths
  * ```ts
  * import { assertEquals } from "@std/assert";
- * import { motionDetectionPath } from "./motion-detection.ts";
+ * import { motionDetection } from "./motion-detection.ts";
  *
  * assertEquals(
- *   motionDetectionPath({ channel: 3, proxy: true }),
+ *   motionDetection({ channel: 3, proxy: true }).path,
  *   "/ISAPI/ContentMgmt/InputProxy/channels/3/video/motionDetection",
  * );
  * assertEquals(
- *   motionDetectionPath({ channel: 1 }),
+ *   motionDetection({ channel: 1 }).path,
  *   "/ISAPI/System/Video/inputs/channels/1/motionDetection",
  * );
  * ```
- */
-export function motionDetectionPath(target: MotionDetectionTarget): string {
-  return target.proxy
-    ? `/ISAPI/ContentMgmt/InputProxy/channels/${target.channel}/video/motionDetection`
-    : `/ISAPI/System/Video/inputs/channels/${target.channel}/motionDetection`;
-}
-
-/**
- * Parses a `<MotionDetection>` document.
- *
- * `grid` is set when the document has a `<gridMap>` and a `<Grid>` to size
- * it, `regions` when its `<RegionList>` has entries.
- *
- * @param xml The document text.
- * @returns The settings, with the grid decoded.
- * @throws {IsapiError} When the request fails: a status outside 2xx, or a failing `<ResponseStatus>` on any status.
- *
- * @example Parse an NVR's copy of a camera's settings
- * ```ts
- * import { assertEquals } from "@std/assert";
- * import { parseMotionDetection } from "./motion-detection.ts";
- *
- * const motion = parseMotionDetection(
- *   "<MotionDetection><enabled>true</enabled><regionType>grid</regionType>" +
- *     "<Grid><rowGranularity>18</rowGranularity><columnGranularity>22</columnGranularity></Grid>" +
- *     "<MotionDetectionLayout><sensitivityLevel>60</sensitivityLevel>" +
- *     `<layout><gridMap>${"fffffc".repeat(18)}</gridMap></layout>` +
- *     "<targetType>human,vehicle</targetType></MotionDetectionLayout></MotionDetection>",
- * );
- *
- * assertEquals(motion.enabled, true);
- * assertEquals(motion.sensitivityLevel, 60);
- * assertEquals(motion.targetType, ["human", "vehicle"]);
- * assertEquals(motion.grid?.[17][21], true);
- * assertEquals(motion.regions, undefined);
- * ```
- */
-export function parseMotionDetection(xml: string): MotionDetection {
-  return buildMotionDetection(motionDetection.parse(xml));
-}
-
-/**
- * Reads a motion detection document from a device.
- *
- * @param options Where the device is and how to log in.
- * @param target Which channel, and whether through an NVR's input proxy.
- * @returns The settings, with the grid decoded.
- * @throws {IsapiError} When the request fails: a status outside 2xx, or a failing `<ResponseStatus>` on any status.
  *
  * @example Read channel 2 through an NVR
  * ```ts
  * import { assertEquals } from "@std/assert";
  * import { resolvesNext, spy } from "@std/testing/mock";
- * import { readMotionDetection } from "./motion-detection.ts";
+ * import { read } from "../request.ts";
+ * import { motionDetection } from "./motion-detection.ts";
  *
  * const fetch = spy(resolvesNext([
  *   new Response(
@@ -243,9 +203,9 @@ export function parseMotionDetection(xml: string): MotionDetection {
  *   ),
  * ]));
  *
- * const motion = await readMotionDetection(
+ * const motion = await read(
  *   { baseUrl: "http://192.0.2.10", username: "admin", password: "hunter2", fetch },
- *   { channel: 2, proxy: true },
+ *   motionDetection({ channel: 2, proxy: true }),
  * );
  *
  * assertEquals(motion.grid, [[false, false, false, false, true, true, true, true]]);
@@ -255,17 +215,19 @@ export function parseMotionDetection(xml: string): MotionDetection {
  * );
  * ```
  */
-export async function readMotionDetection(
-  options: RequestOptions,
+export function motionDetection(
   target: MotionDetectionTarget,
-): Promise<MotionDetection> {
-  return buildMotionDetection(
-    await readDocument(options, motionDetectionPath(target), motionDetection),
-  );
+): Resource<MotionDetection> {
+  return {
+    path: target.proxy
+      ? `/ISAPI/ContentMgmt/InputProxy/channels/${target.channel}/video/motionDetection`
+      : `/ISAPI/System/Video/inputs/channels/${target.channel}/motionDetection`,
+    codec,
+  };
 }
 
 /** Turns the wire shape into the settings: units in the names, grid decoded. */
-function buildMotionDetection(wire: MotionDetectionWire): MotionDetection {
+function toMotionDetection(wire: MotionDetectionWire): MotionDetection {
   const {
     enabled = false,
     samplingInterval,

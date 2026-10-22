@@ -1,12 +1,10 @@
 import { assertEquals, assertRejects, assertThrows } from "@std/assert";
 import { resolvesNext, spy } from "@std/testing/mock";
-import { IsapiError } from "../isapi/status.ts";
-import {
-  parseInputProxyChannelStatus,
-  readInputProxyChannelStatus,
-} from "./channel-status.ts";
+import { IsapiError } from "../status.ts";
+import { read } from "../request.ts";
+import { inputProxyChannelStatus } from "./input-proxy-channel-status.ts";
 
-Deno.test("parseInputProxyChannelStatus reads every field of an NVR document", () => {
+Deno.test("inputProxyChannelStatus.codec.parse reads every field of an NVR document", () => {
   const xml = '<?xml version="1.0" encoding="UTF-8" ?>\n' +
     '<InputProxyChannelStatusList version="1.0" xmlns="http://www.hikvision.com/ver20/XMLSchema">\n' +
     '<InputProxyChannelStatus version="1.0" xmlns="http://www.hikvision.com/ver20/XMLSchema">\n' +
@@ -51,7 +49,7 @@ Deno.test("parseInputProxyChannelStatus reads every field of an NVR document", (
     "</InputProxyChannelStatus>\n" +
     "</InputProxyChannelStatusList>\n";
 
-  assertEquals(parseInputProxyChannelStatus(xml), [
+  assertEquals(inputProxyChannelStatus.codec.parse(xml), [
     {
       id: 1,
       online: true,
@@ -81,25 +79,28 @@ Deno.test("parseInputProxyChannelStatus reads every field of an NVR document", (
   ]);
 });
 
-Deno.test("parseInputProxyChannelStatus leaves optional fields out when absent", () => {
+Deno.test("inputProxyChannelStatus.codec.parse leaves optional fields out when absent", () => {
   const xml = "<InputProxyChannelStatusList><InputProxyChannelStatus>" +
     "<id>3</id><online>false</online>" +
     "</InputProxyChannelStatus></InputProxyChannelStatusList>";
 
-  assertEquals(parseInputProxyChannelStatus(xml), [{ id: 3, online: false }]);
+  assertEquals(inputProxyChannelStatus.codec.parse(xml), [{
+    id: 3,
+    online: false,
+  }]);
 });
 
-Deno.test("parseInputProxyChannelStatus returns an empty list for an empty document", () => {
+Deno.test("inputProxyChannelStatus.codec.parse returns an empty list for an empty document", () => {
   assertEquals(
-    parseInputProxyChannelStatus("<InputProxyChannelStatusList/>"),
+    inputProxyChannelStatus.codec.parse("<InputProxyChannelStatusList/>"),
     [],
   );
 });
 
-Deno.test("parseInputProxyChannelStatus throws when online is missing", () => {
+Deno.test("inputProxyChannelStatus.codec.parse throws when online is missing", () => {
   assertThrows(
     () =>
-      parseInputProxyChannelStatus(
+      inputProxyChannelStatus.codec.parse(
         "<InputProxyChannelStatusList><InputProxyChannelStatus><id>1</id>" +
           "</InputProxyChannelStatus></InputProxyChannelStatusList>",
       ),
@@ -108,17 +109,17 @@ Deno.test("parseInputProxyChannelStatus throws when online is missing", () => {
   );
 });
 
-Deno.test("readInputProxyChannelStatus requests the channel status path", async () => {
+Deno.test("read(inputProxyChannelStatus) requests the channel status path", async () => {
   const fetch = spy(resolvesNext([
     new Response("<InputProxyChannelStatusList/>"),
   ]));
 
-  await readInputProxyChannelStatus({
+  await read({
     baseUrl: "http://192.0.2.10",
     username: "admin",
     password: "hunter2",
     fetch,
-  });
+  }, inputProxyChannelStatus);
 
   assertEquals(
     fetch.calls[0].args[0],
@@ -126,7 +127,7 @@ Deno.test("readInputProxyChannelStatus requests the channel status path", async 
   );
 });
 
-Deno.test("readInputProxyChannelStatus surfaces a camera's ResponseStatus as IsapiError", async () => {
+Deno.test("read(inputProxyChannelStatus) surfaces a camera's ResponseStatus as IsapiError", async () => {
   const fetch = spy(resolvesNext([
     new Response(
       "<ResponseStatus><statusCode>4</statusCode><subStatusCode>notSupport</subStatusCode></ResponseStatus>",
@@ -135,12 +136,12 @@ Deno.test("readInputProxyChannelStatus surfaces a camera's ResponseStatus as Isa
 
   await assertRejects(
     () =>
-      readInputProxyChannelStatus({
+      read({
         baseUrl: "http://192.0.2.21",
         username: "admin",
         password: "hunter2",
         fetch,
-      }),
+      }, inputProxyChannelStatus),
     IsapiError,
     "notSupport",
   );

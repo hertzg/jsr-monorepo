@@ -11,14 +11,13 @@
  * import { assertEquals } from "@std/assert";
  * import { resolvesNext, spy } from "@std/testing/mock";
  * import { document, text } from "./document.ts";
- * import { readDocument } from "./request.ts";
+ * import { read } from "./request.ts";
  *
  * const fetch = spy(resolvesNext([new Response("<DeviceInfo><model>X</model></DeviceInfo>")]));
  *
- * const info = await readDocument(
+ * const info = await read(
  *   { baseUrl: "http://192.0.2.10", username: "admin", password: "hunter2", fetch },
- *   "/ISAPI/System/deviceInfo",
- *   document({ model: text() }),
+ *   { path: "/ISAPI/System/deviceInfo", codec: document({ model: text() }) },
  * );
  *
  * assertEquals(info, { model: "X" });
@@ -152,39 +151,53 @@ export async function requestXml(
 }
 
 /**
- * Sends one request and decodes the reply with a document codec.
+ * One ISAPI resource: where it is and how to read it.
+ *
+ * A resource that takes parameters is a function returning one, such as
+ * `motionDetection({ channel: 2 })`.
+ *
+ * @template T The decoded value.
+ */
+export type Resource<T> = {
+  /** The ISAPI path, starting with `/`. */
+  path: string;
+  /** How to read the reply. */
+  codec: Document<T>;
+};
+
+/**
+ * Reads one resource from a device.
  *
  * @param options Where the device is and how to log in.
- * @param path The ISAPI path, starting with `/`.
- * @param codec The document description.
+ * @param resource What to read and how to decode it.
  * @returns The decoded document.
  * @throws {IsapiError} When the request fails: a status outside 2xx, or a failing `<ResponseStatus>` on any status.
  *
- * @example Read a document that is missing a required element
+ * @example Read a resource with a stubbed fetch
  * ```ts
- * import { assertRejects } from "@std/assert";
+ * import { assertEquals } from "@std/assert";
  * import { resolvesNext, spy } from "@std/testing/mock";
  * import { document, text } from "./document.ts";
- * import { readDocument } from "./request.ts";
+ * import { read, type Resource } from "./request.ts";
  *
- * const fetch = spy(resolvesNext([new Response("<DeviceInfo/>")]));
+ * const deviceInfo: Resource<{ model: string }> = {
+ *   path: "/ISAPI/System/deviceInfo",
+ *   codec: document({ model: text() }),
+ * };
+ * const fetch = spy(resolvesNext([new Response("<DeviceInfo><model>X</model></DeviceInfo>")]));
  *
- * await assertRejects(
- *   () =>
- *     readDocument(
- *       { baseUrl: "http://192.0.2.10", username: "admin", password: "hunter2", fetch },
- *       "/ISAPI/System/deviceInfo",
- *       document({ model: text() }),
- *     ),
- *   Error,
- *   "<DeviceInfo> has no <model>",
+ * const info = await read(
+ *   { baseUrl: "http://192.0.2.10", username: "admin", password: "hunter2", fetch },
+ *   deviceInfo,
  * );
+ *
+ * assertEquals(info, { model: "X" });
+ * assertEquals(fetch.calls[0].args[0], "http://192.0.2.10/ISAPI/System/deviceInfo");
  * ```
  */
-export async function readDocument<T>(
+export async function read<T>(
   options: RequestOptions,
-  path: string,
-  codec: Document<T>,
+  resource: Resource<T>,
 ): Promise<T> {
-  return codec.decode(await requestXml(options, path));
+  return resource.codec.decode(await requestXml(options, resource.path));
 }

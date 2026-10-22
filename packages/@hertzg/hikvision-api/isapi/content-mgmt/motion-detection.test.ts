@@ -1,23 +1,20 @@
 import { assertEquals } from "@std/assert";
 import { resolvesNext, spy } from "@std/testing/mock";
-import {
-  motionDetectionPath,
-  parseMotionDetection,
-  readMotionDetection,
-} from "./motion-detection.ts";
+import { read } from "../request.ts";
+import { motionDetection } from "./motion-detection.ts";
 
-Deno.test("motionDetectionPath picks the input proxy path for an NVR channel", () => {
+Deno.test("motionDetection path picks the input proxy path for an NVR channel", () => {
   assertEquals(
-    motionDetectionPath({ channel: 5, proxy: true }),
+    motionDetection({ channel: 5, proxy: true }).path,
     "/ISAPI/ContentMgmt/InputProxy/channels/5/video/motionDetection",
   );
   assertEquals(
-    motionDetectionPath({ channel: 1 }),
+    motionDetection({ channel: 1 }).path,
     "/ISAPI/System/Video/inputs/channels/1/motionDetection",
   );
 });
 
-Deno.test("parseMotionDetection reads a grid-only document from an NVR", () => {
+Deno.test("motionDetection codec reads a grid-only document from an NVR", () => {
   const xml = '<?xml version="1.0" encoding="UTF-8" ?>\n' +
     '<MotionDetection version="2.0" xmlns="http://www.isapi.org/ver20/XMLSchema">\n' +
     "<enabled>true</enabled>\n" +
@@ -39,7 +36,7 @@ Deno.test("parseMotionDetection reads a grid-only document from an NVR", () => {
     "</MotionDetectionLayout>\n" +
     "</MotionDetection>\n";
 
-  const motion = parseMotionDetection(xml);
+  const motion = motionDetection({ channel: 1 }).codec.parse(xml);
 
   assertEquals(motion.enabled, true);
   assertEquals(motion.enableHighlight, true);
@@ -59,7 +56,7 @@ Deno.test("parseMotionDetection reads a grid-only document from an NVR", () => {
   );
 });
 
-Deno.test("parseMotionDetection reads a gridMap and a RegionList side by side", () => {
+Deno.test("motionDetection codec reads a gridMap and a RegionList side by side", () => {
   const xml =
     '<MotionDetection version="2.0" xmlns="http://www.isapi.org/ver20/XMLSchema">' +
     "<enabled>true</enabled>" +
@@ -86,7 +83,7 @@ Deno.test("parseMotionDetection reads a gridMap and a RegionList side by side", 
     "</MotionDetectionLayout>" +
     "</MotionDetection>";
 
-  const motion = parseMotionDetection(xml);
+  const motion = motionDetection({ channel: 1 }).codec.parse(xml);
 
   assertEquals(motion.grid, [
     [true, true, true, true, false, false, false, false],
@@ -113,7 +110,7 @@ Deno.test("parseMotionDetection reads a gridMap and a RegionList side by side", 
   ]);
 });
 
-Deno.test("parseMotionDetection reads a region-only document without a gridMap", () => {
+Deno.test("motionDetection codec reads a region-only document without a gridMap", () => {
   const xml = "<MotionDetection>" +
     "<enabled>true</enabled>" +
     "<regionType>region</regionType>" +
@@ -132,7 +129,7 @@ Deno.test("parseMotionDetection reads a region-only document without a gridMap",
     "</MotionDetectionLayout>" +
     "</MotionDetection>";
 
-  assertEquals(parseMotionDetection(xml), {
+  assertEquals(motionDetection({ channel: 1 }).codec.parse(xml), {
     enabled: true,
     regionType: "region",
     sensitivityLevel: 80,
@@ -144,13 +141,13 @@ Deno.test("parseMotionDetection reads a region-only document without a gridMap",
   });
 });
 
-Deno.test("parseMotionDetection leaves optional fields out when the device omits them", () => {
+Deno.test("motionDetection codec leaves optional fields out when the device omits them", () => {
   const xml = "<MotionDetection><enabled>false</enabled>" +
     "<Grid><rowGranularity>1</rowGranularity><columnGranularity>8</columnGranularity></Grid>" +
     "<MotionDetectionLayout><layout><gridMap>ff</gridMap></layout></MotionDetectionLayout>" +
     "</MotionDetection>";
 
-  assertEquals(parseMotionDetection(xml), {
+  assertEquals(motionDetection({ channel: 1 }).codec.parse(xml), {
     enabled: false,
     rows: 1,
     columns: 8,
@@ -158,31 +155,33 @@ Deno.test("parseMotionDetection leaves optional fields out when the device omits
   });
 });
 
-Deno.test("parseMotionDetection leaves the grid out when the gridMap has no Grid to size it", () => {
+Deno.test("motionDetection codec leaves the grid out when the gridMap has no Grid to size it", () => {
   const xml = "<MotionDetection><enabled>true</enabled>" +
     "<MotionDetectionLayout><layout><gridMap>ff</gridMap></layout></MotionDetectionLayout>" +
     "</MotionDetection>";
 
-  assertEquals(parseMotionDetection(xml), { enabled: true });
+  assertEquals(motionDetection({ channel: 1 }).codec.parse(xml), {
+    enabled: true,
+  });
 });
 
-Deno.test("parseMotionDetection returns only enabled for a bare document", () => {
+Deno.test("motionDetection codec returns only enabled for a bare document", () => {
   assertEquals(
-    parseMotionDetection(
+    motionDetection({ channel: 1 }).codec.parse(
       "<MotionDetection><regionType>none</regionType></MotionDetection>",
     ),
     { enabled: false, regionType: "none" },
   );
 });
 
-Deno.test("parseMotionDetection drops an empty RegionList", () => {
+Deno.test("motionDetection codec drops an empty RegionList", () => {
   const xml = "<MotionDetection><enabled>true</enabled>" +
     "<Grid><rowGranularity>1</rowGranularity><columnGranularity>8</columnGranularity></Grid>" +
     "<MotionDetectionLayout><layout><gridMap>00</gridMap>" +
     '<RegionList size="4"/></layout></MotionDetectionLayout>' +
     "</MotionDetection>";
 
-  const motion = parseMotionDetection(xml);
+  const motion = motionDetection({ channel: 1 }).codec.parse(xml);
 
   assertEquals(motion.regions, undefined);
   assertEquals(motion.grid, [[
@@ -197,7 +196,7 @@ Deno.test("parseMotionDetection drops an empty RegionList", () => {
   ]]);
 });
 
-Deno.test("readMotionDetection requests the camera-side path when proxy is off", async () => {
+Deno.test("read(motionDetection) requests the camera-side path when proxy is off", async () => {
   const fetch = spy(resolvesNext([
     new Response(
       "<MotionDetection><enabled>true</enabled>" +
@@ -207,14 +206,14 @@ Deno.test("readMotionDetection requests the camera-side path when proxy is off",
     ),
   ]));
 
-  await readMotionDetection(
+  await read(
     {
       baseUrl: "http://192.0.2.21",
       username: "admin",
       password: "hunter2",
       fetch,
     },
-    { channel: 1 },
+    motionDetection({ channel: 1 }),
   );
 
   assertEquals(

@@ -18,9 +18,9 @@
  * @example Parse a time document
  * ```ts
  * import { assertEquals } from "@std/assert";
- * import { parseDeviceTime } from "./time.ts";
+ * import { deviceTime } from "./time.ts";
  *
- * const time = parseDeviceTime(
+ * const time = deviceTime.codec.parse(
  *   "<Time><timeMode>NTP</timeMode>" +
  *     "<localTime>2026-10-22T11:33:52+04:00</localTime>" +
  *     "<timeZone>CST-4:00:00</timeZone></Time>",
@@ -37,11 +37,8 @@
  * @module
  */
 
-import { document, optional, text } from "../isapi/document.ts";
-import { readDocument, type RequestOptions } from "../isapi/request.ts";
-
-/** The device time path. */
-export const TIME_PATH = "/ISAPI/System/time";
+import { document, optional, text } from "../document.ts";
+import type { Resource } from "../request.ts";
 
 /** The fields of `<Time>`. */
 export type DeviceTime = {
@@ -66,13 +63,6 @@ export type DeviceTime = {
   /** `<platformType>`, such as `EZVIZ`, when `timeMode` is `platform`. */
   platformType?: string;
 };
-
-const time = document({
-  timeMode: text(),
-  localTime: text(),
-  timeZone: text(),
-  platformType: optional(text()),
-});
 
 /**
  * Reads the standard-time UTC offset out of a POSIX `TZ` string.
@@ -116,72 +106,50 @@ export function parseTimeZoneOffset(timeZone: string): number | undefined {
 }
 
 /**
- * Parses a `<Time>` document.
+ * The device time resource, `/ISAPI/System/time`.
  *
- * @param xml The document text.
- * @returns The device time. `utcOffsetMinutes` is set when `timeZone`
- *   parses; `platformType` when the device sends it.
- * @throws {IsapiError} When the request fails: a status outside 2xx, or a failing `<ResponseStatus>` on any status.
- * @throws {Error} When `timeMode`, `localTime` or `timeZone` is missing.
- *
- * @example A platform-synced NVR
- * ```ts
- * import { assertEquals } from "@std/assert";
- * import { parseDeviceTime } from "./time.ts";
- *
- * const time = parseDeviceTime(
- *   "<Time><timeMode>platform</timeMode><platformType>EZVIZ</platformType>" +
- *     "<localTime>2026-10-22T11:33:52</localTime>" +
- *     "<timeZone>CST+3:00:00</timeZone></Time>",
- * );
- *
- * assertEquals(time.platformType, "EZVIZ");
- * assertEquals(time.utcOffsetMinutes, -180);
- * ```
- */
-export function parseDeviceTime(xml: string): DeviceTime {
-  return addUtcOffset(time.parse(xml));
-}
-
-/**
- * Reads the clock and time zone from a device.
- *
- * @param options Where the device is and how to log in.
- * @returns The device time.
- * @throws {IsapiError} When the request fails: a status outside 2xx, or a failing `<ResponseStatus>` on any status.
+ * `utcOffsetMinutes` is set when `timeZone` parses; `platformType` when the
+ * device sends it. Parsing throws an `Error` when `timeMode`, `localTime` or
+ * `timeZone` is missing and an `IsapiError` on a failing `<ResponseStatus>`.
  *
  * @example Read through a stubbed fetch
  * ```ts
  * import { assertEquals } from "@std/assert";
  * import { resolvesNext, spy } from "@std/testing/mock";
- * import { readDeviceTime } from "./time.ts";
+ * import { read } from "../request.ts";
+ * import { deviceTime } from "./time.ts";
  *
  * const fetch = spy(resolvesNext([
  *   new Response(
- *     "<Time><timeMode>NTP</timeMode>" +
- *       "<localTime>2026-10-22T11:33:52+04:00</localTime>" +
- *       "<timeZone>CST-4:00:00</timeZone></Time>",
+ *     "<Time><timeMode>platform</timeMode><platformType>EZVIZ</platformType>" +
+ *       "<localTime>2026-10-22T11:33:52</localTime>" +
+ *       "<timeZone>CST+3:00:00</timeZone></Time>",
  *   ),
  * ]));
  *
- * const time = await readDeviceTime({
+ * const time = await read({
  *   baseUrl: "http://192.0.2.21",
  *   username: "admin",
  *   password: "hunter2",
  *   fetch,
- * });
+ * }, deviceTime);
  *
- * assertEquals(time.timeMode, "NTP");
+ * assertEquals(time.platformType, "EZVIZ");
+ * assertEquals(time.utcOffsetMinutes, -180);
  * assertEquals(fetch.calls[0].args[0], "http://192.0.2.21/ISAPI/System/time");
  * ```
  */
-export async function readDeviceTime(
-  options: RequestOptions,
-): Promise<DeviceTime> {
-  return addUtcOffset(await readDocument(options, TIME_PATH, time));
-}
+export const deviceTime: Resource<DeviceTime> = {
+  path: "/ISAPI/System/time",
+  codec: document({
+    timeMode: text(),
+    localTime: text(),
+    timeZone: text(),
+    platformType: optional(text()),
+  }).map(toDeviceTime),
+};
 
-function addUtcOffset(fields: DeviceTime): DeviceTime {
+function toDeviceTime(fields: DeviceTime): DeviceTime {
   const utcOffsetMinutes = parseTimeZoneOffset(fields.timeZone);
   return utcOffsetMinutes === undefined
     ? fields

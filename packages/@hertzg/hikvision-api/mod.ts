@@ -1,28 +1,26 @@
 /**
- * Hikvision ISAPI client: the alert stream and the config documents a
- * monitoring tool needs, for an NVR or a camera.
+ * Hikvision ISAPI client: the alert stream and the resources a monitoring
+ * tool reads, for an NVR or a camera.
  *
- * ISAPI is Hikvision's HTTP API. {@link createClient} binds a device's base
- * URL and credentials once; every method is one request, and the alert
- * stream is a `ReadableStream` that ends when its signal aborts. Basic auth,
- * an injectable `fetch`, and nothing runtime-specific: Deno, Bun, or
- * anywhere `fetch` and web streams exist. An NVR also fronts each camera's
- * own ISAPI on a virtual host port: `baseUrl: "http://<nvr>:65002"` reaches
+ * ISAPI is Hikvision's HTTP API: XML documents at paths under `/ISAPI/`.
+ * This package describes each document once as a codec and reads it
+ * through one engine. {@link createClient} binds a device's base URL and
+ * credentials; every method is one request, and the alert stream is a
+ * `ReadableStream` that ends when its signal aborts. Basic auth, an
+ * injectable `fetch`, nothing runtime-specific: Deno, Bun, or anywhere
+ * `fetch` and web streams exist. An NVR also fronts each camera's own
+ * ISAPI on a virtual host port: `baseUrl: "http://<nvr>:65002"` reaches
  * camera 2 through the NVR.
  *
  * ```
  * createClient({ baseUrl, username, password })
- *   .subscribe({ signal })            ─> GET alertStream, multipart parts ─> Alert, Alert, …
- *   .deviceInfo()                     ─> /ISAPI/System/deviceInfo
- *   .time()                           ─> /ISAPI/System/time
- *   .channels()                       ─> /ISAPI/ContentMgmt/InputProxy/channels
- *   .channelStatus()                  ─> /ISAPI/ContentMgmt/InputProxy/channels/status
- *   .motionDetection({ channel })     ─> …/motionDetection, grid and regions decoded
- *   .motionDetectionCapabilities(…)   ─> …/motionDetection/capabilities
- *   .smartRules({ type, channel })    ─> /ISAPI/Smart/<type>/<channel>
- *   .fieldDetection({ channel })      ─> /ISAPI/Smart/FieldDetection/<channel>
- *   .lineDetection({ channel })       ─> /ISAPI/Smart/LineDetection/<channel>
- *   .xml(path) / .request(path, init) ─> anything else
+ *   .subscribe({ signal })              ─> GET /ISAPI/Event/notification/alertStream ─> Alert, Alert, …
+ *   .read(deviceInfo)                   ─> any resource: /ISAPI/System/deviceInfo
+ *   .read(motionDetection({ channel })) ─> …/motionDetection, grid and regions decoded
+ *   .deviceInfo(), .time(), .channels(), .channelStatus(), .motionDetection(…),
+ *   .motionDetectionCapabilities(…), .smartRules(…), .fieldDetection(…), .lineDetection(…)
+ *                                       ─> the same resources, by name
+ *   .xml(path) / .request(path, init)   ─> anything else
  * ```
  *
  * The client does not reconnect, keep timers, or decide when motion ended.
@@ -53,14 +51,14 @@
  *
  * @example Read a camera's motion grid
  * ```ts ignore
- * import { createClient } from "@hertzg/hikvision-api";
+ * import { createClient, motionDetection } from "@hertzg/hikvision-api";
  *
  * const camera = createClient({
  *   baseUrl: "http://192.0.2.21",
  *   username: "admin",
  *   password: "hunter2",
  * });
- * const motion = await camera.motionDetection({ channel: 1 });
+ * const motion = await camera.read(motionDetection({ channel: 1 }));
  *
  * console.log(motion.grid?.map((row) => row.map((cell) => cell ? "#" : ".").join("")).join("\n"));
  * ```
@@ -71,68 +69,74 @@
 import type { XmlElement } from "@std/xml";
 import {
   type InputProxyChannelStatus,
-  readInputProxyChannelStatus,
-} from "./config/channel-status.ts";
+  inputProxyChannelStatus,
+} from "./isapi/content-mgmt/input-proxy-channel-status.ts";
 import {
   type InputProxyChannel,
-  readInputProxyChannels,
-} from "./config/channels.ts";
-import { type DeviceInfo, readDeviceInfo } from "./config/device-info.ts";
-import {
-  type LineDetection,
-  readLineDetection,
-} from "./config/line-detection.ts";
+  inputProxyChannels,
+} from "./isapi/content-mgmt/input-proxy-channels.ts";
 import {
   type MotionDetectionCapabilities,
-  readMotionDetectionCapabilities,
-} from "./config/motion-capabilities.ts";
+  motionDetectionCapabilities,
+} from "./isapi/content-mgmt/motion-detection-capabilities.ts";
 import {
   type MotionDetection,
+  motionDetection,
   type MotionDetectionTarget,
-  readMotionDetection,
-} from "./config/motion-detection.ts";
+} from "./isapi/content-mgmt/motion-detection.ts";
+import type { Alert } from "./isapi/event/alert.ts";
+import { openAlertStream } from "./isapi/event/alert-stream.ts";
+import {
+  read,
+  request,
+  type RequestOptions,
+  requestXml,
+  type Resource,
+} from "./isapi/request.ts";
+import {
+  type LineDetection,
+  lineDetection,
+} from "./isapi/smart/line-detection.ts";
 import {
   type FieldDetection,
-  readFieldDetection,
-  readSmartRules,
+  fieldDetection,
   type SmartRules,
+  smartRules,
   type SmartRuleType,
-} from "./config/smart.ts";
-import { type DeviceTime, readDeviceTime } from "./config/time.ts";
-import type { Alert } from "./events/alert.ts";
-import { openAlertStream } from "./events/stream.ts";
-import { request, type RequestOptions, requestXml } from "./isapi/request.ts";
+} from "./isapi/smart/rules.ts";
+import { type DeviceInfo, deviceInfo } from "./isapi/system/device-info.ts";
+import { type DeviceTime, deviceTime } from "./isapi/system/time.ts";
 
-export type { RequestOptions } from "./isapi/request.ts";
-export { IsapiError } from "./isapi/status.ts";
-export type { ResponseStatus } from "./isapi/status.ts";
 export type { Point } from "./isapi/document.ts";
-export { parseAlert } from "./events/alert.ts";
-export type { Alert, AlertRegion, TargetRect } from "./events/alert.ts";
-export { openAlertStream } from "./events/stream.ts";
-export type { AlertStreamOptions } from "./events/stream.ts";
-export { parseDeviceInfo } from "./config/device-info.ts";
-export type { DeviceInfo } from "./config/device-info.ts";
-export { parseDeviceTime, parseTimeZoneOffset } from "./config/time.ts";
-export type { DeviceTime } from "./config/time.ts";
-export { parseInputProxyChannels } from "./config/channels.ts";
-export type { InputProxyChannel } from "./config/channels.ts";
-export { parseInputProxyChannelStatus } from "./config/channel-status.ts";
-export type { InputProxyChannelStatus } from "./config/channel-status.ts";
-export { decodeGridMap, encodeGridMap } from "./config/grid-map.ts";
-export { parseMotionDetection } from "./config/motion-detection.ts";
+export type { RequestOptions, Resource } from "./isapi/request.ts";
+export { IsapiError } from "./isapi/status.ts";
+export type { IsapiFailure, ResponseStatus } from "./isapi/status.ts";
+export { parseAlert } from "./isapi/event/alert.ts";
+export type { Alert, AlertRegion, TargetRect } from "./isapi/event/alert.ts";
+export { openAlertStream } from "./isapi/event/alert-stream.ts";
+export type { AlertStreamOptions } from "./isapi/event/alert-stream.ts";
+export { deviceInfo } from "./isapi/system/device-info.ts";
+export type { DeviceInfo } from "./isapi/system/device-info.ts";
+export { deviceTime, parseTimeZoneOffset } from "./isapi/system/time.ts";
+export type { DeviceTime } from "./isapi/system/time.ts";
+export { inputProxyChannels } from "./isapi/content-mgmt/input-proxy-channels.ts";
+export type { InputProxyChannel } from "./isapi/content-mgmt/input-proxy-channels.ts";
+export { inputProxyChannelStatus } from "./isapi/content-mgmt/input-proxy-channel-status.ts";
+export type { InputProxyChannelStatus } from "./isapi/content-mgmt/input-proxy-channel-status.ts";
+export { decodeGridMap, encodeGridMap } from "./isapi/content-mgmt/grid-map.ts";
+export { motionDetection } from "./isapi/content-mgmt/motion-detection.ts";
 export type {
   MotionDetection,
   MotionDetectionTarget,
   MotionRegion,
-} from "./config/motion-detection.ts";
-export { parseMotionDetectionCapabilities } from "./config/motion-capabilities.ts";
-export type { MotionDetectionCapabilities } from "./config/motion-capabilities.ts";
+} from "./isapi/content-mgmt/motion-detection.ts";
+export { motionDetectionCapabilities } from "./isapi/content-mgmt/motion-detection-capabilities.ts";
+export type { MotionDetectionCapabilities } from "./isapi/content-mgmt/motion-detection-capabilities.ts";
 export {
-  parseFieldDetection,
-  parseSmartRules,
+  fieldDetection,
   SMART_RULE_TYPES,
-} from "./config/smart.ts";
+  smartRules,
+} from "./isapi/smart/rules.ts";
 export type {
   FieldDetection,
   FieldDetectionRegion,
@@ -141,12 +145,12 @@ export type {
   SmartRule,
   SmartRules,
   SmartRuleType,
-} from "./config/smart.ts";
-export { parseLineDetection } from "./config/line-detection.ts";
+} from "./isapi/smart/rules.ts";
+export { lineDetection } from "./isapi/smart/line-detection.ts";
 export type {
   LineDetection,
   LineDetectionLine,
-} from "./config/line-detection.ts";
+} from "./isapi/smart/line-detection.ts";
 
 /** Where the device is and how to log in; see {@link RequestOptions}. */
 export type ClientOptions = RequestOptions;
@@ -172,6 +176,13 @@ export type SmartRulesOptions = SmartRuleOptions & {
 /** A client bound to one device. */
 export type Client = {
   /**
+   * Reads any resource, such as {@link deviceInfo} or
+   * `motionDetection({ channel: 2 })`.
+   *
+   * @throws {IsapiError} When the request fails: a status outside 2xx, or a failing `<ResponseStatus>` on any status.
+   */
+  read: <T>(resource: Resource<T>) => Promise<T>;
+  /**
    * Sends any request with the client's credentials.
    *
    * @throws {IsapiError} When the request fails: a status outside 2xx, or a failing `<ResponseStatus>` on any status.
@@ -179,30 +190,30 @@ export type Client = {
   request: (path: string, init?: RequestInit) => Promise<Response>;
   /**
    * Sends any request and parses the reply as an ISAPI document, for paths
-   * this package has no reader for.
+   * this package has no resource for.
    *
    * @throws {IsapiError} When the request fails: a status outside 2xx, or a failing `<ResponseStatus>` on any status.
    */
   xml: (path: string, init?: RequestInit) => Promise<XmlElement>;
-  /** Reads `/ISAPI/System/deviceInfo`. */
+  /** Reads {@link deviceInfo}. */
   deviceInfo: () => Promise<DeviceInfo>;
-  /** Reads `/ISAPI/System/time`: the device clock and its zone. */
+  /** Reads {@link deviceTime}: the device clock and its zone. */
   time: () => Promise<DeviceTime>;
-  /** Reads `/ISAPI/ContentMgmt/InputProxy/channels`: an NVR's IP cameras. */
+  /** Reads {@link inputProxyChannels}: an NVR's IP cameras. */
   channels: () => Promise<InputProxyChannel[]>;
-  /** Reads `/ISAPI/ContentMgmt/InputProxy/channels/status`: which IP cameras are online. */
+  /** Reads {@link inputProxyChannelStatus}: which IP cameras are online. */
   channelStatus: () => Promise<InputProxyChannelStatus[]>;
-  /** Reads a channel's motion detection settings, grid and regions. */
+  /** Reads {@link motionDetection} for a channel: settings, grid and regions. */
   motionDetection: (target: MotionDetectionTarget) => Promise<MotionDetection>;
-  /** Reads what a channel's motion detection supports. */
+  /** Reads {@link motionDetectionCapabilities} for a channel. */
   motionDetectionCapabilities: (
     target: MotionDetectionTarget,
   ) => Promise<MotionDetectionCapabilities>;
-  /** Reads `/ISAPI/Smart/<type>/<channel>`: any region-type smart rule set. */
+  /** Reads {@link smartRules}: any region-type smart rule set of a channel. */
   smartRules: (options: SmartRulesOptions) => Promise<SmartRules>;
-  /** Reads `/ISAPI/Smart/FieldDetection/<channel>`: intrusion regions. */
+  /** Reads {@link fieldDetection}: a channel's intrusion regions. */
   fieldDetection: (options?: SmartRuleOptions) => Promise<FieldDetection>;
-  /** Reads `/ISAPI/Smart/LineDetection/<channel>`: crossing lines. */
+  /** Reads {@link lineDetection}: a channel's crossing lines. */
   lineDetection: (options?: SmartRuleOptions) => Promise<LineDetection>;
   /**
    * Opens the alert stream. The stream ends when the device closes the
@@ -223,7 +234,7 @@ export type Client = {
  * ```ts
  * import { assertEquals } from "@std/assert";
  * import { resolvesNext, spy } from "@std/testing/mock";
- * import { createClient } from "@hertzg/hikvision-api";
+ * import { createClient, deviceInfo } from "@hertzg/hikvision-api";
  *
  * const fetch = spy(resolvesNext([
  *   new Response(
@@ -238,7 +249,7 @@ export type Client = {
  *   fetch,
  * });
  *
- * const info = await nvr.deviceInfo();
+ * const info = await nvr.read(deviceInfo);
  *
  * assertEquals(info.deviceType, "NVR");
  * assertEquals(fetch.calls[0].args[0], "http://192.0.2.10/ISAPI/System/deviceInfo");
@@ -248,18 +259,19 @@ export type Client = {
  */
 export function createClient(options: ClientOptions): Client {
   return {
+    read: (resource) => read(options, resource),
     request: (path, init) => request(options, path, init),
     xml: (path, init) => requestXml(options, path, init),
-    deviceInfo: () => readDeviceInfo(options),
-    time: () => readDeviceTime(options),
-    channels: () => readInputProxyChannels(options),
-    channelStatus: () => readInputProxyChannelStatus(options),
-    motionDetection: (target) => readMotionDetection(options, target),
+    deviceInfo: () => read(options, deviceInfo),
+    time: () => read(options, deviceTime),
+    channels: () => read(options, inputProxyChannels),
+    channelStatus: () => read(options, inputProxyChannelStatus),
+    motionDetection: (target) => read(options, motionDetection(target)),
     motionDetectionCapabilities: (target) =>
-      readMotionDetectionCapabilities(options, target),
-    smartRules: (rule) => readSmartRules(options, rule),
-    fieldDetection: ({ channel } = {}) => readFieldDetection(options, channel),
-    lineDetection: ({ channel } = {}) => readLineDetection(options, channel),
+      read(options, motionDetectionCapabilities(target)),
+    smartRules: (rule) => read(options, smartRules(rule)),
+    fieldDetection: (rule = {}) => read(options, fieldDetection(rule)),
+    lineDetection: (rule = {}) => read(options, lineDetection(rule)),
     subscribe: ({ signal } = {}) => openAlertStream({ ...options, signal }),
   };
 }

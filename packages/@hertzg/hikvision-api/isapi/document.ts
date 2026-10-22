@@ -517,11 +517,47 @@ export function decodeFields<F extends Fields>(
  * @template T The decoded value.
  */
 export type Document<T> = {
-  /** Reads the fields of `root`. */
+  /** Reads the value from the root element. */
   decode: (root: XmlElement) => T;
   /** Parses the text and reads the root; throws {@link IsapiError} on a failing `<ResponseStatus>`. */
   parse: (xml: string) => T;
+  /** The same document with `transform` applied to what it reads. */
+  map: <U>(transform: (value: T) => U) => Document<U>;
 };
+
+/**
+ * A document read by a function of its root, for shapes a field record
+ * cannot express, such as a list named after the root element.
+ *
+ * @param decode Reads the value from the root element.
+ * @returns The document codec.
+ *
+ * @example A document whose list is named after its root
+ * ```ts
+ * import { assertEquals } from "@std/assert";
+ * import { bool, defineDocument, int, list, obj } from "./document.ts";
+ *
+ * const rules = defineDocument((root) => ({
+ *   type: root.name.local,
+ *   regions: list(`${root.name.local}Region`, obj({ id: int(), enabled: bool() }))
+ *     .decode(root, `${root.name.local}RegionList`),
+ * }));
+ *
+ * assertEquals(
+ *   rules.parse("<Loitering><LoiteringRegionList><LoiteringRegion><id>1</id><enabled>true</enabled></LoiteringRegion></LoiteringRegionList></Loitering>"),
+ *   { type: "Loitering", regions: [{ id: 1, enabled: true }] },
+ * );
+ * ```
+ */
+export function defineDocument<T>(
+  decode: (root: XmlElement) => T,
+): Document<T> {
+  return {
+    decode,
+    parse: (xml) => decode(parseIsapi(xml)),
+    map: (transform) => defineDocument((root) => transform(decode(root))),
+  };
+}
 
 /**
  * Describes a document by its root's fields.
@@ -529,27 +565,26 @@ export type Document<T> = {
  * @param fields The field codecs, keyed by element name.
  * @returns The document codec.
  *
- * @example Describe a list document
+ * @example Describe a list document and map it to its public shape
  * ```ts
  * import { assertEquals } from "@std/assert";
  * import { document, int, repeated, obj, text } from "./document.ts";
  *
  * const channels = document({
  *   InputProxyChannel: repeated(obj({ id: int(), name: text() })),
- * });
+ * }).map((list) => list.InputProxyChannel);
  *
  * assertEquals(
  *   channels.parse(
  *     "<InputProxyChannelList><InputProxyChannel><id>1</id><name>Camera 01</name>" +
  *       "</InputProxyChannel></InputProxyChannelList>",
  *   ),
- *   { InputProxyChannel: [{ id: 1, name: "Camera 01" }] },
+ *   [{ id: 1, name: "Camera 01" }],
  * );
  * ```
  */
 export function document<const F extends Fields>(
   fields: F,
 ): Document<Decoded<F>> {
-  const decode = (root: XmlElement) => decodeFields(fields, root);
-  return { decode, parse: (xml) => decode(parseIsapi(xml)) };
+  return defineDocument((root) => decodeFields(fields, root));
 }

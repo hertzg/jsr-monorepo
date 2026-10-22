@@ -1,23 +1,20 @@
 import { assertEquals } from "@std/assert";
 import { resolvesNext, spy } from "@std/testing/mock";
-import {
-  motionDetectionCapabilitiesPath,
-  parseMotionDetectionCapabilities,
-  readMotionDetectionCapabilities,
-} from "./motion-capabilities.ts";
+import { read } from "../request.ts";
+import { motionDetectionCapabilities } from "./motion-detection-capabilities.ts";
 
-Deno.test("motionDetectionCapabilitiesPath appends /capabilities to both paths", () => {
+Deno.test("motionDetectionCapabilities path appends /capabilities to both paths", () => {
   assertEquals(
-    motionDetectionCapabilitiesPath({ channel: 5, proxy: true }),
+    motionDetectionCapabilities({ channel: 5, proxy: true }).path,
     "/ISAPI/ContentMgmt/InputProxy/channels/5/video/motionDetection/capabilities",
   );
   assertEquals(
-    motionDetectionCapabilitiesPath({ channel: 1 }),
+    motionDetectionCapabilities({ channel: 1 }).path,
     "/ISAPI/System/Video/inputs/channels/1/motionDetection/capabilities",
   );
 });
 
-Deno.test("parseMotionDetectionCapabilities reads ranges from attributes", () => {
+Deno.test("motionDetectionCapabilities codec reads ranges from attributes", () => {
   const xml = '<?xml version="1.0" encoding="UTF-8" ?>\n' +
     '<MotionDetection version="2.0" xmlns="http://www.isapi.org/ver20/XMLSchema">\n' +
     '<enabled opt="true,false">true</enabled>\n' +
@@ -35,7 +32,7 @@ Deno.test("parseMotionDetectionCapabilities reads ranges from attributes", () =>
     '<regionEdgesNum min="4" max="10"/>\n' +
     "</MotionDetection>\n";
 
-  assertEquals(parseMotionDetectionCapabilities(xml), {
+  assertEquals(motionDetectionCapabilities({ channel: 1 }).codec.parse(xml), {
     regionTypes: ["grid", "region"],
     rows: 18,
     columns: 22,
@@ -45,35 +42,35 @@ Deno.test("parseMotionDetectionCapabilities reads ranges from attributes", () =>
   });
 });
 
-Deno.test("parseMotionDetectionCapabilities leaves optional ranges out", () => {
+Deno.test("motionDetectionCapabilities codec leaves optional ranges out", () => {
   const xml = "<MotionDetection>" +
     '<regionType opt="grid">grid</regionType>' +
     '<MotionDetectionLayout><sensitivityLevel min="0" max="100">60</sensitivityLevel>' +
     "</MotionDetectionLayout>" +
     "</MotionDetection>";
 
-  assertEquals(parseMotionDetectionCapabilities(xml), {
+  assertEquals(motionDetectionCapabilities({ channel: 1 }).codec.parse(xml), {
     regionTypes: ["grid"],
     sensitivityLevel: { min: 0, max: 100 },
     targetTypes: [],
   });
 });
 
-Deno.test("parseMotionDetectionCapabilities finds sensitivity and targets at the root without a layout", () => {
+Deno.test("motionDetectionCapabilities codec finds sensitivity and targets at the root without a layout", () => {
   const xml = "<MotionDetection>" +
     '<regionType opt="grid">grid</regionType>' +
     '<sensitivityLevel min="0" max="100" step="20">60</sensitivityLevel>' +
     '<targetType opt="human">human</targetType>' +
     "</MotionDetection>";
 
-  assertEquals(parseMotionDetectionCapabilities(xml), {
+  assertEquals(motionDetectionCapabilities({ channel: 1 }).codec.parse(xml), {
     regionTypes: ["grid"],
     sensitivityLevel: { min: 0, max: 100, step: 20 },
     targetTypes: ["human"],
   });
 });
 
-Deno.test("readMotionDetectionCapabilities requests the proxy capabilities path", async () => {
+Deno.test("read(motionDetectionCapabilities) requests the proxy capabilities path", async () => {
   const fetch = spy(resolvesNext([
     new Response(
       '<MotionDetection><regionType opt="grid,region">grid</regionType>' +
@@ -82,14 +79,14 @@ Deno.test("readMotionDetectionCapabilities requests the proxy capabilities path"
     ),
   ]));
 
-  const capabilities = await readMotionDetectionCapabilities(
+  const capabilities = await read(
     {
       baseUrl: "http://192.0.2.10",
       username: "admin",
       password: "hunter2",
       fetch,
     },
-    { channel: 3, proxy: true },
+    motionDetectionCapabilities({ channel: 3, proxy: true }),
   );
 
   assertEquals(capabilities.regionTypes, ["grid", "region"]);

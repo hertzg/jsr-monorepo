@@ -1,5 +1,5 @@
 import { assertEquals } from "@std/assert";
-import { createPartsStream, parseBoundary, type Part } from "./parts.ts";
+import { createPartsStream, parseBoundary, type Part } from "./multipart.ts";
 
 function bytes(text: string): Uint8Array {
   return new TextEncoder().encode(text);
