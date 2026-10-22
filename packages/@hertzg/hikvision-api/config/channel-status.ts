@@ -33,7 +33,7 @@
  * @example Parse a channel status list
  * ```ts
  * import { assertEquals } from "@std/assert";
- * import { parseInputProxyChannelStatus } from "@hertzg/hikvision-api/config/channel-status";
+ * import { parseInputProxyChannelStatus } from "./channel-status.ts";
  *
  * const status = parseInputProxyChannelStatus(
  *   "<InputProxyChannelStatusList><InputProxyChannelStatus><id>1</id>" +
@@ -56,18 +56,18 @@
  * @module
  */
 
-import { type RequestOptions, requestXml } from "../request.ts";
 import {
-  element,
-  elements,
-  parseIsapi,
-  parseNumber,
-  present,
-  requireText,
+  bool,
+  document,
+  type FieldValue,
+  int,
+  list,
+  obj,
+  optional,
+  repeated,
   text,
-  textContent,
-} from "../xml.ts";
-import type { XmlElement } from "@std/xml";
+} from "../isapi/document.ts";
+import { readDocument, type RequestOptions } from "../isapi/request.ts";
 
 /** The input proxy channel status path. */
 export const INPUT_PROXY_CHANNEL_STATUS_PATH =
@@ -117,6 +117,26 @@ export type InputProxyChannelStatus = {
   streamingProxyChannelIds?: number[];
 };
 
+const channelStatus = obj({
+  id: int(),
+  online: bool(),
+  chanDetectResult: optional(text()),
+  url: optional(text()),
+  sourceInputPortDescriptor: optional(obj({
+    ipAddress: optional(text()),
+    proxyProtocol: optional(text()),
+    managePortNo: optional(int()),
+    srcInputPort: optional(int()),
+    connMode: optional(text()),
+  })),
+  SecurityStatus: optional(obj({ PasswordStatus: text() })),
+  streamingProxyChannelIdList: optional(list("streamingProxyChannelId", int())),
+});
+
+const channelStatusList = document({
+  InputProxyChannelStatus: repeated(channelStatus),
+});
+
 /**
  * Parses an `<InputProxyChannelStatusList>` document.
  *
@@ -127,7 +147,7 @@ export type InputProxyChannelStatus = {
  * @example An offline channel without firmware extras
  * ```ts
  * import { assertEquals } from "@std/assert";
- * import { parseInputProxyChannelStatus } from "@hertzg/hikvision-api/config/channel-status";
+ * import { parseInputProxyChannelStatus } from "./channel-status.ts";
  *
  * const status = parseInputProxyChannelStatus(
  *   "<InputProxyChannelStatusList><InputProxyChannelStatus><id>3</id>" +
@@ -141,7 +161,9 @@ export type InputProxyChannelStatus = {
 export function parseInputProxyChannelStatus(
   xml: string,
 ): InputProxyChannelStatus[] {
-  return inputProxyChannelStatus(parseIsapi(xml));
+  return channelStatusList.parse(xml).InputProxyChannelStatus.map(
+    flattenGroups,
+  );
 }
 
 /**
@@ -157,7 +179,7 @@ export function parseInputProxyChannelStatus(
  * ```ts
  * import { assertEquals } from "@std/assert";
  * import { resolvesNext, spy } from "@std/testing/mock";
- * import { readInputProxyChannelStatus } from "@hertzg/hikvision-api/config/channel-status";
+ * import { readInputProxyChannelStatus } from "./channel-status.ts";
  *
  * const fetch = spy(resolvesNext([
  *   new Response(
@@ -184,33 +206,26 @@ export function parseInputProxyChannelStatus(
 export async function readInputProxyChannelStatus(
   options: RequestOptions,
 ): Promise<InputProxyChannelStatus[]> {
-  return inputProxyChannelStatus(
-    await requestXml(options, INPUT_PROXY_CHANNEL_STATUS_PATH),
+  const list = await readDocument(
+    options,
+    INPUT_PROXY_CHANNEL_STATUS_PATH,
+    channelStatusList,
   );
+  return list.InputProxyChannelStatus.map(flattenGroups);
 }
 
-function inputProxyChannelStatus(root: XmlElement): InputProxyChannelStatus[] {
-  return elements(root, "InputProxyChannelStatus").map((entry) => {
-    const source = element(entry, "sourceInputPortDescriptor");
-    const security = element(entry, "SecurityStatus");
-    const streaming = element(entry, "streamingProxyChannelIdList");
-    return {
-      id: Number(requireText(entry, "id")),
-      online: requireText(entry, "online") === "true",
-      ...present({
-        chanDetectResult: text(entry, "chanDetectResult"),
-        url: text(entry, "url"),
-        ipAddress: source && text(source, "ipAddress"),
-        proxyProtocol: source && text(source, "proxyProtocol"),
-        managePortNo: source && parseNumber(text(source, "managePortNo")),
-        srcInputPort: source && parseNumber(text(source, "srcInputPort")),
-        connMode: source && text(source, "connMode"),
-        passwordStatus: security && text(security, "PasswordStatus"),
-        streamingProxyChannelIds: streaming &&
-          elements(streaming, "streamingProxyChannelId").map((id) =>
-            Number(textContent(id))
-          ),
-      }),
-    };
-  });
+function flattenGroups(
+  {
+    sourceInputPortDescriptor: source,
+    SecurityStatus: security,
+    streamingProxyChannelIdList: streamingProxyChannelIds,
+    ...status
+  }: FieldValue<typeof channelStatus>,
+): InputProxyChannelStatus {
+  return {
+    ...status,
+    ...source,
+    ...(security && { passwordStatus: security.PasswordStatus }),
+    ...(streamingProxyChannelIds && { streamingProxyChannelIds }),
+  };
 }

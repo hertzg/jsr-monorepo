@@ -1,6 +1,6 @@
 import { assertEquals, assertRejects, assertThrows } from "@std/assert";
 import { resolvesNext, spy } from "@std/testing/mock";
-import { IsapiError } from "../xml.ts";
+import { IsapiError } from "../isapi/status.ts";
 import { parseDeviceInfo, readDeviceInfo } from "./device-info.ts";
 
 Deno.test("parseDeviceInfo reads every field of an NVR document", () => {

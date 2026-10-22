@@ -39,16 +39,15 @@
  * </MotionDetection>
  * ```
  *
- * `<gridMap>` is decoded with `decodeGridMap` from
- * `@hertzg/hikvision-api/config/grid-map`, which also explains the encoding.
- * Region coordinates are in the device's normalized 1000 x 1000 screen
- * space. What a channel allows comes from
- * `@hertzg/hikvision-api/config/motion-capabilities`.
+ * `<gridMap>` is decoded with `decodeGridMap` from `grid-map.ts`, which also
+ * explains the encoding. Region coordinates are in the device's normalized
+ * 1000 x 1000 screen space. What a channel allows comes from
+ * `motion-capabilities.ts`.
  *
  * @example Read a camera's drawn polygons
  * ```ts
  * import { assertEquals } from "@std/assert";
- * import { parseMotionDetection } from "@hertzg/hikvision-api/config/motion-detection";
+ * import { parseMotionDetection } from "./motion-detection.ts";
  *
  * const motion = parseMotionDetection(
  *   "<MotionDetection><enabled>true</enabled><regionType>region</regionType>" +
@@ -71,20 +70,20 @@
  * @module
  */
 
-import { type RequestOptions, requestXml } from "../request.ts";
 import {
-  element,
-  elements,
-  parseIsapi,
+  bool,
+  document,
+  int,
+  list,
+  obj,
+  optional,
   type Point,
   points,
-  present,
-  requireText,
   text,
   tokens,
-} from "../xml.ts";
+} from "../isapi/document.ts";
+import { readDocument, type RequestOptions } from "../isapi/request.ts";
 import { decodeGridMap } from "./grid-map.ts";
-import type { XmlElement } from "@std/xml";
 
 /** Which motion detection document to read. */
 export type MotionDetectionTarget = {
@@ -135,6 +134,31 @@ export type MotionDetection = {
   targetType?: string[];
 };
 
+// The wire shape, keyed by element name. A description, not state: it holds
+// nothing, so one instance serves every call.
+const motionDetection = document({
+  enabled: optional(bool()),
+  enableHighlight: optional(bool()),
+  samplingInterval: optional(int()),
+  startTriggerTime: optional(int()),
+  endTriggerTime: optional(int()),
+  regionType: optional(text()),
+  Grid: optional(obj({ rowGranularity: int(), columnGranularity: int() })),
+  MotionDetectionLayout: optional(obj({
+    sensitivityLevel: optional(int()),
+    targetType: optional(tokens()),
+    layout: optional(obj({
+      gridMap: optional(text()),
+      RegionList: list(
+        "Region",
+        obj({ id: int(), RegionCoordinatesList: points() }),
+      ),
+    })),
+  })),
+});
+
+type MotionDetectionWire = ReturnType<typeof motionDetection.parse>;
+
 /**
  * The path of a motion detection document.
  *
@@ -144,7 +168,7 @@ export type MotionDetection = {
  * @example Both paths
  * ```ts
  * import { assertEquals } from "@std/assert";
- * import { motionDetectionPath } from "@hertzg/hikvision-api/config/motion-detection";
+ * import { motionDetectionPath } from "./motion-detection.ts";
  *
  * assertEquals(
  *   motionDetectionPath({ channel: 3, proxy: true }),
@@ -175,7 +199,7 @@ export function motionDetectionPath(target: MotionDetectionTarget): string {
  * @example Parse an NVR's copy of a camera's settings
  * ```ts
  * import { assertEquals } from "@std/assert";
- * import { parseMotionDetection } from "@hertzg/hikvision-api/config/motion-detection";
+ * import { parseMotionDetection } from "./motion-detection.ts";
  *
  * const motion = parseMotionDetection(
  *   "<MotionDetection><enabled>true</enabled><regionType>grid</regionType>" +
@@ -193,7 +217,7 @@ export function motionDetectionPath(target: MotionDetectionTarget): string {
  * ```
  */
 export function parseMotionDetection(xml: string): MotionDetection {
-  return parseFields(parseIsapi(xml));
+  return buildMotionDetection(motionDetection.parse(xml));
 }
 
 /**
@@ -209,7 +233,7 @@ export function parseMotionDetection(xml: string): MotionDetection {
  * ```ts
  * import { assertEquals } from "@std/assert";
  * import { resolvesNext, spy } from "@std/testing/mock";
- * import { readMotionDetection } from "@hertzg/hikvision-api/config/motion-detection";
+ * import { readMotionDetection } from "./motion-detection.ts";
  *
  * const fetch = spy(resolvesNext([
  *   new Response(
@@ -236,66 +260,43 @@ export async function readMotionDetection(
   options: RequestOptions,
   target: MotionDetectionTarget,
 ): Promise<MotionDetection> {
-  return parseFields(await requestXml(options, motionDetectionPath(target)));
+  return buildMotionDetection(
+    await readDocument(options, motionDetectionPath(target), motionDetection),
+  );
 }
 
-function parseFields(root: XmlElement): MotionDetection {
-  const size = parseGridSize(root);
-  const layout = element(root, "MotionDetectionLayout");
-  const map = layout && element(layout, "layout");
-  const gridMap = map && text(map, "gridMap");
-  const regions = map === undefined ? [] : parseRegions(map);
+/** Turns the wire shape into the settings: units in the names, grid decoded. */
+function buildMotionDetection(wire: MotionDetectionWire): MotionDetection {
+  const {
+    enabled = false,
+    samplingInterval,
+    startTriggerTime,
+    endTriggerTime,
+    Grid,
+    MotionDetectionLayout,
+    ...sameNamed
+  } = wire;
+  const { layout, ...level } = { ...MotionDetectionLayout };
+  const size = Grid &&
+    { rows: Grid.rowGranularity, columns: Grid.columnGranularity };
+  const gridMap = layout?.gridMap;
+  const grid = size && gridMap !== undefined
+    ? decodeGridMap(gridMap, size)
+    : undefined;
+  const regions = (layout?.RegionList ?? []).map((
+    { id, RegionCoordinatesList },
+  ) => ({ id, coordinates: RegionCoordinatesList }));
   return {
-    enabled: text(root, "enabled") === "true",
-    ...present({
-      enableHighlight: readBoolean(root, "enableHighlight"),
-      samplingIntervalFrames: readNumber(root, "samplingInterval"),
-      startTriggerTimeMs: readNumber(root, "startTriggerTime"),
-      endTriggerTimeMs: readNumber(root, "endTriggerTime"),
-      regionType: text(root, "regionType"),
-      ...size,
-      sensitivityLevel: layout && readNumber(layout, "sensitivityLevel"),
-      grid: gridMap === undefined || size === undefined
-        ? undefined
-        : decodeGridMap(gridMap, size),
-      regions: regions.length === 0 ? undefined : regions,
-      targetType: layout && readTokens(layout, "targetType"),
-    }),
+    enabled,
+    ...sameNamed,
+    ...(samplingInterval !== undefined &&
+      { samplingIntervalFrames: samplingInterval }),
+    ...(startTriggerTime !== undefined &&
+      { startTriggerTimeMs: startTriggerTime }),
+    ...(endTriggerTime !== undefined && { endTriggerTimeMs: endTriggerTime }),
+    ...size,
+    ...level,
+    ...(grid && { grid }),
+    ...(regions.length > 0 && { regions }),
   };
-}
-
-function parseGridSize(
-  root: XmlElement,
-): { rows: number; columns: number } | undefined {
-  const grid = element(root, "Grid");
-  return grid && {
-    rows: Number(requireText(grid, "rowGranularity")),
-    columns: Number(requireText(grid, "columnGranularity")),
-  };
-}
-
-function parseRegions(map: XmlElement): MotionRegion[] {
-  const list = element(map, "RegionList");
-  return list === undefined ? [] : elements(list, "Region").map((region) => {
-    const corners = element(region, "RegionCoordinatesList");
-    return {
-      id: Number(requireText(region, "id")),
-      coordinates: corners === undefined ? [] : points(corners),
-    };
-  });
-}
-
-function readBoolean(parent: XmlElement, name: string): boolean | undefined {
-  const value = text(parent, name);
-  return value === undefined ? undefined : value === "true";
-}
-
-function readNumber(parent: XmlElement, name: string): number | undefined {
-  const value = text(parent, name);
-  return value === undefined ? undefined : Number(value);
-}
-
-function readTokens(parent: XmlElement, name: string): string[] | undefined {
-  const value = text(parent, name);
-  return value === undefined ? undefined : tokens(value);
 }

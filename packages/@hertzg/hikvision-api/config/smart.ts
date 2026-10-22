@@ -7,10 +7,10 @@
  * rules share one document layout named after the type: a `<RegionEntrance>`
  * root holds a `<RegionEntranceRegionList>` of `<RegionEntranceRegion>`s,
  * and so on for each type, so {@link parseSmartRules} reads any of them.
- * Crossing lines use a different layout and live in
- * `@hertzg/hikvision-api/config/line-detection`. Every shape is drawn in a
- * normalized screen space, 1000 x 1000 by default. A device without the
- * feature answers a `<ResponseStatus>` with `subStatusCode notSupport`.
+ * Crossing lines use a different layout, read by `parseLineDetection` in
+ * `line-detection.ts`. Every shape is drawn in a normalized screen space,
+ * 1000 x 1000 by default. A device without the feature answers a
+ * `<ResponseStatus>` with `subStatusCode notSupport`.
  *
  * ```xml
  * <FieldDetection version="2.0" xmlns="http://www.hikvision.com/ver20/XMLSchema">
@@ -43,7 +43,7 @@
  * @example Parse an intrusion region
  * ```ts
  * import { assertEquals } from "@std/assert";
- * import { parseFieldDetection } from "@hertzg/hikvision-api/config/smart";
+ * import { parseFieldDetection } from "./smart.ts";
  *
  * const field = parseFieldDetection(
  *   "<FieldDetection><id>1</id><enabled>true</enabled>" +
@@ -69,19 +69,24 @@
  * @module
  */
 
-import { type RequestOptions, requestXml } from "../request.ts";
+import type { XmlElement } from "@std/xml";
 import {
-  element,
-  elements,
-  parseIsapi,
+  bool,
+  type Decoded,
+  decodeFields,
+  type Field,
+  type FieldValue,
+  int,
+  list,
+  obj,
+  optional,
   type Point,
   points,
-  present,
-  requireText,
   text,
   tokens,
-} from "../xml.ts";
-import type { XmlElement } from "@std/xml";
+} from "../isapi/document.ts";
+import { type RequestOptions, requestXml } from "../isapi/request.ts";
+import { parseIsapi } from "../isapi/status.ts";
 
 /**
  * The smart rule types by path segment, each mapped to the `<eventType>`
@@ -94,7 +99,7 @@ import type { XmlElement } from "@std/xml";
  * @example Match an alert to its rule type
  * ```ts
  * import { assertEquals } from "@std/assert";
- * import { SMART_RULE_TYPES } from "@hertzg/hikvision-api/config/smart";
+ * import { SMART_RULE_TYPES } from "./smart.ts";
  *
  * assertEquals(SMART_RULE_TYPES.FieldDetection, "fielddetection");
  * assertEquals(SMART_RULE_TYPES.regionEntrance, "regionEntrance");
@@ -180,6 +185,119 @@ export type FieldDetectionRegion = SmartRegion;
 export type FieldDetection = SmartRules;
 
 /**
+ * The wire fields every region and crossing line share.
+ *
+ * @example Describe a crossing line with them
+ * ```ts
+ * import { assertEquals } from "@std/assert";
+ * import { document, optional, text } from "../isapi/document.ts";
+ * import { ruleFields } from "./smart.ts";
+ *
+ * const line = document({ ...ruleFields, directionSensitivity: optional(text()) });
+ *
+ * assertEquals(
+ *   line.parse("<LineItem><id>2</id><enabled>true</enabled><detectionTarget>human</detectionTarget></LineItem>"),
+ *   { id: 2, enabled: true, detectionTarget: ["human"] },
+ * );
+ * ```
+ */
+export const ruleFields = {
+  id: int(),
+  enabled: optional(bool()),
+  sensitivityLevel: optional(int()),
+  detectionTarget: optional(tokens()),
+  alarmConfidence: optional(text()),
+};
+
+/**
+ * The misinfo filter flags a rule document carries at its root and per region.
+ *
+ * @example Read the flags of a root
+ * ```ts
+ * import { assertEquals } from "@std/assert";
+ * import { document } from "../isapi/document.ts";
+ * import { misinfoFilterFields } from "./smart.ts";
+ *
+ * const flags = document(misinfoFilterFields);
+ *
+ * assertEquals(
+ *   flags.parse("<FieldDetection><humanMisinfoFilterEnabled>true</humanMisinfoFilterEnabled></FieldDetection>"),
+ *   { humanMisinfoFilterEnabled: true },
+ * );
+ * ```
+ */
+export const misinfoFilterFields = {
+  humanMisinfoFilterEnabled: optional(bool()),
+  vehicleMisinfoFilterEnabled: optional(bool()),
+};
+
+/**
+ * The `<normalizedScreenSize>` field, read as its width and height.
+ *
+ * @example Read the default screen space
+ * ```ts
+ * import { assertEquals } from "@std/assert";
+ * import { parse } from "@std/xml";
+ * import { screenSize } from "./smart.ts";
+ *
+ * const root = parse(
+ *   "<LineDetection><normalizedScreenSize>" +
+ *     "<normalizedScreenWidth>1000</normalizedScreenWidth>" +
+ *     "<normalizedScreenHeight>1000</normalizedScreenHeight>" +
+ *     "</normalizedScreenSize></LineDetection>",
+ * ).root;
+ *
+ * assertEquals(screenSize.decode(root, "normalizedScreenSize"), { width: 1000, height: 1000 });
+ * ```
+ */
+export const screenSize: Field<NormalizedScreenSize> = {
+  decode: (parent, name) => {
+    const { normalizedScreenWidth: width, normalizedScreenHeight: height } =
+      obj({ normalizedScreenWidth: int(), normalizedScreenHeight: int() })
+        .decode(parent, name);
+    return { width, height };
+  },
+};
+
+/**
+ * Joins decoded {@link ruleFields} with their points into a rule, defaulting
+ * `enabled` to `false` and `detectionTarget` to `[]`.
+ *
+ * @template F The decoded fields, {@link ruleFields} plus any the caller adds.
+ * @param fields The decoded fields; extra keys pass through.
+ * @param coordinates The shape's points.
+ * @returns The rule with its extra keys.
+ *
+ * @example Map a decoded line item
+ * ```ts
+ * import { assertEquals } from "@std/assert";
+ * import { mapRule } from "./smart.ts";
+ *
+ * const line = mapRule(
+ *   { id: 2, sensitivityLevel: 70, directionSensitivity: "any" },
+ *   [{ x: 100, y: 500 }, { x: 900, y: 500 }],
+ * );
+ *
+ * assertEquals(line, {
+ *   id: 2,
+ *   enabled: false,
+ *   sensitivityLevel: 70,
+ *   directionSensitivity: "any",
+ *   coordinates: [{ x: 100, y: 500 }, { x: 900, y: 500 }],
+ *   detectionTarget: [],
+ * });
+ * ```
+ */
+export function mapRule<F extends Decoded<typeof ruleFields>>(
+  fields: F,
+  coordinates: Point[],
+): F & SmartRule {
+  // decodeFields leaves an absent optional field out entirely, so the
+  // defaults survive the spread.
+  return { enabled: false, detectionTarget: [], ...fields, coordinates };
+}
+
+/**
  * The path of a region rule document.
  *
  * @param rule The rule's path segment and video channel; the channel defaults to `1`.
@@ -188,7 +306,7 @@ export type FieldDetection = SmartRules;
  * @example Loitering on an NVR's third channel
  * ```ts
  * import { assertEquals } from "@std/assert";
- * import { smartRulesPath } from "@hertzg/hikvision-api/config/smart";
+ * import { smartRulesPath } from "./smart.ts";
  *
  * assertEquals(smartRulesPath({ type: "loitering", channel: 3 }), "/ISAPI/Smart/loitering/3");
  * assertEquals(smartRulesPath({ type: "FieldDetection" }), "/ISAPI/Smart/FieldDetection/1");
@@ -209,7 +327,7 @@ export function smartRulesPath(
  * @example The first channel
  * ```ts
  * import { assertEquals } from "@std/assert";
- * import { fieldDetectionPath } from "@hertzg/hikvision-api/config/smart";
+ * import { fieldDetectionPath } from "./smart.ts";
  *
  * assertEquals(fieldDetectionPath(), "/ISAPI/Smart/FieldDetection/1");
  * ```
@@ -229,7 +347,7 @@ export function fieldDetectionPath(channel = 1): string {
  * @example Parse a region entrance rule
  * ```ts
  * import { assertEquals } from "@std/assert";
- * import { parseSmartRules } from "@hertzg/hikvision-api/config/smart";
+ * import { parseSmartRules } from "./smart.ts";
  *
  * const rules = parseSmartRules(
  *   "<RegionEntrance><id>2</id><enabled>true</enabled>" +
@@ -257,7 +375,7 @@ export function fieldDetectionPath(channel = 1): string {
  * ```
  */
 export function parseSmartRules(xml: string): SmartRules {
-  return smartRules(parseIsapi(xml));
+  return decodeSmartRules(parseIsapi(xml));
 }
 
 /**
@@ -271,8 +389,8 @@ export function parseSmartRules(xml: string): SmartRules {
  * @example A device without the feature
  * ```ts
  * import { assertThrows } from "@std/assert";
- * import { parseFieldDetection } from "@hertzg/hikvision-api/config/smart";
- * import { IsapiError } from "@hertzg/hikvision-api/xml";
+ * import { IsapiError } from "../isapi/status.ts";
+ * import { parseFieldDetection } from "./smart.ts";
  *
  * assertThrows(
  *   () =>
@@ -301,7 +419,7 @@ export function parseFieldDetection(xml: string): FieldDetection {
  * ```ts
  * import { assertEquals } from "@std/assert";
  * import { resolvesNext, spy } from "@std/testing/mock";
- * import { readSmartRules } from "@hertzg/hikvision-api/config/smart";
+ * import { readSmartRules } from "./smart.ts";
  *
  * const fetch = spy(resolvesNext([
  *   new Response("<Loitering><id>4</id><enabled>false</enabled></Loitering>"),
@@ -322,7 +440,7 @@ export async function readSmartRules(
   options: RequestOptions,
   rule: { type: SmartRuleType; channel?: number },
 ): Promise<SmartRules> {
-  return smartRules(await requestXml(options, smartRulesPath(rule)));
+  return decodeSmartRules(await requestXml(options, smartRulesPath(rule)));
 }
 
 /**
@@ -338,7 +456,7 @@ export async function readSmartRules(
  * ```ts
  * import { assertEquals } from "@std/assert";
  * import { resolvesNext, spy } from "@std/testing/mock";
- * import { readFieldDetection } from "@hertzg/hikvision-api/config/smart";
+ * import { readFieldDetection } from "./smart.ts";
  *
  * const fetch = spy(resolvesNext([
  *   new Response("<FieldDetection><id>1</id><enabled>false</enabled></FieldDetection>"),
@@ -362,130 +480,47 @@ export function readFieldDetection(
   return readSmartRules(options, { type: "FieldDetection", channel });
 }
 
-/**
- * Reads the fields every region and crossing line share from its element.
- *
- * @param entry The `<…Region>` or `<LineItem>` element.
- * @param coordinatesListName The local name of its coordinate list, such as `RegionCoordinatesList`.
- * @returns The id, enabled flag, sensitivity, points, targets and confidence.
- *
- * @example Read a line item's common fields
- * ```ts
- * import { assertEquals } from "@std/assert";
- * import { parse } from "@std/xml";
- * import { parseSmartRule } from "@hertzg/hikvision-api/config/smart";
- *
- * const item = parse(
- *   "<LineItem><id>2</id><enabled>true</enabled><sensitivityLevel>70</sensitivityLevel>" +
- *     "<CoordinatesList>" +
- *     "<Coordinates><positionX>100</positionX><positionY>500</positionY></Coordinates>" +
- *     "<Coordinates><positionX>900</positionX><positionY>500</positionY></Coordinates>" +
- *     "</CoordinatesList><detectionTarget>human,vehicle</detectionTarget></LineItem>",
- * ).root;
- *
- * assertEquals(parseSmartRule(item, "CoordinatesList"), {
- *   id: 2,
- *   enabled: true,
- *   sensitivityLevel: 70,
- *   coordinates: [{ x: 100, y: 500 }, { x: 900, y: 500 }],
- *   detectionTarget: ["human", "vehicle"],
- * });
- * ```
- */
-export function parseSmartRule(
-  entry: XmlElement,
-  coordinatesListName: string,
-): SmartRule {
-  const list = element(entry, coordinatesListName);
-  return {
-    id: Number(requireText(entry, "id")),
-    enabled: text(entry, "enabled") === "true",
-    coordinates: list === undefined ? [] : points(list),
-    detectionTarget: tokens(text(entry, "detectionTarget")),
-    ...present({
-      sensitivityLevel: numberText(entry, "sensitivityLevel"),
-      alarmConfidence: text(entry, "alarmConfidence"),
-    }),
-  };
-}
+const rootFields = {
+  id: int(),
+  enabled: optional(bool()),
+  normalizedScreenSize: optional(screenSize),
+  ...misinfoFilterFields,
+};
 
-/**
- * Reads the `<normalizedScreenSize>` under a rule document's root.
- *
- * @param root The rule document's root element.
- * @returns The width and height, or `undefined` when the element is missing.
- *
- * @example Read the default screen space
- * ```ts
- * import { assertEquals } from "@std/assert";
- * import { parse } from "@std/xml";
- * import { parseNormalizedScreenSize } from "@hertzg/hikvision-api/config/smart";
- *
- * const root = parse(
- *   "<LineDetection><normalizedScreenSize>" +
- *     "<normalizedScreenWidth>1000</normalizedScreenWidth>" +
- *     "<normalizedScreenHeight>1000</normalizedScreenHeight>" +
- *     "</normalizedScreenSize></LineDetection>",
- * ).root;
- *
- * assertEquals(parseNormalizedScreenSize(root), { width: 1000, height: 1000 });
- * assertEquals(parseNormalizedScreenSize(parse("<Loitering />").root), undefined);
- * ```
- */
-export function parseNormalizedScreenSize(
-  root: XmlElement,
-): NormalizedScreenSize | undefined {
-  const size = element(root, "normalizedScreenSize");
-  if (size === undefined) {
-    return undefined;
-  }
-  return {
-    width: Number(requireText(size, "normalizedScreenWidth")),
-    height: Number(requireText(size, "normalizedScreenHeight")),
-  };
-}
+const region = obj({
+  ...ruleFields,
+  ...misinfoFilterFields,
+  timeThreshold: optional(int()),
+  objectOccupation: optional(int()),
+  RegionCoordinatesList: optional(points()),
+});
 
-function smartRules(root: XmlElement): SmartRules {
+function decodeSmartRules(root: XmlElement): SmartRules {
   const type = root.name.local;
-  const list = element(root, `${type}RegionList`);
+  const { id, enabled = false, ...rest } = decodeFields(rootFields, root);
   return {
     type,
-    channel: Number(requireText(root, "id")),
-    enabled: text(root, "enabled") === "true",
-    ...present({ normalizedScreenSize: parseNormalizedScreenSize(root) }),
-    ...misinfoFilters(root),
-    regions: list === undefined
-      ? []
-      : elements(list, `${type}Region`).map((entry) => ({
-        ...parseSmartRule(entry, "RegionCoordinatesList"),
-        ...present({
-          timeThresholdSec: numberText(entry, "timeThreshold"),
-          objectOccupationPercent: numberText(entry, "objectOccupation"),
-        }),
-        ...misinfoFilters(entry),
-      })),
+    channel: id,
+    enabled,
+    ...rest,
+    regions: list(`${type}Region`, region)
+      .decode(root, `${type}RegionList`)
+      .map(mapRegion),
   };
 }
 
-function misinfoFilters(parent: XmlElement): {
-  humanMisinfoFilterEnabled?: boolean;
-  vehicleMisinfoFilterEnabled?: boolean;
-} {
-  return present({
-    humanMisinfoFilterEnabled: booleanText(parent, "humanMisinfoFilterEnabled"),
-    vehicleMisinfoFilterEnabled: booleanText(
-      parent,
-      "vehicleMisinfoFilterEnabled",
-    ),
-  });
-}
-
-function numberText(parent: XmlElement, name: string): number | undefined {
-  const value = text(parent, name);
-  return value === undefined ? undefined : Number(value);
-}
-
-function booleanText(parent: XmlElement, name: string): boolean | undefined {
-  const value = text(parent, name);
-  return value === undefined ? undefined : value === "true";
+function mapRegion(
+  {
+    timeThreshold,
+    objectOccupation,
+    RegionCoordinatesList = [],
+    ...rule
+  }: FieldValue<typeof region>,
+): SmartRegion {
+  return {
+    ...mapRule(rule, RegionCoordinatesList),
+    ...(timeThreshold !== undefined && { timeThresholdSec: timeThreshold }),
+    ...(objectOccupation !== undefined &&
+      { objectOccupationPercent: objectOccupation }),
+  };
 }

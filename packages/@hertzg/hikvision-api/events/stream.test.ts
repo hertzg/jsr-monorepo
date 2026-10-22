@@ -1,7 +1,7 @@
 import { assertEquals, assertRejects } from "@std/assert";
 import { assertSpyCalls, resolvesNext, spy } from "@std/testing/mock";
-import { HttpError } from "../request.ts";
-import { IsapiError } from "../xml.ts";
+import { HttpError } from "../isapi/request.ts";
+import { IsapiError } from "../isapi/status.ts";
 import { openAlertStream } from "./stream.ts";
 
 const OPTIONS = {

@@ -24,7 +24,7 @@
  * @example Parse a channel list
  * ```ts
  * import { assertEquals } from "@std/assert";
- * import { parseInputProxyChannels } from "@hertzg/hikvision-api/config/channels";
+ * import { parseInputProxyChannels } from "./channels.ts";
  *
  * const channels = parseInputProxyChannels(
  *   "<InputProxyChannelList><InputProxyChannel><id>1</id><name>Camera 01</name>" +
@@ -45,17 +45,16 @@
  * @module
  */
 
-import { type RequestOptions, requestXml } from "../request.ts";
 import {
-  element,
-  elements,
-  parseIsapi,
-  parseNumber,
-  present,
-  requireText,
+  document,
+  type FieldValue,
+  int,
+  obj,
+  optional,
+  repeated,
   text,
-} from "../xml.ts";
-import type { XmlElement } from "@std/xml";
+} from "../isapi/document.ts";
+import { readDocument, type RequestOptions } from "../isapi/request.ts";
 
 /** The input proxy channel list path. */
 export const INPUT_PROXY_CHANNELS_PATH =
@@ -77,6 +76,19 @@ export type InputProxyChannel = {
   srcInputPort?: number;
 };
 
+const channel = obj({
+  id: int(),
+  name: text(),
+  sourceInputPortDescriptor: optional(obj({
+    proxyProtocol: optional(text()),
+    ipAddress: optional(text()),
+    managePortNo: optional(int()),
+    srcInputPort: optional(int()),
+  })),
+});
+
+const channelList = document({ InputProxyChannel: repeated(channel) });
+
 /**
  * Parses an `<InputProxyChannelList>` document.
  *
@@ -87,7 +99,7 @@ export type InputProxyChannel = {
  * @example A channel without a source descriptor
  * ```ts
  * import { assertEquals } from "@std/assert";
- * import { parseInputProxyChannels } from "@hertzg/hikvision-api/config/channels";
+ * import { parseInputProxyChannels } from "./channels.ts";
  *
  * const channels = parseInputProxyChannels(
  *   "<InputProxyChannelList><InputProxyChannel><id>2</id><name>Camera 02</name>" +
@@ -98,7 +110,7 @@ export type InputProxyChannel = {
  * ```
  */
 export function parseInputProxyChannels(xml: string): InputProxyChannel[] {
-  return inputProxyChannels(parseIsapi(xml));
+  return channelList.parse(xml).InputProxyChannel.map(flattenSource);
 }
 
 /**
@@ -114,7 +126,7 @@ export function parseInputProxyChannels(xml: string): InputProxyChannel[] {
  * ```ts
  * import { assertEquals } from "@std/assert";
  * import { resolvesNext, spy } from "@std/testing/mock";
- * import { readInputProxyChannels } from "@hertzg/hikvision-api/config/channels";
+ * import { readInputProxyChannels } from "./channels.ts";
  *
  * const fetch = spy(resolvesNext([
  *   new Response(
@@ -137,23 +149,16 @@ export function parseInputProxyChannels(xml: string): InputProxyChannel[] {
 export async function readInputProxyChannels(
   options: RequestOptions,
 ): Promise<InputProxyChannel[]> {
-  return inputProxyChannels(
-    await requestXml(options, INPUT_PROXY_CHANNELS_PATH),
+  const list = await readDocument(
+    options,
+    INPUT_PROXY_CHANNELS_PATH,
+    channelList,
   );
+  return list.InputProxyChannel.map(flattenSource);
 }
 
-function inputProxyChannels(root: XmlElement): InputProxyChannel[] {
-  return elements(root, "InputProxyChannel").map((entry) => {
-    const source = element(entry, "sourceInputPortDescriptor");
-    return {
-      id: Number(requireText(entry, "id")),
-      name: requireText(entry, "name"),
-      ...present({
-        proxyProtocol: source && text(source, "proxyProtocol"),
-        ipAddress: source && text(source, "ipAddress"),
-        managePortNo: source && parseNumber(text(source, "managePortNo")),
-        srcInputPort: source && parseNumber(text(source, "srcInputPort")),
-      }),
-    };
-  });
+function flattenSource(
+  { sourceInputPortDescriptor: source, ...fields }: FieldValue<typeof channel>,
+): InputProxyChannel {
+  return { ...fields, ...source };
 }

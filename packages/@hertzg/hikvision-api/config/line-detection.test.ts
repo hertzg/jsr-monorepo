@@ -1,6 +1,6 @@
 import { assertEquals, assertThrows } from "@std/assert";
 import { resolvesNext, spy } from "@std/testing/mock";
-import { IsapiError } from "../xml.ts";
+import { IsapiError } from "../isapi/status.ts";
 import {
   lineDetectionPath,
   parseLineDetection,

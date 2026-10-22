@@ -44,7 +44,7 @@
  * @example Parse a motion alert from an NVR
  * ```ts
  * import { assertEquals } from "@std/assert";
- * import { parseAlert } from "@hertzg/hikvision-api/events/alert";
+ * import { parseAlert } from "./alert.ts";
  *
  * const alert = parseAlert(
  *   "<EventNotificationAlert><ipAddress>192.0.2.10</ipAddress>" +
@@ -71,17 +71,16 @@
  */
 
 import {
-  element,
-  elements,
-  parseNumber,
+  document,
+  int,
+  list,
+  obj,
+  optional,
   type Point,
   points,
-  present,
-  requireText,
   text,
   tokens,
-} from "../xml.ts";
-import { parse, type XmlElement } from "@std/xml";
+} from "../isapi/document.ts";
 
 /**
  * Where a smart event saw its target, from `<TargetRect>`.
@@ -157,6 +156,37 @@ export type Alert = {
   regions?: AlertRegion[];
 };
 
+const alert = document({
+  eventType: text(),
+  eventState: optional(text()),
+  eventDescription: optional(text()),
+  dateTime: optional(text()),
+  dynChannelID: optional(int()),
+  channelID: optional(int()),
+  activePostCount: optional(int()),
+  channelName: optional(text()),
+  ipAddress: optional(text()),
+  macAddress: optional(text()),
+  DetectionRegionList: optional(list(
+    "DetectionRegionEntry",
+    obj({
+      regionID: optional(int()),
+      sensitivityLevel: optional(int()),
+      RegionCoordinatesList: optional(points()),
+      TargetRect: optional(obj({
+        X: int(),
+        Y: int(),
+        width: int(),
+        height: int(),
+      })),
+      detectionTarget: optional(tokens()),
+    }),
+  )),
+});
+
+type WireAlert = ReturnType<typeof alert.parse>;
+type WireRegion = NonNullable<WireAlert["DetectionRegionList"]>[number];
+
 /**
  * Parses one `<EventNotificationAlert>` document.
  *
@@ -171,7 +201,7 @@ export type Alert = {
  * @example A camera's heartbeat carries the channel name and a zone
  * ```ts
  * import { assertEquals } from "@std/assert";
- * import { parseAlert } from "@hertzg/hikvision-api/events/alert";
+ * import { parseAlert } from "./alert.ts";
  *
  * const alert = parseAlert(
  *   '<?xml version="1.0" encoding="UTF-8"?>' +
@@ -191,7 +221,7 @@ export type Alert = {
  * @example An NVR's smart alert carries the box around the target
  * ```ts
  * import { assertEquals } from "@std/assert";
- * import { parseAlert } from "@hertzg/hikvision-api/events/alert";
+ * import { parseAlert } from "./alert.ts";
  *
  * const alert = parseAlert(
  *   "<EventNotificationAlert><dynChannelID>3</dynChannelID>" +
@@ -213,46 +243,37 @@ export type Alert = {
  * ```
  */
 export function parseAlert(xml: string, at: string): Alert {
-  const root = parse(xml).root;
-  const eventType = text(root, "eventType");
-  if (eventType === undefined) {
-    throw new Error(`ISAPI <${root.name.local}> has no <eventType>`);
-  }
-  const regionList = element(root, "DetectionRegionList");
+  const { dynChannelID, channelID, DetectionRegionList, ...fields } = alert
+    .parse(xml);
   return {
-    channel: Number(
-      text(root, "dynChannelID") ?? text(root, "channelID") ?? "0",
-    ),
-    eventType,
-    eventState: text(root, "eventState") ?? "active",
-    dateTime: text(root, "dateTime") ?? "",
+    ...fields,
+    channel: dynChannelID ?? channelID ?? 0,
+    eventState: fields.eventState ?? "active",
+    dateTime: fields.dateTime ?? "",
     at,
-    ...present({
-      eventDescription: text(root, "eventDescription"),
-      activePostCount: parseNumber(text(root, "activePostCount")),
-      channelName: text(root, "channelName"),
-      ipAddress: text(root, "ipAddress"),
-      macAddress: text(root, "macAddress"),
-      regions: regionList &&
-        elements(regionList, "DetectionRegionEntry").map(alertRegion),
-    }),
+    ...(DetectionRegionList && { regions: DetectionRegionList.map(toRegion) }),
   };
 }
 
-function alertRegion(entry: XmlElement): AlertRegion {
-  const list = element(entry, "RegionCoordinatesList");
-  const rect = element(entry, "TargetRect");
+function toRegion(entry: WireRegion): AlertRegion {
+  const {
+    regionID,
+    RegionCoordinatesList,
+    TargetRect,
+    detectionTarget,
+    ...rest
+  } = entry;
   return {
-    coordinates: list === undefined ? [] : points(list),
-    detectionTarget: tokens(text(entry, "detectionTarget")),
-    ...present({
-      id: parseNumber(text(entry, "regionID")),
-      sensitivityLevel: parseNumber(text(entry, "sensitivityLevel")),
-      targetRect: rect && {
-        x: Number(requireText(rect, "X")),
-        y: Number(requireText(rect, "Y")),
-        width: Number(requireText(rect, "width")),
-        height: Number(requireText(rect, "height")),
+    ...rest,
+    ...(regionID !== undefined && { id: regionID }),
+    coordinates: RegionCoordinatesList ?? [],
+    detectionTarget: detectionTarget ?? [],
+    ...(TargetRect && {
+      targetRect: {
+        x: TargetRect.X,
+        y: TargetRect.Y,
+        width: TargetRect.width,
+        height: TargetRect.height,
       },
     }),
   };

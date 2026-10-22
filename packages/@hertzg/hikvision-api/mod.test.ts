@@ -1,6 +1,6 @@
 import { assertEquals } from "@std/assert";
 import { assertSpyCalls, resolvesNext, spy } from "@std/testing/mock";
-import { createClient } from "./client.ts";
+import { createClient } from "./mod.ts";
 
 const OPTIONS = {
   baseUrl: "http://192.0.2.10",

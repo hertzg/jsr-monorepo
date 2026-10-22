@@ -27,7 +27,7 @@
  *
  * @example Print motion alerts until Ctrl-C
  * ```ts ignore
- * import { openAlertStream } from "@hertzg/hikvision-api/events/stream";
+ * import { openAlertStream } from "./stream.ts";
  *
  * const controller = new AbortController();
  * process.on("SIGINT", () => controller.abort());
@@ -54,8 +54,8 @@ import {
   parseBoundary,
   type Part,
 } from "../multipart/parts.ts";
-import { request, type RequestOptions } from "../request.ts";
-import { parseIsapi } from "../xml.ts";
+import { request, type RequestOptions } from "../isapi/request.ts";
+import { parseIsapi } from "../isapi/status.ts";
 import { type Alert, parseAlert } from "./alert.ts";
 
 /** The alert stream path. */
@@ -83,7 +83,7 @@ export type AlertStreamOptions = RequestOptions & {
  * ```ts
  * import { assertEquals } from "@std/assert";
  * import { resolvesNext, spy } from "@std/testing/mock";
- * import { openAlertStream } from "@hertzg/hikvision-api/events/stream";
+ * import { openAlertStream } from "./stream.ts";
  *
  * const xml = "<EventNotificationAlert><dynChannelID>3</dynChannelID>" +
  *   "<dateTime>2026-10-21T20:44:39</dateTime><eventType>VMD</eventType>" +

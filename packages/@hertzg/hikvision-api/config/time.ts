@@ -9,17 +9,16 @@
  * </Time>
  * ```
  *
- * `<timeZone>` is a POSIX 1003.1 `TZ` string, and POSIX puts the sign the
- * other way round from ISO 8601: the number after the zone name is what
- * you add to local time to reach UTC. So `CST-4:00:00` is UTC+4 and
- * `CST+3:00:00` is UTC-3. {@link parseTimeZoneOffset} turns the string into
- * the ISO-style offset in minutes, and `utcOffsetMinutes` carries it on the
- * parsed document.
+ * `<timeZone>` is a POSIX 1003.1 `TZ` string, whose sign is the reverse
+ * of ISO 8601: the number after the zone name is what you add to local
+ * time to reach UTC, so `CST-4:00:00` is UTC+4 and `CST+3:00:00` is UTC-3.
+ * {@link parseTimeZoneOffset} turns it into an ISO-style offset in minutes,
+ * which the parsed document carries as `utcOffsetMinutes`.
  *
  * @example Parse a time document
  * ```ts
  * import { assertEquals } from "@std/assert";
- * import { parseDeviceTime } from "@hertzg/hikvision-api/config/time";
+ * import { parseDeviceTime } from "./time.ts";
  *
  * const time = parseDeviceTime(
  *   "<Time><timeMode>NTP</timeMode>" +
@@ -38,9 +37,8 @@
  * @module
  */
 
-import { type RequestOptions, requestXml } from "../request.ts";
-import { parseIsapi, present, requireText, text } from "../xml.ts";
-import type { XmlElement } from "@std/xml";
+import { document, optional, text } from "../isapi/document.ts";
+import { readDocument, type RequestOptions } from "../isapi/request.ts";
 
 /** The device time path. */
 export const TIME_PATH = "/ISAPI/System/time";
@@ -69,6 +67,13 @@ export type DeviceTime = {
   platformType?: string;
 };
 
+const time = document({
+  timeMode: text(),
+  localTime: text(),
+  timeZone: text(),
+  platformType: optional(text()),
+});
+
 /**
  * Reads the standard-time UTC offset out of a POSIX `TZ` string.
  *
@@ -86,7 +91,7 @@ export type DeviceTime = {
  * @example Both signs, with and without DST
  * ```ts
  * import { assertEquals } from "@std/assert";
- * import { parseTimeZoneOffset } from "@hertzg/hikvision-api/config/time";
+ * import { parseTimeZoneOffset } from "./time.ts";
  *
  * assertEquals(parseTimeZoneOffset("CST-4:00:00"), 240);
  * assertEquals(parseTimeZoneOffset("CST+3:00:00"), -180);
@@ -122,7 +127,7 @@ export function parseTimeZoneOffset(timeZone: string): number | undefined {
  * @example A platform-synced NVR
  * ```ts
  * import { assertEquals } from "@std/assert";
- * import { parseDeviceTime } from "@hertzg/hikvision-api/config/time";
+ * import { parseDeviceTime } from "./time.ts";
  *
  * const time = parseDeviceTime(
  *   "<Time><timeMode>platform</timeMode><platformType>EZVIZ</platformType>" +
@@ -135,7 +140,7 @@ export function parseTimeZoneOffset(timeZone: string): number | undefined {
  * ```
  */
 export function parseDeviceTime(xml: string): DeviceTime {
-  return deviceTime(parseIsapi(xml));
+  return addUtcOffset(time.parse(xml));
 }
 
 /**
@@ -150,7 +155,7 @@ export function parseDeviceTime(xml: string): DeviceTime {
  * ```ts
  * import { assertEquals } from "@std/assert";
  * import { resolvesNext, spy } from "@std/testing/mock";
- * import { readDeviceTime } from "@hertzg/hikvision-api/config/time";
+ * import { readDeviceTime } from "./time.ts";
  *
  * const fetch = spy(resolvesNext([
  *   new Response(
@@ -174,18 +179,12 @@ export function parseDeviceTime(xml: string): DeviceTime {
 export async function readDeviceTime(
   options: RequestOptions,
 ): Promise<DeviceTime> {
-  return deviceTime(await requestXml(options, TIME_PATH));
+  return addUtcOffset(await readDocument(options, TIME_PATH, time));
 }
 
-function deviceTime(root: XmlElement): DeviceTime {
-  const timeZone = requireText(root, "timeZone");
-  return {
-    timeMode: requireText(root, "timeMode"),
-    localTime: requireText(root, "localTime"),
-    timeZone,
-    ...present({
-      utcOffsetMinutes: parseTimeZoneOffset(timeZone),
-      platformType: text(root, "platformType"),
-    }),
-  };
+function addUtcOffset(fields: DeviceTime): DeviceTime {
+  const utcOffsetMinutes = parseTimeZoneOffset(fields.timeZone);
+  return utcOffsetMinutes === undefined
+    ? fields
+    : { ...fields, utcOffsetMinutes };
 }

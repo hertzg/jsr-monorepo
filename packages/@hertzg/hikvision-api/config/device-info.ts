@@ -17,7 +17,7 @@
  * @example Parse a device info document
  * ```ts
  * import { assertEquals } from "@std/assert";
- * import { parseDeviceInfo } from "@hertzg/hikvision-api/config/device-info";
+ * import { parseDeviceInfo } from "./device-info.ts";
  *
  * const info = parseDeviceInfo(
  *   "<DeviceInfo><deviceName>Embedded Net DVR</deviceName>" +
@@ -36,9 +36,8 @@
  * @module
  */
 
-import { type RequestOptions, requestXml } from "../request.ts";
-import { parseIsapi, present, requireText, text } from "../xml.ts";
-import type { XmlElement } from "@std/xml";
+import { document, optional, text } from "../isapi/document.ts";
+import { readDocument, type RequestOptions } from "../isapi/request.ts";
 
 /** The device info path. */
 export const DEVICE_INFO_PATH = "/ISAPI/System/deviceInfo";
@@ -63,19 +62,30 @@ export type DeviceInfo = {
   deviceType: string;
 };
 
+const deviceInfo = document({
+  model: text(),
+  firmwareVersion: text(),
+  deviceType: text(),
+  deviceName: optional(text()),
+  deviceID: optional(text()),
+  serialNumber: optional(text()),
+  macAddress: optional(text()),
+  firmwareReleasedDate: optional(text()),
+});
+
 /**
  * Parses a `<DeviceInfo>` document.
  *
  * @param xml The document text.
- * @returns The device info. `model`, `firmwareVersion` and `deviceType` are
- *   required; the rest appear when the device sends them.
+ * @returns The device info; `model`, `firmwareVersion` and `deviceType` are
+ *   always present.
  * @throws {IsapiError} When the document is a failing `<ResponseStatus>`.
  * @throws {Error} When a required field is missing.
  *
  * @example Optional fields are left out when absent
  * ```ts
  * import { assertEquals } from "@std/assert";
- * import { parseDeviceInfo } from "@hertzg/hikvision-api/config/device-info";
+ * import { parseDeviceInfo } from "./device-info.ts";
  *
  * const info = parseDeviceInfo(
  *   "<DeviceInfo><model>DS-2CD2043G2-I</model>" +
@@ -86,7 +96,7 @@ export type DeviceInfo = {
  * ```
  */
 export function parseDeviceInfo(xml: string): DeviceInfo {
-  return deviceInfo(parseIsapi(xml));
+  return deviceInfo.parse(xml);
 }
 
 /**
@@ -101,7 +111,7 @@ export function parseDeviceInfo(xml: string): DeviceInfo {
  * ```ts
  * import { assertEquals } from "@std/assert";
  * import { resolvesNext, spy } from "@std/testing/mock";
- * import { readDeviceInfo } from "@hertzg/hikvision-api/config/device-info";
+ * import { readDeviceInfo } from "./device-info.ts";
  *
  * const fetch = spy(resolvesNext([
  *   new Response(
@@ -121,23 +131,6 @@ export function parseDeviceInfo(xml: string): DeviceInfo {
  * assertEquals(fetch.calls[0].args[0], "http://192.0.2.21/ISAPI/System/deviceInfo");
  * ```
  */
-export async function readDeviceInfo(
-  options: RequestOptions,
-): Promise<DeviceInfo> {
-  return deviceInfo(await requestXml(options, DEVICE_INFO_PATH));
-}
-
-function deviceInfo(root: XmlElement): DeviceInfo {
-  return {
-    model: requireText(root, "model"),
-    firmwareVersion: requireText(root, "firmwareVersion"),
-    deviceType: requireText(root, "deviceType"),
-    ...present({
-      deviceName: text(root, "deviceName"),
-      deviceID: text(root, "deviceID"),
-      serialNumber: text(root, "serialNumber"),
-      macAddress: text(root, "macAddress"),
-      firmwareReleasedDate: text(root, "firmwareReleasedDate"),
-    }),
-  };
+export function readDeviceInfo(options: RequestOptions): Promise<DeviceInfo> {
+  return readDocument(options, DEVICE_INFO_PATH, deviceInfo);
 }

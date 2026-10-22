@@ -15,7 +15,7 @@
  * @example Decode and re-encode a grid
  * ```ts
  * import { assertEquals } from "@std/assert";
- * import { decodeGridMap, encodeGridMap } from "@hertzg/hikvision-api/config/grid-map";
+ * import { decodeGridMap, encodeGridMap } from "./grid-map.ts";
  *
  * const grid = decodeGridMap("c00000000004", { rows: 2, columns: 22 });
  *
@@ -37,7 +37,7 @@
  * @example The NVR default: every cell on
  * ```ts
  * import { assertEquals } from "@std/assert";
- * import { decodeGridMap } from "@hertzg/hikvision-api/config/grid-map";
+ * import { decodeGridMap } from "./grid-map.ts";
  *
  * const grid = decodeGridMap("fffffc".repeat(18), { rows: 18, columns: 22 });
  *
@@ -72,7 +72,7 @@ export function decodeGridMap(
  * @example Only the top-left cell on
  * ```ts
  * import { assertEquals } from "@std/assert";
- * import { encodeGridMap } from "@hertzg/hikvision-api/config/grid-map";
+ * import { encodeGridMap } from "./grid-map.ts";
  *
  * const grid = Array.from({ length: 2 }, () => Array.from({ length: 22 }, () => false));
  * grid[0][0] = true;

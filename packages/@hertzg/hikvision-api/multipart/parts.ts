@@ -28,7 +28,7 @@
  * @example Split a two-part body
  * ```ts
  * import { assertEquals } from "@std/assert";
- * import { createPartsStream } from "@hertzg/hikvision-api/multipart/parts";
+ * import { createPartsStream } from "./parts.ts";
  *
  * const body = "--boundary\r\nContent-Type: text/plain\r\nContent-Length: 5\r\n\r\n" +
  *   "hello\r\n" +
@@ -69,7 +69,7 @@ export type Part = {
  * @example Read the boundary from a content type
  * ```ts
  * import { assertEquals } from "@std/assert";
- * import { parseBoundary } from "@hertzg/hikvision-api/multipart/parts";
+ * import { parseBoundary } from "./parts.ts";
  *
  * assertEquals(parseBoundary("multipart/mixed;boundary=boundary"), "boundary");
  * assertEquals(parseBoundary('multipart/mixed; boundary="--boundary"'), "boundary");
@@ -96,7 +96,7 @@ export function parseBoundary(contentType: string | null): string | undefined {
  * @example Parts arrive whole however the bytes are chunked
  * ```ts
  * import { assertEquals } from "@std/assert";
- * import { createPartsStream } from "@hertzg/hikvision-api/multipart/parts";
+ * import { createPartsStream } from "./parts.ts";
  *
  * const body = "--boundary\r\nContent-Type: application/xml\r\nContent-Length: 12\r\n\r\n" +
  *   "<a>hello</a>\r\n--boundary\r\n";

@@ -5,7 +5,7 @@
  * range as attributes: `<regionType opt="grid,region">`,
  * `<sensitivityLevel min="0" max="100" step="20">`,
  * `<regionEdgesNum min="4" max="10"/>`. The path is the settings path from
- * `@hertzg/hikvision-api/config/motion-detection` plus `/capabilities`.
+ * `motion-detection.ts` plus `/capabilities`.
  *
  * ```xml
  * <MotionDetection version="2.0" xmlns="http://www.isapi.org/ver20/XMLSchema">
@@ -23,7 +23,7 @@
  * @example Read what a channel allows
  * ```ts
  * import { assertEquals } from "@std/assert";
- * import { parseMotionDetectionCapabilities } from "@hertzg/hikvision-api/config/motion-capabilities";
+ * import { parseMotionDetectionCapabilities } from "./motion-capabilities.ts";
  *
  * const capabilities = parseMotionDetectionCapabilities(
  *   '<MotionDetection><regionType opt="grid">grid</regionType>' +
@@ -42,29 +42,36 @@
  * @module
  */
 
-import { type RequestOptions, requestXml } from "../request.ts";
-import { element, parseIsapi, present, requireText, tokens } from "../xml.ts";
+import {
+  attribute,
+  attributes,
+  document,
+  int,
+  obj,
+  optional,
+  splitTokens,
+} from "../isapi/document.ts";
+import { readDocument, type RequestOptions } from "../isapi/request.ts";
 import {
   motionDetectionPath,
   type MotionDetectionTarget,
 } from "./motion-detection.ts";
-import type { XmlElement } from "@std/xml";
 
 /** What `…/motionDetection/capabilities` allows for a channel. */
 export type MotionDetectionCapabilities = {
-  /** `<regionType opt>`: the region types the device accepts. */
+  /** `<regionType opt>`: the region types the device accepts; `[]` without one. */
   regionTypes: string[];
   /** `<rowGranularity>`: rows in the grid, when `<Grid>` is present. */
   rows?: number;
   /** `<columnGranularity>`: columns in the grid, when `<Grid>` is present. */
   columns?: number;
-  /** `<sensitivityLevel min max step>`, when present. */
+  /** `<sensitivityLevel min max step>`, when present; each attribute the device states. */
   sensitivityLevel?: {
     /** The lowest allowed level. */
-    min: number;
+    min?: number;
     /** The highest allowed level. */
-    max: number;
-    /** The distance between allowed levels, when the device states one. */
+    max?: number;
+    /** The distance between allowed levels. */
     step?: number;
   };
   /** `<targetType opt>`: the detection targets the device accepts; `[]` without one. */
@@ -72,11 +79,33 @@ export type MotionDetectionCapabilities = {
   /** `<regionEdgesNum min max>`: how many corners a region may have, when present. */
   regionEdges?: {
     /** The fewest corners. */
-    min: number;
+    min?: number;
     /** The most corners. */
-    max: number;
+    max?: number;
   };
 };
+
+// The ranges live under <MotionDetectionLayout> on most firmware and at the
+// root on some, so the same fields are described in both places. A
+// description, not state: it holds nothing, so one instance serves every call.
+const ranges = {
+  sensitivityLevel: optional(
+    attributes({ min: Number, max: Number, step: Number }),
+  ),
+  targetType: optional(attribute("opt", splitTokens)),
+  regionEdgesNum: optional(attributes({ min: Number, max: Number })),
+};
+
+const motionDetectionCapabilities = document({
+  regionType: optional(attribute("opt", splitTokens)),
+  Grid: optional(obj({ rowGranularity: int(), columnGranularity: int() })),
+  MotionDetectionLayout: optional(obj(ranges)),
+  ...ranges,
+});
+
+type MotionDetectionCapabilitiesWire = ReturnType<
+  typeof motionDetectionCapabilities.parse
+>;
 
 /**
  * The path of a motion detection capabilities document.
@@ -87,7 +116,7 @@ export type MotionDetectionCapabilities = {
  * @example A camera's own input
  * ```ts
  * import { assertEquals } from "@std/assert";
- * import { motionDetectionCapabilitiesPath } from "@hertzg/hikvision-api/config/motion-capabilities";
+ * import { motionDetectionCapabilitiesPath } from "./motion-capabilities.ts";
  *
  * assertEquals(
  *   motionDetectionCapabilitiesPath({ channel: 1 }),
@@ -111,7 +140,7 @@ export function motionDetectionCapabilitiesPath(
  * @example A camera that draws regions and rasterizes them into an 18 x 22 grid
  * ```ts
  * import { assertEquals } from "@std/assert";
- * import { parseMotionDetectionCapabilities } from "@hertzg/hikvision-api/config/motion-capabilities";
+ * import { parseMotionDetectionCapabilities } from "./motion-capabilities.ts";
  *
  * const capabilities = parseMotionDetectionCapabilities(
  *   '<MotionDetection><enabled opt="true,false">true</enabled>' +
@@ -135,7 +164,7 @@ export function motionDetectionCapabilitiesPath(
 export function parseMotionDetectionCapabilities(
   xml: string,
 ): MotionDetectionCapabilities {
-  return parseFields(parseIsapi(xml));
+  return buildCapabilities(motionDetectionCapabilities.parse(xml));
 }
 
 /**
@@ -151,7 +180,7 @@ export function parseMotionDetectionCapabilities(
  * ```ts
  * import { assertEquals } from "@std/assert";
  * import { resolvesNext, spy } from "@std/testing/mock";
- * import { readMotionDetectionCapabilities } from "@hertzg/hikvision-api/config/motion-capabilities";
+ * import { readMotionDetectionCapabilities } from "./motion-capabilities.ts";
  *
  * const fetch = spy(resolvesNext([
  *   new Response(
@@ -178,45 +207,29 @@ export async function readMotionDetectionCapabilities(
   options: RequestOptions,
   target: MotionDetectionTarget,
 ): Promise<MotionDetectionCapabilities> {
-  return parseFields(
-    await requestXml(options, motionDetectionCapabilitiesPath(target)),
+  return buildCapabilities(
+    await readDocument(
+      options,
+      motionDetectionCapabilitiesPath(target),
+      motionDetectionCapabilities,
+    ),
   );
 }
 
-function parseFields(root: XmlElement): MotionDetectionCapabilities {
-  const layout = element(root, "MotionDetectionLayout") ?? root;
-  const grid = element(root, "Grid");
-  const sensitivity = element(layout, "sensitivityLevel") ??
-    element(root, "sensitivityLevel");
-  const targets = element(layout, "targetType") ??
-    element(root, "targetType");
-  const edges = element(root, "regionEdgesNum") ??
-    element(layout, "regionEdgesNum");
-  return {
-    regionTypes: tokens(element(root, "regionType")?.attributes["opt"]),
-    targetTypes: tokens(targets?.attributes["opt"]),
-    ...present({
-      rows: grid && Number(requireText(grid, "rowGranularity")),
-      columns: grid && Number(requireText(grid, "columnGranularity")),
-      sensitivityLevel: sensitivity && readSensitivityRange(sensitivity),
-      regionEdges: edges && readRange(edges),
-    }),
+/** Merges the two places a range may sit, the layout's winning over the root's. */
+function buildCapabilities(
+  wire: MotionDetectionCapabilitiesWire,
+): MotionDetectionCapabilities {
+  const { regionType = [], Grid, MotionDetectionLayout, ...atRoot } = wire;
+  const { sensitivityLevel, targetType = [], regionEdgesNum } = {
+    ...atRoot,
+    ...MotionDetectionLayout,
   };
-}
-
-function readSensitivityRange(
-  node: XmlElement,
-): NonNullable<MotionDetectionCapabilities["sensitivityLevel"]> {
-  const step = node.attributes["step"];
   return {
-    ...readRange(node),
-    ...present({ step: step === undefined ? undefined : Number(step) }),
-  };
-}
-
-function readRange(node: XmlElement): { min: number; max: number } {
-  return {
-    min: Number(node.attributes["min"]),
-    max: Number(node.attributes["max"]),
+    regionTypes: regionType,
+    ...(Grid && { rows: Grid.rowGranularity, columns: Grid.columnGranularity }),
+    ...(sensitivityLevel && { sensitivityLevel }),
+    targetTypes: targetType,
+    ...(regionEdgesNum && { regionEdges: regionEdgesNum }),
   };
 }

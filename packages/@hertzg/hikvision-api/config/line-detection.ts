@@ -3,12 +3,11 @@
  *
  * The document lives at `/ISAPI/Smart/LineDetection/<channel>`, where
  * `<channel>` is the video input channel: 1..N on an NVR, 1 on a camera.
- * Unlike the region rules in `@hertzg/hikvision-api/config/smart`, the root
- * holds a `<LineItemList>` of `<LineItem>`s, each with a two-point
- * `<CoordinatesList>` and a `<directionSensitivity>`. The points are drawn
- * in the same normalized screen space, 1000 x 1000 by default. A device
- * without the feature answers a `<ResponseStatus>` with
- * `subStatusCode notSupport`.
+ * Unlike the region rules in `smart.ts`, the root holds a `<LineItemList>`
+ * of `<LineItem>`s, each with a two-point `<CoordinatesList>` and a
+ * `<directionSensitivity>`. The points are drawn in the same normalized
+ * screen space, 1000 x 1000 by default. A device without the feature
+ * answers a `<ResponseStatus>` with `subStatusCode notSupport`.
  *
  * ```xml
  * <LineDetection>
@@ -40,7 +39,7 @@
  * @example Parse a crossing line
  * ```ts
  * import { assertEquals } from "@std/assert";
- * import { parseLineDetection } from "@hertzg/hikvision-api/config/line-detection";
+ * import { parseLineDetection } from "./line-detection.ts";
  *
  * const line = parseLineDetection(
  *   "<LineDetection><id>1</id><enabled>true</enabled><LineItemList size=\"1\" >" +
@@ -65,22 +64,25 @@
  * @module
  */
 
-import { type RequestOptions, requestXml } from "../request.ts";
 import {
-  element,
-  elements,
-  parseIsapi,
-  present,
-  requireText,
+  bool,
+  type Decoded,
+  document,
+  int,
+  list,
+  obj,
+  optional,
+  points,
   text,
-} from "../xml.ts";
+} from "../isapi/document.ts";
+import { readDocument, type RequestOptions } from "../isapi/request.ts";
 import {
+  mapRule,
   type NormalizedScreenSize,
-  parseNormalizedScreenSize,
-  parseSmartRule,
+  ruleFields,
+  screenSize,
   type SmartRule,
 } from "./smart.ts";
-import type { XmlElement } from "@std/xml";
 
 /** One `<LineItem>`: a line whose crossing raises `linedetection`. */
 export type LineDetectionLine = SmartRule & {
@@ -109,7 +111,7 @@ export type LineDetection = {
  * @example An NVR's second channel
  * ```ts
  * import { assertEquals } from "@std/assert";
- * import { lineDetectionPath } from "@hertzg/hikvision-api/config/line-detection";
+ * import { lineDetectionPath } from "./line-detection.ts";
  *
  * assertEquals(lineDetectionPath(2), "/ISAPI/Smart/LineDetection/2");
  * assertEquals(lineDetectionPath(), "/ISAPI/Smart/LineDetection/1");
@@ -130,8 +132,8 @@ export function lineDetectionPath(channel = 1): string {
  * @example A device without the feature
  * ```ts
  * import { assertThrows } from "@std/assert";
- * import { parseLineDetection } from "@hertzg/hikvision-api/config/line-detection";
- * import { IsapiError } from "@hertzg/hikvision-api/xml";
+ * import { IsapiError } from "../isapi/status.ts";
+ * import { parseLineDetection } from "./line-detection.ts";
  *
  * assertThrows(
  *   () =>
@@ -144,7 +146,7 @@ export function lineDetectionPath(channel = 1): string {
  * ```
  */
 export function parseLineDetection(xml: string): LineDetection {
-  return lineDetection(parseIsapi(xml));
+  return mapLineDetection(lineDetection.parse(xml));
 }
 
 /**
@@ -160,7 +162,7 @@ export function parseLineDetection(xml: string): LineDetection {
  * ```ts
  * import { assertEquals } from "@std/assert";
  * import { resolvesNext, spy } from "@std/testing/mock";
- * import { readLineDetection } from "@hertzg/hikvision-api/config/line-detection";
+ * import { readLineDetection } from "./line-detection.ts";
  *
  * const fetch = spy(resolvesNext([
  *   new Response("<LineDetection><id>1</id><enabled>true</enabled></LineDetection>"),
@@ -181,22 +183,38 @@ export async function readLineDetection(
   options: RequestOptions,
   channel = 1,
 ): Promise<LineDetection> {
-  return lineDetection(await requestXml(options, lineDetectionPath(channel)));
+  return mapLineDetection(
+    await readDocument(options, lineDetectionPath(channel), lineDetection),
+  );
 }
 
-function lineDetection(root: XmlElement): LineDetection {
-  const list = element(root, "LineItemList");
+const lineDetectionFields = {
+  id: int(),
+  enabled: optional(bool()),
+  normalizedScreenSize: optional(screenSize),
+  LineItemList: list(
+    "LineItem",
+    obj({
+      ...ruleFields,
+      directionSensitivity: optional(text()),
+      CoordinatesList: optional(points()),
+    }),
+  ),
+};
+
+const lineDetection = document(lineDetectionFields);
+
+function mapLineDetection(
+  { id, enabled = false, LineItemList, ...rest }: Decoded<
+    typeof lineDetectionFields
+  >,
+): LineDetection {
   return {
-    channel: Number(requireText(root, "id")),
-    enabled: text(root, "enabled") === "true",
-    ...present({ normalizedScreenSize: parseNormalizedScreenSize(root) }),
-    lines: list === undefined
-      ? []
-      : elements(list, "LineItem").map((entry) => ({
-        ...parseSmartRule(entry, "CoordinatesList"),
-        ...present({
-          directionSensitivity: text(entry, "directionSensitivity"),
-        }),
-      })),
+    channel: id,
+    enabled,
+    ...rest,
+    lines: LineItemList.map(({ CoordinatesList = [], ...line }) =>
+      mapRule(line, CoordinatesList)
+    ),
   };
 }
