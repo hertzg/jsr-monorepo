@@ -67,7 +67,7 @@ Deno.test("request keeps the caller's headers and signal", async () => {
   assertEquals(init.signal, controller.signal);
 });
 
-Deno.test("request throws HttpError with the status and URL on 401", async () => {
+Deno.test("request throws HttpError with the status and URL on 401 with a non-XML body", async () => {
   const fetch = spy(
     resolvesNext([new Response("Unauthorized", { status: 401 })]),
   );
@@ -90,6 +90,88 @@ Deno.test("request throws HttpError with the status and URL on 401", async () =>
   assertEquals(error.url, "http://192.0.2.10/ISAPI/System/deviceInfo");
 });
 
+Deno.test("request throws HttpError when the non-2xx body is XML but not a ResponseStatus", async () => {
+  const fetch = spy(
+    resolvesNext([
+      new Response("<html><body>Not Found</body></html>", { status: 404 }),
+    ]),
+  );
+
+  const error = await assertRejects(
+    () =>
+      request(
+        {
+          baseUrl: "http://192.0.2.10",
+          username: "admin",
+          password: "hunter2",
+          fetch,
+        },
+        "/ISAPI/Nope",
+      ),
+    HttpError,
+  );
+
+  assertEquals(error.status, 404);
+});
+
+Deno.test("request throws IsapiError with httpStatus on 403 with a ResponseStatus body", async () => {
+  const fetch = spy(resolvesNext([
+    new Response(
+      '<?xml version="1.0" encoding="UTF-8"?>' +
+        '<ResponseStatus version="2.0" xmlns="http://www.hikvision.com/ver20/XMLSchema">' +
+        "<requestURL>/ISAPI/Smart/LineDetection/1</requestURL>" +
+        "<statusCode>4</statusCode><statusString>Invalid Operation</statusString>" +
+        "<subStatusCode>notSupport</subStatusCode></ResponseStatus>",
+      { status: 403 },
+    ),
+  ]));
+
+  const error = await assertRejects(
+    () =>
+      request(
+        {
+          baseUrl: "http://192.0.2.10",
+          username: "admin",
+          password: "hunter2",
+          fetch,
+        },
+        "/ISAPI/Smart/LineDetection/1",
+      ),
+    IsapiError,
+  );
+
+  assertEquals(error.httpStatus, 403);
+  assertEquals(error.status.subStatusCode, "notSupport");
+});
+
+Deno.test("request throws IsapiError with httpStatus on 400 with badParameters", async () => {
+  const fetch = spy(resolvesNext([
+    new Response(
+      "<ResponseStatus><statusCode>6</statusCode>" +
+        "<subStatusCode>badParameters</subStatusCode></ResponseStatus>",
+      { status: 400 },
+    ),
+  ]));
+
+  const error = await assertRejects(
+    () =>
+      request(
+        {
+          baseUrl: "http://192.0.2.10",
+          username: "admin",
+          password: "hunter2",
+          fetch,
+        },
+        "/ISAPI/System/time",
+        { method: "PUT", body: "<Time/>" },
+      ),
+    IsapiError,
+  );
+
+  assertEquals(error.httpStatus, 400);
+  assertEquals(error.status.statusCode, 6);
+});
+
 Deno.test("requestXml parses the reply", async () => {
   const fetch = spy(resolvesNext([
     new Response("<DeviceInfo><model>DS-2CD2043G2-I</model></DeviceInfo>"),
@@ -106,6 +188,53 @@ Deno.test("requestXml parses the reply", async () => {
   );
 
   assertEquals(root.name.local, "DeviceInfo");
+});
+
+Deno.test("requestXml returns a ResponseStatus with statusCode 0 on HTTP 200", async () => {
+  const fetch = spy(resolvesNext([
+    new Response(
+      "<ResponseStatus><statusCode>0</statusCode><statusString>OK</statusString></ResponseStatus>",
+    ),
+  ]));
+
+  const root = await requestXml(
+    {
+      baseUrl: "http://192.0.2.21",
+      username: "admin",
+      password: "hunter2",
+      fetch,
+    },
+    "/ISAPI/System/reboot",
+    { method: "PUT" },
+  );
+
+  assertEquals(root.name.local, "ResponseStatus");
+});
+
+Deno.test("requestXml throws IsapiError on statusCode 7 with HTTP 200", async () => {
+  const fetch = spy(resolvesNext([
+    new Response(
+      "<ResponseStatus><statusCode>7</statusCode><subStatusCode>rebootRequired</subStatusCode></ResponseStatus>",
+    ),
+  ]));
+
+  const error = await assertRejects(
+    () =>
+      requestXml(
+        {
+          baseUrl: "http://192.0.2.21",
+          username: "admin",
+          password: "hunter2",
+          fetch,
+        },
+        "/ISAPI/System/Network/interfaces/1",
+        { method: "PUT", body: "<NetworkInterface/>" },
+      ),
+    IsapiError,
+  );
+
+  assertEquals(error.status.statusCode, 7);
+  assertEquals(error.httpStatus, undefined);
 });
 
 Deno.test("requestXml throws IsapiError on a failing ResponseStatus with HTTP 200", async () => {

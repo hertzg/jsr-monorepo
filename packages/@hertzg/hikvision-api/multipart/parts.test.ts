@@ -1,5 +1,5 @@
 import { assertEquals } from "@std/assert";
-import { boundaryOf, createPartsStream, type Part } from "./parts.ts";
+import { createPartsStream, parseBoundary, type Part } from "./parts.ts";
 
 function bytes(text: string): Uint8Array {
   return new TextEncoder().encode(text);
@@ -15,12 +15,18 @@ function split(chunks: Uint8Array[], boundary = "boundary"): Promise<Part[]> {
   );
 }
 
-Deno.test("boundaryOf reads a bare, quoted, or dash-prefixed boundary", () => {
-  assertEquals(boundaryOf("multipart/mixed;boundary=boundary"), "boundary");
-  assertEquals(boundaryOf('multipart/mixed; boundary="frontier"'), "frontier");
-  assertEquals(boundaryOf("multipart/mixed; boundary=--boundary"), "boundary");
-  assertEquals(boundaryOf("application/xml; charset=UTF-8"), undefined);
-  assertEquals(boundaryOf(null), undefined);
+Deno.test("parseBoundary reads a bare, quoted, or dash-prefixed boundary", () => {
+  assertEquals(parseBoundary("multipart/mixed;boundary=boundary"), "boundary");
+  assertEquals(
+    parseBoundary('multipart/mixed; boundary="frontier"'),
+    "frontier",
+  );
+  assertEquals(
+    parseBoundary("multipart/mixed; boundary=--boundary"),
+    "boundary",
+  );
+  assertEquals(parseBoundary("application/xml; charset=UTF-8"), undefined);
+  assertEquals(parseBoundary(null), undefined);
 });
 
 Deno.test("createPartsStream splits parts and parses their headers", async () => {

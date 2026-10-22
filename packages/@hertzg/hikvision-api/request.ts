@@ -3,9 +3,15 @@
  *
  * ISAPI is plain HTTP: `GET /ISAPI/System/deviceInfo` with an
  * `Authorization` header. This layer builds the URL from a base URL and a
- * path, adds Basic authentication, and turns the two ways a request fails
- * into exceptions: a non-2xx status ({@link HttpError}) and a 200 whose body
- * is a `<ResponseStatus>` ({@link IsapiError}, from {@link requestXml}).
+ * path, adds Basic authentication, and turns a failed request into an
+ * exception that keeps the device's reason:
+ *
+ * - A non-2xx status whose body is a `<ResponseStatus>` (the spec's 400, 403
+ *   and 503) throws an {@link IsapiError} with `httpStatus` set, so a 403
+ *   with `notSupport` is told apart from a 403 for a locked account.
+ * - A non-2xx status with any other body throws an {@link HttpError}.
+ * - A 2xx whose body is a failing `<ResponseStatus>` throws an
+ *   {@link IsapiError} without `httpStatus`, from {@link requestXml}.
  *
  * `fetch` is an option so a test can hand in a stub.
  *
@@ -32,8 +38,13 @@
  */
 
 import { encodeBase64 } from "@std/encoding/base64";
-import type { XmlElement } from "@std/xml";
-import { parseIsapi } from "./xml.ts";
+import { parse, type XmlElement } from "@std/xml";
+import {
+  IsapiError,
+  parseIsapi,
+  parseResponseStatus,
+  type ResponseStatus,
+} from "./xml.ts";
 
 /** Where the device is and how to log in. */
 export type RequestOptions = {
@@ -47,7 +58,7 @@ export type RequestOptions = {
   fetch?: typeof globalThis.fetch;
 };
 
-/** A response with a status outside 200-299. */
+/** A response with a status outside 200-299 and no `<ResponseStatus>` body. */
 export class HttpError extends Error {
   /** The HTTP status code. */
   readonly status: number;
@@ -93,7 +104,37 @@ export function basicAuthorization(username: string, password: string): string {
  * @param path The ISAPI path, starting with `/`.
  * @param init Extra request options; `headers` and `signal` are passed through.
  * @returns The response, with a 2xx status.
- * @throws {HttpError} When the status is not 2xx. The body is cancelled.
+ * @throws {IsapiError} When the status is not 2xx and the body is a
+ *   `<ResponseStatus>`; `httpStatus` holds the HTTP status.
+ * @throws {HttpError} When the status is not 2xx and the body is anything
+ *   else. The body is read and discarded.
+ *
+ * @example A path the device does not support, answered with HTTP 403
+ * ```ts
+ * import { assertEquals, assertRejects } from "@std/assert";
+ * import { resolvesNext, spy } from "@std/testing/mock";
+ * import { request } from "@hertzg/hikvision-api/request";
+ * import { IsapiError } from "@hertzg/hikvision-api/xml";
+ *
+ * const fetch = spy(resolvesNext([
+ *   new Response(
+ *     "<ResponseStatus><statusCode>4</statusCode><subStatusCode>notSupport</subStatusCode></ResponseStatus>",
+ *     { status: 403 },
+ *   ),
+ * ]));
+ *
+ * const error = await assertRejects(
+ *   () =>
+ *     request(
+ *       { baseUrl: "http://192.0.2.10", username: "admin", password: "hunter2", fetch },
+ *       "/ISAPI/Smart/LineDetection/1",
+ *     ),
+ *   IsapiError,
+ * );
+ *
+ * assertEquals(error.httpStatus, 403);
+ * assertEquals(error.status.subStatusCode, "notSupport");
+ * ```
  *
  * @example Send a request with the right URL and header
  * ```ts
@@ -125,10 +166,28 @@ export async function request(
   headers.set("authorization", basicAuthorization(username, password));
   const response = await fetch(url, { ...init, headers });
   if (!response.ok) {
-    await response.body?.cancel();
+    const status = tryParseResponseStatus(await response.text());
+    if (status !== undefined) {
+      throw new IsapiError(status, response.status);
+    }
     throw new HttpError(response.status, url);
   }
   return response;
+}
+
+/**
+ * The `<ResponseStatus>` in `body`, or `undefined` when the body is not
+ * XML or its root is something else.
+ */
+function tryParseResponseStatus(body: string): ResponseStatus | undefined {
+  try {
+    const root = parse(body).root;
+    return root.name.local === "ResponseStatus"
+      ? parseResponseStatus(root)
+      : undefined;
+  } catch {
+    return undefined;
+  }
 }
 
 /**
@@ -138,8 +197,10 @@ export async function request(
  * @param path The ISAPI path, starting with `/`.
  * @param init Extra request options.
  * @returns The reply's root element.
- * @throws {HttpError} When the status is not 2xx.
- * @throws {IsapiError} When the body is a failing `<ResponseStatus>`.
+ * @throws {IsapiError} When the body is a failing `<ResponseStatus>`, with
+ *   `httpStatus` set when the status was not 2xx.
+ * @throws {HttpError} When the status is not 2xx and the body is not a
+ *   `<ResponseStatus>`.
  *
  * @example A device that does not support the path
  * ```ts

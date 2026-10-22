@@ -46,7 +46,15 @@
  */
 
 import { type RequestOptions, requestXml } from "../request.ts";
-import { element, elements, parseIsapi, requireText, text } from "../xml.ts";
+import {
+  element,
+  elements,
+  parseIsapi,
+  parseNumber,
+  present,
+  requireText,
+  text,
+} from "../xml.ts";
 import type { XmlElement } from "@std/xml";
 
 /** The input proxy channel list path. */
@@ -136,29 +144,16 @@ export async function readInputProxyChannels(
 
 function inputProxyChannels(root: XmlElement): InputProxyChannel[] {
   return elements(root, "InputProxyChannel").map((entry) => {
-    const channel: InputProxyChannel = {
+    const source = element(entry, "sourceInputPortDescriptor");
+    return {
       id: Number(requireText(entry, "id")),
       name: requireText(entry, "name"),
+      ...present({
+        proxyProtocol: source && text(source, "proxyProtocol"),
+        ipAddress: source && text(source, "ipAddress"),
+        managePortNo: source && parseNumber(text(source, "managePortNo")),
+        srcInputPort: source && parseNumber(text(source, "srcInputPort")),
+      }),
     };
-    const source = element(entry, "sourceInputPortDescriptor");
-    if (source === undefined) {
-      return channel;
-    }
-    const optional = {
-      proxyProtocol: text(source, "proxyProtocol"),
-      ipAddress: text(source, "ipAddress"),
-      managePortNo: number(text(source, "managePortNo")),
-      srcInputPort: number(text(source, "srcInputPort")),
-    };
-    for (const [key, value] of Object.entries(optional)) {
-      if (value !== undefined) {
-        Object.assign(channel, { [key]: value });
-      }
-    }
-    return channel;
   });
-}
-
-function number(value: string | undefined): number | undefined {
-  return value === undefined ? undefined : Number(value);
 }

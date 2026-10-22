@@ -9,9 +9,14 @@
     "./events/alert": "./events/alert.ts",
     "./events/stream": "./events/stream.ts",
     "./config/device-info": "./config/device-info.ts",
+    "./config/time": "./config/time.ts",
     "./config/channels": "./config/channels.ts",
+    "./config/channel-status": "./config/channel-status.ts",
+    "./config/grid-map": "./config/grid-map.ts",
     "./config/motion-detection": "./config/motion-detection.ts",
+    "./config/motion-capabilities": "./config/motion-capabilities.ts",
     "./config/smart": "./config/smart.ts",
+    "./config/line-detection": "./config/line-detection.ts",
     "./client": "./client.ts"
   },
   "publish": {

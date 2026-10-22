@@ -1,8 +1,6 @@
-import { assertEquals, assertThrows } from "@std/assert";
+import { assertEquals } from "@std/assert";
 import { resolvesNext, spy } from "@std/testing/mock";
 import {
-  decodeGridMap,
-  encodeGridMap,
   motionDetectionPath,
   parseMotionDetection,
   readMotionDetection,
@@ -19,53 +17,14 @@ Deno.test("motionDetectionPath picks the input proxy path for an NVR channel", (
   );
 });
 
-Deno.test("decodeGridMap reads 22 columns from 24-bit rows, first column first", () => {
-  const grid = decodeGridMap("800001" + "fffffc", 2, 22);
-
-  assertEquals(grid[0][0], true);
-  assertEquals(grid[0].slice(1).every((cell) => cell === false), true);
-  assertEquals(grid[1].every((cell) => cell === true), true);
-  assertEquals(grid[1].length, 22);
-});
-
-Deno.test("decodeGridMap pads a row to whole bytes", () => {
-  assertEquals(decodeGridMap("0f", 1, 8), [[
-    false,
-    false,
-    false,
-    false,
-    true,
-    true,
-    true,
-    true,
-  ]]);
-  assertEquals(decodeGridMap("c0", 1, 2), [[true, true]]);
-});
-
-Deno.test("encodeGridMap writes rows padded to whole bytes, first column first", () => {
-  const empty = Array.from({ length: 22 }, () => false);
-  const top = [...empty];
-  top[0] = true;
-  const bottom = [...empty];
-  bottom[21] = true;
-
-  assertEquals(encodeGridMap([top, bottom]), "800000000004");
-});
-
-Deno.test("encodeGridMap round-trips the NVR default of every cell on", () => {
-  const gridMap = "fffffc".repeat(18);
-
-  assertEquals(encodeGridMap(decodeGridMap(gridMap, 18, 22)), gridMap);
-});
-
-Deno.test("parseMotionDetection reads an NVR's copy of a camera's settings", () => {
+Deno.test("parseMotionDetection reads a grid-only document from an NVR", () => {
   const xml = '<?xml version="1.0" encoding="UTF-8" ?>\n' +
     '<MotionDetection version="2.0" xmlns="http://www.isapi.org/ver20/XMLSchema">\n' +
     "<enabled>true</enabled>\n" +
     "<enableHighlight>true</enableHighlight>\n" +
     "<samplingInterval>5</samplingInterval>\n" +
     "<startTriggerTime>1000</startTriggerTime>\n" +
-    "<endTriggerTime>1000</endTriggerTime>\n" +
+    "<endTriggerTime>2000</endTriggerTime>\n" +
     "<regionType>grid</regionType>\n" +
     "<Grid>\n" +
     "<rowGranularity>18</rowGranularity>\n" +
@@ -83,16 +42,106 @@ Deno.test("parseMotionDetection reads an NVR's copy of a camera's settings", () 
   const motion = parseMotionDetection(xml);
 
   assertEquals(motion.enabled, true);
+  assertEquals(motion.enableHighlight, true);
+  assertEquals(motion.samplingIntervalFrames, 5);
+  assertEquals(motion.startTriggerTimeMs, 1000);
+  assertEquals(motion.endTriggerTimeMs, 2000);
   assertEquals(motion.regionType, "grid");
   assertEquals(motion.rows, 18);
   assertEquals(motion.columns, 22);
   assertEquals(motion.sensitivityLevel, 60);
   assertEquals(motion.targetType, ["human", "vehicle"]);
-  assertEquals(motion.grid.length, 18);
+  assertEquals(motion.regions, undefined);
+  assertEquals(motion.grid?.length, 18);
   assertEquals(
-    motion.grid.every((row) => row.length === 22 && row.every(Boolean)),
+    motion.grid?.every((row) => row.length === 22 && row.every(Boolean)),
     true,
   );
+});
+
+Deno.test("parseMotionDetection reads a gridMap and a RegionList side by side", () => {
+  const xml =
+    '<MotionDetection version="2.0" xmlns="http://www.isapi.org/ver20/XMLSchema">' +
+    "<enabled>true</enabled>" +
+    "<regionType>grid</regionType>" +
+    "<Grid><rowGranularity>2</rowGranularity><columnGranularity>8</columnGranularity></Grid>" +
+    "<MotionDetectionLayout>" +
+    "<sensitivityLevel>40</sensitivityLevel>" +
+    "<layout>" +
+    "<gridMap>f00f</gridMap>" +
+    '<RegionList size="4">' +
+    "<Region><id>1</id><RegionCoordinatesList>" +
+    "<RegionCoordinates><positionX>0</positionX><positionY>0</positionY></RegionCoordinates>" +
+    "<RegionCoordinates><positionX>500</positionX><positionY>0</positionY></RegionCoordinates>" +
+    "<RegionCoordinates><positionX>500</positionX><positionY>500</positionY></RegionCoordinates>" +
+    "<RegionCoordinates><positionX>0</positionX><positionY>500</positionY></RegionCoordinates>" +
+    "</RegionCoordinatesList></Region>" +
+    "<Region><id>2</id><RegionCoordinatesList>" +
+    "<RegionCoordinates><positionX>500</positionX><positionY>500</positionY></RegionCoordinates>" +
+    "<RegionCoordinates><positionX>1000</positionX><positionY>500</positionY></RegionCoordinates>" +
+    "<RegionCoordinates><positionX>1000</positionX><positionY>1000</positionY></RegionCoordinates>" +
+    "</RegionCoordinatesList></Region>" +
+    "</RegionList>" +
+    "</layout>" +
+    "</MotionDetectionLayout>" +
+    "</MotionDetection>";
+
+  const motion = parseMotionDetection(xml);
+
+  assertEquals(motion.grid, [
+    [true, true, true, true, false, false, false, false],
+    [false, false, false, false, true, true, true, true],
+  ]);
+  assertEquals(motion.regions, [
+    {
+      id: 1,
+      coordinates: [
+        { x: 0, y: 0 },
+        { x: 500, y: 0 },
+        { x: 500, y: 500 },
+        { x: 0, y: 500 },
+      ],
+    },
+    {
+      id: 2,
+      coordinates: [
+        { x: 500, y: 500 },
+        { x: 1000, y: 500 },
+        { x: 1000, y: 1000 },
+      ],
+    },
+  ]);
+});
+
+Deno.test("parseMotionDetection reads a region-only document without a gridMap", () => {
+  const xml = "<MotionDetection>" +
+    "<enabled>true</enabled>" +
+    "<regionType>region</regionType>" +
+    "<MotionDetectionLayout>" +
+    "<sensitivityLevel>80</sensitivityLevel>" +
+    "<layout>" +
+    "<RegionList>" +
+    "<Region><id>1</id><RegionCoordinatesList>" +
+    "<RegionCoordinates><positionX>100</positionX><positionY>200</positionY></RegionCoordinates>" +
+    "<RegionCoordinates><positionX>900</positionX><positionY>200</positionY></RegionCoordinates>" +
+    "<RegionCoordinates><positionX>500</positionX><positionY>800</positionY></RegionCoordinates>" +
+    "</RegionCoordinatesList></Region>" +
+    "</RegionList>" +
+    "</layout>" +
+    "<targetType>human</targetType>" +
+    "</MotionDetectionLayout>" +
+    "</MotionDetection>";
+
+  assertEquals(parseMotionDetection(xml), {
+    enabled: true,
+    regionType: "region",
+    sensitivityLevel: 80,
+    targetType: ["human"],
+    regions: [{
+      id: 1,
+      coordinates: [{ x: 100, y: 200 }, { x: 900, y: 200 }, { x: 500, y: 800 }],
+    }],
+  });
 });
 
 Deno.test("parseMotionDetection leaves optional fields out when the device omits them", () => {
@@ -109,15 +158,43 @@ Deno.test("parseMotionDetection leaves optional fields out when the device omits
   });
 });
 
-Deno.test("parseMotionDetection throws without a grid", () => {
-  assertThrows(
-    () =>
-      parseMotionDetection(
-        "<MotionDetection><enabled>true</enabled></MotionDetection>",
-      ),
-    Error,
-    "<Grid>",
+Deno.test("parseMotionDetection leaves the grid out when the gridMap has no Grid to size it", () => {
+  const xml = "<MotionDetection><enabled>true</enabled>" +
+    "<MotionDetectionLayout><layout><gridMap>ff</gridMap></layout></MotionDetectionLayout>" +
+    "</MotionDetection>";
+
+  assertEquals(parseMotionDetection(xml), { enabled: true });
+});
+
+Deno.test("parseMotionDetection returns only enabled for a bare document", () => {
+  assertEquals(
+    parseMotionDetection(
+      "<MotionDetection><regionType>none</regionType></MotionDetection>",
+    ),
+    { enabled: false, regionType: "none" },
   );
+});
+
+Deno.test("parseMotionDetection drops an empty RegionList", () => {
+  const xml = "<MotionDetection><enabled>true</enabled>" +
+    "<Grid><rowGranularity>1</rowGranularity><columnGranularity>8</columnGranularity></Grid>" +
+    "<MotionDetectionLayout><layout><gridMap>00</gridMap>" +
+    '<RegionList size="4"/></layout></MotionDetectionLayout>' +
+    "</MotionDetection>";
+
+  const motion = parseMotionDetection(xml);
+
+  assertEquals(motion.regions, undefined);
+  assertEquals(motion.grid, [[
+    false,
+    false,
+    false,
+    false,
+    false,
+    false,
+    false,
+    false,
+  ]]);
 });
 
 Deno.test("readMotionDetection requests the camera-side path when proxy is off", async () => {

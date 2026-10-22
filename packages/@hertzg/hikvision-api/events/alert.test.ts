@@ -107,6 +107,65 @@ Deno.test("parseAlert reads the regions of a smart event", () => {
   }]);
 });
 
+Deno.test("parseAlert reads an NVR smart alert with a TargetRect and an empty coordinate list", () => {
+  const xml =
+    '<EventNotificationAlert version="1.0" xmlns="http://www.hikvision.com/ver20/XMLSchema">\n' +
+    "<ipAddress>192.0.2.10</ipAddress>\n" +
+    "<portNo>80</portNo>\n" +
+    "<protocol>HTTP</protocol>\n" +
+    "<macAddress>02:00:00:00:00:01</macAddress>\n" +
+    "<dynChannelID>3</dynChannelID>\n" +
+    "<dateTime>2026-10-21T21:02:11</dateTime>\n" +
+    "<activePostCount>1</activePostCount>\n" +
+    "<eventType>fielddetection</eventType>\n" +
+    "<eventState>active</eventState>\n" +
+    "<eventDescription>fielddetection alarm</eventDescription>\n" +
+    "<DetectionRegionList>\n" +
+    "<DetectionRegionEntry>\n" +
+    "<regionID>0</regionID>\n" +
+    "<RegionCoordinatesList>\n" +
+    "</RegionCoordinatesList>\n" +
+    "<TargetRect>\n" +
+    "<X>412</X>\n" +
+    "<Y>268</Y>\n" +
+    "<width>95</width>\n" +
+    "<height>230</height>\n" +
+    "</TargetRect>\n" +
+    "<detectionTarget>human</detectionTarget>\n" +
+    "</DetectionRegionEntry>\n" +
+    "</DetectionRegionList>\n" +
+    "</EventNotificationAlert>\n";
+
+  assertEquals(parseAlert(xml, "2026-10-21T17:02:11.330Z"), {
+    channel: 3,
+    eventType: "fielddetection",
+    eventState: "active",
+    eventDescription: "fielddetection alarm",
+    dateTime: "2026-10-21T21:02:11",
+    at: "2026-10-21T17:02:11.330Z",
+    activePostCount: 1,
+    ipAddress: "192.0.2.10",
+    macAddress: "02:00:00:00:00:01",
+    regions: [{
+      id: 0,
+      coordinates: [],
+      detectionTarget: ["human"],
+      targetRect: { x: 412, y: 268, width: 95, height: 230 },
+    }],
+  });
+});
+
+Deno.test("parseAlert reads a smart event going inactive", () => {
+  const xml = "<EventNotificationAlert><dynChannelID>3</dynChannelID>" +
+    "<eventType>linedetection</eventType><eventState>inactive</eventState>" +
+    "</EventNotificationAlert>";
+
+  const alert = parseAlert(xml, "2026-10-21T17:02:15.000Z");
+
+  assertEquals(alert.eventType, "linedetection");
+  assertEquals(alert.eventState, "inactive");
+});
+
 Deno.test("parseAlert throws when there is no eventType", () => {
   assertThrows(
     () =>

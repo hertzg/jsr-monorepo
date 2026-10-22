@@ -37,7 +37,7 @@
  */
 
 import { type RequestOptions, requestXml } from "../request.ts";
-import { parseIsapi, requireText, text } from "../xml.ts";
+import { parseIsapi, present, requireText, text } from "../xml.ts";
 import type { XmlElement } from "@std/xml";
 
 /** The device info path. */
@@ -128,22 +128,16 @@ export async function readDeviceInfo(
 }
 
 function deviceInfo(root: XmlElement): DeviceInfo {
-  const info: DeviceInfo = {
+  return {
     model: requireText(root, "model"),
     firmwareVersion: requireText(root, "firmwareVersion"),
     deviceType: requireText(root, "deviceType"),
+    ...present({
+      deviceName: text(root, "deviceName"),
+      deviceID: text(root, "deviceID"),
+      serialNumber: text(root, "serialNumber"),
+      macAddress: text(root, "macAddress"),
+      firmwareReleasedDate: text(root, "firmwareReleasedDate"),
+    }),
   };
-  const optional = {
-    deviceName: text(root, "deviceName"),
-    deviceID: text(root, "deviceID"),
-    serialNumber: text(root, "serialNumber"),
-    macAddress: text(root, "macAddress"),
-    firmwareReleasedDate: text(root, "firmwareReleasedDate"),
-  };
-  for (const [key, value] of Object.entries(optional)) {
-    if (value !== undefined) {
-      Object.assign(info, { [key]: value });
-    }
-  }
-  return info;
 }

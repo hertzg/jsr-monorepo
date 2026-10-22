@@ -1,75 +1,136 @@
 /**
- * Motion detection settings: the grid of cells that trigger `VMD`.
+ * Motion detection settings: where on the picture motion raises `VMD`.
  *
  * The document lives at two paths. An NVR keeps a copy for each IP camera at
  * `/ISAPI/ContentMgmt/InputProxy/channels/<n>/video/motionDetection`; a
  * device's own video input is at
  * `/ISAPI/System/Video/inputs/channels/<n>/motionDetection`.
  *
+ * A device describes the area in one of two ways, named by `<regionType>`:
+ * `grid` is a bitmap of cells, `region` a list of drawn polygons. Many
+ * cameras store both: the polygons under `<RegionList>` and their own
+ * rasterization of them under `<gridMap>`, in the same `<layout>`.
+ *
  * ```xml
  * <MotionDetection version="2.0" xmlns="http://www.isapi.org/ver20/XMLSchema">
  * <enabled>true</enabled>
+ * <enableHighlight>true</enableHighlight>
+ * <samplingInterval>2</samplingInterval>
+ * <startTriggerTime>500</startTriggerTime>
+ * <endTriggerTime>500</endTriggerTime>
  * <regionType>grid</regionType>
  * <Grid><rowGranularity>18</rowGranularity><columnGranularity>22</columnGranularity></Grid>
  * <MotionDetectionLayout version="2.0" xmlns="http://www.isapi.org/ver20/XMLSchema">
  * <sensitivityLevel>60</sensitivityLevel>
- * <layout><gridMap>fffffcfffffc…</gridMap></layout>
+ * <layout>
+ * <gridMap>fffffcfffffc…</gridMap>
+ * <RegionList size="4">
+ * <Region>
+ * <id>1</id>
+ * <RegionCoordinatesList>
+ * <RegionCoordinates><positionX>0</positionX><positionY>0</positionY></RegionCoordinates>
+ * …
+ * </RegionCoordinatesList>
+ * </Region>
+ * </RegionList>
+ * </layout>
  * <targetType>human,vehicle</targetType>
  * </MotionDetectionLayout>
  * </MotionDetection>
  * ```
  *
- * `<gridMap>` is hex, one row after another. Each row is padded to whole
- * bytes: 22 columns take 24 bits, so 18 rows are 108 hex digits. The first
- * column is the most significant bit of the row.
+ * `<gridMap>` is decoded with `decodeGridMap` from
+ * `@hertzg/hikvision-api/config/grid-map`, which also explains the encoding.
+ * Region coordinates are in the device's normalized 1000 x 1000 screen
+ * space. What a channel allows comes from
+ * `@hertzg/hikvision-api/config/motion-capabilities`.
  *
- * @example Decode and re-encode a grid
+ * @example Read a camera's drawn polygons
  * ```ts
  * import { assertEquals } from "@std/assert";
- * import { decodeGridMap, encodeGridMap } from "@hertzg/hikvision-api/config/motion-detection";
+ * import { parseMotionDetection } from "@hertzg/hikvision-api/config/motion-detection";
  *
- * const grid = decodeGridMap("c00000000004", 2, 22);
+ * const motion = parseMotionDetection(
+ *   "<MotionDetection><enabled>true</enabled><regionType>region</regionType>" +
+ *     "<MotionDetectionLayout><layout><RegionList><Region><id>1</id>" +
+ *     "<RegionCoordinatesList>" +
+ *     "<RegionCoordinates><positionX>0</positionX><positionY>0</positionY></RegionCoordinates>" +
+ *     "<RegionCoordinates><positionX>1000</positionX><positionY>0</positionY></RegionCoordinates>" +
+ *     "<RegionCoordinates><positionX>500</positionX><positionY>1000</positionY></RegionCoordinates>" +
+ *     "</RegionCoordinatesList></Region></RegionList></layout>" +
+ *     "</MotionDetectionLayout></MotionDetection>",
+ * );
  *
- * assertEquals(grid[0].slice(0, 3), [true, true, false]);
- * assertEquals(grid[1][21], true);
- * assertEquals(encodeGridMap(grid), "c00000000004");
+ * assertEquals(motion.grid, undefined);
+ * assertEquals(motion.regions, [{
+ *   id: 1,
+ *   coordinates: [{ x: 0, y: 0 }, { x: 1000, y: 0 }, { x: 500, y: 1000 }],
+ * }]);
  * ```
  *
  * @module
  */
 
 import { type RequestOptions, requestXml } from "../request.ts";
-import { element, parseIsapi, requireText, text, tokens } from "../xml.ts";
+import {
+  element,
+  elements,
+  parseIsapi,
+  type Point,
+  points,
+  present,
+  requireText,
+  text,
+  tokens,
+} from "../xml.ts";
+import { decodeGridMap } from "./grid-map.ts";
 import type { XmlElement } from "@std/xml";
 
 /** Which motion detection document to read. */
 export type MotionDetectionTarget = {
   /** The channel number, from 1. */
   channel: number;
-  /**
-   * `true` reads the NVR's copy of an IP camera's settings
-   * (`/ISAPI/ContentMgmt/InputProxy/channels/<n>/video/motionDetection`),
-   * `false` the device's own video input
-   * (`/ISAPI/System/Video/inputs/channels/<n>/motionDetection`). Defaults
-   * to `false`.
-   */
+  /** `true` reads the NVR's copy under `/ISAPI/ContentMgmt/InputProxy`, `false` (the default) the device's own video input. */
   proxy?: boolean;
+};
+
+/** One `<Region>` under `<RegionList>`: a drawn polygon. */
+export type MotionRegion = {
+  /** `<id>`, from 1. */
+  id: number;
+  /** The polygon's corners in the normalized 1000 x 1000 screen space. */
+  coordinates: Point[];
 };
 
 /** The fields of `<MotionDetection>`. */
 export type MotionDetection = {
-  /** `<enabled>`. */
+  /** `<enabled>`; `false` when the element is missing. */
   enabled: boolean;
-  /** `<regionType>`, `grid` on every device seen so far. */
-  regionType?: string;
-  /** `<rowGranularity>`: rows in the grid. */
-  rows: number;
-  /** `<columnGranularity>`: columns in the grid. */
-  columns: number;
+  /** `<enableHighlight>`: draw motion on the live picture, when present. */
+  enableHighlight?: boolean;
+  /** `<samplingInterval>`: frames between two compared pictures, when present. */
+  samplingIntervalFrames?: number;
+  /** `<startTriggerTime>`: milliseconds of motion before the alarm starts, when present. */
+  startTriggerTimeMs?: number;
+  /** `<endTriggerTime>`: milliseconds of stillness before the alarm ends, when present. */
+  endTriggerTimeMs?: number;
+  /** `<regionType>`: `grid`, `roi`, `none`, `region`, or whatever else the device sent. */
+  regionType?:
+    | "grid"
+    | "roi"
+    | "none"
+    | "region"
+    | (string & Record<never, never>);
+  /** `<rowGranularity>`: rows in the grid, when `<Grid>` is present. */
+  rows?: number;
+  /** `<columnGranularity>`: columns in the grid, when `<Grid>` is present. */
+  columns?: number;
   /** `<sensitivityLevel>`, 0 to 100. */
   sensitivityLevel?: number;
-  /** `<gridMap>` decoded: `grid[row][column]` is `true` where motion counts. */
-  grid: boolean[][];
+  /** `<gridMap>` decoded, `grid[row][column]` being `true` where motion counts. */
+  grid?: boolean[][];
+  /** The `<RegionList>` polygons in document order, when there is at least one. */
+  regions?: MotionRegion[];
   /** `<targetType>` split on commas, such as `["human", "vehicle"]`; newer cameras only. */
   targetType?: string[];
 };
@@ -102,79 +163,14 @@ export function motionDetectionPath(target: MotionDetectionTarget): string {
 }
 
 /**
- * Decodes a `<gridMap>` into rows of booleans.
- *
- * @param gridMap The hex text.
- * @param rows The row count, from `<rowGranularity>`.
- * @param columns The column count, from `<columnGranularity>`.
- * @returns `rows` arrays of `columns` booleans.
- *
- * @example The NVR default: every cell on
- * ```ts
- * import { assertEquals } from "@std/assert";
- * import { decodeGridMap } from "@hertzg/hikvision-api/config/motion-detection";
- *
- * const grid = decodeGridMap("fffffc".repeat(18), 18, 22);
- *
- * assertEquals(grid.length, 18);
- * assertEquals(grid.every((row) => row.length === 22 && row.every(Boolean)), true);
- * ```
- */
-export function decodeGridMap(
-  gridMap: string,
-  rows: number,
-  columns: number,
-): boolean[][] {
-  const digitsPerRow = Math.ceil(columns / 8) * 2;
-  return Array.from({ length: rows }, (_, row) => {
-    const bits = BigInt(
-      `0x${gridMap.slice(row * digitsPerRow, (row + 1) * digitsPerRow)}`,
-    );
-    const width = BigInt(digitsPerRow * 4);
-    return Array.from(
-      { length: columns },
-      (_, column) => ((bits >> (width - 1n - BigInt(column))) & 1n) === 1n,
-    );
-  });
-}
-
-/**
- * Encodes rows of booleans as a `<gridMap>`.
- *
- * @param grid `grid[row][column]`, every row the same length.
- * @returns The hex text, rows padded to whole bytes.
- *
- * @example Only the top-left cell on
- * ```ts
- * import { assertEquals } from "@std/assert";
- * import { encodeGridMap } from "@hertzg/hikvision-api/config/motion-detection";
- *
- * const grid = Array.from({ length: 2 }, () => Array.from({ length: 22 }, () => false));
- * grid[0][0] = true;
- *
- * assertEquals(encodeGridMap(grid), "800000000000");
- * ```
- */
-export function encodeGridMap(grid: boolean[][]): string {
-  return grid.map((row) => {
-    const digits = Math.ceil(row.length / 8) * 2;
-    const width = BigInt(digits * 4);
-    const bits = row.reduce(
-      (acc, cell, column) =>
-        cell ? acc | (1n << (width - 1n - BigInt(column))) : acc,
-      0n,
-    );
-    return bits.toString(16).padStart(digits, "0");
-  }).join("");
-}
-
-/**
  * Parses a `<MotionDetection>` document.
+ *
+ * `grid` is set when the document has a `<gridMap>` and a `<Grid>` to size
+ * it, `regions` when its `<RegionList>` has entries.
  *
  * @param xml The document text.
  * @returns The settings, with the grid decoded.
  * @throws {IsapiError} When the document is a failing `<ResponseStatus>`.
- * @throws {Error} When the grid size or map is missing.
  *
  * @example Parse an NVR's copy of a camera's settings
  * ```ts
@@ -192,11 +188,12 @@ export function encodeGridMap(grid: boolean[][]): string {
  * assertEquals(motion.enabled, true);
  * assertEquals(motion.sensitivityLevel, 60);
  * assertEquals(motion.targetType, ["human", "vehicle"]);
- * assertEquals(motion.grid[17][21], true);
+ * assertEquals(motion.grid?.[17][21], true);
+ * assertEquals(motion.regions, undefined);
  * ```
  */
 export function parseMotionDetection(xml: string): MotionDetection {
-  return motionDetection(parseIsapi(xml));
+  return parseFields(parseIsapi(xml));
 }
 
 /**
@@ -239,42 +236,66 @@ export async function readMotionDetection(
   options: RequestOptions,
   target: MotionDetectionTarget,
 ): Promise<MotionDetection> {
-  return motionDetection(
-    await requestXml(options, motionDetectionPath(target)),
-  );
+  return parseFields(await requestXml(options, motionDetectionPath(target)));
 }
 
-function motionDetection(root: XmlElement): MotionDetection {
-  const size = element(root, "Grid");
-  if (size === undefined) {
-    throw new Error("ISAPI <MotionDetection> has no <Grid>");
-  }
+function parseFields(root: XmlElement): MotionDetection {
+  const size = parseGridSize(root);
   const layout = element(root, "MotionDetectionLayout");
-  const map = layout === undefined ? undefined : element(layout, "layout");
-  if (layout === undefined || map === undefined) {
-    throw new Error(
-      "ISAPI <MotionDetection> has no <MotionDetectionLayout>/<layout>",
-    );
-  }
-  const rows = Number(requireText(size, "rowGranularity"));
-  const columns = Number(requireText(size, "columnGranularity"));
-  const motion: MotionDetection = {
+  const map = layout && element(layout, "layout");
+  const gridMap = map && text(map, "gridMap");
+  const regions = map === undefined ? [] : parseRegions(map);
+  return {
     enabled: text(root, "enabled") === "true",
-    rows,
-    columns,
-    grid: decodeGridMap(requireText(map, "gridMap"), rows, columns),
+    ...present({
+      enableHighlight: readBoolean(root, "enableHighlight"),
+      samplingIntervalFrames: readNumber(root, "samplingInterval"),
+      startTriggerTimeMs: readNumber(root, "startTriggerTime"),
+      endTriggerTimeMs: readNumber(root, "endTriggerTime"),
+      regionType: text(root, "regionType"),
+      ...size,
+      sensitivityLevel: layout && readNumber(layout, "sensitivityLevel"),
+      grid: gridMap === undefined || size === undefined
+        ? undefined
+        : decodeGridMap(gridMap, size),
+      regions: regions.length === 0 ? undefined : regions,
+      targetType: layout && readTokens(layout, "targetType"),
+    }),
   };
-  const regionType = text(root, "regionType");
-  if (regionType !== undefined) {
-    motion.regionType = regionType;
-  }
-  const sensitivityLevel = text(layout, "sensitivityLevel");
-  if (sensitivityLevel !== undefined) {
-    motion.sensitivityLevel = Number(sensitivityLevel);
-  }
-  const targetType = text(layout, "targetType");
-  if (targetType !== undefined) {
-    motion.targetType = tokens(targetType);
-  }
-  return motion;
+}
+
+function parseGridSize(
+  root: XmlElement,
+): { rows: number; columns: number } | undefined {
+  const grid = element(root, "Grid");
+  return grid && {
+    rows: Number(requireText(grid, "rowGranularity")),
+    columns: Number(requireText(grid, "columnGranularity")),
+  };
+}
+
+function parseRegions(map: XmlElement): MotionRegion[] {
+  const list = element(map, "RegionList");
+  return list === undefined ? [] : elements(list, "Region").map((region) => {
+    const corners = element(region, "RegionCoordinatesList");
+    return {
+      id: Number(requireText(region, "id")),
+      coordinates: corners === undefined ? [] : points(corners),
+    };
+  });
+}
+
+function readBoolean(parent: XmlElement, name: string): boolean | undefined {
+  const value = text(parent, name);
+  return value === undefined ? undefined : value === "true";
+}
+
+function readNumber(parent: XmlElement, name: string): number | undefined {
+  const value = text(parent, name);
+  return value === undefined ? undefined : Number(value);
+}
+
+function readTokens(parent: XmlElement, name: string): string[] | undefined {
+  const value = text(parent, name);
+  return value === undefined ? undefined : tokens(value);
 }

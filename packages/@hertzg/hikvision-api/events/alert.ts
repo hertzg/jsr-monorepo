@@ -27,11 +27,19 @@
  *   second for as long as it lasts. Devices do not post `inactive` for VMD:
  *   motion ends when the posts stop. How long to wait is the consumer's
  *   call; {@link Alert.at} is the arrival time to measure it from.
+ * - Smart events (`fielddetection`, `linedetection` and the other rules in
+ *   `config/smart`) do post `eventState inactive` on some firmware, and
+ *   carry the regions that fired in a `<DetectionRegionList>`.
  * - The heartbeat is `eventType videoloss`, `eventState inactive`, every
- *   10 seconds while nothing else is posted, and silent while alerts flow.
- *   So a liveness check counts every alert, not only heartbeats.
+ *   10 seconds. An NVR goes quiet on heartbeats while alerts flow, so a
+ *   liveness check counts every alert, not only heartbeats. A camera keeps
+ *   its heartbeat up through a motion burst.
+ * - `<activePostCount>` on an NVR is how many channels have an active event
+ *   right now (`0` on the heartbeat), not a count of posts.
  * - `<dateTime>` is the device's clock. An NVR writes it without a zone, a
  *   camera with one. It is kept as text; `at` is the clock to trust.
+ * - A camera starts each part with an `<?xml …?>` declaration; an NVR does
+ *   not. Both parse the same.
  *
  * @example Parse a motion alert from an NVR
  * ```ts
@@ -62,25 +70,55 @@
  * @module
  */
 
-import { element, elements, type Point, points, text, tokens } from "../xml.ts";
-import { parse } from "@std/xml";
+import {
+  element,
+  elements,
+  parseNumber,
+  type Point,
+  points,
+  present,
+  requireText,
+  text,
+  tokens,
+} from "../xml.ts";
+import { parse, type XmlElement } from "@std/xml";
+
+/**
+ * Where a smart event saw its target, from `<TargetRect>`.
+ *
+ * AcuSense and DeepinView cameras send it with every smart alert, in the
+ * normalized 1000 x 1000 screen space. The rule's own polygon may be left
+ * out at the same time, leaving {@link AlertRegion.coordinates} empty.
+ */
+export type TargetRect = {
+  /** `<X>` of the top-left corner. */
+  x: number;
+  /** `<Y>` of the top-left corner. */
+  y: number;
+  /** `<width>`. */
+  width: number;
+  /** `<height>`. */
+  height: number;
+};
 
 /**
  * A region reported with a smart event, from `<DetectionRegionList>`.
  *
- * The shape follows the ISAPI specification; no device in the test fleet
- * had a smart rule enabled, so it has not been checked against a live
- * stream.
+ * An NVR relaying an AcuSense camera posts one `<DetectionRegionEntry>` per
+ * region that fired, with `<regionID>`, a `<RegionCoordinatesList>` that may
+ * be empty, the `<TargetRect>` of what was seen and the `<detectionTarget>`.
  */
 export type AlertRegion = {
-  /** `<regionID>`, when present. */
+  /** `<regionID>`, when present. Rules count from 0 here, from 1 in `config/smart`. */
   id?: number;
   /** `<sensitivityLevel>`, when present. */
   sensitivityLevel?: number;
-  /** The region's corners, from `<RegionCoordinatesList>`. */
+  /** The region's corners, from `<RegionCoordinatesList>`; `[]` when the list is empty. */
   coordinates: Point[];
   /** `<detectionTarget>` split on commas, such as `["human"]`. */
   detectionTarget: string[];
+  /** The box around what was detected, from `<TargetRect>`, when present. */
+  targetRect?: TargetRect;
 };
 
 /** One `<EventNotificationAlert>`, with the time it arrived. */
@@ -93,7 +131,10 @@ export type Alert = {
   channel: number;
   /** `<eventType>`, such as `VMD`, `videoloss`, `fielddetection` or `linedetection`. */
   eventType: string;
-  /** `<eventState>`: `active` or `inactive`. */
+  /**
+   * `<eventState>`: `active` or `inactive`. VMD only ever posts `active`;
+   * smart events post `inactive` on some firmware when the rule clears.
+   */
   eventState: string;
   /** `<eventDescription>`, such as `Motion alarm`. */
   eventDescription?: string;
@@ -101,7 +142,10 @@ export type Alert = {
   dateTime: string;
   /** When the alert arrived, as an ISO 8601 string. */
   at: string;
-  /** `<activePostCount>`: how many posts this event has produced so far. */
+  /**
+   * `<activePostCount>`: on an NVR, how many channels have an active event
+   * right now; `0` on the heartbeat. Not a count of posts.
+   */
   activePostCount?: number;
   /** `<channelName>`, which cameras send and NVRs do not. */
   channelName?: string;
@@ -130,7 +174,8 @@ export type Alert = {
  * import { parseAlert } from "@hertzg/hikvision-api/events/alert";
  *
  * const alert = parseAlert(
- *   '<EventNotificationAlert version="2.0" xmlns="http://www.hikvision.com/ver20/XMLSchema">' +
+ *   '<?xml version="1.0" encoding="UTF-8"?>' +
+ *     '<EventNotificationAlert version="2.0" xmlns="http://www.hikvision.com/ver20/XMLSchema">' +
  *     "<ipAddress>192.0.2.21</ipAddress><ipv6Address>::</ipv6Address>" +
  *     "<channelID>1</channelID><dateTime>2026-10-21T20:44:20+04:00</dateTime>" +
  *     "<eventType>videoloss</eventType><eventState>inactive</eventState>" +
@@ -142,6 +187,30 @@ export type Alert = {
  * assertEquals(alert.channelName, "Camera 01");
  * assertEquals(alert.dateTime, "2026-10-21T20:44:20+04:00");
  * ```
+ *
+ * @example An NVR's smart alert carries the box around the target
+ * ```ts
+ * import { assertEquals } from "@std/assert";
+ * import { parseAlert } from "@hertzg/hikvision-api/events/alert";
+ *
+ * const alert = parseAlert(
+ *   "<EventNotificationAlert><dynChannelID>3</dynChannelID>" +
+ *     "<eventType>fielddetection</eventType><eventState>active</eventState>" +
+ *     "<DetectionRegionList><DetectionRegionEntry><regionID>0</regionID>" +
+ *     "<RegionCoordinatesList></RegionCoordinatesList>" +
+ *     "<TargetRect><X>412</X><Y>268</Y><width>95</width><height>230</height></TargetRect>" +
+ *     "<detectionTarget>human</detectionTarget>" +
+ *     "</DetectionRegionEntry></DetectionRegionList></EventNotificationAlert>",
+ *   "2026-10-21T16:44:20.004Z",
+ * );
+ *
+ * assertEquals(alert.regions, [{
+ *   id: 0,
+ *   coordinates: [],
+ *   detectionTarget: ["human"],
+ *   targetRect: { x: 412, y: 268, width: 95, height: 230 },
+ * }]);
+ * ```
  */
 export function parseAlert(xml: string, at: string): Alert {
   const root = parse(xml).root;
@@ -149,7 +218,8 @@ export function parseAlert(xml: string, at: string): Alert {
   if (eventType === undefined) {
     throw new Error(`ISAPI <${root.name.local}> has no <eventType>`);
   }
-  const alert: Alert = {
+  const regionList = element(root, "DetectionRegionList");
+  return {
     channel: Number(
       text(root, "dynChannelID") ?? text(root, "channelID") ?? "0",
     ),
@@ -157,43 +227,33 @@ export function parseAlert(xml: string, at: string): Alert {
     eventState: text(root, "eventState") ?? "active",
     dateTime: text(root, "dateTime") ?? "",
     at,
+    ...present({
+      eventDescription: text(root, "eventDescription"),
+      activePostCount: parseNumber(text(root, "activePostCount")),
+      channelName: text(root, "channelName"),
+      ipAddress: text(root, "ipAddress"),
+      macAddress: text(root, "macAddress"),
+      regions: regionList &&
+        elements(regionList, "DetectionRegionEntry").map(alertRegion),
+    }),
   };
-  const optional = {
-    eventDescription: text(root, "eventDescription"),
-    activePostCount: number(text(root, "activePostCount")),
-    channelName: text(root, "channelName"),
-    ipAddress: text(root, "ipAddress"),
-    macAddress: text(root, "macAddress"),
-  };
-  for (const [key, value] of Object.entries(optional)) {
-    if (value !== undefined) {
-      Object.assign(alert, { [key]: value });
-    }
-  }
-  const regionList = element(root, "DetectionRegionList");
-  if (regionList !== undefined) {
-    alert.regions = elements(regionList, "DetectionRegionEntry").map(
-      (entry) => {
-        const list = element(entry, "RegionCoordinatesList");
-        const region: AlertRegion = {
-          coordinates: list === undefined ? [] : points(list),
-          detectionTarget: tokens(text(entry, "detectionTarget")),
-        };
-        const id = number(text(entry, "regionID"));
-        if (id !== undefined) {
-          region.id = id;
-        }
-        const sensitivityLevel = number(text(entry, "sensitivityLevel"));
-        if (sensitivityLevel !== undefined) {
-          region.sensitivityLevel = sensitivityLevel;
-        }
-        return region;
-      },
-    );
-  }
-  return alert;
 }
 
-function number(value: string | undefined): number | undefined {
-  return value === undefined ? undefined : Number(value);
+function alertRegion(entry: XmlElement): AlertRegion {
+  const list = element(entry, "RegionCoordinatesList");
+  const rect = element(entry, "TargetRect");
+  return {
+    coordinates: list === undefined ? [] : points(list),
+    detectionTarget: tokens(text(entry, "detectionTarget")),
+    ...present({
+      id: parseNumber(text(entry, "regionID")),
+      sensitivityLevel: parseNumber(text(entry, "sensitivityLevel")),
+      targetRect: rect && {
+        x: Number(requireText(rect, "X")),
+        y: Number(requireText(rect, "Y")),
+        width: Number(requireText(rect, "width")),
+        height: Number(requireText(rect, "height")),
+      },
+    }),
+  };
 }

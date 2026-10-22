@@ -32,10 +32,22 @@
 
 import type { XmlElement } from "@std/xml";
 import {
+  type InputProxyChannelStatus,
+  readInputProxyChannelStatus,
+} from "./config/channel-status.ts";
+import {
   type InputProxyChannel,
   readInputProxyChannels,
 } from "./config/channels.ts";
 import { type DeviceInfo, readDeviceInfo } from "./config/device-info.ts";
+import {
+  type LineDetection,
+  readLineDetection,
+} from "./config/line-detection.ts";
+import {
+  type MotionDetectionCapabilities,
+  readMotionDetectionCapabilities,
+} from "./config/motion-capabilities.ts";
 import {
   type MotionDetection,
   type MotionDetectionTarget,
@@ -43,10 +55,12 @@ import {
 } from "./config/motion-detection.ts";
 import {
   type FieldDetection,
-  type LineDetection,
   readFieldDetection,
-  readLineDetection,
+  readSmartRules,
+  type SmartRules,
+  type SmartRuleType,
 } from "./config/smart.ts";
+import { type DeviceTime, readDeviceTime } from "./config/time.ts";
 import type { Alert } from "./events/alert.ts";
 import { openAlertStream } from "./events/stream.ts";
 import { request, type RequestOptions, requestXml } from "./request.ts";
@@ -60,10 +74,16 @@ export type SubscribeOptions = {
   signal?: AbortSignal;
 };
 
-/** Which smart rule set to read. */
+/** Which channel's smart rules to read. */
 export type SmartRuleOptions = {
-  /** The rule set number. Defaults to `1`. */
-  id?: number;
+  /** The video channel, from 1. Defaults to `1`. */
+  channel?: number;
+};
+
+/** Which smart rule set and channel {@link Client.smartRules} reads. */
+export type SmartRulesOptions = SmartRuleOptions & {
+  /** The rule type, such as `FieldDetection` or `regionEntrance`. */
+  type: SmartRuleType;
 };
 
 /** A client bound to one device. */
@@ -71,32 +91,43 @@ export type Client = {
   /**
    * Sends any request with the client's credentials.
    *
-   * @throws {HttpError} When the status is not 2xx.
+   * @throws {HttpError} When the status is not 2xx and the body is not a `<ResponseStatus>`.
+   * @throws {IsapiError} When the body is a failing `<ResponseStatus>`.
    */
   request: (path: string, init?: RequestInit) => Promise<Response>;
   /**
    * Sends any request and parses the reply as an ISAPI document, for paths
    * this package has no reader for.
    *
-   * @throws {HttpError} When the status is not 2xx.
+   * @throws {HttpError} When the status is not 2xx and the body is not a `<ResponseStatus>`.
    * @throws {IsapiError} When the body is a failing `<ResponseStatus>`.
    */
   xml: (path: string, init?: RequestInit) => Promise<XmlElement>;
   /** Reads `/ISAPI/System/deviceInfo`. */
   deviceInfo: () => Promise<DeviceInfo>;
+  /** Reads `/ISAPI/System/time`: the device clock and its zone. */
+  time: () => Promise<DeviceTime>;
   /** Reads `/ISAPI/ContentMgmt/InputProxy/channels`: an NVR's IP cameras. */
   channels: () => Promise<InputProxyChannel[]>;
-  /** Reads a channel's motion detection grid. */
+  /** Reads `/ISAPI/ContentMgmt/InputProxy/channels/status`: which IP cameras are online. */
+  channelStatus: () => Promise<InputProxyChannelStatus[]>;
+  /** Reads a channel's motion detection settings, grid and regions. */
   motionDetection: (target: MotionDetectionTarget) => Promise<MotionDetection>;
-  /** Reads `/ISAPI/Smart/FieldDetection/<id>`: intrusion regions. */
+  /** Reads what a channel's motion detection supports. */
+  motionDetectionCapabilities: (
+    target: MotionDetectionTarget,
+  ) => Promise<MotionDetectionCapabilities>;
+  /** Reads `/ISAPI/Smart/<type>/<channel>`: any region-type smart rule set. */
+  smartRules: (options: SmartRulesOptions) => Promise<SmartRules>;
+  /** Reads `/ISAPI/Smart/FieldDetection/<channel>`: intrusion regions. */
   fieldDetection: (options?: SmartRuleOptions) => Promise<FieldDetection>;
-  /** Reads `/ISAPI/Smart/LineDetection/<id>`: crossing lines. */
+  /** Reads `/ISAPI/Smart/LineDetection/<channel>`: crossing lines. */
   lineDetection: (options?: SmartRuleOptions) => Promise<LineDetection>;
   /**
    * Opens the alert stream. The stream ends when the device closes the
    * connection or `signal` aborts; it never reconnects.
    *
-   * @throws {HttpError} When the device answers with a status outside 2xx.
+   * @throws {HttpError} When the status is not 2xx and the body is not a `<ResponseStatus>`.
    * @throws {IsapiError} When the device answers a failing `<ResponseStatus>`.
    */
   subscribe: (options?: SubscribeOptions) => Promise<ReadableStream<Alert>>;
@@ -140,10 +171,15 @@ export function createClient(options: ClientOptions): Client {
     request: (path, init) => request(options, path, init),
     xml: (path, init) => requestXml(options, path, init),
     deviceInfo: () => readDeviceInfo(options),
+    time: () => readDeviceTime(options),
     channels: () => readInputProxyChannels(options),
+    channelStatus: () => readInputProxyChannelStatus(options),
     motionDetection: (target) => readMotionDetection(options, target),
-    fieldDetection: ({ id } = {}) => readFieldDetection(options, id),
-    lineDetection: ({ id } = {}) => readLineDetection(options, id),
+    motionDetectionCapabilities: (target) =>
+      readMotionDetectionCapabilities(options, target),
+    smartRules: (rule) => readSmartRules(options, rule),
+    fieldDetection: ({ channel } = {}) => readFieldDetection(options, channel),
+    lineDetection: ({ channel } = {}) => readLineDetection(options, channel),
     subscribe: ({ signal } = {}) => openAlertStream({ ...options, signal }),
   };
 }

@@ -18,8 +18,12 @@
  * block, with the body as bytes. A part's body is taken from its
  * `Content-Length` when there is one, so a JPEG part that happens to contain
  * the boundary text is read whole; without one the body runs to the next
- * boundary line. Whatever the part is, it comes out as bytes; deciding what
- * it means is the consumer's job.
+ * boundary line. Devices declare a length that covers the XML plus one
+ * trailing line ending (LF on an NVR, CRLF on a camera), never the XML
+ * alone, so the body carries that line ending too; the next part is found
+ * by searching for `--boundary` after the declared length, so the over-count
+ * changes nothing. Whatever the part is, it comes out as bytes; deciding
+ * what it means is the consumer's job.
  *
  * @example Split a two-part body
  * ```ts
@@ -53,9 +57,11 @@ export type Part = {
 /**
  * The boundary named by a `multipart/*` content type.
  *
- * Hikvision devices write `boundary=boundary`, some firmwares
- * `boundary=--boundary`; leading dashes are dropped either way, since the
- * delimiter on the wire is `--boundary` in both cases.
+ * Hikvision devices write `boundary=boundary`. Leading dashes in the value
+ * are dropped, since the delimiter on the wire is `--` plus the boundary.
+ * Older NVRs are known to name one boundary here and write the literal
+ * `--boundary` on the wire; this reads the header as sent and does not
+ * paper over that.
  *
  * @param contentType The response's `Content-Type` header value.
  * @returns The boundary, or `undefined` when the header names none.
@@ -63,14 +69,14 @@ export type Part = {
  * @example Read the boundary from a content type
  * ```ts
  * import { assertEquals } from "@std/assert";
- * import { boundaryOf } from "@hertzg/hikvision-api/multipart/parts";
+ * import { parseBoundary } from "@hertzg/hikvision-api/multipart/parts";
  *
- * assertEquals(boundaryOf("multipart/mixed;boundary=boundary"), "boundary");
- * assertEquals(boundaryOf('multipart/mixed; boundary="--boundary"'), "boundary");
- * assertEquals(boundaryOf("application/xml"), undefined);
+ * assertEquals(parseBoundary("multipart/mixed;boundary=boundary"), "boundary");
+ * assertEquals(parseBoundary('multipart/mixed; boundary="--boundary"'), "boundary");
+ * assertEquals(parseBoundary("application/xml"), undefined);
  * ```
  */
-export function boundaryOf(contentType: string | null): string | undefined {
+export function parseBoundary(contentType: string | null): string | undefined {
   const match = contentType?.match(/boundary="?([^";]+)"?/i);
   return match?.[1].replace(/^-+/, "");
 }
@@ -81,10 +87,10 @@ export function boundaryOf(contentType: string | null): string | undefined {
  * Bytes before the first boundary are dropped. A part cut off by the end of
  * the input is dropped too. A close delimiter (`--boundary--`) is skipped
  * rather than taken as the end: cameras write one after each event part
- * and keep posting.
+ * and keep posting; an NVR never writes one.
  *
  * @param boundary The boundary without its leading dashes, as
- *   {@link boundaryOf} returns it.
+ *   {@link parseBoundary} returns it.
  * @returns A transform from body bytes to parts.
  *
  * @example Parts arrive whole however the bytes are chunked

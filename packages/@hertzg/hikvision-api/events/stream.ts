@@ -5,24 +5,32 @@
  * `200 multipart/mixed;boundary=boundary` and keeps the connection open,
  * posting one XML part per alert. {@link openAlertStream} sends that request,
  * splits the body into parts and parses every XML part into an
- * {@link Alert}. Parts that are not XML, such as a JPEG that some firmwares
- * attach to a smart event, are skipped.
+ * {@link Alert}. Parts that are not XML are skipped: with picture upload on,
+ * a smart event's XML part is followed by an image part, `image/jpeg` or
+ * `image/pjpeg`.
  *
  * ```
  * fetch alertStream ─> body bytes ─> parts ─> XML parts ─> Alert
  * ```
  *
+ * The heartbeat, `videoloss inactive` about every 10 s, comes through as an
+ * alert like any other. An NVR holds it back while alerts flow; a camera
+ * does not. A liveness check should therefore count every alert, not only
+ * heartbeats.
+ *
  * The stream ends when the device closes the connection or the `signal`
- * aborts; aborting closes it cleanly rather than erroring it. It never
- * reconnects: a consumer that wants to stay subscribed opens a new stream
- * when this one ends, with whatever backoff suits it.
+ * aborts; aborting closes it cleanly rather than erroring it. It ends on
+ * the signal by cancelling its own reader and does not rely on the runtime
+ * erroring the fetch body (ADR 0002). It never reconnects: a consumer that
+ * wants to stay subscribed opens a new stream when this one ends, with
+ * whatever backoff suits it.
  *
  * @example Print motion alerts until Ctrl-C
  * ```ts ignore
  * import { openAlertStream } from "@hertzg/hikvision-api/events/stream";
  *
  * const controller = new AbortController();
- * Deno.addSignalListener("SIGINT", () => controller.abort());
+ * process.on("SIGINT", () => controller.abort());
  *
  * const alerts = await openAlertStream({
  *   baseUrl: "http://192.0.2.10",
@@ -42,8 +50,8 @@
  */
 
 import {
-  boundaryOf,
   createPartsStream,
+  parseBoundary,
   type Part,
 } from "../multipart/parts.ts";
 import { request, type RequestOptions } from "../request.ts";
@@ -106,7 +114,7 @@ export async function openAlertStream(
     signal,
   });
   const contentType = response.headers.get("content-type");
-  const boundary = boundaryOf(contentType);
+  const boundary = parseBoundary(contentType);
   if (boundary === undefined || response.body === null) {
     const body = await response.text();
     parseIsapi(body);
@@ -132,7 +140,7 @@ export async function openAlertStream(
     )
     .getReader();
   // The signal is also given to fetch, but the stream does not rely on
-  // fetch erroring the body: on abort it cancels its own reader, which
+  // fetch erroring the body (ADR 0002): on abort it cancels its own reader, which
   // resolves a pending read as done and cancels the response body, so the
   // consumer's loop ends and the connection is dropped either way.
   signal?.addEventListener("abort", () => {

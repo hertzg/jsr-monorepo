@@ -4,12 +4,14 @@ import {
   element,
   elements,
   IsapiError,
+  isOk,
   parseIsapi,
   parseResponseStatus,
   points,
+  present,
   requireText,
   text,
-  textOf,
+  textContent,
   tokens,
 } from "./xml.ts";
 
@@ -37,6 +39,60 @@ Deno.test("parseIsapi returns a ResponseStatus whose statusCode is 1", () => {
     "<statusString>OK</statusString></ResponseStatus>";
 
   assertEquals(parseIsapi(xml).name.local, "ResponseStatus");
+});
+
+Deno.test("parseIsapi returns a ResponseStatus whose statusCode is 0", () => {
+  const xml = "<ResponseStatus><statusCode>0</statusCode>" +
+    "<statusString>OK</statusString></ResponseStatus>";
+
+  assertEquals(parseIsapi(xml).name.local, "ResponseStatus");
+});
+
+Deno.test("parseIsapi throws IsapiError on statusCode 7 (reboot required)", () => {
+  const xml =
+    "<ResponseStatus><requestURL>/ISAPI/System/Network/interfaces/1</requestURL>" +
+    "<statusCode>7</statusCode><statusString>Reboot Required</statusString>" +
+    "<subStatusCode>rebootRequired</subStatusCode></ResponseStatus>";
+
+  const error = assertThrows(() => parseIsapi(xml), IsapiError);
+
+  assertEquals(error.status.statusCode, 7);
+  assertEquals(error.httpStatus, undefined);
+});
+
+Deno.test("IsapiError names the HTTP status in its message when given one", () => {
+  const error = new IsapiError(
+    {
+      requestURL: "/ISAPI/Smart/LineDetection/1",
+      statusCode: 4,
+      subStatusCode: "notSupport",
+    },
+    403,
+  );
+
+  assertEquals(error.httpStatus, 403);
+  assertEquals(
+    error.message,
+    "ISAPI /ISAPI/Smart/LineDetection/1 failed: 4 notSupport (HTTP 403)",
+  );
+});
+
+Deno.test("IsapiError leaves the HTTP status out of its message when unknown", () => {
+  const error = new IsapiError({
+    statusCode: 6,
+    subStatusCode: "badParameters",
+  });
+
+  assertEquals(error.httpStatus, undefined);
+  assertEquals(error.message, "ISAPI request failed: 6 badParameters");
+});
+
+Deno.test("isOk accepts 0 and 1 and rejects every other code", () => {
+  assertEquals(isOk({ statusCode: 0 }), true);
+  assertEquals(isOk({ statusCode: 1 }), true);
+  assertEquals(isOk({ statusCode: 2 }), false);
+  assertEquals(isOk({ statusCode: 7 }), false);
+  assertEquals(isOk({ statusCode: 9 }), false);
 });
 
 Deno.test("parseIsapi returns the root of any other document", () => {
@@ -73,14 +129,14 @@ Deno.test("elements matches by local name regardless of namespace", () => {
 Deno.test("element returns the first match or undefined", () => {
   const root = parse("<a><b>1</b><b>2</b></a>").root;
 
-  assertEquals(textOf(element(root, "b")!), "1");
+  assertEquals(textContent(element(root, "b")!), "1");
   assertEquals(element(root, "c"), undefined);
 });
 
-Deno.test("textOf joins text and CDATA children", () => {
+Deno.test("textContent joins text and CDATA children", () => {
   const root = parse("<name>Camera <![CDATA[<01>]]></name>").root;
 
-  assertEquals(textOf(root), "Camera <01>");
+  assertEquals(textContent(root), "Camera <01>");
 });
 
 Deno.test("requireText throws naming the parent and the missing child", () => {
@@ -107,4 +163,11 @@ Deno.test("points reads every pair under the list whatever the pair element is c
   ).root;
 
   assertEquals(points(list), [{ x: 654, y: 792 }, { x: 435, y: 714 }]);
+});
+
+Deno.test("present drops undefined entries and keeps falsy ones", () => {
+  assertEquals(
+    present({ a: 1, b: undefined, c: 0, d: "", e: false }),
+    { a: 1, c: 0, d: "", e: false },
+  );
 });

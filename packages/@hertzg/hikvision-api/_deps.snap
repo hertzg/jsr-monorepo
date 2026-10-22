@@ -28,15 +28,32 @@
       "jsr:@std/encoding@^1.0.10/base64",
       "jsr:@std/xml@^0.2.0"
     ],
+    "./config/time": [
+      "jsr:@std/encoding@^1.0.10/base64",
+      "jsr:@std/xml@^0.2.0"
+    ],
     "./config/channels": [
       "jsr:@std/encoding@^1.0.10/base64",
       "jsr:@std/xml@^0.2.0"
     ],
+    "./config/channel-status": [
+      "jsr:@std/encoding@^1.0.10/base64",
+      "jsr:@std/xml@^0.2.0"
+    ],
+    "./config/grid-map": [],
     "./config/motion-detection": [
       "jsr:@std/encoding@^1.0.10/base64",
       "jsr:@std/xml@^0.2.0"
     ],
+    "./config/motion-capabilities": [
+      "jsr:@std/encoding@^1.0.10/base64",
+      "jsr:@std/xml@^0.2.0"
+    ],
     "./config/smart": [
+      "jsr:@std/encoding@^1.0.10/base64",
+      "jsr:@std/xml@^0.2.0"
+    ],
+    "./config/line-detection": [
       "jsr:@std/encoding@^1.0.10/base64",
       "jsr:@std/xml@^0.2.0"
     ],

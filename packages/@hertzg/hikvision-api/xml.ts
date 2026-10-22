@@ -3,9 +3,10 @@
  *
  * Every ISAPI reply is one XML document: a config document such as
  * `<DeviceInfo>`, a stream part such as `<EventNotificationAlert>`, or a
- * `<ResponseStatus>` describing why the request failed. Devices answer
+ * `<ResponseStatus>` describing why the request failed. The spec sends a
+ * `<ResponseStatus>` with HTTP 400, 403 or 503, but devices also answer
  * HTTP 200 to requests they do not support, so the failure has to be read
- * from the body:
+ * from the body whatever the HTTP status:
  *
  * ```xml
  * <ResponseStatus version="2.0" xmlns="http://www.hikvision.com/ver20/XMLSchema">
@@ -41,7 +42,22 @@ import { isCData, isElement, isText, parse, type XmlElement } from "@std/xml";
 export type ResponseStatus = {
   /** The path the device is answering about. */
   requestURL?: string;
-  /** `1` is OK; anything else is a failure. */
+  /**
+   * The outcome, from the ISAPI table:
+   *
+   * | Code | Meaning            |
+   * | ---- | ------------------ |
+   * | 0, 1 | OK                 |
+   * | 2    | Device Busy        |
+   * | 3    | Device Error       |
+   * | 4    | Invalid Operation  |
+   * | 5    | Invalid XML Format |
+   * | 6    | Invalid XML Content|
+   * | 7    | Reboot Required    |
+   * | 9    | Additional Error   |
+   *
+   * `7` can come with HTTP 200 after a `PUT` that needs a reboot to apply.
+   */
   statusCode: number;
   /** A short description, such as `Invalid Operation`. */
   statusString?: string;
@@ -49,22 +65,42 @@ export type ResponseStatus = {
   subStatusCode?: string;
 };
 
-/** A `<ResponseStatus>` with a status code other than `1`. */
+/**
+ * A `<ResponseStatus>` with a status code other than `0` or `1`.
+ *
+ * @example Carry the HTTP status the device sent it with
+ * ```ts
+ * import { assertEquals } from "@std/assert";
+ * import { IsapiError } from "@hertzg/hikvision-api/xml";
+ *
+ * const error = new IsapiError(
+ *   { requestURL: "/ISAPI/Smart/LineDetection/1", statusCode: 4, subStatusCode: "notSupport" },
+ *   403,
+ * );
+ *
+ * assertEquals(error.httpStatus, 403);
+ * assertEquals(error.message, "ISAPI /ISAPI/Smart/LineDetection/1 failed: 4 notSupport (HTTP 403)");
+ * ```
+ */
 export class IsapiError extends Error {
   /** The parsed `<ResponseStatus>`. */
   readonly status: ResponseStatus;
+  /** The HTTP status the body came with, when known. */
+  readonly httpStatus?: number;
 
   /**
    * @param status The parsed `<ResponseStatus>`.
+   * @param httpStatus The HTTP status the body came with, when known.
    */
-  constructor(status: ResponseStatus) {
+  constructor(status: ResponseStatus, httpStatus?: number) {
     super(
       `ISAPI ${status.requestURL ?? "request"} failed: ${status.statusCode} ${
         status.subStatusCode ?? status.statusString ?? ""
-      }`.trimEnd(),
+      }`.trimEnd() + (httpStatus === undefined ? "" : ` (HTTP ${httpStatus})`),
     );
     this.name = "IsapiError";
     this.status = status;
+    this.httpStatus = httpStatus;
   }
 }
 
@@ -74,7 +110,7 @@ export class IsapiError extends Error {
  * @param xml The document text.
  * @returns The root element.
  * @throws {IsapiError} When the document is a `<ResponseStatus>` whose
- *   `statusCode` is not `1`.
+ *   `statusCode` is neither `0` nor `1`.
  *
  * @example Read the root of a device reply
  * ```ts
@@ -95,11 +131,31 @@ export function parseIsapi(xml: string): XmlElement {
   const root = parse(xml).root;
   if (root.name.local === "ResponseStatus") {
     const status = parseResponseStatus(root);
-    if (status.statusCode !== 1) {
+    if (!isOk(status)) {
       throw new IsapiError(status);
     }
   }
   return root;
+}
+
+/**
+ * Whether a `<ResponseStatus>` reports success: `statusCode` `0` or `1`.
+ *
+ * @param status The parsed `<ResponseStatus>`.
+ * @returns `true` for `0` and `1`, `false` for every other code.
+ *
+ * @example Both OK codes pass, reboot required does not
+ * ```ts
+ * import { assertEquals } from "@std/assert";
+ * import { isOk } from "@hertzg/hikvision-api/xml";
+ *
+ * assertEquals(isOk({ statusCode: 0 }), true);
+ * assertEquals(isOk({ statusCode: 1 }), true);
+ * assertEquals(isOk({ statusCode: 7, subStatusCode: "rebootRequired" }), false);
+ * ```
+ */
+export function isOk(status: ResponseStatus): boolean {
+  return status.statusCode === 0 || status.statusCode === 1;
 }
 
 /**
@@ -199,12 +255,12 @@ export function element(
  * ```ts
  * import { assertEquals } from "@std/assert";
  * import { parse } from "@std/xml";
- * import { textOf } from "@hertzg/hikvision-api/xml";
+ * import { textContent } from "@hertzg/hikvision-api/xml";
  *
- * assertEquals(textOf(parse("<model>DS-2CD2043G2-I</model>").root), "DS-2CD2043G2-I");
+ * assertEquals(textContent(parse("<model>DS-2CD2043G2-I</model>").root), "DS-2CD2043G2-I");
  * ```
  */
-export function textOf(element: XmlElement): string {
+export function textContent(element: XmlElement): string {
   return element.children
     .filter((node) => isText(node) || isCData(node))
     .map((node) => node.text)
@@ -232,7 +288,7 @@ export function textOf(element: XmlElement): string {
  */
 export function text(parent: XmlElement, name: string): string | undefined {
   const child = element(parent, name);
-  return child === undefined ? undefined : textOf(child);
+  return child === undefined ? undefined : textContent(child);
 }
 
 /**
@@ -322,4 +378,60 @@ export function points(parent: XmlElement): Point[] {
     x: Number(requireText(pair, "positionX")),
     y: Number(requireText(pair, "positionY")),
   }));
+}
+
+/**
+ * The entries of `fields` whose value is defined, for spreading optional
+ * elements into a result without `undefined` keys.
+ *
+ * @param fields Candidate fields, typically `text(root, name)` lookups.
+ * @returns A copy of `fields` without the `undefined` entries.
+ *
+ * @example Keep only the elements the device sent
+ * ```ts
+ * import { assertEquals } from "@std/assert";
+ * import { parse } from "@std/xml";
+ * import { present, text } from "@hertzg/hikvision-api/xml";
+ *
+ * const root = parse("<DeviceInfo><model>DS-2CD2043G2-I</model></DeviceInfo>").root;
+ *
+ * assertEquals(
+ *   present({ model: text(root, "model"), serialNumber: text(root, "serialNumber") }),
+ *   { model: "DS-2CD2043G2-I" },
+ * );
+ * ```
+ */
+export function present<T extends Record<string, unknown>>(
+  fields: T,
+): { [K in keyof T]?: Exclude<T[K], undefined> } {
+  const result: Record<string, unknown> = {};
+  for (const [key, value] of Object.entries(fields)) {
+    if (value !== undefined) {
+      result[key] = value;
+    }
+  }
+  return result as { [K in keyof T]?: Exclude<T[K], undefined> };
+}
+
+/**
+ * The number in an optional element's text, or `undefined` when the element
+ * was missing.
+ *
+ * @param value The element text, typically from {@link text}.
+ * @returns The parsed number, or `undefined` for `undefined`.
+ *
+ * @example Read an optional numeric field
+ * ```ts
+ * import { assertEquals } from "@std/assert";
+ * import { parse } from "@std/xml";
+ * import { parseNumber, text } from "@hertzg/hikvision-api/xml";
+ *
+ * const root = parse("<Channel><managePortNo>8000</managePortNo></Channel>").root;
+ *
+ * assertEquals(parseNumber(text(root, "managePortNo")), 8000);
+ * assertEquals(parseNumber(text(root, "srcInputPort")), undefined);
+ * ```
+ */
+export function parseNumber(value: string | undefined): number | undefined {
+  return value === undefined ? undefined : Number(value);
 }

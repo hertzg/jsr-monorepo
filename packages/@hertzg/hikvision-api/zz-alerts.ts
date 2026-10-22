@@ -2,20 +2,29 @@
  * Reads live alerts from a device with this package and prints per-channel
  * motion on/off, treating 3 s without a VMD post as "off".
  *
- * Not published. Run from this directory:
+ * Not published. Run from this directory, on Deno or Bun:
  *
- *   HIK_HOST=192.0.2.10 HIK_USER=admin HIK_PASS=… deno run -A zz-alerts.ts [seconds]
+ *   HIK_HOST=192.0.2.10 HIK_USER=admin HIK_PASS=… deno run -A zz-alerts.ts 30
+ *   HIK_HOST=192.0.2.10 HIK_USER=admin HIK_PASS=… bun run zz-alerts.ts 30
  *
  * @module
  */
 
+import process from "node:process";
 import { createClient } from "./mod.ts";
 
-const host = Deno.env.get("HIK_HOST") ?? "192.0.2.10";
-const username = Deno.env.get("HIK_USER") ?? "";
-const password = Deno.env.get("HIK_PASS") ?? "";
-const seconds = Number(Deno.args[0] ?? 60);
-const offAfterMs = 3000;
+const host = process.env.HIK_HOST ?? "192.0.2.10";
+const username = process.env.HIK_USER ?? "";
+const password = process.env.HIK_PASS ?? "";
+const seconds = Number(process.argv[2] ?? 60);
+
+/**
+ * A channel's motion ends when no `VMD active` post arrived for this long.
+ * Devices post about once a second while motion lasts and never post
+ * `inactive`. Raise it when one walk past a camera shows as two events;
+ * lower it when visits blur together. pyHik uses 5000, Scrypted 20000.
+ */
+const MOTION_OFF_AFTER_MS = 3000;
 
 const startedAt = Date.now();
 const stamp = () => `+${((Date.now() - startedAt) / 1000).toFixed(1)}s`;
@@ -29,12 +38,12 @@ const alerts = await client.subscribe({
 });
 console.log(stamp(), "subscribed");
 
-const lastActive = new Map<number, number>();
+const lastActiveMs = new Map<number, number>();
 const sweep = setInterval(() => {
   const now = Date.now();
-  for (const [channel, at] of lastActive) {
-    if (now - at < offAfterMs) continue;
-    lastActive.delete(channel);
+  for (const [channel, atMs] of lastActiveMs) {
+    if (now - atMs < MOTION_OFF_AFTER_MS) continue;
+    lastActiveMs.delete(channel);
     console.log(stamp(), `D${channel}`, "motion off (silence)");
   }
 }, 500);
@@ -49,10 +58,10 @@ try {
     }
     posts++;
     if (alert.eventType === "VMD" && alert.eventState === "active") {
-      if (!lastActive.has(alert.channel)) {
+      if (!lastActiveMs.has(alert.channel)) {
         console.log(stamp(), `D${alert.channel}`, "motion on", alert.dateTime);
       }
-      lastActive.set(alert.channel, Date.parse(alert.at));
+      lastActiveMs.set(alert.channel, Date.parse(alert.at));
     } else {
       console.log(
         stamp(),

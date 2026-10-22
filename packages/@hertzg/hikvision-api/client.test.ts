@@ -38,13 +38,13 @@ Deno.test("createClient routes each reader to its path with the credentials", as
   const channels = await nvr.channels();
   const motion = await nvr.motionDetection({ channel: 4, proxy: true });
   const field = await nvr.fieldDetection();
-  const line = await nvr.lineDetection({ id: 2 });
+  const line = await nvr.lineDetection({ channel: 2 });
 
   assertEquals(info.model, "DS-7608NI-Q2/8P");
   assertEquals(channels, []);
   assertEquals(motion.grid, [[true, true, true, true, true, true, true, true]]);
-  assertEquals(field.id, 1);
-  assertEquals(line.id, 2);
+  assertEquals(field.channel, 1);
+  assertEquals(line.channel, 2);
   assertSpyCalls(fetch, 5);
   assertEquals(urlOf(fetch, 0), "http://192.0.2.10/ISAPI/System/deviceInfo");
   assertEquals(
@@ -109,5 +109,48 @@ Deno.test("createClient's subscribe opens the alert stream with the signal", asy
   assertEquals(
     (fetch.calls[0].args[1] as RequestInit).signal,
     controller.signal,
+  );
+});
+
+Deno.test("createClient routes the status, time, capabilities and generic smart readers", async () => {
+  const fetch = spy(resolvesNext([
+    new Response("<InputProxyChannelStatusList/>"),
+    new Response(
+      "<Time><timeMode>NTP</timeMode><localTime>2026-10-22T11:33:52+04:00</localTime>" +
+        "<timeZone>CST-4:00:00</timeZone></Time>",
+    ),
+    new Response(
+      '<MotionDetection><regionType opt="grid,region">grid</regionType></MotionDetection>',
+    ),
+    new Response(
+      "<RegionEntrance><id>3</id><enabled>true</enabled></RegionEntrance>",
+    ),
+  ]));
+  const nvr = createClient({ ...OPTIONS, fetch });
+
+  const status = await nvr.channelStatus();
+  const time = await nvr.time();
+  const capabilities = await nvr.motionDetectionCapabilities({
+    channel: 1,
+    proxy: true,
+  });
+  const rules = await nvr.smartRules({ type: "regionEntrance", channel: 3 });
+
+  assertEquals(status, []);
+  assertEquals(time.utcOffsetMinutes, 240);
+  assertEquals(capabilities.regionTypes, ["grid", "region"]);
+  assertEquals(rules.channel, 3);
+  assertEquals(
+    urlOf(fetch, 0),
+    "http://192.0.2.10/ISAPI/ContentMgmt/InputProxy/channels/status",
+  );
+  assertEquals(urlOf(fetch, 1), "http://192.0.2.10/ISAPI/System/time");
+  assertEquals(
+    urlOf(fetch, 2),
+    "http://192.0.2.10/ISAPI/ContentMgmt/InputProxy/channels/1/video/motionDetection/capabilities",
+  );
+  assertEquals(
+    urlOf(fetch, 3),
+    "http://192.0.2.10/ISAPI/Smart/regionEntrance/3",
   );
 });
