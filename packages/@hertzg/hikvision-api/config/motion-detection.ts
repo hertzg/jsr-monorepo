@@ -194,7 +194,7 @@ export function motionDetectionPath(target: MotionDetectionTarget): string {
  *
  * @param xml The document text.
  * @returns The settings, with the grid decoded.
- * @throws {IsapiError} When the document is a failing `<ResponseStatus>`.
+ * @throws {IsapiError} When the request fails: a status outside 2xx, or a failing `<ResponseStatus>` on any status.
  *
  * @example Parse an NVR's copy of a camera's settings
  * ```ts
@@ -226,8 +226,7 @@ export function parseMotionDetection(xml: string): MotionDetection {
  * @param options Where the device is and how to log in.
  * @param target Which channel, and whether through an NVR's input proxy.
  * @returns The settings, with the grid decoded.
- * @throws {HttpError} When the device answers with a status outside 2xx.
- * @throws {IsapiError} When the device answers a failing `<ResponseStatus>`.
+ * @throws {IsapiError} When the request fails: a status outside 2xx, or a failing `<ResponseStatus>` on any status.
  *
  * @example Read channel 2 through an NVR
  * ```ts

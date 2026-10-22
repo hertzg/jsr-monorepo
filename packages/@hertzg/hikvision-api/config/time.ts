@@ -121,7 +121,7 @@ export function parseTimeZoneOffset(timeZone: string): number | undefined {
  * @param xml The document text.
  * @returns The device time. `utcOffsetMinutes` is set when `timeZone`
  *   parses; `platformType` when the device sends it.
- * @throws {IsapiError} When the document is a failing `<ResponseStatus>`.
+ * @throws {IsapiError} When the request fails: a status outside 2xx, or a failing `<ResponseStatus>` on any status.
  * @throws {Error} When `timeMode`, `localTime` or `timeZone` is missing.
  *
  * @example A platform-synced NVR
@@ -148,8 +148,7 @@ export function parseDeviceTime(xml: string): DeviceTime {
  *
  * @param options Where the device is and how to log in.
  * @returns The device time.
- * @throws {HttpError} When the device answers with a status outside 2xx.
- * @throws {IsapiError} When the device answers a failing `<ResponseStatus>`.
+ * @throws {IsapiError} When the request fails: a status outside 2xx, or a failing `<ResponseStatus>` on any status.
  *
  * @example Read through a stubbed fetch
  * ```ts

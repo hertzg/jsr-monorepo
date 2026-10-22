@@ -46,31 +46,65 @@ export type ResponseStatus = {
   subStatusCode?: string;
 };
 
-/** A `<ResponseStatus>` whose status code is not OK. */
+/** What an {@link IsapiError} knows about the failure. */
+export type IsapiFailure = {
+  /** The URL that was requested, or the `<requestURL>` the device named. */
+  url?: string;
+  /** The HTTP status, when the failure came with one outside 2xx. */
+  httpStatus?: number;
+  /** The `<ResponseStatus>` in the body, when there was one. */
+  status?: ResponseStatus;
+};
+
+/**
+ * A failed ISAPI request: a status outside 2xx, a failing
+ * `<ResponseStatus>` in the body, or both.
+ *
+ * Every field is optional because devices report failures either way.
+ * Branch on `subStatusCode` for the reason (`notSupport`,
+ * `badAuthorization`, …) and on `httpStatus` for the transport.
+ */
 export class IsapiError extends Error {
-  /** The parsed `<ResponseStatus>`. */
-  readonly status: ResponseStatus;
-  /** The HTTP status it came with, when known. */
+  /** The URL that was requested, or the `<requestURL>` the device named. */
+  readonly url?: string;
+  /** The HTTP status, when outside 2xx. */
   readonly httpStatus?: number;
+  /** The `<statusCode>` of the body, when it was a `<ResponseStatus>`. */
+  readonly statusCode?: number;
+  /** The `<subStatusCode>` of the body, such as `notSupport`. */
+  readonly subStatusCode?: string;
+  /** The `<statusString>` of the body, such as `Invalid Operation`. */
+  readonly statusString?: string;
 
   /**
-   * @param status The parsed `<ResponseStatus>`.
-   * @param httpStatus The HTTP status it came with.
+   * @param failure What is known about the failure.
    */
-  constructor(status: ResponseStatus, httpStatus?: number) {
-    const reason = status.subStatusCode ?? status.statusString ?? "";
-    const http = httpStatus === undefined ? "" : ` (HTTP ${httpStatus})`;
-    super(
-      `ISAPI ${
-        status.requestURL ?? "request"
-      } failed: ${status.statusCode} ${reason}`
-        .trimEnd() + http,
-    );
+  constructor(failure: IsapiFailure) {
+    const { url = failure.status?.requestURL, httpStatus, status } = failure;
+    const parts = [
+      httpStatus === undefined ? undefined : `HTTP ${httpStatus}`,
+      status === undefined
+        ? undefined
+        : `${status.statusCode} ${
+          status.subStatusCode ?? status.statusString ?? ""
+        }`.trimEnd(),
+    ].filter((part) => part !== undefined);
+    super(`ISAPI ${url ?? "request"} failed: ${parts.join(", ")}`);
     this.name = "IsapiError";
-    this.status = status;
-    if (httpStatus !== undefined) {
-      this.httpStatus = httpStatus;
-    }
+    Object.assign(
+      this,
+      url === undefined ? {} : { url },
+      httpStatus === undefined ? {} : { httpStatus },
+      status === undefined ? {} : {
+        statusCode: status.statusCode,
+        ...(status.subStatusCode === undefined
+          ? {}
+          : { subStatusCode: status.subStatusCode }),
+        ...(status.statusString === undefined
+          ? {}
+          : { statusString: status.statusString }),
+      },
+    );
   }
 }
 
@@ -175,7 +209,7 @@ export function parseIsapi(xml: string): XmlElement {
   if (root.name.local === "ResponseStatus") {
     const status = parseResponseStatus(root);
     if (!isOk(status)) {
-      throw new IsapiError(status);
+      throw new IsapiError({ status });
     }
   }
   return root;

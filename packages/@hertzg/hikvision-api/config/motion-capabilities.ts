@@ -135,7 +135,7 @@ export function motionDetectionCapabilitiesPath(
  *
  * @param xml The document text.
  * @returns What the channel allows.
- * @throws {IsapiError} When the document is a failing `<ResponseStatus>`.
+ * @throws {IsapiError} When the request fails: a status outside 2xx, or a failing `<ResponseStatus>` on any status.
  *
  * @example A camera that draws regions and rasterizes them into an 18 x 22 grid
  * ```ts
@@ -173,8 +173,7 @@ export function parseMotionDetectionCapabilities(
  * @param options Where the device is and how to log in.
  * @param target Which channel, and whether through an NVR's input proxy.
  * @returns What the channel allows.
- * @throws {HttpError} When the device answers with a status outside 2xx.
- * @throws {IsapiError} When the device answers a failing `<ResponseStatus>`.
+ * @throws {IsapiError} When the request fails: a status outside 2xx, or a failing `<ResponseStatus>` on any status.
  *
  * @example Read what channel 1 allows
  * ```ts

@@ -2,10 +2,9 @@
  * One authenticated HTTP request to an ISAPI path.
  *
  * Builds the URL from a base URL and a path, adds Basic authentication,
- * and turns a failure into an exception: an {@link IsapiError} when the
- * body is a `<ResponseStatus>` whatever the HTTP status, an
- * {@link HttpError} for any other non-2xx reply. `fetch` is an option so
- * a test can hand in a stub.
+ * and turns every failure into an {@link IsapiError}: a status outside 2xx,
+ * a failing `<ResponseStatus>` in the body, or both. `fetch` is an option
+ * so a test can hand in a stub.
  *
  * @example Read a document with a stubbed fetch
  * ```ts
@@ -46,25 +45,6 @@ export type RequestOptions = {
   fetch?: typeof globalThis.fetch;
 };
 
-/** A reply with a status outside 200-299 whose body is not a `<ResponseStatus>`. */
-export class HttpError extends Error {
-  /** The HTTP status code. */
-  readonly status: number;
-  /** The URL that was requested. */
-  readonly url: string;
-
-  /**
-   * @param status The HTTP status code.
-   * @param url The URL that was requested.
-   */
-  constructor(status: number, url: string) {
-    super(`ISAPI ${url} answered HTTP ${status}`);
-    this.name = "HttpError";
-    this.status = status;
-    this.url = url;
-  }
-}
-
 /**
  * The value of a Basic `Authorization` header.
  *
@@ -92,8 +72,7 @@ export function basicAuthorization(username: string, password: string): string {
  * @param path The ISAPI path, starting with `/`.
  * @param init Extra request options; `headers` and `signal` are passed through.
  * @returns The response.
- * @throws {IsapiError} When the status is not 2xx and the body is a `<ResponseStatus>`.
- * @throws {HttpError} When the status is not 2xx and the body is anything else.
+ * @throws {IsapiError} When the request fails: a status outside 2xx, or a failing `<ResponseStatus>` on any status.
  *
  * @example A 403 keeps the device's reason
  * ```ts
@@ -133,10 +112,7 @@ export async function request(
   const response = await fetch(url, { ...init, headers });
   if (!response.ok) {
     const status = findResponseStatus(await response.text());
-    if (status !== undefined) {
-      throw new IsapiError(status, response.status);
-    }
-    throw new HttpError(response.status, url);
+    throw new IsapiError({ url, httpStatus: response.status, status });
   }
   return response;
 }
@@ -148,8 +124,7 @@ export async function request(
  * @param path The ISAPI path, starting with `/`.
  * @param init Extra request options.
  * @returns The reply's root element.
- * @throws {IsapiError} When the body is a failing `<ResponseStatus>`, on any status.
- * @throws {HttpError} When the status is not 2xx and the body is not a `<ResponseStatus>`.
+ * @throws {IsapiError} When the request fails: a status outside 2xx, or a failing `<ResponseStatus>` on any status.
  *
  * @example Reach a document this package has no reader for
  * ```ts
@@ -183,8 +158,7 @@ export async function requestXml(
  * @param path The ISAPI path, starting with `/`.
  * @param codec The document description.
  * @returns The decoded document.
- * @throws {IsapiError} When the body is a failing `<ResponseStatus>`, on any status.
- * @throws {HttpError} When the status is not 2xx and the body is not a `<ResponseStatus>`.
+ * @throws {IsapiError} When the request fails: a status outside 2xx, or a failing `<ResponseStatus>` on any status.
  *
  * @example Read a document that is missing a required element
  * ```ts

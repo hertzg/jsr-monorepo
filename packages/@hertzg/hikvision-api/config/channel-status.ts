@@ -142,7 +142,7 @@ const channelStatusList = document({
  *
  * @param xml The document text.
  * @returns The channel statuses in document order.
- * @throws {IsapiError} When the document is a failing `<ResponseStatus>`.
+ * @throws {IsapiError} When the request fails: a status outside 2xx, or a failing `<ResponseStatus>` on any status.
  *
  * @example An offline channel without firmware extras
  * ```ts
@@ -171,9 +171,7 @@ export function parseInputProxyChannelStatus(
  *
  * @param options Where the NVR is and how to log in.
  * @returns The channel statuses in document order.
- * @throws {HttpError} When the device answers with a status outside 2xx.
- * @throws {IsapiError} When the device answers a failing `<ResponseStatus>`,
- *   as a camera does for this path.
+ * @throws {IsapiError} When the request fails: a status outside 2xx, or a failing `<ResponseStatus>` on any status.
  *
  * @example Read through a stubbed fetch
  * ```ts

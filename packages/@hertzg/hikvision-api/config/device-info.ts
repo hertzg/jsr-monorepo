@@ -79,7 +79,7 @@ const deviceInfo = document({
  * @param xml The document text.
  * @returns The device info; `model`, `firmwareVersion` and `deviceType` are
  *   always present.
- * @throws {IsapiError} When the document is a failing `<ResponseStatus>`.
+ * @throws {IsapiError} When the request fails: a status outside 2xx, or a failing `<ResponseStatus>` on any status.
  * @throws {Error} When a required field is missing.
  *
  * @example Optional fields are left out when absent
@@ -104,8 +104,7 @@ export function parseDeviceInfo(xml: string): DeviceInfo {
  *
  * @param options Where the device is and how to log in.
  * @returns The device info.
- * @throws {HttpError} When the device answers with a status outside 2xx.
- * @throws {IsapiError} When the device answers a failing `<ResponseStatus>`.
+ * @throws {IsapiError} When the request fails: a status outside 2xx, or a failing `<ResponseStatus>` on any status.
  *
  * @example Read through a stubbed fetch
  * ```ts

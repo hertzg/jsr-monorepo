@@ -21,12 +21,10 @@ Deno.test("parseIsapi throws IsapiError carrying the full status for notSupport"
 
   const error = assertThrows(() => parseIsapi(xml), IsapiError);
 
-  assertEquals(error.status, {
-    requestURL: "/ISAPI/Smart",
-    statusCode: 4,
-    statusString: "Invalid Operation",
-    subStatusCode: "notSupport",
-  });
+  assertEquals(
+    [error.url, error.statusCode, error.statusString, error.subStatusCode],
+    ["/ISAPI/Smart", 4, "Invalid Operation", "notSupport"],
+  );
 });
 
 Deno.test("parseIsapi accepts statusCode 0", () => {
@@ -89,30 +87,45 @@ Deno.test("findResponseStatus returns the status of a ResponseStatus", () => {
   });
 });
 
-Deno.test("IsapiError message names the url, code and reason, without httpStatus", () => {
+Deno.test("IsapiError message names the url, code and reason from the body alone", () => {
   const error = new IsapiError({
-    requestURL: "/ISAPI/Smart",
-    statusCode: 4,
-    subStatusCode: "notSupport",
+    status: {
+      requestURL: "/ISAPI/Smart",
+      statusCode: 4,
+      subStatusCode: "notSupport",
+    },
   });
 
   assertEquals(error.message, "ISAPI /ISAPI/Smart failed: 4 notSupport");
 });
 
-Deno.test("IsapiError message appends the httpStatus when given", () => {
-  const error = new IsapiError(
-    { requestURL: "/ISAPI/Smart", statusCode: 4, subStatusCode: "notSupport" },
-    403,
-  );
+Deno.test("IsapiError message names the HTTP status and the body when both are known", () => {
+  const error = new IsapiError({
+    url: "http://192.0.2.10/ISAPI/Smart",
+    httpStatus: 403,
+    status: { statusCode: 4, subStatusCode: "notSupport" },
+  });
 
   assertEquals(
     error.message,
-    "ISAPI /ISAPI/Smart failed: 4 notSupport (HTTP 403)",
+    "ISAPI http://192.0.2.10/ISAPI/Smart failed: HTTP 403, 4 notSupport",
+  );
+});
+
+Deno.test("IsapiError message names only the HTTP status when there was no body", () => {
+  const error = new IsapiError({
+    url: "http://192.0.2.10/ISAPI/System/time",
+    httpStatus: 401,
+  });
+
+  assertEquals(
+    error.message,
+    "ISAPI http://192.0.2.10/ISAPI/System/time failed: HTTP 401",
   );
 });
 
 Deno.test("IsapiError is an Error", () => {
-  const error = new IsapiError({ statusCode: 7 });
+  const error = new IsapiError({ status: { statusCode: 7 } });
 
   assertInstanceOf(error, Error);
 });

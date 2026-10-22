@@ -126,8 +126,7 @@ export function lineDetectionPath(channel = 1): string {
  *
  * @param xml The document text.
  * @returns The rule and its lines.
- * @throws {IsapiError} When the document is a failing `<ResponseStatus>`,
- *   as a device without line crossing detection answers.
+ * @throws {IsapiError} When the request fails: a status outside 2xx, or a failing `<ResponseStatus>` on any status.
  *
  * @example A device without the feature
  * ```ts
@@ -155,8 +154,7 @@ export function parseLineDetection(xml: string): LineDetection {
  * @param options Where the device is and how to log in.
  * @param channel The video channel. Defaults to `1`.
  * @returns The rule and its lines.
- * @throws {HttpError} When the device answers with a status outside 2xx.
- * @throws {IsapiError} When the device answers a failing `<ResponseStatus>`.
+ * @throws {IsapiError} When the request fails: a status outside 2xx, or a failing `<ResponseStatus>` on any status.
  *
  * @example Read through a stubbed fetch
  * ```ts

@@ -3,7 +3,6 @@ import { resolvesNext, spy } from "@std/testing/mock";
 import { document, text } from "./document.ts";
 import {
   basicAuthorization,
-  HttpError,
   readDocument,
   request,
   requestXml,
@@ -120,7 +119,7 @@ Deno.test("request turns a 403 ResponseStatus into IsapiError with the HTTP stat
   );
 
   assertEquals(
-    [error.status.subStatusCode, error.httpStatus],
+    [error.subStatusCode, error.httpStatus],
     ["notSupport", 403],
   );
 });
@@ -151,7 +150,7 @@ Deno.test("request turns a 400 badParameters ResponseStatus into IsapiError", as
   assertEquals(error.httpStatus, 400);
 });
 
-Deno.test("request turns a 401 with a non-XML body into HttpError with status and url", async () => {
+Deno.test("request turns a 401 with a non-XML body into IsapiError with the HTTP status and url", async () => {
   const fetch = spy(resolvesNext([
     new Response("Unauthorized", { status: 401 }),
   ]));
@@ -167,12 +166,12 @@ Deno.test("request turns a 401 with a non-XML body into HttpError with status an
         },
         "/ISAPI/System/time",
       ),
-    HttpError,
+    IsapiError,
   );
 
   assertEquals(
-    [error.status, error.url],
-    [401, "http://192.0.2.10/ISAPI/System/time"],
+    [error.httpStatus, error.statusCode, error.url],
+    [401, undefined, "http://192.0.2.10/ISAPI/System/time"],
   );
 });
 

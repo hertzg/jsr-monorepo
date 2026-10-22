@@ -103,7 +103,6 @@ import type { Alert } from "./events/alert.ts";
 import { openAlertStream } from "./events/stream.ts";
 import { request, type RequestOptions, requestXml } from "./isapi/request.ts";
 
-export { HttpError } from "./isapi/request.ts";
 export type { RequestOptions } from "./isapi/request.ts";
 export { IsapiError } from "./isapi/status.ts";
 export type { ResponseStatus } from "./isapi/status.ts";
@@ -175,16 +174,14 @@ export type Client = {
   /**
    * Sends any request with the client's credentials.
    *
-   * @throws {IsapiError} When the body is a failing `<ResponseStatus>`, on any status.
-   * @throws {HttpError} When the status is not 2xx and the body is anything else.
+   * @throws {IsapiError} When the request fails: a status outside 2xx, or a failing `<ResponseStatus>` on any status.
    */
   request: (path: string, init?: RequestInit) => Promise<Response>;
   /**
    * Sends any request and parses the reply as an ISAPI document, for paths
    * this package has no reader for.
    *
-   * @throws {IsapiError} When the body is a failing `<ResponseStatus>`, on any status.
-   * @throws {HttpError} When the status is not 2xx and the body is anything else.
+   * @throws {IsapiError} When the request fails: a status outside 2xx, or a failing `<ResponseStatus>` on any status.
    */
   xml: (path: string, init?: RequestInit) => Promise<XmlElement>;
   /** Reads `/ISAPI/System/deviceInfo`. */
@@ -211,8 +208,7 @@ export type Client = {
    * Opens the alert stream. The stream ends when the device closes the
    * connection or `signal` aborts; it never reconnects.
    *
-   * @throws {IsapiError} When the device answers a failing `<ResponseStatus>`.
-   * @throws {HttpError} When the status is not 2xx and the body is anything else.
+   * @throws {IsapiError} When the request fails: a status outside 2xx, or a failing `<ResponseStatus>` on any status.
    */
   subscribe: (options?: SubscribeOptions) => Promise<ReadableStream<Alert>>;
 };

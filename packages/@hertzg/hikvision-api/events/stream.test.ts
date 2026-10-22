@@ -1,6 +1,5 @@
 import { assertEquals, assertRejects } from "@std/assert";
 import { assertSpyCalls, resolvesNext, spy } from "@std/testing/mock";
-import { HttpError } from "../isapi/request.ts";
 import { IsapiError } from "../isapi/status.ts";
 import { openAlertStream } from "./stream.ts";
 
@@ -129,10 +128,15 @@ Deno.test("openAlertStream closes cleanly when the signal aborts", async () => {
   assertEquals(await reading, []);
 });
 
-Deno.test("openAlertStream throws HttpError on 401", async () => {
+Deno.test("openAlertStream throws IsapiError with the HTTP status on 401", async () => {
   const fetch = spy(resolvesNext([new Response("", { status: 401 })]));
 
-  await assertRejects(() => openAlertStream({ ...OPTIONS, fetch }), HttpError);
+  const error = await assertRejects(
+    () => openAlertStream({ ...OPTIONS, fetch }),
+    IsapiError,
+  );
+
+  assertEquals(error.httpStatus, 401);
 });
 
 Deno.test("openAlertStream throws IsapiError when the device answers a ResponseStatus", async () => {

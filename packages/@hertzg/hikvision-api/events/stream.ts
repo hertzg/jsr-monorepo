@@ -75,8 +75,7 @@ export type AlertStreamOptions = RequestOptions & {
  *
  * @param options Where the device is, how to log in, and the signal that ends the stream.
  * @returns A stream of alerts in the order the device posted them.
- * @throws {HttpError} When the device answers with a status outside 2xx, such as 401.
- * @throws {IsapiError} When the device answers 200 with a failing `<ResponseStatus>`.
+ * @throws {IsapiError} When the request fails: a status outside 2xx, or a failing `<ResponseStatus>` on any status.
  * @throws {Error} When the reply is neither multipart nor a `<ResponseStatus>`.
  *
  * @example Read a canned stream through a stubbed fetch
