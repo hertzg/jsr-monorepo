@@ -11,7 +11,7 @@
  */
 
 import process from "node:process";
-import { createClient } from "./mod.ts";
+import { alertStream, deviceInfo, request, stream } from "./mod.ts";
 
 const host = process.env.HIK_HOST ?? "192.0.2.10";
 const username = process.env.HIK_USER ?? "";
@@ -29,11 +29,11 @@ const MOTION_OFF_AFTER_MS = 3000;
 const startedAt = Date.now();
 const stamp = () => `+${((Date.now() - startedAt) / 1000).toFixed(1)}s`;
 
-const client = createClient({ baseUrl: `http://${host}`, username, password });
-const info = await client.deviceInfo();
+const device = { baseUrl: `http://${host}`, username, password };
+const info = await request(device, deviceInfo);
 console.log(stamp(), info.deviceType, info.model, info.firmwareVersion);
 
-const alerts = await client.subscribe({
+const alerts = await stream(device, alertStream, {
   signal: AbortSignal.timeout(seconds * 1000),
 });
 console.log(stamp(), "subscribed");

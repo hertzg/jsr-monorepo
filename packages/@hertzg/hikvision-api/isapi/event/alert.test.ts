@@ -1,5 +1,5 @@
 import { assertEquals, assertThrows } from "@std/assert";
-import { parseAlert } from "./alert.ts";
+import { alertStream, parseAlert } from "./alert.ts";
 
 Deno.test("parseAlert reads an NVR motion alert, channel from dynChannelID", () => {
   const xml =
@@ -176,4 +176,15 @@ Deno.test("parseAlert throws when there is no eventType", () => {
     Error,
     "<eventType>",
   );
+});
+
+Deno.test("alertStream stamps each alert with the time it was decoded", () => {
+  const before = Date.now();
+
+  const alert = alertStream.codec.parse(
+    "<EventNotificationAlert><eventType>VMD</eventType></EventNotificationAlert>",
+  );
+
+  const at = Date.parse(alert.at);
+  assertEquals(at >= before && at <= Date.now(), true);
 });

@@ -1,6 +1,6 @@
 # ADR 0002 - The stream ends when the device or the signal says so; nothing else is inferred
 
-`openAlertStream` sends one request and yields alerts until the device
+`stream(device, alertStream)` sends one request and yields alerts until the device
 closes the connection or the caller's `AbortSignal` fires. It does not
 reconnect, keeps no timers, and does not decide that motion has stopped.
 On abort it ends by cancelling its own reader; it does not rely on the

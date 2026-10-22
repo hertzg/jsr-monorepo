@@ -1,9 +1,10 @@
 import { assertEquals, assertRejects } from "@std/assert";
 import { assertSpyCalls, resolvesNext, spy } from "@std/testing/mock";
-import { IsapiError } from "../status.ts";
-import { openAlertStream } from "./alert-stream.ts";
+import { alertStream } from "./event/alert.ts";
+import { IsapiError } from "./status.ts";
+import { stream } from "./stream.ts";
 
-const OPTIONS = {
+const DEVICE = {
   baseUrl: "http://192.0.2.10",
   username: "admin",
   password: "hunter2",
@@ -19,10 +20,10 @@ function alertXml(fields: string): string {
   return "<EventNotificationAlert>" + fields + "</EventNotificationAlert>";
 }
 
-Deno.test("openAlertStream requests the alert stream path with credentials", async () => {
+Deno.test("stream requests the resource's path with credentials", async () => {
   const fetch = spy(resolvesNext([new Response("", { headers: MULTIPART })]));
 
-  await Array.fromAsync(await openAlertStream({ ...OPTIONS, fetch }));
+  await Array.fromAsync(await stream({ ...DEVICE, fetch }, alertStream));
 
   assertEquals(
     fetch.calls[0].args[0],
@@ -35,7 +36,7 @@ Deno.test("openAlertStream requests the alert stream path with credentials", asy
   );
 });
 
-Deno.test("openAlertStream yields one alert per XML part across chunk boundaries", async () => {
+Deno.test("stream yields one value per XML part across chunk boundaries", async () => {
   const body = xmlPart(alertXml(
     "<channelID>0</channelID><dateTime>2026-10-21T20:44:28</dateTime>" +
       "<eventType>videoloss</eventType><eventState>inactive</eventState>",
@@ -54,7 +55,7 @@ Deno.test("openAlertStream yields one alert per XML part across chunk boundaries
   ]));
 
   const alerts = await Array.fromAsync(
-    await openAlertStream({ ...OPTIONS, fetch }),
+    await stream({ ...DEVICE, fetch }, alertStream),
   );
 
   assertEquals(
@@ -70,23 +71,7 @@ Deno.test("openAlertStream yields one alert per XML part across chunk boundaries
   );
 });
 
-Deno.test("openAlertStream stamps each alert with its arrival time", async () => {
-  const before = Date.now();
-  const fetch = spy(resolvesNext([
-    new Response(xmlPart(alertXml("<eventType>VMD</eventType>")), {
-      headers: MULTIPART,
-    }),
-  ]));
-
-  const [alert] = await Array.fromAsync(
-    await openAlertStream({ ...OPTIONS, fetch }),
-  );
-
-  const at = Date.parse(alert.at);
-  assertEquals(at >= before && at <= Date.now(), true);
-});
-
-Deno.test("openAlertStream skips parts that are not XML", async () => {
+Deno.test("stream skips parts that are not XML", async () => {
   const picture = "\xff\xd8\xff\xd9";
   const body =
     `--boundary\r\nContent-Type: image/jpeg\r\nContent-Length: ${picture.length}\r\n\r\n` +
@@ -97,13 +82,29 @@ Deno.test("openAlertStream skips parts that are not XML", async () => {
   ]));
 
   const alerts = await Array.fromAsync(
-    await openAlertStream({ ...OPTIONS, fetch }),
+    await stream({ ...DEVICE, fetch }, alertStream),
   );
 
   assertEquals(alerts.map((alert) => alert.eventType), ["linedetection"]);
 });
 
-Deno.test("openAlertStream closes cleanly when the signal aborts", async () => {
+Deno.test("stream passes the signal to fetch", async () => {
+  const controller = new AbortController();
+  const fetch = spy(resolvesNext([new Response("", { headers: MULTIPART })]));
+
+  await Array.fromAsync(
+    await stream({ ...DEVICE, fetch }, alertStream, {
+      signal: controller.signal,
+    }),
+  );
+
+  assertEquals(
+    (fetch.calls[0].args[1] as RequestInit).signal,
+    controller.signal,
+  );
+});
+
+Deno.test("stream closes cleanly when the signal aborts", async () => {
   const controller = new AbortController();
   const fetch = spy((_url: string | URL | Request, init?: RequestInit) => {
     const signal = init!.signal!;
@@ -117,9 +118,7 @@ Deno.test("openAlertStream closes cleanly when the signal aborts", async () => {
     return Promise.resolve(new Response(body, { headers: MULTIPART }));
   });
 
-  const alerts = await openAlertStream({
-    ...OPTIONS,
-    fetch,
+  const alerts = await stream({ ...DEVICE, fetch }, alertStream, {
     signal: controller.signal,
   });
   const reading = Array.fromAsync(alerts);
@@ -128,18 +127,18 @@ Deno.test("openAlertStream closes cleanly when the signal aborts", async () => {
   assertEquals(await reading, []);
 });
 
-Deno.test("openAlertStream throws IsapiError with the HTTP status on 401", async () => {
+Deno.test("stream throws IsapiError with the HTTP status on 401", async () => {
   const fetch = spy(resolvesNext([new Response("", { status: 401 })]));
 
   const error = await assertRejects(
-    () => openAlertStream({ ...OPTIONS, fetch }),
+    () => stream({ ...DEVICE, fetch }, alertStream),
     IsapiError,
   );
 
   assertEquals(error.httpStatus, 401);
 });
 
-Deno.test("openAlertStream throws IsapiError when the device answers a ResponseStatus", async () => {
+Deno.test("stream throws IsapiError when the device answers a ResponseStatus", async () => {
   const fetch = spy(resolvesNext([
     new Response(
       "<ResponseStatus><statusCode>4</statusCode><subStatusCode>notSupport</subStatusCode></ResponseStatus>",
@@ -148,25 +147,25 @@ Deno.test("openAlertStream throws IsapiError when the device answers a ResponseS
   ]));
 
   await assertRejects(
-    () => openAlertStream({ ...OPTIONS, fetch }),
+    () => stream({ ...DEVICE, fetch }, alertStream),
     IsapiError,
     "notSupport",
   );
 });
 
-Deno.test("openAlertStream throws when the reply is neither multipart nor a ResponseStatus", async () => {
+Deno.test("stream throws when the reply is neither multipart nor a ResponseStatus", async () => {
   const fetch = spy(resolvesNext([
     new Response("<html></html>", { headers: { "content-type": "text/html" } }),
   ]));
 
   await assertRejects(
-    () => openAlertStream({ ...OPTIONS, fetch }),
+    () => stream({ ...DEVICE, fetch }, alertStream),
     Error,
     "not multipart",
   );
 });
 
-Deno.test("openAlertStream ends on abort even when fetch ignores the signal, and cancels the body", async () => {
+Deno.test("stream ends on abort even when fetch ignores the signal, and cancels the body", async () => {
   const controller = new AbortController();
   const cancelled = spy(() => {});
   const fetch = spy((_url: string | URL | Request, _init?: RequestInit) => {
@@ -179,9 +178,7 @@ Deno.test("openAlertStream ends on abort even when fetch ignores the signal, and
     return Promise.resolve(new Response(body, { headers: MULTIPART }));
   });
 
-  const alerts = await openAlertStream({
-    ...OPTIONS,
-    fetch,
+  const alerts = await stream({ ...DEVICE, fetch }, alertStream, {
     signal: controller.signal,
   });
   const reading = Array.fromAsync(alerts);

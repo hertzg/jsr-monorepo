@@ -1,7 +1,7 @@
 import { assertEquals, assertRejects, assertThrows } from "@std/assert";
 import { resolvesNext, spy } from "@std/testing/mock";
 import { IsapiError } from "../status.ts";
-import { read } from "../request.ts";
+import { request } from "../request.ts";
 import { inputProxyChannelStatus } from "./input-proxy-channel-status.ts";
 
 Deno.test("inputProxyChannelStatus.codec.parse reads every field of an NVR document", () => {
@@ -109,12 +109,12 @@ Deno.test("inputProxyChannelStatus.codec.parse throws when online is missing", (
   );
 });
 
-Deno.test("read(inputProxyChannelStatus) requests the channel status path", async () => {
+Deno.test("request(inputProxyChannelStatus) requests the channel status path", async () => {
   const fetch = spy(resolvesNext([
     new Response("<InputProxyChannelStatusList/>"),
   ]));
 
-  await read({
+  await request({
     baseUrl: "http://192.0.2.10",
     username: "admin",
     password: "hunter2",
@@ -127,7 +127,7 @@ Deno.test("read(inputProxyChannelStatus) requests the channel status path", asyn
   );
 });
 
-Deno.test("read(inputProxyChannelStatus) surfaces a camera's ResponseStatus as IsapiError", async () => {
+Deno.test("request(inputProxyChannelStatus) surfaces a camera's ResponseStatus as IsapiError", async () => {
   const fetch = spy(resolvesNext([
     new Response(
       "<ResponseStatus><statusCode>4</statusCode><subStatusCode>notSupport</subStatusCode></ResponseStatus>",
@@ -136,7 +136,7 @@ Deno.test("read(inputProxyChannelStatus) surfaces a camera's ResponseStatus as I
 
   await assertRejects(
     () =>
-      read({
+      request({
         baseUrl: "http://192.0.2.21",
         username: "admin",
         password: "hunter2",

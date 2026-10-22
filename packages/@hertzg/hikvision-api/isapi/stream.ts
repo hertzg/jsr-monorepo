@@ -1,22 +1,16 @@
 /**
- * The alert stream of one device as a `ReadableStream` of {@link Alert}s.
+ * A streamed ISAPI resource as a `ReadableStream` of decoded documents.
  *
- * `GET /ISAPI/Event/notification/alertStream` answers
- * `200 multipart/mixed;boundary=boundary` and keeps the connection open,
- * posting one XML part per alert. {@link openAlertStream} sends that request,
- * splits the body into parts and parses every XML part into an
- * {@link Alert}. Parts that are not XML are skipped: with picture upload on,
- * a smart event's XML part is followed by an image part, `image/jpeg` or
+ * Some paths answer `200 multipart/mixed` and keep the connection open,
+ * posting one part per event. {@link stream} sends that request, splits
+ * the body into parts and decodes every XML part with the resource's
+ * codec. Parts that are not XML are skipped: with picture upload on, a
+ * smart event's XML part is followed by an image part, `image/jpeg` or
  * `image/pjpeg`.
  *
  * ```
- * fetch alertStream ─> body bytes ─> parts ─> XML parts ─> Alert
+ * request ─> body bytes ─> parts ─> XML parts ─> codec ─> T, T, …
  * ```
- *
- * The heartbeat, `videoloss inactive` about every 10 s, comes through as an
- * alert like any other. An NVR holds it back while alerts flow; a camera
- * does not. A liveness check should therefore count every alert, not only
- * heartbeats.
  *
  * The stream ends when the device closes the connection or the `signal`
  * aborts; aborting closes it cleanly rather than erroring it. It ends on
@@ -27,19 +21,14 @@
  *
  * @example Print motion alerts until Ctrl-C
  * ```ts ignore
- * import { openAlertStream } from "./alert-stream.ts";
+ * import { alertStream } from "./event/alert.ts";
+ * import { stream } from "./stream.ts";
  *
  * const controller = new AbortController();
  * process.on("SIGINT", () => controller.abort());
+ * const nvr = { baseUrl: "http://192.0.2.10", username: "admin", password: "hunter2" };
  *
- * const alerts = await openAlertStream({
- *   baseUrl: "http://192.0.2.10",
- *   username: "admin",
- *   password: "hunter2",
- *   signal: controller.signal,
- * });
- *
- * for await (const alert of alerts) {
+ * for await (const alert of await stream(nvr, alertStream, { signal: controller.signal })) {
  *   if (alert.eventType === "VMD") {
  *     console.log(alert.at, `channel ${alert.channel} motion`);
  *   }
@@ -49,28 +38,32 @@
  * @module
  */
 
-import { createPartsStream, parseBoundary, type Part } from "./multipart.ts";
-import { request, type RequestOptions } from "../request.ts";
-import { parseIsapi } from "../status.ts";
-import { type Alert, parseAlert } from "./alert.ts";
+import {
+  createPartsStream,
+  parseBoundary,
+  type Part,
+} from "../http/multipart.ts";
+import { type Device, resolveUrl, send } from "../http/request.ts";
+import type { Resource } from "./request.ts";
+import { findResponseStatus, IsapiError, parseIsapi } from "./status.ts";
 
-/** The alert stream path. */
-export const ALERT_STREAM_PATH = "/ISAPI/Event/notification/alertStream";
-
-/** Options for {@link openAlertStream}. */
-export type AlertStreamOptions = RequestOptions & {
+/** Options for {@link stream}. */
+export type StreamOptions = {
   /** Aborting it ends the stream. */
   signal?: AbortSignal;
 };
 
 /**
- * Opens the device's alert stream.
+ * Opens a streamed resource.
  *
  * Resolves once the device has answered the request, so a wrong password
  * or an unsupported device fails here, not on the first read.
  *
- * @param options Where the device is, how to log in, and the signal that ends the stream.
- * @returns A stream of alerts in the order the device posted them.
+ * @template T The decoded value of one part.
+ * @param device Where the device is and how to log in.
+ * @param resource What to stream and how to decode each part.
+ * @param options The signal that ends the stream.
+ * @returns A stream of decoded parts in the order the device posted them.
  * @throws {IsapiError} When the request fails: a status outside 2xx, or a failing `<ResponseStatus>` on any status.
  * @throws {Error} When the reply is neither multipart nor a `<ResponseStatus>`.
  *
@@ -78,7 +71,8 @@ export type AlertStreamOptions = RequestOptions & {
  * ```ts
  * import { assertEquals } from "@std/assert";
  * import { resolvesNext, spy } from "@std/testing/mock";
- * import { openAlertStream } from "./alert-stream.ts";
+ * import { alertStream } from "./event/alert.ts";
+ * import { stream } from "./stream.ts";
  *
  * const xml = "<EventNotificationAlert><dynChannelID>3</dynChannelID>" +
  *   "<dateTime>2026-10-21T20:44:39</dateTime><eventType>VMD</eventType>" +
@@ -89,46 +83,46 @@ export type AlertStreamOptions = RequestOptions & {
  *   new Response(body, { headers: { "content-type": "multipart/mixed;boundary=boundary" } }),
  * ]));
  *
- * const alerts = await openAlertStream({
- *   baseUrl: "http://192.0.2.10",
- *   username: "admin",
- *   password: "hunter2",
- *   fetch,
- * });
+ * const alerts = await stream(
+ *   { baseUrl: "http://192.0.2.10", username: "admin", password: "hunter2", fetch },
+ *   alertStream,
+ * );
  * const [alert] = await Array.fromAsync(alerts);
  *
  * assertEquals(alert.channel, 3);
  * assertEquals(alert.eventType, "VMD");
  * ```
  */
-export async function openAlertStream(
-  options: AlertStreamOptions,
-): Promise<ReadableStream<Alert>> {
-  const { signal, ...requestOptions } = options;
-  const response = await request(requestOptions, ALERT_STREAM_PATH, {
-    signal,
-  });
+export async function stream<T>(
+  device: Device,
+  resource: Resource<T>,
+  options: StreamOptions = {},
+): Promise<ReadableStream<T>> {
+  const { signal } = options;
+  const response = await send(device, resource.path, { signal });
+  if (!response.ok) {
+    throw new IsapiError({
+      url: resolveUrl(device, resource.path),
+      httpStatus: response.status,
+      status: findResponseStatus(await response.text()),
+    });
+  }
   const contentType = response.headers.get("content-type");
   const boundary = parseBoundary(contentType);
   if (boundary === undefined || response.body === null) {
-    const body = await response.text();
-    parseIsapi(body);
+    parseIsapi(await response.text());
     throw new Error(
-      `ISAPI ${ALERT_STREAM_PATH} answered ${contentType}, not multipart`,
+      `ISAPI ${resource.path} answered ${contentType}, not multipart`,
     );
   }
   const decoder = new TextDecoder();
   const reader = response.body
     .pipeThrough(createPartsStream(boundary))
     .pipeThrough(
-      new TransformStream<Part, Alert>({
+      new TransformStream<Part, T>({
         transform(part, controller) {
-          if (!isXml(part)) {
-            return;
-          }
-          const xml = decoder.decode(part.body);
-          if (xml.includes("<EventNotificationAlert")) {
-            controller.enqueue(parseAlert(xml, new Date().toISOString()));
+          if (isXml(part)) {
+            controller.enqueue(resource.codec.parse(decoder.decode(part.body)));
           }
         },
       }),
@@ -141,7 +135,7 @@ export async function openAlertStream(
   signal?.addEventListener("abort", () => {
     reader.cancel(signal.reason).catch(() => {});
   }, { once: true });
-  return new ReadableStream<Alert>({
+  return new ReadableStream<T>({
     async pull(controller) {
       try {
         const { done, value } = await reader.read();

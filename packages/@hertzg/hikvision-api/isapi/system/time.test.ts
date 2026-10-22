@@ -1,6 +1,6 @@
 import { assertEquals, assertThrows } from "@std/assert";
 import { resolvesNext, spy } from "@std/testing/mock";
-import { read } from "../request.ts";
+import { request } from "../request.ts";
 import { deviceTime, parseTimeZoneOffset } from "./time.ts";
 
 Deno.test("deviceTime.codec.parse reads an NTP-synced device document", () => {
@@ -89,7 +89,7 @@ Deno.test("parseTimeZoneOffset returns undefined when there is no offset", () =>
   assertEquals(parseTimeZoneOffset("-4:00:00"), undefined);
 });
 
-Deno.test("read(deviceTime) requests the time path", async () => {
+Deno.test("request(deviceTime) requests the time path", async () => {
   const fetch = spy(resolvesNext([
     new Response(
       "<Time><timeMode>NTP</timeMode><localTime>2026-10-22T11:33:52+04:00</localTime>" +
@@ -97,7 +97,7 @@ Deno.test("read(deviceTime) requests the time path", async () => {
     ),
   ]));
 
-  const time = await read({
+  const time = await request({
     baseUrl: "http://192.0.2.21",
     username: "admin",
     password: "hunter2",

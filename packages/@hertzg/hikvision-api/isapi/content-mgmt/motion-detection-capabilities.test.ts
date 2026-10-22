@@ -1,6 +1,6 @@
 import { assertEquals } from "@std/assert";
 import { resolvesNext, spy } from "@std/testing/mock";
-import { read } from "../request.ts";
+import { request } from "../request.ts";
 import { motionDetectionCapabilities } from "./motion-detection-capabilities.ts";
 
 Deno.test("motionDetectionCapabilities path appends /capabilities to both paths", () => {
@@ -70,7 +70,7 @@ Deno.test("motionDetectionCapabilities codec finds sensitivity and targets at th
   });
 });
 
-Deno.test("read(motionDetectionCapabilities) requests the proxy capabilities path", async () => {
+Deno.test("request(motionDetectionCapabilities) requests the proxy capabilities path", async () => {
   const fetch = spy(resolvesNext([
     new Response(
       '<MotionDetection><regionType opt="grid,region">grid</regionType>' +
@@ -79,7 +79,7 @@ Deno.test("read(motionDetectionCapabilities) requests the proxy capabilities pat
     ),
   ]));
 
-  const capabilities = await read(
+  const capabilities = await request(
     {
       baseUrl: "http://192.0.2.10",
       username: "admin",

@@ -112,7 +112,7 @@ export type LineDetection = {
  * ```ts
  * import { assertEquals } from "@std/assert";
  * import { resolvesNext, spy } from "@std/testing/mock";
- * import { read } from "../request.ts";
+ * import { request } from "../request.ts";
  * import { lineDetection } from "./line-detection.ts";
  *
  * assertEquals(lineDetection().path, "/ISAPI/Smart/LineDetection/1");
@@ -121,7 +121,7 @@ export type LineDetection = {
  *   new Response("<LineDetection><id>2</id><enabled>true</enabled></LineDetection>"),
  * ]));
  *
- * const line = await read({
+ * const line = await request({
  *   baseUrl: "http://192.0.2.21",
  *   username: "admin",
  *   password: "hunter2",

@@ -191,7 +191,7 @@ const codec = motionDetectionWire.map(toMotionDetection);
  * ```ts
  * import { assertEquals } from "@std/assert";
  * import { resolvesNext, spy } from "@std/testing/mock";
- * import { read } from "../request.ts";
+ * import { request } from "../request.ts";
  * import { motionDetection } from "./motion-detection.ts";
  *
  * const fetch = spy(resolvesNext([
@@ -203,7 +203,7 @@ const codec = motionDetectionWire.map(toMotionDetection);
  *   ),
  * ]));
  *
- * const motion = await read(
+ * const motion = await request(
  *   { baseUrl: "http://192.0.2.10", username: "admin", password: "hunter2", fetch },
  *   motionDetection({ channel: 2, proxy: true }),
  * );

@@ -1,6 +1,6 @@
 import { assertEquals } from "@std/assert";
 import { resolvesNext, spy } from "@std/testing/mock";
-import { read } from "../request.ts";
+import { request } from "../request.ts";
 import { inputProxyChannels } from "./input-proxy-channels.ts";
 
 Deno.test("inputProxyChannels.codec.parse reads every channel with its source", () => {
@@ -56,10 +56,10 @@ Deno.test("inputProxyChannels.codec.parse returns an empty list for an empty doc
   assertEquals(inputProxyChannels.codec.parse("<InputProxyChannelList/>"), []);
 });
 
-Deno.test("read(inputProxyChannels) requests the channel list path", async () => {
+Deno.test("request(inputProxyChannels) requests the channel list path", async () => {
   const fetch = spy(resolvesNext([new Response("<InputProxyChannelList/>")]));
 
-  await read({
+  await request({
     baseUrl: "http://192.0.2.10",
     username: "admin",
     password: "hunter2",

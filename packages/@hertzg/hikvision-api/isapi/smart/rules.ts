@@ -346,14 +346,14 @@ export function toRule<F extends Decoded<typeof ruleFields>>(
  * ```ts
  * import { assertEquals } from "@std/assert";
  * import { resolvesNext, spy } from "@std/testing/mock";
- * import { read } from "../request.ts";
+ * import { request } from "../request.ts";
  * import { smartRules } from "./rules.ts";
  *
  * const fetch = spy(resolvesNext([
  *   new Response("<Loitering><id>4</id><enabled>false</enabled></Loitering>"),
  * ]));
  *
- * const rules = await read({
+ * const rules = await request({
  *   baseUrl: "http://192.0.2.10",
  *   username: "admin",
  *   password: "hunter2",

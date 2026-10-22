@@ -1,7 +1,7 @@
 import { assertEquals, assertThrows } from "@std/assert";
 import { resolvesNext, spy } from "@std/testing/mock";
 import { IsapiError } from "../status.ts";
-import { read } from "../request.ts";
+import { request } from "../request.ts";
 import { fieldDetection, SMART_RULE_TYPES, smartRules } from "./rules.ts";
 
 Deno.test("fieldDetection reads the channel, screen size and every region", () => {
@@ -268,12 +268,12 @@ Deno.test("read requests smartRules and fieldDetection resources for the channel
     fetch,
   };
 
-  const parking = await read(
+  const parking = await request(
     options,
     smartRules({ type: "parking", channel: 4 }),
   );
-  const loitering = await read(options, smartRules({ type: "loitering" }));
-  const field = await read(options, fieldDetection({ channel: 2 }));
+  const loitering = await request(options, smartRules({ type: "loitering" }));
+  const field = await request(options, fieldDetection({ channel: 2 }));
 
   assertEquals(parking.type, "Parking");
   assertEquals(parking.channel, 4);

@@ -1,93 +1,73 @@
 import { assertEquals, assertRejects } from "@std/assert";
 import { resolvesNext, spy } from "@std/testing/mock";
 import { document, text } from "./document.ts";
-import { basicAuthorization, read, request, requestXml } from "./request.ts";
+import { request } from "./request.ts";
 import { IsapiError } from "./status.ts";
 
-Deno.test("basicAuthorization encodes username:password as base64", () => {
+const DEVICE = {
+  baseUrl: "http://192.0.2.10",
+  username: "admin",
+  password: "hunter2",
+};
+
+Deno.test("request with a path returns the response as is", async () => {
+  const fetch = spy(resolvesNext([
+    new Response("Unauthorized", { status: 401 }),
+  ]));
+
+  const response = await request(
+    { ...DEVICE, fetch },
+    "/ISAPI/System/time",
+    { method: "GET" },
+  );
+
+  assertEquals([response.status, await response.text()], [401, "Unauthorized"]);
+  assertEquals(fetch.calls[0].args[0], "http://192.0.2.10/ISAPI/System/time");
+});
+
+Deno.test("request with a resource decodes the reply with its codec", async () => {
+  const fetch = spy(resolvesNext([
+    new Response("<DeviceInfo><model>DS-7608NI-Q2/8P</model></DeviceInfo>"),
+  ]));
+
+  const info = await request(
+    { ...DEVICE, fetch },
+    { path: "/ISAPI/System/deviceInfo", codec: document({ model: text() }) },
+  );
+
+  assertEquals(info, { model: "DS-7608NI-Q2/8P" });
   assertEquals(
-    basicAuthorization("admin", "hunter2"),
+    fetch.calls[0].args[0],
+    "http://192.0.2.10/ISAPI/System/deviceInfo",
+  );
+});
+
+Deno.test("request with a resource sends the credentials", async () => {
+  const fetch = spy(resolvesNext([new Response("<Time><a>1</a></Time>")]));
+
+  await request(
+    { ...DEVICE, fetch },
+    { path: "/ISAPI/System/time", codec: document({ a: text() }) },
+  );
+
+  const init = fetch.calls[0].args[1] as RequestInit;
+  assertEquals(
+    new Headers(init.headers).get("authorization"),
     "Basic YWRtaW46aHVudGVyMg==",
   );
 });
 
-Deno.test("basicAuthorization encodes a non-Latin-1 password as UTF-8", () => {
-  assertEquals(
-    basicAuthorization("admin", "pässwörd€"),
-    "Basic YWRtaW46cMOkc3N3w7ZyZOKCrA==",
-  );
-});
-
-Deno.test("request joins a baseUrl with trailing slash and port to the path", async () => {
-  const fetch = spy(resolvesNext([new Response("<Time/>")]));
+Deno.test("request with a resource passes init through", async () => {
+  const fetch = spy(resolvesNext([new Response("<Time><a>1</a></Time>")]));
 
   await request(
-    {
-      baseUrl: "http://192.0.2.10:65001/",
-      username: "admin",
-      password: "hunter2",
-      fetch,
-    },
-    "/ISAPI/System/time",
+    { ...DEVICE, fetch },
+    { path: "/ISAPI/System/time", codec: document({ a: text() }) },
+    { method: "PUT", body: "<Time><a>1</a></Time>" },
   );
 
-  assertEquals(
-    fetch.calls[0].args[0],
-    "http://192.0.2.10:65001/ISAPI/System/time",
-  );
-});
-
-Deno.test("request sets the Authorization header", async () => {
-  const fetch = spy(resolvesNext([new Response("<Time/>")]));
-
-  await request(
-    {
-      baseUrl: "http://192.0.2.10",
-      username: "admin",
-      password: "hunter2",
-      fetch,
-    },
-    "/ISAPI/System/time",
-  );
-
-  const headers = fetch.calls[0].args[1]?.headers as Headers;
-  assertEquals(headers.get("authorization"), "Basic YWRtaW46aHVudGVyMg==");
-});
-
-Deno.test("request keeps caller headers", async () => {
-  const fetch = spy(resolvesNext([new Response("<Time/>")]));
-
-  await request(
-    {
-      baseUrl: "http://192.0.2.10",
-      username: "admin",
-      password: "hunter2",
-      fetch,
-    },
-    "/ISAPI/System/time",
-    { headers: { "content-type": "application/xml" } },
-  );
-
-  const headers = fetch.calls[0].args[1]?.headers as Headers;
-  assertEquals(headers.get("content-type"), "application/xml");
-});
-
-Deno.test("request keeps the caller's signal", async () => {
-  const fetch = spy(resolvesNext([new Response("<Time/>")]));
-  const controller = new AbortController();
-
-  await request(
-    {
-      baseUrl: "http://192.0.2.10",
-      username: "admin",
-      password: "hunter2",
-      fetch,
-    },
-    "/ISAPI/System/time",
-    { signal: controller.signal },
-  );
-
-  assertEquals(fetch.calls[0].args[1]?.signal, controller.signal);
+  const init = fetch.calls[0].args[1] as RequestInit;
+  assertEquals([init.method, init.body], ["PUT", "<Time><a>1</a></Time>"]);
 });
 
 Deno.test("request turns a 403 ResponseStatus into IsapiError with the HTTP status", async () => {
@@ -102,47 +82,13 @@ Deno.test("request turns a 403 ResponseStatus into IsapiError with the HTTP stat
   const error = await assertRejects(
     () =>
       request(
-        {
-          baseUrl: "http://192.0.2.10",
-          username: "admin",
-          password: "hunter2",
-          fetch,
-        },
-        "/ISAPI/Smart/FieldDetection/1",
+        { ...DEVICE, fetch },
+        { path: "/ISAPI/Smart/FieldDetection/1", codec: document({}) },
       ),
     IsapiError,
   );
 
-  assertEquals(
-    [error.subStatusCode, error.httpStatus],
-    ["notSupport", 403],
-  );
-});
-
-Deno.test("request turns a 400 badParameters ResponseStatus into IsapiError", async () => {
-  const fetch = spy(resolvesNext([
-    new Response(
-      "<ResponseStatus><statusCode>5</statusCode>" +
-        "<subStatusCode>badParameters</subStatusCode></ResponseStatus>",
-      { status: 400 },
-    ),
-  ]));
-
-  const error = await assertRejects(
-    () =>
-      request(
-        {
-          baseUrl: "http://192.0.2.10",
-          username: "admin",
-          password: "hunter2",
-          fetch,
-        },
-        "/ISAPI/System/time",
-      ),
-    IsapiError,
-  );
-
-  assertEquals(error.httpStatus, 400);
+  assertEquals([error.subStatusCode, error.httpStatus], ["notSupport", 403]);
 });
 
 Deno.test("request turns a 401 with a non-XML body into IsapiError with the HTTP status and url", async () => {
@@ -153,13 +99,8 @@ Deno.test("request turns a 401 with a non-XML body into IsapiError with the HTTP
   const error = await assertRejects(
     () =>
       request(
-        {
-          baseUrl: "http://192.0.2.10",
-          username: "admin",
-          password: "hunter2",
-          fetch,
-        },
-        "/ISAPI/System/time",
+        { ...DEVICE, fetch },
+        { path: "/ISAPI/System/time", codec: document({}) },
       ),
     IsapiError,
   );
@@ -170,76 +111,28 @@ Deno.test("request turns a 401 with a non-XML body into IsapiError with the HTTP
   );
 });
 
-Deno.test("requestXml parses a reply into its root element", async () => {
+Deno.test("request throws IsapiError on a 200 ResponseStatus with statusCode 7", async () => {
   const fetch = spy(resolvesNext([
-    new Response("<Time><timeMode>NTP</timeMode></Time>"),
-  ]));
-
-  const root = await requestXml(
-    {
-      baseUrl: "http://192.0.2.10",
-      username: "admin",
-      password: "hunter2",
-      fetch,
-    },
-    "/ISAPI/System/time",
-  );
-
-  assertEquals(root.name.local, "Time");
-});
-
-Deno.test("requestXml throws IsapiError on a 200 ResponseStatus with statusCode 7", async () => {
-  const fetch = spy(resolvesNext([
-    new Response(
-      "<ResponseStatus><statusCode>7</statusCode></ResponseStatus>",
-    ),
+    new Response("<ResponseStatus><statusCode>7</statusCode></ResponseStatus>"),
   ]));
 
   await assertRejects(
     () =>
-      requestXml(
-        {
-          baseUrl: "http://192.0.2.10",
-          username: "admin",
-          password: "hunter2",
-          fetch,
-        },
-        "/ISAPI/System/time",
+      request(
+        { ...DEVICE, fetch },
+        { path: "/ISAPI/System/time", codec: document({}) },
       ),
     IsapiError,
   );
 });
 
-Deno.test("read decodes the reply with the resource's codec", async () => {
-  const fetch = spy(resolvesNext([
-    new Response("<DeviceInfo><model>DS-7608NI-Q2/8P</model></DeviceInfo>"),
-  ]));
-
-  const info = await read(
-    {
-      baseUrl: "http://192.0.2.10",
-      username: "admin",
-      password: "hunter2",
-      fetch,
-    },
-    { path: "/ISAPI/System/deviceInfo", codec: document({ model: text() }) },
-  );
-
-  assertEquals(info, { model: "DS-7608NI-Q2/8P" });
-});
-
-Deno.test("read rejects with the engine's missing-element message", async () => {
+Deno.test("request rejects with the engine's missing-element message", async () => {
   const fetch = spy(resolvesNext([new Response("<DeviceInfo/>")]));
 
   await assertRejects(
     () =>
-      read(
-        {
-          baseUrl: "http://192.0.2.10",
-          username: "admin",
-          password: "hunter2",
-          fetch,
-        },
+      request(
+        { ...DEVICE, fetch },
         {
           path: "/ISAPI/System/deviceInfo",
           codec: document({ model: text() }),

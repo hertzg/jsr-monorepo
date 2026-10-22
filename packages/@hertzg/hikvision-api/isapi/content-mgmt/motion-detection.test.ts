@@ -1,6 +1,6 @@
 import { assertEquals } from "@std/assert";
 import { resolvesNext, spy } from "@std/testing/mock";
-import { read } from "../request.ts";
+import { request } from "../request.ts";
 import { motionDetection } from "./motion-detection.ts";
 
 Deno.test("motionDetection path picks the input proxy path for an NVR channel", () => {
@@ -196,7 +196,7 @@ Deno.test("motionDetection codec drops an empty RegionList", () => {
   ]]);
 });
 
-Deno.test("read(motionDetection) requests the camera-side path when proxy is off", async () => {
+Deno.test("request(motionDetection) requests the camera-side path when proxy is off", async () => {
   const fetch = spy(resolvesNext([
     new Response(
       "<MotionDetection><enabled>true</enabled>" +
@@ -206,7 +206,7 @@ Deno.test("read(motionDetection) requests the camera-side path when proxy is off
     ),
   ]));
 
-  await read(
+  await request(
     {
       baseUrl: "http://192.0.2.21",
       username: "admin",

@@ -93,7 +93,7 @@ const channel = obj({
  * ```ts
  * import { assertEquals } from "@std/assert";
  * import { resolvesNext, spy } from "@std/testing/mock";
- * import { read } from "../request.ts";
+ * import { request } from "../request.ts";
  * import { inputProxyChannels } from "./input-proxy-channels.ts";
  *
  * const fetch = spy(resolvesNext([
@@ -103,7 +103,7 @@ const channel = obj({
  *   ),
  * ]));
  *
- * const channels = await read({
+ * const channels = await request({
  *   baseUrl: "http://192.0.2.10",
  *   username: "admin",
  *   password: "hunter2",

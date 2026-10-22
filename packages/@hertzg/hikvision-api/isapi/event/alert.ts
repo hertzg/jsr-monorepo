@@ -81,6 +81,7 @@ import {
   text,
   tokens,
 } from "../document.ts";
+import type { Resource } from "../request.ts";
 
 /**
  * Where a smart event saw its target, from `<TargetRect>`.
@@ -243,8 +244,30 @@ type WireRegion = NonNullable<WireAlert["DetectionRegionList"]>[number];
  * ```
  */
 export function parseAlert(xml: string, at: string): Alert {
-  const { dynChannelID, channelID, DetectionRegionList, ...fields } = alert
-    .parse(xml);
+  return toAlert(alert.parse(xml), at);
+}
+
+/**
+ * The alert stream: `GET /ISAPI/Event/notification/alertStream`, a
+ * `multipart/mixed` response that never ends, one `<EventNotificationAlert>`
+ * per part. Each alert is stamped with `at`, the time its part was decoded,
+ * which is the time it arrived.
+ *
+ * @example The resource names the stream path
+ * ```ts
+ * import { assertEquals } from "@std/assert";
+ * import { alertStream } from "./alert.ts";
+ *
+ * assertEquals(alertStream.path, "/ISAPI/Event/notification/alertStream");
+ * ```
+ */
+export const alertStream: Resource<Alert> = {
+  path: "/ISAPI/Event/notification/alertStream",
+  codec: alert.map((wire) => toAlert(wire, new Date().toISOString())),
+};
+
+function toAlert(wire: WireAlert, at: string): Alert {
+  const { dynChannelID, channelID, DetectionRegionList, ...fields } = wire;
   return {
     ...fields,
     channel: dynChannelID ?? channelID ?? 0,

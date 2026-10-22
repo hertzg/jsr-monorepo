@@ -1,7 +1,7 @@
 import { assertEquals, assertThrows } from "@std/assert";
 import { resolvesNext, spy } from "@std/testing/mock";
 import { IsapiError } from "../status.ts";
-import { read } from "../request.ts";
+import { request } from "../request.ts";
 import { lineDetection } from "./line-detection.ts";
 
 Deno.test("lineDetection reads a document without a namespace and its lines", () => {
@@ -85,7 +85,7 @@ Deno.test("read requests lineDetection for the channel it is given", async () =>
     ),
   ]));
 
-  const line = await read({
+  const line = await request({
     baseUrl: "http://192.0.2.10",
     username: "admin",
     password: "hunter2",

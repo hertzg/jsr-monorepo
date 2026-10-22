@@ -1,7 +1,7 @@
 import { assertEquals, assertRejects, assertThrows } from "@std/assert";
 import { resolvesNext, spy } from "@std/testing/mock";
 import { IsapiError } from "../status.ts";
-import { read } from "../request.ts";
+import { request } from "../request.ts";
 import { deviceInfo } from "./device-info.ts";
 
 Deno.test("deviceInfo.codec.parse reads every field of an NVR document", () => {
@@ -41,7 +41,7 @@ Deno.test("deviceInfo.codec.parse throws when a required field is missing", () =
   );
 });
 
-Deno.test("read(deviceInfo) surfaces a ResponseStatus as IsapiError", async () => {
+Deno.test("request(deviceInfo) surfaces a ResponseStatus as IsapiError", async () => {
   const fetch = spy(resolvesNext([
     new Response(
       "<ResponseStatus><statusCode>3</statusCode><subStatusCode>deviceError</subStatusCode></ResponseStatus>",
@@ -50,7 +50,7 @@ Deno.test("read(deviceInfo) surfaces a ResponseStatus as IsapiError", async () =
 
   await assertRejects(
     () =>
-      read({
+      request({
         baseUrl: "http://192.0.2.10",
         username: "admin",
         password: "hunter2",

@@ -133,7 +133,7 @@ const codec = capabilitiesWire.map(toCapabilities);
  * ```ts
  * import { assertEquals } from "@std/assert";
  * import { resolvesNext, spy } from "@std/testing/mock";
- * import { read } from "../request.ts";
+ * import { request } from "../request.ts";
  * import { motionDetectionCapabilities } from "./motion-detection-capabilities.ts";
  *
  * const fetch = spy(resolvesNext([
@@ -147,7 +147,7 @@ const codec = capabilitiesWire.map(toCapabilities);
  *   ),
  * ]));
  *
- * const capabilities = await read(
+ * const capabilities = await request(
  *   { baseUrl: "http://192.0.2.21", username: "admin", password: "hunter2", fetch },
  *   motionDetectionCapabilities({ channel: 1 }),
  * );

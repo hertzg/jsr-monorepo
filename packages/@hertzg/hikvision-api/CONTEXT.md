@@ -1,12 +1,18 @@
 # @hertzg/hikvision-api
 
-Hikvision ISAPI, the HTTP API of its NVRs and cameras. One device per
-client, Basic auth, every call its own request. Runs on Deno and Bun.
+Hikvision ISAPI, the HTTP API of its NVRs and cameras. Plain functions
+over a `Device`, Basic auth, every call its own request. Runs on Deno
+and Bun.
 
 ## Glossary
 
 - **ISAPI**: Hikvision's HTTP API. Paths under `/ISAPI/`, XML bodies.
-- **Device**: an NVR or a camera. `deviceInfo().deviceType` tells which.
+- **Device**: `{ baseUrl, username, password }`, the first argument of
+  every call. An NVR or a camera; `deviceInfo` says which, nothing checks.
+- **Resource**: `{ path, codec }`, one ISAPI document. `request(device,
+  resource)` reads it; a resource with parameters is a function.
+- **Layers**: `http/` is fetch plus auth, `isapi/request.ts` and
+  `isapi/stream.ts` are the protocol, `isapi/<tree>/` are the documents.
 - **Channel**: a video input numbered from 1. On an NVR an IP camera is an
   *input proxy channel*; the NVR itself is channel 0 in alerts. Smart and
   motion paths take the channel, never a rule id.
@@ -45,8 +51,9 @@ client, Basic auth, every call its own request. Runs on Deno and Bun.
 
 ## Rules
 
-- `mod.ts` is the only entry point; everything else is internal (ADR 0003).
-- The client never reconnects, keeps no timers, and never infers that
+- `mod.ts` is the only entry point; no client object, two verbs:
+  `request` and `stream` (ADR 0003).
+- The stream never reconnects, keeps no timers, and never infers that
   motion ended (ADR 0002). Consumers measure silence from `at`.
 - Parse the `<ResponseStatus>` on every status and keep its reason.
 - Read by local element name; every element a device may omit is

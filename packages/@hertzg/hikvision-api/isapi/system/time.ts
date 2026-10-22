@@ -116,7 +116,7 @@ export function parseTimeZoneOffset(timeZone: string): number | undefined {
  * ```ts
  * import { assertEquals } from "@std/assert";
  * import { resolvesNext, spy } from "@std/testing/mock";
- * import { read } from "../request.ts";
+ * import { request } from "../request.ts";
  * import { deviceTime } from "./time.ts";
  *
  * const fetch = spy(resolvesNext([
@@ -127,7 +127,7 @@ export function parseTimeZoneOffset(timeZone: string): number | undefined {
  *   ),
  * ]));
  *
- * const time = await read({
+ * const time = await request({
  *   baseUrl: "http://192.0.2.21",
  *   username: "admin",
  *   password: "hunter2",
