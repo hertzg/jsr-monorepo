@@ -81,6 +81,7 @@ the JSR coordinate. Two scopes:
 - `crc` - CRC checksum utilities
 - `ip` - IPv4/IPv6/CIDR utilities
 - `mac` - EUI-48 MAC address parse/stringify
+- `mog2` - MOG2 background subtraction for motion detection
 - `mymagti-api` - MyMagti API client
 - `reolink-api` - Reolink camera client over Baichuan (events, siren, privacy
   mode, snapshot, PTZ)
@@ -440,6 +441,7 @@ both tiresome and error-prone.
 - `@hertzg/bx`
 - `@hertzg/ip`
 - `@hertzg/mac`
+- `@hertzg/mog2`
 - `@hertzg/crc`
 - `@hertzg/reolink-api`
 - `@hertzg/routeros-api`

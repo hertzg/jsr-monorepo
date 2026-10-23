@@ -1,0 +1,16 @@
+{
+  "name": "@hertzg/mog2",
+  "version": "0.1.0",
+  "exports": {
+    ".": "./mod.ts",
+    "./mog2": "./mog2.ts",
+    "./motion": "./motion.ts"
+  },
+  "publish": {
+    "exclude": [
+      "**/*.test.ts",
+      "**/*.md",
+      "adr"
+    ]
+  }
+}

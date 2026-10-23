@@ -109,6 +109,9 @@
 "@hertzg/mac":
   - changed-files:
       - any-glob-to-any-file: packages/@hertzg/mac/**
+"@hertzg/mog2":
+  - changed-files:
+      - any-glob-to-any-file: packages/@hertzg/mog2/**
 "@hertzg/mymagti-api":
   - changed-files:
       - any-glob-to-any-file: packages/@hertzg/mymagti-api/**

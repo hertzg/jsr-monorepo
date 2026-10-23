@@ -297,6 +297,14 @@
         { "type": "json", "path": "deno.json", "jsonpath": "$.version" }
       ]
     },
+    "packages/@hertzg/mog2": {
+      "release-type": "simple",
+      "package-name": "@hertzg/mog2",
+      "component": "@hertzg/mog2",
+      "extra-files": [
+        { "type": "json", "path": "deno.json", "jsonpath": "$.version" }
+      ]
+    },
     "packages/@hertzg/mymagti-api": {
       "release-type": "simple",
       "package-name": "@hertzg/mymagti-api",

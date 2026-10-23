@@ -19,6 +19,7 @@ Source layout mirrors the JSR scope: `packages/<scope>/<name>/`.
 | [@hertzg/crc](https://jsr.io/@hertzg/crc)                   | [![JSR](https://jsr.io/badges/@hertzg/crc)](https://jsr.io/@hertzg/crc)                   |
 | [@hertzg/ip](https://jsr.io/@hertzg/ip)                     | [![JSR](https://jsr.io/badges/@hertzg/ip)](https://jsr.io/@hertzg/ip)                     |
 | [@hertzg/mac](https://jsr.io/@hertzg/mac)                   | [![JSR](https://jsr.io/badges/@hertzg/mac)](https://jsr.io/@hertzg/mac)                   |
+| [@hertzg/mog2](https://jsr.io/@hertzg/mog2)                 | [![JSR](https://jsr.io/badges/@hertzg/mog2)](https://jsr.io/@hertzg/mog2)                 |
 | [@hertzg/mymagti-api](https://jsr.io/@hertzg/mymagti-api)   | [![JSR](https://jsr.io/badges/@hertzg/mymagti-api)](https://jsr.io/@hertzg/mymagti-api)   |
 | [@hertzg/reolink-api](https://jsr.io/@hertzg/reolink-api) | [![JSR](https://jsr.io/badges/@hertzg/reolink-api)](https://jsr.io/@hertzg/reolink-api) |
 | [@hertzg/routeros-api](https://jsr.io/@hertzg/routeros-api) | [![JSR](https://jsr.io/badges/@hertzg/routeros-api)](https://jsr.io/@hertzg/routeros-api) |
