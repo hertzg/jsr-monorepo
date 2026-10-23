@@ -1,0 +1,17 @@
+{
+  "name": "@hertzg/subsense",
+  "version": "0.1.0",
+  "exports": {
+    ".": "./mod.ts",
+    "./lbsp": "./lbsp.ts",
+    "./grayscale": "./grayscale.ts",
+    "./mask": "./mask.ts"
+  },
+  "publish": {
+    "exclude": [
+      "**/*.test.ts",
+      "**/*.md",
+      "adr"
+    ]
+  }
+}

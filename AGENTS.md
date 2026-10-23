@@ -85,6 +85,7 @@ the JSR coordinate. Two scopes:
 - `reolink-api` - Reolink camera client over Baichuan (events, siren, privacy
   mode, snapshot, PTZ)
 - `routeros-api` - MikroTik RouterOS API client
+- `subsense` - SuBSENSE background subtraction for motion detection
 - `tplink-api` - TP-Link Router API client
 - `wg-conf` - WireGuard configuration handling
 - `wg-ini` - INI file parsing
@@ -445,6 +446,7 @@ both tiresome and error-prone.
 - `@hertzg/routeros-api`
 - `@hertzg/tplink-api`
 - `@hertzg/xhb`
+- `@hertzg/subsense`
 
 ## Adding New Workspaces
 

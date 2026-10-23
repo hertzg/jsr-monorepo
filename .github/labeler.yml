@@ -109,6 +109,9 @@
 "@hertzg/mac":
   - changed-files:
       - any-glob-to-any-file: packages/@hertzg/mac/**
+"@hertzg/subsense":
+  - changed-files:
+      - any-glob-to-any-file: packages/@hertzg/subsense/**
 "@hertzg/mymagti-api":
   - changed-files:
       - any-glob-to-any-file: packages/@hertzg/mymagti-api/**
