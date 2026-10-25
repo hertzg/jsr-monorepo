@@ -309,6 +309,8 @@
       "release-type": "simple",
       "package-name": "@hertzg/hikvision-api",
       "component": "@hertzg/hikvision-api",
+      "bump-minor-pre-major": true,
+      "bump-patch-for-minor-pre-major": true,
       "extra-files": [
         { "type": "json", "path": "deno.json", "jsonpath": "$.version" }
       ]
