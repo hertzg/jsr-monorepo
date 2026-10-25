@@ -312,7 +312,7 @@ assertEquals(fetch.calls[0].args[0], &quot;http://192.0.2.21/ISAPI/Smart/LineDet
 <h3 class="example-header"><div class="markdown"><p>A device without the feature</p>
 </div></h3>
   <div><div class="markdown"><pre class="highlight"><code class="language-ts">import { assertThrows } from &quot;@std/assert&quot;;
-import { IsapiError } from &quot;../status.ts&quot;;
+import { IsapiError } from &quot;../status/isapi-error.ts&quot;;
 import { lineDetection } from &quot;./line-detection.ts&quot;;
 
 assertThrows(
@@ -324,7 +324,7 @@ assertThrows(
   IsapiError,
 );
 </code><button class="copyButton" data-copy="import { assertThrows } from &quot;@std/assert&quot;;
-import { IsapiError } from &quot;../status.ts&quot;;
+import { IsapiError } from &quot;../status/isapi-error.ts&quot;;
 import { lineDetection } from &quot;./line-detection.ts&quot;;
 
 assertThrows(

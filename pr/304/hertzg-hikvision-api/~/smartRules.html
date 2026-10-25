@@ -119,7 +119,7 @@
             <span class="text-Function">function</span>&nbsp;<span class="font-bold">smartRules</span>
           </div></div><a
   class="sourceButton"
-  href="file:&#x2F;&#x2F;&#x2F;home&#x2F;runner&#x2F;work&#x2F;jsr-monorepo&#x2F;jsr-monorepo&#x2F;packages&#x2F;@hertzg&#x2F;hikvision-api&#x2F;isapi&#x2F;smart&#x2F;rules.ts"><svg
+  href="file:&#x2F;&#x2F;&#x2F;home&#x2F;runner&#x2F;work&#x2F;jsr-monorepo&#x2F;jsr-monorepo&#x2F;packages&#x2F;@hertzg&#x2F;hikvision-api&#x2F;isapi&#x2F;smart&#x2F;smart-rules.ts"><svg
   width="14"
   height="14"
   viewBox="0 0 14 14"
@@ -215,12 +215,12 @@ Examples</h2></div><div class="space-y-8"><div class="anchorable" id="example_0"
 <h3 class="example-header"><div class="markdown"><p>Loitering on an NVR's third channel</p>
 </div></h3>
   <div><div class="markdown"><pre class="highlight"><code class="language-ts">import { assertEquals } from &quot;@std/assert&quot;;
-import { smartRules } from &quot;./rules.ts&quot;;
+import { smartRules } from &quot;./smart-rules.ts&quot;;
 
 assertEquals(smartRules({ type: &quot;regionEntrance&quot;, channel: 2 }).path, &quot;/ISAPI/Smart/regionEntrance/2&quot;);
 assertEquals(smartRules({ type: &quot;FieldDetection&quot; }).path, &quot;/ISAPI/Smart/FieldDetection/1&quot;);
 </code><button class="copyButton" data-copy="import { assertEquals } from &quot;@std/assert&quot;;
-import { smartRules } from &quot;./rules.ts&quot;;
+import { smartRules } from &quot;./smart-rules.ts&quot;;
 
 assertEquals(smartRules({ type: &quot;regionEntrance&quot;, channel: 2 }).path, &quot;/ISAPI/Smart/regionEntrance/2&quot;);
 assertEquals(smartRules({ type: &quot;FieldDetection&quot; }).path, &quot;/ISAPI/Smart/FieldDetection/1&quot;);
@@ -282,7 +282,7 @@ assertEquals(smartRules({ type: &quot;FieldDetection&quot; }).path, &quot;/ISAPI
 <h3 class="example-header"><div class="markdown"><p>Parse a region entrance rule</p>
 </div></h3>
   <div><div class="markdown"><pre class="highlight"><code class="language-ts">import { assertEquals } from &quot;@std/assert&quot;;
-import { smartRules } from &quot;./rules.ts&quot;;
+import { smartRules } from &quot;./smart-rules.ts&quot;;
 
 const rules = smartRules({ type: &quot;regionEntrance&quot;, channel: 2 }).codec.parse(
   &quot;&lt;RegionEntrance&gt;&lt;id&gt;2&lt;/id&gt;&lt;enabled&gt;true&lt;/enabled&gt;&quot; +
@@ -308,7 +308,7 @@ assertEquals(rules, {
   }],
 });
 </code><button class="copyButton" data-copy="import { assertEquals } from &quot;@std/assert&quot;;
-import { smartRules } from &quot;./rules.ts&quot;;
+import { smartRules } from &quot;./smart-rules.ts&quot;;
 
 const rules = smartRules({ type: &quot;regionEntrance&quot;, channel: 2 }).codec.parse(
   &quot;&lt;RegionEntrance&gt;&lt;id&gt;2&lt;/id&gt;&lt;enabled&gt;true&lt;/enabled&gt;&quot; +
@@ -393,7 +393,7 @@ assertEquals(rules, {
   <div><div class="markdown"><pre class="highlight"><code class="language-ts">import { assertEquals } from &quot;@std/assert&quot;;
 import { resolvesNext, spy } from &quot;@std/testing/mock&quot;;
 import { request } from &quot;../request.ts&quot;;
-import { smartRules } from &quot;./rules.ts&quot;;
+import { smartRules } from &quot;./smart-rules.ts&quot;;
 
 const fetch = spy(resolvesNext([
   new Response(&quot;&lt;Loitering&gt;&lt;id&gt;4&lt;/id&gt;&lt;enabled&gt;false&lt;/enabled&gt;&lt;/Loitering&gt;&quot;),
@@ -411,7 +411,7 @@ assertEquals(fetch.calls[0].args[0], &quot;http://192.0.2.10/ISAPI/Smart/loiteri
 </code><button class="copyButton" data-copy="import { assertEquals } from &quot;@std/assert&quot;;
 import { resolvesNext, spy } from &quot;@std/testing/mock&quot;;
 import { request } from &quot;../request.ts&quot;;
-import { smartRules } from &quot;./rules.ts&quot;;
+import { smartRules } from &quot;./smart-rules.ts&quot;;
 
 const fetch = spy(resolvesNext([
   new Response(&quot;&lt;Loitering&gt;&lt;id&gt;4&lt;/id&gt;&lt;enabled&gt;false&lt;/enabled&gt;&lt;/Loitering&gt;&quot;),
@@ -512,7 +512,7 @@ Parameters</h2></div><div class="space-y-8"><div class="anchorable docEntry" id=
       </code>
     </div><a
   class="sourceButton"
-  href="file:&#x2F;&#x2F;&#x2F;home&#x2F;runner&#x2F;work&#x2F;jsr-monorepo&#x2F;jsr-monorepo&#x2F;packages&#x2F;@hertzg&#x2F;hikvision-api&#x2F;isapi&#x2F;smart&#x2F;rules.ts"><svg
+  href="file:&#x2F;&#x2F;&#x2F;home&#x2F;runner&#x2F;work&#x2F;jsr-monorepo&#x2F;jsr-monorepo&#x2F;packages&#x2F;@hertzg&#x2F;hikvision-api&#x2F;isapi&#x2F;smart&#x2F;smart-rules.ts"><svg
   width="14"
   height="14"
   viewBox="0 0 14 14"
@@ -568,7 +568,7 @@ Return Type</h2></div><div class="space-y-8"><div class=" docEntry" id="function
       </code>
     </div><a
   class="sourceButton"
-  href="file:&#x2F;&#x2F;&#x2F;home&#x2F;runner&#x2F;work&#x2F;jsr-monorepo&#x2F;jsr-monorepo&#x2F;packages&#x2F;@hertzg&#x2F;hikvision-api&#x2F;isapi&#x2F;smart&#x2F;rules.ts"><svg
+  href="file:&#x2F;&#x2F;&#x2F;home&#x2F;runner&#x2F;work&#x2F;jsr-monorepo&#x2F;jsr-monorepo&#x2F;packages&#x2F;@hertzg&#x2F;hikvision-api&#x2F;isapi&#x2F;smart&#x2F;smart-rules.ts"><svg
   width="14"
   height="14"
   viewBox="0 0 14 14"

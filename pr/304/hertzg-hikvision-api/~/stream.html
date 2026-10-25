@@ -218,7 +218,7 @@ Examples</h2></div><div class="space-y-8"><div class="anchorable" id="example_0"
 </div></h3>
   <div><div class="markdown"><pre class="highlight"><code class="language-ts">import { assertEquals } from &quot;@std/assert&quot;;
 import { resolvesNext, spy } from &quot;@std/testing/mock&quot;;
-import { alertStream } from &quot;./event/alert.ts&quot;;
+import { alertStream } from &quot;./event/alert-stream.ts&quot;;
 import { stream } from &quot;./stream.ts&quot;;
 
 const xml = &quot;&lt;EventNotificationAlert&gt;&lt;dynChannelID&gt;3&lt;/dynChannelID&gt;&quot; +
@@ -240,7 +240,7 @@ assertEquals(alert.channel, 3);
 assertEquals(alert.eventType, &quot;VMD&quot;);
 </code><button class="copyButton" data-copy="import { assertEquals } from &quot;@std/assert&quot;;
 import { resolvesNext, spy } from &quot;@std/testing/mock&quot;;
-import { alertStream } from &quot;./event/alert.ts&quot;;
+import { alertStream } from &quot;./event/alert-stream.ts&quot;;
 import { stream } from &quot;./stream.ts&quot;;
 
 const xml = &quot;&lt;EventNotificationAlert&gt;&lt;dynChannelID&gt;3&lt;/dynChannelID&gt;&quot; +

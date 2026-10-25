@@ -119,7 +119,7 @@
             <span class="text-Variable">variable</span>&nbsp;<span class="font-bold">deviceTime</span>
           </div></div><a
   class="sourceButton"
-  href="file:&#x2F;&#x2F;&#x2F;home&#x2F;runner&#x2F;work&#x2F;jsr-monorepo&#x2F;jsr-monorepo&#x2F;packages&#x2F;@hertzg&#x2F;hikvision-api&#x2F;isapi&#x2F;system&#x2F;time.ts"><svg
+  href="file:&#x2F;&#x2F;&#x2F;home&#x2F;runner&#x2F;work&#x2F;jsr-monorepo&#x2F;jsr-monorepo&#x2F;packages&#x2F;@hertzg&#x2F;hikvision-api&#x2F;isapi&#x2F;system&#x2F;device-time.ts"><svg
   width="14"
   height="14"
   viewBox="0 0 14 14"
@@ -196,7 +196,7 @@ Examples</h2></div><div class="space-y-8"><div class="anchorable" id="example_0"
   <div><div class="markdown"><pre class="highlight"><code class="language-ts">import { assertEquals } from &quot;@std/assert&quot;;
 import { resolvesNext, spy } from &quot;@std/testing/mock&quot;;
 import { request } from &quot;../request.ts&quot;;
-import { deviceTime } from &quot;./time.ts&quot;;
+import { deviceTime } from &quot;./device-time.ts&quot;;
 
 const fetch = spy(resolvesNext([
   new Response(
@@ -219,7 +219,7 @@ assertEquals(fetch.calls[0].args[0], &quot;http://192.0.2.21/ISAPI/System/time&q
 </code><button class="copyButton" data-copy="import { assertEquals } from &quot;@std/assert&quot;;
 import { resolvesNext, spy } from &quot;@std/testing/mock&quot;;
 import { request } from &quot;../request.ts&quot;;
-import { deviceTime } from &quot;./time.ts&quot;;
+import { deviceTime } from &quot;./device-time.ts&quot;;
 
 const fetch = spy(resolvesNext([
   new Response(
@@ -303,7 +303,7 @@ Type</h2></div><div class="space-y-8"><div class=" docEntry" id="variable_device
       </code>
     </div><a
   class="sourceButton"
-  href="file:&#x2F;&#x2F;&#x2F;home&#x2F;runner&#x2F;work&#x2F;jsr-monorepo&#x2F;jsr-monorepo&#x2F;packages&#x2F;@hertzg&#x2F;hikvision-api&#x2F;isapi&#x2F;system&#x2F;time.ts"><svg
+  href="file:&#x2F;&#x2F;&#x2F;home&#x2F;runner&#x2F;work&#x2F;jsr-monorepo&#x2F;jsr-monorepo&#x2F;packages&#x2F;@hertzg&#x2F;hikvision-api&#x2F;isapi&#x2F;system&#x2F;device-time.ts"><svg
   width="14"
   height="14"
   viewBox="0 0 14 14"

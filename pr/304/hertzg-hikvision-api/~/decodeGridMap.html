@@ -119,7 +119,7 @@
             <span class="text-Function">function</span>&nbsp;<span class="font-bold">decodeGridMap</span>
           </div></div><a
   class="sourceButton"
-  href="file:&#x2F;&#x2F;&#x2F;home&#x2F;runner&#x2F;work&#x2F;jsr-monorepo&#x2F;jsr-monorepo&#x2F;packages&#x2F;@hertzg&#x2F;hikvision-api&#x2F;isapi&#x2F;content-mgmt&#x2F;grid-map.ts"><svg
+  href="file:&#x2F;&#x2F;&#x2F;home&#x2F;runner&#x2F;work&#x2F;jsr-monorepo&#x2F;jsr-monorepo&#x2F;packages&#x2F;@hertzg&#x2F;hikvision-api&#x2F;isapi&#x2F;content-mgmt&#x2F;decode-grid-map.ts"><svg
   width="14"
   height="14"
   viewBox="0 0 14 14"
@@ -215,14 +215,14 @@ Examples</h2></div><div class="space-y-8"><div class="anchorable" id="example_0"
 <h3 class="example-header"><div class="markdown"><p>The NVR default: every cell on</p>
 </div></h3>
   <div><div class="markdown"><pre class="highlight"><code class="language-ts">import { assertEquals } from &quot;@std/assert&quot;;
-import { decodeGridMap } from &quot;./grid-map.ts&quot;;
+import { decodeGridMap } from &quot;./decode-grid-map.ts&quot;;
 
 const grid = decodeGridMap(&quot;fffffc&quot;.repeat(18), { rows: 18, columns: 22 });
 
 assertEquals(grid.length, 18);
 assertEquals(grid.every((row) =&gt; row.length === 22 &amp;&amp; row.every(Boolean)), true);
 </code><button class="copyButton" data-copy="import { assertEquals } from &quot;@std/assert&quot;;
-import { decodeGridMap } from &quot;./grid-map.ts&quot;;
+import { decodeGridMap } from &quot;./decode-grid-map.ts&quot;;
 
 const grid = decodeGridMap(&quot;fffffc&quot;.repeat(18), { rows: 18, columns: 22 });
 
@@ -314,7 +314,7 @@ Parameters</h2></div><div class="space-y-8"><div class="anchorable docEntry" id=
       </code>
     </div><a
   class="sourceButton"
-  href="file:&#x2F;&#x2F;&#x2F;home&#x2F;runner&#x2F;work&#x2F;jsr-monorepo&#x2F;jsr-monorepo&#x2F;packages&#x2F;@hertzg&#x2F;hikvision-api&#x2F;isapi&#x2F;content-mgmt&#x2F;grid-map.ts"><svg
+  href="file:&#x2F;&#x2F;&#x2F;home&#x2F;runner&#x2F;work&#x2F;jsr-monorepo&#x2F;jsr-monorepo&#x2F;packages&#x2F;@hertzg&#x2F;hikvision-api&#x2F;isapi&#x2F;content-mgmt&#x2F;decode-grid-map.ts"><svg
   width="14"
   height="14"
   viewBox="0 0 14 14"
@@ -368,7 +368,7 @@ Parameters</h2></div><div class="space-y-8"><div class="anchorable docEntry" id=
       </code>
     </div><a
   class="sourceButton"
-  href="file:&#x2F;&#x2F;&#x2F;home&#x2F;runner&#x2F;work&#x2F;jsr-monorepo&#x2F;jsr-monorepo&#x2F;packages&#x2F;@hertzg&#x2F;hikvision-api&#x2F;isapi&#x2F;content-mgmt&#x2F;grid-map.ts"><svg
+  href="file:&#x2F;&#x2F;&#x2F;home&#x2F;runner&#x2F;work&#x2F;jsr-monorepo&#x2F;jsr-monorepo&#x2F;packages&#x2F;@hertzg&#x2F;hikvision-api&#x2F;isapi&#x2F;content-mgmt&#x2F;decode-grid-map.ts"><svg
   width="14"
   height="14"
   viewBox="0 0 14 14"
@@ -424,7 +424,7 @@ Return Type</h2></div><div class="space-y-8"><div class=" docEntry" id="function
       </code>
     </div><a
   class="sourceButton"
-  href="file:&#x2F;&#x2F;&#x2F;home&#x2F;runner&#x2F;work&#x2F;jsr-monorepo&#x2F;jsr-monorepo&#x2F;packages&#x2F;@hertzg&#x2F;hikvision-api&#x2F;isapi&#x2F;content-mgmt&#x2F;grid-map.ts"><svg
+  href="file:&#x2F;&#x2F;&#x2F;home&#x2F;runner&#x2F;work&#x2F;jsr-monorepo&#x2F;jsr-monorepo&#x2F;packages&#x2F;@hertzg&#x2F;hikvision-api&#x2F;isapi&#x2F;content-mgmt&#x2F;decode-grid-map.ts"><svg
   width="14"
   height="14"
   viewBox="0 0 14 14"
