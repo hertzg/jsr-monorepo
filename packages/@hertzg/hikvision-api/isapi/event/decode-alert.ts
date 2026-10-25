@@ -47,13 +47,15 @@
  * @module
  */
 
-import type { XmlElement } from "@std/xml";
+import { isElement, type XmlElement } from "@std/xml";
+import type { OneField } from "../document/decode-fields.ts";
 import { document } from "../document/document.ts";
 import { int } from "../document/int.ts";
 import { list } from "../document/list.ts";
 import { obj } from "../document/obj.ts";
 import { optional } from "../document/optional.ts";
-import { type Point, points } from "../document/points.ts";
+import type { Point } from "../document/points.ts";
+import { scalar } from "../document/scalar.ts";
 import { text } from "../document/text.ts";
 import { tokens } from "../document/tokens.ts";
 
@@ -91,7 +93,10 @@ export type AlertRegion = {
   coordinates: Point[];
   /** `<detectionTarget>` split on commas, such as `["human"]`. */
   detectionTarget: string[];
-  /** The box around what was detected, from `<TargetRect>`, when present. */
+  /**
+   * The box around what was detected, from `<TargetRect>`, when present
+   * and whole: a `<TargetRect>` with an empty or unreadable number is no box.
+   */
   targetRect?: TargetRect;
 };
 
@@ -161,12 +166,12 @@ const alert = document({
     obj({
       regionID: optional(int()),
       sensitivityLevel: optional(int()),
-      RegionCoordinatesList: optional(points()),
+      RegionCoordinatesList: optional(readablePoints()),
       TargetRect: optional(obj({
-        X: int(),
-        Y: int(),
-        width: int(),
-        height: int(),
+        X: optional(readableInt()),
+        Y: optional(readableInt()),
+        width: optional(readableInt()),
+        height: optional(readableInt()),
       })),
       detectionTarget: optional(tokens()),
     }),
@@ -256,13 +261,43 @@ function toRegion(entry: WireRegion): AlertRegion {
     ...(regionID !== undefined && { id: regionID }),
     coordinates: RegionCoordinatesList ?? [],
     detectionTarget: detectionTarget ?? [],
-    ...(TargetRect && {
-      targetRect: {
-        x: TargetRect.X,
-        y: TargetRect.Y,
-        width: TargetRect.width,
-        height: TargetRect.height,
-      },
-    }),
+    ...(TargetRect && toTargetRect(TargetRect)),
+  };
+}
+
+// A box is whole or absent: a camera that writes `<X></X>` reported no box.
+function toTargetRect(
+  { X: x, Y: y, width, height }: NonNullable<WireRegion["TargetRect"]>,
+): { targetRect: TargetRect } | undefined {
+  if (
+    x === undefined || y === undefined || width === undefined ||
+    height === undefined
+  ) {
+    return undefined;
+  }
+  return { targetRect: { x, y, width, height } };
+}
+
+// The alert stream must not end over one unreadable number, so alert
+// numbers decode as `undefined` where `int()` would throw.
+function readableInt(): OneField<number | undefined> {
+  return scalar((value) => {
+    const parsed = Number(value);
+    return value.trim() === "" || Number.isNaN(parsed) ? undefined : parsed;
+  });
+}
+
+// A pair with an unreadable coordinate is no point.
+function readablePoints(): OneField<Point[]> {
+  const pair = obj({
+    positionX: optional(readableInt()),
+    positionY: optional(readableInt()),
+  });
+  return {
+    decode: (element) =>
+      element.children.filter(isElement).flatMap((child) => {
+        const { positionX: x, positionY: y } = pair.decode(child);
+        return x === undefined || y === undefined ? [] : [{ x, y }];
+      }),
   };
 }

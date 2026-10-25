@@ -224,3 +224,37 @@ test("parseAlert reads an AcuSense intrusion post with an empty regionID and a s
     pictureTransport: "url",
   });
 });
+
+test("parseAlert drops a TargetRect with an empty number instead of throwing", () => {
+  const alert = parseAlert(
+    "<EventNotificationAlert><dynChannelID>3</dynChannelID>" +
+      "<eventType>fielddetection</eventType>" +
+      "<DetectionRegionList><DetectionRegionEntry><regionID>0</regionID>" +
+      "<TargetRect><X></X><Y>268</Y><width>95</width><height>230</height></TargetRect>" +
+      "</DetectionRegionEntry></DetectionRegionList></EventNotificationAlert>",
+    "2026-10-21T16:44:20.004Z",
+  );
+
+  assertEquals(alert.regions, [{
+    id: 0,
+    coordinates: [],
+    detectionTarget: [],
+  }]);
+});
+
+test("parseAlert drops a coordinate pair with an unreadable number and keeps the rest", () => {
+  const alert = parseAlert(
+    "<EventNotificationAlert><dynChannelID>3</dynChannelID>" +
+      "<eventType>fielddetection</eventType>" +
+      "<DetectionRegionList><DetectionRegionEntry>" +
+      "<RegionCoordinatesList>" +
+      "<RegionCoordinates><positionX>10</positionX><positionY>20</positionY></RegionCoordinates>" +
+      "<RegionCoordinates><positionX>abc</positionX><positionY>40</positionY></RegionCoordinates>" +
+      "<RegionCoordinates><positionX>50</positionX><positionY></positionY></RegionCoordinates>" +
+      "</RegionCoordinatesList>" +
+      "</DetectionRegionEntry></DetectionRegionList></EventNotificationAlert>",
+    "2026-10-21T16:44:20.004Z",
+  );
+
+  assertEquals(alert.regions?.[0].coordinates, [{ x: 10, y: 20 }]);
+});
