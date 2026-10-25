@@ -1,6 +1,7 @@
 import { assertEquals, assertThrows } from "@std/assert";
 import { parse } from "@std/xml";
 import { test } from "node:test";
+import { attribute } from "./attribute.ts";
 import { decodeFields } from "./decode-fields.ts";
 import { int } from "./int.ts";
 import { optional } from "./optional.ts";
@@ -58,4 +59,42 @@ test("decodeFields matches namespace-prefixed elements by local name", () => {
   ).root;
 
   assertEquals(decodeFields({ timeMode: text() }, root), { timeMode: "NTP" });
+});
+
+test("decodeFields reads an empty optional element as absent", () => {
+  const root = parse(
+    "<DetectionRegionEntry><regionID></regionID><sensitivityLevel>0</sensitivityLevel></DetectionRegionEntry>",
+  ).root;
+
+  const entry = decodeFields(
+    { regionID: optional(int()), sensitivityLevel: optional(int()) },
+    root,
+  );
+
+  assertEquals(entry, { sensitivityLevel: 0 });
+});
+
+test("decodeFields reads a whitespace-only optional element as absent", () => {
+  const root = parse("<E><regionID>\n </regionID></E>").root;
+
+  assertEquals(decodeFields({ regionID: optional(int()) }, root), {});
+});
+
+test("decodeFields still throws for an empty required element", () => {
+  const root = parse("<E><regionID></regionID></E>").root;
+
+  assertThrows(
+    () => decodeFields({ regionID: int() }, root),
+    Error,
+    'ISAPI <regionID> is not a number: ""',
+  );
+});
+
+test("decodeFields keeps an empty optional element that has attributes", () => {
+  const root = parse('<Cap><regionType opt="grid,region"/></Cap>').root;
+
+  assertEquals(
+    decodeFields({ regionType: optional(attribute("opt")) }, root),
+    { regionType: "grid,region" },
+  );
 });
