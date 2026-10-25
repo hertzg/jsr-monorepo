@@ -13,6 +13,8 @@ and Bun.
   resource)` reads it; a resource with parameters is a function.
 - **Layers**: `http/` is fetch plus auth, `isapi/request.ts` and
   `isapi/stream.ts` are the protocol, `isapi/<tree>/` are the documents.
+  One exported function per kebab-case file, its test beside it, on
+  `node:test`.
 - **Channel**: a video input numbered from 1. On an NVR an IP camera is an
   *input proxy channel*; the NVR itself is channel 0 in alerts. Smart and
   motion paths take the channel, never a rule id.
@@ -45,9 +47,10 @@ and Bun.
   attributes instead of values.
 - **ResponseStatus**: the failure document, on 4xx or 200. `statusCode` 0
   or 1 is OK; anything else is `IsapiError`.
-- **Document codec**: a `document({...})` of field codecs in `isapi/`,
+- **Document codec**: a `document({...})` of fields from `isapi/document/`,
   keyed by element name; every reader is one description plus a small
-  mapping to its public type (ADR 0001).
+  mapping to its public type (ADR 0001). A field reads an element; the
+  record finds it.
 
 ## Rules
 

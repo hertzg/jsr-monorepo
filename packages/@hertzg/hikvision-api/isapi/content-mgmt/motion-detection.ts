@@ -39,7 +39,7 @@
  * </MotionDetection>
  * ```
  *
- * `<gridMap>` is decoded with `decodeGridMap` from `grid-map.ts`, which also
+ * `<gridMap>` is decoded with `decodeGridMap` from `decode-grid-map.ts`, which also
  * explains the encoding. Region coordinates are in the device's normalized
  * 1000 x 1000 screen space. What a channel allows comes from
  * `motion-detection-capabilities.ts`.
@@ -70,20 +70,17 @@
  * @module
  */
 
-import {
-  bool,
-  document,
-  int,
-  list,
-  obj,
-  optional,
-  type Point,
-  points,
-  text,
-  tokens,
-} from "../document.ts";
+import { bool } from "../document/bool.ts";
+import { document } from "../document/document.ts";
+import { int } from "../document/int.ts";
+import { list } from "../document/list.ts";
+import { obj } from "../document/obj.ts";
+import { optional } from "../document/optional.ts";
+import { type Point, points } from "../document/points.ts";
+import { text } from "../document/text.ts";
+import { tokens } from "../document/tokens.ts";
 import type { Resource } from "../request.ts";
-import { decodeGridMap } from "./grid-map.ts";
+import { decodeGridMap } from "./decode-grid-map.ts";
 
 /** Which motion detection document to read. */
 export type MotionDetectionTarget = {

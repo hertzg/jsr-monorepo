@@ -82,26 +82,34 @@
  * @module
  */
 
-export type { Device } from "./http/request.ts";
-export { basicAuthorization } from "./http/request.ts";
+export type { Device } from "./http/send.ts";
+export { basicAuthorization } from "./http/basic-authorization.ts";
 export { request } from "./isapi/request.ts";
 export type { Resource } from "./isapi/request.ts";
 export { stream } from "./isapi/stream.ts";
 export type { StreamOptions } from "./isapi/stream.ts";
-export type { Point } from "./isapi/document.ts";
-export { IsapiError } from "./isapi/status.ts";
-export type { IsapiFailure, ResponseStatus } from "./isapi/status.ts";
-export { alertStream, parseAlert } from "./isapi/event/alert.ts";
-export type { Alert, AlertRegion, TargetRect } from "./isapi/event/alert.ts";
+export type { Point } from "./isapi/document/points.ts";
+export { IsapiError } from "./isapi/status/isapi-error.ts";
+export type { IsapiFailure } from "./isapi/status/isapi-error.ts";
+export type { ResponseStatus } from "./isapi/status/parse-response-status.ts";
+export { alertStream } from "./isapi/event/alert-stream.ts";
+export { parseAlert } from "./isapi/event/parse-alert.ts";
+export type {
+  Alert,
+  AlertRegion,
+  TargetRect,
+} from "./isapi/event/decode-alert.ts";
 export { deviceInfo } from "./isapi/system/device-info.ts";
 export type { DeviceInfo } from "./isapi/system/device-info.ts";
-export { deviceTime, parseTimeZoneOffset } from "./isapi/system/time.ts";
-export type { DeviceTime } from "./isapi/system/time.ts";
+export { deviceTime } from "./isapi/system/device-time.ts";
+export type { DeviceTime } from "./isapi/system/device-time.ts";
+export { parseTimeZoneOffset } from "./isapi/system/parse-time-zone-offset.ts";
 export { inputProxyChannels } from "./isapi/content-mgmt/input-proxy-channels.ts";
 export type { InputProxyChannel } from "./isapi/content-mgmt/input-proxy-channels.ts";
 export { inputProxyChannelStatus } from "./isapi/content-mgmt/input-proxy-channel-status.ts";
 export type { InputProxyChannelStatus } from "./isapi/content-mgmt/input-proxy-channel-status.ts";
-export { decodeGridMap, encodeGridMap } from "./isapi/content-mgmt/grid-map.ts";
+export { decodeGridMap } from "./isapi/content-mgmt/decode-grid-map.ts";
+export { encodeGridMap } from "./isapi/content-mgmt/encode-grid-map.ts";
 export { motionDetection } from "./isapi/content-mgmt/motion-detection.ts";
 export type {
   MotionDetection,
@@ -110,20 +118,17 @@ export type {
 } from "./isapi/content-mgmt/motion-detection.ts";
 export { motionDetectionCapabilities } from "./isapi/content-mgmt/motion-detection-capabilities.ts";
 export type { MotionDetectionCapabilities } from "./isapi/content-mgmt/motion-detection-capabilities.ts";
-export {
-  fieldDetection,
-  SMART_RULE_TYPES,
-  smartRules,
-} from "./isapi/smart/rules.ts";
+export { SMART_RULE_TYPES } from "./isapi/smart/smart-rule-types.ts";
+export type { SmartRuleType } from "./isapi/smart/smart-rule-types.ts";
+export { smartRules } from "./isapi/smart/smart-rules.ts";
+export type { SmartRegion, SmartRules } from "./isapi/smart/smart-rules.ts";
+export type { SmartRule } from "./isapi/smart/rule-fields.ts";
+export type { NormalizedScreenSize } from "./isapi/smart/screen-size.ts";
+export { fieldDetection } from "./isapi/smart/field-detection.ts";
 export type {
   FieldDetection,
   FieldDetectionRegion,
-  NormalizedScreenSize,
-  SmartRegion,
-  SmartRule,
-  SmartRules,
-  SmartRuleType,
-} from "./isapi/smart/rules.ts";
+} from "./isapi/smart/field-detection.ts";
 export { lineDetection } from "./isapi/smart/line-detection.ts";
 export type {
   LineDetection,

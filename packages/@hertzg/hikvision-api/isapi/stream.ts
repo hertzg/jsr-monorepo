@@ -21,7 +21,7 @@
  *
  * @example Print motion alerts until Ctrl-C
  * ```ts ignore
- * import { alertStream } from "./event/alert.ts";
+ * import { alertStream } from "./event/alert-stream.ts";
  * import { stream } from "./stream.ts";
  *
  * const controller = new AbortController();
@@ -38,14 +38,14 @@
  * @module
  */
 
-import {
-  createPartsStream,
-  parseBoundary,
-  type Part,
-} from "../http/multipart.ts";
-import { type Device, resolveUrl, send } from "../http/request.ts";
+import { createPartsStream, type Part } from "../http/create-parts-stream.ts";
+import { parseBoundary } from "../http/parse-boundary.ts";
+import { resolveUrl } from "../http/resolve-url.ts";
+import { type Device, send } from "../http/send.ts";
 import type { Resource } from "./request.ts";
-import { findResponseStatus, IsapiError, parseIsapi } from "./status.ts";
+import { findResponseStatus } from "./status/find-response-status.ts";
+import { IsapiError } from "./status/isapi-error.ts";
+import { parseIsapi } from "./status/parse-isapi.ts";
 
 /** Options for {@link stream}. */
 export type StreamOptions = {
@@ -71,7 +71,7 @@ export type StreamOptions = {
  * ```ts
  * import { assertEquals } from "@std/assert";
  * import { resolvesNext, spy } from "@std/testing/mock";
- * import { alertStream } from "./event/alert.ts";
+ * import { alertStream } from "./event/alert-stream.ts";
  * import { stream } from "./stream.ts";
  *
  * const xml = "<EventNotificationAlert><dynChannelID>3</dynChannelID>" +

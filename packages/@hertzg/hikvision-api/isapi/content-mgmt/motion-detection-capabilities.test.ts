@@ -1,9 +1,10 @@
+import { test } from "node:test";
 import { assertEquals } from "@std/assert";
 import { resolvesNext, spy } from "@std/testing/mock";
 import { request } from "../request.ts";
 import { motionDetectionCapabilities } from "./motion-detection-capabilities.ts";
 
-Deno.test("motionDetectionCapabilities path appends /capabilities to both paths", () => {
+test("motionDetectionCapabilities path appends /capabilities to both paths", () => {
   assertEquals(
     motionDetectionCapabilities({ channel: 5, proxy: true }).path,
     "/ISAPI/ContentMgmt/InputProxy/channels/5/video/motionDetection/capabilities",
@@ -14,7 +15,7 @@ Deno.test("motionDetectionCapabilities path appends /capabilities to both paths"
   );
 });
 
-Deno.test("motionDetectionCapabilities codec reads ranges from attributes", () => {
+test("motionDetectionCapabilities codec reads ranges from attributes", () => {
   const xml = '<?xml version="1.0" encoding="UTF-8" ?>\n' +
     '<MotionDetection version="2.0" xmlns="http://www.isapi.org/ver20/XMLSchema">\n' +
     '<enabled opt="true,false">true</enabled>\n' +
@@ -42,7 +43,7 @@ Deno.test("motionDetectionCapabilities codec reads ranges from attributes", () =
   });
 });
 
-Deno.test("motionDetectionCapabilities codec leaves optional ranges out", () => {
+test("motionDetectionCapabilities codec leaves optional ranges out", () => {
   const xml = "<MotionDetection>" +
     '<regionType opt="grid">grid</regionType>' +
     '<MotionDetectionLayout><sensitivityLevel min="0" max="100">60</sensitivityLevel>' +
@@ -56,7 +57,7 @@ Deno.test("motionDetectionCapabilities codec leaves optional ranges out", () => 
   });
 });
 
-Deno.test("motionDetectionCapabilities codec finds sensitivity and targets at the root without a layout", () => {
+test("motionDetectionCapabilities codec finds sensitivity and targets at the root without a layout", () => {
   const xml = "<MotionDetection>" +
     '<regionType opt="grid">grid</regionType>' +
     '<sensitivityLevel min="0" max="100" step="20">60</sensitivityLevel>' +
@@ -70,7 +71,7 @@ Deno.test("motionDetectionCapabilities codec finds sensitivity and targets at th
   });
 });
 
-Deno.test("request(motionDetectionCapabilities) requests the proxy capabilities path", async () => {
+test("request(motionDetectionCapabilities) requests the proxy capabilities path", async () => {
   const fetch = spy(resolvesNext([
     new Response(
       '<MotionDetection><regionType opt="grid,region">grid</regionType>' +

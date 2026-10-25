@@ -1,10 +1,11 @@
+import { test } from "node:test";
 import { assertEquals, assertThrows } from "@std/assert";
 import { resolvesNext, spy } from "@std/testing/mock";
-import { IsapiError } from "../status.ts";
+import { IsapiError } from "../status/isapi-error.ts";
 import { request } from "../request.ts";
 import { lineDetection } from "./line-detection.ts";
 
-Deno.test("lineDetection reads a document without a namespace and its lines", () => {
+test("lineDetection reads a document without a namespace and its lines", () => {
   const xml = '<?xml version="1.0" encoding="UTF-8"?>\n' +
     "<LineDetection>\n" +
     "<id>1</id>\n" +
@@ -48,7 +49,7 @@ Deno.test("lineDetection reads a document without a namespace and its lines", ()
   });
 });
 
-Deno.test("lineDetection reads a document without lines", () => {
+test("lineDetection reads a document without lines", () => {
   assertEquals(
     lineDetection().codec.parse(
       "<LineDetection><id>2</id><enabled>false</enabled></LineDetection>",
@@ -57,7 +58,7 @@ Deno.test("lineDetection reads a document without lines", () => {
   );
 });
 
-Deno.test("lineDetection throws IsapiError for a device without the feature", () => {
+test("lineDetection throws IsapiError for a device without the feature", () => {
   assertThrows(
     () =>
       lineDetection().codec.parse(
@@ -70,7 +71,7 @@ Deno.test("lineDetection throws IsapiError for a device without the feature", ()
   );
 });
 
-Deno.test("lineDetection puts the channel in the path", () => {
+test("lineDetection puts the channel in the path", () => {
   assertEquals(lineDetection().path, "/ISAPI/Smart/LineDetection/1");
   assertEquals(
     lineDetection({ channel: 3 }).path,
@@ -78,7 +79,7 @@ Deno.test("lineDetection puts the channel in the path", () => {
   );
 });
 
-Deno.test("read requests lineDetection for the channel it is given", async () => {
+test("read requests lineDetection for the channel it is given", async () => {
   const fetch = spy(resolvesNext([
     new Response(
       "<LineDetection><id>3</id><enabled>true</enabled></LineDetection>",

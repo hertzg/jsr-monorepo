@@ -1,10 +1,11 @@
+import { test } from "node:test";
 import { assertEquals, assertRejects, assertThrows } from "@std/assert";
 import { resolvesNext, spy } from "@std/testing/mock";
-import { IsapiError } from "../status.ts";
+import { IsapiError } from "../status/isapi-error.ts";
 import { request } from "../request.ts";
 import { inputProxyChannelStatus } from "./input-proxy-channel-status.ts";
 
-Deno.test("inputProxyChannelStatus.codec.parse reads every field of an NVR document", () => {
+test("inputProxyChannelStatus.codec.parse reads every field of an NVR document", () => {
   const xml = '<?xml version="1.0" encoding="UTF-8" ?>\n' +
     '<InputProxyChannelStatusList version="1.0" xmlns="http://www.hikvision.com/ver20/XMLSchema">\n' +
     '<InputProxyChannelStatus version="1.0" xmlns="http://www.hikvision.com/ver20/XMLSchema">\n' +
@@ -79,7 +80,7 @@ Deno.test("inputProxyChannelStatus.codec.parse reads every field of an NVR docum
   ]);
 });
 
-Deno.test("inputProxyChannelStatus.codec.parse leaves optional fields out when absent", () => {
+test("inputProxyChannelStatus.codec.parse leaves optional fields out when absent", () => {
   const xml = "<InputProxyChannelStatusList><InputProxyChannelStatus>" +
     "<id>3</id><online>false</online>" +
     "</InputProxyChannelStatus></InputProxyChannelStatusList>";
@@ -90,14 +91,14 @@ Deno.test("inputProxyChannelStatus.codec.parse leaves optional fields out when a
   }]);
 });
 
-Deno.test("inputProxyChannelStatus.codec.parse returns an empty list for an empty document", () => {
+test("inputProxyChannelStatus.codec.parse returns an empty list for an empty document", () => {
   assertEquals(
     inputProxyChannelStatus.codec.parse("<InputProxyChannelStatusList/>"),
     [],
   );
 });
 
-Deno.test("inputProxyChannelStatus.codec.parse throws when online is missing", () => {
+test("inputProxyChannelStatus.codec.parse throws when online is missing", () => {
   assertThrows(
     () =>
       inputProxyChannelStatus.codec.parse(
@@ -109,7 +110,7 @@ Deno.test("inputProxyChannelStatus.codec.parse throws when online is missing", (
   );
 });
 
-Deno.test("request(inputProxyChannelStatus) requests the channel status path", async () => {
+test("request(inputProxyChannelStatus) requests the channel status path", async () => {
   const fetch = spy(resolvesNext([
     new Response("<InputProxyChannelStatusList/>"),
   ]));
@@ -127,7 +128,7 @@ Deno.test("request(inputProxyChannelStatus) requests the channel status path", a
   );
 });
 
-Deno.test("request(inputProxyChannelStatus) surfaces a camera's ResponseStatus as IsapiError", async () => {
+test("request(inputProxyChannelStatus) surfaces a camera's ResponseStatus as IsapiError", async () => {
   const fetch = spy(resolvesNext([
     new Response(
       "<ResponseStatus><statusCode>4</statusCode><subStatusCode>notSupport</subStatusCode></ResponseStatus>",

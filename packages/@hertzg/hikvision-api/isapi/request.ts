@@ -21,7 +21,8 @@
  * ```ts
  * import { assertEquals } from "@std/assert";
  * import { resolvesNext, spy } from "@std/testing/mock";
- * import { document, text } from "./document.ts";
+ * import { document } from "./document/document.ts";
+ * import { text } from "./document/text.ts";
  * import { request } from "./request.ts";
  *
  * const fetch = spy(resolvesNext([new Response("<DeviceInfo><model>X</model></DeviceInfo>")]));
@@ -38,9 +39,11 @@
  * @module
  */
 
-import { type Device, resolveUrl, send } from "../http/request.ts";
-import type { Document } from "./document.ts";
-import { findResponseStatus, IsapiError } from "./status.ts";
+import { resolveUrl } from "../http/resolve-url.ts";
+import { type Device, send } from "../http/send.ts";
+import type { Document } from "./document/define-document.ts";
+import { findResponseStatus } from "./status/find-response-status.ts";
+import { IsapiError } from "./status/isapi-error.ts";
 
 /**
  * One ISAPI resource: where it is and how to read it.
@@ -99,9 +102,10 @@ export function request<T>(
  * ```ts
  * import { assertEquals, assertRejects } from "@std/assert";
  * import { resolvesNext, spy } from "@std/testing/mock";
- * import { document, text } from "./document.ts";
+ * import { document } from "./document/document.ts";
+ * import { text } from "./document/text.ts";
  * import { request } from "./request.ts";
- * import { IsapiError } from "./status.ts";
+ * import { IsapiError } from "./status/isapi-error.ts";
  *
  * const fetch = spy(resolvesNext([
  *   new Response(

@@ -36,7 +36,9 @@
  * @module
  */
 
-import { document, optional, text } from "../document.ts";
+import { document } from "../document/document.ts";
+import { optional } from "../document/optional.ts";
+import { text } from "../document/text.ts";
 import type { Resource } from "../request.ts";
 
 /** The fields of `<DeviceInfo>`. */

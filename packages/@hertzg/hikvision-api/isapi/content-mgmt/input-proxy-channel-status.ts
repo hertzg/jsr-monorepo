@@ -56,17 +56,15 @@
  * @module
  */
 
-import {
-  bool,
-  document,
-  type FieldValue,
-  int,
-  list,
-  obj,
-  optional,
-  repeated,
-  text,
-} from "../document.ts";
+import { bool } from "../document/bool.ts";
+import type { FieldValue } from "../document/decode-fields.ts";
+import { document } from "../document/document.ts";
+import { int } from "../document/int.ts";
+import { list } from "../document/list.ts";
+import { obj } from "../document/obj.ts";
+import { optional } from "../document/optional.ts";
+import { repeated } from "../document/repeated.ts";
+import { text } from "../document/text.ts";
 import type { Resource } from "../request.ts";
 
 /** One `<InputProxyChannelStatus>`: the NVR's view of one IP camera. */
@@ -126,7 +124,7 @@ const channelStatus = obj({
     connMode: optional(text()),
   })),
   SecurityStatus: optional(obj({ PasswordStatus: text() })),
-  streamingProxyChannelIdList: optional(list("streamingProxyChannelId", int())),
+  streamingProxyChannelIdList: list("streamingProxyChannelId", int()),
 });
 
 /**
@@ -184,6 +182,6 @@ function toInputProxyChannelStatus(
     ...status,
     ...source,
     ...(security && { passwordStatus: security.PasswordStatus }),
-    ...(streamingProxyChannelIds && { streamingProxyChannelIds }),
+    ...(streamingProxyChannelIds.length > 0 && { streamingProxyChannelIds }),
   };
 }

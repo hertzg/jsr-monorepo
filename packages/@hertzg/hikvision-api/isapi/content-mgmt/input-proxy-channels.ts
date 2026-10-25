@@ -45,15 +45,13 @@
  * @module
  */
 
-import {
-  document,
-  type FieldValue,
-  int,
-  obj,
-  optional,
-  repeated,
-  text,
-} from "../document.ts";
+import type { FieldValue } from "../document/decode-fields.ts";
+import { document } from "../document/document.ts";
+import { int } from "../document/int.ts";
+import { obj } from "../document/obj.ts";
+import { optional } from "../document/optional.ts";
+import { repeated } from "../document/repeated.ts";
+import { text } from "../document/text.ts";
 import type { Resource } from "../request.ts";
 
 /** One `<InputProxyChannel>`: an IP camera as the NVR sees it. */

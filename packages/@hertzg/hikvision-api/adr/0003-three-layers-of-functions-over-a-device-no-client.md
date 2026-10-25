@@ -6,8 +6,8 @@ The two verbs are shaped like `fetch(input, init)`: the second argument
 says what comes back.
 
 ```
-http/request.ts    send(device, path, init) -> Response          fetch + Basic auth, no ISAPI
-http/multipart.ts  bytes -> parts
+http/send.ts       send(device, path, init) -> Response          fetch + Basic auth, no ISAPI
+http/*.ts          multipart parts, auth header, url
 isapi/request.ts   request(device, path | resource, init)        Response | decoded T, IsapiError
 isapi/stream.ts    stream(device, resource, { signal })          ReadableStream<T>
 isapi/<tree>/*.ts  deviceInfo, motionDetection({ channel }), alertStream   Resource<T> = { path, codec }

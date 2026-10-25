@@ -3,7 +3,7 @@
  *
  * The document lives at `/ISAPI/Smart/LineDetection/<channel>`, where
  * `<channel>` is the video input channel: 1..N on an NVR, 1 on a camera.
- * Unlike the region rules in `rules.ts`, the root holds a `<LineItemList>`
+ * Unlike the region rules in `smart-rules.ts`, the root holds a `<LineItemList>`
  * of `<LineItem>`s, each with a two-point `<CoordinatesList>` and a
  * `<directionSensitivity>`. The points are drawn in the same normalized
  * screen space, 1000 x 1000 by default. A device without the feature
@@ -64,25 +64,19 @@
  * @module
  */
 
-import {
-  bool,
-  type Decoded,
-  document,
-  int,
-  list,
-  obj,
-  optional,
-  points,
-  text,
-} from "../document.ts";
+import { bool } from "../document/bool.ts";
+import type { Decoded } from "../document/decode-fields.ts";
+import { document } from "../document/document.ts";
+import { int } from "../document/int.ts";
+import { list } from "../document/list.ts";
+import { obj } from "../document/obj.ts";
+import { optional } from "../document/optional.ts";
+import { points } from "../document/points.ts";
+import { text } from "../document/text.ts";
 import type { Resource } from "../request.ts";
-import {
-  type NormalizedScreenSize,
-  ruleFields,
-  screenSize,
-  type SmartRule,
-  toRule,
-} from "./rules.ts";
+import { ruleFields, type SmartRule } from "./rule-fields.ts";
+import { type NormalizedScreenSize, screenSize } from "./screen-size.ts";
+import { toRule } from "./to-rule.ts";
 
 /** One `<LineItem>`: a line whose crossing raises `linedetection`. */
 export type LineDetectionLine = SmartRule & {
@@ -135,7 +129,7 @@ export type LineDetection = {
  * @example A device without the feature
  * ```ts
  * import { assertThrows } from "@std/assert";
- * import { IsapiError } from "../status.ts";
+ * import { IsapiError } from "../status/isapi-error.ts";
  * import { lineDetection } from "./line-detection.ts";
  *
  * assertThrows(

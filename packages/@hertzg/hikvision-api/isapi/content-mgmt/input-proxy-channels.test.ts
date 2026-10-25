@@ -1,9 +1,10 @@
+import { test } from "node:test";
 import { assertEquals } from "@std/assert";
 import { resolvesNext, spy } from "@std/testing/mock";
 import { request } from "../request.ts";
 import { inputProxyChannels } from "./input-proxy-channels.ts";
 
-Deno.test("inputProxyChannels.codec.parse reads every channel with its source", () => {
+test("inputProxyChannels.codec.parse reads every channel with its source", () => {
   const xml = '<?xml version="1.0" encoding="UTF-8" ?>\n' +
     '<InputProxyChannelList version="2.0" xmlns="http://www.hikvision.com/ver20/XMLSchema">\n' +
     '<InputProxyChannel version="2.0" xmlns="http://www.hikvision.com/ver20/XMLSchema">\n' +
@@ -52,11 +53,11 @@ Deno.test("inputProxyChannels.codec.parse reads every channel with its source", 
   ]);
 });
 
-Deno.test("inputProxyChannels.codec.parse returns an empty list for an empty document", () => {
+test("inputProxyChannels.codec.parse returns an empty list for an empty document", () => {
   assertEquals(inputProxyChannels.codec.parse("<InputProxyChannelList/>"), []);
 });
 
-Deno.test("request(inputProxyChannels) requests the channel list path", async () => {
+test("request(inputProxyChannels) requests the channel list path", async () => {
   const fetch = spy(resolvesNext([new Response("<InputProxyChannelList/>")]));
 
   await request({

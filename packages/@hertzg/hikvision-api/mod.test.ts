@@ -1,5 +1,6 @@
 import { assertEquals } from "@std/assert";
 import { resolvesNext, spy } from "@std/testing/mock";
+import { test } from "node:test";
 import {
   alertStream,
   fieldDetection,
@@ -15,7 +16,7 @@ const DEVICE = {
   password: "hunter2",
 };
 
-Deno.test("request routes a parameterized resource to its path", async () => {
+test("request routes a parameterized resource to its path", async () => {
   const fetch = spy(resolvesNext([
     new Response(
       "<MotionDetection><enabled>true</enabled>" +
@@ -55,7 +56,7 @@ Deno.test("request routes a parameterized resource to its path", async () => {
   );
 });
 
-Deno.test("request with a path sends any method", async () => {
+test("request with a path sends any method", async () => {
   const fetch = spy(resolvesNext([new Response("raw")]));
 
   const response = await request(
@@ -69,7 +70,7 @@ Deno.test("request with a path sends any method", async () => {
   assertEquals((fetch.calls[0].args[1] as RequestInit).method, "PUT");
 });
 
-Deno.test("stream opens the alert stream with the signal", async () => {
+test("stream opens the alert stream with the signal", async () => {
   const controller = new AbortController();
   const fetch = spy(resolvesNext([
     new Response("", {

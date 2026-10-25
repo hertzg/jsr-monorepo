@@ -1,9 +1,10 @@
+import { test } from "node:test";
 import { assertEquals } from "@std/assert";
 import { resolvesNext, spy } from "@std/testing/mock";
 import { request } from "../request.ts";
 import { motionDetection } from "./motion-detection.ts";
 
-Deno.test("motionDetection path picks the input proxy path for an NVR channel", () => {
+test("motionDetection path picks the input proxy path for an NVR channel", () => {
   assertEquals(
     motionDetection({ channel: 5, proxy: true }).path,
     "/ISAPI/ContentMgmt/InputProxy/channels/5/video/motionDetection",
@@ -14,7 +15,7 @@ Deno.test("motionDetection path picks the input proxy path for an NVR channel", 
   );
 });
 
-Deno.test("motionDetection codec reads a grid-only document from an NVR", () => {
+test("motionDetection codec reads a grid-only document from an NVR", () => {
   const xml = '<?xml version="1.0" encoding="UTF-8" ?>\n' +
     '<MotionDetection version="2.0" xmlns="http://www.isapi.org/ver20/XMLSchema">\n' +
     "<enabled>true</enabled>\n" +
@@ -56,7 +57,7 @@ Deno.test("motionDetection codec reads a grid-only document from an NVR", () => 
   );
 });
 
-Deno.test("motionDetection codec reads a gridMap and a RegionList side by side", () => {
+test("motionDetection codec reads a gridMap and a RegionList side by side", () => {
   const xml =
     '<MotionDetection version="2.0" xmlns="http://www.isapi.org/ver20/XMLSchema">' +
     "<enabled>true</enabled>" +
@@ -110,7 +111,7 @@ Deno.test("motionDetection codec reads a gridMap and a RegionList side by side",
   ]);
 });
 
-Deno.test("motionDetection codec reads a region-only document without a gridMap", () => {
+test("motionDetection codec reads a region-only document without a gridMap", () => {
   const xml = "<MotionDetection>" +
     "<enabled>true</enabled>" +
     "<regionType>region</regionType>" +
@@ -141,7 +142,7 @@ Deno.test("motionDetection codec reads a region-only document without a gridMap"
   });
 });
 
-Deno.test("motionDetection codec leaves optional fields out when the device omits them", () => {
+test("motionDetection codec leaves optional fields out when the device omits them", () => {
   const xml = "<MotionDetection><enabled>false</enabled>" +
     "<Grid><rowGranularity>1</rowGranularity><columnGranularity>8</columnGranularity></Grid>" +
     "<MotionDetectionLayout><layout><gridMap>ff</gridMap></layout></MotionDetectionLayout>" +
@@ -155,7 +156,7 @@ Deno.test("motionDetection codec leaves optional fields out when the device omit
   });
 });
 
-Deno.test("motionDetection codec leaves the grid out when the gridMap has no Grid to size it", () => {
+test("motionDetection codec leaves the grid out when the gridMap has no Grid to size it", () => {
   const xml = "<MotionDetection><enabled>true</enabled>" +
     "<MotionDetectionLayout><layout><gridMap>ff</gridMap></layout></MotionDetectionLayout>" +
     "</MotionDetection>";
@@ -165,7 +166,7 @@ Deno.test("motionDetection codec leaves the grid out when the gridMap has no Gri
   });
 });
 
-Deno.test("motionDetection codec returns only enabled for a bare document", () => {
+test("motionDetection codec returns only enabled for a bare document", () => {
   assertEquals(
     motionDetection({ channel: 1 }).codec.parse(
       "<MotionDetection><regionType>none</regionType></MotionDetection>",
@@ -174,7 +175,7 @@ Deno.test("motionDetection codec returns only enabled for a bare document", () =
   );
 });
 
-Deno.test("motionDetection codec drops an empty RegionList", () => {
+test("motionDetection codec drops an empty RegionList", () => {
   const xml = "<MotionDetection><enabled>true</enabled>" +
     "<Grid><rowGranularity>1</rowGranularity><columnGranularity>8</columnGranularity></Grid>" +
     "<MotionDetectionLayout><layout><gridMap>00</gridMap>" +
@@ -196,7 +197,7 @@ Deno.test("motionDetection codec drops an empty RegionList", () => {
   ]]);
 });
 
-Deno.test("request(motionDetection) requests the camera-side path when proxy is off", async () => {
+test("request(motionDetection) requests the camera-side path when proxy is off", async () => {
   const fetch = spy(resolvesNext([
     new Response(
       "<MotionDetection><enabled>true</enabled>" +

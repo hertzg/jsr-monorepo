@@ -1,10 +1,11 @@
+import { test } from "node:test";
 import { assertEquals, assertRejects, assertThrows } from "@std/assert";
 import { resolvesNext, spy } from "@std/testing/mock";
-import { IsapiError } from "../status.ts";
+import { IsapiError } from "../status/isapi-error.ts";
 import { request } from "../request.ts";
 import { deviceInfo } from "./device-info.ts";
 
-Deno.test("deviceInfo.codec.parse reads every field of an NVR document", () => {
+test("deviceInfo.codec.parse reads every field of an NVR document", () => {
   const xml = '<?xml version="1.0" encoding="UTF-8" ?>\n' +
     '<DeviceInfo version="2.0" xmlns="http://www.hikvision.com/ver20/XMLSchema">\n' +
     "<deviceName>Embedded Net DVR</deviceName>\n" +
@@ -30,7 +31,7 @@ Deno.test("deviceInfo.codec.parse reads every field of an NVR document", () => {
   });
 });
 
-Deno.test("deviceInfo.codec.parse throws when a required field is missing", () => {
+test("deviceInfo.codec.parse throws when a required field is missing", () => {
   assertThrows(
     () =>
       deviceInfo.codec.parse(
@@ -41,7 +42,7 @@ Deno.test("deviceInfo.codec.parse throws when a required field is missing", () =
   );
 });
 
-Deno.test("request(deviceInfo) surfaces a ResponseStatus as IsapiError", async () => {
+test("request(deviceInfo) surfaces a ResponseStatus as IsapiError", async () => {
   const fetch = spy(resolvesNext([
     new Response(
       "<ResponseStatus><statusCode>3</statusCode><subStatusCode>deviceError</subStatusCode></ResponseStatus>",

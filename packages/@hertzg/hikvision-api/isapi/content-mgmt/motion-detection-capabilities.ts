@@ -42,15 +42,13 @@
  * @module
  */
 
-import {
-  attribute,
-  attributes,
-  document,
-  int,
-  obj,
-  optional,
-  splitTokens,
-} from "../document.ts";
+import { attribute } from "../document/attribute.ts";
+import { attributes } from "../document/attributes.ts";
+import { document } from "../document/document.ts";
+import { int } from "../document/int.ts";
+import { obj } from "../document/obj.ts";
+import { optional } from "../document/optional.ts";
+import { splitTokens } from "../document/split-tokens.ts";
 import type { Resource } from "../request.ts";
 import {
   motionDetection,
