@@ -1,0 +1,13 @@
+{
+  "name": "@hertzg/hikvision-api",
+  "version": "0.0.1",
+  "exports": "./mod.ts",
+  "publish": {
+    "exclude": [
+      "**/*.test.ts",
+      "**/*.md",
+      "adr",
+      "zz-*.ts"
+    ]
+  }
+}
