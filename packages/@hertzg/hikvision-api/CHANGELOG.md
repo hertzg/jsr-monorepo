@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.1.2](https://github.com/hertzg/jsr-monorepo/compare/@hertzg/hikvision-api-v0.1.1...@hertzg/hikvision-api-v0.1.2) (2026-10-25)
+
+
+### Bug Fixes
+
+* **@hertzg/hikvision-api:** read a smart alert's box and points whole or not at all ([#309](https://github.com/hertzg/jsr-monorepo/issues/309)) ([708afe4](https://github.com/hertzg/jsr-monorepo/commit/708afe4cc30d9bdd0d0596169f307827116b1679))
+
 ## [0.1.1](https://github.com/hertzg/jsr-monorepo/compare/@hertzg/hikvision-api-v0.1.0...@hertzg/hikvision-api-v0.1.1) (2026-10-25)
 
 
