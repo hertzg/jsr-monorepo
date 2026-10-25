@@ -169,7 +169,7 @@ export function splitTokens(value: string): string[] {
   );
 }
 
-function require(parent: XmlElement, name: string): XmlElement {
+function requireChild(parent: XmlElement, name: string): XmlElement {
   const found = child(parent, name);
   if (found === undefined) {
     throw new Error(`ISAPI <${parent.name.local}> has no <${name}>`);
@@ -187,7 +187,7 @@ function number(value: string, name: string): number {
 
 function scalar<T>(convert: (value: string, name: string) => T): Field<T> {
   return {
-    decode: (parent, name) => convert(textContent(require(parent, name)), name),
+    decode: (parent, name) => convert(textContent(requireChild(parent, name)), name),
   };
 }
 
@@ -292,7 +292,7 @@ export function points(): Field<Point[]> {
   const pair = obj({ positionX: int(), positionY: int() });
   return {
     decode: (parent, name) =>
-      require(parent, name).children.filter(isElement).map((element) => {
+      requireChild(parent, name).children.filter(isElement).map((element) => {
         const { positionX, positionY } = pair.decode(
           { ...parent, children: [element] },
           element.name.local,
@@ -328,7 +328,7 @@ export function attribute<T = string>(
 ): Field<T> {
   return {
     decode: (parent, name) => {
-      const value = require(parent, name).attributes[attribute];
+      const value = requireChild(parent, name).attributes[attribute];
       if (value === undefined) {
         throw new Error(`ISAPI <${name}> has no ${attribute} attribute`);
       }
@@ -363,7 +363,7 @@ export function attributes<
 ): Field<{ [K in keyof C]?: ReturnType<C[K]> }> {
   return {
     decode: (parent, name) => {
-      const element = require(parent, name);
+      const element = requireChild(parent, name);
       const result: Record<string, unknown> = {};
       for (const [key, convert] of Object.entries(converters)) {
         const value = element.attributes[key];
@@ -396,7 +396,7 @@ export function attributes<
  */
 export function obj<const F extends Fields>(fields: F): Field<Decoded<F>> {
   return {
-    decode: (parent, name) => decodeFields(fields, require(parent, name)),
+    decode: (parent, name) => decodeFields(fields, requireChild(parent, name)),
   };
 }
 
