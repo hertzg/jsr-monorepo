@@ -28,8 +28,11 @@
  *   motion ends when the posts stop. How long to wait is the consumer's
  *   call; {@link Alert.at} is the arrival time to measure it from.
  * - Smart events (`fielddetection`, `linedetection` and the other rules in
- *   `smart/rules.ts`) do post `eventState inactive` on some firmware, and
- *   carry the regions that fired in a `<DetectionRegionList>`.
+ *   `smart/`) do post `eventState inactive` on some firmware, and carry the
+ *   regions that fired in a `<DetectionRegionList>`. An AcuSense camera
+ *   through an NVR posts entries with an empty `<regionID></regionID>` and
+ *   an empty `<RegionCoordinatesList>`, plus a `<bkgUrl>` snapshot; those
+ *   read as a region without `id`, with no coordinates, and `pictureUrl`.
  * - The heartbeat is `eventType videoloss`, `eventState inactive`, every
  *   10 seconds. An NVR goes quiet on heartbeats while alerts flow, so a
  *   liveness check counts every alert, not only heartbeats. A camera keeps
@@ -126,6 +129,18 @@ export type Alert = {
   macAddress?: string;
   /** The regions of a smart event, when the alert carries a `<DetectionRegionList>`. */
   regions?: AlertRegion[];
+  /**
+   * `<bkgUrl>`: where to fetch the snapshot the device took for a smart
+   * event, with the same credentials (`<URLCertificationType>` says which
+   * scheme, usually `digest`). Sent when `pictureTransport` is `url`.
+   */
+  pictureUrl?: string;
+  /**
+   * `<detectionPictureTransType>`: `url` when the snapshot is at
+   * {@link Alert.pictureUrl}, `binary` when it follows as an image part of
+   * the stream.
+   */
+  pictureTransport?: string;
 };
 
 const alert = document({
@@ -139,6 +154,8 @@ const alert = document({
   channelName: optional(text()),
   ipAddress: optional(text()),
   macAddress: optional(text()),
+  bkgUrl: optional(text()),
+  detectionPictureTransType: optional(text()),
   DetectionRegionList: list(
     "DetectionRegionEntry",
     obj({
@@ -204,7 +221,14 @@ export function decodeAlert(root: XmlElement, at: string): Alert {
 }
 
 function toAlert(wire: WireAlert, at: string): Alert {
-  const { dynChannelID, channelID, DetectionRegionList, ...fields } = wire;
+  const {
+    dynChannelID,
+    channelID,
+    DetectionRegionList,
+    bkgUrl,
+    detectionPictureTransType,
+    ...fields
+  } = wire;
   return {
     ...fields,
     channel: dynChannelID ?? channelID ?? 0,
@@ -213,6 +237,9 @@ function toAlert(wire: WireAlert, at: string): Alert {
     at,
     ...(DetectionRegionList.length > 0 &&
       { regions: DetectionRegionList.map(toRegion) }),
+    ...(bkgUrl !== undefined && { pictureUrl: bkgUrl }),
+    ...(detectionPictureTransType !== undefined &&
+      { pictureTransport: detectionPictureTransType }),
   };
 }
 

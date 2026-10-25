@@ -6,7 +6,8 @@
  *
  * ```
  * OneField   exactly one child: decode(child); none throws, or the key
- *            is left out when the field is optional
+ *            is left out when the field is optional. For an optional field
+ *            an empty element (`<regionID></regionID>`) counts as none.
  * ManyField  every child of the name: decodeAll(children); none is fine
  * ```
  *
@@ -30,7 +31,7 @@
  * @module
  */
 
-import type { XmlElement } from "@std/xml";
+import { isCData, isElement, isText, type XmlElement } from "@std/xml";
 import { children } from "./children.ts";
 
 /**
@@ -114,11 +115,21 @@ export function decodeFields<F extends Fields>(
     const found = children(element, name);
     if ("decodeAll" in field) {
       value[name] = field.decodeAll(found);
-    } else if (found.length > 0) {
+    } else if (found.length > 0 && !(field.optional && isEmpty(found[0]))) {
       value[name] = field.decode(found[0]);
     } else if (!field.optional) {
       throw new Error(`ISAPI <${element.name.local}> has no <${name}>`);
     }
   }
   return value as Decoded<F>;
+}
+
+// An AcuSense camera posts `<regionID></regionID>` in a smart alert. For an
+// optional field, an element with nothing in it means the same as no element.
+function isEmpty(element: XmlElement): boolean {
+  return Object.keys(element.attributes).length === 0 &&
+    element.children.every((node) =>
+      !isElement(node) && (isText(node) || isCData(node)) &&
+      node.text.trim() === ""
+    );
 }

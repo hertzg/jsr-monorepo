@@ -8,8 +8,11 @@ import type { OneField } from "./decode-fields.ts";
 
 /**
  * The same field, marked optional: when its element is absent the key is
- * left out of the decoded object instead of throwing. Firmwares differ in
- * which elements they send, so most fields are.
+ * left out of the decoded object instead of throwing. An element that is
+ * present but empty, with no text, children or attributes, counts as
+ * absent too: an AcuSense camera posts `<regionID></regionID>`, and an
+ * `optional(int())` must not take the alert stream down over it.
+ * Firmwares differ in which elements they send, so most fields are.
  *
  * @template T The decoded value.
  * @param field The field.

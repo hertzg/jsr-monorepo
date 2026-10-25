@@ -178,3 +178,49 @@ test("parseAlert throws when there is no eventType", () => {
     "<eventType>",
   );
 });
+
+test("parseAlert reads an AcuSense intrusion post with an empty regionID and a snapshot URL", () => {
+  // The post an NVR relays for an AcuSense camera's fielddetection rule,
+  // with the device's address and MAC replaced.
+  const xml =
+    '<EventNotificationAlert version="1.0" xmlns="http://www.hikvision.com/ver20/XMLSchema">\n' +
+    "<ipAddress>192.0.2.10</ipAddress>\n" +
+    "<portNo>80</portNo>\n" +
+    "<protocol>HTTP</protocol>\n" +
+    "<macAddress>02:00:00:00:00:01</macAddress>\n" +
+    "<dynChannelID>2</dynChannelID>\n" +
+    "<dateTime>2026-10-25T15:50:25</dateTime>\n" +
+    "<activePostCount>1</activePostCount>\n" +
+    "<eventType>fielddetection</eventType>\n" +
+    "<eventState>active</eventState>\n" +
+    "<eventDescription>fielddetection alarm</eventDescription>\n" +
+    "<DetectionRegionList>\n" +
+    "<DetectionRegionEntry>\n" +
+    "<regionID></regionID>\n" +
+    "<sensitivityLevel>0</sensitivityLevel>\n" +
+    "<RegionCoordinatesList>\n" +
+    "</RegionCoordinatesList>\n" +
+    "</DetectionRegionEntry>\n" +
+    "</DetectionRegionList>\n" +
+    "<detectionPictureTransType>url</detectionPictureTransType>\n" +
+    "<detectionPicturesNumber>1</detectionPicturesNumber>\n" +
+    "<bkgUrl>http://192.0.2.10:80/picture/Streaming/tracks/203/?name=ch00002_00000005439082781440000308956&amp;size=308956</bkgUrl>\n" +
+    "<URLCertificationType>digest</URLCertificationType>\n" +
+    "</EventNotificationAlert>\n";
+
+  assertEquals(parseAlert(xml, "2026-10-25T11:50:25.145Z"), {
+    channel: 2,
+    eventType: "fielddetection",
+    eventState: "active",
+    eventDescription: "fielddetection alarm",
+    dateTime: "2026-10-25T15:50:25",
+    at: "2026-10-25T11:50:25.145Z",
+    activePostCount: 1,
+    ipAddress: "192.0.2.10",
+    macAddress: "02:00:00:00:00:01",
+    regions: [{ sensitivityLevel: 0, coordinates: [], detectionTarget: [] }],
+    pictureUrl:
+      "http://192.0.2.10:80/picture/Streaming/tracks/203/?name=ch00002_00000005439082781440000308956&size=308956",
+    pictureTransport: "url",
+  });
+});
