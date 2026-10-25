@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.1.1](https://github.com/hertzg/jsr-monorepo/compare/@hertzg/hikvision-api-v0.1.0...@hertzg/hikvision-api-v0.1.1) (2026-10-25)
+
+
+### Bug Fixes
+
+* **@hertzg/hikvision-api:** read an empty optional element as absent so one bad regionID cannot end the alert stream ([#307](https://github.com/hertzg/jsr-monorepo/issues/307)) ([094a039](https://github.com/hertzg/jsr-monorepo/commit/094a039066485de9df5d8bdfa85c6deba7268683))
+
 ## [0.1.0](https://github.com/hertzg/jsr-monorepo/compare/@hertzg/hikvision-api-v0.0.1...@hertzg/hikvision-api-v0.1.0) (2026-10-25)
 
 
