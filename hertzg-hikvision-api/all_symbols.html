@@ -528,7 +528,7 @@ Functions</h2></div><div class="namespaceSection"><div id="namespace_basicauthor
 Type Aliases</h2></div><div class="namespaceSection"><div id="namespace_alert" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-TypeAlias bg-TypeAlias/15 dark:text-TypeAliasDark dark:bg-TypeAliasDark/15" title="Type Alias">T</div></div>
 <div class="namespaceItemContent">
 		    <a href=".&#x2F;.&#x2F;.&#x2F;~&#x2F;Alert.html" title="Alert">
-			    <span>Alert</span><span> = { channel<span>: <span class="td-kw">number</span></span>; eventType<span>: <span class="td-kw">string</span></span>; eventState<span>: <span class="td-kw">string</span></span>; eventDescription<span class="td-op">?</span><span>: <span class="td-kw">string</span></span>; dateTime<span>: <span class="td-kw">string</span></span>; at<span>: <span class="td-kw">string</span></span>; activePostCount<span class="td-op">?</span><span>: <span class="td-kw">number</span></span>; channelName<span class="td-op">?</span><span>: <span class="td-kw">string</span></span>; ipAddress<span class="td-op">?</span><span>: <span class="td-kw">string</span></span>; macAddress<span class="td-op">?</span><span>: <span class="td-kw">string</span></span>; regions<span class="td-op">?</span><span>: <span class="td-ref">AlertRegion</span>[]</span>;  }</span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>One <code>&lt;EventNotificationAlert&gt;</code>, with the time it arrived.</p>
+			    <span>Alert</span><span> = { channel<span>: <span class="td-kw">number</span></span>; eventType<span>: <span class="td-kw">string</span></span>; eventState<span>: <span class="td-kw">string</span></span>; eventDescription<span class="td-op">?</span><span>: <span class="td-kw">string</span></span>; dateTime<span>: <span class="td-kw">string</span></span>; at<span>: <span class="td-kw">string</span></span>; activePostCount<span class="td-op">?</span><span>: <span class="td-kw">number</span></span>; channelName<span class="td-op">?</span><span>: <span class="td-kw">string</span></span>; ipAddress<span class="td-op">?</span><span>: <span class="td-kw">string</span></span>; macAddress<span class="td-op">?</span><span>: <span class="td-kw">string</span></span>; regions<span class="td-op">?</span><span>: <span class="td-ref">AlertRegion</span>[]</span>; pictureUrl<span class="td-op">?</span><span>: <span class="td-kw">string</span></span>; pictureTransport<span class="td-op">?</span><span>: <span class="td-kw">string</span></span>;  }</span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>One <code>&lt;EventNotificationAlert&gt;</code>, with the time it arrived.</p>
 </div></div><ul class="namespaceItemContentSubItems"><li>
                 <a href=".&#x2F;.&#x2F;.&#x2F;~&#x2F;Alert.html#property_activepostcount">
                   <span>activePostCount</span><span>: <span class="td-kw">number</span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p><code>&lt;activePostCount&gt;</code>: on an NVR, how many channels have an active event
@@ -563,6 +563,16 @@ smart events post <code>inactive</code> on some firmware when the rule clears.</
 </div></div></li><li>
                 <a href=".&#x2F;.&#x2F;.&#x2F;~&#x2F;Alert.html#property_macaddress">
                   <span>macAddress</span><span>: <span class="td-kw">string</span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p><code>&lt;macAddress&gt;</code> of the device that posted.</p>
+</div></div></li><li>
+                <a href=".&#x2F;.&#x2F;.&#x2F;~&#x2F;Alert.html#property_picturetransport">
+                  <span>pictureTransport</span><span>: <span class="td-kw">string</span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p><code>&lt;detectionPictureTransType&gt;</code>: <code>url</code> when the snapshot is at
+Alert.pictureUrl, <code>binary</code> when it follows as an image part of
+the stream.</p>
+</div></div></li><li>
+                <a href=".&#x2F;.&#x2F;.&#x2F;~&#x2F;Alert.html#property_pictureurl">
+                  <span>pictureUrl</span><span>: <span class="td-kw">string</span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p><code>&lt;bkgUrl&gt;</code>: where to fetch the snapshot the device took for a smart
+event, with the same credentials (<code>&lt;URLCertificationType&gt;</code> says which
+scheme, usually <code>digest</code>). Sent when <code>pictureTransport</code> is <code>url</code>.</p>
 </div></div></li><li>
                 <a href=".&#x2F;.&#x2F;.&#x2F;~&#x2F;Alert.html#property_regions">
                   <span>regions</span><span>: <span class="td-ref">AlertRegion</span>[]</span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>The regions of a smart event, when the alert carries a <code>&lt;DetectionRegionList&gt;</code>.</p>
