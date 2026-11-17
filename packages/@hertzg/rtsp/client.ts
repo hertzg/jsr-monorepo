@@ -593,6 +593,11 @@ function createAnswer(
 /**
  * Ends the connection on the caller's wish: lets what was written go out,
  * then closes the writable side and cancels the readable side.
+ *
+ * The readable is cancelled only after the writable has closed. On a
+ * `node:net` socket wrapped with `Duplex.toWeb`, cancelling the readable
+ * destroys the socket, and a socket destroyed while its writable is still
+ * closing fails the close with an `AbortError`.
  */
 async function closeConnection(connection: Connection): Promise<void> {
   if (connection.ended !== undefined) {
@@ -601,11 +606,8 @@ async function closeConnection(connection: Connection): Promise<void> {
   for (const channel of endConnection(connection, new Error(CLOSED_MESSAGE))) {
     channel.controller.close();
   }
-  await Promise.all([
-    connection.writer.close(),
-    connection.piped,
-    connection.reader.cancel(),
-  ]);
+  await Promise.all([connection.writer.close(), connection.piped]);
+  await connection.reader.cancel();
 }
 
 /**

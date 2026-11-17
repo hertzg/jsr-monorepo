@@ -5,7 +5,12 @@ import {
   assertRejects,
   assertStrictEquals,
 } from "@std/assert";
-import { assertSpyCallArg, assertSpyCalls, spy } from "@std/testing/mock";
+import {
+  assertSpyCall,
+  assertSpyCallArg,
+  assertSpyCalls,
+  spy,
+} from "@std/testing/mock";
 import { createClient } from "./client.ts";
 import { isRequest, isResponse } from "./protocol/message.ts";
 import type { RtspRequest } from "./protocol/request.ts";
@@ -1003,6 +1008,27 @@ test("close cancels the connection's readable", async () => {
   await client.close();
 
   assertSpyCalls(cancel, 1);
+});
+
+test("close cancels the readable only after the writable has closed", async () => {
+  const finishClosing = spy();
+  const countFinishedCloses = spy(() => finishClosing.calls.length);
+  const client = createClient({
+    readable: new ReadableStream<Uint8Array>({
+      cancel() {
+        countFinishedCloses();
+      },
+    }),
+    writable: new WritableStream<Uint8Array>({
+      // A socket takes a turn of the event loop to close, not a microtask.
+      close: () =>
+        new Promise<void>((resolve) => setTimeout(resolve)).then(finishClosing),
+    }),
+  });
+
+  await client.close();
+
+  assertSpyCall(countFinishedCloses, 0, { returned: 1 });
 });
 
 test("a second close resolves", async () => {
