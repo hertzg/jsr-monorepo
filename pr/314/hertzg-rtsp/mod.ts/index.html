@@ -1,0 +1,805 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>mod.ts - @hertzg/rtsp documentation</title>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="doc-current-file" content="">
+  <link rel="stylesheet" href="..&#x2F;styles.css">
+  <link rel="stylesheet" href="..&#x2F;page.css">
+  <link id="ddocResetStylesheet" rel="stylesheet" href="..&#x2F;reset.css"><link href="../comrak.css" rel="stylesheet" /><link href="../prism.css" rel="stylesheet" /><script src="../prism.js"></script><script src="..&#x2F;script.js" defer></script>
+  <script src="..&#x2F;darkmode_toggle.js"></script><script src="..&#x2F;search_index.js" defer></script>
+    <script src="..&#x2F;fuse.js" defer></script>
+    <script src="..&#x2F;search.js" defer></script></head>
+<body>
+<div class="ddoc">
+<div><nav id="topnav">
+  <div class="h-full">
+    <div class="flex items-center"><ul class="breadcrumbs">
+  <li>
+    <a href="..&#x2F;" class="contextLink">@hertzg&#x2F;rtsp</a>
+  </li><span class="text-black dark:text-white"><svg
+  width="16"
+  height="16"
+  viewBox="0 0 16 16"
+  fill="none"
+  xmlns="http://www.w3.org/2000/svg"
+>
+  <path
+    fill-rule="evenodd"
+    clip-rule="evenodd"
+    d="M5.76748 11.8159C5.5378 11.577 5.54525 11.1972 5.78411 10.9675L8.93431 8L5.78411 5.0325C5.54525 4.80282 5.5378 4.423 5.76748 4.18413C5.99715 3.94527 6.37698 3.93782 6.61584 4.1675L10.2158 7.5675C10.3335 7.68062 10.4 7.83679 10.4 8C10.4 8.16321 10.3335 8.31938 10.2158 8.4325L6.61584 11.8325C6.37698 12.0622 5.99715 12.0547 5.76748 11.8159Z"
+    fill="currentColor"
+  />
+</svg>
+</span>mod.ts</ul>
+</div>
+
+    <div class="flex items-center gap-2">
+      <button id="theme-toggle" type="button" aria-label="Toggle dark mode" style="display: none;"><svg
+  xmlns="http://www.w3.org/2000/svg"
+  width="14"
+  height="14"
+  viewBox="0 0 24 24"
+  fill="currentColor"
+>
+  <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+  <path
+    d="M12 1.992a10 10 0 1 0 9.236 13.838c.341 -.82 -.476 -1.644 -1.298 -1.31a6.5 6.5 0 0 1 -6.864 -10.787l.077 -.08c.551 -.63 .113 -1.653 -.758 -1.653h-.266l-.068 -.006l-.06 -.002z"
+  />
+</svg>
+<svg
+  xmlns="http://www.w3.org/2000/svg"
+  width="14"
+  height="14"
+  viewBox="0 0 24 24"
+  fill="currentColor"
+  class="hidden"
+>
+  <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+  <path
+    d="M12 19a1 1 0 0 1 .993 .883l.007 .117v1a1 1 0 0 1 -1.993 .117l-.007 -.117v-1a1 1 0 0 1 1 -1z"
+  />
+  <path
+    d="M18.313 16.91l.094 .083l.7 .7a1 1 0 0 1 -1.32 1.497l-.094 -.083l-.7 -.7a1 1 0 0 1 1.218 -1.567l.102 .07z"
+  />
+  <path
+    d="M7.007 16.993a1 1 0 0 1 .083 1.32l-.083 .094l-.7 .7a1 1 0 0 1 -1.497 -1.32l.083 -.094l.7 -.7a1 1 0 0 1 1.414 0z"
+  />
+  <path
+    d="M4 11a1 1 0 0 1 .117 1.993l-.117 .007h-1a1 1 0 0 1 -.117 -1.993l.117 -.007h1z"
+  />
+  <path
+    d="M21 11a1 1 0 0 1 .117 1.993l-.117 .007h-1a1 1 0 0 1 -.117 -1.993l.117 -.007h1z"
+  />
+  <path
+    d="M6.213 4.81l.094 .083l.7 .7a1 1 0 0 1 -1.32 1.497l-.094 -.083l-.7 -.7a1 1 0 0 1 1.217 -1.567l.102 .07z"
+  />
+  <path
+    d="M19.107 4.893a1 1 0 0 1 .083 1.32l-.083 .094l-.7 .7a1 1 0 0 1 -1.497 -1.32l.083 -.094l.7 -.7a1 1 0 0 1 1.414 0z"
+  />
+  <path
+    d="M12 2a1 1 0 0 1 .993 .883l.007 .117v1a1 1 0 0 1 -1.993 .117l-.007 -.117v-1a1 1 0 0 1 1 -1z"
+  />
+  <path
+    d="M12 7a5 5 0 1 1 -4.995 5.217l-.005 -.217l.005 -.217a5 5 0 0 1 4.995 -4.783z"
+  />
+</svg>
+</button>
+
+        <input
+          type="text"
+          id="searchbar"
+          style="display: none;"
+          class="py-2 px-2.5 mx-1 rounded text-sm border border-gray-300 bg-transparent dark:bg-gray-800 dark:border-gray-700"
+          />
+    </div>
+  </div>
+</nav>
+<div id="searchResults"></div><div id="content">
+    <main><section>
+  <div class="space-y-2 flex-1"><div class="space-y-7" id="module_doc"><div class="markdown"><p>An RTSP connection over any <code>{ readable, writable }</code> byte pair. Terminology
+follows RFC 7826 (RTSP 2.0); the message syntax is the same for <code>RTSP/1.0</code>,
+which is what cameras speak, so the version is just a field.</p>
+<pre class="highlight"><code>TCP octets
+   |
+streams/decode    TransformStream&lt;Uint8Array, RtspMessage | InterleavedBinaryData&gt;
+   |
+client read loop
+   |-- RtspResponse           -&gt; resolves request() by CSeq
+   |-- RtspRequest            -&gt; onRequest handler, answer written back
+   '-- InterleavedBinaryData  -&gt; channel(channelId), or dropped and counted
+</code><button class="copyButton" data-copy="TCP octets
+   |
+streams/decode    TransformStream&lt;Uint8Array, RtspMessage | InterleavedBinaryData&gt;
+   |
+client read loop
+   |-- RtspResponse           -&gt; resolves request() by CSeq
+   |-- RtspRequest            -&gt; onRequest handler, answer written back
+   '-- InterleavedBinaryData  -&gt; channel(channelId), or dropped and counted
+"><svg
+  class="copy"
+  width="15"
+  height="15"
+  viewBox="0 0 15 15"
+  fill="none"
+  xmlns="http://www.w3.org/2000/svg"
+>
+  <rect x="2" y="2" width="7" height="7" fill="none" />
+  <rect x="6" y="6" width="7" height="7" fill="none" />
+  <path
+    d="M1.55566 2.7C1.55566 2.03726 2.09292 1.5 2.75566 1.5H8.75566C9.41841 1.5 9.95566 2.03726 9.95566 2.7V5.1H12.3557C13.0184 5.1 13.5557 5.63726 13.5557 6.3V12.3C13.5557 12.9627 13.0184 13.5 12.3557 13.5H6.35566C5.69292 13.5 5.15566 12.9627 5.15566 12.3V9.9H2.75566C2.09292 9.9 1.55566 9.36274 1.55566 8.7V2.7ZM6.35566 9.9V12.3H12.3557V6.3H9.95566V8.7C9.95566 9.36274 9.41841 9.9 8.75566 9.9H6.35566ZM8.75566 8.7V2.7H2.75566V8.7H8.75566Z"
+    fill="currentColor"
+  />
+</svg>
+<svg
+  class="check"
+  width="15"
+  height="15"
+  viewBox="0 0 24 24"
+  stroke-width="2"
+  stroke="currentColor"
+  fill="none"
+  stroke-linecap="round"
+  stroke-linejoin="round"
+  xmlns="http://www.w3.org/2000/svg"
+>
+  <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+  <path d="M5 12l5 5l10 -10" />
+</svg>
+</button><code></code></pre>
+<p>The client carries messages and <code>$</code> blocks, nothing more. It keeps no RTSP
+session state, does not parse the <code>Transport</code> header or SDP, and does not
+authenticate. It does not open the socket either: the caller passes the two
+sides of a connection it already has. Any pair with <code>getReader()</code> and
+<code>getWriter()</code> will do (<code>OctetSource</code> and <code>OctetSink</code>), so the web streams
+of this runtime and what <code>Duplex.toWeb(socket)</code> returns both go in as they
+are.</p>
+<p>A request names its method and its Request-URI. The rest may be left out:
+the version is <code>RTSP/1.0</code> unless the request or the client's <code>rtspVersion</code>
+option says otherwise, and there are no header fields besides <code>CSeq</code> and no
+message body.</p>
+<p>The <code>headers</code> of a message are <code>[name, value]</code> pairs, one per header line,
+in the order of the lines and with each name as written. What the caller
+passes goes out in that order and that spelling, and what a camera sends
+comes back the same way. <code>new Headers(response.headers)</code> looks a name up
+whatever its case.</p>
+<p>Every layer is its own entry point: <code>encoding/interleaved</code>,
+<code>encoding/message</code>, <code>protocol/request</code>, <code>protocol/response</code>,
+<code>protocol/message</code>, <code>streams/decode</code>, <code>streams/encode</code> and <code>client</code>.</p>
+</div><section class="section"  id="examples"><div>
+      <h2 class="anchorable mb-1"><a href="#examples" class="anchor" aria-label="Anchor" tabIndex="-1"><svg
+  width="16"
+  height="16"
+  viewBox="0 0 14 14"
+  fill="none"
+  xmlns="http://www.w3.org/2000/svg"
+>
+  <g clip-path="url(#clip0_1081_1237)">
+    <path
+      fill-rule="evenodd"
+      clip-rule="evenodd"
+      d="M6.80328 2.8656C6.68736 2.99 6.62425 3.15454 6.62725 3.32456C6.63025 3.49457 6.69913 3.65678 6.81936 3.77702C6.9396 3.89725 7.10181 3.96613 7.27182 3.96913C7.44184 3.97213 7.60638 3.90902 7.73078 3.7931L8.82453 2.69935C8.98712 2.53676 9.18015 2.40778 9.39259 2.31978C9.60503 2.23179 9.83272 2.1865 10.0627 2.1865C10.2926 2.1865 10.5203 2.23179 10.7327 2.31978C10.9452 2.40778 11.1382 2.53676 11.3008 2.69935C11.4634 2.86194 11.5923 3.05497 11.6803 3.2674C11.7683 3.47984 11.8136 3.70753 11.8136 3.93747C11.8136 4.16741 11.7683 4.3951 11.6803 4.60754C11.5923 4.81998 11.4634 5.013 11.3008 5.1756L9.11328 7.3631C8.95075 7.52581 8.75775 7.65488 8.5453 7.74295C8.33285 7.83102 8.10513 7.87635 7.87516 7.87635C7.64518 7.87635 7.41746 7.83102 7.20501 7.74295C6.99256 7.65488 6.79956 7.52581 6.63703 7.3631C6.51263 7.24718 6.34809 7.18407 6.17807 7.18707C6.00806 7.19007 5.84585 7.25894 5.72561 7.37918C5.60538 7.49942 5.5365 7.66163 5.5335 7.83164C5.5305 8.00165 5.59361 8.1662 5.70953 8.2906C5.99391 8.57501 6.33154 8.80062 6.70312 8.95455C7.0747 9.10847 7.47296 9.18769 7.87516 9.18769C8.27736 9.18769 8.67562 9.10847 9.0472 8.95455C9.41878 8.80062 9.7564 8.57501 10.0408 8.2906L12.2283 6.1031C12.8026 5.52874 13.1253 4.74974 13.1253 3.93747C13.1253 3.12521 12.8026 2.34621 12.2283 1.77185C11.6539 1.19749 10.8749 0.874817 10.0627 0.874817C9.25039 0.874817 8.47139 1.19749 7.89703 1.77185L6.80328 2.8656ZM2.69953 11.3006C2.53682 11.1381 2.40774 10.9451 2.31968 10.7326C2.23161 10.5202 2.18628 10.2924 2.18628 10.0625C2.18628 9.8325 2.23161 9.60477 2.31968 9.39233C2.40774 9.17988 2.53682 8.98688 2.69953 8.82435L4.88703 6.63685C5.04956 6.47414 5.24256 6.34506 5.45501 6.25699C5.66746 6.16893 5.89518 6.1236 6.12516 6.1236C6.35513 6.1236 6.58285 6.16893 6.7953 6.25699C7.00775 6.34506 7.20075 6.47414 7.36328 6.63685C7.48768 6.75277 7.65223 6.81588 7.82224 6.81288C7.99225 6.80988 8.15446 6.741 8.2747 6.62077C8.39494 6.50053 8.46381 6.33832 8.46681 6.1683C8.46981 5.99829 8.4067 5.83375 8.29078 5.70935C8.0064 5.42494 7.66878 5.19933 7.2972 5.0454C6.92562 4.89148 6.52736 4.81225 6.12516 4.81225C5.72296 4.81225 5.3247 4.89148 4.95312 5.0454C4.58154 5.19933 4.24391 5.42494 3.95953 5.70935L1.77203 7.89685C1.19767 8.47121 0.875 9.25021 0.875 10.0625C0.875 10.8747 1.19767 11.6537 1.77203 12.2281C2.34639 12.8025 3.12539 13.1251 3.93766 13.1251C4.74992 13.1251 5.52892 12.8025 6.10328 12.2281L7.19703 11.1343C7.31295 11.0099 7.37606 10.8454 7.37306 10.6754C7.37006 10.5054 7.30119 10.3432 7.18095 10.2229C7.06071 10.1027 6.8985 10.0338 6.72849 10.0308C6.55848 10.0278 6.39393 10.0909 6.26953 10.2068L5.17578 11.3006C5.01325 11.4633 4.82025 11.5924 4.6078 11.6805C4.39535 11.7685 4.16763 11.8138 3.93766 11.8138C3.70768 11.8138 3.47996 11.7685 3.26751 11.6805C3.05506 11.5924 2.86206 11.4633 2.69953 11.3006Z"
+      fill="currentColor"
+    />
+  </g>
+  <defs>
+    <clipPath id="clip0_1081_1237">
+      <rect width="14" height="14" fill="white" />
+    </clipPath>
+  </defs>
+</svg>
+</a>
+Examples</h2></div><div class="space-y-8"><div class="anchorable" id="example_0"><a href="#example_0" class="anchor" aria-label="Anchor" tabIndex="-1"><svg
+  width="16"
+  height="16"
+  viewBox="0 0 14 14"
+  fill="none"
+  xmlns="http://www.w3.org/2000/svg"
+>
+  <g clip-path="url(#clip0_1081_1237)">
+    <path
+      fill-rule="evenodd"
+      clip-rule="evenodd"
+      d="M6.80328 2.8656C6.68736 2.99 6.62425 3.15454 6.62725 3.32456C6.63025 3.49457 6.69913 3.65678 6.81936 3.77702C6.9396 3.89725 7.10181 3.96613 7.27182 3.96913C7.44184 3.97213 7.60638 3.90902 7.73078 3.7931L8.82453 2.69935C8.98712 2.53676 9.18015 2.40778 9.39259 2.31978C9.60503 2.23179 9.83272 2.1865 10.0627 2.1865C10.2926 2.1865 10.5203 2.23179 10.7327 2.31978C10.9452 2.40778 11.1382 2.53676 11.3008 2.69935C11.4634 2.86194 11.5923 3.05497 11.6803 3.2674C11.7683 3.47984 11.8136 3.70753 11.8136 3.93747C11.8136 4.16741 11.7683 4.3951 11.6803 4.60754C11.5923 4.81998 11.4634 5.013 11.3008 5.1756L9.11328 7.3631C8.95075 7.52581 8.75775 7.65488 8.5453 7.74295C8.33285 7.83102 8.10513 7.87635 7.87516 7.87635C7.64518 7.87635 7.41746 7.83102 7.20501 7.74295C6.99256 7.65488 6.79956 7.52581 6.63703 7.3631C6.51263 7.24718 6.34809 7.18407 6.17807 7.18707C6.00806 7.19007 5.84585 7.25894 5.72561 7.37918C5.60538 7.49942 5.5365 7.66163 5.5335 7.83164C5.5305 8.00165 5.59361 8.1662 5.70953 8.2906C5.99391 8.57501 6.33154 8.80062 6.70312 8.95455C7.0747 9.10847 7.47296 9.18769 7.87516 9.18769C8.27736 9.18769 8.67562 9.10847 9.0472 8.95455C9.41878 8.80062 9.7564 8.57501 10.0408 8.2906L12.2283 6.1031C12.8026 5.52874 13.1253 4.74974 13.1253 3.93747C13.1253 3.12521 12.8026 2.34621 12.2283 1.77185C11.6539 1.19749 10.8749 0.874817 10.0627 0.874817C9.25039 0.874817 8.47139 1.19749 7.89703 1.77185L6.80328 2.8656ZM2.69953 11.3006C2.53682 11.1381 2.40774 10.9451 2.31968 10.7326C2.23161 10.5202 2.18628 10.2924 2.18628 10.0625C2.18628 9.8325 2.23161 9.60477 2.31968 9.39233C2.40774 9.17988 2.53682 8.98688 2.69953 8.82435L4.88703 6.63685C5.04956 6.47414 5.24256 6.34506 5.45501 6.25699C5.66746 6.16893 5.89518 6.1236 6.12516 6.1236C6.35513 6.1236 6.58285 6.16893 6.7953 6.25699C7.00775 6.34506 7.20075 6.47414 7.36328 6.63685C7.48768 6.75277 7.65223 6.81588 7.82224 6.81288C7.99225 6.80988 8.15446 6.741 8.2747 6.62077C8.39494 6.50053 8.46381 6.33832 8.46681 6.1683C8.46981 5.99829 8.4067 5.83375 8.29078 5.70935C8.0064 5.42494 7.66878 5.19933 7.2972 5.0454C6.92562 4.89148 6.52736 4.81225 6.12516 4.81225C5.72296 4.81225 5.3247 4.89148 4.95312 5.0454C4.58154 5.19933 4.24391 5.42494 3.95953 5.70935L1.77203 7.89685C1.19767 8.47121 0.875 9.25021 0.875 10.0625C0.875 10.8747 1.19767 11.6537 1.77203 12.2281C2.34639 12.8025 3.12539 13.1251 3.93766 13.1251C4.74992 13.1251 5.52892 12.8025 6.10328 12.2281L7.19703 11.1343C7.31295 11.0099 7.37606 10.8454 7.37306 10.6754C7.37006 10.5054 7.30119 10.3432 7.18095 10.2229C7.06071 10.1027 6.8985 10.0338 6.72849 10.0308C6.55848 10.0278 6.39393 10.0909 6.26953 10.2068L5.17578 11.3006C5.01325 11.4633 4.82025 11.5924 4.6078 11.6805C4.39535 11.7685 4.16763 11.8138 3.93766 11.8138C3.70768 11.8138 3.47996 11.7685 3.26751 11.6805C3.05506 11.5924 2.86206 11.4633 2.69953 11.3006Z"
+      fill="currentColor"
+    />
+  </g>
+  <defs>
+    <clipPath id="clip0_1081_1237">
+      <rect width="14" height="14" fill="white" />
+    </clipPath>
+  </defs>
+</svg>
+</a>
+<h3 class="example-header"><div class="markdown"><p>Send a request and read its response</p>
+</div></h3>
+  <div><div class="markdown"><pre class="highlight"><code class="language-ts">import { assertEquals } from &quot;@std/assert&quot;;
+import { createClient } from &quot;@hertzg/rtsp&quot;;
+
+const toServer = new TransformStream&lt;Uint8Array, Uint8Array&gt;();
+const toClient = new TransformStream&lt;Uint8Array, Uint8Array&gt;();
+const client = createClient({
+  readable: toClient.readable,
+  writable: toServer.writable,
+});
+
+const response = client.request({ method: &quot;OPTIONS&quot;, requestUri: &quot;*&quot; });
+
+const { value: sent } = await toServer.readable.getReader().read();
+assertEquals(
+  new TextDecoder().decode(sent),
+  &quot;OPTIONS * RTSP/1.0\r\nCSeq: 1\r\n\r\n&quot;,
+);
+
+await toClient.writable.getWriter().write(
+  new TextEncoder().encode(&quot;RTSP/1.0 200 OK\r\nCSeq: 1\r\n\r\n&quot;),
+);
+assertEquals((await response).statusCode, 200);
+
+await client.close();
+</code><button class="copyButton" data-copy="import { assertEquals } from &quot;@std/assert&quot;;
+import { createClient } from &quot;@hertzg/rtsp&quot;;
+
+const toServer = new TransformStream&lt;Uint8Array, Uint8Array&gt;();
+const toClient = new TransformStream&lt;Uint8Array, Uint8Array&gt;();
+const client = createClient({
+  readable: toClient.readable,
+  writable: toServer.writable,
+});
+
+const response = client.request({ method: &quot;OPTIONS&quot;, requestUri: &quot;*&quot; });
+
+const { value: sent } = await toServer.readable.getReader().read();
+assertEquals(
+  new TextDecoder().decode(sent),
+  &quot;OPTIONS * RTSP/1.0\r\nCSeq: 1\r\n\r\n&quot;,
+);
+
+await toClient.writable.getWriter().write(
+  new TextEncoder().encode(&quot;RTSP/1.0 200 OK\r\nCSeq: 1\r\n\r\n&quot;),
+);
+assertEquals((await response).statusCode, 200);
+
+await client.close();
+"><svg
+  class="copy"
+  width="15"
+  height="15"
+  viewBox="0 0 15 15"
+  fill="none"
+  xmlns="http://www.w3.org/2000/svg"
+>
+  <rect x="2" y="2" width="7" height="7" fill="none" />
+  <rect x="6" y="6" width="7" height="7" fill="none" />
+  <path
+    d="M1.55566 2.7C1.55566 2.03726 2.09292 1.5 2.75566 1.5H8.75566C9.41841 1.5 9.95566 2.03726 9.95566 2.7V5.1H12.3557C13.0184 5.1 13.5557 5.63726 13.5557 6.3V12.3C13.5557 12.9627 13.0184 13.5 12.3557 13.5H6.35566C5.69292 13.5 5.15566 12.9627 5.15566 12.3V9.9H2.75566C2.09292 9.9 1.55566 9.36274 1.55566 8.7V2.7ZM6.35566 9.9V12.3H12.3557V6.3H9.95566V8.7C9.95566 9.36274 9.41841 9.9 8.75566 9.9H6.35566ZM8.75566 8.7V2.7H2.75566V8.7H8.75566Z"
+    fill="currentColor"
+  />
+</svg>
+<svg
+  class="check"
+  width="15"
+  height="15"
+  viewBox="0 0 24 24"
+  stroke-width="2"
+  stroke="currentColor"
+  fill="none"
+  stroke-linecap="round"
+  stroke-linejoin="round"
+  xmlns="http://www.w3.org/2000/svg"
+>
+  <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+  <path d="M5 12l5 5l10 -10" />
+</svg>
+</button><code></code></pre>
+</div></div>
+</div>
+<div class="border-b border-gray-300 dark:border-gray-700"></div><div class="anchorable" id="example_1"><a href="#example_1" class="anchor" aria-label="Anchor" tabIndex="-1"><svg
+  width="16"
+  height="16"
+  viewBox="0 0 14 14"
+  fill="none"
+  xmlns="http://www.w3.org/2000/svg"
+>
+  <g clip-path="url(#clip0_1081_1237)">
+    <path
+      fill-rule="evenodd"
+      clip-rule="evenodd"
+      d="M6.80328 2.8656C6.68736 2.99 6.62425 3.15454 6.62725 3.32456C6.63025 3.49457 6.69913 3.65678 6.81936 3.77702C6.9396 3.89725 7.10181 3.96613 7.27182 3.96913C7.44184 3.97213 7.60638 3.90902 7.73078 3.7931L8.82453 2.69935C8.98712 2.53676 9.18015 2.40778 9.39259 2.31978C9.60503 2.23179 9.83272 2.1865 10.0627 2.1865C10.2926 2.1865 10.5203 2.23179 10.7327 2.31978C10.9452 2.40778 11.1382 2.53676 11.3008 2.69935C11.4634 2.86194 11.5923 3.05497 11.6803 3.2674C11.7683 3.47984 11.8136 3.70753 11.8136 3.93747C11.8136 4.16741 11.7683 4.3951 11.6803 4.60754C11.5923 4.81998 11.4634 5.013 11.3008 5.1756L9.11328 7.3631C8.95075 7.52581 8.75775 7.65488 8.5453 7.74295C8.33285 7.83102 8.10513 7.87635 7.87516 7.87635C7.64518 7.87635 7.41746 7.83102 7.20501 7.74295C6.99256 7.65488 6.79956 7.52581 6.63703 7.3631C6.51263 7.24718 6.34809 7.18407 6.17807 7.18707C6.00806 7.19007 5.84585 7.25894 5.72561 7.37918C5.60538 7.49942 5.5365 7.66163 5.5335 7.83164C5.5305 8.00165 5.59361 8.1662 5.70953 8.2906C5.99391 8.57501 6.33154 8.80062 6.70312 8.95455C7.0747 9.10847 7.47296 9.18769 7.87516 9.18769C8.27736 9.18769 8.67562 9.10847 9.0472 8.95455C9.41878 8.80062 9.7564 8.57501 10.0408 8.2906L12.2283 6.1031C12.8026 5.52874 13.1253 4.74974 13.1253 3.93747C13.1253 3.12521 12.8026 2.34621 12.2283 1.77185C11.6539 1.19749 10.8749 0.874817 10.0627 0.874817C9.25039 0.874817 8.47139 1.19749 7.89703 1.77185L6.80328 2.8656ZM2.69953 11.3006C2.53682 11.1381 2.40774 10.9451 2.31968 10.7326C2.23161 10.5202 2.18628 10.2924 2.18628 10.0625C2.18628 9.8325 2.23161 9.60477 2.31968 9.39233C2.40774 9.17988 2.53682 8.98688 2.69953 8.82435L4.88703 6.63685C5.04956 6.47414 5.24256 6.34506 5.45501 6.25699C5.66746 6.16893 5.89518 6.1236 6.12516 6.1236C6.35513 6.1236 6.58285 6.16893 6.7953 6.25699C7.00775 6.34506 7.20075 6.47414 7.36328 6.63685C7.48768 6.75277 7.65223 6.81588 7.82224 6.81288C7.99225 6.80988 8.15446 6.741 8.2747 6.62077C8.39494 6.50053 8.46381 6.33832 8.46681 6.1683C8.46981 5.99829 8.4067 5.83375 8.29078 5.70935C8.0064 5.42494 7.66878 5.19933 7.2972 5.0454C6.92562 4.89148 6.52736 4.81225 6.12516 4.81225C5.72296 4.81225 5.3247 4.89148 4.95312 5.0454C4.58154 5.19933 4.24391 5.42494 3.95953 5.70935L1.77203 7.89685C1.19767 8.47121 0.875 9.25021 0.875 10.0625C0.875 10.8747 1.19767 11.6537 1.77203 12.2281C2.34639 12.8025 3.12539 13.1251 3.93766 13.1251C4.74992 13.1251 5.52892 12.8025 6.10328 12.2281L7.19703 11.1343C7.31295 11.0099 7.37606 10.8454 7.37306 10.6754C7.37006 10.5054 7.30119 10.3432 7.18095 10.2229C7.06071 10.1027 6.8985 10.0338 6.72849 10.0308C6.55848 10.0278 6.39393 10.0909 6.26953 10.2068L5.17578 11.3006C5.01325 11.4633 4.82025 11.5924 4.6078 11.6805C4.39535 11.7685 4.16763 11.8138 3.93766 11.8138C3.70768 11.8138 3.47996 11.7685 3.26751 11.6805C3.05506 11.5924 2.86206 11.4633 2.69953 11.3006Z"
+      fill="currentColor"
+    />
+  </g>
+  <defs>
+    <clipPath id="clip0_1081_1237">
+      <rect width="14" height="14" fill="white" />
+    </clipPath>
+  </defs>
+</svg>
+</a>
+<h3 class="example-header"><div class="markdown"><p>Describe a camera stream over a TCP socket</p>
+</div></h3>
+  <div><div class="markdown"><pre class="highlight"><code class="language-ts">import { connect } from &quot;node:net&quot;;
+import { Duplex } from &quot;node:stream&quot;;
+import { createClient } from &quot;@hertzg/rtsp&quot;;
+
+const socket = connect({ host: &quot;192.0.2.10&quot;, port: 554 });
+const client = createClient(Duplex.toWeb(socket));
+
+const response = await client.request({
+  method: &quot;DESCRIBE&quot;,
+  requestUri: &quot;rtsp://192.0.2.10/stream1&quot;,
+  headers: [[&quot;Accept&quot;, &quot;application/sdp&quot;]],
+});
+const sdp = new TextDecoder().decode(response.messageBody);
+
+await client.close();
+</code><button class="copyButton" data-copy="import { connect } from &quot;node:net&quot;;
+import { Duplex } from &quot;node:stream&quot;;
+import { createClient } from &quot;@hertzg/rtsp&quot;;
+
+const socket = connect({ host: &quot;192.0.2.10&quot;, port: 554 });
+const client = createClient(Duplex.toWeb(socket));
+
+const response = await client.request({
+  method: &quot;DESCRIBE&quot;,
+  requestUri: &quot;rtsp://192.0.2.10/stream1&quot;,
+  headers: [[&quot;Accept&quot;, &quot;application/sdp&quot;]],
+});
+const sdp = new TextDecoder().decode(response.messageBody);
+
+await client.close();
+"><svg
+  class="copy"
+  width="15"
+  height="15"
+  viewBox="0 0 15 15"
+  fill="none"
+  xmlns="http://www.w3.org/2000/svg"
+>
+  <rect x="2" y="2" width="7" height="7" fill="none" />
+  <rect x="6" y="6" width="7" height="7" fill="none" />
+  <path
+    d="M1.55566 2.7C1.55566 2.03726 2.09292 1.5 2.75566 1.5H8.75566C9.41841 1.5 9.95566 2.03726 9.95566 2.7V5.1H12.3557C13.0184 5.1 13.5557 5.63726 13.5557 6.3V12.3C13.5557 12.9627 13.0184 13.5 12.3557 13.5H6.35566C5.69292 13.5 5.15566 12.9627 5.15566 12.3V9.9H2.75566C2.09292 9.9 1.55566 9.36274 1.55566 8.7V2.7ZM6.35566 9.9V12.3H12.3557V6.3H9.95566V8.7C9.95566 9.36274 9.41841 9.9 8.75566 9.9H6.35566ZM8.75566 8.7V2.7H2.75566V8.7H8.75566Z"
+    fill="currentColor"
+  />
+</svg>
+<svg
+  class="check"
+  width="15"
+  height="15"
+  viewBox="0 0 24 24"
+  stroke-width="2"
+  stroke="currentColor"
+  fill="none"
+  stroke-linecap="round"
+  stroke-linejoin="round"
+  xmlns="http://www.w3.org/2000/svg"
+>
+  <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+  <path d="M5 12l5 5l10 -10" />
+</svg>
+</button><code></code></pre>
+</div></div>
+</div>
+</div></section>
+<section class="section"  id="mod_ts_functions"><div>
+      <h2 class="anchorable mb-1"><a href="#mod_ts_functions" class="anchor" aria-label="Anchor" tabIndex="-1"><svg
+  width="16"
+  height="16"
+  viewBox="0 0 14 14"
+  fill="none"
+  xmlns="http://www.w3.org/2000/svg"
+>
+  <g clip-path="url(#clip0_1081_1237)">
+    <path
+      fill-rule="evenodd"
+      clip-rule="evenodd"
+      d="M6.80328 2.8656C6.68736 2.99 6.62425 3.15454 6.62725 3.32456C6.63025 3.49457 6.69913 3.65678 6.81936 3.77702C6.9396 3.89725 7.10181 3.96613 7.27182 3.96913C7.44184 3.97213 7.60638 3.90902 7.73078 3.7931L8.82453 2.69935C8.98712 2.53676 9.18015 2.40778 9.39259 2.31978C9.60503 2.23179 9.83272 2.1865 10.0627 2.1865C10.2926 2.1865 10.5203 2.23179 10.7327 2.31978C10.9452 2.40778 11.1382 2.53676 11.3008 2.69935C11.4634 2.86194 11.5923 3.05497 11.6803 3.2674C11.7683 3.47984 11.8136 3.70753 11.8136 3.93747C11.8136 4.16741 11.7683 4.3951 11.6803 4.60754C11.5923 4.81998 11.4634 5.013 11.3008 5.1756L9.11328 7.3631C8.95075 7.52581 8.75775 7.65488 8.5453 7.74295C8.33285 7.83102 8.10513 7.87635 7.87516 7.87635C7.64518 7.87635 7.41746 7.83102 7.20501 7.74295C6.99256 7.65488 6.79956 7.52581 6.63703 7.3631C6.51263 7.24718 6.34809 7.18407 6.17807 7.18707C6.00806 7.19007 5.84585 7.25894 5.72561 7.37918C5.60538 7.49942 5.5365 7.66163 5.5335 7.83164C5.5305 8.00165 5.59361 8.1662 5.70953 8.2906C5.99391 8.57501 6.33154 8.80062 6.70312 8.95455C7.0747 9.10847 7.47296 9.18769 7.87516 9.18769C8.27736 9.18769 8.67562 9.10847 9.0472 8.95455C9.41878 8.80062 9.7564 8.57501 10.0408 8.2906L12.2283 6.1031C12.8026 5.52874 13.1253 4.74974 13.1253 3.93747C13.1253 3.12521 12.8026 2.34621 12.2283 1.77185C11.6539 1.19749 10.8749 0.874817 10.0627 0.874817C9.25039 0.874817 8.47139 1.19749 7.89703 1.77185L6.80328 2.8656ZM2.69953 11.3006C2.53682 11.1381 2.40774 10.9451 2.31968 10.7326C2.23161 10.5202 2.18628 10.2924 2.18628 10.0625C2.18628 9.8325 2.23161 9.60477 2.31968 9.39233C2.40774 9.17988 2.53682 8.98688 2.69953 8.82435L4.88703 6.63685C5.04956 6.47414 5.24256 6.34506 5.45501 6.25699C5.66746 6.16893 5.89518 6.1236 6.12516 6.1236C6.35513 6.1236 6.58285 6.16893 6.7953 6.25699C7.00775 6.34506 7.20075 6.47414 7.36328 6.63685C7.48768 6.75277 7.65223 6.81588 7.82224 6.81288C7.99225 6.80988 8.15446 6.741 8.2747 6.62077C8.39494 6.50053 8.46381 6.33832 8.46681 6.1683C8.46981 5.99829 8.4067 5.83375 8.29078 5.70935C8.0064 5.42494 7.66878 5.19933 7.2972 5.0454C6.92562 4.89148 6.52736 4.81225 6.12516 4.81225C5.72296 4.81225 5.3247 4.89148 4.95312 5.0454C4.58154 5.19933 4.24391 5.42494 3.95953 5.70935L1.77203 7.89685C1.19767 8.47121 0.875 9.25021 0.875 10.0625C0.875 10.8747 1.19767 11.6537 1.77203 12.2281C2.34639 12.8025 3.12539 13.1251 3.93766 13.1251C4.74992 13.1251 5.52892 12.8025 6.10328 12.2281L7.19703 11.1343C7.31295 11.0099 7.37606 10.8454 7.37306 10.6754C7.37006 10.5054 7.30119 10.3432 7.18095 10.2229C7.06071 10.1027 6.8985 10.0338 6.72849 10.0308C6.55848 10.0278 6.39393 10.0909 6.26953 10.2068L5.17578 11.3006C5.01325 11.4633 4.82025 11.5924 4.6078 11.6805C4.39535 11.7685 4.16763 11.8138 3.93766 11.8138C3.70768 11.8138 3.47996 11.7685 3.26751 11.6805C3.05506 11.5924 2.86206 11.4633 2.69953 11.3006Z"
+      fill="currentColor"
+    />
+  </g>
+  <defs>
+    <clipPath id="clip0_1081_1237">
+      <rect width="14" height="14" fill="white" />
+    </clipPath>
+  </defs>
+</svg>
+</a>
+Functions</h2></div><div class="namespaceSection"><div id="namespace_createclient" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-Function bg-Function/15 dark:text-FunctionDark dark:bg-FunctionDark/15" title="Function">f</div></div>
+<div class="namespaceItemContent">
+		    <a href="..&#x2F;.&#x2F;client.ts&#x2F;~&#x2F;createClient.html" title="createClient">
+			    <span>createClient</span><span>(<span><span>options<span>: <span class="td-ref">ClientOptions</span></span></span></span>)<span>: <span class="td-ref">Client</span></span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Creates an RTSP client on a connection that is already open.</p>
+</div></div></div>
+    </div><div id="namespace_creatertspdecodestream" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-Function bg-Function/15 dark:text-FunctionDark dark:bg-FunctionDark/15" title="Function">f</div></div>
+<div class="namespaceItemContent">
+		    <a href="..&#x2F;.&#x2F;streams&#x2F;decode.ts&#x2F;~&#x2F;createRtspDecodeStream.html" title="createRtspDecodeStream">
+			    <span>createRtspDecodeStream</span><span>()<span>: <span class="td-ref">TransformStream</span>&lt;<span class="td-ref">Uint8Array</span><span>, </span><span><span class="td-ref">RtspMessage</span><span class="td-op"> | </span><span class="td-ref">InterleavedBinaryData</span></span>&gt;</span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Creates a stream that turns the octets of an RTSP connection into RTSP
+messages and interleaved binary data, in the order they arrive.</p>
+</div></div></div>
+    </div><div id="namespace_creatertspencodestream" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-Function bg-Function/15 dark:text-FunctionDark dark:bg-FunctionDark/15" title="Function">f</div></div>
+<div class="namespaceItemContent">
+		    <a href="..&#x2F;.&#x2F;streams&#x2F;encode.ts&#x2F;~&#x2F;createRtspEncodeStream.html" title="createRtspEncodeStream">
+			    <span>createRtspEncodeStream</span><span>()<span>: <span class="td-ref">TransformStream</span>&lt;<span><span class="td-ref">RtspMessage</span><span class="td-op"> | </span><span class="td-ref">InterleavedBinaryData</span></span><span>, </span><span class="td-ref">Uint8Array</span>&gt;</span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Creates a stream that turns RTSP messages and interleaved binary data into
+the octets of an RTSP connection.</p>
+</div></div></div>
+    </div><div id="namespace_decodeinterleavedbinarydata" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-Function bg-Function/15 dark:text-FunctionDark dark:bg-FunctionDark/15" title="Function">f</div></div>
+<div class="namespaceItemContent">
+		    <a href="..&#x2F;.&#x2F;encoding&#x2F;interleaved.ts&#x2F;~&#x2F;decodeInterleavedBinaryData.html" title="decodeInterleavedBinaryData">
+			    <span>decodeInterleavedBinaryData</span><span>(<span><span>octets<span>: <span class="td-ref">Uint8Array</span></span></span></span>)<span>: <span><span>[<span class="td-ref">InterleavedBinaryData</span>, <span class="td-kw">number</span>]</span><span class="td-op"> | </span><span class="td-kw">undefined</span></span></span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Decodes one <code>$</code> block from the start of <code>octets</code>.</p>
+</div></div></div>
+    </div><div id="namespace_decodemessage" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-Function bg-Function/15 dark:text-FunctionDark dark:bg-FunctionDark/15" title="Function">f</div></div>
+<div class="namespaceItemContent">
+		    <a href="..&#x2F;.&#x2F;encoding&#x2F;message.ts&#x2F;~&#x2F;decodeMessage.html" title="decodeMessage">
+			    <span>decodeMessage</span><span>(<span><span>octets<span>: <span class="td-ref">Uint8Array</span></span></span></span>)<span>: <span><span>[<span class="td-ref">MessageFrame</span>, <span class="td-kw">number</span>]</span><span class="td-op"> | </span><span class="td-kw">undefined</span></span></span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Decodes one RTSP message from the front of <code>octets</code>.</p>
+</div></div></div>
+    </div><div id="namespace_encodeinterleavedbinarydata" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-Function bg-Function/15 dark:text-FunctionDark dark:bg-FunctionDark/15" title="Function">f</div></div>
+<div class="namespaceItemContent">
+		    <a href="..&#x2F;.&#x2F;encoding&#x2F;interleaved.ts&#x2F;~&#x2F;encodeInterleavedBinaryData.html" title="encodeInterleavedBinaryData">
+			    <span>encodeInterleavedBinaryData</span><span>(<span><span>data<span>: <span class="td-ref">InterleavedBinaryData</span></span></span></span>)<span>: <span class="td-ref">Uint8Array</span></span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Encodes one <code>$</code> block.</p>
+</div></div></div>
+    </div><div id="namespace_encodemessage" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-Function bg-Function/15 dark:text-FunctionDark dark:bg-FunctionDark/15" title="Function">f</div></div>
+<div class="namespaceItemContent">
+		    <a href="..&#x2F;.&#x2F;encoding&#x2F;message.ts&#x2F;~&#x2F;encodeMessage.html" title="encodeMessage">
+			    <span>encodeMessage</span><span>(<span><span>frame<span>: <span class="td-ref">MessageFrame</span></span></span></span>)<span>: <span class="td-ref">Uint8Array</span></span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Encodes one RTSP message.</p>
+</div></div></div>
+    </div><div id="namespace_isinterleavedbinarydata" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-Function bg-Function/15 dark:text-FunctionDark dark:bg-FunctionDark/15" title="Function">f</div></div>
+<div class="namespaceItemContent">
+		    <a href="..&#x2F;.&#x2F;encoding&#x2F;interleaved.ts&#x2F;~&#x2F;isInterleavedBinaryData.html" title="isInterleavedBinaryData">
+			    <span>isInterleavedBinaryData</span><span>(<span><span>value<span>: <span class="td-kw">unknown</span></span></span></span>)<span>: value <span class="td-kw">is</span> <span class="td-ref">InterleavedBinaryData</span></span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Tells a <code>$</code> block apart from an RTSP message in what the decode stream
+emits.</p>
+</div></div></div>
+    </div><div id="namespace_isrequest" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-Function bg-Function/15 dark:text-FunctionDark dark:bg-FunctionDark/15" title="Function">f</div></div>
+<div class="namespaceItemContent">
+		    <a href="..&#x2F;.&#x2F;protocol&#x2F;message.ts&#x2F;~&#x2F;isRequest.html" title="isRequest">
+			    <span>isRequest</span><span>(<span><span>value<span>: <span class="td-kw">unknown</span></span></span></span>)<span>: value <span class="td-kw">is</span> <span class="td-ref">RtspRequest</span></span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Checks whether a value is a request, by its <code>method</code> field.</p>
+</div></div></div>
+    </div><div id="namespace_isresponse" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-Function bg-Function/15 dark:text-FunctionDark dark:bg-FunctionDark/15" title="Function">f</div></div>
+<div class="namespaceItemContent">
+		    <a href="..&#x2F;.&#x2F;protocol&#x2F;message.ts&#x2F;~&#x2F;isResponse.html" title="isResponse">
+			    <span>isResponse</span><span>(<span><span>value<span>: <span class="td-kw">unknown</span></span></span></span>)<span>: value <span class="td-kw">is</span> <span class="td-ref">RtspResponse</span></span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Checks whether a value is a response, by its <code>statusCode</code> field.</p>
+</div></div></div>
+    </div><div id="namespace_parsemessage" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-Function bg-Function/15 dark:text-FunctionDark dark:bg-FunctionDark/15" title="Function">f</div></div>
+<div class="namespaceItemContent">
+		    <a href="..&#x2F;.&#x2F;protocol&#x2F;message.ts&#x2F;~&#x2F;parseMessage.html" title="parseMessage">
+			    <span>parseMessage</span><span>(<span><span>frame<span>: <span class="td-ref">MessageFrame</span></span></span></span>)<span>: <span class="td-ref">RtspMessage</span></span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Reads a frame as a request or a response.</p>
+</div></div></div>
+    </div><div id="namespace_parserequest" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-Function bg-Function/15 dark:text-FunctionDark dark:bg-FunctionDark/15" title="Function">f</div></div>
+<div class="namespaceItemContent">
+		    <a href="..&#x2F;.&#x2F;protocol&#x2F;request.ts&#x2F;~&#x2F;parseRequest.html" title="parseRequest">
+			    <span>parseRequest</span><span>(<span><span>frame<span>: <span class="td-ref">MessageFrame</span></span></span></span>)<span>: <span class="td-ref">RtspRequest</span></span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Reads a frame whose start-line is a Request-Line:
+<code>Method SP Request-URI SP RTSP-Version</code>.</p>
+</div></div></div>
+    </div><div id="namespace_parseresponse" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-Function bg-Function/15 dark:text-FunctionDark dark:bg-FunctionDark/15" title="Function">f</div></div>
+<div class="namespaceItemContent">
+		    <a href="..&#x2F;.&#x2F;protocol&#x2F;response.ts&#x2F;~&#x2F;parseResponse.html" title="parseResponse">
+			    <span>parseResponse</span><span>(<span><span>frame<span>: <span class="td-ref">MessageFrame</span></span></span></span>)<span>: <span class="td-ref">RtspResponse</span></span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Reads a frame whose start-line is a Status-Line:
+<code>RTSP-Version SP Status-Code SP Reason-Phrase</code>.</p>
+</div></div></div>
+    </div><div id="namespace_serializemessage" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-Function bg-Function/15 dark:text-FunctionDark dark:bg-FunctionDark/15" title="Function">f</div></div>
+<div class="namespaceItemContent">
+		    <a href="..&#x2F;.&#x2F;protocol&#x2F;message.ts&#x2F;~&#x2F;serializeMessage.html" title="serializeMessage">
+			    <span>serializeMessage</span><span>(<span><span>message<span>: <span class="td-ref">RtspMessage</span></span></span></span>)<span>: <span class="td-ref">MessageFrame</span></span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Writes a request or a response as a frame, ready for <code>encodeMessage</code>.</p>
+</div></div></div>
+    </div><div id="namespace_serializerequest" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-Function bg-Function/15 dark:text-FunctionDark dark:bg-FunctionDark/15" title="Function">f</div></div>
+<div class="namespaceItemContent">
+		    <a href="..&#x2F;.&#x2F;protocol&#x2F;request.ts&#x2F;~&#x2F;serializeRequest.html" title="serializeRequest">
+			    <span>serializeRequest</span><span>(<span><span>request<span>: <span class="td-ref">RtspRequest</span></span></span></span>)<span>: <span class="td-ref">MessageFrame</span></span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Writes a request as a frame, ready for <code>encodeMessage</code>.</p>
+</div></div></div>
+    </div><div id="namespace_serializeresponse" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-Function bg-Function/15 dark:text-FunctionDark dark:bg-FunctionDark/15" title="Function">f</div></div>
+<div class="namespaceItemContent">
+		    <a href="..&#x2F;.&#x2F;protocol&#x2F;response.ts&#x2F;~&#x2F;serializeResponse.html" title="serializeResponse">
+			    <span>serializeResponse</span><span>(<span><span>response<span>: <span class="td-ref">RtspResponse</span></span></span></span>)<span>: <span class="td-ref">MessageFrame</span></span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Writes a response as a frame, ready for <code>encodeMessage</code>.</p>
+</div></div></div>
+    </div></div>
+</section>
+<section class="section"  id="mod_ts_type-aliases"><div>
+      <h2 class="anchorable mb-1"><a href="#mod_ts_type-aliases" class="anchor" aria-label="Anchor" tabIndex="-1"><svg
+  width="16"
+  height="16"
+  viewBox="0 0 14 14"
+  fill="none"
+  xmlns="http://www.w3.org/2000/svg"
+>
+  <g clip-path="url(#clip0_1081_1237)">
+    <path
+      fill-rule="evenodd"
+      clip-rule="evenodd"
+      d="M6.80328 2.8656C6.68736 2.99 6.62425 3.15454 6.62725 3.32456C6.63025 3.49457 6.69913 3.65678 6.81936 3.77702C6.9396 3.89725 7.10181 3.96613 7.27182 3.96913C7.44184 3.97213 7.60638 3.90902 7.73078 3.7931L8.82453 2.69935C8.98712 2.53676 9.18015 2.40778 9.39259 2.31978C9.60503 2.23179 9.83272 2.1865 10.0627 2.1865C10.2926 2.1865 10.5203 2.23179 10.7327 2.31978C10.9452 2.40778 11.1382 2.53676 11.3008 2.69935C11.4634 2.86194 11.5923 3.05497 11.6803 3.2674C11.7683 3.47984 11.8136 3.70753 11.8136 3.93747C11.8136 4.16741 11.7683 4.3951 11.6803 4.60754C11.5923 4.81998 11.4634 5.013 11.3008 5.1756L9.11328 7.3631C8.95075 7.52581 8.75775 7.65488 8.5453 7.74295C8.33285 7.83102 8.10513 7.87635 7.87516 7.87635C7.64518 7.87635 7.41746 7.83102 7.20501 7.74295C6.99256 7.65488 6.79956 7.52581 6.63703 7.3631C6.51263 7.24718 6.34809 7.18407 6.17807 7.18707C6.00806 7.19007 5.84585 7.25894 5.72561 7.37918C5.60538 7.49942 5.5365 7.66163 5.5335 7.83164C5.5305 8.00165 5.59361 8.1662 5.70953 8.2906C5.99391 8.57501 6.33154 8.80062 6.70312 8.95455C7.0747 9.10847 7.47296 9.18769 7.87516 9.18769C8.27736 9.18769 8.67562 9.10847 9.0472 8.95455C9.41878 8.80062 9.7564 8.57501 10.0408 8.2906L12.2283 6.1031C12.8026 5.52874 13.1253 4.74974 13.1253 3.93747C13.1253 3.12521 12.8026 2.34621 12.2283 1.77185C11.6539 1.19749 10.8749 0.874817 10.0627 0.874817C9.25039 0.874817 8.47139 1.19749 7.89703 1.77185L6.80328 2.8656ZM2.69953 11.3006C2.53682 11.1381 2.40774 10.9451 2.31968 10.7326C2.23161 10.5202 2.18628 10.2924 2.18628 10.0625C2.18628 9.8325 2.23161 9.60477 2.31968 9.39233C2.40774 9.17988 2.53682 8.98688 2.69953 8.82435L4.88703 6.63685C5.04956 6.47414 5.24256 6.34506 5.45501 6.25699C5.66746 6.16893 5.89518 6.1236 6.12516 6.1236C6.35513 6.1236 6.58285 6.16893 6.7953 6.25699C7.00775 6.34506 7.20075 6.47414 7.36328 6.63685C7.48768 6.75277 7.65223 6.81588 7.82224 6.81288C7.99225 6.80988 8.15446 6.741 8.2747 6.62077C8.39494 6.50053 8.46381 6.33832 8.46681 6.1683C8.46981 5.99829 8.4067 5.83375 8.29078 5.70935C8.0064 5.42494 7.66878 5.19933 7.2972 5.0454C6.92562 4.89148 6.52736 4.81225 6.12516 4.81225C5.72296 4.81225 5.3247 4.89148 4.95312 5.0454C4.58154 5.19933 4.24391 5.42494 3.95953 5.70935L1.77203 7.89685C1.19767 8.47121 0.875 9.25021 0.875 10.0625C0.875 10.8747 1.19767 11.6537 1.77203 12.2281C2.34639 12.8025 3.12539 13.1251 3.93766 13.1251C4.74992 13.1251 5.52892 12.8025 6.10328 12.2281L7.19703 11.1343C7.31295 11.0099 7.37606 10.8454 7.37306 10.6754C7.37006 10.5054 7.30119 10.3432 7.18095 10.2229C7.06071 10.1027 6.8985 10.0338 6.72849 10.0308C6.55848 10.0278 6.39393 10.0909 6.26953 10.2068L5.17578 11.3006C5.01325 11.4633 4.82025 11.5924 4.6078 11.6805C4.39535 11.7685 4.16763 11.8138 3.93766 11.8138C3.70768 11.8138 3.47996 11.7685 3.26751 11.6805C3.05506 11.5924 2.86206 11.4633 2.69953 11.3006Z"
+      fill="currentColor"
+    />
+  </g>
+  <defs>
+    <clipPath id="clip0_1081_1237">
+      <rect width="14" height="14" fill="white" />
+    </clipPath>
+  </defs>
+</svg>
+</a>
+Type Aliases</h2></div><div class="namespaceSection"><div id="namespace_client" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-TypeAlias bg-TypeAlias/15 dark:text-TypeAliasDark dark:bg-TypeAliasDark/15" title="Type Alias">T</div></div>
+<div class="namespaceItemContent">
+		    <a href="..&#x2F;.&#x2F;client.ts&#x2F;~&#x2F;Client.html" title="Client">
+			    <span>Client</span><span> = { request<span>: (<span><span>request<span>: <span class="td-ref">ClientRequest</span></span></span></span>) =&gt; <span class="td-ref">Promise</span>&lt;<span class="td-ref">RtspResponse</span>&gt;</span>; channel<span>: (<span><span>channelId<span>: <span class="td-kw">number</span></span></span></span>) =&gt; <span class="td-ref">ReadableWritablePair</span>&lt;<span class="td-ref">Uint8Array</span><span>, </span><span class="td-ref">Uint8Array</span>&gt;</span>; droppedBlocks<span>: <span class="td-ref">ReadonlyMap</span>&lt;<span class="td-kw">number</span><span>, </span><span class="td-kw">number</span>&gt;</span>; close<span>: () =&gt; <span class="td-ref">Promise</span>&lt;<span class="td-kw">void</span>&gt;</span>;  }</span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>An RTSP client, made by <a href=".././mod.ts/~/createClient.html">createClient</a>.</p>
+</div></div><ul class="namespaceItemContentSubItems"><li>
+                <a href="..&#x2F;.&#x2F;client.ts&#x2F;~&#x2F;Client.html#property_channel">
+                  <span>channel</span><span>: (<span><span>channelId<span>: <span class="td-kw">number</span></span></span></span>) =&gt; <span class="td-ref">ReadableWritablePair</span>&lt;<span class="td-ref">Uint8Array</span><span>, </span><span class="td-ref">Uint8Array</span>&gt;</span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Claims a Channel ID (0 to 255) and returns its two sides.</p>
+</div></div></li><li>
+                <a href="..&#x2F;.&#x2F;client.ts&#x2F;~&#x2F;Client.html#property_close">
+                  <span>close</span><span>: () =&gt; <span class="td-ref">Promise</span>&lt;<span class="td-kw">void</span>&gt;</span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Ends the connection: closes the writable side once everything written
+has gone out, cancels the readable side, rejects the requests still
+waiting and closes the readable side of every claimed channel.</p>
+</div></div></li><li>
+                <a href="..&#x2F;.&#x2F;client.ts&#x2F;~&#x2F;Client.html#property_droppedblocks">
+                  <span>droppedBlocks</span><span>: <span class="td-ref">ReadonlyMap</span>&lt;<span class="td-kw">number</span><span>, </span><span class="td-kw">number</span>&gt;</span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>How many <code>$</code> blocks were dropped, by Channel ID, because nobody had
+claimed that Channel ID when they arrived. A live view: it changes as
+blocks are dropped.</p>
+</div></div></li><li>
+                <a href="..&#x2F;.&#x2F;client.ts&#x2F;~&#x2F;Client.html#property_request">
+                  <span>request</span><span>: (<span><span>request<span>: <span class="td-ref">ClientRequest</span></span></span></span>) =&gt; <span class="td-ref">Promise</span>&lt;<span class="td-ref">RtspResponse</span>&gt;</span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Sends a request and resolves with its final response.</p>
+</div></div></li></ul></div>
+    </div><div id="namespace_clientoptions" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-TypeAlias bg-TypeAlias/15 dark:text-TypeAliasDark dark:bg-TypeAliasDark/15" title="Type Alias">T</div></div>
+<div class="namespaceItemContent">
+		    <a href="..&#x2F;.&#x2F;client.ts&#x2F;~&#x2F;ClientOptions.html" title="ClientOptions">
+			    <span>ClientOptions</span><span> = { readable<span>: <span class="td-ref">OctetSource</span></span>; writable<span>: <span class="td-ref">OctetSink</span></span>; rtspVersion<span class="td-op">?</span><span>: <span class="td-kw">string</span></span>; onRequest<span class="td-op">?</span><span>: (<span><span>request<span>: <span class="td-ref">RtspRequest</span></span></span></span>) =&gt; <span><span class="td-ref">RtspResponse</span><span class="td-op"> | </span><span class="td-ref">Promise</span>&lt;<span class="td-ref">RtspResponse</span>&gt;</span></span>;  }</span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>The two sides of the connection a client runs on, and how it answers the server.</p>
+</div></div><ul class="namespaceItemContentSubItems"><li>
+                <a href="..&#x2F;.&#x2F;client.ts&#x2F;~&#x2F;ClientOptions.html#property_onrequest">
+                  <span>onRequest</span><span>: (<span><span>request<span>: <span class="td-ref">RtspRequest</span></span></span></span>) =&gt; <span><span class="td-ref">RtspResponse</span><span class="td-op"> | </span><span class="td-ref">Promise</span>&lt;<span class="td-ref">RtspResponse</span>&gt;</span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Answers a request sent by the server. Default: <code>501 Not Implemented</code>.</p>
+</div></div></li><li>
+                <a href="..&#x2F;.&#x2F;client.ts&#x2F;~&#x2F;ClientOptions.html#property_readable">
+                  <span>readable</span><span>: <span class="td-ref">OctetSource</span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>The octets the server sends.</p>
+</div></div></li><li>
+                <a href="..&#x2F;.&#x2F;client.ts&#x2F;~&#x2F;ClientOptions.html#property_rtspversion">
+                  <span>rtspVersion</span><span>: <span class="td-kw">string</span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>The version put on a request that names none. Default: <code>&quot;RTSP/1.0&quot;</code>,
+which is what cameras speak.</p>
+</div></div></li><li>
+                <a href="..&#x2F;.&#x2F;client.ts&#x2F;~&#x2F;ClientOptions.html#property_writable">
+                  <span>writable</span><span>: <span class="td-ref">OctetSink</span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Where the octets for the server go.</p>
+</div></div></li></ul></div>
+    </div><div id="namespace_clientrequest" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-TypeAlias bg-TypeAlias/15 dark:text-TypeAliasDark dark:bg-TypeAliasDark/15" title="Type Alias">T</div></div>
+<div class="namespaceItemContent">
+		    <a href="..&#x2F;.&#x2F;client.ts&#x2F;~&#x2F;ClientRequest.html" title="ClientRequest">
+			    <span>ClientRequest</span><span> = { method<span>: <span class="td-kw">string</span></span>; requestUri<span>: <span class="td-kw">string</span></span>; rtspVersion<span class="td-op">?</span><span>: <span class="td-kw">string</span></span>; headers<span class="td-op">?</span><span>: <span class="td-ref">HeaderField</span>[]</span>; messageBody<span class="td-op">?</span><span>: <span class="td-ref">Uint8Array</span></span>;  }</span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>What <code>request()</code> takes: an <a href=".././mod.ts/~/RtspRequest.html">RtspRequest</a> whose <code>rtspVersion</code>,
+<code>headers</code> and <code>messageBody</code> may be left out. An <code>RtspRequest</code> is one.</p>
+</div></div><ul class="namespaceItemContentSubItems"><li>
+                <a href="..&#x2F;.&#x2F;client.ts&#x2F;~&#x2F;ClientRequest.html#property_headers">
+                  <span>headers</span><span>: <span class="td-ref">HeaderField</span>[]</span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Default: no header fields.</p>
+</div></div></li><li>
+                <a href="..&#x2F;.&#x2F;client.ts&#x2F;~&#x2F;ClientRequest.html#property_messagebody">
+                  <span>messageBody</span><span>: <span class="td-ref">Uint8Array</span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Default: no message body.</p>
+</div></div></li><li>
+                <a href="..&#x2F;.&#x2F;client.ts&#x2F;~&#x2F;ClientRequest.html#property_method">
+                  <span>method</span><span>: <span class="td-kw">string</span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>The method, such as <code>&quot;DESCRIBE&quot;</code>, sent as written.</p>
+</div></div></li><li>
+                <a href="..&#x2F;.&#x2F;client.ts&#x2F;~&#x2F;ClientRequest.html#property_requesturi">
+                  <span>requestUri</span><span>: <span class="td-kw">string</span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p><code>&quot;*&quot;</code> or an RTSP URI.</p>
+</div></div></li><li>
+                <a href="..&#x2F;.&#x2F;client.ts&#x2F;~&#x2F;ClientRequest.html#property_rtspversion">
+                  <span>rtspVersion</span><span>: <span class="td-kw">string</span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Default: the client's <code>rtspVersion</code> option.</p>
+</div></div></li></ul></div>
+    </div><div id="namespace_headerfield" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-TypeAlias bg-TypeAlias/15 dark:text-TypeAliasDark dark:bg-TypeAliasDark/15" title="Type Alias">T</div></div>
+<div class="namespaceItemContent">
+		    <a href="..&#x2F;.&#x2F;encoding&#x2F;message.ts&#x2F;~&#x2F;HeaderField.html" title="HeaderField">
+			    <span>HeaderField</span><span> = <span>[<span class="td-kw">string</span>, <span class="td-kw">string</span>]</span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>One header field: its name exactly as written, and its value.</p>
+</div></div></div>
+    </div><div id="namespace_interleavedbinarydata" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-TypeAlias bg-TypeAlias/15 dark:text-TypeAliasDark dark:bg-TypeAliasDark/15" title="Type Alias">T</div></div>
+<div class="namespaceItemContent">
+		    <a href="..&#x2F;.&#x2F;encoding&#x2F;interleaved.ts&#x2F;~&#x2F;InterleavedBinaryData.html" title="InterleavedBinaryData">
+			    <span>InterleavedBinaryData</span><span> = { channelId<span>: <span class="td-kw">number</span></span>; binaryData<span>: <span class="td-ref">Uint8Array</span></span>;  }</span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>One <code>$</code> block: the channel it travels on and the upper-layer PDU it carries.</p>
+</div></div><ul class="namespaceItemContentSubItems"><li>
+                <a href="..&#x2F;.&#x2F;encoding&#x2F;interleaved.ts&#x2F;~&#x2F;InterleavedBinaryData.html#property_binarydata">
+                  <span>binaryData</span><span>: <span class="td-ref">Uint8Array</span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>One upper-layer PDU, at most 65535 octets.</p>
+</div></div></li><li>
+                <a href="..&#x2F;.&#x2F;encoding&#x2F;interleaved.ts&#x2F;~&#x2F;InterleavedBinaryData.html#property_channelid">
+                  <span>channelId</span><span>: <span class="td-kw">number</span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Channel ID, 0-255, as agreed in the <code>Transport</code> header's <code>interleaved</code>.</p>
+</div></div></li></ul></div>
+    </div><div id="namespace_messageframe" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-TypeAlias bg-TypeAlias/15 dark:text-TypeAliasDark dark:bg-TypeAliasDark/15" title="Type Alias">T</div></div>
+<div class="namespaceItemContent">
+		    <a href="..&#x2F;.&#x2F;encoding&#x2F;message.ts&#x2F;~&#x2F;MessageFrame.html" title="MessageFrame">
+			    <span>MessageFrame</span><span> = { startLine<span>: <span class="td-kw">string</span></span>; headerFields<span>: <span class="td-ref">HeaderField</span>[]</span>; messageBody<span>: <span class="td-ref">Uint8Array</span></span>;  }</span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>One RTSP message split into its three parts, with the start-line still a
+plain string.</p>
+</div></div><ul class="namespaceItemContentSubItems"><li>
+                <a href="..&#x2F;.&#x2F;encoding&#x2F;message.ts&#x2F;~&#x2F;MessageFrame.html#property_headerfields">
+                  <span>headerFields</span><span>: <span class="td-ref">HeaderField</span>[]</span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>The header fields, one pair per line, in the order of the lines. A name
+that is on several lines is in several pairs. Folded values are already
+unfolded.</p>
+</div></div></li><li>
+                <a href="..&#x2F;.&#x2F;encoding&#x2F;message.ts&#x2F;~&#x2F;MessageFrame.html#property_messagebody">
+                  <span>messageBody</span><span>: <span class="td-ref">Uint8Array</span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>The message body, empty when the message has none.</p>
+</div></div></li><li>
+                <a href="..&#x2F;.&#x2F;encoding&#x2F;message.ts&#x2F;~&#x2F;MessageFrame.html#property_startline">
+                  <span>startLine</span><span>: <span class="td-kw">string</span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>The Request-Line or Status-Line, without its CRLF.</p>
+</div></div></li></ul></div>
+    </div><div id="namespace_octetreader" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-TypeAlias bg-TypeAlias/15 dark:text-TypeAliasDark dark:bg-TypeAliasDark/15" title="Type Alias">T</div></div>
+<div class="namespaceItemContent">
+		    <a href="..&#x2F;.&#x2F;client.ts&#x2F;~&#x2F;OctetReader.html" title="OctetReader">
+			    <span>OctetReader</span><span> = { read()<span>: <span class="td-ref">Promise</span>&lt;<div class="ml-indent"><div><span>{ done<span>: <span class="td-lit">false</span></span>; value<span>: <span class="td-ref">Uint8Array</span></span>;  }</span><br /><span><span class="td-op"> | </span>{ done<span>: <span class="td-lit">true</span></span>; value<span class="td-op">?</span><span>: <span class="td-kw">unknown</span></span>;  }</span></div></div>&gt;</span>; cancel(<span><span>reason<span class="td-op">?</span><span>: <span class="td-kw">unknown</span></span></span></span>)<span>: <span class="td-ref">Promise</span>&lt;<span class="td-kw">void</span>&gt;</span>;  }</span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>The reader of an <a href=".././mod.ts/~/OctetSource.html">OctetSource</a>: what the client calls to take the
+octets the server sends. A <code>ReadableStreamDefaultReader&lt;Uint8Array&gt;</code> is
+one.</p>
+</div></div><ul class="namespaceItemContentSubItems"><li>
+                <a href="..&#x2F;.&#x2F;client.ts&#x2F;~&#x2F;OctetReader.html#method_cancel_0">
+                  <span>cancel</span><span>(<span><span>reason<span class="td-op">?</span><span>: <span class="td-kw">unknown</span></span></span></span>)<span>: <span class="td-ref">Promise</span>&lt;<span class="td-kw">void</span>&gt;</span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Tells the connection that nothing more will be read.</p>
+</div></div></li><li>
+                <a href="..&#x2F;.&#x2F;client.ts&#x2F;~&#x2F;OctetReader.html#method_read_0">
+                  <span>read</span><span>()<span>: <span class="td-ref">Promise</span>&lt;<div class="ml-indent"><div><span>{ done<span>: <span class="td-lit">false</span></span>; value<span>: <span class="td-ref">Uint8Array</span></span>;  }</span><br /><span><span class="td-op"> | </span>{ done<span>: <span class="td-lit">true</span></span>; value<span class="td-op">?</span><span>: <span class="td-kw">unknown</span></span>;  }</span></div></div>&gt;</span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Resolves with the next chunk, or with <code>done: true</code> when the server has
+ended the connection. Rejects when the connection failed. Whatever
+<code>value</code> comes with <code>done: true</code> is not looked at.</p>
+</div></div></li></ul></div>
+    </div><div id="namespace_octetsink" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-TypeAlias bg-TypeAlias/15 dark:text-TypeAliasDark dark:bg-TypeAliasDark/15" title="Type Alias">T</div></div>
+<div class="namespaceItemContent">
+		    <a href="..&#x2F;.&#x2F;client.ts&#x2F;~&#x2F;OctetSink.html" title="OctetSink">
+			    <span>OctetSink</span><span> = { getWriter()<span>: <span class="td-ref">OctetWriter</span></span>;  }</span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>The writable side of a connection, reduced to what the client calls. A
+<code>WritableStream&lt;Uint8Array&gt;</code> is one, whichever runtime or package typed
+it. The client calls <code>getWriter()</code> once and keeps the writer.</p>
+</div></div><ul class="namespaceItemContentSubItems"><li>
+                <a href="..&#x2F;.&#x2F;client.ts&#x2F;~&#x2F;OctetSink.html#method_getwriter_0">
+                  <span>getWriter</span><span>()<span>: <span class="td-ref">OctetWriter</span></span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Returns the one writer the client writes the connection through.</p>
+</div></div></li></ul></div>
+    </div><div id="namespace_octetsource" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-TypeAlias bg-TypeAlias/15 dark:text-TypeAliasDark dark:bg-TypeAliasDark/15" title="Type Alias">T</div></div>
+<div class="namespaceItemContent">
+		    <a href="..&#x2F;.&#x2F;client.ts&#x2F;~&#x2F;OctetSource.html" title="OctetSource">
+			    <span>OctetSource</span><span> = { getReader()<span>: <span class="td-ref">OctetReader</span></span>;  }</span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>The readable side of a connection, reduced to what the client calls. A
+<code>ReadableStream&lt;Uint8Array&gt;</code> is one, whichever runtime or package typed
+it. The client calls <code>getReader()</code> once and keeps the reader.</p>
+</div></div><ul class="namespaceItemContentSubItems"><li>
+                <a href="..&#x2F;.&#x2F;client.ts&#x2F;~&#x2F;OctetSource.html#method_getreader_0">
+                  <span>getReader</span><span>()<span>: <span class="td-ref">OctetReader</span></span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Returns the one reader the client reads the connection through.</p>
+</div></div></li></ul></div>
+    </div><div id="namespace_octetwriter" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-TypeAlias bg-TypeAlias/15 dark:text-TypeAliasDark dark:bg-TypeAliasDark/15" title="Type Alias">T</div></div>
+<div class="namespaceItemContent">
+		    <a href="..&#x2F;.&#x2F;client.ts&#x2F;~&#x2F;OctetWriter.html" title="OctetWriter">
+			    <span>OctetWriter</span><span> = { write(<span><span>chunk<span>: <span class="td-ref">Uint8Array</span></span></span></span>)<span>: <span class="td-ref">Promise</span>&lt;<span class="td-kw">void</span>&gt;</span>; close()<span>: <span class="td-ref">Promise</span>&lt;<span class="td-kw">void</span>&gt;</span>; abort(<span><span>reason<span class="td-op">?</span><span>: <span class="td-kw">unknown</span></span></span></span>)<span>: <span class="td-ref">Promise</span>&lt;<span class="td-kw">void</span>&gt;</span>;  }</span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>The writer of an <a href=".././mod.ts/~/OctetSink.html">OctetSink</a>: what the client calls to send octets
+to the server. A <code>WritableStreamDefaultWriter&lt;Uint8Array&gt;</code> is one.</p>
+</div></div><ul class="namespaceItemContentSubItems"><li>
+                <a href="..&#x2F;.&#x2F;client.ts&#x2F;~&#x2F;OctetWriter.html#method_abort_0">
+                  <span>abort</span><span>(<span><span>reason<span class="td-op">?</span><span>: <span class="td-kw">unknown</span></span></span></span>)<span>: <span class="td-ref">Promise</span>&lt;<span class="td-kw">void</span>&gt;</span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Ends the writable side at once, dropping what has not gone out.</p>
+</div></div></li><li>
+                <a href="..&#x2F;.&#x2F;client.ts&#x2F;~&#x2F;OctetWriter.html#method_close_0">
+                  <span>close</span><span>()<span>: <span class="td-ref">Promise</span>&lt;<span class="td-kw">void</span>&gt;</span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Ends the writable side once everything written has gone out.</p>
+</div></div></li><li>
+                <a href="..&#x2F;.&#x2F;client.ts&#x2F;~&#x2F;OctetWriter.html#method_write_0">
+                  <span>write</span><span>(<span><span>chunk<span>: <span class="td-ref">Uint8Array</span></span></span></span>)<span>: <span class="td-ref">Promise</span>&lt;<span class="td-kw">void</span>&gt;</span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Sends one chunk. The client waits for it to resolve before it writes the
+next one, and takes a rejection as the failure of the connection.</p>
+</div></div></li></ul></div>
+    </div><div id="namespace_rtspmessage" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-TypeAlias bg-TypeAlias/15 dark:text-TypeAliasDark dark:bg-TypeAliasDark/15" title="Type Alias">T</div></div>
+<div class="namespaceItemContent">
+		    <a href="..&#x2F;.&#x2F;protocol&#x2F;message.ts&#x2F;~&#x2F;RtspMessage.html" title="RtspMessage">
+			    <span>RtspMessage</span><span> = <span><span class="td-ref">RtspRequest</span><span class="td-op"> | </span><span class="td-ref">RtspResponse</span></span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>An RTSP message: a request or a response.</p>
+</div></div></div>
+    </div><div id="namespace_rtsprequest" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-TypeAlias bg-TypeAlias/15 dark:text-TypeAliasDark dark:bg-TypeAliasDark/15" title="Type Alias">T</div></div>
+<div class="namespaceItemContent">
+		    <a href="..&#x2F;.&#x2F;protocol&#x2F;request.ts&#x2F;~&#x2F;RtspRequest.html" title="RtspRequest">
+			    <span>RtspRequest</span><span> = { method<span>: <span class="td-kw">string</span></span>; requestUri<span>: <span class="td-kw">string</span></span>; rtspVersion<span>: <span class="td-kw">string</span></span>; headers<span>: <span class="td-ref">HeaderField</span>[]</span>; messageBody<span>: <span class="td-ref">Uint8Array</span></span>;  }</span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>An RTSP request.</p>
+</div></div><ul class="namespaceItemContentSubItems"><li>
+                <a href="..&#x2F;.&#x2F;protocol&#x2F;request.ts&#x2F;~&#x2F;RtspRequest.html#property_headers">
+                  <span>headers</span><span>: <span class="td-ref">HeaderField</span>[]</span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>The header fields, one pair per line, in the order of the lines and with
+each name as written. <code>new Headers(request.headers)</code> looks a name up
+whatever its case.</p>
+</div></div></li><li>
+                <a href="..&#x2F;.&#x2F;protocol&#x2F;request.ts&#x2F;~&#x2F;RtspRequest.html#property_messagebody">
+                  <span>messageBody</span><span>: <span class="td-ref">Uint8Array</span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>The message body, empty when there is none.</p>
+</div></div></li><li>
+                <a href="..&#x2F;.&#x2F;protocol&#x2F;request.ts&#x2F;~&#x2F;RtspRequest.html#property_method">
+                  <span>method</span><span>: <span class="td-kw">string</span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>The method, such as <code>&quot;DESCRIBE&quot;</code>, kept as written.</p>
+</div></div></li><li>
+                <a href="..&#x2F;.&#x2F;protocol&#x2F;request.ts&#x2F;~&#x2F;RtspRequest.html#property_requesturi">
+                  <span>requestUri</span><span>: <span class="td-kw">string</span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p><code>&quot;*&quot;</code> or an RTSP URI.</p>
+</div></div></li><li>
+                <a href="..&#x2F;.&#x2F;protocol&#x2F;request.ts&#x2F;~&#x2F;RtspRequest.html#property_rtspversion">
+                  <span>rtspVersion</span><span>: <span class="td-kw">string</span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>The version, such as <code>&quot;RTSP/2.0&quot;</code> or <code>&quot;RTSP/1.0&quot;</code>, kept as written.</p>
+</div></div></li></ul></div>
+    </div><div id="namespace_rtspresponse" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-TypeAlias bg-TypeAlias/15 dark:text-TypeAliasDark dark:bg-TypeAliasDark/15" title="Type Alias">T</div></div>
+<div class="namespaceItemContent">
+		    <a href="..&#x2F;.&#x2F;protocol&#x2F;response.ts&#x2F;~&#x2F;RtspResponse.html" title="RtspResponse">
+			    <span>RtspResponse</span><span> = { rtspVersion<span>: <span class="td-kw">string</span></span>; statusCode<span>: <span class="td-kw">number</span></span>; reasonPhrase<span>: <span class="td-kw">string</span></span>; headers<span>: <span class="td-ref">HeaderField</span>[]</span>; messageBody<span>: <span class="td-ref">Uint8Array</span></span>;  }</span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>An RTSP response.</p>
+</div></div><ul class="namespaceItemContentSubItems"><li>
+                <a href="..&#x2F;.&#x2F;protocol&#x2F;response.ts&#x2F;~&#x2F;RtspResponse.html#property_headers">
+                  <span>headers</span><span>: <span class="td-ref">HeaderField</span>[]</span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>The header fields, one pair per line, in the order of the lines and with
+each name as written. <code>new Headers(response.headers)</code> looks a name up
+whatever its case.</p>
+</div></div></li><li>
+                <a href="..&#x2F;.&#x2F;protocol&#x2F;response.ts&#x2F;~&#x2F;RtspResponse.html#property_messagebody">
+                  <span>messageBody</span><span>: <span class="td-ref">Uint8Array</span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>The message body, empty when there is none.</p>
+</div></div></li><li>
+                <a href="..&#x2F;.&#x2F;protocol&#x2F;response.ts&#x2F;~&#x2F;RtspResponse.html#property_reasonphrase">
+                  <span>reasonPhrase</span><span>: <span class="td-kw">string</span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>The text after the Status-Code. It may hold spaces and may be empty.</p>
+</div></div></li><li>
+                <a href="..&#x2F;.&#x2F;protocol&#x2F;response.ts&#x2F;~&#x2F;RtspResponse.html#property_rtspversion">
+                  <span>rtspVersion</span><span>: <span class="td-kw">string</span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>The version, such as <code>&quot;RTSP/2.0&quot;</code> or <code>&quot;RTSP/1.0&quot;</code>, kept as written.</p>
+</div></div></li><li>
+                <a href="..&#x2F;.&#x2F;protocol&#x2F;response.ts&#x2F;~&#x2F;RtspResponse.html#property_statuscode">
+                  <span>statusCode</span><span>: <span class="td-kw">number</span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>The Status-Code, such as <code>200</code>. A 1xx code is an interim response.</p>
+</div></div></li></ul></div>
+    </div></div>
+</section>
+</div>
+</div>
+</section>
+</main><div class="toc">
+    <div><div class="usageContent">
+    <h3>Usage</h3><div class="markdown"><pre class="highlight"><code class="language-typescript">import * as mod from &quot;mod.ts&quot;;
+</code><button class="copyButton" data-copy="import * as mod from &quot;mod.ts&quot;;
+"><svg
+  class="copy"
+  width="15"
+  height="15"
+  viewBox="0 0 15 15"
+  fill="none"
+  xmlns="http://www.w3.org/2000/svg"
+>
+  <rect x="2" y="2" width="7" height="7" fill="none" />
+  <rect x="6" y="6" width="7" height="7" fill="none" />
+  <path
+    d="M1.55566 2.7C1.55566 2.03726 2.09292 1.5 2.75566 1.5H8.75566C9.41841 1.5 9.95566 2.03726 9.95566 2.7V5.1H12.3557C13.0184 5.1 13.5557 5.63726 13.5557 6.3V12.3C13.5557 12.9627 13.0184 13.5 12.3557 13.5H6.35566C5.69292 13.5 5.15566 12.9627 5.15566 12.3V9.9H2.75566C2.09292 9.9 1.55566 9.36274 1.55566 8.7V2.7ZM6.35566 9.9V12.3H12.3557V6.3H9.95566V8.7C9.95566 9.36274 9.41841 9.9 8.75566 9.9H6.35566ZM8.75566 8.7V2.7H2.75566V8.7H8.75566Z"
+    fill="currentColor"
+  />
+</svg>
+<svg
+  class="check"
+  width="15"
+  height="15"
+  viewBox="0 0 24 24"
+  stroke-width="2"
+  stroke="currentColor"
+  fill="none"
+  stroke-linecap="round"
+  stroke-linejoin="round"
+  xmlns="http://www.w3.org/2000/svg"
+>
+  <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+  <path d="M5 12l5 5l10 -10" />
+</svg>
+</button><code></code></pre>
+</div></div><nav class="topSymbols">
+          <h3>Symbols</h3>
+          <ul><li>
+                <a href="..&#x2F;.&#x2F;client.ts&#x2F;~&#x2F;createClient.html" title="createClient"><div class="docNodeKindIcon"><div class="text-Function bg-Function/15 dark:text-FunctionDark dark:bg-FunctionDark/15" title="Function">f</div></div>
+<span class="hover:bg-Function/15 hover:bg-FunctionDark/15">
+                    createClient
+                  </span>
+                </a>
+              </li><li>
+                <a href="..&#x2F;.&#x2F;client.ts&#x2F;~&#x2F;Client.html" title="Client"><div class="docNodeKindIcon"><div class="text-TypeAlias bg-TypeAlias/15 dark:text-TypeAliasDark dark:bg-TypeAliasDark/15" title="Type Alias">T</div></div>
+<span class="hover:bg-TypeAlias/15 hover:bg-TypeAliasDark/15">
+                    Client
+                  </span>
+                </a>
+              </li><li>
+                <a href="..&#x2F;.&#x2F;client.ts&#x2F;~&#x2F;ClientOptions.html" title="ClientOptions"><div class="docNodeKindIcon"><div class="text-TypeAlias bg-TypeAlias/15 dark:text-TypeAliasDark dark:bg-TypeAliasDark/15" title="Type Alias">T</div></div>
+<span class="hover:bg-TypeAlias/15 hover:bg-TypeAliasDark/15">
+                    ClientOptions
+                  </span>
+                </a>
+              </li><li>
+                <a href="..&#x2F;.&#x2F;client.ts&#x2F;~&#x2F;ClientRequest.html" title="ClientRequest"><div class="docNodeKindIcon"><div class="text-TypeAlias bg-TypeAlias/15 dark:text-TypeAliasDark dark:bg-TypeAliasDark/15" title="Type Alias">T</div></div>
+<span class="hover:bg-TypeAlias/15 hover:bg-TypeAliasDark/15">
+                    ClientRequest
+                  </span>
+                </a>
+              </li><li>
+                <a href="..&#x2F;.&#x2F;client.ts&#x2F;~&#x2F;OctetReader.html" title="OctetReader"><div class="docNodeKindIcon"><div class="text-TypeAlias bg-TypeAlias/15 dark:text-TypeAliasDark dark:bg-TypeAliasDark/15" title="Type Alias">T</div></div>
+<span class="hover:bg-TypeAlias/15 hover:bg-TypeAliasDark/15">
+                    OctetReader
+                  </span>
+                </a>
+              </li></ul><a class="flex items-center gap-0.5" href="..&#x2F;.&#x2F;all_symbols.html">
+              <span class="leading-none">view all 58 symbols</span><svg
+  width="16"
+  height="16"
+  viewBox="0 0 16 16"
+  fill="none"
+  xmlns="http://www.w3.org/2000/svg"
+>
+  <path
+    fill-rule="evenodd"
+    clip-rule="evenodd"
+    d="M5.76748 11.8159C5.5378 11.577 5.54525 11.1972 5.78411 10.9675L8.93431 8L5.78411 5.0325C5.54525 4.80282 5.5378 4.423 5.76748 4.18413C5.99715 3.94527 6.37698 3.93782 6.61584 4.1675L10.2158 7.5675C10.3335 7.68062 10.4 7.83679 10.4 8C10.4 8.16321 10.3335 8.31938 10.2158 8.4325L6.61584 11.8325C6.37698 12.0622 5.99715 12.0547 5.76748 11.8159Z"
+    fill="currentColor"
+  />
+</svg>
+</a></nav><nav class="documentNavigation">
+          <h3>Document Navigation</h3><ul><li><a href="#examples" title="Examples">Examples</a></li><li><ul><li><a href="#example_0" title="Send a request and read its response">Send a request and read its response</a></li><li><a href="#example_1" title="Describe a camera stream over a TCP socket">Describe a camera stream over a TCP socket</a></li></ul></li><li><a href="#mod_ts_functions" title="Functions">Functions</a></li><li><ul><li><a href="#namespace_createclient" title="createClient">createClient</a></li><li><a href="#namespace_creatertspdecodestream" title="createRtspDecodeStream">createRtspDecodeStream</a></li><li><a href="#namespace_creatertspencodestream" title="createRtspEncodeStream">createRtspEncodeStream</a></li><li><a href="#namespace_decodeinterleavedbinarydata" title="decodeInterleavedBinaryData">decodeInterleavedBinaryData</a></li><li><a href="#namespace_decodemessage" title="decodeMessage">decodeMessage</a></li><li><a href="#namespace_encodeinterleavedbinarydata" title="encodeInterleavedBinaryData">encodeInterleavedBinaryData</a></li><li><a href="#namespace_encodemessage" title="encodeMessage">encodeMessage</a></li><li><a href="#namespace_isinterleavedbinarydata" title="isInterleavedBinaryData">isInterleavedBinaryData</a></li><li><a href="#namespace_isrequest" title="isRequest">isRequest</a></li><li><a href="#namespace_isresponse" title="isResponse">isResponse</a></li><li><a href="#namespace_parsemessage" title="parseMessage">parseMessage</a></li><li><a href="#namespace_parserequest" title="parseRequest">parseRequest</a></li><li><a href="#namespace_parseresponse" title="parseResponse">parseResponse</a></li><li><a href="#namespace_serializemessage" title="serializeMessage">serializeMessage</a></li><li><a href="#namespace_serializerequest" title="serializeRequest">serializeRequest</a></li><li><a href="#namespace_serializeresponse" title="serializeResponse">serializeResponse</a></li></ul></li><li><a href="#mod_ts_type-aliases" title="Type Aliases">Type Aliases</a></li><li><ul><li><a href="#namespace_client" title="Client">Client</a></li><li><a href="#namespace_clientoptions" title="ClientOptions">ClientOptions</a></li><li><a href="#namespace_clientrequest" title="ClientRequest">ClientRequest</a></li><li><a href="#namespace_headerfield" title="HeaderField">HeaderField</a></li><li><a href="#namespace_interleavedbinarydata" title="InterleavedBinaryData">InterleavedBinaryData</a></li><li><a href="#namespace_messageframe" title="MessageFrame">MessageFrame</a></li><li><a href="#namespace_octetreader" title="OctetReader">OctetReader</a></li><li><a href="#namespace_octetsink" title="OctetSink">OctetSink</a></li><li><a href="#namespace_octetsource" title="OctetSource">OctetSource</a></li><li><a href="#namespace_octetwriter" title="OctetWriter">OctetWriter</a></li><li><a href="#namespace_rtspmessage" title="RtspMessage">RtspMessage</a></li><li><a href="#namespace_rtsprequest" title="RtspRequest">RtspRequest</a></li><li><a href="#namespace_rtspresponse" title="RtspResponse">RtspResponse</a></li></ul></li></ul></nav></div>
+  </div></div>
+</div>
+</div>
+</body>
+</html>
