@@ -40,6 +40,7 @@
   "packages/@hertzg/hikvision-api": "0.1.2",
   "packages/@hertzg/reolink-api": "0.1.0",
   "packages/@hertzg/routeros-api": "0.1.2",
+  "packages/@hertzg/rtsp": "0.0.1",
   "packages/@hertzg/tplink-api": "1.5.0",
   "packages/@hertzg/ip": "5.0.1",
   "packages/@hertzg/mac": "0.2.0",

@@ -121,6 +121,9 @@
 "@hertzg/routeros-api":
   - changed-files:
       - any-glob-to-any-file: packages/@hertzg/routeros-api/**
+"@hertzg/rtsp":
+  - changed-files:
+      - any-glob-to-any-file: packages/@hertzg/rtsp/**
 "@hertzg/tplink-api":
   - changed-files:
       - any-glob-to-any-file: packages/@hertzg/tplink-api/**

@@ -87,6 +87,8 @@ the JSR coordinate. Two scopes:
 - `reolink-api` - Reolink camera client over Baichuan (events, siren, privacy
   mode, snapshot, PTZ)
 - `routeros-api` - MikroTik RouterOS API client
+- `rtsp` - RTSP connection over a byte stream pair (messages, interleaved
+  binary data, request/response by CSeq)
 - `tplink-api` - TP-Link Router API client
 - `wg-conf` - WireGuard configuration handling
 - `wg-ini` - INI file parsing
@@ -446,6 +448,7 @@ both tiresome and error-prone.
 - `@hertzg/hikvision-api`
 - `@hertzg/reolink-api`
 - `@hertzg/routeros-api`
+- `@hertzg/rtsp`
 - `@hertzg/tplink-api`
 - `@hertzg/xhb`
 
