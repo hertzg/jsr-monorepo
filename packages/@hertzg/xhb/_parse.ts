@@ -2,7 +2,7 @@ import type { gCharP, gDouble, gInt, gUInt32 } from "./_g_types.ts";
 
 const parseAsInt = <T extends number>(s: string): T => parseInt(s, 10) as T;
 const parseAsString = <T extends string>(s: string) => s && (String(s) as T);
-const parseAsDecimal = <T extends string>(s: string) => s;
+const parseAsDecimal = <T extends string>(s: string) => s as T;
 
 /**
  * Parses a string to an integer, returning `0` for null or undefined input.

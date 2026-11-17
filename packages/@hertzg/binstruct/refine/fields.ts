@@ -62,7 +62,7 @@ import type { Refiner } from "./refine.ts";
  * types compose without forcing the caller to widen each entry. The
  * decoded value type for each field is recovered via {@linkcode DecodedFields}.
  */
-// deno-lint-ignore no-explicit-any
+// oxlint-disable-next-line typescript/no-explicit-any
 export type FieldCoders = Record<string, Coder<any>>;
 
 /**

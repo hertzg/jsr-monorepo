@@ -1,3 +1,4 @@
+import { test } from "node:test";
 import { assertEquals } from "@std/assert";
 import { cbc } from "@noble/ciphers/aes.js";
 import { md5 } from "@noble/hashes/legacy.js";
@@ -11,7 +12,7 @@ import { bigIntToBytes, bytesToBigInt } from "./utils.ts";
  * Test vectors were generated using Node.js node:crypto module.
  */
 
-Deno.test("AES-128-CBC encrypt matches node:crypto", () => {
+test("AES-128-CBC encrypt matches node:crypto", () => {
   const testCases = [
     {
       key: "0123456789abcdef",
@@ -49,7 +50,7 @@ Deno.test("AES-128-CBC encrypt matches node:crypto", () => {
   }
 });
 
-Deno.test("AES-128-CBC decrypt matches node:crypto", () => {
+test("AES-128-CBC decrypt matches node:crypto", () => {
   const testCases = [
     {
       key: "0123456789abcdef",
@@ -87,7 +88,7 @@ Deno.test("AES-128-CBC decrypt matches node:crypto", () => {
   }
 });
 
-Deno.test("AES-128-CBC roundtrip", () => {
+test("AES-128-CBC roundtrip", () => {
   const key = new TextEncoder().encode("0123456789abcdef");
   const iv = new TextEncoder().encode("fedcba9876543210");
   const plaintext = new TextEncoder().encode("roundtrip test data!");
@@ -102,7 +103,7 @@ Deno.test("AES-128-CBC roundtrip", () => {
   );
 });
 
-Deno.test("MD5 hash matches node:crypto", () => {
+test("MD5 hash matches node:crypto", () => {
   const testCases = [
     {
       input: "admin1234",
@@ -134,7 +135,7 @@ Deno.test("MD5 hash matches node:crypto", () => {
   }
 });
 
-Deno.test("RSA encrypt (no padding) matches node:crypto", () => {
+test("RSA encrypt (no padding) matches node:crypto", () => {
   // Test vector generated with Node.js crypto module
   // Using a 1024-bit RSA key
   const modulus = BigInt(
@@ -156,7 +157,7 @@ Deno.test("RSA encrypt (no padding) matches node:crypto", () => {
   assertEquals(encrypted.toString(16), expected);
 });
 
-Deno.test("rsaPad pads value with zeros on the right (low bits)", () => {
+test("rsaPad pads value with zeros on the right (low bits)", () => {
   const message = new TextEncoder().encode("short");
   const value = bytesToBigInt(message);
   const padded = rsaPad(value, message.length, 16);
@@ -175,7 +176,7 @@ Deno.test("rsaPad pads value with zeros on the right (low bits)", () => {
   }
 });
 
-Deno.test("rsaPad returns original if already correct size", () => {
+test("rsaPad returns original if already correct size", () => {
   const message = new TextEncoder().encode("exactly16chars!!");
   const value = bytesToBigInt(message);
   const padded = rsaPad(value, message.length, 16);
@@ -189,7 +190,7 @@ Deno.test("rsaPad returns original if already correct size", () => {
   assertEquals(new TextDecoder().decode(paddedBytes), "exactly16chars!!");
 });
 
-Deno.test("RSA multi-chunk encryption matches node:crypto", () => {
+test("RSA multi-chunk encryption matches node:crypto", () => {
   // Test vector generated with Node.js crypto module
   // Data that spans 3 chunks (300 bytes with 128-byte modulus = 3 chunks)
   const modulus = BigInt(
@@ -231,7 +232,7 @@ Deno.test("RSA multi-chunk encryption matches node:crypto", () => {
   assertEquals(fullEncrypted.toHex(), expected);
 });
 
-Deno.test("createCipher allows multiple encryptions with same instance", () => {
+test("createCipher allows multiple encryptions with same instance", () => {
   const modulus = Uint8Array.fromHex(
     "b3096650d220465f74878dbbced0d240218e04068dbb7f2496019751b17066e46b58d5e9fdbc6a6201eb9cd1a611b94ceffec43563260a55922c520a760c32ecacfbc872006aacb202a5e573814c3e02a91fc4221635e2818a249629989d6a953eed30bd088dde1e6b933eea6f18c7f962b47e674c8f758059064178556320c7",
   );

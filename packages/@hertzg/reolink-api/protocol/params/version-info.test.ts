@@ -1,8 +1,9 @@
+import { test } from "node:test";
 import { assertEquals, assertThrows } from "@std/assert";
 import { parse } from "@std/xml";
 import { versionInfo } from "./version-info.ts";
 
-Deno.test("versionInfo decodes a reply with every field the handler writes", () => {
+test("versionInfo decodes a reply with every field the handler writes", () => {
   const root = parse(
     '<VersionInfo version="1.1"><name>Front door</name><type>IPC</type>' +
       "<serialNumber>serial-abc123</serialNumber><buildDay>build 23110119</buildDay>" +
@@ -29,7 +30,7 @@ Deno.test("versionInfo decodes a reply with every field the handler writes", () 
   });
 });
 
-Deno.test("versionInfo round-trips through encode and decode", () => {
+test("versionInfo round-trips through encode and decode", () => {
   const value = {
     name: "name-rt",
     type: "type-rt",
@@ -51,7 +52,7 @@ Deno.test("versionInfo round-trips through encode and decode", () => {
   );
 });
 
-Deno.test("versionInfo decodes a reply without the conditional fields", () => {
+test("versionInfo decodes a reply without the conditional fields", () => {
   const root = parse(
     '<VersionInfo version="1.1"><name>n</name><type>t</type>' +
       "<serialNumber>s</serialNumber><buildDay>b</buildDay>" +
@@ -63,14 +64,14 @@ Deno.test("versionInfo decodes a reply without the conditional fields", () => {
   assertEquals("anotherPakSuffix" in versionInfo.decode(root), false);
 });
 
-Deno.test("versionInfo throws when an always-written field is missing", () => {
+test("versionInfo throws when an always-written field is missing", () => {
   const root = parse('<VersionInfo version="1.1"><name>n</name></VersionInfo>')
     .root;
 
   assertThrows(() => versionInfo.decode(root), Error, "<type>");
 });
 
-Deno.test("versionInfo reads the Video Doorbell PoE's itemNo and aiVersion", () => {
+test("versionInfo reads the Video Doorbell PoE's itemNo and aiVersion", () => {
   const root = parse(
     '<VersionInfo version="1.1"><name>Doorbell</name><type>IPC</type>' +
       "<serialNumber>serial-db1</serialNumber><buildDay>build 2508071283</buildDay>" +

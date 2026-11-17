@@ -118,9 +118,9 @@ const kKindRefineSwitch = Symbol("refineSwitch");
  * type Result = RefinedUnion<Refiners>; // string | boolean
  * ```
  */
-// deno-lint-ignore no-explicit-any
+// oxlint-disable-next-line typescript/no-explicit-any
 export type RefinedUnion<T extends Record<string, Refiner<any, any, any>>> = {
-  // deno-lint-ignore no-explicit-any
+  // oxlint-disable-next-line typescript/no-explicit-any
   [K in keyof T]: T[K] extends Refiner<any, infer R, any> ? R : never;
 }[keyof T];
 
@@ -300,7 +300,7 @@ export type RefinedUnion<T extends Record<string, Refiner<any, any, any>>> = {
  */
 export function refineSwitch<
   TBase,
-  // deno-lint-ignore no-explicit-any
+  // oxlint-disable-next-line typescript/no-explicit-any
   const TRefiners extends Record<string, Refiner<TBase, any, []>>,
 >(
   baseCoder: Coder<TBase>,
@@ -374,7 +374,7 @@ export function refineSwitch<
       );
 
       // Unrefine the value back to base type
-      // deno-lint-ignore no-explicit-any
+      // oxlint-disable-next-line typescript/no-explicit-any
       const base = refiner.unrefine(refined as any, ctx);
 
       // Encode the base value

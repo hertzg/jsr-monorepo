@@ -1,8 +1,9 @@
+import { test } from "node:test";
 import { assertEquals, assertThrows } from "@std/assert";
 import { parse } from "@std/xml";
 import { net3g4gInfo } from "./net3g4g-info.ts";
 
-Deno.test("net3g4gInfo decodes the cmd 255 push nets_4g_net_info_report writes", () => {
+test("net3g4gInfo decodes the cmd 255 push nets_4g_net_info_report writes", () => {
   const root = parse(
     '<Net3g4gInfo version="1.1"><sigIntensityLevel>3</sigIntensityLevel>' +
       "<sigIntensityValue>-83</sigIntensityValue><netMode>5</netMode>" +
@@ -17,7 +18,7 @@ Deno.test("net3g4gInfo decodes the cmd 255 push nets_4g_net_info_report writes",
   });
 });
 
-Deno.test("net3g4gInfo round-trips a full value", () => {
+test("net3g4gInfo round-trips a full value", () => {
   const value = {
     sigIntensityLevel: 1,
     sigIntensityValue: -110,
@@ -31,7 +32,7 @@ Deno.test("net3g4gInfo round-trips a full value", () => {
   );
 });
 
-Deno.test("net3g4gInfo rejects a reply without mobileOperator", () => {
+test("net3g4gInfo rejects a reply without mobileOperator", () => {
   const root = parse(
     '<Net3g4gInfo version="1.1"><sigIntensityLevel>3</sigIntensityLevel>' +
       "<sigIntensityValue>-83</sigIntensityValue><netMode>5</netMode></Net3g4gInfo>",

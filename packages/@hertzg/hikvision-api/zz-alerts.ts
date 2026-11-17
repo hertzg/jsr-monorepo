@@ -2,9 +2,8 @@
  * Reads live alerts from a device with this package and prints per-channel
  * motion on/off, treating 3 s without a VMD post as "off".
  *
- * Not published. Run from this directory, on Deno or Bun:
+ * Not published. Run from this directory:
  *
- *   HIK_HOST=192.0.2.10 HIK_USER=admin HIK_PASS=… deno run -A zz-alerts.ts 30
  *   HIK_HOST=192.0.2.10 HIK_USER=admin HIK_PASS=… bun run zz-alerts.ts 30
  *
  * @module

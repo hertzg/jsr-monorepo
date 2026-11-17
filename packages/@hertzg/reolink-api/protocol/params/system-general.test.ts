@@ -1,8 +1,9 @@
+import { test } from "node:test";
 import { assertEquals, assertThrows } from "@std/assert";
 import { parse } from "@std/xml";
 import { systemGeneral } from "./system-general.ts";
 
-Deno.test("systemGeneral decodes the element the firmware writes", () => {
+test("systemGeneral decodes the element the firmware writes", () => {
   const root = parse(
     '<SystemGeneral version="1.1"><timeZone>-14400</timeZone><osdFormat>DMY</osdFormat>' +
       "<year>2026</year><month>10</month><day>9</day><hour>13</hour><minute>14</minute>" +
@@ -32,7 +33,7 @@ Deno.test("systemGeneral decodes the element the firmware writes", () => {
   });
 });
 
-Deno.test("systemGeneral round-trips through encode and decode", () => {
+test("systemGeneral round-trips through encode and decode", () => {
   const value = {
     timeZone: 3600,
     osdFormat: "YMD_CN" as const,
@@ -58,7 +59,7 @@ Deno.test("systemGeneral round-trips through encode and decode", () => {
   );
 });
 
-Deno.test("systemGeneral rejects an OSD format the firmware never writes", () => {
+test("systemGeneral rejects an OSD format the firmware never writes", () => {
   const root = parse(
     '<SystemGeneral version="1.1"><osdFormat>ISO</osdFormat></SystemGeneral>',
   ).root;
@@ -66,7 +67,7 @@ Deno.test("systemGeneral rejects an OSD format the firmware never writes", () =>
   assertThrows(() => systemGeneral.decode(root), Error, '"ISO"');
 });
 
-Deno.test("systemGeneral decodes a request that sets only the clock", () => {
+test("systemGeneral decodes a request that sets only the clock", () => {
   const root = parse(
     '<SystemGeneral version="1.1"><hour>8</hour><minute>9</minute></SystemGeneral>',
   ).root;

@@ -1,8 +1,9 @@
+import { test } from "node:test";
 import { assertEquals } from "@std/assert";
 import { parse } from "@std/xml";
 import { emailTask } from "./email-task.ts";
 
-Deno.test("emailTask decodes the reply nets_email_task_s2x writes", () => {
+test("emailTask decodes the reply nets_email_task_s2x writes", () => {
   const motionHours = "0".repeat(144) + "1".repeat(24);
   const peopleHours = "1".repeat(168);
   const root = parse(
@@ -23,7 +24,7 @@ Deno.test("emailTask decodes the reply nets_email_task_s2x writes", () => {
   });
 });
 
-Deno.test("emailTask round-trips a full value", () => {
+test("emailTask round-trips a full value", () => {
   const value = {
     channelId: 1,
     enable: 0,
@@ -36,7 +37,7 @@ Deno.test("emailTask round-trips a full value", () => {
   assertEquals(emailTask.decode(parse(emailTask.encode(value)).root), value);
 });
 
-Deno.test("emailTask decodes a request that carries only the channel", () => {
+test("emailTask decodes a request that carries only the channel", () => {
   const root = parse(
     '<EmailTask version="1.1"><channelId>0</channelId></EmailTask>',
   ).root;
@@ -44,7 +45,7 @@ Deno.test("emailTask decodes a request that carries only the channel", () => {
   assertEquals(emailTask.decode(root), { channelId: 0 });
 });
 
-Deno.test("emailTask writes an empty typeScheduleList as an empty wrapper", () => {
+test("emailTask writes an empty typeScheduleList as an empty wrapper", () => {
   assertEquals(
     emailTask.encode({ channelId: 0, enable: 1, typeScheduleList: [] }),
     '<EmailTask version="1.1"><channelId>0</channelId><enable>1</enable>' +

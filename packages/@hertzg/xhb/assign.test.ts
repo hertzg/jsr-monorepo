@@ -1,3 +1,4 @@
+import { test } from "node:test";
 import { assertEquals } from "@std/assert";
 import { parse, serialize } from "./mod.ts";
 import {
@@ -8,7 +9,7 @@ import {
 } from "./assign.ts";
 import { PAY_MODE_CASH } from "./operation.ts";
 
-Deno.test("an <asg> rule matches imported transactions and fills in the blanks", () => {
+test("an <asg> rule matches imported transactions and fills in the blanks", () => {
   const xml = [
     '<?xml version="1.0"?>',
     '<homebank v="1.3" d="050402">',
@@ -31,7 +32,7 @@ Deno.test("an <asg> rule matches imported transactions and fills in the blanks",
   assertEquals(serialize(parse(xml)), xml);
 });
 
-Deno.test("format version 0.7 and older keep `exact` as its own attribute, later versions as a flag", () => {
+test("format version 0.7 and older keep `exact` as its own attribute, later versions as a flag", () => {
   const xml = [
     '<?xml version="1.0"?>',
     '<homebank v="0.7" d="030000">',
@@ -53,7 +54,7 @@ Deno.test("format version 0.7 and older keep `exact` as its own attribute, later
   assertEquals(amazon.flags, ASSIGN_FLAG_DOPAY | ASSIGN_FLAG_DOCAT);
 });
 
-Deno.test("the 0.7 migration overwrites whatever flags a newer-looking file carried", () => {
+test("the 0.7 migration overwrites whatever flags a newer-looking file carried", () => {
   const oldFormat = [
     '<?xml version="1.0"?>',
     '<homebank v="0.7" d="030000">',

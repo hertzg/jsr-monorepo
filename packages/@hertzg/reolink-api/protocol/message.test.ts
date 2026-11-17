@@ -1,8 +1,9 @@
+import { test } from "node:test";
 import { assertEquals, assertThrows } from "@std/assert";
 import { aesCfbEncrypt, xorCipher } from "../encoding/cipher.ts";
 import { createMessage, decryptBody, decryptPayload } from "./message.ts";
 
-Deno.test("createMessage builds a 24-byte request by default", () => {
+test("createMessage builds a 24-byte request by default", () => {
   const body = Uint8Array.of(1, 2, 3);
 
   assertEquals(
@@ -23,7 +24,7 @@ Deno.test("createMessage builds a 24-byte request by default", () => {
   );
 });
 
-Deno.test("createMessage builds the 20-byte nonce request", () => {
+test("createMessage builds the 20-byte nonce request", () => {
   assertEquals(
     createMessage({
       cmdId: 1,
@@ -42,13 +43,13 @@ Deno.test("createMessage builds the 20-byte nonce request", () => {
   );
 });
 
-Deno.test("decryptBody returns an empty string for an empty body", () => {
+test("decryptBody returns an empty string for an empty body", () => {
   const message = createMessage({ cmdId: 31, channelId: 251, messageId: 3 });
 
   assertEquals(decryptBody(message), "");
 });
 
-Deno.test("decryptBody uses AES for a 24-byte push when a key is given", () => {
+test("decryptBody uses AES for a 24-byte push when a key is given", () => {
   const key = new TextEncoder().encode("08822D7143979103");
   const xml = '<?xml version="1.0" ?><body><AlarmEventList/></body>';
   const message = createMessage({
@@ -61,7 +62,7 @@ Deno.test("decryptBody uses AES for a 24-byte push when a key is given", () => {
   assertEquals(decryptBody(message, key), xml);
 });
 
-Deno.test("decryptBody falls back to XOR for a 24-byte login reply", () => {
+test("decryptBody falls back to XOR for a 24-byte login reply", () => {
   const key = new TextEncoder().encode("08822D7143979103");
   const xml = '<?xml version="1.0" ?><body><DeviceInfo/></body>';
   const message = createMessage({
@@ -74,7 +75,7 @@ Deno.test("decryptBody falls back to XOR for a 24-byte login reply", () => {
   assertEquals(decryptBody(message, key), xml);
 });
 
-Deno.test("decryptBody reads a plain body marked 00 dd", () => {
+test("decryptBody reads a plain body marked 00 dd", () => {
   const xml = '<?xml version="1.0" ?><body/>';
   const body = new TextEncoder().encode(xml);
 
@@ -95,7 +96,7 @@ Deno.test("decryptBody reads a plain body marked 00 dd", () => {
   );
 });
 
-Deno.test("decryptBody throws when nothing yields XML", () => {
+test("decryptBody throws when nothing yields XML", () => {
   const message = createMessage({
     cmdId: 33,
     channelId: 251,
@@ -106,7 +107,7 @@ Deno.test("decryptBody throws when nothing yields XML", () => {
   assertThrows(() => decryptBody(message), Error, "cmd 33");
 });
 
-Deno.test("createMessage puts the extension before the body and points payloadOffset past it", () => {
+test("createMessage puts the extension before the body and points payloadOffset past it", () => {
   const extension = Uint8Array.of(1, 2, 3);
   const body = Uint8Array.of(4, 5);
 
@@ -133,7 +134,7 @@ Deno.test("createMessage puts the extension before the body and points payloadOf
   });
 });
 
-Deno.test("decryptPayload AES-decrypts the first encryptLen bytes and keeps the rest", () => {
+test("decryptPayload AES-decrypts the first encryptLen bytes and keeps the rest", () => {
   const aesKey = new TextEncoder().encode("08822D7143979103");
   const body = aesCfbEncrypt(
     aesKey,

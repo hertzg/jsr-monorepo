@@ -1,8 +1,9 @@
+import { test } from "node:test";
 import { assertEquals } from "@std/assert";
 import { parse } from "@std/xml";
 import { imageFileInfo } from "./image-file-info.ts";
 
-Deno.test("imageFileInfo decodes the export reply the camera writes", () => {
+test("imageFileInfo decodes the export reply the camera writes", () => {
   const root = parse(
     '<imageFileInfo version="1.1"><fileSize>4096</fileSize></imageFileInfo>',
   ).root;
@@ -10,7 +11,7 @@ Deno.test("imageFileInfo decodes the export reply the camera writes", () => {
   assertEquals(imageFileInfo.decode(root), { fileSize: 4096 });
 });
 
-Deno.test("imageFileInfo round-trips through encode and decode", () => {
+test("imageFileInfo round-trips through encode and decode", () => {
   const value = {
     channelId: 1,
     fileSize: 8192,
@@ -23,7 +24,7 @@ Deno.test("imageFileInfo round-trips through encode and decode", () => {
   assertEquals(imageFileInfo.decode(parse(xml).root), value);
 });
 
-Deno.test("imageFileInfo decodes a request that deletes an image", () => {
+test("imageFileInfo decodes a request that deletes an image", () => {
   const root = parse(
     '<imageFileInfo version="1.1"><imageName>image-def456</imageName>' +
       "<delete>1</delete></imageFileInfo>",

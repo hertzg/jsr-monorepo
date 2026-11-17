@@ -1,8 +1,9 @@
+import { test } from "node:test";
 import { assertEquals } from "@std/assert";
 import { parse } from "@std/xml";
 import { afLearnRes } from "./af-learn-res.ts";
 
-Deno.test("afLearnRes decodes every field the serializer writes", () => {
+test("afLearnRes decodes every field the serializer writes", () => {
   const root = parse(
     '<AfLearnRes version="1.1"><zoomPos>120</zoomPos><focusPos>340</focusPos>' +
       "<rangeMin>10</rangeMin><rangeMax>900</rangeMax>" +
@@ -22,7 +23,7 @@ Deno.test("afLearnRes decodes every field the serializer writes", () => {
   });
 });
 
-Deno.test("afLearnRes decodes an element with only some fields", () => {
+test("afLearnRes decodes an element with only some fields", () => {
   const root = parse(
     '<AfLearnRes version="1.1"><backLashf>6</backLashf></AfLearnRes>',
   ).root;
@@ -30,7 +31,7 @@ Deno.test("afLearnRes decodes an element with only some fields", () => {
   assertEquals(afLearnRes.decode(root), { backLashf: 6 });
 });
 
-Deno.test("afLearnRes writes fields in serializer order", () => {
+test("afLearnRes writes fields in serializer order", () => {
   const xml = afLearnRes.encode({
     zoomPos: 1,
     focusPos: 2,
@@ -51,7 +52,7 @@ Deno.test("afLearnRes writes fields in serializer order", () => {
   );
 });
 
-Deno.test("afLearnRes round-trips through encode and decode", () => {
+test("afLearnRes round-trips through encode and decode", () => {
   const value = {
     zoomPos: 121,
     focusPos: 341,

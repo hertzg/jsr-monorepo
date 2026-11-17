@@ -1,8 +1,9 @@
+import { test } from "node:test";
 import { assertEquals } from "@std/assert";
 import { parse } from "@std/xml";
 import { iotBindInfoList } from "./iot-bind-info-list.ts";
 
-Deno.test("iotBindInfoList decodes the reply the camera writes", () => {
+test("iotBindInfoList decodes the reply the camera writes", () => {
   const root = parse(
     '<IOTBindInfoList version="1.1">' +
       "<item><deviceType>1</deviceType><name>name-abc123</name>" +
@@ -20,7 +21,7 @@ Deno.test("iotBindInfoList decodes the reply the camera writes", () => {
   });
 });
 
-Deno.test("iotBindInfoList round-trips a reply through encode and decode", () => {
+test("iotBindInfoList round-trips a reply through encode and decode", () => {
   const value = {
     item: [
       { deviceType: 5, name: "name-ghi789", uid: "uid-ghi789", mode: 6 },
@@ -32,7 +33,7 @@ Deno.test("iotBindInfoList round-trips a reply through encode and decode", () =>
   assertEquals(iotBindInfoList.decode(parse(xml).root), value);
 });
 
-Deno.test("iotBindInfoList round-trips a request through encode and decode", () => {
+test("iotBindInfoList round-trips a request through encode and decode", () => {
   const value = {
     info: [
       { devName: "devname-jkl012", uid: "uid-jkl012" },
@@ -45,7 +46,7 @@ Deno.test("iotBindInfoList round-trips a request through encode and decode", () 
   assertEquals(iotBindInfoList.decode(parse(xml).root), value);
 });
 
-Deno.test("iotBindInfoList decodes an empty list as no devices", () => {
+test("iotBindInfoList decodes an empty list as no devices", () => {
   const root = parse('<IOTBindInfoList version="1.1"></IOTBindInfoList>').root;
 
   assertEquals(iotBindInfoList.decode(root), {});

@@ -1,8 +1,9 @@
+import { test } from "node:test";
 import { assertEquals, assertThrows } from "@std/assert";
 import { parse } from "@std/xml";
 import { autoReboot } from "./auto-reboot.ts";
 
-Deno.test("autoReboot decodes the element the firmware writes", () => {
+test("autoReboot decodes the element the firmware writes", () => {
   const root = parse(
     '<AutoReboot version="1.1"><enable>1</enable><weekDay>Wednesday</weekDay>' +
       "<hour>2</hour><minute>45</minute><second>30</second></AutoReboot>",
@@ -17,7 +18,7 @@ Deno.test("autoReboot decodes the element the firmware writes", () => {
   });
 });
 
-Deno.test("autoReboot round-trips through encode and decode", () => {
+test("autoReboot round-trips through encode and decode", () => {
   const value = {
     enable: 0,
     weekDay: "everyday" as const,
@@ -29,7 +30,7 @@ Deno.test("autoReboot round-trips through encode and decode", () => {
   assertEquals(autoReboot.decode(parse(autoReboot.encode(value)).root), value);
 });
 
-Deno.test("autoReboot rejects a day spelling the firmware never writes", () => {
+test("autoReboot rejects a day spelling the firmware never writes", () => {
   const root = parse(
     '<AutoReboot version="1.1"><weekDay>Everyday</weekDay></AutoReboot>',
   ).root;
@@ -37,7 +38,7 @@ Deno.test("autoReboot rejects a day spelling the firmware never writes", () => {
   assertThrows(() => autoReboot.decode(root), Error, '"Everyday"');
 });
 
-Deno.test("autoReboot encodes a request that only switches it off", () => {
+test("autoReboot encodes a request that only switches it off", () => {
   assertEquals(
     autoReboot.encode({ enable: 0 }),
     '<AutoReboot version="1.1"><enable>0</enable></AutoReboot>',

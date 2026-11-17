@@ -1,8 +1,9 @@
+import { test } from "node:test";
 import { assertEquals } from "@std/assert";
 import { parse } from "@std/xml";
 import { alarmVideoInfo } from "./alarm-video-info.ts";
 
-Deno.test("alarmVideoInfo decodes the cmd 273 reply", () => {
+test("alarmVideoInfo decodes the cmd 273 reply", () => {
   const root = parse(
     '<alarmVideoInfo version="1.1"><channelId>0</channelId>' +
       "<fileHandle>7</fileHandle><bFinished>0</bFinished><alarmVideoList>" +
@@ -45,7 +46,7 @@ Deno.test("alarmVideoInfo decodes the cmd 273 reply", () => {
   });
 });
 
-Deno.test("alarmVideoInfo reads a recording without a type extension", () => {
+test("alarmVideoInfo reads a recording without a type extension", () => {
   const root = parse(
     '<alarmVideoInfo version="1.1"><channelId>0</channelId>' +
       "<fileHandle>7</fileHandle><bFinished>1</bFinished><alarmVideoList>" +
@@ -64,7 +65,7 @@ Deno.test("alarmVideoInfo reads a recording without a type extension", () => {
   );
 });
 
-Deno.test("alarmVideoInfo round-trips through encode and decode", () => {
+test("alarmVideoInfo round-trips through encode and decode", () => {
   const value = {
     channelId: 0,
     fileHandle: 12,

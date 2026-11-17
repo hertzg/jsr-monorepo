@@ -1,8 +1,9 @@
+import { test } from "node:test";
 import { assertEquals, assertThrows } from "@std/assert";
 import { parse } from "@std/xml";
 import { onlineUserList } from "./online-user-list.ts";
 
-Deno.test("onlineUserList decodes a cmd 120 reply with two sessions", () => {
+test("onlineUserList decodes a cmd 120 reply with two sessions", () => {
   const root = parse(
     '<OnlineUserList version="1.1">' +
       "<OnlineUser><userId>0</userId><sessionId>17</sessionId>" +
@@ -42,13 +43,13 @@ Deno.test("onlineUserList decodes a cmd 120 reply with two sessions", () => {
   });
 });
 
-Deno.test("onlineUserList decodes an empty list", () => {
+test("onlineUserList decodes an empty list", () => {
   const root = parse('<OnlineUserList version="1.1"></OnlineUserList>').root;
 
   assertEquals(onlineUserList.decode(root), { OnlineUser: [] });
 });
 
-Deno.test("onlineUserList rejects a user without a session", () => {
+test("onlineUserList rejects a user without a session", () => {
   const root = parse(
     '<OnlineUserList version="1.1"><OnlineUser><userName>admin</userName>' +
       "</OnlineUser></OnlineUserList>",
@@ -57,7 +58,7 @@ Deno.test("onlineUserList rejects a user without a session", () => {
   assertThrows(() => onlineUserList.decode(root), Error, "<sessionId>");
 });
 
-Deno.test("onlineUserList round-trips through encode and decode", () => {
+test("onlineUserList round-trips through encode and decode", () => {
   const value = {
     OnlineUser: [{
       userId: 1,

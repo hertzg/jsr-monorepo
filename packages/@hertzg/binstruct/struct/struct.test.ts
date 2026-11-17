@@ -1,3 +1,4 @@
+import { test } from "node:test";
 import { assertAlmostEquals, assertEquals, assertThrows } from "@std/assert";
 import { struct } from "./struct.ts";
 import {
@@ -14,8 +15,8 @@ import { arrayLP } from "../array/length-prefixed.ts";
 import { stringNT } from "../string/null-terminated.ts";
 import { stringLP } from "../string/length-prefixed.ts";
 
-Deno.test("struct: basic functionality", async (t) => {
-  await t.step("encodes and decodes simple struct", () => {
+test("struct: basic functionality", async (t) => {
+  await t.test("encodes and decodes simple struct", () => {
     const personCoder = struct({
       id: u32be(),
       age: u8be(),
@@ -31,7 +32,7 @@ Deno.test("struct: basic functionality", async (t) => {
     assertEquals(bytesWritten, bytesRead);
   });
 
-  await t.step("encodes and decodes struct with all numeric types", () => {
+  await t.test("encodes and decodes struct with all numeric types", () => {
     const dataCoder = struct({
       u8: u8be(),
       u16: u16be(),
@@ -69,7 +70,7 @@ Deno.test("struct: basic functionality", async (t) => {
     assertEquals(bytesWritten, bytesRead);
   });
 
-  await t.step("encodes and decodes empty struct", () => {
+  await t.test("encodes and decodes empty struct", () => {
     const emptyCoder = struct({});
     const data = {};
 
@@ -81,7 +82,7 @@ Deno.test("struct: basic functionality", async (t) => {
     assertEquals(bytesWritten, bytesRead);
   });
 
-  await t.step("encodes and decodes struct with arrays", () => {
+  await t.test("encodes and decodes struct with arrays", () => {
     const gameStateCoder = struct({
       playerCount: u8be(),
       scores: arrayLP(u16be(), u8be()),
@@ -107,7 +108,7 @@ Deno.test("struct: basic functionality", async (t) => {
     assertEquals(bytesWritten, bytesRead);
   });
 
-  await t.step("encodes and decodes struct with string fields", () => {
+  await t.test("encodes and decodes struct with string fields", () => {
     const userCoder = struct({
       id: u32be(),
       name: stringLP(u16be()),
@@ -131,8 +132,8 @@ Deno.test("struct: basic functionality", async (t) => {
   });
 });
 
-Deno.test("struct: property order", async (t) => {
-  await t.step("maintains property order", () => {
+test("struct: property order", async (t) => {
+  await t.test("maintains property order", () => {
     const orderCoder = struct({
       first: u8be(),
       second: u16be(),
@@ -152,7 +153,7 @@ Deno.test("struct: property order", async (t) => {
     assertEquals(bytesWritten, bytesRead);
   });
 
-  await t.step("works with different property orders", () => {
+  await t.test("works with different property orders", () => {
     const coder1 = struct({
       a: u8be(),
       b: u16be(),
@@ -184,8 +185,8 @@ Deno.test("struct: property order", async (t) => {
   });
 });
 
-Deno.test("struct: edge cases", async (t) => {
-  await t.step("handles struct with single property", () => {
+test("struct: edge cases", async (t) => {
+  await t.test("handles struct with single property", () => {
     const singleCoder = struct({
       value: u32be(),
     });
@@ -199,7 +200,7 @@ Deno.test("struct: edge cases", async (t) => {
     assertEquals(bytesWritten, bytesRead);
   });
 
-  await t.step("handles struct with many properties", () => {
+  await t.test("handles struct with many properties", () => {
     const manyPropsCoder = struct({
       p1: u8be(),
       p2: u8be(),
@@ -234,7 +235,7 @@ Deno.test("struct: edge cases", async (t) => {
     assertEquals(bytesWritten, bytesRead);
   });
 
-  await t.step("handles struct with zero values", () => {
+  await t.test("handles struct with zero values", () => {
     const zeroCoder = struct({
       u8: u8be(),
       u16: u16be(),
@@ -259,7 +260,7 @@ Deno.test("struct: edge cases", async (t) => {
     assertEquals(bytesWritten, bytesRead);
   });
 
-  await t.step("handles struct with maximum values", () => {
+  await t.test("handles struct with maximum values", () => {
     const maxCoder = struct({
       u8: u8be(),
       u16: u16be(),
@@ -286,7 +287,7 @@ Deno.test("struct: edge cases", async (t) => {
     assertEquals(bytesWritten, bytesRead);
   });
 
-  await t.step("handles struct with arrays of strings", () => {
+  await t.test("handles struct with arrays of strings", () => {
     const configCoder = struct({
       version: u8be(),
       names: arrayLP(stringLP(u16be()), u8be()),
@@ -310,8 +311,8 @@ Deno.test("struct: edge cases", async (t) => {
   });
 });
 
-Deno.test("struct: error handling", async (t) => {
-  await t.step("throws on buffer too small for first property", () => {
+test("struct: error handling", async (t) => {
+  await t.test("throws on buffer too small for first property", () => {
     const coder = struct({
       id: u32be(),
       age: u8be(),
@@ -322,7 +323,7 @@ Deno.test("struct: error handling", async (t) => {
     assertThrows(() => coder.decode(smallBuffer), Error);
   });
 
-  await t.step("throws on buffer too small for later property", () => {
+  await t.test("throws on buffer too small for later property", () => {
     const coder = struct({
       id: u8be(),
       age: u32be(),
@@ -333,7 +334,7 @@ Deno.test("struct: error handling", async (t) => {
     assertThrows(() => coder.decode(partialBuffer), Error);
   });
 
-  await t.step("throws on empty buffer", () => {
+  await t.test("throws on empty buffer", () => {
     const coder = struct({
       id: u32be(),
       age: u8be(),
@@ -344,8 +345,8 @@ Deno.test("struct: error handling", async (t) => {
   });
 });
 
-Deno.test("struct: roundtrip with offset", async (t) => {
-  await t.step("works with buffer offset", () => {
+test("struct: roundtrip with offset", async (t) => {
+  await t.test("works with buffer offset", () => {
     const coder = struct({
       id: u16be(),
       age: u8be(),
@@ -364,7 +365,7 @@ Deno.test("struct: roundtrip with offset", async (t) => {
     assertEquals(bytesWritten, bytesRead);
   });
 
-  await t.step("works with multiple structs in same buffer", () => {
+  await t.test("works with multiple structs in same buffer", () => {
     const coder = struct({
       id: u8be(),
       value: u16be(),
@@ -395,8 +396,8 @@ Deno.test("struct: roundtrip with offset", async (t) => {
   });
 });
 
-Deno.test("struct: floating point precision", async (t) => {
-  await t.step("maintains precision for f32 properties", () => {
+test("struct: floating point precision", async (t) => {
+  await t.test("maintains precision for f32 properties", () => {
     const coder = struct({
       x: f32be(),
       y: f32be(),
@@ -414,7 +415,7 @@ Deno.test("struct: floating point precision", async (t) => {
     assertEquals(bytesWritten, bytesRead);
   });
 
-  await t.step("maintains precision for f64 properties", () => {
+  await t.test("maintains precision for f64 properties", () => {
     const coder = struct({
       pi: f64be(),
       e: f64be(),
@@ -433,8 +434,8 @@ Deno.test("struct: floating point precision", async (t) => {
   });
 });
 
-Deno.test("struct: complex nested structures", async (t) => {
-  await t.step("handles struct with nested arrays", () => {
+test("struct: complex nested structures", async (t) => {
+  await t.test("handles struct with nested arrays", () => {
     const nestedCoder = struct({
       id: u32be(),
       tags: arrayLP(u8be(), u8be()),
@@ -463,7 +464,7 @@ Deno.test("struct: complex nested structures", async (t) => {
     assertEquals(bytesWritten, bytesRead);
   });
 
-  await t.step("handles struct with arrays of structs", () => {
+  await t.test("handles struct with arrays of structs", () => {
     const playerCoder = struct({
       id: u8be(),
       name: arrayLP(u8be(), u8be()), // array of bytes representing string

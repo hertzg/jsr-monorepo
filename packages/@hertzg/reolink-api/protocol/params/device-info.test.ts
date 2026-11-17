@@ -1,8 +1,9 @@
+import { test } from "node:test";
 import { assertEquals, assertThrows } from "@std/assert";
 import { parse } from "@std/xml";
 import { deviceInfo } from "./device-info.ts";
 
-Deno.test("deviceInfo decodes an RLC-823A login reply", () => {
+test("deviceInfo decodes an RLC-823A login reply", () => {
   const root = parse(
     '<DeviceInfo version="1.1"><firmVersion>firm-abc123</firmVersion>' +
       "<IOInputPortNum>1</IOInputPortNum><IOOutputPortNum>2</IOOutputPortNum>" +
@@ -55,7 +56,7 @@ Deno.test("deviceInfo decodes an RLC-823A login reply", () => {
   });
 });
 
-Deno.test("deviceInfo decodes an alertor reply without resolution or secret", () => {
+test("deviceInfo decodes an alertor reply without resolution or secret", () => {
   const root = parse(
     '<DeviceInfo version="1.1"><firmVersion>f</firmVersion>' +
       "<IOInputPortNum>0</IOInputPortNum><IOOutputPortNum>0</IOOutputPortNum>" +
@@ -73,7 +74,7 @@ Deno.test("deviceInfo decodes an alertor reply without resolution or secret", ()
   assertEquals("resolution" in deviceInfo.decode(root), false);
 });
 
-Deno.test("deviceInfo round-trips a doorbell reply through encode and decode", () => {
+test("deviceInfo round-trips a doorbell reply through encode and decode", () => {
   const value = {
     firmVersion: "firm-rt",
     IOInputPortNum: 0,
@@ -113,7 +114,7 @@ Deno.test("deviceInfo round-trips a doorbell reply through encode and decode", (
   assertEquals(deviceInfo.decode(parse(deviceInfo.encode(value)).root), value);
 });
 
-Deno.test("deviceInfo throws on a ptzMode the firmware never writes", () => {
+test("deviceInfo throws on a ptzMode the firmware never writes", () => {
   const root = parse(
     '<DeviceInfo version="1.1"><firmVersion>f</firmVersion>' +
       "<IOInputPortNum>0</IOInputPortNum><IOOutputPortNum>0</IOOutputPortNum>" +

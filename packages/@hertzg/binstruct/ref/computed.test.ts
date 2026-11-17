@@ -1,3 +1,4 @@
+import { test } from "node:test";
 import { bytes } from "../bytes/bytes.ts";
 import { assertEquals } from "@std/assert";
 import { arrayFL } from "../array/fixed-length.ts";
@@ -6,7 +7,7 @@ import { string } from "../string/string.ts";
 import { struct } from "../struct/struct.ts";
 import { computedRef, isRef, ref } from "./ref.ts";
 
-Deno.test("computedRef: is a ref", () => {
+test("computedRef: is a ref", () => {
   const width = u8be();
   const height = u8be();
   const computed = computedRef(
@@ -16,7 +17,7 @@ Deno.test("computedRef: is a ref", () => {
   assertEquals(isRef(computed), true);
 });
 
-Deno.test("computedRef: computes values from multiple references", () => {
+test("computedRef: computes values from multiple references", () => {
   const width = u8();
   const height = u8();
 
@@ -47,7 +48,7 @@ Deno.test("computedRef: computes values from multiple references", () => {
   assertEquals(bytesWritten, bytesRead);
 });
 
-Deno.test("computedRef: works with different data types", () => {
+test("computedRef: works with different data types", () => {
   const n = u8();
   const b = u64();
   const s = string(); // null terminated string

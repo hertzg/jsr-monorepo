@@ -93,10 +93,10 @@ export const kKindStringFL = Symbol("stringFL");
 
 export function stringFL(
   byteLength?: LengthOrRef,
-  decoderEncoding: string = "utf-8",
-  decoderOptions: TextDecoderOptions = {},
+  decoderEncoding: ConstructorParameters<typeof TextDecoder>[0] = "utf-8",
+  decoderOptions: ConstructorParameters<typeof TextDecoder>[1] = {},
 ): Coder<string> {
-  const decoderInit: TextDecoderOptions = {
+  const decoderInit: ConstructorParameters<typeof TextDecoder>[1] = {
     fatal: true,
     ignoreBOM: true,
     ...decoderOptions,

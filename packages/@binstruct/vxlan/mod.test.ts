@@ -1,3 +1,4 @@
+import { test } from "node:test";
 import { assertEquals } from "@std/assert";
 import {
   VXLAN_FLAG_VALID_VNI,
@@ -7,8 +8,8 @@ import {
   vxlanHeader,
 } from "./mod.ts";
 
-Deno.test("vxlanHeader", async (t) => {
-  await t.step("round-trips a header with an inner frame", () => {
+test("vxlanHeader", async (t) => {
+  await t.test("round-trips a header with an inner frame", () => {
     const coder = vxlanHeader();
     const innerFrame = new Uint8Array([0xde, 0xad, 0xbe, 0xef]);
     const header: VxlanHeader = {
@@ -26,7 +27,7 @@ Deno.test("vxlanHeader", async (t) => {
     assertEquals(decoded, header);
   });
 
-  await t.step("round-trips a header with an empty inner frame", () => {
+  await t.test("round-trips a header with an empty inner frame", () => {
     const coder = vxlanHeader();
     const header: VxlanHeader = {
       flagsReserved1: { flags: VXLAN_FLAG_VALID_VNI, reserved1: 0 },
@@ -43,7 +44,7 @@ Deno.test("vxlanHeader", async (t) => {
     assertEquals(decoded.innerFrame.length, 0);
   });
 
-  await t.step("decodes a known wire-format header (VNI 42)", () => {
+  await t.test("decodes a known wire-format header (VNI 42)", () => {
     // deno-fmt-ignore
     const wire = new Uint8Array([
       0x08, 0x00, 0x00, 0x00, // flags = I-bit set, reserved1 = 0
@@ -61,7 +62,7 @@ Deno.test("vxlanHeader", async (t) => {
     assertEquals(decoded.innerFrame, new Uint8Array([0xaa, 0xbb, 0xcc, 0xdd]));
   });
 
-  await t.step("decodes a known wire-format header (VNI 0x123456)", () => {
+  await t.test("decodes a known wire-format header (VNI 0x123456)", () => {
     // deno-fmt-ignore
     const wire = new Uint8Array([
       0x08, 0x00, 0x00, 0x00, // flags = I-bit set, reserved1 = 0
@@ -75,15 +76,15 @@ Deno.test("vxlanHeader", async (t) => {
     assertEquals(decoded.innerFrame.length, 0);
   });
 
-  await t.step("VXLAN_FLAG_VALID_VNI marks the I-bit", () => {
+  await t.test("VXLAN_FLAG_VALID_VNI marks the I-bit", () => {
     assertEquals(VXLAN_FLAG_VALID_VNI, 0x08);
   });
 
-  await t.step("VXLAN_PORT is the IANA-assigned UDP port", () => {
+  await t.test("VXLAN_PORT is the IANA-assigned UDP port", () => {
     assertEquals(VXLAN_PORT, 4789);
   });
 
-  await t.step("VXLAN_HEADER_SIZE is 8 bytes", () => {
+  await t.test("VXLAN_HEADER_SIZE is 8 bytes", () => {
     assertEquals(VXLAN_HEADER_SIZE, 8);
   });
 });

@@ -1,8 +1,9 @@
+import { test } from "node:test";
 import { assertEquals } from "@std/assert";
 import { parse } from "@std/xml";
 import { pushCreateListener } from "./push-create-listener.ts";
 
-Deno.test("pushCreateListener decodes a cmd 524 request", () => {
+test("pushCreateListener decodes a cmd 524 request", () => {
   const root = parse(
     '<PushCreateListener version="1.1"><clientID>client-31</clientID>' +
       "<channelId>2</channelId></PushCreateListener>",
@@ -14,7 +15,7 @@ Deno.test("pushCreateListener decodes a cmd 524 request", () => {
   });
 });
 
-Deno.test("pushCreateListener round-trips through encode and decode", () => {
+test("pushCreateListener round-trips through encode and decode", () => {
   const value = { clientID: "client-64", channelId: "channel-1" };
 
   assertEquals(
@@ -23,7 +24,7 @@ Deno.test("pushCreateListener round-trips through encode and decode", () => {
   );
 });
 
-Deno.test("pushCreateListener encodes only the fields given", () => {
+test("pushCreateListener encodes only the fields given", () => {
   assertEquals(
     pushCreateListener.encode({ clientID: "client-5" }),
     '<PushCreateListener version="1.1"><clientID>client-5</clientID></PushCreateListener>',

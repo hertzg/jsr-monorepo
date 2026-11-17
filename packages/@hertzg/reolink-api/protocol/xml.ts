@@ -56,7 +56,7 @@ export type XmlFieldValue<F> = F extends XmlField<infer T> ? T : never;
 /** A record of named field codecs, as passed to {@link obj} and {@link xmlParam}. */
 // `any`, not `unknown`: `encode` takes the value, so a field of `number` is
 // not assignable to a field of `unknown`.
-// deno-lint-ignore no-explicit-any
+// oxlint-disable-next-line typescript/no-explicit-any
 export type XmlFields = Record<string, XmlField<any>>;
 
 /** The keys of `F` whose codecs are marked {@link optional}. */
@@ -421,7 +421,7 @@ export type XmlParam<N extends string, T> = {
  * Any {@link XmlParam}, whatever its value. `any` for the same variance
  * reason as {@link XmlFields}.
  */
-// deno-lint-ignore no-explicit-any
+// oxlint-disable-next-line typescript/no-explicit-any
 export type AnyXmlParam = XmlParam<string, any>;
 
 /** The decoded value of an {@link XmlParam}. */

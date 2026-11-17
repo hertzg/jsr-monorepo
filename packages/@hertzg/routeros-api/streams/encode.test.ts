@@ -1,3 +1,4 @@
+import { test } from "node:test";
 import { assertEquals } from "@std/assert";
 import { createApiEncodeStream } from "./encode.ts";
 import type { Command } from "../protocol/command.ts";
@@ -14,7 +15,7 @@ async function encodeCommand(cmd: Command): Promise<Uint8Array> {
   return value!;
 }
 
-Deno.test("createApiEncodeStream - simple command", async () => {
+test("createApiEncodeStream - simple command", async () => {
   const cmd: Command = { command: "/login" };
   const result = await encodeCommand(cmd);
 
@@ -24,7 +25,7 @@ Deno.test("createApiEncodeStream - simple command", async () => {
   assertEquals(result[result.length - 1], 0x00); // terminator
 });
 
-Deno.test("createApiEncodeStream - command with attributes", async () => {
+test("createApiEncodeStream - command with attributes", async () => {
   const cmd: Command = {
     command: "/login",
     attributes: { name: "admin", password: "secret" },
@@ -37,7 +38,7 @@ Deno.test("createApiEncodeStream - command with attributes", async () => {
   assertEquals(result[0], 0x06);
 });
 
-Deno.test("createApiEncodeStream - command with queries", async () => {
+test("createApiEncodeStream - command with queries", async () => {
   const cmd: Command = {
     command: "/interface/print",
     queries: { type: "ether" },
@@ -47,7 +48,7 @@ Deno.test("createApiEncodeStream - command with queries", async () => {
   assertEquals(result[result.length - 1], 0x00); // terminator
 });
 
-Deno.test("createApiEncodeStream - multiple commands", async () => {
+test("createApiEncodeStream - multiple commands", async () => {
   const commands: Command[] = [
     { command: "/login", attributes: { name: "admin", password: "secret" } },
     { command: "/interface/print" },
@@ -83,7 +84,7 @@ Deno.test("createApiEncodeStream - multiple commands", async () => {
   }
 });
 
-Deno.test("createApiEncodeStream - empty attributes/queries", async () => {
+test("createApiEncodeStream - empty attributes/queries", async () => {
   const cmd: Command = {
     command: "/interface/print",
     attributes: {},
@@ -96,7 +97,7 @@ Deno.test("createApiEncodeStream - empty attributes/queries", async () => {
   assertEquals(result[result.length - 1], 0x00);
 });
 
-Deno.test("createApiEncodeStream - complex command", async () => {
+test("createApiEncodeStream - complex command", async () => {
   const cmd: Command = {
     command: "/interface/vlan/add",
     attributes: {

@@ -1,9 +1,10 @@
+import { test } from "node:test";
 import { assertEquals } from "@std/assert";
 import { createContext } from "@hertzg/binstruct";
 import type { PngChunkUnknown } from "../mod.ts";
 import { type IhdrChunk, ihdrChunkRefiner } from "./ihdr.ts";
 
-Deno.test("ihdrChunkRefiner() - refines IHDR chunk", () => {
+test("ihdrChunkRefiner() - refines IHDR chunk", () => {
   const refiner = ihdrChunkRefiner();
   const context = createContext("decode");
 
@@ -37,7 +38,7 @@ Deno.test("ihdrChunkRefiner() - refines IHDR chunk", () => {
   assertEquals(refined.crc, 0x12345678);
 });
 
-Deno.test("ihdrChunkRefiner() - unrefines IHDR chunk", () => {
+test("ihdrChunkRefiner() - unrefines IHDR chunk", () => {
   const refiner = ihdrChunkRefiner();
   const context = createContext("encode");
 
@@ -64,7 +65,7 @@ Deno.test("ihdrChunkRefiner() - unrefines IHDR chunk", () => {
   assertEquals(unrefined.crc, 0x12345678);
 });
 
-Deno.test("ihdrChunkRefiner() - round-trip with 1x1 image", () => {
+test("ihdrChunkRefiner() - round-trip with 1x1 image", () => {
   const refiner = ihdrChunkRefiner();
   const encodeContext = createContext("encode");
   const decodeContext = createContext("decode");
@@ -98,7 +99,7 @@ Deno.test("ihdrChunkRefiner() - round-trip with 1x1 image", () => {
   assertEquals(refined.crc, original.crc);
 });
 
-Deno.test("ihdrChunkRefiner() - round-trip with large dimensions", () => {
+test("ihdrChunkRefiner() - round-trip with large dimensions", () => {
   const refiner = ihdrChunkRefiner();
   const encodeContext = createContext("encode");
   const decodeContext = createContext("decode");
@@ -130,7 +131,7 @@ Deno.test("ihdrChunkRefiner() - round-trip with large dimensions", () => {
   assertEquals(refined.data.interlaceMethod, original.data.interlaceMethod);
 });
 
-Deno.test("ihdrChunkRefiner() - round-trip with grayscale", () => {
+test("ihdrChunkRefiner() - round-trip with grayscale", () => {
   const refiner = ihdrChunkRefiner();
   const encodeContext = createContext("encode");
   const decodeContext = createContext("decode");
@@ -159,7 +160,7 @@ Deno.test("ihdrChunkRefiner() - round-trip with grayscale", () => {
   assertEquals(refined.data.colorType, original.data.colorType);
 });
 
-Deno.test("ihdrChunkRefiner() - round-trip with indexed color", () => {
+test("ihdrChunkRefiner() - round-trip with indexed color", () => {
   const refiner = ihdrChunkRefiner();
   const encodeContext = createContext("encode");
   const decodeContext = createContext("decode");
@@ -188,7 +189,7 @@ Deno.test("ihdrChunkRefiner() - round-trip with indexed color", () => {
   assertEquals(refined.data.colorType, original.data.colorType);
 });
 
-Deno.test("ihdrChunkRefiner() - all bit depths", () => {
+test("ihdrChunkRefiner() - all bit depths", () => {
   const refiner = ihdrChunkRefiner();
   const encodeContext = createContext("encode");
   const decodeContext = createContext("decode");
@@ -218,7 +219,7 @@ Deno.test("ihdrChunkRefiner() - all bit depths", () => {
   }
 });
 
-Deno.test("ihdrChunkRefiner() - all color types", () => {
+test("ihdrChunkRefiner() - all color types", () => {
   const refiner = ihdrChunkRefiner();
   const encodeContext = createContext("encode");
   const decodeContext = createContext("decode");
@@ -254,7 +255,7 @@ Deno.test("ihdrChunkRefiner() - all color types", () => {
   }
 });
 
-Deno.test("ihdrChunkRefiner() - both interlace methods", () => {
+test("ihdrChunkRefiner() - both interlace methods", () => {
   const refiner = ihdrChunkRefiner();
   const encodeContext = createContext("encode");
   const decodeContext = createContext("decode");

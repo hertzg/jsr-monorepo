@@ -54,7 +54,7 @@
  * @example Audio processing with signed integers:
  * ```ts
  * import { assertEquals } from "@std/assert";
- * import { s16be, s32le } from "@hertzg/binstruct/numeric";
+ * import { s16be, s16le, s32le } from "@hertzg/binstruct/numeric";
  * import { struct } from "@hertzg/binstruct/struct";
  *
  * // Audio sample structure with signed integers

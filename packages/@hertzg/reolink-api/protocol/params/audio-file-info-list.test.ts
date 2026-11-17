@@ -1,8 +1,9 @@
+import { test } from "node:test";
 import { assertEquals, assertThrows } from "@std/assert";
 import { parse } from "@std/xml";
 import { audioFileInfoList } from "./audio-file-info-list.ts";
 
-Deno.test("audioFileInfoList decodes a cmd 347 reply with two files", () => {
+test("audioFileInfoList decodes a cmd 347 reply with two files", () => {
   const root = parse(
     '<audioFileInfoList version="1.1">' +
       "<audioFileInfo><id>3</id><fileSize>48000</fileSize>" +
@@ -37,7 +38,7 @@ Deno.test("audioFileInfoList decodes a cmd 347 reply with two files", () => {
   });
 });
 
-Deno.test("audioFileInfoList decodes a cmd 368 request with only the fields the parser reads", () => {
+test("audioFileInfoList decodes a cmd 368 request with only the fields the parser reads", () => {
   const root = parse(
     "<audioFileInfoList><audioFileInfo><fileName>door.wav</fileName>" +
       "<id>5</id><extId>ext-door</extId></audioFileInfo></audioFileInfoList>",
@@ -48,7 +49,7 @@ Deno.test("audioFileInfoList decodes a cmd 368 request with only the fields the 
   });
 });
 
-Deno.test("audioFileInfoList decodes an empty list as no files", () => {
+test("audioFileInfoList decodes an empty list as no files", () => {
   const root = parse(
     '<audioFileInfoList version="1.1"><maxFileNumber>12</maxFileNumber>' +
       "</audioFileInfoList>",
@@ -57,7 +58,7 @@ Deno.test("audioFileInfoList decodes an empty list as no files", () => {
   assertEquals(audioFileInfoList.decode(root).audioFileInfo, []);
 });
 
-Deno.test("audioFileInfoList rejects an unknown file type", () => {
+test("audioFileInfoList rejects an unknown file type", () => {
   const root = parse(
     "<audioFileInfoList><audioFileInfo><type>ringtone</type></audioFileInfo>" +
       "</audioFileInfoList>",
@@ -66,7 +67,7 @@ Deno.test("audioFileInfoList rejects an unknown file type", () => {
   assertThrows(() => audioFileInfoList.decode(root), Error, '"ringtone"');
 });
 
-Deno.test("audioFileInfoList round-trips through encode and decode", () => {
+test("audioFileInfoList round-trips through encode and decode", () => {
   const value = {
     audioFileInfo: [{
       id: 7,
@@ -84,7 +85,7 @@ Deno.test("audioFileInfoList round-trips through encode and decode", () => {
   assertEquals(audioFileInfoList.decode(parse(xml).root), value);
 });
 
-Deno.test("audioFileInfoList reads the RLC-823A cmd 347 reply's <item> files", () => {
+test("audioFileInfoList reads the RLC-823A cmd 347 reply's <item> files", () => {
   const root = parse(
     '<audioFileInfoList version="1.1">' +
       "<item><id>2</id><fileSize>2048</fileSize><audioLen>5</audioLen>" +

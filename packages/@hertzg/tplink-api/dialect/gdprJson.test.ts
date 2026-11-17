@@ -1,3 +1,4 @@
+import { test } from "node:test";
 import { assertEquals } from "@std/assert";
 import { ACT, type Action } from "./dialect.ts";
 import { encodeAction, gdprJson } from "./gdprJson.ts";
@@ -23,12 +24,12 @@ const GO_RESPONSE =
 const GL_RESPONSE =
   '{"success":true,"data":[{"band":"n78","cellConnectionStatus":"1"},{"band":"1","cellConnectionStatus":"0"}]}';
 
-Deno.test("dialect identity", () => {
+test("dialect identity", () => {
   assertEquals(gdprJson.id, "gdprJson");
   assertEquals(gdprJson.defaultUsername, "user");
 });
 
-Deno.test("shares the gdprText parsers it does not override", () => {
+test("shares the gdprText parsers it does not override", () => {
   assertEquals(gdprJson.parsePublicKey, gdprText.parsePublicKey);
   assertEquals(gdprJson.parseBusy, gdprText.parseBusy);
   assertEquals(gdprJson.parseSessionId, gdprText.parseSessionId);
@@ -45,7 +46,7 @@ Deno.test("shares the gdprText parsers it does not override", () => {
 const NE200_LOGIN_PAGE =
   `<html><body>…</body></html>\n<script type="text/javascript"> var authTimes=0; var forbidFlag=0; var forbidTime=0; var modelName="NE200-Outdoor"; var modelDesc="5G Outdoor Router"; var locale_language="en_US"; var adminType="user"; var hasMobile="0";</script>`;
 
-Deno.test("parseInfo reads the login page this firmware actually serves", () => {
+test("parseInfo reads the login page this firmware actually serves", () => {
   assertEquals(gdprJson.parseInfo(NE200_LOGIN_PAGE), {
     authTimes: 0,
     forbidFlag: 0,
@@ -58,7 +59,7 @@ Deno.test("parseInfo reads the login page this firmware actually serves", () => 
   });
 });
 
-Deno.test("parseInfo surfaces the account this firmware expects", () => {
+test("parseInfo surfaces the account this firmware expects", () => {
   const info = gdprJson.parseInfo(NE200_LOGIN_PAGE);
 
   // `defaultUsername` is a fallback; the device states the real answer here,
@@ -67,7 +68,7 @@ Deno.test("parseInfo surfaces the account this firmware expects", () => {
   assertEquals(gdprJson.defaultUsername, "user");
 });
 
-Deno.test("publicKeyRequest posts to cgi/getGDPRParm", () => {
+test("publicKeyRequest posts to cgi/getGDPRParm", () => {
   const request = gdprJson.publicKeyRequest(BASE_URL);
 
   assertEquals(request.method, "POST");
@@ -76,7 +77,7 @@ Deno.test("publicKeyRequest posts to cgi/getGDPRParm", () => {
   assertEquals(request.body, null);
 });
 
-Deno.test("encodeLogin base64-encodes credentials inside JSON", () => {
+test("encodeLogin base64-encodes credentials inside JSON", () => {
   const payload = gdprJson.encodeLogin({
     username: "user",
     password: "hunter2",
@@ -94,7 +95,7 @@ Deno.test("encodeLogin base64-encodes credentials inside JSON", () => {
   assertEquals(atob(parsed.data.Passwd), "hunter2");
 });
 
-Deno.test("loginRequest posts the envelope to cgi_gdpr?9", async () => {
+test("loginRequest posts the envelope to cgi_gdpr?9", async () => {
   const request = gdprJson.loginRequest(BASE_URL, ENVELOPE);
 
   assertEquals(request.method, "POST");
@@ -109,7 +110,7 @@ Deno.test("loginRequest posts the envelope to cgi_gdpr?9", async () => {
   assertEquals(await request.text(), "sign=00ff\r\ndata=ZGF0YQ==\r\n");
 });
 
-Deno.test("tokenRequest sends only the session cookie", () => {
+test("tokenRequest sends only the session cookie", () => {
   const request = gdprJson.tokenRequest(BASE_URL, {
     sessionId: "1B3A7C2E9F4D",
     authTimes: 3,
@@ -120,7 +121,7 @@ Deno.test("tokenRequest sends only the session cookie", () => {
   assertEquals(request.headers.get("cookie"), "JSESSIONID=1B3A7C2E9F4D");
 });
 
-Deno.test("encodeAction serializes a go read", () => {
+test("encodeAction serializes a go read", () => {
   assertEquals(
     encodeAction([ACT.GET, "DEV2_LTE_LINK_CFG"]),
     '{"data":{"stack":"0,0,0,0,0,0","pstack":"0,0,0,0,0,0"},' +
@@ -128,7 +129,7 @@ Deno.test("encodeAction serializes a go read", () => {
   );
 });
 
-Deno.test("encodeAction serializes a gl read with the list stack", () => {
+test("encodeAction serializes a gl read with the list stack", () => {
   assertEquals(
     encodeAction([ACT.GL, "DEV2_LTE_SERVING_CELL_INFO"]),
     '{"data":{"stack":"0,0,0,0,0,0","pstack":"0,0,0,0,0,0"},' +
@@ -136,7 +137,7 @@ Deno.test("encodeAction serializes a gl read with the list stack", () => {
   );
 });
 
-Deno.test("encodeAction turns requested attribute names into empty fields", () => {
+test("encodeAction turns requested attribute names into empty fields", () => {
   assertEquals(
     encodeAction([ACT.GET, "DEV2_MEM_STATUS", ["total", "free"]]),
     '{"data":{"total":"","free":"","stack":"0,0,0,0,0,0","pstack":"0,0,0,0,0,0"},' +
@@ -144,7 +145,7 @@ Deno.test("encodeAction turns requested attribute names into empty fields", () =
   );
 });
 
-Deno.test("encodeAction passes attribute values through", () => {
+test("encodeAction passes attribute values through", () => {
   assertEquals(
     encodeAction([ACT.CGI, "/cgi/logout", { Action: "1" }]),
     '{"data":{"Action":"1","stack":"0,0,0,0,0,0","pstack":"0,0,0,0,0,0"},' +
@@ -152,7 +153,7 @@ Deno.test("encodeAction passes attribute values through", () => {
   );
 });
 
-Deno.test("encodeAction honours explicit stack and pStack", () => {
+test("encodeAction honours explicit stack and pStack", () => {
   assertEquals(
     encodeAction([ACT.GET, "DEV2_ADT_WAN", [], "2,0,0,0,0,0", "1,0,0,0,0,0"]),
     '{"data":{"stack":"2,0,0,0,0,0","pstack":"1,0,0,0,0,0"},' +
@@ -160,7 +161,7 @@ Deno.test("encodeAction honours explicit stack and pStack", () => {
   );
 });
 
-Deno.test("encodeAction serializes a gs read", () => {
+test("encodeAction serializes a gs read", () => {
   assertEquals(
     encodeAction([ACT.GS, "DEV2_WLAN"]),
     '{"data":{"stack":"0,0,0,0,0,0","pstack":"0,0,0,0,0,0"},' +
@@ -168,7 +169,7 @@ Deno.test("encodeAction serializes a gs read", () => {
   );
 });
 
-Deno.test("encodeAction serializes a so write with isuseractive", () => {
+test("encodeAction serializes a so write with isuseractive", () => {
   assertEquals(
     encodeAction([
       ACT.SET,
@@ -190,7 +191,7 @@ Deno.test("encodeAction serializes a so write with isuseractive", () => {
   );
 });
 
-Deno.test("encodeAction serializes an ao write with isuseractive", () => {
+test("encodeAction serializes an ao write with isuseractive", () => {
   assertEquals(
     encodeAction([
       ACT.ADD,
@@ -217,7 +218,7 @@ Deno.test("encodeAction serializes an ao write with isuseractive", () => {
   );
 });
 
-Deno.test("encodeAction serializes a do write with isuseractive", () => {
+test("encodeAction serializes a do write with isuseractive", () => {
   assertEquals(
     encodeAction([ACT.DEL, "DEV2_PORTMAPPING", [], "8,0,0,0,0,0"]),
     '{"data":{"stack":"8,0,0,0,0,0","pstack":"0,0,0,0,0,0"},' +
@@ -225,7 +226,7 @@ Deno.test("encodeAction serializes a do write with isuseractive", () => {
   );
 });
 
-Deno.test("encodeAction serializes an op write with isuseractive", () => {
+test("encodeAction serializes an op write with isuseractive", () => {
   assertEquals(
     encodeAction([ACT.OP, "ACT_NTP_REQUEST"]),
     '{"data":{"stack":"0,0,0,0,0,0","pstack":"0,0,0,0,0,0"},' +
@@ -233,7 +234,7 @@ Deno.test("encodeAction serializes an op write with isuseractive", () => {
   );
 });
 
-Deno.test("encodeCommands emits one batch per action", () => {
+test("encodeCommands emits one batch per action", () => {
   const actions: Action[] = [
     [ACT.GET, "DEV2_DEV_INFO"],
     [ACT.GL, "DEV2_LTE_SERVING_CELL_INFO"],
@@ -246,11 +247,11 @@ Deno.test("encodeCommands emits one batch per action", () => {
   assertEquals(batches[1].payload, encodeAction(actions[1]));
 });
 
-Deno.test("encodeCommands with no actions emits no round trips", () => {
+test("encodeCommands with no actions emits no round trips", () => {
   assertEquals(gdprJson.encodeCommands([]), []);
 });
 
-Deno.test("commandRequest carries session, token and the ?9 suffix", async () => {
+test("commandRequest carries session, token and the ?9 suffix", async () => {
   const request = gdprJson.commandRequest(BASE_URL, ENVELOPE, SESSION);
 
   assertEquals(request.method, "POST");
@@ -263,7 +264,7 @@ Deno.test("commandRequest carries session, token and the ?9 suffix", async () =>
   assertEquals(await request.text(), "sign=00ff\r\ndata=ZGF0YQ==\r\n");
 });
 
-Deno.test("decodeCommand normalizes a go response to one record", () => {
+test("decodeCommand normalizes a go response to one record", () => {
   const decoded = gdprJson.decodeCommand(GO_RESPONSE, {
     payload: "",
     indices: [0],
@@ -277,7 +278,7 @@ Deno.test("decodeCommand normalizes a go response to one record", () => {
   }]);
 });
 
-Deno.test("decodeCommand normalizes a gl response to a record list", () => {
+test("decodeCommand normalizes a gl response to a record list", () => {
   const decoded = gdprJson.decodeCommand(GL_RESPONSE, {
     payload: "",
     indices: [4],
@@ -290,7 +291,7 @@ Deno.test("decodeCommand normalizes a gl response to a record list", () => {
   ]]);
 });
 
-Deno.test("decodeCommand stringifies non-string JSON values", () => {
+test("decodeCommand stringifies non-string JSON values", () => {
   const decoded = gdprJson.decodeCommand(
     '{"success":true,"data":{"upTime":86400,"enabled":true}}',
     { payload: "", indices: [0] },
@@ -299,7 +300,7 @@ Deno.test("decodeCommand stringifies non-string JSON values", () => {
   assertEquals(decoded.results, [{ upTime: "86400", enabled: "true" }]);
 });
 
-Deno.test("decodeCommand surfaces the router error code", () => {
+test("decodeCommand surfaces the router error code", () => {
   const decoded = gdprJson.decodeCommand(
     '{"success":false,"errorcode":71011}',
     { payload: "", indices: [0] },
@@ -316,7 +317,7 @@ Deno.test("decodeCommand surfaces the router error code", () => {
  * matter here that the hand-built fixtures above do not show: the field is
  * lowercase `errorcode`, and a failure still carries an empty `data`.
  */
-Deno.test("decodeCommand reads a real EX220 failure", () => {
+test("decodeCommand reads a real EX220 failure", () => {
   const decoded = gdprJson.decodeCommand(
     '{"data":[],"operation":"gl","oid":"DEV2_WIFI_APDEV_ETHASSOCDEV",' +
       '"success":false,"errorcode":9804}',
@@ -333,7 +334,7 @@ Deno.test("decodeCommand reads a real EX220 failure", () => {
  * data field, which must survive decoding rather than being mistaken for the
  * request's instance path.
  */
-Deno.test("decodeCommand keeps a device-reported stack as data", () => {
+test("decodeCommand keeps a device-reported stack as data", () => {
   const decoded = gdprJson.decodeCommand(
     '{"success":true,"data":{"X_TP_PlatformCodeName":"Volcano",' +
       '"X_TP_BuildSpec":"WISP","X_TP_Zone":"EU","X_TP_MaxAuthTimes":"5",' +
@@ -351,7 +352,7 @@ Deno.test("decodeCommand keeps a device-reported stack as data", () => {
   }]);
 });
 
-Deno.test("decodeCommand reads the plain-text reply of a cgi operation", () => {
+test("decodeCommand reads the plain-text reply of a cgi operation", () => {
   for (
     const body of ["$.ret=0", "$.ret=0;", "$.ret=0;\n", "\r\n$.ret=0;\r\n"]
   ) {
@@ -362,7 +363,7 @@ Deno.test("decodeCommand reads the plain-text reply of a cgi operation", () => {
   }
 });
 
-Deno.test("decodeCommand surfaces a non-zero plain-text return code", () => {
+test("decodeCommand surfaces a non-zero plain-text return code", () => {
   const decoded = gdprJson.decodeCommand("$.ret=5;", {
     payload: "",
     indices: [0],
@@ -372,7 +373,7 @@ Deno.test("decodeCommand surfaces a non-zero plain-text return code", () => {
   assertEquals(decoded.results, [null]);
 });
 
-Deno.test("decodeCommand falls back to -1 for an unreadable plain-text reply", () => {
+test("decodeCommand falls back to -1 for an unreadable plain-text reply", () => {
   const decoded = gdprJson.decodeCommand("<html>login page</html>", {
     payload: "",
     indices: [0],
@@ -382,7 +383,7 @@ Deno.test("decodeCommand falls back to -1 for an unreadable plain-text reply", (
   assertEquals(decoded.results, [null]);
 });
 
-Deno.test("decodeCommand falls back to -1 for an unrecognizable failure", () => {
+test("decodeCommand falls back to -1 for an unrecognizable failure", () => {
   const decoded = gdprJson.decodeCommand('{"success":false}', {
     payload: "",
     indices: [0],

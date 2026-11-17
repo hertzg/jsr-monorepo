@@ -1,7 +1,3 @@
-// deno-lint-ignore-file no-import-prefix -- the competitor packages are
-// deliberately not in import_map.json: they are not dependencies of anything
-// this repo publishes, only of this on-demand comparison.
-
 // ip-num is absent: `RangedSet.subtract()` is a union, not a difference — its
 // body is `new RangedSet(this.getFirst(), otherRange.getLast())`.
 //
@@ -11,7 +7,8 @@
 // cidr-tools is string-only (`type Network = string`), so its case
 // necessarily includes parsing and re-stringifying.
 
-import { excludeCidr } from "npm:cidr-tools@^12.1.3";
+import { bench, group, summary } from "mitata";
+import { excludeCidr } from "cidr-tools";
 
 import { cidrSubtract, parseCidr } from "../cidr.ts";
 
@@ -21,13 +18,14 @@ const SUBTRACT_EXCLUDE = "10.0.1.0/24";
 const oursBase = parseCidr(SUBTRACT_BASE);
 const oursExclude = parseCidr(SUBTRACT_EXCLUDE);
 
-Deno.bench("@hertzg/ip cidrSubtract", {
-  group: "cidr subtract",
-  baseline: true,
-}, () => {
-  cidrSubtract(oursBase, oursExclude);
-});
+group("cidr subtract", () => {
+  summary(() => {
+    bench("@hertzg/ip cidrSubtract", () => {
+      cidrSubtract(oursBase, oursExclude);
+    }).baseline(true);
 
-Deno.bench("cidr-tools excludeCidr", { group: "cidr subtract" }, () => {
-  excludeCidr(SUBTRACT_BASE, SUBTRACT_EXCLUDE);
+    bench("cidr-tools excludeCidr", () => {
+      excludeCidr(SUBTRACT_BASE, SUBTRACT_EXCLUDE);
+    });
+  });
 });

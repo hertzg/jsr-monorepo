@@ -1,8 +1,9 @@
+import { test } from "node:test";
 import { assertEquals, assertThrows } from "@std/assert";
 import { parse } from "@std/xml";
 import { timelapseTasks } from "./timelapse-tasks.ts";
 
-Deno.test("timelapseTasks decodes what net_timelapse_task_s2x writes", () => {
+test("timelapseTasks decodes what net_timelapse_task_s2x writes", () => {
   const root = parse(
     '<timelapseTasks version="1.1"><channelId>0</channelId><uid>disk-uid-1</uid>' +
       "<item><id>task-one</id><properties>props-one</properties>" +
@@ -32,7 +33,7 @@ Deno.test("timelapseTasks decodes what net_timelapse_task_s2x writes", () => {
   });
 });
 
-Deno.test("timelapseTasks round-trips every field", () => {
+test("timelapseTasks round-trips every field", () => {
   const value = {
     channelId: 1,
     uid: "disk-uid-2",
@@ -50,7 +51,7 @@ Deno.test("timelapseTasks round-trips every field", () => {
   );
 });
 
-Deno.test("timelapseTasks reads a reply without tasks as no items", () => {
+test("timelapseTasks reads a reply without tasks as no items", () => {
   const root = parse(
     '<timelapseTasks version="1.1"><channelId>0</channelId><uid>u</uid></timelapseTasks>',
   ).root;
@@ -58,7 +59,7 @@ Deno.test("timelapseTasks reads a reply without tasks as no items", () => {
   assertEquals(timelapseTasks.decode(root).item, undefined);
 });
 
-Deno.test("timelapseTasks throws on a taskState the firmware does not write", () => {
+test("timelapseTasks throws on a taskState the firmware does not write", () => {
   const root = parse(
     '<timelapseTasks version="1.1"><item><taskState>PAUSED</taskState></item>' +
       "</timelapseTasks>",

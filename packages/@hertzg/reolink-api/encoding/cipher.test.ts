@@ -1,35 +1,36 @@
+import { test } from "node:test";
 import { assertEquals } from "@std/assert";
 import { decodeHex } from "@std/encoding/hex";
 import { aesCfbDecrypt, aesCfbEncrypt, xorCipher } from "./cipher.ts";
 
-Deno.test("xorCipher matches reolink_aio at offset 250", () => {
+test("xorCipher matches reolink_aio at offset 250", () => {
   assertEquals(
     xorCipher(new TextEncoder().encode("<?xml"), 250),
     decodeHex("fa8ed8feee"),
   );
 });
 
-Deno.test("xorCipher matches reolink_aio at offset 0", () => {
+test("xorCipher matches reolink_aio at offset 0", () => {
   assertEquals(
     xorCipher(new TextEncoder().encode("hello world"), 0),
     decodeHex("7748502735490f906d4158"),
   );
 });
 
-Deno.test("xorCipher matches reolink_aio at offset 251", () => {
+test("xorCipher matches reolink_aio at offset 251", () => {
   assertEquals(
     xorCipher(new TextEncoder().encode("abcdefghij"), 251),
     decodeHex("d1c3f1e76182b1afd9cb"),
   );
 });
 
-Deno.test("xorCipher decrypts what it encrypts", () => {
+test("xorCipher decrypts what it encrypts", () => {
   const plain = new TextEncoder().encode("<body><nonce>abc</nonce></body>");
 
   assertEquals(xorCipher(xorCipher(plain, 250), 250), plain);
 });
 
-Deno.test("aesCfbEncrypt matches openssl aes-128-cfb for a partial block", () => {
+test("aesCfbEncrypt matches openssl aes-128-cfb for a partial block", () => {
   assertEquals(
     aesCfbEncrypt(
       new TextEncoder().encode("08822D7143979103"),
@@ -39,7 +40,7 @@ Deno.test("aesCfbEncrypt matches openssl aes-128-cfb for a partial block", () =>
   );
 });
 
-Deno.test("aesCfbDecrypt reads an openssl aes-128-cfb alarm event", () => {
+test("aesCfbDecrypt reads an openssl aes-128-cfb alarm event", () => {
   // deno-fmt-ignore
   const encrypted = decodeHex(
     "5276852cd5acf759b478e73ec559a4e7ff594bab8c8d4bbc7d02fd24e6fc8dfe" +

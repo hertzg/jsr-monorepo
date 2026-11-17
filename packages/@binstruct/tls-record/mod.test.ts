@@ -1,3 +1,4 @@
+import { test } from "node:test";
 import { assertEquals } from "@std/assert";
 import {
   TLS_CONTENT_TYPE,
@@ -7,8 +8,8 @@ import {
   tlsRecord,
 } from "./mod.ts";
 
-Deno.test("tlsRecord", async (t) => {
-  await t.step("round-trips a handshake record", () => {
+test("tlsRecord", async (t) => {
+  await t.test("round-trips a handshake record", () => {
     const coder = tlsRecord();
     // deno-fmt-ignore
     const fragment = new Uint8Array([0x01, 0x00, 0x00, 0x04, 0xde, 0xad, 0xbe, 0xef]);
@@ -28,7 +29,7 @@ Deno.test("tlsRecord", async (t) => {
     assertEquals(decoded, record);
   });
 
-  await t.step("round-trips an empty application data record", () => {
+  await t.test("round-trips an empty application data record", () => {
     const coder = tlsRecord();
     const record: TlsRecord = {
       contentType: TLS_CONTENT_TYPE.applicationData,
@@ -46,7 +47,7 @@ Deno.test("tlsRecord", async (t) => {
     assertEquals(decoded, record);
   });
 
-  await t.step("decodes a known ClientHello-shaped record header", () => {
+  await t.test("decodes a known ClientHello-shaped record header", () => {
     // deno-fmt-ignore
     const wire = new Uint8Array([
       0x16,       // contentType = handshake
@@ -64,7 +65,7 @@ Deno.test("tlsRecord", async (t) => {
     assertEquals(decoded.fragment, new Uint8Array([0x01, 0x00, 0x00, 0x00]));
   });
 
-  await t.step("decodes a known alert record with a trailing buffer", () => {
+  await t.test("decodes a known alert record with a trailing buffer", () => {
     // deno-fmt-ignore
     const wire = new Uint8Array([
       0x15,       // contentType = alert
@@ -82,7 +83,7 @@ Deno.test("tlsRecord", async (t) => {
     assertEquals(decoded.fragment, new Uint8Array([0x02, 0x0a]));
   });
 
-  await t.step("content type and version constants match RFC 8446", () => {
+  await t.test("content type and version constants match RFC 8446", () => {
     assertEquals(TLS_CONTENT_TYPE.changeCipherSpec, 20);
     assertEquals(TLS_CONTENT_TYPE.alert, 21);
     assertEquals(TLS_CONTENT_TYPE.handshake, 22);

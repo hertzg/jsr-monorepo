@@ -1,3 +1,4 @@
+import { test } from "node:test";
 import { assertEquals } from "@std/assert";
 import {
   type DosMzHeader,
@@ -7,8 +8,8 @@ import {
   MZ_SIGNATURE,
 } from "./mod.ts";
 
-Deno.test("dosMzHeader", async (t) => {
-  await t.step("round-trips a minimal header", () => {
+test("dosMzHeader", async (t) => {
+  await t.test("round-trips a minimal header", () => {
     const coder = dosMzHeader();
     const header: DosMzHeader = {
       signature: MZ_SIGNATURE,
@@ -41,7 +42,7 @@ Deno.test("dosMzHeader", async (t) => {
     assertEquals(decoded, header);
   });
 
-  await t.step("round-trips non-zero reserved and oem fields", () => {
+  await t.test("round-trips non-zero reserved and oem fields", () => {
     const coder = dosMzHeader();
     const header: DosMzHeader = {
       signature: MZ_SIGNATURE,
@@ -74,7 +75,7 @@ Deno.test("dosMzHeader", async (t) => {
     assertEquals(decoded, header);
   });
 
-  await t.step("decodes a known 64-byte MZ header", () => {
+  await t.test("decodes a known 64-byte MZ header", () => {
     // deno-fmt-ignore
     const wire = new Uint8Array([
       0x4d, 0x5a, // signature = "MZ"
@@ -114,7 +115,7 @@ Deno.test("dosMzHeader", async (t) => {
     assertEquals(decoded.reserved2.length, 20);
   });
 
-  await t.step("decodes a known header with a PE new header offset", () => {
+  await t.test("decodes a known header with a PE new header offset", () => {
     // deno-fmt-ignore
     const wire = new Uint8Array([
       0x4d, 0x5a, // signature = "MZ"
@@ -146,7 +147,7 @@ Deno.test("dosMzHeader", async (t) => {
     assertEquals(decoded.newHeaderOffset, 0x100);
   });
 
-  await t.step("signature encodes to the ASCII bytes MZ", () => {
+  await t.test("signature encodes to the ASCII bytes MZ", () => {
     const buffer = new Uint8Array(MZ_HEADER_SIZE);
     dosMzHeader().encode({
       signature: MZ_SIGNATURE,

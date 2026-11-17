@@ -1,8 +1,9 @@
+import { test } from "node:test";
 import { assertEquals } from "@std/assert";
 import { parse } from "@std/xml";
 import { offsetAdjust } from "./offset-adjust.ts";
 
-Deno.test("offsetAdjust decodes the request field", () => {
+test("offsetAdjust decodes the request field", () => {
   const root = parse(
     "<OffsetAdjust><maxOffset>32</maxOffset></OffsetAdjust>",
   ).root;
@@ -10,7 +11,7 @@ Deno.test("offsetAdjust decodes the request field", () => {
   assertEquals(offsetAdjust.decode(root), { maxOffset: 32 });
 });
 
-Deno.test("offsetAdjust decodes the netserver reply", () => {
+test("offsetAdjust decodes the netserver reply", () => {
   const root = parse(
     '<OffsetAdjust version="1.1"><OffsetX>6</OffsetX><OffsetY>-3</OffsetY>' +
       "<Offset>7</Offset></OffsetAdjust>",
@@ -23,7 +24,7 @@ Deno.test("offsetAdjust decodes the netserver reply", () => {
   });
 });
 
-Deno.test("offsetAdjust round-trips through encode and decode", () => {
+test("offsetAdjust round-trips through encode and decode", () => {
   const value = { maxOffset: 10, OffsetX: 1, OffsetY: 2, Offset: 3 };
 
   const xml = offsetAdjust.encode(value);

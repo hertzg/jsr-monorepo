@@ -1,9 +1,10 @@
+import { test } from "node:test";
 import { assertEquals } from "@std/assert";
 import { createContext } from "@hertzg/binstruct";
 import type { PngChunkUnknown } from "../mod.ts";
 import { type IendChunk, iendChunkRefiner } from "./iend.ts";
 
-Deno.test("iendChunkRefiner() - refines IEND chunk", () => {
+test("iendChunkRefiner() - refines IEND chunk", () => {
   const refiner = iendChunkRefiner();
   const context = createContext("decode");
 
@@ -21,7 +22,7 @@ Deno.test("iendChunkRefiner() - refines IEND chunk", () => {
   assertEquals(refined.crc, 0xAE426082);
 });
 
-Deno.test("iendChunkRefiner() - unrefines IEND chunk", () => {
+test("iendChunkRefiner() - unrefines IEND chunk", () => {
   const refiner = iendChunkRefiner();
   const context = createContext("encode");
 
@@ -39,7 +40,7 @@ Deno.test("iendChunkRefiner() - unrefines IEND chunk", () => {
   assertEquals(unrefined.crc, 0xAE426082);
 });
 
-Deno.test("iendChunkRefiner() - round-trip with standard CRC", () => {
+test("iendChunkRefiner() - round-trip with standard CRC", () => {
   const refiner = iendChunkRefiner();
   const encodeContext = createContext("encode");
   const decodeContext = createContext("decode");
@@ -58,7 +59,7 @@ Deno.test("iendChunkRefiner() - round-trip with standard CRC", () => {
   assertEquals(refined.crc, original.crc);
 });
 
-Deno.test("iendChunkRefiner() - round-trip with different CRC", () => {
+test("iendChunkRefiner() - round-trip with different CRC", () => {
   const refiner = iendChunkRefiner();
   const encodeContext = createContext("encode");
   const decodeContext = createContext("decode");
@@ -78,7 +79,7 @@ Deno.test("iendChunkRefiner() - round-trip with different CRC", () => {
   assertEquals(refined.crc, original.crc);
 });
 
-Deno.test("iendChunkRefiner() - always produces empty data when unrefining", () => {
+test("iendChunkRefiner() - always produces empty data when unrefining", () => {
   const refiner = iendChunkRefiner();
   const context = createContext("encode");
 
@@ -94,7 +95,7 @@ Deno.test("iendChunkRefiner() - always produces empty data when unrefining", () 
   assertEquals(unrefined.data, new Uint8Array(0));
 });
 
-Deno.test("iendChunkRefiner() - preserves CRC through round-trip", () => {
+test("iendChunkRefiner() - preserves CRC through round-trip", () => {
   const refiner = iendChunkRefiner();
   const encodeContext = createContext("encode");
   const decodeContext = createContext("decode");
@@ -122,7 +123,7 @@ Deno.test("iendChunkRefiner() - preserves CRC through round-trip", () => {
   }
 });
 
-Deno.test("iendChunkRefiner() - refine ignores data field", () => {
+test("iendChunkRefiner() - refine ignores data field", () => {
   const refiner = iendChunkRefiner();
   const context = createContext("decode");
 
@@ -143,7 +144,7 @@ Deno.test("iendChunkRefiner() - refine ignores data field", () => {
   assertEquals("data" in refined, false);
 });
 
-Deno.test("iendChunkRefiner() - length is always 0", () => {
+test("iendChunkRefiner() - length is always 0", () => {
   const refiner = iendChunkRefiner();
   const encodeContext = createContext("encode");
   const decodeContext = createContext("decode");
@@ -161,7 +162,7 @@ Deno.test("iendChunkRefiner() - length is always 0", () => {
   assertEquals(unrefined.length, 0);
 });
 
-Deno.test("iendChunkRefiner() - type is preserved as string", () => {
+test("iendChunkRefiner() - type is preserved as string", () => {
   const refiner = iendChunkRefiner();
   const context = createContext("decode");
 
@@ -179,7 +180,7 @@ Deno.test("iendChunkRefiner() - type is preserved as string", () => {
   assertEquals(typeof refined.type, "string");
 });
 
-Deno.test("iendChunkRefiner() - multiple round-trips are consistent", () => {
+test("iendChunkRefiner() - multiple round-trips are consistent", () => {
   const refiner = iendChunkRefiner();
   const encodeContext = createContext("encode");
   const decodeContext = createContext("decode");

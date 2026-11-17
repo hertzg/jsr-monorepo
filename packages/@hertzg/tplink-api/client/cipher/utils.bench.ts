@@ -1,3 +1,4 @@
+import { bench } from "mitata";
 import { bigIntToBytes, bytesToBigInt } from "./utils.ts";
 
 // Pre-generate test data for various sizes
@@ -11,11 +12,11 @@ const testData = sizes.map((size) => {
 });
 
 for (const { size, bytes, bigint } of testData) {
-  Deno.bench(`bytesToBigInt (${size} bytes)`, () => {
+  bench(`bytesToBigInt (${size} bytes)`, () => {
     bytesToBigInt(bytes);
   });
 
-  Deno.bench(`bigIntToBytes (${size} bytes)`, () => {
+  bench(`bigIntToBytes (${size} bytes)`, () => {
     bigIntToBytes(bigint, size);
   });
 }

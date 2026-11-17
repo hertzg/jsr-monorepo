@@ -1,8 +1,9 @@
+import { test } from "node:test";
 import { assertEquals, assertThrows } from "@std/assert";
 import { parse } from "@std/xml";
 import { aiDetectCfg } from "./ai-detect-cfg.ts";
 
-Deno.test("aiDetectCfg decodes the reply the camera writes", () => {
+test("aiDetectCfg decodes the reply the camera writes", () => {
   const root = parse(
     '<AiDetectCfg version="1.1"><chn>1</chn><type>dog_cat</type>' +
       "<sensitivity>61</sensitivity><stayTime>3</stayTime>" +
@@ -26,7 +27,7 @@ Deno.test("aiDetectCfg decodes the reply the camera writes", () => {
   });
 });
 
-Deno.test("aiDetectCfg round-trips through encode and decode", () => {
+test("aiDetectCfg round-trips through encode and decode", () => {
   const value = {
     chn: 0,
     type: "face" as const,
@@ -46,7 +47,7 @@ Deno.test("aiDetectCfg round-trips through encode and decode", () => {
   assertEquals(aiDetectCfg.decode(parse(xml).root), value);
 });
 
-Deno.test("aiDetectCfg decodes a reply whose grid failed to encode", () => {
+test("aiDetectCfg decodes a reply whose grid failed to encode", () => {
   const root = parse(
     '<AiDetectCfg version="1.1"><chn>0</chn><type>other</type>' +
       "<sensitivity>10</sensitivity><stayTime>0</stayTime>" +
@@ -58,7 +59,7 @@ Deno.test("aiDetectCfg decodes a reply whose grid failed to encode", () => {
   assertEquals(aiDetectCfg.decode(root).area, undefined);
 });
 
-Deno.test("aiDetectCfg rejects a target type the firmware does not map", () => {
+test("aiDetectCfg rejects a target type the firmware does not map", () => {
   const root = parse(
     '<AiDetectCfg version="1.1"><type>bicycle</type></AiDetectCfg>',
   ).root;
@@ -66,7 +67,7 @@ Deno.test("aiDetectCfg rejects a target type the firmware does not map", () => {
   assertThrows(() => aiDetectCfg.decode(root), Error, "type");
 });
 
-Deno.test("aiDetectCfg reads the Video Doorbell PoE's package type", () => {
+test("aiDetectCfg reads the Video Doorbell PoE's package type", () => {
   const root = parse(
     '<AiDetectCfg version="1.1"><type>package</type></AiDetectCfg>',
   ).root;

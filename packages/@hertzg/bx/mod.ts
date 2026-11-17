@@ -4,6 +4,8 @@
  *
  * @example
  * ```ts
+ * import { bx } from "@hertzg/bx";
+ *
  * // Examples of cases when it returns an ArrayBuffer
  * const HEADER = bx('00 ff 00 ff'); // ArrayBuffer { [Uint8Contents]: <00 ff 00 ff>, byteLength: 4 }
  * const SYNC1 = bx('00ff00ff_b4_01020304'); // ArrayBuffer { [Uint8Contents]: <00 ff 00 ff b4 01 02 03 04>, byteLength: 9 }
@@ -31,6 +33,7 @@ import { Buffer } from "node:buffer";
  * @example
  * ```ts
  * import { assertEquals } from "@std/assert";
+ * import { bx } from "@hertzg/bx";
  *
  * // Using spaces to separate bytes
  * const HEADER = bx('00 ff 00 ff');
@@ -40,6 +43,7 @@ import { Buffer } from "node:buffer";
  * @example
  * ```ts
  * import { assertEquals } from "@std/assert";
+ * import { bx } from "@hertzg/bx";
  *
  * // Using underscores, dashes and other symbols to separate bytes
  * const SYNC1 = bx('00ff00ff_b4_01020304');
@@ -49,6 +53,7 @@ import { Buffer } from "node:buffer";
  * @example
  * ```ts
  * import { assertEquals, assertThrows } from "@std/assert";
+ * import { bx } from "@hertzg/bx";
  *
  * // Empty string will return an empty ArrayBuffer
  * const ZEROLENGTH = bx('');
@@ -61,6 +66,8 @@ import { Buffer } from "node:buffer";
  * @example
  * ```ts
  * import { assertThrows } from "@std/assert";
+ * import { bx } from "@hertzg/bx";
+ *
  * // Odd number of hex characters will throw a TypeError
  * assertThrows(() => bx('0 0 0'), TypeError);
  * ```
@@ -68,6 +75,8 @@ import { Buffer } from "node:buffer";
  * @example
  * ```ts
  * import { assertThrows } from "@std/assert";
+ * import { bx } from "@hertzg/bx";
+ *
  * // Each byte must be represented by two characters
  * assertThrows(() => bx('f2-00_0_00'), TypeError);
  * ```
@@ -88,7 +97,6 @@ export function bx(hex: string): ArrayBuffer {
     );
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
   const data = cleanHex.match(/../g)!.map((hex) => parseInt(hex, 16));
 
   return new Uint8Array(data).buffer;

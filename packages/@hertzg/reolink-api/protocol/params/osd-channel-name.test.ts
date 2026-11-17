@@ -1,8 +1,9 @@
+import { test } from "node:test";
 import { assertEquals } from "@std/assert";
 import { parse } from "@std/xml";
 import { osdChannelName } from "./osd-channel-name.ts";
 
-Deno.test("osdChannelName decodes the cmd 44 reply element", () => {
+test("osdChannelName decodes the cmd 44 reply element", () => {
   const root = parse(
     '<OsdChannelName version="1.1"><channelId>0</channelId>' +
       "<name>Front door</name><enable>1</enable><topLeftX>12</topLeftX>" +
@@ -21,7 +22,7 @@ Deno.test("osdChannelName decodes the cmd 44 reply element", () => {
   });
 });
 
-Deno.test("osdChannelName round-trips every field", () => {
+test("osdChannelName round-trips every field", () => {
   const value = {
     channelId: 1,
     name: "Back & yard",

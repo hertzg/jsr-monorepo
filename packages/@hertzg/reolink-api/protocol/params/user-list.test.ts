@@ -1,8 +1,9 @@
+import { test } from "node:test";
 import { assertEquals, assertThrows } from "@std/assert";
 import { parse } from "@std/xml";
 import { type UserList, userList } from "./user-list.ts";
 
-Deno.test("userList decodes the cmd 58 reply element with two accounts", () => {
+test("userList decodes the cmd 58 reply element with two accounts", () => {
   const root = parse(
     '<UserList version="1.1"><User><userId>0</userId>' +
       "<userName>admin</userName><userLevel>1</userLevel>" +
@@ -32,7 +33,7 @@ Deno.test("userList decodes the cmd 58 reply element with two accounts", () => {
   });
 });
 
-Deno.test("userList round-trips a modify request with a password", () => {
+test("userList round-trips a modify request with a password", () => {
   const value: UserList = {
     User: [{
       userId: 2,
@@ -46,7 +47,7 @@ Deno.test("userList round-trips a modify request with a password", () => {
   assertEquals(userList.decode(parse(userList.encode(value)).root), value);
 });
 
-Deno.test("userList rejects an unknown userSetState", () => {
+test("userList rejects an unknown userSetState", () => {
   const root = parse(
     '<UserList version="1.1"><User><userName>x</userName>' +
       "<userSetState>rename</userSetState></User></UserList>",

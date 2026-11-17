@@ -1,8 +1,9 @@
+import { test } from "node:test";
 import { assertEquals, assertStringIncludes, assertThrows } from "@std/assert";
 import { parse } from "@std/xml";
 import { wifi } from "./wifi.ts";
 
-Deno.test("wifi decodes an RLC-823A cmd 116 reply with scanned access points", () => {
+test("wifi decodes an RLC-823A cmd 116 reply with scanned access points", () => {
   const root = parse(
     '<Wifi version="1.1"><freqPolicy>1</freqPolicy><protocol>2</protocol>' +
       "<mode>station</mode><udidList>" +
@@ -33,7 +34,7 @@ Deno.test("wifi decodes an RLC-823A cmd 116 reply with scanned access points", (
   });
 });
 
-Deno.test("wifi decodes a reply without mode, access points or kit fields", () => {
+test("wifi decodes a reply without mode, access points or kit fields", () => {
   const root = parse(
     '<Wifi version="1.1"><freqPolicy>0</freqPolicy><protocol>0</protocol>' +
       "<ssid>HomeNet</ssid><key>secret-key</key><channel>6</channel>" +
@@ -51,7 +52,7 @@ Deno.test("wifi decodes a reply without mode, access points or kit fields", () =
   });
 });
 
-Deno.test("wifi writes the parse-only auth and encryption fields", () => {
+test("wifi writes the parse-only auth and encryption fields", () => {
   const xml = wifi.encode({ authMode: "wpapsk", encryptType: "tkip" });
 
   assertEquals(
@@ -61,7 +62,7 @@ Deno.test("wifi writes the parse-only auth and encryption fields", () => {
   );
 });
 
-Deno.test("wifi writes the access point list as udid items", () => {
+test("wifi writes the access point list as udid items", () => {
   const xml = wifi.encode({ udidList: [{ name: "HomeNet", signal: 70 }] });
 
   assertStringIncludes(
@@ -70,13 +71,13 @@ Deno.test("wifi writes the access point list as udid items", () => {
   );
 });
 
-Deno.test("wifi rejects a mode the firmware does not know", () => {
+test("wifi rejects a mode the firmware does not know", () => {
   const root = parse('<Wifi version="1.1"><mode>mesh</mode></Wifi>').root;
 
   assertThrows(() => wifi.decode(root), Error, "expected one of station, ap");
 });
 
-Deno.test("wifi round-trips through encode and decode", () => {
+test("wifi round-trips through encode and decode", () => {
   const value = {
     freqPolicy: 2,
     protocol: 1,
@@ -98,7 +99,7 @@ Deno.test("wifi round-trips through encode and decode", () => {
   assertEquals(wifi.decode(parse(xml).root), value);
 });
 
-Deno.test("wifi decodes a Video Doorbell PoE cmd 116 reply without protocol or type", () => {
+test("wifi decodes a Video Doorbell PoE cmd 116 reply without protocol or type", () => {
   const root = parse(
     '<Wifi version="1.1"><freqPolicy>1</freqPolicy><mode>station</mode>' +
       "<udidList>" +
@@ -124,7 +125,7 @@ Deno.test("wifi decodes a Video Doorbell PoE cmd 116 reply without protocol or t
   });
 });
 
-Deno.test("wifi round-trips a Video Doorbell PoE request with scanAp", () => {
+test("wifi round-trips a Video Doorbell PoE request with scanAp", () => {
   const value = { scanAp: 1, ssid: "HomeNet", key: "secret-key" };
 
   const xml = wifi.encode(value);

@@ -1,8 +1,9 @@
+import { test } from "node:test";
 import { assertEquals } from "@std/assert";
 import { parse } from "@std/xml";
 import { net3g4gModuleInfo } from "./net3g4g-module-info.ts";
 
-Deno.test("net3g4gModuleInfo decodes the reply net_4g_module_info_s2x writes", () => {
+test("net3g4gModuleInfo decodes the reply net_4g_module_info_s2x writes", () => {
   const root = parse(
     '<Net3g4gModuleInfo version="1.1"><iccid>iccid-8944500000000000001</iccid>' +
       "<imei>imei-356938035643809</imei><phoneNumber>phone-15550001111</phoneNumber>" +
@@ -16,7 +17,7 @@ Deno.test("net3g4gModuleInfo decodes the reply net_4g_module_info_s2x writes", (
   });
 });
 
-Deno.test("net3g4gModuleInfo round-trips a full value", () => {
+test("net3g4gModuleInfo round-trips a full value", () => {
   const value = {
     iccid: "8937204016201234567",
     imei: "352099001761481",
@@ -29,7 +30,7 @@ Deno.test("net3g4gModuleInfo round-trips a full value", () => {
   );
 });
 
-Deno.test("net3g4gModuleInfo reads empty identifiers as empty strings", () => {
+test("net3g4gModuleInfo reads empty identifiers as empty strings", () => {
   const root = parse(
     '<Net3g4gModuleInfo version="1.1"><iccid></iccid><imei>352099001761481</imei>' +
       "<phoneNumber></phoneNumber></Net3g4gModuleInfo>",

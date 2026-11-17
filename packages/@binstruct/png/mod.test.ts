@@ -1,3 +1,4 @@
+import { test } from "node:test";
 import { assertEquals, assertGreaterOrEqual } from "@std/assert";
 import {
   chunkCrc,
@@ -24,7 +25,7 @@ const PNG_SIGNATURE_DECODED = {
   unixLineEnding: "\n",
 };
 
-Deno.test("pngChunkUnknown() - decodes unknown chunk", () => {
+test("pngChunkUnknown() - decodes unknown chunk", () => {
   const coder = pngChunkUnknown();
   // deno-fmt-ignore
   const buffer = new Uint8Array([
@@ -43,7 +44,7 @@ Deno.test("pngChunkUnknown() - decodes unknown chunk", () => {
   assertEquals(decoded.crc, 0x12345678);
 });
 
-Deno.test("pngChunkUnknown() - encodes unknown chunk", () => {
+test("pngChunkUnknown() - encodes unknown chunk", () => {
   const coder = pngChunkUnknown();
   const chunk: PngChunkUnknown = {
     length: 5,
@@ -65,7 +66,7 @@ Deno.test("pngChunkUnknown() - encodes unknown chunk", () => {
   ]));
 });
 
-Deno.test("pngChunkUnknown() - round-trip with empty data", () => {
+test("pngChunkUnknown() - round-trip with empty data", () => {
   const coder = pngChunkUnknown();
   const chunk: PngChunkUnknown = {
     length: 0,
@@ -85,7 +86,7 @@ Deno.test("pngChunkUnknown() - round-trip with empty data", () => {
   assertEquals(decoded.crc, chunk.crc);
 });
 
-Deno.test("pngFileChunks() - decodes PNG file with multiple chunks", () => {
+test("pngFileChunks() - decodes PNG file with multiple chunks", () => {
   const coder = pngFileChunks(pngChunkUnknown());
   // deno-fmt-ignore
   const buffer = new Uint8Array([
@@ -113,7 +114,7 @@ Deno.test("pngFileChunks() - decodes PNG file with multiple chunks", () => {
   assertEquals(decoded.chunks[1].data, new Uint8Array([4, 5]));
 });
 
-Deno.test("pngFileChunks() - encodes PNG file with multiple chunks", () => {
+test("pngFileChunks() - encodes PNG file with multiple chunks", () => {
   const coder = pngFileChunks(pngChunkUnknown());
   const pngData: PngFile<PngChunkUnknown> = {
     signature: PNG_SIGNATURE_DECODED,
@@ -140,7 +141,7 @@ Deno.test("pngFileChunks() - encodes PNG file with multiple chunks", () => {
   assertEquals(buffer.slice(0, 8), PNG_SIGNATURE);
 });
 
-Deno.test("pngFileChunks() - round-trip with empty chunks array", () => {
+test("pngFileChunks() - round-trip with empty chunks array", () => {
   const coder = pngFileChunks(pngChunkUnknown());
   const pngData: PngFile<PngChunkUnknown> = {
     signature: PNG_SIGNATURE_DECODED,
@@ -156,7 +157,7 @@ Deno.test("pngFileChunks() - round-trip with empty chunks array", () => {
   assertEquals(decoded.chunks.length, 0);
 });
 
-Deno.test("pngFileChunks() - defaults to the same chunk coder as pngFile()", () => {
+test("pngFileChunks() - defaults to the same chunk coder as pngFile()", () => {
   const pngData: PngFile<IhdrChunk | IendChunk> = {
     signature: PNG_SIGNATURE_DECODED,
     chunks: [
@@ -191,7 +192,7 @@ Deno.test("pngFileChunks() - defaults to the same chunk coder as pngFile()", () 
   assertEquals(defaultedBuffer, explicitBuffer);
 });
 
-Deno.test("pngFileChunks() - zero-argument call round-trips refined chunks", () => {
+test("pngFileChunks() - zero-argument call round-trips refined chunks", () => {
   const coder = pngFileChunks();
   const pngData: PngFile<IhdrChunk | IendChunk> = {
     signature: PNG_SIGNATURE_DECODED,
@@ -229,7 +230,7 @@ Deno.test("pngFileChunks() - zero-argument call round-trips refined chunks", () 
   assertEquals((decoded.chunks[1] as IendChunk).type, "IEND");
 });
 
-Deno.test("pngFileChunks() - explicit chunk coder still leaves chunks unrefined", () => {
+test("pngFileChunks() - explicit chunk coder still leaves chunks unrefined", () => {
   const coder = pngFileChunks(pngChunkUnknown());
   // deno-fmt-ignore
   const buffer = new Uint8Array([
@@ -245,7 +246,7 @@ Deno.test("pngFileChunks() - explicit chunk coder still leaves chunks unrefined"
   assertEquals(decoded.chunks[0].type, new Uint8Array([73, 69, 78, 68]));
 });
 
-Deno.test("pngChunkRefined() - decodes IHDR chunk", () => {
+test("pngChunkRefined() - decodes IHDR chunk", () => {
   const coder = pngChunkRefined();
   // deno-fmt-ignore
   const buffer = new Uint8Array([
@@ -271,7 +272,7 @@ Deno.test("pngChunkRefined() - decodes IHDR chunk", () => {
   assertEquals((decoded as IhdrChunk).data.colorType, 2);
 });
 
-Deno.test("pngChunkRefined() - encodes IHDR chunk", () => {
+test("pngChunkRefined() - encodes IHDR chunk", () => {
   const coder = pngChunkRefined();
   const chunk: IhdrChunk = {
     length: 13,
@@ -300,7 +301,7 @@ Deno.test("pngChunkRefined() - encodes IHDR chunk", () => {
   assertEquals(buffer[7], 82); // 'R'
 });
 
-Deno.test("pngChunkRefined() - decodes IDAT chunk", () => {
+test("pngChunkRefined() - decodes IDAT chunk", () => {
   const coder = pngChunkRefined();
   const uncompressed = new Uint8Array([1, 2, 3, 4, 5]);
   const compressedData = new Uint8Array(zlibSync(uncompressed));
@@ -319,7 +320,7 @@ Deno.test("pngChunkRefined() - decodes IDAT chunk", () => {
   assertEquals((decoded as IdatChunk).data.uncompressed, uncompressed);
 });
 
-Deno.test("pngChunkRefined() - decodes IEND chunk", () => {
+test("pngChunkRefined() - decodes IEND chunk", () => {
   const coder = pngChunkRefined();
   // deno-fmt-ignore
   const buffer = new Uint8Array([
@@ -336,7 +337,7 @@ Deno.test("pngChunkRefined() - decodes IEND chunk", () => {
   assertEquals((decoded as IendChunk).crc, 0xAE426082);
 });
 
-Deno.test("pngChunkRefined() - decodes PLTE chunk", () => {
+test("pngChunkRefined() - decodes PLTE chunk", () => {
   const coder = pngChunkRefined();
   // deno-fmt-ignore
   const buffer = new Uint8Array([
@@ -358,7 +359,7 @@ Deno.test("pngChunkRefined() - decodes PLTE chunk", () => {
   assertEquals((decoded as PlteChunk).data.colors[2], [0, 0, 255]);
 });
 
-Deno.test("pngChunkRefined() - decodes unknown chunk type", () => {
+test("pngChunkRefined() - decodes unknown chunk type", () => {
   const coder = pngChunkRefined();
   // deno-fmt-ignore
   const buffer = new Uint8Array([
@@ -375,7 +376,7 @@ Deno.test("pngChunkRefined() - decodes unknown chunk type", () => {
   assertEquals((decoded as PngChunkUnknown).data, new Uint8Array([1, 2, 3]));
 });
 
-Deno.test("pngFile() - decodes complete PNG file with IHDR and IEND", () => {
+test("pngFile() - decodes complete PNG file with IHDR and IEND", () => {
   const coder = pngFile();
   // deno-fmt-ignore
   const buffer = new Uint8Array([
@@ -406,7 +407,7 @@ Deno.test("pngFile() - decodes complete PNG file with IHDR and IEND", () => {
   assertEquals((decoded.chunks[1] as IendChunk).type, "IEND");
 });
 
-Deno.test("pngFile() - encodes complete PNG file", () => {
+test("pngFile() - encodes complete PNG file", () => {
   const coder = pngFile();
   const pngData: PngFile<IhdrChunk | IendChunk> = {
     signature: PNG_SIGNATURE_DECODED,
@@ -440,7 +441,7 @@ Deno.test("pngFile() - encodes complete PNG file", () => {
   assertEquals(buffer.slice(0, 8), PNG_SIGNATURE);
 });
 
-Deno.test("pngFile() - round-trip with mixed chunk types", () => {
+test("pngFile() - round-trip with mixed chunk types", () => {
   const coder = pngFile();
   const uncompressed = new Uint8Array([1, 2, 3]);
   const compressedData = new Uint8Array(zlibSync(uncompressed));
@@ -491,7 +492,7 @@ Deno.test("pngFile() - round-trip with mixed chunk types", () => {
   assertEquals((decoded.chunks[2] as IendChunk).type, "IEND");
 });
 
-Deno.test("chunkCrc() - calculates CRC for raw bytes", () => {
+test("chunkCrc() - calculates CRC for raw bytes", () => {
   // deno-fmt-ignore
   const data = new Uint8Array([73, 72, 68, 82, 0, 0, 0, 1, 0, 0, 0, 1, 8, 2, 0, 0, 0]);
   const crc = chunkCrc(data);
@@ -501,7 +502,7 @@ Deno.test("chunkCrc() - calculates CRC for raw bytes", () => {
   assertEquals(crc, 0x907753DE);
 });
 
-Deno.test("chunkCrc() - calculates CRC for chunk object", () => {
+test("chunkCrc() - calculates CRC for chunk object", () => {
   const chunk = {
     type: new Uint8Array([73, 72, 68, 82]), // "IHDR"
     // deno-fmt-ignore
@@ -514,7 +515,7 @@ Deno.test("chunkCrc() - calculates CRC for chunk object", () => {
   assertEquals(crc, 0x907753DE);
 });
 
-Deno.test("chunkCrc() - returns same CRC for equivalent data", () => {
+test("chunkCrc() - returns same CRC for equivalent data", () => {
   // deno-fmt-ignore
   const rawBytes = new Uint8Array([73, 72, 68, 82, 0, 0, 0, 1, 0, 0, 0, 1, 8, 2, 0, 0, 0]);
   const chunk = {
@@ -526,7 +527,7 @@ Deno.test("chunkCrc() - returns same CRC for equivalent data", () => {
   assertEquals(chunkCrc(rawBytes), chunkCrc(chunk));
 });
 
-Deno.test("chunkCrc() - calculates CRC for IEND chunk", () => {
+test("chunkCrc() - calculates CRC for IEND chunk", () => {
   const chunk = {
     type: new Uint8Array([73, 69, 78, 68]), // "IEND"
     data: new Uint8Array(0),
@@ -536,7 +537,7 @@ Deno.test("chunkCrc() - calculates CRC for IEND chunk", () => {
   assertEquals(crc, 0xAE426082);
 });
 
-Deno.test("chunkCrc() - different data produces different CRC", () => {
+test("chunkCrc() - different data produces different CRC", () => {
   const chunk1 = {
     type: new Uint8Array([73, 72, 68, 82]),
     data: new Uint8Array([1, 2, 3]),

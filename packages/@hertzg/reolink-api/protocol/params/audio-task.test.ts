@@ -1,8 +1,9 @@
+import { test } from "node:test";
 import { assertEquals } from "@std/assert";
 import { parse } from "@std/xml";
 import { audioTask } from "./audio-task.ts";
 
-Deno.test("audioTask decodes the reply nets_audio_task_s2x writes", () => {
+test("audioTask decodes the reply nets_audio_task_s2x writes", () => {
   const motionHours = "1".repeat(24) + "0".repeat(144);
   const peopleHours = "0".repeat(168);
   const root = parse(
@@ -23,7 +24,7 @@ Deno.test("audioTask decodes the reply nets_audio_task_s2x writes", () => {
   });
 });
 
-Deno.test("audioTask round-trips a full value", () => {
+test("audioTask round-trips a full value", () => {
   const value = {
     channelId: 0,
     enable: 0,
@@ -33,7 +34,7 @@ Deno.test("audioTask round-trips a full value", () => {
   assertEquals(audioTask.decode(parse(audioTask.encode(value)).root), value);
 });
 
-Deno.test("audioTask decodes a request that carries only the channel", () => {
+test("audioTask decodes a request that carries only the channel", () => {
   const root = parse(
     '<AudioTask version="1.1"><channelId>2</channelId></AudioTask>',
   ).root;

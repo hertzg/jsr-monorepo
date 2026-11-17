@@ -1,8 +1,9 @@
+import { test } from "node:test";
 import { assertEquals } from "@std/assert";
 import { parse } from "@std/xml";
 import { audioPlayInfo } from "./audio-play-info.ts";
 
-Deno.test("audioPlayInfo decodes every field nets_param_manul_play_x2s reads", () => {
+test("audioPlayInfo decodes every field nets_param_manul_play_x2s reads", () => {
   const root = parse(
     '<audioPlayInfo version="1.1"><channelId>1</channelId><playMode>2</playMode>' +
       "<playDuration>15</playDuration><playTimes>3</playTimes><onOff>1</onOff>" +
@@ -18,7 +19,7 @@ Deno.test("audioPlayInfo decodes every field nets_param_manul_play_x2s reads", (
   });
 });
 
-Deno.test("audioPlayInfo round-trips a full value", () => {
+test("audioPlayInfo round-trips a full value", () => {
   const value = {
     channelId: 0,
     playMode: 1,
@@ -33,7 +34,7 @@ Deno.test("audioPlayInfo round-trips a full value", () => {
   );
 });
 
-Deno.test("audioPlayInfo omits fields that are not set", () => {
+test("audioPlayInfo omits fields that are not set", () => {
   assertEquals(
     audioPlayInfo.encode({ channelId: 0, onOff: 0 }),
     '<audioPlayInfo version="1.1"><channelId>0</channelId><onOff>0</onOff></audioPlayInfo>',

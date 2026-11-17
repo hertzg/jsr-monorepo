@@ -1,8 +1,9 @@
+import { test } from "node:test";
 import { assertEquals, assertThrows } from "@std/assert";
 import { parse } from "@std/xml";
 import { dayRecords } from "./day-records.ts";
 
-Deno.test("dayRecords decodes a cmd 142 reply with two channels", () => {
+test("dayRecords decodes a cmd 142 reply with two channels", () => {
   const root = parse(
     '<DayRecords version="1.1">' +
       "<startTime><year>2026</year><month>10</month><day>1</day>" +
@@ -48,7 +49,7 @@ Deno.test("dayRecords decodes a cmd 142 reply with two channels", () => {
   });
 });
 
-Deno.test("dayRecords decodes a channel with no recorded days", () => {
+test("dayRecords decodes a channel with no recorded days", () => {
   const root = parse(
     '<DayRecords version="1.1"><DayRecordList><DayRecord><index>0</index>' +
       "<channelId>1</channelId><dayTypeList></dayTypeList></DayRecord>" +
@@ -60,7 +61,7 @@ Deno.test("dayRecords decodes a channel with no recorded days", () => {
   ]);
 });
 
-Deno.test("dayRecords rejects a day without a type", () => {
+test("dayRecords rejects a day without a type", () => {
   const root = parse(
     '<DayRecords version="1.1"><DayRecordList><DayRecord><dayTypeList>' +
       "<dayType><index>5</index></dayType></dayTypeList></DayRecord>" +
@@ -70,7 +71,7 @@ Deno.test("dayRecords rejects a day without a type", () => {
   assertThrows(() => dayRecords.decode(root), Error, "<type>");
 });
 
-Deno.test("dayRecords rejects an unknown day type", () => {
+test("dayRecords rejects an unknown day type", () => {
   const root = parse(
     '<DayRecords version="1.1"><DayRecordList><DayRecord><dayTypeList>' +
       "<dayType><index>5</index><type>motion</type></dayType></dayTypeList>" +
@@ -80,7 +81,7 @@ Deno.test("dayRecords rejects an unknown day type", () => {
   assertThrows(() => dayRecords.decode(root), Error, "expected one of");
 });
 
-Deno.test("dayRecords round-trips through encode and decode", () => {
+test("dayRecords round-trips through encode and decode", () => {
   const value = {
     startTime: { year: 2025, month: 2, day: 3, hour: 4, minute: 5, second: 6 },
     endTime: { year: 2025, month: 7, day: 8, hour: 9, minute: 10, second: 11 },

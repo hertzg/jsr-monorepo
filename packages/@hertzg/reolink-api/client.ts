@@ -7,10 +7,12 @@
  *
  * @example Stream doorbell and motion events
  * ```ts ignore
+ * import { connect } from "node:net";
+ * import { Duplex } from "node:stream";
  * import { createClient } from "@hertzg/reolink-api/client";
  *
- * const conn = await Deno.connect({ hostname: "192.168.1.10", port: 9000 });
- * const client = createClient({ readable: conn.readable, writable: conn.writable });
+ * const conn = connect({ host: "192.168.1.10", port: 9000 });
+ * const client = createClient(Duplex.toWeb(conn));
  *
  * await client.login({ username: "admin", password: "secret" });
  * const events = await client.subscribe();
@@ -282,10 +284,12 @@ export type Client = {
  *
  * @example Log in and subscribe
  * ```ts ignore
+ * import { connect } from "node:net";
+ * import { Duplex } from "node:stream";
  * import { createClient } from "@hertzg/reolink-api/client";
  *
- * const conn = await Deno.connect({ hostname: "192.168.1.10", port: 9000 });
- * const client = createClient({ readable: conn.readable, writable: conn.writable });
+ * const conn = connect({ host: "192.168.1.10", port: 9000 });
+ * const client = createClient(Duplex.toWeb(conn));
  *
  * await client.login({ username: "admin", password: "secret" });
  * const events = await client.subscribe({ keepAliveMs: 20_000 });
@@ -297,7 +301,7 @@ export type Client = {
  * }
  *
  * await client.close();
- * conn.close();
+ * conn.destroy();
  * ```
  */
 export function createClient(options: ClientOptions): Client {

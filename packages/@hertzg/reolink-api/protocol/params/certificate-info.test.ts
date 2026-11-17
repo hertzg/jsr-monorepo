@@ -1,8 +1,9 @@
+import { test } from "node:test";
 import { assertEquals, assertThrows } from "@std/assert";
 import { parse } from "@std/xml";
 import { certificateInfo } from "./certificate-info.ts";
 
-Deno.test("certificateInfo decodes the reply the camera writes", () => {
+test("certificateInfo decodes the reply the camera writes", () => {
   const root = parse(
     '<certificateInfo version="1.1"><enable>1</enable>' +
       "<certName>cert-abc123</certName><keyName>key-abc123</keyName>" +
@@ -16,7 +17,7 @@ Deno.test("certificateInfo decodes the reply the camera writes", () => {
   });
 });
 
-Deno.test("certificateInfo round-trips an import through encode and decode", () => {
+test("certificateInfo round-trips an import through encode and decode", () => {
   const value = {
     certName: "cert-def456",
     keyName: "key-def456",
@@ -30,7 +31,7 @@ Deno.test("certificateInfo round-trips an import through encode and decode", () 
   assertEquals(certificateInfo.decode(parse(xml).root), value);
 });
 
-Deno.test("certificateInfo decodes a request that clears the certificate", () => {
+test("certificateInfo decodes a request that clears the certificate", () => {
   const root = parse(
     '<certificateInfo version="1.1"><option>clear</option></certificateInfo>',
   ).root;
@@ -38,7 +39,7 @@ Deno.test("certificateInfo decodes a request that clears the certificate", () =>
   assertEquals(certificateInfo.decode(root), { option: "clear" });
 });
 
-Deno.test("certificateInfo rejects an option the firmware does not map", () => {
+test("certificateInfo rejects an option the firmware does not map", () => {
   const root = parse(
     '<certificateInfo version="1.1"><option>export</option></certificateInfo>',
   ).root;

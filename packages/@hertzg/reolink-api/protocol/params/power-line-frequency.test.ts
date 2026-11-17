@@ -1,8 +1,9 @@
+import { test } from "node:test";
 import { assertEquals, assertThrows } from "@std/assert";
 import { parse } from "@std/xml";
 import { powerLineFrequency } from "./power-line-frequency.ts";
 
-Deno.test("powerLineFrequency decodes the cmd 154 reply", () => {
+test("powerLineFrequency decodes the cmd 154 reply", () => {
   const root = parse(
     '<PowerLineFrequency version="1.1"><mode>50hz</mode><enable>0</enable>' +
       "</PowerLineFrequency>",
@@ -11,7 +12,7 @@ Deno.test("powerLineFrequency decodes the cmd 154 reply", () => {
   assertEquals(powerLineFrequency.decode(root), { mode: "50hz", enable: 0 });
 });
 
-Deno.test("powerLineFrequency round-trips through encode and decode", () => {
+test("powerLineFrequency round-trips through encode and decode", () => {
   const value = { mode: "60hz" as const, enable: 1 };
 
   assertEquals(
@@ -20,7 +21,7 @@ Deno.test("powerLineFrequency round-trips through encode and decode", () => {
   );
 });
 
-Deno.test("powerLineFrequency rejects a mode the firmware does not write", () => {
+test("powerLineFrequency rejects a mode the firmware does not write", () => {
   const root = parse(
     "<PowerLineFrequency><mode>55hz</mode><enable>1</enable></PowerLineFrequency>",
   ).root;

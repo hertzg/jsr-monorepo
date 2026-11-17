@@ -1,3 +1,4 @@
+import { test } from "node:test";
 import { assertEquals } from "@std/assert";
 import {
   TGA_HEADER_SIZE,
@@ -6,8 +7,8 @@ import {
   tgaHeader,
 } from "./mod.ts";
 
-Deno.test("tgaHeader", async (t) => {
-  await t.step("round-trips a header with no image ID", () => {
+test("tgaHeader", async (t) => {
+  await t.test("round-trips a header with no image ID", () => {
     const coder = tgaHeader();
     const header: TgaHeader = {
       idLength: 0,
@@ -34,7 +35,7 @@ Deno.test("tgaHeader", async (t) => {
     assertEquals(decoded, header);
   });
 
-  await t.step("sizes the image ID from idLength", () => {
+  await t.test("sizes the image ID from idLength", () => {
     const imageId = new TextEncoder().encode("frame01");
     const coder = tgaHeader();
     const header: TgaHeader = {
@@ -63,7 +64,7 @@ Deno.test("tgaHeader", async (t) => {
     assertEquals(decoded.idLength, imageId.length);
   });
 
-  await t.step("decodes known wire bytes for a color-mapped image", () => {
+  await t.test("decodes known wire bytes for a color-mapped image", () => {
     // deno-fmt-ignore
     const wire = new Uint8Array([
       0x00,             // idLength = 0
@@ -94,7 +95,7 @@ Deno.test("tgaHeader", async (t) => {
     assertEquals(decoded.imageId.length, 0);
   });
 
-  await t.step("decodes known wire bytes with an image ID and origin", () => {
+  await t.test("decodes known wire bytes with an image ID and origin", () => {
     // deno-fmt-ignore
     const wire = new Uint8Array([
       0x04,             // idLength = 4

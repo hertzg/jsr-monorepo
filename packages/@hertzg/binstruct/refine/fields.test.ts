@@ -1,3 +1,4 @@
+import { test } from "node:test";
 import { assertEquals } from "@std/assert";
 import { bytes } from "../bytes/bytes.ts";
 import { u16be, u8 } from "../numeric/numeric.ts";
@@ -7,7 +8,7 @@ import { refine } from "./refine.ts";
 import { refineSwitch } from "./switch.ts";
 import { refineFields } from "./fields.ts";
 
-Deno.test("refineFields: refines a single payload field", () => {
+test("refineFields: refines a single payload field", () => {
   const inner = struct({ a: u8(), b: u8() });
   const outer = struct({ tag: u16be(), payload: bytes(2) });
 
@@ -26,7 +27,7 @@ Deno.test("refineFields: refines a single payload field", () => {
   assertEquals(decoded.payload.b, 2);
 });
 
-Deno.test("refineFields: refines multiple fields in one pass", () => {
+test("refineFields: refines multiple fields in one pass", () => {
   const word = struct({ value: u16be() });
   const host = struct({ a: bytes(2), b: bytes(2) });
 
@@ -44,7 +45,7 @@ Deno.test("refineFields: refines multiple fields in one pass", () => {
   assertEquals(decoded.b.value, 0x5678);
 });
 
-Deno.test("refineFields: unlisted fields pass through unchanged", () => {
+test("refineFields: unlisted fields pass through unchanged", () => {
   const inner = struct({ value: u8() });
   const host = struct({
     keepMe: u16be(),
@@ -67,7 +68,7 @@ Deno.test("refineFields: unlisted fields pass through unchanged", () => {
   assertEquals(decoded.alsoKeepMe, 0x42);
 });
 
-Deno.test("refineFields: composes as a refineSwitch arm", () => {
+test("refineFields: composes as a refineSwitch arm", () => {
   type Tag = 1 | 2;
   const word = struct({ value: u16be() });
   const text = struct({ value: string() });
@@ -103,7 +104,7 @@ Deno.test("refineFields: composes as a refineSwitch arm", () => {
   assertEquals(payload.value, 0xabcd);
 });
 
-Deno.test("refineFields: round-trips an empty coder map (identity)", () => {
+test("refineFields: round-trips an empty coder map (identity)", () => {
   const host = struct({ a: u8(), b: u8() });
 
   const coder = refine(host, refineFields({}))();

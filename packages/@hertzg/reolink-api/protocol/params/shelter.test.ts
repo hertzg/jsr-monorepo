@@ -1,8 +1,9 @@
+import { test } from "node:test";
 import { assertEquals, assertThrows } from "@std/assert";
 import { parse } from "@std/xml";
 import { shelter } from "./shelter.ts";
 
-Deno.test("shelter decodes the cmd 52 reply element", () => {
+test("shelter decodes the cmd 52 reply element", () => {
   const root = parse(
     '<Shelter version="1.1"><channelId>0</channelId><enable>1</enable>' +
       "<shelterList><Shelter><id>3</id><enable>1</enable><layer>1</layer>" +
@@ -26,7 +27,7 @@ Deno.test("shelter decodes the cmd 52 reply element", () => {
   });
 });
 
-Deno.test("shelter decodes an empty mask list", () => {
+test("shelter decodes an empty mask list", () => {
   const root = parse(
     '<Shelter version="1.1"><channelId>0</channelId><enable>0</enable>' +
       "<shelterList></shelterList></Shelter>",
@@ -35,7 +36,7 @@ Deno.test("shelter decodes an empty mask list", () => {
   assertEquals(shelter.decode(root).shelterList, []);
 });
 
-Deno.test("shelter round-trips two masks", () => {
+test("shelter round-trips two masks", () => {
   const value = {
     channelId: 1,
     enable: 1,
@@ -48,7 +49,7 @@ Deno.test("shelter round-trips two masks", () => {
   assertEquals(shelter.decode(parse(shelter.encode(value)).root), value);
 });
 
-Deno.test("shelter rejects a mask without id", () => {
+test("shelter rejects a mask without id", () => {
   const root = parse(
     '<Shelter version="1.1"><shelterList><Shelter><width>3</width>' +
       "</Shelter></shelterList></Shelter>",

@@ -1,8 +1,9 @@
+import { test } from "node:test";
 import { assertEquals, assertThrows } from "@std/assert";
 import { parse } from "@std/xml";
 import { chargeBatteryInfo } from "./charge-battery-info.ts";
 
-Deno.test("chargeBatteryInfo decodes the BatteryInfo reply net_bat_info_s2x writes", () => {
+test("chargeBatteryInfo decodes the BatteryInfo reply net_bat_info_s2x writes", () => {
   const root = parse(
     '<BatteryInfo version="1.1"><channelId>0</channelId>' +
       "<chargeStatus>chargeComplete</chargeStatus><adapterStatus>solarPanel</adapterStatus>" +
@@ -24,7 +25,7 @@ Deno.test("chargeBatteryInfo decodes the BatteryInfo reply net_bat_info_s2x writ
   });
 });
 
-Deno.test("chargeBatteryInfo round-trips a full value", () => {
+test("chargeBatteryInfo round-trips a full value", () => {
   const value = {
     channelId: 1,
     chargeStatus: "charging" as const,
@@ -43,7 +44,7 @@ Deno.test("chargeBatteryInfo round-trips a full value", () => {
   );
 });
 
-Deno.test("chargeBatteryInfo decodes a request that carries only the channel", () => {
+test("chargeBatteryInfo decodes a request that carries only the channel", () => {
   const root = parse(
     '<ChargeBatteryInfo version="1.1"><channelId>0</channelId></ChargeBatteryInfo>',
   ).root;
@@ -51,7 +52,7 @@ Deno.test("chargeBatteryInfo decodes a request that carries only the channel", (
   assertEquals(chargeBatteryInfo.decode(root), { channelId: 0 });
 });
 
-Deno.test("chargeBatteryInfo rejects an adapter state the firmware never writes", () => {
+test("chargeBatteryInfo rejects an adapter state the firmware never writes", () => {
   const root = parse(
     '<BatteryInfo version="1.1"><adapterStatus>usb</adapterStatus></BatteryInfo>',
   ).root;

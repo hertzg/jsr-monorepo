@@ -1,8 +1,9 @@
+import { test } from "node:test";
 import { assertEquals, assertThrows } from "@std/assert";
 import { parse } from "@std/xml";
 import { talkAbility } from "./talk-ability.ts";
 
-Deno.test("talkAbility decodes the reply the camera writes", () => {
+test("talkAbility decodes the reply the camera writes", () => {
   const root = parse(
     '<TalkAbility version="1.1">' +
       "<duplexList><duplex>FDX</duplex><duplex>HDX</duplex></duplexList>" +
@@ -29,7 +30,7 @@ Deno.test("talkAbility decodes the reply the camera writes", () => {
   });
 });
 
-Deno.test("talkAbility round-trips through encode and decode", () => {
+test("talkAbility round-trips through encode and decode", () => {
   const value = {
     duplexList: ["HDX" as const],
     audioStreamModeList: ["onlyAudioStream" as const],
@@ -49,7 +50,7 @@ Deno.test("talkAbility round-trips through encode and decode", () => {
   );
 });
 
-Deno.test("talkAbility reads a reply without audioConfigList", () => {
+test("talkAbility reads a reply without audioConfigList", () => {
   const root = parse(
     "<TalkAbility><duplexList></duplexList><audioStreamModeList>" +
       "</audioStreamModeList></TalkAbility>",
@@ -61,7 +62,7 @@ Deno.test("talkAbility reads a reply without audioConfigList", () => {
   });
 });
 
-Deno.test("talkAbility throws without duplexList, which the camera always writes", () => {
+test("talkAbility throws without duplexList, which the camera always writes", () => {
   const root = parse(
     "<TalkAbility><audioStreamModeList></audioStreamModeList></TalkAbility>",
   ).root;
@@ -69,7 +70,7 @@ Deno.test("talkAbility throws without duplexList, which the camera always writes
   assertThrows(() => talkAbility.decode(root), Error, "<duplexList>");
 });
 
-Deno.test("talkAbility reads the Video Doorbell PoE's mixAudioStream mode", () => {
+test("talkAbility reads the Video Doorbell PoE's mixAudioStream mode", () => {
   const root = parse(
     '<TalkAbility version="1.1">' +
       "<duplexList><duplex>FDX</duplex></duplexList>" +

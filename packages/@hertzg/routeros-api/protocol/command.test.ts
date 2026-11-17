@@ -1,12 +1,13 @@
+import { test } from "node:test";
 import { assertEquals } from "@std/assert";
 import { buildCommand, commandToWords } from "./command.ts";
 
-Deno.test("buildCommand - simple command", () => {
+test("buildCommand - simple command", () => {
   const result = buildCommand("/login");
   assertEquals(result, ["/login"]);
 });
 
-Deno.test("buildCommand - .tag attribute", () => {
+test("buildCommand - .tag attribute", () => {
   const result = buildCommand("/system/identity/set", {
     attributes: { ".tag": "session123", name: "MyRouter" },
   });
@@ -17,14 +18,14 @@ Deno.test("buildCommand - .tag attribute", () => {
   ]);
 });
 
-Deno.test("buildCommand - with attributes", () => {
+test("buildCommand - with attributes", () => {
   const result = buildCommand("/login", {
     attributes: { name: "admin", password: "secret" },
   });
   assertEquals(result, ["/login", "=name=admin", "=password=secret"]);
 });
 
-Deno.test("buildCommand - with queries", () => {
+test("buildCommand - with queries", () => {
   const result = buildCommand("/interface/print", {
     queries: { type: "ether", disabled: false },
   });
@@ -35,7 +36,7 @@ Deno.test("buildCommand - with queries", () => {
   ]);
 });
 
-Deno.test("buildCommand - with attributes and queries", () => {
+test("buildCommand - with attributes and queries", () => {
   const result = buildCommand("/interface/set", {
     attributes: { ".id": "*1", name: "ether1-new" },
     queries: { disabled: true },
@@ -48,7 +49,7 @@ Deno.test("buildCommand - with attributes and queries", () => {
   ]);
 });
 
-Deno.test("buildCommand - numeric values", () => {
+test("buildCommand - numeric values", () => {
   const result = buildCommand("/interface/vlan/add", {
     attributes: { name: "vlan10", "vlan-id": 10, interface: "ether1" },
   });
@@ -60,7 +61,7 @@ Deno.test("buildCommand - numeric values", () => {
   ]);
 });
 
-Deno.test("buildCommand - boolean values", () => {
+test("buildCommand - boolean values", () => {
   const result = buildCommand("/interface/set", {
     attributes: { ".id": "*1", disabled: false },
   });
@@ -71,7 +72,7 @@ Deno.test("buildCommand - boolean values", () => {
   ]);
 });
 
-Deno.test("commandToWords - simple command", () => {
+test("commandToWords - simple command", () => {
   const cmd = {
     command: "/system/resource/print",
   };
@@ -79,7 +80,7 @@ Deno.test("commandToWords - simple command", () => {
   assertEquals(result, ["/system/resource/print"]);
 });
 
-Deno.test("commandToWords - full command", () => {
+test("commandToWords - full command", () => {
   const cmd = {
     command: "/interface/print",
     queries: { type: "ether" },
@@ -91,7 +92,7 @@ Deno.test("commandToWords - full command", () => {
   ]);
 });
 
-Deno.test("commandToWords - with all options", () => {
+test("commandToWords - with all options", () => {
   const cmd = {
     command: "/interface/vlan/add",
     attributes: {
@@ -109,12 +110,12 @@ Deno.test("commandToWords - with all options", () => {
   ]);
 });
 
-Deno.test("buildCommand - empty options", () => {
+test("buildCommand - empty options", () => {
   const result = buildCommand("/interface/print", {});
   assertEquals(result, ["/interface/print"]);
 });
 
-Deno.test("buildCommand - complex commands", () => {
+test("buildCommand - complex commands", () => {
   const testcommands = [
     "/system/resource/print",
     "/ip/address/add",

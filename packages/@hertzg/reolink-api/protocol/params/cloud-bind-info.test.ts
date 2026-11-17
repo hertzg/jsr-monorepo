@@ -1,8 +1,9 @@
+import { test } from "node:test";
 import { assertEquals, assertThrows } from "@std/assert";
 import { parse } from "@std/xml";
 import { cloudBindInfo } from "./cloud-bind-info.ts";
 
-Deno.test("cloudBindInfo decodes the reply the cmd 268 handler writes", () => {
+test("cloudBindInfo decodes the reply the cmd 268 handler writes", () => {
   const root = parse(
     '<CloudBindInfo version="1.1"><binded>0</binded></CloudBindInfo>',
   ).root;
@@ -10,7 +11,7 @@ Deno.test("cloudBindInfo decodes the reply the cmd 268 handler writes", () => {
   assertEquals(cloudBindInfo.decode(root), { binded: 0 });
 });
 
-Deno.test("cloudBindInfo round-trips a full value", () => {
+test("cloudBindInfo round-trips a full value", () => {
   const value = { binded: 1 };
 
   assertEquals(
@@ -19,7 +20,7 @@ Deno.test("cloudBindInfo round-trips a full value", () => {
   );
 });
 
-Deno.test("cloudBindInfo rejects a reply without binded", () => {
+test("cloudBindInfo rejects a reply without binded", () => {
   const root = parse('<CloudBindInfo version="1.1"></CloudBindInfo>').root;
 
   assertThrows(() => cloudBindInfo.decode(root), Error, "binded");

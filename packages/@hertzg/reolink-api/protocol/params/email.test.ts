@@ -1,8 +1,9 @@
+import { test } from "node:test";
 import { assertEquals, assertThrows } from "@std/assert";
 import { parse } from "@std/xml";
 import { email } from "./email.ts";
 
-Deno.test("email decodes every field nets_email_cfg_s2x writes", () => {
+test("email decodes every field nets_email_cfg_s2x writes", () => {
   const root = parse(
     '<Email version="1.1"><smtpServer>smtp.example.com</smtpServer>' +
       "<userName>sender@example.com</userName><senderMaxLen>127</senderMaxLen>" +
@@ -33,7 +34,7 @@ Deno.test("email decodes every field nets_email_cfg_s2x writes", () => {
   });
 });
 
-Deno.test("email decodes a video attachment, which the camera writes without attachment", () => {
+test("email decodes a video attachment, which the camera writes without attachment", () => {
   const root = parse(
     '<Email version="1.1"><attachmentType>video</attachmentType></Email>',
   ).root;
@@ -41,7 +42,7 @@ Deno.test("email decodes a video attachment, which the camera writes without att
   assertEquals(email.decode(root), { attachmentType: "video" });
 });
 
-Deno.test("email round-trips a request with the parser-only emailAttachType", () => {
+test("email round-trips a request with the parser-only emailAttachType", () => {
   const value = {
     smtpServer: "mail.example.net",
     smtpPort: 587,
@@ -52,7 +53,7 @@ Deno.test("email round-trips a request with the parser-only emailAttachType", ()
   assertEquals(email.decode(parse(email.encode(value)).root), value);
 });
 
-Deno.test("email rejects an unknown text type", () => {
+test("email rejects an unknown text type", () => {
   const root = parse(
     '<Email version="1.1"><textType>html</textType></Email>',
   ).root;

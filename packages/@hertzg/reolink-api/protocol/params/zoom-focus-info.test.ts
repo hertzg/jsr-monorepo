@@ -1,8 +1,9 @@
+import { test } from "node:test";
 import { assertEquals } from "@std/assert";
 import { parse } from "@std/xml";
 import { zoomFocusInfo } from "./zoom-focus-info.ts";
 
-Deno.test("zoomFocusInfo decodes the <PtzZoomFocus> reply", () => {
+test("zoomFocusInfo decodes the <PtzZoomFocus> reply", () => {
   const root = parse(
     '<PtzZoomFocus version="1.1"><channelId>0</channelId>' +
       "<zoom><maxPos>1000</maxPos><minPos>0</minPos><curPos>100</curPos></zoom>" +
@@ -17,7 +18,7 @@ Deno.test("zoomFocusInfo decodes the <PtzZoomFocus> reply", () => {
   });
 });
 
-Deno.test("zoomFocusInfo round-trips every field", () => {
+test("zoomFocusInfo round-trips every field", () => {
   const value = {
     channelId: 2,
     zoom: { maxPos: 2000, minPos: 1, curPos: 300 },
@@ -30,7 +31,7 @@ Deno.test("zoomFocusInfo round-trips every field", () => {
   );
 });
 
-Deno.test("zoomFocusInfo builds the request with only channelId", () => {
+test("zoomFocusInfo builds the request with only channelId", () => {
   assertEquals(
     zoomFocusInfo.encode({ channelId: 0 }),
     '<ZoomFocusInfo version="1.1"><channelId>0</channelId></ZoomFocusInfo>',

@@ -1,8 +1,9 @@
+import { test } from "node:test";
 import { assertEquals, assertThrows } from "@std/assert";
 import { parse } from "@std/xml";
 import { freqCorrectResult } from "./freq-correct-result.ts";
 
-Deno.test("freqCorrectResult decodes the cmd 606 reply the firmware writes", () => {
+test("freqCorrectResult decodes the cmd 606 reply the firmware writes", () => {
   const root = parse(
     '<freqCorrectResult version="1.1"><result>unknow</result></freqCorrectResult>',
   ).root;
@@ -10,7 +11,7 @@ Deno.test("freqCorrectResult decodes the cmd 606 reply the firmware writes", () 
   assertEquals(freqCorrectResult.decode(root), { result: "unknow" });
 });
 
-Deno.test("freqCorrectResult round-trips through encode and decode", () => {
+test("freqCorrectResult round-trips through encode and decode", () => {
   const value = { result: "success" as const };
 
   assertEquals(
@@ -19,7 +20,7 @@ Deno.test("freqCorrectResult round-trips through encode and decode", () => {
   );
 });
 
-Deno.test("freqCorrectResult rejects the corrected spelling unknown", () => {
+test("freqCorrectResult rejects the corrected spelling unknown", () => {
   const root = parse(
     '<freqCorrectResult version="1.1"><result>unknown</result></freqCorrectResult>',
   ).root;

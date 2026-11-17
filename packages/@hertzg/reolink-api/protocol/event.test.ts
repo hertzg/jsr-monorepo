@@ -1,7 +1,8 @@
+import { test } from "node:test";
 import { assertEquals } from "@std/assert";
 import { parseAlarmEvents } from "./event.ts";
 
-Deno.test("parseAlarmEvents reads a doorbell press with motion and a person", () => {
+test("parseAlarmEvents reads a doorbell press with motion and a person", () => {
   const xml = '<?xml version="1.0" encoding="UTF-8" ?>\n' +
     "<body>\n" +
     '<AlarmEventList version="1.1">\n' +
@@ -20,7 +21,7 @@ Deno.test("parseAlarmEvents reads a doorbell press with motion and a person", ()
   ]);
 });
 
-Deno.test("parseAlarmEvents reports every flag off for status none", () => {
+test("parseAlarmEvents reports every flag off for status none", () => {
   const xml = "<body><AlarmEventList><AlarmEvent>" +
     "<channelId>0</channelId><status>none</status><AItype>none</AItype>" +
     "</AlarmEvent></AlarmEventList></body>";
@@ -30,7 +31,7 @@ Deno.test("parseAlarmEvents reports every flag off for status none", () => {
   ]);
 });
 
-Deno.test("parseAlarmEvents keeps every AI type the camera sends", () => {
+test("parseAlarmEvents keeps every AI type the camera sends", () => {
   const xml = "<body><AlarmEventList><AlarmEvent>" +
     "<channelId>2</channelId><status>MD</status>" +
     "<AItype>people,vehicle,dog_cat</AItype>" +
@@ -39,7 +40,7 @@ Deno.test("parseAlarmEvents keeps every AI type the camera sends", () => {
   assertEquals(parseAlarmEvents(xml)[0].ai, ["people", "vehicle", "dog_cat"]);
 });
 
-Deno.test("parseAlarmEvents reads tamper", () => {
+test("parseAlarmEvents reads tamper", () => {
   const xml = "<body><AlarmEventList><AlarmEvent>" +
     "<channelId>0</channelId><status>tamper</status>" +
     "</AlarmEvent></AlarmEventList></body>";
@@ -47,7 +48,7 @@ Deno.test("parseAlarmEvents reads tamper", () => {
   assertEquals(parseAlarmEvents(xml)[0].tamper, true);
 });
 
-Deno.test("parseAlarmEvents returns one event per channel in a push", () => {
+test("parseAlarmEvents returns one event per channel in a push", () => {
   const xml = "<body><AlarmEventList>" +
     "<AlarmEvent><channelId>0</channelId><status>MD</status></AlarmEvent>" +
     "<AlarmEvent><channelId>1</channelId><status>none</status></AlarmEvent>" +
@@ -56,7 +57,7 @@ Deno.test("parseAlarmEvents returns one event per channel in a push", () => {
   assertEquals(parseAlarmEvents(xml).map((event) => event.channel), [0, 1]);
 });
 
-Deno.test("parseAlarmEvents skips events without a channel id", () => {
+test("parseAlarmEvents skips events without a channel id", () => {
   const xml = "<body><AlarmEventList>" +
     "<AlarmEvent><status>MD</status></AlarmEvent>" +
     "</AlarmEventList></body>";
@@ -64,7 +65,7 @@ Deno.test("parseAlarmEvents skips events without a channel id", () => {
   assertEquals(parseAlarmEvents(xml), []);
 });
 
-Deno.test("parseAlarmEvents ignores other events in the same push", () => {
+test("parseAlarmEvents ignores other events in the same push", () => {
   const xml = "<body><DayNightEventList><DayNightEvent>" +
     "<channelId>0</channelId><mode>day</mode>" +
     "</DayNightEvent></DayNightEventList></body>";

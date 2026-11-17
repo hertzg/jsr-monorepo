@@ -1,11 +1,12 @@
+import { test } from "node:test";
 import { assertEquals } from "@std/assert";
 import { computedRef, ref } from "./ref.ts";
 import { struct } from "../struct/struct.ts";
 import { u16be, u8be } from "../numeric/numeric.ts";
 import { arrayFL } from "../array/fixed-length.ts";
 
-Deno.test("computedRef: basic functionality", async (t) => {
-  await t.step("computes values from multiple references", () => {
+test("computedRef: basic functionality", async (t) => {
+  await t.test("computes values from multiple references", () => {
     // Create the coders that will be referenced
     const width = u16be();
     const height = u16be();
@@ -47,7 +48,7 @@ Deno.test("computedRef: basic functionality", async (t) => {
     assertEquals(bytesWritten, bytesRead);
   });
 
-  await t.step("works with color struct example", () => {
+  await t.test("works with color struct example", () => {
     const color = struct({
       r: u8be(),
       g: u8be(),

@@ -1,10 +1,11 @@
+import { test } from "node:test";
 import { assertEquals, assertNotEquals } from "@std/assert";
 import { u16 } from "../numeric/numeric.ts";
 import { stringFL } from "./fixed-length.ts";
 import { ref } from "../ref/ref.ts";
 import { struct } from "../struct/struct.ts";
 
-Deno.test("string - fixed length - fits in byteLength", () => {
+test("string - fixed length - fits in byteLength", () => {
   const length = 50;
   const coder = stringFL(length);
   const testString = "Hello, World!";
@@ -22,7 +23,7 @@ Deno.test("string - fixed length - fits in byteLength", () => {
   assertEquals(bytesRead, length);
 });
 
-Deno.test("string - fixed length - does not fit in byteLength", () => {
+test("string - fixed length - does not fit in byteLength", () => {
   const length = 5;
   const coder = stringFL(length);
   const testString = "Hello, World!";
@@ -36,7 +37,7 @@ Deno.test("string - fixed length - does not fit in byteLength", () => {
   assertEquals(bytesWritten, length);
 });
 
-Deno.test("string - fixed length - empty string", () => {
+test("string - fixed length - empty string", () => {
   const length = 5;
   const coder = stringFL(length);
   const testString = "";
@@ -51,7 +52,7 @@ Deno.test("string - fixed length - empty string", () => {
   assertEquals(bytesRead, length);
 });
 
-Deno.test("string - fixed length - with ref length", () => {
+test("string - fixed length - with ref length", () => {
   const lengthCoder = u16();
   const coder = struct({
     length: lengthCoder,

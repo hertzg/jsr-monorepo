@@ -1,8 +1,9 @@
+import { test } from "node:test";
 import { assertEquals } from "@std/assert";
 import { parse, serialize } from "./mod.ts";
 import { CATEGORY_FLAG_BUDGET, CATEGORY_FLAG_SUB } from "./category.ts";
 
-Deno.test("a category is a name, an optional parent and a budget table", () => {
+test("a category is a name, an optional parent and a budget table", () => {
   const xml = [
     '<?xml version="1.0"?>',
     '<homebank v="1.3" d="050402">',
@@ -27,7 +28,7 @@ Deno.test("a category is a name, an optional parent and a budget table", () => {
   assertEquals(serialize(parse(xml)), xml);
 });
 
-Deno.test("budgets are the b0..b12 attributes: b0 is the every-month amount, b1..b12 the individual months", () => {
+test("budgets are the b0..b12 attributes: b0 is the every-month amount, b1..b12 the individual months", () => {
   const xml = [
     '<?xml version="1.0"?>',
     '<homebank v="1.3" d="050402">',
@@ -46,7 +47,7 @@ Deno.test("budgets are the b0..b12 attributes: b0 is the every-month amount, b1.
   assertEquals(0 in heating.budgets, false);
 });
 
-Deno.test("budgets are renumbered from b0 when serialized, so a gap shifts the months", () => {
+test("budgets are renumbered from b0 when serialized, so a gap shifts the months", () => {
   const xml = [
     '<?xml version="1.0"?>',
     '<homebank v="1.3" d="050402">',

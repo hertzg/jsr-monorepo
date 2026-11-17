@@ -1,8 +1,9 @@
+import { test } from "node:test";
 import { assertEquals } from "@std/assert";
 import { parse } from "@std/xml";
 import { agingTest } from "./aging-test.ts";
 
-Deno.test("agingTest decodes every field the parser reads", () => {
+test("agingTest decodes every field the parser reads", () => {
   const root = parse(
     '<AgingTest version="1.1"><channelId>1</channelId><enable>1</enable>' +
       "<fileName>aging-run.bin</fileName><size>8192</size></AgingTest>",
@@ -16,14 +17,14 @@ Deno.test("agingTest decodes every field the parser reads", () => {
   });
 });
 
-Deno.test("agingTest decodes an element with only some fields", () => {
+test("agingTest decodes an element with only some fields", () => {
   const root = parse('<AgingTest version="1.1"><enable>0</enable></AgingTest>')
     .root;
 
   assertEquals(agingTest.decode(root), { enable: 0 });
 });
 
-Deno.test("agingTest round-trips through encode and decode", () => {
+test("agingTest round-trips through encode and decode", () => {
   const value = {
     channelId: 2,
     enable: 1,

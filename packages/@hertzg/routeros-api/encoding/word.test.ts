@@ -1,12 +1,13 @@
+import { test } from "node:test";
 import { assertEquals, assertThrows } from "@std/assert";
 import { decodeWord, encodeWord } from "./word.ts";
 
-Deno.test("encodeWord - empty string", () => {
+test("encodeWord - empty string", () => {
   const result = encodeWord("");
   assertEquals(result, new Uint8Array([0x00]));
 });
 
-Deno.test("encodeWord - short string", () => {
+test("encodeWord - short string", () => {
   const result = encodeWord("test");
   // Length 4 (0x04) + "test"
   assertEquals(
@@ -15,7 +16,7 @@ Deno.test("encodeWord - short string", () => {
   );
 });
 
-Deno.test("encodeWord - command word", () => {
+test("encodeWord - command word", () => {
   const result = encodeWord("/login");
   // Length 6 (0x06) + "/login"
   assertEquals(
@@ -24,14 +25,14 @@ Deno.test("encodeWord - command word", () => {
   );
 });
 
-Deno.test("encodeWord - attribute word", () => {
+test("encodeWord - attribute word", () => {
   const result = encodeWord("=name=admin");
   // Length 11 (0x0B) + "=name=admin"
   assertEquals(result[0], 0x0B);
   assertEquals(result.length, 12);
 });
 
-Deno.test("encodeWord - from Uint8Array", () => {
+test("encodeWord - from Uint8Array", () => {
   const input = new Uint8Array([0x01, 0x02, 0x03]);
   const result = encodeWord(input);
   // Length 3 (0x03) + bytes
@@ -41,7 +42,7 @@ Deno.test("encodeWord - from Uint8Array", () => {
   );
 });
 
-Deno.test("encodeWord - long string (2-byte length)", () => {
+test("encodeWord - long string (2-byte length)", () => {
   const longString = "a".repeat(200);
   const result = encodeWord(longString);
   // Length 200 encoded as 2 bytes: [0x80, 0xC8]
@@ -50,30 +51,30 @@ Deno.test("encodeWord - long string (2-byte length)", () => {
   assertEquals(result.length, 202); // 2 (length) + 200 (content)
 });
 
-Deno.test("decodeWord - empty word", () => {
+test("decodeWord - empty word", () => {
   const result = decodeWord(new Uint8Array([0x00]));
   assertEquals(result, { word: "", bytesRead: 1 });
 });
 
-Deno.test("decodeWord - short string", () => {
+test("decodeWord - short string", () => {
   const bytes = new Uint8Array([0x04, 0x74, 0x65, 0x73, 0x74]);
   const result = decodeWord(bytes);
   assertEquals(result, { word: "test", bytesRead: 5 });
 });
 
-Deno.test("decodeWord - command word", () => {
+test("decodeWord - command word", () => {
   const bytes = new Uint8Array([0x06, 0x2f, 0x6c, 0x6f, 0x67, 0x69, 0x6e]);
   const result = decodeWord(bytes);
   assertEquals(result, { word: "/login", bytesRead: 7 });
 });
 
-Deno.test("decodeWord - with offset", () => {
+test("decodeWord - with offset", () => {
   const bytes = new Uint8Array([0xFF, 0xFF, 0x04, 0x74, 0x65, 0x73, 0x74]);
   const result = decodeWord(bytes, { offset: 2 });
   assertEquals(result, { word: "test", bytesRead: 5 });
 });
 
-Deno.test("decodeWord - incomplete word throws", () => {
+test("decodeWord - incomplete word throws", () => {
   // Claims length 10 but only has 3 bytes
   const bytes = new Uint8Array([0x0A, 0x01, 0x02, 0x03]);
   assertThrows(
@@ -83,7 +84,7 @@ Deno.test("decodeWord - incomplete word throws", () => {
   );
 });
 
-Deno.test("decodeWord - long string (2-byte length)", () => {
+test("decodeWord - long string (2-byte length)", () => {
   const longString = "a".repeat(200);
   const encoded = encodeWord(longString);
   const decoded = decodeWord(encoded);
@@ -91,7 +92,7 @@ Deno.test("decodeWord - long string (2-byte length)", () => {
   assertEquals(decoded.bytesRead, 202);
 });
 
-Deno.test("encodeWord/decodeWord - roundtrip", () => {
+test("encodeWord/decodeWord - roundtrip", () => {
   const testStrings = [
     "",
     "a",
@@ -113,7 +114,7 @@ Deno.test("encodeWord/decodeWord - roundtrip", () => {
   }
 });
 
-Deno.test("encodeWord/decodeWord - binary roundtrip", () => {
+test("encodeWord/decodeWord - binary roundtrip", () => {
   const testArrays = [
     new Uint8Array([]),
     new Uint8Array([0x00]),

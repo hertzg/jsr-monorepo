@@ -1,7 +1,3 @@
-// deno-lint-ignore-file no-import-prefix -- the competitor packages are
-// deliberately not in import_map.json: they are not dependencies of anything
-// this repo publishes, only of this on-demand comparison.
-
 // ipaddr.js is absent: it has no reverse-pointer method at all.
 //
 // Competitor address objects are built outside the timed function so this
@@ -15,7 +11,8 @@
 // here: that was a one-time comparison, and reading the nibbles back off
 // `stringifyAddressv6Expanded` was chosen at 1.38x the fastest route (ADR 0009).
 
-import { Address4, Address6 } from "npm:ip-address@^10.5.0";
+import { bench, group, summary } from "mitata";
+import { Address4, Address6 } from "ip-address";
 
 import { addressv4ToArpa } from "../arpav4.ts";
 import { addressv6ToArpa } from "../arpav6.ts";
@@ -28,24 +25,26 @@ const IPV6_BIGINT = 42540766452641154071740215577757643572n;
 const ipAddressIpv4 = new Address4(IPV4);
 const ipAddressIpv6 = new Address6(IPV6);
 
-Deno.bench("@hertzg/ip addressv4ToArpa", {
-  group: "arpa ipv4",
-  baseline: true,
-}, () => {
-  addressv4ToArpa(IPV4_NUMBER);
+group("arpa ipv4", () => {
+  summary(() => {
+    bench("@hertzg/ip addressv4ToArpa", () => {
+      addressv4ToArpa(IPV4_NUMBER);
+    }).baseline(true);
+
+    bench("ip-address reverseForm", () => {
+      ipAddressIpv4.reverseForm();
+    });
+  });
 });
 
-Deno.bench("ip-address reverseForm", { group: "arpa ipv4" }, () => {
-  ipAddressIpv4.reverseForm();
-});
+group("arpa ipv6", () => {
+  summary(() => {
+    bench("@hertzg/ip addressv6ToArpa", () => {
+      addressv6ToArpa(IPV6_BIGINT);
+    }).baseline(true);
 
-Deno.bench("@hertzg/ip addressv6ToArpa", {
-  group: "arpa ipv6",
-  baseline: true,
-}, () => {
-  addressv6ToArpa(IPV6_BIGINT);
-});
-
-Deno.bench("ip-address reverseForm", { group: "arpa ipv6" }, () => {
-  ipAddressIpv6.reverseForm();
+    bench("ip-address reverseForm", () => {
+      ipAddressIpv6.reverseForm();
+    });
+  });
 });

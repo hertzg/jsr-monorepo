@@ -1,3 +1,4 @@
+import { test } from "node:test";
 import { assertEquals, assertThrows } from "@std/assert";
 import {
   array,
@@ -11,7 +12,7 @@ import {
   u8le,
 } from "./mod.ts";
 
-Deno.test("encode - auto-allocation small data", () => {
+test("encode - auto-allocation small data", () => {
   const coder = struct({ id: u16le(), flag: u8le() });
   const data = { id: 42, flag: 7 };
 
@@ -19,7 +20,7 @@ Deno.test("encode - auto-allocation small data", () => {
   assertEquals(encoded.length, 3);
 });
 
-Deno.test("encode - provided target buffer", () => {
+test("encode - provided target buffer", () => {
   const coder = struct({ value: u32le() });
   const data = { value: 12345 };
   const buffer = new Uint8Array(100);
@@ -29,20 +30,20 @@ Deno.test("encode - provided target buffer", () => {
   assertEquals(encoded.buffer, buffer.buffer);
 });
 
-Deno.test("encode - grows the target buffer to fit the payload", async (t) => {
+test("encode - grows the target buffer to fit the payload", async (t) => {
   // How many times the grow-and-retry loop runs is driven by `initialSize`,
   // not by payload size — a one-byte initial buffer walks more of the loop
   // than a huge payload does against the 4KB default, at a fraction of the
   // cost. The large-payload step below is here to prove real-scale encoding,
   // not to reach the growth path.
-  await t.step("fits within the initial buffer without growing", () => {
+  await t.test("fits within the initial buffer without growing", () => {
     const coder = struct({ data: array(u8le(), u16le()) });
 
     const encoded = encode(coder, { data: new Array(100).fill(42) });
     assertEquals(encoded.length, 102); // 2 bytes length + 100 bytes data
   });
 
-  await t.step("grows repeatedly from a one-byte initial buffer", () => {
+  await t.test("grows repeatedly from a one-byte initial buffer", () => {
     const coder = struct({ data: array(u8le(), u16le()) });
 
     const encoded = encode(
@@ -55,7 +56,7 @@ Deno.test("encode - grows the target buffer to fit the payload", async (t) => {
     assertEquals(encoded.length, 102); // 2 bytes length + 100 bytes data
   });
 
-  await t.step("grows past a 4-byte length prefix", () => {
+  await t.test("grows past a 4-byte length prefix", () => {
     const coder = struct({ data: array(u8le(), u32le()) });
 
     const encoded = encode(
@@ -68,7 +69,7 @@ Deno.test("encode - grows the target buffer to fit the payload", async (t) => {
     assertEquals(encoded.length, 104); // 4 bytes length + 100 bytes data
   });
 
-  await t.step("encodes a payload larger than the default initial size", () => {
+  await t.test("encodes a payload larger than the default initial size", () => {
     const coder = struct({ data: array(u8le(), u16le()) });
 
     const encoded = encode(coder, { data: new Array(10000).fill(42) });
@@ -76,8 +77,8 @@ Deno.test("encode - grows the target buffer to fit the payload", async (t) => {
   });
 });
 
-Deno.test("encode - context handling", async (t) => {
-  await t.step("provided context", () => {
+test("encode - context handling", async (t) => {
+  await t.test("provided context", () => {
     const coder = struct({ value: u16le() });
     const data = { value: 42 };
     const context = createContext("encode");
@@ -86,7 +87,7 @@ Deno.test("encode - context handling", async (t) => {
     assertEquals(encoded.length, 2);
   });
 
-  await t.step("auto-created context", () => {
+  await t.test("auto-created context", () => {
     const coder = struct({ value: u16le() });
     const data = { value: 42 };
 
@@ -95,8 +96,8 @@ Deno.test("encode - context handling", async (t) => {
   });
 });
 
-Deno.test("encode - error handling", async (t) => {
-  await t.step("buffer too small", () => {
+test("encode - error handling", async (t) => {
+  await t.test("buffer too small", () => {
     const coder = struct({ value: u32le() });
     const data = { value: 12345 };
     const smallBuffer = new Uint8Array(2); // Too small for u32le
@@ -107,7 +108,7 @@ Deno.test("encode - error handling", async (t) => {
   });
 });
 
-Deno.test("decode - basic decoding", () => {
+test("decode - basic decoding", () => {
   const coder = struct({ id: u16le(), flag: u8le() });
   const buffer = new Uint8Array([42, 0, 7]); // Little-endian: id=42, flag=7
 
@@ -116,7 +117,7 @@ Deno.test("decode - basic decoding", () => {
   assertEquals(decoded.flag, 7);
 });
 
-Deno.test("decode - multiple values from buffer", () => {
+test("decode - multiple values from buffer", () => {
   const coder = struct({ value: u16le() });
 
   // Create a buffer with multiple encoded values
@@ -136,8 +137,8 @@ Deno.test("decode - multiple values from buffer", () => {
   assertEquals(decoded2.value, 200);
 });
 
-Deno.test("decode - context handling", async (t) => {
-  await t.step("provided context", () => {
+test("decode - context handling", async (t) => {
+  await t.test("provided context", () => {
     const coder = struct({ value: u32le() });
     const buffer = new Uint8Array([42, 0, 0, 0]); // Little-endian: value=42
     const context = createContext("decode");
@@ -146,7 +147,7 @@ Deno.test("decode - context handling", async (t) => {
     assertEquals(decoded.value, 42);
   });
 
-  await t.step("auto-created context", () => {
+  await t.test("auto-created context", () => {
     const coder = struct({ value: u32le() });
     const buffer = new Uint8Array([42, 0, 0, 0]); // Little-endian: value=42
 
@@ -155,8 +156,8 @@ Deno.test("decode - context handling", async (t) => {
   });
 });
 
-Deno.test("round-trip integrity", async (t) => {
-  await t.step("simple struct", () => {
+test("round-trip integrity", async (t) => {
+  await t.test("simple struct", () => {
     const coder = struct({
       id: u16le(),
       name: bytes(10),
@@ -179,7 +180,7 @@ Deno.test("round-trip integrity", async (t) => {
     assertEquals(decodedData, originalData);
   });
 
-  await t.step("complex nested structure", () => {
+  await t.test("complex nested structure", () => {
     const innerCoder = struct({
       x: u16le(),
       y: u16le(),
@@ -211,8 +212,8 @@ Deno.test("round-trip integrity", async (t) => {
   });
 });
 
-Deno.test("edge cases", async (t) => {
-  await t.step("empty data", () => {
+test("edge cases", async (t) => {
+  await t.test("empty data", () => {
     const coder = struct({});
     const data = {};
 
@@ -223,7 +224,7 @@ Deno.test("edge cases", async (t) => {
     assertEquals(decoded, {});
   });
 
-  await t.step("single byte", () => {
+  await t.test("single byte", () => {
     const coder = u8le();
     const data = 42;
 
@@ -235,7 +236,7 @@ Deno.test("edge cases", async (t) => {
     assertEquals(decoded, 42);
   });
 
-  await t.step("zero values", () => {
+  await t.test("zero values", () => {
     const coder = struct({
       a: u16le(),
       b: u32le(),

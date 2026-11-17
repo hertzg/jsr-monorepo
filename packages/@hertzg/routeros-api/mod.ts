@@ -6,10 +6,12 @@
  *
  * @example
  * ```ts ignore
+ * import { connect } from 'node:net';
+ * import { Duplex } from 'node:stream';
  * import { createClient } from '@hertzg/routeros-api';
  *
- * // Connect to router (example uses Deno, but works with any streams)
- * const conn = await Deno.connect({ hostname: '192.168.88.1', port: 8728 });
+ * // Connect to router (example uses node:net, but works with any streams)
+ * const conn = Duplex.toWeb(connect({ host: '192.168.88.1', port: 8728 }));
  *
  * // Create client
  * const client = createClient({

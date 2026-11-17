@@ -1,3 +1,4 @@
+import { test } from "node:test";
 import { assertEquals, assertThrows } from "@std/assert";
 import {
   cidrv4BroadcastAddress,
@@ -10,14 +11,14 @@ import {
   stringifyAddressv4,
 } from "./mod.ts";
 
-Deno.test("mod.ts re-exports", async (t) => {
-  await t.step("IPv4 functions work via main module", () => {
+test("mod.ts re-exports", async (t) => {
+  await t.test("IPv4 functions work via main module", () => {
     const ip = parseAddressv4("192.168.1.1").address;
     assertEquals(ip, 3232235777);
     assertEquals(stringifyAddressv4(ip), "192.168.1.1");
   });
 
-  await t.step("CIDR functions work via main module", () => {
+  await t.test("CIDR functions work via main module", () => {
     const cidr = parseCidrv4("192.168.1.0/24");
     assertEquals(cidr, { address: 3232235776, prefixLength: 24 });
 
@@ -29,7 +30,7 @@ Deno.test("mod.ts re-exports", async (t) => {
     );
   });
 
-  await t.step("mask to prefix length works via main module", () => {
+  await t.test("mask to prefix length works via main module", () => {
     assertEquals(cidrv4PrefixLength(0xFFFFFF00), 24);
     assertThrows(() => cidrv4PrefixLength(0xFF00FF00), TypeError);
     assertEquals(

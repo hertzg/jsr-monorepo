@@ -376,7 +376,7 @@ export function cidrv6PrefixLength(cidr: Cidrv6): PrefixLengthv6;
  * `"ffff:ffff:ffff:ffff::"` is a well-formed IPv6 *address* literal whose
  * 128 bits are being read as a mask. It is accepted here because system
  * APIs do report masks that way: POSIX `getifaddrs()` fills `ifa_netmask`
- * with a `sockaddr_in6`, which is what `Deno.networkInterfaces()` surfaces
+ * with a `sockaddr_in6`, which is what `os.networkInterfaces()` surfaces
  * as `netmask: "ffff:ffff:ffff:ffff::"`. Prefer the prefix length when a
  * source offers one -- those same APIs usually also report `cidr`.
  *

@@ -1,7 +1,3 @@
-// deno-lint-ignore-file no-import-prefix -- the competitor packages are
-// deliberately not in import_map.json: they are not dependencies of anything
-// this repo publishes, only of this on-demand comparison.
-
 // The hot path of the whole ecosystem: what proxy-addr and pac-resolver
 // execute per request.
 //
@@ -10,10 +6,11 @@
 // its API is string-only (`type Network = string`), so its case necessarily
 // includes parsing both arguments.
 
-import ipaddr from "npm:ipaddr.js@^2.5.0";
-import { Address4 } from "npm:ip-address@^10.5.0";
-import { Netmask } from "npm:netmask@^2.1.1";
-import { containsCidr } from "npm:cidr-tools@^12.1.3";
+import { bench, group, summary } from "mitata";
+import ipaddr from "ipaddr.js";
+import { Address4 } from "ip-address";
+import { Netmask } from "netmask";
+import { containsCidr } from "cidr-tools";
 
 import { parseAddressv4 } from "../addressv4.ts";
 import { cidrv4Contains, parseCidrv4 } from "../cidrv4.ts";
@@ -37,29 +34,30 @@ const ipAddressSubnet = new Address4(CIDR_V4);
 
 const netmaskBlock = new Netmask(CIDR_V4);
 
-Deno.bench("@hertzg/ip cidrv4Contains", {
-  group: "cidr contains (v4)",
-  baseline: true,
-}, () => {
-  cidrv4Contains(oursCidr, oursAddress);
-});
+group("cidr contains (v4)", () => {
+  summary(() => {
+    bench("@hertzg/ip cidrv4Contains", () => {
+      cidrv4Contains(oursCidr, oursAddress);
+    }).baseline(true);
 
-Deno.bench("ipaddr.js match", { group: "cidr contains (v4)" }, () => {
-  ipaddrIpv4.match(ipaddrCidrV4);
-});
+    bench("ipaddr.js match", () => {
+      ipaddrIpv4.match(ipaddrCidrV4);
+    });
 
-Deno.bench("ipaddr.js subnetMatch", { group: "cidr contains (v4)" }, () => {
-  ipaddr.subnetMatch(ipaddrIpv4, ipaddrRangeList, "none");
-});
+    bench("ipaddr.js subnetMatch", () => {
+      ipaddr.subnetMatch(ipaddrIpv4, ipaddrRangeList, "none");
+    });
 
-Deno.bench("ip-address isInSubnet", { group: "cidr contains (v4)" }, () => {
-  ipAddressIpv4.isInSubnet(ipAddressSubnet);
-});
+    bench("ip-address isInSubnet", () => {
+      ipAddressIpv4.isInSubnet(ipAddressSubnet);
+    });
 
-Deno.bench("netmask contains", { group: "cidr contains (v4)" }, () => {
-  netmaskBlock.contains(IPV4);
-});
+    bench("netmask contains", () => {
+      netmaskBlock.contains(IPV4);
+    });
 
-Deno.bench("cidr-tools containsCidr", { group: "cidr contains (v4)" }, () => {
-  containsCidr(CIDR_V4, IPV4);
+    bench("cidr-tools containsCidr", () => {
+      containsCidr(CIDR_V4, IPV4);
+    });
+  });
 });

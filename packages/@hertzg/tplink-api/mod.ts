@@ -1,5 +1,5 @@
 /**
- * TP-Link Router API client library for Deno.
+ * TP-Link Router API client library.
  *
  * This module provides authentication and command execution capabilities for
  * TP-Link routers (EU/GDPR versions) via direct API calls. The library handles

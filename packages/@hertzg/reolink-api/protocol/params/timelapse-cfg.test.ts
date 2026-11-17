@@ -1,8 +1,9 @@
+import { test } from "node:test";
 import { assertEquals, assertThrows } from "@std/assert";
 import { parse } from "@std/xml";
 import { timelapseCfg } from "./timelapse-cfg.ts";
 
-Deno.test("timelapseCfg decodes what net_timelapse_cfg_s2x writes", () => {
+test("timelapseCfg decodes what net_timelapse_cfg_s2x writes", () => {
   const root = parse(
     '<timelapseCfg version="1.1"><channelId>0</channelId>' +
       "<overwrite>1</overwrite><maxFileNum>32</maxFileNum><item>" +
@@ -56,7 +57,7 @@ Deno.test("timelapseCfg decodes what net_timelapse_cfg_s2x writes", () => {
   });
 });
 
-Deno.test("timelapseCfg decodes a reply with no task", () => {
+test("timelapseCfg decodes a reply with no task", () => {
   const root = parse(
     '<timelapseCfg version="1.1"><channelId>0</channelId>' +
       "<overwrite>0</overwrite><maxFileNum>16</maxFileNum></timelapseCfg>",
@@ -69,7 +70,7 @@ Deno.test("timelapseCfg decodes a reply with no task", () => {
   });
 });
 
-Deno.test("timelapseCfg round-trips every field", () => {
+test("timelapseCfg round-trips every field", () => {
   const value = {
     channelId: 1,
     overwrite: 1,
@@ -107,7 +108,7 @@ Deno.test("timelapseCfg round-trips every field", () => {
   );
 });
 
-Deno.test("timelapseCfg throws on a taskType the firmware does not map", () => {
+test("timelapseCfg throws on a taskType the firmware does not map", () => {
   const root = parse(
     '<timelapseCfg version="1.1"><item><taskType>gif</taskType></item></timelapseCfg>',
   ).root;

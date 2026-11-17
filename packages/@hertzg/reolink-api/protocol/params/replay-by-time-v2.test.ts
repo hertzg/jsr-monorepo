@@ -1,8 +1,9 @@
+import { test } from "node:test";
 import { assertEquals, assertThrows } from "@std/assert";
 import { parse } from "@std/xml";
 import { replayByTimeV2 } from "./replay-by-time-v2.ts";
 
-Deno.test("replayByTimeV2 decodes every field nets_param_new_replay_start_x2s reads", () => {
+test("replayByTimeV2 decodes every field nets_param_new_replay_start_x2s reads", () => {
   const root = parse(
     '<ReplayByTimeV2 version="1.1"><seq>4</seq>' +
       "<streamType>subStream</streamType><playSpeed>2</playSpeed>" +
@@ -51,7 +52,7 @@ Deno.test("replayByTimeV2 decodes every field nets_param_new_replay_start_x2s re
   });
 });
 
-Deno.test("replayByTimeV2 decodes a cmd 382 stop request with only a sequence number", () => {
+test("replayByTimeV2 decodes a cmd 382 stop request with only a sequence number", () => {
   const root = parse(
     '<ReplayByTimeV2 version="1.1"><seq>9</seq></ReplayByTimeV2>',
   ).root;
@@ -59,7 +60,7 @@ Deno.test("replayByTimeV2 decodes a cmd 382 stop request with only a sequence nu
   assertEquals(replayByTimeV2.decode(root), { seq: 9 });
 });
 
-Deno.test("replayByTimeV2 rejects a stream type outside the four names", () => {
+test("replayByTimeV2 rejects a stream type outside the four names", () => {
   const root = parse(
     "<ReplayByTimeV2><streamType>thirdStream</streamType></ReplayByTimeV2>",
   ).root;
@@ -67,7 +68,7 @@ Deno.test("replayByTimeV2 rejects a stream type outside the four names", () => {
   assertThrows(() => replayByTimeV2.decode(root), Error, '"thirdStream"');
 });
 
-Deno.test("replayByTimeV2 round-trips through encode and decode", () => {
+test("replayByTimeV2 round-trips through encode and decode", () => {
   const value = {
     seq: 1,
     streamType: "externStream" as const,

@@ -1,3 +1,4 @@
+import { test } from "node:test";
 import { assertEquals, assertRejects, assertThrows } from "@std/assert";
 import { assertSpyCalls, spy } from "@std/testing/mock";
 import { FakeTime } from "@std/testing/time";
@@ -75,7 +76,7 @@ async function loggedIn() {
   return { client, requests, camera };
 }
 
-Deno.test("login sends the nonce request, then the XOR-encrypted login", async () => {
+test("login sends the nonce request, then the XOR-encrypted login", async () => {
   const { connection, requests, camera } = cameraLink();
   const client = createClient(connection);
 
@@ -139,7 +140,7 @@ Deno.test("login sends the nonce request, then the XOR-encrypted login", async (
   await client.close();
 });
 
-Deno.test("login rejects when the camera answers 401", async () => {
+test("login rejects when the camera answers 401", async () => {
   const { connection, requests, camera } = cameraLink();
   const client = createClient(connection);
 
@@ -183,7 +184,7 @@ Deno.test("login rejects when the camera answers 401", async () => {
   await client.close();
 });
 
-Deno.test("subscribe streams AES-encrypted alarm pushes after login", async () => {
+test("subscribe streams AES-encrypted alarm pushes after login", async () => {
   const { connection, requests, camera } = cameraLink();
   const client = createClient(connection);
 
@@ -276,7 +277,7 @@ Deno.test("subscribe streams AES-encrypted alarm pushes after login", async () =
   await client.close();
 });
 
-Deno.test("subscribe repeats cmd 31 after a silent interval with no event yet", async () => {
+test("subscribe repeats cmd 31 after a silent interval with no event yet", async () => {
   using time = new FakeTime();
   const { connection, requests, camera } = cameraLink();
   const client = createClient(connection);
@@ -306,7 +307,7 @@ Deno.test("subscribe repeats cmd 31 after a silent interval with no event yet", 
   await client.close();
 });
 
-Deno.test("subscribe pings with cmd 93 after a silent interval once events flow", async () => {
+test("subscribe pings with cmd 93 after a silent interval once events flow", async () => {
   using time = new FakeTime();
   const { connection, requests, camera } = cameraLink();
   const client = createClient(connection);
@@ -355,7 +356,7 @@ Deno.test("subscribe pings with cmd 93 after a silent interval once events flow"
   await client.close();
 });
 
-Deno.test("subscribe does not ping while the camera keeps talking", async () => {
+test("subscribe does not ping while the camera keeps talking", async () => {
   using time = new FakeTime();
   const { connection, requests, camera } = cameraLink();
   const client = createClient(connection);
@@ -403,7 +404,7 @@ Deno.test("subscribe does not ping while the camera keeps talking", async () => 
   assertEquals((await requests.read()).done, true);
 });
 
-Deno.test("subscribe errors the event stream when the keepalive gets no answer", async () => {
+test("subscribe errors the event stream when the keepalive gets no answer", async () => {
   using time = new FakeTime();
   const { connection, requests, camera } = cameraLink();
   const client = createClient(connection);
@@ -433,7 +434,7 @@ Deno.test("subscribe errors the event stream when the keepalive gets no answer",
   await client.close();
 });
 
-Deno.test("the event stream ends when the camera closes the connection", async () => {
+test("the event stream ends when the camera closes the connection", async () => {
   const { connection, requests, camera } = cameraLink();
   const client = createClient(connection);
 
@@ -460,7 +461,7 @@ Deno.test("the event stream ends when the camera closes the connection", async (
   await client.close();
 });
 
-Deno.test("subscribe rejects a second subscription", async () => {
+test("subscribe rejects a second subscription", async () => {
   const { connection, requests, camera } = cameraLink();
   const client = createClient(connection);
 
@@ -485,7 +486,7 @@ Deno.test("subscribe rejects a second subscription", async () => {
   await client.close();
 });
 
-Deno.test("subscribe rejects a second subscription made in the same tick", async () => {
+test("subscribe rejects a second subscription made in the same tick", async () => {
   const { connection } = cameraLink();
   const client = createClient(connection);
 
@@ -496,7 +497,7 @@ Deno.test("subscribe rejects a second subscription made in the same tick", async
   await assertRejects(() => first, Error, "closed");
 });
 
-Deno.test("close rejects requests still queued behind a slow write", async () => {
+test("close rejects requests still queued behind a slow write", async () => {
   const write = Promise.withResolvers<void>();
   const client = createClient({
     readable: new ReadableStream(),
@@ -518,7 +519,7 @@ Deno.test("close rejects requests still queued behind a slow write", async () =>
   await closing;
 });
 
-Deno.test("a push that fails to decrypt leaves the connection's readable alone", async () => {
+test("a push that fails to decrypt leaves the connection's readable alone", async () => {
   const { connection, requests, camera } = cameraLink();
   const cancel = spy();
   const source = connection.readable.getReader();
@@ -573,7 +574,7 @@ Deno.test("a push that fails to decrypt leaves the connection's readable alone",
   await camera.close();
 });
 
-Deno.test("close ends the event stream and the connection's writable", async () => {
+test("close ends the event stream and the connection's writable", async () => {
   const { connection, requests, camera } = cameraLink();
   const client = createClient(connection);
 
@@ -600,7 +601,7 @@ Deno.test("close ends the event stream and the connection's writable", async () 
   assertEquals((await requests.read()).done, true);
 });
 
-Deno.test("channel requests reject before login", async () => {
+test("channel requests reject before login", async () => {
   const { connection } = cameraLink();
   const client = createClient(connection);
 
@@ -608,7 +609,7 @@ Deno.test("channel requests reject before login", async () => {
   await client.close();
 });
 
-Deno.test("playSiren sends cmd 263 with the channel extension and the siren body, both AES-encrypted", async () => {
+test("playSiren sends cmd 263 with the channel extension and the siren body, both AES-encrypted", async () => {
   const { client, requests, camera } = await loggedIn();
   const aesKey = new TextEncoder().encode("08822D7143979103");
 
@@ -642,7 +643,7 @@ Deno.test("playSiren sends cmd 263 with the channel extension and the siren body
   await client.close();
 });
 
-Deno.test("stopSiren during a timed play starts manual play before stopping", async () => {
+test("stopSiren during a timed play starts manual play before stopping", async () => {
   const { client, requests, camera } = await loggedIn();
   const aesKey = new TextEncoder().encode("08822D7143979103");
   const ack = (messageId: number) =>
@@ -682,7 +683,7 @@ Deno.test("stopSiren during a timed play starts manual play before stopping", as
   await client.close();
 });
 
-Deno.test("stopSiren with nothing playing only sends the stop", async () => {
+test("stopSiren with nothing playing only sends the stop", async () => {
   const { client, requests, camera } = await loggedIn();
   const aesKey = new TextEncoder().encode("08822D7143979103");
 
@@ -710,7 +711,7 @@ Deno.test("stopSiren with nothing playing only sends the stop", async () => {
   await client.close();
 });
 
-Deno.test("setPrivacyMode sends cmd 575 with the sleep body", async () => {
+test("setPrivacyMode sends cmd 575 with the sleep body", async () => {
   const { client, requests, camera } = await loggedIn();
   const aesKey = new TextEncoder().encode("08822D7143979103");
 
@@ -739,7 +740,7 @@ Deno.test("setPrivacyMode sends cmd 575 with the sleep body", async () => {
   await client.close();
 });
 
-Deno.test("privacyMode sends cmd 574 without a body and reads sleep from the reply", async () => {
+test("privacyMode sends cmd 574 without a body and reads sleep from the reply", async () => {
   const { client, requests, camera } = await loggedIn();
   const aesKey = new TextEncoder().encode("08822D7143979103");
 
@@ -772,7 +773,7 @@ Deno.test("privacyMode sends cmd 574 without a body and reads sleep from the rep
   await client.close();
 });
 
-Deno.test("snapshot collects the payload chunks that follow the reply", async () => {
+test("snapshot collects the payload chunks that follow the reply", async () => {
   const { client, requests, camera } = await loggedIn();
   const aesKey = new TextEncoder().encode("08822D7143979103");
   const xml = (text: string) =>
@@ -856,7 +857,7 @@ Deno.test("snapshot collects the payload chunks that follow the reply", async ()
   await client.close();
 });
 
-Deno.test("snapshot rejects an image of a different size than announced", async () => {
+test("snapshot rejects an image of a different size than announced", async () => {
   const { client, requests, camera } = await loggedIn();
   const aesKey = new TextEncoder().encode("08822D7143979103");
 
@@ -899,7 +900,7 @@ Deno.test("snapshot rejects an image of a different size than announced", async 
   await client.close();
 });
 
-Deno.test("ptz sends cmd 18 with the command and speed", async () => {
+test("ptz sends cmd 18 with the command and speed", async () => {
   const { client, requests, camera } = await loggedIn();
   const aesKey = new TextEncoder().encode("08822D7143979103");
 
@@ -928,7 +929,7 @@ Deno.test("ptz sends cmd 18 with the command and speed", async () => {
   await client.close();
 });
 
-Deno.test("ptzPresets sends cmd 190 and lists the named presets", async () => {
+test("ptzPresets sends cmd 190 and lists the named presets", async () => {
   const { client, requests, camera } = await loggedIn();
   const aesKey = new TextEncoder().encode("08822D7143979103");
 
@@ -961,7 +962,7 @@ Deno.test("ptzPresets sends cmd 190 and lists the named presets", async () => {
   await client.close();
 });
 
-Deno.test("ptzGoToPreset sends cmd 19 with the preset id", async () => {
+test("ptzGoToPreset sends cmd 19 with the preset id", async () => {
   const { client, requests, camera } = await loggedIn();
   const aesKey = new TextEncoder().encode("08822D7143979103");
 
@@ -990,7 +991,7 @@ Deno.test("ptzGoToPreset sends cmd 19 with the preset id", async () => {
   await client.close();
 });
 
-Deno.test("ptzPosition sends cmd 433 without a body and reads pan and tilt", async () => {
+test("ptzPosition sends cmd 433 without a body and reads pan and tilt", async () => {
   const { client, requests, camera } = await loggedIn();
   const aesKey = new TextEncoder().encode("08822D7143979103");
 
@@ -1024,7 +1025,7 @@ Deno.test("ptzPosition sends cmd 433 without a body and reads pan and tilt", asy
   await client.close();
 });
 
-Deno.test("call without a channel addresses the host with an empty body and reads the reply", async () => {
+test("call without a channel addresses the host with an empty body and reads the reply", async () => {
   const { client, requests, camera } = await loggedIn();
   const aesKey = new TextEncoder().encode("08822D7143979103");
   const getPorts = command(37, "GET_NETPORT_CFG_V20", [
@@ -1064,7 +1065,7 @@ Deno.test("call without a channel addresses the host with an empty body and read
   await client.close();
 });
 
-Deno.test("call with a channel sends the extension and the encoded body", async () => {
+test("call with a channel sends the extension and the encoded body", async () => {
   const { client, requests, camera } = await loggedIn();
   const aesKey = new TextEncoder().encode("08822D7143979103");
   const setPorts = command(36, "SET_NETPORT_CFG_V20", [
@@ -1105,7 +1106,7 @@ Deno.test("call with a channel sends the extension and the encoded body", async 
   await client.close();
 });
 
-Deno.test("call rejects when the camera answers with an error status", async () => {
+test("call rejects when the camera answers with an error status", async () => {
   const { client, requests, camera } = await loggedIn();
   const reboot = command(23, "REBOOT_V20", []);
 
@@ -1129,7 +1130,7 @@ Deno.test("call rejects when the camera answers with an error status", async () 
   await client.close();
 });
 
-Deno.test("pushes decodes a known push by the PUSHES table", async () => {
+test("pushes decodes a known push by the PUSHES table", async () => {
   const { client, camera } = await loggedIn();
   const aesKey = new TextEncoder().encode("08822D7143979103");
   const pushes = client.pushes().getReader();
@@ -1179,7 +1180,7 @@ Deno.test("pushes decodes a known push by the PUSHES table", async () => {
   await client.close();
 });
 
-Deno.test("pushes passes an unknown push through as raw XML", async () => {
+test("pushes passes an unknown push through as raw XML", async () => {
   const { client, camera } = await loggedIn();
   const aesKey = new TextEncoder().encode("08822D7143979103");
   const pushes = client.pushes().getReader();
@@ -1205,7 +1206,7 @@ Deno.test("pushes passes an unknown push through as raw XML", async () => {
   await client.close();
 });
 
-Deno.test("a push the table cannot read errors the push stream but not the client", async () => {
+test("a push the table cannot read errors the push stream but not the client", async () => {
   const { client, requests, camera } = await loggedIn();
   const aesKey = new TextEncoder().encode("08822D7143979103");
   const pushes = client.pushes().getReader();
@@ -1251,7 +1252,7 @@ Deno.test("a push the table cannot read errors the push stream but not the clien
   await client.close();
 });
 
-Deno.test("pushes rejects a second push stream", async () => {
+test("pushes rejects a second push stream", async () => {
   const { client } = await loggedIn();
   client.pushes();
 
@@ -1259,7 +1260,7 @@ Deno.test("pushes rejects a second push stream", async () => {
   await client.close();
 });
 
-Deno.test("close ends the push stream", async () => {
+test("close ends the push stream", async () => {
   const { client } = await loggedIn();
   const pushes = client.pushes().getReader();
 

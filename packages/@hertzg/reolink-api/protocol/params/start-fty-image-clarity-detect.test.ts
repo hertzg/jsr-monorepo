@@ -1,8 +1,9 @@
+import { test } from "node:test";
 import { assertEquals } from "@std/assert";
 import { parse } from "@std/xml";
 import { startFtyImageClarityDetect } from "./start-fty-image-clarity-detect.ts";
 
-Deno.test("startFtyImageClarityDetect decodes every field the parser reads", () => {
+test("startFtyImageClarityDetect decodes every field the parser reads", () => {
   const root = parse(
     '<startFtyImageClarityDetect version="1.1">' +
       "<threshold>60,55,50,45,40</threshold><aeExpTime>33</aeExpTime>" +
@@ -22,7 +23,7 @@ Deno.test("startFtyImageClarityDetect decodes every field the parser reads", () 
   });
 });
 
-Deno.test("startFtyImageClarityDetect keeps the threshold list as text", () => {
+test("startFtyImageClarityDetect keeps the threshold list as text", () => {
   const root = parse(
     '<startFtyImageClarityDetect version="1.1">' +
       "<threshold>70,65</threshold></startFtyImageClarityDetect>",
@@ -31,7 +32,7 @@ Deno.test("startFtyImageClarityDetect keeps the threshold list as text", () => {
   assertEquals(startFtyImageClarityDetect.decode(root).threshold, "70,65");
 });
 
-Deno.test("startFtyImageClarityDetect decodes an element with no fields", () => {
+test("startFtyImageClarityDetect decodes an element with no fields", () => {
   const root = parse(
     '<startFtyImageClarityDetect version="1.1"></startFtyImageClarityDetect>',
   ).root;
@@ -39,7 +40,7 @@ Deno.test("startFtyImageClarityDetect decodes an element with no fields", () => 
   assertEquals(startFtyImageClarityDetect.decode(root), {});
 });
 
-Deno.test("startFtyImageClarityDetect round-trips through encode and decode", () => {
+test("startFtyImageClarityDetect round-trips through encode and decode", () => {
   const value = {
     threshold: "61,56,51,46,41",
     aeExpTime: 40,

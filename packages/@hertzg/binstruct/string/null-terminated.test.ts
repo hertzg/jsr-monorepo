@@ -1,7 +1,8 @@
+import { test } from "node:test";
 import { assertEquals, assertNotEquals } from "@std/assert";
 import { stringNT } from "./null-terminated.ts";
 
-Deno.test("string - null terminated - simple", () => {
+test("string - null terminated - simple", () => {
   const coder = stringNT();
   const testString = "Hello, World!";
   const buffer = new Uint8Array(100);
@@ -14,7 +15,7 @@ Deno.test("string - null terminated - simple", () => {
   assertEquals(bytesWritten, testString.length + 1);
 });
 
-Deno.test("string - null terminated - including null", () => {
+test("string - null terminated - including null", () => {
   const coder = stringNT();
   const testString = "ABC\0";
   const buffer = new Uint8Array(100);
@@ -29,7 +30,7 @@ Deno.test("string - null terminated - including null", () => {
   assertEquals(bytesRead, 4); // 3 bytes for "ABC" + 1 for null
 });
 
-Deno.test("string - null terminated - empty string", () => {
+test("string - null terminated - empty string", () => {
   const coder = stringNT();
   const testString = "";
   const buffer = new Uint8Array(100);

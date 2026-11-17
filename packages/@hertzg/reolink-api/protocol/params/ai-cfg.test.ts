@@ -1,8 +1,9 @@
+import { test } from "node:test";
 import { assertEquals } from "@std/assert";
 import { parse } from "@std/xml";
 import { aiCfg } from "./ai-cfg.ts";
 
-Deno.test("aiCfg decodes what the cmd 299 handler writes", () => {
+test("aiCfg decodes what the cmd 299 handler writes", () => {
   const root = parse(
     '<AiCfg version="1.1"><channelId>0</channelId><smartTrack>1</smartTrack>' +
       "<smartTrackMode>2</smartTrackMode>" +
@@ -27,7 +28,7 @@ Deno.test("aiCfg decodes what the cmd 299 handler writes", () => {
   });
 });
 
-Deno.test("aiCfg decodes a reply without the delay fields", () => {
+test("aiCfg decodes a reply without the delay fields", () => {
   const root = parse(
     '<AiCfg version="1.1"><channelId>0</channelId><smartTrack>0</smartTrack>' +
       "<smartTrackMode>0</smartTrackMode>" +
@@ -39,7 +40,7 @@ Deno.test("aiCfg decodes a reply without the delay fields", () => {
   assertEquals(aiCfg.decode(root).smartTrackObjectStopDelay, undefined);
 });
 
-Deno.test("aiCfg round-trips every field", () => {
+test("aiCfg round-trips every field", () => {
   const value = {
     channelId: 1,
     smartTrack: 1,

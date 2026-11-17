@@ -1,8 +1,9 @@
+import { test } from "node:test";
 import { assertEquals, assertThrows } from "@std/assert";
 import { parse } from "@std/xml";
 import { startZoomFocus } from "./start-zoom-focus.ts";
 
-Deno.test("startZoomFocus decodes a zoom move", () => {
+test("startZoomFocus decodes a zoom move", () => {
   const root = parse(
     '<StartZoomFocus version="1.1"><channelId>1</channelId>' +
       "<command>zoomPos</command><movePos>100</movePos></StartZoomFocus>",
@@ -15,7 +16,7 @@ Deno.test("startZoomFocus decodes a zoom move", () => {
   });
 });
 
-Deno.test("startZoomFocus round-trips every field", () => {
+test("startZoomFocus round-trips every field", () => {
   const value = { channelId: 0, command: "focusPos" as const, movePos: 250 };
 
   assertEquals(
@@ -24,7 +25,7 @@ Deno.test("startZoomFocus round-trips every field", () => {
   );
 });
 
-Deno.test("startZoomFocus throws on a command _get_ptz_cmd does not know", () => {
+test("startZoomFocus throws on a command _get_ptz_cmd does not know", () => {
   const root = parse(
     '<StartZoomFocus version="1.1"><command>zoomTo</command></StartZoomFocus>',
   ).root;

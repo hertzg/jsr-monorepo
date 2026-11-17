@@ -1,3 +1,4 @@
+import { test } from "node:test";
 import { assertEquals } from "@std/assert";
 import {
   TPID_8021Q,
@@ -8,8 +9,8 @@ import {
   vlanTag,
 } from "./mod.ts";
 
-Deno.test("vlanTag", async (t) => {
-  await t.step("round-trips a tag with an IPv4 payload", () => {
+test("vlanTag", async (t) => {
+  await t.test("round-trips a tag with an IPv4 payload", () => {
     const coder = vlanTag();
     const tag: VlanTag = {
       tci: { pcp: 5, dei: 0, vlanId: 100 },
@@ -26,7 +27,7 @@ Deno.test("vlanTag", async (t) => {
     assertEquals(decoded, tag);
   });
 
-  await t.step("round-trips the drop-eligible bit and an empty payload", () => {
+  await t.test("round-trips the drop-eligible bit and an empty payload", () => {
     const coder = vlanTag();
     const tag: VlanTag = {
       tci: { pcp: 0, dei: 1, vlanId: 4000 },
@@ -43,7 +44,7 @@ Deno.test("vlanTag", async (t) => {
     assertEquals(decoded, tag);
   });
 
-  await t.step("decodes known wire bytes for VID 100, priority 5", () => {
+  await t.test("decodes known wire bytes for VID 100, priority 5", () => {
     // deno-fmt-ignore
     const wire = new Uint8Array([
       0xa0, 0x64, // pcp=5, dei=0, vlanId=100
@@ -59,7 +60,7 @@ Deno.test("vlanTag", async (t) => {
     assertEquals(decoded.payload, new Uint8Array([0x45, 0x00, 0x00, 0x14]));
   });
 
-  await t.step("decodes known wire bytes for a priority-tagged frame", () => {
+  await t.test("decodes known wire bytes for a priority-tagged frame", () => {
     // deno-fmt-ignore
     const wire = new Uint8Array([
       0xe0, 0x00, // pcp=7, dei=0, vlanId=0 (priority-tagged)
@@ -76,7 +77,7 @@ Deno.test("vlanTag", async (t) => {
     assertEquals(decoded.payload.length, 0);
   });
 
-  await t.step("round-trips the reserved vlanId", () => {
+  await t.test("round-trips the reserved vlanId", () => {
     const coder = vlanTag();
     const tag: VlanTag = {
       tci: { pcp: 0, dei: 0, vlanId: VLAN_ID_RESERVED },
@@ -91,7 +92,7 @@ Deno.test("vlanTag", async (t) => {
     assertEquals(decoded.tci.vlanId, VLAN_ID_RESERVED);
   });
 
-  await t.step("TPID_8021Q matches the IEEE 802.1Q EtherType", () => {
+  await t.test("TPID_8021Q matches the IEEE 802.1Q EtherType", () => {
     assertEquals(TPID_8021Q, 0x8100);
   });
 });

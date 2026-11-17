@@ -1,8 +1,9 @@
+import { test } from "node:test";
 import { assertEquals } from "@std/assert";
 import { parse, serialize } from "./mod.ts";
 import { CURRENCY_FLAG_CUSTOM, serializeCurrency } from "./currency.ts";
 
-Deno.test("parseCurrency reads the formatting rules HomeBank uses to print amounts", () => {
+test("parseCurrency reads the formatting rules HomeBank uses to print amounts", () => {
   const xml = [
     '<?xml version="1.0"?>',
     '<homebank v="1.3" d="050402">',
@@ -30,7 +31,7 @@ Deno.test("parseCurrency reads the formatting rules HomeBank uses to print amoun
   assertEquals(serialize(parse(xml)), xml);
 });
 
-Deno.test("<cur> always writes its full attribute list, zeros and empties included", () => {
+test("<cur> always writes its full attribute list, zeros and empties included", () => {
   // Unlike the other entities, currency does not go through hb_xml_tag and
   // so has no attribute-omission rules at all: a custom currency with no ISO
   // code and no grouping character still writes iso="" and gchar=""

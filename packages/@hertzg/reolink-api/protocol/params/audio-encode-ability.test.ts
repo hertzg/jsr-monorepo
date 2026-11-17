@@ -1,8 +1,9 @@
+import { test } from "node:test";
 import { assertEquals, assertThrows } from "@std/assert";
 import { parse } from "@std/xml";
 import { audioEncodeAbility } from "./audio-encode-ability.ts";
 
-Deno.test("audioEncodeAbility decodes the reply nets_audio_encode_ability_s2x writes", () => {
+test("audioEncodeAbility decodes the reply nets_audio_encode_ability_s2x writes", () => {
   const root = parse(
     '<AudioEncodeAbility version="1.1"><channelId>0</channelId>' +
       "<maxCapacity>2</maxCapacity><audioEncodeList>" +
@@ -37,7 +38,7 @@ Deno.test("audioEncodeAbility decodes the reply nets_audio_encode_ability_s2x wr
   });
 });
 
-Deno.test("audioEncodeAbility round-trips a full value", () => {
+test("audioEncodeAbility round-trips a full value", () => {
   const value = {
     channelId: 1,
     maxCapacity: 3,
@@ -56,7 +57,7 @@ Deno.test("audioEncodeAbility round-trips a full value", () => {
   );
 });
 
-Deno.test("audioEncodeAbility decodes a reply with no encoding enabled", () => {
+test("audioEncodeAbility decodes a reply with no encoding enabled", () => {
   const root = parse(
     '<AudioEncodeAbility version="1.1"><channelId>0</channelId>' +
       "<maxCapacity>0</maxCapacity></AudioEncodeAbility>",
@@ -68,7 +69,7 @@ Deno.test("audioEncodeAbility decodes a reply with no encoding enabled", () => {
   });
 });
 
-Deno.test("audioEncodeAbility rejects an audio type the firmware never writes", () => {
+test("audioEncodeAbility rejects an audio type the firmware never writes", () => {
   const root = parse(
     '<AudioEncodeAbility version="1.1"><audioEncodeList><audioEncode>' +
       "<audioType>aac</audioType><sampleRate>16000</sampleRate>" +

@@ -1,8 +1,9 @@
+import { test } from "node:test";
 import { assertEquals } from "@std/assert";
 import { parse } from "@std/xml";
 import { timelapseFileSearch } from "./timelapse-file-search.ts";
 
-Deno.test("timelapseFileSearch decodes an mp4 page from net_timelapse_file_s2x", () => {
+test("timelapseFileSearch decodes an mp4 page from net_timelapse_file_s2x", () => {
   const root = parse(
     '<timelapseFileSearch version="1.1"><channelId>0</channelId>' +
       "<handle>7</handle><totalNum>1</totalNum><finished>1</finished>" +
@@ -54,7 +55,7 @@ Deno.test("timelapseFileSearch decodes an mp4 page from net_timelapse_file_s2x",
   });
 });
 
-Deno.test("timelapseFileSearch decodes a jpeg item with original and thumbnail", () => {
+test("timelapseFileSearch decodes a jpeg item with original and thumbnail", () => {
   const root = parse(
     '<timelapseFileSearch version="1.1"><taskType>jpeg</taskType><item>' +
       "<original><id>image-full</id><fileName>full.jpg</fileName>" +
@@ -83,7 +84,7 @@ Deno.test("timelapseFileSearch decodes a jpeg item with original and thumbnail",
   }]);
 });
 
-Deno.test("timelapseFileSearch round-trips a search request", () => {
+test("timelapseFileSearch round-trips a search request", () => {
   const value = {
     channelId: 1,
     uid: "disk-uid-2",
@@ -100,7 +101,7 @@ Deno.test("timelapseFileSearch round-trips a search request", () => {
   );
 });
 
-Deno.test("timelapseFileSearch round-trips a result page", () => {
+test("timelapseFileSearch round-trips a result page", () => {
   const value = {
     handle: 3,
     totalNum: 2,

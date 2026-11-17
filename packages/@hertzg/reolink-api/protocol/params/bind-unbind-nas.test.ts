@@ -1,8 +1,9 @@
+import { test } from "node:test";
 import { assertEquals } from "@std/assert";
 import { parse } from "@std/xml";
 import { bindUnbindNas } from "./bind-unbind-nas.ts";
 
-Deno.test("bindUnbindNas decodes what net_bind_unbind_nas_s2x writes", () => {
+test("bindUnbindNas decodes what net_bind_unbind_nas_s2x writes", () => {
   const root = parse(
     '<BindUnbindNas version="1.1"><devName>Basement NAS</devName>' +
       "<uid>95270000ABCDEF12</uid></BindUnbindNas>",
@@ -14,7 +15,7 @@ Deno.test("bindUnbindNas decodes what net_bind_unbind_nas_s2x writes", () => {
   });
 });
 
-Deno.test("bindUnbindNas round-trips every field", () => {
+test("bindUnbindNas round-trips every field", () => {
   const value = {
     userName: "nas-user",
     password: "nas-password",
@@ -29,7 +30,7 @@ Deno.test("bindUnbindNas round-trips every field", () => {
   );
 });
 
-Deno.test("bindUnbindNas writes the credentials before the device", () => {
+test("bindUnbindNas writes the credentials before the device", () => {
   assertEquals(
     bindUnbindNas.encode({ uid: "nas-uid-0002", userName: "nas-user" }),
     '<BindUnbindNas version="1.1"><userName>nas-user</userName>' +

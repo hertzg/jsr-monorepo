@@ -1,3 +1,4 @@
+import { test } from "node:test";
 import { assertEquals } from "@std/assert";
 import {
   NTP_LEAP_INDICATOR,
@@ -8,13 +9,13 @@ import {
   ntpPacket,
 } from "./mod.ts";
 
-Deno.test("ntpPacket", async (t) => {
-  await t.step("constants", () => {
+test("ntpPacket", async (t) => {
+  await t.test("constants", () => {
     assertEquals(NTP_PACKET_SIZE, 48);
     assertEquals(NTP_PORT, 123);
   });
 
-  await t.step("round-trips a client request packet", () => {
+  await t.test("round-trips a client request packet", () => {
     const coder = ntpPacket();
     const packet: NtpPacket = {
       leapVersionMode: {
@@ -43,7 +44,7 @@ Deno.test("ntpPacket", async (t) => {
     assertEquals(decoded, packet);
   });
 
-  await t.step("round-trips negative poll and precision exponents", () => {
+  await t.test("round-trips negative poll and precision exponents", () => {
     const coder = ntpPacket();
     const packet: NtpPacket = {
       leapVersionMode: {
@@ -72,7 +73,7 @@ Deno.test("ntpPacket", async (t) => {
     assertEquals(decoded, packet);
   });
 
-  await t.step("decodes a known 48-byte server response", () => {
+  await t.test("decodes a known 48-byte server response", () => {
     // deno-fmt-ignore
     const wire = new Uint8Array([
       0x24,                   // LI=0 VN=4 Mode=4 (server)
@@ -108,7 +109,7 @@ Deno.test("ntpPacket", async (t) => {
     assertEquals(decoded.transmitTimestamp, 0xe4c5c46780000000n);
   });
 
-  await t.step("decodes a known 48-byte client request", () => {
+  await t.test("decodes a known 48-byte client request", () => {
     // deno-fmt-ignore
     const wire = new Uint8Array([
       0x1b,                   // LI=0 VN=3 Mode=3 (client)
@@ -138,7 +139,7 @@ Deno.test("ntpPacket", async (t) => {
     assertEquals(decoded.precision, -6);
   });
 
-  await t.step("mode constants match RFC 5905 §7.3", () => {
+  await t.test("mode constants match RFC 5905 §7.3", () => {
     assertEquals(NTP_MODE.CLIENT, 3);
     assertEquals(NTP_MODE.SERVER, 4);
     assertEquals(NTP_MODE.BROADCAST, 5);

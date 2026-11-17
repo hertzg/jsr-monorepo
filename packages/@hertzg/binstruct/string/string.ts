@@ -88,8 +88,8 @@ import { stringNT } from "./null-terminated.ts";
  */
 export function string(
   lengthOrLengthType?: Coder<number> | LengthOrRef | null,
-  decoderEncoding: string = "utf-8",
-  decoderOptions: TextDecoderOptions = {},
+  decoderEncoding: ConstructorParameters<typeof TextDecoder>[0] = "utf-8",
+  decoderOptions: ConstructorParameters<typeof TextDecoder>[1] = {},
 ): Coder<string> {
   // If no arguments provided, create a null-terminated string
   if (lengthOrLengthType == null) {

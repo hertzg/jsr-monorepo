@@ -1,8 +1,9 @@
+import { test } from "node:test";
 import { assertEquals } from "@std/assert";
 import { parse } from "@std/xml";
 import { ftp } from "./ftp.ts";
 
-Deno.test("ftp decodes every field the firmware writes", () => {
+test("ftp decodes every field the firmware writes", () => {
   const root = parse(
     '<Ftp version="1.1"><server>ftp.example.com</server><port>21</port>' +
       "<nonymous>0</nonymous><remoteDir>dir-abc123</remoteDir>" +
@@ -43,7 +44,7 @@ Deno.test("ftp decodes every field the firmware writes", () => {
   });
 });
 
-Deno.test("ftp round-trips through encode and decode", () => {
+test("ftp round-trips through encode and decode", () => {
   const value = {
     server: "server-rt",
     port: 990,
@@ -73,7 +74,7 @@ Deno.test("ftp round-trips through encode and decode", () => {
   assertEquals(ftp.decode(parse(ftp.encode(value)).root), value);
 });
 
-Deno.test("ftp writes bnameEncrypt between mode and autoDir", () => {
+test("ftp writes bnameEncrypt between mode and autoDir", () => {
   assertEquals(
     ftp.encode({ mode: 1, bnameEncrypt: 0, autoDir: 1 }),
     '<Ftp version="1.1"><mode>1</mode><bnameEncrypt>0</bnameEncrypt>' +

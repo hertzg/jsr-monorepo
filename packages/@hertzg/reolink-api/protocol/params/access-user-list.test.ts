@@ -1,8 +1,9 @@
+import { test } from "node:test";
 import { assertEquals, assertThrows } from "@std/assert";
 import { parse } from "@std/xml";
 import { accessUserList } from "./access-user-list.ts";
 
-Deno.test("accessUserList decodes the admin cmd 511 reply netserver writes", () => {
+test("accessUserList decodes the admin cmd 511 reply netserver writes", () => {
   const root = parse(
     '<accessUserList version="1.1"><maxAccessUserNum>10</maxAccessUserNum>' +
       "<availableAbility>15</availableAbility>" +
@@ -42,7 +43,7 @@ Deno.test("accessUserList decodes the admin cmd 511 reply netserver writes", () 
   });
 });
 
-Deno.test("accessUserList decodes a reply with no users as an empty list", () => {
+test("accessUserList decodes a reply with no users as an empty list", () => {
   const root = parse(
     '<accessUserList version="1.1"><maxAccessUserNum>10</maxAccessUserNum>' +
       "<availableAbility>3</availableAbility></accessUserList>",
@@ -51,7 +52,7 @@ Deno.test("accessUserList decodes a reply with no users as an empty list", () =>
   assertEquals(accessUserList.decode(root).User, []);
 });
 
-Deno.test("accessUserList round-trips a cmd 512 request", () => {
+test("accessUserList round-trips a cmd 512 request", () => {
   const value = {
     User: [{
       userId: "guest-c",
@@ -69,7 +70,7 @@ Deno.test("accessUserList round-trips a cmd 512 request", () => {
   );
 });
 
-Deno.test("accessUserList rejects a user state the firmware does not map", () => {
+test("accessUserList rejects a user state the firmware does not map", () => {
   const root = parse(
     "<accessUserList><User><userSetState>add</userSetState></User></accessUserList>",
   ).root;

@@ -1,3 +1,4 @@
+import { test } from "node:test";
 import { assertAlmostEquals, assertEquals, assertThrows } from "@std/assert";
 import type { Coder } from "../core.ts";
 // deno-fmt-ignore
@@ -110,13 +111,13 @@ function testNumericType<T extends number | bigint>(
 ) {
   const typeTests = TRUTH_TABLE.filter(([type]) => type === name);
 
-  Deno.test(`${name}:`, async (t) => {
+  test(`${name}:`, async (t) => {
     // Each leaf step covers the aligned and the offset case for one truth-table
     // row: they are the same claim about the same bytes, and folding them into
     // one body keeps the offset case from depending on a parent step's locals.
-    await t.step("reads", async (t) => {
+    await t.test("reads", async (t) => {
       for (const [, value, bytesBe, description] of typeTests) {
-        await t.step(`big-endian: ${description}`, () => {
+        await t.test(`big-endian: ${description}`, () => {
           const coder = bigEndianType();
 
           const [aligned] = coder.decode(new Uint8Array(bytesBe));
@@ -129,7 +130,7 @@ function testNumericType<T extends number | bigint>(
           assertEquals(offset, value as T);
         });
 
-        await t.step(`little-endian: ${description}`, () => {
+        await t.test(`little-endian: ${description}`, () => {
           const coder = littleEndianType();
           const bytesLe = toLittleEndian(bytesBe);
 
@@ -145,9 +146,9 @@ function testNumericType<T extends number | bigint>(
       }
     });
 
-    await t.step("writes", async (t) => {
+    await t.test("writes", async (t) => {
       for (const [, value, bytesBe, description] of typeTests) {
-        await t.step(`big-endian: ${description}`, () => {
+        await t.test(`big-endian: ${description}`, () => {
           const coder = bigEndianType();
 
           const buffer = new Uint8Array(bytesBe.length);
@@ -160,7 +161,7 @@ function testNumericType<T extends number | bigint>(
           assertEquals(withOffset, new Uint8Array([0, 0, 0, 0, ...bytesBe]));
         });
 
-        await t.step(`little-endian: ${description}`, () => {
+        await t.test(`little-endian: ${description}`, () => {
           const coder = littleEndianType();
           const bytesLe = toLittleEndian(bytesBe);
 
@@ -176,9 +177,9 @@ function testNumericType<T extends number | bigint>(
       }
     });
 
-    await t.step("roundtrip", async (t) => {
+    await t.test("roundtrip", async (t) => {
       for (const [, value, , description] of typeTests) {
-        await t.step(`big-endian: ${description}`, () => {
+        await t.test(`big-endian: ${description}`, () => {
           const coder = bigEndianType();
 
           const buffer = new Uint8Array(expectedSize);
@@ -191,7 +192,7 @@ function testNumericType<T extends number | bigint>(
           assertEquals(coder.decode(view)[0], value as T);
         });
 
-        await t.step(`little-endian: ${description}`, () => {
+        await t.test(`little-endian: ${description}`, () => {
           const coder = littleEndianType();
 
           const buffer = new Uint8Array(expectedSize);
@@ -206,8 +207,8 @@ function testNumericType<T extends number | bigint>(
       }
     });
 
-    await t.step("size", async (t) => {
-      await t.step("buffer too small for read", () => {
+    await t.test("size", async (t) => {
+      await t.test("buffer too small for read", () => {
         const buffer = new Uint8Array(
           Math.max(expectedSize - 1, 0),
         );
@@ -215,7 +216,7 @@ function testNumericType<T extends number | bigint>(
         assertThrows(() => littleEndianType().decode(buffer), Error);
       });
 
-      await t.step("buffer too small for write", () => {
+      await t.test("buffer too small for write", () => {
         // A short encode target must raise RangeError — that is the signal
         // `autoGrowBuffer` catches to resize and retry (ADR 0009).
         const [, value] = typeTests[0];
@@ -230,7 +231,7 @@ function testNumericType<T extends number | bigint>(
         );
       });
 
-      await t.step("empty buffer", () => {
+      await t.test("empty buffer", () => {
         const buffer = new Uint8Array(0);
         assertThrows(() => bigEndianType().decode(buffer), Error);
         assertThrows(() => littleEndianType().decode(buffer), Error);
@@ -240,8 +241,8 @@ function testNumericType<T extends number | bigint>(
 }
 
 // Test floating point precision
-Deno.test("floating point precision", async (t) => {
-  await t.step("f32 precision", () => {
+test("floating point precision", async (t) => {
+  await t.test("f32 precision", () => {
     const value = 3.14159;
     const buffer = new Uint8Array(4);
     const bytesWritten = f32be().encode(value, buffer);
@@ -251,7 +252,7 @@ Deno.test("floating point precision", async (t) => {
     assertAlmostEquals(result, value, 0.0001);
   });
 
-  await t.step("f64 precision", () => {
+  await t.test("f64 precision", () => {
     const value = Math.PI;
     const buffer = new Uint8Array(8);
     const bytesWritten = f64be().encode(value, buffer);
@@ -263,15 +264,15 @@ Deno.test("floating point precision", async (t) => {
 });
 
 // Test edge cases
-Deno.test("edge cases", async (t) => {
-  await t.step("u8 overflow", () => {
+test("edge cases", async (t) => {
+  await t.test("u8 overflow", () => {
     const buffer = new Uint8Array(1);
     const bytesWritten = u8be().encode(256, buffer);
     assertEquals(bytesWritten, 1);
     assertEquals(buffer[0], 0); // Should wrap around
   });
 
-  await t.step("s8 overflow", () => {
+  await t.test("s8 overflow", () => {
     const buffer = new Uint8Array(1);
     const bytesWritten = s8be().encode(128, buffer);
     assertEquals(bytesWritten, 1);
@@ -283,7 +284,7 @@ Deno.test("edge cases", async (t) => {
     assertEquals(buffer2[0], 127); // Should wrap around
   });
 
-  await t.step("factory functions", () => {
+  await t.test("factory functions", () => {
     const beFn = u8("be");
     const leFn = u8("le");
     const value = 255;

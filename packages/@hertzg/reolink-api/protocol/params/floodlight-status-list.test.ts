@@ -1,8 +1,9 @@
+import { test } from "node:test";
 import { assertEquals, assertThrows } from "@std/assert";
 import { parse } from "@std/xml";
 import { floodlightStatusList } from "./floodlight-status-list.ts";
 
-Deno.test("floodlightStatusList decodes the cmd 291 push", () => {
+test("floodlightStatusList decodes the cmd 291 push", () => {
   const root = parse(
     '<FloodlightStatusList version="1.1">' +
       "<FloodlightStatus><channel>0</channel><status>1</status></FloodlightStatus>" +
@@ -18,7 +19,7 @@ Deno.test("floodlightStatusList decodes the cmd 291 push", () => {
   });
 });
 
-Deno.test("floodlightStatusList round-trips every field", () => {
+test("floodlightStatusList round-trips every field", () => {
   const value = { FloodlightStatus: [{ channel: 3, status: 1 }] };
 
   assertEquals(
@@ -27,7 +28,7 @@ Deno.test("floodlightStatusList round-trips every field", () => {
   );
 });
 
-Deno.test("floodlightStatusList reads a push with no floodlights as empty", () => {
+test("floodlightStatusList reads a push with no floodlights as empty", () => {
   const root = parse(
     '<FloodlightStatusList version="1.1"></FloodlightStatusList>',
   ).root;
@@ -35,7 +36,7 @@ Deno.test("floodlightStatusList reads a push with no floodlights as empty", () =
   assertEquals(floodlightStatusList.decode(root).FloodlightStatus, []);
 });
 
-Deno.test("floodlightStatusList throws on an entry without status", () => {
+test("floodlightStatusList throws on an entry without status", () => {
   const root = parse(
     '<FloodlightStatusList version="1.1"><FloodlightStatus><channel>0</channel>' +
       "</FloodlightStatus></FloodlightStatusList>",

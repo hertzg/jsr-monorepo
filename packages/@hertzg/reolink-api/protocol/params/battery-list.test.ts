@@ -1,8 +1,9 @@
+import { test } from "node:test";
 import { assertEquals, assertThrows } from "@std/assert";
 import { parse } from "@std/xml";
 import { batteryList } from "./battery-list.ts";
 
-Deno.test("batteryList decodes the cmd 252 push nets_battery_status_report writes", () => {
+test("batteryList decodes the cmd 252 push nets_battery_status_report writes", () => {
   const root = parse(
     '<BatteryList version="1.1"><BatteryInfo><channelId>0</channelId>' +
       "<chargeStatus>charging</chargeStatus><adapterStatus>adapter</adapterStatus>" +
@@ -26,7 +27,7 @@ Deno.test("batteryList decodes the cmd 252 push nets_battery_status_report write
   });
 });
 
-Deno.test("batteryList round-trips a full value", () => {
+test("batteryList round-trips a full value", () => {
   const value = {
     BatteryInfo: {
       channelId: 0,
@@ -47,13 +48,13 @@ Deno.test("batteryList round-trips a full value", () => {
   );
 });
 
-Deno.test("batteryList rejects a push without BatteryInfo", () => {
+test("batteryList rejects a push without BatteryInfo", () => {
   const root = parse('<BatteryList version="1.1"></BatteryList>').root;
 
   assertThrows(() => batteryList.decode(root), Error, "BatteryInfo");
 });
 
-Deno.test("batteryList rejects a charge state the firmware never writes", () => {
+test("batteryList rejects a charge state the firmware never writes", () => {
   const root = parse(
     '<BatteryList version="1.1"><BatteryInfo><channelId>0</channelId>' +
       "<chargeStatus>discharging</chargeStatus><adapterStatus>none</adapterStatus>" +

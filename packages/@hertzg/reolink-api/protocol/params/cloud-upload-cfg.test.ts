@@ -1,8 +1,9 @@
+import { test } from "node:test";
 import { assertEquals } from "@std/assert";
 import { parse } from "@std/xml";
 import { cloudUploadCfg } from "./cloud-upload-cfg.ts";
 
-Deno.test("cloudUploadCfg decodes what nets_cloud_upload_cfg_s2x writes", () => {
+test("cloudUploadCfg decodes what nets_cloud_upload_cfg_s2x writes", () => {
   const root = parse(
     '<CloudUploadCfg version="1.1"><enable>1</enable><version>7</version>' +
       "<streamOpList>1,1,0</streamOpList><streamCfgList>0,1,0</streamCfgList>" +
@@ -17,7 +18,7 @@ Deno.test("cloudUploadCfg decodes what nets_cloud_upload_cfg_s2x writes", () => 
   });
 });
 
-Deno.test("cloudUploadCfg round-trips every field", () => {
+test("cloudUploadCfg round-trips every field", () => {
   const value = {
     enable: 0,
     version: 3,
@@ -31,7 +32,7 @@ Deno.test("cloudUploadCfg round-trips every field", () => {
   );
 });
 
-Deno.test("cloudUploadCfg reads the child <version>, not the attribute", () => {
+test("cloudUploadCfg reads the child <version>, not the attribute", () => {
   const root = parse(
     '<CloudUploadCfg version="1.1"><version>9</version></CloudUploadCfg>',
   ).root;
@@ -39,7 +40,7 @@ Deno.test("cloudUploadCfg reads the child <version>, not the attribute", () => {
   assertEquals(cloudUploadCfg.decode(root).version, 9);
 });
 
-Deno.test("cloudUploadCfg leaves out fields that are not set", () => {
+test("cloudUploadCfg leaves out fields that are not set", () => {
   assertEquals(
     cloudUploadCfg.encode({ enable: 1 }),
     '<CloudUploadCfg version="1.1"><enable>1</enable></CloudUploadCfg>',

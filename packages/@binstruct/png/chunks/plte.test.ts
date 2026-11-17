@@ -1,9 +1,10 @@
+import { test } from "node:test";
 import { assertEquals } from "@std/assert";
 import { createContext } from "@hertzg/binstruct";
 import type { PngChunkUnknown } from "../mod.ts";
 import { type PlteChunk, plteChunkRefiner } from "./plte.ts";
 
-Deno.test("plteChunkRefiner() - refines PLTE chunk with single color", () => {
+test("plteChunkRefiner() - refines PLTE chunk with single color", () => {
   const refiner = plteChunkRefiner();
   const context = createContext("decode");
 
@@ -23,7 +24,7 @@ Deno.test("plteChunkRefiner() - refines PLTE chunk with single color", () => {
   assertEquals(refined.crc, 0x12345678);
 });
 
-Deno.test("plteChunkRefiner() - refines PLTE chunk with multiple colors", () => {
+test("plteChunkRefiner() - refines PLTE chunk with multiple colors", () => {
   const refiner = plteChunkRefiner();
   const context = createContext("decode");
 
@@ -49,7 +50,7 @@ Deno.test("plteChunkRefiner() - refines PLTE chunk with multiple colors", () => 
   assertEquals(refined.data.colors[2], [0, 0, 255]);
 });
 
-Deno.test("plteChunkRefiner() - unrefines PLTE chunk", () => {
+test("plteChunkRefiner() - unrefines PLTE chunk", () => {
   const refiner = plteChunkRefiner();
   const context = createContext("encode");
 
@@ -74,7 +75,7 @@ Deno.test("plteChunkRefiner() - unrefines PLTE chunk", () => {
   assertEquals(unrefined.crc, 0x11223344);
 });
 
-Deno.test("plteChunkRefiner() - round-trip with single color", () => {
+test("plteChunkRefiner() - round-trip with single color", () => {
   const refiner = plteChunkRefiner();
   const encodeContext = createContext("encode");
   const decodeContext = createContext("decode");
@@ -97,7 +98,7 @@ Deno.test("plteChunkRefiner() - round-trip with single color", () => {
   assertEquals(refined.crc, original.crc);
 });
 
-Deno.test("plteChunkRefiner() - round-trip with RGB palette", () => {
+test("plteChunkRefiner() - round-trip with RGB palette", () => {
   const refiner = plteChunkRefiner();
   const encodeContext = createContext("encode");
   const decodeContext = createContext("decode");
@@ -125,7 +126,7 @@ Deno.test("plteChunkRefiner() - round-trip with RGB palette", () => {
   assertEquals(refined.data.colors[2], [0, 0, 255]);
 });
 
-Deno.test("plteChunkRefiner() - round-trip with grayscale palette", () => {
+test("plteChunkRefiner() - round-trip with grayscale palette", () => {
   const refiner = plteChunkRefiner();
   const encodeContext = createContext("encode");
   const decodeContext = createContext("decode");
@@ -154,7 +155,7 @@ Deno.test("plteChunkRefiner() - round-trip with grayscale palette", () => {
   assertEquals(refined.data.colors[3], [255, 255, 255]);
 });
 
-Deno.test("plteChunkRefiner() - round-trip with maximum palette size", () => {
+test("plteChunkRefiner() - round-trip with maximum palette size", () => {
   const refiner = plteChunkRefiner();
   const encodeContext = createContext("encode");
   const decodeContext = createContext("decode");
@@ -181,7 +182,7 @@ Deno.test("plteChunkRefiner() - round-trip with maximum palette size", () => {
   assertEquals(refined.data.colors[255], colors[255]);
 });
 
-Deno.test("plteChunkRefiner() - preserves color values exactly", () => {
+test("plteChunkRefiner() - preserves color values exactly", () => {
   const refiner = plteChunkRefiner();
   const encodeContext = createContext("encode");
   const decodeContext = createContext("decode");
@@ -210,7 +211,7 @@ Deno.test("plteChunkRefiner() - preserves color values exactly", () => {
   }
 });
 
-Deno.test("plteChunkRefiner() - handles partial palette entries", () => {
+test("plteChunkRefiner() - handles partial palette entries", () => {
   const refiner = plteChunkRefiner();
   const encodeContext = createContext("encode");
   const decodeContext = createContext("decode");
@@ -238,7 +239,7 @@ Deno.test("plteChunkRefiner() - handles partial palette entries", () => {
   }
 });
 
-Deno.test("plteChunkRefiner() - color components are independent", () => {
+test("plteChunkRefiner() - color components are independent", () => {
   const refiner = plteChunkRefiner();
   const encodeContext = createContext("encode");
   const decodeContext = createContext("decode");
@@ -267,7 +268,7 @@ Deno.test("plteChunkRefiner() - color components are independent", () => {
   assertEquals(refined.data.colors[3], [255, 255, 0]);
 });
 
-Deno.test("plteChunkRefiner() - multiple round-trips are consistent", () => {
+test("plteChunkRefiner() - multiple round-trips are consistent", () => {
   const refiner = plteChunkRefiner();
   const encodeContext = createContext("encode");
   const decodeContext = createContext("decode");

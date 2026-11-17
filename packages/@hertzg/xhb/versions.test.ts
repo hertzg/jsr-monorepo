@@ -1,8 +1,9 @@
+import { test } from "node:test";
 import { assertEquals } from "@std/assert";
 import { parse } from "./mod.ts";
 import { serializeVersions } from "./versions.ts";
 
-Deno.test("the <homebank> root carries the file format version and the app data version", () => {
+test("the <homebank> root carries the file format version and the app data version", () => {
   const xml = [
     '<?xml version="1.0"?>',
     '<homebank v="1.3999999999999999" d="050402">',
@@ -18,7 +19,7 @@ Deno.test("the <homebank> root carries the file format version and the app data 
   });
 });
 
-Deno.test("the data version is written back zero-padded to six digits", () => {
+test("the data version is written back zero-padded to six digits", () => {
   // 50402 must not come back out as d="50402" — this is the one place where
   // a number is reformatted on the way out (ADR 0001).
   assertEquals(

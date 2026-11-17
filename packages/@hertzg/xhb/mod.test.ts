@@ -1,25 +1,30 @@
+import { readFileSync } from "node:fs";
+import { test } from "node:test";
 import { assertEquals } from "@std/assert";
 import { parse, serialize } from "./mod.ts";
 
 const save = (name: string) =>
-  Deno.readTextFileSync(new URL(`./fixtures/saves/${name}`, import.meta.url));
+  readFileSync(
+    new URL(`./fixtures/saves/${name}`, import.meta.url),
+    "utf8",
+  );
 
-Deno.test("a real HomeBank 5.2.4 save round-trips byte for byte", () => {
+test("a real HomeBank 5.2.4 save round-trips byte for byte", () => {
   const original = save("example-v5.2.4.xhb");
   assertEquals(serialize(parse(original)), original);
 });
 
-Deno.test("a real HomeBank 5.3.1 save round-trips byte for byte", () => {
+test("a real HomeBank 5.3.1 save round-trips byte for byte", () => {
   const original = save("example-v5.3.1.xhb");
   assertEquals(serialize(parse(original)), original);
 });
 
-Deno.test("a real HomeBank 5.4.2 save round-trips byte for byte", () => {
+test("a real HomeBank 5.4.2 save round-trips byte for byte", () => {
   const original = save("example-v5.4.2.xhb");
   assertEquals(serialize(parse(original)), original);
 });
 
-Deno.test("a whole file is a flat list of elements under <homebank>, one array per entity", () => {
+test("a whole file is a flat list of elements under <homebank>, one array per entity", () => {
   const xml = [
     '<?xml version="1.0"?>',
     '<homebank v="1.3" d="050402">',
@@ -50,7 +55,7 @@ Deno.test("a whole file is a flat list of elements under <homebank>, one array p
   assertEquals(xhb.operations.length, 1);
 });
 
-Deno.test("serialize writes entities in HomeBank's order, whatever order they were read in", () => {
+test("serialize writes entities in HomeBank's order, whatever order they were read in", () => {
   const shuffled = [
     '<?xml version="1.0"?>',
     '<homebank v="1.3" d="050402">',
@@ -86,7 +91,7 @@ Deno.test("serialize writes entities in HomeBank's order, whatever order they we
   );
 });
 
-Deno.test("elements the format does not define are dropped, as is a missing <properties>", () => {
+test("elements the format does not define are dropped, as is a missing <properties>", () => {
   const xml = [
     '<?xml version="1.0"?>',
     '<homebank v="1.3" d="050402">',

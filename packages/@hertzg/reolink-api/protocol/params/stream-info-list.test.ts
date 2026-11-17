@@ -1,8 +1,9 @@
+import { test } from "node:test";
 import { assertEquals, assertThrows } from "@std/assert";
 import { parse } from "@std/xml";
 import { streamInfoList } from "./stream-info-list.ts";
 
-Deno.test("streamInfoList decodes a cmd 146 reply with both streams", () => {
+test("streamInfoList decodes a cmd 146 reply with both streams", () => {
   const root = parse(
     '<StreamInfoList version="1.1"><StreamInfo><channelBits>1</channelBits>' +
       "<encodeTable><type>mainStream</type>" +
@@ -46,7 +47,7 @@ Deno.test("streamInfoList decodes a cmd 146 reply with both streams", () => {
   });
 });
 
-Deno.test("streamInfoList decodes a table without defaultGop", () => {
+test("streamInfoList decodes a table without defaultGop", () => {
   const root = parse(
     '<StreamInfoList version="1.1"><StreamInfo><channelBits>2</channelBits>' +
       "<encodeTable><type>subStream</type>" +
@@ -66,7 +67,7 @@ Deno.test("streamInfoList decodes a table without defaultGop", () => {
   });
 });
 
-Deno.test("streamInfoList rejects an unknown stream type", () => {
+test("streamInfoList rejects an unknown stream type", () => {
   const root = parse(
     '<StreamInfoList version="1.1"><StreamInfo><channelBits>1</channelBits>' +
       "<encodeTable><type>thirdStream</type>" +
@@ -79,7 +80,7 @@ Deno.test("streamInfoList rejects an unknown stream type", () => {
   assertThrows(() => streamInfoList.decode(root), Error, "<type>");
 });
 
-Deno.test("streamInfoList round-trips through encode and decode", () => {
+test("streamInfoList round-trips through encode and decode", () => {
   const value = {
     StreamInfo: [{
       channelBits: 3,

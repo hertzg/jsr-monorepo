@@ -53,10 +53,12 @@ type PendingRequest = {
  *
  * @example Basic client usage
  * ```ts ignore
+ * import { connect } from "node:net";
+ * import { Duplex } from "node:stream";
  * import { createClient } from "@hertzg/routeros-api/client";
  *
- * // Create connection (example uses Deno, but works with any streams)
- * const conn = await Deno.connect({ hostname: "192.168.88.1", port: 8728 });
+ * // Create connection (example uses node:net, but works with any streams)
+ * const conn = Duplex.toWeb(connect({ host: "192.168.88.1", port: 8728 }));
  *
  * // Create client
  * const client = createClient({
@@ -73,9 +75,11 @@ type PendingRequest = {
  *
  * @example Concurrent commands
  * ```ts ignore
+ * import { connect } from "node:net";
+ * import { Duplex } from "node:stream";
  * import { createClient } from "@hertzg/routeros-api/client";
  *
- * const conn = await Deno.connect({ hostname: "192.168.88.1", port: 8728 });
+ * const conn = Duplex.toWeb(connect({ host: "192.168.88.1", port: 8728 }));
  * const client = createClient({
  *   readable: conn.readable,
  *   writable: conn.writable

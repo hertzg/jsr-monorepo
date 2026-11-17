@@ -1,3 +1,4 @@
+import { test } from "node:test";
 import { assertEquals } from "@std/assert";
 import {
   MP3_CHANNEL_MODE,
@@ -9,8 +10,8 @@ import {
   mp3FrameHeader,
 } from "./mod.ts";
 
-Deno.test("mp3FrameHeader", async (t) => {
-  await t.step("round-trips an MPEG-1 Layer III stereo header", () => {
+test("mp3FrameHeader", async (t) => {
+  await t.test("round-trips an MPEG-1 Layer III stereo header", () => {
     const coder = mp3FrameHeader();
     const header: Mp3FrameHeader = {
       frameSync: MP3_FRAME_SYNC,
@@ -37,7 +38,7 @@ Deno.test("mp3FrameHeader", async (t) => {
     assertEquals(decoded, header);
   });
 
-  await t.step(
+  await t.test(
     "round-trips an MPEG-2 Layer II mono header with padding",
     () => {
       const coder = mp3FrameHeader();
@@ -67,7 +68,7 @@ Deno.test("mp3FrameHeader", async (t) => {
     },
   );
 
-  await t.step("decodes a known MPEG-1 Layer III header", () => {
+  await t.test("decodes a known MPEG-1 Layer III header", () => {
     // deno-fmt-ignore
     const wire = new Uint8Array([
       0xff, 0xfb, // frameSync + mpegVersion + layer + protectionAbsent
@@ -93,7 +94,7 @@ Deno.test("mp3FrameHeader", async (t) => {
     assertEquals(decoded.emphasis, 0);
   });
 
-  await t.step(
+  await t.test(
     "decodes a known MPEG-2.5 Layer I header with CRC present",
     () => {
       // deno-fmt-ignore
@@ -113,7 +114,7 @@ Deno.test("mp3FrameHeader", async (t) => {
     },
   );
 
-  await t.step("frame sync is 11 bits of all ones", () => {
+  await t.test("frame sync is 11 bits of all ones", () => {
     assertEquals(MP3_FRAME_SYNC, 0b111_1111_1111);
     assertEquals(MP3_FRAME_SYNC, 0x7ff);
   });

@@ -1,3 +1,4 @@
+import { test } from "node:test";
 import { assertEquals } from "@std/assert";
 import { assertSpyCalls, resolvesNext, spy } from "@std/testing/mock";
 import { createEncryption, type Encryption } from "./client/encryption.ts";
@@ -42,7 +43,7 @@ function requestAt(
   return fetch.calls[index].args[0] as Request;
 }
 
-Deno.test("execute batches gdprText actions into one request and aligns results", async () => {
+test("execute batches gdprText actions into one request and aligns results", async () => {
   const encryption = newEncryption();
   const actions: Action[] = [
     [ACT.GET, "IGD_DEV_INFO"],
@@ -76,7 +77,7 @@ Deno.test("execute batches gdprText actions into one request and aligns results"
   });
 });
 
-Deno.test("execute pads unanswered actions with null", async () => {
+test("execute pads unanswered actions with null", async () => {
   const encryption = newEncryption();
   const actions: Action[] = [
     [ACT.GET, "IGD_DEV_INFO"],
@@ -104,7 +105,7 @@ Deno.test("execute pads unanswered actions with null", async () => {
   assertEquals(result.actions.map((action) => action.req), actions);
 });
 
-Deno.test("execute surfaces the router error code", async () => {
+test("execute surfaces the router error code", async () => {
   const encryption = newEncryption();
   const fetch = spy(resolvesNext([cannedResponse(encryption, "[error]5")]));
 
@@ -120,7 +121,7 @@ Deno.test("execute surfaces the router error code", async () => {
   assertEquals(result.actions[0].res, null);
 });
 
-Deno.test("execute short-circuits on a transport failure", async () => {
+test("execute short-circuits on a transport failure", async () => {
   const encryption = newEncryption();
   const fetch = spy(resolvesNext([new Response("nope", { status: 401 })]));
 
@@ -135,7 +136,7 @@ Deno.test("execute short-circuits on a transport failure", async () => {
   assertEquals(result, { error: -1, actions: [] });
 });
 
-Deno.test("execute honours an explicit authTimes", async () => {
+test("execute honours an explicit authTimes", async () => {
   const encryption = newEncryption();
   const fetch = spy(resolvesNext([
     cannedResponse(encryption, "[IGD_DEV_INFO]0\nmodelName=MR600\n"),
@@ -157,7 +158,7 @@ Deno.test("execute honours an explicit authTimes", async () => {
   );
 });
 
-Deno.test("execute sends one gdprJson request per action", async () => {
+test("execute sends one gdprJson request per action", async () => {
   const encryption = newEncryption();
   const actions: Action[] = [
     [ACT.GET, "DEV2_DEV_INFO"],
@@ -190,7 +191,7 @@ Deno.test("execute sends one gdprJson request per action", async () => {
   });
 });
 
-Deno.test("execute decodes the plain-text reply of a gdprJson cgi action", async () => {
+test("execute decodes the plain-text reply of a gdprJson cgi action", async () => {
   const encryption = newEncryption();
   const actions: Action[] = [[ACT.CGI, "/cgi/logout"]];
   const fetch = spy(resolvesNext([cannedResponse(encryption, "$.ret=0")]));
@@ -210,7 +211,7 @@ Deno.test("execute decodes the plain-text reply of a gdprJson cgi action", async
   });
 });
 
-Deno.test("execute keeps the first error reported across gdprJson round trips", async () => {
+test("execute keeps the first error reported across gdprJson round trips", async () => {
   const encryption = newEncryption();
   const actions: Action[] = [
     [ACT.GET, "DEV2_DEV_INFO"],

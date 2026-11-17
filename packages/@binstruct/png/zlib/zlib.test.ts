@@ -1,9 +1,10 @@
+import { test } from "node:test";
 import { assertEquals } from "@std/assert";
 import { zlibSync } from "fflate";
 import { zlibUncompressedCoder } from "./zlib.ts";
 import { encode } from "@hertzg/binstruct";
 
-Deno.test("zlibUncompressedCoder() - decodes zlib compressed data and extracts header fields", () => {
+test("zlibUncompressedCoder() - decodes zlib compressed data and extracts header fields", () => {
   const coder = zlibUncompressedCoder();
 
   const originalUncompressed = new TextEncoder().encode("Hello, PNG!");
@@ -33,7 +34,7 @@ Deno.test("zlibUncompressedCoder() - decodes zlib compressed data and extracts h
   assertEquals(bytesRead, originalCompressed.length);
 });
 
-Deno.test("zlibUncompressedCoder() - validates real zlib compression", async (t) => {
+test("zlibUncompressedCoder() - validates real zlib compression", async (t) => {
   const coder = zlibUncompressedCoder();
 
   const originalUncompressed = new TextEncoder().encode(
@@ -58,7 +59,7 @@ Deno.test("zlibUncompressedCoder() - validates real zlib compression", async (t)
     { cLevel: 8, fLevel: 2 },
     { cLevel: 9, fLevel: 3 },
   ]) {
-    await t.step(`compression level ${cLevel}`, () => {
+    await t.test(`compression level ${cLevel}`, () => {
       const originalCompressed = zlibSync(originalUncompressed, {
         level: cLevel as 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9,
       });

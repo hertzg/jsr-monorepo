@@ -1,3 +1,4 @@
+import { test } from "node:test";
 import { assertEquals } from "@std/assert";
 import { assertSpyCalls, spy } from "@std/testing/mock";
 import { lazy } from "./lazy.ts";
@@ -7,7 +8,7 @@ import { refine } from "../refine/refine.ts";
 import { struct } from "../struct/struct.ts";
 import { bytes } from "../bytes/bytes.ts";
 
-Deno.test("lazy - round-trips like the coder it wraps", () => {
+test("lazy - round-trips like the coder it wraps", () => {
   const inner = u8be();
   const coder = lazy(() => inner);
 
@@ -24,7 +25,7 @@ Deno.test("lazy - round-trips like the coder it wraps", () => {
   assertEquals(read, referenceRead);
 });
 
-Deno.test("lazy - does not call the factory until first use", () => {
+test("lazy - does not call the factory until first use", () => {
   const factory = spy(() => u8be());
   const coder = lazy(factory);
 
@@ -36,7 +37,7 @@ Deno.test("lazy - does not call the factory until first use", () => {
   assertSpyCalls(factory, 1);
 });
 
-Deno.test("lazy - builds the inner coder at most once across many calls", () => {
+test("lazy - builds the inner coder at most once across many calls", () => {
   const factory = spy(() => u8be());
   const coder = lazy(factory);
 
@@ -49,7 +50,7 @@ Deno.test("lazy - builds the inner coder at most once across many calls", () => 
   assertSpyCalls(factory, 1);
 });
 
-Deno.test("lazy - shares a single context across nested encode/decode calls", () => {
+test("lazy - shares a single context across nested encode/decode calls", () => {
   const inner = struct({ a: u8be(), b: u8be() });
   const coder = lazy(() => inner);
 
@@ -117,7 +118,7 @@ function makeFrameCoder(): Coder<Frame> {
   return frameCoder;
 }
 
-Deno.test("lazy - self-referential graph round-trips through multiple levels", () => {
+test("lazy - self-referential graph round-trips through multiple levels", () => {
   const frameCoder = makeFrameCoder();
   const value: Frame = {
     hasNext: 1,
@@ -138,7 +139,7 @@ Deno.test("lazy - self-referential graph round-trips through multiple levels", (
   assertEquals(written, read);
 });
 
-Deno.test("lazy - self-referential graph round-trips a single leaf", () => {
+test("lazy - self-referential graph round-trips a single leaf", () => {
   const frameCoder = makeFrameCoder();
   const value: Frame = { hasNext: 0, rest: new Uint8Array(0) };
 
@@ -159,7 +160,7 @@ interface Pong {
   ttl: number;
 }
 
-Deno.test("lazy - breaks a build-time cycle between two struct coders", () => {
+test("lazy - breaks a build-time cycle between two struct coders", () => {
   const pingCoder: Coder<Ping> = struct({
     kind: u8be() as unknown as Coder<0>,
     next: lazy(() => pongCoder),

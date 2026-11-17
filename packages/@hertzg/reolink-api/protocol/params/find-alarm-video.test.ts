@@ -1,8 +1,9 @@
+import { test } from "node:test";
 import { assertEquals } from "@std/assert";
 import { parse } from "@std/xml";
 import { findAlarmVideo } from "./find-alarm-video.ts";
 
-Deno.test("findAlarmVideo decodes the cmd 272 reply netserver writes", () => {
+test("findAlarmVideo decodes the cmd 272 reply netserver writes", () => {
   const root = parse(
     '<findAlarmVideo version="1.1"><channelId>0</channelId>' +
       "<fileHandle>7</fileHandle></findAlarmVideo>",
@@ -11,7 +12,7 @@ Deno.test("findAlarmVideo decodes the cmd 272 reply netserver writes", () => {
   assertEquals(findAlarmVideo.decode(root), { channelId: 0, fileHandle: 7 });
 });
 
-Deno.test("findAlarmVideo decodes a cmd 272 request", () => {
+test("findAlarmVideo decodes a cmd 272 request", () => {
   const root = parse(
     "<findAlarmVideo><channelId>1</channelId><streamType>2</streamType>" +
       "<startTime><year>2026</year><month>3</month><day>4</day>" +
@@ -37,7 +38,7 @@ Deno.test("findAlarmVideo decodes a cmd 272 request", () => {
   });
 });
 
-Deno.test("findAlarmVideo round-trips through encode and decode", () => {
+test("findAlarmVideo round-trips through encode and decode", () => {
   const value = {
     channelId: 3,
     fileHandle: 21,
@@ -53,7 +54,7 @@ Deno.test("findAlarmVideo round-trips through encode and decode", () => {
   );
 });
 
-Deno.test("findAlarmVideo encodes a cmd 274 stop with only the handle", () => {
+test("findAlarmVideo encodes a cmd 274 stop with only the handle", () => {
   assertEquals(
     findAlarmVideo.encode({ fileHandle: 9 }),
     '<findAlarmVideo version="1.1"><fileHandle>9</fileHandle></findAlarmVideo>',

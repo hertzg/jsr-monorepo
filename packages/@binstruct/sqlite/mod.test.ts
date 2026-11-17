@@ -1,3 +1,4 @@
+import { test } from "node:test";
 import { assertEquals } from "@std/assert";
 import {
   SQLITE_HEADER_SIZE,
@@ -7,8 +8,8 @@ import {
   sqliteHeader,
 } from "./mod.ts";
 
-Deno.test("sqliteHeader", async (t) => {
-  await t.step("round-trips a freshly-created database header", () => {
+test("sqliteHeader", async (t) => {
+  await t.test("round-trips a freshly-created database header", () => {
     const coder = sqliteHeader();
     const header: SqliteHeader = {
       magic: SQLITE_MAGIC,
@@ -45,7 +46,7 @@ Deno.test("sqliteHeader", async (t) => {
     assertEquals(decoded, header);
   });
 
-  await t.step("round-trips a WAL-mode header with vacuum enabled", () => {
+  await t.test("round-trips a WAL-mode header with vacuum enabled", () => {
     const coder = sqliteHeader();
     const header: SqliteHeader = {
       magic: SQLITE_MAGIC,
@@ -82,7 +83,7 @@ Deno.test("sqliteHeader", async (t) => {
     assertEquals(decoded, header);
   });
 
-  await t.step("decodes a known wire-format header", () => {
+  await t.test("decodes a known wire-format header", () => {
     // deno-fmt-ignore
     const wire = new Uint8Array([
       0x53, 0x51, 0x4c, 0x69, 0x74, 0x65, 0x20, 0x66, 0x6f, 0x72, 0x6d, 0x61, 0x74, 0x20, 0x33, 0x00, // magic
@@ -130,7 +131,7 @@ Deno.test("sqliteHeader", async (t) => {
     assertEquals(decoded.reservedForExpansion, new Uint8Array(20));
   });
 
-  await t.step("magic matches the ASCII bytes SQLite format 3\\0", () => {
+  await t.test("magic matches the ASCII bytes SQLite format 3\\0", () => {
     const buffer = new Uint8Array(SQLITE_HEADER_SIZE);
     sqliteHeader().encode({
       magic: SQLITE_MAGIC,

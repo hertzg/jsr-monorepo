@@ -1,8 +1,9 @@
+import { test } from "node:test";
 import { assertEquals, assertThrows } from "@std/assert";
 import { parse } from "@std/xml";
 import { ptz3DLocation } from "./ptz3-d-location.ts";
 
-Deno.test("ptz3DLocation decodes a request carrying every field", () => {
+test("ptz3DLocation decodes a request carrying every field", () => {
   const root = parse(
     '<Ptz3DLocation version="1.1"><channelId>1</channelId>' +
       "<topLeftX>12.5</topLeftX><topLeftY>34.25</topLeftY>" +
@@ -21,7 +22,7 @@ Deno.test("ptz3DLocation decodes a request carrying every field", () => {
   });
 });
 
-Deno.test("ptz3DLocation round-trips through encode and decode", () => {
+test("ptz3DLocation round-trips through encode and decode", () => {
   const value = {
     channelId: 0,
     topLeftX: 100.125,
@@ -37,7 +38,7 @@ Deno.test("ptz3DLocation round-trips through encode and decode", () => {
   assertEquals(ptz3DLocation.decode(parse(xml).root), value);
 });
 
-Deno.test("ptz3DLocation decodes a request without a stream type", () => {
+test("ptz3DLocation decodes a request without a stream type", () => {
   const root = parse(
     '<Ptz3DLocation version="1.1"><width>64</width><height>48</height></Ptz3DLocation>',
   ).root;
@@ -45,7 +46,7 @@ Deno.test("ptz3DLocation decodes a request without a stream type", () => {
   assertEquals(ptz3DLocation.decode(root), { width: 64, height: 48 });
 });
 
-Deno.test("ptz3DLocation rejects a stream type the firmware does not map", () => {
+test("ptz3DLocation rejects a stream type the firmware does not map", () => {
   const root = parse(
     '<Ptz3DLocation version="1.1"><streamType>thirdStream</streamType></Ptz3DLocation>',
   ).root;

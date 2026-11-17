@@ -1,8 +1,9 @@
+import { test } from "node:test";
 import { assertEquals, assertThrows } from "@std/assert";
 import { parse } from "@std/xml";
 import { upgradeState } from "./upgrade-state.ts";
 
-Deno.test("upgradeState decodes the reply net_online_update_state_s2x writes", () => {
+test("upgradeState decodes the reply net_online_update_state_s2x writes", () => {
   const root = parse(
     '<upgradeState version="1.1"><downloadSize>524288</downloadSize>' +
       "<packetSize>33554432</packetSize><state>downloading</state></upgradeState>",
@@ -15,7 +16,7 @@ Deno.test("upgradeState decodes the reply net_online_update_state_s2x writes", (
   });
 });
 
-Deno.test("upgradeState round-trips a full value", () => {
+test("upgradeState round-trips a full value", () => {
   const value = {
     downloadSize: 1024,
     packetSize: 2048,
@@ -28,7 +29,7 @@ Deno.test("upgradeState round-trips a full value", () => {
   );
 });
 
-Deno.test("upgradeState reads none, the state the writer uses for an unknown number", () => {
+test("upgradeState reads none, the state the writer uses for an unknown number", () => {
   const root = parse(
     '<upgradeState version="1.1"><downloadSize>0</downloadSize>' +
       "<packetSize>0</packetSize><state>none</state></upgradeState>",
@@ -37,7 +38,7 @@ Deno.test("upgradeState reads none, the state the writer uses for an unknown num
   assertEquals(upgradeState.decode(root).state, "none");
 });
 
-Deno.test("upgradeState rejects a state neither direction knows", () => {
+test("upgradeState rejects a state neither direction knows", () => {
   const root = parse(
     '<upgradeState version="1.1"><state>paused</state></upgradeState>',
   ).root;

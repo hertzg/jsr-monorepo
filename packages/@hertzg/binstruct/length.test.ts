@@ -1,10 +1,11 @@
+import { test } from "node:test";
 import { assertEquals, assertThrows } from "@std/assert";
 import { isValidLength, lengthRefGet } from "./length.ts";
 import { type Context, createContext } from "./core.ts";
 import { u8be } from "./numeric/numeric.ts";
 import { ref, refSetValue } from "./ref/ref.ts";
 
-Deno.test("isValidLength", () => {
+test("isValidLength", () => {
   // Valid lengths
   assertEquals(isValidLength(0), true);
   assertEquals(isValidLength(1), true);
@@ -21,8 +22,8 @@ Deno.test("isValidLength", () => {
   assertEquals(isValidLength(-Infinity), false);
 });
 
-Deno.test("lengthRefGetSet", async (t) => {
-  await t.step("without context", () => {
+test("lengthRefGetSet", async (t) => {
+  await t.test("without context", () => {
     const lengthCoder = u8be();
     const lengthRef = ref(lengthCoder);
     assertEquals(lengthRefGet(null, 5), 5);
@@ -31,7 +32,7 @@ Deno.test("lengthRefGetSet", async (t) => {
     assertEquals(lengthRefGet(undefined, lengthRef), undefined);
   });
 
-  await t.step("with context", () => {
+  await t.test("with context", () => {
     const context = createContext("encode");
     const lengthCoder = u8be();
     const lengthRef = ref(lengthCoder);

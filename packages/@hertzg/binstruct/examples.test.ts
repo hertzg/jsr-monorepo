@@ -1,11 +1,12 @@
+import { test } from "node:test";
 import { assertEquals } from "@std/assert";
 import { array, bytes, ref, struct } from "./mod.ts";
 import { f32be, f64be, s32be, u16be, u32be, u8be } from "./numeric/numeric.ts";
 import { string } from "./string/string.ts";
 
-Deno.test("Comprehensive examples showcasing all library functionality", async (t) => {
+test("Comprehensive examples showcasing all library functionality", async (t) => {
   // Example 1: Basic struct with all numeric types
-  await t.step("Basic struct with all numeric types", () => {
+  await t.test("Basic struct with all numeric types", () => {
     const basicStructCoder = struct({
       unsigned8: u8be(),
       unsigned16: u16be(),
@@ -40,7 +41,7 @@ Deno.test("Comprehensive examples showcasing all library functionality", async (
   });
 
   // Example 2: String handling - all three types
-  await t.step("String handling - all three types", () => {
+  await t.test("String handling - all three types", () => {
     const stringStructCoder = struct({
       lengthPrefixed: string(u16be()), // length-prefixed string
       nullTerminated: string(), // null-terminated string
@@ -66,7 +67,7 @@ Deno.test("Comprehensive examples showcasing all library functionality", async (
   });
 
   // Example 3: Array handling - length-prefixed and fixed-length
-  await t.step("Array handling - length-prefixed and fixed-length", () => {
+  await t.test("Array handling - length-prefixed and fixed-length", () => {
     const arrayStructCoder = struct({
       lengthPrefixed: array(u16be(), u8be()), // length-prefixed array
       fixedLength: array(u16be(), 3), // fixed-length array
@@ -90,7 +91,7 @@ Deno.test("Comprehensive examples showcasing all library functionality", async (
   });
 
   // Example 4: Reference system - basic references
-  await t.step("Reference system - basic references", () => {
+  await t.test("Reference system - basic references", () => {
     const lengthCoder = u16be();
     const dataCoder = struct({
       length: lengthCoder,
@@ -115,7 +116,7 @@ Deno.test("Comprehensive examples showcasing all library functionality", async (
   });
 
   // Example 5: Bytes handling - fixed and variable length
-  await t.step("Bytes handling - fixed and variable length", () => {
+  await t.test("Bytes handling - fixed and variable length", () => {
     const bytesStructCoder = struct({
       fixedBytes: bytes(5),
       variableBytes: bytes(),
@@ -140,7 +141,7 @@ Deno.test("Comprehensive examples showcasing all library functionality", async (
   });
 
   // Example 6: Complex nested structures
-  await t.step("Complex nested structures", () => {
+  await t.test("Complex nested structures", () => {
     const addressCoder = struct({
       street: string(u16be()),
       city: string(u16be()),
@@ -187,7 +188,7 @@ Deno.test("Comprehensive examples showcasing all library functionality", async (
   });
 
   // Example 7: Mixed data types with references
-  await t.step("Mixed data types with references", () => {
+  await t.test("Mixed data types with references", () => {
     const headerLengthCoder = u16be();
     const dataLengthCoder = u16be();
 
@@ -223,7 +224,7 @@ Deno.test("Comprehensive examples showcasing all library functionality", async (
   });
 
   // Example 8: Protocol-like structure with TLV and complex references
-  await t.step(
+  await t.test(
     "Protocol-like structure with TLV and complex references",
     () => {
       const tlvLengthCoder = u16be();

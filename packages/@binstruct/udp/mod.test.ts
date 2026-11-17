@@ -1,3 +1,4 @@
+import { test } from "node:test";
 import { assertEquals } from "@std/assert";
 import { UDP_HEADER_SIZE, udpPacket } from "./mod.ts";
 import type { UdpPacket } from "./mod.ts";
@@ -16,8 +17,8 @@ function makeDatagram(
   };
 }
 
-Deno.test("udpPacket", async (t) => {
-  await t.step("round-trip with non-empty payload", () => {
+test("udpPacket", async (t) => {
+  await t.test("round-trip with non-empty payload", () => {
     const coder = udpPacket();
     const payload = new Uint8Array([0xde, 0xad, 0xbe, 0xef]);
     const datagram = makeDatagram(payload, {
@@ -39,7 +40,7 @@ Deno.test("udpPacket", async (t) => {
     assertEquals(decoded.payload, payload);
   });
 
-  await t.step("zero-length payload (header-only)", () => {
+  await t.test("zero-length payload (header-only)", () => {
     const coder = udpPacket();
     const datagram = makeDatagram(new Uint8Array(0), {
       srcPort: 1234,
@@ -56,7 +57,7 @@ Deno.test("udpPacket", async (t) => {
     assertEquals(decoded.payload.length, 0);
   });
 
-  await t.step("checksum=0 (IPv4 'not computed')", () => {
+  await t.test("checksum=0 (IPv4 'not computed')", () => {
     const coder = udpPacket();
     const payload = new Uint8Array([0x10, 0x20, 0x30]);
     const datagram = makeDatagram(payload, {
@@ -73,7 +74,7 @@ Deno.test("udpPacket", async (t) => {
     assertEquals(decoded.payload, payload);
   });
 
-  await t.step("port boundary values", () => {
+  await t.test("port boundary values", () => {
     const coder = udpPacket();
     const payload = new Uint8Array([0xff]);
     const cases: Array<[number, number]> = [
@@ -95,7 +96,7 @@ Deno.test("udpPacket", async (t) => {
     }
   });
 
-  await t.step("encodes header bytes in network order", () => {
+  await t.test("encodes header bytes in network order", () => {
     const coder = udpPacket();
     const payload = new Uint8Array([0xaa]);
     const datagram = makeDatagram(payload, {
@@ -118,7 +119,7 @@ Deno.test("udpPacket", async (t) => {
     assertEquals(buffer.subarray(0, written), expected);
   });
 
-  await t.step(
+  await t.test(
     "decode honours length field even when buffer is larger",
     () => {
       const coder = udpPacket();
@@ -139,7 +140,7 @@ Deno.test("udpPacket", async (t) => {
     },
   );
 
-  await t.step("payload longer than length is truncated on encode", () => {
+  await t.test("payload longer than length is truncated on encode", () => {
     const coder = udpPacket();
     const buffer = new Uint8Array(16);
     const written = coder.encode({

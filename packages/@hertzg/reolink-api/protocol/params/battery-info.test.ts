@@ -1,8 +1,9 @@
+import { test } from "node:test";
 import { assertEquals, assertThrows } from "@std/assert";
 import { parse } from "@std/xml";
 import { batteryInfo } from "./battery-info.ts";
 
-Deno.test("batteryInfo decodes the cmd 253 reply", () => {
+test("batteryInfo decodes the cmd 253 reply", () => {
   const root = parse(
     '<BatteryInfo version="1.1"><channelId>0</channelId>' +
       "<chargeStatus>charging</chargeStatus><adapterStatus>solarPanel</adapterStatus>" +
@@ -24,7 +25,7 @@ Deno.test("batteryInfo decodes the cmd 253 reply", () => {
   });
 });
 
-Deno.test("batteryInfo round-trips through encode and decode", () => {
+test("batteryInfo round-trips through encode and decode", () => {
   const value = {
     channelId: 0,
     chargeStatus: "none" as const,
@@ -42,7 +43,7 @@ Deno.test("batteryInfo round-trips through encode and decode", () => {
   assertEquals(batteryInfo.decode(parse(xml).root), value);
 });
 
-Deno.test("batteryInfo rejects an unknown charge state", () => {
+test("batteryInfo rejects an unknown charge state", () => {
   const root = parse(
     '<BatteryInfo version="1.1"><channelId>0</channelId>' +
       "<chargeStatus>draining</chargeStatus><adapterStatus>none</adapterStatus>" +

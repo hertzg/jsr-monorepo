@@ -1,8 +1,9 @@
+import { test } from "node:test";
 import { assertEquals, assertThrows } from "@std/assert";
 import { parse } from "@std/xml";
 import { inputAdvanceCfg } from "./input-advance-cfg.ts";
 
-Deno.test("inputAdvanceCfg decodes the full reply the camera writes", () => {
+test("inputAdvanceCfg decodes the full reply the camera writes", () => {
   const root = parse(
     '<InputAdvanceCfg version="1.1"><channelId>0</channelId>' +
       "<digitalChannel>1</digitalChannel>" +
@@ -68,7 +69,7 @@ Deno.test("inputAdvanceCfg decodes the full reply the camera writes", () => {
   });
 });
 
-Deno.test("inputAdvanceCfg decodes a channel without ISP settings", () => {
+test("inputAdvanceCfg decodes a channel without ISP settings", () => {
   const root = parse(
     '<InputAdvanceCfg version="1.1"><channelId>3</channelId>' +
       "<digitalChannel>0</digitalChannel></InputAdvanceCfg>",
@@ -80,7 +81,7 @@ Deno.test("inputAdvanceCfg decodes a channel without ISP settings", () => {
   });
 });
 
-Deno.test("inputAdvanceCfg round-trips through encode and decode", () => {
+test("inputAdvanceCfg round-trips through encode and decode", () => {
   const value = {
     channelId: 1,
     Exposure: { mode: "gainFist" as const, gainLevel: 55 },
@@ -98,7 +99,7 @@ Deno.test("inputAdvanceCfg round-trips through encode and decode", () => {
   );
 });
 
-Deno.test("inputAdvanceCfg throws on a bright/dark block without mode", () => {
+test("inputAdvanceCfg throws on a bright/dark block without mode", () => {
   const root = parse(
     "<InputAdvanceCfg><bdNightColor><bright><cur>1</cur></bright>" +
       "</bdNightColor></InputAdvanceCfg>",
@@ -107,7 +108,7 @@ Deno.test("inputAdvanceCfg throws on a bright/dark block without mode", () => {
   assertThrows(() => inputAdvanceCfg.decode(root), Error, "<mode>");
 });
 
-Deno.test("inputAdvanceCfg rejects a shutter level the firmware does not name", () => {
+test("inputAdvanceCfg rejects a shutter level the firmware does not name", () => {
   const root = parse(
     "<InputAdvanceCfg><Exposure><shutterLevel>1/90</shutterLevel>" +
       "</Exposure></InputAdvanceCfg>",

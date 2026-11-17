@@ -1,3 +1,4 @@
+import { test } from "node:test";
 import { assert, assertEquals } from "@std/assert";
 import { parseAddressv6 } from "./addressv6.ts";
 import {
@@ -16,12 +17,12 @@ import {
   isAddressv6Unspecified,
 } from "./classifyv6.ts";
 
-Deno.test("isAddressv6Loopback", async (t) => {
-  await t.step("matches ::1", () => {
+test("isAddressv6Loopback", async (t) => {
+  await t.test("matches ::1", () => {
     assert(isAddressv6Loopback(parseAddressv6("::1").address));
   });
 
-  await t.step("rejects non-loopback", () => {
+  await t.test("rejects non-loopback", () => {
     assertEquals(isAddressv6Loopback(parseAddressv6("::").address), false);
     assertEquals(isAddressv6Loopback(parseAddressv6("::2").address), false);
     assertEquals(
@@ -31,12 +32,12 @@ Deno.test("isAddressv6Loopback", async (t) => {
   });
 });
 
-Deno.test("isAddressv6Unspecified", async (t) => {
-  await t.step("matches ::", () => {
+test("isAddressv6Unspecified", async (t) => {
+  await t.test("matches ::", () => {
     assert(isAddressv6Unspecified(parseAddressv6("::").address));
   });
 
-  await t.step("rejects non-unspecified", () => {
+  await t.test("rejects non-unspecified", () => {
     assertEquals(isAddressv6Unspecified(parseAddressv6("::1").address), false);
     assertEquals(
       isAddressv6Unspecified(parseAddressv6("2001:db8::1").address),
@@ -45,8 +46,8 @@ Deno.test("isAddressv6Unspecified", async (t) => {
   });
 });
 
-Deno.test("isAddressv6LinkLocal", async (t) => {
-  await t.step("matches fe80::/10", () => {
+test("isAddressv6LinkLocal", async (t) => {
+  await t.test("matches fe80::/10", () => {
     assert(isAddressv6LinkLocal(parseAddressv6("fe80::").address));
     assert(isAddressv6LinkLocal(parseAddressv6("fe80::1").address));
     assert(
@@ -56,14 +57,14 @@ Deno.test("isAddressv6LinkLocal", async (t) => {
     );
   });
 
-  await t.step("rejects non-link-local", () => {
+  await t.test("rejects non-link-local", () => {
     assertEquals(isAddressv6LinkLocal(parseAddressv6("fe7f::").address), false);
     assertEquals(isAddressv6LinkLocal(parseAddressv6("fec0::").address), false);
   });
 });
 
-Deno.test("isAddressv6Multicast", async (t) => {
-  await t.step("matches ff00::/8", () => {
+test("isAddressv6Multicast", async (t) => {
+  await t.test("matches ff00::/8", () => {
     assert(isAddressv6Multicast(parseAddressv6("ff00::").address));
     assert(isAddressv6Multicast(parseAddressv6("ff02::1").address));
     assert(
@@ -73,7 +74,7 @@ Deno.test("isAddressv6Multicast", async (t) => {
     );
   });
 
-  await t.step("rejects non-multicast", () => {
+  await t.test("rejects non-multicast", () => {
     assertEquals(isAddressv6Multicast(parseAddressv6("feff::").address), false);
     assertEquals(
       isAddressv6Multicast(parseAddressv6("fe80::1").address),
@@ -82,8 +83,8 @@ Deno.test("isAddressv6Multicast", async (t) => {
   });
 });
 
-Deno.test("isAddressv6UniqueLocal", async (t) => {
-  await t.step("matches fc00::/7", () => {
+test("isAddressv6UniqueLocal", async (t) => {
+  await t.test("matches fc00::/7", () => {
     assert(isAddressv6UniqueLocal(parseAddressv6("fc00::").address));
     assert(isAddressv6UniqueLocal(parseAddressv6("fc00::1").address));
     assert(isAddressv6UniqueLocal(parseAddressv6("fd00::1").address));
@@ -94,7 +95,7 @@ Deno.test("isAddressv6UniqueLocal", async (t) => {
     );
   });
 
-  await t.step("rejects non-unique-local", () => {
+  await t.test("rejects non-unique-local", () => {
     assertEquals(
       isAddressv6UniqueLocal(parseAddressv6("fbff::").address),
       false,
@@ -106,8 +107,8 @@ Deno.test("isAddressv6UniqueLocal", async (t) => {
   });
 });
 
-Deno.test("isAddressv6GlobalUnicast", async (t) => {
-  await t.step("matches 2000::/3", () => {
+test("isAddressv6GlobalUnicast", async (t) => {
+  await t.test("matches 2000::/3", () => {
     assert(isAddressv6GlobalUnicast(parseAddressv6("2000::").address));
     assert(isAddressv6GlobalUnicast(parseAddressv6("2001:db8::1").address));
     assert(
@@ -122,7 +123,7 @@ Deno.test("isAddressv6GlobalUnicast", async (t) => {
     );
   });
 
-  await t.step("rejects non-global-unicast", () => {
+  await t.test("rejects non-global-unicast", () => {
     assertEquals(
       isAddressv6GlobalUnicast(parseAddressv6("1fff::").address),
       false,
@@ -138,15 +139,15 @@ Deno.test("isAddressv6GlobalUnicast", async (t) => {
   });
 });
 
-Deno.test("isAddressv6Mapped", async (t) => {
-  await t.step("matches ::ffff:0:0/96", () => {
+test("isAddressv6Mapped", async (t) => {
+  await t.test("matches ::ffff:0:0/96", () => {
     assert(isAddressv6Mapped(parseAddressv6("::ffff:0.0.0.0").address));
     assert(isAddressv6Mapped(parseAddressv6("::ffff:192.168.1.1").address));
     assert(isAddressv6Mapped(parseAddressv6("::ffff:255.255.255.255").address));
     assert(isAddressv6Mapped(parseAddressv6("::ffff:c0a8:101").address));
   });
 
-  await t.step("rejects non-ipv4-mapped", () => {
+  await t.test("rejects non-ipv4-mapped", () => {
     assertEquals(isAddressv6Mapped(parseAddressv6("::1").address), false);
     assertEquals(
       isAddressv6Mapped(parseAddressv6("::fffe:c0a8:101").address),
@@ -155,14 +156,14 @@ Deno.test("isAddressv6Mapped", async (t) => {
   });
 });
 
-Deno.test("isAddressv6Translated", async (t) => {
-  await t.step("matches 64:ff9b::/96", () => {
+test("isAddressv6Translated", async (t) => {
+  await t.test("matches 64:ff9b::/96", () => {
     assert(isAddressv6Translated(parseAddressv6("64:ff9b::").address));
     assert(isAddressv6Translated(parseAddressv6("64:ff9b::1").address));
     assert(isAddressv6Translated(parseAddressv6("64:ff9b::ffff:ffff").address));
   });
 
-  await t.step("rejects non-ipv4-translated", () => {
+  await t.test("rejects non-ipv4-translated", () => {
     assertEquals(
       isAddressv6Translated(parseAddressv6("64:ff9a::").address),
       false,
@@ -174,8 +175,8 @@ Deno.test("isAddressv6Translated", async (t) => {
   });
 });
 
-Deno.test("isAddressv6Documentation", async (t) => {
-  await t.step("matches 2001:db8::/32", () => {
+test("isAddressv6Documentation", async (t) => {
+  await t.test("matches 2001:db8::/32", () => {
     assert(isAddressv6Documentation(parseAddressv6("2001:db8::").address));
     assert(isAddressv6Documentation(parseAddressv6("2001:db8::1").address));
     assert(
@@ -185,7 +186,7 @@ Deno.test("isAddressv6Documentation", async (t) => {
     );
   });
 
-  await t.step("rejects non-documentation", () => {
+  await t.test("rejects non-documentation", () => {
     assertEquals(
       isAddressv6Documentation(parseAddressv6("2001:db7::").address),
       false,
@@ -197,8 +198,8 @@ Deno.test("isAddressv6Documentation", async (t) => {
   });
 });
 
-Deno.test("isAddressv6Teredo", async (t) => {
-  await t.step("matches 2001::/32", () => {
+test("isAddressv6Teredo", async (t) => {
+  await t.test("matches 2001::/32", () => {
     assert(isAddressv6Teredo(parseAddressv6("2001::").address));
     assert(isAddressv6Teredo(parseAddressv6("2001::1").address));
     assert(
@@ -208,7 +209,7 @@ Deno.test("isAddressv6Teredo", async (t) => {
     );
   });
 
-  await t.step("rejects non-teredo", () => {
+  await t.test("rejects non-teredo", () => {
     assertEquals(
       isAddressv6Teredo(parseAddressv6("2000:ffff::").address),
       false,
@@ -217,8 +218,8 @@ Deno.test("isAddressv6Teredo", async (t) => {
   });
 });
 
-Deno.test("isAddressv6Benchmarking", async (t) => {
-  await t.step("matches 2001:2::/48", () => {
+test("isAddressv6Benchmarking", async (t) => {
+  await t.test("matches 2001:2::/48", () => {
     assert(isAddressv6Benchmarking(parseAddressv6("2001:2::").address));
     assert(isAddressv6Benchmarking(parseAddressv6("2001:2::1").address));
     assert(
@@ -228,7 +229,7 @@ Deno.test("isAddressv6Benchmarking", async (t) => {
     );
   });
 
-  await t.step("rejects non-benchmarking", () => {
+  await t.test("rejects non-benchmarking", () => {
     assertEquals(
       isAddressv6Benchmarking(parseAddressv6("2001:1:ffff::").address),
       false,
@@ -240,8 +241,8 @@ Deno.test("isAddressv6Benchmarking", async (t) => {
   });
 });
 
-Deno.test("isAddressv6Orchidv2", async (t) => {
-  await t.step("matches 2001:20::/28", () => {
+test("isAddressv6Orchidv2", async (t) => {
+  await t.test("matches 2001:20::/28", () => {
     assert(isAddressv6Orchidv2(parseAddressv6("2001:20::").address));
     assert(isAddressv6Orchidv2(parseAddressv6("2001:20::1").address));
     assert(
@@ -251,7 +252,7 @@ Deno.test("isAddressv6Orchidv2", async (t) => {
     );
   });
 
-  await t.step("rejects non-orchidv2", () => {
+  await t.test("rejects non-orchidv2", () => {
     assertEquals(
       isAddressv6Orchidv2(parseAddressv6("2001:1f:ffff::").address),
       false,
@@ -263,8 +264,8 @@ Deno.test("isAddressv6Orchidv2", async (t) => {
   });
 });
 
-Deno.test("classifyAddressv6", async (t) => {
-  await t.step("classifies all range types", () => {
+test("classifyAddressv6", async (t) => {
+  await t.test("classifies all range types", () => {
     assertEquals(classifyAddressv6(parseAddressv6("::1").address), "loopback");
     assertEquals(
       classifyAddressv6(parseAddressv6("::").address),
@@ -312,7 +313,7 @@ Deno.test("classifyAddressv6", async (t) => {
     );
   });
 
-  await t.step("returns unassigned for unknown ranges", () => {
+  await t.test("returns unassigned for unknown ranges", () => {
     assertEquals(
       classifyAddressv6(parseAddressv6("100::").address),
       "unassigned",
@@ -323,7 +324,7 @@ Deno.test("classifyAddressv6", async (t) => {
     );
   });
 
-  await t.step("most specific wins for overlapping ranges", () => {
+  await t.test("most specific wins for overlapping ranges", () => {
     // 2001:db8::/32 is documentation, not just teredo or global-unicast
     assertEquals(
       classifyAddressv6(parseAddressv6("2001:db8::1").address),

@@ -1,8 +1,9 @@
+import { test } from "node:test";
 import { assertEquals, assertStringIncludes, assertThrows } from "@std/assert";
 import { parse } from "@std/xml";
 import { dst } from "./dst.ts";
 
-Deno.test("dst decodes the element the firmware writes", () => {
+test("dst decodes the element the firmware writes", () => {
   const root = parse(
     '<Dst version="1.1"><enable>1</enable><offset>2</offset>' +
       "<startMonth>3</startMonth><startWeekIndex>4</startWeekIndex>" +
@@ -32,7 +33,7 @@ Deno.test("dst decodes the element the firmware writes", () => {
   });
 });
 
-Deno.test("dst round-trips through encode and decode", () => {
+test("dst round-trips through encode and decode", () => {
   const value = {
     enable: 0,
     offset: 1,
@@ -54,14 +55,14 @@ Deno.test("dst round-trips through encode and decode", () => {
   assertEquals(dst.decode(parse(dst.encode(value)).root), value);
 });
 
-Deno.test("dst writes the version child next to the version attribute", () => {
+test("dst writes the version child next to the version attribute", () => {
   assertStringIncludes(
     dst.encode({ version: 5 }),
     '<Dst version="1.1"><version>5</version></Dst>',
   );
 });
 
-Deno.test("dst rejects a weekday the firmware never writes", () => {
+test("dst rejects a weekday the firmware never writes", () => {
   const root = parse('<Dst version="1.1"><endWeekday>sun</endWeekday></Dst>')
     .root;
 

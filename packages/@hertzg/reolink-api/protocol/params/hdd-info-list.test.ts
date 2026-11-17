@@ -1,8 +1,9 @@
+import { test } from "node:test";
 import { assertEquals } from "@std/assert";
 import { parse } from "@std/xml";
 import { hddInfoList } from "./hdd-info-list.ts";
 
-Deno.test("hddInfoList decodes two devices in order", () => {
+test("hddInfoList decodes two devices in order", () => {
   const root = parse(
     '<HddInfoList version="1.1">' +
       "<HddInfo><number>0</number><capacity>119</capacity><capacityM>256</capacityM>" +
@@ -38,7 +39,7 @@ Deno.test("hddInfoList decodes two devices in order", () => {
   });
 });
 
-Deno.test("hddInfoList round-trips through encode and decode", () => {
+test("hddInfoList round-trips through encode and decode", () => {
   const value = {
     HddInfo: [{
       number: 1,
@@ -57,7 +58,7 @@ Deno.test("hddInfoList round-trips through encode and decode", () => {
   );
 });
 
-Deno.test("hddInfoList decodes a list without devices as empty", () => {
+test("hddInfoList decodes a list without devices as empty", () => {
   const root = parse('<HddInfoList version="1.1"></HddInfoList>').root;
 
   assertEquals(hddInfoList.decode(root), { HddInfo: [] });

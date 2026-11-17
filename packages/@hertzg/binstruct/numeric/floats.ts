@@ -53,7 +53,7 @@
  * @example Scientific data processing with floating-point:
  * ```ts
  * import { assertEquals } from "@std/assert";
- * import { f32be, f64le } from "@hertzg/binstruct/numeric";
+ * import { f32be, f32le, f64le } from "@hertzg/binstruct/numeric";
  * import { struct } from "@hertzg/binstruct/struct";
  *
  * // Scientific measurement structure with floating-point

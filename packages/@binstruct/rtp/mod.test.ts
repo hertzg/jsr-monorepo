@@ -1,3 +1,4 @@
+import { test } from "node:test";
 import { assertEquals } from "@std/assert";
 import {
   RTP_HEADER_MIN_SIZE,
@@ -6,8 +7,8 @@ import {
   rtpPacket,
 } from "./mod.ts";
 
-Deno.test("rtpPacket", async (t) => {
-  await t.step("round-trips a packet with no CSRC entries", () => {
+test("rtpPacket", async (t) => {
+  await t.test("round-trips a packet with no CSRC entries", () => {
     const coder = rtpPacket();
     const payload = new Uint8Array([0xde, 0xad, 0xbe, 0xef]);
     const packet: RtpPacket = {
@@ -34,7 +35,7 @@ Deno.test("rtpPacket", async (t) => {
     assertEquals(decoded, packet);
   });
 
-  await t.step("round-trips a packet with CSRC identifiers", () => {
+  await t.test("round-trips a packet with CSRC identifiers", () => {
     const coder = rtpPacket();
     const payload = new Uint8Array([0x01, 0x02, 0x03]);
     const packet: RtpPacket = {
@@ -63,7 +64,7 @@ Deno.test("rtpPacket", async (t) => {
     assertEquals(decoded, packet);
   });
 
-  await t.step("round-trips padding and extension bits", () => {
+  await t.test("round-trips padding and extension bits", () => {
     const coder = rtpPacket();
     const packet: RtpPacket = {
       versionFlags: {
@@ -88,7 +89,7 @@ Deno.test("rtpPacket", async (t) => {
     assertEquals(decoded.versionFlags.extension, 1);
   });
 
-  await t.step("decodes a known minimal wire packet", () => {
+  await t.test("decodes a known minimal wire packet", () => {
     // deno-fmt-ignore
     const wire = new Uint8Array([
       0x80, 0x00, 0x00, 0x01, // V=2,P=0,X=0,CC=0 | M=0,PT=0 | seq=1
@@ -112,7 +113,7 @@ Deno.test("rtpPacket", async (t) => {
     assertEquals(decoded.payload.length, 0);
   });
 
-  await t.step("decodes a known wire packet with two CSRC entries", () => {
+  await t.test("decodes a known wire packet with two CSRC entries", () => {
     // deno-fmt-ignore
     const wire = new Uint8Array([
       0x92, 0xe3, 0x12, 0x34, // V=2,P=0,X=1,CC=2 | M=1,PT=99 | seq=0x1234

@@ -1,8 +1,9 @@
+import { test } from "node:test";
 import { assertEquals, assertThrows } from "@std/assert";
 import { parse } from "@std/xml";
 import { ptzControl } from "./ptz-control.ts";
 
-Deno.test("ptzControl decodes a patrol request", () => {
+test("ptzControl decodes a patrol request", () => {
   const root = parse(
     '<PtzControl version="1.1"><channelId>0</channelId>' +
       "<command>startPatrol</command><patrolId>2</patrolId></PtzControl>",
@@ -15,7 +16,7 @@ Deno.test("ptzControl decodes a patrol request", () => {
   });
 });
 
-Deno.test("ptzControl round-trips through encode and decode", () => {
+test("ptzControl round-trips through encode and decode", () => {
   const value = {
     channelId: 1,
     command: "toPos" as const,
@@ -30,7 +31,7 @@ Deno.test("ptzControl round-trips through encode and decode", () => {
   assertEquals(ptzControl.decode(parse(ptzControl.encode(value)).root), value);
 });
 
-Deno.test("ptzControl rejects a command _get_ptz_cmd does not accept", () => {
+test("ptzControl rejects a command _get_ptz_cmd does not accept", () => {
   const root = parse("<PtzControl><command>spin</command></PtzControl>").root;
 
   assertThrows(() => ptzControl.decode(root), Error, "expected one of");

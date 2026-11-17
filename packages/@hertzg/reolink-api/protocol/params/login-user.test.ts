@@ -1,8 +1,9 @@
+import { test } from "node:test";
 import { assertEquals, assertThrows } from "@std/assert";
 import { parse } from "@std/xml";
 import { loginUser } from "./login-user.ts";
 
-Deno.test("loginUser decodes a hashed login", () => {
+test("loginUser decodes a hashed login", () => {
   const root = parse(
     '<LoginUser version="1.1"><userName>user-hash-abc123</userName>' +
       "<password>password-hash-def456</password><userVer>1</userVer>" +
@@ -16,7 +17,7 @@ Deno.test("loginUser decodes a hashed login", () => {
   });
 });
 
-Deno.test("loginUser decodes token scopes", () => {
+test("loginUser decodes token scopes", () => {
   const root = parse(
     "<LoginUser><authToken>token-abc</authToken><scopes>" +
       "<item><channelId>-1</channelId><privileges>privileges-all</privileges></item>" +
@@ -30,7 +31,7 @@ Deno.test("loginUser decodes token scopes", () => {
   ]);
 });
 
-Deno.test("loginUser round-trips through encode and decode", () => {
+test("loginUser round-trips through encode and decode", () => {
   const value = {
     userName: "user-hash-ghi789",
     password: "password-hash-jkl012",
@@ -46,7 +47,7 @@ Deno.test("loginUser round-trips through encode and decode", () => {
   assertEquals(loginUser.decode(parse(loginUser.encode(value)).root), value);
 });
 
-Deno.test("loginUser throws on a scope item without channelId", () => {
+test("loginUser throws on a scope item without channelId", () => {
   const root = parse(
     "<LoginUser><scopes><item><privileges>p</privileges></item></scopes></LoginUser>",
   ).root;

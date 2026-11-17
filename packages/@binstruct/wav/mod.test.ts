@@ -1,3 +1,4 @@
+import { test } from "node:test";
 import { assertEquals, assertThrows } from "@std/assert";
 import {
   dataChunk,
@@ -8,7 +9,7 @@ import {
   wavFile,
 } from "./mod.ts";
 
-Deno.test("WAV package - basic PCM encoding/decoding", () => {
+test("WAV package - basic PCM encoding/decoding", () => {
   const wavCoder = wavFile();
   const testWav = {
     riff: {
@@ -47,7 +48,7 @@ Deno.test("WAV package - basic PCM encoding/decoding", () => {
   assertEquals(decoded.data.audioData.length, 1000); // Exactly chunkSize bytes
 });
 
-Deno.test("WAV package - IEEE float format", () => {
+test("WAV package - IEEE float format", () => {
   const wavCoder = wavFile();
   const floatWav = {
     riff: {
@@ -84,8 +85,8 @@ Deno.test("WAV package - IEEE float format", () => {
   assertEquals(decoded.data.audioData.length, 800); // Exactly chunkSize bytes
 });
 
-Deno.test("WAV package - multiple channel configurations", async (t) => {
-  await t.step("mono configuration", () => {
+test("WAV package - multiple channel configurations", async (t) => {
+  await t.test("mono configuration", () => {
     const wavCoder = wavFile();
     const monoWav = {
       riff: {
@@ -120,7 +121,7 @@ Deno.test("WAV package - multiple channel configurations", async (t) => {
     assertEquals(decoded.fmt.bitsPerSample, 8);
   });
 
-  await t.step("stereo configuration", () => {
+  await t.test("stereo configuration", () => {
     const wavCoder = wavFile();
     const stereoWav = {
       riff: {
@@ -156,8 +157,8 @@ Deno.test("WAV package - multiple channel configurations", async (t) => {
   });
 });
 
-Deno.test("WAV package - different sample rates", async (t) => {
-  await t.step("8kHz sample rate", () => {
+test("WAV package - different sample rates", async (t) => {
+  await t.test("8kHz sample rate", () => {
     const wavCoder = wavFile();
     const wav8k = {
       riff: {
@@ -191,7 +192,7 @@ Deno.test("WAV package - different sample rates", async (t) => {
     assertEquals(decoded.fmt.sampleRate, 8000);
   });
 
-  await t.step("44.1kHz sample rate", () => {
+  await t.test("44.1kHz sample rate", () => {
     const wavCoder = wavFile();
     const wav44k = {
       riff: {
@@ -225,7 +226,7 @@ Deno.test("WAV package - different sample rates", async (t) => {
     assertEquals(decoded.fmt.sampleRate, 44100);
   });
 
-  await t.step("48kHz sample rate", () => {
+  await t.test("48kHz sample rate", () => {
     const wavCoder = wavFile();
     const wav48k = {
       riff: {
@@ -260,7 +261,7 @@ Deno.test("WAV package - different sample rates", async (t) => {
   });
 });
 
-Deno.test("WAV package - round-trip integrity", () => {
+test("WAV package - round-trip integrity", () => {
   const wavCoder = wavFile();
 
   // Create test audio data with a simple pattern
@@ -320,8 +321,8 @@ Deno.test("WAV package - round-trip integrity", () => {
   }
 });
 
-Deno.test("WAV package - optional chunks", async (t) => {
-  await t.step("basic WAV without optional chunks", () => {
+test("WAV package - optional chunks", async (t) => {
+  await t.test("basic WAV without optional chunks", () => {
     const wavCoder = wavFile();
     const basicWav = {
       riff: {
@@ -358,8 +359,8 @@ Deno.test("WAV package - optional chunks", async (t) => {
   });
 });
 
-Deno.test("WAV package - individual chunk coders", async (t) => {
-  await t.step("RIFF chunk coder", () => {
+test("WAV package - individual chunk coders", async (t) => {
+  await t.test("RIFF chunk coder", () => {
     const riffCoder = riffChunk();
     const testRiff = {
       chunkId: "RIFF" as const,
@@ -378,7 +379,7 @@ Deno.test("WAV package - individual chunk coders", async (t) => {
     assertEquals(decoded.format, "WAVE");
   });
 
-  await t.step("format chunk coder", () => {
+  await t.test("format chunk coder", () => {
     const fmtCoder = fmtChunk();
     const testFmt = {
       chunkId: "fmt " as const,
@@ -405,7 +406,7 @@ Deno.test("WAV package - individual chunk coders", async (t) => {
     assertEquals(decoded.bitsPerSample, 16);
   });
 
-  await t.step("data chunk coder", () => {
+  await t.test("data chunk coder", () => {
     const dataCoder = dataChunk();
     const testData = {
       chunkId: "data",
@@ -423,7 +424,7 @@ Deno.test("WAV package - individual chunk coders", async (t) => {
     assertEquals(decoded.audioData.length, 1000); // Exactly chunkSize bytes
   });
 
-  await t.step("fact chunk coder", () => {
+  await t.test("fact chunk coder", () => {
     const factCoder = factChunk();
     const testFact = {
       chunkId: "fact",
@@ -442,7 +443,7 @@ Deno.test("WAV package - individual chunk coders", async (t) => {
     assertEquals(decoded.sampleLength, 44100);
   });
 
-  await t.step("LIST chunk coder", () => {
+  await t.test("LIST chunk coder", () => {
     const listCoder = listChunk();
     const testList = {
       chunkId: "LIST",
@@ -463,8 +464,8 @@ Deno.test("WAV package - individual chunk coders", async (t) => {
   });
 });
 
-Deno.test("WAV package - error cases", async (t) => {
-  await t.step("invalid buffer size", () => {
+test("WAV package - error cases", async (t) => {
+  await t.test("invalid buffer size", () => {
     const wavCoder = wavFile();
     const testWav = {
       riff: {
@@ -496,7 +497,7 @@ Deno.test("WAV package - error cases", async (t) => {
     }, Error);
   });
 
-  await t.step("malformed data", () => {
+  await t.test("malformed data", () => {
     const wavCoder = wavFile();
     const buffer = new Uint8Array(100);
 
@@ -543,7 +544,7 @@ const wavFixture = (): Uint8Array => Uint8Array.from([
   0x34, 0x12,             // sample 4660
 ]);
 
-Deno.test("WAV package - decodes a real RIFF/WAVE byte fixture", () => {
+test("WAV package - decodes a real RIFF/WAVE byte fixture", () => {
   const fixture = wavFixture();
   const wavCoder = wavFile();
   const [decoded, bytesRead] = wavCoder.decode(fixture);
@@ -575,7 +576,7 @@ Deno.test("WAV package - decodes a real RIFF/WAVE byte fixture", () => {
   ]);
 });
 
-Deno.test("WAV package - re-encodes a real RIFF/WAVE byte fixture", () => {
+test("WAV package - re-encodes a real RIFF/WAVE byte fixture", () => {
   const fixture = wavFixture();
   const wavCoder = wavFile();
   const [decoded] = wavCoder.decode(fixture);
@@ -587,7 +588,7 @@ Deno.test("WAV package - re-encodes a real RIFF/WAVE byte fixture", () => {
   assertEquals(buffer, fixture);
 });
 
-Deno.test("WAV package - data chunk stops at chunkSize", () => {
+test("WAV package - data chunk stops at chunkSize", () => {
   // deno-fmt-ignore
   const fixture = Uint8Array.from([
     0x64, 0x61, 0x74, 0x61, // "data"
@@ -611,7 +612,7 @@ Deno.test("WAV package - data chunk stops at chunkSize", () => {
   assertEquals(buffer, fixture.subarray(0, 12));
 });
 
-Deno.test("WAV package - LIST chunk payload excludes the list type", () => {
+test("WAV package - LIST chunk payload excludes the list type", () => {
   // deno-fmt-ignore
   const fixture = Uint8Array.from([
     0x4c, 0x49, 0x53, 0x54, // "LIST"

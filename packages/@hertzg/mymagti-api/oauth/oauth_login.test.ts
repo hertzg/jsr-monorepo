@@ -1,4 +1,4 @@
-import { afterEach, beforeEach, describe, it } from "@std/testing/bdd";
+import { afterEach, beforeEach, describe, it } from "node:test";
 import {
   assertSpyCallAsync,
   assertSpyCalls,

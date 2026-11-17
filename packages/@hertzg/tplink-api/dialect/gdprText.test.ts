@@ -1,3 +1,4 @@
+import { test } from "node:test";
 import { assert, assertEquals } from "@std/assert";
 import { ACT, type Action } from "./dialect.ts";
 import { gdprText, parse, type Section, stringify } from "./gdprText.ts";
@@ -26,7 +27,7 @@ const PUBLIC_KEY_RESPONSE = [
   "$.ret=0;",
 ].join("\n");
 
-Deno.test("ACT enum has correct values", () => {
+test("ACT enum has correct values", () => {
   assertEquals(ACT.GET, 1);
   assertEquals(ACT.SET, 2);
   assertEquals(ACT.ADD, 3);
@@ -37,7 +38,7 @@ Deno.test("ACT enum has correct values", () => {
   assertEquals(ACT.CGI, 8);
 });
 
-Deno.test("stringify single action with array attributes", () => {
+test("stringify single action with array attributes", () => {
   const result = stringify([[ACT.GET, "some_oid", [
     "attr1=value1",
     "attr2=value2",
@@ -49,7 +50,7 @@ Deno.test("stringify single action with array attributes", () => {
   );
 });
 
-Deno.test("stringify single action with object attributes", () => {
+test("stringify single action with object attributes", () => {
   const result = stringify([[ACT.SET, "some_oid", {
     key1: "val1",
     key2: "val2",
@@ -61,7 +62,7 @@ Deno.test("stringify single action with object attributes", () => {
   );
 });
 
-Deno.test("stringify action with custom stack values", () => {
+test("stringify action with custom stack values", () => {
   const result = stringify([[
     ACT.GET,
     "oid",
@@ -73,7 +74,7 @@ Deno.test("stringify action with custom stack values", () => {
   assertEquals(result, "1\r\n[oid#1,2,3,4,5,6#7,8,9,10,11,12]0,0\r\n");
 });
 
-Deno.test("stringify multiple actions", () => {
+test("stringify multiple actions", () => {
   const result = stringify([
     [ACT.GET, "oid1", ["a=1"]],
     [ACT.SET, "oid2", ["b=2"]],
@@ -85,13 +86,13 @@ Deno.test("stringify multiple actions", () => {
   );
 });
 
-Deno.test("stringify action with no attributes", () => {
+test("stringify action with no attributes", () => {
   const result = stringify([[ACT.GET, "simple_oid"]]);
 
   assertEquals(result, "1\r\n[simple_oid#0,0,0,0,0,0#0,0,0,0,0,0]0,0\r\n");
 });
 
-Deno.test("parse simple response with attributes", () => {
+test("parse simple response with attributes", () => {
   const data = "[some_stack]0\nattr1=value1\nattr2=value2";
   const result = parse(data);
   const action = result.actions[0] as Section;
@@ -106,7 +107,7 @@ Deno.test("parse simple response with attributes", () => {
   });
 });
 
-Deno.test("parse response with error section", () => {
+test("parse response with error section", () => {
   const data = "[error]5";
   const result = parse(data);
 
@@ -114,7 +115,7 @@ Deno.test("parse response with error section", () => {
   assertEquals(result.actions.length, 0);
 });
 
-Deno.test("parse response with cgi script", () => {
+test("parse response with cgi script", () => {
   const data = "[cgi]0\nconsole.log('hello');\nvar x = 1;";
   const result = parse(data);
   const action = result.actions[0] as Section;
@@ -124,7 +125,7 @@ Deno.test("parse response with cgi script", () => {
   assertEquals(action.script, "console.log('hello');\nvar x = 1;\n");
 });
 
-Deno.test("parse response with multiple sections for same action", () => {
+test("parse response with multiple sections for same action", () => {
   const data = "[stack1]0\na=1\n[stack2]0\nb=2";
   const result = parse(data);
 
@@ -135,7 +136,7 @@ Deno.test("parse response with multiple sections for same action", () => {
   assertEquals(result.actions[0][1].attributes, { b: "2" });
 });
 
-Deno.test("parse response with gaps in action indices", () => {
+test("parse response with gaps in action indices", () => {
   const data = "[stack]2\na=1";
   const result = parse(data);
   const action2 = result.actions[2] as Section;
@@ -148,7 +149,7 @@ Deno.test("parse response with gaps in action indices", () => {
   assertEquals(action2.attributes, { a: "1" });
 });
 
-Deno.test("parse attribute with equals sign in value", () => {
+test("parse attribute with equals sign in value", () => {
   const data = "[stack]0\nkey=value=with=equals";
   const result = parse(data);
   const action = result.actions[0] as Section;
@@ -156,7 +157,7 @@ Deno.test("parse attribute with equals sign in value", () => {
   assertEquals(action.attributes?.key, "value=with=equals");
 });
 
-Deno.test("stringify and parse roundtrip preserves structure", () => {
+test("stringify and parse roundtrip preserves structure", () => {
   const original: Action[] = [[ACT.GET, "test_oid", {
     foo: "bar",
     num: "123",
@@ -173,12 +174,12 @@ Deno.test("stringify and parse roundtrip preserves structure", () => {
   assertEquals(action.attributes, { foo: "bar", num: "123" });
 });
 
-Deno.test("dialect identity", () => {
+test("dialect identity", () => {
   assertEquals(gdprText.id, "gdprText");
   assertEquals(gdprText.defaultUsername, "admin");
 });
 
-Deno.test("infoRequest targets the login page", async () => {
+test("infoRequest targets the login page", async () => {
   const request = gdprText.infoRequest(BASE_URL);
 
   assertEquals(request.method, "GET");
@@ -187,14 +188,14 @@ Deno.test("infoRequest targets the login page", async () => {
   assertEquals(await request.text(), "");
 });
 
-Deno.test("parseInfo scrapes the login page script block", () => {
+test("parseInfo scrapes the login page script block", () => {
   assertEquals(gdprText.parseInfo(LOGIN_PAGE), {
     authTimes: 2,
     isWizard: "0",
   });
 });
 
-Deno.test("publicKeyRequest posts to cgi/getParm with no body", () => {
+test("publicKeyRequest posts to cgi/getParm with no body", () => {
   const request = gdprText.publicKeyRequest(BASE_URL);
 
   assertEquals(request.method, "POST");
@@ -204,7 +205,7 @@ Deno.test("publicKeyRequest posts to cgi/getParm with no body", () => {
   assertEquals(request.body, null);
 });
 
-Deno.test("parsePublicKey decodes RSA parameters", () => {
+test("parsePublicKey decodes RSA parameters", () => {
   const key = gdprText.parsePublicKey(PUBLIC_KEY_RESPONSE);
 
   assertEquals(key.exponent, Uint8Array.from([0x01, 0x00, 0x01]));
@@ -212,7 +213,7 @@ Deno.test("parsePublicKey decodes RSA parameters", () => {
   assertEquals(key.sequence, 742334261);
 });
 
-Deno.test("busyRequest posts to cgi/getBusy with no body", () => {
+test("busyRequest posts to cgi/getBusy with no body", () => {
   const request = gdprText.busyRequest(BASE_URL);
 
   assertEquals(request.method, "POST");
@@ -221,21 +222,21 @@ Deno.test("busyRequest posts to cgi/getBusy with no body", () => {
   assertEquals(request.body, null);
 });
 
-Deno.test("parseBusy reads both flags", () => {
+test("parseBusy reads both flags", () => {
   assertEquals(gdprText.parseBusy("var isLogined=1;\nvar isBusy=0;\n"), {
     isLoggedIn: true,
     isBusy: false,
   });
 });
 
-Deno.test("encodeLogin joins credentials with a newline", () => {
+test("encodeLogin joins credentials with a newline", () => {
   assertEquals(
     gdprText.encodeLogin({ username: "admin", password: "hunter2" }),
     "admin\nhunter2",
   );
 });
 
-Deno.test("loginRequest carries the envelope in the query string", async () => {
+test("loginRequest carries the envelope in the query string", async () => {
   const request = gdprText.loginRequest(BASE_URL, {
     data: "a+b/c=",
     sign: "00ff",
@@ -256,7 +257,7 @@ Deno.test("loginRequest carries the envelope in the query string", async () => {
   assertEquals(await request.text(), "");
 });
 
-Deno.test("parseSessionId reads the session cookie", () => {
+test("parseSessionId reads the session cookie", () => {
   assertEquals(
     gdprText.parseSessionId(
       new Headers([["set-cookie", "JSESSIONID=1B3A7C2E9F4D; Path=/"]]),
@@ -272,7 +273,7 @@ Deno.test("parseSessionId reads the session cookie", () => {
   );
 });
 
-Deno.test("tokenRequest sends the session cookie to the landing page", () => {
+test("tokenRequest sends the session cookie to the landing page", () => {
   const request = gdprText.tokenRequest(BASE_URL, {
     sessionId: "1B3A7C2E9F4D",
     authTimes: 3,
@@ -287,14 +288,14 @@ Deno.test("tokenRequest sends the session cookie to the landing page", () => {
   );
 });
 
-Deno.test("parseTokenId scrapes the token variable", () => {
+test("parseTokenId scrapes the token variable", () => {
   assertEquals(
     gdprText.parseTokenId('<script>var token="d41d8cd98f";</script>'),
     "d41d8cd98f",
   );
 });
 
-Deno.test("encodeCommands emits one batch covering every action", () => {
+test("encodeCommands emits one batch covering every action", () => {
   const actions: Action[] = [
     [ACT.GET, "oid1", ["a=1"]],
     [ACT.SET, "oid2", ["b=2"]],
@@ -306,7 +307,7 @@ Deno.test("encodeCommands emits one batch covering every action", () => {
   assertEquals(batches[0].payload, stringify(actions));
 });
 
-Deno.test("encodeCommands with no actions still emits one batch", () => {
+test("encodeCommands with no actions still emits one batch", () => {
   const batches = gdprText.encodeCommands([]);
 
   assertEquals(batches.length, 1);
@@ -314,7 +315,7 @@ Deno.test("encodeCommands with no actions still emits one batch", () => {
   assertEquals(batches[0].payload, "\r\n\r\n");
 });
 
-Deno.test("commandRequest frames the envelope in the body", async () => {
+test("commandRequest frames the envelope in the body", async () => {
   const request = gdprText.commandRequest(BASE_URL, ENVELOPE, SESSION);
 
   assertEquals(request.method, "POST");
@@ -329,7 +330,7 @@ Deno.test("commandRequest frames the envelope in the body", async () => {
   assertEquals(await request.text(), "sign=00ff\r\ndata=ZGF0YQ==\r\n");
 });
 
-Deno.test("decodeCommand aligns results with the batch indices", () => {
+test("decodeCommand aligns results with the batch indices", () => {
   const batch = { payload: "", indices: [0, 1, 2] };
   const decoded = gdprText.decodeCommand(
     "[a]0\nx=1\n[b]2\ny=2",
@@ -340,7 +341,7 @@ Deno.test("decodeCommand aligns results with the batch indices", () => {
   assertEquals(decoded.results, [{ x: "1" }, null, { y: "2" }]);
 });
 
-Deno.test("decodeCommand groups repeated sections into a list", () => {
+test("decodeCommand groups repeated sections into a list", () => {
   const decoded = gdprText.decodeCommand(
     "[entry]0\nid=1\n[entry]0\nid=2",
     { payload: "", indices: [0] },
@@ -349,7 +350,7 @@ Deno.test("decodeCommand groups repeated sections into a list", () => {
   assertEquals(decoded.results, [[{ id: "1" }, { id: "2" }]]);
 });
 
-Deno.test("decodeCommand surfaces the router error code", () => {
+test("decodeCommand surfaces the router error code", () => {
   const decoded = gdprText.decodeCommand("[error]5", {
     payload: "",
     indices: [0],
@@ -359,7 +360,7 @@ Deno.test("decodeCommand surfaces the router error code", () => {
   assertEquals(decoded.results, [null]);
 });
 
-Deno.test("decodeCommand reports empty and cgi sections as null", () => {
+test("decodeCommand reports empty and cgi sections as null", () => {
   const decoded = gdprText.decodeCommand(
     "[empty]0\n[cgi]1\nvar x = 1;",
     { payload: "", indices: [0, 1] },

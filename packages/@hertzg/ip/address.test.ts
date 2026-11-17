@@ -1,17 +1,18 @@
+import { test } from "node:test";
 import { assertEquals, assertThrows } from "@std/assert";
 import { compareAddress, parseAddress, stringifyAddress } from "./address.ts";
 import { parseAddressv4 } from "./addressv4.ts";
 import { parseAddressv6 } from "./addressv6.ts";
 
-Deno.test("parseAddress", async (t) => {
-  await t.step("parses IPv4 addresses", () => {
+test("parseAddress", async (t) => {
+  await t.test("parses IPv4 addresses", () => {
     assertEquals(parseAddress("192.168.1.1"), { address: 3232235777 });
     assertEquals(parseAddress("10.0.0.1"), { address: 167772161 });
     assertEquals(parseAddress("0.0.0.0"), { address: 0 });
     assertEquals(parseAddress("255.255.255.255"), { address: 4294967295 });
   });
 
-  await t.step("parses IPv6 addresses", () => {
+  await t.test("parses IPv6 addresses", () => {
     assertEquals(parseAddress("::1"), { address: 1n });
     assertEquals(parseAddress("::"), { address: 0n });
     assertEquals(parseAddress("2001:db8::1"), {
@@ -19,7 +20,7 @@ Deno.test("parseAddress", async (t) => {
     });
   });
 
-  await t.step("carries a zone ID on either version", () => {
+  await t.test("carries a zone ID on either version", () => {
     assertEquals(parseAddress("192.168.1.1%ether1"), {
       address: 3232235777,
       zoneId: "ether1",
@@ -30,7 +31,7 @@ Deno.test("parseAddress", async (t) => {
     });
   });
 
-  await t.step("dispatches on the address slot, not the whole string", () => {
+  await t.test("dispatches on the address slot, not the whole string", () => {
     // A colon in the zone does not make an IPv4 address IPv6.
     assertEquals(parseAddress("10.0.0.1%eth0:1"), {
       address: 167772161,
@@ -38,21 +39,21 @@ Deno.test("parseAddress", async (t) => {
     });
   });
 
-  await t.step("unmaps IPv4-mapped IPv6 to IPv4 by default", () => {
+  await t.test("unmaps IPv4-mapped IPv6 to IPv4 by default", () => {
     assertEquals(parseAddress("::ffff:192.168.1.1"), { address: 3232235777 });
     assertEquals(parseAddress("::ffff:10.0.0.1"), { address: 167772161 });
     assertEquals(parseAddress("::ffff:0.0.0.0"), { address: 0 });
     assertEquals(parseAddress("::ffff:c0a8:101"), { address: 3232235777 });
   });
 
-  await t.step("keeps the zone ID when it unmaps", () => {
+  await t.test("keeps the zone ID when it unmaps", () => {
     assertEquals(parseAddress("::ffff:192.168.1.1%eth0"), {
       address: 3232235777,
       zoneId: "eth0",
     });
   });
 
-  await t.step("unmapToV4: false keeps the bigint", () => {
+  await t.test("unmapToV4: false keeps the bigint", () => {
     assertEquals(parseAddress("::ffff:192.168.1.1", { unmapToV4: false }), {
       address: 0xffffc0a80101n,
     });
@@ -64,21 +65,21 @@ Deno.test("parseAddress", async (t) => {
     });
   });
 
-  await t.step("only the mapped range unmaps", () => {
+  await t.test("only the mapped range unmaps", () => {
     assertEquals(parseAddress("::1.2.3.4"), { address: 0x1020304n });
     assertEquals(parseAddress("64:ff9b::1.2.3.4"), {
       address: 0x0064ff9b0000000000000000_01020304n,
     });
   });
 
-  await t.step("rejects a prefix", () => {
+  await t.test("rejects a prefix", () => {
     assertThrows(() => parseAddress("10.0.0.0/8"), TypeError);
     assertThrows(() => parseAddress("10.0.0.0/255.0.0.0"), TypeError);
     assertThrows(() => parseAddress("fe80::%eth0/64"), TypeError);
     assertThrows(() => parseAddress("::ffff:1.2.3.4/120"), TypeError);
   });
 
-  await t.step("rejects a malformed zone ID", () => {
+  await t.test("rejects a malformed zone ID", () => {
     assertThrows(() => parseAddress("fe80::1%"), TypeError);
     assertThrows(() => parseAddress("192.168.1.1%"), TypeError);
     assertThrows(() => parseAddress("%eth0"), TypeError);
@@ -87,13 +88,13 @@ Deno.test("parseAddress", async (t) => {
   });
 });
 
-Deno.test("stringifyAddress", async (t) => {
-  await t.step("stringifies IPv4 addresses", () => {
+test("stringifyAddress", async (t) => {
+  await t.test("stringifies IPv4 addresses", () => {
     assertEquals(stringifyAddress(3232235777), "192.168.1.1");
     assertEquals(stringifyAddress(0), "0.0.0.0");
   });
 
-  await t.step("stringifies IPv6 addresses", () => {
+  await t.test("stringifies IPv6 addresses", () => {
     assertEquals(stringifyAddress(1n), "::1");
     assertEquals(stringifyAddress(0n), "::");
     assertEquals(
@@ -102,7 +103,7 @@ Deno.test("stringifyAddress", async (t) => {
     );
   });
 
-  await t.step("stringifies a parse result, zone included", () => {
+  await t.test("stringifies a parse result, zone included", () => {
     assertEquals(stringifyAddress({ address: 3232235777 }), "192.168.1.1");
     assertEquals(
       stringifyAddress({ address: 3232235777, zoneId: "ether1" }),
@@ -111,27 +112,27 @@ Deno.test("stringifyAddress", async (t) => {
     assertEquals(stringifyAddress({ address: 1n, zoneId: "lo0" }), "::1%lo0");
   });
 
-  await t.step("an empty zone ID writes no %", () => {
+  await t.test("an empty zone ID writes no %", () => {
     assertEquals(stringifyAddress({ address: 1n, zoneId: "" }), "::1");
   });
 });
 
-Deno.test("parseAddress round-trip", async (t) => {
-  await t.step("IPv4 round-trip", () => {
+test("parseAddress round-trip", async (t) => {
+  await t.test("IPv4 round-trip", () => {
     const addrs = ["192.168.1.1", "10.0.0.1", "0.0.0.0", "255.255.255.255"];
     for (const addr of addrs) {
       assertEquals(stringifyAddress(parseAddress(addr)), addr);
     }
   });
 
-  await t.step("IPv6 round-trip", () => {
+  await t.test("IPv6 round-trip", () => {
     const addrs = ["::1", "::", "2001:db8::1", "fe80::1"];
     for (const addr of addrs) {
       assertEquals(stringifyAddress(parseAddress(addr)), addr);
     }
   });
 
-  await t.step("zone IDs round-trip verbatim", () => {
+  await t.test("zone IDs round-trip verbatim", () => {
     const addrs = [
       "fe80::1%eth0",
       "fe80::1%12",
@@ -146,7 +147,7 @@ Deno.test("parseAddress round-trip", async (t) => {
     }
   });
 
-  await t.step("a mapped address round-trips to its IPv4 form", () => {
+  await t.test("a mapped address round-trips to its IPv4 form", () => {
     assertEquals(
       stringifyAddress(parseAddress("::ffff:192.168.1.1")),
       "192.168.1.1",
@@ -154,8 +155,8 @@ Deno.test("parseAddress round-trip", async (t) => {
   });
 });
 
-Deno.test("compareAddress", async (t) => {
-  await t.step("delegates to IPv4", () => {
+test("compareAddress", async (t) => {
+  await t.test("delegates to IPv4", () => {
     assertEquals(
       compareAddress(
         parseAddress("10.0.0.1").address,
@@ -179,7 +180,7 @@ Deno.test("compareAddress", async (t) => {
     );
   });
 
-  await t.step("delegates to IPv6", () => {
+  await t.test("delegates to IPv6", () => {
     assertEquals(
       compareAddress(parseAddress("::1").address, parseAddress("::2").address),
       -1,
@@ -194,7 +195,7 @@ Deno.test("compareAddress", async (t) => {
     );
   });
 
-  await t.step("sorts every IPv4 address before every IPv6 address", () => {
+  await t.test("sorts every IPv4 address before every IPv6 address", () => {
     assertEquals(
       compareAddress(
         parseAddress("255.255.255.255").address,
@@ -211,7 +212,7 @@ Deno.test("compareAddress", async (t) => {
     );
   });
 
-  await t.step("sorts a mixed list instead of throwing", () => {
+  await t.test("sorts a mixed list instead of throwing", () => {
     const mixed = ["2001:db8::1", "10.0.0.2", "::1", "10.0.0.1"].map(
       (s) => parseAddress(s).address,
     );
@@ -223,7 +224,7 @@ Deno.test("compareAddress", async (t) => {
     ]);
   });
 
-  await t.step(
+  await t.test(
     "an IPv4-mapped bigint is an IPv6 value, not its IPv4 twin",
     () => {
       const mapped = parseAddressv6("::ffff:10.0.0.1").address;
@@ -234,7 +235,7 @@ Deno.test("compareAddress", async (t) => {
     },
   );
 
-  await t.step(
+  await t.test(
     "parseAddress unmaps mapped addresses, so they compare equal",
     () => {
       assertEquals(

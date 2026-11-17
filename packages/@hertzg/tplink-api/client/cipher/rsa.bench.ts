@@ -1,3 +1,4 @@
+import { bench } from "mitata";
 import { createMontgomeryParams } from "./montgomery.ts";
 import { rsaEncrypt, rsaPad } from "./rsa.ts";
 import { bytesToBigInt } from "./utils.ts";
@@ -19,14 +20,14 @@ const fullChunk = new Uint8Array(rsaChunkSize);
 crypto.getRandomValues(fullChunk);
 const fullValue = bytesToBigInt(fullChunk);
 
-Deno.bench("rsaEncrypt (128-byte chunk)", () => {
+bench("rsaEncrypt (128-byte chunk)", () => {
   rsaEncrypt(fullValue, exponent, params);
 });
 
-Deno.bench("rsaPad (16 -> 128 bytes)", () => {
+bench("rsaPad (16 -> 128 bytes)", () => {
   rsaPad(smallValue, 16, rsaChunkSize);
 });
 
-Deno.bench("rsaPad (128 -> 128 bytes, no-op)", () => {
+bench("rsaPad (128 -> 128 bytes, no-op)", () => {
   rsaPad(fullValue, rsaChunkSize, rsaChunkSize);
 });

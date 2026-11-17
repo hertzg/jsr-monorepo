@@ -1,8 +1,9 @@
+import { test } from "node:test";
 import { assertEquals, assertThrows } from "@std/assert";
 import { parse } from "@std/xml";
 import { talkConfig } from "./talk-config.ts";
 
-Deno.test("talkConfig decodes a full cmd 201 request", () => {
+test("talkConfig decodes a full cmd 201 request", () => {
   const root = parse(
     '<TalkConfig version="1.1"><duplex>FDX</duplex>' +
       "<audioStreamMode>onlyAudioStream</audioStreamMode><audioConfig>" +
@@ -26,13 +27,13 @@ Deno.test("talkConfig decodes a full cmd 201 request", () => {
   });
 });
 
-Deno.test("talkConfig decodes an empty element", () => {
+test("talkConfig decodes an empty element", () => {
   const root = parse('<TalkConfig version="1.1"></TalkConfig>').root;
 
   assertEquals(talkConfig.decode(root), {});
 });
 
-Deno.test("talkConfig rejects an audio config without a sound track", () => {
+test("talkConfig rejects an audio config without a sound track", () => {
   const root = parse(
     '<TalkConfig version="1.1"><audioConfig><audioType>adpcm</audioType>' +
       "<sampleRate>16000</sampleRate><samplePrecision>16</samplePrecision>" +
@@ -42,7 +43,7 @@ Deno.test("talkConfig rejects an audio config without a sound track", () => {
   assertThrows(() => talkConfig.decode(root), Error, "<soundTrack>");
 });
 
-Deno.test("talkConfig rejects an unknown audio codec", () => {
+test("talkConfig rejects an unknown audio codec", () => {
   const root = parse(
     '<TalkConfig version="1.1"><audioConfig><audioType>aac</audioType>' +
       "<sampleRate>16000</sampleRate><samplePrecision>16</samplePrecision>" +
@@ -53,7 +54,7 @@ Deno.test("talkConfig rejects an unknown audio codec", () => {
   assertThrows(() => talkConfig.decode(root), Error, "<audioType>");
 });
 
-Deno.test("talkConfig round-trips through encode and decode", () => {
+test("talkConfig round-trips through encode and decode", () => {
   const value = {
     duplex: "HDX" as const,
     audioStreamMode: "followVideoStream" as const,

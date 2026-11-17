@@ -1,3 +1,4 @@
+import { test } from "node:test";
 import { assertEquals } from "@std/assert";
 import { createContext } from "@hertzg/binstruct";
 import type { PngChunkUnknown } from "../mod.ts";
@@ -5,7 +6,7 @@ import { type BkgdChunk, bkgdChunkRefiner } from "./bkgd.ts";
 
 // A. Basic refine/unrefine tests
 
-Deno.test("bkgdChunkRefiner() - refines grayscale bKGD chunk", () => {
+test("bkgdChunkRefiner() - refines grayscale bKGD chunk", () => {
   const refiner = bkgdChunkRefiner();
   const context = createContext("decode");
 
@@ -26,7 +27,7 @@ Deno.test("bkgdChunkRefiner() - refines grayscale bKGD chunk", () => {
   assertEquals(refined.crc, 0xAABBCCDD);
 });
 
-Deno.test("bkgdChunkRefiner() - refines RGB bKGD chunk", () => {
+test("bkgdChunkRefiner() - refines RGB bKGD chunk", () => {
   const refiner = bkgdChunkRefiner();
   const context = createContext("decode");
 
@@ -50,7 +51,7 @@ Deno.test("bkgdChunkRefiner() - refines RGB bKGD chunk", () => {
   assertEquals(refined.data.values, [0, 255, 0, 255, 0, 255]);
 });
 
-Deno.test("bkgdChunkRefiner() - refines indexed bKGD chunk", () => {
+test("bkgdChunkRefiner() - refines indexed bKGD chunk", () => {
   const refiner = bkgdChunkRefiner();
   const context = createContext("decode");
 
@@ -69,7 +70,7 @@ Deno.test("bkgdChunkRefiner() - refines indexed bKGD chunk", () => {
   assertEquals(refined.crc, 0x12345678);
 });
 
-Deno.test("bkgdChunkRefiner() - unrefines bKGD chunk", () => {
+test("bkgdChunkRefiner() - unrefines bKGD chunk", () => {
   const refiner = bkgdChunkRefiner();
   const context = createContext("encode");
 
@@ -93,7 +94,7 @@ Deno.test("bkgdChunkRefiner() - unrefines bKGD chunk", () => {
 
 // B. Round-trip tests
 
-Deno.test("bkgdChunkRefiner() - round-trip grayscale background", () => {
+test("bkgdChunkRefiner() - round-trip grayscale background", () => {
   const refiner = bkgdChunkRefiner();
   const encodeContext = createContext("encode");
   const decodeContext = createContext("decode");
@@ -115,7 +116,7 @@ Deno.test("bkgdChunkRefiner() - round-trip grayscale background", () => {
   assertEquals(refined.crc, original.crc);
 });
 
-Deno.test("bkgdChunkRefiner() - round-trip RGB background", () => {
+test("bkgdChunkRefiner() - round-trip RGB background", () => {
   const refiner = bkgdChunkRefiner();
   const encodeContext = createContext("encode");
   const decodeContext = createContext("decode");
@@ -141,7 +142,7 @@ Deno.test("bkgdChunkRefiner() - round-trip RGB background", () => {
   assertEquals(refined.data.values, original.data.values);
 });
 
-Deno.test("bkgdChunkRefiner() - round-trip indexed with palette index 0", () => {
+test("bkgdChunkRefiner() - round-trip indexed with palette index 0", () => {
   const refiner = bkgdChunkRefiner();
   const encodeContext = createContext("encode");
   const decodeContext = createContext("decode");
@@ -162,7 +163,7 @@ Deno.test("bkgdChunkRefiner() - round-trip indexed with palette index 0", () => 
   assertEquals(refined.data.values, [0]);
 });
 
-Deno.test("bkgdChunkRefiner() - round-trip indexed with max palette index", () => {
+test("bkgdChunkRefiner() - round-trip indexed with max palette index", () => {
   const refiner = bkgdChunkRefiner();
   const encodeContext = createContext("encode");
   const decodeContext = createContext("decode");
@@ -183,7 +184,7 @@ Deno.test("bkgdChunkRefiner() - round-trip indexed with max palette index", () =
   assertEquals(refined.data.values, [255]);
 });
 
-Deno.test("bkgdChunkRefiner() - multiple round-trips consistency", () => {
+test("bkgdChunkRefiner() - multiple round-trips consistency", () => {
   const refiner = bkgdChunkRefiner();
   const encodeContext = createContext("encode");
   const decodeContext = createContext("decode");
@@ -211,7 +212,7 @@ Deno.test("bkgdChunkRefiner() - multiple round-trips consistency", () => {
 
 // C. Edge cases
 
-Deno.test("bkgdChunkRefiner() - grayscale at bit depth boundaries", () => {
+test("bkgdChunkRefiner() - grayscale at bit depth boundaries", () => {
   const refiner = bkgdChunkRefiner();
   const encodeContext = createContext("encode");
   const decodeContext = createContext("decode");
@@ -240,7 +241,7 @@ Deno.test("bkgdChunkRefiner() - grayscale at bit depth boundaries", () => {
   }
 });
 
-Deno.test("bkgdChunkRefiner() - RGB background with extreme values", () => {
+test("bkgdChunkRefiner() - RGB background with extreme values", () => {
   const refiner = bkgdChunkRefiner();
   const encodeContext = createContext("encode");
   const decodeContext = createContext("decode");
@@ -268,7 +269,7 @@ Deno.test("bkgdChunkRefiner() - RGB background with extreme values", () => {
   }
 });
 
-Deno.test("bkgdChunkRefiner() - indexed with all valid palette indices", () => {
+test("bkgdChunkRefiner() - indexed with all valid palette indices", () => {
   const refiner = bkgdChunkRefiner();
   const encodeContext = createContext("encode");
   const decodeContext = createContext("decode");
@@ -290,7 +291,7 @@ Deno.test("bkgdChunkRefiner() - indexed with all valid palette indices", () => {
   }
 });
 
-Deno.test("bkgdChunkRefiner() - preserves exact byte values", () => {
+test("bkgdChunkRefiner() - preserves exact byte values", () => {
   const refiner = bkgdChunkRefiner();
   const encodeContext = createContext("encode");
   const decodeContext = createContext("decode");
@@ -324,7 +325,7 @@ Deno.test("bkgdChunkRefiner() - preserves exact byte values", () => {
   }
 });
 
-Deno.test("bkgdChunkRefiner() - grayscale with common values", () => {
+test("bkgdChunkRefiner() - grayscale with common values", () => {
   const refiner = bkgdChunkRefiner();
   const encodeContext = createContext("encode");
   const decodeContext = createContext("decode");
@@ -353,7 +354,7 @@ Deno.test("bkgdChunkRefiner() - grayscale with common values", () => {
   }
 });
 
-Deno.test("bkgdChunkRefiner() - RGB with 16-bit depth values", () => {
+test("bkgdChunkRefiner() - RGB with 16-bit depth values", () => {
   const refiner = bkgdChunkRefiner();
   const encodeContext = createContext("encode");
   const decodeContext = createContext("decode");
@@ -379,7 +380,7 @@ Deno.test("bkgdChunkRefiner() - RGB with 16-bit depth values", () => {
   }
 });
 
-Deno.test("bkgdChunkRefiner() - preserves various CRC values", () => {
+test("bkgdChunkRefiner() - preserves various CRC values", () => {
   const refiner = bkgdChunkRefiner();
   const encodeContext = createContext("encode");
   const decodeContext = createContext("decode");

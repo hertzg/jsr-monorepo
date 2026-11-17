@@ -1,8 +1,9 @@
+import { test } from "node:test";
 import { assertEquals } from "@std/assert";
 import { parse } from "@std/xml";
 import { syncSsid } from "./sync-ssid.ts";
 
-Deno.test("syncSsid decodes a request carrying both bands", () => {
+test("syncSsid decodes a request carrying both bands", () => {
   const root = parse(
     '<syncSSID version="1.1"><ssid2Dot4G>ssid-abc123</ssid2Dot4G>' +
       "<ssid5G>ssid-def456</ssid5G></syncSSID>",
@@ -14,7 +15,7 @@ Deno.test("syncSsid decodes a request carrying both bands", () => {
   });
 });
 
-Deno.test("syncSsid round-trips through encode and decode", () => {
+test("syncSsid round-trips through encode and decode", () => {
   const value = { ssid2Dot4G: "ssid-ghi789 & co", ssid5G: "ssid-jkl012" };
 
   const xml = syncSsid.encode(value);
@@ -22,7 +23,7 @@ Deno.test("syncSsid round-trips through encode and decode", () => {
   assertEquals(syncSsid.decode(parse(xml).root), value);
 });
 
-Deno.test("syncSsid decodes a request for the 5 GHz band only", () => {
+test("syncSsid decodes a request for the 5 GHz band only", () => {
   const root = parse(
     '<syncSSID version="1.1"><ssid5G>ssid-mno345</ssid5G></syncSSID>',
   ).root;

@@ -1,3 +1,4 @@
+import { test } from "node:test";
 import { assertEquals, assertThrows } from "@std/assert";
 import {
   parsePtzPosition,
@@ -6,7 +7,7 @@ import {
   ptzPresetXml,
 } from "./ptz.ts";
 
-Deno.test("ptzControlXml leaves out speed when not given", () => {
+test("ptzControlXml leaves out speed when not given", () => {
   assertEquals(
     ptzControlXml({ channel: 0, command: "Stop" }),
     '<?xml version="1.0" encoding="UTF-8" ?>\n' +
@@ -19,7 +20,7 @@ Deno.test("ptzControlXml leaves out speed when not given", () => {
   );
 });
 
-Deno.test("ptzControlXml adds speed after the command", () => {
+test("ptzControlXml adds speed after the command", () => {
   assertEquals(
     ptzControlXml({ channel: 1, command: "ZoomInc", speed: 5 }),
     '<?xml version="1.0" encoding="UTF-8" ?>\n' +
@@ -33,7 +34,7 @@ Deno.test("ptzControlXml adds speed after the command", () => {
   );
 });
 
-Deno.test("ptzPresetXml moves to a preset with toPos", () => {
+test("ptzPresetXml moves to a preset with toPos", () => {
   assertEquals(
     ptzPresetXml({ channel: 0, id: 4 }),
     '<?xml version="1.0" encoding="UTF-8" ?>\n' +
@@ -51,7 +52,7 @@ Deno.test("ptzPresetXml moves to a preset with toPos", () => {
   );
 });
 
-Deno.test("parsePtzPresets skips slots without a name", () => {
+test("parsePtzPresets skips slots without a name", () => {
   assertEquals(
     parsePtzPresets(
       "<body><PtzPreset><channelId>0</channelId><presetList>" +
@@ -64,11 +65,11 @@ Deno.test("parsePtzPresets skips slots without a name", () => {
   );
 });
 
-Deno.test("parsePtzPresets returns nothing for an empty list", () => {
+test("parsePtzPresets returns nothing for an empty list", () => {
   assertEquals(parsePtzPresets("<body><PtzPreset /></body>"), []);
 });
 
-Deno.test("parsePtzPosition reads pPos and tPos from a ptzCurPos reply", () => {
+test("parsePtzPosition reads pPos and tPos from a ptzCurPos reply", () => {
   assertEquals(
     parsePtzPosition(
       '<?xml version="1.0" encoding="UTF-8" ?>\n' +
@@ -79,7 +80,7 @@ Deno.test("parsePtzPosition reads pPos and tPos from a ptzCurPos reply", () => {
   );
 });
 
-Deno.test("parsePtzPosition throws without a tilt position", () => {
+test("parsePtzPosition throws without a tilt position", () => {
   assertThrows(
     () =>
       parsePtzPosition("<body><ptzCurPos><pPos>1</pPos></ptzCurPos></body>"),

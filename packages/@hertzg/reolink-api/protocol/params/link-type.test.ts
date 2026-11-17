@@ -1,8 +1,9 @@
+import { test } from "node:test";
 import { assertEquals, assertExists, assertThrows } from "@std/assert";
 import { isElement, parse } from "@std/xml";
 import { linkType } from "./link-type.ts";
 
-Deno.test("linkType decodes a cmd 93 reply captured from a camera", () => {
+test("linkType decodes a cmd 93 reply captured from a camera", () => {
   const body = parse(
     '<?xml version="1.0" encoding="UTF-8" ?>\n' +
       "<body>\n" +
@@ -17,7 +18,7 @@ Deno.test("linkType decodes a cmd 93 reply captured from a camera", () => {
   assertEquals(linkType.decode(root), { type: "LAN" });
 });
 
-Deno.test("linkType round-trips every link the firmware writes", () => {
+test("linkType round-trips every link the firmware writes", () => {
   for (const type of ["LAN", "PPPOE", "CDMA"] as const) {
     const value = { type };
 
@@ -25,14 +26,14 @@ Deno.test("linkType round-trips every link the firmware writes", () => {
   }
 });
 
-Deno.test("linkType rejects a link type the firmware never writes", () => {
+test("linkType rejects a link type the firmware never writes", () => {
   const root = parse('<LinkType version="1.1"><type>WIFI</type></LinkType>')
     .root;
 
   assertThrows(() => linkType.decode(root), Error, '"WIFI"');
 });
 
-Deno.test("linkType throws when the reply has no type", () => {
+test("linkType throws when the reply has no type", () => {
   const root = parse('<LinkType version="1.1"></LinkType>').root;
 
   assertThrows(() => linkType.decode(root), Error, "<type>");

@@ -1,41 +1,39 @@
-// deno-lint-ignore-file no-import-prefix -- the competitor packages are
-// deliberately not in import_map.json: they are not dependencies of anything
-// this repo publishes, only of this on-demand comparison.
-
 // NOT apples-to-apples. `parseAddressv4` returns a `number` in a two-field
 // object; ipaddr.js, ip-address and ip-num return objects that validate more,
 // retain the original text, and carry a large method surface. They are doing
 // more work because they offer more. Read this group as "cost of getting an address into memory in each
 // library's own idiom", not as a like-for-like algorithm comparison.
 
-import ipaddr from "npm:ipaddr.js@^2.5.0";
-import { Address4 } from "npm:ip-address@^10.5.0";
-import { ip2long } from "npm:netmask@^2.1.1";
-import { IPv4 } from "npm:ip-num@^1.6.2";
+import { bench, group, summary } from "mitata";
+import ipaddr from "ipaddr.js";
+import { Address4 } from "ip-address";
+import { ip2long } from "netmask";
+import { IPv4 } from "ip-num";
 
 import { parseAddressv4 } from "../addressv4.ts";
 
 const IPV4 = "192.168.1.100";
 
-Deno.bench("@hertzg/ip parseAddressv4", {
-  group: "parse ipv4",
-  baseline: true,
-}, () => {
-  parseAddressv4(IPV4);
-});
+group("parse ipv4", () => {
+  summary(() => {
+    bench("@hertzg/ip parseAddressv4", () => {
+      parseAddressv4(IPV4);
+    }).baseline(true);
 
-Deno.bench("ipaddr.js parse", { group: "parse ipv4" }, () => {
-  ipaddr.parse(IPV4);
-});
+    bench("ipaddr.js parse", () => {
+      ipaddr.parse(IPV4);
+    });
 
-Deno.bench("ip-address Address4", { group: "parse ipv4" }, () => {
-  new Address4(IPV4);
-});
+    bench("ip-address Address4", () => {
+      new Address4(IPV4);
+    });
 
-Deno.bench("netmask ip2long", { group: "parse ipv4" }, () => {
-  ip2long(IPV4);
-});
+    bench("netmask ip2long", () => {
+      ip2long(IPV4);
+    });
 
-Deno.bench("ip-num IPv4", { group: "parse ipv4" }, () => {
-  IPv4.fromDecimalDottedString(IPV4);
+    bench("ip-num IPv4", () => {
+      IPv4.fromDecimalDottedString(IPV4);
+    });
+  });
 });

@@ -1,3 +1,4 @@
+import { test } from "node:test";
 import { assertEquals } from "@std/assert";
 import {
   ICO_IMAGE_TYPE,
@@ -7,8 +8,8 @@ import {
   ICONDIRENTRY_SIZE,
 } from "./mod.ts";
 
-Deno.test("icoDir", async (t) => {
-  await t.step("round-trips a directory with no entries", () => {
+test("icoDir", async (t) => {
+  await t.test("round-trips a directory with no entries", () => {
     const coder = icoDir();
     const dir: IcoDir = {
       reserved: 0,
@@ -26,7 +27,7 @@ Deno.test("icoDir", async (t) => {
     assertEquals(decoded, dir);
   });
 
-  await t.step("round-trips a directory with multiple entries", () => {
+  await t.test("round-trips a directory with multiple entries", () => {
     const coder = icoDir();
     const dir: IcoDir = {
       reserved: 0,
@@ -67,7 +68,7 @@ Deno.test("icoDir", async (t) => {
     assertEquals(decoded, dir);
   });
 
-  await t.step("round-trips a cursor directory", () => {
+  await t.test("round-trips a cursor directory", () => {
     const coder = icoDir();
     const dir: IcoDir = {
       reserved: 0,
@@ -97,7 +98,7 @@ Deno.test("icoDir", async (t) => {
     assertEquals(decoded.entries[0].bitCount, 16);
   });
 
-  await t.step("decodes a known two-entry ICONDIR", () => {
+  await t.test("decodes a known two-entry ICONDIR", () => {
     // deno-fmt-ignore
     const wire = new Uint8Array([
       0x00, 0x00, // reserved = 0
@@ -140,7 +141,7 @@ Deno.test("icoDir", async (t) => {
     });
   });
 
-  await t.step("decodes a known single-entry CUR directory", () => {
+  await t.test("decodes a known single-entry CUR directory", () => {
     // deno-fmt-ignore
     const wire = new Uint8Array([
       0x00, 0x00, // reserved = 0

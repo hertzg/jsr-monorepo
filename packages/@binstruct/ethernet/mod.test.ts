@@ -1,3 +1,4 @@
+import { test } from "node:test";
 import { assertEquals } from "@std/assert";
 import { refine } from "@hertzg/binstruct";
 import { parse as parseMac, stringify as stringifyMac } from "@hertzg/mac";
@@ -21,7 +22,7 @@ function assertPayloadEquals(actual: Uint8Array, expected: Uint8Array) {
   assertEquals(actual.slice(0, expected.length), expected);
 }
 
-Deno.test("ethernet2Frame: basic encode/decode", () => {
+test("ethernet2Frame: basic encode/decode", () => {
   const frameCoder = ethernet2Frame();
   const frame = {
     dstMac: new Uint8Array([0x00, 0x11, 0x22, 0x33, 0x44, 0x55]),
@@ -41,7 +42,7 @@ Deno.test("ethernet2Frame: basic encode/decode", () => {
   assertPayloadEquals(decoded.payload, frame.payload);
 });
 
-Deno.test("ethernet2Frame: broadcast and zero MACs", () => {
+test("ethernet2Frame: broadcast and zero MACs", () => {
   const frameCoder = ethernet2Frame();
   const frame: Ethernet2Frame = {
     dstMac: new Uint8Array(6).fill(0xff),
@@ -59,7 +60,7 @@ Deno.test("ethernet2Frame: broadcast and zero MACs", () => {
   assertEquals(decoded.srcMac, frame.srcMac);
 });
 
-Deno.test("ethernet2Frame: integration with @hertzg/mac string addresses", () => {
+test("ethernet2Frame: integration with @hertzg/mac string addresses", () => {
   const frameCoder = ethernet2Frame();
   const dstMacString = "00:11:22:33:44:55";
   const srcMacString = "66:77:88:99:aa:bb";
@@ -80,7 +81,7 @@ Deno.test("ethernet2Frame: integration with @hertzg/mac string addresses", () =>
   assertEquals(stringifyMac(decoded.srcMac), srcMacString);
 });
 
-Deno.test("ethernet2Frame: refined to string-MAC variant", () => {
+test("ethernet2Frame: refined to string-MAC variant", () => {
   type StringMacFrame = Omit<Ethernet2Frame, "dstMac" | "srcMac"> & {
     dstMac: string;
     srcMac: string;

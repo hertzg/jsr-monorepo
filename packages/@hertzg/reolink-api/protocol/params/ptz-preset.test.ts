@@ -1,8 +1,9 @@
+import { test } from "node:test";
 import { assertEquals, assertThrows } from "@std/assert";
 import { parse } from "@std/xml";
 import { ptzPreset } from "./ptz-preset.ts";
 
-Deno.test("ptzPreset decodes the cmd 190 reply", () => {
+test("ptzPreset decodes the cmd 190 reply", () => {
   const root = parse(
     '<PtzPreset version="1.1"><channelId>0</channelId>' +
       "<maxPresetNum>64</maxPresetNum><maxPresetPicNum>64</maxPresetPicNum>" +
@@ -23,7 +24,7 @@ Deno.test("ptzPreset decodes the cmd 190 reply", () => {
   });
 });
 
-Deno.test("ptzPreset round-trips a set request", () => {
+test("ptzPreset round-trips a set request", () => {
   const value = {
     channelId: 1,
     presetList: [{ id: 7, name: "name-drive", command: "setPos" as const }],
@@ -32,7 +33,7 @@ Deno.test("ptzPreset round-trips a set request", () => {
   assertEquals(ptzPreset.decode(parse(ptzPreset.encode(value)).root), value);
 });
 
-Deno.test("ptzPreset throws without channelId, which the firmware requires", () => {
+test("ptzPreset throws without channelId, which the firmware requires", () => {
   const root = parse(
     "<PtzPreset><presetList><preset><id>1</id></preset></presetList></PtzPreset>",
   ).root;
@@ -40,7 +41,7 @@ Deno.test("ptzPreset throws without channelId, which the firmware requires", () 
   assertThrows(() => ptzPreset.decode(root), Error, "<channelId>");
 });
 
-Deno.test("ptzPreset throws on a preset without id", () => {
+test("ptzPreset throws on a preset without id", () => {
   const root = parse(
     "<PtzPreset><channelId>0</channelId><presetList><preset>" +
       "<name>name-x</name></preset></presetList></PtzPreset>",

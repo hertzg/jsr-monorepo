@@ -1,24 +1,25 @@
+import { test } from "node:test";
 import { assertEquals, assertThrows } from "@std/assert";
 import { addressFromBytes, addressToBytes } from "./bytes.ts";
 import { parseAddressv4 } from "./addressv4.ts";
 import { parseAddressv6, unmapToAddressv4 } from "./addressv6.ts";
 
-Deno.test("addressFromBytes", async (t) => {
-  await t.step("a 4-byte span reads as IPv4 and returns a number", () => {
+test("addressFromBytes", async (t) => {
+  await t.test("a 4-byte span reads as IPv4 and returns a number", () => {
     const address = addressFromBytes(new Uint8Array([10, 0, 0, 1]));
 
     assertEquals(typeof address, "number");
     assertEquals(address, 167772161);
   });
 
-  await t.step("a 16-byte span reads as IPv6 and returns a bigint", () => {
+  await t.test("a 16-byte span reads as IPv6 and returns a bigint", () => {
     const address = addressFromBytes(new Uint8Array(16));
 
     assertEquals(typeof address, "bigint");
     assertEquals(address, 0n);
   });
 
-  await t.step("a subarray of the exact width reads through", () => {
+  await t.test("a subarray of the exact width reads through", () => {
     const packet = new Uint8Array(20);
     packet.set([203, 0, 113, 7], 16);
 
@@ -28,7 +29,7 @@ Deno.test("addressFromBytes", async (t) => {
     assertEquals(addressFromBytes(packet.subarray(4, 20)), 3405803783n);
   });
 
-  await t.step("a length that is neither 4 nor 16 throws", () => {
+  await t.test("a length that is neither 4 nor 16 throws", () => {
     assertThrows(
       () => addressFromBytes(new Uint8Array([1, 2, 3])),
       RangeError,
@@ -40,7 +41,7 @@ Deno.test("addressFromBytes", async (t) => {
     assertThrows(() => addressFromBytes(new Uint8Array()), RangeError);
   });
 
-  await t.step(
+  await t.test(
     "a whole frame throws rather than reading its first 16 bytes",
     () => {
       assertThrows(
@@ -56,7 +57,7 @@ Deno.test("addressFromBytes", async (t) => {
     },
   );
 
-  await t.step("the amount of trailing data cannot change the version", () => {
+  await t.test("the amount of trailing data cannot change the version", () => {
     // The same 4-byte field at the same place in frames of different sizes.
     // Slicing pins the width, so every frame reads it identically.
     for (const total of [20, 24, 28, 32]) {
@@ -67,7 +68,7 @@ Deno.test("addressFromBytes", async (t) => {
     }
   });
 
-  await t.step("IPv4-mapped bytes are not unwrapped to a number", () => {
+  await t.test("IPv4-mapped bytes are not unwrapped to a number", () => {
     // deno-fmt-ignore
     const mapped = new Uint8Array([
       0, 0, 0, 0, 0, 0, 0, 0,
@@ -83,22 +84,22 @@ Deno.test("addressFromBytes", async (t) => {
   });
 });
 
-Deno.test("addressToBytes", async (t) => {
-  await t.step("a number writes four bytes", () => {
+test("addressToBytes", async (t) => {
+  await t.test("a number writes four bytes", () => {
     assertEquals(
       addressToBytes(parseAddressv4("192.168.1.1").address),
       new Uint8Array([192, 168, 1, 1]),
     );
   });
 
-  await t.step("a bigint writes sixteen bytes", () => {
+  await t.test("a bigint writes sixteen bytes", () => {
     const written = addressToBytes(parseAddressv6("::1").address);
 
     assertEquals(written.length, 16);
     assertEquals(written[15], 1);
   });
 
-  await t.step("writes into an existing buffer at an offset", () => {
+  await t.test("writes into an existing buffer at an offset", () => {
     const frame = new Uint8Array(40).fill(0xaa);
     addressToBytes(parseAddressv4("10.0.0.1").address, frame, 0);
     addressToBytes(parseAddressv6("2001:db8::1").address, frame, 8);
@@ -111,7 +112,7 @@ Deno.test("addressToBytes", async (t) => {
     ]));
   });
 
-  await t.step("returns only the written span, not the whole buffer", () => {
+  await t.test("returns only the written span, not the whole buffer", () => {
     const frame = new Uint8Array(40).fill(0xaa);
 
     assertEquals(
@@ -125,12 +126,12 @@ Deno.test("addressToBytes", async (t) => {
     ]));
   });
 
-  await t.step("an out-of-range address throws for either version", () => {
+  await t.test("an out-of-range address throws for either version", () => {
     assertThrows(() => addressToBytes(4294967296), RangeError);
     assertThrows(() => addressToBytes(1n << 128n), RangeError);
   });
 
-  await t.step("a span running off the end throws for either version", () => {
+  await t.test("a span running off the end throws for either version", () => {
     assertThrows(
       () => addressToBytes(167772161, new Uint8Array(3)),
       RangeError,
@@ -138,7 +139,7 @@ Deno.test("addressToBytes", async (t) => {
     assertThrows(() => addressToBytes(1n, new Uint8Array(15)), RangeError);
   });
 
-  await t.step(
+  await t.test(
     "round-trips with addressFromBytes, preserving the width",
     () => {
       const v4 = new Uint8Array([198, 51, 100, 42]);

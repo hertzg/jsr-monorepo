@@ -1,3 +1,4 @@
+import { test } from "node:test";
 import { assertEquals } from "@std/assert";
 import { createApiDecodeStream } from "./decode.ts";
 import { encodeSentence } from "../encoding/sentence.ts";
@@ -15,14 +16,14 @@ async function decodeBytes(bytes: Uint8Array): Promise<Reply> {
   return value!;
 }
 
-Deno.test("createApiDecodeStream - !done reply", async () => {
+test("createApiDecodeStream - !done reply", async () => {
   const bytes = encodeSentence(["!done"]);
   const result = await decodeBytes(bytes);
 
   assertEquals(result, { type: "done" });
 });
 
-Deno.test("createApiDecodeStream - !re reply", async () => {
+test("createApiDecodeStream - !re reply", async () => {
   const bytes = encodeSentence([
     "!re",
     "=name=ether1",
@@ -39,7 +40,7 @@ Deno.test("createApiDecodeStream - !re reply", async () => {
   });
 });
 
-Deno.test("createApiDecodeStream - !trap reply", async () => {
+test("createApiDecodeStream - !trap reply", async () => {
   const bytes = encodeSentence([
     "!trap",
     "=message=no such item",
@@ -54,7 +55,7 @@ Deno.test("createApiDecodeStream - !trap reply", async () => {
   });
 });
 
-Deno.test("createApiDecodeStream - !fatal reply", async () => {
+test("createApiDecodeStream - !fatal reply", async () => {
   const bytes = encodeSentence([
     "!fatal",
     "=message=connection lost",
@@ -67,7 +68,7 @@ Deno.test("createApiDecodeStream - !fatal reply", async () => {
   });
 });
 
-Deno.test("createApiDecodeStream - multiple replies", async () => {
+test("createApiDecodeStream - multiple replies", async () => {
   const replies = [
     ["!re", "=name=ether1"],
     ["!re", "=name=ether2"],
@@ -109,7 +110,7 @@ Deno.test("createApiDecodeStream - multiple replies", async () => {
   assertEquals(results[2].type, "done");
 });
 
-Deno.test("createApiDecodeStream - chunked input", async () => {
+test("createApiDecodeStream - chunked input", async () => {
   const bytes = encodeSentence(["!done", "=tag=req-1"]);
 
   // Split bytes into chunks
@@ -136,7 +137,7 @@ Deno.test("createApiDecodeStream - chunked input", async () => {
   });
 });
 
-Deno.test("createApiDecodeStream - multiple replies in chunks", async () => {
+test("createApiDecodeStream - multiple replies in chunks", async () => {
   const reply1 = encodeSentence(["!re", "=name=ether1"]);
   const reply2 = encodeSentence(["!done"]);
 
@@ -172,7 +173,7 @@ Deno.test("createApiDecodeStream - multiple replies in chunks", async () => {
   assertEquals(results[1].type, "done");
 });
 
-Deno.test("createApiDecodeStream - complex reply", async () => {
+test("createApiDecodeStream - complex reply", async () => {
   const bytes = encodeSentence([
     "!re",
     "=.id=*1",

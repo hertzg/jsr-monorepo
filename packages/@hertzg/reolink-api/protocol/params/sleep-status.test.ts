@@ -1,8 +1,9 @@
+import { test } from "node:test";
 import { assertEquals, assertThrows } from "@std/assert";
 import { isElement, parse } from "@std/xml";
 import { sleepStatus } from "./sleep-status.ts";
 
-Deno.test("sleepStatus decodes a cmd 623 push captured from a doorbell", () => {
+test("sleepStatus decodes a cmd 623 push captured from a doorbell", () => {
   const xml = '<?xml version="1.0" encoding="UTF-8" ?>\n' +
     "<body>\n" +
     '<sleepStatus version="1.1">\n' +
@@ -14,7 +15,7 @@ Deno.test("sleepStatus decodes a cmd 623 push captured from a doorbell", () => {
   assertEquals(sleepStatus.decode(element), { sleep: 0 });
 });
 
-Deno.test("sleepStatus round-trips through encode and decode", () => {
+test("sleepStatus round-trips through encode and decode", () => {
   const value = { sleep: 1 };
 
   assertEquals(
@@ -23,7 +24,7 @@ Deno.test("sleepStatus round-trips through encode and decode", () => {
   );
 });
 
-Deno.test("sleepStatus rejects a push without sleep", () => {
+test("sleepStatus rejects a push without sleep", () => {
   const root = parse('<sleepStatus version="1.1"></sleepStatus>').root;
 
   assertThrows(() => sleepStatus.decode(root), Error, "<sleep>");

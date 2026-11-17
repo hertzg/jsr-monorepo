@@ -1,3 +1,4 @@
+import { test } from "node:test";
 import { assertEquals } from "@std/assert";
 import {
   ESP_HEADER_SIZE,
@@ -6,8 +7,8 @@ import {
   IP_PROTOCOL_ESP,
 } from "./mod.ts";
 
-Deno.test("espPacket", async (t) => {
-  await t.step("round-trips a header with an opaque payload", () => {
+test("espPacket", async (t) => {
+  await t.test("round-trips a header with an opaque payload", () => {
     const coder = espPacket();
     const packet: EspPacket = {
       spi: 0x12345678,
@@ -24,7 +25,7 @@ Deno.test("espPacket", async (t) => {
     assertEquals(decoded, packet);
   });
 
-  await t.step("round-trips a header with an empty payload", () => {
+  await t.test("round-trips a header with an empty payload", () => {
     const coder = espPacket();
     const packet: EspPacket = {
       spi: 1,
@@ -41,7 +42,7 @@ Deno.test("espPacket", async (t) => {
     assertEquals(decoded, packet);
   });
 
-  await t.step("decodes known wire bytes", () => {
+  await t.test("decodes known wire bytes", () => {
     // deno-fmt-ignore
     const wire = new Uint8Array([
       0x00, 0x00, 0x03, 0x00, // spi = 768
@@ -57,7 +58,7 @@ Deno.test("espPacket", async (t) => {
     assertEquals(decoded.payloadData, wire.subarray(ESP_HEADER_SIZE));
   });
 
-  await t.step(
+  await t.test(
     "decodes a header with the maximum SPI and sequence number",
     () => {
       // deno-fmt-ignore
@@ -75,7 +76,7 @@ Deno.test("espPacket", async (t) => {
     },
   );
 
-  await t.step("exposes the well-known constants", () => {
+  await t.test("exposes the well-known constants", () => {
     assertEquals(ESP_HEADER_SIZE, 8);
     assertEquals(IP_PROTOCOL_ESP, 50);
   });

@@ -1,8 +1,9 @@
+import { test } from "node:test";
 import { assertEquals } from "@std/assert";
 import { parse } from "@std/xml";
 import { iotBindUnBind } from "./iot-bind-un-bind.ts";
 
-Deno.test("iotBindUnBind decodes the reply the camera writes", () => {
+test("iotBindUnBind decodes the reply the camera writes", () => {
   const root = parse(
     '<IOTBindUnBind version="1.1"><name>name-abc123</name>' +
       "<uid>uid-abc123</uid></IOTBindUnBind>",
@@ -14,7 +15,7 @@ Deno.test("iotBindUnBind decodes the reply the camera writes", () => {
   });
 });
 
-Deno.test("iotBindUnBind round-trips through encode and decode", () => {
+test("iotBindUnBind round-trips through encode and decode", () => {
   const value = {
     name: "name-def456",
     uid: "uid-def456",
@@ -29,7 +30,7 @@ Deno.test("iotBindUnBind round-trips through encode and decode", () => {
   assertEquals(iotBindUnBind.decode(parse(xml).root), value);
 });
 
-Deno.test("iotBindUnBind decodes an unbind request naming only the uid", () => {
+test("iotBindUnBind decodes an unbind request naming only the uid", () => {
   const root = parse(
     '<IOTBindUnBind version="1.1"><uid>uid-ghi789</uid></IOTBindUnBind>',
   ).root;

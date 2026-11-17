@@ -1,8 +1,9 @@
+import { test } from "node:test";
 import { assertEquals, assertRejects } from "@std/assert";
 import { decodeHex } from "@std/encoding/hex";
 import { createBaichuanDecodeStream } from "./decode.ts";
 
-Deno.test("createBaichuanDecodeStream reassembles a message split byte by byte", async () => {
+test("createBaichuanDecodeStream reassembles a message split byte by byte", async () => {
   const bytes = decodeHex(
     "f0debc0a0100000003000000fa01000001dd1466" + "aabbcc",
   );
@@ -26,7 +27,7 @@ Deno.test("createBaichuanDecodeStream reassembles a message split byte by byte",
   }]);
 });
 
-Deno.test("createBaichuanDecodeStream splits the payload at payloadOffset", async () => {
+test("createBaichuanDecodeStream splits the payload at payloadOffset", async () => {
   const bytes = decodeHex(
     "f0debc0a0300000005000000010700000000146402000000" + "aabb" + "ccddee",
   );
@@ -39,7 +40,7 @@ Deno.test("createBaichuanDecodeStream splits the payload at payloadOffset", asyn
   assertEquals(message.payload, Uint8Array.of(0xcc, 0xdd, 0xee));
 });
 
-Deno.test("createBaichuanDecodeStream reads messages joined across chunks", async () => {
+test("createBaichuanDecodeStream reads messages joined across chunks", async () => {
   const first = decodeHex("f0debc0a1f00000000000000fb030000c800146400000000");
   const second = decodeHex("f0debc0a5d00000000000000fa040000c800146400000000");
   const joined = new Uint8Array([...first, ...second]);
@@ -52,7 +53,7 @@ Deno.test("createBaichuanDecodeStream reads messages joined across chunks", asyn
   assertEquals(messages.map((message) => message.header.cmdId), [31, 93]);
 });
 
-Deno.test("createBaichuanDecodeStream errors on a missing magic", async () => {
+test("createBaichuanDecodeStream errors on a missing magic", async () => {
   const bytes = decodeHex("deadbeef1f00000000000000fb030000c800146400000000");
 
   await assertRejects(
@@ -65,7 +66,7 @@ Deno.test("createBaichuanDecodeStream errors on a missing magic", async () => {
   );
 });
 
-Deno.test("createBaichuanDecodeStream errors when input ends mid-message", async () => {
+test("createBaichuanDecodeStream errors when input ends mid-message", async () => {
   const bytes = decodeHex("f0debc0a0100000003000000fa01000001dd1466aa");
 
   await assertRejects(

@@ -1,8 +1,9 @@
+import { test } from "node:test";
 import { assertEquals } from "@std/assert";
 import { parse } from "@std/xml";
 import { rfAlarmCfg } from "./rf-alarm-cfg.ts";
 
-Deno.test("rfAlarmCfg decodes the cmd 212 reply", () => {
+test("rfAlarmCfg decodes the cmd 212 reply", () => {
   const root = parse(
     '<rfAlarmCfg version="1.1"><enable>1</enable><sensiValue>60</sensiValue>' +
       "<reduceFalseAlarm>2</reduceFalseAlarm></rfAlarmCfg>",
@@ -15,7 +16,7 @@ Deno.test("rfAlarmCfg decodes the cmd 212 reply", () => {
   });
 });
 
-Deno.test("rfAlarmCfg decodes a request with only the sensitivity", () => {
+test("rfAlarmCfg decodes a request with only the sensitivity", () => {
   const root = parse(
     '<rfAlarmCfg version="1.1"><sensiValue>35</sensiValue></rfAlarmCfg>',
   ).root;
@@ -23,7 +24,7 @@ Deno.test("rfAlarmCfg decodes a request with only the sensitivity", () => {
   assertEquals(rfAlarmCfg.decode(root), { sensiValue: 35 });
 });
 
-Deno.test("rfAlarmCfg round-trips through encode and decode", () => {
+test("rfAlarmCfg round-trips through encode and decode", () => {
   const value = { enable: 0, sensiValue: 90, reduceFalseAlarm: 1 };
 
   const xml = rfAlarmCfg.encode(value);

@@ -1,8 +1,9 @@
+import { test } from "node:test";
 import { assert, assertEquals } from "@std/assert";
 import { isValidAddress, isValidCidr } from "./validate.ts";
 
-Deno.test("isValidAddress", async (t) => {
-  await t.step("accepts all valid formats", () => {
+test("isValidAddress", async (t) => {
+  await t.test("accepts all valid formats", () => {
     assert(isValidAddress("192.168.1.1"));
     assert(isValidAddress("::1"));
     assert(isValidAddress("0.0.0.0"));
@@ -10,18 +11,18 @@ Deno.test("isValidAddress", async (t) => {
     assert(isValidAddress("192.168.1.1%ether1"));
   });
 
-  await t.step("follows the parser on zone IDs", () => {
+  await t.test("follows the parser on zone IDs", () => {
     assertEquals(isValidAddress("fe80::1%"), false);
     assertEquals(isValidAddress("fe80::1%eth0%1"), false);
     assertEquals(isValidAddress("fe80::1% eth0"), false);
   });
 
-  await t.step("rejects CIDR notation", () => {
+  await t.test("rejects CIDR notation", () => {
     assertEquals(isValidAddress("10.0.0.0/8"), false);
     assertEquals(isValidAddress("2001:db8::/32"), false);
   });
 
-  await t.step("rejects invalid strings", () => {
+  await t.test("rejects invalid strings", () => {
     assertEquals(isValidAddress(""), false);
     assertEquals(isValidAddress("not an ip"), false);
     assertEquals(isValidAddress("999.999.999.999"), false);
@@ -29,15 +30,15 @@ Deno.test("isValidAddress", async (t) => {
   });
 });
 
-Deno.test("isValidCidr", async (t) => {
-  await t.step("accepts valid CIDR notation", () => {
+test("isValidCidr", async (t) => {
+  await t.test("accepts valid CIDR notation", () => {
     assert(isValidCidr("10.0.0.0/8"));
     assert(isValidCidr("2001:db8::/32"));
     assert(isValidCidr("192.168.1.0/24"));
     assert(isValidCidr("::/0"));
   });
 
-  await t.step(
+  await t.test(
     "accepts the mask dialect and zone IDs, as the parsers do",
     () => {
       assert(isValidCidr("10.0.0.0/255.0.0.0"));
@@ -48,12 +49,12 @@ Deno.test("isValidCidr", async (t) => {
     },
   );
 
-  await t.step("rejects plain IP addresses", () => {
+  await t.test("rejects plain IP addresses", () => {
     assertEquals(isValidCidr("192.168.1.1"), false);
     assertEquals(isValidCidr("::1"), false);
   });
 
-  await t.step("rejects invalid strings", () => {
+  await t.test("rejects invalid strings", () => {
     assertEquals(isValidCidr(""), false);
     assertEquals(isValidCidr("garbage/24"), false);
     assertEquals(isValidCidr("192.168.1.0/33"), false);

@@ -1,3 +1,4 @@
+import { test } from "node:test";
 import { assertEquals } from "@std/assert";
 import {
   MBR_BOOT_SIGNATURE,
@@ -18,8 +19,8 @@ const emptyEntry = {
   sectorCount: 0,
 };
 
-Deno.test("mbrSector", async (t) => {
-  await t.step("round-trips a sector with all partitions empty", () => {
+test("mbrSector", async (t) => {
+  await t.test("round-trips a sector with all partitions empty", () => {
     const coder = mbrSector();
     const sector: MbrSector = {
       bootstrapCode: new Uint8Array(446),
@@ -36,7 +37,7 @@ Deno.test("mbrSector", async (t) => {
     assertEquals(decoded, sector);
   });
 
-  await t.step("round-trips a sector with a bootable Linux partition", () => {
+  await t.test("round-trips a sector with a bootable Linux partition", () => {
     const coder = mbrSector();
     const bootstrapCode = new Uint8Array(446);
     bootstrapCode[0] = 0xeb;
@@ -80,7 +81,7 @@ Deno.test("mbrSector", async (t) => {
     assertEquals(decoded.partitions[0].sectorCount, 1048576);
   });
 
-  await t.step(
+  await t.test(
     "decodes a known-bytes sector with an EFI protective partition",
     () => {
       const wire = new Uint8Array(MBR_SIZE);
@@ -112,7 +113,7 @@ Deno.test("mbrSector", async (t) => {
     },
   );
 
-  await t.step("decodes a known-bytes empty sector", () => {
+  await t.test("decodes a known-bytes empty sector", () => {
     const wire = new Uint8Array(MBR_SIZE);
     wire[510] = 0x55;
     wire[511] = 0xaa;
@@ -129,7 +130,7 @@ Deno.test("mbrSector", async (t) => {
     assertEquals(decoded.bootSignature, MBR_BOOT_SIGNATURE);
   });
 
-  await t.step(
+  await t.test(
     "each partition entry occupies PARTITION_ENTRY_SIZE bytes",
     () => {
       const coder = mbrSector();

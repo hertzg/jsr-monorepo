@@ -1,8 +1,9 @@
+import { test } from "node:test";
 import { assertEquals, assertThrows } from "@std/assert";
 import { parse } from "@std/xml";
 import { performanceInfo } from "./performance-info.ts";
 
-Deno.test("performanceInfo decodes the cmd 122 reply", () => {
+test("performanceInfo decodes the cmd 122 reply", () => {
   const root = parse(
     '<PerformanceInfo version="1.1"><cpuUseRate>37</cpuUseRate>' +
       "<codeRate>4096</codeRate><netDataRate>512</netDataRate></PerformanceInfo>",
@@ -15,7 +16,7 @@ Deno.test("performanceInfo decodes the cmd 122 reply", () => {
   });
 });
 
-Deno.test("performanceInfo rejects a reply without netDataRate", () => {
+test("performanceInfo rejects a reply without netDataRate", () => {
   const root = parse(
     '<PerformanceInfo version="1.1"><cpuUseRate>37</cpuUseRate>' +
       "<codeRate>4096</codeRate></PerformanceInfo>",
@@ -24,7 +25,7 @@ Deno.test("performanceInfo rejects a reply without netDataRate", () => {
   assertThrows(() => performanceInfo.decode(root), Error, "<netDataRate>");
 });
 
-Deno.test("performanceInfo round-trips through encode and decode", () => {
+test("performanceInfo round-trips through encode and decode", () => {
   const value = { cpuUseRate: 81, codeRate: 6144, netDataRate: 1024 };
 
   const xml = performanceInfo.encode(value);

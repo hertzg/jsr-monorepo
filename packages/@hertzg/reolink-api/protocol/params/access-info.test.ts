@@ -1,8 +1,9 @@
+import { test } from "node:test";
 import { assertEquals, assertThrows } from "@std/assert";
 import { parse } from "@std/xml";
 import { accessInfo } from "./access-info.ts";
 
-Deno.test("accessInfo decodes both base64 fields", () => {
+test("accessInfo decodes both base64 fields", () => {
   const root = parse(
     '<accessInfo version="1.1"><userName>dXNlci1hYmMxMjM=</userName>' +
       "<accesskey>a2V5LWFiYzEyMw==</accesskey></accessInfo>",
@@ -14,13 +15,13 @@ Deno.test("accessInfo decodes both base64 fields", () => {
   });
 });
 
-Deno.test("accessInfo round-trips through encode and decode", () => {
+test("accessInfo round-trips through encode and decode", () => {
   const value = { userName: "dXNlci1ydA==", accesskey: "a2V5LXJ0" };
 
   assertEquals(accessInfo.decode(parse(accessInfo.encode(value)).root), value);
 });
 
-Deno.test("accessInfo throws when an always-written field is missing", () => {
+test("accessInfo throws when an always-written field is missing", () => {
   const root = parse(
     '<accessInfo version="1.1"><userName>dXNlcg==</userName></accessInfo>',
   ).root;

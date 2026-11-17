@@ -1,3 +1,4 @@
+import { test } from "node:test";
 import { assertEquals, assertStrictEquals, assertThrows } from "@std/assert";
 import { assertSpyCalls, spy } from "@std/testing/mock";
 import { struct } from "../struct/struct.ts";
@@ -30,7 +31,7 @@ interface AckPacket {
   sequenceNumber: number;
 }
 
-Deno.test("refineSwitch - basic round-trip with single refiner", () => {
+test("refineSwitch - basic round-trip with single refiner", () => {
   const pingRefiner: Refiner<BasePacket, PingPacket, []> = {
     refine: (packet, ctx) => ({
       type: 1,
@@ -70,7 +71,7 @@ Deno.test("refineSwitch - basic round-trip with single refiner", () => {
   assertEquals(decoded.timestamp, 42);
 });
 
-Deno.test("refineSwitch - multiple refiners with different types", () => {
+test("refineSwitch - multiple refiners with different types", () => {
   const pingRefiner: Refiner<BasePacket, PingPacket, []> = {
     refine: (packet, ctx) => ({
       type: 1,
@@ -164,7 +165,7 @@ Deno.test("refineSwitch - multiple refiners with different types", () => {
   assertEquals((decodedAck as AckPacket).sequenceNumber, 123);
 });
 
-Deno.test("refineSwitch - decode error when selector.refine returns null", () => {
+test("refineSwitch - decode error when selector.refine returns null", () => {
   const pingRefiner: Refiner<BasePacket, PingPacket, []> = {
     refine: (packet, ctx) => ({
       type: 1,
@@ -201,7 +202,7 @@ Deno.test("refineSwitch - decode error when selector.refine returns null", () =>
   );
 });
 
-Deno.test("refineSwitch - encode error when selector.unrefine returns null", () => {
+test("refineSwitch - encode error when selector.unrefine returns null", () => {
   const pingRefiner: Refiner<BasePacket, PingPacket, []> = {
     refine: (packet, ctx) => ({
       type: 1,
@@ -239,7 +240,7 @@ Deno.test("refineSwitch - encode error when selector.unrefine returns null", () 
   );
 });
 
-Deno.test("refineSwitch - decode error when selector returns invalid key", () => {
+test("refineSwitch - decode error when selector returns invalid key", () => {
   const pingRefiner: Refiner<BasePacket, PingPacket, []> = {
     refine: (packet, ctx) => ({
       type: 1,
@@ -263,7 +264,7 @@ Deno.test("refineSwitch - decode error when selector returns invalid key", () =>
     },
     {
       // Return invalid key that doesn't exist in refiners
-      // deno-lint-ignore no-explicit-any
+      // oxlint-disable-next-line typescript/no-explicit-any
       refine: (_packet, _ctx) => "invalid" as any,
       unrefine: (packet, _ctx) => (packet.type === 1 ? "ping" : null),
     },
@@ -278,7 +279,7 @@ Deno.test("refineSwitch - decode error when selector returns invalid key", () =>
   );
 });
 
-Deno.test("refineSwitch - encode error when selector returns invalid key", () => {
+test("refineSwitch - encode error when selector returns invalid key", () => {
   const pingRefiner: Refiner<BasePacket, PingPacket, []> = {
     refine: (packet, ctx) => ({
       type: 1,
@@ -303,7 +304,7 @@ Deno.test("refineSwitch - encode error when selector returns invalid key", () =>
     {
       refine: (packet, _ctx) => (packet.type === 1 ? "ping" : null),
       // Return invalid key that doesn't exist in refiners
-      // deno-lint-ignore no-explicit-any
+      // oxlint-disable-next-line typescript/no-explicit-any
       unrefine: (_packet, _ctx) => "invalid" as any,
     },
   );
@@ -318,7 +319,7 @@ Deno.test("refineSwitch - encode error when selector returns invalid key", () =>
   );
 });
 
-Deno.test("refineSwitch - context propagation", () => {
+test("refineSwitch - context propagation", () => {
   const refinePing = spy((packet: BasePacket, ctx: Context): PingPacket => ({
     type: 1,
     timestamp: decode(u8(), packet.data, ctx),
@@ -366,7 +367,7 @@ Deno.test("refineSwitch - context propagation", () => {
   assertStrictEquals(refinePing.calls[0].args[1], decodeCtx);
 });
 
-Deno.test("refineSwitch - passthrough refiner for unknown values", () => {
+test("refineSwitch - passthrough refiner for unknown values", () => {
   const pingRefiner: Refiner<BasePacket, PingPacket, []> = {
     refine: (packet, ctx) => ({
       type: 1,

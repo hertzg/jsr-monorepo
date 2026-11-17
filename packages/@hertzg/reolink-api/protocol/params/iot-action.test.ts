@@ -1,8 +1,9 @@
+import { test } from "node:test";
 import { assertEquals } from "@std/assert";
 import { parse } from "@std/xml";
 import { iotAction } from "./iot-action.ts";
 
-Deno.test("iotAction decodes a request carrying every field", () => {
+test("iotAction decodes a request carrying every field", () => {
   const timeTable = "10".repeat(84);
   const root = parse(
     '<IOTAction version="1.1"><channelBits>18446744073709551615</channelBits>' +
@@ -23,7 +24,7 @@ Deno.test("iotAction decodes a request carrying every field", () => {
   });
 });
 
-Deno.test("iotAction round-trips through encode and decode", () => {
+test("iotAction round-trips through encode and decode", () => {
   const value = {
     channelBits: 5n,
     setState: 0,
@@ -40,7 +41,7 @@ Deno.test("iotAction round-trips through encode and decode", () => {
   assertEquals(iotAction.decode(parse(xml).root), value);
 });
 
-Deno.test("iotAction decodes a request that only switches a device state", () => {
+test("iotAction decodes a request that only switches a device state", () => {
   const root = parse(
     '<IOTAction version="1.1"><setState>1</setState><uid>uid-ghi789</uid></IOTAction>',
   ).root;

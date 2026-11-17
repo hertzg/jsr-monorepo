@@ -1,3 +1,4 @@
+import { test } from "node:test";
 import { assert, assertEquals, assertThrows } from "@std/assert";
 import {
   compareAddressv6,
@@ -10,8 +11,8 @@ import {
 import { parseAddressv4, stringifyAddressv4 } from "./addressv4.ts";
 import { isValidAddressv6 } from "./validatev6.ts";
 
-Deno.test("parseAddressv6", async (t) => {
-  await t.step("full form addresses", () => {
+test("parseAddressv6", async (t) => {
+  await t.test("full form addresses", () => {
     assertEquals(parseAddressv6("2001:0db8:0000:0000:0000:0000:0000:0001"), {
       address: 0x20010db8000000000000000000000001n,
     });
@@ -23,7 +24,7 @@ Deno.test("parseAddressv6", async (t) => {
     });
   });
 
-  await t.step("compressed form with leading ::", () => {
+  await t.test("compressed form with leading ::", () => {
     assertEquals(parseAddressv6("::1"), { address: 1n });
     assertEquals(parseAddressv6("::"), { address: 0n });
     assertEquals(parseAddressv6("::ffff"), { address: 0xffffn });
@@ -33,7 +34,7 @@ Deno.test("parseAddressv6", async (t) => {
     );
   });
 
-  await t.step("compressed form with trailing ::", () => {
+  await t.test("compressed form with trailing ::", () => {
     assertEquals(parseAddressv6("2001:db8::"), {
       address: 0x20010db8000000000000000000000000n,
     });
@@ -42,7 +43,7 @@ Deno.test("parseAddressv6", async (t) => {
     });
   });
 
-  await t.step("compressed form with :: in middle", () => {
+  await t.test("compressed form with :: in middle", () => {
     assertEquals(parseAddressv6("2001:db8::1"), {
       address: 0x20010db8000000000000000000000001n,
     });
@@ -57,25 +58,25 @@ Deno.test("parseAddressv6", async (t) => {
     });
   });
 
-  await t.step("lowercase hex", () => {
+  await t.test("lowercase hex", () => {
     assertEquals(parseAddressv6("abcd:ef01::1"), {
       address: 0xabcdef01000000000000000000000001n,
     });
   });
 
-  await t.step("uppercase hex", () => {
+  await t.test("uppercase hex", () => {
     assertEquals(parseAddressv6("ABCD:EF01::1"), {
       address: 0xabcdef01000000000000000000000001n,
     });
   });
 
-  await t.step("mixed case hex", () => {
+  await t.test("mixed case hex", () => {
     assertEquals(parseAddressv6("AbCd:eF01::1"), {
       address: 0xabcdef01000000000000000000000001n,
     });
   });
 
-  await t.step("IPv4-mapped addresses", () => {
+  await t.test("IPv4-mapped addresses", () => {
     assertEquals(
       parseAddressv6("::ffff:192.168.1.1").address,
       0x0000_0000_0000_0000_0000_ffff_c0a8_0101n,
@@ -94,7 +95,7 @@ Deno.test("parseAddressv6", async (t) => {
     );
   });
 
-  await t.step("carries a zone ID verbatim", () => {
+  await t.test("carries a zone ID verbatim", () => {
     assertEquals(parseAddressv6("fe80::1%eth0"), {
       address: 0xfe800000000000000000000000000001n,
       zoneId: "eth0",
@@ -118,18 +119,18 @@ Deno.test("parseAddressv6", async (t) => {
     });
   });
 
-  await t.step("never percent-decodes the zone ID", () => {
+  await t.test("never percent-decodes the zone ID", () => {
     assertEquals(parseAddressv6("fe80::1%25eth0"), {
       address: 0xfe800000000000000000000000000001n,
       zoneId: "25eth0",
     });
   });
 
-  await t.step("has no zoneId key when there is no zone", () => {
+  await t.test("has no zoneId key when there is no zone", () => {
     assertEquals(Object.keys(parseAddressv6("fe80::1")), ["address"]);
   });
 
-  await t.step("rejects a malformed zone ID as a shape error", () => {
+  await t.test("rejects a malformed zone ID as a shape error", () => {
     assertThrows(() => parseAddressv6("fe80::1%"), TypeError);
     assertThrows(() => parseAddressv6("fe80::%"), TypeError);
     assertThrows(() => parseAddressv6("%eth0"), TypeError);
@@ -143,7 +144,7 @@ Deno.test("parseAddressv6", async (t) => {
     assertThrows(() => parseAddressv6("fe80::1%eth\t0"), TypeError);
   });
 
-  await t.step("rejects a prefix: that slot belongs to parseCidrv6", () => {
+  await t.test("rejects a prefix: that slot belongs to parseCidrv6", () => {
     assertThrows(
       () => parseAddressv6("2001:db8::/32"),
       TypeError,
@@ -154,12 +155,12 @@ Deno.test("parseAddressv6", async (t) => {
     assertThrows(() => parseAddressv6("fe80::/"), TypeError);
   });
 
-  await t.step("rejects IPv4 notation", () => {
+  await t.test("rejects IPv4 notation", () => {
     assertThrows(() => parseAddressv6("192.168.1.1"), TypeError);
     assertThrows(() => parseAddressv6("192.168.1.1%eth0"), TypeError);
   });
 
-  await t.step("edge cases", () => {
+  await t.test("edge cases", () => {
     assertEquals(parseAddressv6("0:0:0:0:0:0:0:0"), { address: 0n });
     assertEquals(parseAddressv6("0:0:0:0:0:0:0:1"), { address: 1n });
     assertEquals(parseAddressv6("ffff:ffff:ffff:ffff:ffff:ffff:ffff:ffff"), {
@@ -167,7 +168,7 @@ Deno.test("parseAddressv6", async (t) => {
     });
   });
 
-  await t.step("invalid format - multiple ::", () => {
+  await t.test("invalid format - multiple ::", () => {
     assertThrows(
       () => parseAddressv6("2001::db8::1"),
       TypeError,
@@ -175,7 +176,7 @@ Deno.test("parseAddressv6", async (t) => {
     );
   });
 
-  await t.step("invalid format - too many groups", () => {
+  await t.test("invalid format - too many groups", () => {
     assertThrows(
       () => parseAddressv6("1:2:3:4:5:6:7:8:9"),
       TypeError,
@@ -183,7 +184,7 @@ Deno.test("parseAddressv6", async (t) => {
     );
   });
 
-  await t.step("invalid format - too few groups without ::", () => {
+  await t.test("invalid format - too few groups without ::", () => {
     assertThrows(
       () => parseAddressv6("2001:db8:1"),
       TypeError,
@@ -191,7 +192,7 @@ Deno.test("parseAddressv6", async (t) => {
     );
   });
 
-  await t.step("invalid format - invalid hex", () => {
+  await t.test("invalid format - invalid hex", () => {
     assertThrows(
       () => parseAddressv6("2001:gggg::1"),
       TypeError,
@@ -204,7 +205,7 @@ Deno.test("parseAddressv6", async (t) => {
     );
   });
 
-  await t.step("invalid format - group too long", () => {
+  await t.test("invalid format - group too long", () => {
     assertThrows(
       () => parseAddressv6("2001:12345::1"),
       TypeError,
@@ -212,14 +213,14 @@ Deno.test("parseAddressv6", async (t) => {
     );
   });
 
-  await t.step("invalid format - empty group", () => {
+  await t.test("invalid format - empty group", () => {
     assertThrows(
       () => parseAddressv6("2001::db8:::1"),
       TypeError,
     );
   });
 
-  await t.step("never returns a negative, whatever the sign looks like", () => {
+  await t.test("never returns a negative, whatever the sign looks like", () => {
     // A hex group was read with parseInt, which accepts a sign, and nothing
     // range-checked the result -- so these returned values outside the
     // 0 .. 2^128-1 the type is documented to hold. "-" is not a hex digit.
@@ -229,7 +230,7 @@ Deno.test("parseAddressv6", async (t) => {
     assertThrows(() => parseAddressv6("1:2:3:4:5:6:7:-8"), TypeError);
   });
 
-  await t.step("RangeError only from the embedded IPv4 form", () => {
+  await t.test("RangeError only from the embedded IPv4 form", () => {
     // A hex group cannot be numerically out of range -- 4 digits cannot
     // exceed ffff -- so an over-long group is a TypeError, not a RangeError.
     assertThrows(
@@ -276,8 +277,8 @@ function assertRow(input: string, expected: bigint | ErrorConstructor): void {
 // step below, since a Row has no slot for one; "fe80::%" and the like are
 // covered by the zone ID steps of the parseAddressv6 test.
 
-Deno.test("parseAddressv6 acceptance table", async (t) => {
-  await t.step("accepts '::' covering one or more groups", () => {
+test("parseAddressv6 acceptance table", async (t) => {
+  await t.test("accepts '::' covering one or more groups", () => {
     const rows: Row[] = [
       ["2001:252:0:1::2008:6", 0x20010252000000010000000020080006n],
       ["2001:dead:beef:1::2008:6", 0x2001deadbeef00010000000020080006n],
@@ -500,7 +501,7 @@ Deno.test("parseAddressv6 acceptance table", async (t) => {
     for (const [input, expected] of rows) assertRow(input, expected);
   });
 
-  await t.step("rejects a malformed embedded IPv4 form", () => {
+  await t.test("rejects a malformed embedded IPv4 form", () => {
     const rows: Row[] = [
       ["::2001:252:1:255.255.255.255.76", TypeError],
       ["::ffff:300.168.1.1", RangeError],
@@ -622,7 +623,7 @@ Deno.test("parseAddressv6 acceptance table", async (t) => {
     for (const [input, expected] of rows) assertRow(input, expected);
   });
 
-  await t.step("accepts the embedded IPv4 form", () => {
+  await t.test("accepts the embedded IPv4 form", () => {
     const rows: Row[] = [
       ["::2001:252:1:1.1.1.1", 0x20010252000101010101n],
       ["::2001:252:1:255.255.255.255", 0x200102520001ffffffffn],
@@ -711,7 +712,7 @@ Deno.test("parseAddressv6 acceptance table", async (t) => {
     for (const [input, expected] of rows) assertRow(input, expected);
   });
 
-  await t.step("rejects more than one '::'", () => {
+  await t.test("rejects more than one '::'", () => {
     const rows: Row[] = [
       ["2001:252::1::2008:6", TypeError],
       ["2001:db8::F53A::1", TypeError],
@@ -759,7 +760,7 @@ Deno.test("parseAddressv6 acceptance table", async (t) => {
     for (const [input, expected] of rows) assertRow(input, expected);
   });
 
-  await t.step("rejects three or more consecutive colons", () => {
+  await t.test("rejects three or more consecutive colons", () => {
     const rows: Row[] = [
       ["1111:2222:3333:4444:5555:6666:7777:::", TypeError],
       ["1111:2222:3333:4444:5555:6666:::", TypeError],
@@ -799,7 +800,7 @@ Deno.test("parseAddressv6 acceptance table", async (t) => {
     for (const [input, expected] of rows) assertRow(input, expected);
   });
 
-  await t.step("accepts the canonical eight-group form", () => {
+  await t.test("accepts the canonical eight-group form", () => {
     const rows: Row[] = [
       ["0000:0000:0000:0000:0000:0000:0000:0000", 0x0n],
       ["1050:0:0:0:5:600:300c:326b", 0x105000000000000000050600300c326bn],
@@ -872,7 +873,7 @@ Deno.test("parseAddressv6 acceptance table", async (t) => {
     for (const [input, expected] of rows) assertRow(input, expected);
   });
 
-  await t.step("rejects a group count other than eight", () => {
+  await t.test("rejects a group count other than eight", () => {
     const rows: Row[] = [
       ["1111:", TypeError],
       ["1111:2222", TypeError],
@@ -908,7 +909,7 @@ Deno.test("parseAddressv6 acceptance table", async (t) => {
     for (const [input, expected] of rows) assertRow(input, expected);
   });
 
-  await t.step("rejects '::' covering zero groups", () => {
+  await t.test("rejects '::' covering zero groups", () => {
     const rows: Row[] = [
       ["0000:0000:0000:0000:0000:0000:0000:0000::0000", TypeError],
       [":2001:252:0:1::2008:6:", TypeError],
@@ -938,7 +939,7 @@ Deno.test("parseAddressv6 acceptance table", async (t) => {
     for (const [input, expected] of rows) assertRow(input, expected);
   });
 
-  await t.step("rejects groups over four hex digits", () => {
+  await t.test("rejects groups over four hex digits", () => {
     const rows: Row[] = [
       ["0000:0000:0000:0000:0000:0000:12345:0000", TypeError],
       ["200001::1", TypeError],
@@ -966,7 +967,7 @@ Deno.test("parseAddressv6 acceptance table", async (t) => {
     for (const [input, expected] of rows) assertRow(input, expected);
   });
 
-  await t.step("rejects characters outside the hex/IPv4 grammar", () => {
+  await t.test("rejects characters outside the hex/IPv4 grammar", () => {
     const rows: Row[] = [
       ["::anything", TypeError],
       ["fe80::wtf", TypeError],
@@ -987,7 +988,7 @@ Deno.test("parseAddressv6 acceptance table", async (t) => {
     for (const [input, expected] of rows) assertRow(input, expected);
   });
 
-  await t.step("rejects input that is not colon-hexadecimal", () => {
+  await t.test("rejects input that is not colon-hexadecimal", () => {
     const rows: Row[] = [
       ["127.0.0.1", TypeError],
       ["x127.0.0.1", TypeError],
@@ -1005,7 +1006,7 @@ Deno.test("parseAddressv6 acceptance table", async (t) => {
     for (const [input, expected] of rows) assertRow(input, expected);
   });
 
-  await t.step("rejects whitespace anywhere", () => {
+  await t.test("rejects whitespace anywhere", () => {
     const rows: Row[] = [
       ["::1 ::1", TypeError],
       ["2001:0000:1234: 0000:0000:C1C0:ABCD:0876", TypeError],
@@ -1022,7 +1023,7 @@ Deno.test("parseAddressv6 acceptance table", async (t) => {
     for (const [input, expected] of rows) assertRow(input, expected);
   });
 
-  await t.step("carries a well-formed zone ID", () => {
+  await t.test("carries a well-formed zone ID", () => {
     const rows: [string, bigint, string][] = [
       ["fe80::2008%eth0", 0xfe800000000000000000000000002008n, "eth0"],
       ["fe80::2008%eth0.0", 0xfe800000000000000000000000002008n, "eth0.0"],
@@ -1040,16 +1041,16 @@ Deno.test("parseAddressv6 acceptance table", async (t) => {
   });
 });
 
-Deno.test("stringifyAddressv6", async (t) => {
-  await t.step("zero address", () => {
+test("stringifyAddressv6", async (t) => {
+  await t.test("zero address", () => {
     assertEquals(stringifyAddressv6(0n), "::");
   });
 
-  await t.step("loopback", () => {
+  await t.test("loopback", () => {
     assertEquals(stringifyAddressv6(1n), "::1");
   });
 
-  await t.step("common addresses", () => {
+  await t.test("common addresses", () => {
     assertEquals(
       stringifyAddressv6(0x20010db8000000000000000000000001n),
       "2001:db8::1",
@@ -1060,63 +1061,63 @@ Deno.test("stringifyAddressv6", async (t) => {
     );
   });
 
-  await t.step("no compression needed", () => {
+  await t.test("no compression needed", () => {
     assertEquals(
       stringifyAddressv6(0x00010002000300040005000600070008n),
       "1:2:3:4:5:6:7:8",
     );
   });
 
-  await t.step("single zero not compressed", () => {
+  await t.test("single zero not compressed", () => {
     assertEquals(
       stringifyAddressv6(0x00010000000300040005000600070008n),
       "1:0:3:4:5:6:7:8",
     );
   });
 
-  await t.step("longest zero run is compressed", () => {
+  await t.test("longest zero run is compressed", () => {
     assertEquals(
       stringifyAddressv6(0x00010000000000000000000600070008n),
       "1::6:7:8",
     );
   });
 
-  await t.step("first longest run is compressed", () => {
+  await t.test("first longest run is compressed", () => {
     assertEquals(
       stringifyAddressv6(0x00010000000000000001000000000001n),
       "1::1:0:0:1",
     );
   });
 
-  await t.step("max address", () => {
+  await t.test("max address", () => {
     assertEquals(
       stringifyAddressv6(0xffffffffffffffffffffffffffffffffn),
       "ffff:ffff:ffff:ffff:ffff:ffff:ffff:ffff",
     );
   });
 
-  await t.step("leading zeros in groups are stripped", () => {
+  await t.test("leading zeros in groups are stripped", () => {
     assertEquals(
       stringifyAddressv6(0x00010002000300040005000600070008n),
       "1:2:3:4:5:6:7:8",
     );
   });
 
-  await t.step("compression at start", () => {
+  await t.test("compression at start", () => {
     assertEquals(
       stringifyAddressv6(0x00000000000000000000000000000001n),
       "::1",
     );
   });
 
-  await t.step("compression at end", () => {
+  await t.test("compression at end", () => {
     assertEquals(
       stringifyAddressv6(0x20010db8000000000000000000000000n),
       "2001:db8::",
     );
   });
 
-  await t.step("out of range values", () => {
+  await t.test("out of range values", () => {
     assertThrows(
       () => stringifyAddressv6(-1n),
       RangeError,
@@ -1130,43 +1131,43 @@ Deno.test("stringifyAddressv6", async (t) => {
   });
 });
 
-Deno.test("stringifyAddressv6Expanded", async (t) => {
-  await t.step("zero address", () => {
+test("stringifyAddressv6Expanded", async (t) => {
+  await t.test("zero address", () => {
     assertEquals(
       stringifyAddressv6Expanded(0n),
       "0000:0000:0000:0000:0000:0000:0000:0000",
     );
   });
 
-  await t.step("loopback", () => {
+  await t.test("loopback", () => {
     assertEquals(
       stringifyAddressv6Expanded(1n),
       "0000:0000:0000:0000:0000:0000:0000:0001",
     );
   });
 
-  await t.step("every group padded to four hex digits", () => {
+  await t.test("every group padded to four hex digits", () => {
     assertEquals(
       stringifyAddressv6Expanded(0x20010db8000000000000000000000001n),
       "2001:0db8:0000:0000:0000:0000:0000:0001",
     );
   });
 
-  await t.step("never compresses a zero run", () => {
+  await t.test("never compresses a zero run", () => {
     assertEquals(
       stringifyAddressv6Expanded(0x00010000000000000001000000000001n),
       "0001:0000:0000:0000:0001:0000:0000:0001",
     );
   });
 
-  await t.step("max address", () => {
+  await t.test("max address", () => {
     assertEquals(
       stringifyAddressv6Expanded(340282366920938463463374607431768211455n),
       "ffff:ffff:ffff:ffff:ffff:ffff:ffff:ffff",
     );
   });
 
-  await t.step("out of range values", () => {
+  await t.test("out of range values", () => {
     assertThrows(() => stringifyAddressv6Expanded(-1n), RangeError);
     assertThrows(
       () =>
@@ -1176,8 +1177,8 @@ Deno.test("stringifyAddressv6Expanded", async (t) => {
   });
 });
 
-Deno.test("IPv6 round-trip", async (t) => {
-  await t.step("parse then stringify", () => {
+test("IPv6 round-trip", async (t) => {
+  await t.test("parse then stringify", () => {
     const addresses = [
       "::",
       "::1",
@@ -1192,7 +1193,7 @@ Deno.test("IPv6 round-trip", async (t) => {
     }
   });
 
-  await t.step("stringify then parse", () => {
+  await t.test("stringify then parse", () => {
     const values = [
       0n,
       1n,
@@ -1206,7 +1207,7 @@ Deno.test("IPv6 round-trip", async (t) => {
     }
   });
 
-  await t.step("zone IDs round-trip verbatim", () => {
+  await t.test("zone IDs round-trip verbatim", () => {
     const addresses = [
       "fe80::1%eth0",
       "fe80::1%12",
@@ -1221,7 +1222,7 @@ Deno.test("IPv6 round-trip", async (t) => {
     }
   });
 
-  await t.step("full form to compressed and back", () => {
+  await t.test("full form to compressed and back", () => {
     const fullForms = [
       "0000:0000:0000:0000:0000:0000:0000:0000",
       "2001:0db8:0000:0000:0000:0000:0000:0001",
@@ -1236,30 +1237,30 @@ Deno.test("IPv6 round-trip", async (t) => {
   });
 });
 
-Deno.test("IPv6 arithmetic", async (t) => {
-  await t.step("increment IP", () => {
+test("IPv6 arithmetic", async (t) => {
+  await t.test("increment IP", () => {
     const ip = parseAddressv6("2001:db8::1").address;
     assertEquals(stringifyAddressv6(ip + 1n), "2001:db8::2");
   });
 
-  await t.step("decrement IP", () => {
+  await t.test("decrement IP", () => {
     const ip = parseAddressv6("2001:db8::2").address;
     assertEquals(stringifyAddressv6(ip - 1n), "2001:db8::1");
   });
 
-  await t.step("increment across group boundary", () => {
+  await t.test("increment across group boundary", () => {
     const ip = parseAddressv6("2001:db8::ffff").address;
     assertEquals(stringifyAddressv6(ip + 1n), "2001:db8::1:0");
   });
 
-  await t.step("add large offset", () => {
+  await t.test("add large offset", () => {
     const ip = parseAddressv6("::").address;
     assertEquals(stringifyAddressv6(ip + 0x10000n), "::1:0");
   });
 });
 
-Deno.test("isValidAddressv6", async (t) => {
-  await t.step("valid addresses", () => {
+test("isValidAddressv6", async (t) => {
+  await t.test("valid addresses", () => {
     assert(isValidAddressv6("::"));
     assert(isValidAddressv6("::1"));
     assert(isValidAddressv6("2001:db8::1"));
@@ -1270,7 +1271,7 @@ Deno.test("isValidAddressv6", async (t) => {
     );
   });
 
-  await t.step("invalid addresses", () => {
+  await t.test("invalid addresses", () => {
     assertEquals(isValidAddressv6(""), false);
     assertEquals(isValidAddressv6("192.168.1.1"), false);
     assertEquals(isValidAddressv6("2001:db8:::1"), false);
@@ -1280,8 +1281,8 @@ Deno.test("isValidAddressv6", async (t) => {
   });
 });
 
-Deno.test("compareAddressv6", async (t) => {
-  await t.step("orders numerically ascending", () => {
+test("compareAddressv6", async (t) => {
+  await t.test("orders numerically ascending", () => {
     assertEquals(
       compareAddressv6(
         parseAddressv6("::1").address,
@@ -1305,7 +1306,7 @@ Deno.test("compareAddressv6", async (t) => {
     );
   });
 
-  await t.step("returns only -1, 0 or 1, never a magnitude", () => {
+  await t.test("returns only -1, 0 or 1, never a magnitude", () => {
     const lowest = parseAddressv6("::").address;
     const highest = parseAddressv6("ffff:ffff:ffff:ffff:ffff:ffff:ffff:ffff")
       .address;
@@ -1313,7 +1314,7 @@ Deno.test("compareAddressv6", async (t) => {
     assertEquals(compareAddressv6(highest, lowest), 1);
   });
 
-  await t.step("sorts numerically, not lexicographically", () => {
+  await t.test("sorts numerically, not lexicographically", () => {
     const addresses = ["2001:db8::9", "2001:db8::10", "2001:db8::2"].map(
       (s) => parseAddressv6(s).address,
     );
@@ -1324,7 +1325,7 @@ Deno.test("compareAddressv6", async (t) => {
     ]);
   });
 
-  await t.step("orders IPv4-mapped addresses by their 128-bit value", () => {
+  await t.test("orders IPv4-mapped addresses by their 128-bit value", () => {
     const addresses = ["::ffff:10.0.0.1", "::1", "2001:db8::1"].map(
       (s) => parseAddressv6(s).address,
     );
@@ -1336,8 +1337,8 @@ Deno.test("compareAddressv6", async (t) => {
   });
 });
 
-Deno.test("mapFromAddressv4", async (t) => {
-  await t.step("embeds IPv4 into mapped prefix", () => {
+test("mapFromAddressv4", async (t) => {
+  await t.test("embeds IPv4 into mapped prefix", () => {
     assertEquals(
       mapFromAddressv4(parseAddressv4("192.168.1.1").address),
       parseAddressv6("::ffff:192.168.1.1").address,
@@ -1352,7 +1353,7 @@ Deno.test("mapFromAddressv4", async (t) => {
     );
   });
 
-  await t.step("edge cases", () => {
+  await t.test("edge cases", () => {
     assertEquals(
       mapFromAddressv4(parseAddressv4("0.0.0.0").address),
       parseAddressv6("::ffff:0.0.0.0").address,
@@ -1363,7 +1364,7 @@ Deno.test("mapFromAddressv4", async (t) => {
     );
   });
 
-  await t.step("result stringifies to mapped hex notation", () => {
+  await t.test("result stringifies to mapped hex notation", () => {
     assertEquals(
       stringifyAddressv6(
         mapFromAddressv4(parseAddressv4("192.168.1.1").address),
@@ -1376,15 +1377,15 @@ Deno.test("mapFromAddressv4", async (t) => {
     );
   });
 
-  await t.step("raw numeric value is correct", () => {
+  await t.test("raw numeric value is correct", () => {
     assertEquals(mapFromAddressv4(0), 0xFFFF_0000_0000n);
     assertEquals(mapFromAddressv4(1), 0xFFFF_0000_0001n);
     assertEquals(mapFromAddressv4(0xC0A80101), 0xFFFF_C0A8_0101n);
   });
 });
 
-Deno.test("unmapToAddressv4", async (t) => {
-  await t.step("extracts IPv4 from mapped address", () => {
+test("unmapToAddressv4", async (t) => {
+  await t.test("extracts IPv4 from mapped address", () => {
     assertEquals(
       stringifyAddressv4(
         unmapToAddressv4(parseAddressv6("::ffff:192.168.1.1").address),
@@ -1405,7 +1406,7 @@ Deno.test("unmapToAddressv4", async (t) => {
     );
   });
 
-  await t.step("accepts hex notation input", () => {
+  await t.test("accepts hex notation input", () => {
     assertEquals(
       stringifyAddressv4(
         unmapToAddressv4(parseAddressv6("::ffff:c0a8:101").address),
@@ -1414,7 +1415,7 @@ Deno.test("unmapToAddressv4", async (t) => {
     );
   });
 
-  await t.step("edge cases", () => {
+  await t.test("edge cases", () => {
     assertEquals(unmapToAddressv4(parseAddressv6("::ffff:0.0.0.0").address), 0);
     assertEquals(
       unmapToAddressv4(parseAddressv6("::ffff:255.255.255.255").address),
@@ -1422,7 +1423,7 @@ Deno.test("unmapToAddressv4", async (t) => {
     );
   });
 
-  await t.step("round-trip with mapFromAddressv4", () => {
+  await t.test("round-trip with mapFromAddressv4", () => {
     const addrs = [
       "0.0.0.0",
       "127.0.0.1",

@@ -1,8 +1,9 @@
+import { test } from "node:test";
 import { assertEquals } from "@std/assert";
 import { parse } from "@std/xml";
 import { configFileInfo } from "./config-file-info.ts";
 
-Deno.test("configFileInfo decodes every field the firmware reads", () => {
+test("configFileInfo decodes every field the firmware reads", () => {
   const root = parse(
     '<ConfigFileInfo version="1.1"><fileName>cfg-abc123.bin</fileName>' +
       "<fileSize>4294967295</fileSize><curSize>1024</curSize>" +
@@ -19,7 +20,7 @@ Deno.test("configFileInfo decodes every field the firmware reads", () => {
   });
 });
 
-Deno.test("configFileInfo round-trips through encode and decode", () => {
+test("configFileInfo round-trips through encode and decode", () => {
   const value = {
     fileName: "cfg-roundtrip.bin",
     fileSize: 8192,
@@ -34,7 +35,7 @@ Deno.test("configFileInfo round-trips through encode and decode", () => {
   );
 });
 
-Deno.test("configFileInfo decodes a request with only a file name", () => {
+test("configFileInfo decodes a request with only a file name", () => {
   const root = parse(
     '<ConfigFileInfo version="1.1"><fileName>only.bin</fileName></ConfigFileInfo>',
   ).root;

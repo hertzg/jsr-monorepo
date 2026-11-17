@@ -1,3 +1,4 @@
+import { test } from "node:test";
 import { assertEquals, assertThrows } from "@std/assert";
 import { parse } from "@std/xml";
 import {
@@ -14,7 +15,7 @@ import {
   xmlParam,
 } from "./xml.ts";
 
-Deno.test("xmlParam writes version 1.1 and fields in declaration order", () => {
+test("xmlParam writes version 1.1 and fields in declaration order", () => {
   const port = xmlParam("RtspPort", { rtspPort: int(), enable: int() });
 
   assertEquals(
@@ -23,7 +24,7 @@ Deno.test("xmlParam writes version 1.1 and fields in declaration order", () => {
   );
 });
 
-Deno.test("xmlParam round-trips every field kind", () => {
+test("xmlParam round-trips every field kind", () => {
   const param = xmlParam("Everything", {
     signed: int(),
     unsigned: uint(),
@@ -50,7 +51,7 @@ Deno.test("xmlParam round-trips every field kind", () => {
   assertEquals(param.decode(parse(param.encode(value)).root), value);
 });
 
-Deno.test("xmlParam reads fields in any order and ignores unknown ones", () => {
+test("xmlParam reads fields in any order and ignores unknown ones", () => {
   const port = xmlParam("RtspPort", { rtspPort: int(), enable: int() });
 
   assertEquals(
@@ -63,7 +64,7 @@ Deno.test("xmlParam reads fields in any order and ignores unknown ones", () => {
   );
 });
 
-Deno.test("xmlParam throws on a missing required field", () => {
+test("xmlParam throws on a missing required field", () => {
   const port = xmlParam("RtspPort", { rtspPort: int(), enable: int() });
 
   assertThrows(
@@ -73,7 +74,7 @@ Deno.test("xmlParam throws on a missing required field", () => {
   );
 });
 
-Deno.test("optional fields are skipped when absent, both ways", () => {
+test("optional fields are skipped when absent, both ways", () => {
   const port = xmlParam("RtmpPort", {
     rtmpPort: int(),
     enable: optional(int()),
@@ -89,7 +90,7 @@ Deno.test("optional fields are skipped when absent, both ways", () => {
   );
 });
 
-Deno.test("repeated reads no elements as an empty array", () => {
+test("repeated reads no elements as an empty array", () => {
   const events = xmlParam("AlarmEventList", {
     AlarmEvent: repeated(obj({ channelId: int() })),
   });
@@ -99,7 +100,7 @@ Deno.test("repeated reads no elements as an empty array", () => {
   });
 });
 
-Deno.test("int throws on text that is not a number", () => {
+test("int throws on text that is not a number", () => {
   assertThrows(
     () => int().decode("speed", parse("<p><speed>fast</speed></p>").root),
     Error,
@@ -107,7 +108,7 @@ Deno.test("int throws on text that is not a number", () => {
   );
 });
 
-Deno.test("int throws on an empty element", () => {
+test("int throws on an empty element", () => {
   assertThrows(
     () => int().decode("speed", parse("<p><speed/></p>").root),
     Error,
@@ -115,7 +116,7 @@ Deno.test("int throws on an empty element", () => {
   );
 });
 
-Deno.test("u64 throws on text that is not an integer", () => {
+test("u64 throws on text that is not an integer", () => {
   assertThrows(
     () => u64().decode("size", parse("<p><size>1.5</size></p>").root),
     Error,
@@ -123,7 +124,7 @@ Deno.test("u64 throws on text that is not an integer", () => {
   );
 });
 
-Deno.test("oneOf throws on a value outside the list", () => {
+test("oneOf throws on a value outside the list", () => {
   assertThrows(
     () =>
       oneOf("none", "odd", "even").decode(
@@ -135,6 +136,6 @@ Deno.test("oneOf throws on a value outside the list", () => {
   );
 });
 
-Deno.test("text keeps an empty element as an empty string", () => {
+test("text keeps an empty element as an empty string", () => {
   assertEquals(text().decode("name", parse("<p><name/></p>").root), "");
 });

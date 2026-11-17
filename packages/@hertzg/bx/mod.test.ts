@@ -1,5 +1,5 @@
 import { bx, bxx } from "./mod.ts";
-import { describe, it } from "@std/testing/bdd";
+import { describe, it } from "node:test";
 import { expect } from "@std/expect";
 import { Buffer } from "node:buffer";
 

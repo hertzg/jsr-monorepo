@@ -1,8 +1,9 @@
+import { test } from "node:test";
 import { assertEquals } from "@std/assert";
 import { parse } from "@std/xml";
 import { deleteRecordFile } from "./delete-record-file.ts";
 
-Deno.test("deleteRecordFile decodes a cmd 650 request", () => {
+test("deleteRecordFile decodes a cmd 650 request", () => {
   const root = parse(
     '<DeleteRecordFile version="1.1"><chnbits>3</chnbits>' +
       "<streamType>1</streamType><bmerge>0</bmerge>" +
@@ -22,7 +23,7 @@ Deno.test("deleteRecordFile decodes a cmd 650 request", () => {
   });
 });
 
-Deno.test("deleteRecordFile reads a full 64-bit channel mask", () => {
+test("deleteRecordFile reads a full 64-bit channel mask", () => {
   const root = parse(
     "<DeleteRecordFile><chnbits>18446744073709551615</chnbits></DeleteRecordFile>",
   ).root;
@@ -30,7 +31,7 @@ Deno.test("deleteRecordFile reads a full 64-bit channel mask", () => {
   assertEquals(deleteRecordFile.decode(root).chnbits, 18446744073709551615n);
 });
 
-Deno.test("deleteRecordFile round-trips through encode and decode", () => {
+test("deleteRecordFile round-trips through encode and decode", () => {
   const value = {
     chnbits: 5n,
     streamType: 2,

@@ -1,3 +1,4 @@
+import { test } from "node:test";
 import { assertEquals, assertStringIncludes, assertThrows } from "@std/assert";
 import { bitStruct } from "./bit-struct.ts";
 import { struct } from "../struct/struct.ts";
@@ -5,8 +6,8 @@ import { u32le } from "../numeric/numeric.ts";
 import { createContext } from "../core.ts";
 import { ref } from "../ref/ref.ts";
 
-Deno.test("bitStruct: schema validation", async (t) => {
-  await t.step("rejects bit count < 1", () => {
+test("bitStruct: schema validation", async (t) => {
+  await t.test("rejects bit count < 1", () => {
     assertThrows(
       () => bitStruct({ field: 0 }),
       Error,
@@ -14,7 +15,7 @@ Deno.test("bitStruct: schema validation", async (t) => {
     );
   });
 
-  await t.step("rejects bit count > 32", () => {
+  await t.test("rejects bit count > 32", () => {
     assertThrows(
       () => bitStruct({ field: 33 }),
       Error,
@@ -22,7 +23,7 @@ Deno.test("bitStruct: schema validation", async (t) => {
     );
   });
 
-  await t.step("rejects negative bit count", () => {
+  await t.test("rejects negative bit count", () => {
     assertThrows(
       () => bitStruct({ field: -1 }),
       Error,
@@ -30,7 +31,7 @@ Deno.test("bitStruct: schema validation", async (t) => {
     );
   });
 
-  await t.step("rejects non-integer bit count", () => {
+  await t.test("rejects non-integer bit count", () => {
     assertThrows(
       () => bitStruct({ field: 1.5 }),
       Error,
@@ -38,7 +39,7 @@ Deno.test("bitStruct: schema validation", async (t) => {
     );
   });
 
-  await t.step("rejects non-byte-aligned total (7 bits)", () => {
+  await t.test("rejects non-byte-aligned total (7 bits)", () => {
     assertThrows(
       () => bitStruct({ a: 3, b: 4 }),
       Error,
@@ -46,7 +47,7 @@ Deno.test("bitStruct: schema validation", async (t) => {
     );
   });
 
-  await t.step("rejects non-byte-aligned total (11 bits)", () => {
+  await t.test("rejects non-byte-aligned total (11 bits)", () => {
     assertThrows(
       () => bitStruct({ a: 6, b: 5 }),
       Error,
@@ -54,7 +55,7 @@ Deno.test("bitStruct: schema validation", async (t) => {
     );
   });
 
-  await t.step("accepts byte-aligned totals", () => {
+  await t.test("accepts byte-aligned totals", () => {
     // Should not throw
     bitStruct({ a: 8 });
     bitStruct({ a: 4, b: 4 });
@@ -63,7 +64,7 @@ Deno.test("bitStruct: schema validation", async (t) => {
     bitStruct({ a: 32 });
   });
 
-  await t.step("provides helpful error message for padding", () => {
+  await t.test("provides helpful error message for padding", () => {
     const error = assertThrows(
       () => bitStruct({ a: 5 }),
       Error,
@@ -73,8 +74,8 @@ Deno.test("bitStruct: schema validation", async (t) => {
   });
 });
 
-Deno.test("bitStruct: basic functionality", async (t) => {
-  await t.step("encodes and decodes simple 8-bit structure", () => {
+test("bitStruct: basic functionality", async (t) => {
+  await t.test("encodes and decodes simple 8-bit structure", () => {
     const flags = bitStruct({
       enabled: 1,
       priority: 3,
@@ -93,7 +94,7 @@ Deno.test("bitStruct: basic functionality", async (t) => {
     assertEquals(buffer[0], 0b1_101_0010);
   });
 
-  await t.step("verifies MSB-first ordering with known byte pattern", () => {
+  await t.test("verifies MSB-first ordering with known byte pattern", () => {
     const bits = bitStruct({ a: 1, b: 1, c: 1, d: 1, e: 4 });
     const value = { a: 1, b: 0, c: 1, d: 0, e: 15 };
     const buffer = new Uint8Array(1);
@@ -107,7 +108,7 @@ Deno.test("bitStruct: basic functionality", async (t) => {
     assertEquals(decoded, value);
   });
 
-  await t.step("verifies bytesRead and bytesWritten values", () => {
+  await t.test("verifies bytesRead and bytesWritten values", () => {
     const coder = bitStruct({ a: 4, b: 4 });
     const buffer = new Uint8Array(1);
 
@@ -119,8 +120,8 @@ Deno.test("bitStruct: basic functionality", async (t) => {
   });
 });
 
-Deno.test("bitStruct: multi-byte structures", async (t) => {
-  await t.step("handles 16-bit structure", () => {
+test("bitStruct: multi-byte structures", async (t) => {
+  await t.test("handles 16-bit structure", () => {
     const header = bitStruct({
       version: 4,
       type: 4,
@@ -138,7 +139,7 @@ Deno.test("bitStruct: multi-byte structures", async (t) => {
     assertEquals(read, 2);
   });
 
-  await t.step("handles 24-bit structure", () => {
+  await t.test("handles 24-bit structure", () => {
     const data = bitStruct({
       field1: 8,
       field2: 8,
@@ -156,7 +157,7 @@ Deno.test("bitStruct: multi-byte structures", async (t) => {
     assertEquals(read, 3);
   });
 
-  await t.step("handles 32-bit structure", () => {
+  await t.test("handles 32-bit structure", () => {
     const header = bitStruct({
       version: 4,
       type: 4,
@@ -175,7 +176,7 @@ Deno.test("bitStruct: multi-byte structures", async (t) => {
     assertEquals(read, 4);
   });
 
-  await t.step("handles complex field arrangements", () => {
+  await t.test("handles complex field arrangements", () => {
     const complex = bitStruct({
       a: 3,
       b: 5,
@@ -196,8 +197,8 @@ Deno.test("bitStruct: multi-byte structures", async (t) => {
   });
 });
 
-Deno.test("bitStruct: round-trip integrity", async (t) => {
-  await t.step("round-trip with various bit field combinations", () => {
+test("bitStruct: round-trip integrity", async (t) => {
+  await t.test("round-trip with various bit field combinations", () => {
     const coder = bitStruct({
       f1: 2,
       f2: 3,
@@ -215,7 +216,7 @@ Deno.test("bitStruct: round-trip integrity", async (t) => {
     assertEquals(decoded, original);
   });
 
-  await t.step("round-trip with edge values (0 for each field)", () => {
+  await t.test("round-trip with edge values (0 for each field)", () => {
     const coder = bitStruct({ a: 5, b: 3, c: 8, d: 16 });
     const original = { a: 0, b: 0, c: 0, d: 0 };
 
@@ -226,7 +227,7 @@ Deno.test("bitStruct: round-trip integrity", async (t) => {
     assertEquals(decoded, original);
   });
 
-  await t.step("round-trip with max values for each field", () => {
+  await t.test("round-trip with max values for each field", () => {
     const coder = bitStruct({ a: 5, b: 3, c: 8, d: 16 });
     const original = { a: 31, b: 7, c: 255, d: 65535 };
 
@@ -237,7 +238,7 @@ Deno.test("bitStruct: round-trip integrity", async (t) => {
     assertEquals(decoded, original);
   });
 
-  await t.step("round-trip with mixed values", () => {
+  await t.test("round-trip with mixed values", () => {
     const coder = bitStruct({ a: 4, b: 4, c: 8, d: 16 });
     const original = { a: 8, b: 7, c: 128, d: 16384 };
 
@@ -249,8 +250,8 @@ Deno.test("bitStruct: round-trip integrity", async (t) => {
   });
 });
 
-Deno.test("bitStruct: integration with struct", async (t) => {
-  await t.step("works within struct composition", () => {
+test("bitStruct: integration with struct", async (t) => {
+  await t.test("works within struct composition", () => {
     const flags = bitStruct({
       compressed: 1,
       encrypted: 1,
@@ -277,7 +278,7 @@ Deno.test("bitStruct: integration with struct", async (t) => {
     assertEquals(decoded.payloadSize, 1024);
   });
 
-  await t.step("multiple bitStructs in one struct", () => {
+  await t.test("multiple bitStructs in one struct", () => {
     const header = bitStruct({ version: 4, type: 4 });
     const flags = bitStruct({ flag1: 1, flag2: 1, flag3: 6 });
 
@@ -301,8 +302,8 @@ Deno.test("bitStruct: integration with struct", async (t) => {
   });
 });
 
-Deno.test("bitStruct: edge cases", async (t) => {
-  await t.step("handles single-bit fields", () => {
+test("bitStruct: edge cases", async (t) => {
+  await t.test("handles single-bit fields", () => {
     const bits = bitStruct({
       b0: 1,
       b1: 1,
@@ -324,7 +325,7 @@ Deno.test("bitStruct: edge cases", async (t) => {
     assertEquals(decoded, value);
   });
 
-  await t.step("handles 32-bit field", () => {
+  await t.test("handles 32-bit field", () => {
     const coder = bitStruct({ value: 32 });
 
     const original = { value: 0xDEADBEEF };
@@ -336,7 +337,7 @@ Deno.test("bitStruct: edge cases", async (t) => {
     assertEquals(decoded, original);
   });
 
-  await t.step("handles all zeros", () => {
+  await t.test("handles all zeros", () => {
     const coder = bitStruct({ a: 8, b: 8, c: 16 });
 
     const original = { a: 0, b: 0, c: 0 };
@@ -349,7 +350,7 @@ Deno.test("bitStruct: edge cases", async (t) => {
     assertEquals(decoded, original);
   });
 
-  await t.step("handles all ones (max values)", () => {
+  await t.test("handles all ones (max values)", () => {
     const coder = bitStruct({ a: 8, b: 8, c: 16 });
 
     const original = { a: 255, b: 255, c: 65535 };
@@ -362,7 +363,7 @@ Deno.test("bitStruct: edge cases", async (t) => {
     assertEquals(decoded, original);
   });
 
-  await t.step("rejects value exceeding bit range", () => {
+  await t.test("rejects value exceeding bit range", () => {
     const coder = bitStruct({ small: 3, large: 5 });
 
     // small field is 3 bits, max value is 7
@@ -373,7 +374,7 @@ Deno.test("bitStruct: edge cases", async (t) => {
     );
   });
 
-  await t.step("rejects negative value", () => {
+  await t.test("rejects negative value", () => {
     const coder = bitStruct({ field: 8 });
 
     assertThrows(
@@ -384,8 +385,8 @@ Deno.test("bitStruct: edge cases", async (t) => {
   });
 });
 
-Deno.test("bitStruct: buffer size validation", async (t) => {
-  await t.step("throws error when buffer too small for decode", () => {
+test("bitStruct: buffer size validation", async (t) => {
+  await t.test("throws error when buffer too small for decode", () => {
     const coder = bitStruct({ a: 16 });
     const buffer = new Uint8Array(1); // Need 2 bytes
 
@@ -396,7 +397,7 @@ Deno.test("bitStruct: buffer size validation", async (t) => {
     );
   });
 
-  await t.step("accepts buffer larger than needed", () => {
+  await t.test("accepts buffer larger than needed", () => {
     const coder = bitStruct({ a: 8 });
     const buffer = new Uint8Array(10); // Only need 1 byte
 
@@ -408,8 +409,8 @@ Deno.test("bitStruct: buffer size validation", async (t) => {
   });
 });
 
-Deno.test("bitStruct: context integration", async (t) => {
-  await t.step("stores value in context during encode", () => {
+test("bitStruct: context integration", async (t) => {
+  await t.test("stores value in context during encode", () => {
     const coder = bitStruct({ a: 4, b: 4 });
     const ctx = createContext("encode");
     const buffer = new Uint8Array(1);
@@ -420,7 +421,7 @@ Deno.test("bitStruct: context integration", async (t) => {
     assertEquals(ref(coder)(ctx), { a: 15, b: 7 });
   });
 
-  await t.step("stores value in context during decode", () => {
+  await t.test("stores value in context during decode", () => {
     const coder = bitStruct({ a: 4, b: 4 });
     const ctx = createContext("decode");
     const buffer = new Uint8Array([0xFF]);
@@ -431,8 +432,8 @@ Deno.test("bitStruct: context integration", async (t) => {
   });
 });
 
-Deno.test("bitStruct: real-world use cases", async (t) => {
-  await t.step("PNG/Zlib header (2 bytes)", () => {
+test("bitStruct: real-world use cases", async (t) => {
+  await t.test("PNG/Zlib header (2 bytes)", () => {
     const zlibHeader = bitStruct({
       // Byte 0 (CMF): MSB-first means CINFO comes first, then CM
       compressionInfo: 4, // CMF bits 7-4: Compression info
@@ -456,7 +457,7 @@ Deno.test("bitStruct: real-world use cases", async (t) => {
     assertEquals(decoded.flevel, 0); // bits 1-0 of 0x9C = 00
   });
 
-  await t.step("Ethernet VLAN tag (2 bytes)", () => {
+  await t.test("Ethernet VLAN tag (2 bytes)", () => {
     const vlanTCI = bitStruct({
       pcp: 3,
       dei: 1,
@@ -472,7 +473,7 @@ Deno.test("bitStruct: real-world use cases", async (t) => {
     assertEquals(decoded, value);
   });
 
-  await t.step("IPv4 fragment field (2 bytes)", () => {
+  await t.test("IPv4 fragment field (2 bytes)", () => {
     const ipv4FragmentField = bitStruct({
       reserved: 1,
       dontFragment: 1,
@@ -494,7 +495,7 @@ Deno.test("bitStruct: real-world use cases", async (t) => {
     assertEquals(decoded, value);
   });
 
-  await t.step("TCP data offset (1 byte)", () => {
+  await t.test("TCP data offset (1 byte)", () => {
     const tcpDataOffset = bitStruct({
       dataOffset: 4,
       reserved: 3,

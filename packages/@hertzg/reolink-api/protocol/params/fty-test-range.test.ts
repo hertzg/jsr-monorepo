@@ -1,8 +1,9 @@
+import { test } from "node:test";
 import { assertEquals } from "@std/assert";
 import { parse } from "@std/xml";
 import { ftyTestRange } from "./fty-test-range.ts";
 
-Deno.test("ftyTestRange decodes every range the serializer writes", () => {
+test("ftyTestRange decodes every range the serializer writes", () => {
   const root = parse(
     '<ftyTestRange version="1.1">' +
       "<rangeQuantity><max>100</max><min>20</min></rangeQuantity>" +
@@ -26,7 +27,7 @@ Deno.test("ftyTestRange decodes every range the serializer writes", () => {
   });
 });
 
-Deno.test("ftyTestRange decodes a range with only one bound", () => {
+test("ftyTestRange decodes a range with only one bound", () => {
   const root = parse(
     '<ftyTestRange version="1.1">' +
       "<rangeTemperature><min>-20</min></rangeTemperature></ftyTestRange>",
@@ -35,7 +36,7 @@ Deno.test("ftyTestRange decodes a range with only one bound", () => {
   assertEquals(ftyTestRange.decode(root), { rangeTemperature: { min: -20 } });
 });
 
-Deno.test("ftyTestRange writes max before min", () => {
+test("ftyTestRange writes max before min", () => {
   const xml = ftyTestRange.encode({ rangeQuantity: { min: 20, max: 100 } });
 
   assertEquals(
@@ -46,7 +47,7 @@ Deno.test("ftyTestRange writes max before min", () => {
   );
 });
 
-Deno.test("ftyTestRange round-trips through encode and decode", () => {
+test("ftyTestRange round-trips through encode and decode", () => {
   const value = {
     rangeQuantity: { max: 99, min: 21 },
     rangeTemperature: { max: 55, min: -5 },

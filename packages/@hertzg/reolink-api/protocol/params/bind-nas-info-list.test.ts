@@ -1,8 +1,9 @@
+import { test } from "node:test";
 import { assertEquals } from "@std/assert";
 import { parse } from "@std/xml";
 import { bindNasInfoList } from "./bind-nas-info-list.ts";
 
-Deno.test("bindNasInfoList decodes what net_nas_bind_info_list_s2x writes", () => {
+test("bindNasInfoList decodes what net_nas_bind_info_list_s2x writes", () => {
   const root = parse(
     '<BindNasInfoList version="1.1">' +
       "<info><devName>nas-one</devName><uid>uid-one</uid><bBinded>1</bBinded></info>" +
@@ -18,7 +19,7 @@ Deno.test("bindNasInfoList decodes what net_nas_bind_info_list_s2x writes", () =
   });
 });
 
-Deno.test("bindNasInfoList round-trips a list", () => {
+test("bindNasInfoList round-trips a list", () => {
   const value = {
     info: [{ devName: "nas-three", uid: "uid-three", bBinded: 1 }],
   };
@@ -29,7 +30,7 @@ Deno.test("bindNasInfoList round-trips a list", () => {
   );
 });
 
-Deno.test("bindNasInfoList reads a list with no <info> as absent", () => {
+test("bindNasInfoList reads a list with no <info> as absent", () => {
   const root = parse('<BindNasInfoList version="1.1"></BindNasInfoList>').root;
 
   assertEquals(bindNasInfoList.decode(root).info, undefined);

@@ -1,8 +1,9 @@
+import { test } from "node:test";
 import { assertEquals } from "@std/assert";
 import { parse } from "@std/xml";
 import { ftyDoorbellTest } from "./fty-doorbell-test.ts";
 
-Deno.test("ftyDoorbellTest decodes every field net_fty_doorbell_test_x2s reads", () => {
+test("ftyDoorbellTest decodes every field net_fty_doorbell_test_x2s reads", () => {
   const root = parse(
     "<ftyDoorbellTest><testDuration>120</testDuration>" +
       "<testTimes>8</testTimes><result>1</result><op>2</op>" +
@@ -18,13 +19,13 @@ Deno.test("ftyDoorbellTest decodes every field net_fty_doorbell_test_x2s reads",
   });
 });
 
-Deno.test("ftyDoorbellTest decodes an element with no fields", () => {
+test("ftyDoorbellTest decodes an element with no fields", () => {
   const root = parse("<ftyDoorbellTest></ftyDoorbellTest>").root;
 
   assertEquals(ftyDoorbellTest.decode(root), {});
 });
 
-Deno.test("ftyDoorbellTest round-trips through encode and decode", () => {
+test("ftyDoorbellTest round-trips through encode and decode", () => {
   const value = {
     testDuration: 300,
     testTimes: 3,

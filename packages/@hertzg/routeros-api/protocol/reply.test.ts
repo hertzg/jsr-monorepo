@@ -1,18 +1,19 @@
+import { test } from "node:test";
 import { assertEquals, assertThrows } from "@std/assert";
 import { isData, isDone, isFatal, isTrap, parseReply } from "./reply.ts";
 
-Deno.test("parseReply - !done without attributes", () => {
+test("parseReply - !done without attributes", () => {
   const result = parseReply(["!done"]);
   assertEquals(result, { type: "done" });
   assertEquals(isDone(result), true);
 });
 
-Deno.test("parseReply - !done with attributes", () => {
+test("parseReply - !done with attributes", () => {
   const result = parseReply(["!done", "=tag=req-1"]);
   assertEquals(result, { type: "done", attributes: { tag: "req-1" } });
 });
 
-Deno.test("parseReply - !re data reply", () => {
+test("parseReply - !re data reply", () => {
   const result = parseReply([
     "!re",
     "=name=ether1",
@@ -30,12 +31,12 @@ Deno.test("parseReply - !re data reply", () => {
   assertEquals(isData(result), true);
 });
 
-Deno.test("parseReply - !re without attributes", () => {
+test("parseReply - !re without attributes", () => {
   const result = parseReply(["!re"]);
   assertEquals(result, { type: "re", attributes: {} });
 });
 
-Deno.test("parseReply - !trap with message", () => {
+test("parseReply - !trap with message", () => {
   const result = parseReply([
     "!trap",
     "=message=no such item",
@@ -49,7 +50,7 @@ Deno.test("parseReply - !trap with message", () => {
   assertEquals(isTrap(result), true);
 });
 
-Deno.test("parseReply - !trap without category", () => {
+test("parseReply - !trap without category", () => {
   const result = parseReply([
     "!trap",
     "=message=invalid command",
@@ -61,7 +62,7 @@ Deno.test("parseReply - !trap without category", () => {
   });
 });
 
-Deno.test("parseReply - !trap with extra attributes", () => {
+test("parseReply - !trap with extra attributes", () => {
   const result = parseReply([
     "!trap",
     "=message=error occurred",
@@ -76,7 +77,7 @@ Deno.test("parseReply - !trap with extra attributes", () => {
   });
 });
 
-Deno.test("parseReply - !fatal", () => {
+test("parseReply - !fatal", () => {
   const result = parseReply([
     "!fatal",
     "=message=connection lost",
@@ -88,7 +89,7 @@ Deno.test("parseReply - !fatal", () => {
   assertEquals(isFatal(result), true);
 });
 
-Deno.test("parseReply - !fatal without message", () => {
+test("parseReply - !fatal without message", () => {
   const result = parseReply(["!fatal"]);
   assertEquals(result, {
     type: "fatal",
@@ -96,7 +97,7 @@ Deno.test("parseReply - !fatal without message", () => {
   });
 });
 
-Deno.test("parseReply - empty words throws", () => {
+test("parseReply - empty words throws", () => {
   assertThrows(
     () => parseReply([]),
     Error,
@@ -104,7 +105,7 @@ Deno.test("parseReply - empty words throws", () => {
   );
 });
 
-Deno.test("parseReply - unknown reply type throws", () => {
+test("parseReply - unknown reply type throws", () => {
   assertThrows(
     () => parseReply(["!unknown"]),
     Error,
@@ -112,7 +113,7 @@ Deno.test("parseReply - unknown reply type throws", () => {
   );
 });
 
-Deno.test("parseReply - attribute with equals in value", () => {
+test("parseReply - attribute with equals in value", () => {
   const result = parseReply([
     "!re",
     "=comment=value=with=equals",
@@ -125,7 +126,7 @@ Deno.test("parseReply - attribute with equals in value", () => {
   });
 });
 
-Deno.test("parseReply - complex attributes", () => {
+test("parseReply - complex attributes", () => {
   const result = parseReply([
     "!re",
     "=.id=*1",
@@ -146,7 +147,7 @@ Deno.test("parseReply - complex attributes", () => {
   });
 });
 
-Deno.test("type guards work correctly", () => {
+test("type guards work correctly", () => {
   const doneReply = parseReply(["!done"]);
   const dataReply = parseReply(["!re", "=name=test"]);
   const trapReply = parseReply(["!trap", "=message=error"]);

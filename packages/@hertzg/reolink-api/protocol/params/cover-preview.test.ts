@@ -1,8 +1,9 @@
+import { test } from "node:test";
 import { assertEquals } from "@std/assert";
 import { parse } from "@std/xml";
 import { coverPreview } from "./cover-preview.ts";
 
-Deno.test("coverPreview decodes every field net_cover_preview_x2s reads", () => {
+test("coverPreview decodes every field net_cover_preview_x2s reads", () => {
   const root = parse(
     '<CoverPreview version="1.1"><channelId>0</channelId>' +
       "<streamType>subStream</streamType>" +
@@ -37,7 +38,7 @@ Deno.test("coverPreview decodes every field net_cover_preview_x2s reads", () => 
   });
 });
 
-Deno.test("coverPreview round-trips every field", () => {
+test("coverPreview round-trips every field", () => {
   const value = {
     channelId: 2,
     streamType: "externStream" as const,
@@ -52,7 +53,7 @@ Deno.test("coverPreview round-trips every field", () => {
   );
 });
 
-Deno.test("coverPreview reads an empty frameList as no frames", () => {
+test("coverPreview reads an empty frameList as no frames", () => {
   const root = parse(
     '<CoverPreview version="1.1"><frameList></frameList></CoverPreview>',
   ).root;

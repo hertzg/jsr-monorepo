@@ -1,7 +1,8 @@
+import { test } from "node:test";
 import { assertEquals } from "@std/assert";
 import { sirenXml } from "./siren.ts";
 
-Deno.test("sirenXml plays a number of times in play mode 0", () => {
+test("sirenXml plays a number of times in play mode 0", () => {
   assertEquals(
     sirenXml({ channel: 0, times: 3 }),
     '<?xml version="1.0" encoding="UTF-8" ?>\n' +
@@ -17,7 +18,7 @@ Deno.test("sirenXml plays a number of times in play mode 0", () => {
   );
 });
 
-Deno.test("sirenXml stops manual play in play mode 2", () => {
+test("sirenXml stops manual play in play mode 2", () => {
   assertEquals(
     sirenXml({ channel: 1, on: false }),
     '<?xml version="1.0" encoding="UTF-8" ?>\n' +
@@ -33,7 +34,7 @@ Deno.test("sirenXml stops manual play in play mode 2", () => {
   );
 });
 
-Deno.test("sirenXml leaves out channelId for the device itself", () => {
+test("sirenXml leaves out channelId for the device itself", () => {
   assertEquals(
     sirenXml({ on: true }),
     '<?xml version="1.0" encoding="UTF-8" ?>\n' +

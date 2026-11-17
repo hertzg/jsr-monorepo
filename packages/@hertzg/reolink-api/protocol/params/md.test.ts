@@ -1,8 +1,9 @@
+import { test } from "node:test";
 import { assertEquals, assertThrows } from "@std/assert";
 import { parse } from "@std/xml";
 import { type Md, md } from "./md.ts";
 
-Deno.test("md decodes every element net_md_s2x writes", () => {
+test("md decodes every element net_md_s2x writes", () => {
   const root = parse(
     '<MD version="1.1"><channelId>0</channelId><enable>1</enable>' +
       "<usepir>0</usepir><width>96</width><height>64</height>" +
@@ -61,7 +62,7 @@ Deno.test("md decodes every element net_md_s2x writes", () => {
   });
 });
 
-Deno.test("md decodes a scope without valueTable, which the camera may leave out", () => {
+test("md decodes a scope without valueTable, which the camera may leave out", () => {
   const root = parse(
     '<MD version="1.1"><scope><columns>120</columns><rows>80</rows></scope></MD>',
   ).root;
@@ -69,7 +70,7 @@ Deno.test("md decodes a scope without valueTable, which the camera may leave out
   assertEquals(md.decode(root).scope, { columns: 120, rows: 80 });
 });
 
-Deno.test("md round-trips a schedule update", () => {
+test("md round-trips a schedule update", () => {
   const value: Md = {
     channelId: 1,
     timeBlockList: [
@@ -81,7 +82,7 @@ Deno.test("md round-trips a schedule update", () => {
   assertEquals(md.decode(parse(md.encode(value)).root), value);
 });
 
-Deno.test("md rejects a time block with an unknown weekday", () => {
+test("md rejects a time block with an unknown weekday", () => {
   const root = parse(
     '<MD version="1.1"><timeBlockList><timeBlock><enable>1</enable>' +
       "<weekDay>Funday</weekDay><beginHour>0</beginHour><endHour>1</endHour>" +
@@ -91,7 +92,7 @@ Deno.test("md rejects a time block with an unknown weekday", () => {
   assertThrows(() => md.decode(root), Error, '"Funday"');
 });
 
-Deno.test("md rejects a sensInfo without priority", () => {
+test("md rejects a sensInfo without priority", () => {
   const root = parse(
     '<MD version="1.1"><sensInfoNew><sensInfoList><sensInfo>' +
       "<sensitivity>10</sensitivity></sensInfo></sensInfoList></sensInfoNew></MD>",

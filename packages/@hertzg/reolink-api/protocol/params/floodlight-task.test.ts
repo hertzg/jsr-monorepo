@@ -1,8 +1,9 @@
+import { test } from "node:test";
 import { assertEquals } from "@std/assert";
 import { parse } from "@std/xml";
 import { floodlightTask } from "./floodlight-task.ts";
 
-Deno.test("floodlightTask decodes what the cmd 289 handler writes", () => {
+test("floodlightTask decodes what the cmd 289 handler writes", () => {
   const root = parse(
     '<FloodlightTask version="1.1"><channel>0</channel><alarmMode>1</alarmMode>' +
       "<enable>1</enable><preview_auto>0</preview_auto><duration>60</duration>" +
@@ -30,7 +31,7 @@ Deno.test("floodlightTask decodes what the cmd 289 handler writes", () => {
   });
 });
 
-Deno.test("floodlightTask round-trips every field", () => {
+test("floodlightTask round-trips every field", () => {
   const value = {
     channel: 1,
     alarmMode: 0,
@@ -51,7 +52,7 @@ Deno.test("floodlightTask round-trips every field", () => {
   );
 });
 
-Deno.test("floodlightTask writes only the fields that are set", () => {
+test("floodlightTask writes only the fields that are set", () => {
   assertEquals(
     floodlightTask.encode({ channel: 0, schedule: { startHour: 20 } }),
     '<FloodlightTask version="1.1"><channel>0</channel>' +

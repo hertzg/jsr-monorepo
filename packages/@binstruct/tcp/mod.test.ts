@@ -1,3 +1,4 @@
+import { test } from "node:test";
 import { assertEquals } from "@std/assert";
 import { IP_PROTOCOL_TCP, TCP_HEADER_MIN_SIZE, tcpPacket } from "./mod.ts";
 import type { TcpPacket } from "./mod.ts";
@@ -36,12 +37,12 @@ function makeSegment(
   };
 }
 
-Deno.test("tcpPacket: exports IP_PROTOCOL_TCP and TCP_HEADER_MIN_SIZE", () => {
+test("tcpPacket: exports IP_PROTOCOL_TCP and TCP_HEADER_MIN_SIZE", () => {
   assertEquals(IP_PROTOCOL_TCP, 6);
   assertEquals(TCP_HEADER_MIN_SIZE, 20);
 });
 
-Deno.test("tcpPacket: round-trips a minimal SYN segment", () => {
+test("tcpPacket: round-trips a minimal SYN segment", () => {
   const coder = tcpPacket();
   const segment = makeSegment(new Uint8Array(0), new Uint8Array(0), {
     sourcePort: 49152,
@@ -68,7 +69,7 @@ Deno.test("tcpPacket: round-trips a minimal SYN segment", () => {
   assertEquals(decoded.payload.length, 0);
 });
 
-Deno.test("tcpPacket: round-trips a segment with options", () => {
+test("tcpPacket: round-trips a segment with options", () => {
   const coder = tcpPacket();
   // MSS option: kind=2, len=4, value=0x05b4 (1460), then NOP NOP NOP NOP padding
   // deno-fmt-ignore
@@ -94,7 +95,7 @@ Deno.test("tcpPacket: round-trips a segment with options", () => {
   assertEquals(decoded.payload.length, 0);
 });
 
-Deno.test("tcpPacket: round-trips a segment with payload", () => {
+test("tcpPacket: round-trips a segment with payload", () => {
   const coder = tcpPacket();
   const payload = new Uint8Array([0x68, 0x65, 0x6c, 0x6c, 0x6f]);
   const segment = makeSegment(payload, new Uint8Array(0), {
@@ -117,7 +118,7 @@ Deno.test("tcpPacket: round-trips a segment with payload", () => {
   assertEquals(decoded.flags.psh, 1);
 });
 
-Deno.test("tcpPacket: encodes header bytes in network order", () => {
+test("tcpPacket: encodes header bytes in network order", () => {
   const coder = tcpPacket();
   const segment = makeSegment(new Uint8Array(0), new Uint8Array(0), {
     sourcePort: 0x1234,
@@ -148,7 +149,7 @@ Deno.test("tcpPacket: encodes header bytes in network order", () => {
   assertEquals(buffer, expected);
 });
 
-Deno.test("tcpPacket: each flag bit packs into its expected position", () => {
+test("tcpPacket: each flag bit packs into its expected position", () => {
   const coder = tcpPacket();
   const cases: Array<[keyof TcpPacket["flags"], number]> = [
     ["cwr", 0x80],
@@ -182,7 +183,7 @@ Deno.test("tcpPacket: each flag bit packs into its expected position", () => {
   }
 });
 
-Deno.test("tcpPacket: port boundary values", () => {
+test("tcpPacket: port boundary values", () => {
   const coder = tcpPacket();
   const cases: Array<[number, number]> = [
     [0, 0],
@@ -205,7 +206,7 @@ Deno.test("tcpPacket: port boundary values", () => {
   }
 });
 
-Deno.test("tcpPacket: decodes a captured SYN segment to port 80", () => {
+test("tcpPacket: decodes a captured SYN segment to port 80", () => {
   const coder = tcpPacket();
   // Captured TCP/SYN: sourcePort=49152, destinationPort=80, seq=0x12345678,
   // ack=0, dataOffset=8 (32-byte header, 12 bytes of options), flags=SYN,

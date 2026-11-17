@@ -1,8 +1,9 @@
+import { test } from "node:test";
 import { assertEquals, assertThrows } from "@std/assert";
 import { parse } from "@std/xml";
 import { support } from "./support.ts";
 
-Deno.test("support decodes an RLC-823A cmd 199 reply in serializer order", () => {
+test("support decodes an RLC-823A cmd 199 reply in serializer order", () => {
   const root = parse(
     '<Support version="1.1"><IOInputPortNum>1</IOInputPortNum>' +
       "<IOOutputPortNum>2</IOOutputPortNum><diskNum>3</diskNum>" +
@@ -139,7 +140,7 @@ Deno.test("support decodes an RLC-823A cmd 199 reply in serializer order", () =>
   });
 });
 
-Deno.test("support reads an empty smartHome as no assistants", () => {
+test("support reads an empty smartHome as no assistants", () => {
   const parent = parse("<p><smartHome></smartHome></p>").root;
 
   assertEquals(support.fields.smartHome.decode("smartHome", parent), {
@@ -147,7 +148,7 @@ Deno.test("support reads an empty smartHome as no assistants", () => {
   });
 });
 
-Deno.test("support keeps channel items apart from smartHome items", () => {
+test("support keeps channel items apart from smartHome items", () => {
   const xml = support.encode({
     IOInputPortNum: 0,
     IOOutputPortNum: 0,
@@ -235,7 +236,7 @@ Deno.test("support keeps channel items apart from smartHome items", () => {
   assertEquals(support.decode(parse(xml).root).item.map((i) => i.chnID), [7]);
 });
 
-Deno.test("support rejects an unknown ptz mode", () => {
+test("support rejects an unknown ptz mode", () => {
   const parent = parse("<p><ptzMode>zoom</ptzMode></p>").root;
 
   assertThrows(
@@ -245,7 +246,7 @@ Deno.test("support rejects an unknown ptz mode", () => {
   );
 });
 
-Deno.test("support round-trips through encode and decode", () => {
+test("support round-trips through encode and decode", () => {
   const value = {
     IOInputPortNum: 2,
     IOOutputPortNum: 1,
@@ -338,7 +339,7 @@ Deno.test("support round-trips through encode and decode", () => {
   assertEquals(support.decode(parse(xml).root), value);
 });
 
-Deno.test("support decodes a Video Doorbell PoE cmd 199 reply in serializer order", () => {
+test("support decodes a Video Doorbell PoE cmd 199 reply in serializer order", () => {
   const root = parse(
     '<Support version="1.1"><IOInputPortNum>1</IOInputPortNum>' +
       "<IOOutputPortNum>2</IOOutputPortNum><diskNum>3</diskNum>" +

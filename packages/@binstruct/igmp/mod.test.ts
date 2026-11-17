@@ -1,3 +1,4 @@
+import { test } from "node:test";
 import { assertEquals } from "@std/assert";
 import {
   IGMP_MESSAGE_SIZE,
@@ -6,8 +7,8 @@ import {
   igmpMessage,
 } from "./mod.ts";
 
-Deno.test("igmpMessage", async (t) => {
-  await t.step("round-trips a general membership query", () => {
+test("igmpMessage", async (t) => {
+  await t.test("round-trips a general membership query", () => {
     const coder = igmpMessage();
     const message: IgmpMessage = {
       type: IGMP_TYPE.MEMBERSHIP_QUERY,
@@ -25,7 +26,7 @@ Deno.test("igmpMessage", async (t) => {
     assertEquals(decoded, message);
   });
 
-  await t.step("round-trips a group-specific query", () => {
+  await t.test("round-trips a group-specific query", () => {
     const coder = igmpMessage();
     const message: IgmpMessage = {
       type: IGMP_TYPE.MEMBERSHIP_QUERY,
@@ -43,7 +44,7 @@ Deno.test("igmpMessage", async (t) => {
     assertEquals(decoded, message);
   });
 
-  await t.step("round-trips a v2 membership report", () => {
+  await t.test("round-trips a v2 membership report", () => {
     const coder = igmpMessage();
     const message: IgmpMessage = {
       type: IGMP_TYPE.V2_MEMBERSHIP_REPORT,
@@ -61,7 +62,7 @@ Deno.test("igmpMessage", async (t) => {
     assertEquals(decoded, message);
   });
 
-  await t.step("round-trips a leave group message", () => {
+  await t.test("round-trips a leave group message", () => {
     const coder = igmpMessage();
     const message: IgmpMessage = {
       type: IGMP_TYPE.LEAVE_GROUP,
@@ -79,7 +80,7 @@ Deno.test("igmpMessage", async (t) => {
     assertEquals(decoded, message);
   });
 
-  await t.step("decodes a known general query wire capture", () => {
+  await t.test("decodes a known general query wire capture", () => {
     // deno-fmt-ignore
     const wire = new Uint8Array([
       0x11, 0x64, 0xee, 0x9b, // type=Query, maxResp=100, checksum
@@ -95,7 +96,7 @@ Deno.test("igmpMessage", async (t) => {
     assertEquals(decoded.groupAddress, 0);
   });
 
-  await t.step("decodes a known v2 membership report wire capture", () => {
+  await t.test("decodes a known v2 membership report wire capture", () => {
     // deno-fmt-ignore
     const wire = new Uint8Array([
       0x16, 0x00, 0x09, 0xfe, // type=V2Report, maxResp=0, checksum
@@ -111,7 +112,7 @@ Deno.test("igmpMessage", async (t) => {
     assertEquals(decoded.groupAddress, 0xe0000001);
   });
 
-  await t.step("decodes a known leave group wire capture", () => {
+  await t.test("decodes a known leave group wire capture", () => {
     // deno-fmt-ignore
     const wire = new Uint8Array([
       0x17, 0x00, 0x08, 0xfa, // type=Leave, maxResp=0, checksum

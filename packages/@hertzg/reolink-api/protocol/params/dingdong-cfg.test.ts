@@ -1,8 +1,9 @@
+import { test } from "node:test";
 import { assertEquals, assertThrows } from "@std/assert";
 import { parse } from "@std/xml";
 import { dingdongCfg } from "./dingdong-cfg.ts";
 
-Deno.test("dingdongCfg decodes a cmd 486 reply with two chimes", () => {
+test("dingdongCfg decodes a cmd 486 reply with two chimes", () => {
   const root = parse(
     '<dingdongCfg version="1.1">' +
       "<deviceCfg><id>0</id><name>Front chime</name>" +
@@ -33,7 +34,7 @@ Deno.test("dingdongCfg decodes a cmd 486 reply with two chimes", () => {
   });
 });
 
-Deno.test("dingdongCfg decodes a cmd 487 request with a pair threshold", () => {
+test("dingdongCfg decodes a cmd 487 request with a pair threshold", () => {
   const root = parse(
     "<dingdongCfg><pairThreshold>5</pairThreshold><deviceCfg><id>2</id>" +
       "<alarminCfg><type>dog_cat</type><valid>1</valid><musicId>4</musicId>" +
@@ -49,7 +50,7 @@ Deno.test("dingdongCfg decodes a cmd 487 request with a pair threshold", () => {
   });
 });
 
-Deno.test("dingdongCfg decodes a chime with no supported alarms as an empty rule list", () => {
+test("dingdongCfg decodes a chime with no supported alarms as an empty rule list", () => {
   const root = parse(
     '<dingdongCfg version="1.1"><deviceCfg><id>0</id><name>Chime</name>' +
       "</deviceCfg></dingdongCfg>",
@@ -58,7 +59,7 @@ Deno.test("dingdongCfg decodes a chime with no supported alarms as an empty rule
   assertEquals(dingdongCfg.decode(root).deviceCfg[0].alarminCfg, []);
 });
 
-Deno.test("dingdongCfg rejects an alarm type the firmware does not map", () => {
+test("dingdongCfg rejects an alarm type the firmware does not map", () => {
   const root = parse(
     "<dingdongCfg><deviceCfg><alarminCfg><type>face</type></alarminCfg>" +
       "</deviceCfg></dingdongCfg>",
@@ -67,7 +68,7 @@ Deno.test("dingdongCfg rejects an alarm type the firmware does not map", () => {
   assertThrows(() => dingdongCfg.decode(root), Error, '"face"');
 });
 
-Deno.test("dingdongCfg round-trips through encode and decode", () => {
+test("dingdongCfg round-trips through encode and decode", () => {
   const value = {
     deviceCfg: [{
       id: 3,

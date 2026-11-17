@@ -1,3 +1,4 @@
+import { test } from "node:test";
 import { assertEquals } from "@std/assert";
 import { refine } from "@hertzg/binstruct";
 import { parseAddressv4, stringifyAddressv4 } from "@hertzg/ip/addressv4";
@@ -39,7 +40,7 @@ const REPLY_WIRE = new Uint8Array([
   0xc0, 0xa8, 0x01, 0x01,             // targetProtocolAddress: 192.168.1.1
 ]);
 
-Deno.test("arp — decode known request bytes", () => {
+test("arp — decode known request bytes", () => {
   const [packet, bytesRead] = arpData().decode(REQUEST_WIRE);
 
   assertEquals(bytesRead, ARP_ETHERNET_IPV4_SIZE);
@@ -54,7 +55,7 @@ Deno.test("arp — decode known request bytes", () => {
   assertEquals(stringifyAddressv4(packet.targetProtocolAddress), "192.168.1.2");
 });
 
-Deno.test("arp — decode known reply bytes", () => {
+test("arp — decode known reply bytes", () => {
   const [packet, bytesRead] = arpData().decode(REPLY_WIRE);
 
   assertEquals(bytesRead, ARP_ETHERNET_IPV4_SIZE);
@@ -65,7 +66,7 @@ Deno.test("arp — decode known reply bytes", () => {
   assertEquals(stringifyAddressv4(packet.targetProtocolAddress), "192.168.1.1");
 });
 
-Deno.test("arp — encode produces expected wire bytes", () => {
+test("arp — encode produces expected wire bytes", () => {
   const coder = arpData();
   const request: ArpData = {
     hardwareType: ARP_HARDWARE_TYPE.ETHERNET,
@@ -86,7 +87,7 @@ Deno.test("arp — encode produces expected wire bytes", () => {
   assertEquals(buffer, REQUEST_WIRE);
 });
 
-Deno.test("arp — round-trip request and reply", () => {
+test("arp — round-trip request and reply", () => {
   const coder = arpData();
   const cases: ArpData[] = [
     {
@@ -124,7 +125,7 @@ Deno.test("arp — round-trip request and reply", () => {
   }
 });
 
-Deno.test("arp — composes with refine for human-readable form", () => {
+test("arp — composes with refine for human-readable form", () => {
   type RefinedArp =
     & Omit<
       ArpData,

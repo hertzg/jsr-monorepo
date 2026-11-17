@@ -1,8 +1,9 @@
+import { test } from "node:test";
 import { assertEquals, assertThrows } from "@std/assert";
 import { parse } from "@std/xml";
 import { dayNightMode } from "./day-night-mode.ts";
 
-Deno.test("dayNightMode decodes the cmd 164 reply", () => {
+test("dayNightMode decodes the cmd 164 reply", () => {
   const root =
     parse('<DayNightMode version="1.1"><mode>color</mode></DayNightMode>')
       .root;
@@ -10,7 +11,7 @@ Deno.test("dayNightMode decodes the cmd 164 reply", () => {
   assertEquals(dayNightMode.decode(root), { mode: "color" });
 });
 
-Deno.test("dayNightMode round-trips through encode and decode", () => {
+test("dayNightMode round-trips through encode and decode", () => {
   const value = { mode: "blackAndWhite" as const };
 
   assertEquals(
@@ -19,7 +20,7 @@ Deno.test("dayNightMode round-trips through encode and decode", () => {
   );
 });
 
-Deno.test("dayNightMode rejects a mode the firmware does not write", () => {
+test("dayNightMode rejects a mode the firmware does not write", () => {
   const root = parse("<DayNightMode><mode>night</mode></DayNightMode>").root;
 
   assertThrows(() => dayNightMode.decode(root), Error, "blackAndWhite");

@@ -1,8 +1,9 @@
+import { test } from "node:test";
 import { assertEquals, assertThrows } from "@std/assert";
 import { parse } from "@std/xml";
 import { compression } from "./compression.ts";
 
-Deno.test("compression decodes an RLC-823A cmd 56 reply", () => {
+test("compression decodes an RLC-823A cmd 56 reply", () => {
   const root = parse(
     '<Compression version="1.1"><channelId>0</channelId>' +
       "<isNoTranslateFrame>0</isNoTranslateFrame>" +
@@ -55,7 +56,7 @@ Deno.test("compression decodes an RLC-823A cmd 56 reply", () => {
   });
 });
 
-Deno.test("compression round-trips a main stream update", () => {
+test("compression round-trips a main stream update", () => {
   const value = {
     channelId: 0,
     mainStream: {
@@ -72,7 +73,7 @@ Deno.test("compression round-trips a main stream update", () => {
   );
 });
 
-Deno.test("compression rejects an unknown encoder profile", () => {
+test("compression rejects an unknown encoder profile", () => {
   const root = parse(
     '<Compression version="1.1"><subStream><encoderProfile>extended' +
       "</encoderProfile></subStream></Compression>",
@@ -81,7 +82,7 @@ Deno.test("compression rejects an unknown encoder profile", () => {
   assertThrows(() => compression.decode(root), Error, '"extended"');
 });
 
-Deno.test("compression decodes a Video Doorbell PoE cmd 56 reply", () => {
+test("compression decodes a Video Doorbell PoE cmd 56 reply", () => {
   const root = parse(
     '<Compression version="1.1"><channelId>0</channelId>' +
       "<isNoTranslateFrame>0</isNoTranslateFrame>" +

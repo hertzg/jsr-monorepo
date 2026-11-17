@@ -1,8 +1,9 @@
+import { test } from "node:test";
 import { assertEquals } from "@std/assert";
 import { parse } from "@std/xml";
 import { timelapseTaskDel } from "./timelapse-task-del.ts";
 
-Deno.test("timelapseTaskDel decodes the reply the camera writes", () => {
+test("timelapseTaskDel decodes the reply the camera writes", () => {
   const root = parse(
     '<timelapseTaskDel version="1.1"><uid>uid-abc123</uid>' +
       "<id>task-abc123</id></timelapseTaskDel>",
@@ -14,7 +15,7 @@ Deno.test("timelapseTaskDel decodes the reply the camera writes", () => {
   });
 });
 
-Deno.test("timelapseTaskDel round-trips through encode and decode", () => {
+test("timelapseTaskDel round-trips through encode and decode", () => {
   const value = { uid: "uid-def456", id: "task-def456" };
 
   const xml = timelapseTaskDel.encode(value);
@@ -22,7 +23,7 @@ Deno.test("timelapseTaskDel round-trips through encode and decode", () => {
   assertEquals(timelapseTaskDel.decode(parse(xml).root), value);
 });
 
-Deno.test("timelapseTaskDel decodes a request without a uid", () => {
+test("timelapseTaskDel decodes a request without a uid", () => {
   const root = parse(
     '<timelapseTaskDel version="1.1"><id>task-ghi789</id></timelapseTaskDel>',
   ).root;

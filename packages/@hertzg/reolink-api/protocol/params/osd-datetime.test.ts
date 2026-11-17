@@ -1,8 +1,9 @@
+import { test } from "node:test";
 import { assertEquals, assertThrows } from "@std/assert";
 import { parse } from "@std/xml";
 import { osdDatetime } from "./osd-datetime.ts";
 
-Deno.test("osdDatetime decodes the cmd 44 reply element", () => {
+test("osdDatetime decodes the cmd 44 reply element", () => {
   const root = parse(
     '<OsdDatetime version="1.1"><channelId>0</channelId><enable>1</enable>' +
       "<topLeftX>11</topLeftX><topLeftY>22</topLeftY><width>333</width>" +
@@ -20,7 +21,7 @@ Deno.test("osdDatetime decodes the cmd 44 reply element", () => {
   });
 });
 
-Deno.test("osdDatetime round-trips every field", () => {
+test("osdDatetime round-trips every field", () => {
   const value = {
     channelId: 2,
     enable: 0,
@@ -37,7 +38,7 @@ Deno.test("osdDatetime round-trips every field", () => {
   );
 });
 
-Deno.test("osdDatetime rejects a language the camera never writes", () => {
+test("osdDatetime rejects a language the camera never writes", () => {
   const root = parse(
     '<OsdDatetime version="1.1"><language>German</language></OsdDatetime>',
   ).root;

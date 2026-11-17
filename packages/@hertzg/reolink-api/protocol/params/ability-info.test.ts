@@ -1,8 +1,9 @@
+import { test } from "node:test";
 import { assertEquals, assertThrows } from "@std/assert";
 import { parse } from "@std/xml";
 import { abilityInfo } from "./ability-info.ts";
 
-Deno.test("abilityInfo decodes a cmd 151 reply with every module shape", () => {
+test("abilityInfo decodes a cmd 151 reply with every module shape", () => {
   const root = parse(
     '<AbilityInfo version="1.1"><userName>admin</userName>' +
       "<system><subModule><abilityValue>general_rw, reboot_rw</abilityValue>" +
@@ -38,7 +39,7 @@ Deno.test("abilityInfo decodes a cmd 151 reply with every module shape", () => {
   });
 });
 
-Deno.test("abilityInfo decodes a user without any module", () => {
+test("abilityInfo decodes a user without any module", () => {
   const root = parse(
     '<AbilityInfo version="1.1"><userName>guest</userName></AbilityInfo>',
   ).root;
@@ -46,7 +47,7 @@ Deno.test("abilityInfo decodes a user without any module", () => {
   assertEquals(abilityInfo.decode(root), { userName: "guest" });
 });
 
-Deno.test("abilityInfo rejects a per-channel entry without a channel", () => {
+test("abilityInfo rejects a per-channel entry without a channel", () => {
   const root = parse(
     '<AbilityInfo version="1.1"><userName>admin</userName><record>' +
       "<subModule><abilityValue>download_ro</abilityValue></subModule>" +
@@ -56,7 +57,7 @@ Deno.test("abilityInfo rejects a per-channel entry without a channel", () => {
   assertThrows(() => abilityInfo.decode(root), Error, "<channelId>");
 });
 
-Deno.test("abilityInfo round-trips through encode and decode", () => {
+test("abilityInfo round-trips through encode and decode", () => {
   const value = {
     userName: "operator",
     system: { subModule: { abilityValue: "general_ro" } },

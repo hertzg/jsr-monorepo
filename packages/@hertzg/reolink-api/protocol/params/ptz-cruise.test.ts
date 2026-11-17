@@ -1,8 +1,9 @@
+import { test } from "node:test";
 import { assertEquals, assertThrows } from "@std/assert";
 import { parse } from "@std/xml";
 import { ptzCruise } from "./ptz-cruise.ts";
 
-Deno.test("ptzCruise decodes the cmd 64 reply", () => {
+test("ptzCruise decodes the cmd 64 reply", () => {
   const root = parse(
     '<PtzCruise version="1.1"><channelId>0</channelId><cruiseList>' +
       "<cruise><patrolId>2</patrolId><enable>1</enable><starting>1</starting>" +
@@ -29,7 +30,7 @@ Deno.test("ptzCruise decodes the cmd 64 reply", () => {
   });
 });
 
-Deno.test("ptzCruise round-trips through encode and decode", () => {
+test("ptzCruise round-trips through encode and decode", () => {
   const value = {
     channelId: 1,
     cruiseList: [{
@@ -42,7 +43,7 @@ Deno.test("ptzCruise round-trips through encode and decode", () => {
   assertEquals(ptzCruise.decode(parse(ptzCruise.encode(value)).root), value);
 });
 
-Deno.test("ptzCruise throws on a key position without presetId", () => {
+test("ptzCruise throws on a key position without presetId", () => {
   const root = parse(
     "<PtzCruise><channelId>0</channelId><cruiseList><cruise>" +
       "<patrolId>0</patrolId><keyPosList><keyPos><keyPosId>0</keyPosId>" +

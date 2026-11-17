@@ -1,8 +1,9 @@
+import { test } from "node:test";
 import { assertEquals, assertThrows } from "@std/assert";
 import { parse } from "@std/xml";
 import { timelapseFileDel } from "./timelapse-file-del.ts";
 
-Deno.test("timelapseFileDel decodes the reply the camera writes", () => {
+test("timelapseFileDel decodes the reply the camera writes", () => {
   const root = parse(
     '<timelapseFileDel version="1.1"><item><id>file-abc123</id></item>' +
       "<item><id>file-def456</id></item></timelapseFileDel>",
@@ -13,7 +14,7 @@ Deno.test("timelapseFileDel decodes the reply the camera writes", () => {
   });
 });
 
-Deno.test("timelapseFileDel round-trips through encode and decode", () => {
+test("timelapseFileDel round-trips through encode and decode", () => {
   const value = {
     taskType: "mp4" as const,
     item: [{ id: "file-ghi789" }, { id: "file-jkl012" }],
@@ -24,14 +25,14 @@ Deno.test("timelapseFileDel round-trips through encode and decode", () => {
   assertEquals(timelapseFileDel.decode(parse(xml).root), value);
 });
 
-Deno.test("timelapseFileDel decodes no items as an empty list", () => {
+test("timelapseFileDel decodes no items as an empty list", () => {
   const root = parse('<timelapseFileDel version="1.1"></timelapseFileDel>')
     .root;
 
   assertEquals(timelapseFileDel.decode(root).item, []);
 });
 
-Deno.test("timelapseFileDel rejects a media type the firmware does not map", () => {
+test("timelapseFileDel rejects a media type the firmware does not map", () => {
   const root = parse(
     '<timelapseFileDel version="1.1"><taskType>avi</taskType></timelapseFileDel>',
   ).root;

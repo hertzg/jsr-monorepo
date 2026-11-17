@@ -1,3 +1,4 @@
+import { test } from "node:test";
 import { assert, assertEquals } from "@std/assert";
 import { parseAddressv4 } from "@hertzg/ip/addressv4";
 import { ARP_OPCODE, ETHERTYPE_ARP } from "@binstruct/arp";
@@ -51,7 +52,7 @@ import {
   type VlanQinQFrame,
 } from "./mod.ts";
 
-Deno.test("internetChecksum: RFC 1071 §3 worked example", () => {
+test("internetChecksum: RFC 1071 §3 worked example", () => {
   // deno-fmt-ignore
   const sample = new Uint8Array([
     0x00, 0x01, 0xf2, 0x03, 0xf4, 0xf5, 0xf6, 0xf7,
@@ -59,7 +60,7 @@ Deno.test("internetChecksum: RFC 1071 §3 worked example", () => {
   assertEquals(internetChecksum(sample), 0x220d);
 });
 
-Deno.test("internetChecksum: a fully checksummed packet sums to zero", () => {
+test("internetChecksum: a fully checksummed packet sums to zero", () => {
   // deno-fmt-ignore
   const echoRequest = new Uint8Array([
     0x08, 0x00, 0xf7, 0xfd, 0x00, 0x01, 0x00, 0x01,
@@ -67,7 +68,7 @@ Deno.test("internetChecksum: a fully checksummed packet sums to zero", () => {
   assertEquals(internetChecksum(echoRequest), 0x0000);
 });
 
-Deno.test("internetChecksum: compute then verify on a longer packet", () => {
+test("internetChecksum: compute then verify on a longer packet", () => {
   // deno-fmt-ignore
   const packet = new Uint8Array([
     0x08, 0x00, 0x00, 0x00, 0x00, 0x05, 0x00, 0x07,
@@ -78,20 +79,20 @@ Deno.test("internetChecksum: compute then verify on a longer packet", () => {
   assertEquals(internetChecksum(packet), 0x0000);
 });
 
-Deno.test("internetChecksum: odd length pads with a trailing zero", () => {
+test("internetChecksum: odd length pads with a trailing zero", () => {
   assertEquals(internetChecksum(new Uint8Array([0x01, 0x02, 0x03])), 0xfbfd);
 });
 
-Deno.test("internetChecksum: empty buffer is 0xffff", () => {
+test("internetChecksum: empty buffer is 0xffff", () => {
   assertEquals(internetChecksum(new Uint8Array(0)), 0xffff);
 });
 
-Deno.test("internetChecksum: carry folding wraps multiple times", () => {
+test("internetChecksum: carry folding wraps multiple times", () => {
   const data = new Uint8Array(0x10000).fill(0xff);
   assertEquals(internetChecksum(data), 0x0000);
 });
 
-Deno.test("inetFrame: round-trips ethernet → ipv4 → udp", () => {
+test("inetFrame: round-trips ethernet → ipv4 → udp", () => {
   const coder = inetFrame();
   const value: FrameRefined = {
     dstMac: new Uint8Array([0, 0, 0, 0, 0, 1]),
@@ -145,7 +146,7 @@ Deno.test("inetFrame: round-trips ethernet → ipv4 → udp", () => {
   );
 });
 
-Deno.test("inetFrame: round-trips ethernet → ipv4 → tcp", () => {
+test("inetFrame: round-trips ethernet → ipv4 → tcp", () => {
   const coder = inetFrame();
   const tcpPayload = new Uint8Array([0x68, 0x69]);
   const value: FrameRefined = {
@@ -217,7 +218,7 @@ Deno.test("inetFrame: round-trips ethernet → ipv4 → tcp", () => {
   assertEquals(buf2, buf.subarray(0, written));
 });
 
-Deno.test("inetFrame: round-trips ethernet → ipv4 → icmp", () => {
+test("inetFrame: round-trips ethernet → ipv4 → icmp", () => {
   const coder = inetFrame();
   const value: FrameRefined = {
     dstMac: new Uint8Array([0, 0, 0, 0, 0, 1]),
@@ -263,7 +264,7 @@ Deno.test("inetFrame: round-trips ethernet → ipv4 → icmp", () => {
   assertEquals(decoded.payload.payload.type, 8);
 });
 
-Deno.test("inetFrame: round-trips ethernet → arp", () => {
+test("inetFrame: round-trips ethernet → arp", () => {
   const coder = inetFrame();
   const value: FrameRefined = {
     dstMac: new Uint8Array([0xff, 0xff, 0xff, 0xff, 0xff, 0xff]),
@@ -293,7 +294,7 @@ Deno.test("inetFrame: round-trips ethernet → arp", () => {
   assertEquals(decoded.payload.senderProtocolAddress, 0xc0000201);
 });
 
-Deno.test("inetFrame: unknown EtherType surfaces as a raw Uint8Array", () => {
+test("inetFrame: unknown EtherType surfaces as a raw Uint8Array", () => {
   const coder = inetFrame();
   const value: FrameRefined = {
     dstMac: new Uint8Array([0, 0, 0, 0, 0, 1]),
@@ -310,7 +311,7 @@ Deno.test("inetFrame: unknown EtherType surfaces as a raw Uint8Array", () => {
   assertEquals(decoded.payload, new Uint8Array([0x01, 0x02, 0x03, 0x04]));
 });
 
-Deno.test("inetFrame: unknown IPv4 protocol surfaces as a raw Uint8Array", () => {
+test("inetFrame: unknown IPv4 protocol surfaces as a raw Uint8Array", () => {
   const coder = inetFrame();
   const innerBytes = new Uint8Array([0xaa, 0xbb, 0xcc]);
   const value: FrameRefined = {
@@ -349,7 +350,7 @@ Deno.test("inetFrame: unknown IPv4 protocol surfaces as a raw Uint8Array", () =>
   assertEquals(decoded.payload.payload, innerBytes);
 });
 
-Deno.test("inetFrame: round-trips ethernet → vlan → ipv4 → udp", () => {
+test("inetFrame: round-trips ethernet → vlan → ipv4 → udp", () => {
   const coder = inetFrame();
   const udpPayload = new Uint8Array([0xaa, 0xbb]);
   const value: FrameRefined = {
@@ -401,7 +402,7 @@ Deno.test("inetFrame: round-trips ethernet → vlan → ipv4 → udp", () => {
   assertEquals(udp.payload, udpPayload);
 });
 
-Deno.test("inetFrame: round-trips ethernet → vlan → vlan → ipv4 (QinQ)", () => {
+test("inetFrame: round-trips ethernet → vlan → vlan → ipv4 (QinQ)", () => {
   const coder = inetFrame();
   const value: FrameRefined = {
     dstMac: new Uint8Array([0, 0, 0, 0, 0, 1]),
@@ -448,7 +449,7 @@ Deno.test("inetFrame: round-trips ethernet → vlan → vlan → ipv4 (QinQ)", (
   assertEquals(inner.payload.protocol, 253);
 });
 
-Deno.test("inetFrame: a third stacked VLAN tag decodes raw (QinQ depth is bounded)", () => {
+test("inetFrame: a third stacked VLAN tag decodes raw (QinQ depth is bounded)", () => {
   const coder = inetFrame();
   const value: FrameRefined = {
     dstMac: new Uint8Array([0, 0, 0, 0, 0, 1]),
@@ -480,7 +481,7 @@ Deno.test("inetFrame: a third stacked VLAN tag decodes raw (QinQ depth is bounde
   assertEquals(middle.payload, new Uint8Array([0x11, 0x22, 0x33, 0x44]));
 });
 
-Deno.test("inetFrame: round-trips ethernet → pppoe-session → ppp(ipv4) → tcp", () => {
+test("inetFrame: round-trips ethernet → pppoe-session → ppp(ipv4) → tcp", () => {
   const coder = inetFrame();
   const tcpPayload = new Uint8Array([0x68, 0x69]);
   const ipv4TotalLength = 20 + 20 + tcpPayload.length;
@@ -555,7 +556,7 @@ Deno.test("inetFrame: round-trips ethernet → pppoe-session → ppp(ipv4) → t
   assertEquals(ip.payload.payload, tcpPayload);
 });
 
-Deno.test("inetFrame: round-trips ethernet → pppoe-session → ppp(ipv6) → tcp", () => {
+test("inetFrame: round-trips ethernet → pppoe-session → ppp(ipv6) → tcp", () => {
   const coder = inetFrame();
   const tcpPayload = new Uint8Array([0x68, 0x69]);
   const tcpTotalLength = 20 + tcpPayload.length;
@@ -618,7 +619,7 @@ Deno.test("inetFrame: round-trips ethernet → pppoe-session → ppp(ipv6) → t
   assertEquals(ip.payload.payload, tcpPayload);
 });
 
-Deno.test("inetFrame: round-trips ethernet → pppoe-discovery (PADI)", () => {
+test("inetFrame: round-trips ethernet → pppoe-discovery (PADI)", () => {
   const coder = inetFrame();
   const tags = new Uint8Array([0x01, 0x01, 0x00, 0x00]); // Service-Name tag, empty
   const value: FrameRefined = {
@@ -645,7 +646,7 @@ Deno.test("inetFrame: round-trips ethernet → pppoe-discovery (PADI)", () => {
   assertEquals(discovery.payload, tags);
 });
 
-Deno.test("inetFrame: round-trips ethernet → ipv6 → udp → ntp", () => {
+test("inetFrame: round-trips ethernet → ipv6 → udp → ntp", () => {
   const coder = inetFrame();
   const ntpPacket = {
     leapVersionMode: { leapIndicator: 0, version: 4, mode: NTP_MODE.CLIENT },
@@ -693,7 +694,7 @@ Deno.test("inetFrame: round-trips ethernet → ipv6 → udp → ntp", () => {
   assertEquals(udp.payload.transmitTimestamp, 0xe4c5c46700000000n);
 });
 
-Deno.test("inetFrame: round-trips ethernet → ipv6 → icmpv6", () => {
+test("inetFrame: round-trips ethernet → ipv6 → icmpv6", () => {
   const coder = inetFrame();
   const body = new Uint8Array([0xbe, 0xef, 0x00, 0x2a]);
   const value: FrameRefined = {
@@ -726,7 +727,7 @@ Deno.test("inetFrame: round-trips ethernet → ipv6 → icmpv6", () => {
   assertEquals(ip.payload.body, body);
 });
 
-Deno.test("inetFrame: round-trips ethernet → ipv6 → esp", () => {
+test("inetFrame: round-trips ethernet → ipv6 → esp", () => {
   const coder = inetFrame();
   const payloadData = new Uint8Array([0xde, 0xad, 0xbe, 0xef]);
   const value: FrameRefined = {
@@ -758,7 +759,7 @@ Deno.test("inetFrame: round-trips ethernet → ipv6 → esp", () => {
   assertEquals(ip.payload.payloadData, payloadData);
 });
 
-Deno.test("inetFrame: round-trips ethernet → ipv4 → igmp", () => {
+test("inetFrame: round-trips ethernet → ipv4 → igmp", () => {
   const coder = inetFrame();
   const value: FrameRefined = {
     dstMac: new Uint8Array([0, 0, 0, 0, 0, 1]),
@@ -800,7 +801,7 @@ Deno.test("inetFrame: round-trips ethernet → ipv4 → igmp", () => {
   assertEquals(ip.payload.groupAddress, 0xe0000005);
 });
 
-Deno.test("inetFrame: round-trips ethernet → ipv4 → esp", () => {
+test("inetFrame: round-trips ethernet → ipv4 → esp", () => {
   const coder = inetFrame();
   const payloadData = new Uint8Array([0xde, 0xad, 0xbe, 0xef]);
   const value: FrameRefined = {
@@ -842,7 +843,7 @@ Deno.test("inetFrame: round-trips ethernet → ipv4 → esp", () => {
   assertEquals(ip.payload.payloadData, payloadData);
 });
 
-Deno.test("inetFrame: round-trips a full VXLAN tunnel (udp:4789 → vxlan → ethernet → ipv4 → udp)", () => {
+test("inetFrame: round-trips a full VXLAN tunnel (udp:4789 → vxlan → ethernet → ipv4 → udp)", () => {
   const coder = inetFrame();
 
   const innerUdpPayload = new Uint8Array([0xca, 0xfe]);
@@ -939,7 +940,7 @@ Deno.test("inetFrame: round-trips a full VXLAN tunnel (udp:4789 → vxlan → et
   assertEquals(innerUdpDecoded.payload, innerUdpPayload);
 });
 
-Deno.test("inetFrame: decodes a hand-built VXLAN tunnel from known wire bytes", () => {
+test("inetFrame: decodes a hand-built VXLAN tunnel from known wire bytes", () => {
   // Outer Ethernet(14) + IPv4(20) + UDP(8) + VXLAN(8) + inner Ethernet(14) +
   // inner IPv4(20, no payload) = 84 bytes total.
   // deno-fmt-ignore
@@ -1002,7 +1003,7 @@ Deno.test("inetFrame: decodes a hand-built VXLAN tunnel from known wire bytes", 
   assertEquals(buf, wire);
 });
 
-Deno.test("inetFrame: two independent decodes through the same coder instance both resolve nested VXLAN tunnels", () => {
+test("inetFrame: two independent decodes through the same coder instance both resolve nested VXLAN tunnels", () => {
   // deno-fmt-ignore
   const wire = new Uint8Array([
     0x00, 0x00, 0x00, 0x00, 0x00, 0x01,
@@ -1052,7 +1053,7 @@ Deno.test("inetFrame: two independent decodes through the same coder instance bo
   assertEquals(firstDecoded, secondDecoded);
 });
 
-Deno.test("inetFrame: UDP port ambiguity — destination port wins over source port", () => {
+test("inetFrame: UDP port ambiguity — destination port wins over source port", () => {
   const coder = inetFrame();
   const value: FrameRefined = {
     dstMac: new Uint8Array([0, 0, 0, 0, 0, 1]),
@@ -1114,7 +1115,7 @@ Deno.test("inetFrame: UDP port ambiguity — destination port wins over source p
   assertEquals(udp.payload.flags.state, BFD_STATE.UP);
 });
 
-Deno.test("inetFrame: unknown UDP port stays a plain UdpPacket", () => {
+test("inetFrame: unknown UDP port stays a plain UdpPacket", () => {
   const coder = inetFrame();
   const payload = new Uint8Array([0x01, 0x02, 0x03]);
   const value: FrameRefined = {
@@ -1158,7 +1159,7 @@ Deno.test("inetFrame: unknown UDP port stays a plain UdpPacket", () => {
   assertEquals(udp.payload, payload);
 });
 
-Deno.test("inetFrame: unknown IPv6 nextHeader stays a plain Ipv6Packet", () => {
+test("inetFrame: unknown IPv6 nextHeader stays a plain Ipv6Packet", () => {
   const coder = inetFrame();
   const payload = new Uint8Array([0x01, 0x02, 0x03, 0x04]);
   const value: FrameRefined = {
@@ -1185,7 +1186,7 @@ Deno.test("inetFrame: unknown IPv6 nextHeader stays a plain Ipv6Packet", () => {
   assertEquals(ip.payload, payload);
 });
 
-Deno.test("sllInetFrame: round-trips sll → ipv4 → udp", () => {
+test("sllInetFrame: round-trips sll → ipv4 → udp", () => {
   const coder = sllInetFrame();
   const udpPayload = new Uint8Array([0x01, 0x02]);
   const value: SllFrameRefined = {
@@ -1241,7 +1242,7 @@ Deno.test("sllInetFrame: round-trips sll → ipv4 → udp", () => {
   assertEquals(udp.payload, udpPayload);
 });
 
-Deno.test("sllInetFrame: round-trips sll → arp", () => {
+test("sllInetFrame: round-trips sll → arp", () => {
   const coder = sllInetFrame();
   const value: SllFrameRefined = {
     packetType: SLL_PACKET_TYPE.HOST,
@@ -1282,7 +1283,7 @@ Deno.test("sllInetFrame: round-trips sll → arp", () => {
   assertEquals(decoded.payload.operation, ARP_OPCODE.REQUEST);
 });
 
-Deno.test("sllInetFrame: round-trips sll → vlan → ipv4 → udp", () => {
+test("sllInetFrame: round-trips sll → vlan → ipv4 → udp", () => {
   const coder = sllInetFrame();
   const udpPayload = new Uint8Array([0xaa, 0xbb]);
   const value: SllFrameRefined = {

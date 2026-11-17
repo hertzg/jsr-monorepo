@@ -1,8 +1,9 @@
+import { test } from "node:test";
 import { assertEquals } from "@std/assert";
 import { parse } from "@std/xml";
 import { ptzGuard } from "./ptz-guard.ts";
 
-Deno.test("ptzGuard decodes the reply the camera writes", () => {
+test("ptzGuard decodes the reply the camera writes", () => {
   const root = parse(
     '<PtzGuard version="1.1"><channelId>2</channelId><timeout>45</timeout>' +
       "<benable>1</benable><bvalid>0</bvalid>" +
@@ -18,7 +19,7 @@ Deno.test("ptzGuard decodes the reply the camera writes", () => {
   });
 });
 
-Deno.test("ptzGuard round-trips through encode and decode", () => {
+test("ptzGuard round-trips through encode and decode", () => {
   const value = {
     channelId: 1,
     timeout: 300,
@@ -34,7 +35,7 @@ Deno.test("ptzGuard round-trips through encode and decode", () => {
   assertEquals(ptzGuard.decode(parse(xml).root), value);
 });
 
-Deno.test("ptzGuard decodes a request that only switches the guard off", () => {
+test("ptzGuard decodes a request that only switches the guard off", () => {
   const root = parse(
     '<PtzGuard version="1.1"><channelId>0</channelId><benable>0</benable></PtzGuard>',
   ).root;

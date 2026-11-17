@@ -1,15 +1,16 @@
+import { test } from "node:test";
 import { assertEquals } from "@std/assert";
 import { parse } from "@std/xml";
 import { authInfo } from "./auth-info.ts";
 
-Deno.test("authInfo decodes the cmd 509 reply the firmware writes", () => {
+test("authInfo decodes the cmd 509 reply the firmware writes", () => {
   const root = parse('<authInfo version="1.1"><code>135790</code></authInfo>')
     .root;
 
   assertEquals(authInfo.decode(root), { code: 135790 });
 });
 
-Deno.test("authInfo decodes a cmd 509 request", () => {
+test("authInfo decodes a cmd 509 request", () => {
   const root = parse(
     "<authInfo><notes>Dog walker</notes><validhours>48</validhours>" +
       "<userLevel>1</userLevel><ability>5</ability>" +
@@ -25,7 +26,7 @@ Deno.test("authInfo decodes a cmd 509 request", () => {
   });
 });
 
-Deno.test("authInfo round-trips through encode and decode", () => {
+test("authInfo round-trips through encode and decode", () => {
   const value = {
     notes: "Cleaner",
     validhours: 12,

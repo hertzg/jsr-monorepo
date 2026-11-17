@@ -1,8 +1,9 @@
+import { test } from "node:test";
 import { assertEquals } from "@std/assert";
 import { parse } from "@std/xml";
 import { ftyAudioTest } from "./fty-audio-test.ts";
 
-Deno.test("ftyAudioTest decodes every field the parser reads", () => {
+test("ftyAudioTest decodes every field the parser reads", () => {
   const root = parse(
     '<ftyAudioTest version="1.1"><ratedPower>80</ratedPower>' +
       "<difPower>5</difPower><difHz>20</difHz><difZero>3</difZero>" +
@@ -22,7 +23,7 @@ Deno.test("ftyAudioTest decodes every field the parser reads", () => {
   });
 });
 
-Deno.test("ftyAudioTest decodes an element with only some fields", () => {
+test("ftyAudioTest decodes an element with only some fields", () => {
   const root = parse(
     '<ftyAudioTest version="1.1"><difHz>20</difHz></ftyAudioTest>',
   ).root;
@@ -30,7 +31,7 @@ Deno.test("ftyAudioTest decodes an element with only some fields", () => {
   assertEquals(ftyAudioTest.decode(root), { difHz: 20 });
 });
 
-Deno.test("ftyAudioTest round-trips through encode and decode", () => {
+test("ftyAudioTest round-trips through encode and decode", () => {
   const value = {
     ratedPower: 81,
     difPower: 4,

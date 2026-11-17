@@ -1,8 +1,9 @@
+import { test } from "node:test";
 import { assertEquals, assertThrows } from "@std/assert";
 import { parse } from "@std/xml";
 import { dingdongList } from "./dingdong-list.ts";
 
-Deno.test("dingdongList decodes a cmd 484 reply from net_dingdong_list_s2x", () => {
+test("dingdongList decodes a cmd 484 reply from net_dingdong_list_s2x", () => {
   const root = parse(
     '<dingdongList version="1.1"><maxPairNumber>10</maxPairNumber>' +
       "<pairedList>" +
@@ -22,7 +23,7 @@ Deno.test("dingdongList decodes a cmd 484 reply from net_dingdong_list_s2x", () 
   });
 });
 
-Deno.test("dingdongList decodes the cmd 484 push with netState in camel case", () => {
+test("dingdongList decodes the cmd 484 push with netState in camel case", () => {
   const root = parse(
     '<dingdongList version="1.1"><maxPairNumber>4</maxPairNumber>' +
       "<pairedList><dingdongDeviceInfo><id>3</id><name>Garage</name>" +
@@ -35,7 +36,7 @@ Deno.test("dingdongList decodes the cmd 484 push with netState in camel case", (
   });
 });
 
-Deno.test("dingdongList decodes a cmd 490 scan push", () => {
+test("dingdongList decodes a cmd 490 scan push", () => {
   const root = parse(
     '<dingdongList version="1.1"><scanList>' +
       "<dingdongDeviceInfo><id>5</id><name>New chime</name></dingdongDeviceInfo>" +
@@ -47,7 +48,7 @@ Deno.test("dingdongList decodes a cmd 490 scan push", () => {
   });
 });
 
-Deno.test("dingdongList decodes an empty paired list", () => {
+test("dingdongList decodes an empty paired list", () => {
   const root = parse(
     '<dingdongList version="1.1"><maxPairNumber>10</maxPairNumber>' +
       "<pairedList></pairedList></dingdongList>",
@@ -56,7 +57,7 @@ Deno.test("dingdongList decodes an empty paired list", () => {
   assertEquals(dingdongList.decode(root).pairedList, []);
 });
 
-Deno.test("dingdongList rejects a paired device without a name", () => {
+test("dingdongList rejects a paired device without a name", () => {
   const root = parse(
     "<dingdongList><pairedList><dingdongDeviceInfo><id>0</id>" +
       "</dingdongDeviceInfo></pairedList></dingdongList>",
@@ -65,7 +66,7 @@ Deno.test("dingdongList rejects a paired device without a name", () => {
   assertThrows(() => dingdongList.decode(root), Error, "<name>");
 });
 
-Deno.test("dingdongList round-trips through encode and decode", () => {
+test("dingdongList round-trips through encode and decode", () => {
   const value = {
     maxPairNumber: 8,
     pairedList: [{ id: 6, netstate: 1, name: "Kitchen", netState: 0 }],

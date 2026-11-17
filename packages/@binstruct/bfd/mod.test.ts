@@ -1,3 +1,4 @@
+import { test } from "node:test";
 import { assertEquals } from "@std/assert";
 import {
   BFD_CONTROL_SIZE,
@@ -7,8 +8,8 @@ import {
   bfdControlPacket,
 } from "./mod.ts";
 
-Deno.test("bfdControlPacket", async (t) => {
-  await t.step("round-trips an Up packet with no flags set", () => {
+test("bfdControlPacket", async (t) => {
+  await t.test("round-trips an Up packet with no flags set", () => {
     const coder = bfdControlPacket();
     const packet: BfdControlPacket = {
       versionDiagnostic: { version: 1, diagnostic: 0 },
@@ -39,7 +40,7 @@ Deno.test("bfdControlPacket", async (t) => {
     assertEquals(decoded, packet);
   });
 
-  await t.step("round-trips an Init packet with poll and CPI set", () => {
+  await t.test("round-trips an Init packet with poll and CPI set", () => {
     const coder = bfdControlPacket();
     const packet: BfdControlPacket = {
       versionDiagnostic: { version: 1, diagnostic: 3 },
@@ -70,7 +71,7 @@ Deno.test("bfdControlPacket", async (t) => {
     assertEquals(decoded, packet);
   });
 
-  await t.step("decodes a known Down packet with final bit set", () => {
+  await t.test("decodes a known Down packet with final bit set", () => {
     // deno-fmt-ignore
     const wire = new Uint8Array([
       0x20, 0x50, 0x03, 0x18,
@@ -98,7 +99,7 @@ Deno.test("bfdControlPacket", async (t) => {
     assertEquals(decoded.requiredMinEchoRxInterval, 0);
   });
 
-  await t.step(
+  await t.test(
     "decodes a known Init packet with poll, CPI and diagnostic set",
     () => {
       // deno-fmt-ignore
@@ -126,7 +127,7 @@ Deno.test("bfdControlPacket", async (t) => {
     },
   );
 
-  await t.step("exports well-known constants", () => {
+  await t.test("exports well-known constants", () => {
     assertEquals(BFD_CONTROL_SIZE, 24);
     assertEquals(BFD_PORT, 3784);
     assertEquals(BFD_STATE.ADMIN_DOWN, 0);

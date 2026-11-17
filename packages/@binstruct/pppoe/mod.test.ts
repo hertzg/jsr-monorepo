@@ -1,3 +1,4 @@
+import { test } from "node:test";
 import { assertEquals } from "@std/assert";
 import {
   PPPOE_CODE,
@@ -6,8 +7,8 @@ import {
   pppoeHeader,
 } from "./mod.ts";
 
-Deno.test("pppoeHeader", async (t) => {
-  await t.step("round-trips a PADI with a Service-Name tag payload", () => {
+test("pppoeHeader", async (t) => {
+  await t.test("round-trips a PADI with a Service-Name tag payload", () => {
     const coder = pppoeHeader();
     const payload = new Uint8Array([0x01, 0x01, 0x00, 0x00]);
     const packet: PppoeHeader = {
@@ -27,7 +28,7 @@ Deno.test("pppoeHeader", async (t) => {
     assertEquals(decoded, packet);
   });
 
-  await t.step("round-trips a session data frame with no payload", () => {
+  await t.test("round-trips a session data frame with no payload", () => {
     const coder = pppoeHeader();
     const packet: PppoeHeader = {
       versionType: { version: 1, type: 1 },
@@ -46,7 +47,7 @@ Deno.test("pppoeHeader", async (t) => {
     assertEquals(decoded, packet);
   });
 
-  await t.step("sizes the payload from the length field", () => {
+  await t.test("sizes the payload from the length field", () => {
     const coder = pppoeHeader();
     const payload = new Uint8Array([0xde, 0xad, 0xbe, 0xef, 0x00]);
     const packet: PppoeHeader = {
@@ -66,7 +67,7 @@ Deno.test("pppoeHeader", async (t) => {
     assertEquals(decoded.payload, payload);
   });
 
-  await t.step("decodes a known PADO wire capture", () => {
+  await t.test("decodes a known PADO wire capture", () => {
     // deno-fmt-ignore
     const wire = new Uint8Array([
       0x11,       // version=1, type=1
@@ -86,7 +87,7 @@ Deno.test("pppoeHeader", async (t) => {
     assertEquals(decoded.payload.length, 8);
   });
 
-  await t.step("decodes a known PADT wire capture", () => {
+  await t.test("decodes a known PADT wire capture", () => {
     // deno-fmt-ignore
     const wire = new Uint8Array([
       0x11,       // version=1, type=1
@@ -105,7 +106,7 @@ Deno.test("pppoeHeader", async (t) => {
     assertEquals(decoded.payload.length, 0);
   });
 
-  await t.step("version/type nibbles pack into a single octet", () => {
+  await t.test("version/type nibbles pack into a single octet", () => {
     const buffer = new Uint8Array(PPPOE_HEADER_SIZE);
     pppoeHeader().encode({
       versionType: { version: 1, type: 1 },

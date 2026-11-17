@@ -1,8 +1,9 @@
+import { test } from "node:test";
 import { assertEquals } from "@std/assert";
 import { parse } from "@std/xml";
 import { timelapseDateTbl } from "./timelapse-date-tbl.ts";
 
-Deno.test("timelapseDateTbl decodes what net_timelapse_date_s2x writes", () => {
+test("timelapseDateTbl decodes what net_timelapse_date_s2x writes", () => {
   const root = parse(
     '<timelapseDateTbl version="1.1"><channelId>0</channelId>' +
       "<uid>disk-uid-1</uid><id>task-one</id>" +
@@ -22,7 +23,7 @@ Deno.test("timelapseDateTbl decodes what net_timelapse_date_s2x writes", () => {
   });
 });
 
-Deno.test("timelapseDateTbl round-trips every field", () => {
+test("timelapseDateTbl round-trips every field", () => {
   const value = {
     channelId: 1,
     uid: "disk-uid-2",

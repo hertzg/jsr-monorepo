@@ -1,7 +1,8 @@
+import { test } from "node:test";
 import { assertEquals, assertThrows } from "@std/assert";
 import { parseSnapshotSize, snapshotXml } from "./snapshot.ts";
 
-Deno.test("snapshotXml asks for the current frame of a stream", () => {
+test("snapshotXml asks for the current frame of a stream", () => {
   assertEquals(
     snapshotXml({ channel: 2, stream: "sub" }),
     '<?xml version="1.0" encoding="UTF-8" ?>\n' +
@@ -17,7 +18,7 @@ Deno.test("snapshotXml asks for the current frame of a stream", () => {
   );
 });
 
-Deno.test("parseSnapshotSize reads pictureSize", () => {
+test("parseSnapshotSize reads pictureSize", () => {
   assertEquals(
     parseSnapshotSize(
       '<?xml version="1.0" encoding="UTF-8" ?>\n' +
@@ -28,7 +29,7 @@ Deno.test("parseSnapshotSize reads pictureSize", () => {
   );
 });
 
-Deno.test("parseSnapshotSize throws without a pictureSize element", () => {
+test("parseSnapshotSize throws without a pictureSize element", () => {
   assertThrows(
     () => parseSnapshotSize("<body><Snap /></body>"),
     Error,

@@ -1,8 +1,9 @@
+import { test } from "node:test";
 import { assertEquals } from "@std/assert";
 import { parse } from "@std/xml";
 import { recordCfg } from "./record-cfg.ts";
 
-Deno.test("recordCfg decodes the cmd 54 reply element with both lists", () => {
+test("recordCfg decodes the cmd 54 reply element with both lists", () => {
   const root = parse(
     '<RecordCfg version="1.1"><channelId>0</channelId><cycle>1</cycle>' +
       "<recordDelayTime>30</recordDelayTime><preRecordTime>5</preRecordTime>" +
@@ -22,7 +23,7 @@ Deno.test("recordCfg decodes the cmd 54 reply element with both lists", () => {
   });
 });
 
-Deno.test("recordCfg decodes a reply without the lists, which the camera leaves out when empty", () => {
+test("recordCfg decodes a reply without the lists, which the camera leaves out when empty", () => {
   const root = parse(
     '<RecordCfg version="1.1"><channelId>0</channelId><cycle>0</cycle>' +
       "<recordDelayTime>10</recordDelayTime><preRecordTime>2</preRecordTime>" +
@@ -38,7 +39,7 @@ Deno.test("recordCfg decodes a reply without the lists, which the camera leaves 
   });
 });
 
-Deno.test("recordCfg round-trips every field", () => {
+test("recordCfg round-trips every field", () => {
   const value = {
     channelId: 1,
     cycle: 1,
@@ -52,7 +53,7 @@ Deno.test("recordCfg round-trips every field", () => {
   assertEquals(recordCfg.decode(parse(recordCfg.encode(value)).root), value);
 });
 
-Deno.test("recordCfg reads the Video Doorbell PoE's extra switches", () => {
+test("recordCfg reads the Video Doorbell PoE's extra switches", () => {
   const root = parse(
     '<RecordCfg version="1.1"><channelId>0</channelId><cycle>1</cycle>' +
       "<recordAbility>7</recordAbility><smartRecord>1</smartRecord>" +

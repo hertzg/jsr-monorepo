@@ -38,7 +38,7 @@ const kKindStruct = Symbol("struct");
  *
  * @template T - Object where keys are property names and values are coders
  */
-// deno-lint-ignore no-explicit-any
+// oxlint-disable-next-line typescript/no-explicit-any
 export type StructDecoded<T extends Record<string, Coder<any>>> = {
   [K in keyof T]: T[K] extends Coder<infer U> ? U : never;
 };
@@ -98,7 +98,7 @@ export type StructDecoded<T extends Record<string, Coder<any>>> = {
  * assertEquals(bytesWritten, bytesRead);
  * ```
  */
-// deno-lint-ignore no-explicit-any
+// oxlint-disable-next-line typescript/no-explicit-any
 export function struct<T extends Record<string, Coder<any>>>(
   schema: T,
 ): Coder<StructDecoded<T>> {

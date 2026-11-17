@@ -1,10 +1,11 @@
+import { test } from "node:test";
 import { assertEquals, assertThrows } from "@std/assert";
 import { addressv6FromBytes, addressv6ToBytes } from "./bytesv6.ts";
 import { parseAddressv4 } from "./addressv4.ts";
 import { mapFromAddressv4, parseAddressv6 } from "./addressv6.ts";
 
-Deno.test("addressv6FromBytes", async (t) => {
-  await t.step("reads sixteen bytes in network order", () => {
+test("addressv6FromBytes", async (t) => {
+  await t.test("reads sixteen bytes in network order", () => {
     // deno-fmt-ignore
     const bytes = new Uint8Array([
       0x20, 0x01, 0x0d, 0xb8, 0x00, 0x00, 0x00, 0x00,
@@ -17,7 +18,7 @@ Deno.test("addressv6FromBytes", async (t) => {
     );
   });
 
-  await t.step("edge cases", () => {
+  await t.test("edge cases", () => {
     assertEquals(addressv6FromBytes(new Uint8Array(16)), 0n);
     assertEquals(
       addressv6FromBytes(new Uint8Array(16).fill(0xff)),
@@ -25,7 +26,7 @@ Deno.test("addressv6FromBytes", async (t) => {
     );
   });
 
-  await t.step("carries bytes across the 64-bit halves", () => {
+  await t.test("carries bytes across the 64-bit halves", () => {
     const bytes = new Uint8Array(16);
     bytes[7] = 1;
     bytes[8] = 1;
@@ -33,7 +34,7 @@ Deno.test("addressv6FromBytes", async (t) => {
     assertEquals(addressv6FromBytes(bytes), (1n << 64n) | (1n << 56n));
   });
 
-  await t.step("a set high bit does not sign-extend", () => {
+  await t.test("a set high bit does not sign-extend", () => {
     const bytes = new Uint8Array(16);
     bytes[0] = 0xff;
     bytes[4] = 0xff;
@@ -46,7 +47,7 @@ Deno.test("addressv6FromBytes", async (t) => {
     );
   });
 
-  await t.step("reads at an offset inside a larger buffer", () => {
+  await t.test("reads at an offset inside a larger buffer", () => {
     // deno-fmt-ignore
     const packet = new Uint8Array([
       ...new Uint8Array(8),
@@ -66,7 +67,7 @@ Deno.test("addressv6FromBytes", async (t) => {
     );
   });
 
-  await t.step("IPv4-mapped bytes stay a 128-bit value", () => {
+  await t.test("IPv4-mapped bytes stay a 128-bit value", () => {
     // deno-fmt-ignore
     const mapped = new Uint8Array([
       0, 0, 0, 0, 0, 0, 0, 0,
@@ -79,7 +80,7 @@ Deno.test("addressv6FromBytes", async (t) => {
     );
   });
 
-  await t.step("a short buffer throws", () => {
+  await t.test("a short buffer throws", () => {
     assertThrows(
       () => addressv6FromBytes(new Uint8Array(15)),
       RangeError,
@@ -87,7 +88,7 @@ Deno.test("addressv6FromBytes", async (t) => {
     );
   });
 
-  await t.step("a span running off the end throws", () => {
+  await t.test("a span running off the end throws", () => {
     assertThrows(
       () => addressv6FromBytes(new Uint8Array(16), 1),
       RangeError,
@@ -97,8 +98,8 @@ Deno.test("addressv6FromBytes", async (t) => {
   });
 });
 
-Deno.test("addressv6ToBytes", async (t) => {
-  await t.step(
+test("addressv6ToBytes", async (t) => {
+  await t.test(
     "allocates sixteen bytes in network order when into is omitted",
     () => {
       // deno-fmt-ignore
@@ -114,7 +115,7 @@ Deno.test("addressv6ToBytes", async (t) => {
     },
   );
 
-  await t.step("writes into an existing buffer at an offset", () => {
+  await t.test("writes into an existing buffer at an offset", () => {
     const frame = new Uint8Array(40);
     addressv6ToBytes(parseAddressv6("::1").address, frame, 8);
 
@@ -123,7 +124,7 @@ Deno.test("addressv6ToBytes", async (t) => {
     assertEquals(frame.slice(24), new Uint8Array(16));
   });
 
-  await t.step("returns only the written span, not the whole buffer", () => {
+  await t.test("returns only the written span, not the whole buffer", () => {
     const frame = new Uint8Array(40).fill(0xaa);
     const written = addressv6ToBytes(
       parseAddressv6("fe80::1").address,
@@ -138,7 +139,7 @@ Deno.test("addressv6ToBytes", async (t) => {
     ]));
   });
 
-  await t.step("the returned span is a view aliasing the target buffer", () => {
+  await t.test("the returned span is a view aliasing the target buffer", () => {
     const frame = new Uint8Array(32);
     const written = addressv6ToBytes(
       parseAddressv6("2001:db8::2").address,
@@ -150,7 +151,7 @@ Deno.test("addressv6ToBytes", async (t) => {
     assertEquals(frame[31], 9);
   });
 
-  await t.step("an out-of-range address throws", () => {
+  await t.test("an out-of-range address throws", () => {
     assertThrows(
       () => addressv6ToBytes(-1n),
       RangeError,
@@ -163,7 +164,7 @@ Deno.test("addressv6ToBytes", async (t) => {
     );
   });
 
-  await t.step("a span running off the end throws", () => {
+  await t.test("a span running off the end throws", () => {
     assertThrows(
       () => addressv6ToBytes(1n, new Uint8Array(15)),
       RangeError,
@@ -176,7 +177,7 @@ Deno.test("addressv6ToBytes", async (t) => {
     );
   });
 
-  await t.step("round-trips with addressv6FromBytes", () => {
+  await t.test("round-trips with addressv6FromBytes", () => {
     for (const notation of ["::", "::1", "2001:db8::1", "fe80::dead:beef"]) {
       const address = parseAddressv6(notation).address;
       assertEquals(addressv6FromBytes(addressv6ToBytes(address)), address);

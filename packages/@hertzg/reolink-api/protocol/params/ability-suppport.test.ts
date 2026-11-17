@@ -1,8 +1,9 @@
+import { test } from "node:test";
 import { assertEquals } from "@std/assert";
 import { parse } from "@std/xml";
 import { abilitySuppport } from "./ability-suppport.ts";
 
-Deno.test("abilitySuppport decodes every field nets_ability_support_s2x writes", () => {
+test("abilitySuppport decodes every field nets_ability_support_s2x writes", () => {
   const root = parse(
     '<AbilitySuppport version="1.1"><userName>admin</userName>' +
       "<system>1</system><streaming>1</streaming><record>0</record>" +
@@ -29,7 +30,7 @@ Deno.test("abilitySuppport decodes every field nets_ability_support_s2x writes",
   });
 });
 
-Deno.test("abilitySuppport round-trips a partial element", () => {
+test("abilitySuppport round-trips a partial element", () => {
   const value = { userName: "guest", streaming: 1, replay: 0 };
 
   assertEquals(

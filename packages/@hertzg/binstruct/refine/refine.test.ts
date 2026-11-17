@@ -1,8 +1,9 @@
+import { test } from "node:test";
 import { assertEquals } from "@std/assert";
 import { u8 } from "../numeric/numeric.ts";
 import { refine } from "./refine.ts";
 
-Deno.test("refine - bitfield", () => {
+test("refine - bitfield", () => {
   const bitfield = refine(u8(), {
     refine: (decoded: number) =>
       decoded.toString(2)
@@ -24,7 +25,7 @@ Deno.test("refine - bitfield", () => {
   assertEquals(decoded, [1, 0, 1, 0, 1, 0, 1, 0]);
 });
 
-Deno.test("refine with args", () => {
+test("refine with args", () => {
   const u8Mapped = refine(u8(), {
     refine: (
       decoded,

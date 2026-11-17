@@ -1,3 +1,4 @@
+import { test } from "node:test";
 import { assertEquals } from "@std/assert";
 import { createContext } from "@hertzg/binstruct";
 import type { PngChunkUnknown } from "../mod.ts";
@@ -5,7 +6,7 @@ import { type IdatChunk, idatChunkRefiner } from "./idat.ts";
 import { unzlibSync, zlibSync } from "fflate";
 import { decodeHeader } from "../zlib/header.ts";
 
-Deno.test("idatChunkRefiner() - refines IDAT chunk", () => {
+test("idatChunkRefiner() - refines IDAT chunk", () => {
   const refiner = idatChunkRefiner();
   const context = createContext("decode");
 
@@ -27,7 +28,7 @@ Deno.test("idatChunkRefiner() - refines IDAT chunk", () => {
   assertEquals(refined.crc, 0x12345678);
 });
 
-Deno.test("idatChunkRefiner() - unrefines IDAT chunk", () => {
+test("idatChunkRefiner() - unrefines IDAT chunk", () => {
   const refiner = idatChunkRefiner();
   const context = createContext("encode");
 
@@ -57,7 +58,7 @@ Deno.test("idatChunkRefiner() - unrefines IDAT chunk", () => {
   assertEquals(unrefined.crc, 0xAABBCCDD);
 });
 
-Deno.test("idatChunkRefiner() - round-trip with empty data", () => {
+test("idatChunkRefiner() - round-trip with empty data", () => {
   const refiner = idatChunkRefiner();
   const encodeContext = createContext("encode");
   const decodeContext = createContext("decode");
@@ -85,7 +86,7 @@ Deno.test("idatChunkRefiner() - round-trip with empty data", () => {
   assertEquals(refined.crc, original.crc);
 });
 
-Deno.test("idatChunkRefiner() - round-trip with small data", () => {
+test("idatChunkRefiner() - round-trip with small data", () => {
   const refiner = idatChunkRefiner();
   const encodeContext = createContext("encode");
   const decodeContext = createContext("decode");
@@ -113,7 +114,7 @@ Deno.test("idatChunkRefiner() - round-trip with small data", () => {
   assertEquals(refined.crc, original.crc);
 });
 
-Deno.test("idatChunkRefiner() - round-trip with compressed data", () => {
+test("idatChunkRefiner() - round-trip with compressed data", () => {
   const refiner = idatChunkRefiner();
   const encodeContext = createContext("encode");
   const decodeContext = createContext("decode");
@@ -148,7 +149,7 @@ Deno.test("idatChunkRefiner() - round-trip with compressed data", () => {
   assertEquals(refined.crc, original.crc);
 });
 
-Deno.test("idatChunkRefiner() - round-trip with large data", () => {
+test("idatChunkRefiner() - round-trip with large data", () => {
   const refiner = idatChunkRefiner();
   const encodeContext = createContext("encode");
   const decodeContext = createContext("decode");
@@ -181,7 +182,7 @@ Deno.test("idatChunkRefiner() - round-trip with large data", () => {
   assertEquals(refined.crc, original.crc);
 });
 
-Deno.test("idatChunkRefiner() - preserves data bytes exactly", () => {
+test("idatChunkRefiner() - preserves data bytes exactly", () => {
   const refiner = idatChunkRefiner();
   const encodeContext = createContext("encode");
   const decodeContext = createContext("decode");
@@ -217,7 +218,7 @@ Deno.test("idatChunkRefiner() - preserves data bytes exactly", () => {
   }
 });
 
-Deno.test("idatChunkRefiner() - handles multiple consecutive chunks", () => {
+test("idatChunkRefiner() - handles multiple consecutive chunks", () => {
   const refiner = idatChunkRefiner();
   const encodeContext = createContext("encode");
   const decodeContext = createContext("decode");

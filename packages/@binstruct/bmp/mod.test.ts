@@ -1,3 +1,4 @@
+import { test } from "node:test";
 import { assertEquals } from "@std/assert";
 import {
   bitmapFileHeader,
@@ -8,7 +9,7 @@ import {
   rowStride,
 } from "@binstruct/bmp";
 
-Deno.test("bitmapFileHeader: round-trips a 14-byte header", () => {
+test("bitmapFileHeader: round-trips a 14-byte header", () => {
   const coder = bitmapFileHeader();
   const header = {
     signature: "BM",
@@ -34,7 +35,7 @@ Deno.test("bitmapFileHeader: round-trips a 14-byte header", () => {
   ]));
 });
 
-Deno.test("bitmapInfoHeader: round-trips a 40-byte BITMAPINFOHEADER", () => {
+test("bitmapInfoHeader: round-trips a 40-byte BITMAPINFOHEADER", () => {
   const coder = bitmapInfoHeader();
   const dib = {
     size: 40,
@@ -59,7 +60,7 @@ Deno.test("bitmapInfoHeader: round-trips a 40-byte BITMAPINFOHEADER", () => {
   assertEquals(decoded, dib);
 });
 
-Deno.test("bitmapInfoHeader: preserves negative height for top-down DIBs", () => {
+test("bitmapInfoHeader: preserves negative height for top-down DIBs", () => {
   const coder = bitmapInfoHeader();
   const dib = {
     size: 40,
@@ -82,7 +83,7 @@ Deno.test("bitmapInfoHeader: preserves negative height for top-down DIBs", () =>
   assertEquals(decoded.height, -3);
 });
 
-Deno.test("rowStride: matches the canonical formula", () => {
+test("rowStride: matches the canonical formula", () => {
   assertEquals(rowStride(1, 1), 4);
   assertEquals(rowStride(1, 24), 4);
   assertEquals(rowStride(2, 24), 8);
@@ -91,14 +92,14 @@ Deno.test("rowStride: matches the canonical formula", () => {
   assertEquals(rowStride(1, 8), 4);
 });
 
-Deno.test("pixelDataSize: ignores the sign of height", () => {
+test("pixelDataSize: ignores the sign of height", () => {
   assertEquals(pixelDataSize(2, 2, 24), 16);
   assertEquals(pixelDataSize(2, -2, 24), 16);
   assertEquals(pixelDataSize(2, -2, 32), 16);
   assertEquals(pixelDataSize(3, 4, 24), 48);
 });
 
-Deno.test("bmp: round-trips a 2x2 24bpp bottom-up image", () => {
+test("bmp: round-trips a 2x2 24bpp bottom-up image", () => {
   const coder = bmp();
   const image: BmpFile = {
     file: {
@@ -139,7 +140,7 @@ Deno.test("bmp: round-trips a 2x2 24bpp bottom-up image", () => {
   assertEquals(decoded.pixelData, image.pixelData);
 });
 
-Deno.test("bmp: round-trips a 2x2 32bpp top-down image", () => {
+test("bmp: round-trips a 2x2 32bpp top-down image", () => {
   const coder = bmp();
   const image: BmpFile = {
     file: {
@@ -180,7 +181,7 @@ Deno.test("bmp: round-trips a 2x2 32bpp top-down image", () => {
   assertEquals(decoded.pixelData, image.pixelData);
 });
 
-Deno.test("bmp: round-trips a 3x2 24bpp image with row padding", () => {
+test("bmp: round-trips a 3x2 24bpp image with row padding", () => {
   // 3 pixels × 3 bytes = 9 bytes; padded to 12 per row; 2 rows = 24 bytes.
   const coder = bmp();
   const image: BmpFile = {

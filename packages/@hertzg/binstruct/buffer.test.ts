@@ -1,8 +1,9 @@
+import { test } from "node:test";
 import { assertEquals, assertLessOrEqual, assertThrows } from "@std/assert";
 import { assertSpyCalls, spy } from "@std/testing/mock";
 import { autoGrowBuffer } from "./buffer.ts";
 
-Deno.test("autoGrowBuffer - basic functionality", () => {
+test("autoGrowBuffer - basic functionality", () => {
   const data = new Uint8Array(10000);
   data.fill(42);
 
@@ -17,7 +18,7 @@ Deno.test("autoGrowBuffer - basic functionality", () => {
   assertEquals(result, 10000);
 });
 
-Deno.test("autoGrowBuffer - no growth needed", () => {
+test("autoGrowBuffer - no growth needed", () => {
   const result = autoGrowBuffer((_buffer) => {
     // Should fit in default initial size (4096)
     return "success";
@@ -26,7 +27,7 @@ Deno.test("autoGrowBuffer - no growth needed", () => {
   assertEquals(result, "success");
 });
 
-Deno.test("autoGrowBuffer - custom configuration", () => {
+test("autoGrowBuffer - custom configuration", () => {
   const result = autoGrowBuffer(
     (buffer) => {
       if (buffer.length < 1000) {
@@ -44,7 +45,7 @@ Deno.test("autoGrowBuffer - custom configuration", () => {
   assertEquals(result, "encoded");
 });
 
-Deno.test("autoGrowBuffer - error propagation", () => {
+test("autoGrowBuffer - error propagation", () => {
   assertThrows(
     () => {
       autoGrowBuffer(() => {
@@ -56,7 +57,7 @@ Deno.test("autoGrowBuffer - error propagation", () => {
   );
 });
 
-Deno.test("autoGrowBuffer - data integrity", () => {
+test("autoGrowBuffer - data integrity", () => {
   const originalData = new Uint8Array(5000);
   for (let i = 0; i < originalData.length; i++) {
     originalData[i] = i % 256;
@@ -74,7 +75,7 @@ Deno.test("autoGrowBuffer - data integrity", () => {
   assertEquals(result, originalData);
 });
 
-Deno.test("autoGrowBuffer - growth behavior", () => {
+test("autoGrowBuffer - growth behavior", () => {
   const requiredSize = 20000;
 
   const fill = spy((buffer: Uint8Array) => {
@@ -88,7 +89,7 @@ Deno.test("autoGrowBuffer - growth behavior", () => {
   assertSpyCalls(fill, 4);
 });
 
-Deno.test("autoGrowBuffer - invalid configuration", () => {
+test("autoGrowBuffer - invalid configuration", () => {
   assertThrows(
     () => {
       autoGrowBuffer(
@@ -106,7 +107,7 @@ Deno.test("autoGrowBuffer - invalid configuration", () => {
   );
 });
 
-Deno.test("autoGrowBuffer - return type flexibility", () => {
+test("autoGrowBuffer - return type flexibility", () => {
   const stringResult = autoGrowBuffer(() => "hello");
   assertEquals(stringResult, "hello");
 
@@ -117,7 +118,7 @@ Deno.test("autoGrowBuffer - return type flexibility", () => {
   assertEquals(objectResult, { success: true });
 });
 
-Deno.test("autoGrowBuffer - growth factor validation", () => {
+test("autoGrowBuffer - growth factor validation", () => {
   // Anything at or below 1 fails to grow the buffer, so it is rejected up front
   // rather than looping forever.
   const rejected = [1, 0.5, 0, -1];
@@ -131,7 +132,7 @@ Deno.test("autoGrowBuffer - growth factor validation", () => {
   }
 });
 
-Deno.test("autoGrowBuffer - minimum growth guarantee", () => {
+test("autoGrowBuffer - minimum growth guarantee", () => {
   // Test with very small growth factor that would result in no growth due to truncation
   const result = autoGrowBuffer(
     (buffer) => {
@@ -149,7 +150,7 @@ Deno.test("autoGrowBuffer - minimum growth guarantee", () => {
   assertEquals(result, "success");
 });
 
-Deno.test("autoGrowBuffer - small growth factor edge case", () => {
+test("autoGrowBuffer - small growth factor edge case", () => {
   // Test with growth factor that would result in same size due to truncation
   // This tests the Math.max fix that ensures at least 1 byte growth
   const fill = spy((buffer: Uint8Array) => {
@@ -168,7 +169,7 @@ Deno.test("autoGrowBuffer - small growth factor edge case", () => {
   assertSpyCalls(fill, 5);
 });
 
-Deno.test("autoGrowBuffer - integer truncation safety", () => {
+test("autoGrowBuffer - integer truncation safety", () => {
   // Test that truncation doesn't cause infinite loops
   const fill = spy((buffer: Uint8Array) => {
     if (buffer.length < 3) {
@@ -186,7 +187,7 @@ Deno.test("autoGrowBuffer - integer truncation safety", () => {
   assertSpyCalls(fill, 3);
 });
 
-Deno.test("autoGrowBuffer - robustness with edge case configurations", () => {
+test("autoGrowBuffer - robustness with edge case configurations", () => {
   // Test multiple edge cases that could cause infinite loops
   const testCases = [
     { initialSize: 1, growthFactor: 1.001 },
@@ -208,7 +209,7 @@ Deno.test("autoGrowBuffer - robustness with edge case configurations", () => {
   }
 });
 
-Deno.test("autoGrowBuffer - initial size validation", () => {
+test("autoGrowBuffer - initial size validation", () => {
   // Test negative initial size
   assertThrows(
     () => {

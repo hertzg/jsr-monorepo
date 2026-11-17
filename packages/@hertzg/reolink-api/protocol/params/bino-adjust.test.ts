@@ -1,8 +1,9 @@
+import { test } from "node:test";
 import { assertEquals } from "@std/assert";
 import { parse } from "@std/xml";
 import { binoAdjust } from "./bino-adjust.ts";
 
-Deno.test("binoAdjust decodes every field nets_param_bino_adjust_x2s reads", () => {
+test("binoAdjust decodes every field nets_param_bino_adjust_x2s reads", () => {
   const root = parse(
     "<BinoAdjust><lineWidthRef>10</lineWidthRef><lineWidthMin>8</lineWidthMin>" +
       "<lineWidthMax>12</lineWidthMax><heightDiffMax>4</heightDiffMax>" +
@@ -17,7 +18,7 @@ Deno.test("binoAdjust decodes every field nets_param_bino_adjust_x2s reads", () 
   });
 });
 
-Deno.test("binoAdjust decodes the netserver reply", () => {
+test("binoAdjust decodes the netserver reply", () => {
   const root = parse(
     '<BinoAdjust version="1.1"><heightDiff>2</heightDiff>' +
       "<widthDiff>5</widthDiff></BinoAdjust>",
@@ -26,7 +27,7 @@ Deno.test("binoAdjust decodes the netserver reply", () => {
   assertEquals(binoAdjust.decode(root), { heightDiff: 2, widthDiff: 5 });
 });
 
-Deno.test("binoAdjust round-trips through encode and decode", () => {
+test("binoAdjust round-trips through encode and decode", () => {
   const value = {
     lineWidthRef: 20,
     lineWidthMin: 16,

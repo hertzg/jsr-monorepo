@@ -1,8 +1,9 @@
+import { test } from "node:test";
 import { assertEquals, assertThrows } from "@std/assert";
 import { isElement, parse } from "@std/xml";
 import { alarmEventList } from "./alarm-event-list.ts";
 
-Deno.test("alarmEventList decodes the captured idle cmd 33 push", () => {
+test("alarmEventList decodes the captured idle cmd 33 push", () => {
   const root = parse(
     '<?xml version="1.0" encoding="UTF-8" ?>\n<body>\n' +
       '<AlarmEventList version="1.1">\n<AlarmEvent version="1.1">\n' +
@@ -23,7 +24,7 @@ Deno.test("alarmEventList decodes the captured idle cmd 33 push", () => {
   });
 });
 
-Deno.test("alarmEventList keeps comma-separated status and AI lists as text", () => {
+test("alarmEventList keeps comma-separated status and AI lists as text", () => {
   const root = parse(
     '<AlarmEventList version="1.1"><AlarmEvent version="1.1">' +
       "<channelId>1</channelId><status>MD,IOAlarm</status>" +
@@ -37,7 +38,7 @@ Deno.test("alarmEventList keeps comma-separated status and AI lists as text", ()
   );
 });
 
-Deno.test("alarmEventList round-trips one event per channel", () => {
+test("alarmEventList round-trips one event per channel", () => {
   const value = {
     AlarmEvent: [
       {
@@ -63,7 +64,7 @@ Deno.test("alarmEventList round-trips one event per channel", () => {
   );
 });
 
-Deno.test("alarmEventList rejects an event missing a field the camera always writes", () => {
+test("alarmEventList rejects an event missing a field the camera always writes", () => {
   const root = parse(
     '<AlarmEventList version="1.1"><AlarmEvent><channelId>0</channelId>' +
       "<status>none</status><AItype>none</AItype><recording>0</recording>" +

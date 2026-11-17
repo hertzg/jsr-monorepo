@@ -1,3 +1,4 @@
+import { test } from "node:test";
 import { assertEquals } from "@std/assert";
 import {
   TAR_BLOCK_SIZE,
@@ -61,8 +62,8 @@ function buildWireHeader(
   return block;
 }
 
-Deno.test("ustarHeader", async (t) => {
-  await t.step("round-trips a regular-file header", () => {
+test("ustarHeader", async (t) => {
+  await t.test("round-trips a regular-file header", () => {
     const coder = ustarHeader();
     const header: UstarHeader = {
       name: "hello.txt",
@@ -93,7 +94,7 @@ Deno.test("ustarHeader", async (t) => {
     assertEquals(decoded, header);
   });
 
-  await t.step("round-trips a directory header with a long prefix", () => {
+  await t.test("round-trips a directory header with a long prefix", () => {
     const coder = ustarHeader();
     const header: UstarHeader = {
       name: "deeply/nested/directory",
@@ -124,7 +125,7 @@ Deno.test("ustarHeader", async (t) => {
     assertEquals(decoded, header);
   });
 
-  await t.step("round-trips a symlink header", () => {
+  await t.test("round-trips a symlink header", () => {
     const coder = ustarHeader();
     const header: UstarHeader = {
       name: "current",
@@ -155,7 +156,7 @@ Deno.test("ustarHeader", async (t) => {
     assertEquals(decoded, header);
   });
 
-  await t.step("decodes a known regular-file header block", () => {
+  await t.test("decodes a known regular-file header block", () => {
     const wire = buildWireHeader({
       name: "test.txt",
       mode: "0000644\0",
@@ -194,7 +195,7 @@ Deno.test("ustarHeader", async (t) => {
     assertEquals(decoded.prefix, "");
   });
 
-  await t.step("decodes a known hard-link header block", () => {
+  await t.test("decodes a known hard-link header block", () => {
     const wire = buildWireHeader({
       name: "backup/report.pdf",
       mode: "0000440\0",
@@ -228,7 +229,7 @@ Deno.test("ustarHeader", async (t) => {
     assertEquals(decoded.gname, "staff");
   });
 
-  await t.step("magic and version match the ustar constants", () => {
+  await t.test("magic and version match the ustar constants", () => {
     const buffer = new Uint8Array(TAR_BLOCK_SIZE);
     ustarHeader().encode({
       name: "f",

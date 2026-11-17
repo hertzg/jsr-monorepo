@@ -1,3 +1,4 @@
+import { test } from "node:test";
 import { assertEquals } from "@std/assert";
 import {
   ICMPV6_TYPE,
@@ -6,8 +7,8 @@ import {
   IP_PROTOCOL_ICMPV6,
 } from "./mod.ts";
 
-Deno.test("icmpv6Message", async (t) => {
-  await t.step("round-trips a generic Echo Request", () => {
+test("icmpv6Message", async (t) => {
+  await t.test("round-trips a generic Echo Request", () => {
     const coder = icmpv6Message();
     const message: Icmpv6Message = {
       type: ICMPV6_TYPE.ECHO_REQUEST,
@@ -30,7 +31,7 @@ Deno.test("icmpv6Message", async (t) => {
     assertEquals(decoded.body, message.body);
   });
 
-  await t.step("round-trips a Packet Too Big message", () => {
+  await t.test("round-trips a Packet Too Big message", () => {
     const coder = icmpv6Message();
     const message: Icmpv6Message = {
       type: ICMPV6_TYPE.PACKET_TOO_BIG,
@@ -49,7 +50,7 @@ Deno.test("icmpv6Message", async (t) => {
     assertEquals(decoded, message);
   });
 
-  await t.step("decodes a known Time Exceeded message on the wire", () => {
+  await t.test("decodes a known Time Exceeded message on the wire", () => {
     // deno-fmt-ignore
     const wire = new Uint8Array([
       0x03, 0x00, 0xfc, 0xff, 0x00, 0x00, 0x00, 0x00,
@@ -64,7 +65,7 @@ Deno.test("icmpv6Message", async (t) => {
     assertEquals(decoded.body, new Uint8Array(4));
   });
 
-  await t.step(
+  await t.test(
     "decodes a known Neighbor Solicitation header on the wire",
     () => {
       // deno-fmt-ignore
@@ -83,7 +84,7 @@ Deno.test("icmpv6Message", async (t) => {
     },
   );
 
-  await t.step("exposes the IPv6 next-header protocol number", () => {
+  await t.test("exposes the IPv6 next-header protocol number", () => {
     assertEquals(IP_PROTOCOL_ICMPV6, 58);
   });
 });

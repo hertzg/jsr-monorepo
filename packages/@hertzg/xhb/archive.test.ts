@@ -1,3 +1,4 @@
+import { test } from "node:test";
 import { assertEquals } from "@std/assert";
 import { parse, serialize } from "./mod.ts";
 import {
@@ -8,7 +9,7 @@ import {
 } from "./archive.ts";
 import { PAY_MODE_XFER } from "./operation.ts";
 
-Deno.test("a <fav> is a transaction template plus a schedule", () => {
+test("a <fav> is a transaction template plus a schedule", () => {
   const xml = [
     '<?xml version="1.0"?>',
     '<homebank v="1.3" d="050402">',
@@ -44,7 +45,7 @@ Deno.test("a <fav> is a transaction template plus a schedule", () => {
   assertEquals(serialize(parse(xml)), xml);
 });
 
-Deno.test("archives use the same ||-framed splits as operations and set ARCHIVE_FLAG_SPLIT", () => {
+test("archives use the same ||-framed splits as operations and set ARCHIVE_FLAG_SPLIT", () => {
   const xml = [
     '<?xml version="1.0"?>',
     '<homebank v="1.3" d="050402">',

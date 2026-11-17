@@ -19,11 +19,13 @@
  *
  * @example Read the network ports
  * ```ts ignore
+ * import { connect } from "node:net";
+ * import { Duplex } from "node:stream";
  * import { createClient } from "@hertzg/reolink-api";
  * import { COMMANDS } from "@hertzg/reolink-api/protocol/commands";
  *
- * const conn = await Deno.connect({ hostname: "192.168.1.10", port: 9000 });
- * const client = createClient({ readable: conn.readable, writable: conn.writable });
+ * const conn = connect({ host: "192.168.1.10", port: 9000 });
+ * const client = createClient(Duplex.toWeb(conn));
  * await client.login({ username: "admin", password: "secret" });
  *
  * const { body } = await client.call(COMMANDS.GET_NETPORT_CFG_V20);

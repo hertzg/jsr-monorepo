@@ -1,8 +1,9 @@
+import { test } from "node:test";
 import { assertEquals, assertThrows } from "@std/assert";
 import { parse } from "@std/xml";
 import { dayNightThreshold } from "./day-night-threshold.ts";
 
-Deno.test("dayNightThreshold decodes what nets_param_day_night_threshold_s2x writes", () => {
+test("dayNightThreshold decodes what nets_param_day_night_threshold_s2x writes", () => {
   const root = parse(
     '<DayNightThreshold version="1.1"><channelId>0</channelId>' +
       "<threshold>custom</threshold><stat>night</stat>" +
@@ -18,7 +19,7 @@ Deno.test("dayNightThreshold decodes what nets_param_day_night_threshold_s2x wri
   });
 });
 
-Deno.test("dayNightThreshold round-trips every field", () => {
+test("dayNightThreshold round-trips every field", () => {
   const value = {
     channelId: 1,
     threshold: "default" as const,
@@ -32,7 +33,7 @@ Deno.test("dayNightThreshold round-trips every field", () => {
   );
 });
 
-Deno.test("dayNightThreshold throws on a threshold name the firmware does not map", () => {
+test("dayNightThreshold throws on a threshold name the firmware does not map", () => {
   const root = parse(
     '<DayNightThreshold version="1.1"><threshold>auto</threshold></DayNightThreshold>',
   ).root;
@@ -40,7 +41,7 @@ Deno.test("dayNightThreshold throws on a threshold name the firmware does not ma
   assertThrows(() => dayNightThreshold.decode(root), Error, "auto");
 });
 
-Deno.test("dayNightThreshold throws on a stat name the firmware does not map", () => {
+test("dayNightThreshold throws on a stat name the firmware does not map", () => {
   const root = parse(
     '<DayNightThreshold version="1.1"><stat>dusk</stat></DayNightThreshold>',
   ).root;

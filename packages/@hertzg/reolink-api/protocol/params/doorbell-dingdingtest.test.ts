@@ -1,8 +1,9 @@
+import { test } from "node:test";
 import { assertEquals, assertThrows } from "@std/assert";
 import { parse } from "@std/xml";
 import { doorbellDingdingtest } from "./doorbell-dingdingtest.ts";
 
-Deno.test("doorbellDingdingtest decodes the test code 5 update list", () => {
+test("doorbellDingdingtest decodes the test code 5 update list", () => {
   const root = parse(
     '<doorbellDingdingtest version="1.1">' +
       "<update><result>0</result><curVer>v1.0.1</curVer>" +
@@ -19,7 +20,7 @@ Deno.test("doorbellDingdingtest decodes the test code 5 update list", () => {
   });
 });
 
-Deno.test("doorbellDingdingtest decodes the test code 0 frequency", () => {
+test("doorbellDingdingtest decodes the test code 0 frequency", () => {
   const root = parse(
     '<doorbellDingdingtest version="1.1"><freq>433</freq></doorbellDingdingtest>',
   ).root;
@@ -27,7 +28,7 @@ Deno.test("doorbellDingdingtest decodes the test code 0 frequency", () => {
   assertEquals(doorbellDingdingtest.decode(root), { freq: 433 });
 });
 
-Deno.test("doorbellDingdingtest rejects an update without its version", () => {
+test("doorbellDingdingtest rejects an update without its version", () => {
   const root = parse(
     "<doorbellDingdingtest><update><result>0</result><curVer>v1</curVer>" +
       "</update></doorbellDingdingtest>",
@@ -36,7 +37,7 @@ Deno.test("doorbellDingdingtest rejects an update without its version", () => {
   assertThrows(() => doorbellDingdingtest.decode(root), Error, "<reqVer>");
 });
 
-Deno.test("doorbellDingdingtest round-trips through encode and decode", () => {
+test("doorbellDingdingtest round-trips through encode and decode", () => {
   const value = {
     freq: 868,
     curFreq: 869,

@@ -1,8 +1,9 @@
+import { test } from "node:test";
 import { assertEquals } from "@std/assert";
 import { parse } from "@std/xml";
 import { trackLimit } from "./track-limit.ts";
 
-Deno.test("trackLimit decodes the reply the camera writes", () => {
+test("trackLimit decodes the reply the camera writes", () => {
   const root = parse(
     '<trackLimit version="1.1"><channelId>1</channelId><leftLimit>120</leftLimit>' +
       "<leftImageName>left-abc123</leftImageName><rightLimit>2480</rightLimit>" +
@@ -18,7 +19,7 @@ Deno.test("trackLimit decodes the reply the camera writes", () => {
   });
 });
 
-Deno.test("trackLimit round-trips through encode and decode", () => {
+test("trackLimit round-trips through encode and decode", () => {
   const value = {
     channelId: 0,
     leftLimit: 35,
@@ -32,7 +33,7 @@ Deno.test("trackLimit round-trips through encode and decode", () => {
   assertEquals(trackLimit.decode(parse(xml).root), value);
 });
 
-Deno.test("trackLimit decodes a request that moves only the left limit", () => {
+test("trackLimit decodes a request that moves only the left limit", () => {
   const root = parse(
     '<trackLimit version="1.1"><channelId>0</channelId><leftLimit>64</leftLimit></trackLimit>',
   ).root;

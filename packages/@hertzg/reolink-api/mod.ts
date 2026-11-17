@@ -25,10 +25,12 @@
  *
  * @example Stream doorbell and motion events
  * ```ts ignore
+ * import { connect } from "node:net";
+ * import { Duplex } from "node:stream";
  * import { createClient } from "@hertzg/reolink-api";
  *
- * const conn = await Deno.connect({ hostname: "192.168.1.10", port: 9000 });
- * const client = createClient({ readable: conn.readable, writable: conn.writable });
+ * const conn = connect({ host: "192.168.1.10", port: 9000 });
+ * const client = createClient(Duplex.toWeb(conn));
  *
  * await client.login({ username: "admin", password: "secret" });
  * const events = await client.subscribe();
@@ -39,37 +41,42 @@
  * }
  *
  * await client.close();
- * conn.close();
+ * conn.destroy();
  * ```
  *
  * @example Read a setting with any command
  * ```ts ignore
+ * import { connect } from "node:net";
+ * import { Duplex } from "node:stream";
  * import { COMMANDS, createClient } from "@hertzg/reolink-api";
  *
- * const conn = await Deno.connect({ hostname: "192.168.1.10", port: 9000 });
- * const client = createClient({ readable: conn.readable, writable: conn.writable });
+ * const conn = connect({ host: "192.168.1.10", port: 9000 });
+ * const client = createClient(Duplex.toWeb(conn));
  *
  * await client.login({ username: "admin", password: "secret" });
  * const { body } = await client.call(COMMANDS.GET_NTPCFG_V20);
  * console.log(body.Ntp);
  *
  * await client.close();
- * conn.close();
+ * conn.destroy();
  * ```
  *
  * @example Take a snapshot and sound the siren
  * ```ts ignore
+ * import { writeFile } from "node:fs/promises";
+ * import { connect } from "node:net";
+ * import { Duplex } from "node:stream";
  * import { createClient } from "@hertzg/reolink-api";
  *
- * const conn = await Deno.connect({ hostname: "192.168.1.10", port: 9000 });
- * const client = createClient({ readable: conn.readable, writable: conn.writable });
+ * const conn = connect({ host: "192.168.1.10", port: 9000 });
+ * const client = createClient(Duplex.toWeb(conn));
  *
  * await client.login({ username: "admin", password: "secret" });
- * await Deno.writeFile("front-door.jpg", await client.snapshot());
+ * await writeFile("front-door.jpg", await client.snapshot());
  * await client.playSiren({ times: 2 });
  *
  * await client.close();
- * conn.close();
+ * conn.destroy();
  * ```
  *
  * @module

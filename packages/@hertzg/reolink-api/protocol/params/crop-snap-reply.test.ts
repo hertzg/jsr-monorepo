@@ -1,8 +1,9 @@
+import { test } from "node:test";
 import { assertEquals, assertThrows } from "@std/assert";
 import { parse } from "@std/xml";
 import { cropSnapReply } from "./crop-snap-reply.ts";
 
-Deno.test("cropSnapReply decodes the cmd 230 reply", () => {
+test("cropSnapReply decodes the cmd 230 reply", () => {
   const root = parse(
     '<cropSnap version="1.1"><channelId>0</channelId>' +
       "<pictureSize>48213</pictureSize></cropSnap>",
@@ -14,7 +15,7 @@ Deno.test("cropSnapReply decodes the cmd 230 reply", () => {
   });
 });
 
-Deno.test("cropSnapReply round-trips through encode and decode", () => {
+test("cropSnapReply round-trips through encode and decode", () => {
   const value = { channelId: 2, pictureSize: 130072 };
 
   const xml = cropSnapReply.encode(value);
@@ -22,7 +23,7 @@ Deno.test("cropSnapReply round-trips through encode and decode", () => {
   assertEquals(cropSnapReply.decode(parse(xml).root), value);
 });
 
-Deno.test("cropSnapReply rejects a reply without the picture size", () => {
+test("cropSnapReply rejects a reply without the picture size", () => {
   const root = parse(
     '<cropSnap version="1.1"><channelId>0</channelId></cropSnap>',
   ).root;

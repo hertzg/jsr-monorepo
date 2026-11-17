@@ -1,3 +1,4 @@
+import { test } from "node:test";
 import { assertEquals } from "@std/assert";
 import { parse, serialize } from "./mod.ts";
 import {
@@ -10,7 +11,7 @@ import {
 // entity holds `undefined` wherever the XML had nothing.
 const OMITTED = undefined as unknown as string;
 
-Deno.test("an <ope> is one transaction: a date, an amount and a pile of foreign keys", () => {
+test("an <ope> is one transaction: a date, an amount and a pile of foreign keys", () => {
   const xml = [
     '<?xml version="1.0"?>',
     '<homebank v="1.3" d="050402">',
@@ -43,7 +44,7 @@ Deno.test("an <ope> is one transaction: a date, an amount and a pile of foreign 
   assertEquals(serialize(parse(xml)), xml);
 });
 
-Deno.test("tags are a space-separated list of tag names, not keys", () => {
+test("tags are a space-separated list of tag names, not keys", () => {
   const xml = [
     '<?xml version="1.0"?>',
     '<homebank v="1.3" d="050402">',
@@ -60,7 +61,7 @@ Deno.test("tags are a space-separated list of tag names, not keys", () => {
   assertEquals(serialize(parse(xml)), xml);
 });
 
-Deno.test("a split transaction stores its parts in three parallel ||-separated lists", () => {
+test("a split transaction stores its parts in three parallel ||-separated lists", () => {
   const xml = [
     '<?xml version="1.0"?>',
     '<homebank v="1.3" d="050402">',
@@ -84,7 +85,7 @@ Deno.test("a split transaction stores its parts in three parallel ||-separated l
   assertEquals(serialize(parse(xml)), xml);
 });
 
-Deno.test("parsing splits sets OPERATION_FLAG_SPLIT even when the flags attribute did not", () => {
+test("parsing splits sets OPERATION_FLAG_SPLIT even when the flags attribute did not", () => {
   const xml = [
     '<?xml version="1.0"?>',
     '<homebank v="1.3" d="050402">',
@@ -106,7 +107,7 @@ Deno.test("parsing splits sets OPERATION_FLAG_SPLIT even when the flags attribut
   );
 });
 
-Deno.test("serializeOperation writes the amount even at zero but drops zeroed keys", () => {
+test("serializeOperation writes the amount even at zero but drops zeroed keys", () => {
   assertEquals(
     serializeOperation({
       date: 736968,

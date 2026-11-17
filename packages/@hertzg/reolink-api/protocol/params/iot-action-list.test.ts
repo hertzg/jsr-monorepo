@@ -1,8 +1,9 @@
+import { test } from "node:test";
 import { assertEquals } from "@std/assert";
 import { parse } from "@std/xml";
 import { iotActionList } from "./iot-action-list.ts";
 
-Deno.test("iotActionList decodes the cmd 394 reply", () => {
+test("iotActionList decodes the cmd 394 reply", () => {
   const timeTable = "0".repeat(24) + "1".repeat(144);
   const root = parse(
     '<IOTActionList version="1.1"><item><actionID>1</actionID>' +
@@ -26,13 +27,13 @@ Deno.test("iotActionList decodes the cmd 394 reply", () => {
   });
 });
 
-Deno.test("iotActionList decodes an empty list", () => {
+test("iotActionList decodes an empty list", () => {
   const root = parse('<IOTActionList version="1.1"></IOTActionList>').root;
 
   assertEquals(iotActionList.decode(root), { item: [] });
 });
 
-Deno.test("iotActionList round-trips through encode and decode", () => {
+test("iotActionList round-trips through encode and decode", () => {
   const value = {
     item: [
       {

@@ -1,3 +1,4 @@
+import { test } from "node:test";
 import { assertEquals } from "@std/assert";
 import {
   AU_DATA_SIZE_UNKNOWN,
@@ -8,8 +9,8 @@ import {
   auHeader,
 } from "./mod.ts";
 
-Deno.test("auHeader", async (t) => {
-  await t.step("round-trips a header with no annotation", () => {
+test("auHeader", async (t) => {
+  await t.test("round-trips a header with no annotation", () => {
     const coder = auHeader();
     const header: AuHeader = {
       magic: AU_MAGIC,
@@ -30,7 +31,7 @@ Deno.test("auHeader", async (t) => {
     assertEquals(decoded, header);
   });
 
-  await t.step("sizes the annotation from dataOffset", () => {
+  await t.test("sizes the annotation from dataOffset", () => {
     const annotation = new TextEncoder().encode("take 1\0\0");
     const coder = auHeader();
     const header: AuHeader = {
@@ -52,7 +53,7 @@ Deno.test("auHeader", async (t) => {
     assertEquals(decoded.annotation, annotation);
   });
 
-  await t.step("decodes a known 8kHz mono µ-law header", () => {
+  await t.test("decodes a known 8kHz mono µ-law header", () => {
     // deno-fmt-ignore
     const wire = new Uint8Array([
       0x2e, 0x73, 0x6e, 0x64, // ".snd"
@@ -75,7 +76,7 @@ Deno.test("auHeader", async (t) => {
     assertEquals(decoded.annotation.length, 0);
   });
 
-  await t.step("magic matches the ASCII bytes .snd", () => {
+  await t.test("magic matches the ASCII bytes .snd", () => {
     const buffer = new Uint8Array(AU_HEADER_SIZE);
     auHeader().encode({
       magic: AU_MAGIC,

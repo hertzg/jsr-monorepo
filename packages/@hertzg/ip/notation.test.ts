@@ -1,3 +1,4 @@
+import { test } from "node:test";
 import { assertEquals, assertThrows } from "@std/assert";
 import { parseAddress, stringifyAddress } from "./address.ts";
 import { parseAddressv4, stringifyAddressv4 } from "./addressv4.ts";
@@ -7,13 +8,13 @@ import { cidrv4PrefixLength, parseCidrv4, stringifyCidrv4 } from "./cidrv4.ts";
 import { parseCidrv6, stringifyCidrv6 } from "./cidrv6.ts";
 import { splitNotation } from "./notation.ts";
 
-Deno.test("splitNotation", async (t) => {
-  await t.step("an address alone", () => {
+test("splitNotation", async (t) => {
+  await t.test("an address alone", () => {
     assertEquals(splitNotation("192.168.1.1"), { address: "192.168.1.1" });
     assertEquals(splitNotation("fe80::1"), { address: "fe80::1" });
   });
 
-  await t.step("address and zone ID", () => {
+  await t.test("address and zone ID", () => {
     assertEquals(splitNotation("fe80::1%eth0"), {
       address: "fe80::1",
       zoneId: "eth0",
@@ -24,7 +25,7 @@ Deno.test("splitNotation", async (t) => {
     });
   });
 
-  await t.step("address and prefix", () => {
+  await t.test("address and prefix", () => {
     assertEquals(splitNotation("10.0.0.0/8"), {
       address: "10.0.0.0",
       prefix: "8",
@@ -39,7 +40,7 @@ Deno.test("splitNotation", async (t) => {
     });
   });
 
-  await t.step("all three slots", () => {
+  await t.test("all three slots", () => {
     assertEquals(splitNotation("fe80::%ether1/64"), {
       address: "fe80::",
       zoneId: "ether1",
@@ -52,7 +53,7 @@ Deno.test("splitNotation", async (t) => {
     });
   });
 
-  await t.step("absent slots are absent, not undefined-valued keys", () => {
+  await t.test("absent slots are absent, not undefined-valued keys", () => {
     assertEquals(Object.keys(splitNotation("fe80::1")), ["address"]);
     assertEquals(Object.keys(splitNotation("fe80::1%eth0")), [
       "address",
@@ -64,7 +65,7 @@ Deno.test("splitNotation", async (t) => {
     ]);
   });
 
-  await t.step("knows nothing about IP: any text splits", () => {
+  await t.test("knows nothing about IP: any text splits", () => {
     assertEquals(splitNotation("garbage"), { address: "garbage" });
     assertEquals(splitNotation("a%b/c"), {
       address: "a",
@@ -74,7 +75,7 @@ Deno.test("splitNotation", async (t) => {
     assertEquals(splitNotation(" 10.0.0.1 "), { address: " 10.0.0.1 " });
   });
 
-  await t.step("the zone slice stops at the slash: no greedy zone", () => {
+  await t.test("the zone slice stops at the slash: no greedy zone", () => {
     // Go and Java read "fe80::1%eth0/64" as the zone "eth0/64". Here the
     // slash bounds the zone, so that reading cannot happen.
     const { zoneId, prefix } = splitNotation("fe80::1%eth0/64");
@@ -82,7 +83,7 @@ Deno.test("splitNotation", async (t) => {
     assertEquals(prefix, "64");
   });
 
-  await t.step("the zone is split off before any dot is looked at", () => {
+  await t.test("the zone is split off before any dot is looked at", () => {
     // A VLAN interface name has a dot; a dot-first parser would take
     // "eth0.100" for an embedded IPv4 tail.
     assertEquals(splitNotation("fe80::1%eth0.100"), {
@@ -91,7 +92,7 @@ Deno.test("splitNotation", async (t) => {
     });
   });
 
-  await t.step("the zone is carried verbatim, never percent-decoded", () => {
+  await t.test("the zone is carried verbatim, never percent-decoded", () => {
     assertEquals(splitNotation("fe80::1%25eth0"), {
       address: "fe80::1",
       zoneId: "25eth0",
@@ -102,7 +103,7 @@ Deno.test("splitNotation", async (t) => {
     });
   });
 
-  await t.step("whitespace in a zone is not this layer's concern", () => {
+  await t.test("whitespace in a zone is not this layer's concern", () => {
     assertEquals(splitNotation("fe80::1% eth0"), {
       address: "fe80::1",
       zoneId: " eth0",
@@ -110,8 +111,8 @@ Deno.test("splitNotation", async (t) => {
   });
 });
 
-Deno.test("splitNotation rejects exactly five shapes", async (t) => {
-  await t.step("two %", () => {
+test("splitNotation rejects exactly five shapes", async (t) => {
+  await t.test("two %", () => {
     assertThrows(
       () => splitNotation("fe80::1%eth0%1"),
       TypeError,
@@ -121,7 +122,7 @@ Deno.test("splitNotation rejects exactly five shapes", async (t) => {
     assertThrows(() => splitNotation("%%"), TypeError);
   });
 
-  await t.step("two /", () => {
+  await t.test("two /", () => {
     assertThrows(
       () => splitNotation("10.0.0.0/8/8"),
       TypeError,
@@ -131,7 +132,7 @@ Deno.test("splitNotation rejects exactly five shapes", async (t) => {
     assertThrows(() => splitNotation("fe80::1%a/64/64"), TypeError);
   });
 
-  await t.step("% after /", () => {
+  await t.test("% after /", () => {
     assertThrows(
       () => splitNotation("10.0.0.0/8%eth0"),
       TypeError,
@@ -141,7 +142,7 @@ Deno.test("splitNotation rejects exactly five shapes", async (t) => {
     assertThrows(() => splitNotation("fe80::/64%"), TypeError);
   });
 
-  await t.step("empty address", () => {
+  await t.test("empty address", () => {
     assertThrows(
       () => splitNotation("%eth0"),
       TypeError,
@@ -154,7 +155,7 @@ Deno.test("splitNotation rejects exactly five shapes", async (t) => {
     assertThrows(() => splitNotation("/"), TypeError);
   });
 
-  await t.step("empty zone ID or prefix", () => {
+  await t.test("empty zone ID or prefix", () => {
     assertThrows(
       () => splitNotation("fe80::1%"),
       TypeError,
@@ -169,7 +170,7 @@ Deno.test("splitNotation rejects exactly five shapes", async (t) => {
     assertThrows(() => splitNotation("fe80::1%eth0/"), TypeError);
   });
 
-  await t.step("and nothing else", () => {
+  await t.test("and nothing else", () => {
     // Every rejection above is a shape error; nothing here is a range error.
     for (const input of ["a%b%c", "a/b/c", "a/b%c", "%a", "/a", "a%", "a/"]) {
       assertThrows(() => splitNotation(input), TypeError, undefined, input);
@@ -180,7 +181,7 @@ Deno.test("splitNotation rejects exactly five shapes", async (t) => {
 // The six parsers are narrowings of one grammar (ADR 0003). This is the
 // behaviour table from the v5 proposal, at the parsers' defaults: each row
 // is one input, each column one parser, `TypeError` a rejection.
-Deno.test("the six parsers narrow one grammar", async (t) => {
+test("the six parsers narrow one grammar", async (t) => {
   const L1 = 0xfe800000000000000000000000000001n;
   const V1 = 3232235777;
   const M4 = 16909060;
@@ -313,7 +314,7 @@ Deno.test("the six parsers narrow one grammar", async (t) => {
   ] as const;
 
   for (const [input, ...cells] of table) {
-    await t.step(input, () => {
+    await t.test(input, () => {
       for (const [column, [name, parse]] of parsers.entries()) {
         const expected = cells[column];
         if (typeof expected === "function") {
@@ -327,8 +328,8 @@ Deno.test("the six parsers narrow one grammar", async (t) => {
 });
 
 // The traces from the parser spec, one per layer-3 rule they exercise.
-Deno.test("layered parser traces", async (t) => {
-  await t.step("fe80::%ether1/64: L1 splits, L3 checks the range", () => {
+test("layered parser traces", async (t) => {
+  await t.test("fe80::%ether1/64: L1 splits, L3 checks the range", () => {
     assertEquals(parseCidrv6("fe80::%ether1/64"), {
       address: 0xfe80n << 112n,
       zoneId: "ether1",
@@ -336,11 +337,11 @@ Deno.test("layered parser traces", async (t) => {
     });
   });
 
-  await t.step("fe80::1%eth0.100: the zone splits before any dot", () => {
+  await t.test("fe80::1%eth0.100: the zone splits before any dot", () => {
     assertEquals(parseAddressv6("fe80::1%eth0.100").zoneId, "eth0.100");
   });
 
-  await t.step("10.0.0.0/8%eth0: the zone must precede the prefix", () => {
+  await t.test("10.0.0.0/8%eth0: the zone must precede the prefix", () => {
     assertThrows(
       () => parseCidrv4("10.0.0.0/8%eth0"),
       TypeError,
@@ -348,7 +349,7 @@ Deno.test("layered parser traces", async (t) => {
     );
   });
 
-  await t.step("fe80::1%eth0%1: two % die in layer 1", () => {
+  await t.test("fe80::1%eth0%1: two % die in layer 1", () => {
     assertThrows(
       () => parseAddressv6("fe80::1%eth0%1"),
       TypeError,
@@ -356,21 +357,21 @@ Deno.test("layered parser traces", async (t) => {
     );
   });
 
-  await t.step("10.0.0.0/255.0.0.0: a dotted prefix is a mask", () => {
+  await t.test("10.0.0.0/255.0.0.0: a dotted prefix is a mask", () => {
     assertEquals(parseCidrv4("10.0.0.0/255.0.0.0"), {
       address: 167772160,
       mask: 0xff000000,
     });
   });
 
-  await t.step("10.0.0.0/ffff:ff00::: a mask must match the version", () => {
+  await t.test("10.0.0.0/ffff:ff00::: a mask must match the version", () => {
     assertThrows(() => parseCidrv4("10.0.0.0/ffff:ff00::"), TypeError);
     assertThrows(() => parseCidr("10.0.0.0/ffff:ff00::"), TypeError);
     assertThrows(() => parseCidrv6("fe80::/255.0.0.0"), TypeError);
     assertThrows(() => parseCidr("fe80::/255.0.0.0"), TypeError);
   });
 
-  await t.step("10.0.0.0/255.0.0.255: a non-contiguous mask parses", () => {
+  await t.test("10.0.0.0/255.0.0.255: a non-contiguous mask parses", () => {
     assertEquals(parseCidrv4("10.0.0.0/255.0.0.255"), {
       address: 167772160,
       mask: 0xff0000ff,
@@ -381,43 +382,43 @@ Deno.test("layered parser traces", async (t) => {
     );
   });
 
-  await t.step("::ffff:1.2.3.4/120: parseCidr unmaps and rebases", () => {
+  await t.test("::ffff:1.2.3.4/120: parseCidr unmaps and rebases", () => {
     assertEquals(parseCidr("::ffff:1.2.3.4/120"), {
       address: 16909060,
       prefixLength: 24,
     });
   });
 
-  await t.step("::ffff:1.2.3.4/64: below /96 stays IPv6", () => {
+  await t.test("::ffff:1.2.3.4/64: below /96 stays IPv6", () => {
     assertEquals(parseCidr("::ffff:1.2.3.4/64"), {
       address: 0xffff01020304n,
       prefixLength: 64,
     });
   });
 
-  await t.step("192.168.1.1%ether1: IPv4 zones are real", () => {
+  await t.test("192.168.1.1%ether1: IPv4 zones are real", () => {
     assertEquals(parseAddressv4("192.168.1.1%ether1"), {
       address: 3232235777,
       zoneId: "ether1",
     });
   });
 
-  await t.step("fe80::1%: an empty zone is a shape error", () => {
+  await t.test("fe80::1%: an empty zone is a shape error", () => {
     assertThrows(() => parseAddressv6("fe80::1%"), TypeError);
   });
 
-  await t.step("::ffff:1.2.3.4/96: unmaps to /0", () => {
+  await t.test("::ffff:1.2.3.4/96: unmaps to /0", () => {
     assertEquals(parseCidr("::ffff:1.2.3.4/96"), {
       address: 16909060,
       prefixLength: 0,
     });
   });
 
-  await t.step("1:2:3:4:5:6:7:8::: :: must cover a group", () => {
+  await t.test("1:2:3:4:5:6:7:8::: :: must cover a group", () => {
     assertThrows(() => parseAddressv6("1:2:3:4:5:6:7:8::"), TypeError);
   });
 
-  await t.step(
+  await t.test(
     "1:2:3:1.2.3.4:5:6: a dotted quad only as the last field",
     () => {
       assertThrows(() => parseAddressv6("1:2:3:1.2.3.4:5:6"), TypeError);
@@ -425,8 +426,8 @@ Deno.test("layered parser traces", async (t) => {
   );
 });
 
-Deno.test("errors: wrong shape is TypeError, too large is RangeError", async (t) => {
-  await t.step("shape errors", () => {
+test("errors: wrong shape is TypeError, too large is RangeError", async (t) => {
+  await t.test("shape errors", () => {
     const shapes = [
       "fe80::1%eth0%1",
       "10.0.0.0/8/8",
@@ -451,7 +452,7 @@ Deno.test("errors: wrong shape is TypeError, too large is RangeError", async (t)
     }
   });
 
-  await t.step("range errors", () => {
+  await t.test("range errors", () => {
     assertThrows(() => parseAddress("256.0.0.1"), RangeError);
     assertThrows(() => parseAddress("::1.2.3.256"), RangeError);
     assertThrows(() => parseCidr("10.0.0.0/33"), RangeError);
@@ -461,7 +462,7 @@ Deno.test("errors: wrong shape is TypeError, too large is RangeError", async (t)
   });
 });
 
-Deno.test("stringify(parse(s)) === s for every canonical accepted form", async (t) => {
+test("stringify(parse(s)) === s for every canonical accepted form", async (t) => {
   const addresses = [
     "192.168.1.1",
     "192.168.1.1%ether1",
@@ -492,7 +493,7 @@ Deno.test("stringify(parse(s)) === s for every canonical accepted form", async (
     "::/0",
   ];
 
-  await t.step("universal", () => {
+  await t.test("universal", () => {
     for (const s of addresses) {
       assertEquals(stringifyAddress(parseAddress(s)), s);
     }
@@ -501,7 +502,7 @@ Deno.test("stringify(parse(s)) === s for every canonical accepted form", async (
     }
   });
 
-  await t.step("IPv4", () => {
+  await t.test("IPv4", () => {
     for (const s of addresses.filter((s) => !s.includes(":"))) {
       assertEquals(stringifyAddressv4(parseAddressv4(s)), s);
     }
@@ -510,7 +511,7 @@ Deno.test("stringify(parse(s)) === s for every canonical accepted form", async (
     }
   });
 
-  await t.step("IPv6", () => {
+  await t.test("IPv6", () => {
     for (
       const s of [...addresses, "::ffff:c0a8:101%z"].filter((s) =>
         s.includes(":")
@@ -523,7 +524,7 @@ Deno.test("stringify(parse(s)) === s for every canonical accepted form", async (
     }
   });
 
-  await t.step("the dialect is preserved, the omission is not", () => {
+  await t.test("the dialect is preserved, the omission is not", () => {
     assertEquals(
       stringifyCidr(parseCidr("10.0.0.0/255.0.0.0")),
       "10.0.0.0/255.0.0.0",

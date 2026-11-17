@@ -1,8 +1,9 @@
+import { test } from "node:test";
 import { assertEquals } from "@std/assert";
 import { parse } from "@std/xml";
 import { ipcVersionList } from "./ipc-version-list.ts";
 
-Deno.test("ipcVersionList decodes every IpcVersion entry", () => {
+test("ipcVersionList decodes every IpcVersion entry", () => {
   const root = parse(
     '<IpcVersionList version="1.1">' +
       "<IpcVersion><platform>platform-a</platform><version>version-a</version>" +
@@ -23,7 +24,7 @@ Deno.test("ipcVersionList decodes every IpcVersion entry", () => {
   });
 });
 
-Deno.test("ipcVersionList round-trips through encode and decode", () => {
+test("ipcVersionList round-trips through encode and decode", () => {
   const value = {
     IpcVersion: [{
       platform: "platform-c",
@@ -38,7 +39,7 @@ Deno.test("ipcVersionList round-trips through encode and decode", () => {
   );
 });
 
-Deno.test("ipcVersionList reads an empty list as no entries", () => {
+test("ipcVersionList reads an empty list as no entries", () => {
   const root = parse('<IpcVersionList version="1.1"></IpcVersionList>').root;
 
   assertEquals(ipcVersionList.decode(root), { IpcVersion: [] });

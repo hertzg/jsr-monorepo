@@ -1,13 +1,14 @@
+import { test } from "node:test";
 import { assertEquals, assertThrows } from "@std/assert";
 import { decodeSentence, encodeSentence } from "./sentence.ts";
 
-Deno.test("encodeSentence - empty sentence", () => {
+test("encodeSentence - empty sentence", () => {
   const result = encodeSentence([]);
   // Just the terminator
   assertEquals(result, new Uint8Array([0x00]));
 });
 
-Deno.test("encodeSentence - single word", () => {
+test("encodeSentence - single word", () => {
   const result = encodeSentence(["/login"]);
   // 0x06 + "/login" + 0x00 terminator
   assertEquals(
@@ -16,7 +17,7 @@ Deno.test("encodeSentence - single word", () => {
   );
 });
 
-Deno.test("encodeSentence - multiple words", () => {
+test("encodeSentence - multiple words", () => {
   const result = encodeSentence(["/login", "=name=admin", "=password=secret"]);
   // Each word: length + content, then terminator
   const expected = new Uint8Array([
@@ -61,7 +62,7 @@ Deno.test("encodeSentence - multiple words", () => {
   assertEquals(result, expected);
 });
 
-Deno.test("encodeSentence - command with attributes", () => {
+test("encodeSentence - command with attributes", () => {
   const result = encodeSentence([
     "/interface/print",
     "?type=ether",
@@ -71,13 +72,13 @@ Deno.test("encodeSentence - command with attributes", () => {
   assertEquals(lastByte, 0x00, "Should end with terminator");
 });
 
-Deno.test("decodeSentence - empty sentence", () => {
+test("decodeSentence - empty sentence", () => {
   const bytes = new Uint8Array([0x00]);
   const result = decodeSentence(bytes);
   assertEquals(result, { words: [], bytesRead: 1 });
 });
 
-Deno.test("decodeSentence - single word", () => {
+test("decodeSentence - single word", () => {
   const bytes = new Uint8Array([
     0x06,
     0x2f,
@@ -92,7 +93,7 @@ Deno.test("decodeSentence - single word", () => {
   assertEquals(result, { words: ["/login"], bytesRead: 8 });
 });
 
-Deno.test("decodeSentence - multiple words", () => {
+test("decodeSentence - multiple words", () => {
   const bytes = new Uint8Array([
     0x06,
     0x2f,
@@ -122,7 +123,7 @@ Deno.test("decodeSentence - multiple words", () => {
   });
 });
 
-Deno.test("decodeSentence - with offset", () => {
+test("decodeSentence - with offset", () => {
   const bytes = new Uint8Array([
     0xFF,
     0xFF, // padding
@@ -137,7 +138,7 @@ Deno.test("decodeSentence - with offset", () => {
   assertEquals(result, { words: ["test"], bytesRead: 6 });
 });
 
-Deno.test("decodeSentence - missing terminator throws", () => {
+test("decodeSentence - missing terminator throws", () => {
   const bytes = new Uint8Array([0x06, 0x2f, 0x6c, 0x6f, 0x67, 0x69, 0x6e]);
   assertThrows(
     () => decodeSentence(bytes),
@@ -146,7 +147,7 @@ Deno.test("decodeSentence - missing terminator throws", () => {
   );
 });
 
-Deno.test("encodeSentence/decodeSentence - roundtrip", () => {
+test("encodeSentence/decodeSentence - roundtrip", () => {
   const testCases = [
     [],
     ["/login"],
@@ -171,7 +172,7 @@ Deno.test("encodeSentence/decodeSentence - roundtrip", () => {
   }
 });
 
-Deno.test("decodeSentence - handles multiple sentences", () => {
+test("decodeSentence - handles multiple sentences", () => {
   // Two sentences back-to-back
   const bytes = new Uint8Array([
     0x04,

@@ -1,3 +1,4 @@
+import { test } from "node:test";
 import { assertEquals } from "@std/assert";
 import {
   ETHERTYPE_IPV6,
@@ -23,8 +24,8 @@ function makePacket(
   };
 }
 
-Deno.test("ipv6Packet", async (t) => {
-  await t.step("round-trip with non-empty payload", () => {
+test("ipv6Packet", async (t) => {
+  await t.test("round-trip with non-empty payload", () => {
     const coder = ipv6Packet();
     const payload = new Uint8Array([0xde, 0xad, 0xbe, 0xef]);
     const packet = makePacket(payload, {
@@ -44,7 +45,7 @@ Deno.test("ipv6Packet", async (t) => {
     assertEquals(decoded, packet);
   });
 
-  await t.step("zero-length payload (header-only)", () => {
+  await t.test("zero-length payload (header-only)", () => {
     const coder = ipv6Packet();
     const packet = makePacket(new Uint8Array(0));
 
@@ -58,7 +59,7 @@ Deno.test("ipv6Packet", async (t) => {
     assertEquals(decoded.payload.length, 0);
   });
 
-  await t.step(
+  await t.test(
     "packs version/trafficClass/flowLabel into one 32-bit word",
     () => {
       const coder = ipv6Packet();
@@ -82,7 +83,7 @@ Deno.test("ipv6Packet", async (t) => {
     },
   );
 
-  await t.step("hop limit boundary values", () => {
+  await t.test("hop limit boundary values", () => {
     const coder = ipv6Packet();
     for (const hopLimit of [0, 1, 64, 255]) {
       const packet = makePacket(new Uint8Array(0), { hopLimit });
@@ -94,7 +95,7 @@ Deno.test("ipv6Packet", async (t) => {
     }
   });
 
-  await t.step(
+  await t.test(
     "decode honours payloadLength even when buffer is larger",
     () => {
       const coder = ipv6Packet();
@@ -117,7 +118,7 @@ Deno.test("ipv6Packet", async (t) => {
     },
   );
 
-  await t.step("decodes a known-wire loopback packet with no payload", () => {
+  await t.test("decodes a known-wire loopback packet with no payload", () => {
     const coder = ipv6Packet();
     // deno-fmt-ignore
     const wire = new Uint8Array([
@@ -151,7 +152,7 @@ Deno.test("ipv6Packet", async (t) => {
     assertEquals(decoded.payload.length, 0);
   });
 
-  await t.step(
+  await t.test(
     "payload longer than payloadLength is truncated on encode",
     () => {
       const coder = ipv6Packet();
@@ -169,7 +170,7 @@ Deno.test("ipv6Packet", async (t) => {
     },
   );
 
-  await t.step("well-known constants", () => {
+  await t.test("well-known constants", () => {
     assertEquals(IPV6_HEADER_SIZE, 40);
     assertEquals(ETHERTYPE_IPV6, 0x86dd);
     assertEquals(IPV6_NEXT_HEADER.TCP, 6);

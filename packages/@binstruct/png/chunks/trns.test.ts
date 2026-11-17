@@ -1,3 +1,4 @@
+import { test } from "node:test";
 import { assertEquals } from "@std/assert";
 import { createContext } from "@hertzg/binstruct";
 import type { PngChunkUnknown } from "../mod.ts";
@@ -5,7 +6,7 @@ import { type TrnsChunk, trnsChunkRefiner } from "./trns.ts";
 
 // A. Basic refine/unrefine tests
 
-Deno.test("trnsChunkRefiner() - refines grayscale tRNS chunk", () => {
+test("trnsChunkRefiner() - refines grayscale tRNS chunk", () => {
   const refiner = trnsChunkRefiner();
   const context = createContext("decode");
 
@@ -26,7 +27,7 @@ Deno.test("trnsChunkRefiner() - refines grayscale tRNS chunk", () => {
   assertEquals(refined.crc, 0xAABBCCDD);
 });
 
-Deno.test("trnsChunkRefiner() - refines RGB tRNS chunk", () => {
+test("trnsChunkRefiner() - refines RGB tRNS chunk", () => {
   const refiner = trnsChunkRefiner();
   const context = createContext("decode");
 
@@ -50,7 +51,7 @@ Deno.test("trnsChunkRefiner() - refines RGB tRNS chunk", () => {
   assertEquals(refined.data.values, [255, 255, 128, 0, 0, 0]);
 });
 
-Deno.test("trnsChunkRefiner() - refines indexed tRNS chunk", () => {
+test("trnsChunkRefiner() - refines indexed tRNS chunk", () => {
   const refiner = trnsChunkRefiner();
   const context = createContext("decode");
 
@@ -69,7 +70,7 @@ Deno.test("trnsChunkRefiner() - refines indexed tRNS chunk", () => {
   assertEquals(refined.crc, 0x12345678);
 });
 
-Deno.test("trnsChunkRefiner() - unrefines tRNS chunk", () => {
+test("trnsChunkRefiner() - unrefines tRNS chunk", () => {
   const refiner = trnsChunkRefiner();
   const context = createContext("encode");
 
@@ -93,7 +94,7 @@ Deno.test("trnsChunkRefiner() - unrefines tRNS chunk", () => {
 
 // B. Round-trip tests
 
-Deno.test("trnsChunkRefiner() - round-trip grayscale transparency", () => {
+test("trnsChunkRefiner() - round-trip grayscale transparency", () => {
   const refiner = trnsChunkRefiner();
   const encodeContext = createContext("encode");
   const decodeContext = createContext("decode");
@@ -115,7 +116,7 @@ Deno.test("trnsChunkRefiner() - round-trip grayscale transparency", () => {
   assertEquals(refined.crc, original.crc);
 });
 
-Deno.test("trnsChunkRefiner() - round-trip RGB transparency", () => {
+test("trnsChunkRefiner() - round-trip RGB transparency", () => {
   const refiner = trnsChunkRefiner();
   const encodeContext = createContext("encode");
   const decodeContext = createContext("decode");
@@ -141,7 +142,7 @@ Deno.test("trnsChunkRefiner() - round-trip RGB transparency", () => {
   assertEquals(refined.data.values, original.data.values);
 });
 
-Deno.test("trnsChunkRefiner() - round-trip indexed with single alpha", () => {
+test("trnsChunkRefiner() - round-trip indexed with single alpha", () => {
   const refiner = trnsChunkRefiner();
   const encodeContext = createContext("encode");
   const decodeContext = createContext("decode");
@@ -162,7 +163,7 @@ Deno.test("trnsChunkRefiner() - round-trip indexed with single alpha", () => {
   assertEquals(refined.data.values, [128]);
 });
 
-Deno.test("trnsChunkRefiner() - round-trip indexed with multiple alphas", () => {
+test("trnsChunkRefiner() - round-trip indexed with multiple alphas", () => {
   const refiner = trnsChunkRefiner();
   const encodeContext = createContext("encode");
   const decodeContext = createContext("decode");
@@ -183,7 +184,7 @@ Deno.test("trnsChunkRefiner() - round-trip indexed with multiple alphas", () => 
   assertEquals(refined.data.values, [0, 64, 128, 192, 255]);
 });
 
-Deno.test("trnsChunkRefiner() - round-trip full palette (256 alphas)", () => {
+test("trnsChunkRefiner() - round-trip full palette (256 alphas)", () => {
   const refiner = trnsChunkRefiner();
   const encodeContext = createContext("encode");
   const decodeContext = createContext("decode");
@@ -211,7 +212,7 @@ Deno.test("trnsChunkRefiner() - round-trip full palette (256 alphas)", () => {
 
 // C. Edge cases
 
-Deno.test("trnsChunkRefiner() - empty indexed transparency", () => {
+test("trnsChunkRefiner() - empty indexed transparency", () => {
   const refiner = trnsChunkRefiner();
   const encodeContext = createContext("encode");
   const decodeContext = createContext("decode");
@@ -231,7 +232,7 @@ Deno.test("trnsChunkRefiner() - empty indexed transparency", () => {
   assertEquals(refined.data.values, []);
 });
 
-Deno.test("trnsChunkRefiner() - partial palette transparency (various sizes)", () => {
+test("trnsChunkRefiner() - partial palette transparency (various sizes)", () => {
   const refiner = trnsChunkRefiner();
   const encodeContext = createContext("encode");
   const decodeContext = createContext("decode");
@@ -259,7 +260,7 @@ Deno.test("trnsChunkRefiner() - partial palette transparency (various sizes)", (
   }
 });
 
-Deno.test("trnsChunkRefiner() - grayscale at bit depth boundaries", () => {
+test("trnsChunkRefiner() - grayscale at bit depth boundaries", () => {
   const refiner = trnsChunkRefiner();
   const encodeContext = createContext("encode");
   const decodeContext = createContext("decode");
@@ -288,7 +289,7 @@ Deno.test("trnsChunkRefiner() - grayscale at bit depth boundaries", () => {
   }
 });
 
-Deno.test("trnsChunkRefiner() - RGB transparency with extreme values", () => {
+test("trnsChunkRefiner() - RGB transparency with extreme values", () => {
   const refiner = trnsChunkRefiner();
   const encodeContext = createContext("encode");
   const decodeContext = createContext("decode");
@@ -316,7 +317,7 @@ Deno.test("trnsChunkRefiner() - RGB transparency with extreme values", () => {
   }
 });
 
-Deno.test("trnsChunkRefiner() - multiple round-trips consistency", () => {
+test("trnsChunkRefiner() - multiple round-trips consistency", () => {
   const refiner = trnsChunkRefiner();
   const encodeContext = createContext("encode");
   const decodeContext = createContext("decode");
@@ -342,7 +343,7 @@ Deno.test("trnsChunkRefiner() - multiple round-trips consistency", () => {
   assertEquals(current.crc, original.crc);
 });
 
-Deno.test("trnsChunkRefiner() - preserves exact byte values", () => {
+test("trnsChunkRefiner() - preserves exact byte values", () => {
   const refiner = trnsChunkRefiner();
   const encodeContext = createContext("encode");
   const decodeContext = createContext("decode");

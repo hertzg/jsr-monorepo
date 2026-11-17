@@ -1,7 +1,8 @@
+import { test } from "node:test";
 import { assertEquals, assertThrows } from "@std/assert";
 import { bytes } from "./bytes.ts";
 
-Deno.test("bytes - fixed length", () => {
+test("bytes - fixed length", () => {
   const coder = bytes(4);
   const data = new Uint8Array([1, 2, 3, 4, 5]);
   const buffer = new Uint8Array(100);
@@ -15,7 +16,7 @@ Deno.test("bytes - fixed length", () => {
   assertEquals(read, 4);
 });
 
-Deno.test("bytes - variable length", () => {
+test("bytes - variable length", () => {
   const coder = bytes();
   const data = new Uint8Array([1, 2, 3, 4, 5]);
   const buffer = new Uint8Array(100);
@@ -33,12 +34,12 @@ Deno.test("bytes - variable length", () => {
   assertEquals(read, buffer.length);
 });
 
-Deno.test("bytes - error on invalid length", () => {
+test("bytes - error on invalid length", () => {
   assertThrows(() => bytes(-1), Error, "Invalid length: -1");
   assertThrows(() => bytes(1.5), Error, "Invalid length: 1.5");
 });
 
-Deno.test("bytes - error on insufficient buffer", () => {
+test("bytes - error on insufficient buffer", () => {
   const coder = bytes(4);
   const shortBuffer = new Uint8Array([1, 2]); // Only 2 bytes
 

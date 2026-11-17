@@ -1,8 +1,9 @@
+import { test } from "node:test";
 import { assertEquals } from "@std/assert";
 import { parse } from "@std/xml";
 import { autoReply } from "./auto-reply.ts";
 
-Deno.test("autoReply decodes a cmd 427 reply with every field", () => {
+test("autoReply decodes a cmd 427 reply with every field", () => {
   const root = parse(
     '<AutoReply version="1.1"><enable>1</enable><timeout>15</timeout>' +
       "<audioId>2</audioId><extId>ext-busy</extId>" +
@@ -32,7 +33,7 @@ Deno.test("autoReply decodes a cmd 427 reply with every field", () => {
   });
 });
 
-Deno.test("autoReply decodes a reply without the empty name strings", () => {
+test("autoReply decodes a reply without the empty name strings", () => {
   const root = parse(
     '<AutoReply version="1.1"><enable>0</enable><timeout>10</timeout>' +
       "<audioId>1</audioId><fesEnable>0</fesEnable><fesAudioId>4</fesAudioId>" +
@@ -49,7 +50,7 @@ Deno.test("autoReply decodes a reply without the empty name strings", () => {
   });
 });
 
-Deno.test("autoReply round-trips through encode and decode", () => {
+test("autoReply round-trips through encode and decode", () => {
   const value = {
     enable: 1,
     timeout: 20,

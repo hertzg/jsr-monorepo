@@ -1,8 +1,9 @@
+import { test } from "node:test";
 import { assertEquals } from "@std/assert";
 import { parse } from "@std/xml";
 import { audioFileInfo } from "./audio-file-info.ts";
 
-Deno.test("audioFileInfo decodes the element nets_audio_file_info_s2x writes", () => {
+test("audioFileInfo decodes the element nets_audio_file_info_s2x writes", () => {
   const root = parse(
     '<audioFileInfo version="1.1"><channelId>1</channelId>' +
       "<fileSize>64000</fileSize></audioFileInfo>",
@@ -11,7 +12,7 @@ Deno.test("audioFileInfo decodes the element nets_audio_file_info_s2x writes", (
   assertEquals(audioFileInfo.decode(root), { channelId: 1, fileSize: 64000 });
 });
 
-Deno.test("audioFileInfo decodes every field nets_param_audio_file_info_x2s reads", () => {
+test("audioFileInfo decodes every field nets_param_audio_file_info_x2s reads", () => {
   const root = parse(
     '<audioFileInfo version="1.1"><channelId>0</channelId>' +
       "<fileSize>16000</fileSize><audioLen>5</audioLen>" +
@@ -29,7 +30,7 @@ Deno.test("audioFileInfo decodes every field nets_param_audio_file_info_x2s read
   });
 });
 
-Deno.test("audioFileInfo round-trips a full value", () => {
+test("audioFileInfo round-trips a full value", () => {
   const value = {
     channelId: 2,
     fileSize: 8000,

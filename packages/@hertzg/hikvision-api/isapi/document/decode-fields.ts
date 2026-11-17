@@ -68,7 +68,7 @@ export type FieldValue<F> = F extends Field<infer T> ? T : never;
 
 /** A record of fields keyed by element name. */
 // `any`, not `unknown`: a Field<number> is not assignable to Field<unknown>.
-// deno-lint-ignore no-explicit-any
+// oxlint-disable-next-line typescript/no-explicit-any
 export type Fields = Record<string, Field<any>>;
 
 /** The keys of `F` marked optional. */

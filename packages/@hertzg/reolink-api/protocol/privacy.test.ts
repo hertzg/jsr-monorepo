@@ -1,7 +1,8 @@
+import { test } from "node:test";
 import { assertEquals, assertThrows } from "@std/assert";
 import { parsePrivacyMode, privacyModeXml } from "./privacy.ts";
 
-Deno.test("privacyModeXml turns sleep on with operate 2", () => {
+test("privacyModeXml turns sleep on with operate 2", () => {
   assertEquals(
     privacyModeXml(true),
     '<?xml version="1.0" encoding="UTF-8" ?>\n' +
@@ -14,7 +15,7 @@ Deno.test("privacyModeXml turns sleep on with operate 2", () => {
   );
 });
 
-Deno.test("parsePrivacyMode reads sleep 1 as on", () => {
+test("parsePrivacyMode reads sleep 1 as on", () => {
   assertEquals(
     parsePrivacyMode(
       '<?xml version="1.0" encoding="UTF-8" ?>\n' +
@@ -24,14 +25,14 @@ Deno.test("parsePrivacyMode reads sleep 1 as on", () => {
   );
 });
 
-Deno.test("parsePrivacyMode reads sleep 0 as off", () => {
+test("parsePrivacyMode reads sleep 0 as off", () => {
   assertEquals(
     parsePrivacyMode("<body><sleepState><sleep>0</sleep></sleepState></body>"),
     false,
   );
 });
 
-Deno.test("parsePrivacyMode throws without a sleep element", () => {
+test("parsePrivacyMode throws without a sleep element", () => {
   assertThrows(
     () => parsePrivacyMode("<body><sleepState /></body>"),
     Error,

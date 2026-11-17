@@ -1,3 +1,4 @@
+import { test } from "node:test";
 import { assertEquals } from "@std/assert";
 import { SLL_HEADER_SIZE, SLL_PACKET_TYPE, sllHeader } from "./mod.ts";
 import type { SllHeader } from "./mod.ts";
@@ -17,8 +18,8 @@ function makeHeader(
   };
 }
 
-Deno.test("sllHeader", async (t) => {
-  await t.step("round-trips a header with a payload", () => {
+test("sllHeader", async (t) => {
+  await t.test("round-trips a header with a payload", () => {
     const coder = sllHeader();
     const payload = new Uint8Array([0x45, 0x00, 0x00, 0x14]);
     const header = makeHeader(payload, {
@@ -47,7 +48,7 @@ Deno.test("sllHeader", async (t) => {
     assertEquals(decoded, header);
   });
 
-  await t.step("round-trips a header with an empty payload", () => {
+  await t.test("round-trips a header with an empty payload", () => {
     const coder = sllHeader();
     const header = makeHeader(new Uint8Array(0));
 
@@ -60,7 +61,7 @@ Deno.test("sllHeader", async (t) => {
     assertEquals(decoded.payload.length, 0);
   });
 
-  await t.step("linkLayerAddress is always written as 8 bytes", () => {
+  await t.test("linkLayerAddress is always written as 8 bytes", () => {
     const coder = sllHeader();
     const header = makeHeader(new Uint8Array(0), {
       linkLayerAddressLength: 4,
@@ -74,7 +75,7 @@ Deno.test("sllHeader", async (t) => {
     assertEquals(buffer.subarray(6, 14).length, 8);
   });
 
-  await t.step("decodes a known Ethernet/ARP-carrying header", () => {
+  await t.test("decodes a known Ethernet/ARP-carrying header", () => {
     // deno-fmt-ignore
     const wire = new Uint8Array([
       0x00, 0x00,                                     // packetType: HOST
@@ -99,7 +100,7 @@ Deno.test("sllHeader", async (t) => {
     assertEquals(decoded.payload, new Uint8Array([0x00, 0x01, 0x08, 0x00]));
   });
 
-  await t.step("decodes a known broadcast/loopback-style header", () => {
+  await t.test("decodes a known broadcast/loopback-style header", () => {
     // deno-fmt-ignore
     const wire = new Uint8Array([
       0x00, 0x04,             // packetType: OUTGOING
@@ -120,7 +121,7 @@ Deno.test("sllHeader", async (t) => {
     assertEquals(decoded.payload, new Uint8Array([0xde, 0xad]));
   });
 
-  await t.step("all packetType values round-trip", () => {
+  await t.test("all packetType values round-trip", () => {
     const coder = sllHeader();
     const values = [
       SLL_PACKET_TYPE.HOST,
@@ -140,7 +141,7 @@ Deno.test("sllHeader", async (t) => {
     }
   });
 
-  await t.step("encodes header bytes in network order", () => {
+  await t.test("encodes header bytes in network order", () => {
     const coder = sllHeader();
     const header = makeHeader(new Uint8Array([0xaa]), {
       packetType: 0x0102,

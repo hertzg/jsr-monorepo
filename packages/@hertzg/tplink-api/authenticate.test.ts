@@ -1,3 +1,4 @@
+import { test } from "node:test";
 import { assertEquals } from "@std/assert";
 import { assertSpyCalls, resolvesNext, spy } from "@std/testing/mock";
 import { authenticate } from "./authenticate.ts";
@@ -63,7 +64,7 @@ function steps(fetch: { calls: { args: unknown[] }[] }): string[] {
   });
 }
 
-Deno.test("authenticate walks the gdprText flow in order", async () => {
+test("authenticate walks the gdprText flow in order", async () => {
   const fetch = spy(resolvesNext(flowResponses()));
 
   const auth = await authenticate(BASE_URL, { password: "hunter2", fetch });
@@ -93,7 +94,7 @@ Deno.test("authenticate walks the gdprText flow in order", async () => {
   assertEquals(auth?.dialect, gdprText);
 });
 
-Deno.test("authenticate returns null when already logged in and not forcing", async () => {
+test("authenticate returns null when already logged in and not forcing", async () => {
   const fetch = spy(
     resolvesNext(flowResponses({ busyPage: ACTIVE_BUSY_PAGE })),
   );
@@ -108,7 +109,7 @@ Deno.test("authenticate returns null when already logged in and not forcing", as
   assertSpyCalls(fetch, 3);
 });
 
-Deno.test("authenticate returns null when the router issues no session", async () => {
+test("authenticate returns null when the router issues no session", async () => {
   const fetch = spy(resolvesNext(flowResponses({
     login: new Response(null, {
       headers: { "set-cookie": "JSESSIONID=deleted;" },
@@ -121,7 +122,7 @@ Deno.test("authenticate returns null when the router issues no session", async (
   assertSpyCalls(fetch, 4);
 });
 
-Deno.test("authenticate walks the gdprJson flow in order", async () => {
+test("authenticate walks the gdprJson flow in order", async () => {
   const fetch = spy(resolvesNext(
     flowResponses({ loginPage: "<html>an unfamiliar login page</html>" }),
   ));
@@ -150,7 +151,7 @@ Deno.test("authenticate walks the gdprJson flow in order", async () => {
   assertEquals(auth?.dialect, gdprJson);
 });
 
-Deno.test("authenticate defaults the username per dialect", async () => {
+test("authenticate defaults the username per dialect", async () => {
   const seen: string[] = [];
 
   for (const dialect of [gdprText, gdprJson]) {

@@ -1,3 +1,4 @@
+import { bench } from "mitata";
 import { createCipher } from "./cipher.ts";
 
 // Test RSA key (1024-bit modulus from test vectors)
@@ -22,11 +23,11 @@ const testData = sizes.map((size) => {
 
 // AES benchmarks
 for (const { size, data, encrypted } of testData) {
-  Deno.bench(`aesEncrypt (${size} bytes)`, () => {
+  bench(`aesEncrypt (${size} bytes)`, () => {
     cipher.aesEncrypt(data);
   });
 
-  Deno.bench(`aesDecrypt (${size} bytes)`, () => {
+  bench(`aesDecrypt (${size} bytes)`, () => {
     cipher.aesDecrypt(encrypted);
   });
 }
@@ -42,7 +43,7 @@ const rsaTestData = rsaSizes.map((size) => {
 
 for (const { size, data } of rsaTestData) {
   const chunks = Math.ceil(size / modulus.length);
-  Deno.bench(
+  bench(
     `cipher.rsaEncrypt (${size} bytes, ${chunks} chunk${
       chunks > 1 ? "s" : ""
     })`,
@@ -53,10 +54,10 @@ for (const { size, data } of rsaTestData) {
 }
 
 // createCipher benchmark
-Deno.bench("createCipher (with provided key/iv)", () => {
+bench("createCipher (with provided key/iv)", () => {
   createCipher({ modulus, exponent, key, iv });
 });
 
-Deno.bench("createCipher (generate key/iv)", () => {
+bench("createCipher (generate key/iv)", () => {
   createCipher({ modulus, exponent });
 });

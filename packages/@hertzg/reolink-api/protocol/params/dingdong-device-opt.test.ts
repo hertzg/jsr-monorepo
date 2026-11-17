@@ -1,8 +1,9 @@
+import { test } from "node:test";
 import { assertEquals, assertThrows } from "@std/assert";
 import { parse } from "@std/xml";
 import { dingdongDeviceOpt } from "./dingdong-device-opt.ts";
 
-Deno.test("dingdongDeviceOpt decodes every field net_dingdong_dev_opt_x2s reads", () => {
+test("dingdongDeviceOpt decodes every field net_dingdong_dev_opt_x2s reads", () => {
   const root = parse(
     "<dingdongDeviceOpt><id>2</id><opt>setParam</opt><musicId>4</musicId>" +
       "<volLevel>5</volLevel><ledState>1</ledState><name>Hallway</name>" +
@@ -19,7 +20,7 @@ Deno.test("dingdongDeviceOpt decodes every field net_dingdong_dev_opt_x2s reads"
   });
 });
 
-Deno.test("dingdongDeviceOpt decodes a cmd 485 getParam reply", () => {
+test("dingdongDeviceOpt decodes a cmd 485 getParam reply", () => {
   const root = parse(
     '<dingdongDeviceOpt version="1.1"><id>1</id><volLevel>3</volLevel>' +
       "<ledState>0</ledState><name>Office</name></dingdongDeviceOpt>",
@@ -33,7 +34,7 @@ Deno.test("dingdongDeviceOpt decodes a cmd 485 getParam reply", () => {
   });
 });
 
-Deno.test("dingdongDeviceOpt rejects an option the firmware does not map", () => {
+test("dingdongDeviceOpt rejects an option the firmware does not map", () => {
   const root = parse(
     "<dingdongDeviceOpt><opt>rename</opt></dingdongDeviceOpt>",
   ).root;
@@ -41,7 +42,7 @@ Deno.test("dingdongDeviceOpt rejects an option the firmware does not map", () =>
   assertThrows(() => dingdongDeviceOpt.decode(root), Error, '"rename"');
 });
 
-Deno.test("dingdongDeviceOpt round-trips through encode and decode", () => {
+test("dingdongDeviceOpt round-trips through encode and decode", () => {
   const value = {
     id: 3,
     opt: "addDevice" as const,

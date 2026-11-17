@@ -1,8 +1,9 @@
+import { test } from "node:test";
 import { assertEquals } from "@std/assert";
 import { ICMP_TYPE, type IcmpPacket, icmpPacket } from "./mod.ts";
 
-Deno.test("icmpPacket", async (t) => {
-  await t.step("round-trips a generic packet", () => {
+test("icmpPacket", async (t) => {
+  await t.test("round-trips a generic packet", () => {
     const coder = icmpPacket();
     const packet: IcmpPacket = {
       type: ICMP_TYPE.ECHO_REQUEST,
@@ -25,7 +26,7 @@ Deno.test("icmpPacket", async (t) => {
     assertEquals(decoded.payload, packet.payload);
   });
 
-  await t.step("decodes Time Exceeded with empty payload", () => {
+  await t.test("decodes Time Exceeded with empty payload", () => {
     // deno-fmt-ignore
     const wire = new Uint8Array([
       0x0b, 0x00, 0xf4, 0xff, 0x00, 0x00, 0x00, 0x00,
@@ -40,7 +41,7 @@ Deno.test("icmpPacket", async (t) => {
     assertEquals(packet.payload, new Uint8Array(4));
   });
 
-  await t.step("decodes a known Echo Reply on the wire", () => {
+  await t.test("decodes a known Echo Reply on the wire", () => {
     // deno-fmt-ignore
     const wire = new Uint8Array([
       0x00, 0x00, 0xff, 0xfd, 0x00, 0x01, 0x00, 0x01,

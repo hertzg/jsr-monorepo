@@ -1,3 +1,4 @@
+import { test } from "node:test";
 import { assertEquals } from "@std/assert";
 import { parse, serialize } from "./mod.ts";
 import { ACCOUNT_TYPE_BANK, serializeAccount } from "./account.ts";
@@ -6,7 +7,7 @@ import { ACCOUNT_TYPE_BANK, serializeAccount } from "./account.ts";
 // entity holds `undefined` wherever the XML had nothing.
 const OMITTED = undefined as unknown as string;
 
-Deno.test("parseAccount renames the terse XHB attributes to descriptive properties", () => {
+test("parseAccount renames the terse XHB attributes to descriptive properties", () => {
   const xml = [
     '<?xml version="1.0"?>',
     '<homebank v="1.3" d="050402">',
@@ -41,7 +42,7 @@ Deno.test("parseAccount renames the terse XHB attributes to descriptive properti
   assertEquals(serialize(parse(xml)), xml);
 });
 
-Deno.test("serializeAccount omits every zero-valued integer attribute", () => {
+test("serializeAccount omits every zero-valued integer attribute", () => {
   assertEquals(
     serializeAccount({
       key: 4,
@@ -65,7 +66,7 @@ Deno.test("serializeAccount omits every zero-valued integer attribute", () => {
   );
 });
 
-Deno.test("notes are the only account text that gets XML-escaped", () => {
+test("notes are the only account text that gets XML-escaped", () => {
   const xml = [
     '<?xml version="1.0"?>',
     '<homebank v="1.3" d="050402">',
