@@ -7,7 +7,9 @@
     "./encoding/message": "./encoding/message.ts",
     "./protocol/request": "./protocol/request.ts",
     "./protocol/response": "./protocol/response.ts",
-    "./protocol/message": "./protocol/message.ts"
+    "./protocol/message": "./protocol/message.ts",
+    "./streams/decode": "./streams/decode.ts",
+    "./streams/encode": "./streams/encode.ts"
   },
   "publish": {
     "exclude": [

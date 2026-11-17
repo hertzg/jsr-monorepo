@@ -6,6 +6,8 @@
     "./encoding/message": [],
     "./protocol/request": [],
     "./protocol/response": [],
-    "./protocol/message": []
+    "./protocol/message": [],
+    "./streams/decode": [],
+    "./streams/encode": []
   }
 }
