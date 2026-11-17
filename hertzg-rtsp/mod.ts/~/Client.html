@@ -191,7 +191,7 @@ Properties</h2></div><div class="space-y-8"><div class="anchorable docEntry" id=
   </defs>
 </svg>
 </a>
-<span class="font-bold font-lg">request</span><span class="font-medium text-stone-500 dark:text-stone-200"><span>: (<span><span>request<span>: <a href="../.././mod.ts/~/RtspRequest.html" class="link td-ref">RtspRequest</a></span></span></span>) =&gt; <span class="td-ref">Promise</span>&lt;<a href="../.././mod.ts/~/RtspResponse.html" class="link td-ref">RtspResponse</a>&gt;</span></span>
+<span class="font-bold font-lg">request</span><span class="font-medium text-stone-500 dark:text-stone-200"><span>: (<span><span>request<span>: <a href="../.././mod.ts/~/ClientRequest.html" class="link td-ref">ClientRequest</a></span></span></span>) =&gt; <span class="td-ref">Promise</span>&lt;<a href="../.././mod.ts/~/RtspResponse.html" class="link td-ref">RtspResponse</a>&gt;</span></span>
       </code>
     </div><a
   class="sourceButton"
@@ -219,6 +219,10 @@ Properties</h2></div><div class="space-y-8"><div class="anchorable docEntry" id=
 </svg>
 </a>
 </div><div class="max-w-[75ch]"><div class="markdown"><p>Sends a request and resolves with its final response.</p>
+<p>A request that names no <code>rtspVersion</code> gets the client's <code>rtspVersion</code>
+option, and <code>&quot;RTSP/1.0&quot;</code> without that option. One without <code>headers</code>
+goes out with <code>CSeq</code> alone, one without <code>messageBody</code> with no message
+body.</p>
 <p>The other header fields go out in the order and the spelling given. The
 client sets <code>CSeq</code> itself, on a copy: the request passed in and its
 <code>headers</code> are left as they are. A <code>CSeq</code> the caller did set, in any

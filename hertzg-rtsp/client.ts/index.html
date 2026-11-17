@@ -100,9 +100,13 @@
     <main><section>
   <div class="space-y-2 flex-1"><div class="space-y-7" id="module_doc"><div class="markdown"><p>An RTSP client over any <code>{ readable, writable }</code> byte pair.</p>
 <p><a href=".././client.ts/~/createClient.html">createClient</a> does not open a socket: the caller passes the two
-sides of a connection it already has. Requests are numbered with <code>CSeq</code> and
-each one resolves with the response that carries the same number, so
-several can be on the wire at once.</p>
+sides of a connection it already has. The pair does not have to be web
+streams of this runtime: an <a href=".././client.ts/~/OctetSource.html">OctetSource</a> and an <a href=".././client.ts/~/OctetSink.html">OctetSink</a>
+are enough, so what <code>Duplex.toWeb(socket)</code> returns goes in as it is.</p>
+<p>Requests are numbered with <code>CSeq</code> and each one resolves with the response
+that carries the same number, so several can be on the wire at once. A
+request names its method and its Request-URI. Its RTSP version, header
+fields and message body may be left out, see <a href=".././client.ts/~/ClientRequest.html">ClientRequest</a>.</p>
 <p>Interleaved binary data (the <code>$</code> blocks that carry media on the same
 connection) is read and written per Channel ID through <code>channel()</code>. A <code>$</code>
 block for a Channel ID nobody claimed is dropped and counted in
@@ -171,19 +175,16 @@ const client = createClient({
 const response = client.request({
   method: &quot;OPTIONS&quot;,
   requestUri: &quot;*&quot;,
-  rtspVersion: &quot;RTSP/2.0&quot;,
-  headers: [],
-  messageBody: new Uint8Array(0),
 });
 
 const { value: sent } = await toServer.readable.getReader().read();
 assertEquals(
   new TextDecoder().decode(sent),
-  &quot;OPTIONS * RTSP/2.0\r\nCSeq: 1\r\n\r\n&quot;,
+  &quot;OPTIONS * RTSP/1.0\r\nCSeq: 1\r\n\r\n&quot;,
 );
 
 await toClient.writable.getWriter().write(
-  new TextEncoder().encode(&quot;RTSP/2.0 200 OK\r\nCSeq: 1\r\n\r\n&quot;),
+  new TextEncoder().encode(&quot;RTSP/1.0 200 OK\r\nCSeq: 1\r\n\r\n&quot;),
 );
 assertEquals((await response).statusCode, 200);
 
@@ -201,19 +202,16 @@ const client = createClient({
 const response = client.request({
   method: &quot;OPTIONS&quot;,
   requestUri: &quot;*&quot;,
-  rtspVersion: &quot;RTSP/2.0&quot;,
-  headers: [],
-  messageBody: new Uint8Array(0),
 });
 
 const { value: sent } = await toServer.readable.getReader().read();
 assertEquals(
   new TextDecoder().decode(sent),
-  &quot;OPTIONS * RTSP/2.0\r\nCSeq: 1\r\n\r\n&quot;,
+  &quot;OPTIONS * RTSP/1.0\r\nCSeq: 1\r\n\r\n&quot;,
 );
 
 await toClient.writable.getWriter().write(
-  new TextEncoder().encode(&quot;RTSP/2.0 200 OK\r\nCSeq: 1\r\n\r\n&quot;),
+  new TextEncoder().encode(&quot;RTSP/1.0 200 OK\r\nCSeq: 1\r\n\r\n&quot;),
 );
 assertEquals((await response).statusCode, 200);
 
@@ -308,7 +306,7 @@ Functions</h2></div><div class="namespaceSection"><div id="namespace_createclien
 Type Aliases</h2></div><div class="namespaceSection"><div id="namespace_client" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-TypeAlias bg-TypeAlias/15 dark:text-TypeAliasDark dark:bg-TypeAliasDark/15" title="Type Alias">T</div></div>
 <div class="namespaceItemContent">
 		    <a href="..&#x2F;.&#x2F;client.ts&#x2F;~&#x2F;Client.html" title="Client">
-			    <span>Client</span><span> = { request<span>: (<span><span>request<span>: <span class="td-ref">RtspRequest</span></span></span></span>) =&gt; <span class="td-ref">Promise</span>&lt;<span class="td-ref">RtspResponse</span>&gt;</span>; channel<span>: (<span><span>channelId<span>: <span class="td-kw">number</span></span></span></span>) =&gt; <span class="td-ref">ReadableWritablePair</span>&lt;<span class="td-ref">Uint8Array</span><span>, </span><span class="td-ref">Uint8Array</span>&gt;</span>; droppedBlocks<span>: <span class="td-ref">ReadonlyMap</span>&lt;<span class="td-kw">number</span><span>, </span><span class="td-kw">number</span>&gt;</span>; close<span>: () =&gt; <span class="td-ref">Promise</span>&lt;<span class="td-kw">void</span>&gt;</span>;  }</span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>An RTSP client, made by <a href=".././client.ts/~/createClient.html">createClient</a>.</p>
+			    <span>Client</span><span> = { request<span>: (<span><span>request<span>: <span class="td-ref">ClientRequest</span></span></span></span>) =&gt; <span class="td-ref">Promise</span>&lt;<span class="td-ref">RtspResponse</span>&gt;</span>; channel<span>: (<span><span>channelId<span>: <span class="td-kw">number</span></span></span></span>) =&gt; <span class="td-ref">ReadableWritablePair</span>&lt;<span class="td-ref">Uint8Array</span><span>, </span><span class="td-ref">Uint8Array</span>&gt;</span>; droppedBlocks<span>: <span class="td-ref">ReadonlyMap</span>&lt;<span class="td-kw">number</span><span>, </span><span class="td-kw">number</span>&gt;</span>; close<span>: () =&gt; <span class="td-ref">Promise</span>&lt;<span class="td-kw">void</span>&gt;</span>;  }</span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>An RTSP client, made by <a href=".././client.ts/~/createClient.html">createClient</a>.</p>
 </div></div><ul class="namespaceItemContentSubItems"><li>
                 <a href="..&#x2F;.&#x2F;client.ts&#x2F;~&#x2F;Client.html#property_channel">
                   <span>channel</span><span>: (<span><span>channelId<span>: <span class="td-kw">number</span></span></span></span>) =&gt; <span class="td-ref">ReadableWritablePair</span>&lt;<span class="td-ref">Uint8Array</span><span>, </span><span class="td-ref">Uint8Array</span>&gt;</span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Claims a Channel ID (0 to 255) and returns its two sides.</p>
@@ -324,21 +322,97 @@ claimed that Channel ID when they arrived. A live view: it changes as
 blocks are dropped.</p>
 </div></div></li><li>
                 <a href="..&#x2F;.&#x2F;client.ts&#x2F;~&#x2F;Client.html#property_request">
-                  <span>request</span><span>: (<span><span>request<span>: <span class="td-ref">RtspRequest</span></span></span></span>) =&gt; <span class="td-ref">Promise</span>&lt;<span class="td-ref">RtspResponse</span>&gt;</span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Sends a request and resolves with its final response.</p>
+                  <span>request</span><span>: (<span><span>request<span>: <span class="td-ref">ClientRequest</span></span></span></span>) =&gt; <span class="td-ref">Promise</span>&lt;<span class="td-ref">RtspResponse</span>&gt;</span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Sends a request and resolves with its final response.</p>
 </div></div></li></ul></div>
     </div><div id="namespace_clientoptions" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-TypeAlias bg-TypeAlias/15 dark:text-TypeAliasDark dark:bg-TypeAliasDark/15" title="Type Alias">T</div></div>
 <div class="namespaceItemContent">
 		    <a href="..&#x2F;.&#x2F;client.ts&#x2F;~&#x2F;ClientOptions.html" title="ClientOptions">
-			    <span>ClientOptions</span><span> = { readable<span>: <span class="td-ref">ReadableStream</span>&lt;<span class="td-ref">Uint8Array</span>&gt;</span>; writable<span>: <span class="td-ref">WritableStream</span>&lt;<span class="td-ref">Uint8Array</span>&gt;</span>; onRequest<span class="td-op">?</span><span>: (<span><span>request<span>: <span class="td-ref">RtspRequest</span></span></span></span>) =&gt; <span><span class="td-ref">RtspResponse</span><span class="td-op"> | </span><span class="td-ref">Promise</span>&lt;<span class="td-ref">RtspResponse</span>&gt;</span></span>;  }</span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>The two sides of the connection a client runs on, and how it answers the server.</p>
+			    <span>ClientOptions</span><span> = { readable<span>: <span class="td-ref">OctetSource</span></span>; writable<span>: <span class="td-ref">OctetSink</span></span>; rtspVersion<span class="td-op">?</span><span>: <span class="td-kw">string</span></span>; onRequest<span class="td-op">?</span><span>: (<span><span>request<span>: <span class="td-ref">RtspRequest</span></span></span></span>) =&gt; <span><span class="td-ref">RtspResponse</span><span class="td-op"> | </span><span class="td-ref">Promise</span>&lt;<span class="td-ref">RtspResponse</span>&gt;</span></span>;  }</span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>The two sides of the connection a client runs on, and how it answers the server.</p>
 </div></div><ul class="namespaceItemContentSubItems"><li>
                 <a href="..&#x2F;.&#x2F;client.ts&#x2F;~&#x2F;ClientOptions.html#property_onrequest">
                   <span>onRequest</span><span>: (<span><span>request<span>: <span class="td-ref">RtspRequest</span></span></span></span>) =&gt; <span><span class="td-ref">RtspResponse</span><span class="td-op"> | </span><span class="td-ref">Promise</span>&lt;<span class="td-ref">RtspResponse</span>&gt;</span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Answers a request sent by the server. Default: <code>501 Not Implemented</code>.</p>
 </div></div></li><li>
                 <a href="..&#x2F;.&#x2F;client.ts&#x2F;~&#x2F;ClientOptions.html#property_readable">
-                  <span>readable</span><span>: <span class="td-ref">ReadableStream</span>&lt;<span class="td-ref">Uint8Array</span>&gt;</span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>The octets the server sends.</p>
+                  <span>readable</span><span>: <span class="td-ref">OctetSource</span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>The octets the server sends.</p>
+</div></div></li><li>
+                <a href="..&#x2F;.&#x2F;client.ts&#x2F;~&#x2F;ClientOptions.html#property_rtspversion">
+                  <span>rtspVersion</span><span>: <span class="td-kw">string</span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>The version put on a request that names none. Default: <code>&quot;RTSP/1.0&quot;</code>,
+which is what cameras speak.</p>
 </div></div></li><li>
                 <a href="..&#x2F;.&#x2F;client.ts&#x2F;~&#x2F;ClientOptions.html#property_writable">
-                  <span>writable</span><span>: <span class="td-ref">WritableStream</span>&lt;<span class="td-ref">Uint8Array</span>&gt;</span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Where the octets for the server go.</p>
+                  <span>writable</span><span>: <span class="td-ref">OctetSink</span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Where the octets for the server go.</p>
+</div></div></li></ul></div>
+    </div><div id="namespace_clientrequest" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-TypeAlias bg-TypeAlias/15 dark:text-TypeAliasDark dark:bg-TypeAliasDark/15" title="Type Alias">T</div></div>
+<div class="namespaceItemContent">
+		    <a href="..&#x2F;.&#x2F;client.ts&#x2F;~&#x2F;ClientRequest.html" title="ClientRequest">
+			    <span>ClientRequest</span><span> = { method<span>: <span class="td-kw">string</span></span>; requestUri<span>: <span class="td-kw">string</span></span>; rtspVersion<span class="td-op">?</span><span>: <span class="td-kw">string</span></span>; headers<span class="td-op">?</span><span>: <span class="td-ref">HeaderField</span>[]</span>; messageBody<span class="td-op">?</span><span>: <span class="td-ref">Uint8Array</span></span>;  }</span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>What <code>request()</code> takes: an <a href=".././protocol/request.ts/~/RtspRequest.html">RtspRequest</a> whose <code>rtspVersion</code>,
+<code>headers</code> and <code>messageBody</code> may be left out. An <code>RtspRequest</code> is one.</p>
+</div></div><ul class="namespaceItemContentSubItems"><li>
+                <a href="..&#x2F;.&#x2F;client.ts&#x2F;~&#x2F;ClientRequest.html#property_headers">
+                  <span>headers</span><span>: <span class="td-ref">HeaderField</span>[]</span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Default: no header fields.</p>
+</div></div></li><li>
+                <a href="..&#x2F;.&#x2F;client.ts&#x2F;~&#x2F;ClientRequest.html#property_messagebody">
+                  <span>messageBody</span><span>: <span class="td-ref">Uint8Array</span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Default: no message body.</p>
+</div></div></li><li>
+                <a href="..&#x2F;.&#x2F;client.ts&#x2F;~&#x2F;ClientRequest.html#property_method">
+                  <span>method</span><span>: <span class="td-kw">string</span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>The method, such as <code>&quot;DESCRIBE&quot;</code>, sent as written.</p>
+</div></div></li><li>
+                <a href="..&#x2F;.&#x2F;client.ts&#x2F;~&#x2F;ClientRequest.html#property_requesturi">
+                  <span>requestUri</span><span>: <span class="td-kw">string</span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p><code>&quot;*&quot;</code> or an RTSP URI.</p>
+</div></div></li><li>
+                <a href="..&#x2F;.&#x2F;client.ts&#x2F;~&#x2F;ClientRequest.html#property_rtspversion">
+                  <span>rtspVersion</span><span>: <span class="td-kw">string</span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Default: the client's <code>rtspVersion</code> option.</p>
+</div></div></li></ul></div>
+    </div><div id="namespace_octetreader" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-TypeAlias bg-TypeAlias/15 dark:text-TypeAliasDark dark:bg-TypeAliasDark/15" title="Type Alias">T</div></div>
+<div class="namespaceItemContent">
+		    <a href="..&#x2F;.&#x2F;client.ts&#x2F;~&#x2F;OctetReader.html" title="OctetReader">
+			    <span>OctetReader</span><span> = { read()<span>: <span class="td-ref">Promise</span>&lt;<div class="ml-indent"><div><span>{ done<span>: <span class="td-lit">false</span></span>; value<span>: <span class="td-ref">Uint8Array</span></span>;  }</span><br /><span><span class="td-op"> | </span>{ done<span>: <span class="td-lit">true</span></span>; value<span class="td-op">?</span><span>: <span class="td-kw">unknown</span></span>;  }</span></div></div>&gt;</span>; cancel(<span><span>reason<span class="td-op">?</span><span>: <span class="td-kw">unknown</span></span></span></span>)<span>: <span class="td-ref">Promise</span>&lt;<span class="td-kw">void</span>&gt;</span>;  }</span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>The reader of an <a href=".././client.ts/~/OctetSource.html">OctetSource</a>: what the client calls to take the
+octets the server sends. A <code>ReadableStreamDefaultReader&lt;Uint8Array&gt;</code> is
+one.</p>
+</div></div><ul class="namespaceItemContentSubItems"><li>
+                <a href="..&#x2F;.&#x2F;client.ts&#x2F;~&#x2F;OctetReader.html#method_cancel_0">
+                  <span>cancel</span><span>(<span><span>reason<span class="td-op">?</span><span>: <span class="td-kw">unknown</span></span></span></span>)<span>: <span class="td-ref">Promise</span>&lt;<span class="td-kw">void</span>&gt;</span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Tells the connection that nothing more will be read.</p>
+</div></div></li><li>
+                <a href="..&#x2F;.&#x2F;client.ts&#x2F;~&#x2F;OctetReader.html#method_read_0">
+                  <span>read</span><span>()<span>: <span class="td-ref">Promise</span>&lt;<div class="ml-indent"><div><span>{ done<span>: <span class="td-lit">false</span></span>; value<span>: <span class="td-ref">Uint8Array</span></span>;  }</span><br /><span><span class="td-op"> | </span>{ done<span>: <span class="td-lit">true</span></span>; value<span class="td-op">?</span><span>: <span class="td-kw">unknown</span></span>;  }</span></div></div>&gt;</span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Resolves with the next chunk, or with <code>done: true</code> when the server has
+ended the connection. Rejects when the connection failed. Whatever
+<code>value</code> comes with <code>done: true</code> is not looked at.</p>
+</div></div></li></ul></div>
+    </div><div id="namespace_octetsink" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-TypeAlias bg-TypeAlias/15 dark:text-TypeAliasDark dark:bg-TypeAliasDark/15" title="Type Alias">T</div></div>
+<div class="namespaceItemContent">
+		    <a href="..&#x2F;.&#x2F;client.ts&#x2F;~&#x2F;OctetSink.html" title="OctetSink">
+			    <span>OctetSink</span><span> = { getWriter()<span>: <span class="td-ref">OctetWriter</span></span>;  }</span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>The writable side of a connection, reduced to what the client calls. A
+<code>WritableStream&lt;Uint8Array&gt;</code> is one, whichever runtime or package typed
+it. The client calls <code>getWriter()</code> once and keeps the writer.</p>
+</div></div><ul class="namespaceItemContentSubItems"><li>
+                <a href="..&#x2F;.&#x2F;client.ts&#x2F;~&#x2F;OctetSink.html#method_getwriter_0">
+                  <span>getWriter</span><span>()<span>: <span class="td-ref">OctetWriter</span></span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Returns the one writer the client writes the connection through.</p>
+</div></div></li></ul></div>
+    </div><div id="namespace_octetsource" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-TypeAlias bg-TypeAlias/15 dark:text-TypeAliasDark dark:bg-TypeAliasDark/15" title="Type Alias">T</div></div>
+<div class="namespaceItemContent">
+		    <a href="..&#x2F;.&#x2F;client.ts&#x2F;~&#x2F;OctetSource.html" title="OctetSource">
+			    <span>OctetSource</span><span> = { getReader()<span>: <span class="td-ref">OctetReader</span></span>;  }</span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>The readable side of a connection, reduced to what the client calls. A
+<code>ReadableStream&lt;Uint8Array&gt;</code> is one, whichever runtime or package typed
+it. The client calls <code>getReader()</code> once and keeps the reader.</p>
+</div></div><ul class="namespaceItemContentSubItems"><li>
+                <a href="..&#x2F;.&#x2F;client.ts&#x2F;~&#x2F;OctetSource.html#method_getreader_0">
+                  <span>getReader</span><span>()<span>: <span class="td-ref">OctetReader</span></span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Returns the one reader the client reads the connection through.</p>
+</div></div></li></ul></div>
+    </div><div id="namespace_octetwriter" class="namespaceItem" ><div class="docNodeKindIcon"><div class="text-TypeAlias bg-TypeAlias/15 dark:text-TypeAliasDark dark:bg-TypeAliasDark/15" title="Type Alias">T</div></div>
+<div class="namespaceItemContent">
+		    <a href="..&#x2F;.&#x2F;client.ts&#x2F;~&#x2F;OctetWriter.html" title="OctetWriter">
+			    <span>OctetWriter</span><span> = { write(<span><span>chunk<span>: <span class="td-ref">Uint8Array</span></span></span></span>)<span>: <span class="td-ref">Promise</span>&lt;<span class="td-kw">void</span>&gt;</span>; close()<span>: <span class="td-ref">Promise</span>&lt;<span class="td-kw">void</span>&gt;</span>; abort(<span><span>reason<span class="td-op">?</span><span>: <span class="td-kw">unknown</span></span></span></span>)<span>: <span class="td-ref">Promise</span>&lt;<span class="td-kw">void</span>&gt;</span>;  }</span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>The writer of an <a href=".././client.ts/~/OctetSink.html">OctetSink</a>: what the client calls to send octets
+to the server. A <code>WritableStreamDefaultWriter&lt;Uint8Array&gt;</code> is one.</p>
+</div></div><ul class="namespaceItemContentSubItems"><li>
+                <a href="..&#x2F;.&#x2F;client.ts&#x2F;~&#x2F;OctetWriter.html#method_abort_0">
+                  <span>abort</span><span>(<span><span>reason<span class="td-op">?</span><span>: <span class="td-kw">unknown</span></span></span></span>)<span>: <span class="td-ref">Promise</span>&lt;<span class="td-kw">void</span>&gt;</span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Ends the writable side at once, dropping what has not gone out.</p>
+</div></div></li><li>
+                <a href="..&#x2F;.&#x2F;client.ts&#x2F;~&#x2F;OctetWriter.html#method_close_0">
+                  <span>close</span><span>()<span>: <span class="td-ref">Promise</span>&lt;<span class="td-kw">void</span>&gt;</span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Ends the writable side once everything written has gone out.</p>
+</div></div></li><li>
+                <a href="..&#x2F;.&#x2F;client.ts&#x2F;~&#x2F;OctetWriter.html#method_write_0">
+                  <span>write</span><span>(<span><span>chunk<span>: <span class="td-ref">Uint8Array</span></span></span></span>)<span>: <span class="td-ref">Promise</span>&lt;<span class="td-kw">void</span>&gt;</span></span></a><div class="namespaceItemContentDoc"><div class="markdown_summary"><p>Sends one chunk. The client waits for it to resolve before it writes the
+next one, and takes a rejection as the failure of the connection.</p>
 </div></div></li></ul></div>
     </div></div>
 </section>
@@ -401,19 +475,19 @@ blocks are dropped.</p>
                   </span>
                 </a>
               </li><li>
-                <a href="..&#x2F;.&#x2F;encoding&#x2F;interleaved.ts&#x2F;~&#x2F;decodeInterleavedBinaryData.html" title="decodeInterleavedBinaryData"><div class="docNodeKindIcon"><div class="text-Function bg-Function/15 dark:text-FunctionDark dark:bg-FunctionDark/15" title="Function">f</div></div>
-<span class="hover:bg-Function/15 hover:bg-FunctionDark/15">
-                    decodeInterleavedBinaryData
+                <a href="..&#x2F;.&#x2F;client.ts&#x2F;~&#x2F;ClientRequest.html" title="ClientRequest"><div class="docNodeKindIcon"><div class="text-TypeAlias bg-TypeAlias/15 dark:text-TypeAliasDark dark:bg-TypeAliasDark/15" title="Type Alias">T</div></div>
+<span class="hover:bg-TypeAlias/15 hover:bg-TypeAliasDark/15">
+                    ClientRequest
                   </span>
                 </a>
               </li><li>
-                <a href="..&#x2F;.&#x2F;encoding&#x2F;interleaved.ts&#x2F;~&#x2F;encodeInterleavedBinaryData.html" title="encodeInterleavedBinaryData"><div class="docNodeKindIcon"><div class="text-Function bg-Function/15 dark:text-FunctionDark dark:bg-FunctionDark/15" title="Function">f</div></div>
-<span class="hover:bg-Function/15 hover:bg-FunctionDark/15">
-                    encodeInterleavedBinaryData
+                <a href="..&#x2F;.&#x2F;client.ts&#x2F;~&#x2F;OctetReader.html" title="OctetReader"><div class="docNodeKindIcon"><div class="text-TypeAlias bg-TypeAlias/15 dark:text-TypeAliasDark dark:bg-TypeAliasDark/15" title="Type Alias">T</div></div>
+<span class="hover:bg-TypeAlias/15 hover:bg-TypeAliasDark/15">
+                    OctetReader
                   </span>
                 </a>
               </li></ul><a class="flex items-center gap-0.5" href="..&#x2F;.&#x2F;all_symbols.html">
-              <span class="leading-none">view all 48 symbols</span><svg
+              <span class="leading-none">view all 58 symbols</span><svg
   width="16"
   height="16"
   viewBox="0 0 16 16"
@@ -428,7 +502,7 @@ blocks are dropped.</p>
   />
 </svg>
 </a></nav><nav class="documentNavigation">
-          <h3>Document Navigation</h3><ul><li><a href="#examples" title="Examples">Examples</a></li><li><ul><li><a href="#example_0" title="Send a request and read its response">Send a request and read its response</a></li></ul></li><li><a href="#client_ts_functions" title="Functions">Functions</a></li><li><ul><li><a href="#namespace_createclient" title="createClient">createClient</a></li></ul></li><li><a href="#client_ts_type-aliases" title="Type Aliases">Type Aliases</a></li><li><ul><li><a href="#namespace_client" title="Client">Client</a></li><li><a href="#namespace_clientoptions" title="ClientOptions">ClientOptions</a></li></ul></li></ul></nav></div>
+          <h3>Document Navigation</h3><ul><li><a href="#examples" title="Examples">Examples</a></li><li><ul><li><a href="#example_0" title="Send a request and read its response">Send a request and read its response</a></li></ul></li><li><a href="#client_ts_functions" title="Functions">Functions</a></li><li><ul><li><a href="#namespace_createclient" title="createClient">createClient</a></li></ul></li><li><a href="#client_ts_type-aliases" title="Type Aliases">Type Aliases</a></li><li><ul><li><a href="#namespace_client" title="Client">Client</a></li><li><a href="#namespace_clientoptions" title="ClientOptions">ClientOptions</a></li><li><a href="#namespace_clientrequest" title="ClientRequest">ClientRequest</a></li><li><a href="#namespace_octetreader" title="OctetReader">OctetReader</a></li><li><a href="#namespace_octetsink" title="OctetSink">OctetSink</a></li><li><a href="#namespace_octetsource" title="OctetSource">OctetSource</a></li><li><a href="#namespace_octetwriter" title="OctetWriter">OctetWriter</a></li></ul></li></ul></nav></div>
   </div></div>
 </div>
 </div>

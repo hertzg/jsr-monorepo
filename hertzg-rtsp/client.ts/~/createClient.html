@@ -167,6 +167,11 @@
 </a>
 <span class="font-bold">createClient</span><span class="font-medium">(<span><span>options<span>: <a href="../.././client.ts/~/ClientOptions.html" class="link td-ref">ClientOptions</a></span></span></span>)<span>: <a href="../.././client.ts/~/Client.html" class="link td-ref">Client</a></span> </span>
       </code><div class="space-y-7" id=""><div class="markdown"><p>Creates an RTSP client on a connection that is already open.</p>
+<p>The two sides are used through <code>getReader()</code> and <code>getWriter()</code> only, and
+the reader and the writer through <code>read</code>, <code>cancel</code>, <code>write</code>, <code>close</code> and
+<code>abort</code> only. The client takes both for itself and does not give them
+back. It writes one chunk at a time and reads only when it has room for
+what comes in.</p>
 <p>Each request gets the next <code>CSeq</code>, starting at 1, in place of any <code>CSeq</code>
 the caller set. A response resolves the request with the same <code>CSeq</code>,
 whatever case the server writes that name in, so responses may arrive in
@@ -236,16 +241,11 @@ const client = createClient({
 const described = client.request({
   method: &quot;DESCRIBE&quot;,
   requestUri: &quot;rtsp://example.com/fizzle/foo&quot;,
-  rtspVersion: &quot;RTSP/2.0&quot;,
   headers: [[&quot;Accept&quot;, &quot;application/sdp&quot;]],
-  messageBody: new Uint8Array(0),
 });
 const options = client.request({
   method: &quot;OPTIONS&quot;,
   requestUri: &quot;*&quot;,
-  rtspVersion: &quot;RTSP/2.0&quot;,
-  headers: [],
-  messageBody: new Uint8Array(0),
 });
 
 const sent = toServer.readable.getReader();
@@ -254,8 +254,8 @@ await sent.read();
 
 await toClient.writable.getWriter().write(
   new TextEncoder().encode(
-    &quot;RTSP/2.0 200 OK\r\nCSeq: 2\r\n\r\n&quot; +
-      &quot;RTSP/2.0 404 Not Found\r\nCSeq: 1\r\n\r\n&quot;,
+    &quot;RTSP/1.0 200 OK\r\nCSeq: 2\r\n\r\n&quot; +
+      &quot;RTSP/1.0 404 Not Found\r\nCSeq: 1\r\n\r\n&quot;,
   ),
 );
 
@@ -274,16 +274,11 @@ const client = createClient({
 const described = client.request({
   method: &quot;DESCRIBE&quot;,
   requestUri: &quot;rtsp://example.com/fizzle/foo&quot;,
-  rtspVersion: &quot;RTSP/2.0&quot;,
   headers: [[&quot;Accept&quot;, &quot;application/sdp&quot;]],
-  messageBody: new Uint8Array(0),
 });
 const options = client.request({
   method: &quot;OPTIONS&quot;,
   requestUri: &quot;*&quot;,
-  rtspVersion: &quot;RTSP/2.0&quot;,
-  headers: [],
-  messageBody: new Uint8Array(0),
 });
 
 const sent = toServer.readable.getReader();
@@ -292,8 +287,8 @@ await sent.read();
 
 await toClient.writable.getWriter().write(
   new TextEncoder().encode(
-    &quot;RTSP/2.0 200 OK\r\nCSeq: 2\r\n\r\n&quot; +
-      &quot;RTSP/2.0 404 Not Found\r\nCSeq: 1\r\n\r\n&quot;,
+    &quot;RTSP/1.0 200 OK\r\nCSeq: 2\r\n\r\n&quot; +
+      &quot;RTSP/1.0 404 Not Found\r\nCSeq: 1\r\n\r\n&quot;,
   ),
 );
 
@@ -369,13 +364,11 @@ const client = createClient({
 const response = client.request({
   method: &quot;DESCRIBE&quot;,
   requestUri: &quot;rtsp://example.com/fizzle/foo&quot;,
-  rtspVersion: &quot;RTSP/1.0&quot;,
   headers: [
     [&quot;cseq&quot;, &quot;&quot;],
     [&quot;User-Agent&quot;, &quot;PhonyClient/1.2&quot;],
     [&quot;accept&quot;, &quot;application/sdp&quot;],
   ],
-  messageBody: new Uint8Array(0),
 });
 
 const { value: sent } = await toServer.readable.getReader().read();
@@ -410,13 +403,11 @@ const client = createClient({
 const response = client.request({
   method: &quot;DESCRIBE&quot;,
   requestUri: &quot;rtsp://example.com/fizzle/foo&quot;,
-  rtspVersion: &quot;RTSP/1.0&quot;,
   headers: [
     [&quot;cseq&quot;, &quot;&quot;],
     [&quot;User-Agent&quot;, &quot;PhonyClient/1.2&quot;],
     [&quot;accept&quot;, &quot;application/sdp&quot;],
   ],
-  messageBody: new Uint8Array(0),
 });
 
 const { value: sent } = await toServer.readable.getReader().read();
@@ -611,9 +602,6 @@ const client = createClient({
 const response = client.request({
   method: &quot;OPTIONS&quot;,
   requestUri: &quot;*&quot;,
-  rtspVersion: &quot;RTSP/2.0&quot;,
-  headers: [],
-  messageBody: new Uint8Array(0),
 });
 await toServer.readable.getReader().read();
 
@@ -621,7 +609,7 @@ await toClient.writable.getWriter().write(
   new TextEncoder().encode(
     &quot;$\x07\x00\x01A&quot; +
       &quot;$\x07\x00\x01B&quot; +
-      &quot;RTSP/2.0 200 OK\r\nCSeq: 1\r\n\r\n&quot;,
+      &quot;RTSP/1.0 200 OK\r\nCSeq: 1\r\n\r\n&quot;,
   ),
 );
 await response;
@@ -640,9 +628,6 @@ const client = createClient({
 const response = client.request({
   method: &quot;OPTIONS&quot;,
   requestUri: &quot;*&quot;,
-  rtspVersion: &quot;RTSP/2.0&quot;,
-  headers: [],
-  messageBody: new Uint8Array(0),
 });
 await toServer.readable.getReader().read();
 
@@ -650,7 +635,7 @@ await toClient.writable.getWriter().write(
   new TextEncoder().encode(
     &quot;$\x07\x00\x01A&quot; +
       &quot;$\x07\x00\x01B&quot; +
-      &quot;RTSP/2.0 200 OK\r\nCSeq: 1\r\n\r\n&quot;,
+      &quot;RTSP/1.0 200 OK\r\nCSeq: 1\r\n\r\n&quot;,
   ),
 );
 await response;
@@ -835,9 +820,6 @@ const client = createClient({
 const response = client.request({
   method: &quot;OPTIONS&quot;,
   requestUri: &quot;*&quot;,
-  rtspVersion: &quot;RTSP/2.0&quot;,
-  headers: [],
-  messageBody: new Uint8Array(0),
 });
 await toServer.readable.getReader().read();
 
@@ -857,9 +839,6 @@ const client = createClient({
 const response = client.request({
   method: &quot;OPTIONS&quot;,
   requestUri: &quot;*&quot;,
-  rtspVersion: &quot;RTSP/2.0&quot;,
-  headers: [],
-  messageBody: new Uint8Array(0),
 });
 await toServer.readable.getReader().read();
 
@@ -975,8 +954,8 @@ Parameters</h2></div><div class="space-y-8"><div class="anchorable docEntry" id=
   />
 </svg>
 </a>
-</div><div class="max-w-[75ch]"><div class="markdown"><p>The two sides of the connection, and the handler for
-requests sent by the server.</p>
+</div><div class="max-w-[75ch]"><div class="markdown"><p>The two sides of the connection, the version for requests
+that name none, and the handler for requests sent by the server.</p>
 </div></div></div>
 </div></section>
 <section class="section"  id="return-type"><div>
