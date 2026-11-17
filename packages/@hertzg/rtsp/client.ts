@@ -2,9 +2,14 @@
  * An RTSP client over any `{ readable, writable }` byte pair.
  *
  * {@link createClient} does not open a socket: the caller passes the two
- * sides of a connection it already has. Requests are numbered with `CSeq` and
- * each one resolves with the response that carries the same number, so
- * several can be on the wire at once.
+ * sides of a connection it already has. The pair does not have to be web
+ * streams of this runtime: an {@link OctetSource} and an {@link OctetSink}
+ * are enough, so what `Duplex.toWeb(socket)` returns goes in as it is.
+ *
+ * Requests are numbered with `CSeq` and each one resolves with the response
+ * that carries the same number, so several can be on the wire at once. A
+ * request names its method and its Request-URI. Its RTSP version, header
+ * fields and message body may be left out, see {@link ClientRequest}.
  *
  * Interleaved binary data (the `$` blocks that carry media on the same
  * connection) is read and written per Channel ID through `channel()`. A `$`
@@ -31,19 +36,16 @@
  * const response = client.request({
  *   method: "OPTIONS",
  *   requestUri: "*",
- *   rtspVersion: "RTSP/2.0",
- *   headers: [],
- *   messageBody: new Uint8Array(0),
  * });
  *
  * const { value: sent } = await toServer.readable.getReader().read();
  * assertEquals(
  *   new TextDecoder().decode(sent),
- *   "OPTIONS * RTSP/2.0\r\nCSeq: 1\r\n\r\n",
+ *   "OPTIONS * RTSP/1.0\r\nCSeq: 1\r\n\r\n",
  * );
  *
  * await toClient.writable.getWriter().write(
- *   new TextEncoder().encode("RTSP/2.0 200 OK\r\nCSeq: 1\r\n\r\n"),
+ *   new TextEncoder().encode("RTSP/1.0 200 OK\r\nCSeq: 1\r\n\r\n"),
  * );
  * assertEquals((await response).statusCode, 200);
  *
@@ -81,15 +83,101 @@ const FIRST_FINAL_STATUS_CODE = 200;
  */
 const CHANNEL_QUEUE_BLOCKS = 1;
 
+/**
+ * How many chunks the client holds between the connection's readable side
+ * and the decoder. At 0 it reads the connection only when the decoder asks,
+ * so nothing is read ahead of a slow reader.
+ */
+const SOURCE_QUEUE_CHUNKS = 0;
+
+/** The version put on a request when neither the request nor the client's options name one. */
+const DEFAULT_RTSP_VERSION = "RTSP/1.0";
+
 const CLOSED_MESSAGE = "RTSP client is closed";
 const ENDED_MESSAGE = "RTSP connection ended";
+
+/**
+ * The reader of an {@link OctetSource}: what the client calls to take the
+ * octets the server sends. A `ReadableStreamDefaultReader<Uint8Array>` is
+ * one.
+ */
+export type OctetReader = {
+  /**
+   * Resolves with the next chunk, or with `done: true` when the server has
+   * ended the connection. Rejects when the connection failed. Whatever
+   * `value` comes with `done: true` is not looked at.
+   */
+  read(): Promise<
+    { done: false; value: Uint8Array } | { done: true; value?: unknown }
+  >;
+  /** Tells the connection that nothing more will be read. */
+  cancel(reason?: unknown): Promise<void>;
+};
+
+/**
+ * The writer of an {@link OctetSink}: what the client calls to send octets
+ * to the server. A `WritableStreamDefaultWriter<Uint8Array>` is one.
+ */
+export type OctetWriter = {
+  /**
+   * Sends one chunk. The client waits for it to resolve before it writes the
+   * next one, and takes a rejection as the failure of the connection.
+   */
+  write(chunk: Uint8Array): Promise<void>;
+  /** Ends the writable side once everything written has gone out. */
+  close(): Promise<void>;
+  /** Ends the writable side at once, dropping what has not gone out. */
+  abort(reason?: unknown): Promise<void>;
+};
+
+/**
+ * The readable side of a connection, reduced to what the client calls. A
+ * `ReadableStream<Uint8Array>` is one, whichever runtime or package typed
+ * it. The client calls `getReader()` once and keeps the reader.
+ */
+export type OctetSource = {
+  /** Returns the one reader the client reads the connection through. */
+  getReader(): OctetReader;
+};
+
+/**
+ * The writable side of a connection, reduced to what the client calls. A
+ * `WritableStream<Uint8Array>` is one, whichever runtime or package typed
+ * it. The client calls `getWriter()` once and keeps the writer.
+ */
+export type OctetSink = {
+  /** Returns the one writer the client writes the connection through. */
+  getWriter(): OctetWriter;
+};
+
+/**
+ * What `request()` takes: an {@link RtspRequest} whose `rtspVersion`,
+ * `headers` and `messageBody` may be left out. An `RtspRequest` is one.
+ */
+export type ClientRequest = {
+  /** The method, such as `"DESCRIBE"`, sent as written. */
+  method: string;
+  /** `"*"` or an RTSP URI. */
+  requestUri: string;
+  /** Default: the client's `rtspVersion` option. */
+  rtspVersion?: string;
+  /** Default: no header fields. */
+  headers?: HeaderField[];
+  /** Default: no message body. */
+  messageBody?: Uint8Array;
+};
 
 /** The two sides of the connection a client runs on, and how it answers the server. */
 export type ClientOptions = {
   /** The octets the server sends. */
-  readable: ReadableStream<Uint8Array>;
+  readable: OctetSource;
   /** Where the octets for the server go. */
-  writable: WritableStream<Uint8Array>;
+  writable: OctetSink;
+  /**
+   * The version put on a request that names none. Default: `"RTSP/1.0"`,
+   * which is what cameras speak.
+   */
+  rtspVersion?: string;
   /**
    * Answers a request sent by the server. Default: `501 Not Implemented`.
    *
@@ -113,6 +201,11 @@ export type Client = {
   /**
    * Sends a request and resolves with its final response.
    *
+   * A request that names no `rtspVersion` gets the client's `rtspVersion`
+   * option, and `"RTSP/1.0"` without that option. One without `headers`
+   * goes out with `CSeq` alone, one without `messageBody` with no message
+   * body.
+   *
    * The other header fields go out in the order and the spelling given. The
    * client sets `CSeq` itself, on a copy: the request passed in and its
    * `headers` are left as they are. A `CSeq` the caller did set, in any
@@ -126,7 +219,7 @@ export type Client = {
    * the error of the readable or writable side, as it is, after that side
    * failed.
    */
-  request: (request: RtspRequest) => Promise<RtspResponse>;
+  request: (request: ClientRequest) => Promise<RtspResponse>;
   /**
    * Claims a Channel ID (0 to 255) and returns its two sides.
    *
@@ -181,6 +274,8 @@ type Connection = {
   /** Settles when the encoded octets stop flowing into the writable side. */
   piped: Promise<void>;
   onRequest: ClientOptions["onRequest"];
+  /** The version put on a request that names none. */
+  rtspVersion: string;
   /** Set once, when the connection ends: by `close()`, by the server or by a failure. */
   ended?: { reason: unknown };
   /** Requests still waiting for their final response, by `CSeq`. */
@@ -202,6 +297,12 @@ type Channel = {
 /**
  * Creates an RTSP client on a connection that is already open.
  *
+ * The two sides are used through `getReader()` and `getWriter()` only, and
+ * the reader and the writer through `read`, `cancel`, `write`, `close` and
+ * `abort` only. The client takes both for itself and does not give them
+ * back. It writes one chunk at a time and reads only when it has room for
+ * what comes in.
+ *
  * Each request gets the next `CSeq`, starting at 1, in place of any `CSeq`
  * the caller set. A response resolves the request with the same `CSeq`,
  * whatever case the server writes that name in, so responses may arrive in
@@ -213,8 +314,8 @@ type Channel = {
  * readable or writable side fails. Every waiting request then rejects and
  * every later one rejects at once, as `request` describes.
  *
- * @param options The two sides of the connection, and the handler for
- * requests sent by the server.
+ * @param options The two sides of the connection, the version for requests
+ * that name none, and the handler for requests sent by the server.
  * @returns The client.
  *
  * @example Two requests answered out of order
@@ -232,16 +333,11 @@ type Channel = {
  * const described = client.request({
  *   method: "DESCRIBE",
  *   requestUri: "rtsp://example.com/fizzle/foo",
- *   rtspVersion: "RTSP/2.0",
  *   headers: [["Accept", "application/sdp"]],
- *   messageBody: new Uint8Array(0),
  * });
  * const options = client.request({
  *   method: "OPTIONS",
  *   requestUri: "*",
- *   rtspVersion: "RTSP/2.0",
- *   headers: [],
- *   messageBody: new Uint8Array(0),
  * });
  *
  * const sent = toServer.readable.getReader();
@@ -250,8 +346,8 @@ type Channel = {
  *
  * await toClient.writable.getWriter().write(
  *   new TextEncoder().encode(
- *     "RTSP/2.0 200 OK\r\nCSeq: 2\r\n\r\n" +
- *       "RTSP/2.0 404 Not Found\r\nCSeq: 1\r\n\r\n",
+ *     "RTSP/1.0 200 OK\r\nCSeq: 2\r\n\r\n" +
+ *       "RTSP/1.0 404 Not Found\r\nCSeq: 1\r\n\r\n",
  *   ),
  * );
  *
@@ -274,13 +370,11 @@ type Channel = {
  * const response = client.request({
  *   method: "DESCRIBE",
  *   requestUri: "rtsp://example.com/fizzle/foo",
- *   rtspVersion: "RTSP/1.0",
  *   headers: [
  *     ["cseq", ""],
  *     ["User-Agent", "PhonyClient/1.2"],
  *     ["accept", "application/sdp"],
  *   ],
- *   messageBody: new Uint8Array(0),
  * });
  *
  * const { value: sent } = await toServer.readable.getReader().read();
@@ -346,9 +440,6 @@ type Channel = {
  * const response = client.request({
  *   method: "OPTIONS",
  *   requestUri: "*",
- *   rtspVersion: "RTSP/2.0",
- *   headers: [],
- *   messageBody: new Uint8Array(0),
  * });
  * await toServer.readable.getReader().read();
  *
@@ -356,7 +447,7 @@ type Channel = {
  *   new TextEncoder().encode(
  *     "$\x07\x00\x01A" +
  *       "$\x07\x00\x01B" +
- *       "RTSP/2.0 200 OK\r\nCSeq: 1\r\n\r\n",
+ *       "RTSP/1.0 200 OK\r\nCSeq: 1\r\n\r\n",
  *   ),
  * );
  * await response;
@@ -409,9 +500,6 @@ type Channel = {
  * const response = client.request({
  *   method: "OPTIONS",
  *   requestUri: "*",
- *   rtspVersion: "RTSP/2.0",
- *   headers: [],
- *   messageBody: new Uint8Array(0),
  * });
  * await toServer.readable.getReader().read();
  *
@@ -423,10 +511,13 @@ type Channel = {
 export function createClient(options: ClientOptions): Client {
   const encodeStream = createRtspEncodeStream();
   const connection: Connection = {
-    reader: options.readable.pipeThrough(createRtspDecodeStream()).getReader(),
+    reader: adaptSource(options.readable)
+      .pipeThrough(createRtspDecodeStream())
+      .getReader(),
     writer: encodeStream.writable.getWriter(),
-    piped: encodeStream.readable.pipeTo(options.writable),
+    piped: encodeStream.readable.pipeTo(adaptSink(options.writable)),
     onRequest: options.onRequest,
+    rtspVersion: options.rtspVersion ?? DEFAULT_RTSP_VERSION,
     pendingResponses: new Map(),
     nextCSeq: FIRST_C_SEQ,
     channels: new Map(),
@@ -447,6 +538,44 @@ export function createClient(options: ClientOptions): Client {
   };
 }
 
+/**
+ * Wraps the connection's readable side in a stream of this runtime, calling
+ * nothing but what {@link OctetSource} names.
+ *
+ * A read that rejects fails the stream with the same error, the end of the
+ * source closes it, and cancelling it cancels the source's reader.
+ */
+function adaptSource(source: OctetSource): ReadableStream<Uint8Array> {
+  const reader = source.getReader();
+  return new ReadableStream<Uint8Array>({
+    async pull(controller) {
+      const result = await reader.read();
+      if (result.done) {
+        controller.close();
+      } else {
+        controller.enqueue(result.value);
+      }
+    },
+    cancel: (reason) => reader.cancel(reason),
+  }, { highWaterMark: SOURCE_QUEUE_CHUNKS });
+}
+
+/**
+ * Wraps the connection's writable side in a stream of this runtime, calling
+ * nothing but what {@link OctetSink} names.
+ *
+ * Each chunk waits for the sink's writer to take the one before it. A write
+ * that rejects fails the stream with the same error.
+ */
+function adaptSink(sink: OctetSink): WritableStream<Uint8Array> {
+  const writer = sink.getWriter();
+  return new WritableStream<Uint8Array>({
+    write: (chunk) => writer.write(chunk),
+    close: () => writer.close(),
+    abort: (reason) => writer.abort(reason),
+  });
+}
+
 /** Writes one item through the one writer, or rejects with the reason the connection ended. */
 function writeItem(connection: Connection, item: Item): Promise<void> {
   return connection.ended === undefined
@@ -454,20 +583,29 @@ function writeItem(connection: Connection, item: Item): Promise<void> {
     : Promise.reject(connection.ended.reason);
 }
 
-/** Sends a copy of `request` under the next `CSeq` and waits for its final response. */
+/**
+ * Sends a copy of `request` under the next `CSeq`, with what it left out
+ * filled in, and waits for its final response.
+ */
 async function sendRequest(
   connection: Connection,
-  request: RtspRequest,
+  request: ClientRequest,
 ): Promise<RtspResponse> {
   const cSeq = connection.nextCSeq++;
-  const headers = setHeaderField(request.headers, [C_SEQ, String(cSeq)]);
+  const sent: RtspRequest = {
+    method: request.method,
+    requestUri: request.requestUri,
+    rtspVersion: request.rtspVersion ?? connection.rtspVersion,
+    headers: setHeaderField(request.headers ?? [], [C_SEQ, String(cSeq)]),
+    messageBody: request.messageBody ?? new Uint8Array(0),
+  };
 
   const pending = Promise.withResolvers<RtspResponse>();
   connection.pendingResponses.set(cSeq, pending);
   try {
     const [response] = await Promise.all([
       pending.promise,
-      writeItem(connection, { ...request, headers }),
+      writeItem(connection, sent),
     ]);
     return response;
   } finally {

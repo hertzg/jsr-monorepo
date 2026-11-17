@@ -17,7 +17,15 @@
  * The client carries messages and `$` blocks, nothing more. It keeps no RTSP
  * session state, does not parse the `Transport` header or SDP, and does not
  * authenticate. It does not open the socket either: the caller passes the two
- * sides of a connection it already has.
+ * sides of a connection it already has. Any pair with `getReader()` and
+ * `getWriter()` will do (`OctetSource` and `OctetSink`), so the web streams
+ * of this runtime and what `Duplex.toWeb(socket)` returns both go in as they
+ * are.
+ *
+ * A request names its method and its Request-URI. The rest may be left out:
+ * the version is `RTSP/1.0` unless the request or the client's `rtspVersion`
+ * option says otherwise, and there are no header fields besides `CSeq` and no
+ * message body.
  *
  * The `headers` of a message are `[name, value]` pairs, one per header line,
  * in the order of the lines and with each name as written. What the caller
@@ -41,13 +49,7 @@
  *   writable: toServer.writable,
  * });
  *
- * const response = client.request({
- *   method: "OPTIONS",
- *   requestUri: "*",
- *   rtspVersion: "RTSP/1.0",
- *   headers: [],
- *   messageBody: new Uint8Array(0),
- * });
+ * const response = client.request({ method: "OPTIONS", requestUri: "*" });
  *
  * const { value: sent } = await toServer.readable.getReader().read();
  * assertEquals(
@@ -75,9 +77,7 @@
  * const response = await client.request({
  *   method: "DESCRIBE",
  *   requestUri: "rtsp://192.0.2.10/stream1",
- *   rtspVersion: "RTSP/1.0",
  *   headers: [["Accept", "application/sdp"]],
- *   messageBody: new Uint8Array(0),
  * });
  * const sdp = new TextDecoder().decode(response.messageBody);
  *
@@ -88,7 +88,15 @@
  */
 
 export { createClient } from "./client.ts";
-export type { Client, ClientOptions } from "./client.ts";
+export type {
+  Client,
+  ClientOptions,
+  ClientRequest,
+  OctetReader,
+  OctetSink,
+  OctetSource,
+  OctetWriter,
+} from "./client.ts";
 export {
   decodeInterleavedBinaryData,
   encodeInterleavedBinaryData,
