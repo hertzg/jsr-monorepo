@@ -67,8 +67,7 @@ so rather than a cross-scope search.
 - **Staleness self-corrects.** The generated file lives under
   `packages/@binstruct/cli/`, so adding a format package touches a path Release
   Please attributes to the CLI, which cuts the release that carries the updated
-  list. This is the same mechanism that makes `_deps.snap` diffs releasable
-  under repo ADR 0005.
+  list.
 - **Every new format package forces a CLI release.** Intended, and the cost of
   the previous point.
 - **Names-only keeps the generator trivial** — a directory scan plus the ADR
@@ -80,7 +79,6 @@ so rather than a cross-scope search.
 
 - `_tools/check_readme.ts`, `_tools/check_labeler.ts` — the existing
   generated-file-plus-lint-check pattern
-- Repo ADR 0005 — deps snapshot pinning, same release-attribution argument
 - Repo ADR 0009 — two-tier workspace layout, why the scopes are separate
 - `@binstruct/cli` ADR 0002 — the probe that decides membership
 - `@binstruct/cli` ADR 0004 — specifier resolution for everything outside the

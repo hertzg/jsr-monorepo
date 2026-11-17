@@ -7,17 +7,34 @@
  * one of them is callable, `pcap` has three plus `pcapFileWith` which takes
  * two, and `@hertzg/mac` is not a binstruct package at all.
  *
- * The package listing is stubbed for the whole file, and the permissions its
- * cache needs are refused, so level 0 answers from {@linkcode LISTED} without
- * reaching jsr.io or touching the cache directory of whoever runs the suite.
+ * The package listing is stubbed for the whole file, and the home directory
+ * its cache lives under is one nothing can be written to, so level 0 answers
+ * from {@linkcode LISTED} without reaching jsr.io or touching the cache
+ * directory of whoever runs the suite.
  */
 
+import { spawn } from "node:child_process";
+import { once } from "node:events";
+import {
+  mkdir,
+  mkdtemp,
+  readFile,
+  realpath,
+  rm,
+  symlink,
+  writeFile,
+} from "node:fs/promises";
+import { type AddressInfo, createServer, type Socket } from "node:net";
+import os from "node:os";
+import { env, execPath } from "node:process";
+import { buffer, text } from "node:stream/consumers";
+import { after, test } from "node:test";
 import {
   assertEquals,
   assertNotEquals,
   assertStringIncludes,
 } from "@std/assert";
-import { fromFileUrl, toFileUrl } from "@std/path";
+import { fromFileUrl, join, toFileUrl } from "@std/path";
 import { stub } from "@std/testing/mock";
 import { FakeTime } from "@std/testing/time";
 import { explainFailure, parseCliArgs, planCli } from "./cli.ts";
@@ -73,7 +90,7 @@ const LISTED = [
 let answer: () => Promise<Response> = () =>
   Promise.resolve(Response.json({ items: LISTED }));
 
-stub(globalThis, "fetch", () => answer());
+const fetchStub = stub(globalThis, "fetch", () => answer());
 
 /**
  * Swaps the answer the stubbed `fetch` gives, for the duration of a block.
@@ -91,23 +108,33 @@ function answering(next: () => Promise<Response>): Disposable {
   return { [Symbol.dispose]: () => void (answer = previous) };
 }
 
-stub(
-  Deno.permissions,
-  "query",
-  (descriptor: Deno.PermissionDescriptor) =>
-    Promise.resolve(
-      {
-        state: descriptor.name === "read" || descriptor.name === "write"
-          ? "denied"
-          : "granted",
-        onchange: null,
-        partial: false,
-        addEventListener() {},
-        removeEventListener() {},
-        dispatchEvent: () => true,
-      } as unknown as Deno.PermissionStatus,
-    ),
+/**
+ * A home directory that cannot hold a cache: a path underneath this very file,
+ * so reading the cache and creating its directory both fail and are skipped.
+ */
+const homedirStub = stub(
+  os,
+  "homedir",
+  () => join(fromFileUrl(import.meta.url), "no-home"),
 );
+
+/**
+ * The variables that would point the cache somewhere other than the home
+ * directory, taken out of the environment for as long as this file runs.
+ */
+const cacheVariables = ["XDG_CACHE_HOME", "LOCALAPPDATA"].map((name) => {
+  const value = env[name];
+  delete env[name];
+  return { name, value };
+});
+
+after(() => {
+  fetchStub.restore();
+  homedirStub.restore();
+  for (const { name, value } of cacheVariables) {
+    if (value !== undefined) env[name] = value;
+  }
+});
 
 /** A package with exactly one zero-argument coder, `arpData`. */
 const ARP = import.meta.resolve("../arp/mod.ts");
@@ -125,13 +152,110 @@ const MAC = import.meta.resolve("../../@hertzg/mac/mod.ts");
 const CLI = import.meta.resolve("./cli.ts");
 
 /**
- * Everything except the network, for the subprocess cases that reach level 0.
+ * No network, for the subprocess cases that reach level 0.
  *
  * The package listing is the only thing the CLI fetches, and a test suite has
- * no business asking jsr.io for it. Refused, the screen these cases assert on
- * is the same one minus the `PACKAGES` names.
+ * no business asking jsr.io for it. Sent to a proxy nothing listens on, the
+ * request is refused and the screen these cases assert on is the same one
+ * minus the `PACKAGES` names.
  */
-const OFFLINE = ["-A", "--deny-net"];
+const OFFLINE = {
+  HTTPS_PROXY: "http://127.0.0.1:1",
+  https_proxy: "http://127.0.0.1:1",
+};
+
+/**
+ * No `deno` to spawn, for the subprocess cases that need discovery
+ * unavailable: a `PATH` holding one directory, which does not exist.
+ */
+const NO_DENO = { PATH: join(fromFileUrl(import.meta.url), "no-bin") };
+
+/**
+ * What has to follow the script path for the CLI to see its arguments as typed.
+ *
+ * Bun drops a `--` that directly follows the script path, so
+ * `bun cli.ts -- -dash/mod.ts` reaches the CLI without its separator. One `--`
+ * of its own goes there for Bun to take, and the arguments after it arrive
+ * whole. Node passes everything through and needs nothing.
+ */
+const SCRIPT_GUARD: readonly string[] = "Bun" in globalThis ? ["--"] : [];
+
+/**
+ * Starts a local server that accepts every connection and never answers.
+ *
+ * It gives the deadline cases a package `deno doc` has to fetch and cannot:
+ * the subprocess really does hang, so only the deadline can end it. A module
+ * on disk will not do. `deno doc` answers about one in milliseconds, and the
+ * CLI stats a local path before it spawns anything, so a tick of the faked
+ * clock could land before the deadline timer existed and leave the real
+ * answer to win.
+ *
+ * @returns The specifier of a module behind it, and how to shut it down
+ */
+async function listenBlackHole(): Promise<
+  { readonly specifier: string } & AsyncDisposable
+> {
+  const sockets = new Set<Socket>();
+  const server = createServer((socket) => {
+    sockets.add(socket);
+    socket.on("error", () => {});
+  });
+  server.listen(0, "127.0.0.1");
+  await once(server, "listening");
+
+  const { port } = server.address() as AddressInfo;
+
+  return {
+    specifier: `http://127.0.0.1:${port}/mod.ts`,
+    async [Symbol.asyncDispose]() {
+      for (const socket of sockets) socket.destroy();
+      server.close();
+      await once(server, "close");
+    },
+  };
+}
+
+/**
+ * Makes a fresh temporary directory.
+ *
+ * @returns The directory, to be removed by the caller
+ */
+async function makeTempDir(): Promise<string> {
+  return await mkdtemp(join(os.tmpdir(), "binstruct-cli-"));
+}
+
+/**
+ * Runs a command to completion with its output captured.
+ *
+ * @param command The executable
+ * @param args Its arguments
+ * @param options Working directory, environment overrides and stdin bytes
+ * @returns Exit code, stdout as it came, and stderr as text
+ */
+async function run(
+  command: string,
+  args: string[],
+  options: {
+    readonly cwd?: string;
+    readonly environment?: Record<string, string>;
+    readonly input?: Uint8Array;
+  } = {},
+): Promise<{ code: number; bytes: Uint8Array; stderr: string }> {
+  const child = spawn(command, args, {
+    cwd: options.cwd,
+    env: { ...env, ...options.environment },
+    stdio: ["pipe", "pipe", "pipe"],
+  });
+  child.stdin.end(options.input);
+
+  const [bytes, stderr, [code]] = await Promise.all([
+    buffer(child.stdout),
+    text(child.stderr),
+    once(child, "close"),
+  ]);
+
+  return { code, bytes: new Uint8Array(bytes), stderr };
+}
 
 /**
  * Asserts that a plan writes text, and hands back the plan for further checks.
@@ -150,7 +274,7 @@ function printed(plan: Awaited<ReturnType<typeof planCli>>) {
  * streams and the real exit code.
  *
  * @param args Arguments after the script name
- * @param permissions Permission flags, defaulting to everything
+ * @param environment Environment overrides, defaulting to none
  * @param cwd Working directory, for the path-resolution cases
  * @param input Bytes to feed stdin, for the cases that actually decode
  * @returns Exit code, decoded output, and stdout as it came, for the cases
@@ -158,36 +282,19 @@ function printed(plan: Awaited<ReturnType<typeof planCli>>) {
  */
 async function runCli(
   args: string[],
-  permissions: string[] = ["-A"],
+  environment: Record<string, string> = {},
   cwd?: string,
   input?: Uint8Array,
 ): Promise<
   { code: number; stdout: string; stderr: string; bytes: Uint8Array }
 > {
-  const command = new Deno.Command(Deno.execPath(), {
-    args: ["run", ...permissions, CLI, ...args],
-    cwd,
-    stdin: input === undefined ? "null" : "piped",
-    stdout: "piped",
-    stderr: "piped",
-  });
+  const output = await run(
+    execPath,
+    [fromFileUrl(CLI), ...SCRIPT_GUARD, ...args],
+    { cwd, environment, input },
+  );
 
-  const child = command.spawn();
-  if (input !== undefined) {
-    const writer = child.stdin.getWriter();
-    await writer.write(input);
-    await writer.close();
-  }
-
-  const output = await child.output();
-  const decoder = new TextDecoder();
-
-  return {
-    code: output.code,
-    stdout: decoder.decode(output.stdout),
-    stderr: decoder.decode(output.stderr),
-    bytes: output.stdout,
-  };
+  return { ...output, stdout: new TextDecoder().decode(output.bytes) };
 }
 
 /**
@@ -224,10 +331,10 @@ function coderModule(coder: string, fields: readonly string[]): string {
  * @returns The containing directory, realpathed, to be removed by the caller
  */
 async function writeLocalPackage(entry = "mod.ts"): Promise<string> {
-  const directory = await Deno.realPath(await Deno.makeTempDir());
+  const directory = await realpath(await makeTempDir());
 
-  await Deno.mkdir(`${directory}/mypkg`);
-  await Deno.writeTextFile(
+  await mkdir(`${directory}/mypkg`);
+  await writeFile(
     `${directory}/mypkg/${entry}`,
     coderModule("myStruct", ["a"]),
   );
@@ -246,11 +353,11 @@ async function writeLocalPackage(entry = "mod.ts"): Promise<string> {
  * @returns The containing directory, realpathed, to be removed by the caller
  */
 async function writeOptionalParameterPackage(): Promise<string> {
-  const directory = await Deno.realPath(await Deno.makeTempDir());
+  const directory = await realpath(await makeTempDir());
   const binstruct = import.meta.resolve("../../@hertzg/binstruct/mod.ts");
 
-  await Deno.mkdir(`${directory}/mypkg`);
-  await Deno.writeTextFile(
+  await mkdir(`${directory}/mypkg`);
+  await writeFile(
     `${directory}/mypkg/mod.ts`,
     [
       `import { type Coder, struct, u8 } from "${binstruct}";`,
@@ -277,11 +384,11 @@ async function writeOptionalParameterPackage(): Promise<string> {
  * @returns The containing directory, realpathed, to be removed by the caller
  */
 async function writeArgumentOnlyPackage(): Promise<string> {
-  const directory = await Deno.realPath(await Deno.makeTempDir());
+  const directory = await realpath(await makeTempDir());
   const binstruct = import.meta.resolve("../../@hertzg/binstruct/mod.ts");
 
-  await Deno.mkdir(`${directory}/mypkg`);
-  await Deno.writeTextFile(
+  await mkdir(`${directory}/mypkg`);
+  await writeFile(
     `${directory}/mypkg/mod.ts`,
     [
       `import { type Coder, struct, u8 } from "${binstruct}";`,
@@ -314,14 +421,14 @@ async function writeArgumentOnlyPackage(): Promise<string> {
  * @returns The containing directory, realpathed, to be removed by the caller
  */
 async function writeAmbiguousPackage(name = "mypkg"): Promise<string> {
-  const directory = await Deno.realPath(await Deno.makeTempDir());
+  const directory = await realpath(await makeTempDir());
 
-  await Deno.mkdir(`${directory}/${name}`, { recursive: true });
-  await Deno.writeTextFile(
+  await mkdir(`${directory}/${name}`, { recursive: true });
+  await writeFile(
     `${directory}/${name}/mod.ts`,
     coderModule("pair", ["a", "b"]),
   );
-  await Deno.writeTextFile(
+  await writeFile(
     `${directory}/${name}/aaa_other.ts`,
     coderModule("internalOnly", ["z"]),
   );
@@ -340,15 +447,15 @@ async function writeAmbiguousPackage(name = "mypkg"): Promise<string> {
  * @returns The containing directory, realpathed, to be removed by the caller
  */
 async function writeSpacedPackage(): Promise<string> {
-  const directory = await Deno.realPath(await Deno.makeTempDir());
+  const directory = await realpath(await makeTempDir());
   const [, ...second] = coderModule("solo", ["y"]).split("\n");
 
-  await Deno.mkdir(`${directory}/spaced dir`);
-  await Deno.writeTextFile(
+  await mkdir(`${directory}/spaced dir`);
+  await writeFile(
     `${directory}/spaced dir/mod.ts`,
     coderModule("pair", ["a", "b"]) + second.join("\n"),
   );
-  await Deno.writeTextFile(
+  await writeFile(
     `${directory}/spaced dir/aaa_other.ts`,
     coderModule("internalOnly", ["z"]),
   );
@@ -356,7 +463,7 @@ async function writeSpacedPackage(): Promise<string> {
   return directory;
 }
 
-Deno.test("parseCliArgs fills the three positionals in order", () => {
+test("parseCliArgs fills the three positionals in order", () => {
   assertEquals(parseCliArgs(["png", "pngFile", "decode"]), {
     package: "png",
     coder: "pngFile",
@@ -370,7 +477,7 @@ Deno.test("parseCliArgs fills the three positionals in order", () => {
   });
 });
 
-Deno.test("parseCliArgs keeps -p and -c working as aliases", () => {
+test("parseCliArgs keeps -p and -c working as aliases", () => {
   const short = parseCliArgs([
     "-p",
     "jsr:@binstruct/png",
@@ -392,7 +499,7 @@ Deno.test("parseCliArgs keeps -p and -c working as aliases", () => {
   assertEquals(short.command, "decode");
 });
 
-Deno.test("parseCliArgs mixes flags and positionals", () => {
+test("parseCliArgs mixes flags and positionals", () => {
   const options = parseCliArgs(["-c", "pngFile", "png", "encode"]);
 
   assertEquals(options.package, "png");
@@ -400,7 +507,7 @@ Deno.test("parseCliArgs mixes flags and positionals", () => {
   assertEquals(options.command, "encode");
 });
 
-Deno.test("parseCliArgs leaves absent positionals undefined", () => {
+test("parseCliArgs leaves absent positionals undefined", () => {
   assertEquals(parseCliArgs([]), {
     package: undefined,
     coder: undefined,
@@ -417,7 +524,7 @@ Deno.test("parseCliArgs leaves absent positionals undefined", () => {
   assertEquals(parseCliArgs(["png", "pngFile"]).command, undefined);
 });
 
-Deno.test("parseCliArgs reserves the command names in the coder slot", () => {
+test("parseCliArgs reserves the command names in the coder slot", () => {
   const decode = parseCliArgs(["arp", "decode"]);
 
   assertEquals(decode.coder, undefined);
@@ -429,14 +536,14 @@ Deno.test("parseCliArgs reserves the command names in the coder slot", () => {
   assertEquals(encode.command, "encode");
 });
 
-Deno.test("parseCliArgs reads the first positional as the package, always", () => {
+test("parseCliArgs reads the first positional as the package, always", () => {
   const options = parseCliArgs(["decode"]);
 
   assertEquals(options.package, "decode");
   assertEquals(options.command, undefined);
 });
 
-Deno.test("parseCliArgs ends the flags at --", () => {
+test("parseCliArgs ends the flags at --", () => {
   // `-dash/` is the flag cluster -d -a -s -h to any getopt-shaped parser, and
   // the `h` is `--help`: the CLI answered a decode with the whole help screen
   // on stdout, at exit 0, which is the redirect corruption ADR 0001 forbids.
@@ -458,7 +565,7 @@ Deno.test("parseCliArgs ends the flags at --", () => {
   assertEquals(literal.unknownFlags, []);
 });
 
-Deno.test("parseCliArgs reports a flag it does not know", () => {
+test("parseCliArgs reports a flag it does not know", () => {
   // The damage an accepted unknown flag does is the shift: `--format` swallowed
   // `png` as its value, the package slot got `decode`, and the CLI reported
   // confidently on jsr:@binstruct/decode.
@@ -481,7 +588,7 @@ Deno.test("parseCliArgs reports a flag it does not know", () => {
   assertEquals(parseCliArgs(["--", "--format"]).package, "--format");
 });
 
-Deno.test("parseCliArgs reads the flags", () => {
+test("parseCliArgs reads the flags", () => {
   assertEquals(parseCliArgs(["-h"]).help, true);
   assertEquals(parseCliArgs(["--help"]).help, true);
   assertEquals(parseCliArgs(["-v"]).version, true);
@@ -493,7 +600,7 @@ Deno.test("parseCliArgs reads the flags", () => {
   );
 });
 
-Deno.test("level 0 asks for a package, on stderr, with exit 1", async () => {
+test("level 0 asks for a package, on stderr, with exit 1", async () => {
   const plan = printed(await planCli([]));
 
   assertEquals(plan.stream, "stderr");
@@ -504,7 +611,7 @@ Deno.test("level 0 asks for a package, on stderr, with exit 1", async () => {
   assertStringIncludes(plan.text, "TRY\n  binstruct png");
 });
 
-Deno.test("level 0 lists what JSR answers, not what shipped with the CLI", async () => {
+test("level 0 lists what JSR answers, not what shipped with the CLI", async () => {
   // A generated list is a hardcoded list: it needs a CLI release to change,
   // and its lint check compared it against the same directory scan that had
   // produced it. Whatever the listing says is what level 0 shows.
@@ -515,7 +622,7 @@ Deno.test("level 0 lists what JSR answers, not what shipped with the CLI", async
   assertEquals(plan.text.includes("cli"), false);
 });
 
-Deno.test("level 0 never offers a name that has nothing published", async () => {
+test("level 0 never offers a name that has nothing published", async () => {
   // JSR's scope listing carries every *claimed* name. `@binstruct/bencode` is
   // one: `latestVersion: null`, `versionCount: 0`, and
   // https://jsr.io/@binstruct/bencode/meta.json answers 404. Listed, it read
@@ -526,7 +633,7 @@ Deno.test("level 0 never offers a name that has nothing published", async () => 
   assertEquals(plan.text.includes("bencode"), false);
 });
 
-Deno.test("an unloadable name is not suggested as a correction of itself", async () => {
+test("an unloadable name is not suggested as a correction of itself", async () => {
   // A name the listing offered and the runtime could not load answered
   // `cannot read jsr:@binstruct/bencode … did you mean bencode?` — the word
   // that had just been typed, matched at distance zero and handed back as a
@@ -549,7 +656,7 @@ Deno.test("an unloadable name is not suggested as a correction of itself", async
   assertEquals(plan.text.includes("did you mean"), false);
 });
 
-Deno.test("a listing that cannot be fetched is not a dead end", async () => {
+test("a listing that cannot be fetched is not a dead end", async () => {
   using _offline = answering(() =>
     Promise.reject(new TypeError("error sending request"))
   );
@@ -569,7 +676,7 @@ Deno.test("a listing that cannot be fetched is not a dead end", async () => {
   assertEquals(plan.text.includes("tls-record"), false);
 });
 
-Deno.test("a listing that answers 404 degrades the same way", async () => {
+test("a listing that answers 404 degrades the same way", async () => {
   using _refused = answering(() =>
     Promise.resolve(new Response("nope", { status: 404 }))
   );
@@ -580,7 +687,7 @@ Deno.test("a listing that answers 404 degrades the same way", async () => {
   assertStringIncludes(plan.text, "NEXT  <package>");
 });
 
-Deno.test("a listing with a body that is not a listing degrades too", async () => {
+test("a listing with a body that is not a listing degrades too", async () => {
   using _garbage = answering(() =>
     Promise.resolve(Response.json({ message: "nope" }))
   );
@@ -591,7 +698,7 @@ Deno.test("a listing with a body that is not a listing degrades too", async () =
   assertStringIncludes(plan.text, "TRY\n  binstruct png");
 });
 
-Deno.test("a misspelled bare name is matched against the live listing", async () => {
+test("a misspelled bare name is matched against the live listing", async () => {
   const plan = printed(await planCli(["pnj"]));
 
   assertEquals(plan.code, 1);
@@ -602,21 +709,7 @@ Deno.test("a misspelled bare name is matched against the live listing", async ()
   );
 });
 
-Deno.test("with no permissions at all the guidance still prints", async () => {
-  // No --allow-net, so no listing; no --allow-read or --allow-env, so no
-  // cache either. --no-prompt turns a permission the CLI forgot to check into
-  // a failure rather than a hung terminal.
-  const { code, stdout, stderr } = await runCli(["--help"], ["--no-prompt"]);
-
-  assertEquals(code, 0);
-  assertEquals(stderr, "");
-  assertStringIncludes(stdout, "NEXT  <package>");
-  assertStringIncludes(stdout, "cannot list the @binstruct scope");
-  assertStringIncludes(stdout, "--allow-net=jsr.io");
-  assertStringIncludes(stdout, "TRY\n  binstruct png");
-});
-
-Deno.test("--help prints the same material on stdout, with exit 0", async () => {
+test("--help prints the same material on stdout, with exit 0", async () => {
   const guidance = printed(await planCli([]));
   const help = printed(await planCli(["--help"]));
 
@@ -627,7 +720,7 @@ Deno.test("--help prints the same material on stdout, with exit 0", async () => 
   assertStringIncludes(help.text, "-p, --package");
 });
 
-Deno.test("--version prints on stdout with exit 0", async () => {
+test("--version prints on stdout with exit 0", async () => {
   const plan = printed(await planCli(["--version"]));
 
   assertEquals(plan.stream, "stdout");
@@ -635,7 +728,7 @@ Deno.test("--version prints on stdout with exit 0", async () => {
   assertStringIncludes(plan.text, "@binstruct/cli");
 });
 
-Deno.test("level 1 lists the coders of a package with several", async () => {
+test("level 1 lists the coders of a package with several", async () => {
   const plan = printed(await planCli([PNG]));
 
   assertEquals(plan.stream, "stderr");
@@ -650,7 +743,7 @@ Deno.test("level 1 lists the coders of a package with several", async () => {
   );
 });
 
-Deno.test("the coder count agrees with the coders listed under it", async () => {
+test("the coder count agrees with the coders listed under it", async () => {
   // The sentence counted the callable coders while the block rendered every
   // discovered one, so `png exposes 3 coders` sat directly above four rows.
   const plan = printed(await planCli([PNG]));
@@ -668,7 +761,7 @@ Deno.test("the coder count agrees with the coders listed under it", async () => 
   assertEquals(rows.length, counted);
 });
 
-Deno.test("level 1 collapses to level 2 when there is a lone coder", async () => {
+test("level 1 collapses to level 2 when there is a lone coder", async () => {
   const plan = printed(await planCli([ARP]));
 
   assertEquals(plan.code, 1);
@@ -682,7 +775,7 @@ Deno.test("level 1 collapses to level 2 when there is a lone coder", async () =>
   assertEquals(plan.text.includes(`${ARP} arpData decode`), false);
 });
 
-Deno.test("level 2 asks for a command once the coder is known", async () => {
+test("level 2 asks for a command once the coder is known", async () => {
   const plan = printed(await planCli([PNG, "pngFile"]));
 
   assertEquals(plan.stream, "stderr");
@@ -693,7 +786,7 @@ Deno.test("level 2 asks for a command once the coder is known", async () => {
   assertStringIncludes(plan.text, `TRY\n  binstruct ${PNG} pngFile decode`);
 });
 
-Deno.test("the guidance names the format the CLI actually writes", async () => {
+test("the guidance names the format the CLI actually writes", async () => {
   // The COMMANDS block advertised JSON and every TRY line said `> output.json`,
   // while serialization.ts emits JSON5 — quoted keys, 0x literals, comments —
   // which `python3 -c 'import json; json.load(...)'` rejects.
@@ -710,7 +803,7 @@ Deno.test("the guidance names the format the CLI actually writes", async () => {
   assertStringIncludes(help.text, "the payload is JSON5, not JSON");
 });
 
-Deno.test("a complete invocation runs, and announces the resolved specifier", async () => {
+test("a complete invocation runs, and announces the resolved specifier", async () => {
   const plan = await planCli(["png", "pngFile", "decode"]);
 
   assertEquals(plan.kind, "run");
@@ -722,7 +815,7 @@ Deno.test("a complete invocation runs, and announces the resolved specifier", as
   assertEquals(plan.notices, ["package: png → jsr:@binstruct/png"]);
 });
 
-Deno.test("the -p/-c form still reaches a run", async () => {
+test("the -p/-c form still reaches a run", async () => {
   const plan = await planCli(["-p", "png", "-c", "pngFile", "encode"]);
 
   assertEquals(plan.kind, "run");
@@ -732,7 +825,7 @@ Deno.test("the -p/-c form still reaches a run", async () => {
   assertEquals(plan.coder, "pngFile");
 });
 
-Deno.test("a lone coder is inferred, and the inference is announced", async () => {
+test("a lone coder is inferred, and the inference is announced", async () => {
   const plan = await planCli([ARP, "decode"]);
 
   assertEquals(plan.kind, "run");
@@ -746,7 +839,7 @@ Deno.test("a lone coder is inferred, and the inference is announced", async () =
   ]);
 });
 
-Deno.test("two or more coders require the explicit name", async () => {
+test("two or more coders require the explicit name", async () => {
   const plan = printed(await planCli([PNG, "decode"]));
 
   assertEquals(plan.stream, "stderr");
@@ -755,7 +848,7 @@ Deno.test("two or more coders require the explicit name", async () => {
   assertStringIncludes(plan.text, "exposes 4 coders");
 });
 
-Deno.test("a TRY line keeps the words the user already typed", async () => {
+test("a TRY line keeps the words the user already typed", async () => {
   // `binstruct png decode` asks for the coder and answered
   // `TRY binstruct png pngChunkUnknown`, dropping the `decode` that was
   // already on the command line: a step sideways rather than one further on.
@@ -796,7 +889,7 @@ Deno.test("a TRY line keeps the words the user already typed", async () => {
   );
 });
 
-Deno.test("a local path that is not there says so, and says nothing else", async () => {
+test("a local path that is not there says so, and says nothing else", async () => {
   // Distinct from the directory refusal: nothing exists here, so telling
   // someone to name the module inside it would be nonsense.
   const plan = printed(await planCli(["./no-such-package.ts"]));
@@ -809,7 +902,7 @@ Deno.test("a local path that is not there says so, and says nothing else", async
   assertEquals(plan.text.includes("["), false);
 });
 
-Deno.test("a bare name that cannot be read explains the implied scope", async () => {
+test("a bare name that cannot be read explains the implied scope", async () => {
   const plan = printed(await planCli(["definitely-not-a-package"]));
 
   assertEquals(plan.code, 1);
@@ -824,7 +917,7 @@ Deno.test("a bare name that cannot be read explains the implied scope", async ()
   assertStringIncludes(plan.text, "binstruct @hertzg/definitely-not-a-package");
 });
 
-Deno.test("an unknown coder is answered with the listing and a suggestion", async () => {
+test("an unknown coder is answered with the listing and a suggestion", async () => {
   const plan = printed(await planCli([PNG, "pngfile"]));
 
   assertEquals(plan.code, 1);
@@ -834,7 +927,7 @@ Deno.test("an unknown coder is answered with the listing and a suggestion", asyn
   assertStringIncludes(plan.text, `TRY\n  binstruct ${PNG} pngFile`);
 });
 
-Deno.test("a package with no coders is diagnosed", async () => {
+test("a package with no coders is diagnosed", async () => {
   const plan = printed(await planCli([MAC]));
 
   assertEquals(plan.code, 1);
@@ -843,7 +936,7 @@ Deno.test("a package with no coders is diagnosed", async () => {
   assertStringIncludes(plan.text, "NEXT  <package>");
 });
 
-Deno.test("a package whose coders all take arguments is a dead end", async () => {
+test("a package whose coders all take arguments is a dead end", async () => {
   const directory = await writeArgumentOnlyPackage();
   try {
     const plan = printed(await planCli([`file://${directory}/mypkg/mod.ts`]));
@@ -857,11 +950,11 @@ Deno.test("a package whose coders all take arguments is a dead end", async () =>
     assertStringIncludes(plan.text, "ordered — 1 required");
     assertStringIncludes(plan.text, "NEXT  <package>");
   } finally {
-    await Deno.remove(directory, { recursive: true });
+    await rm(directory, { recursive: true });
   }
 });
 
-Deno.test("an unknown command is answered with the command list", async () => {
+test("an unknown command is answered with the command list", async () => {
   const plan = printed(await planCli([PNG, "pngFile", "frobnicate"]));
 
   assertEquals(plan.code, 1);
@@ -869,7 +962,7 @@ Deno.test("an unknown command is answered with the command list", async () => {
   assertStringIncludes(plan.text, "NEXT  <command>");
 });
 
-Deno.test("--docs delegates the formatting to deno doc", async () => {
+test("--docs delegates the formatting to deno doc", async () => {
   const plan = printed(await planCli([ARP, "--docs"]));
 
   assertEquals(plan.stream, "stdout");
@@ -877,20 +970,20 @@ Deno.test("--docs delegates the formatting to deno doc", async () => {
   assertStringIncludes(plan.text, "arpData");
 });
 
-Deno.test("explainFailure names the nearest coder", async () => {
+test("explainFailure names the nearest coder", async () => {
   const text = await explainFailure(PNG, "pngFil", new Error("not found"));
 
   assertStringIncludes(text, "no coder named 'pngFil'");
   assertStringIncludes(text, "did you mean 'pngFile'?");
 });
 
-Deno.test("explainFailure falls back to the raw error", async () => {
+test("explainFailure falls back to the raw error", async () => {
   const text = await explainFailure(ARP, "arpData", new Error("bad input"));
 
   assertEquals(text, "Error: bad input");
 });
 
-Deno.test("explainFailure answers an unreadable package with the package list", async () => {
+test("explainFailure answers an unreadable package with the package list", async () => {
   const text = await explainFailure("./no-such-package.ts", "whatever", "boom");
 
   assertStringIncludes(text, "cannot read file://");
@@ -898,7 +991,7 @@ Deno.test("explainFailure answers an unreadable package with the package list", 
   assertStringIncludes(text, "NEXT  <package>");
 });
 
-Deno.test("explainFailure leaves the header to its caller", async () => {
+test("explainFailure leaves the header to its caller", async () => {
   // main() announces the specifier before the run starts, so a guide that
   // carried one too opened every post-import failure with the same line twice.
   const text = await explainFailure(PNG, "pngFil", new Error("not found"));
@@ -907,7 +1000,7 @@ Deno.test("explainFailure leaves the header to its caller", async () => {
   assertStringIncludes(text, "no coder named 'pngFil'");
 });
 
-Deno.test("explainFailure explains a coder that takes arguments", async () => {
+test("explainFailure explains a coder that takes arguments", async () => {
   const text = await explainFailure(PCAP, "pcapFileWith", new Error("boom"));
 
   assertStringIncludes(
@@ -917,7 +1010,7 @@ Deno.test("explainFailure explains a coder that takes arguments", async () => {
   assertEquals(text.includes("Error: boom"), false);
 });
 
-Deno.test("an incomplete invocation writes nothing to stdout and exits 1", async () => {
+test("an incomplete invocation writes nothing to stdout and exits 1", async () => {
   const bare = await runCli([], OFFLINE);
 
   assertEquals(bare.code, 1);
@@ -931,7 +1024,7 @@ Deno.test("an incomplete invocation writes nothing to stdout and exits 1", async
   assertStringIncludes(halfTyped.stderr, "NEXT  <coder>");
 });
 
-Deno.test("--help writes nothing to stderr and exits 0", async () => {
+test("--help writes nothing to stderr and exits 0", async () => {
   const help = await runCli(["--help"], OFFLINE);
 
   assertEquals(help.code, 0);
@@ -940,30 +1033,27 @@ Deno.test("--help writes nothing to stderr and exits 0", async () => {
   assertStringIncludes(help.stdout, "USAGE");
 });
 
-Deno.test("discovery denied still points at naming the coder directly", async () => {
-  const denied = await runCli([ARP], [
-    "--no-prompt",
-    "--allow-read",
-    "--allow-env",
-  ]);
+test("discovery unavailable still points at naming the coder directly", async () => {
+  const denied = await runCli([ARP], NO_DENO);
 
   assertEquals(denied.code, 1);
   assertEquals(denied.stdout, "");
   assertStringIncludes(denied.stderr, "cannot list the coders");
-  assertStringIncludes(denied.stderr, "--allow-run=deno");
+  assertStringIncludes(denied.stderr, "deno could not be started");
   assertStringIncludes(denied.stderr, "naming the coder yourself");
   assertNotEquals(denied.stderr.indexOf("NEXT  <coder>"), -1);
 });
 
-Deno.test("a discovery that runs out of time still points at the coder word", async () => {
+test("a discovery that runs out of time still points at the coder word", async () => {
   // Level 0 is bounded at three seconds; level 1 had no deadline at all, so
   // against a black-hole proxy `binstruct <package>` ran 145 seconds with a
   // blank screen and only stopped when it was killed. A timed-out subprocess
   // is now an ordinary tool failure and reaches the guidance that carries the
   // escape hatch. The clock is faked, so none of that time is spent here.
+  await using blackHole = await listenBlackHole();
   using time = new FakeTime();
 
-  const planning = planCli([PNG]);
+  const planning = planCli([blackHole.specifier]);
   await time.tickAsync(120_000);
   const plan = printed(await planning);
 
@@ -976,12 +1066,13 @@ Deno.test("a discovery that runs out of time still points at the coder word", as
   assertStringIncludes(plan.text, "'<coder>' decode < input.bin");
 });
 
-Deno.test("a named coder outlives a discovery that ran out of time", async () => {
+test("a named coder outlives a discovery that ran out of time", async () => {
   // The escape hatch of ADR 0002, one level on: discovery being unavailable is
   // not a reason to refuse a name the user supplied.
+  await using blackHole = await listenBlackHole();
   using time = new FakeTime();
 
-  const planning = planCli([PNG, "pngFile", "decode"]);
+  const planning = planCli([blackHole.specifier, "pngFile", "decode"]);
   await time.tickAsync(120_000);
   const plan = await planning;
 
@@ -991,18 +1082,14 @@ Deno.test("a named coder outlives a discovery that ran out of time", async () =>
   assertEquals(plan.coder, "pngFile");
 });
 
-Deno.test("a coder taking arguments is refused when the listing is unavailable", async () => {
+test("a coder taking arguments is refused when the listing is unavailable", async () => {
   // The escape hatch of ADR 0002 accepts a name discovery could not check, and
   // an accepted *name* was being turned into an unchecked *call*: without
-  // --allow-run=deno, `binstruct pcap pcapFileWith decode` called
+  // discovery, `binstruct pcap pcapFileWith decode` called
   // `pcapFileWith()` with no sub-coders and wrote whatever that decoded to
   // stdout at exit 0 with nothing on stderr. `.length` is the check that
-  // survives the missing permission.
-  const refused = await runCli([PCAP, "pcapFileWith", "decode"], [
-    "--no-prompt",
-    "--allow-read",
-    "--allow-env",
-  ]);
+  // survives the missing `deno`.
+  const refused = await runCli([PCAP, "pcapFileWith", "decode"], NO_DENO);
 
   assertEquals(refused.code, 1);
   assertEquals(refused.stdout, "");
@@ -1010,17 +1097,17 @@ Deno.test("a coder taking arguments is refused when the listing is unavailable",
   assertStringIncludes(refused.stderr, "2 arguments at runtime");
   // And the screen owes the user the check's blind spot, plus the way out.
   assertStringIncludes(refused.stderr, "'x?: T'");
-  assertStringIncludes(refused.stderr, "--allow-run=deno");
+  assertStringIncludes(refused.stderr, "deno on PATH");
 });
 
-Deno.test("a zero-argument coder still runs when the listing is unavailable", async () => {
+test("a zero-argument coder still runs when the listing is unavailable", async () => {
   // The other half: refusing everything unverified would close the escape
-  // hatch, which is what makes a tightened permission set usable at all.
+  // hatch, which is what makes a machine without `deno` usable at all.
   const directory = await writeLocalPackage();
   try {
     const run = await runCli(
       ["./mypkg/mod.ts", "myStruct", "decode"],
-      ["--no-prompt", "--allow-read", "--allow-env"],
+      NO_DENO,
       directory,
       new Uint8Array([7]),
     );
@@ -1029,21 +1116,21 @@ Deno.test("a zero-argument coder still runs when the listing is unavailable", as
     assertStringIncludes(run.stdout, "'a'");
     assertStringIncludes(run.stdout, "7");
   } finally {
-    await Deno.remove(directory, { recursive: true });
+    await rm(directory, { recursive: true });
   }
 });
 
-Deno.test("an optional parameter is refused unverified and runs once read", async () => {
+test("an optional parameter is refused unverified and runs once read", async () => {
   // The honest limit of `.length`: TypeScript erases the `?`, so a factory
   // that is genuinely callable with no arguments reports an arity of 1 and is
   // refused. `@binstruct/pcap` is being reshaped to exactly this signature, so
   // the two halves are asserted together — the refusal, and the fact that the
-  // permission is what lifts it.
+  // listing is what lifts it.
   const directory = await writeOptionalParameterPackage();
   try {
     const refused = await runCli(
       ["./mypkg/mod.ts", "maybe", "decode"],
-      ["--no-prompt", "--allow-read", "--allow-env"],
+      NO_DENO,
       directory,
       new Uint8Array([7]),
     );
@@ -1053,12 +1140,12 @@ Deno.test("an optional parameter is refused unverified and runs once read", asyn
     assertStringIncludes(refused.stderr, "maybe was not called");
     assertStringIncludes(
       refused.stderr,
-      "if maybe is one of those, run again with --allow-run=deno",
+      "if maybe is one of those, run again with deno on PATH",
     );
 
     const granted = await runCli(
       ["./mypkg/mod.ts", "maybe", "decode"],
-      ["-A"],
+      {},
       directory,
       new Uint8Array([7]),
     );
@@ -1066,11 +1153,11 @@ Deno.test("an optional parameter is refused unverified and runs once read", asyn
     assertEquals(granted.code, 0);
     assertStringIncludes(granted.stdout, "'a'");
   } finally {
-    await Deno.remove(directory, { recursive: true });
+    await rm(directory, { recursive: true });
   }
 });
 
-Deno.test("parseCliArgs keeps a numeric-looking word as typed", () => {
+test("parseCliArgs keeps a numeric-looking word as typed", () => {
   // @std/cli coerces `_` entries, so `007` used to reach the resolver as `7`
   // and every message quoted a package the user never typed.
   assertEquals(parseCliArgs(["007"]).package, "007");
@@ -1087,7 +1174,7 @@ Deno.test("parseCliArgs keeps a numeric-looking word as typed", () => {
   });
 });
 
-Deno.test("parseCliArgs lets a blank word occupy the slot it was typed in", () => {
+test("parseCliArgs lets a blank word occupy the slot it was typed in", () => {
   // Filtering blanks out of the positional list before filling the slots is the
   // unknown-flag shift by another route: an argument the user typed silently
   // changed the meaning of the ones after it.
@@ -1117,7 +1204,7 @@ Deno.test("parseCliArgs lets a blank word occupy the slot it was typed in", () =
   assertEquals(parseCliArgs(["png", "pngFile", "decode"]).blankSlots, []);
 });
 
-Deno.test("parseCliArgs keeps the positionals it has no slot for", () => {
+test("parseCliArgs keeps the positionals it has no slot for", () => {
   const forgotten = parseCliArgs(["arp", "arpData", "decode", "input.bin"]);
 
   assertEquals(forgotten.package, "arp");
@@ -1129,7 +1216,7 @@ Deno.test("parseCliArgs keeps the positionals it has no slot for", () => {
   assertEquals(parseCliArgs(["png", "pngFile", "decode"]).extraArgs, []);
 });
 
-Deno.test("a blank word is refused, and never shifts the package", async () => {
+test("a blank word is refused, and never shifts the package", async () => {
   // `binstruct "" decode` read `decode` as the package and reported on
   // jsr:@binstruct/decode — a package nobody named, from an argument that was
   // dropped rather than answered.
@@ -1144,7 +1231,7 @@ Deno.test("a blank word is refused, and never shifts the package", async () => {
   assertStringIncludes(plan.text, "OPTIONS");
 });
 
-Deno.test("a blank coder word is refused rather than inferred around", async () => {
+test("a blank coder word is refused rather than inferred around", async () => {
   // The same shift one slot along: the blank vanished, `decode` moved into the
   // coder slot, was reserved as a command there, and the run went ahead with an
   // inferred coder — a decode nobody asked for from a word nobody typed.
@@ -1161,7 +1248,7 @@ Deno.test("a blank coder word is refused rather than inferred around", async () 
   assertEquals(inferred.text.includes("using coder"), false);
 });
 
-Deno.test("a blank word beats --version and --help to the answer", async () => {
+test("a blank word beats --version and --help to the answer", async () => {
   const version = printed(await planCli(["", "--version"]));
 
   assertEquals(version.stream, "stderr");
@@ -1174,7 +1261,7 @@ Deno.test("a blank word beats --version and --help to the answer", async () => {
   assertEquals(help.code, 1);
 });
 
-Deno.test("an extra positional is named, not discarded", async () => {
+test("an extra positional is named, not discarded", async () => {
   // The forgotten `<`: the file was dropped where it stood and the CLI sat
   // reading a terminal, with nothing on the screen to say input.bin had been
   // ignored.
@@ -1193,7 +1280,7 @@ Deno.test("an extra positional is named, not discarded", async () => {
   );
 });
 
-Deno.test("extra positionals are only guessed at when there is one", async () => {
+test("extra positionals are only guessed at when there is one", async () => {
   // Two words past the third are anyone's guess, so the screen says what
   // happened and offers no command it cannot vouch for.
   const plan = printed(await planCli(["arp", "arpData", "decode", "a", "b"]));
@@ -1212,7 +1299,7 @@ Deno.test("extra positionals are only guessed at when there is one", async () =>
   assertEquals(incomplete.text.includes("< input.bin"), false);
 });
 
-Deno.test("an extra positional writes nothing to stdout", async () => {
+test("an extra positional writes nothing to stdout", async () => {
   const run = await runCli([ARP, "arpData", "decode", "input.bin"], OFFLINE);
 
   assertEquals(run.code, 1);
@@ -1220,7 +1307,7 @@ Deno.test("an extra positional writes nothing to stdout", async () => {
   assertStringIncludes(run.stderr, "unexpected argument: input.bin");
 });
 
-Deno.test("level 1 shows the package's own description", async () => {
+test("level 1 shows the package's own description", async () => {
   // ADR 0003 defers descriptions from level 0 to level 1; discovery read the
   // module doc all along and the screen threw it away.
   const plan = printed(await planCli([PNG]));
@@ -1231,14 +1318,14 @@ Deno.test("level 1 shows the package's own description", async () => {
   );
 });
 
-Deno.test("the level 2 collapse keeps the description too", async () => {
+test("the level 2 collapse keeps the description too", async () => {
   const plan = printed(await planCli([ARP]));
 
   assertStringIncludes(plan.text, "NEXT  <command>");
   assertStringIncludes(plan.text, "ARP (Address Resolution Protocol) packet");
 });
 
-Deno.test("a named coder that takes arguments is refused, not called", async () => {
+test("a named coder that takes arguments is refused, not called", async () => {
   // pcapFileWith(header, record) called bare would build a file coder over two
   // undefined sub-coders and fail somewhere inside the decode instead of here.
   const plan = printed(await planCli([PCAP, "pcapFileWith", "decode"]));
@@ -1251,7 +1338,7 @@ Deno.test("a named coder that takes arguments is refused, not called", async () 
   );
 });
 
-Deno.test("a named coder that takes arguments still lists the callable ones", async () => {
+test("a named coder that takes arguments still lists the callable ones", async () => {
   const plan = printed(await planCli([PCAP, "pcapFileWith", "decode"]));
 
   assertEquals(plan.code, 1);
@@ -1260,7 +1347,7 @@ Deno.test("a named coder that takes arguments still lists the callable ones", as
   assertStringIncludes(plan.text, `TRY\n  binstruct ${PCAP} pcapGlobalHeader`);
 });
 
-Deno.test("--docs announces the specifier and the inferred coder", async () => {
+test("--docs announces the specifier and the inferred coder", async () => {
   const plan = printed(await planCli([ARP, "--docs"]));
 
   assertEquals(plan.stream, "stdout");
@@ -1270,7 +1357,7 @@ Deno.test("--docs announces the specifier and the inferred coder", async () => {
   ]);
 });
 
-Deno.test("--docs documents the decoded type as well as the coder", async () => {
+test("--docs documents the decoded type as well as the coder", async () => {
   const plan = printed(await planCli([ARP, "--docs"]));
 
   assertStringIncludes(plan.text, "function arpData");
@@ -1282,13 +1369,13 @@ Deno.test("--docs documents the decoded type as well as the coder", async () => 
   );
 });
 
-Deno.test("--docs writes plain text when stdout is not a terminal", async () => {
+test("--docs writes plain text when stdout is not a terminal", async () => {
   const plan = printed(await planCli([ARP, "--docs"]));
 
   assertEquals(plan.text.includes(String.fromCharCode(27) + "["), false);
 });
 
-Deno.test("--help does not turn a diagnostic into a success", async () => {
+test("--help does not turn a diagnostic into a success", async () => {
   // Relocating guidance for a missing word is what --help is for; converting
   // an unreadable package into stdout and exit 0 is not.
   const plan = printed(await planCli(["definitely-not-a-package", "--help"]));
@@ -1298,7 +1385,7 @@ Deno.test("--help does not turn a diagnostic into a success", async () => {
   assertStringIncludes(plan.text, "cannot read jsr:@binstruct/");
 });
 
-Deno.test("--help does not excuse an unknown coder or a bad command", async () => {
+test("--help does not excuse an unknown coder or a bad command", async () => {
   const coder = printed(await planCli([PNG, "pngfile", "--help"]));
 
   assertEquals(coder.stream, "stderr");
@@ -1310,7 +1397,7 @@ Deno.test("--help does not excuse an unknown coder or a bad command", async () =
   assertEquals(command.code, 1);
 });
 
-Deno.test("--help still relocates a pure disclosure level", async () => {
+test("--help still relocates a pure disclosure level", async () => {
   const level1 = printed(await planCli([PNG, "--help"]));
 
   assertEquals(level1.stream, "stdout");
@@ -1324,21 +1411,21 @@ Deno.test("--help still relocates a pure disclosure level", async () => {
   assertStringIncludes(level2.text, "NEXT  <command>");
 });
 
-Deno.test("a run announces the specifier exactly once", async () => {
+test("a run announces the specifier exactly once", async () => {
   const run = await runCli([PNG, "pngfile", "decode"]);
 
   assertEquals(run.code, 1);
   assertEquals(run.stderr.split(`package: ${PNG}`).length, 2);
 });
 
-Deno.test("a relative package is read from the working directory", async () => {
+test("a relative package is read from the working directory", async () => {
   // Discovery resolved a relative specifier against the cwd while import()
   // resolved it against cli.ts, so a local module was listed from one place
   // and loaded — or not — from another.
-  const directory = await Deno.makeTempDir();
+  const directory = await makeTempDir();
   try {
     const binstruct = import.meta.resolve("../../@hertzg/binstruct/mod.ts");
-    await Deno.writeTextFile(
+    await writeFile(
       `${directory}/local.ts`,
       [
         `import { type Coder, struct, u8 } from "${binstruct}";`,
@@ -1351,18 +1438,18 @@ Deno.test("a relative package is read from the working directory", async () => {
       ].join("\n"),
     );
 
-    const listed = await runCli(["./local.ts"], ["-A"], directory);
+    const listed = await runCli(["./local.ts"], {}, directory);
 
     assertEquals(listed.code, 1);
     assertStringIncludes(listed.stderr, "localOnly");
     assertStringIncludes(listed.stderr, `package: ./local.ts → file://`);
     assertEquals(listed.stderr.includes("@binstruct/cli/local.ts"), false);
   } finally {
-    await Deno.remove(directory, { recursive: true });
+    await rm(directory, { recursive: true });
   }
 });
 
-Deno.test("a directory is refused, and its modules are offered instead", async () => {
+test("a directory is refused, and its modules are offered instead", async () => {
   // `deno doc ./mypkg` documents every module file under it — one node each,
   // no entrypoint among them — and the CLI read the first, so ./mypkg decoded
   // through aaa_other.ts: the alphabetical accident, not the package. import()
@@ -1381,18 +1468,18 @@ Deno.test("a directory is refused, and its modules are offered instead", async (
     assertEquals(plan.text.includes("internalOnly"), false);
     assertEquals(plan.text.includes("using coder"), false);
   } finally {
-    await Deno.remove(directory, { recursive: true });
+    await rm(directory, { recursive: true });
   }
 });
 
-Deno.test("a directory never decodes to the wrong shape", async () => {
+test("a directory never decodes to the wrong shape", async () => {
   // Two bytes in, `{ 'z': 1 }` out, exit 0 — a one-byte internal structure
   // decoded from input meant for a two-byte one, reported as a success.
   const directory = await writeAmbiguousPackage();
   try {
     const run = await runCli(
       ["./mypkg", "decode"],
-      ["-A"],
+      {},
       directory,
       new Uint8Array([1, 2]),
     );
@@ -1403,18 +1490,18 @@ Deno.test("a directory never decodes to the wrong shape", async () => {
     assertEquals(run.stderr.includes("using coder: internalOnly"), false);
     assertStringIncludes(run.stderr, "names a directory");
   } finally {
-    await Deno.remove(directory, { recursive: true });
+    await rm(directory, { recursive: true });
   }
 });
 
-Deno.test("the module named directly decodes, end to end", async () => {
+test("the module named directly decodes, end to end", async () => {
   // The other half of the refusal: naming the module works, and works with the
   // structure the module actually declares.
   const directory = await writeAmbiguousPackage();
   try {
     const run = await runCli(
       ["./mypkg/mod.ts", "decode"],
-      ["-A"],
+      {},
       directory,
       new Uint8Array([1, 2]),
     );
@@ -1425,18 +1512,18 @@ Deno.test("the module named directly decodes, end to end", async () => {
     assertEquals(run.stdout.includes("'z'"), false);
     assertStringIncludes(run.stderr, "using coder: pair");
   } finally {
-    await Deno.remove(directory, { recursive: true });
+    await rm(directory, { recursive: true });
   }
 });
 
-Deno.test("the standard deno.json + mod.ts layout is refused, not called empty", async () => {
+test("the standard deno.json + mod.ts layout is refused, not called empty", async () => {
   // This layout used to die inside the empty-discovery diagnosis, reported as
   // "exposes no coders — its module graph could not be read:
   // [ERR_UNSUPPORTED_DIR_IMPORT] …", which blames the package for the CLI
   // having pointed a directory at import().
   const directory = await writeLocalPackage();
   try {
-    await Deno.writeTextFile(
+    await writeFile(
       `${directory}/mypkg/deno.json`,
       '{ "name": "@x/mypkg", "version": "0.0.1", "exports": "./mod.ts" }\n',
     );
@@ -1457,18 +1544,18 @@ Deno.test("the standard deno.json + mod.ts layout is refused, not called empty",
       `TRY\n  binstruct ${directory}/mypkg/mod.ts`,
     );
   } finally {
-    await Deno.remove(directory, { recursive: true });
+    await rm(directory, { recursive: true });
   }
 });
 
-Deno.test("a directory is refused however it is spelled", async () => {
+test("a directory is refused however it is spelled", async () => {
   // The header prints `→ file:///…` for every local path and `--docs` prints
   // `Defined in file:///…`, so the URL spelling is one the CLI itself teaches;
   // a trailing slash and a symlink are the same directory again. The decision
   // is taken on the resolved target, so all of them reach it.
   const directory = await writeAmbiguousPackage();
   try {
-    await Deno.symlink(`${directory}/mypkg`, `${directory}/link`);
+    await symlink(`${directory}/mypkg`, `${directory}/link`);
 
     const spellings = [
       `${directory}/mypkg`,
@@ -1489,11 +1576,11 @@ Deno.test("a directory is refused however it is spelled", async () => {
       assertStringIncludes(plan.text, "TRY\n  binstruct ");
     }
   } finally {
-    await Deno.remove(directory, { recursive: true });
+    await rm(directory, { recursive: true });
   }
 });
 
-Deno.test("a trailing slash is a directory, not a registry name", async () => {
+test("a trailing slash is a directory, not a registry name", async () => {
   // `arp/` is what shell tab-completion types for a directory, and it starts
   // with neither `.` nor `/` and ends in no module extension — so the old
   // classifier called it a bare name, expanded it to `jsr:@binstruct/arp/` and
@@ -1505,7 +1592,7 @@ Deno.test("a trailing slash is a directory, not a registry name", async () => {
   try {
     const run = await runCli(
       ["arp/", "decode"],
-      ["-A"],
+      {},
       directory,
       new Uint8Array([1, 2]),
     );
@@ -1518,11 +1605,11 @@ Deno.test("a trailing slash is a directory, not a registry name", async () => {
     assertEquals(run.stderr.includes("using coder"), false);
     assertEquals(run.stderr.includes("hardwareType"), false);
   } finally {
-    await Deno.remove(directory, { recursive: true });
+    await rm(directory, { recursive: true });
   }
 });
 
-Deno.test("a nested path is a path, not a scope and a package", async () => {
+test("a nested path is a path, not a scope and a package", async () => {
   // Same leak, second spelling: `nested/inner` became `jsr:@binstruct/nested/inner`.
   const directory = await writeAmbiguousPackage("nested/inner");
   try {
@@ -1533,7 +1620,7 @@ Deno.test("a nested path is a path, not a scope and a package", async () => {
 
     const run = await runCli(
       ["nested/inner", "decode"],
-      ["-A"],
+      {},
       directory,
       new Uint8Array([1, 2]),
     );
@@ -1542,11 +1629,11 @@ Deno.test("a nested path is a path, not a scope and a package", async () => {
     assertEquals(run.stdout, "");
     assertStringIncludes(run.stderr, "names a directory");
   } finally {
-    await Deno.remove(directory, { recursive: true });
+    await rm(directory, { recursive: true });
   }
 });
 
-Deno.test("every spelling of one directory reaches one decision", async () => {
+test("every spelling of one directory reaches one decision", async () => {
   // What `target.ts` and ADR 0004 claim, checked rather than assumed: the
   // relative form, the trailing slash, the absolute path, the `file:` URL and
   // a symlink to any of them are one thing and answer one way. Resolution
@@ -1555,7 +1642,7 @@ Deno.test("every spelling of one directory reaches one decision", async () => {
   // `pkg/` used to reach neither half.
   const directory = await writeAmbiguousPackage();
   try {
-    await Deno.symlink(`${directory}/mypkg`, `${directory}/link`);
+    await symlink(`${directory}/mypkg`, `${directory}/link`);
     const url = toFileUrl(`${directory}/mypkg`).href;
 
     const spellings = [
@@ -1573,7 +1660,7 @@ Deno.test("every spelling of one directory reaches one decision", async () => {
     for (const spelling of spellings) {
       const run = await runCli(
         [spelling, "decode"],
-        ["-A"],
+        {},
         directory,
         new Uint8Array([1, 2]),
       );
@@ -1583,11 +1670,11 @@ Deno.test("every spelling of one directory reaches one decision", async () => {
       assertStringIncludes(run.stderr, "names a directory");
     }
   } finally {
-    await Deno.remove(directory, { recursive: true });
+    await rm(directory, { recursive: true });
   }
 });
 
-Deno.test("a TRY line pastes back as one argument", async (t) => {
+test("a TRY line pastes back as one argument", async (t) => {
   // A `TRY` line is a promise that the command works when pasted. Spaces are
   // ordinary in a path, and `binstruct "./spaced dir"` answered
   // `TRY binstruct ./spaced dir/aaa_other.ts`, which pastes as two arguments
@@ -1596,7 +1683,7 @@ Deno.test("a TRY line pastes back as one argument", async (t) => {
   const directory = await writeSpacedPackage();
   const pkg = `${directory}/spaced dir`;
   try {
-    await t.step("the directory refusal", async () => {
+    await t.test("the directory refusal", async () => {
       const plan = printed(await planCli([pkg, "decode"]));
 
       assertStringIncludes(
@@ -1605,7 +1692,7 @@ Deno.test("a TRY line pastes back as one argument", async (t) => {
       );
     });
 
-    await t.step("the `file:` spelling the header teaches", async () => {
+    await t.test("the `file:` spelling the header teaches", async () => {
       const plan = printed(await planCli([`file://${pkg}`, "decode"]));
 
       assertStringIncludes(
@@ -1614,13 +1701,13 @@ Deno.test("a TRY line pastes back as one argument", async (t) => {
       );
     });
 
-    await t.step("level 1, where the coder comes from discovery", async () => {
+    await t.test("level 1, where the coder comes from discovery", async () => {
       const plan = printed(await planCli([`${pkg}/mod.ts`]));
 
       assertStringIncludes(plan.text, `TRY\n  binstruct '${pkg}/mod.ts' pair`);
     });
 
-    await t.step("level 2, where the redirections must stay bare", async () => {
+    await t.test("level 2, where the redirections must stay bare", async () => {
       const plan = printed(await planCli([`${pkg}/mod.ts`, "pair"]));
 
       assertStringIncludes(
@@ -1629,7 +1716,7 @@ Deno.test("a TRY line pastes back as one argument", async (t) => {
       );
     });
   } finally {
-    await Deno.remove(directory, { recursive: true });
+    await rm(directory, { recursive: true });
   }
 });
 
@@ -1664,7 +1751,7 @@ function shellHazards(line: string): string[] {
   );
 }
 
-Deno.test("no TRY line carries shell syntax outside a redirection", async () => {
+test("no TRY line carries shell syntax outside a redirection", async () => {
   // `toolFailureGuide` put a bare `<coder>` in its TRY line, exempted from
   // `shellWord` as if it were prose. To a shell it is an input redirection, so
   // the promised command pasted back as a decode of a file called `coder`.
@@ -1683,11 +1770,7 @@ Deno.test("no TRY line carries shell syntax outside a redirection", async () => 
 
     // The guide that carried the metavariable is only reachable with discovery
     // unavailable, which takes a subprocess, so it joins the scan from there.
-    const denied = await runCli([ARP], [
-      "--no-prompt",
-      "--allow-read",
-      "--allow-env",
-    ]);
+    const denied = await runCli([ARP], NO_DENO);
 
     assertStringIncludes(denied.stderr, "cannot list the coders");
 
@@ -1703,23 +1786,23 @@ Deno.test("no TRY line carries shell syntax outside a redirection", async () => 
       assertEquals(shellHazards(line), [], line);
     }
   } finally {
-    await Deno.remove(directory, { recursive: true });
+    await rm(directory, { recursive: true });
   }
 });
 
-Deno.test("the escape-hatch TRY line pastes back as a placeholder", async () => {
+test("the escape-hatch TRY line pastes back as a placeholder", async () => {
   // The one TRY line the CLI cannot finish, since the missing word is the one
   // it could not look up. Bare, `<coder>` is an input redirection: the line
   // pasted back as `binstruct ./mypkg/mod.ts decode`, reading a file called
   // `coder` — a different command, and one that could exit 0.
   const directory = await writeLocalPackage();
   try {
-    await Deno.writeTextFile(`${directory}/coder`, "not a coder\n");
-    await Deno.writeFile(`${directory}/input.bin`, new Uint8Array([7]));
+    await writeFile(`${directory}/coder`, "not a coder\n");
+    await writeFile(`${directory}/input.bin`, new Uint8Array([7]));
 
     const denied = await runCli(
       ["./mypkg/mod.ts"],
-      ["--no-prompt", "--allow-read", "--allow-env"],
+      NO_DENO,
       directory,
     );
 
@@ -1735,28 +1818,28 @@ Deno.test("the escape-hatch TRY line pastes back as a placeholder", async () => 
       `./mypkg/mod.ts '<coder>' decode < input.bin > output.json5`,
     );
 
-    const shell = new Deno.Command("sh", {
-      args: ["-c", `"$0" run -A "$1" ${suggestion}`, Deno.execPath(), CLI],
-      cwd: directory,
-      stdout: "piped",
-      stderr: "piped",
-    });
-    const output = await shell.output();
+    const output = await run(
+      "sh",
+      [
+        "-c",
+        `"$0" "$1" ${SCRIPT_GUARD.join(" ")} ${suggestion}`,
+        execPath,
+        fromFileUrl(CLI),
+      ],
+      { cwd: directory },
+    );
 
     // The placeholder reaches the CLI as a word and is refused by name, rather
     // than being eaten by the shell and decoding whatever `coder` held.
     assertNotEquals(output.code, 0);
-    assertStringIncludes(
-      new TextDecoder().decode(output.stderr),
-      "no coder named '<coder>'",
-    );
-    assertEquals(await Deno.readTextFile(`${directory}/output.json5`), "");
+    assertStringIncludes(output.stderr, "no coder named '<coder>'");
+    assertEquals(await readFile(`${directory}/output.json5`, "utf8"), "");
   } finally {
-    await Deno.remove(directory, { recursive: true });
+    await rm(directory, { recursive: true });
   }
 });
 
-Deno.test("a quoted TRY line survives a real shell", async () => {
+test("a quoted TRY line survives a real shell", async () => {
   // The point of the quoting, end to end: the suggestion is pasted back into a
   // shell, word-split by it, and still has to decode.
   const directory = await writeSpacedPackage();
@@ -1767,42 +1850,42 @@ Deno.test("a quoted TRY line survives a real shell", async () => {
     const suggestion =
       refusal.text.split("TRY\n  binstruct ")[1].split("\n")[0];
 
-    const shell = new Deno.Command("sh", {
-      args: [
+    const output = await run(
+      "sh",
+      [
         "-c",
         // `mod.ts` here exports two coders, so the run names one; the point
         // under test is that the quoted path survives the shell's word
         // splitting, which the following words do not change.
-        `printf '\\1\\2' | "$0" run -A "$1" ${suggestion} pair decode`,
-        Deno.execPath(),
-        CLI,
+        `printf '\\1\\2' | "$0" "$1" ${
+          SCRIPT_GUARD.join(" ")
+        } ${suggestion} pair decode`,
+        execPath,
+        fromFileUrl(CLI),
       ],
-      cwd: directory,
-      stdout: "piped",
-      stderr: "piped",
-    });
-    const output = await shell.output();
+      { cwd: directory },
+    );
 
     assertEquals(output.code, 0);
-    assertStringIncludes(new TextDecoder().decode(output.stdout), "'a'");
+    assertStringIncludes(new TextDecoder().decode(output.bytes), "'a'");
   } finally {
-    await Deno.remove(directory, { recursive: true });
+    await rm(directory, { recursive: true });
   }
 });
 
-Deno.test("a symlink the refusal offers is one that loads", async () => {
-  // `Deno.readDir` does not follow links, so a dangling `aaa_link.ts` was
+test("a symlink the refusal offers is one that loads", async () => {
+  // `readdir` does not follow links, so a dangling `aaa_link.ts` was
   // listed as a module and — sorting first — became the `TRY` line, which then
   // failed with `no such path`. A `*.ts` link to a directory landed back on
   // the directory refusal. The refusal's only suggestion must work, whichever
   // module it lands on.
   const directory = await writeAmbiguousPackage();
   try {
-    await Deno.symlink(
+    await symlink(
       `${directory}/mypkg/nowhere.ts`,
       `${directory}/mypkg/aaa_dead.ts`,
     );
-    await Deno.symlink(`${directory}/mypkg`, `${directory}/mypkg/aaa_dir.ts`);
+    await symlink(`${directory}/mypkg`, `${directory}/mypkg/aaa_dir.ts`);
 
     const plan = printed(await planCli([`${directory}/mypkg`, "decode"]));
 
@@ -1816,7 +1899,7 @@ Deno.test("a symlink the refusal offers is one that loads", async () => {
     // And the suggestion loads, rather than bouncing off another refusal.
     const run = await runCli(
       ["./mypkg/mod.ts", "decode"],
-      ["-A"],
+      {},
       directory,
       new Uint8Array([1, 2]),
     );
@@ -1824,19 +1907,19 @@ Deno.test("a symlink the refusal offers is one that loads", async () => {
     assertEquals(run.code, 0);
     assertStringIncludes(run.stdout, "'a'");
   } finally {
-    await Deno.remove(directory, { recursive: true });
+    await rm(directory, { recursive: true });
   }
 });
 
-Deno.test("the directory refusal offers an entrypoint, not a test file", async () => {
+test("the directory refusal offers an entrypoint, not a test file", async () => {
   // The listing is alphabetical and the TRY line was built from its first
   // entry, which in a normal package is `foo.test.ts`: another `deno doc`,
   // arriving nowhere, with `mod.ts` sitting two rows below it.
-  const directory = await Deno.realPath(await Deno.makeTempDir());
+  const directory = await realpath(await makeTempDir());
   try {
-    await Deno.mkdir(`${directory}/mypkg`);
+    await mkdir(`${directory}/mypkg`);
     for (const name of ["aaa.test.ts", "mod.ts", "zzz.ts"]) {
-      await Deno.writeTextFile(
+      await writeFile(
         `${directory}/mypkg/${name}`,
         coderModule("myStruct", ["a"]),
       );
@@ -1852,7 +1935,7 @@ Deno.test("the directory refusal offers an entrypoint, not a test file", async (
 
     // Without a conventional entrypoint the first non-test module is offered,
     // which is still a module the listing above proves exists.
-    await Deno.remove(`${directory}/mypkg/mod.ts`);
+    await rm(`${directory}/mypkg/mod.ts`);
     const noEntry = printed(await planCli([`${directory}/mypkg`]));
 
     assertStringIncludes(
@@ -1862,7 +1945,7 @@ Deno.test("the directory refusal offers an entrypoint, not a test file", async (
 
     // And a directory of nothing but tests still offers one of them rather
     // than dropping the TRY line: it is a module, and it is what is there.
-    await Deno.remove(`${directory}/mypkg/zzz.ts`);
+    await rm(`${directory}/mypkg/zzz.ts`);
     const onlyTests = printed(await planCli([`${directory}/mypkg`]));
 
     assertStringIncludes(
@@ -1870,11 +1953,11 @@ Deno.test("the directory refusal offers an entrypoint, not a test file", async (
       `TRY\n  binstruct ${directory}/mypkg/aaa.test.ts`,
     );
   } finally {
-    await Deno.remove(directory, { recursive: true });
+    await rm(directory, { recursive: true });
   }
 });
 
-Deno.test("a malformed file: URL is a refusal, not a stack trace", async () => {
+test("a malformed file: URL is a refusal, not a stack trace", async () => {
   // `fromFileUrl` sat outside the try that guards the stat, so this escaped as
   // `error: Uncaught (in promise) TypeError: Invalid URL` with a trace through
   // the CLI's own frames.
@@ -1887,12 +1970,12 @@ Deno.test("a malformed file: URL is a refusal, not a stack trace", async () => {
   assertEquals(run.stderr.includes("target.ts:"), false);
 });
 
-Deno.test("a directory with no modules is refused without a TRY line", async () => {
+test("a directory with no modules is refused without a TRY line", async () => {
   // The refusal must never name a command that does not exist, so when there
   // is nothing to name it says so and stops.
-  const directory = await Deno.realPath(await Deno.makeTempDir());
+  const directory = await realpath(await makeTempDir());
   try {
-    await Deno.writeTextFile(`${directory}/README.md`, "not a module\n");
+    await writeFile(`${directory}/README.md`, "not a module\n");
 
     const plan = printed(await planCli([directory, "decode"]));
 
@@ -1902,11 +1985,11 @@ Deno.test("a directory with no modules is refused without a TRY line", async () 
     assertEquals(plan.text.includes("README.md"), false);
     assertEquals(plan.text.includes("TRY"), false);
   } finally {
-    await Deno.remove(directory, { recursive: true });
+    await rm(directory, { recursive: true });
   }
 });
 
-Deno.test("a .mts entrypoint is a module, not a directory", async () => {
+test("a .mts entrypoint is a module, not a directory", async () => {
   // `.mts`, `.cts` and `.jsx` were missing from the extension list, so a real
   // module was called a directory and offered `./mypkg/mod.mts/mod.ts`. The
   // extension no longer decides it either way — the stat does — but the list
@@ -1915,7 +1998,7 @@ Deno.test("a .mts entrypoint is a module, not a directory", async () => {
   try {
     const run = await runCli(
       ["./mypkg/mod.mts", "decode"],
-      ["-A"],
+      {},
       directory,
       new Uint8Array([7]),
     );
@@ -1925,11 +2008,11 @@ Deno.test("a .mts entrypoint is a module, not a directory", async () => {
     assertEquals(run.stderr.includes("it names a directory"), false);
     assertEquals(run.stderr.includes("mod.mts/mod.ts"), false);
   } finally {
-    await Deno.remove(directory, { recursive: true });
+    await rm(directory, { recursive: true });
   }
 });
 
-Deno.test("a specifier is imported exactly as it resolved", async () => {
+test("a specifier is imported exactly as it resolved", async () => {
   // Nothing is substituted for what discovery was asked about. Importing the
   // https://jsr.io/… URL the symbols live at, say, would load the package by a
   // route that bypasses the version and import map the project resolved.
@@ -1941,7 +2024,7 @@ Deno.test("a specifier is imported exactly as it resolved", async () => {
   assertEquals(plan.specifier, "jsr:@binstruct/png");
 });
 
-Deno.test("the header and the inference notice keep the typed form", async () => {
+test("the header and the inference notice keep the typed form", async () => {
   // Both used to print the resolved specifier, so a local package announced
   // itself twice as an absolute file:// URL nobody had typed, while every
   // listing and TRY line on the same screen said ./mypkg/mod.ts.
@@ -1949,7 +2032,7 @@ Deno.test("the header and the inference notice keep the typed form", async () =>
   try {
     const run = await runCli(
       ["./mypkg/mod.ts", "decode"],
-      ["-A"],
+      {},
       directory,
       new Uint8Array([7]),
     );
@@ -1962,11 +2045,11 @@ Deno.test("the header and the inference notice keep the typed form", async () =>
     );
     assertEquals(run.stderr.includes("only coder in file://"), false);
   } finally {
-    await Deno.remove(directory, { recursive: true });
+    await rm(directory, { recursive: true });
   }
 });
 
-Deno.test("the header still shows what shorthand expanded to", async () => {
+test("the header still shows what shorthand expanded to", async () => {
   // The short form leads, but ADR 0004's echo rule stands: a bare name has to
   // be seen becoming jsr:@binstruct/<name>, or the shorthand is a guess.
   const plan = await planCli(["png", "pngFile", "decode"]);
@@ -1977,14 +2060,14 @@ Deno.test("the header still shows what shorthand expanded to", async () => {
   assertEquals(plan.notices, ["package: png → jsr:@binstruct/png"]);
 });
 
-Deno.test("the header does not repeat itself when nothing was expanded", async () => {
+test("the header does not repeat itself when nothing was expanded", async () => {
   const plan = printed(await planCli([PNG]));
 
   assertEquals(plan.text.split("\n")[0], `package: ${PNG}`);
   assertEquals(plan.text.includes("→ file://"), false);
 });
 
-Deno.test("an unknown flag is refused, and no package is guessed at", async () => {
+test("an unknown flag is refused, and no package is guessed at", async () => {
   const plan = printed(await planCli(["--format", "png", "decode"]));
 
   assertEquals(plan.stream, "stderr");
@@ -1999,7 +2082,7 @@ Deno.test("an unknown flag is refused, and no package is guessed at", async () =
   assertStringIncludes(plan.text, "-p, --package");
 });
 
-Deno.test("--help does not excuse an unknown flag either", async () => {
+test("--help does not excuse an unknown flag either", async () => {
   const plan = printed(await planCli(["--format", "json", "png", "--help"]));
 
   assertEquals(plan.stream, "stderr");
@@ -2007,7 +2090,7 @@ Deno.test("--help does not excuse an unknown flag either", async () => {
   assertStringIncludes(plan.text, "unknown option: --format");
 });
 
-Deno.test("an unknown flag beats --version to the answer", async () => {
+test("an unknown flag beats --version to the answer", async () => {
   // --version reads no positionals, but reporting a version for a command line
   // the parser did not understand says the invocation was fine. It was not.
   const plan = printed(await planCli(["--version", "--format"]));
@@ -2017,7 +2100,7 @@ Deno.test("an unknown flag beats --version to the answer", async () => {
   assertStringIncludes(plan.text, "unknown option: --format");
 });
 
-Deno.test("an unknown flag writes nothing to stdout", async () => {
+test("an unknown flag writes nothing to stdout", async () => {
   const run = await runCli(["--format", "json", "png"], OFFLINE);
 
   assertEquals(run.code, 1);
@@ -2025,7 +2108,7 @@ Deno.test("an unknown flag writes nothing to stdout", async () => {
   assertStringIncludes(run.stderr, "unknown option: --format");
 });
 
-Deno.test("a package word that reads as flags never prints help on stdout", async () => {
+test("a package word that reads as flags never prints help on stdout", async () => {
   // `-dash/` parsed as -d -a -s -h, the `h` set --help, and the CLI wrote the
   // whole help screen to stdout at exit 0 with no decode having happened —
   // `binstruct -dash/ decode > out.json5` filled the redirect with a help
@@ -2043,16 +2126,16 @@ Deno.test("a package word that reads as flags never prints help on stdout", asyn
     assertEquals(run.stdout, "");
     assertStringIncludes(run.stderr, "unknown option: -dash/");
   } finally {
-    await Deno.remove(directory, { recursive: true });
+    await rm(directory, { recursive: true });
   }
 });
 
-Deno.test("-- makes a dash-leading package word an ordinary one", async () => {
+test("-- makes a dash-leading package word an ordinary one", async () => {
   const directory = await writeAmbiguousPackage("-dash");
   try {
     const run = await runCli(
       ["--", "-dash/mod.ts", "decode"],
-      ["-A"],
+      {},
       directory,
       new Uint8Array([1, 2]),
     );
@@ -2062,11 +2145,11 @@ Deno.test("-- makes a dash-leading package word an ordinary one", async () => {
     assertStringIncludes(run.stdout, "'b'");
     assertStringIncludes(run.stderr, "using coder: pair");
   } finally {
-    await Deno.remove(directory, { recursive: true });
+    await rm(directory, { recursive: true });
   }
 });
 
-Deno.test("a TRY line for a dash-leading module pastes back and runs", async () => {
+test("a TRY line for a dash-leading module pastes back and runs", async () => {
   // The refusal of ADR 0004 lists what is in a directory and offers one of the
   // names, and a module file may perfectly well start with a `-`. `shellWord`
   // quotes for the shell and has no notion of one, so the suggestion pasted
@@ -2074,7 +2157,7 @@ Deno.test("a TRY line for a dash-leading module pastes back and runs", async () 
   // command that does not run.
   const directory = await writeAmbiguousPackage("-dash");
   try {
-    const refusal = await runCli(["--", "-dash/", "decode"], ["-A"], directory);
+    const refusal = await runCli(["--", "-dash/", "decode"], {}, directory);
 
     assertEquals(refusal.code, 1);
     assertEquals(refusal.stdout, "");
@@ -2086,27 +2169,27 @@ Deno.test("a TRY line for a dash-leading module pastes back and runs", async () 
 
     assertEquals(suggestion, "-- -dash/mod.ts");
 
-    const shell = new Deno.Command("sh", {
-      args: [
+    const output = await run(
+      "sh",
+      [
         "-c",
-        `printf '\\1\\2' | "$0" run -A "$1" ${suggestion} decode`,
-        Deno.execPath(),
-        CLI,
+        `printf '\\1\\2' | "$0" "$1" ${
+          SCRIPT_GUARD.join(" ")
+        } ${suggestion} decode`,
+        execPath,
+        fromFileUrl(CLI),
       ],
-      cwd: directory,
-      stdout: "piped",
-      stderr: "piped",
-    });
-    const output = await shell.output();
+      { cwd: directory },
+    );
 
     assertEquals(output.code, 0);
-    assertStringIncludes(new TextDecoder().decode(output.stdout), "'a'");
+    assertStringIncludes(new TextDecoder().decode(output.bytes), "'a'");
   } finally {
-    await Deno.remove(directory, { recursive: true });
+    await rm(directory, { recursive: true });
   }
 });
 
-Deno.test("a colon inside a path segment is a path, not a scheme", async () => {
+test("a colon inside a path segment is a path, not a scheme", async () => {
   // `^[a-z][a-z0-9+.-]+:` matched `my:`, so this was classified `scheme`: not
   // anchored to the working directory and not stat'ed, while `deno doc`
   // resolved it against the working directory as the path it is. Discovery
@@ -2116,7 +2199,7 @@ Deno.test("a colon inside a path segment is a path, not a scheme", async () => {
   try {
     const run = await runCli(
       ["my:dir/mod.ts", "decode"],
-      ["-A"],
+      {},
       directory,
       new Uint8Array([1, 2]),
     );
@@ -2129,7 +2212,7 @@ Deno.test("a colon inside a path segment is a path, not a scheme", async () => {
     // And the directory spelling reaches the refusal, as any other path does.
     const refused = await runCli(
       ["my:dir/", "decode"],
-      ["-A"],
+      {},
       directory,
       new Uint8Array([1, 2]),
     );
@@ -2138,11 +2221,11 @@ Deno.test("a colon inside a path segment is a path, not a scheme", async () => {
     assertEquals(refused.stdout, "");
     assertStringIncludes(refused.stderr, "names a directory");
   } finally {
-    await Deno.remove(directory, { recursive: true });
+    await rm(directory, { recursive: true });
   }
 });
 
-Deno.test("a node: word is not a scheme, and a local file of that name loads", async () => {
+test("a node: word is not a scheme, and a local file of that name loads", async () => {
   // `node:` and `data:` were in the scheme set because `import()` resolves
   // them, which is the wrong question: the set is the schemes a *package* can
   // live behind, and a runtime built-in hosts none. Keeping them was the
@@ -2150,16 +2233,16 @@ Deno.test("a node: word is not a scheme, and a local file of that name loads", a
   // positional `node:evil.ts` against the working directory and listed the
   // local file's coder, then `import()` asked for a built-in module and died
   // with `No such built-in module: node:evil.ts`.
-  const directory = await Deno.realPath(await Deno.makeTempDir());
+  const directory = await realpath(await makeTempDir());
   try {
-    await Deno.writeTextFile(
+    await writeFile(
       `${directory}/node:evil.ts`,
       coderModule("evilStruct", ["a"]),
     );
 
     const run = await runCli(
       ["node:evil.ts", "decode"],
-      ["-A"],
+      {},
       directory,
       new Uint8Array([7]),
     );
@@ -2169,38 +2252,40 @@ Deno.test("a node: word is not a scheme, and a local file of that name loads", a
     assertStringIncludes(run.stderr, "package: node:evil.ts → file://");
     assertEquals(run.stderr.includes("No such built-in module"), false);
   } finally {
-    await Deno.remove(directory, { recursive: true });
+    await rm(directory, { recursive: true });
   }
 });
 
-Deno.test("an environmental failure is not blamed on the package name", async () => {
+test("an environmental failure is not blamed on the package name", async () => {
   // A malformed deno.json in the working directory used to be reported as
   // "cannot read jsr:@binstruct/png", with png right there in the listing.
-  const directory = await Deno.makeTempDir();
+  const directory = await makeTempDir();
   try {
-    await Deno.writeTextFile(
+    await writeFile(
       `${directory}/deno.json`,
       '{ "imports": { "a": } }\n',
     );
 
-    const broken = await runCli(["png"], ["-A"], directory);
+    const broken = await runCli(["png"], {}, directory);
 
     assertEquals(broken.code, 1);
     assertStringIncludes(broken.stderr, "cannot list the coders in png");
     assertStringIncludes(broken.stderr, "naming the coder yourself");
     assertEquals(broken.stderr.includes("a bare name always means"), false);
   } finally {
-    await Deno.remove(directory, { recursive: true });
+    await rm(directory, { recursive: true });
   }
 });
 
-Deno.test("a decode and encode round trip gives the file back", async () => {
+test("a decode and encode round trip gives the file back", async () => {
   // Encoded output is binary, and binary holds 0x0a wherever the bytes fall.
   // Stdout being line buffered, a single write would have stopped at the last
   // one of those: in this capture it sits 1921 bytes from the end, so that is
   // how much used to go missing, with an exit status of 0 over it.
-  const capture = await Deno.readFile(
-    fromFileUrl(import.meta.resolve("../pcap/_fixtures/dns.cap")),
+  const capture = new Uint8Array(
+    await readFile(
+      fromFileUrl(import.meta.resolve("../pcap/_fixtures/dns.cap")),
+    ),
   );
 
   const decoded = await runCli(

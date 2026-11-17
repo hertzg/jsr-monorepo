@@ -1,4 +1,4 @@
-#!/usr/bin/env -S deno run -A
+#!/usr/bin/env bun
 
 /**
  * Binary Structure CLI Tool
@@ -28,15 +28,15 @@
  *
  * The `PACKAGES` block is JSR's own scope listing, fetched and cached for a day
  * (`./scope.ts`, ADR 0006), so it names what is published rather than what was
- * published when this CLI was released. That costs `--allow-net=jsr.io`; the
- * listing is a hint, so without the permission, without a network, or against a
- * JSR that will not answer, the block is omitted and the screen still says how
- * to name a package. Listing the *coders* of a package costs
- * `--allow-run=deno` in the same way (ADR 0002) — but that listing is not only
- * a hint, since it also says how many arguments each factory takes. Without it
- * a coder you name is accepted, and then refused unless its factory takes no
- * arguments at runtime: the CLI has none to pass, and calling one that wanted
- * some lets the argument default silently.
+ * published when this CLI was released. The listing is a hint, so without a
+ * network, or against a JSR that will not answer, the block is omitted and the
+ * screen still says how to name a package. Listing the *coders* of a package
+ * takes a `deno` executable on `PATH`, because it is read by `deno doc`
+ * (ADR 0002) — and that listing is not only a hint, since it also says how
+ * many arguments each factory takes. Without it a coder you name is accepted,
+ * and then refused unless its factory takes no arguments at runtime: the CLI
+ * has none to pass, and calling one that wanted some lets the argument default
+ * silently.
  *
  * @example Decode a PNG file
  * ```bash
@@ -61,6 +61,7 @@
  * @module
  */
 
+import { argv, exit } from "node:process";
 import { parseArgs } from "@std/cli";
 import { decodeCommand } from "./commands/decode.ts";
 import { encodeCommand } from "./commands/encode.ts";
@@ -124,13 +125,13 @@ const USAGE_FOOTER: readonly string[] = [
   "  without --help, guidance goes to stderr and exits 1, so a half-typed",
   "  redirect stays empty",
   "",
-  "PERMISSIONS",
-  "  --allow-net=jsr.io  lists the @binstruct packages, live and cached for a",
-  "                      day; without it the list is omitted, nothing else",
-  "  --allow-run=deno    lists the coders of a package, via deno doc, and reads",
-  "                      how many arguments each one takes; without it a coder",
-  "                      you name runs only when its factory takes none at",
-  "                      runtime, and is refused rather than called otherwise",
+  "REQUIREMENTS",
+  "  a network     lists the @binstruct packages from jsr.io, live and cached",
+  "                for a day; without one the list is omitted, nothing else",
+  "  deno on PATH  lists the coders of a package, via deno doc, and reads how",
+  "                many arguments each one takes; without it a coder you name",
+  "                runs only when its factory takes none at runtime, and is",
+  "                refused rather than called otherwise",
 ];
 
 /**
@@ -460,8 +461,8 @@ export function parseCliArgs(args: string[]): CliOptions {
  * The list is a hint, so its absence must not be a dead end: the two lines
  * name what failed and then say, in full, how to write a package the CLI will
  * accept — which is everything the listing would have taught anyway. Offline,
- * on a locked-down `--allow-net`, or against a JSR having a bad day, level 0
- * still ends with a command that can be typed.
+ * or against a JSR having a bad day, level 0 still ends with a command that can
+ * be typed.
  *
  * @param listing The listing that came back empty
  * @returns The notes to append, or nothing when there is a list to show
@@ -1146,8 +1147,6 @@ async function parameterizedCoderGuide(
  */
 function failureNote(failure: ToolFailure): string {
   switch (failure.reason) {
-    case "permission-denied":
-      return "listing coders needs --allow-run=deno, and it was denied";
     case "not-spawned":
       return `deno could not be started: ${failure.stderr}`;
     case "minimum-dependency-age":
@@ -1193,7 +1192,7 @@ function blamesSpecifier(stderr: string): boolean {
 /**
  * Builds the guide for a discovery run that could not happen.
  *
- * Discovery is the one part of the CLI that needs `--allow-run=deno`, so this
+ * Discovery is the one part of the CLI that needs a `deno` executable, so this
  * screen always carries the escape hatch: naming the coder yourself works
  * whether or not the listing does. It is the one `TRY` line the CLI cannot
  * finish, since the missing word is the one it could not look up, so the word
@@ -1234,7 +1233,7 @@ function toolFailureGuide(
     ],
     footer: [
       `the ${metavariable("coder")} above is a placeholder: put the name there`,
-      "naming the coder yourself needs no permissions; with the listing gone,",
+      "naming the coder yourself needs no deno; with the listing gone,",
       "one whose factory takes arguments is refused on its runtime arity rather",
       "than called with none.",
     ],
@@ -1257,8 +1256,8 @@ function toolFailureGuide(
  * and lands here. A parameter default (`x = v`) drops out of the count and a
  * `?` does not, which is why `@binstruct/pcap` spells its optional endianness
  * with a default (its ADR 0002). For the packages that do not, the footer names
- * the way out rather than leaving a correct invocation looking broken: grant
- * `--allow-run=deno` and the declaration settles it.
+ * the way out rather than leaving a correct invocation looking broken: put
+ * `deno` on `PATH` and the declaration settles it.
  *
  * @param resolved The package as typed and as resolved
  * @param error The refusal, carrying the factory and its runtime arity
@@ -1296,7 +1295,7 @@ function unverifiedArityGuide(
       "a parameter written 'x?: T' counts here too: TypeScript erases the '?',",
       "so at runtime it cannot be told from a required one, and a factory that",
       "really is callable with no arguments is refused all the same.",
-      `if ${error.coderName} is one of those, run again with --allow-run=deno`,
+      `if ${error.coderName} is one of those, run again with deno on PATH`,
       "and the count comes from its declaration rather than from the function.",
     ],
   };
@@ -1384,8 +1383,8 @@ function chose(
  * distinguishes that from a correct run: a factory's runtime arity counts TypeScript's
  * optional parameters, which discovery correctly does not.
  *
- * When discovery is *unavailable* — no permission to spawn `deno`, no `deno`
- * on `PATH`, a broken config in the working directory — a named coder is still
+ * When discovery is *unavailable* — no `deno` on `PATH`, a broken config in
+ * the working directory, a subprocess that never answers — a named coder is still
  * accepted, so the escape hatch of ADR 0002 survives. It is accepted
  * **unverified**: the choice is marked `arityVerified: false`, and the run it
  * produces checks the factory's runtime arity before calling it
@@ -1653,7 +1652,7 @@ function withoutSharedPreamble(first: string, second: string): string {
  * import { assertEquals } from "@std/assert";
  * import { planCli } from "./cli.ts";
  *
- * const module = import.meta.resolve("../arp/mod.ts");
+ * const module = import.meta.resolve("@binstruct/arp");
  * const plan = await planCli([module, "decode"]);
  *
  * assertEquals(plan.kind, "run");
@@ -1668,7 +1667,8 @@ function withoutSharedPreamble(first: string, second: string): string {
  * import { assertEquals, assertStringIncludes } from "@std/assert";
  * import { planCli } from "./cli.ts";
  *
- * const plan = await planCli([import.meta.resolve("../arp/"), "decode"]);
+ * const directory = new URL(".", import.meta.resolve("@binstruct/arp")).href;
+ * const plan = await planCli([directory, "decode"]);
  *
  * assertEquals(plan.kind, "print");
  * if (plan.kind === "print") {
@@ -1821,7 +1821,7 @@ export async function planCli(args: string[]): Promise<CliPlan> {
  * import { explainFailure } from "./cli.ts";
  *
  * const text = await explainFailure(
- *   import.meta.resolve("../arp/mod.ts"),
+ *   import.meta.resolve("@binstruct/arp"),
  *   "arpDatum",
  *   new Error("Coder 'arpDatum' not found"),
  * );
@@ -1878,7 +1878,7 @@ export async function explainFailure(
  * A run that throws is explained through {@linkcode explainFailure} and exits
  * 1.
  *
- * @param args Command line arguments (defaults to `Deno.args`)
+ * @param args Command line arguments (defaults to the process's own)
  *
  * @example Run a decode from a pipeline
  * ```ts ignore
@@ -1887,7 +1887,7 @@ export async function explainFailure(
  * await main(["png", "pngFile", "decode"]);
  * ```
  */
-export async function main(args: string[] = Deno.args): Promise<void> {
+export async function main(args: string[] = argv.slice(2)): Promise<void> {
   const plan = await planCli(args);
 
   for (const notice of plan.notices ?? []) {
@@ -1901,7 +1901,7 @@ export async function main(args: string[] = Deno.args): Promise<void> {
       console.error(plan.text);
     }
     if (plan.code !== 0) {
-      Deno.exit(plan.code);
+      exit(plan.code);
     }
     return;
   }
@@ -1916,7 +1916,7 @@ export async function main(args: string[] = Deno.args): Promise<void> {
     }
   } catch (error) {
     console.error(await explainFailure(plan.specifier, plan.coder, error));
-    Deno.exit(1);
+    exit(1);
   }
 }
 

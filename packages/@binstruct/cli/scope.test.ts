@@ -1,18 +1,14 @@
 /**
  * Tests for the `@binstruct` scope listing.
  *
- * Nothing here touches the network or the real cache directory: `fetch`,
- * `Deno.permissions.query` and the cache location are all supplied by the
- * test, so every path — fresh, cached, stale, refused, unreadable — is
- * reachable without one.
- *
- * Every case stubs the permission query, granted paths included. Stubbing it
- * only in the denial cases left the rest reading whoever ran the suite: a
- * machine with `--allow-net` withheld would have skipped the request and
- * failed cases that assert a network answer, and the file's claim to supply
- * the permissions was true of five tests out of fifteen.
+ * Nothing here touches the network or the real cache directory: `fetch` and
+ * the cache location are both supplied by the test, so every path — fresh,
+ * cached, stale, unwritable, unreadable — is reachable without one.
  */
 
+import { chmod, mkdtemp, rm, writeFile } from "node:fs/promises";
+import { tmpdir } from "node:os";
+import { test } from "node:test";
 import { assertEquals } from "@std/assert";
 import { returnsNext, stub } from "@std/testing/mock";
 import { join } from "@std/path";
@@ -73,43 +69,26 @@ function stubFetch(answers: (Response | Error)[]) {
 }
 
 /**
- * Stubs the permission query, optionally refusing one permission.
+ * Makes a fresh temporary directory to keep a cache file in.
  *
- * Called with nothing it grants everything, which is how the tests that are
- * not about a refusal stop depending on the flags the suite happens to run
- * under.
- *
- * @param denied The permission name to refuse, if any
- * @returns The stub, to be disposed by the caller
+ * @returns The directory, to be removed by the caller
  */
-function stubPermissions(denied?: Deno.PermissionDescriptor["name"]) {
-  return stub(
-    Deno.permissions,
-    "query",
-    (descriptor: Deno.PermissionDescriptor) =>
-      Promise.resolve({
-        state: descriptor.name === denied ? "denied" : "granted",
-        onchange: null,
-        partial: false,
-        addEventListener() {},
-        removeEventListener() {},
-        dispatchEvent: () => true,
-      } as unknown as Deno.PermissionStatus),
-  );
+async function makeTempDir(): Promise<string> {
+  return await mkdtemp(join(tmpdir(), "binstruct-cli-"));
 }
 
-Deno.test("readScopeListing keeps names, drops the cli, and sorts", () => {
+test("readScopeListing keeps names, drops the cli, and sorts", () => {
   assertEquals(readScopeListing({ items: ITEMS }), READ);
 });
 
-Deno.test("readScopeListing tolerates entries missing a description", () => {
+test("readScopeListing tolerates entries missing a description", () => {
   assertEquals(
     readScopeListing({ items: [{ name: "tar", latestVersion: "0.1.0" }] }),
     [{ name: "tar", description: "", latestVersion: "0.1.0" }],
   );
 });
 
-Deno.test("readScopeListing drops a name with nothing published behind it", () => {
+test("readScopeListing drops a name with nothing published behind it", () => {
   // `@binstruct/bencode` is a reserved name: the scope listing carries it with
   // `latestVersion: null` and `versionCount: 0`, and
   // https://jsr.io/@binstruct/bencode/meta.json answers 404. Offered at level
@@ -127,7 +106,7 @@ Deno.test("readScopeListing drops a name with nothing published behind it", () =
   );
 });
 
-Deno.test("readScopeListing rejects a body that is not a listing", () => {
+test("readScopeListing rejects a body that is not a listing", () => {
   assertEquals(readScopeListing(undefined), undefined);
   assertEquals(readScopeListing(null), undefined);
   assertEquals(readScopeListing(42), undefined);
@@ -136,7 +115,7 @@ Deno.test("readScopeListing rejects a body that is not a listing", () => {
   assertEquals(readScopeListing({ items: {} }), undefined);
 });
 
-Deno.test("readScopeListing skips entries with no usable name", () => {
+test("readScopeListing skips entries with no usable name", () => {
   assertEquals(
     readScopeListing({
       items: [null, {}, { name: "" }, { name: 7 }].map((item) => ({
@@ -148,9 +127,8 @@ Deno.test("readScopeListing skips entries with no usable name", () => {
   );
 });
 
-Deno.test("a listing is fetched, and the CLI itself is not in it", async () => {
+test("a listing is fetched, and the CLI itself is not in it", async () => {
   using _fetch = stubFetch([Response.json({ items: ITEMS })]);
-  using _permissions = stubPermissions();
 
   const listing = await listScopePackages({ cacheDir: null });
 
@@ -159,13 +137,12 @@ Deno.test("a listing is fetched, and the CLI itself is not in it", async () => {
   assertEquals(listing.reason, undefined);
 });
 
-Deno.test("a reserved name never reaches the listing", async () => {
+test("a reserved name never reaches the listing", async () => {
   using _fetch = stubFetch([
     Response.json({
       items: [{ name: "bencode", description: "B.", latestVersion: null }],
     }),
   ]);
-  using _permissions = stubPermissions();
 
   const listing = await listScopePackages({ cacheDir: null });
 
@@ -175,11 +152,10 @@ Deno.test("a reserved name never reaches the listing", async () => {
   assertEquals(listing.source, "none");
 });
 
-Deno.test("a non-200 answer leaves an empty list and its status", async () => {
+test("a non-200 answer leaves an empty list and its status", async () => {
   using _fetch = stubFetch([
     new Response("not found", { status: 404 }),
   ]);
-  using _permissions = stubPermissions();
 
   const listing = await listScopePackages({ cacheDir: null });
 
@@ -188,9 +164,8 @@ Deno.test("a non-200 answer leaves an empty list and its status", async () => {
   assertEquals(listing.reason, "jsr.io answered 404");
 });
 
-Deno.test("a body that is not a listing leaves an empty list", async () => {
+test("a body that is not a listing leaves an empty list", async () => {
   using _fetch = stubFetch([Response.json({ message: "nope" })]);
-  using _permissions = stubPermissions();
 
   const listing = await listScopePackages({ cacheDir: null });
 
@@ -199,14 +174,13 @@ Deno.test("a body that is not a listing leaves an empty list", async () => {
   assertEquals(listing.reason, "jsr.io answered no package listing");
 });
 
-Deno.test("a body that is not JSON leaves an empty list", async () => {
+test("a body that is not JSON leaves an empty list", async () => {
   using _fetch = stubFetch([
     new Response("<!doctype html>", {
       status: 200,
       headers: { "content-type": "text/html" },
     }),
   ]);
-  using _permissions = stubPermissions();
 
   const listing = await listScopePackages({ cacheDir: null });
 
@@ -215,9 +189,8 @@ Deno.test("a body that is not JSON leaves an empty list", async () => {
   assertEquals(typeof listing.reason, "string");
 });
 
-Deno.test("a network error leaves an empty list and its message", async () => {
+test("a network error leaves an empty list and its message", async () => {
   using _fetch = stubFetch([new TypeError("error sending request")]);
-  using _permissions = stubPermissions();
 
   const listing = await listScopePackages({ cacheDir: null });
 
@@ -226,26 +199,10 @@ Deno.test("a network error leaves an empty list and its message", async () => {
   assertEquals(listing.reason, "error sending request");
 });
 
-Deno.test("without --allow-net nothing is requested", async () => {
-  using fetchStub = stubFetch([Response.json({ items: ITEMS })]);
-  using _permissions = stubPermissions("net");
-
-  const listing = await listScopePackages({ cacheDir: null });
-
-  assertEquals(fetchStub.calls.length, 0);
-  assertEquals(listing.source, "none");
-  assertEquals(listing.packages, []);
-  assertEquals(
-    listing.reason,
-    "listing packages needs --allow-net=jsr.io, and it was not granted",
-  );
-});
-
-Deno.test("a fresh cache answers without a request", async () => {
-  const cacheDir = await Deno.makeTempDir();
+test("a fresh cache answers without a request", async () => {
+  const cacheDir = await makeTempDir();
   try {
     using fetchStub = stubFetch([Response.json({ items: ITEMS })]);
-    using _permissions = stubPermissions();
 
     const first = await listScopePackages({ cacheDir, now: 1_000 });
     assertEquals(first.source, "network");
@@ -256,22 +213,21 @@ Deno.test("a fresh cache answers without a request", async () => {
     assertEquals(second.packages, first.packages);
     assertEquals(fetchStub.calls.length, 1);
   } finally {
-    await Deno.remove(cacheDir, { recursive: true });
+    await rm(cacheDir, { recursive: true });
   }
 });
 
-Deno.test("a cached listing round-trips through the same reader", async () => {
+test("a cached listing round-trips through the same reader", async () => {
   // The cache is written in the shape the API answers with, so the publication
   // filter reads it back the same way. An entry stored without the version
   // that got it past that filter would be dropped on the way back in, turning
   // every cache hit into an empty list.
-  const cacheDir = await Deno.makeTempDir();
+  const cacheDir = await makeTempDir();
   try {
     using _fetch = stubFetch([
       Response.json({ items: ITEMS }),
       new TypeError("offline"),
     ]);
-    using _permissions = stubPermissions();
 
     const fresh = await listScopePackages({ cacheDir, now: 0 });
     const cached = await listScopePackages({ cacheDir, now: 1 });
@@ -280,12 +236,12 @@ Deno.test("a cached listing round-trips through the same reader", async () => {
     assertEquals(cached.packages, READ);
     assertEquals(cached.packages, fresh.packages);
   } finally {
-    await Deno.remove(cacheDir, { recursive: true });
+    await rm(cacheDir, { recursive: true });
   }
 });
 
-Deno.test("an expired cache is refreshed", async () => {
-  const cacheDir = await Deno.makeTempDir();
+test("an expired cache is refreshed", async () => {
+  const cacheDir = await makeTempDir();
   try {
     using fetchStub = stubFetch([
       Response.json({ items: ITEMS }),
@@ -297,7 +253,6 @@ Deno.test("an expired cache is refreshed", async () => {
         }],
       }),
     ]);
-    using _permissions = stubPermissions();
 
     await listScopePackages({ cacheDir, now: 0, ttl: 10 });
     const refreshed = await listScopePackages({ cacheDir, now: 100, ttl: 10 });
@@ -310,18 +265,17 @@ Deno.test("an expired cache is refreshed", async () => {
     ]);
     assertEquals(fetchStub.calls.length, 2);
   } finally {
-    await Deno.remove(cacheDir, { recursive: true });
+    await rm(cacheDir, { recursive: true });
   }
 });
 
-Deno.test("a failed refresh falls back to the expired cache", async () => {
-  const cacheDir = await Deno.makeTempDir();
+test("a failed refresh falls back to the expired cache", async () => {
+  const cacheDir = await makeTempDir();
   try {
     using _fetch = stubFetch([
       Response.json({ items: ITEMS }),
       new TypeError("offline"),
     ]);
-    using _permissions = stubPermissions();
 
     await listScopePackages({ cacheDir, now: 0, ttl: 10 });
     const stale = await listScopePackages({ cacheDir, now: 100, ttl: 10 });
@@ -330,71 +284,69 @@ Deno.test("a failed refresh falls back to the expired cache", async () => {
     assertEquals(stale.packages.map(({ name }) => name), ["arp", "png"]);
     assertEquals(stale.reason, "offline");
   } finally {
-    await Deno.remove(cacheDir, { recursive: true });
+    await rm(cacheDir, { recursive: true });
   }
 });
 
-Deno.test("an offline run with no cache is still an answer", async () => {
-  const cacheDir = await Deno.makeTempDir();
+test("an offline run with no cache is still an answer", async () => {
+  const cacheDir = await makeTempDir();
   try {
     using _fetch = stubFetch([new TypeError("offline")]);
-    using _permissions = stubPermissions();
 
     const listing = await listScopePackages({ cacheDir, now: 0 });
 
     assertEquals(listing.source, "none");
     assertEquals(listing.packages, []);
   } finally {
-    await Deno.remove(cacheDir, { recursive: true });
+    await rm(cacheDir, { recursive: true });
   }
 });
 
-Deno.test("a corrupt cache file is a miss, not a crash", async () => {
-  const cacheDir = await Deno.makeTempDir();
+test("a corrupt cache file is a miss, not a crash", async () => {
+  const cacheDir = await makeTempDir();
   try {
-    await Deno.writeTextFile(
+    await writeFile(
       join(cacheDir, "scope-binstruct.json"),
       "{ truncated",
     );
     using _fetch = stubFetch([Response.json({ items: ITEMS })]);
-    using _permissions = stubPermissions();
 
     const listing = await listScopePackages({ cacheDir, now: 0 });
 
     assertEquals(listing.source, "network");
     assertEquals(listing.packages.map(({ name }) => name), ["arp", "png"]);
   } finally {
-    await Deno.remove(cacheDir, { recursive: true });
+    await rm(cacheDir, { recursive: true });
   }
 });
 
-Deno.test("a cache file without a timestamp is a miss", async () => {
-  const cacheDir = await Deno.makeTempDir();
+test("a cache file without a timestamp is a miss", async () => {
+  const cacheDir = await makeTempDir();
   try {
-    await Deno.writeTextFile(
+    await writeFile(
       join(cacheDir, "scope-binstruct.json"),
       JSON.stringify({ items: ITEMS }),
     );
     using _fetch = stubFetch([new TypeError("offline")]);
-    using _permissions = stubPermissions();
 
     const listing = await listScopePackages({ cacheDir, now: 0 });
 
     assertEquals(listing.source, "none");
   } finally {
-    await Deno.remove(cacheDir, { recursive: true });
+    await rm(cacheDir, { recursive: true });
   }
 });
 
-Deno.test("an unwritable cache costs a request, not a failure", async () => {
+test("an unwritable cache costs a request, not a failure", async () => {
   using fetchStub = stubFetch([
     Response.json({ items: ITEMS }),
     Response.json({ items: ITEMS }),
   ]);
-  using _permissions = stubPermissions("write");
 
-  const cacheDir = await Deno.makeTempDir();
+  const cacheDir = await makeTempDir();
   try {
+    await chmod(cacheDir, 0o555);
+
     const first = await listScopePackages({ cacheDir, now: 0 });
     const second = await listScopePackages({ cacheDir, now: 1 });
 
@@ -402,36 +354,26 @@ Deno.test("an unwritable cache costs a request, not a failure", async () => {
     assertEquals(second.source, "network");
     assertEquals(fetchStub.calls.length, 2);
   } finally {
-    await Deno.remove(cacheDir, { recursive: true });
+    await rm(cacheDir, { recursive: true });
   }
 });
 
-Deno.test("an unreadable cache is a miss", async () => {
-  const cacheDir = await Deno.makeTempDir();
+test("an unreadable cache is a miss", async () => {
+  const cacheDir = await makeTempDir();
   try {
-    await Deno.writeTextFile(
+    await writeFile(
       join(cacheDir, "scope-binstruct.json"),
       JSON.stringify({ fetchedAt: 0, items: ITEMS }),
     );
+    await chmod(join(cacheDir, "scope-binstruct.json"), 0o000);
 
     using fetchStub = stubFetch([Response.json({ items: ITEMS })]);
-    using _permissions = stubPermissions("read");
 
     const listing = await listScopePackages({ cacheDir, now: 1 });
 
     assertEquals(listing.source, "network");
     assertEquals(fetchStub.calls.length, 1);
   } finally {
-    await Deno.remove(cacheDir, { recursive: true });
+    await rm(cacheDir, { recursive: true });
   }
-});
-
-Deno.test("no cache directory can be located without --allow-env", async () => {
-  using fetchStub = stubFetch([Response.json({ items: ITEMS })]);
-  using _permissions = stubPermissions("env");
-
-  const listing = await listScopePackages({ now: 0 });
-
-  assertEquals(listing.source, "network");
-  assertEquals(fetchStub.calls.length, 1);
 });

@@ -8,29 +8,25 @@
  * dropped from it: the CLI package itself, and any name with no published
  * version behind it. See `@binstruct/cli` ADR 0006.
  *
- * **The listing is a hint, never a gate.** Every failure — no `--allow-net`,
- * no network, a non-200 answer, a body that is not a listing — resolves to an
- * empty list with a reason attached, and the caller still shows the shorthand
- * rule and the escape hatch. Nothing here throws, and nothing here writes to
- * stdout.
+ * **The listing is a hint, never a gate.** Every failure — no network, a
+ * non-200 answer, a body that is not a listing — resolves to an empty list
+ * with a reason attached, and the caller still shows the shorthand rule and
+ * the escape hatch. Nothing here throws, and nothing here writes to stdout.
  *
- * Three permissions are consulted, and each is *queried* rather than assumed,
- * so a missing one degrades instead of raising an interactive prompt in the
- * middle of a pipeline:
- *
- * - `--allow-net=jsr.io` — without it the request is skipped entirely.
- * - `--allow-env` — locates the OS cache directory (`HOME`,
- *   `XDG_CACHE_HOME`, `LOCALAPPDATA`). Without it there is no cache, only the
- *   live request.
- * - `--allow-read` / `--allow-write` on that directory — without either, the
- *   cache is skipped in that direction.
+ * The cache degrades the same way. A cache directory that cannot be located
+ * (no home directory, no `LOCALAPPDATA`) means there is no cache, only the
+ * live request, and a cache file that cannot be read or written is skipped in
+ * that direction.
  *
  * @module
  */
 
+import { mkdir, readFile, writeFile } from "node:fs/promises";
+import os from "node:os";
+import { env, platform } from "node:process";
 import { dirname, join } from "@std/path";
 
-/** Host the listing is fetched from, and the one `--allow-net` must name. */
+/** Host the listing is fetched from. */
 const JSR_HOST = "jsr.io";
 
 /** The scope whose packages the CLI lists. */
@@ -218,34 +214,23 @@ export function readScopeListing(body: unknown): ScopePackage[] | undefined {
 }
 
 /**
- * Answers whether a permission is already granted, without asking for it.
- *
- * `Deno.permissions.query` never prompts, which is the point: a listing that
- * is only ever a hint must not stop a pipeline to ask for the network.
- *
- * @param descriptor The permission to check
- * @returns Whether it is granted
- */
-async function granted(
-  descriptor: Deno.PermissionDescriptor,
-): Promise<boolean> {
-  try {
-    return (await Deno.permissions.query(descriptor)).state === "granted";
-  } catch {
-    return false;
-  }
-}
-
-/**
- * Reads an environment variable, or `undefined` when it is unset or unreadable.
+ * Reads an environment variable, or `undefined` when it is unset or empty.
  *
  * @param name The variable to read
  * @returns Its value, when there is one to be had
  */
-async function readEnv(name: string): Promise<string | undefined> {
-  if (!await granted({ name: "env", variable: name })) return undefined;
+function readEnv(name: string): string | undefined {
+  return env[name] || undefined;
+}
+
+/**
+ * Locates the current user's home directory.
+ *
+ * @returns The directory, or `undefined` when the system cannot name one
+ */
+function readHome(): string | undefined {
   try {
-    return Deno.env.get(name) || undefined;
+    return os.homedir() || undefined;
   } catch {
     return undefined;
   }
@@ -259,23 +244,23 @@ async function readEnv(name: string): Promise<string | undefined> {
  *
  * @returns The file path, or `undefined` when the directory cannot be located
  */
-async function defaultCacheDir(): Promise<string | undefined> {
-  if (Deno.build.os === "windows") {
-    const local = await readEnv("LOCALAPPDATA");
+function defaultCacheDir(): string | undefined {
+  if (platform === "win32") {
+    const local = readEnv("LOCALAPPDATA");
     return local === undefined ? undefined : join(local, CACHE_DIR);
   }
 
-  if (Deno.build.os === "darwin") {
-    const home = await readEnv("HOME");
+  if (platform === "darwin") {
+    const home = readHome();
     return home === undefined
       ? undefined
       : join(home, "Library", "Caches", CACHE_DIR);
   }
 
-  const xdg = await readEnv("XDG_CACHE_HOME");
+  const xdg = readEnv("XDG_CACHE_HOME");
   if (xdg !== undefined) return join(xdg, CACHE_DIR);
 
-  const home = await readEnv("HOME");
+  const home = readHome();
   return home === undefined ? undefined : join(home, ".cache", CACHE_DIR);
 }
 
@@ -285,11 +270,11 @@ async function defaultCacheDir(): Promise<string | undefined> {
  * @param cacheDir The configured directory, `null` to disable the cache
  * @returns The file path, or `undefined` when there is no cache to use
  */
-async function cacheFilePath(
+function cacheFilePath(
   cacheDir: string | null | undefined,
-): Promise<string | undefined> {
+): string | undefined {
   if (cacheDir === null) return undefined;
-  const directory = cacheDir ?? await defaultCacheDir();
+  const directory = cacheDir ?? defaultCacheDir();
   return directory === undefined ? undefined : join(directory, CACHE_FILE);
 }
 
@@ -308,10 +293,8 @@ type CacheEntry = {
  * @returns The stored listing, or `undefined` when there is not a usable one
  */
 async function readCache(file: string): Promise<CacheEntry | undefined> {
-  if (!await granted({ name: "read", path: file })) return undefined;
-
   try {
-    const raw: unknown = JSON.parse(await Deno.readTextFile(file));
+    const raw: unknown = JSON.parse(await readFile(file, "utf8"));
     const packages = readScopeListing(raw);
     const fetchedAt = (raw as { fetchedAt?: unknown } | null)?.fetchedAt;
 
@@ -337,11 +320,9 @@ async function readCache(file: string): Promise<CacheEntry | undefined> {
  * @param entry The listing to store
  */
 async function writeCache(file: string, entry: CacheEntry): Promise<void> {
-  if (!await granted({ name: "write", path: file })) return;
-
   try {
-    await Deno.mkdir(dirname(file), { recursive: true });
-    await Deno.writeTextFile(
+    await mkdir(dirname(file), { recursive: true });
+    await writeFile(
       file,
       JSON.stringify({ fetchedAt: entry.fetchedAt, items: entry.packages }),
     );
@@ -366,14 +347,6 @@ async function fetchListing(): Promise<
     reason: string;
   }
 > {
-  if (!await granted({ name: "net", host: JSR_HOST })) {
-    return {
-      ok: false,
-      reason:
-        `listing packages needs --allow-net=${JSR_HOST}, and it was not granted`,
-    };
-  }
-
   try {
     const response = await fetch(LISTING_URL, {
       headers: { accept: "application/json" },
@@ -457,7 +430,7 @@ export async function listScopePackages(
   const now = options.now ?? Date.now();
   const ttl = options.ttl ?? CACHE_TTL;
 
-  const file = await cacheFilePath(options.cacheDir);
+  const file = cacheFilePath(options.cacheDir);
   const cached = file === undefined ? undefined : await readCache(file);
 
   if (cached !== undefined && now - cached.fetchedAt < ttl) {

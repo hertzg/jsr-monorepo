@@ -21,28 +21,27 @@
  *
  * The package list shown for the missing `<package>` word is fetched from
  * JSR's scope API and cached for a day, so it names what is published today
- * rather than what was published when the CLI was released. That costs
- * `--allow-net=jsr.io`; without it — or without a network — the list is
- * omitted and everything else still works.
+ * rather than what was published when the CLI was released. Without a network
+ * the list is omitted and everything else still works.
  *
  * @example Decode with the full three-word form
  * ```bash
- * deno run -A @binstruct/cli png pngFile decode < input.png > struct.json5
+ * binstruct png pngFile decode < input.png > struct.json5
  * ```
  *
  * @example Encode it back
  * ```bash
- * deno run -A @binstruct/cli png pngFile encode < struct.json5 > output.png
+ * binstruct png pngFile encode < struct.json5 > output.png
  * ```
  *
  * @example Omit the coder when the package has only one
  * ```bash
- * deno run -A @binstruct/cli arp decode < arp.bin > arp.json5
+ * binstruct arp decode < arp.bin > arp.json5
  * ```
  *
  * @example A local module works the same way, relative to the working directory
  * ```bash
- * deno run -A @binstruct/cli ./my-package/mod.ts myStruct decode < input.bin > output.json5
+ * binstruct ./my-package/mod.ts myStruct decode < input.bin > output.json5
  * ```
  *
  * @example Programmatic usage: plan an invocation without performing it
@@ -59,6 +58,7 @@
  * @module
  */
 
+import { argv } from "node:process";
 import { main } from "./cli.ts";
 export { explainFailure, main, parseCliArgs, planCli } from "./cli.ts";
 export type { CliOptions, CliPlan, CommandName } from "./cli.ts";
@@ -103,5 +103,5 @@ export type {
 } from "./scope.ts";
 
 if (import.meta.main) {
-  await main(Deno.args);
+  await main(argv.slice(2));
 }

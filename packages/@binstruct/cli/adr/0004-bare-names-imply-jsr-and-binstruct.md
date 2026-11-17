@@ -179,8 +179,8 @@ mechanism called the ordinary `deno.json` + `mod.ts` layout empty, reporting
 because `deno.json` sorts before `mod.ts`.
 
 So: **refusal, decided on the resolved target.** When the resolved specifier has
-the `file:` scheme, `Deno.stat` is called on it before discovery runs
-(`inspectLocalTarget` in `target.ts`); `isDirectory` refuses, a `NotFound` gets
+the `file:` scheme, `stat` is called on it before discovery runs
+(`inspectLocalTarget` in `target.ts`); a directory is refused, an `ENOENT` gets
 its own "no such path" message rather than the directory one, and a specifier
 that does not parse as a URL at all is `unreadable` rather than an uncaught
 `TypeError` — `binstruct "file://a b/x"` used to escape as a stack trace,
@@ -190,7 +190,7 @@ Spelling is then irrelevant, but only because **both halves hold**: `./pkg`,
 `pkg/`, `/abs/pkg`, `file:///abs/pkg` and a symlink to any of them are one URL
 because the table above classifies every one of them as a path or a scheme and
 `resolve` normalizes the trailing slash away, and they are one target because
-`Deno.stat` follows symlinks. This paragraph asserted the conclusion for three
+`stat` follows symlinks. This paragraph asserted the conclusion for three
 releases while the first half was false for `pkg/`, which the table sent to the
 registry and which therefore reached neither the URL nor the target.
 
@@ -216,7 +216,7 @@ does not exist. Nothing reads `deno.json`.
 
 "Demonstrably exists" is a claim about the target, on the same argument as the
 refusal itself, so **each candidate is stat'ed and kept only if a readable file
-is at the far end of it**. `Deno.readDir` reports what it finds without
+is at the far end of it**. `readdir` reports what it finds without
 following links, so a symlink is neither a file nor a directory to it: filtering
 on `isDirectory` alone listed a dangling `aaa_link.ts` as a module and — sorting
 first — made it the `TRY` line, which then failed with `no such path`, while a
@@ -265,9 +265,9 @@ package by a route that bypasses the version resolution, the import map and the
 lockfile the user's project resolved it through.
 
 `ResolvedSpecifier.input` and `.short` keep the typed form, so listings, `TRY`
-lines and the left-hand half of the header still say `./pkg`. Reading
-`Deno.cwd()` is the one thing resolution takes from outside its argument, and
-only for the path forms.
+lines and the left-hand half of the header still say `./pkg`. Reading the
+working directory is the one thing resolution takes from outside its argument,
+and only for the path forms.
 
 Version suffixes ride along: `wav@0.2.0` becomes `jsr:@binstruct/wav@0.2.0`,
 which `deno doc` resolves (verified against `jsr:@binstruct/png@0.3.2`).
@@ -296,9 +296,7 @@ teaches it.
   becomes short enough to read at a glance.
 - **Resolution consults nothing but the input string and the working
   directory.** It does not touch the registry, the network or the filesystem, so
-  it cannot behave differently on a stale registry or offline. The `Deno.cwd()`
-  read means a path form now needs `--allow-read`, which every documented
-  invocation already has.
+  it cannot behave differently on a stale registry or offline.
 - **A local directory named like a package is shadowed only while it is spelled
   like a package.** Bare `png` resolves to the JSR package whatever is on disk;
   `./png` and `png/` both name the directory, and then say to name the module
@@ -321,10 +319,8 @@ teaches it.
 - **A package whose entrypoint is unusual costs nothing extra.** The listing
   shows what is actually there, so there is no filename for the CLI to guess
   wrong and no convention for the user to work around.
-- **The refusal needs `--allow-read`** for the `stat` and the `readDir`, which
-  every documented invocation already has. A target that cannot be inspected is
-  refused rather than assumed to be a module: assuming is what produced the
-  wrong-module decode.
+- **A target that cannot be inspected is refused** rather than assumed to be a
+  module: assuming is what produced the wrong-module decode.
 - **The escape hatch is unaffected.** Naming a coder when discovery is
   unavailable still works; the refusal happens earlier and for a different
   reason, and it applies whether or not discovery could have run.

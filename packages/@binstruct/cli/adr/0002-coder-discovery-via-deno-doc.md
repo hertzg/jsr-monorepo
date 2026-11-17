@@ -42,6 +42,12 @@ zero-required-parameter coders first.
 The resolved package version comes free from the same call: `location.filename`
 on any symbol is `https://jsr.io/@binstruct/png/0.4.0/mod.ts`.
 
+**`deno` is an external tool found on `PATH`, whatever runtime runs the CLI.**
+The CLI itself runs under Bun, Node or Deno. `deno doc` and `deno info` have no
+counterpart in the first two, so discovery spawns the `deno` executable by name
+and works exactly when one is installed. With none, discovery is unavailable
+and the escape hatch below applies.
+
 **Discovery is only ever asked about a specifier that names one module.** A
 directory is refused before it runs (ADR 0004), and that precondition is what
 makes the output here a single node under `nodes` and therefore what makes the
@@ -95,14 +101,15 @@ tell an optional parameter from a required one — so the subprocess is the pric
 of getting the question right, and it is paid on every run.
 
 **When discovery is unavailable, the name is accepted and the call is still
-checked.** A named coder must survive a tightened permission set, or the escape
-hatch below is worthless; but accepting a _name_ is not accepting a _call_. The
-factory object is in hand after `import()`, and `Function.prototype.length` is a
-check that costs nothing and needs no permission, so `loadCoder` applies it
-before calling: a non-zero arity with nothing to vouch for it is refused rather
-than called with no arguments. Skipping it is what let the original defect
-survive the fix above — the refusal held only where `--allow-run=deno` happened
-to be granted, and `--help` documents that permission as optional.
+checked.** A named coder must survive a machine with no `deno` on `PATH`, or the
+escape hatch below is worthless; but accepting a _name_ is not accepting a
+_call_. The factory object is in hand after `import()`, and
+`Function.prototype.length` is a check that costs nothing and needs no
+subprocess, so `loadCoder` applies it before calling: a non-zero arity with
+nothing to vouch for it is refused rather than called with no arguments.
+Skipping it is what let the original defect survive the fix above — the refusal
+held only where discovery happened to run, and `--help` documents `deno` as
+optional.
 
 The fallback is coarser than the check it stands in for, and it is coarse in the
 safe direction. TypeScript erases the `?` of an optional parameter, so
@@ -110,9 +117,9 @@ safe direction. TypeScript erases the `?` of an optional parameter, so
 what its author intended; a defaulted parameter (`x = v`) and a rest tail do
 drop out of the count. `@binstruct/pcap` is being reshaped to
 `pcapFile(endianness?)`, which makes this the ordinary case rather than a corner
-one, so the refusal names the limit on screen and says that `--allow-run=deno`
-settles it from the declaration. Refusing a correct invocation is recoverable in
-one flag; emitting wrong bytes at exit 0 is not recoverable at all.
+one, so the refusal names the limit on screen and says that `deno` on `PATH`
+settles it from the declaration. Refusing a correct invocation is recoverable by
+installing one tool; emitting wrong bytes at exit 0 is not recoverable at all.
 
 **Every subprocess runs under a deadline of 30 seconds and is killed when it
 passes.** `deno doc` fetches, a fetch can stall, and `deno doc` carries no
@@ -127,8 +134,8 @@ uncached JSR package — with roughly eighteen times the headroom, so a cold
 module graph over a slow link is not cut short. It is deliberately far looser
 than level 0's three seconds, which buys one HTTP GET rather than a module
 graph. An expired deadline is an ordinary tool failure carrying
-`reason: "timed-out"`, so it reaches the same screen as a denied
-`--allow-run=deno` and prints the same escape hatch.
+`reason: "timed-out"`, so it reaches the same screen as a missing `deno` and
+prints the same escape hatch.
 
 ## Consequences
 
@@ -144,15 +151,20 @@ graph. An expired deadline is an ordinary tool failure carrying
   and every later one is instant. Only level 0 escapes it — a complete
   invocation pays the warm cost on every run, which is what buys the arity check
   above.
-- **Discovery needs `--allow-run=deno`.** The published usage already says `-A`,
-  but a tightened permission set breaks levels 1–2 while decode and encode keep
+- **Discovery needs `deno` on `PATH`.** Under Bun or Node that is a second
+  runtime to install; without it levels 1–2 break while decode and encode keep
   working. Discovery failure must therefore always print the "you can still name
   the coder directly" escape hatch.
 - **The escape hatch does not extend to factories that take arguments.** Without
-  the permission, a name you supply is accepted and then checked against the
-  factory's runtime arity; a non-zero one is refused. So `--allow-run=deno` is
-  not purely a listing convenience — it is what lets a factory with an optional
-  parameter run at all, and both the `--help` screen and the refusal say so.
+  `deno`, a name you supply is accepted and then checked against the factory's
+  runtime arity; a non-zero one is refused. So `deno` is not purely a listing
+  convenience — it is what lets a factory with an optional parameter run at
+  all, and both the `--help` screen and the refusal say so.
+- **What discovery lists and what the run can import are decided by different
+  programs.** `deno doc` reads `jsr:`, `npm:` and `https:` specifiers; `import()`
+  under Bun and Node loads only a `file:` URL or an installed package name. A
+  bare name still resolves to `jsr:@binstruct/<name>` (ADR 0004), so under those
+  runtimes it lists its coders and then fails at the import.
 - **Packages without type declarations show zero coders**, however well they
   work at runtime. Untyped `npm:` packages are the likely case.
 - **A pathologically slow but legitimate cold lookup now fails at 30 seconds**

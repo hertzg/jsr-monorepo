@@ -2,11 +2,12 @@
  * Tests for the serialization utilities.
  */
 
+import { test } from "node:test";
 import { assertEquals } from "@std/assert";
 import { deserializeFromJson, serializeToJson } from "./serialization.ts";
 import JSON5 from "json5";
 
-Deno.test("serializeToJson with Uint8Array", () => {
+test("serializeToJson with Uint8Array", () => {
   const data = {
     bytes: new Uint8Array([1, 2, 3, 4]),
     regularNumber: 42,
@@ -19,7 +20,7 @@ Deno.test("serializeToJson with Uint8Array", () => {
   assertEquals(parsed.regularNumber, 42);
 });
 
-Deno.test("serializeToJson with BigInt", () => {
+test("serializeToJson with BigInt", () => {
   const data = {
     bigNumber: 12345678901234567890n,
     regularNumber: 42,
@@ -32,7 +33,7 @@ Deno.test("serializeToJson with BigInt", () => {
   assertEquals(parsed.regularNumber, 42);
 });
 
-Deno.test("serializeToJson with mixed types", () => {
+test("serializeToJson with mixed types", () => {
   const data = {
     bytes: new Uint8Array([255, 128, 64]),
     bigNumber: 98765432109876543210n,
@@ -51,7 +52,7 @@ Deno.test("serializeToJson with mixed types", () => {
   assertEquals(parsed.array, [1, 2, 3]);
 });
 
-Deno.test("deserializeFromJson with Uint8Array", () => {
+test("deserializeFromJson with Uint8Array", () => {
   const json = '{"bytes":{"$bytes":[1,2,3,4]},"regularNumber":42}';
   const data = deserializeFromJson(json) as Record<string, unknown>;
 
@@ -60,7 +61,7 @@ Deno.test("deserializeFromJson with Uint8Array", () => {
   assertEquals(data.regularNumber, 42);
 });
 
-Deno.test("deserializeFromJson with BigInt", () => {
+test("deserializeFromJson with BigInt", () => {
   const json =
     '{"bigNumber":{"$bigint":"12345678901234567890"},"regularNumber":42}';
   const data = deserializeFromJson(json) as Record<string, unknown>;
@@ -70,7 +71,7 @@ Deno.test("deserializeFromJson with BigInt", () => {
   assertEquals(data.regularNumber, 42);
 });
 
-Deno.test("deserializeFromJson with mixed types", () => {
+test("deserializeFromJson with mixed types", () => {
   const json =
     '{"bytes":{"$bytes":[255,128,64]},"bigNumber":{"$bigint":"98765432109876543210"},"regularNumber":42,"string":"test","array":[1,2,3]}';
   const data = deserializeFromJson(json) as Record<string, unknown>;
@@ -84,7 +85,7 @@ Deno.test("deserializeFromJson with mixed types", () => {
   assertEquals(data.array, [1, 2, 3]);
 });
 
-Deno.test("roundtrip serialization with Uint8Array", () => {
+test("roundtrip serialization with Uint8Array", () => {
   const original = {
     bytes: new Uint8Array([1, 2, 3, 4, 5]),
     regularNumber: 42,
@@ -98,7 +99,7 @@ Deno.test("roundtrip serialization with Uint8Array", () => {
   assertEquals(reconstructed.regularNumber, original.regularNumber);
 });
 
-Deno.test("roundtrip serialization with BigInt", () => {
+test("roundtrip serialization with BigInt", () => {
   const original = {
     bigNumber: 12345678901234567890n,
     regularNumber: 42,
@@ -112,7 +113,7 @@ Deno.test("roundtrip serialization with BigInt", () => {
   assertEquals(reconstructed.regularNumber, original.regularNumber);
 });
 
-Deno.test("roundtrip serialization with mixed types", () => {
+test("roundtrip serialization with mixed types", () => {
   const original = {
     bytes: new Uint8Array([255, 128, 64]),
     bigNumber: 98765432109876543210n,

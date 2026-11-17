@@ -33,6 +33,10 @@
  * @module
  */
 
+import { Buffer } from "node:buffer";
+import { spawn } from "node:child_process";
+import { env, stdout } from "node:process";
+
 /** The dependency whose presence marks a package as binstruct-based. */
 const BINSTRUCT_PACKAGE = "@hertzg/binstruct";
 
@@ -169,10 +173,9 @@ export type PackageSurface = {
 /**
  * Why a `deno` subprocess spawned by discovery produced no usable output.
  *
- * - `permission-denied` — the CLI was run without `--allow-run=deno`.
- *   Decoding and encoding still work; only discovery is unavailable.
  * - `not-spawned` — the process could not be started at all, e.g. no `deno`
- *   on `PATH`.
+ *   on `PATH`. Decoding and encoding still work; only discovery is
+ *   unavailable.
  * - `minimum-dependency-age` — the requested version is younger than the
  *   consuming project's `minimumDependencyAge`, so the graph refused to
  *   resolve. Nothing about the invocation was wrong.
@@ -186,7 +189,6 @@ export type PackageSurface = {
  *   without this the CLI waits forever with a blank screen.
  */
 export type ToolFailureReason =
-  | "permission-denied"
   | "not-spawned"
   | "minimum-dependency-age"
   | "exited-non-zero"
@@ -429,6 +431,10 @@ export function readDocSurface(doc: DenoDocJson): PackageSurface {
 /**
  * Runs `deno` with the given arguments and captures its output, under a clock.
  *
+ * `deno` is found on `PATH` as an external tool, not taken from the runtime
+ * running the CLI: `deno doc` and `deno info` have no counterpart in Bun or
+ * Node, so discovery works under any of them exactly when `deno` is installed.
+ *
  * The subprocess is spawned rather than run to completion in one call, because
  * a deadline needs a handle to kill: `deno doc` inherits no timeout from
  * anything and a stalled fetch inside it stalls the CLI with it. When the
@@ -455,45 +461,50 @@ async function runDeno(
   const command = ["deno", ...args];
   const timeout = options.timeout ?? TOOL_TIMEOUT;
 
-  let child: Deno.ChildProcess;
+  let expired = false;
+  let output: { code: number | null; stdout: string; stderr: string };
   try {
-    child = new Deno.Command("deno", {
-      args,
-      env: options.env ?? {},
-      stdout: "piped",
-      stderr: "piped",
-    }).spawn();
+    output = await new Promise((resolve, reject) => {
+      const child = spawn("deno", args, {
+        env: { ...env, ...options.env },
+        stdio: ["inherit", "pipe", "pipe"],
+      });
+
+      const alarm = setTimeout(() => {
+        expired = true;
+        child.kill("SIGKILL");
+      }, timeout);
+
+      const stdoutChunks: Uint8Array[] = [];
+      const stderrChunks: Uint8Array[] = [];
+      child.stdout.on("data", (chunk: Uint8Array) => stdoutChunks.push(chunk));
+      child.stderr.on("data", (chunk: Uint8Array) => stderrChunks.push(chunk));
+
+      child.once("error", (error) => {
+        clearTimeout(alarm);
+        reject(error);
+      });
+      child.once("close", (code) => {
+        clearTimeout(alarm);
+        resolve({
+          code,
+          stdout: Buffer.concat(stdoutChunks).toString(),
+          stderr: Buffer.concat(stderrChunks).toString(),
+        });
+      });
+    });
   } catch (error) {
     return {
       ok: false,
-      reason: error instanceof Deno.errors.NotCapable
-        ? "permission-denied"
-        : "not-spawned",
+      reason: "not-spawned",
       specifier,
       command,
       stderr: error instanceof Error ? error.message : String(error),
     };
   }
 
-  let expired = false;
-  const alarm = setTimeout(() => {
-    expired = true;
-    try {
-      child.kill("SIGKILL");
-    } catch {
-      // It finished between the deadline and the kill; the output stands.
-    }
-  }, timeout);
-
-  let output: Deno.CommandOutput;
-  try {
-    output = await child.output();
-  } finally {
-    clearTimeout(alarm);
-  }
-
-  const decoder = new TextDecoder();
-  const stderr = decoder.decode(output.stderr);
+  const { stderr } = output;
+  const code = output.code ?? undefined;
 
   if (expired) {
     return {
@@ -501,14 +512,14 @@ async function runDeno(
       reason: "timed-out",
       specifier,
       command,
-      code: output.code,
+      ...(code === undefined ? {} : { code }),
       stderr: stderr === ""
         ? `no answer within ${timeout / 1000}s`
         : stderr.trimEnd(),
     };
   }
 
-  if (!output.success) {
+  if (code !== 0) {
     return {
       ok: false,
       reason: stderr.toLowerCase().includes("minimum dependency age")
@@ -516,22 +527,22 @@ async function runDeno(
         : "exited-non-zero",
       specifier,
       command,
-      code: output.code,
+      ...(code === undefined ? {} : { code }),
       stderr,
     };
   }
 
-  return { ok: true, stdout: decoder.decode(output.stdout) };
+  return { ok: true, stdout: output.stdout };
 }
 
 /**
  * Discovers the coder factories a package exposes, without importing it.
  *
  * Runs `deno doc --json --quiet <specifier>` and reads the result with
- * {@linkcode readDocSurface}. Requires permission to spawn `deno`
- * (`--allow-run=deno`); without it the outcome is a `permission-denied`
- * {@linkcode ToolFailure} and callers should fall back to asking for an
- * explicit coder name.
+ * {@linkcode readDocSurface}. Requires a `deno` executable on `PATH`, whatever
+ * runtime the CLI itself runs under; without one the outcome is a
+ * `not-spawned` {@linkcode ToolFailure} and callers should fall back to asking
+ * for an explicit coder name.
  *
  * A cold lookup pays for building the module graph — on the order of a second
  * for a JSR package — while a warm one is near-instant. One that answers
@@ -551,7 +562,7 @@ async function runDeno(
  * import { assertEquals } from "@std/assert";
  * import { discoverCoders } from "./discover.ts";
  *
- * const outcome = await discoverCoders(import.meta.resolve("../arp/mod.ts"));
+ * const outcome = await discoverCoders(import.meta.resolve("@binstruct/arp"));
  *
  * assertEquals(outcome.ok, true);
  * if (outcome.ok) {
@@ -607,7 +618,7 @@ export async function discoverCoders(
  * import { readSymbolDocs } from "./discover.ts";
  *
  * const docs = await readSymbolDocs(
- *   import.meta.resolve("../arp/mod.ts"),
+ *   import.meta.resolve("@binstruct/arp"),
  *   "arpData",
  * );
  *
@@ -624,7 +635,7 @@ export async function readSymbolDocs(
     ["doc", "--filter", symbol, specifier],
     specifier,
     {
-      env: Deno.stdout.isTerminal() ? {} : { NO_COLOR: "1" },
+      env: stdout.isTTY ? {} : { NO_COLOR: "1" },
       timeout,
     },
   );
@@ -658,7 +669,7 @@ export async function readSymbolDocs(
  * import { diagnoseEmptyDiscovery } from "./discover.ts";
  *
  * const diagnosis = await diagnoseEmptyDiscovery(
- *   import.meta.resolve("../../@hertzg/mac/mod.ts"),
+ *   import.meta.resolve("@hertzg/mac"),
  * );
  *
  * assertEquals(diagnosis.ok, true);

@@ -6,6 +6,7 @@
  * point at real modules in this repository, and need no network.
  */
 
+import { test } from "node:test";
 import { assertEquals, assertRejects } from "@std/assert";
 import { loadCoder, UnverifiedArityError } from "./loader.ts";
 
@@ -25,14 +26,14 @@ const PCAP = import.meta.resolve("../pcap/mod.ts");
 const OPTIONAL = "data:text/javascript,export const maybe = (flag) => " +
   "({ decode: () => [flag ?? null, 0], encode: () => 0 });";
 
-Deno.test("loadCoder calls the factory and returns its coder", async () => {
+test("loadCoder calls the factory and returns its coder", async () => {
   const coder = await loadCoder(ARP, "arpData");
 
   assertEquals(typeof coder.decode, "function");
   assertEquals(typeof coder.encode, "function");
 });
 
-Deno.test("loadCoder rejects a name the package does not export", async () => {
+test("loadCoder rejects a name the package does not export", async () => {
   const error = await assertRejects(
     () => loadCoder(ARP, "arpDatum"),
     Error,
@@ -42,7 +43,7 @@ Deno.test("loadCoder rejects a name the package does not export", async () => {
   assertEquals(error.message.includes("arpData"), true);
 });
 
-Deno.test("loadCoder rejects an export that is not a factory", async () => {
+test("loadCoder rejects an export that is not a factory", async () => {
   await assertRejects(
     () =>
       loadCoder(
@@ -54,7 +55,7 @@ Deno.test("loadCoder rejects an export that is not a factory", async () => {
   );
 });
 
-Deno.test("loadCoder refuses a factory whose arity nothing has verified", async () => {
+test("loadCoder refuses a factory whose arity nothing has verified", async () => {
   // The defect this guards: with `deno doc` unavailable the coder name is
   // taken on trust, and calling `pcapFileWith()` bare hands the struct
   // `undefined` sub-coders, failing somewhere inside the decode instead.
@@ -67,16 +68,16 @@ Deno.test("loadCoder refuses a factory whose arity nothing has verified", async 
   assertEquals(error.arity, 2);
 });
 
-Deno.test("loadCoder calls a factory a declaration-level count vouched for", async () => {
+test("loadCoder calls a factory a declaration-level count vouched for", async () => {
   // `.length` counts an optional parameter and the declaration does not, so
   // discovery's answer has to be able to overrule this one — otherwise the
-  // check refuses a correct invocation whenever the permission is granted too.
+  // check refuses a correct invocation whenever discovery is available too.
   const coder = await loadCoder(OPTIONAL, "maybe", { arityVerified: true });
 
   assertEquals(coder.decode(new Uint8Array()), [null, 0]);
 });
 
-Deno.test("loadCoder rejects a package that cannot be resolved", async () => {
+test("loadCoder rejects a package that cannot be resolved", async () => {
   await assertRejects(() =>
     loadCoder(import.meta.resolve("./no-such-module.ts"), "anything")
   );

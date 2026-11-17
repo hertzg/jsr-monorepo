@@ -7,6 +7,7 @@
  * there is no way to declare a variable to pass in, or to hold the result.
  */
 
+import { test } from "node:test";
 import { assertEquals } from "@std/assert";
 import {
   type DenoDocDeclaration,
@@ -22,16 +23,16 @@ import {
   type SymbolDocsOutcome,
 } from "./mod.ts";
 
-Deno.test("main function is exported", () => {
+test("main function is exported", () => {
   assertEquals(typeof main, "function");
 });
 
-Deno.test("main function is async", () => {
+test("main function is async", () => {
   const result = main(["-h"]); // Use help flag to avoid exit
   assertEquals(result instanceof Promise, true);
 });
 
-Deno.test("the types in the exported signatures are exported too", () => {
+test("the types in the exported signatures are exported too", () => {
   const param: DenoDocParam = { kind: "identifier" };
   const returnType: DenoDocType = {
     repr: "Coder",

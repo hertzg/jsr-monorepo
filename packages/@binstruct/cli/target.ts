@@ -8,7 +8,7 @@
  * symlink to any of them all name one thing and must reach one decision.
  * Two halves make that true and neither is sufficient alone — resolution
  * classifies every one of those spellings as a path or a `file:` URL and
- * normalizes the trailing slash away, and `Deno.stat` here follows symlinks.
+ * normalizes the trailing slash away, and `stat` here follows symlinks.
  * `pkg/` reached neither for as long as classification called it a bare
  * registry name; see ADR 0004.
  *
@@ -27,6 +27,7 @@
  * @module
  */
 
+import { readdir, stat } from "node:fs/promises";
 import { fromFileUrl, join } from "@std/path";
 import { isModulePath } from "./specifier.ts";
 
@@ -43,8 +44,8 @@ const FILE_SCHEME = "file:";
  *   the candidates to name instead.
  * - `"missing"` — nothing is there at all, which is a different mistake from
  *   naming a directory and gets a different message.
- * - `"unreadable"` — the target could not be inspected: read permission was
- *   denied, or the `file:` specifier does not parse as a URL and so names no
+ * - `"unreadable"` — the target could not be inspected: the filesystem
+ *   refused, or the `file:` specifier does not parse as a URL and so names no
  *   path to inspect at all. Refused rather than assumed to be a module:
  *   assuming is how the directory case produced confident wrong output.
  */
@@ -74,9 +75,19 @@ function reasonOf(error: unknown): string {
 }
 
 /**
+ * Reports whether a filesystem call failed because nothing is at the path.
+ *
+ * @param error The thrown value
+ * @returns Whether it is the `ENOENT` of a path that does not exist
+ */
+function isNotFound(error: unknown): boolean {
+  return error instanceof Error && "code" in error && error.code === "ENOENT";
+}
+
+/**
  * Reports whether a path leads to a file that can be read.
  *
- * `Deno.stat` follows symlinks, so this answers about the target rather than
+ * `stat` follows symlinks, so this answers about the target rather than
  * about the link, and anything that cannot be inspected at all answers `false`.
  *
  * @param path The path to inspect
@@ -84,7 +95,7 @@ function reasonOf(error: unknown): string {
  */
 async function isReadableFile(path: string): Promise<boolean> {
   try {
-    return (await Deno.stat(path)).isFile;
+    return (await stat(path)).isFile();
   } catch {
     return false;
   }
@@ -93,12 +104,12 @@ async function isReadableFile(path: string): Promise<boolean> {
 /**
  * Lists the module files sitting directly inside a directory.
  *
- * Sorted, because `Deno.readDir` yields in whatever order the filesystem
+ * Sorted, because `readdir` yields in whatever order the filesystem
  * happens to hold, and a listing that reorders itself between runs cannot be
  * quoted in a bug report.
  *
  * Every candidate is confirmed to be a readable **file at the far end of its
- * name**, which is the same target question the caller asks. `Deno.readDir`
+ * name**, which is the same target question the caller asks. `readdir`
  * reports what it finds without following links, so a symlink is neither a file
  * nor a directory to it: filtering on `isDirectory` alone listed a dangling
  * `aaa_link.ts` as a module and, since it sorted first, put it in the `TRY`
@@ -112,9 +123,9 @@ async function isReadableFile(path: string): Promise<boolean> {
  */
 async function modulesInside(path: string): Promise<string[]> {
   const names: string[] = [];
-  for await (const entry of Deno.readDir(path)) {
+  for (const entry of await readdir(path, { withFileTypes: true })) {
     if (!isModulePath(entry.name)) continue;
-    if (entry.isFile || await isReadableFile(join(path, entry.name))) {
+    if (entry.isFile() || await isReadableFile(join(path, entry.name))) {
       names.push(entry.name);
     }
   }
@@ -142,11 +153,12 @@ async function modulesInside(path: string): Promise<string[]> {
  * import { assertEquals } from "@std/assert";
  * import { inspectLocalTarget } from "./target.ts";
  *
- * const module = await inspectLocalTarget(import.meta.resolve("./target.ts"));
+ * const entrypoint = import.meta.resolve("@binstruct/cli");
+ * const module = await inspectLocalTarget(entrypoint);
  *
  * assertEquals(module.kind, "module");
  *
- * const directory = await inspectLocalTarget(import.meta.resolve("./"));
+ * const directory = await inspectLocalTarget(new URL(".", entrypoint).href);
  *
  * assertEquals(directory.kind, "directory");
  * if (directory.kind === "directory") {
@@ -163,7 +175,7 @@ async function modulesInside(path: string): Promise<string[]> {
  * import { inspectLocalTarget } from "./target.ts";
  *
  * const missing = await inspectLocalTarget(
- *   import.meta.resolve("./no-such-module.ts"),
+ *   new URL("./no-such-module.ts", import.meta.url).href,
  * );
  *
  * assertEquals(missing.kind, "missing");
@@ -188,19 +200,22 @@ export async function inspectLocalTarget(
   try {
     path = fromFileUrl(specifier);
   } catch (error) {
-    return { kind: "unreadable", reason: reasonOf(error) };
+    return {
+      kind: "unreadable",
+      reason: `${reasonOf(error)}: ${specifier}`,
+    };
   }
 
-  let info: Deno.FileInfo;
+  let isDirectory: boolean;
   try {
-    info = await Deno.stat(path);
+    isDirectory = (await stat(path)).isDirectory();
   } catch (error) {
-    return error instanceof Deno.errors.NotFound
+    return isNotFound(error)
       ? { kind: "missing" }
       : { kind: "unreadable", reason: reasonOf(error) };
   }
 
-  if (!info.isDirectory) return { kind: "module" };
+  if (!isDirectory) return { kind: "module" };
 
   try {
     return { kind: "directory", modules: await modulesInside(path) };

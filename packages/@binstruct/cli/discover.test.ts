@@ -1,5 +1,8 @@
+import { mkdir, mkdtemp, realpath, rm, writeFile } from "node:fs/promises";
+import { tmpdir } from "node:os";
+import { test } from "node:test";
 import { assert, assertEquals, assertStringIncludes } from "@std/assert";
-import { toFileUrl } from "@std/path";
+import { join, toFileUrl } from "@std/path";
 import { FakeTime } from "@std/testing/time";
 import {
   type DenoDocJson,
@@ -339,7 +342,16 @@ const ARP_ENTRYPOINT = import.meta.resolve("../arp/mod.ts");
 /** Entrypoint of a real workspace package that is not binstruct-based. */
 const MAC_ENTRYPOINT = import.meta.resolve("../../@hertzg/mac/mod.ts");
 
-Deno.test("readDocSurface keeps only Coder-returning functions", () => {
+/**
+ * Makes a fresh temporary directory.
+ *
+ * @returns The directory, realpathed, to be removed by the caller
+ */
+async function makeTempDir(): Promise<string> {
+  return await realpath(await mkdtemp(join(tmpdir(), "binstruct-cli-")));
+}
+
+test("readDocSurface keeps only Coder-returning functions", () => {
   const surface = readDocSurface(PNG_DOC);
 
   assertEquals(surface.coders.map((coder) => coder.name), [
@@ -350,7 +362,7 @@ Deno.test("readDocSurface keeps only Coder-returning functions", () => {
   ]);
 });
 
-Deno.test("readDocSurface sorts zero-argument coders first", () => {
+test("readDocSurface sorts zero-argument coders first", () => {
   const { coders } = readDocSurface(PNG_DOC);
 
   assertEquals(coders.map((coder) => coder.requiredParams), [0, 0, 0, 1]);
@@ -358,7 +370,7 @@ Deno.test("readDocSurface sorts zero-argument coders first", () => {
   assertEquals(coders.at(-1)?.name, "pngFileChunks");
 });
 
-Deno.test("readDocSurface reads decoded type, summary and arity", () => {
+test("readDocSurface reads decoded type, summary and arity", () => {
   const { coders } = readDocSurface(PNG_DOC);
 
   assertEquals(coders[2], {
@@ -376,7 +388,7 @@ Deno.test("readDocSurface reads decoded type, summary and arity", () => {
   });
 });
 
-Deno.test("readDocSurface omits an anonymous decoded type", () => {
+test("readDocSurface omits an anonymous decoded type", () => {
   const refined = readDocSurface(PNG_DOC).coders.find(
     (coder) => coder.name === "pngChunkRefined",
   );
@@ -385,7 +397,7 @@ Deno.test("readDocSurface omits an anonymous decoded type", () => {
   assertEquals(refined?.requiredParams, 0);
 });
 
-Deno.test("readDocSurface reads module summary and resolved version", () => {
+test("readDocSurface reads module summary and resolved version", () => {
   const surface = readDocSurface(PNG_DOC);
 
   assertEquals(
@@ -395,7 +407,7 @@ Deno.test("readDocSurface reads module summary and resolved version", () => {
   assertEquals(surface.version, "0.4.0");
 });
 
-Deno.test("readDocSurface reports no coders for a non-coder package", () => {
+test("readDocSurface reports no coders for a non-coder package", () => {
   const surface = readDocSurface(MAC_DOC);
 
   assertEquals(surface.coders, []);
@@ -406,7 +418,7 @@ Deno.test("readDocSurface reports no coders for a non-coder package", () => {
   );
 });
 
-Deno.test("readDocSurface excludes defaulted and optional parameters from arity", () => {
+test("readDocSurface excludes defaulted and optional parameters from arity", () => {
   const surface = readDocSurface(BINSTRUCT_DOC);
 
   assertEquals(
@@ -422,26 +434,26 @@ Deno.test("readDocSurface excludes defaulted and optional parameters from arity"
   );
 });
 
-Deno.test("readDocSurface has no version for a non-JSR entrypoint", () => {
+test("readDocSurface has no version for a non-JSR entrypoint", () => {
   assertEquals(readDocSurface(BINSTRUCT_DOC).version, undefined);
 });
 
-Deno.test("readDocSurface answers an empty document instead of throwing", () => {
+test("readDocSurface answers an empty document instead of throwing", () => {
   // `Object.entries(doc.nodes)[0]` was destructured unguarded, so a document
   // with no nodes — which `deno doc` emits, at exit 0 — came back as an
   // uncaught TypeError with a stack trace through the CLI's own frames.
   assertEquals(readDocSurface({ nodes: {} }), { coders: [] });
 });
 
-Deno.test("deno doc exits 0 with no nodes at all for a directory of no modules", async () => {
+test("deno doc exits 0 with no nodes at all for a directory of no modules", async () => {
   // Where the empty document comes from, so the guard above is pinned to the
   // tool's real behaviour rather than to a hand-written fixture. Callers refuse
   // a directory first, but discovery is exported and answers about whatever it
   // is handed; "nothing to report" is an answer, not a crash.
-  const directory = await Deno.realPath(await Deno.makeTempDir());
+  const directory = await makeTempDir();
   try {
-    await Deno.writeTextFile(`${directory}/README.md`, "not a module\n");
-    await Deno.mkdir(`${directory}/empty`);
+    await writeFile(`${directory}/README.md`, "not a module\n");
+    await mkdir(`${directory}/empty`);
 
     const outcome = await discoverCoders(toFileUrl(`${directory}/empty`).href);
 
@@ -450,20 +462,20 @@ Deno.test("deno doc exits 0 with no nodes at all for a directory of no modules",
     assertEquals(outcome.version, undefined);
     assertEquals(outcome.summary, undefined);
   } finally {
-    await Deno.remove(directory, { recursive: true });
+    await rm(directory, { recursive: true });
   }
 });
 
-Deno.test("deno doc documents every module under a directory, not an entrypoint", async () => {
+test("deno doc documents every module under a directory, not an entrypoint", async () => {
   // The reason directories are refused before discovery runs. Asked about a
   // directory, `deno doc` answers with one node per module file it finds
   // underneath — none of them an entrypoint, and their order is the order of
   // the file names, so reading the first is reading `aaa_other.ts`.
-  const directory = await Deno.realPath(await Deno.makeTempDir());
+  const directory = await makeTempDir();
   try {
     const binstruct = import.meta.resolve("../../@hertzg/binstruct/mod.ts");
     for (const name of ["mod.ts", "aaa_other.ts"]) {
-      await Deno.writeTextFile(
+      await writeFile(
         `${directory}/${name}`,
         [
           `import { type Coder, struct, u8 } from "${binstruct}";`,
@@ -484,11 +496,11 @@ Deno.test("deno doc documents every module under a directory, not an entrypoint"
     assert(outcome.ok, "deno doc reads a directory happily");
     assertEquals(outcome.coders.map((coder) => coder.name), ["internalOnly"]);
   } finally {
-    await Deno.remove(directory, { recursive: true });
+    await rm(directory, { recursive: true });
   }
 });
 
-Deno.test("discoverCoders reads a real package through deno doc", async () => {
+test("discoverCoders reads a real package through deno doc", async () => {
   const outcome = await discoverCoders(ARP_ENTRYPOINT);
 
   assert(outcome.ok, "discovery should succeed for a local entrypoint");
@@ -501,7 +513,7 @@ Deno.test("discoverCoders reads a real package through deno doc", async () => {
   assertStringIncludes(outcome.summary ?? "", "ARP");
 });
 
-Deno.test("discoverCoders reports a failing deno doc as an outcome", async () => {
+test("discoverCoders reports a failing deno doc as an outcome", async () => {
   const specifier = import.meta.resolve("./no-such-module.ts");
   const outcome = await discoverCoders(specifier);
 
@@ -513,7 +525,7 @@ Deno.test("discoverCoders reports a failing deno doc as an outcome", async () =>
   assert(outcome.stderr.length > 0, "the tool's stderr is captured");
 });
 
-Deno.test("a deno subprocess that never answers is killed, not waited on", async () => {
+test("a deno subprocess that never answers is killed, not waited on", async () => {
   // `deno doc` fetches, a fetch can stall, and neither had a deadline: behind
   // a black-hole proxy `binstruct <package>` ran 145 seconds with nothing on
   // the screen, stopped only by killing the terminal, and left the child
@@ -534,7 +546,7 @@ Deno.test("a deno subprocess that never answers is killed, not waited on", async
   assertEquals(outcome.command[0], "deno");
 });
 
-Deno.test("a deadline that has already passed reports the tool, not a crash", async () => {
+test("a deadline that has already passed reports the tool, not a crash", async () => {
   // The same path with the deadline injected rather than the clock moved: no
   // subprocess starts and finishes inside a millisecond, so the kill always
   // wins, and what comes back has to be an ordinary ToolFailure.
@@ -546,21 +558,21 @@ Deno.test("a deadline that has already passed reports the tool, not a crash", as
   assert(outcome.stderr.length > 0, "the failure says something about itself");
 });
 
-Deno.test("a deadline that is not reached changes nothing", async () => {
+test("a deadline that is not reached changes nothing", async () => {
   const outcome = await discoverCoders(ARP_ENTRYPOINT, 120_000);
 
   assert(outcome.ok, "a subprocess inside its deadline is an ordinary run");
   assertEquals(outcome.coders.map((coder) => coder.name), ["arpData"]);
 });
 
-Deno.test("readSymbolDocs returns deno doc's formatted output", async () => {
+test("readSymbolDocs returns deno doc's formatted output", async () => {
   const docs = await readSymbolDocs(ARP_ENTRYPOINT, "arpData");
 
   assert(docs.ok, "documentation should be available for a local entrypoint");
   assertStringIncludes(docs.text, "arpData");
 });
 
-Deno.test("readSymbolDocs leaves out colour when stdout is not a terminal", async () => {
+test("readSymbolDocs leaves out colour when stdout is not a terminal", async () => {
   // The subprocess colours its output whether or not anyone can see it, so
   // `--docs > notes.txt` used to write escape sequences into the file.
   const docs = await readSymbolDocs(ARP_ENTRYPOINT, "arpData");
@@ -569,10 +581,10 @@ Deno.test("readSymbolDocs leaves out colour when stdout is not a terminal", asyn
   assertEquals(docs.text.includes(String.fromCharCode(27) + "["), false);
 });
 
-Deno.test("diagnoseEmptyDiscovery reports a graph it could not walk", async () => {
+test("diagnoseEmptyDiscovery reports a graph it could not walk", async () => {
   // `deno info` exits 0 for an unresolvable root and reports the problem as an
   // `error` on the module, which read as "this graph contains no binstruct".
-  const directory = await Deno.makeTempDir();
+  const directory = await makeTempDir();
   try {
     const diagnosis = await diagnoseEmptyDiscovery(toFileUrl(directory).href);
 
@@ -580,18 +592,18 @@ Deno.test("diagnoseEmptyDiscovery reports a graph it could not walk", async () =
     assertEquals(diagnosis.reason, "graph-incomplete");
     assertStringIncludes(diagnosis.stderr, "Directory import");
   } finally {
-    await Deno.remove(directory, { recursive: true });
+    await rm(directory, { recursive: true });
   }
 });
 
-Deno.test("diagnoseEmptyDiscovery detects a binstruct dependency", async () => {
+test("diagnoseEmptyDiscovery detects a binstruct dependency", async () => {
   const diagnosis = await diagnoseEmptyDiscovery(ARP_ENTRYPOINT);
 
   assert(diagnosis.ok, "the module graph should be readable");
   assertEquals(diagnosis.dependsOnBinstruct, true);
 });
 
-Deno.test("diagnoseEmptyDiscovery detects a non-binstruct package", async () => {
+test("diagnoseEmptyDiscovery detects a non-binstruct package", async () => {
   const diagnosis = await diagnoseEmptyDiscovery(MAC_ENTRYPOINT);
 
   assert(diagnosis.ok, "the module graph should be readable");

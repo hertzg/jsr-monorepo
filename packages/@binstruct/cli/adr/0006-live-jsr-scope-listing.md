@@ -83,9 +83,9 @@ in the shape JSR answers with, so a cached listing round-trips through the same
 reader and the same filter.
 
 **The listing is a hint, and every failure resolves to "no list", never to an
-error.** No `--allow-net`, no network, a non-200 answer, a body that is not a
-listing, a request that times out after three seconds — each produces an empty
-list carrying a reason, and level 0 then prints:
+error.** No network, a non-200 answer, a body that is not a listing, a request
+that times out after three seconds — each produces an empty list carrying a
+reason, and level 0 then prints:
 
 ```
 cannot list the @binstruct scope: <reason>
@@ -110,13 +110,12 @@ listing reaches stdout, under any outcome.
 fresh cache, then network, then stale cache, then nothing. A user who has run
 the tool once has a list on a plane.
 
-**Every permission is queried, never assumed.** `Deno.permissions.query` does
-not prompt, so a missing `--allow-net=jsr.io` skips the request instead of
-stopping a pipeline to ask for it — which is the one thing a hint must never do.
-`--allow-env` (locating the cache directory) and `--allow-read` /
-`--allow-write` on it are treated the same way, each degrading only the part it
-covers. `--allow-net=jsr.io` is listed in a `PERMISSIONS` block in `--help`,
-next to the `--allow-run=deno` that level 1 already needed.
+**The cache degrades the same way, one part at a time.** No home directory (or
+no `LOCALAPPDATA` on Windows) means no cache, only the live request. A cache
+file that cannot be read is a miss, and one that cannot be written costs the
+next run a request. None of them is an error. The network is listed in a
+`REQUIREMENTS` block in `--help`, next to the `deno` on `PATH` that level 1
+already needed.
 
 **Level 0 still shows names only.** The listing carries a description per
 package, which the bundled registry could not have had — ADR 0003 recorded that
@@ -152,11 +151,8 @@ answer rather than a spelling correction.
   instead: one cached request a day, and a degraded screen that still teaches
   the shorthand rule when even that is unavailable. This is the real cost of the
   decision and the one worth arguing about.
-- **A new permission appears in the story.** `--allow-net=jsr.io` earns the
-  package list. Its absence is not an error, so
-  `deno run --allow-run=deno
-  jsr:@binstruct/cli` keeps working with one block
-  missing.
+- **A network appears in the story.** It earns the package list. Its absence is
+  not an error, so an offline `binstruct` keeps working with one block missing.
 - **Level 0 can now be slow.** Bounded at three seconds, once a day, and never
   on a cache hit.
 - **The list is what JSR says is loadable, not what the CLI can drive.** A
@@ -172,13 +168,10 @@ answer rather than a spelling correction.
   matters.
 - **The cache can be wrong for a day.** It is a suggestion list; a name missing
   from it still resolves.
-- **Tests do not touch the network.** In `scope.test.ts`, `fetch`, the
-  permission query and the cache directory are supplied by **every** case, which
-  is what makes the offline, non-200, malformed, stale-cache and no-permission
-  paths reachable at all — none of them were, under a bundled constant. The
-  permission stub was at first written only for the denial cases, which left the
-  granted paths reading whatever flags the suite happened to run under while the
-  file's own header claimed otherwise; it now covers both.
+- **Tests do not touch the network.** In `scope.test.ts`, `fetch` and the cache
+  directory are supplied by **every** case, which is what makes the offline,
+  non-200, malformed, stale-cache, unreadable and unwritable paths reachable at
+  all — none of them were, under a bundled constant.
 
 ## References
 

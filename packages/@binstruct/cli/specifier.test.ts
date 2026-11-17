@@ -1,3 +1,5 @@
+import { cwd } from "node:process";
+import { test } from "node:test";
 import { assertEquals, assertStringIncludes } from "@std/assert";
 import { join, resolve, toFileUrl } from "@std/path";
 import {
@@ -64,7 +66,7 @@ const cases: readonly ResolutionCase[] = [
   },
   // A `file:` URL keeps its scheme form. That form says nothing about what is
   // at the far end: `file:///abs/pkg` is a directory and `file:///abs/mod.ts`
-  // is not, and only `Deno.stat` on the target can tell them apart.
+  // is not, and only a `stat` on the target can tell them apart.
   {
     input: "file:///abs/mod.ts",
     specifier: "file:///abs/mod.ts",
@@ -366,16 +368,16 @@ const classifications: readonly ClassificationCase[] = [
   { input: "", form: "bare", why: "degenerate, expands and fails at load" },
 ];
 
-Deno.test("classification enumerates the registry coordinate, not the path", async (t) => {
+test("classification enumerates the registry coordinate, not the path", async (t) => {
   for (const { input, form, why } of classifications) {
     const shown = input === "" ? "<empty>" : input;
-    await t.step(`${shown} -> ${form} (${why})`, () => {
+    await t.test(`${shown} -> ${form} (${why})`, () => {
       assertEquals(resolveSpecifier(input).form, form);
     });
   }
 });
 
-Deno.test("classification leaves no shape unaccounted for", () => {
+test("classification leaves no shape unaccounted for", () => {
   // The table is the guarantee, so it has to actually reach every branch: a
   // row deleted by accident would otherwise leave a form silently untested.
   const covered = new Set(classifications.map((row) => row.form));
@@ -384,9 +386,9 @@ Deno.test("classification leaves no shape unaccounted for", () => {
   assertEquals(forms.filter((form) => !covered.has(form)), []);
 });
 
-Deno.test("resolveSpecifier resolves by first match", async (t) => {
+test("resolveSpecifier resolves by first match", async (t) => {
   for (const { input, specifier, form, short } of cases) {
-    await t.step(`${input === "" ? "<empty>" : input} -> ${specifier}`, () => {
+    await t.test(`${input === "" ? "<empty>" : input} -> ${specifier}`, () => {
       assertEquals(resolveSpecifier(input), {
         input,
         specifier,
@@ -398,7 +400,7 @@ Deno.test("resolveSpecifier resolves by first match", async (t) => {
   }
 });
 
-Deno.test("resolveSpecifier anchors a path to the working directory", () => {
+test("resolveSpecifier anchors a path to the working directory", () => {
   // `deno doc` reads a relative specifier against the process's working
   // directory and `import()` reads it against this module, so leaving one
   // relative had discovery and execution looking at two different files —
@@ -407,14 +409,14 @@ Deno.test("resolveSpecifier anchors a path to the working directory", () => {
 
   assertEquals(
     relative.specifier,
-    toFileUrl(join(Deno.cwd(), "pkg/mod.ts")).href,
+    toFileUrl(join(cwd(), "pkg/mod.ts")).href,
   );
   assertEquals(relative.specifier.startsWith(import.meta.url), false);
   assertEquals(relative.short, "./pkg/mod.ts");
   assertEquals(relative.input, "./pkg/mod.ts");
 });
 
-Deno.test("resolveSpecifier leaves an explicit file URL alone", () => {
+test("resolveSpecifier leaves an explicit file URL alone", () => {
   const url = import.meta.resolve("./specifier.ts");
   const resolved = resolveSpecifier(url);
 
@@ -423,7 +425,7 @@ Deno.test("resolveSpecifier leaves an explicit file URL alone", () => {
   assertEquals(resolved.short, url);
 });
 
-Deno.test("resolveSpecifier flags shorthand but not explicit forms", () => {
+test("resolveSpecifier flags shorthand but not explicit forms", () => {
   assertEquals(resolveSpecifier("png").shorthand, true);
   assertEquals(resolveSpecifier("@hertzg/xhb").shorthand, true);
   assertEquals(resolveSpecifier("jsr:@binstruct/png").shorthand, false);
@@ -431,7 +433,7 @@ Deno.test("resolveSpecifier flags shorthand but not explicit forms", () => {
   assertEquals(resolveSpecifier("./local/mod.ts").shorthand, false);
 });
 
-Deno.test("resolveSpecifier accepts every module extension the runtime loads", () => {
+test("resolveSpecifier accepts every module extension the runtime loads", () => {
   // `.mts` was missing once, and `./pkg/mod.mts` — a module `deno doc` reads
   // and `import()` loads — was classified as a directory and refused, with a
   // TRY line pointing at `./pkg/mod.mts/mod.ts`, which cannot exist.
@@ -451,11 +453,11 @@ Deno.test("resolveSpecifier accepts every module extension the runtime loads", (
   }
 });
 
-Deno.test("resolveSpecifier does not decide file or directory from the spelling", async (t) => {
+test("resolveSpecifier does not decide file or directory from the spelling", async (t) => {
   // Which one it is is a fact about the target, not about how the argument was
   // typed, so classification stops at "this is a path" and `inspectLocalTarget`
   // stats the target.
-  await t.step("a directory and the module inside it are the same form", () => {
+  await t.test("a directory and the module inside it are the same form", () => {
     for (
       const input of ["./pkg", "../pkg", "/abs/pkg", ".", "./pkg/", "pkg/"]
     ) {
@@ -464,7 +466,7 @@ Deno.test("resolveSpecifier does not decide file or directory from the spelling"
     assertEquals(resolveSpecifier("./pkg/mod.ts").form, "path");
   });
 
-  await t.step("every spelling of one directory resolves to one URL", () => {
+  await t.test("every spelling of one directory resolves to one URL", () => {
     // The refusal keys off the resolved target, so these have to agree: a
     // trailing slash, a bare relative name and a `file:` URL are the same
     // directory as `./pkg`. `pkg/` used to resolve to `jsr:@binstruct/pkg/`
@@ -477,7 +479,7 @@ Deno.test("resolveSpecifier does not decide file or directory from the spelling"
     assertEquals(resolveSpecifier(url).specifier, url);
   });
 
-  await t.step("nothing on disk is consulted", () => {
+  await t.test("nothing on disk is consulted", () => {
     // Neither of these exists, and the classification does not go looking:
     // resolution stays a function of the input string and the working
     // directory, which is what ADR 0004 promises.
@@ -486,8 +488,8 @@ Deno.test("resolveSpecifier does not decide file or directory from the spelling"
   });
 });
 
-Deno.test("resolveSpecifier admits only the schemes a package lives behind", async (t) => {
-  await t.step("each of the five passes through unchanged", () => {
+test("resolveSpecifier admits only the schemes a package lives behind", async (t) => {
+  await t.test("each of the five passes through unchanged", () => {
     for (
       const input of [
         "jsr:@binstruct/png",
@@ -503,7 +505,7 @@ Deno.test("resolveSpecifier admits only the schemes a package lives behind", asy
     }
   });
 
-  await t.step("a scheme that cannot host a package is not one", () => {
+  await t.test("a scheme that cannot host a package is not one", () => {
     // The leak, third spelling. `deno doc` resolves a positional `node:…`
     // against the working directory while `import()` treats it as a built-in,
     // so a local `node:evil.ts` was discovered on disk and then imported as a
@@ -525,12 +527,12 @@ Deno.test("resolveSpecifier admits only the schemes a package lives behind", asy
     assertEquals(resolveSpecifier("data:text/plain,x").form, "path");
   });
 
-  await t.step("a colon that is not one of them is part of a path", () => {
+  await t.test("a colon that is not one of them is part of a path", () => {
     // The leak: `^[a-z][a-z0-9+.-]+:` matched `my:`, so a relative path whose
     // first segment held a colon was classified `scheme`, went to `deno doc`
-    // and to `import()` unanchored, and reached neither `Deno.cwd()` nor
-    // `inspectLocalTarget` — while `deno doc` resolved it against the working
-    // directory as the path it plainly is.
+    // and to `import()` unanchored, and reached neither the working directory
+    // nor `inspectLocalTarget` — while `deno doc` resolved it against the
+    // working directory as the path it plainly is.
     const resolved = resolveSpecifier("my:dir/mod.ts");
 
     assertEquals(resolved.form, "path");
@@ -538,17 +540,17 @@ Deno.test("resolveSpecifier admits only the schemes a package lives behind", asy
     assertEquals(resolved.specifier, underCwd("my:dir/mod.ts"));
   });
 
-  await t.step("an unknown scheme with no slash is a bare name", () => {
+  await t.test("an unknown scheme with no slash is a bare name", () => {
     assertEquals(resolveSpecifier("gopher:x").form, "bare");
     assertEquals(resolveSpecifier("ab:x").form, "bare");
   });
 
-  await t.step("membership is case-sensitive", () => {
+  await t.test("membership is case-sensitive", () => {
     assertEquals(resolveSpecifier("FILE:///abs/pkg").form, "path");
     assertEquals(resolveSpecifier("JSR:@binstruct/png").form, "path");
   });
 
-  await t.step("the closure does not disturb the other rows", () => {
+  await t.test("the closure does not disturb the other rows", () => {
     // Every shape that was already classified stays classified the same way;
     // closing the scheme rule is meant to move exactly one class of input.
     const unchanged: readonly [string, SpecifierForm][] = [
@@ -570,14 +572,14 @@ Deno.test("resolveSpecifier admits only the schemes a package lives behind", asy
   });
 });
 
-Deno.test("resolveSpecifier does not read a drive prefix as a scheme", async (t) => {
-  await t.step("a single-letter drive prefix is not a scheme", () => {
+test("resolveSpecifier does not read a drive prefix as a scheme", async (t) => {
+  await t.test("a single-letter drive prefix is not a scheme", () => {
     const resolved = resolveSpecifier("C:");
     assertEquals(resolved.form, "bare");
     assertEquals(resolved.specifier, "jsr:@binstruct/C:");
   });
 
-  await t.step(
+  await t.test(
     "a lowercase single-letter prefix is not a scheme either",
     () => {
       // Not a scheme, and not a coordinate either: it holds a slash outside a
@@ -591,21 +593,21 @@ Deno.test("resolveSpecifier does not read a drive prefix as a scheme", async (t)
     },
   );
 
-  await t.step("a drive path with a module extension is a path", () => {
+  await t.test("a drive path with a module extension is a path", () => {
     const resolved = resolveSpecifier("C:/tmp/mod.ts");
     assertEquals(resolved.form, "path");
     assertEquals(resolved.short, "C:/tmp/mod.ts");
     assertStringIncludes(resolved.specifier, "file://");
   });
 
-  await t.step("an uppercase scheme is not matched", () => {
+  await t.test("an uppercase scheme is not matched", () => {
     // It is not a scheme, and the slash then makes it a path rather than a
     // name — `jsr:@binstruct/JSR:@binstruct/png` was never a useful answer.
     assertEquals(resolveSpecifier("JSR:@binstruct/png").form, "path");
   });
 });
 
-Deno.test("resolveSpecifier treats the empty string as a bare name", () => {
+test("resolveSpecifier treats the empty string as a bare name", () => {
   assertEquals(resolveSpecifier(""), {
     input: "",
     specifier: "jsr:@binstruct/",
@@ -615,7 +617,7 @@ Deno.test("resolveSpecifier treats the empty string as a bare name", () => {
   });
 });
 
-Deno.test("resolveSpecifier consults nothing outside its argument", () => {
+test("resolveSpecifier consults nothing outside its argument", () => {
   const nonexistent = resolveSpecifier("definitely-not-a-package");
   assertEquals(
     nonexistent.specifier,
@@ -624,7 +626,7 @@ Deno.test("resolveSpecifier consults nothing outside its argument", () => {
   assertEquals(nonexistent.form, "bare");
 });
 
-Deno.test("isModulePath agrees with the classifier about what a module is", () => {
+test("isModulePath agrees with the classifier about what a module is", () => {
   // The directory refusal lists module files with this predicate and the
   // classifier accepts them with the same one, so a name offered in a `TRY`
   // line cannot be a name the next invocation rejects.
@@ -651,7 +653,7 @@ Deno.test("isModulePath agrees with the classifier about what a module is", () =
   }
 });
 
-Deno.test("shortenSpecifier drops the implied scheme and scope", () => {
+test("shortenSpecifier drops the implied scheme and scope", () => {
   assertEquals(shortenSpecifier("jsr:@binstruct/png"), "png");
   assertEquals(shortenSpecifier("jsr:@binstruct/wav@0.2.0"), "wav@0.2.0");
   assertEquals(shortenSpecifier("jsr:@hertzg/xhb"), "@hertzg/xhb");
@@ -660,7 +662,7 @@ Deno.test("shortenSpecifier drops the implied scheme and scope", () => {
   assertEquals(shortenSpecifier("mod.ts"), "mod.ts");
 });
 
-Deno.test("shortenSpecifier never proposes a form that reads back differently", () => {
+test("shortenSpecifier never proposes a form that reads back differently", () => {
   // The bare candidate "mod.ts" reads back as a path, so it is rejected; the
   // scoped one survives, because a leading `@` is a coordinate whatever
   // follows it.
@@ -679,9 +681,9 @@ Deno.test("shortenSpecifier never proposes a form that reads back differently", 
   );
 });
 
-Deno.test("shortenSpecifier round-trips through resolveSpecifier", async (t) => {
+test("shortenSpecifier round-trips through resolveSpecifier", async (t) => {
   for (const { specifier } of cases) {
-    await t.step(specifier, () => {
+    await t.test(specifier, () => {
       assertEquals(
         resolveSpecifier(shortenSpecifier(specifier)).specifier,
         specifier,

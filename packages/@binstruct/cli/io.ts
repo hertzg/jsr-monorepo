@@ -9,7 +9,7 @@
  * @module
  */
 
-import { writeAll } from "@std/io/write-all";
+import { stdin, stdout } from "node:process";
 import { deserializeFromJson, serializeToJson } from "./serialization.ts";
 
 /**
@@ -19,16 +19,9 @@ import { deserializeFromJson, serializeToJson } from "./serialization.ts";
  */
 export async function readStdin(): Promise<Uint8Array> {
   const chunks: Uint8Array[] = [];
-  const reader = Deno.stdin.readable.getReader();
 
-  try {
-    while (true) {
-      const { done, value } = await reader.read();
-      if (done) break;
-      chunks.push(value);
-    }
-  } finally {
-    reader.releaseLock();
+  for await (const chunk of stdin) {
+    chunks.push(chunk);
   }
 
   // Combine all chunks into a single Uint8Array
@@ -105,17 +98,19 @@ export async function readStdinFormatted(
 /**
  * Writes binary data to stdout, in full.
  *
- * A single `Deno.stdout.write` is not enough. Stdout is line buffered, so one
- * write consumes only up to and including the last `0x0a` in the buffer plus a
- * short remainder, and returns how much it took. Binary output routinely holds
- * a `0x0a` far from its end, so the rest would be dropped without a word and
- * the CLI would still exit 0. {@linkcode writeAll} keeps writing until every
- * byte has landed.
+ * Returning as soon as the write is handed over is not enough. Stdout may take
+ * only part of a buffer at once and queue the rest, and a process that exits
+ * before the queue drains drops the tail without a word and still exits 0.
+ * Binary output is routinely larger than one write, so this resolves only when
+ * the stream reports that every byte has landed, and rejects when it says one
+ * did not.
  *
  * @param data Binary data to write
  */
 export async function writeStdout(data: Uint8Array): Promise<void> {
-  await writeAll(Deno.stdout, data);
+  await new Promise<void>((resolve, reject) => {
+    stdout.write(data, (error) => error ? reject(error) : resolve());
+  });
 }
 
 /**

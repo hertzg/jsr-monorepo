@@ -231,7 +231,7 @@ function classify(input: string): SpecifierForm {
  * Deliberately pure, including for a path, which {@linkcode resolveSpecifier}
  * anchors to the working directory afterwards. That keeps
  * {@linkcode shortenSpecifier}, whose round trip runs through here, free of
- * both the `Deno.cwd()` read and the question of where the caller happens to
+ * both the working-directory read and the question of where the caller happens to
  * be standing.
  *
  * @param input Package argument as typed.
@@ -261,9 +261,9 @@ function expand(input: string, form: SpecifierForm): string {
  *
  * A path is anchored to the working directory and returned as a `file://` URL,
  * so that discovery and `import()` — which disagree about what a relative
- * specifier is relative to — resolve it to the same module. Reading
- * `Deno.cwd()` is the one thing this function needs from outside its argument,
- * and only for that form.
+ * specifier is relative to — resolve it to the same module. Reading the
+ * working directory is the one thing this function needs from outside its
+ * argument, and only for that form.
  *
  * Whether the path names a file or a directory is left open. Both are the
  * `"path"` form, because a directory and the module inside it are
@@ -292,6 +292,7 @@ function expand(input: string, form: SpecifierForm): string {
  * @example A scope, a scheme and a path
  * ```ts
  * import { assertEquals } from "@std/assert";
+ * import { cwd } from "node:process";
  * import { toFileUrl } from "@std/path";
  * import { resolveSpecifier } from "./specifier.ts";
  *
@@ -300,7 +301,7 @@ function expand(input: string, form: SpecifierForm): string {
  *
  * const local = resolveSpecifier("./local/mod.ts");
  *
- * assertEquals(local.specifier, toFileUrl(`${Deno.cwd()}/local/mod.ts`).href);
+ * assertEquals(local.specifier, toFileUrl(`${cwd()}/local/mod.ts`).href);
  * assertEquals(local.short, "./local/mod.ts");
  * assertEquals(local.form, "path");
  * ```

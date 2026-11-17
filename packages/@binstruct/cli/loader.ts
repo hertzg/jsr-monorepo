@@ -55,7 +55,7 @@ export type LoadCoderOptions = {
  * import { loadCoder, UnverifiedArityError } from "./loader.ts";
  *
  * const error = await assertRejects(
- *   () => loadCoder(import.meta.resolve("../pcap/mod.ts"), "pcapFileWith"),
+ *   () => loadCoder(import.meta.resolve("@binstruct/pcap"), "pcapFileWith"),
  *   UnverifiedArityError,
  * );
  *
@@ -92,10 +92,12 @@ export class UnverifiedArityError extends Error {
 /**
  * Loads a coder from the specified package.
  *
- * `packageSpec` is forwarded to dynamic `import()`, so any specifier the
- * runtime accepts works — `jsr:@scope/pkg`, `npm:pkg`, an absolute URL,
- * or a local path. The package must export `coderName` as a function
- * returning a coder (an object with `encode` and `decode`).
+ * `packageSpec` is forwarded to dynamic `import()`, so what loads is whatever
+ * the runtime running the CLI accepts. A `file:` URL and an installed package
+ * name load everywhere; `jsr:@scope/pkg`, `npm:pkg` and `https:` URLs load
+ * under Deno only, and fail at this import under Bun and Node. The package
+ * must export `coderName` as a function returning a coder (an object with
+ * `encode` and `decode`).
  *
  * The factory is called with no arguments, so one that takes any is refused
  * with an {@linkcode UnverifiedArityError} unless the caller has already read
@@ -107,12 +109,15 @@ export class UnverifiedArityError extends Error {
  * @param options What the caller already knows about the factory
  * @returns The coder instance
  *
- * @example Load a coder from a JSR package
+ * @example Load a coder from an installed package
  * ```ts
  * import { assertEquals } from "@std/assert";
  * import { loadCoder } from "./loader.ts";
  *
- * const coder = await loadCoder("jsr:@binstruct/png", "pngFile");
+ * const coder = await loadCoder(
+ *   import.meta.resolve("@binstruct/png"),
+ *   "pngFile",
+ * );
  * assertEquals(typeof coder.decode, "function");
  * assertEquals(typeof coder.encode, "function");
  * ```

@@ -2,6 +2,7 @@
  * Tests for the guidance renderer.
  */
 
+import { test } from "node:test";
 import { assertEquals } from "@std/assert";
 import { type Guide, nearestName, renderGuide } from "./guide.ts";
 
@@ -18,7 +19,7 @@ const MINIMAL: Guide = {
   try: ["binstruct arp decode < arp.bin > arp.json"],
 };
 
-Deno.test("renderGuide renders NEXT, options and TRY, in that order", () => {
+test("renderGuide renders NEXT, options and TRY, in that order", () => {
   assertEquals(
     renderGuide(MINIMAL),
     [
@@ -35,11 +36,11 @@ Deno.test("renderGuide renders NEXT, options and TRY, in that order", () => {
   );
 });
 
-Deno.test("renderGuide carries no trailing newline", () => {
+test("renderGuide carries no trailing newline", () => {
   assertEquals(renderGuide(MINIMAL).endsWith("\n"), false);
 });
 
-Deno.test("renderGuide puts the header first and the notes above NEXT", () => {
+test("renderGuide puts the header first and the notes above NEXT", () => {
   const lines = renderGuide({
     ...MINIMAL,
     header: "package: jsr:@binstruct/arp",
@@ -56,17 +57,17 @@ Deno.test("renderGuide puts the header first and the notes above NEXT", () => {
   ]);
 });
 
-Deno.test("renderGuide appends the footer as the last block", () => {
+test("renderGuide appends the footer as the last block", () => {
   const text = renderGuide({ ...MINIMAL, footer: ["USAGE", "  binstruct"] });
 
   assertEquals(text.endsWith("\n\nUSAGE\n  binstruct"), true);
 });
 
-Deno.test("renderGuide omits the TRY block when there is nothing to try", () => {
+test("renderGuide omits the TRY block when there is nothing to try", () => {
   assertEquals(renderGuide({ ...MINIMAL, try: [] }).includes("TRY"), false);
 });
 
-Deno.test("renderGuide flows bare names into aligned columns", () => {
+test("renderGuide flows bare names into aligned columns", () => {
   const text = renderGuide({
     next: { word: "<package>", meaning: "the format your bytes are in" },
     options: {
@@ -81,7 +82,7 @@ Deno.test("renderGuide flows bare names into aligned columns", () => {
   );
 });
 
-Deno.test("renderGuide aligns the name, detail and summary columns", () => {
+test("renderGuide aligns the name, detail and summary columns", () => {
   const text = renderGuide({
     next: { word: "<coder>", meaning: "which structure to work with" },
     options: {
@@ -103,7 +104,7 @@ Deno.test("renderGuide aligns the name, detail and summary columns", () => {
   );
 });
 
-Deno.test("renderGuide keeps a described option inside the line budget", () => {
+test("renderGuide keeps a described option inside the line budget", () => {
   // Only `flowNames` consulted LINE_WIDTH, so CODERS and COMMANDS blocks
   // concatenated name, detail and summary unbounded: the real `png` block ran
   // to 121 columns and the terminal soft-wrapped it back to column zero,
@@ -139,7 +140,7 @@ Deno.test("renderGuide keeps a described option inside the line budget", () => {
   assertEquals(rows[4].length - rows[4].trimStart().length, 38);
 });
 
-Deno.test("renderGuide leaves a summary alone when it already fits", () => {
+test("renderGuide leaves a summary alone when it already fits", () => {
   const text = renderGuide({
     next: { word: "<command>", meaning: "which direction to run the coder in" },
     options: {
@@ -154,7 +155,7 @@ Deno.test("renderGuide leaves a summary alone when it already fits", () => {
   );
 });
 
-Deno.test("renderGuide explains an empty options block", () => {
+test("renderGuide explains an empty options block", () => {
   const text = renderGuide({
     next: { word: "<coder>", meaning: "which structure to work with" },
     options: {
@@ -170,30 +171,30 @@ Deno.test("renderGuide explains an empty options block", () => {
   );
 });
 
-Deno.test("nearestName ignores case", () => {
+test("nearestName ignores case", () => {
   assertEquals(
     nearestName("pngfile", ["pngFile", "pngChunkUnknown"]),
     "pngFile",
   );
 });
 
-Deno.test("nearestName tolerates a small typo", () => {
+test("nearestName tolerates a small typo", () => {
   const coders = ["arpData", "arpHeader"];
 
   assertEquals(nearestName("arpDatum", coders), "arpData");
   assertEquals(nearestName("arpdta", coders), "arpData");
 });
 
-Deno.test("nearestName suggests nothing when nothing is close", () => {
+test("nearestName suggests nothing when nothing is close", () => {
   assertEquals(nearestName("totallyUnrelated", ["arpData"]), undefined);
   assertEquals(nearestName("arpData", []), undefined);
 });
 
-Deno.test("nearestName breaks ties towards the earlier candidate", () => {
+test("nearestName breaks ties towards the earlier candidate", () => {
   assertEquals(nearestName("ab", ["ax", "ay"]), "ax");
 });
 
-Deno.test("nearestName never suggests the word that was typed", () => {
+test("nearestName never suggests the word that was typed", () => {
   // A listed name that would not load answered `cannot read
   // jsr:@binstruct/bencode … did you mean bencode?` — the minimum distance was
   // zero and nothing stopped an exact match from being offered as a
