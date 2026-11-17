@@ -1,3 +1,4 @@
+import { Duplex, PassThrough } from "node:stream";
 import { test } from "node:test";
 import {
   assert,
@@ -9,6 +10,7 @@ import {
   assertSpyCall,
   assertSpyCallArg,
   assertSpyCalls,
+  resolvesNext,
   spy,
 } from "@std/testing/mock";
 import { createClient } from "./client.ts";
@@ -1500,4 +1502,325 @@ test("a write error fails the readable of a claimed channel with the same error"
   );
 
   assertStrictEquals(await outcome, cause);
+});
+
+test("request with only a method and a Request-URI sends RTSP/1.0, CSeq and no message body", async () => {
+  const toServer = new TransformStream<Uint8Array, Uint8Array>();
+  const toClient = new TransformStream<Uint8Array, Uint8Array>();
+  const client = createClient({
+    readable: toClient.readable,
+    writable: toServer.writable,
+  });
+
+  client.request({ method: "OPTIONS", requestUri: "*" });
+
+  const { value: sent } = await toServer.readable.getReader().read();
+  assertEquals(
+    new TextDecoder().decode(sent),
+    "OPTIONS * RTSP/1.0\r\nCSeq: 1\r\n\r\n",
+  );
+});
+
+test("request without an rtspVersion goes out as RTSP/1.0", async () => {
+  const { connection, requests } = serverLink();
+  const client = createClient(connection);
+
+  client.request({
+    method: "OPTIONS",
+    requestUri: "*",
+    headers: [],
+    messageBody: new Uint8Array(0),
+  });
+
+  const { value: sent } = await requests.read();
+  assert(isRequest(sent));
+  assertEquals(sent.rtspVersion, "RTSP/1.0");
+});
+
+test("request without an rtspVersion goes out in the version of the rtspVersion option", async () => {
+  const { connection, requests } = serverLink();
+  const client = createClient({ ...connection, rtspVersion: "RTSP/2.0" });
+
+  client.request({
+    method: "OPTIONS",
+    requestUri: "*",
+    headers: [],
+    messageBody: new Uint8Array(0),
+  });
+
+  const { value: sent } = await requests.read();
+  assert(isRequest(sent));
+  assertEquals(sent.rtspVersion, "RTSP/2.0");
+});
+
+test("request with an rtspVersion keeps it over the rtspVersion option", async () => {
+  const { connection, requests } = serverLink();
+  const client = createClient({ ...connection, rtspVersion: "RTSP/2.0" });
+
+  client.request({
+    method: "OPTIONS",
+    requestUri: "*",
+    rtspVersion: "RTSP/1.1",
+    headers: [],
+    messageBody: new Uint8Array(0),
+  });
+
+  const { value: sent } = await requests.read();
+  assert(isRequest(sent));
+  assertEquals(sent.rtspVersion, "RTSP/1.1");
+});
+
+test("request without headers goes out with CSeq alone", async () => {
+  const { connection, requests } = serverLink();
+  const client = createClient(connection);
+
+  client.request({
+    method: "OPTIONS",
+    requestUri: "*",
+    rtspVersion: "RTSP/2.0",
+    messageBody: new Uint8Array(0),
+  });
+
+  const { value: sent } = await requests.read();
+  assert(isRequest(sent));
+  assertEquals(sent.headers, [["CSeq", "1"]]);
+});
+
+test("request without a messageBody goes out with no message body", async () => {
+  const { connection, requests } = serverLink();
+  const client = createClient(connection);
+
+  client.request({
+    method: "OPTIONS",
+    requestUri: "*",
+    rtspVersion: "RTSP/2.0",
+    headers: [],
+  });
+
+  const { value: sent } = await requests.read();
+  assert(isRequest(sent));
+  assertEquals(sent.messageBody, new Uint8Array(0));
+});
+
+test("a pair that is no web stream carries a request and its response", async () => {
+  const client = createClient({
+    readable: {
+      getReader: () => ({
+        read: resolvesNext<{ done: false; value: Uint8Array }>([
+          {
+            done: false,
+            value: new TextEncoder().encode(
+              "RTSP/1.0 404 Not Found\r\nCSeq: 1\r\n\r\n",
+            ),
+          },
+          new Promise<never>(() => {}),
+        ]),
+        cancel: () => Promise.resolve(),
+      }),
+    },
+    writable: {
+      getWriter: () => ({
+        write: () => Promise.resolve(),
+        close: () => Promise.resolve(),
+        abort: () => Promise.resolve(),
+      }),
+    },
+  });
+
+  const response = await client.request({ method: "OPTIONS", requestUri: "*" });
+
+  assertEquals(response.statusCode, 404);
+});
+
+test("a pair that is no web stream gets the request's octets through its writer", async () => {
+  const write = spy((_chunk: Uint8Array) => Promise.resolve());
+  const client = createClient({
+    readable: {
+      getReader: () => ({
+        read: resolvesNext<{ done: false; value: Uint8Array }>([
+          {
+            done: false,
+            value: new TextEncoder().encode(
+              "RTSP/1.0 200 OK\r\nCSeq: 1\r\n\r\n",
+            ),
+          },
+          new Promise<never>(() => {}),
+        ]),
+        cancel: () => Promise.resolve(),
+      }),
+    },
+    writable: {
+      getWriter: () => ({
+        write,
+        close: () => Promise.resolve(),
+        abort: () => Promise.resolve(),
+      }),
+    },
+  });
+
+  await client.request({ method: "OPTIONS", requestUri: "*" });
+
+  assertEquals(
+    new TextDecoder().decode(write.calls[0].args[0]),
+    "OPTIONS * RTSP/1.0\r\nCSeq: 1\r\n\r\n",
+  );
+});
+
+test("close closes the writer of a pair that is no web stream", async () => {
+  const close = spy(() => Promise.resolve());
+  const client = createClient({
+    readable: {
+      getReader: () => ({
+        read: () => new Promise<never>(() => {}),
+        cancel: () => Promise.resolve(),
+      }),
+    },
+    writable: {
+      getWriter: () => ({
+        write: () => Promise.resolve(),
+        close,
+        abort: () => Promise.resolve(),
+      }),
+    },
+  });
+
+  await client.close();
+
+  assertSpyCalls(close, 1);
+});
+
+test("close cancels the reader of a pair that is no web stream", async () => {
+  const cancel = spy(() => Promise.resolve());
+  const client = createClient({
+    readable: {
+      getReader: () => ({
+        read: () => new Promise<never>(() => {}),
+        cancel,
+      }),
+    },
+    writable: {
+      getWriter: () => ({
+        write: () => Promise.resolve(),
+        close: () => Promise.resolve(),
+        abort: () => Promise.resolve(),
+      }),
+    },
+  });
+
+  await client.close();
+
+  assertSpyCalls(cancel, 1);
+});
+
+test("a read that rejects on a pair that is no web stream rejects a waiting request with the same error", async () => {
+  const cause = new Error("connection reset");
+  const client = createClient({
+    readable: {
+      getReader: () => ({
+        read: () => Promise.reject(cause),
+        cancel: () => Promise.resolve(),
+      }),
+    },
+    writable: {
+      getWriter: () => ({
+        write: () => Promise.resolve(),
+        close: () => Promise.resolve(),
+        abort: () => Promise.resolve(),
+      }),
+    },
+  });
+
+  const outcome = await client.request({ method: "OPTIONS", requestUri: "*" })
+    .catch((error) => error);
+
+  assertStrictEquals(outcome, cause);
+});
+
+test("a write that rejects on a pair that is no web stream rejects the request with the same error", async () => {
+  const cause = new Error("broken pipe");
+  const client = createClient({
+    readable: {
+      getReader: () => ({
+        read: () => new Promise<never>(() => {}),
+        cancel: () => Promise.resolve(),
+      }),
+    },
+    writable: {
+      getWriter: () => ({
+        write: () => Promise.reject(cause),
+        close: () => Promise.resolve(),
+        abort: () => Promise.resolve(),
+      }),
+    },
+  });
+
+  const outcome = await client.request({ method: "OPTIONS", requestUri: "*" })
+    .catch((error) => error);
+
+  assertStrictEquals(outcome, cause);
+});
+
+test("a pair that is no web stream ending rejects a waiting request", async () => {
+  const client = createClient({
+    readable: {
+      getReader: () => ({
+        read: () => Promise.resolve({ done: true as const }),
+        cancel: () => Promise.resolve(),
+      }),
+    },
+    writable: {
+      getWriter: () => ({
+        write: () => Promise.resolve(),
+        close: () => Promise.resolve(),
+        abort: () => Promise.resolve(),
+      }),
+    },
+  });
+
+  await assertRejects(
+    () => client.request({ method: "OPTIONS", requestUri: "*" }),
+    Error,
+    "RTSP connection ended",
+  );
+});
+
+test("a pair that is no web stream ending aborts its writer with the error the request got", async () => {
+  const aborted = Promise.withResolvers<unknown>();
+  const client = createClient({
+    readable: {
+      getReader: () => ({
+        read: () => Promise.resolve({ done: true as const }),
+        cancel: () => Promise.resolve(),
+      }),
+    },
+    writable: {
+      getWriter: () => ({
+        write: () => Promise.resolve(),
+        close: () => Promise.resolve(),
+        abort: (reason) => {
+          aborted.resolve(reason);
+          return Promise.resolve();
+        },
+      }),
+    },
+  });
+
+  const outcome = await client.request({ method: "OPTIONS", requestUri: "*" })
+    .catch((error) => error);
+
+  assertStrictEquals(await aborted.promise, outcome);
+});
+
+test("the pair Duplex.toWeb returns carries a $ block out and back in", async () => {
+  // A PassThrough hands back what is written to it, so the client reads its
+  // own $ block.
+  const client = createClient(Duplex.toWeb(new PassThrough()));
+  const channel = client.channel(0);
+
+  const written = channel.writable.getWriter().write(new Uint8Array([0x80]));
+  const { value: received } = await channel.readable.getReader().read();
+  await written;
+  await client.close();
+
+  assertEquals(received, new Uint8Array([0x80]));
 });
