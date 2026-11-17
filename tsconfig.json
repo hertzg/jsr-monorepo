@@ -1,0 +1,28 @@
+{
+  "compilerOptions": {
+    "target": "esnext",
+    "lib": [
+      "esnext",
+      "dom",
+      "dom.iterable"
+    ],
+    "module": "nodenext",
+    "moduleResolution": "nodenext",
+    "strict": true,
+    "noImplicitOverride": true,
+    "allowImportingTsExtensions": true,
+    "noEmit": true,
+    "skipLibCheck": true,
+    "types": [
+      "node"
+    ]
+  },
+  "include": [
+    "packages/**/*.ts",
+    "_tools/**/*.ts"
+  ],
+  "exclude": [
+    "**/node_modules",
+    "**/dist"
+  ]
+}

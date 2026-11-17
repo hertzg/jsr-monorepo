@@ -1,0 +1,3 @@
+[install]
+# Same rule as ADR 0011: a version younger than twelve hours does not resolve.
+minimumReleaseAge = 43200

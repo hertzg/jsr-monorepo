@@ -1,0 +1,12 @@
+{
+  "name": "@hertzg/xhb",
+  "version": "4.0.0",
+  "license": "GPL-2.0-only",
+  "type": "module",
+  "exports": {
+    ".": "./mod.ts"
+  },
+  "dependencies": {
+    "@std/xml": "npm:@jsr/std__xml@^0.2.0"
+  }
+}

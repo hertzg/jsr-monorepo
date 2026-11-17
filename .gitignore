@@ -13,3 +13,7 @@ cov.lcov
 codecov
 codecov.SHA256SUM
 codecov.SHA256SUM.sig
+
+# bun
+node_modules/
+dist/

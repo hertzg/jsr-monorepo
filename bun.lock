@@ -1,0 +1,560 @@
+{
+  "lockfileVersion": 2,
+  "configVersion": 1,
+  "workspaces": {
+    "": {
+      "name": "jsr-monorepo",
+      "devDependencies": {
+        "@binstruct/arp": "workspace:*",
+        "@binstruct/au": "workspace:*",
+        "@binstruct/bfd": "workspace:*",
+        "@binstruct/bmp": "workspace:*",
+        "@binstruct/cli": "workspace:*",
+        "@binstruct/dos-mz": "workspace:*",
+        "@binstruct/esp": "workspace:*",
+        "@binstruct/ethernet": "workspace:*",
+        "@binstruct/icmp": "workspace:*",
+        "@binstruct/icmpv6": "workspace:*",
+        "@binstruct/ico": "workspace:*",
+        "@binstruct/igmp": "workspace:*",
+        "@binstruct/inet": "workspace:*",
+        "@binstruct/ipv4": "workspace:*",
+        "@binstruct/ipv6": "workspace:*",
+        "@binstruct/mbr": "workspace:*",
+        "@binstruct/mp3": "workspace:*",
+        "@binstruct/ntp": "workspace:*",
+        "@binstruct/pcap": "workspace:*",
+        "@binstruct/png": "workspace:*",
+        "@binstruct/pppoe": "workspace:*",
+        "@binstruct/rtp": "workspace:*",
+        "@binstruct/sll": "workspace:*",
+        "@binstruct/sqlite": "workspace:*",
+        "@binstruct/tar": "workspace:*",
+        "@binstruct/tcp": "workspace:*",
+        "@binstruct/tga": "workspace:*",
+        "@binstruct/tls-record": "workspace:*",
+        "@binstruct/udp": "workspace:*",
+        "@binstruct/vlan": "workspace:*",
+        "@binstruct/vxlan": "workspace:*",
+        "@binstruct/wav": "workspace:*",
+        "@hertzg/binstruct": "workspace:*",
+        "@hertzg/bx": "workspace:*",
+        "@hertzg/crc": "workspace:*",
+        "@hertzg/hikvision-api": "workspace:*",
+        "@hertzg/ip": "workspace:*",
+        "@hertzg/mac": "workspace:*",
+        "@hertzg/mymagti-api": "workspace:*",
+        "@hertzg/reolink-api": "workspace:*",
+        "@hertzg/routeros-api": "workspace:*",
+        "@hertzg/tplink-api": "workspace:*",
+        "@hertzg/wg-conf": "workspace:*",
+        "@hertzg/wg-ini": "workspace:*",
+        "@hertzg/wg-keys": "workspace:*",
+        "@hertzg/xhb": "workspace:*",
+        "@noble/ciphers": "npm:@jsr/noble__ciphers@^2.1.1",
+        "@noble/hashes": "npm:@jsr/noble__hashes@^2.0.1",
+        "@std/assert": "npm:@jsr/std__assert@^1.0.16",
+        "@std/bytes": "npm:@jsr/std__bytes@^1.0.6",
+        "@std/cache": "npm:@jsr/std__cache@^0.2.1",
+        "@std/cli": "npm:@jsr/std__cli@^1.0.25",
+        "@std/encoding": "npm:@jsr/std__encoding@^1.0.10",
+        "@std/expect": "npm:@jsr/std__expect@^1.0.17",
+        "@std/io": "npm:@jsr/std__io@^0.225.3",
+        "@std/jsonc": "npm:@jsr/std__jsonc@^1.0.2",
+        "@std/path": "npm:@jsr/std__path@^1.1.4",
+        "@std/streams": "npm:@jsr/std__streams@^1.0.16",
+        "@std/testing": "npm:@jsr/std__testing@^1.0.16",
+        "@std/xml": "npm:@jsr/std__xml@^0.2.0",
+        "@std/yaml": "npm:@jsr/std__yaml@^1.0.10",
+        "@types/node": "^24.0.0",
+        "fflate": "^0.8.2",
+        "json5": "^2.2.3",
+        "typescript": "^5.9.0",
+      },
+    },
+    "packages/@binstruct/arp": {
+      "name": "@binstruct/arp",
+      "version": "1.0.0",
+      "dependencies": {
+        "@hertzg/binstruct": "workspace:^",
+      },
+    },
+    "packages/@binstruct/au": {
+      "name": "@binstruct/au",
+      "version": "0.1.0",
+      "dependencies": {
+        "@hertzg/binstruct": "workspace:^",
+      },
+    },
+    "packages/@binstruct/bfd": {
+      "name": "@binstruct/bfd",
+      "version": "0.1.0",
+      "dependencies": {
+        "@hertzg/binstruct": "workspace:^",
+      },
+    },
+    "packages/@binstruct/bmp": {
+      "name": "@binstruct/bmp",
+      "version": "1.0.0",
+      "dependencies": {
+        "@hertzg/binstruct": "workspace:^",
+      },
+    },
+    "packages/@binstruct/cli": {
+      "name": "@binstruct/cli",
+      "version": "0.4.0",
+      "dependencies": {
+        "@hertzg/binstruct": "workspace:^",
+        "@std/cli": "npm:@jsr/std__cli@^1.0.25",
+        "@std/io": "npm:@jsr/std__io@^0.225.3",
+        "@std/path": "npm:@jsr/std__path@^1.1.4",
+        "json5": "^2.2.3",
+      },
+    },
+    "packages/@binstruct/dos-mz": {
+      "name": "@binstruct/dos-mz",
+      "version": "0.1.0",
+      "dependencies": {
+        "@hertzg/binstruct": "workspace:^",
+      },
+    },
+    "packages/@binstruct/esp": {
+      "name": "@binstruct/esp",
+      "version": "0.1.0",
+      "dependencies": {
+        "@hertzg/binstruct": "workspace:^",
+      },
+    },
+    "packages/@binstruct/ethernet": {
+      "name": "@binstruct/ethernet",
+      "version": "1.1.0",
+      "dependencies": {
+        "@hertzg/binstruct": "workspace:^",
+      },
+    },
+    "packages/@binstruct/icmp": {
+      "name": "@binstruct/icmp",
+      "version": "1.1.0",
+      "dependencies": {
+        "@hertzg/binstruct": "workspace:^",
+      },
+    },
+    "packages/@binstruct/icmpv6": {
+      "name": "@binstruct/icmpv6",
+      "version": "0.1.0",
+      "dependencies": {
+        "@hertzg/binstruct": "workspace:^",
+      },
+    },
+    "packages/@binstruct/ico": {
+      "name": "@binstruct/ico",
+      "version": "0.1.0",
+      "dependencies": {
+        "@hertzg/binstruct": "workspace:^",
+      },
+    },
+    "packages/@binstruct/igmp": {
+      "name": "@binstruct/igmp",
+      "version": "1.0.0",
+      "dependencies": {
+        "@hertzg/binstruct": "workspace:^",
+      },
+    },
+    "packages/@binstruct/inet": {
+      "name": "@binstruct/inet",
+      "version": "2.0.0",
+      "dependencies": {
+        "@binstruct/arp": "workspace:^",
+        "@binstruct/bfd": "workspace:^",
+        "@binstruct/esp": "workspace:^",
+        "@binstruct/ethernet": "workspace:^",
+        "@binstruct/icmp": "workspace:^",
+        "@binstruct/icmpv6": "workspace:^",
+        "@binstruct/igmp": "workspace:^",
+        "@binstruct/ipv4": "workspace:^",
+        "@binstruct/ipv6": "workspace:^",
+        "@binstruct/ntp": "workspace:^",
+        "@binstruct/pppoe": "workspace:^",
+        "@binstruct/sll": "workspace:^",
+        "@binstruct/tcp": "workspace:^",
+        "@binstruct/udp": "workspace:^",
+        "@binstruct/vlan": "workspace:^",
+        "@binstruct/vxlan": "workspace:^",
+        "@hertzg/binstruct": "workspace:^",
+      },
+    },
+    "packages/@binstruct/ipv4": {
+      "name": "@binstruct/ipv4",
+      "version": "1.0.0",
+      "dependencies": {
+        "@hertzg/binstruct": "workspace:^",
+      },
+    },
+    "packages/@binstruct/ipv6": {
+      "name": "@binstruct/ipv6",
+      "version": "1.0.0",
+      "dependencies": {
+        "@hertzg/binstruct": "workspace:^",
+      },
+    },
+    "packages/@binstruct/mbr": {
+      "name": "@binstruct/mbr",
+      "version": "0.1.0",
+      "dependencies": {
+        "@hertzg/binstruct": "workspace:^",
+      },
+    },
+    "packages/@binstruct/mp3": {
+      "name": "@binstruct/mp3",
+      "version": "0.1.0",
+      "dependencies": {
+        "@hertzg/binstruct": "workspace:^",
+      },
+    },
+    "packages/@binstruct/ntp": {
+      "name": "@binstruct/ntp",
+      "version": "0.1.0",
+      "dependencies": {
+        "@hertzg/binstruct": "workspace:^",
+      },
+    },
+    "packages/@binstruct/pcap": {
+      "name": "@binstruct/pcap",
+      "version": "1.0.0",
+      "dependencies": {
+        "@hertzg/binstruct": "workspace:^",
+      },
+    },
+    "packages/@binstruct/png": {
+      "name": "@binstruct/png",
+      "version": "0.5.0",
+      "dependencies": {
+        "@hertzg/binstruct": "workspace:^",
+        "@hertzg/crc": "workspace:^",
+        "fflate": "^0.8.2",
+      },
+    },
+    "packages/@binstruct/pppoe": {
+      "name": "@binstruct/pppoe",
+      "version": "0.1.0",
+      "dependencies": {
+        "@hertzg/binstruct": "workspace:^",
+      },
+    },
+    "packages/@binstruct/rtp": {
+      "name": "@binstruct/rtp",
+      "version": "0.1.0",
+      "dependencies": {
+        "@hertzg/binstruct": "workspace:^",
+      },
+    },
+    "packages/@binstruct/sll": {
+      "name": "@binstruct/sll",
+      "version": "0.1.0",
+      "dependencies": {
+        "@hertzg/binstruct": "workspace:^",
+      },
+    },
+    "packages/@binstruct/sqlite": {
+      "name": "@binstruct/sqlite",
+      "version": "0.1.0",
+      "dependencies": {
+        "@hertzg/binstruct": "workspace:^",
+      },
+    },
+    "packages/@binstruct/tar": {
+      "name": "@binstruct/tar",
+      "version": "0.1.0",
+      "dependencies": {
+        "@hertzg/binstruct": "workspace:^",
+      },
+    },
+    "packages/@binstruct/tcp": {
+      "name": "@binstruct/tcp",
+      "version": "0.2.0",
+      "dependencies": {
+        "@hertzg/binstruct": "workspace:^",
+      },
+    },
+    "packages/@binstruct/tga": {
+      "name": "@binstruct/tga",
+      "version": "0.1.0",
+      "dependencies": {
+        "@hertzg/binstruct": "workspace:^",
+      },
+    },
+    "packages/@binstruct/tls-record": {
+      "name": "@binstruct/tls-record",
+      "version": "0.1.0",
+      "dependencies": {
+        "@hertzg/binstruct": "workspace:^",
+      },
+    },
+    "packages/@binstruct/udp": {
+      "name": "@binstruct/udp",
+      "version": "1.1.0",
+      "dependencies": {
+        "@hertzg/binstruct": "workspace:^",
+      },
+    },
+    "packages/@binstruct/vlan": {
+      "name": "@binstruct/vlan",
+      "version": "0.1.0",
+      "dependencies": {
+        "@hertzg/binstruct": "workspace:^",
+      },
+    },
+    "packages/@binstruct/vxlan": {
+      "name": "@binstruct/vxlan",
+      "version": "0.1.0",
+      "dependencies": {
+        "@hertzg/binstruct": "workspace:^",
+      },
+    },
+    "packages/@binstruct/wav": {
+      "name": "@binstruct/wav",
+      "version": "1.0.0",
+      "dependencies": {
+        "@hertzg/binstruct": "workspace:^",
+      },
+    },
+    "packages/@hertzg/binstruct": {
+      "name": "@hertzg/binstruct",
+      "version": "3.4.0",
+    },
+    "packages/@hertzg/bx": {
+      "name": "@hertzg/bx",
+      "version": "3.0.3",
+    },
+    "packages/@hertzg/crc": {
+      "name": "@hertzg/crc",
+      "version": "0.3.1",
+      "dependencies": {
+        "@std/cache": "npm:@jsr/std__cache@^0.2.1",
+      },
+    },
+    "packages/@hertzg/hikvision-api": {
+      "name": "@hertzg/hikvision-api",
+      "version": "0.1.2",
+      "dependencies": {
+        "@std/bytes": "npm:@jsr/std__bytes@^1.0.6",
+        "@std/encoding": "npm:@jsr/std__encoding@^1.0.10",
+        "@std/xml": "npm:@jsr/std__xml@^0.2.0",
+      },
+    },
+    "packages/@hertzg/ip": {
+      "name": "@hertzg/ip",
+      "version": "5.0.1",
+    },
+    "packages/@hertzg/mac": {
+      "name": "@hertzg/mac",
+      "version": "0.2.0",
+    },
+    "packages/@hertzg/mymagti-api": {
+      "name": "@hertzg/mymagti-api",
+      "version": "0.1.2",
+    },
+    "packages/@hertzg/reolink-api": {
+      "name": "@hertzg/reolink-api",
+      "version": "0.1.0",
+      "dependencies": {
+        "@hertzg/binstruct": "workspace:^",
+        "@std/bytes": "npm:@jsr/std__bytes@^1.0.6",
+        "@std/xml": "npm:@jsr/std__xml@^0.2.0",
+      },
+    },
+    "packages/@hertzg/routeros-api": {
+      "name": "@hertzg/routeros-api",
+      "version": "0.1.2",
+    },
+    "packages/@hertzg/tplink-api": {
+      "name": "@hertzg/tplink-api",
+      "version": "1.5.0",
+      "dependencies": {
+        "@noble/ciphers": "npm:@jsr/noble__ciphers@^2.1.1",
+        "@noble/hashes": "npm:@jsr/noble__hashes@^2.0.1",
+      },
+    },
+    "packages/@hertzg/wg-conf": {
+      "name": "@hertzg/wg-conf",
+      "version": "0.2.3",
+      "dependencies": {
+        "@hertzg/wg-ini": "workspace:^",
+      },
+    },
+    "packages/@hertzg/wg-ini": {
+      "name": "@hertzg/wg-ini",
+      "version": "0.2.4",
+      "dependencies": {
+        "@std/streams": "npm:@jsr/std__streams@^1.0.16",
+      },
+    },
+    "packages/@hertzg/wg-keys": {
+      "name": "@hertzg/wg-keys",
+      "version": "2.2.0",
+      "dependencies": {
+        "@std/encoding": "npm:@jsr/std__encoding@^1.0.10",
+      },
+    },
+    "packages/@hertzg/xhb": {
+      "name": "@hertzg/xhb",
+      "version": "4.0.0",
+      "dependencies": {
+        "@std/xml": "npm:@jsr/std__xml@^0.2.0",
+      },
+    },
+  },
+  "packages": {
+    "@binstruct/arp": ["@binstruct/arp@workspace:packages/@binstruct/arp"],
+
+    "@binstruct/au": ["@binstruct/au@workspace:packages/@binstruct/au"],
+
+    "@binstruct/bfd": ["@binstruct/bfd@workspace:packages/@binstruct/bfd"],
+
+    "@binstruct/bmp": ["@binstruct/bmp@workspace:packages/@binstruct/bmp"],
+
+    "@binstruct/cli": ["@binstruct/cli@workspace:packages/@binstruct/cli"],
+
+    "@binstruct/dos-mz": ["@binstruct/dos-mz@workspace:packages/@binstruct/dos-mz"],
+
+    "@binstruct/esp": ["@binstruct/esp@workspace:packages/@binstruct/esp"],
+
+    "@binstruct/ethernet": ["@binstruct/ethernet@workspace:packages/@binstruct/ethernet"],
+
+    "@binstruct/icmp": ["@binstruct/icmp@workspace:packages/@binstruct/icmp"],
+
+    "@binstruct/icmpv6": ["@binstruct/icmpv6@workspace:packages/@binstruct/icmpv6"],
+
+    "@binstruct/ico": ["@binstruct/ico@workspace:packages/@binstruct/ico"],
+
+    "@binstruct/igmp": ["@binstruct/igmp@workspace:packages/@binstruct/igmp"],
+
+    "@binstruct/inet": ["@binstruct/inet@workspace:packages/@binstruct/inet"],
+
+    "@binstruct/ipv4": ["@binstruct/ipv4@workspace:packages/@binstruct/ipv4"],
+
+    "@binstruct/ipv6": ["@binstruct/ipv6@workspace:packages/@binstruct/ipv6"],
+
+    "@binstruct/mbr": ["@binstruct/mbr@workspace:packages/@binstruct/mbr"],
+
+    "@binstruct/mp3": ["@binstruct/mp3@workspace:packages/@binstruct/mp3"],
+
+    "@binstruct/ntp": ["@binstruct/ntp@workspace:packages/@binstruct/ntp"],
+
+    "@binstruct/pcap": ["@binstruct/pcap@workspace:packages/@binstruct/pcap"],
+
+    "@binstruct/png": ["@binstruct/png@workspace:packages/@binstruct/png"],
+
+    "@binstruct/pppoe": ["@binstruct/pppoe@workspace:packages/@binstruct/pppoe"],
+
+    "@binstruct/rtp": ["@binstruct/rtp@workspace:packages/@binstruct/rtp"],
+
+    "@binstruct/sll": ["@binstruct/sll@workspace:packages/@binstruct/sll"],
+
+    "@binstruct/sqlite": ["@binstruct/sqlite@workspace:packages/@binstruct/sqlite"],
+
+    "@binstruct/tar": ["@binstruct/tar@workspace:packages/@binstruct/tar"],
+
+    "@binstruct/tcp": ["@binstruct/tcp@workspace:packages/@binstruct/tcp"],
+
+    "@binstruct/tga": ["@binstruct/tga@workspace:packages/@binstruct/tga"],
+
+    "@binstruct/tls-record": ["@binstruct/tls-record@workspace:packages/@binstruct/tls-record"],
+
+    "@binstruct/udp": ["@binstruct/udp@workspace:packages/@binstruct/udp"],
+
+    "@binstruct/vlan": ["@binstruct/vlan@workspace:packages/@binstruct/vlan"],
+
+    "@binstruct/vxlan": ["@binstruct/vxlan@workspace:packages/@binstruct/vxlan"],
+
+    "@binstruct/wav": ["@binstruct/wav@workspace:packages/@binstruct/wav"],
+
+    "@hertzg/binstruct": ["@hertzg/binstruct@workspace:packages/@hertzg/binstruct"],
+
+    "@hertzg/bx": ["@hertzg/bx@workspace:packages/@hertzg/bx"],
+
+    "@hertzg/crc": ["@hertzg/crc@workspace:packages/@hertzg/crc"],
+
+    "@hertzg/hikvision-api": ["@hertzg/hikvision-api@workspace:packages/@hertzg/hikvision-api"],
+
+    "@hertzg/ip": ["@hertzg/ip@workspace:packages/@hertzg/ip"],
+
+    "@hertzg/mac": ["@hertzg/mac@workspace:packages/@hertzg/mac"],
+
+    "@hertzg/mymagti-api": ["@hertzg/mymagti-api@workspace:packages/@hertzg/mymagti-api"],
+
+    "@hertzg/reolink-api": ["@hertzg/reolink-api@workspace:packages/@hertzg/reolink-api"],
+
+    "@hertzg/routeros-api": ["@hertzg/routeros-api@workspace:packages/@hertzg/routeros-api"],
+
+    "@hertzg/tplink-api": ["@hertzg/tplink-api@workspace:packages/@hertzg/tplink-api"],
+
+    "@hertzg/wg-conf": ["@hertzg/wg-conf@workspace:packages/@hertzg/wg-conf"],
+
+    "@hertzg/wg-ini": ["@hertzg/wg-ini@workspace:packages/@hertzg/wg-ini"],
+
+    "@hertzg/wg-keys": ["@hertzg/wg-keys@workspace:packages/@hertzg/wg-keys"],
+
+    "@hertzg/xhb": ["@hertzg/xhb@workspace:packages/@hertzg/xhb"],
+
+    "@jsr/std__assert": ["@jsr/std__assert@1.0.19", "https://npm.jsr.io/~/11/@jsr/std__assert/1.0.19.tgz", { "dependencies": { "@jsr/std__internal": "^1.0.12" } }, "sha512-pEj6RPkGbqlgRmyKwATp4cUs6+ijxtdrv3bq8v1d2I2CEcMEyPaO8cVKro61wGRDH4cNg8Zx6haztvK/9m7gkA=="],
+
+    "@jsr/std__async": ["@jsr/std__async@1.5.1", "https://npm.jsr.io/~/11/@jsr/std__async/1.5.1.tgz", { "dependencies": { "@jsr/std__data-structures": "^1.1.3" } }, "sha512-L6CfoI0FsWWTdnR6tWej3mcRObhmz7dthGj577uLwbDXpA1jZQTnIOL2PRdqgzqHzz9Q6Y8xvfOcEUpDNp8Wkw=="],
+
+    "@jsr/std__bytes": ["@jsr/std__bytes@1.0.6", "https://npm.jsr.io/~/11/@jsr/std__bytes/1.0.6.tgz", {}, "sha512-St6yKggjFGhxS52IFLJWvkchRFbAKg2Xh8UxA4S1EGz7GJ2Ui+ssDDldj/w2c8vCxvl6qgR0HaYbKeFJNqujmA=="],
+
+    "@jsr/std__data-structures": ["@jsr/std__data-structures@1.1.3", "https://npm.jsr.io/~/11/@jsr/std__data-structures/1.1.3.tgz", { "dependencies": { "@jsr/std__assert": "^1.0.19" } }, "sha512-crPd/DvrElv0WDxCuDIlA4PDLvBgVbo+Ry3/XgOFKQTnWTNnpi/XC4znW6awQQZ0nbJLpWoo9AYc/+CxTYfUpQ=="],
+
+    "@jsr/std__fmt": ["@jsr/std__fmt@1.0.10", "https://npm.jsr.io/~/11/@jsr/std__fmt/1.0.10.tgz", {}, "sha512-Q2N8XDNkh/c1IKTi+sO4Vm64M5m4W0o47qTURmMX0vgHm9AJ6jL7jEQ2kw0M1T2rBZiwAY78eUbYzFyOYWaCqQ=="],
+
+    "@jsr/std__fs": ["@jsr/std__fs@1.0.24", "https://npm.jsr.io/~/11/@jsr/std__fs/1.0.24.tgz", { "dependencies": { "@jsr/std__internal": "^1.0.14", "@jsr/std__path": "^1.1.5" } }, "sha512-UunW2Rg++9sA74NJnYMGTsMVQgoFRAwPP02wRRohL0PQBNorbyxHiyCMRaxYQCtLepTLkC4nUyMtcwrGKqTR6g=="],
+
+    "@jsr/std__internal": ["@jsr/std__internal@1.0.14", "https://npm.jsr.io/~/11/@jsr/std__internal/1.0.14.tgz", {}, "sha512-JT8b/t40WcR9q0GDwRZUooY7aXeXnFal8iidE/5TckdAFtvpVAsaJ71/Xgf1SfoChs41s6CZkuCYM8toaNgdvA=="],
+
+    "@jsr/std__json": ["@jsr/std__json@1.1.0", "https://npm.jsr.io/~/11/@jsr/std__json/1.1.0.tgz", { "dependencies": { "@jsr/std__streams": "^1.1.0" } }, "sha512-a9Eylh7ox33tFn5RxhESnvI4akpefQP5Qn+ePz3Ih4IJ/EPA8p0SKq0aztRfN1sGDhfyWMPWwlUcwNxONt+Ncg=="],
+
+    "@jsr/std__path": ["@jsr/std__path@1.1.6", "https://npm.jsr.io/~/11/@jsr/std__path/1.1.6.tgz", { "dependencies": { "@jsr/std__internal": "^1.0.14" } }, "sha512-H1Cmg6z8jFyIsQbVV+vZB4eOx4k6Qg8lyUM6l7nZysj5MZumg89kb0M1bsPBTGQis3fw6mJFkJELo5+AK6oCFA=="],
+
+    "@jsr/std__streams": ["@jsr/std__streams@1.2.0", "https://npm.jsr.io/~/11/@jsr/std__streams/1.2.0.tgz", { "dependencies": { "@jsr/std__bytes": "^1.0.6" } }, "sha512-cQnU2wdP12rYRy+gGAiFarEK9YmWjVwnFMiOGIe0wMKmRLY68INH9hB/mqjKdPX/ruUhNYB70x5YRPLzUYIrbg=="],
+
+    "@noble/ciphers": ["@jsr/noble__ciphers@2.4.0", "https://npm.jsr.io/~/11/@jsr/noble__ciphers/2.4.0.tgz", {}, "sha512-9KpsEWCeMnDLB5j9zdV0sH15NHTsu5dOWQaniwKe/5kp4wFeUG7Ngy/JNJliunLtAvdX3KdT/X+PRdABbRfHDw=="],
+
+    "@noble/hashes": ["@jsr/noble__hashes@2.4.0", "https://npm.jsr.io/~/11/@jsr/noble__hashes/2.4.0.tgz", {}, "sha512-x4m413gT9zB3jpSb2V+seFQJkUGzTFn9MLjrQ3HKMGbVeQKFAExgs6DNeoeqSgS9iYTmodiLzIhEDeKG3HMe/A=="],
+
+    "@std/assert": ["@jsr/std__assert@1.0.19", "https://npm.jsr.io/~/11/@jsr/std__assert/1.0.19.tgz", { "dependencies": { "@jsr/std__internal": "^1.0.12" } }, "sha512-pEj6RPkGbqlgRmyKwATp4cUs6+ijxtdrv3bq8v1d2I2CEcMEyPaO8cVKro61wGRDH4cNg8Zx6haztvK/9m7gkA=="],
+
+    "@std/bytes": ["@jsr/std__bytes@1.0.6", "https://npm.jsr.io/~/11/@jsr/std__bytes/1.0.6.tgz", {}, "sha512-St6yKggjFGhxS52IFLJWvkchRFbAKg2Xh8UxA4S1EGz7GJ2Ui+ssDDldj/w2c8vCxvl6qgR0HaYbKeFJNqujmA=="],
+
+    "@std/cache": ["@jsr/std__cache@0.2.4", "https://npm.jsr.io/~/11/@jsr/std__cache/0.2.4.tgz", {}, "sha512-sn2DvH7Nog+7A0wTwUkBS6DP+TlqnlT8e6GiaJLEmMQ9hXUe1Sf9U1PWSjEzq0Q/Z2H2lDbzvmzlmszYFsOXSw=="],
+
+    "@std/cli": ["@jsr/std__cli@1.0.32", "https://npm.jsr.io/~/11/@jsr/std__cli/1.0.32.tgz", { "dependencies": { "@jsr/std__fmt": "^1.0.10", "@jsr/std__internal": "^1.0.14" } }, "sha512-piaFso6urosCHGLkmy49pXXBJrW8zf1FlXXF4Zj0R2FGQdOGeoDDIfBejMzh+5W/GfJy3kbZGKqP8V2XHzZobQ=="],
+
+    "@std/encoding": ["@jsr/std__encoding@1.0.11", "https://npm.jsr.io/~/11/@jsr/std__encoding/1.0.11.tgz", {}, "sha512-4SmW8WXf4x4FjkxVpxbir06QYwxw/h/2+RU5A66iKXbJC9WAYCICZkH01mcOGj8FgSitF/lSTlT585RZfo8Ukg=="],
+
+    "@std/expect": ["@jsr/std__expect@1.0.20", "https://npm.jsr.io/~/11/@jsr/std__expect/1.0.20.tgz", { "dependencies": { "@jsr/std__assert": "^1.0.19", "@jsr/std__internal": "^1.0.14", "@jsr/std__path": "^1.1.6" } }, "sha512-AkDNshk9qIKP7OzRcSZ9qb4txPJVOxd2mDWl0XtU19eZecIzcNrxrG9gnz1j5t+U+vm6AEHkjMdwnvIfFQsJ7g=="],
+
+    "@std/io": ["@jsr/std__io@0.225.3", "https://npm.jsr.io/~/11/@jsr/std__io/0.225.3.tgz", { "dependencies": { "@jsr/std__bytes": "^1.0.6" } }, "sha512-IDXY253ipW6FV34CJVxO+3ubfvSEEzw9N2W303KnLe9K/Y9+v/ID1dQYf9VsCCOFMpFtCmOLqzIZsRqv6yQnWw=="],
+
+    "@std/jsonc": ["@jsr/std__jsonc@1.0.3", "https://npm.jsr.io/~/11/@jsr/std__jsonc/1.0.3.tgz", { "dependencies": { "@jsr/std__json": "^1.1.0" } }, "sha512-NALyuVr8/MJsdKnVFCXKNyWzCJTbLlXASTF/4YyfQN2evCRWaZoTeQ17estdejU5a/xhdPfJ4aDv6MP0b17UHQ=="],
+
+    "@std/path": ["@jsr/std__path@1.1.6", "https://npm.jsr.io/~/11/@jsr/std__path/1.1.6.tgz", { "dependencies": { "@jsr/std__internal": "^1.0.14" } }, "sha512-H1Cmg6z8jFyIsQbVV+vZB4eOx4k6Qg8lyUM6l7nZysj5MZumg89kb0M1bsPBTGQis3fw6mJFkJELo5+AK6oCFA=="],
+
+    "@std/streams": ["@jsr/std__streams@1.2.0", "https://npm.jsr.io/~/11/@jsr/std__streams/1.2.0.tgz", { "dependencies": { "@jsr/std__bytes": "^1.0.6" } }, "sha512-cQnU2wdP12rYRy+gGAiFarEK9YmWjVwnFMiOGIe0wMKmRLY68INH9hB/mqjKdPX/ruUhNYB70x5YRPLzUYIrbg=="],
+
+    "@std/testing": ["@jsr/std__testing@1.0.21", "https://npm.jsr.io/~/11/@jsr/std__testing/1.0.21.tgz", { "dependencies": { "@jsr/std__assert": "^1.0.19", "@jsr/std__async": "^1.5.1", "@jsr/std__data-structures": "^1.1.3", "@jsr/std__fs": "^1.0.24", "@jsr/std__internal": "^1.0.14", "@jsr/std__path": "^1.1.6" } }, "sha512-co+fpkfJIthVk8XP9tJOrkOIBjKac2ubY7FtCOM9zWj53OxXhP7XiOb6pRQZKWVcdH3byf9+kMAKYe+Ar9YaVQ=="],
+
+    "@std/xml": ["@jsr/std__xml@0.2.0", "https://npm.jsr.io/~/11/@jsr/std__xml/0.2.0.tgz", {}, "sha512-uuUkBEiLfxa8P6cu9Sl8MjRNNzf5v96UbYmBMn+YE7+7OCBKoCLctjpSXf8vttWTBEM+Raa4FZ6B09L2CPl/Yg=="],
+
+    "@std/yaml": ["@jsr/std__yaml@1.3.0", "https://npm.jsr.io/~/11/@jsr/std__yaml/1.3.0.tgz", {}, "sha512-TuFbXlSy3nRuQuR8co2t7yzhv53ObdYZZidn8M958Glj6vBp5b7nxg7wTN8VTyCwC3vpbr6Mfdx9auNe/BMAVA=="],
+
+    "@types/node": ["@types/node@24.19.2", "", { "dependencies": { "undici-types": ">=7.24.0 <7.24.7" } }, "sha512-93d49wCWJkCyN87MxLpNN6KXPCwFw7bVUg79mGUV1OS40JGWwVCr8n61DXCSqz7CV6/VfPkb7xec7uP2M+QHWQ=="],
+
+    "fflate": ["fflate@0.8.3", "", {}, "sha512-tbZNuJrLwGUp3zshBtdy4W+ORxZuIh8a5ilyIEQDC5rY1f3U20JMry0Ll3WBzU58EZKsEuJFXhb5gwv8CsPvgA=="],
+
+    "json5": ["json5@2.2.3", "", { "bin": { "json5": "lib/cli.js" } }, "sha512-XmOWe7eyHYH14cLdVPoyg+GOH3rYX++KpzrylJwSW98t3Nk+U8XOl8FWKOgwtzdb8lXGf6zYwDUzeHMWfxasyg=="],
+
+    "typescript": ["typescript@5.9.3", "", { "bin": { "tsc": "bin/tsc", "tsserver": "bin/tsserver" } }, "sha512-jl1vZzPDinLr9eUt3J/t7V6FgNEw9QjvBPdysz9KfQDD41fQrC2Y4vKQdiaUpFT4bXlb1RHhLpp8wtm6M5TgSw=="],
+
+    "undici-types": ["undici-types@7.24.6", "", {}, "sha512-WRNW+sJgj5OBN4/0JpHFqtqzhpbnV0GuB+OozA9gCL7a993SmU+1JBZCzLNxYsbMfIeDL+lTsphD5jN5N+n0zg=="],
+  }
+}

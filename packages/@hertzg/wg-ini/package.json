@@ -1,0 +1,14 @@
+{
+  "name": "@hertzg/wg-ini",
+  "version": "0.2.4",
+  "license": "GPL-2.0-only",
+  "type": "module",
+  "exports": {
+    ".": "./mod.ts",
+    "./lines": "./lines.ts",
+    "./sections": "./sections.ts"
+  },
+  "dependencies": {
+    "@std/streams": "npm:@jsr/std__streams@^1.0.16"
+  }
+}

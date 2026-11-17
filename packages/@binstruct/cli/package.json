@@ -1,0 +1,17 @@
+{
+  "name": "@binstruct/cli",
+  "version": "0.4.0",
+  "license": "GPL-2.0-only",
+  "type": "module",
+  "exports": {
+    ".": "./mod.ts",
+    "./cli": "./cli.ts"
+  },
+  "dependencies": {
+    "@hertzg/binstruct": "workspace:^",
+    "@std/cli": "npm:@jsr/std__cli@^1.0.25",
+    "@std/io": "npm:@jsr/std__io@^0.225.3",
+    "@std/path": "npm:@jsr/std__path@^1.1.4",
+    "json5": "^2.2.3"
+  }
+}

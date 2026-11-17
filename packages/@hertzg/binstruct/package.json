@@ -1,0 +1,20 @@
+{
+  "name": "@hertzg/binstruct",
+  "version": "3.4.0",
+  "license": "GPL-2.0-only",
+  "type": "module",
+  "exports": {
+    ".": "./mod.ts",
+    "./bits": "./bits/mod.ts",
+    "./buffer": "./buffer.ts",
+    "./numeric": "./numeric/numeric.ts",
+    "./array": "./array/array.ts",
+    "./struct": "./struct/struct.ts",
+    "./string": "./string/string.ts",
+    "./bytes": "./bytes/bytes.ts",
+    "./refine": "./refine/refine.ts",
+    "./ref": "./ref/ref.ts",
+    "./lazy": "./lazy/lazy.ts",
+    "./helpers": "./helpers.ts"
+  }
+}

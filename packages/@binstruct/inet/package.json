@@ -1,0 +1,28 @@
+{
+  "name": "@binstruct/inet",
+  "version": "2.0.0",
+  "license": "GPL-2.0-only",
+  "type": "module",
+  "exports": {
+    ".": "./mod.ts"
+  },
+  "dependencies": {
+    "@binstruct/arp": "workspace:^",
+    "@binstruct/bfd": "workspace:^",
+    "@binstruct/esp": "workspace:^",
+    "@binstruct/ethernet": "workspace:^",
+    "@binstruct/icmp": "workspace:^",
+    "@binstruct/icmpv6": "workspace:^",
+    "@binstruct/igmp": "workspace:^",
+    "@binstruct/ipv4": "workspace:^",
+    "@binstruct/ipv6": "workspace:^",
+    "@binstruct/ntp": "workspace:^",
+    "@binstruct/pppoe": "workspace:^",
+    "@binstruct/sll": "workspace:^",
+    "@binstruct/tcp": "workspace:^",
+    "@binstruct/udp": "workspace:^",
+    "@binstruct/vlan": "workspace:^",
+    "@binstruct/vxlan": "workspace:^",
+    "@hertzg/binstruct": "workspace:^"
+  }
+}

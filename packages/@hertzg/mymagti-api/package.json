@@ -1,0 +1,10 @@
+{
+  "name": "@hertzg/mymagti-api",
+  "version": "0.1.2",
+  "license": "GPL-2.0-only",
+  "type": "module",
+  "exports": {
+    ".": "./mod.ts",
+    "./oauth": "./oauth/oauth.ts"
+  }
+}

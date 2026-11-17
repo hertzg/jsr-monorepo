@@ -1,0 +1,12 @@
+{
+  "name": "@binstruct/tga",
+  "version": "0.1.0",
+  "license": "GPL-2.0-only",
+  "type": "module",
+  "exports": {
+    ".": "./mod.ts"
+  },
+  "dependencies": {
+    "@hertzg/binstruct": "workspace:^"
+  }
+}

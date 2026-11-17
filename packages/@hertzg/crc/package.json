@@ -1,0 +1,16 @@
+{
+  "name": "@hertzg/crc",
+  "version": "0.3.1",
+  "license": "GPL-2.0-only",
+  "type": "module",
+  "exports": {
+    ".": "./mod.ts",
+    "./crc8": "./crc8.ts",
+    "./crc16": "./crc16.ts",
+    "./crc32": "./crc32.ts",
+    "./crc64": "./crc64.ts"
+  },
+  "dependencies": {
+    "@std/cache": "npm:@jsr/std__cache@^0.2.1"
+  }
+}

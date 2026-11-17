@@ -1,0 +1,12 @@
+{
+  "name": "@hertzg/wg-conf",
+  "version": "0.2.3",
+  "license": "GPL-2.0-only",
+  "type": "module",
+  "exports": {
+    ".": "./mod.ts"
+  },
+  "dependencies": {
+    "@hertzg/wg-ini": "workspace:^"
+  }
+}

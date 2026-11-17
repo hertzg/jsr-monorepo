@@ -1,0 +1,12 @@
+{
+  "name": "@hertzg/wg-keys",
+  "version": "2.2.0",
+  "license": "GPL-2.0-only",
+  "type": "module",
+  "exports": {
+    ".": "./mod.ts"
+  },
+  "dependencies": {
+    "@std/encoding": "npm:@jsr/std__encoding@^1.0.10"
+  }
+}

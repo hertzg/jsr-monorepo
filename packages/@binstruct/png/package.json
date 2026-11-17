@@ -1,0 +1,14 @@
+{
+  "name": "@binstruct/png",
+  "version": "0.5.0",
+  "license": "GPL-2.0-only",
+  "type": "module",
+  "exports": {
+    ".": "./mod.ts"
+  },
+  "dependencies": {
+    "@hertzg/binstruct": "workspace:^",
+    "@hertzg/crc": "workspace:^",
+    "fflate": "^0.8.2"
+  }
+}

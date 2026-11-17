@@ -1,0 +1,18 @@
+{
+  "name": "@hertzg/routeros-api",
+  "version": "0.1.2",
+  "license": "GPL-2.0-only",
+  "type": "module",
+  "exports": {
+    ".": "./mod.ts",
+    "./encoding/length": "./encoding/length.ts",
+    "./encoding/word": "./encoding/word.ts",
+    "./encoding/sentence": "./encoding/sentence.ts",
+    "./protocol/command": "./protocol/command.ts",
+    "./protocol/reply": "./protocol/reply.ts",
+    "./streams/encode": "./streams/encode.ts",
+    "./streams/decode": "./streams/decode.ts",
+    "./utils/tag": "./utils/tag.ts",
+    "./client": "./client.ts"
+  }
+}

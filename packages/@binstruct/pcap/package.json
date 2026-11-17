@@ -1,0 +1,12 @@
+{
+  "name": "@binstruct/pcap",
+  "version": "1.0.0",
+  "license": "GPL-2.0-only",
+  "type": "module",
+  "exports": {
+    ".": "./mod.ts"
+  },
+  "dependencies": {
+    "@hertzg/binstruct": "workspace:^"
+  }
+}
