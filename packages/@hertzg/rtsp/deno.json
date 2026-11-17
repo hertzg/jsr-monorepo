@@ -9,7 +9,8 @@
     "./protocol/response": "./protocol/response.ts",
     "./protocol/message": "./protocol/message.ts",
     "./streams/decode": "./streams/decode.ts",
-    "./streams/encode": "./streams/encode.ts"
+    "./streams/encode": "./streams/encode.ts",
+    "./client": "./client.ts"
   },
   "publish": {
     "exclude": [

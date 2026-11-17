@@ -8,6 +8,7 @@
     "./protocol/response": [],
     "./protocol/message": [],
     "./streams/decode": [],
-    "./streams/encode": []
+    "./streams/encode": [],
+    "./client": []
   }
 }
