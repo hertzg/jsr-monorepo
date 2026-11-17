@@ -1,7 +1,15 @@
 import { test } from "node:test";
-import { assert, assertEquals, assertStrictEquals } from "@std/assert";
+import {
+  assert,
+  assertEquals,
+  assertRejects,
+  assertStrictEquals,
+} from "@std/assert";
+import { assertSpyCallArg, assertSpyCalls, spy } from "@std/testing/mock";
 import { createClient } from "./client.ts";
-import { isRequest } from "./protocol/message.ts";
+import { isRequest, isResponse } from "./protocol/message.ts";
+import type { RtspRequest } from "./protocol/request.ts";
+import type { RtspResponse } from "./protocol/response.ts";
 import { createRtspDecodeStream } from "./streams/decode.ts";
 import { createRtspEncodeStream } from "./streams/encode.ts";
 
@@ -616,4 +624,574 @@ test("reading the $ block lets the held-back response through", async () => {
   await channel.readable.getReader().read();
 
   assertEquals((await heldResponse).statusCode, 200);
+});
+
+test("onRequest is called with the request the server sent", async () => {
+  const { connection, requests, server } = serverLink();
+  const onRequest = spy((request: RtspRequest) => ({
+    rtspVersion: request.rtspVersion,
+    statusCode: 200,
+    reasonPhrase: "OK",
+    headers: new Headers(),
+    messageBody: new Uint8Array(0),
+  }));
+  createClient({ ...connection, onRequest });
+
+  await server.write({
+    method: "TEARDOWN",
+    requestUri: "rtsp://example.com/fizzle/foo",
+    rtspVersion: "RTSP/2.0",
+    headers: new Headers([["CSeq", "7"]]),
+    messageBody: new Uint8Array(0),
+  });
+  await requests.read();
+
+  assertSpyCallArg(onRequest, 0, 0, {
+    method: "TEARDOWN",
+    requestUri: "rtsp://example.com/fizzle/foo",
+    rtspVersion: "RTSP/2.0",
+    headers: new Headers([["CSeq", "7"]]),
+    messageBody: new Uint8Array(0),
+  });
+});
+
+test("the answer from onRequest is sent to the server", async () => {
+  const { connection, requests, server } = serverLink();
+  createClient({
+    ...connection,
+    onRequest: () => ({
+      rtspVersion: "RTSP/2.0",
+      statusCode: 454,
+      reasonPhrase: "Session Not Found",
+      headers: new Headers(),
+      messageBody: new Uint8Array(0),
+    }),
+  });
+
+  await server.write({
+    method: "TEARDOWN",
+    requestUri: "rtsp://example.com/fizzle/foo",
+    rtspVersion: "RTSP/2.0",
+    headers: new Headers([["CSeq", "7"]]),
+    messageBody: new Uint8Array(0),
+  });
+
+  const { value: answer } = await requests.read();
+  assert(isResponse(answer));
+  assertEquals(answer.statusCode, 454);
+});
+
+test("the answer from onRequest carries the request's CSeq", async () => {
+  const { connection, requests, server } = serverLink();
+  createClient({
+    ...connection,
+    onRequest: () => ({
+      rtspVersion: "RTSP/2.0",
+      statusCode: 200,
+      reasonPhrase: "OK",
+      headers: new Headers(),
+      messageBody: new Uint8Array(0),
+    }),
+  });
+
+  await server.write({
+    method: "OPTIONS",
+    requestUri: "*",
+    rtspVersion: "RTSP/2.0",
+    headers: new Headers([["CSeq", "7"]]),
+    messageBody: new Uint8Array(0),
+  });
+
+  const { value: answer } = await requests.read();
+  assert(isResponse(answer));
+  assertEquals(answer.headers.get("CSeq"), "7");
+});
+
+test("the request's CSeq overwrites a CSeq that onRequest set", async () => {
+  const { connection, requests, server } = serverLink();
+  createClient({
+    ...connection,
+    onRequest: () => ({
+      rtspVersion: "RTSP/2.0",
+      statusCode: 200,
+      reasonPhrase: "OK",
+      headers: new Headers([["CSeq", "99"]]),
+      messageBody: new Uint8Array(0),
+    }),
+  });
+
+  await server.write({
+    method: "OPTIONS",
+    requestUri: "*",
+    rtspVersion: "RTSP/2.0",
+    headers: new Headers([["CSeq", "7"]]),
+    messageBody: new Uint8Array(0),
+  });
+
+  const { value: answer } = await requests.read();
+  assert(isResponse(answer));
+  assertEquals(answer.headers.get("CSeq"), "7");
+});
+
+test("the Headers of the answer from onRequest are left unchanged", async () => {
+  const { connection, requests, server } = serverLink();
+  const headers = new Headers([["CSeq", "99"]]);
+  createClient({
+    ...connection,
+    onRequest: () => ({
+      rtspVersion: "RTSP/2.0",
+      statusCode: 200,
+      reasonPhrase: "OK",
+      headers,
+      messageBody: new Uint8Array(0),
+    }),
+  });
+
+  await server.write({
+    method: "OPTIONS",
+    requestUri: "*",
+    rtspVersion: "RTSP/2.0",
+    headers: new Headers([["CSeq", "7"]]),
+    messageBody: new Uint8Array(0),
+  });
+  await requests.read();
+
+  assertEquals(headers.get("CSeq"), "99");
+});
+
+test("a server request is answered 501 when there is no onRequest", async () => {
+  const { connection, requests, server } = serverLink();
+  createClient(connection);
+
+  await server.write({
+    method: "OPTIONS",
+    requestUri: "*",
+    rtspVersion: "RTSP/2.0",
+    headers: new Headers([["CSeq", "7"]]),
+    messageBody: new Uint8Array(0),
+  });
+
+  const { value: answer } = await requests.read();
+  assert(isResponse(answer));
+  assertEquals(answer.statusCode, 501);
+});
+
+test("the 501 answer carries the request's CSeq", async () => {
+  const { connection, requests, server } = serverLink();
+  createClient(connection);
+
+  await server.write({
+    method: "OPTIONS",
+    requestUri: "*",
+    rtspVersion: "RTSP/2.0",
+    headers: new Headers([["CSeq", "7"]]),
+    messageBody: new Uint8Array(0),
+  });
+
+  const { value: answer } = await requests.read();
+  assert(isResponse(answer));
+  assertEquals(answer.headers.get("CSeq"), "7");
+});
+
+test("the 501 answer uses the request's RTSP version", async () => {
+  const { connection, requests, server } = serverLink();
+  createClient(connection);
+
+  await server.write({
+    method: "OPTIONS",
+    requestUri: "*",
+    rtspVersion: "RTSP/1.0",
+    headers: new Headers([["CSeq", "7"]]),
+    messageBody: new Uint8Array(0),
+  });
+
+  const { value: answer } = await requests.read();
+  assert(isResponse(answer));
+  assertEquals(answer.rtspVersion, "RTSP/1.0");
+});
+
+test("a server request is answered 500 when onRequest rejects", async () => {
+  const { connection, requests, server } = serverLink();
+  createClient({
+    ...connection,
+    onRequest: () => Promise.reject(new Error("handler broke")),
+  });
+
+  await server.write({
+    method: "OPTIONS",
+    requestUri: "*",
+    rtspVersion: "RTSP/2.0",
+    headers: new Headers([["CSeq", "7"]]),
+    messageBody: new Uint8Array(0),
+  });
+
+  const { value: answer } = await requests.read();
+  assert(isResponse(answer));
+  assertEquals(answer.statusCode, 500);
+});
+
+test("a server request is answered 500 when onRequest throws", async () => {
+  const { connection, requests, server } = serverLink();
+  createClient({
+    ...connection,
+    onRequest: () => {
+      throw new Error("handler broke");
+    },
+  });
+
+  await server.write({
+    method: "OPTIONS",
+    requestUri: "*",
+    rtspVersion: "RTSP/2.0",
+    headers: new Headers([["CSeq", "7"]]),
+    messageBody: new Uint8Array(0),
+  });
+
+  const { value: answer } = await requests.read();
+  assert(isResponse(answer));
+  assertEquals(answer.statusCode, 500);
+});
+
+test("the 500 answer carries the request's CSeq", async () => {
+  const { connection, requests, server } = serverLink();
+  createClient({
+    ...connection,
+    onRequest: () => Promise.reject(new Error("handler broke")),
+  });
+
+  await server.write({
+    method: "OPTIONS",
+    requestUri: "*",
+    rtspVersion: "RTSP/2.0",
+    headers: new Headers([["CSeq", "7"]]),
+    messageBody: new Uint8Array(0),
+  });
+
+  const { value: answer } = await requests.read();
+  assert(isResponse(answer));
+  assertEquals(answer.headers.get("CSeq"), "7");
+});
+
+test("an onRequest that has not answered yet does not hold back a response", async () => {
+  const { connection, requests, server } = serverLink();
+  const answer = Promise.withResolvers<RtspResponse>();
+  const client = createClient({
+    ...connection,
+    onRequest: () => answer.promise,
+  });
+
+  const response = client.request({
+    method: "OPTIONS",
+    requestUri: "*",
+    rtspVersion: "RTSP/2.0",
+    headers: new Headers(),
+    messageBody: new Uint8Array(0),
+  });
+  await requests.read();
+  await server.write({
+    method: "TEARDOWN",
+    requestUri: "rtsp://example.com/fizzle/foo",
+    rtspVersion: "RTSP/2.0",
+    headers: new Headers([["CSeq", "7"]]),
+    messageBody: new Uint8Array(0),
+  });
+  await server.write({
+    rtspVersion: "RTSP/2.0",
+    statusCode: 200,
+    reasonPhrase: "OK",
+    headers: new Headers([["CSeq", "1"]]),
+    messageBody: new Uint8Array(0),
+  });
+
+  assertEquals((await response).statusCode, 200);
+});
+
+test("close rejects a request that is waiting for its response", async () => {
+  const { connection, requests } = serverLink();
+  const client = createClient(connection);
+
+  const response = client.request({
+    method: "OPTIONS",
+    requestUri: "*",
+    rtspVersion: "RTSP/2.0",
+    headers: new Headers(),
+    messageBody: new Uint8Array(0),
+  });
+  await requests.read();
+  const closed = client.close();
+
+  await assertRejects(() => response, Error, "RTSP client is closed");
+  await closed;
+});
+
+test("close closes the readable of a claimed channel", async () => {
+  const { connection } = serverLink();
+  const client = createClient(connection);
+  const reader = client.channel(0).readable.getReader();
+
+  await client.close();
+  const { done } = await reader.read();
+
+  assertEquals(done, true);
+});
+
+test("close rejects a request while an unread $ block holds the connection back", async () => {
+  // The control client gets more traffic, later, over a link of the same
+  // depth. Once its response is in, the held client has had the time to
+  // queue its $ block and is waiting for the channel's reader.
+  const held = serverLink();
+  const heldClient = createClient(held.connection);
+  heldClient.channel(0);
+  const control = serverLink();
+  const controlClient = createClient(control.connection);
+
+  const heldResponse = heldClient.request({
+    method: "OPTIONS",
+    requestUri: "*",
+    rtspVersion: "RTSP/2.0",
+    headers: new Headers(),
+    messageBody: new Uint8Array(0),
+  });
+  await held.requests.read();
+  const controlResponse = controlClient.request({
+    method: "OPTIONS",
+    requestUri: "*",
+    rtspVersion: "RTSP/2.0",
+    headers: new Headers(),
+    messageBody: new Uint8Array(0),
+  });
+  await control.requests.read();
+
+  const heldWrites = Promise.allSettled([
+    held.server.write({ channelId: 0, binaryData: new Uint8Array([0x80]) }),
+    held.server.write({ channelId: 0, binaryData: new Uint8Array([0x81]) }),
+  ]);
+  control.server.write({ channelId: 0, binaryData: new Uint8Array([0x80]) });
+  control.server.write({ channelId: 0, binaryData: new Uint8Array([0x81]) });
+  control.server.write({
+    rtspVersion: "RTSP/2.0",
+    statusCode: 200,
+    reasonPhrase: "OK",
+    headers: new Headers([["CSeq", "1"]]),
+    messageBody: new Uint8Array(0),
+  });
+  await controlResponse;
+  const closed = heldClient.close();
+
+  await assertRejects(() => heldResponse, Error, "RTSP client is closed");
+  await closed;
+  await heldWrites;
+});
+
+test("close closes the connection's writable", async () => {
+  const { connection, requests } = serverLink();
+  const client = createClient(connection);
+
+  await client.close();
+  const { done } = await requests.read();
+
+  assertEquals(done, true);
+});
+
+test("close cancels the connection's readable", async () => {
+  const cancel = spy();
+  const client = createClient({
+    readable: new ReadableStream<Uint8Array>({ cancel }),
+    writable: new WritableStream<Uint8Array>(),
+  });
+
+  await client.close();
+
+  assertSpyCalls(cancel, 1);
+});
+
+test("a second close resolves", async () => {
+  const { connection } = serverLink();
+  const client = createClient(connection);
+
+  await client.close();
+
+  assertEquals(await client.close(), undefined);
+});
+
+test("request rejects after close", async () => {
+  const { connection } = serverLink();
+  const client = createClient(connection);
+
+  await client.close();
+
+  await assertRejects(
+    () =>
+      client.request({
+        method: "OPTIONS",
+        requestUri: "*",
+        rtspVersion: "RTSP/2.0",
+        headers: new Headers(),
+        messageBody: new Uint8Array(0),
+      }),
+    Error,
+    "RTSP client is closed",
+  );
+});
+
+test("a channel claimed after close has a failed readable", async () => {
+  const { connection } = serverLink();
+  const client = createClient(connection);
+
+  await client.close();
+
+  await assertRejects(
+    () => client.channel(0).readable.getReader().read(),
+    Error,
+    "RTSP client is closed",
+  );
+});
+
+test("writing to a channel rejects after close", async () => {
+  const { connection } = serverLink();
+  const client = createClient(connection);
+  const writer = client.channel(0).writable.getWriter();
+
+  await client.close();
+
+  await assertRejects(
+    () => writer.write(new Uint8Array([0x80])),
+    Error,
+    "RTSP client is closed",
+  );
+});
+
+test("a read error rejects a waiting request with the same error", async () => {
+  const { connection, requests, server } = serverLink();
+  const client = createClient(connection);
+  const cause = new Error("connection reset");
+
+  const response = client.request({
+    method: "OPTIONS",
+    requestUri: "*",
+    rtspVersion: "RTSP/2.0",
+    headers: new Headers(),
+    messageBody: new Uint8Array(0),
+  });
+  await requests.read();
+  const outcome = response.catch((error) => error);
+  await server.abort(cause);
+
+  assertStrictEquals(await outcome, cause);
+});
+
+test("a read error fails the readable of a claimed channel with the same error", async () => {
+  const { connection, server } = serverLink();
+  const client = createClient(connection);
+  const cause = new Error("connection reset");
+  const reader = client.channel(0).readable.getReader();
+
+  const outcome = reader.read().catch((error) => error);
+  await server.abort(cause);
+
+  assertStrictEquals(await outcome, cause);
+});
+
+test("request rejects with the same error after a read error", async () => {
+  const { connection, server } = serverLink();
+  const client = createClient(connection);
+  const cause = new Error("connection reset");
+  const reader = client.channel(0).readable.getReader();
+
+  const failed = reader.read().catch((error) => error);
+  await server.abort(cause);
+  await failed;
+  const outcome = await client.request({
+    method: "OPTIONS",
+    requestUri: "*",
+    rtspVersion: "RTSP/2.0",
+    headers: new Headers(),
+    messageBody: new Uint8Array(0),
+  }).catch((error) => error);
+
+  assertStrictEquals(outcome, cause);
+});
+
+test("the server ending the connection rejects a waiting request", async () => {
+  const { connection, requests, server } = serverLink();
+  const client = createClient(connection);
+
+  const response = client.request({
+    method: "OPTIONS",
+    requestUri: "*",
+    rtspVersion: "RTSP/2.0",
+    headers: new Headers(),
+    messageBody: new Uint8Array(0),
+  });
+  await requests.read();
+  const rejected = assertRejects(
+    () => response,
+    Error,
+    "RTSP connection ended",
+  );
+  await server.close();
+
+  await rejected;
+});
+
+test("the server ending the connection fails a claimed channel with the error the request got", async () => {
+  const { connection, requests, server } = serverLink();
+  const client = createClient(connection);
+  const reader = client.channel(0).readable.getReader();
+
+  const response = client.request({
+    method: "OPTIONS",
+    requestUri: "*",
+    rtspVersion: "RTSP/2.0",
+    headers: new Headers(),
+    messageBody: new Uint8Array(0),
+  });
+  await requests.read();
+  const requestOutcome = response.catch((error) => error);
+  const channelOutcome = reader.read().catch((error) => error);
+  await server.close();
+
+  assertStrictEquals(await channelOutcome, await requestOutcome);
+});
+
+test("a write error rejects a request that was already written", async () => {
+  const cause = new Error("broken pipe");
+  const client = createClient({
+    readable: new ReadableStream<Uint8Array>(),
+    writable: new WritableStream<Uint8Array>({
+      write() {
+        throw cause;
+      },
+    }),
+  });
+
+  const outcome = await client.request({
+    method: "OPTIONS",
+    requestUri: "*",
+    rtspVersion: "RTSP/2.0",
+    headers: new Headers(),
+    messageBody: new Uint8Array(0),
+  }).catch((error) => error);
+
+  assertStrictEquals(outcome, cause);
+});
+
+test("a write error fails the readable of a claimed channel with the same error", async () => {
+  const cause = new Error("broken pipe");
+  const client = createClient({
+    readable: new ReadableStream<Uint8Array>(),
+    writable: new WritableStream<Uint8Array>({
+      write() {
+        throw cause;
+      },
+    }),
+  });
+  const channel = client.channel(0);
+
+  const outcome = channel.readable.getReader().read().catch((error) => error);
+  await channel.writable.getWriter().write(new Uint8Array([0x80])).catch(
+    () => {},
+  );
+
+  assertStrictEquals(await outcome, cause);
 });
