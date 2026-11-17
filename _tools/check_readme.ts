@@ -1,6 +1,7 @@
-import { getPackageNames, getPackages } from "./utils.ts";
+import { join } from "node:path";
+import { getPackageNames, getPackages, ROOT_DIR } from "./utils.ts";
 
-const readme = await Deno.readTextFile("README.md");
+const readme = await Bun.file(join(ROOT_DIR, "README.md")).text();
 
 const packages = await getPackages();
 
@@ -50,7 +51,7 @@ for (const pkgName of readmePackages.keys()) {
 }
 
 if (failed) {
-  Deno.exit(1);
+  process.exit(1);
 }
 
 console.log("check_readme: ok");

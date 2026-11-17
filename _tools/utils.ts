@@ -1,68 +1,95 @@
-import { parse as parseJsonc } from "@std/jsonc";
-import { basename, fromFileUrl, join } from "@std/path";
+import { Glob } from "bun";
+import { basename, dirname, join, resolve } from "node:path";
+
+/** Absolute path of the repository root. */
+export const ROOT_DIR = resolve(import.meta.dirname, "..");
+
+/** `exports` as package.json allows it: a path, or a map that may nest conditions. */
+export type PackageExports = string | { [key: string]: PackageExports };
 
 export interface PackageInfo {
   name: string;
   version: string;
-  exports: Record<string, string> | string;
+  exports: PackageExports;
+  dependencies: Record<string, string>;
+  devDependencies: Record<string, string>;
+  peerDependencies: Record<string, string>;
+  /** Package directory relative to the repository root, e.g. `packages/@hertzg/ip`. */
   workspacePath: string;
   dirName: string;
 }
 
+interface PackageJson {
+  name: string;
+  version: string;
+  exports?: PackageExports;
+  workspaces?: string[];
+  dependencies?: Record<string, string>;
+  devDependencies?: Record<string, string>;
+  peerDependencies?: Record<string, string>;
+}
+
+async function readPackageJson(path: string): Promise<PackageJson> {
+  return await Bun.file(path).json() as PackageJson;
+}
+
+function toPackageInfo(json: PackageJson, workspacePath: string): PackageInfo {
+  return {
+    name: json.name,
+    version: json.version,
+    exports: json.exports ?? {},
+    dependencies: json.dependencies ?? {},
+    devDependencies: json.devDependencies ?? {},
+    peerDependencies: json.peerDependencies ?? {},
+    workspacePath,
+    dirName: basename(workspacePath),
+  };
+}
+
+/** Reads the root `package.json`, the workspace root every package belongs to. */
+export async function getRootPackage(): Promise<PackageInfo> {
+  return toPackageInfo(
+    await readPackageJson(join(ROOT_DIR, "package.json")),
+    ".",
+  );
+}
+
 /**
- * Expands the `workspace` entries from deno.json. Entries ending in `/*` are
- * treated as glob patterns and expanded to one path per matching subdirectory;
- * other entries are passed through verbatim.
- *
- * The root config is read as JSONC rather than imported as a JSON module,
- * because Deno permits comments in `deno.json` and this repo uses them.
+ * Lists every workspace package, sorted by path. The set is whatever the
+ * `workspaces` globs of the root `package.json` match, and all metadata comes
+ * from each package's own `package.json`.
  */
-async function expandWorkspacePaths(): Promise<string[]> {
-  const denoJson = parseJsonc(
-    await Deno.readTextFile(
-      fromFileUrl(new URL("../deno.json", import.meta.url)),
-    ),
-  ) as { workspace: string[] };
-
-  const out: string[] = [];
-  for (const entry of denoJson.workspace) {
-    if (entry.endsWith("/*")) {
-      const parent = entry.slice(0, -2);
-      for await (const dirent of Deno.readDir(parent)) {
-        if (dirent.isDirectory) {
-          out.push(`${parent}/${dirent.name}`);
-        }
-      }
-    } else {
-      out.push(entry);
-    }
-  }
-  out.sort();
-  return out;
-}
-
-export async function getWorkspacePaths(): Promise<string[]> {
-  return await expandWorkspacePaths();
-}
-
 export async function getPackages(): Promise<PackageInfo[]> {
-  const paths = await expandWorkspacePaths();
-  return Promise.all(
-    paths.map(async (workspacePath) => {
-      const pkgJson = parseJsonc(
-        await Deno.readTextFile(join(workspacePath, "deno.json")),
-      ) as Pick<PackageInfo, "name" | "version" | "exports">;
-      return {
-        name: pkgJson.name,
-        version: pkgJson.version,
-        exports: pkgJson.exports,
-        workspacePath,
-        dirName: basename(workspacePath),
-      };
-    }),
+  const root = await readPackageJson(join(ROOT_DIR, "package.json"));
+  const manifestPaths: string[] = [];
+  for (const workspace of root.workspaces ?? []) {
+    const glob = new Glob(`${workspace}/package.json`);
+    manifestPaths.push(...await Array.fromAsync(glob.scan(ROOT_DIR)));
+  }
+  return await Promise.all(
+    manifestPaths.sort().map(async (manifestPath) =>
+      toPackageInfo(
+        await readPackageJson(join(ROOT_DIR, manifestPath)),
+        dirname(manifestPath),
+      )
+    ),
   );
 }
 
 export function getPackageNames(packages: PackageInfo[]): Set<string> {
   return new Set(packages.map((p) => p.name));
+}
+
+function flattenExports(exports: PackageExports): string[] {
+  return typeof exports === "string"
+    ? [exports]
+    : Object.values(exports).flatMap(flattenExports);
+}
+
+/** Lists the files a package exports, relative to the repository root. */
+export function getEntryPoints(pkg: PackageInfo): string[] {
+  const files = flattenExports(pkg.exports).map((file) =>
+    join(pkg.workspacePath, file)
+  );
+  return [...new Set(files)];
 }

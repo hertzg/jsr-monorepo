@@ -1,11 +1,12 @@
 import { parse as parseYaml } from "@std/yaml";
-import { getPackageNames, getPackages } from "./utils.ts";
+import { join } from "node:path";
+import { getPackageNames, getPackages, ROOT_DIR } from "./utils.ts";
 
 type LabelerRule = { "changed-files"?: { "any-glob-to-any-file": string }[] }[];
 type Labeler = Record<string, LabelerRule>;
 
 const labeler = parseYaml(
-  await Deno.readTextFile(".github/labeler.yml"),
+  await Bun.file(join(ROOT_DIR, ".github/labeler.yml")).text(),
 ) as Labeler;
 
 const packages = await getPackages();
@@ -14,9 +15,7 @@ let failed = false;
 
 for (const pkg of packages) {
   const label = labeler[pkg.name];
-  // Strip leading "./" so the glob matches the form used by .github/labeler.yml.
-  const relPath = pkg.workspacePath.replace(/^\.\//, "");
-  const expectedGlob = `${relPath}/**`;
+  const expectedGlob = `${pkg.workspacePath}/**`;
 
   if (!label) {
     console.warn(`check_labeler: No label found for ${pkg.name}`);
@@ -48,7 +47,7 @@ for (const label of Object.keys(labeler)) {
 }
 
 if (failed) {
-  Deno.exit(1);
+  process.exit(1);
 }
 
 console.log("check_labeler: ok");

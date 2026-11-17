@@ -1,0 +1,25 @@
+{
+  "lineWidth": 80,
+  "typescript": {
+    "deno": true,
+    "ignoreNodeCommentText": "deno-fmt-ignore",
+    "ignoreFileCommentText": "deno-fmt-ignore-file"
+  },
+  "json": {
+    "deno": true,
+    "packageJson.applyConventions": false,
+    "ignoreNodeCommentText": "deno-fmt-ignore"
+  },
+  "excludes": [
+    "**/node_modules",
+    "**/dist",
+    "docs",
+    "cov",
+    "coverage",
+    ".claude"
+  ],
+  "plugins": [
+    "https://plugins.dprint.dev/typescript-0.96.0.wasm",
+    "https://plugins.dprint.dev/json-0.26.0.wasm"
+  ]
+}

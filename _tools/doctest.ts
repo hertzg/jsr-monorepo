@@ -12,6 +12,7 @@ import { Glob } from "bun";
 import { mkdir, rm, stat } from "node:fs/promises";
 import { availableParallelism } from "node:os";
 import { dirname, join, resolve } from "node:path";
+import { ROOT_DIR } from "./utils.ts";
 
 interface Example {
   sourceFile: string;
@@ -81,9 +82,12 @@ async function runExample(
 ): Promise<Failure | undefined> {
   await Bun.write(
     scriptFile,
-    absolutizeRelativeImports(example.code, dirname(resolve(example.sourceFile))),
+    absolutizeRelativeImports(
+      example.code,
+      dirname(resolve(example.sourceFile)),
+    ),
   );
-  const child = Bun.spawn(["bun", scriptFile], {
+  const child = Bun.spawn([process.execPath, scriptFile], {
     stdout: "ignore",
     stderr: "pipe",
   });
@@ -95,7 +99,9 @@ async function runExample(
 }
 
 async function main(paths: string[]): Promise<void> {
-  const cacheDir = resolve("node_modules/.cache/doctest");
+  // Always under the root, whatever the cwd: that is where an example's bare
+  // imports resolve from.
+  const cacheDir = join(ROOT_DIR, "node_modules/.cache/doctest");
   await rm(cacheDir, { recursive: true, force: true });
   await mkdir(cacheDir, { recursive: true });
 

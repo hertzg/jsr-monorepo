@@ -1,3 +1,8 @@
 [install]
 # Same rule as ADR 0011: a version younger than twelve hours does not resolve.
 minimumReleaseAge = 43200
+
+[test]
+# Applies to `bun run cov` and `bun run cov:gen`.
+coverageSkipTestFiles = true
+coveragePathIgnorePatterns = ["**/*.generated.mjs", "**/_test_utils.ts"]

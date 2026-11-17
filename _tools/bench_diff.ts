@@ -1,36 +1,10 @@
 /**
- * Compares two Deno benchmark JSON outputs and generates a markdown diff report.
+ * Compares two `bun _tools/bench.ts --json` outputs and generates a markdown
+ * diff report.
  *
- * Usage: deno run --allow-read bench_diff.ts <base.json> <pr.json>
+ * Usage: bun _tools/bench_diff.ts <base.json> <pr.json>
  */
-
-interface BenchmarkEntry {
-  origin: string;
-  group: string | null;
-  name: string;
-  baseline: boolean;
-  results: Array<{
-    ok: {
-      n: number;
-      min: number;
-      max: number;
-      avg: number;
-      p75: number;
-      p99: number;
-      p995: number;
-      p999: number;
-      highPrecision: boolean;
-      usedExplicitTimers: boolean;
-    };
-  }>;
-}
-
-interface BenchmarkOutput {
-  version: number;
-  runtime: string;
-  cpu: string;
-  benches: BenchmarkEntry[];
-}
+import type { BenchReport } from "./bench.ts";
 
 interface ParsedBenchmark {
   name: string;
@@ -58,30 +32,17 @@ function parseBenchmarkFile(content: string): Map<string, ParsedBenchmark> {
   }
 
   try {
-    const output = JSON.parse(jsonMatch[0]) as BenchmarkOutput;
+    const output = JSON.parse(jsonMatch[0]) as BenchReport;
 
     if (!output.benches || !Array.isArray(output.benches)) {
       return benchmarks;
     }
 
     for (const bench of output.benches) {
-      if (bench.results && bench.results.length > 0) {
-        const ok = bench.results[0].ok;
-        if (ok) {
-          const key = `${bench.origin}::${bench.name}`;
-          benchmarks.set(key, {
-            name: bench.name,
-            origin: bench.origin,
-            avg: ok.avg,
-            min: ok.min,
-            max: ok.max,
-            p75: ok.p75,
-            p99: ok.p99,
-            iterations: ok.n,
-            noise: ok.avg > 0 ? (ok.max - ok.min) / ok.avg : 0,
-          });
-        }
-      }
+      benchmarks.set(`${bench.origin}::${bench.name}`, {
+        ...bench,
+        noise: bench.avg > 0 ? (bench.max - bench.min) / bench.avg : 0,
+      });
     }
   } catch {
     // Unable to parse JSON
@@ -275,11 +236,7 @@ function generateReport(
     const originResults = significantResults.filter((r) => r.origin === origin);
     if (originResults.length === 0) continue;
 
-    const shortOrigin = origin.replace(/^file:\/\//, "").replace(
-      /.*\/packages\//,
-      "packages/",
-    );
-    lines.push(`### \`${shortOrigin}\`\n`);
+    lines.push(`### \`${origin}\`\n`);
 
     lines.push("| Benchmark | Base | PR | Change |");
     lines.push("|-----------|------|-------|--------|");
@@ -323,11 +280,11 @@ function generateReport(
 }
 
 async function main() {
-  const args = Deno.args;
+  const args = process.argv.slice(2);
 
   if (args.length !== 2) {
     console.error("Usage: bench_diff.ts <base.json> <pr.json>");
-    Deno.exit(1);
+    process.exit(1);
   }
 
   const [baseFile, prFile] = args;
@@ -336,16 +293,16 @@ async function main() {
   let prContent = "";
 
   try {
-    baseContent = await Deno.readTextFile(baseFile);
+    baseContent = await Bun.file(baseFile).text();
   } catch {
     // Base file might not exist if benchmarks are new
   }
 
   try {
-    prContent = await Deno.readTextFile(prFile);
+    prContent = await Bun.file(prFile).text();
   } catch {
     console.error(`Error: Cannot read PR benchmark file: ${prFile}`);
-    Deno.exit(1);
+    process.exit(1);
   }
 
   const baseBenchmarks = parseBenchmarkFile(baseContent);

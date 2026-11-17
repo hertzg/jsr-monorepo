@@ -1,15 +1,17 @@
-#!/usr/bin/env -S deno run --allow-read --allow-write --allow-run
-import { join } from "@std/path";
-import { getPackages, type PackageInfo } from "./utils.ts";
-
-const ROOT_DIR = new URL("..", import.meta.url).pathname;
-
-function getEntryPoints(pkg: PackageInfo): string[] {
-  const exports = typeof pkg.exports === "string"
-    ? { ".": pkg.exports }
-    : pkg.exports;
-  return Object.values(exports).map((ep) => join(pkg.workspacePath, ep));
-}
+/**
+ * Generates HTML API documentation: one TypeDoc site per package plus an index
+ * page that links them.
+ *
+ * Usage: `bun _tools/gen_docs.ts [outputDir]` - default `docs`.
+ */
+import { availableParallelism } from "node:os";
+import { join, resolve } from "node:path";
+import {
+  getEntryPoints,
+  getPackages,
+  type PackageInfo,
+  ROOT_DIR,
+} from "./utils.ts";
 
 function slugify(name: string): string {
   return name.replace(/^@/, "").replace(/\//g, "-");
@@ -20,30 +22,54 @@ async function generatePackageDocs(
   outputDir: string,
 ): Promise<void> {
   const slug = slugify(pkg.name);
-  const pkgOutputDir = join(outputDir, slug);
-  const entryPoints = getEntryPoints(pkg);
 
-  await Deno.mkdir(pkgOutputDir, { recursive: true });
-
-  const cmd = new Deno.Command("deno", {
-    args: [
-      "doc",
-      "--html",
-      `--name=${pkg.name}`,
-      `--output=${pkgOutputDir}`,
-      ...entryPoints,
+  // `--skipErrorChecking`: `bun run typecheck` owns type errors. Without it
+  // TypeDoc typechecks the whole repo once per package.
+  const child = Bun.spawn(
+    [
+      process.execPath,
+      "x",
+      "typedoc",
+      "--skipErrorChecking",
+      "--logLevel",
+      "Error",
+      "--name",
+      pkg.name,
+      "--out",
+      join(outputDir, slug),
+      ...getEntryPoints(pkg),
     ],
-    cwd: ROOT_DIR,
-    stdout: "piped",
-    stderr: "piped",
-  });
-
-  const result = await cmd.output();
-  if (!result.success) {
-    const stderr = new TextDecoder().decode(result.stderr);
+    { cwd: ROOT_DIR, stdout: "ignore", stderr: "pipe" },
+  );
+  const [exitCode, stderr] = await Promise.all([
+    child.exited,
+    new Response(child.stderr).text(),
+  ]);
+  if (exitCode !== 0) {
     throw new Error(`Failed to generate docs for ${pkg.name}: ${stderr}`);
   }
   console.log(`Generated docs for ${pkg.name} -> ${slug}/`);
+}
+
+/** Runs `generatePackageDocs` for every package, a few TypeDoc processes at a time. */
+async function generateAllDocs(
+  packages: PackageInfo[],
+  outputDir: string,
+): Promise<PromiseSettledResult<void>[]> {
+  const results = new Array<PromiseSettledResult<void>>(packages.length);
+  let nextIndex = 0;
+  const work = async () => {
+    while (nextIndex < packages.length) {
+      const index = nextIndex++;
+      [results[index]] = await Promise.allSettled([
+        generatePackageDocs(packages[index], outputDir),
+      ]);
+    }
+  };
+  await Promise.all(
+    Array.from({ length: availableParallelism() }, () => work()),
+  );
+  return results;
 }
 
 function generateIndexHtml(packages: PackageInfo[]): string {
@@ -125,14 +151,12 @@ ${rows}
 }
 
 async function main() {
-  const outputDir = Deno.args[0] || join(ROOT_DIR, "docs");
+  const outputDir = resolve(process.argv[2] || join(ROOT_DIR, "docs"));
 
   const packages = await getPackages();
   console.log(`Generating docs for ${packages.length} packages...`);
 
-  const results = await Promise.allSettled(
-    packages.map((pkg) => generatePackageDocs(pkg, outputDir)),
-  );
+  const results = await generateAllDocs(packages, outputDir);
 
   const succeeded: PackageInfo[] = [];
   for (let i = 0; i < results.length; i++) {
@@ -146,15 +170,15 @@ async function main() {
 
   if (succeeded.length === 0) {
     console.error("All packages failed doc generation");
-    Deno.exit(1);
+    process.exit(1);
   }
 
   const indexHtml = generateIndexHtml(succeeded);
-  await Deno.writeTextFile(join(outputDir, "index.html"), indexHtml);
-  await Deno.writeTextFile(join(outputDir, ".nojekyll"), "");
+  await Bun.write(join(outputDir, "index.html"), indexHtml);
+  await Bun.write(join(outputDir, ".nojekyll"), "");
   console.log(
     `Generated index.html (${succeeded.length}/${packages.length} packages)`,
   );
 }
 
-main();
+await main();

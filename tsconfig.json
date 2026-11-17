@@ -2,9 +2,7 @@
   "compilerOptions": {
     "target": "esnext",
     "lib": [
-      "esnext",
-      "dom",
-      "dom.iterable"
+      "esnext"
     ],
     "module": "nodenext",
     "moduleResolution": "nodenext",
@@ -18,11 +16,11 @@
     ]
   },
   "include": [
-    "packages/**/*.ts",
-    "_tools/**/*.ts"
+    "packages/**/*.ts"
   ],
   "exclude": [
     "**/node_modules",
-    "**/dist"
+    "**/dist",
+    "packages/@binstruct/png/pngsuite/pngsuite.test.ts"
   ]
 }

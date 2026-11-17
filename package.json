@@ -7,9 +7,25 @@
     "packages/@hertzg/*"
   ],
   "scripts": {
-    "test": "bun test",
+    "test": "bun run --parallel test:unit test:doc",
+    "test:unit": "bun test",
     "test:doc": "bun _tools/doctest.ts",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit && tsc --noEmit -p _tools",
+    "lint": "bun run --parallel --no-exit-on-error typecheck lint:oxlint lint:fmt lint:imports lint:labeler lint:readme",
+    "lint:fmt": "dprint check",
+    "fmt": "dprint fmt",
+    "lint:oxlint": "oxlint --report-unused-disable-directives --deny-warnings",
+    "lint:imports": "bun _tools/check_imports.ts",
+    "lint:labeler": "bun _tools/check_labeler.ts",
+    "lint:readme": "bun _tools/check_readme.ts",
+    "bench": "bun _tools/bench.ts",
+    "bench:json": "bun _tools/bench.ts --json",
+    "build:jsr": "bun _tools/build_jsr.ts",
+    "build:npm": "bun _tools/build_npm.ts",
+    "verify:npm": "bun _tools/verify_npm.ts",
+    "cov": "bun test --coverage",
+    "cov:gen": "bun test --coverage --coverage-reporter=lcov --coverage-dir=cov",
+    "docs": "bun _tools/gen_docs.ts"
   },
   "devDependencies": {
     "@binstruct/arp": "workspace:*",
@@ -58,8 +74,8 @@
     "@hertzg/wg-ini": "workspace:*",
     "@hertzg/wg-keys": "workspace:*",
     "@hertzg/xhb": "workspace:*",
-    "@noble/ciphers": "npm:@jsr/noble__ciphers@^2.1.1",
-    "@noble/hashes": "npm:@jsr/noble__hashes@^2.0.1",
+    "@noble/ciphers": "^2.1.1",
+    "@noble/hashes": "^2.0.1",
     "@std/assert": "npm:@jsr/std__assert@^1.0.16",
     "@std/bytes": "npm:@jsr/std__bytes@^1.0.6",
     "@std/cache": "npm:@jsr/std__cache@^0.2.1",
@@ -73,9 +89,15 @@
     "@std/testing": "npm:@jsr/std__testing@^1.0.16",
     "@std/xml": "npm:@jsr/std__xml@^0.2.0",
     "@std/yaml": "npm:@jsr/std__yaml@^1.0.10",
+    "@types/bun": "^1.4.4",
     "@types/node": "^24.0.0",
+    "dprint": "^0.65.0",
     "fflate": "^0.8.2",
     "json5": "^2.2.3",
+    "jsr": "^0.14.3",
+    "mitata": "^1.0.34",
+    "oxlint": "^1.94.0",
+    "typedoc": "^0.28.20",
     "typescript": "^5.9.0"
   }
 }
