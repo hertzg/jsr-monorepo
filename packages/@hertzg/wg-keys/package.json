@@ -1,11 +1,23 @@
 {
   "name": "@hertzg/wg-keys",
   "version": "2.2.0",
+  "description": "WireGuard key management",
   "license": "GPL-2.0-only",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/hertzg/jsr-monorepo.git",
+    "directory": "packages/@hertzg/wg-keys"
+  },
+  "homepage": "https://jsr.io/@hertzg/wg-keys",
+  "bugs": "https://github.com/hertzg/jsr-monorepo/issues",
   "type": "module",
   "exports": {
     ".": "./mod.ts"
   },
+  "files": [
+    "**/*.ts",
+    "!**/*.test.ts"
+  ],
   "dependencies": {
     "@std/encoding": "npm:@jsr/std__encoding@^1.0.10"
   }

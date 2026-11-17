@@ -1,8 +1,12 @@
+import { spawnSync } from "node:child_process";
+import { test } from "node:test";
 import {
   assertExists,
   assertNotStrictEquals,
   assertStrictEquals,
 } from "@std/assert";
+import { decodeBase64, encodeBase64 } from "@std/encoding/base64";
+import { encodeHex } from "@std/encoding/hex";
 import {
   importPrivateKey,
   importPublicKey,
@@ -12,11 +16,11 @@ import {
   wgPubKey,
 } from "./mod.ts";
 
-Deno.test("private key is clamped", () => {
+test("private key is clamped", () => {
   const key = wgGenKey();
   assertStrictEquals(key.length, 44);
 
-  const bytes = Uint8Array.fromBase64(key);
+  const bytes = decodeBase64(key);
   assertStrictEquals(bytes.length, 32);
 
   assertStrictEquals(bytes[0] & 0b00000111, 0);
@@ -24,17 +28,17 @@ Deno.test("private key is clamped", () => {
   assertStrictEquals(bytes[31] & 0b01000000, 0b01000000);
 });
 
-Deno.test("public key values are interchangable", async () => {
+test("public key values are interchangable", async () => {
   const privKeyBytes = randomPrivateKeyBytes();
-  const privKeyBase64 = privKeyBytes.toBase64();
+  const privKeyBase64 = encodeBase64(privKeyBytes);
 
   assertStrictEquals(
     await wgPubKey(privKeyBase64),
-    (await publicBytesFromPrivateBytes(privKeyBytes)).toBase64(),
+    encodeBase64(await publicBytesFromPrivateBytes(privKeyBytes)),
   );
 });
 
-Deno.test("importPrivateKey with Uint8Array", async () => {
+test("importPrivateKey with Uint8Array", async () => {
   const privKeyBytes = randomPrivateKeyBytes();
   const cryptoKey = await importPrivateKey(privKeyBytes);
 
@@ -45,7 +49,7 @@ Deno.test("importPrivateKey with Uint8Array", async () => {
   assertStrictEquals(cryptoKey.usages[0], "deriveBits");
 });
 
-Deno.test("importPrivateKey with base64 string", async () => {
+test("importPrivateKey with base64 string", async () => {
   const privKeyBase64 = wgGenKey();
   const cryptoKey = await importPrivateKey(privKeyBase64);
 
@@ -54,7 +58,7 @@ Deno.test("importPrivateKey with base64 string", async () => {
   assertStrictEquals(cryptoKey.extractable, true);
 });
 
-Deno.test("importPublicKey with Uint8Array", async () => {
+test("importPublicKey with Uint8Array", async () => {
   const privKeyBytes = randomPrivateKeyBytes();
   const pubKeyBytes = await publicBytesFromPrivateBytes(privKeyBytes);
   const cryptoKey = await importPublicKey(pubKeyBytes);
@@ -65,7 +69,7 @@ Deno.test("importPublicKey with Uint8Array", async () => {
   assertStrictEquals(cryptoKey.usages.length, 0);
 });
 
-Deno.test("importPublicKey with base64 string", async () => {
+test("importPublicKey with base64 string", async () => {
   const privKeyBase64 = wgGenKey();
   const pubKeyBase64 = await wgPubKey(privKeyBase64);
   const cryptoKey = await importPublicKey(pubKeyBase64);
@@ -75,7 +79,7 @@ Deno.test("importPublicKey with base64 string", async () => {
   assertStrictEquals(cryptoKey.extractable, true);
 });
 
-Deno.test("imported keys work with deriveBits", async () => {
+test("imported keys work with deriveBits", async () => {
   const alicePrivKeyBytes = randomPrivateKeyBytes();
   const alicePubKeyBytes = await publicBytesFromPrivateBytes(alicePrivKeyBytes);
 
@@ -101,54 +105,31 @@ Deno.test("imported keys work with deriveBits", async () => {
   );
 
   assertStrictEquals(
-    new Uint8Array(aliceShared).toHex(),
-    new Uint8Array(bobShared).toHex(),
+    encodeHex(aliceShared),
+    encodeHex(bobShared),
   );
 });
 
-async function isGivenEnoughPermissions() {
-  try {
-    const [runPerm, envPerm, readPerm] = await Promise.all([
-      Deno.permissions.query({ name: "run" }),
-      Deno.permissions.query({ name: "env" }),
-      Deno.permissions.query({ name: "read" }),
-    ]);
-
-    return (
-      readPerm.state === "granted" &&
-      envPerm.state === "granted" &&
-      runPerm.state === "granted"
-    );
-  } catch (_) {
-    return false;
-  }
+function isWgInstalled() {
+  return spawnSync("wg", ["--version"]).error === undefined;
 }
 
-Deno.test({
-  name: "integration: public key matches output of wg pubkey",
-  ignore: !(await isGivenEnoughPermissions()),
-  async fn() {
+test(
+  "integration: public key matches output of wg pubkey",
+  { skip: !isWgInstalled() },
+  async () => {
     const privKey = wgGenKey();
     assertExists(privKey);
 
     const pubKey = await wgPubKey(privKey);
     assertNotStrictEquals(pubKey, privKey);
 
-    const command = new Deno.Command("wg", {
-      args: ["pubkey"],
-      stdin: "piped",
-      stdout: "piped",
-      stderr: "inherit",
+    const { stdout: execResult } = spawnSync("wg", ["pubkey"], {
+      input: privKey,
+      encoding: "utf8",
+      stdio: ["pipe", "pipe", "inherit"],
     });
-
-    const proc = command.spawn();
-    const writer = proc.stdin.getWriter();
-    await writer.write(new TextEncoder().encode(privKey));
-    await writer.close();
-
-    const { stdout } = await proc.output();
-    const execResult = new TextDecoder().decode(stdout);
 
     assertStrictEquals(pubKey, execResult.trim());
   },
-});
+);

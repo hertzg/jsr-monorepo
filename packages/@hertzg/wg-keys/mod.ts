@@ -72,6 +72,7 @@
  *
  * @module
  */
+import type { webcrypto } from "node:crypto";
 import { decodeBase64Url } from "@std/encoding/base64url";
 import { decodeBase64, encodeBase64 } from "@std/encoding/base64";
 
@@ -160,7 +161,7 @@ const PKCS8_PREAMBLE = new Uint8Array([
   0x30, 0x05, // SEQUENCE(5)
     0x06, 0x03, 0x2b, 0x65, 0x6e, // OID: 1.3.101.110 (x25519)
   0x04, 0x22, // OCTET STRING(34)
-  0x20, 0x04, // OCTET STRING(32): private key bytes follow 
+  0x04, 0x20, // OCTET STRING(32): private key bytes follow
 ]);
 
 /**
@@ -170,7 +171,7 @@ export type ImportPrivateKeyOptions = {
   /**
    * Algorithm identifier for the key. Defaults to `{ name: "X25519" }`.
    */
-  algorithm?: AlgorithmIdentifier;
+  algorithm?: webcrypto.AlgorithmIdentifier;
   /**
    * Whether the key can be exported. Defaults to `true`.
    */
@@ -178,7 +179,7 @@ export type ImportPrivateKeyOptions = {
   /**
    * Array of key usages. Defaults to `["deriveBits"]`.
    */
-  keyUsages?: KeyUsage[];
+  keyUsages?: webcrypto.KeyUsage[];
 };
 
 /**
@@ -188,7 +189,7 @@ export type ImportPublicKeyOptions = {
   /**
    * Algorithm identifier for the key. Defaults to `{ name: "X25519" }`.
    */
-  algorithm?: AlgorithmIdentifier;
+  algorithm?: webcrypto.AlgorithmIdentifier;
   /**
    * Whether the key can be exported. Defaults to `true`.
    */
@@ -220,7 +221,7 @@ export type ImportPublicKeyOptions = {
 export async function importPrivateKey(
   privateKey: string,
   options?: ImportPrivateKeyOptions,
-): Promise<CryptoKey>;
+): Promise<webcrypto.CryptoKey>;
 /**
  * Imports an x25519 private key as a CryptoKey by wrapping it in PKCS8 format.
  *
@@ -260,11 +261,11 @@ export async function importPrivateKey(
 export async function importPrivateKey(
   privateKey: Uint8Array,
   options?: ImportPrivateKeyOptions,
-): Promise<CryptoKey>;
+): Promise<webcrypto.CryptoKey>;
 export async function importPrivateKey(
   privateKey: string | Uint8Array,
   options: ImportPrivateKeyOptions = {},
-): Promise<CryptoKey> {
+): Promise<webcrypto.CryptoKey> {
   const {
     algorithm = { name: "X25519" },
     extractable = true,
@@ -313,7 +314,7 @@ export async function importPrivateKey(
 export async function importPublicKey(
   publicKey: string,
   options?: ImportPublicKeyOptions,
-): Promise<CryptoKey>;
+): Promise<webcrypto.CryptoKey>;
 /**
  * Imports an x25519 public key as a CryptoKey.
  *
@@ -339,11 +340,11 @@ export async function importPublicKey(
 export async function importPublicKey(
   publicKey: Uint8Array,
   options?: ImportPublicKeyOptions,
-): Promise<CryptoKey>;
+): Promise<webcrypto.CryptoKey>;
 export async function importPublicKey(
   publicKey: string | Uint8Array,
   options: ImportPublicKeyOptions = {},
-): Promise<CryptoKey> {
+): Promise<webcrypto.CryptoKey> {
   const {
     algorithm = { name: "X25519" },
     extractable = true,
