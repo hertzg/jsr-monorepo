@@ -26,7 +26,7 @@
     "@hertzg/hikvision-api": "jsr:@hertzg/hikvision-api@^0.1.2",
     "@hertzg/reolink-api": "jsr:@hertzg/reolink-api@^0.1.0",
     "@hertzg/routeros-api": "jsr:@hertzg/routeros-api@^0.1.2",
-    "@hertzg/rtsp": "jsr:@hertzg/rtsp@^0.0.1",
+    "@hertzg/rtsp": "jsr:@hertzg/rtsp@^0.1.0",
     "@hertzg/tplink-api": "jsr:@hertzg/tplink-api@^1.5.0",
     "@hertzg/wg-keys": "jsr:@hertzg/wg-keys@^2.2.0",
     "@hertzg/wg-ini": "jsr:@hertzg/wg-ini@^0.2.4",
