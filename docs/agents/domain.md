@@ -25,9 +25,9 @@ get resolved.
 /
 ├── CONTEXT-MAP.md                                   ← created lazily
 ├── adr/                                             ← repo-wide decisions
-│   ├── 0001-bare-imports-via-import-map.md
+│   ├── 0001-package-json-is-the-source-of-truth.md
 │   ├── …
-│   └── 0010-sub-entrypoint-exports.md
+│   └── 0012-bun-runs-every-task.md
 └── packages/
     ├── @hertzg/
     │   ├── binstruct/

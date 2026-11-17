@@ -74,19 +74,25 @@ All packages are published to JSR. Install using your preferred package manager:
 
 ### Prerequisites
 
-- [Deno](https://deno.land/) 2.1.4 or later
+- [Bun](https://bun.sh/), latest release (CI runs `latest`)
 
 ### Commands
 
 ```bash
-# Run tests
-deno task test
+# Install dependencies
+bun install
 
-# Run linter
-deno task lint
+# Run tests (unit tests and JSDoc examples)
+bun run test
+
+# Run linter (type check, oxlint, format check, repo checks)
+bun run lint
+
+# Fix formatting
+bun run fmt
 
 # View coverage
-deno task cov
+bun run cov
 ```
 
 ## Releasing
@@ -96,7 +102,7 @@ Releases are automated via
 following [Conventional Commits](https://www.conventionalcommits.org/) are
 analyzed automatically, and a release PR is maintained with version bumps and
 changelogs. Merging the release PR creates GitHub Releases and publishes all
-packages to JSR.
+packages to JSR and npm. See [RELEASE.md](./RELEASE.md).
 
 ## License
 

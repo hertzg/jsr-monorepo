@@ -1,60 +1,21 @@
-# ADR 0009 — Two-tier workspace layout: `packages/@<scope>/<name>/`
+# ADR 0009 - A package lives at packages/@scope/name, the same as its registry name
 
-**Status:** Accepted
+The directory path is the package name. `@hertzg/ip` is at
+`packages/@hertzg/ip/`.
 
-## Context
-
-The repo originally used a flat `packages/<scope-name>/` layout — e.g.
-`packages/binstruct-png/`, `packages/wg-keys/`. As the package count grew
-past a dozen, scope boundaries (`@binstruct/*` vs `@hertzg/*`) became
-invisible in the directory tree, and tooling that needed to enumerate
-packages by scope had to parse names. New scopes added more flat siblings
-with no structural separation.
-
-## Decision
-
-Workspaces live under `packages/@<scope>/<name>/`, mirroring the literal
-JSR scope (with the `@` prefix) and package name:
-
-```
-packages/
-  @binstruct/
-    png/
-    wav/
-    inet/
-    tcp/
-    ...
-  @hertzg/
-    binstruct/
-    ip/
-    mac/
-    wg-keys/
-    ...
+```jsonc
+// package.json (root)
+"workspaces": ["packages/@binstruct/*", "packages/@hertzg/*"]
 ```
 
-The migration from the prior flat `packages/<scope-name>/` layout was done
-in `8447a32 chore: group packages by JSR scope folder`.
+The globs pick up a new directory by themselves. A new package still needs a
+label in `.github/labeler.yml`, an entry in `release-please-config.json` and
+`.release-please-manifest.json`, a row in the README table, and a
+`workspace:*` line in the root `devDependencies` so tests and doc examples can
+import it by name. `bun run lint:labeler` and `bun run lint:readme` check the
+label and the README row.
 
-Each leaf has its own `deno.json` declaring `name`, `version`, and
-`exports`. The root `deno.json` enumerates them via `workspace`. Shared
-imports are declared once in the root `import_map.json` and inherited by
-every workspace (see ADR 0001).
+Ruled out:
 
-## Consequences
-
-- Scope ownership is visible at the directory level.
-- Cross-scope refactors are easier to reason about — one tree per scope.
-- Tooling can glob `packages/@<scope>/*` to act per-scope.
-- Adding a workspace = creating `packages/@<scope>/<name>/`, registering
-  it in the root `deno.json` `workspace` array, and adding the bare
-  specifier to `import_map.json`.
-- Operational config files also need updates when adding/removing a
-  workspace: `.github/labeler.yml`, `release-please-config.json`, the README
-  table. Lint tasks (`lint:labeler`, `lint:import-map`, `lint:deps`)
-  enforce these.
-
-## References
-
-- AGENTS.md "Workspace Organization" and "Adding New Workspaces"
-- ADR 0001 — Bare imports via `import_map.json`
-- ADR 0003 — Release Please for monorepo releases
+- A flat `packages/<scope>-<name>/`. Scope boundaries were invisible in the
+  tree, and tooling had to parse names to find them.

@@ -5,10 +5,10 @@ code in this repository.
 
 ## Project Overview
 
-This is a Deno monorepo published to JSR (jsr.io) containing binary structure
-encoding/decoding libraries and related utilities. The core package is
-`@hertzg/binstruct`, which provides type-safe binary data serialization with
-full TypeScript support. Additional packages implement format-specific decoders
+This is a Bun workspace monorepo published to JSR (jsr.io) and npm, containing
+binary structure encoding/decoding libraries and related utilities. The core
+package is `@hertzg/binstruct`, which provides type-safe binary data
+serialization with full TypeScript support. Additional packages implement format-specific decoders
 (PNG, WAV, Ethernet) and utilities (WireGuard configuration, CLI tools).
 
 ## Essential Commands
@@ -20,54 +20,83 @@ task:**
 
 ```bash
 # Run from project root - MANDATORY final check before completing work
-deno task lint
-deno task test
+bun run lint
+bun run test
 ```
 
 Both commands must pass with exit code 0 before any task is considered complete.
 
+`bun run lint` runs the type check (`tsc`), `oxlint`, the format check
+(`dprint check`) and the `_tools` checks for imports, labeler and README.
+`bun run fmt` rewrites files to the expected format.
+
+Bun runs everything here (ADR 0012). Do not run any `deno` command: there is no
+`deno.json`. Run `bun install` once after cloning.
+
+Deno survives in two places, neither of which you invoke directly:
+
+- `bun x jsr publish` downloads its own pinned Deno to do the JSR publish.
+- `@binstruct/cli` runs on Bun and Node, but its coder discovery still shells
+  out to `deno doc` when `deno` is on `PATH`. This is the current state, not a
+  decision.
+
 ### Development Commands (Workspace Level)
 
-For faster feedback during active development, run in individual workspace
-directories:
+For faster feedback during active development, point the commands at one
+package from the project root:
 
 ```bash
 # Quick feedback loop during development
-deno test
-deno test --doc
-deno lint
+bun test packages/@hertzg/ip/              # unit tests
+bun _tools/doctest.ts packages/@hertzg/ip  # JSDoc examples
+bunx oxlint packages/@hertzg/ip
 ```
 
-The root `deno task test` is two subtasks that run concurrently, and the doc
-examples are roughly twice the wall clock of the unit tests. Run one alone when
-only half the surface changed:
+The path given to `bun test` is a substring match, so keep the trailing slash:
+without it `packages/@binstruct/icmp` also runs the `icmpv6` tests.
+
+The root `bun run test` is two subtasks that run concurrently. Run one alone
+when only half the surface changed:
 
 ```bash
-deno task test:doc       # JSDoc examples only - for documentation changes
-deno task test:parallel  # unit tests only - for changes with no JSDoc impact
+bun run test:doc   # JSDoc examples only - for documentation changes
+bun run test:unit  # unit tests only - for changes with no JSDoc impact
 ```
 
-Neither substitutes for the mandatory root `deno task test` before completing
+Neither substitutes for the mandatory root `bun run test` before completing
 work.
 
 ### Additional Commands
 
 ```bash
 # Coverage reports
-deno task cov              # View coverage summary
-deno task cov:gen          # Generate lcov coverage
-deno task cov:view         # View HTML coverage report
+bun run cov                # Run tests and print a coverage summary
+bun run cov:gen            # Write lcov coverage to cov/lcov.info
+
+# Benchmarks and API docs
+bun run bench              # Run *.bench.ts files with mitata
+bun run docs               # Generate HTML API docs into docs/
+
+# Publishing checks (see RELEASE.md)
+bun run build:jsr          # Generate jsr.json beside every package.json
+bun run build:npm          # Build npm packages into dist/
+bun run verify:npm         # Install and import every built npm package
 ```
 
 ## Monorepo Structure
 
 ### Workspace Organization
 
-- **Root**: Contains shared `import_map.json` and workspace configuration in
-  `deno.json`
-- **Packages**: Each workspace has its own `deno.json` with name, version, and
-  exports
-- **Publishing**: All packages follow JSR publishing conventions
+- **Root**: `package.json` declares the Bun workspace (`workspaces` globs), the
+  scripts above and the dev tooling. `bunfig.toml`, `tsconfig.json`,
+  `dprint.json` and `.oxlintrc.json` configure install, type check, format and
+  lint
+- **Packages**: Each workspace has its own `package.json` with name, version,
+  exports, `files` and dependencies. It is the only file that describes the
+  package (ADR 0001)
+- **Publishing**: Every package ships to JSR as TypeScript source and to npm as
+  built JavaScript (ADR 0005, `RELEASE.md`). `jsr.json` files are generated and
+  ignored by git - never edit or commit one
 
 ### Workspaces
 
@@ -179,39 +208,39 @@ binary and domain-specific representations.
 ### Critical Rules
 
 - **NEVER** use `deps.ts` for dependency management
-- **ALL** dependencies defined in root `import_map.json`
+- A package's runtime dependencies are declared in **its own** `package.json`
+  `dependencies` (ADR 0001):
+  - sibling packages as `workspace:^`
+  - `@std/*` through the JSR alias, e.g.
+    `"@std/xml": "npm:@jsr/std__xml@^0.2.0"`
+  - npm packages as a plain range
+- Test-only dependencies (`@std/assert`, `@std/testing`, ...) live in the root
+  `package.json` `devDependencies`, which also lists every workspace package as
+  `workspace:*` so tests and JSDoc examples can import any of them by name
 - Use bare imports throughout (e.g., `@std/assert`, `@hertzg/binstruct`)
 - When **NOT** referencing public methods use `./something.ts` relative imports
-- `node:` imports are allowed
-- Import validation enforced by `deno task lint:import-map`
+- `node:` imports are allowed. `bun:` imports are not allowed in shipped source
+- Import validation enforced by `bun run lint:imports`: shipped source may
+  import only what the package's `dependencies` list, every listed dependency
+  must be used, and a relative import may not leave the package
 
 ### Updating Dependencies
 
-When updating dependency versions in `import_map.json`, the `lint:deps` check
-will fail because it uses snapshots to track dependency versions. This is
-expected behavior, not a breaking change. To fix:
+Edit the range in the `package.json` of the package that uses it, then run
+`bun install` and commit `bun.lock` with it. There is nothing else to
+regenerate.
 
-```bash
-deno run -A _tools/check_deps.ts --update
-```
+The edit sits inside `packages/<scope>/<name>/`, which is what lets Release
+Please attribute the bump to that package. It still needs a `fix` or `feat`
+commit to produce a release: a `chore` commit bumps nothing.
 
-This updates the `_deps.snap` files to reflect the new dependency versions.
-
-**Always commit the regenerated snapshots together with the `import_map.json`
-change.** They are not bookkeeping — Release Please attributes a commit to a
-package by the file paths it touches, and `import_map.json` belongs to no
-package. The snapshot diff is what places a dependency bump inside
-`packages/<scope>/<name>/`, and therefore what makes that package releasable.
-Dropping it means the bump can never ship to JSR consumers, silently. See
-ADR 0005.
-
-New dependencies must also satisfy the age policy in ADR 0011: a version
-published less than twelve hours ago will not resolve.
+New dependencies must also satisfy the age policy in ADR 0011: Bun will not
+install a version published less than twelve hours ago.
 
 ### Correct Import Patterns
 
 ```typescript ignore
-// ✅ Correct - Bare imports from import_map.json
+// ✅ Correct - Bare imports, declared in package.json
 import { assertEquals } from "@std/assert";
 import { struct } from "@hertzg/binstruct";
 
@@ -267,12 +296,15 @@ import { assertEquals } from "./deps.ts";
 
 - Examples MUST be executable and use `assert*` functions
 - **AVOID** `console.log` and comments in examples
-- Examples are tested during `deno task test`
+- Examples are run during `bun run test` (by `_tools/doctest.ts`). They are
+  run, not type-checked: a type error that still runs passes
+- A block fenced `ts ignore` is skipped
 - Use realistic data demonstrating real-world usage
 - Show both encoding and decoding operations
 - Verify data integrity with assertions
 - Use `// deno-fmt-ignore` to preserve formatting of byte arrays and binary data
-  when specific formatting aids readability
+  when specific formatting aids readability (the formatter is dprint, configured
+  in `dprint.json` to honor that comment)
 
 Example structure:
 
@@ -301,10 +333,36 @@ Example structure:
 
 ### Test Organization
 
-- Use `Deno.test()` with descriptive names
-- Group related tests logically
+- Use `test()` from `node:test` with descriptive names, and `assert*` from
+  `@std/assert`
+- Group related tests logically, with `describe`/`it` from `node:test`.
+  `@std/testing/bdd` does not work here: it calls `Deno.test`
+- `@std/testing/mock` and `@std/testing/time` work and are the way to stub and
+  fake time
 - Test positive and negative cases
 - Include edge cases and error conditions
+- `bun test` does not count `t.test()` subtests in its summary, so a file with
+  one test and ten subtests reports one test
+- Snapshots use `expect(value).toMatchSnapshot()` from `bun:test`. A test file
+  that imports `bun:test` must be added to `include` in `_tools/tsconfig.json`
+  and to `exclude` in the root `tsconfig.json`, so Bun's global types do not
+  leak into the packages
+- Packages are type-checked with `lib: ["esnext"]` and `types: ["node"]`. There
+  is no DOM lib, so DOM-only type names (`RequestInfo`, a global `CryptoKey`)
+  are not available
+
+```typescript ignore
+import { test } from "node:test";
+import { assertEquals } from "@std/assert";
+import { parse } from "@hertzg/mac";
+
+test("parse: colon-delimited", () => {
+  assertEquals(
+    parse("00:11:22:33:44:55"),
+    new Uint8Array([0x00, 0x11, 0x22, 0x33, 0x44, 0x55]),
+  );
+});
+```
 
 ### Test Categories
 
@@ -332,19 +390,20 @@ await assertRejects(async () => await asyncInvalidOperation(), SpecificError);
 ### Development Workflow
 
 1. Make code changes
-2. Run workspace-level commands for quick feedback (`deno test`, `deno lint`)
+2. Run workspace-level commands for quick feedback
+   (`bun test packages/<scope>/<name>/`, `bunx oxlint packages/<scope>/<name>`)
 3. Fix issues and iterate
 4. **Complete all code changes**
-5. **Run `deno task lint` from project root**
-6. Fix any linting issues
-7. **Run `deno task test` from project root**
+5. **Run `bun run lint` from project root**
+6. Fix any linting issues (`bun run fmt` fixes formatting)
+7. **Run `bun run test` from project root**
 8. Fix any test failures
 9. Repeat steps 5-8 until both commands pass
 10. **Only then consider the task complete**
 
 ### Quality Gates
 
-Both `deno task lint` and `deno task test` must pass before:
+Both `bun run lint` and `bun run test` must pass before:
 
 - Completing any coding task
 - Committing code changes
@@ -393,7 +452,7 @@ BREAKING CHANGE: parseIp("::ffff:192.168.1.1") now returns a number instead of b
 
 #### Valid Commit Scopes
 
-Commit scopes must match the `name` property in each workspace's `deno.json`.
+Commit scopes must match the `name` property in each workspace's `package.json`.
 The CI pipeline fails if scopes are wrong, and the only recovery is to rebase
 and reword commits—avoid this by double-checking scopes before committing.
 Currently allowed scopes:
@@ -452,7 +511,10 @@ both tiresome and error-prone.
 ## Adding New Workspaces
 
 Place the new package at `packages/<scope>/<name>/` matching its JSR coordinate
-(e.g. `packages/@hertzg/foo/` for `@hertzg/foo`). Then update:
+(e.g. `packages/@hertzg/foo/` for `@hertzg/foo`), with a `package.json` that
+has `name`, `version`, `description`, `license`, `repository`, `type: "module"`,
+`exports` (pointing at the `.ts` sources), `files` and `dependencies`. Copy a
+sibling's `package.json` as the template. Then update:
 
 1. **AGENTS.md** (this file):
    - Add the package to the per-scope list under "Workspaces"
@@ -461,20 +523,25 @@ Place the new package at `packages/<scope>/<name>/` matching its JSR coordinate
 2. **README.md**:
    - Add the new package to the table with JSR badge
 
-3. **Configuration files** (validated by `deno task lint`):
+3. **Configuration files**:
    - `.github/labeler.yml` - Add label with package name and glob pattern
      (`packages/<scope>/<name>/**`)
-   - `release-please-config.json` - Add a `packages/<scope>/<name>` entry
+   - `release-please-config.json` - Add a `packages/<scope>/<name>` entry with
+     `"release-type": "node"`
    - `.release-please-manifest.json` - Add the same key with the starting
      version
-   - `import_map.json` - Add JSR import for the package
+   - Root `package.json` - Add `"<name>": "workspace:*"` to `devDependencies`,
+     then run `bun install`, so tests and JSDoc examples can import the package
+     by name
 
-The root `deno.json` workspace field uses globs (`./packages/@binstruct/*`,
-`./packages/@hertzg/*`), so package directories are picked up automatically once
-they exist on disk — no need to list them.
+The root `package.json` `workspaces` field uses globs
+(`packages/@binstruct/*`, `packages/@hertzg/*`), so package directories are
+picked up automatically once they exist on disk — no need to list them.
 
-The lint tools `lint:labeler`, `lint:readme`, `lint:import-map`, and `lint:deps`
-will fail if these files are not updated correctly.
+The lint tools `lint:labeler` and `lint:readme` will fail if the labeler or the
+README table is not updated correctly, and `lint:imports` fails if the new
+package imports something its `package.json` does not declare. Nothing checks
+the two Release Please files: a package missing from them is never released.
 
 ## Common Patterns
 
@@ -578,9 +645,7 @@ reading the whole file.
 
 Not every agent has an LSP tool. Background subagents in particular do not — the
 tool is absent from their registry, so it cannot be loaded on demand, while
-foreground subagents load it normally. Without one, use
-`deno doc --json <files>`, where `def.params[].name` is the real signature
-identifier and `jsDoc.tags` holds the `@param` tags. This matters because
-nothing in `deno task lint` checks that a `@param` tag names a real parameter:
-`deno doc --lint` exits 0 when it does not, so a half-finished rename is
-invisible to the gate.
+foreground subagents load it normally. Without one, read the declaration itself
+and compare its parameter names with the `@param` tags by hand. This matters
+because nothing in `bun run lint` checks that a `@param` tag names a real
+parameter, so a half-finished rename is invisible to the gate.
