@@ -10,9 +10,6 @@
 "@binstruct/bmp":
   - changed-files:
       - any-glob-to-any-file: packages/@binstruct/bmp/**
-"@binstruct/cli":
-  - changed-files:
-      - any-glob-to-any-file: packages/@binstruct/cli/**
 "@binstruct/dos-mz":
   - changed-files:
       - any-glob-to-any-file: packages/@binstruct/dos-mz/**

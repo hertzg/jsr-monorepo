@@ -37,7 +37,6 @@ Source layout mirrors the JSR scope: `packages/<scope>/<name>/`.
 | [@binstruct/au](https://jsr.io/@binstruct/au)             | [![JSR](https://jsr.io/badges/@binstruct/au)](https://jsr.io/@binstruct/au)             |
 | [@binstruct/bfd](https://jsr.io/@binstruct/bfd)           | [![JSR](https://jsr.io/badges/@binstruct/bfd)](https://jsr.io/@binstruct/bfd)           |
 | [@binstruct/bmp](https://jsr.io/@binstruct/bmp)           | [![JSR](https://jsr.io/badges/@binstruct/bmp)](https://jsr.io/@binstruct/bmp)           |
-| [@binstruct/cli](https://jsr.io/@binstruct/cli)           | [![JSR](https://jsr.io/badges/@binstruct/cli)](https://jsr.io/@binstruct/cli)           |
 | [@binstruct/dos-mz](https://jsr.io/@binstruct/dos-mz)     | [![JSR](https://jsr.io/badges/@binstruct/dos-mz)](https://jsr.io/@binstruct/dos-mz)     |
 | [@binstruct/esp](https://jsr.io/@binstruct/esp)           | [![JSR](https://jsr.io/badges/@binstruct/esp)](https://jsr.io/@binstruct/esp)           |
 | [@binstruct/ethernet](https://jsr.io/@binstruct/ethernet) | [![JSR](https://jsr.io/badges/@binstruct/ethernet)](https://jsr.io/@binstruct/ethernet) |

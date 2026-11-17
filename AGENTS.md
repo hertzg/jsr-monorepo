@@ -9,7 +9,7 @@ This is a Bun workspace monorepo published to JSR (jsr.io) and npm, containing
 binary structure encoding/decoding libraries and related utilities. The core
 package is `@hertzg/binstruct`, which provides type-safe binary data
 serialization with full TypeScript support. Additional packages implement format-specific decoders
-(PNG, WAV, Ethernet) and utilities (WireGuard configuration, CLI tools).
+(PNG, WAV, Ethernet) and utilities (WireGuard configuration, device API clients).
 
 ## Essential Commands
 
@@ -33,12 +33,8 @@ Both commands must pass with exit code 0 before any task is considered complete.
 Bun runs everything here (ADR 0012). Do not run any `deno` command: there is no
 `deno.json`. Run `bun install` once after cloning.
 
-Deno survives in two places, neither of which you invoke directly:
-
-- `bun x jsr publish` downloads its own pinned Deno to do the JSR publish.
-- `@binstruct/cli` runs on Bun and Node, but its coder discovery still shells
-  out to `deno doc` when `deno` is on `PATH`. This is the current state, not a
-  decision.
+Deno survives in one place, which you never invoke directly: `bun x jsr publish`
+downloads its own pinned Deno to do the JSR publish.
 
 ### Development Commands (Workspace Level)
 
@@ -128,7 +124,6 @@ the JSR coordinate. Two scopes:
 - `au` - Sun/NeXT `.au` audio file header
 - `bfd` - BFD control packet mandatory section (RFC 5880)
 - `bmp` - BMP/DIB image file format support
-- `cli` - CLI tools for binary structure operations
 - `dos-mz` - DOS MZ executable header
 - `esp` - IPsec ESP header parsing (RFC 4303)
 - `ethernet` - Ethernet frame parsing
@@ -466,7 +461,6 @@ both tiresome and error-prone.
 - `@binstruct/au`
 - `@binstruct/bfd`
 - `@binstruct/bmp`
-- `@binstruct/cli`
 - `@binstruct/dos-mz`
 - `@binstruct/esp`
 - `@binstruct/ethernet`

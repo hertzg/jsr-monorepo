@@ -26,11 +26,6 @@
       "package-name": "@binstruct/bmp",
       "component": "@binstruct/bmp"
     },
-    "packages/@binstruct/cli": {
-      "release-type": "node",
-      "package-name": "@binstruct/cli",
-      "component": "@binstruct/cli"
-    },
     "packages/@binstruct/dos-mz": {
       "release-type": "node",
       "package-name": "@binstruct/dos-mz",
