@@ -1,7 +1,15 @@
 {
   "name": "@hertzg/ip",
   "version": "5.0.1",
+  "description": "IPv4/IPv6/CIDR utilities",
   "license": "GPL-2.0-only",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/hertzg/jsr-monorepo.git",
+    "directory": "packages/@hertzg/ip"
+  },
+  "homepage": "https://jsr.io/@hertzg/ip",
+  "bugs": "https://github.com/hertzg/jsr-monorepo/issues",
   "type": "module",
   "exports": {
     ".": "./mod.ts",
@@ -25,5 +33,23 @@
     "./arpa": "./arpa.ts",
     "./arpav4": "./arpav4.ts",
     "./arpav6": "./arpav6.ts"
+  },
+  "files": [
+    "**/*.ts",
+    "!**/*.test.ts",
+    "!adr/**",
+    "!_bench/**"
+  ],
+  "scripts": {
+    "bench": "bun ../../../_tools/bench.ts _bench"
+  },
+  "devDependencies": {
+    "cidr-tools": "^12.1.3",
+    "ip-address": "^10.5.0",
+    "ip-num": "^1.6.2",
+    "ip-regex": "^5.0.0",
+    "ipaddr.js": "^2.5.0",
+    "mitata": "^1.0.34",
+    "netmask": "^2.1.1"
   }
 }

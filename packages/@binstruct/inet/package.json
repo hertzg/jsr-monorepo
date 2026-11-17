@@ -1,11 +1,23 @@
 {
   "name": "@binstruct/inet",
   "version": "2.0.0",
+  "description": "Internet stack coder (Ethernet→IPv4→UDP/ICMP/ARP) + RFC 1071 checksum",
   "license": "GPL-2.0-only",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/hertzg/jsr-monorepo.git",
+    "directory": "packages/@binstruct/inet"
+  },
+  "homepage": "https://jsr.io/@binstruct/inet",
+  "bugs": "https://github.com/hertzg/jsr-monorepo/issues",
   "type": "module",
   "exports": {
     ".": "./mod.ts"
   },
+  "files": [
+    "**/*.ts",
+    "!**/*.test.ts"
+  ],
   "dependencies": {
     "@binstruct/arp": "workspace:^",
     "@binstruct/bfd": "workspace:^",

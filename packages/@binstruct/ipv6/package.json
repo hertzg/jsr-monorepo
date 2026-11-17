@@ -1,11 +1,23 @@
 {
   "name": "@binstruct/ipv6",
   "version": "1.0.0",
+  "description": "IPv6 fixed header parsing (RFC 8200)",
   "license": "GPL-2.0-only",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/hertzg/jsr-monorepo.git",
+    "directory": "packages/@binstruct/ipv6"
+  },
+  "homepage": "https://jsr.io/@binstruct/ipv6",
+  "bugs": "https://github.com/hertzg/jsr-monorepo/issues",
   "type": "module",
   "exports": {
     ".": "./mod.ts"
   },
+  "files": [
+    "**/*.ts",
+    "!**/*.test.ts"
+  ],
   "dependencies": {
     "@hertzg/binstruct": "workspace:^"
   }

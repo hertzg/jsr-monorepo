@@ -19,22 +19,23 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Set up Deno
-        uses: denoland/setup-deno@v2
-        with:
-          deno-version: v2.x
+      - name: Set up Bun
+        uses: oven-sh/setup-bun@v2
 
       - name: Run benchmarks on PR branch
         run: |
-          deno task bench:json > bench-pr.json 2>&1 || true
+          bun install --frozen-lockfile
+          bun run --silent bench:json > bench-pr.json || true
 
       - name: Checkout base branch
         run: |
           git checkout ${{ github.event.pull_request.base.sha }}
 
       - name: Run benchmarks on base branch
+        # A base from before the Bun migration has no lockfile or bench script.
+        # The report then shows every benchmark as new.
         run: |
-          deno task bench:json > bench-base.json 2>&1 || true
+          bun install --frozen-lockfile && bun run --silent bench:json > bench-base.json || true
 
       - name: Checkout PR branch
         run: |
@@ -43,7 +44,8 @@ jobs:
       - name: Compare benchmarks and generate report
         id: bench-diff
         run: |
-          deno run --allow-read _tools/bench_diff.ts bench-base.json bench-pr.json > bench-report.md
+          bun install --frozen-lockfile
+          bun _tools/bench_diff.ts bench-base.json bench-pr.json > bench-report.md
 
       - name: Find existing comment
         uses: peter-evans/find-comment@v4

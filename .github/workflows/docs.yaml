@@ -20,16 +20,14 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v7
 
-      - name: Set up Deno
-        uses: denoland/setup-deno@v2
-        with:
-          deno-version: v2.x
+      - name: Set up Bun
+        uses: oven-sh/setup-bun@v2
 
-      - name: Cache dependencies
-        run: deno install
+      - name: Install packages
+        run: bun install --frozen-lockfile
 
       - name: Generate docs
-        run: deno run --allow-read --allow-write --allow-run _tools/gen_docs.ts docs
+        run: bun run docs
 
       - name: Deploy main
         if: github.event_name != 'pull_request' && github.ref == 'refs/heads/main'

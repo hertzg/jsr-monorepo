@@ -1,11 +1,23 @@
 {
   "name": "@binstruct/igmp",
   "version": "1.0.0",
+  "description": "IGMPv2 message parsing (RFC 2236)",
   "license": "GPL-2.0-only",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/hertzg/jsr-monorepo.git",
+    "directory": "packages/@binstruct/igmp"
+  },
+  "homepage": "https://jsr.io/@binstruct/igmp",
+  "bugs": "https://github.com/hertzg/jsr-monorepo/issues",
   "type": "module",
   "exports": {
     ".": "./mod.ts"
   },
+  "files": [
+    "**/*.ts",
+    "!**/*.test.ts"
+  ],
   "dependencies": {
     "@hertzg/binstruct": "workspace:^"
   }

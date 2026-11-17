@@ -1,11 +1,23 @@
 {
   "name": "@binstruct/vxlan",
   "version": "0.1.0",
+  "description": "VXLAN header encoding/decoding (RFC 7348)",
   "license": "GPL-2.0-only",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/hertzg/jsr-monorepo.git",
+    "directory": "packages/@binstruct/vxlan"
+  },
+  "homepage": "https://jsr.io/@binstruct/vxlan",
+  "bugs": "https://github.com/hertzg/jsr-monorepo/issues",
   "type": "module",
   "exports": {
     ".": "./mod.ts"
   },
+  "files": [
+    "**/*.ts",
+    "!**/*.test.ts"
+  ],
   "dependencies": {
     "@hertzg/binstruct": "workspace:^"
   }

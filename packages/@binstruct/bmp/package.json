@@ -1,11 +1,23 @@
 {
   "name": "@binstruct/bmp",
   "version": "1.0.0",
+  "description": "BMP/DIB image file format support",
   "license": "GPL-2.0-only",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/hertzg/jsr-monorepo.git",
+    "directory": "packages/@binstruct/bmp"
+  },
+  "homepage": "https://jsr.io/@binstruct/bmp",
+  "bugs": "https://github.com/hertzg/jsr-monorepo/issues",
   "type": "module",
   "exports": {
     ".": "./mod.ts"
   },
+  "files": [
+    "**/*.ts",
+    "!**/*.test.ts"
+  ],
   "dependencies": {
     "@hertzg/binstruct": "workspace:^"
   }

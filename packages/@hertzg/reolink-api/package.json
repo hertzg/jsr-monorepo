@@ -1,7 +1,15 @@
 {
   "name": "@hertzg/reolink-api",
   "version": "0.1.0",
+  "description": "Reolink camera client over Baichuan (events, siren, privacy mode, snapshot, PTZ)",
   "license": "GPL-2.0-only",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/hertzg/jsr-monorepo.git",
+    "directory": "packages/@hertzg/reolink-api"
+  },
+  "homepage": "https://jsr.io/@hertzg/reolink-api",
+  "bugs": "https://github.com/hertzg/jsr-monorepo/issues",
   "type": "module",
   "exports": {
     ".": "./mod.ts",
@@ -22,6 +30,11 @@
     "./streams/decode": "./streams/decode.ts",
     "./client": "./client.ts"
   },
+  "files": [
+    "**/*.ts",
+    "!**/*.test.ts",
+    "!adr/**"
+  ],
   "dependencies": {
     "@hertzg/binstruct": "workspace:^",
     "@std/bytes": "npm:@jsr/std__bytes@^1.0.6",

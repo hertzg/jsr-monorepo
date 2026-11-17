@@ -1,7 +1,15 @@
 {
   "name": "@hertzg/binstruct",
   "version": "3.4.0",
+  "description": "Core binary structure encoding/decoding library",
   "license": "GPL-2.0-only",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/hertzg/jsr-monorepo.git",
+    "directory": "packages/@hertzg/binstruct"
+  },
+  "homepage": "https://jsr.io/@hertzg/binstruct",
+  "bugs": "https://github.com/hertzg/jsr-monorepo/issues",
   "type": "module",
   "exports": {
     ".": "./mod.ts",
@@ -16,5 +24,10 @@
     "./ref": "./ref/ref.ts",
     "./lazy": "./lazy/lazy.ts",
     "./helpers": "./helpers.ts"
-  }
+  },
+  "files": [
+    "**/*.ts",
+    "!**/*.test.ts",
+    "!adr/**"
+  ]
 }

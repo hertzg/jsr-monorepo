@@ -1,11 +1,23 @@
 {
   "name": "@binstruct/pppoe",
   "version": "0.1.0",
+  "description": "PPPoE header parsing (RFC 2516)",
   "license": "GPL-2.0-only",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/hertzg/jsr-monorepo.git",
+    "directory": "packages/@binstruct/pppoe"
+  },
+  "homepage": "https://jsr.io/@binstruct/pppoe",
+  "bugs": "https://github.com/hertzg/jsr-monorepo/issues",
   "type": "module",
   "exports": {
     ".": "./mod.ts"
   },
+  "files": [
+    "**/*.ts",
+    "!**/*.test.ts"
+  ],
   "dependencies": {
     "@hertzg/binstruct": "workspace:^"
   }

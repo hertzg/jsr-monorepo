@@ -1,11 +1,25 @@
 {
   "name": "@binstruct/png",
   "version": "0.5.0",
+  "description": "PNG file format support",
   "license": "GPL-2.0-only",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/hertzg/jsr-monorepo.git",
+    "directory": "packages/@binstruct/png"
+  },
+  "homepage": "https://jsr.io/@binstruct/png",
+  "bugs": "https://github.com/hertzg/jsr-monorepo/issues",
   "type": "module",
   "exports": {
     ".": "./mod.ts"
   },
+  "files": [
+    "**/*.ts",
+    "!**/*.test.ts",
+    "!adr/**",
+    "!pngsuite/**"
+  ],
   "dependencies": {
     "@hertzg/binstruct": "workspace:^",
     "@hertzg/crc": "workspace:^",

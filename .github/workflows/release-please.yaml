@@ -8,6 +8,7 @@ on:
 permissions:
   contents: write
   pull-requests: write
+  # OIDC: JSR and npm both trust this workflow instead of a stored token.
   id-token: write
 
 jobs:
@@ -27,34 +28,53 @@ jobs:
           config-file: release-please-config.json
           manifest-file: .release-please-manifest.json
 
-      # When the release PR is created/updated, sync import_map.json
-      # to match the bumped package versions
-      - if: ${{ steps.release.outputs.pr }}
+      # Everything below runs only when a release PR was merged.
+      - if: ${{ steps.release.outputs.releases_created == 'true' }}
         uses: actions/checkout@v7
+
+      - if: ${{ steps.release.outputs.releases_created == 'true' }}
+        uses: oven-sh/setup-bun@v2
+
+      # npm 11.5.1 or newer is what speaks trusted publishing.
+      - if: ${{ steps.release.outputs.releases_created == 'true' }}
+        uses: actions/setup-node@v6
         with:
-          ref: ${{ fromJSON(steps.release.outputs.pr).headBranchName }}
-          token: ${{ steps.app-token.outputs.token }}
+          node-version: 24
+          registry-url: https://registry.npmjs.org
 
-      - if: ${{ steps.release.outputs.pr }}
-        uses: denoland/setup-deno@v2
+      - if: ${{ steps.release.outputs.releases_created == 'true' }}
+        run: bun install --frozen-lockfile
 
-      - if: ${{ steps.release.outputs.pr }}
-        run: deno run -A _tools/sync_import_map.ts
-
-      - if: ${{ steps.release.outputs.pr }}
+      # JSR gets the TypeScript source. The jsr CLI downloads its own Deno
+      # and skips every version that is already published.
+      - if: ${{ steps.release.outputs.releases_created == 'true' }}
+        name: Publish to JSR
         run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add import_map.json
-          git diff --staged --quiet || git commit -m "chore: sync import_map.json versions"
-          git push
+          bun _tools/build_jsr.ts
+          bun x jsr publish
 
-      # When releases are created, publish to JSR
+      # npm gets built JavaScript and declarations. `bun pm pack` makes the
+      # tarball and `npm publish` uploads it: only the npm CLI can publish
+      # through OIDC and attach provenance. Versions already on npm are
+      # skipped, so a re-run after a partial failure finishes the job.
+      #
+      # NPM_TOKEN is only for the first publish of a package: npm lets a
+      # trusted publisher be set up on a package that already exists, not
+      # before. Delete the secret once every package has one.
       - if: ${{ steps.release.outputs.releases_created == 'true' }}
-        uses: actions/checkout@v7
-
-      - if: ${{ steps.release.outputs.releases_created == 'true' }}
-        uses: denoland/setup-deno@v2
-
-      - if: ${{ steps.release.outputs.releases_created == 'true' }}
-        run: deno publish
+        name: Publish to npm
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+        run: |
+          bun _tools/build_npm.ts
+          mkdir -p dist/tarballs
+          for dir in dist/@*/*/; do
+            name=$(jq -r .name "$dir/package.json")
+            version=$(jq -r .version "$dir/package.json")
+            if npm view "$name@$version" version > /dev/null 2>&1; then
+              echo "skip $name@$version: already published"
+              continue
+            fi
+            tarball=$(cd "$dir" && bun pm pack --quiet --destination "$GITHUB_WORKSPACE/dist/tarballs" | tail -n 1)
+            npm publish "$tarball" --access public --provenance
+          done

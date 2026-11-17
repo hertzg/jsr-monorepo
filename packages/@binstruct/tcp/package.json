@@ -1,11 +1,23 @@
 {
   "name": "@binstruct/tcp",
   "version": "0.2.0",
+  "description": "TCP segment parsing (RFC 9293)",
   "license": "GPL-2.0-only",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/hertzg/jsr-monorepo.git",
+    "directory": "packages/@binstruct/tcp"
+  },
+  "homepage": "https://jsr.io/@binstruct/tcp",
+  "bugs": "https://github.com/hertzg/jsr-monorepo/issues",
   "type": "module",
   "exports": {
     ".": "./mod.ts"
   },
+  "files": [
+    "**/*.ts",
+    "!**/*.test.ts"
+  ],
   "dependencies": {
     "@hertzg/binstruct": "workspace:^"
   }

@@ -1,4 +1,3 @@
-deno.lock
 cov/
 docs/*
 !docs/agents/
@@ -16,4 +15,7 @@ codecov.SHA256SUM.sig
 
 # bun
 node_modules/
+
+# build output: npm packages (_tools/build_npm.ts), JSR config (_tools/build_jsr.ts)
 dist/
+packages/*/*/jsr.json

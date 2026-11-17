@@ -1,11 +1,23 @@
 {
   "name": "@binstruct/tar",
   "version": "0.1.0",
+  "description": "POSIX ustar tar archive header",
   "license": "GPL-2.0-only",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/hertzg/jsr-monorepo.git",
+    "directory": "packages/@binstruct/tar"
+  },
+  "homepage": "https://jsr.io/@binstruct/tar",
+  "bugs": "https://github.com/hertzg/jsr-monorepo/issues",
   "type": "module",
   "exports": {
     ".": "./mod.ts"
   },
+  "files": [
+    "**/*.ts",
+    "!**/*.test.ts"
+  ],
   "dependencies": {
     "@hertzg/binstruct": "workspace:^"
   }

@@ -1,11 +1,23 @@
 {
   "name": "@binstruct/sqlite",
   "version": "0.1.0",
+  "description": "SQLite database file header parsing",
   "license": "GPL-2.0-only",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/hertzg/jsr-monorepo.git",
+    "directory": "packages/@binstruct/sqlite"
+  },
+  "homepage": "https://jsr.io/@binstruct/sqlite",
+  "bugs": "https://github.com/hertzg/jsr-monorepo/issues",
   "type": "module",
   "exports": {
     ".": "./mod.ts"
   },
+  "files": [
+    "**/*.ts",
+    "!**/*.test.ts"
+  ],
   "dependencies": {
     "@hertzg/binstruct": "workspace:^"
   }

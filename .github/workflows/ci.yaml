@@ -16,8 +16,8 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        deno:
-          - v2.x
+        bun:
+          - latest
         os:
           - ubuntu-latest
 
@@ -25,32 +25,49 @@ jobs:
       - name: Clone repository
         uses: actions/checkout@v7
 
-      - name: Set up Deno
-        uses: denoland/setup-deno@v2
+      - name: Set up Bun
+        uses: oven-sh/setup-bun@v2
         with:
-          deno-version: ${{ matrix.deno }}
+          bun-version: ${{ matrix.bun }}
+
+      # The npm verification installs with npm and imports under node.
+      - name: Set up Node
+        uses: actions/setup-node@v6
+        with:
+          node-version: 24
 
       - name: Install dependencies
         run: sudo apt-get install -y wireguard-tools
         if: ${{ matrix.os == 'ubuntu-latest' }}
 
-      - name: Publish dry run
-        run: deno publish --dry-run
+      - name: Install packages
+        run: bun install --frozen-lockfile
+
+      - name: Publish dry run (JSR)
+        run: |
+          bun _tools/build_jsr.ts
+          bun x jsr publish --dry-run
+
+      - name: Publish dry run (npm)
+        run: |
+          bun _tools/build_npm.ts
+          bun _tools/verify_npm.ts
 
       - name: Run tests
         run: |
-          deno task test
+          bun run test
 
-      - name: Generate lcov and html reports
+      - name: Generate lcov report
         run: |
-          deno task cov:gen
+          bun run cov:gen
 
       - name: Upload coverage
         uses: codecov/codecov-action@v7
         env:
           CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
         with:
-          name: ${{ matrix.os }}-${{ matrix.deno }}
+          name: ${{ matrix.os }}-bun-${{ matrix.bun }}
+          files: cov/lcov.info
 
   lint:
     runs-on: ${{ matrix.os }}
@@ -66,8 +83,11 @@ jobs:
         with:
           persist-credentials: false
 
-      - name: Set up Deno
-        uses: denoland/setup-deno@v2
+      - name: Set up Bun
+        uses: oven-sh/setup-bun@v2
+
+      - name: Install packages
+        run: bun install --frozen-lockfile
 
       - name: Lint
-        run: deno task lint
+        run: bun run lint

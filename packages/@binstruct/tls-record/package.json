@@ -1,11 +1,23 @@
 {
   "name": "@binstruct/tls-record",
   "version": "0.1.0",
+  "description": "TLS record layer header parsing (RFC 8446 section 5.1)",
   "license": "GPL-2.0-only",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/hertzg/jsr-monorepo.git",
+    "directory": "packages/@binstruct/tls-record"
+  },
+  "homepage": "https://jsr.io/@binstruct/tls-record",
+  "bugs": "https://github.com/hertzg/jsr-monorepo/issues",
   "type": "module",
   "exports": {
     ".": "./mod.ts"
   },
+  "files": [
+    "**/*.ts",
+    "!**/*.test.ts"
+  ],
   "dependencies": {
     "@hertzg/binstruct": "workspace:^"
   }

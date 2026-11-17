@@ -1,14 +1,33 @@
 {
   "name": "@hertzg/tplink-api",
   "version": "1.5.0",
+  "description": "TP-Link Router API client",
   "license": "GPL-2.0-only",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/hertzg/jsr-monorepo.git",
+    "directory": "packages/@hertzg/tplink-api"
+  },
+  "homepage": "https://jsr.io/@hertzg/tplink-api",
+  "bugs": "https://github.com/hertzg/jsr-monorepo/issues",
   "type": "module",
   "exports": {
     ".": "./mod.ts",
     "./dialect": "./dialect/mod.ts"
   },
+  "files": [
+    "**/*.ts",
+    "!**/*.test.ts",
+    "!**/*.bench.ts"
+  ],
+  "scripts": {
+    "bench": "bun ../../../_tools/bench.ts client/cipher"
+  },
   "dependencies": {
-    "@noble/ciphers": "npm:@jsr/noble__ciphers@^2.1.1",
-    "@noble/hashes": "npm:@jsr/noble__hashes@^2.0.1"
+    "@noble/ciphers": "^2.1.1",
+    "@noble/hashes": "^2.0.1"
+  },
+  "devDependencies": {
+    "mitata": "^1.0.34"
   }
 }

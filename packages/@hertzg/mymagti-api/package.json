@@ -1,10 +1,22 @@
 {
   "name": "@hertzg/mymagti-api",
   "version": "0.1.2",
+  "description": "MyMagti API client",
   "license": "GPL-2.0-only",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/hertzg/jsr-monorepo.git",
+    "directory": "packages/@hertzg/mymagti-api"
+  },
+  "homepage": "https://jsr.io/@hertzg/mymagti-api",
+  "bugs": "https://github.com/hertzg/jsr-monorepo/issues",
   "type": "module",
   "exports": {
     ".": "./mod.ts",
     "./oauth": "./oauth/oauth.ts"
-  }
+  },
+  "files": [
+    "**/*.ts",
+    "!**/*.test.ts"
+  ]
 }

@@ -2,374 +2,236 @@
   "bootstrap-sha": "2f85f9e8786fa6fad0fe9d64119cd3bdb91441d7",
   "packages": {
     "packages/@hertzg/binstruct": {
-      "release-type": "simple",
+      "release-type": "node",
       "package-name": "@hertzg/binstruct",
-      "component": "@hertzg/binstruct",
-      "extra-files": [
-        { "type": "json", "path": "deno.json", "jsonpath": "$.version" }
-      ]
+      "component": "@hertzg/binstruct"
     },
     "packages/@binstruct/arp": {
-      "release-type": "simple",
+      "release-type": "node",
       "package-name": "@binstruct/arp",
-      "component": "@binstruct/arp",
-      "extra-files": [
-        { "type": "json", "path": "deno.json", "jsonpath": "$.version" }
-      ]
+      "component": "@binstruct/arp"
     },
     "packages/@binstruct/au": {
-      "release-type": "simple",
+      "release-type": "node",
       "package-name": "@binstruct/au",
-      "component": "@binstruct/au",
-      "extra-files": [
-        { "type": "json", "path": "deno.json", "jsonpath": "$.version" }
-      ]
+      "component": "@binstruct/au"
     },
     "packages/@binstruct/bfd": {
-      "release-type": "simple",
+      "release-type": "node",
       "package-name": "@binstruct/bfd",
-      "component": "@binstruct/bfd",
-      "extra-files": [
-        { "type": "json", "path": "deno.json", "jsonpath": "$.version" }
-      ]
+      "component": "@binstruct/bfd"
     },
     "packages/@binstruct/bmp": {
-      "release-type": "simple",
+      "release-type": "node",
       "package-name": "@binstruct/bmp",
-      "component": "@binstruct/bmp",
-      "extra-files": [
-        { "type": "json", "path": "deno.json", "jsonpath": "$.version" }
-      ]
+      "component": "@binstruct/bmp"
     },
     "packages/@binstruct/cli": {
-      "release-type": "simple",
+      "release-type": "node",
       "package-name": "@binstruct/cli",
-      "component": "@binstruct/cli",
-      "extra-files": [
-        { "type": "json", "path": "deno.json", "jsonpath": "$.version" }
-      ]
+      "component": "@binstruct/cli"
     },
     "packages/@binstruct/dos-mz": {
-      "release-type": "simple",
+      "release-type": "node",
       "package-name": "@binstruct/dos-mz",
-      "component": "@binstruct/dos-mz",
-      "extra-files": [
-        { "type": "json", "path": "deno.json", "jsonpath": "$.version" }
-      ]
+      "component": "@binstruct/dos-mz"
     },
     "packages/@binstruct/esp": {
-      "release-type": "simple",
+      "release-type": "node",
       "package-name": "@binstruct/esp",
-      "component": "@binstruct/esp",
-      "extra-files": [
-        { "type": "json", "path": "deno.json", "jsonpath": "$.version" }
-      ]
+      "component": "@binstruct/esp"
     },
     "packages/@binstruct/ethernet": {
-      "release-type": "simple",
+      "release-type": "node",
       "package-name": "@binstruct/ethernet",
-      "component": "@binstruct/ethernet",
-      "extra-files": [
-        { "type": "json", "path": "deno.json", "jsonpath": "$.version" }
-      ]
+      "component": "@binstruct/ethernet"
     },
     "packages/@binstruct/icmp": {
-      "release-type": "simple",
+      "release-type": "node",
       "package-name": "@binstruct/icmp",
-      "component": "@binstruct/icmp",
-      "extra-files": [
-        { "type": "json", "path": "deno.json", "jsonpath": "$.version" }
-      ]
+      "component": "@binstruct/icmp"
     },
     "packages/@binstruct/icmpv6": {
-      "release-type": "simple",
+      "release-type": "node",
       "package-name": "@binstruct/icmpv6",
-      "component": "@binstruct/icmpv6",
-      "extra-files": [
-        { "type": "json", "path": "deno.json", "jsonpath": "$.version" }
-      ]
+      "component": "@binstruct/icmpv6"
     },
     "packages/@binstruct/ico": {
-      "release-type": "simple",
+      "release-type": "node",
       "package-name": "@binstruct/ico",
-      "component": "@binstruct/ico",
-      "extra-files": [
-        { "type": "json", "path": "deno.json", "jsonpath": "$.version" }
-      ]
+      "component": "@binstruct/ico"
     },
     "packages/@binstruct/igmp": {
-      "release-type": "simple",
+      "release-type": "node",
       "package-name": "@binstruct/igmp",
-      "component": "@binstruct/igmp",
-      "extra-files": [
-        { "type": "json", "path": "deno.json", "jsonpath": "$.version" }
-      ]
+      "component": "@binstruct/igmp"
     },
     "packages/@binstruct/inet": {
-      "release-type": "simple",
+      "release-type": "node",
       "package-name": "@binstruct/inet",
-      "component": "@binstruct/inet",
-      "extra-files": [
-        { "type": "json", "path": "deno.json", "jsonpath": "$.version" }
-      ]
+      "component": "@binstruct/inet"
     },
     "packages/@binstruct/ipv4": {
-      "release-type": "simple",
+      "release-type": "node",
       "package-name": "@binstruct/ipv4",
-      "component": "@binstruct/ipv4",
-      "extra-files": [
-        { "type": "json", "path": "deno.json", "jsonpath": "$.version" }
-      ]
+      "component": "@binstruct/ipv4"
     },
     "packages/@binstruct/ipv6": {
-      "release-type": "simple",
+      "release-type": "node",
       "package-name": "@binstruct/ipv6",
-      "component": "@binstruct/ipv6",
-      "extra-files": [
-        { "type": "json", "path": "deno.json", "jsonpath": "$.version" }
-      ]
+      "component": "@binstruct/ipv6"
     },
     "packages/@binstruct/mbr": {
-      "release-type": "simple",
+      "release-type": "node",
       "package-name": "@binstruct/mbr",
-      "component": "@binstruct/mbr",
-      "extra-files": [
-        { "type": "json", "path": "deno.json", "jsonpath": "$.version" }
-      ]
+      "component": "@binstruct/mbr"
     },
     "packages/@binstruct/mp3": {
-      "release-type": "simple",
+      "release-type": "node",
       "package-name": "@binstruct/mp3",
-      "component": "@binstruct/mp3",
-      "extra-files": [
-        { "type": "json", "path": "deno.json", "jsonpath": "$.version" }
-      ]
+      "component": "@binstruct/mp3"
     },
     "packages/@binstruct/ntp": {
-      "release-type": "simple",
+      "release-type": "node",
       "package-name": "@binstruct/ntp",
-      "component": "@binstruct/ntp",
-      "extra-files": [
-        { "type": "json", "path": "deno.json", "jsonpath": "$.version" }
-      ]
+      "component": "@binstruct/ntp"
     },
     "packages/@binstruct/pcap": {
-      "release-type": "simple",
+      "release-type": "node",
       "package-name": "@binstruct/pcap",
-      "component": "@binstruct/pcap",
-      "extra-files": [
-        { "type": "json", "path": "deno.json", "jsonpath": "$.version" }
-      ]
+      "component": "@binstruct/pcap"
     },
     "packages/@binstruct/png": {
-      "release-type": "simple",
+      "release-type": "node",
       "package-name": "@binstruct/png",
-      "component": "@binstruct/png",
-      "extra-files": [
-        { "type": "json", "path": "deno.json", "jsonpath": "$.version" }
-      ]
+      "component": "@binstruct/png"
     },
     "packages/@binstruct/pppoe": {
-      "release-type": "simple",
+      "release-type": "node",
       "package-name": "@binstruct/pppoe",
-      "component": "@binstruct/pppoe",
-      "extra-files": [
-        { "type": "json", "path": "deno.json", "jsonpath": "$.version" }
-      ]
+      "component": "@binstruct/pppoe"
     },
     "packages/@binstruct/rtp": {
-      "release-type": "simple",
+      "release-type": "node",
       "package-name": "@binstruct/rtp",
-      "component": "@binstruct/rtp",
-      "extra-files": [
-        { "type": "json", "path": "deno.json", "jsonpath": "$.version" }
-      ]
+      "component": "@binstruct/rtp"
     },
     "packages/@binstruct/sll": {
-      "release-type": "simple",
+      "release-type": "node",
       "package-name": "@binstruct/sll",
-      "component": "@binstruct/sll",
-      "extra-files": [
-        { "type": "json", "path": "deno.json", "jsonpath": "$.version" }
-      ]
+      "component": "@binstruct/sll"
     },
     "packages/@binstruct/sqlite": {
-      "release-type": "simple",
+      "release-type": "node",
       "package-name": "@binstruct/sqlite",
-      "component": "@binstruct/sqlite",
-      "extra-files": [
-        { "type": "json", "path": "deno.json", "jsonpath": "$.version" }
-      ]
+      "component": "@binstruct/sqlite"
     },
     "packages/@binstruct/tar": {
-      "release-type": "simple",
+      "release-type": "node",
       "package-name": "@binstruct/tar",
-      "component": "@binstruct/tar",
-      "extra-files": [
-        { "type": "json", "path": "deno.json", "jsonpath": "$.version" }
-      ]
+      "component": "@binstruct/tar"
     },
     "packages/@binstruct/tcp": {
-      "release-type": "simple",
+      "release-type": "node",
       "package-name": "@binstruct/tcp",
-      "component": "@binstruct/tcp",
-      "extra-files": [
-        { "type": "json", "path": "deno.json", "jsonpath": "$.version" }
-      ]
+      "component": "@binstruct/tcp"
     },
     "packages/@binstruct/tga": {
-      "release-type": "simple",
+      "release-type": "node",
       "package-name": "@binstruct/tga",
-      "component": "@binstruct/tga",
-      "extra-files": [
-        { "type": "json", "path": "deno.json", "jsonpath": "$.version" }
-      ]
+      "component": "@binstruct/tga"
     },
     "packages/@binstruct/tls-record": {
-      "release-type": "simple",
+      "release-type": "node",
       "package-name": "@binstruct/tls-record",
-      "component": "@binstruct/tls-record",
-      "extra-files": [
-        { "type": "json", "path": "deno.json", "jsonpath": "$.version" }
-      ]
+      "component": "@binstruct/tls-record"
     },
     "packages/@binstruct/udp": {
-      "release-type": "simple",
+      "release-type": "node",
       "package-name": "@binstruct/udp",
-      "component": "@binstruct/udp",
-      "extra-files": [
-        { "type": "json", "path": "deno.json", "jsonpath": "$.version" }
-      ]
+      "component": "@binstruct/udp"
     },
     "packages/@binstruct/vlan": {
-      "release-type": "simple",
+      "release-type": "node",
       "package-name": "@binstruct/vlan",
-      "component": "@binstruct/vlan",
-      "extra-files": [
-        { "type": "json", "path": "deno.json", "jsonpath": "$.version" }
-      ]
+      "component": "@binstruct/vlan"
     },
     "packages/@binstruct/vxlan": {
-      "release-type": "simple",
+      "release-type": "node",
       "package-name": "@binstruct/vxlan",
-      "component": "@binstruct/vxlan",
-      "extra-files": [
-        { "type": "json", "path": "deno.json", "jsonpath": "$.version" }
-      ]
+      "component": "@binstruct/vxlan"
     },
     "packages/@binstruct/wav": {
-      "release-type": "simple",
+      "release-type": "node",
       "package-name": "@binstruct/wav",
-      "component": "@binstruct/wav",
-      "extra-files": [
-        { "type": "json", "path": "deno.json", "jsonpath": "$.version" }
-      ]
+      "component": "@binstruct/wav"
     },
     "packages/@hertzg/bx": {
-      "release-type": "simple",
+      "release-type": "node",
       "package-name": "@hertzg/bx",
-      "component": "@hertzg/bx",
-      "extra-files": [
-        { "type": "json", "path": "deno.json", "jsonpath": "$.version" }
-      ]
+      "component": "@hertzg/bx"
     },
     "packages/@hertzg/crc": {
-      "release-type": "simple",
+      "release-type": "node",
       "package-name": "@hertzg/crc",
-      "component": "@hertzg/crc",
-      "extra-files": [
-        { "type": "json", "path": "deno.json", "jsonpath": "$.version" }
-      ]
+      "component": "@hertzg/crc"
     },
     "packages/@hertzg/ip": {
-      "release-type": "simple",
+      "release-type": "node",
       "package-name": "@hertzg/ip",
-      "component": "@hertzg/ip",
-      "extra-files": [
-        { "type": "json", "path": "deno.json", "jsonpath": "$.version" }
-      ]
+      "component": "@hertzg/ip"
     },
     "packages/@hertzg/mac": {
-      "release-type": "simple",
+      "release-type": "node",
       "package-name": "@hertzg/mac",
-      "component": "@hertzg/mac",
-      "extra-files": [
-        { "type": "json", "path": "deno.json", "jsonpath": "$.version" }
-      ]
+      "component": "@hertzg/mac"
     },
     "packages/@hertzg/mymagti-api": {
-      "release-type": "simple",
+      "release-type": "node",
       "package-name": "@hertzg/mymagti-api",
-      "component": "@hertzg/mymagti-api",
-      "extra-files": [
-        { "type": "json", "path": "deno.json", "jsonpath": "$.version" }
-      ]
+      "component": "@hertzg/mymagti-api"
     },
     "packages/@hertzg/hikvision-api": {
-      "release-type": "simple",
+      "release-type": "node",
       "package-name": "@hertzg/hikvision-api",
       "component": "@hertzg/hikvision-api",
       "bump-minor-pre-major": true,
-      "bump-patch-for-minor-pre-major": true,
-      "extra-files": [
-        { "type": "json", "path": "deno.json", "jsonpath": "$.version" }
-      ]
+      "bump-patch-for-minor-pre-major": true
     },
     "packages/@hertzg/reolink-api": {
-      "release-type": "simple",
+      "release-type": "node",
       "package-name": "@hertzg/reolink-api",
-      "component": "@hertzg/reolink-api",
-      "extra-files": [
-        { "type": "json", "path": "deno.json", "jsonpath": "$.version" }
-      ]
+      "component": "@hertzg/reolink-api"
     },
     "packages/@hertzg/routeros-api": {
-      "release-type": "simple",
+      "release-type": "node",
       "package-name": "@hertzg/routeros-api",
-      "component": "@hertzg/routeros-api",
-      "extra-files": [
-        { "type": "json", "path": "deno.json", "jsonpath": "$.version" }
-      ]
+      "component": "@hertzg/routeros-api"
     },
     "packages/@hertzg/tplink-api": {
-      "release-type": "simple",
+      "release-type": "node",
       "package-name": "@hertzg/tplink-api",
-      "component": "@hertzg/tplink-api",
-      "extra-files": [
-        { "type": "json", "path": "deno.json", "jsonpath": "$.version" }
-      ]
+      "component": "@hertzg/tplink-api"
     },
     "packages/@hertzg/wg-conf": {
-      "release-type": "simple",
+      "release-type": "node",
       "package-name": "@hertzg/wg-conf",
-      "component": "@hertzg/wg-conf",
-      "extra-files": [
-        { "type": "json", "path": "deno.json", "jsonpath": "$.version" }
-      ]
+      "component": "@hertzg/wg-conf"
     },
     "packages/@hertzg/wg-ini": {
-      "release-type": "simple",
+      "release-type": "node",
       "package-name": "@hertzg/wg-ini",
-      "component": "@hertzg/wg-ini",
-      "extra-files": [
-        { "type": "json", "path": "deno.json", "jsonpath": "$.version" }
-      ]
+      "component": "@hertzg/wg-ini"
     },
     "packages/@hertzg/wg-keys": {
-      "release-type": "simple",
+      "release-type": "node",
       "package-name": "@hertzg/wg-keys",
-      "component": "@hertzg/wg-keys",
-      "extra-files": [
-        { "type": "json", "path": "deno.json", "jsonpath": "$.version" }
-      ]
+      "component": "@hertzg/wg-keys"
     },
     "packages/@hertzg/xhb": {
-      "release-type": "simple",
+      "release-type": "node",
       "package-name": "@hertzg/xhb",
-      "component": "@hertzg/xhb",
-      "extra-files": [
-        { "type": "json", "path": "deno.json", "jsonpath": "$.version" }
-      ]
+      "component": "@hertzg/xhb"
     }
   }
 }

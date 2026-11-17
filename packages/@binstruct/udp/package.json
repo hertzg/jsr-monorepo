@@ -1,11 +1,23 @@
 {
   "name": "@binstruct/udp",
   "version": "1.1.0",
+  "description": "UDP datagram parsing (RFC 768)",
   "license": "GPL-2.0-only",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/hertzg/jsr-monorepo.git",
+    "directory": "packages/@binstruct/udp"
+  },
+  "homepage": "https://jsr.io/@binstruct/udp",
+  "bugs": "https://github.com/hertzg/jsr-monorepo/issues",
   "type": "module",
   "exports": {
     ".": "./mod.ts"
   },
+  "files": [
+    "**/*.ts",
+    "!**/*.test.ts"
+  ],
   "dependencies": {
     "@hertzg/binstruct": "workspace:^"
   }

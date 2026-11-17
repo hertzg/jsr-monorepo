@@ -1,13 +1,25 @@
 {
   "name": "@hertzg/wg-ini",
   "version": "0.2.4",
+  "description": "INI file parsing",
   "license": "GPL-2.0-only",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/hertzg/jsr-monorepo.git",
+    "directory": "packages/@hertzg/wg-ini"
+  },
+  "homepage": "https://jsr.io/@hertzg/wg-ini",
+  "bugs": "https://github.com/hertzg/jsr-monorepo/issues",
   "type": "module",
   "exports": {
     ".": "./mod.ts",
     "./lines": "./lines.ts",
     "./sections": "./sections.ts"
   },
+  "files": [
+    "**/*.ts",
+    "!**/*.test.ts"
+  ],
   "dependencies": {
     "@std/streams": "npm:@jsr/std__streams@^1.0.16"
   }

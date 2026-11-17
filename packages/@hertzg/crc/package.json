@@ -1,7 +1,15 @@
 {
   "name": "@hertzg/crc",
   "version": "0.3.1",
+  "description": "CRC checksum utilities",
   "license": "GPL-2.0-only",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/hertzg/jsr-monorepo.git",
+    "directory": "packages/@hertzg/crc"
+  },
+  "homepage": "https://jsr.io/@hertzg/crc",
+  "bugs": "https://github.com/hertzg/jsr-monorepo/issues",
   "type": "module",
   "exports": {
     ".": "./mod.ts",
@@ -10,6 +18,10 @@
     "./crc32": "./crc32.ts",
     "./crc64": "./crc64.ts"
   },
+  "files": [
+    "**/*.ts",
+    "!**/*.test.ts"
+  ],
   "dependencies": {
     "@std/cache": "npm:@jsr/std__cache@^0.2.1"
   }

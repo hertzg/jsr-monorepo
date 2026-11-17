@@ -1,11 +1,25 @@
 {
   "name": "@binstruct/pcap",
   "version": "1.0.0",
+  "description": "libpcap (.pcap) capture file format support",
   "license": "GPL-2.0-only",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/hertzg/jsr-monorepo.git",
+    "directory": "packages/@binstruct/pcap"
+  },
+  "homepage": "https://jsr.io/@binstruct/pcap",
+  "bugs": "https://github.com/hertzg/jsr-monorepo/issues",
   "type": "module",
   "exports": {
     ".": "./mod.ts"
   },
+  "files": [
+    "**/*.ts",
+    "!**/*.test.ts",
+    "!adr/**",
+    "!_fixtures/**"
+  ],
   "dependencies": {
     "@hertzg/binstruct": "workspace:^"
   }

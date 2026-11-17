@@ -1,11 +1,23 @@
 {
   "name": "@binstruct/ethernet",
   "version": "1.1.0",
+  "description": "Ethernet frame parsing",
   "license": "GPL-2.0-only",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/hertzg/jsr-monorepo.git",
+    "directory": "packages/@binstruct/ethernet"
+  },
+  "homepage": "https://jsr.io/@binstruct/ethernet",
+  "bugs": "https://github.com/hertzg/jsr-monorepo/issues",
   "type": "module",
   "exports": {
     ".": "./mod.ts"
   },
+  "files": [
+    "**/*.ts",
+    "!**/*.test.ts"
+  ],
   "dependencies": {
     "@hertzg/binstruct": "workspace:^"
   }

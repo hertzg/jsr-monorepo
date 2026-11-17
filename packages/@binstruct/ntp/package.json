@@ -1,11 +1,23 @@
 {
   "name": "@binstruct/ntp",
   "version": "0.1.0",
+  "description": "NTPv4 packet header parsing (RFC 5905)",
   "license": "GPL-2.0-only",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/hertzg/jsr-monorepo.git",
+    "directory": "packages/@binstruct/ntp"
+  },
+  "homepage": "https://jsr.io/@binstruct/ntp",
+  "bugs": "https://github.com/hertzg/jsr-monorepo/issues",
   "type": "module",
   "exports": {
     ".": "./mod.ts"
   },
+  "files": [
+    "**/*.ts",
+    "!**/*.test.ts"
+  ],
   "dependencies": {
     "@hertzg/binstruct": "workspace:^"
   }
