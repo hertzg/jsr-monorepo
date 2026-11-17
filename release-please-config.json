@@ -331,6 +331,14 @@
         { "type": "json", "path": "deno.json", "jsonpath": "$.version" }
       ]
     },
+    "packages/@hertzg/rtsp": {
+      "release-type": "simple",
+      "package-name": "@hertzg/rtsp",
+      "component": "@hertzg/rtsp",
+      "extra-files": [
+        { "type": "json", "path": "deno.json", "jsonpath": "$.version" }
+      ]
+    },
     "packages/@hertzg/tplink-api": {
       "release-type": "simple",
       "package-name": "@hertzg/tplink-api",
