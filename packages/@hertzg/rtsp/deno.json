@@ -3,7 +3,11 @@
   "version": "0.0.1",
   "exports": {
     ".": "./mod.ts",
-    "./encoding/interleaved": "./encoding/interleaved.ts"
+    "./encoding/interleaved": "./encoding/interleaved.ts",
+    "./encoding/message": "./encoding/message.ts",
+    "./protocol/request": "./protocol/request.ts",
+    "./protocol/response": "./protocol/response.ts",
+    "./protocol/message": "./protocol/message.ts"
   },
   "publish": {
     "exclude": [
