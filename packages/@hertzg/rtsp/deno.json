@@ -2,7 +2,8 @@
   "name": "@hertzg/rtsp",
   "version": "0.0.1",
   "exports": {
-    ".": "./mod.ts"
+    ".": "./mod.ts",
+    "./encoding/interleaved": "./encoding/interleaved.ts"
   },
   "publish": {
     "exclude": [
