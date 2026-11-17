@@ -12,7 +12,7 @@
  *
  * const response = parseResponse({
  *   startLine: "RTSP/2.0 404 Not Found",
- *   headerFields: new Headers({ "CSeq": "3" }),
+ *   headerFields: [["CSeq", "3"]],
  *   messageBody: new Uint8Array(0),
  * });
  *
@@ -25,7 +25,7 @@
  * @module
  */
 
-import type { MessageFrame } from "../encoding/message.ts";
+import type { HeaderField, MessageFrame } from "../encoding/message.ts";
 
 /** An RTSP response. */
 export type RtspResponse = {
@@ -35,8 +35,12 @@ export type RtspResponse = {
   statusCode: number;
   /** The text after the Status-Code. It may hold spaces and may be empty. */
   reasonPhrase: string;
-  /** The header fields. */
-  headers: Headers;
+  /**
+   * The header fields, one pair per line, in the order of the lines and with
+   * each name as written. `new Headers(response.headers)` looks a name up
+   * whatever its case.
+   */
+  headers: HeaderField[];
   /** The message body, empty when there is none. */
   messageBody: Uint8Array;
 };
@@ -59,14 +63,14 @@ export type RtspResponse = {
  *
  * const response = parseResponse({
  *   startLine: "RTSP/2.0 100 Continue",
- *   headerFields: new Headers({ "CSeq": "7" }),
+ *   headerFields: [["CSeq", "7"]],
  *   messageBody: new Uint8Array(0),
  * });
  *
  * assertEquals(response.rtspVersion, "RTSP/2.0");
  * assertEquals(response.statusCode, 100);
  * assertEquals(response.reasonPhrase, "Continue");
- * assertEquals(response.headers.get("CSeq"), "7");
+ * assertEquals(response.headers, [["CSeq", "7"]]);
  * ```
  */
 export function parseResponse(frame: MessageFrame): RtspResponse {
@@ -99,12 +103,12 @@ export function parseResponse(frame: MessageFrame): RtspResponse {
  *   rtspVersion: "RTSP/2.0",
  *   statusCode: 501,
  *   reasonPhrase: "Not Implemented",
- *   headers: new Headers({ "CSeq": "9" }),
+ *   headers: [["CSeq", "9"]],
  *   messageBody: new Uint8Array(0),
  * });
  *
  * assertEquals(frame.startLine, "RTSP/2.0 501 Not Implemented");
- * assertEquals(frame.headerFields.get("CSeq"), "9");
+ * assertEquals(frame.headerFields, [["CSeq", "9"]]);
  * ```
  */
 export function serializeResponse(response: RtspResponse): MessageFrame {

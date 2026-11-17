@@ -10,7 +10,7 @@ import {
 test("parseMessage reads a start-line beginning with RTSP/ as a response", () => {
   const message = parseMessage({
     startLine: "RTSP/2.0 200 OK",
-    headerFields: new Headers([["CSeq", "3"]]),
+    headerFields: [["CSeq", "3"]],
     messageBody: new Uint8Array(0),
   });
 
@@ -18,7 +18,7 @@ test("parseMessage reads a start-line beginning with RTSP/ as a response", () =>
     rtspVersion: "RTSP/2.0",
     statusCode: 200,
     reasonPhrase: "OK",
-    headers: new Headers([["CSeq", "3"]]),
+    headers: [["CSeq", "3"]],
     messageBody: new Uint8Array(0),
   });
 });
@@ -26,7 +26,7 @@ test("parseMessage reads a start-line beginning with RTSP/ as a response", () =>
 test("parseMessage reads an RTSP/1.0 Status-Line as a response", () => {
   const message = parseMessage({
     startLine: "RTSP/1.0 100 Continue",
-    headerFields: new Headers(),
+    headerFields: [],
     messageBody: new Uint8Array(0),
   });
 
@@ -36,7 +36,7 @@ test("parseMessage reads an RTSP/1.0 Status-Line as a response", () => {
 test("parseMessage reads any other start-line as a request", () => {
   const message = parseMessage({
     startLine: "PLAY rtsp://example.com/bar.file RTSP/2.0",
-    headerFields: new Headers([["CSeq", "3"]]),
+    headerFields: [["CSeq", "3"]],
     messageBody: new Uint8Array(0),
   });
 
@@ -44,7 +44,7 @@ test("parseMessage reads any other start-line as a request", () => {
     method: "PLAY",
     requestUri: "rtsp://example.com/bar.file",
     rtspVersion: "RTSP/2.0",
-    headers: new Headers([["CSeq", "3"]]),
+    headers: [["CSeq", "3"]],
     messageBody: new Uint8Array(0),
   });
 });
@@ -54,7 +54,7 @@ test("serializeMessage writes a response with a Status-Line", () => {
     rtspVersion: "RTSP/2.0",
     statusCode: 200,
     reasonPhrase: "OK",
-    headers: new Headers(),
+    headers: [],
     messageBody: new Uint8Array(0),
   });
 
@@ -66,7 +66,7 @@ test("serializeMessage writes a request with a Request-Line", () => {
     method: "OPTIONS",
     requestUri: "*",
     rtspVersion: "RTSP/2.0",
-    headers: new Headers(),
+    headers: [],
     messageBody: new Uint8Array(0),
   });
 
@@ -79,7 +79,7 @@ test("isRequest is true for a request only", () => {
       method: "OPTIONS",
       requestUri: "*",
       rtspVersion: "RTSP/2.0",
-      headers: new Headers(),
+      headers: [],
       messageBody: new Uint8Array(0),
     }),
     true,
@@ -89,7 +89,7 @@ test("isRequest is true for a request only", () => {
       rtspVersion: "RTSP/2.0",
       statusCode: 200,
       reasonPhrase: "OK",
-      headers: new Headers(),
+      headers: [],
       messageBody: new Uint8Array(0),
     }),
     false,
@@ -109,7 +109,7 @@ test("isResponse is true for a response only", () => {
       rtspVersion: "RTSP/2.0",
       statusCode: 200,
       reasonPhrase: "OK",
-      headers: new Headers(),
+      headers: [],
       messageBody: new Uint8Array(0),
     }),
     true,
@@ -119,7 +119,7 @@ test("isResponse is true for a response only", () => {
       method: "OPTIONS",
       requestUri: "*",
       rtspVersion: "RTSP/2.0",
-      headers: new Headers(),
+      headers: [],
       messageBody: new Uint8Array(0),
     }),
     false,

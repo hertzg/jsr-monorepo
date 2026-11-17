@@ -22,7 +22,7 @@
  *   rtspVersion: "RTSP/2.0",
  *   statusCode: 200,
  *   reasonPhrase: "OK",
- *   headers: new Headers({ "CSeq": "3" }),
+ *   headers: [["CSeq", "3"]],
  *   messageBody: new Uint8Array(0),
  * }]);
  * ```

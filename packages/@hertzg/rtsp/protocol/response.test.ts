@@ -5,7 +5,7 @@ import { parseResponse, serializeResponse } from "./response.ts";
 test("parseResponse splits the Status-Line of the SETUP response of RFC 7826 section 14", () => {
   const response = parseResponse({
     startLine: "RTSP/2.0 200 OK",
-    headerFields: new Headers(),
+    headerFields: [],
     messageBody: new Uint8Array(0),
   });
 
@@ -17,7 +17,7 @@ test("parseResponse splits the Status-Line of the SETUP response of RFC 7826 sec
 test("parseResponse reads Status-Code 100", () => {
   const response = parseResponse({
     startLine: "RTSP/2.0 100 Continue",
-    headerFields: new Headers(),
+    headerFields: [],
     messageBody: new Uint8Array(0),
   });
 
@@ -27,7 +27,7 @@ test("parseResponse reads Status-Code 100", () => {
 test("parseResponse keeps RTSP/1.0 as the version", () => {
   const response = parseResponse({
     startLine: "RTSP/1.0 200 OK",
-    headerFields: new Headers(),
+    headerFields: [],
     messageBody: new Uint8Array(0),
   });
 
@@ -37,7 +37,7 @@ test("parseResponse keeps RTSP/1.0 as the version", () => {
 test("parseResponse keeps the spaces of a Reason-Phrase", () => {
   const response = parseResponse({
     startLine: "RTSP/2.0 453 Not Enough Bandwidth",
-    headerFields: new Headers(),
+    headerFields: [],
     messageBody: new Uint8Array(0),
   });
 
@@ -47,7 +47,7 @@ test("parseResponse keeps the spaces of a Reason-Phrase", () => {
 test("parseResponse reads an empty Reason-Phrase", () => {
   const response = parseResponse({
     startLine: "RTSP/2.0 200 ",
-    headerFields: new Headers(),
+    headerFields: [],
     messageBody: new Uint8Array(0),
   });
 
@@ -58,7 +58,7 @@ test("parseResponse reads an empty Reason-Phrase", () => {
 test("parseResponse reads a Status-Line that ends at the Status-Code", () => {
   const response = parseResponse({
     startLine: "RTSP/1.0 200",
-    headerFields: new Headers(),
+    headerFields: [],
     messageBody: new Uint8Array(0),
   });
 
@@ -69,11 +69,11 @@ test("parseResponse reads a Status-Line that ends at the Status-Code", () => {
 test("parseResponse passes on the header fields and the message body", () => {
   const response = parseResponse({
     startLine: "RTSP/2.0 200 OK",
-    headerFields: new Headers([["CSeq", "312"]]),
+    headerFields: [["CSeq", "312"]],
     messageBody: Uint8Array.of(0x76, 0x3d, 0x30),
   });
 
-  assertEquals(Array.from(response.headers), [["cseq", "312"]]);
+  assertEquals(response.headers, [["CSeq", "312"]]);
   assertEquals(response.messageBody, Uint8Array.of(0x76, 0x3d, 0x30));
 });
 
@@ -82,7 +82,7 @@ test("serializeResponse writes the Status-Line", () => {
     rtspVersion: "RTSP/2.0",
     statusCode: 453,
     reasonPhrase: "Not Enough Bandwidth",
-    headers: new Headers(),
+    headers: [],
     messageBody: new Uint8Array(0),
   });
 
@@ -94,7 +94,7 @@ test("serializeResponse keeps the space in front of an empty Reason-Phrase", () 
     rtspVersion: "RTSP/1.0",
     statusCode: 200,
     reasonPhrase: "",
-    headers: new Headers(),
+    headers: [],
     messageBody: new Uint8Array(0),
   });
 
@@ -106,11 +106,11 @@ test("serializeResponse passes on the header fields and the message body", () =>
     rtspVersion: "RTSP/2.0",
     statusCode: 200,
     reasonPhrase: "OK",
-    headers: new Headers([["CSeq", "312"]]),
+    headers: [["CSeq", "312"]],
     messageBody: Uint8Array.of(0x76, 0x3d, 0x30),
   });
 
-  assertEquals(Array.from(frame.headerFields), [["cseq", "312"]]);
+  assertEquals(frame.headerFields, [["CSeq", "312"]]);
   assertEquals(frame.messageBody, Uint8Array.of(0x76, 0x3d, 0x30));
 });
 
@@ -119,13 +119,13 @@ test("serializeResponse output parses back to the same response", () => {
     rtspVersion: "RTSP/2.0",
     statusCode: 100,
     reasonPhrase: "Continue",
-    headers: new Headers([["CSeq", "7"]]),
+    headers: [["CSeq", "7"]],
     messageBody: new Uint8Array(0),
   }));
 
   assertEquals(response.rtspVersion, "RTSP/2.0");
   assertEquals(response.statusCode, 100);
   assertEquals(response.reasonPhrase, "Continue");
-  assertEquals(Array.from(response.headers), [["cseq", "7"]]);
+  assertEquals(response.headers, [["CSeq", "7"]]);
   assertEquals(response.messageBody, new Uint8Array(0));
 });

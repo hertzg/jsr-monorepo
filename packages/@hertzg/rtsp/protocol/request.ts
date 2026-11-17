@@ -9,7 +9,7 @@
  *
  * const request = parseRequest({
  *   startLine: "PLAY rtsp://example.com/bar.file RTSP/2.0",
- *   headerFields: new Headers({ "CSeq": "3" }),
+ *   headerFields: [["CSeq", "3"]],
  *   messageBody: new Uint8Array(0),
  * });
  *
@@ -25,7 +25,7 @@
  * @module
  */
 
-import type { MessageFrame } from "../encoding/message.ts";
+import type { HeaderField, MessageFrame } from "../encoding/message.ts";
 
 /** An RTSP request. */
 export type RtspRequest = {
@@ -35,8 +35,12 @@ export type RtspRequest = {
   requestUri: string;
   /** The version, such as `"RTSP/2.0"` or `"RTSP/1.0"`, kept as written. */
   rtspVersion: string;
-  /** The header fields. */
-  headers: Headers;
+  /**
+   * The header fields, one pair per line, in the order of the lines and with
+   * each name as written. `new Headers(request.headers)` looks a name up
+   * whatever its case.
+   */
+  headers: HeaderField[];
   /** The message body, empty when there is none. */
   messageBody: Uint8Array;
 };
@@ -58,14 +62,14 @@ export type RtspRequest = {
  *
  * const request = parseRequest({
  *   startLine: "OPTIONS * RTSP/2.0",
- *   headerFields: new Headers({ "CSeq": "1" }),
+ *   headerFields: [["CSeq", "1"]],
  *   messageBody: new Uint8Array(0),
  * });
  *
  * assertEquals(request.method, "OPTIONS");
  * assertEquals(request.requestUri, "*");
  * assertEquals(request.rtspVersion, "RTSP/2.0");
- * assertEquals(request.headers.get("CSeq"), "1");
+ * assertEquals(request.headers, [["CSeq", "1"]]);
  * ```
  */
 export function parseRequest(frame: MessageFrame): RtspRequest {
@@ -97,7 +101,7 @@ export function parseRequest(frame: MessageFrame): RtspRequest {
  *   method: "DESCRIBE",
  *   requestUri: "rtsp://server.example.com/fizzle/foo",
  *   rtspVersion: "RTSP/2.0",
- *   headers: new Headers({ "Accept": "application/sdp" }),
+ *   headers: [["Accept", "application/sdp"]],
  *   messageBody: new Uint8Array(0),
  * });
  *
@@ -105,7 +109,7 @@ export function parseRequest(frame: MessageFrame): RtspRequest {
  *   frame.startLine,
  *   "DESCRIBE rtsp://server.example.com/fizzle/foo RTSP/2.0",
  * );
- * assertEquals(frame.headerFields.get("Accept"), "application/sdp");
+ * assertEquals(frame.headerFields, [["Accept", "application/sdp"]]);
  * ```
  */
 export function serializeRequest(request: RtspRequest): MessageFrame {

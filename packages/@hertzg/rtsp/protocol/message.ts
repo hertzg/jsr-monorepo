@@ -12,7 +12,7 @@
  *
  * const message = parseMessage({
  *   startLine: "RTSP/2.0 200 OK",
- *   headerFields: new Headers({ "CSeq": "3" }),
+ *   headerFields: [["CSeq", "3"]],
  *   messageBody: new Uint8Array(0),
  * });
  *
@@ -52,7 +52,7 @@ export type RtspMessage = RtspRequest | RtspResponse;
  *
  * const message = parseMessage({
  *   startLine: "PLAY rtsp://example.com/bar.file RTSP/2.0",
- *   headerFields: new Headers({ "CSeq": "3" }),
+ *   headerFields: [["CSeq", "3"]],
  *   messageBody: new Uint8Array(0),
  * });
  *
@@ -81,7 +81,7 @@ export function parseMessage(frame: MessageFrame): RtspMessage {
  *   rtspVersion: "RTSP/2.0",
  *   statusCode: 200,
  *   reasonPhrase: "OK",
- *   headers: new Headers({ "CSeq": "3" }),
+ *   headers: [["CSeq", "3"]],
  *   messageBody: new Uint8Array(0),
  * });
  *
@@ -107,12 +107,12 @@ export function serializeMessage(message: RtspMessage): MessageFrame {
  *
  * const request = parseMessage({
  *   startLine: "OPTIONS * RTSP/2.0",
- *   headerFields: new Headers({ "CSeq": "1" }),
+ *   headerFields: [["CSeq", "1"]],
  *   messageBody: new Uint8Array(0),
  * });
  * const response = parseMessage({
  *   startLine: "RTSP/2.0 200 OK",
- *   headerFields: new Headers({ "CSeq": "1" }),
+ *   headerFields: [["CSeq", "1"]],
  *   messageBody: new Uint8Array(0),
  * });
  *
@@ -137,12 +137,12 @@ export function isRequest(value: unknown): value is RtspRequest {
  *
  * const response = parseMessage({
  *   startLine: "RTSP/2.0 200 OK",
- *   headerFields: new Headers({ "CSeq": "1" }),
+ *   headerFields: [["CSeq", "1"]],
  *   messageBody: new Uint8Array(0),
  * });
  * const request = parseMessage({
  *   startLine: "OPTIONS * RTSP/2.0",
- *   headerFields: new Headers({ "CSeq": "1" }),
+ *   headerFields: [["CSeq", "1"]],
  *   messageBody: new Uint8Array(0),
  * });
  *

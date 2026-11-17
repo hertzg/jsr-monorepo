@@ -32,7 +32,7 @@
  *   method: "OPTIONS",
  *   requestUri: "*",
  *   rtspVersion: "RTSP/2.0",
- *   headers: new Headers(),
+ *   headers: [],
  *   messageBody: new Uint8Array(0),
  * });
  *
@@ -57,6 +57,7 @@ import {
   type InterleavedBinaryData,
   isInterleavedBinaryData,
 } from "./encoding/interleaved.ts";
+import type { HeaderField } from "./encoding/message.ts";
 import { isResponse, type RtspMessage } from "./protocol/message.ts";
 import type { RtspRequest } from "./protocol/request.ts";
 import type { RtspResponse } from "./protocol/response.ts";
@@ -64,6 +65,7 @@ import { createRtspDecodeStream } from "./streams/decode.ts";
 import { createRtspEncodeStream } from "./streams/encode.ts";
 
 const FIRST_C_SEQ = 1;
+const C_SEQ = "CSeq";
 
 /** Status-Codes below this one are 1xx: interim, with a final response to follow. */
 const FIRST_FINAL_STATUS_CODE = 200;
@@ -92,7 +94,10 @@ export type ClientOptions = {
    * Answers a request sent by the server. Default: `501 Not Implemented`.
    *
    * The client sets the request's `CSeq` on a copy of the answer, so the
-   * handler does not have to. The handler does not hold the connection up:
+   * handler does not have to. A `CSeq` the handler did set, in any case,
+   * keeps its place and its spelling and gets the request's value. Without
+   * one, `CSeq` goes last, spelled the way the server spelled it. The
+   * handler does not hold the connection up:
    * responses and `$` blocks that arrive while it works are handled, and
    * answers go out in the order the handlers finish.
    *
@@ -108,8 +113,11 @@ export type Client = {
   /**
    * Sends a request and resolves with its final response.
    *
-   * The client sets `CSeq` itself, on a copy: the request passed in and its
-   * `Headers` are left as they are.
+   * The other header fields go out in the order and the spelling given. The
+   * client sets `CSeq` itself, on a copy: the request passed in and its
+   * `headers` are left as they are. A `CSeq` the caller did set, in any
+   * case, keeps its place and its spelling and gets the client's number, and
+   * later ones are left out. Without one, `CSeq` goes last.
    *
    * Rejects when the connection ends before the response arrives, and at
    * once when it has ended already: with an `Error` whose message is
@@ -195,8 +203,9 @@ type Channel = {
  * Creates an RTSP client on a connection that is already open.
  *
  * Each request gets the next `CSeq`, starting at 1, in place of any `CSeq`
- * the caller set. A response resolves the request with the same `CSeq`, so
- * responses may arrive in any order. A 1xx response is interim and is
+ * the caller set. A response resolves the request with the same `CSeq`,
+ * whatever case the server writes that name in, so responses may arrive in
+ * any order. A 1xx response is interim and is
  * skipped: the request keeps waiting for the final one. A response whose
  * `CSeq` matches no waiting request is ignored.
  *
@@ -224,14 +233,14 @@ type Channel = {
  *   method: "DESCRIBE",
  *   requestUri: "rtsp://example.com/fizzle/foo",
  *   rtspVersion: "RTSP/2.0",
- *   headers: new Headers({ "Accept": "application/sdp" }),
+ *   headers: [["Accept", "application/sdp"]],
  *   messageBody: new Uint8Array(0),
  * });
  * const options = client.request({
  *   method: "OPTIONS",
  *   requestUri: "*",
  *   rtspVersion: "RTSP/2.0",
- *   headers: new Headers(),
+ *   headers: [],
  *   messageBody: new Uint8Array(0),
  * });
  *
@@ -248,6 +257,51 @@ type Channel = {
  *
  * assertEquals((await described).statusCode, 404);
  * assertEquals((await options).statusCode, 200);
+ * ```
+ *
+ * @example Send header fields in the caller's order and spelling
+ * ```ts
+ * import { assertEquals } from "@std/assert";
+ * import { createClient } from "@hertzg/rtsp/client";
+ *
+ * const toServer = new TransformStream<Uint8Array, Uint8Array>();
+ * const toClient = new TransformStream<Uint8Array, Uint8Array>();
+ * const client = createClient({
+ *   readable: toClient.readable,
+ *   writable: toServer.writable,
+ * });
+ *
+ * const response = client.request({
+ *   method: "DESCRIBE",
+ *   requestUri: "rtsp://example.com/fizzle/foo",
+ *   rtspVersion: "RTSP/1.0",
+ *   headers: [
+ *     ["cseq", ""],
+ *     ["User-Agent", "PhonyClient/1.2"],
+ *     ["accept", "application/sdp"],
+ *   ],
+ *   messageBody: new Uint8Array(0),
+ * });
+ *
+ * const { value: sent } = await toServer.readable.getReader().read();
+ * assertEquals(
+ *   new TextDecoder().decode(sent),
+ *   "DESCRIBE rtsp://example.com/fizzle/foo RTSP/1.0\r\n" +
+ *     "cseq: 1\r\n" +
+ *     "User-Agent: PhonyClient/1.2\r\n" +
+ *     "accept: application/sdp\r\n" +
+ *     "\r\n",
+ * );
+ *
+ * await toClient.writable.getWriter().write(
+ *   new TextEncoder().encode(
+ *     "RTSP/1.0 200 OK\r\ncseq: 1\r\nServer: PhonyServer/1.1\r\n\r\n",
+ *   ),
+ * );
+ * assertEquals((await response).headers, [
+ *   ["cseq", "1"],
+ *   ["Server", "PhonyServer/1.1"],
+ * ]);
  * ```
  *
  * @example Read and write interleaved binary data on a channel
@@ -293,7 +347,7 @@ type Channel = {
  *   method: "OPTIONS",
  *   requestUri: "*",
  *   rtspVersion: "RTSP/2.0",
- *   headers: new Headers(),
+ *   headers: [],
  *   messageBody: new Uint8Array(0),
  * });
  * await toServer.readable.getReader().read();
@@ -324,7 +378,7 @@ type Channel = {
  *     rtspVersion: request.rtspVersion,
  *     statusCode: 200,
  *     reasonPhrase: "OK",
- *     headers: new Headers(),
+ *     headers: [],
  *     messageBody: new Uint8Array(0),
  *   }),
  * });
@@ -356,7 +410,7 @@ type Channel = {
  *   method: "OPTIONS",
  *   requestUri: "*",
  *   rtspVersion: "RTSP/2.0",
- *   headers: new Headers(),
+ *   headers: [],
  *   messageBody: new Uint8Array(0),
  * });
  * await toServer.readable.getReader().read();
@@ -406,8 +460,7 @@ async function sendRequest(
   request: RtspRequest,
 ): Promise<RtspResponse> {
   const cSeq = connection.nextCSeq++;
-  const headers = new Headers(request.headers);
-  headers.set("CSeq", String(cSeq));
+  const headers = setHeaderField(request.headers, [C_SEQ, String(cSeq)]);
 
   const pending = Promise.withResolvers<RtspResponse>();
   connection.pendingResponses.set(cSeq, pending);
@@ -532,7 +585,7 @@ function handleResponse(connection: Connection, response: RtspResponse): void {
   if (response.statusCode < FIRST_FINAL_STATUS_CODE) {
     return;
   }
-  const cSeq = Number(response.headers.get("CSeq"));
+  const cSeq = Number(findHeaderField(response.headers, C_SEQ)?.[1]);
   connection.pendingResponses.get(cSeq)?.resolve(response);
   connection.pendingResponses.delete(cSeq);
 }
@@ -543,14 +596,51 @@ async function answerRequest(
   request: RtspRequest,
 ): Promise<void> {
   const answer = await buildAnswer(connection, request);
-  const headers = new Headers(answer.headers);
-  const cSeq = request.headers.get("CSeq");
-  if (cSeq === null) {
-    headers.delete("CSeq");
-  } else {
-    headers.set("CSeq", cSeq);
-  }
+  const cSeq = findHeaderField(request.headers, C_SEQ);
+  const headers = cSeq === undefined
+    ? answer.headers.filter(([name]) => !isSameHeaderName(name, C_SEQ))
+    : setHeaderField(answer.headers, cSeq);
   await writeItem(connection, { ...answer, headers });
+}
+
+/** Tells whether two header names are the same name, whatever their case. */
+function isSameHeaderName(name: string, other: string): boolean {
+  return name.toLowerCase() === other.toLowerCase();
+}
+
+/** Returns the first pair named `name`, whatever its case, or `undefined`. */
+function findHeaderField(
+  headerFields: HeaderField[],
+  name: string,
+): HeaderField | undefined {
+  return headerFields.find(([other]) => isSameHeaderName(other, name));
+}
+
+/**
+ * Returns a copy of `headerFields` in which the header named like `field`,
+ * whatever its case, has the value of `field`.
+ *
+ * The first pair with that name keeps its place and its spelling and gets the
+ * value, later pairs with that name are left out. Without such a pair,
+ * `field` goes to the end. Neither `headerFields` nor its pairs are changed.
+ */
+function setHeaderField(
+  headerFields: HeaderField[],
+  field: HeaderField,
+): HeaderField[] {
+  const [name, value] = field;
+  const first = headerFields.findIndex(([other]) =>
+    isSameHeaderName(other, name)
+  );
+  if (first === -1) {
+    return [...headerFields, [name, value]];
+  }
+  return headerFields.flatMap((other, index): HeaderField[] => {
+    if (index === first) {
+      return [[other[0], value]];
+    }
+    return isSameHeaderName(other[0], name) ? [] : [other];
+  });
 }
 
 /**
@@ -585,7 +675,7 @@ function createAnswer(
   return {
     rtspVersion: request.rtspVersion,
     ...status,
-    headers: new Headers(),
+    headers: [],
     messageBody: new Uint8Array(0),
   };
 }

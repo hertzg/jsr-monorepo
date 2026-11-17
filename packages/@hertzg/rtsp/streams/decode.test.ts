@@ -24,11 +24,11 @@ test("createRtspDecodeStream emits the same response for a split at every octet"
         rtspVersion: "RTSP/2.0",
         statusCode: 200,
         reasonPhrase: "OK",
-        headers: new Headers([
+        headers: [
           ["CSeq", "312"],
           ["Content-Type", "application/sdp"],
           ["Content-Length", "5"],
-        ]),
+        ],
         messageBody: Uint8Array.of(0x76, 0x3d, 0x30, 0x0d, 0x0a),
       }],
       `split at octet ${split}`,
@@ -53,10 +53,10 @@ test("createRtspDecodeStream emits a request that arrives one octet per chunk", 
     method: "PLAY",
     requestUri: "rtsp://example.com/bar.file",
     rtspVersion: "RTSP/2.0",
-    headers: new Headers([
+    headers: [
       ["CSeq", "3"],
       ["Session", "OccldOFFq23KwjYpAnBbUr"],
-    ]),
+    ],
     messageBody: new Uint8Array(0),
   }]);
 });
@@ -107,10 +107,10 @@ test("createRtspDecodeStream emits a $ block between two messages in order", asy
       rtspVersion: "RTSP/2.0",
       statusCode: 200,
       reasonPhrase: "OK",
-      headers: new Headers([
+      headers: [
         ["CSeq", "2"],
         ["Transport", "RTP/AVP/TCP;unicast;interleaved=5-6"],
-      ]),
+      ],
       messageBody: new Uint8Array(0),
     },
     { channelId: 5, binaryData: new Uint8Array([0x80, 0x60]) },
@@ -118,10 +118,10 @@ test("createRtspDecodeStream emits a $ block between two messages in order", asy
       rtspVersion: "RTSP/2.0",
       statusCode: 200,
       reasonPhrase: "OK",
-      headers: new Headers([
+      headers: [
         ["CSeq", "3"],
         ["Range", "npt=0-56.8"],
-      ]),
+      ],
       messageBody: new Uint8Array(0),
     },
   ]);
@@ -142,7 +142,7 @@ test("createRtspDecodeStream emits two items that arrive in one chunk", async ()
       rtspVersion: "RTSP/2.0",
       statusCode: 200,
       reasonPhrase: "OK",
-      headers: new Headers([["CSeq", "3"]]),
+      headers: [["CSeq", "3"]],
       messageBody: new Uint8Array(0),
     },
     { channelId: 1, binaryData: new Uint8Array([0x41, 0x42]) },
@@ -162,7 +162,7 @@ test("createRtspDecodeStream does not read a $ at the start of a message body as
     rtspVersion: "RTSP/2.0",
     statusCode: 200,
     reasonPhrase: "OK",
-    headers: new Headers([["Content-Length", "4"]]),
+    headers: [["Content-Length", "4"]],
     messageBody: new Uint8Array([0x24, 0x00, 0x00, 0x00]),
   }]);
 });
@@ -208,7 +208,7 @@ test("createRtspDecodeStream skips empty lines before a start-line", async () =>
     method: "OPTIONS",
     requestUri: "*",
     rtspVersion: "RTSP/2.0",
-    headers: new Headers([["CSeq", "1"]]),
+    headers: [["CSeq", "1"]],
     messageBody: new Uint8Array(0),
   }]);
 });
@@ -310,7 +310,7 @@ test("createRtspDecodeStream emits the items before the one the stream ends insi
     rtspVersion: "RTSP/2.0",
     statusCode: 200,
     reasonPhrase: "OK",
-    headers: new Headers([["CSeq", "3"]]),
+    headers: [["CSeq", "3"]],
     messageBody: new Uint8Array(0),
   });
   await assertRejects(

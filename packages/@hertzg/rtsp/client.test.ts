@@ -41,13 +41,13 @@ test("request sends the first request with CSeq 1", async () => {
     method: "OPTIONS",
     requestUri: "*",
     rtspVersion: "RTSP/2.0",
-    headers: new Headers(),
+    headers: [],
     messageBody: new Uint8Array(0),
   });
 
   const { value: sent } = await requests.read();
   assert(isRequest(sent));
-  assertEquals(sent.headers.get("CSeq"), "1");
+  assertEquals(sent.headers, [["CSeq", "1"]]);
 });
 
 test("request sends the second request with CSeq 2", async () => {
@@ -58,21 +58,21 @@ test("request sends the second request with CSeq 2", async () => {
     method: "OPTIONS",
     requestUri: "*",
     rtspVersion: "RTSP/2.0",
-    headers: new Headers(),
+    headers: [],
     messageBody: new Uint8Array(0),
   });
   client.request({
     method: "DESCRIBE",
     requestUri: "rtsp://example.com/fizzle/foo",
     rtspVersion: "RTSP/2.0",
-    headers: new Headers(),
+    headers: [],
     messageBody: new Uint8Array(0),
   });
 
   await requests.read();
   const { value: sent } = await requests.read();
   assert(isRequest(sent));
-  assertEquals(sent.headers.get("CSeq"), "2");
+  assertEquals(sent.headers, [["CSeq", "2"]]);
 });
 
 test("request overwrites a CSeq the caller set", async () => {
@@ -83,19 +83,96 @@ test("request overwrites a CSeq the caller set", async () => {
     method: "OPTIONS",
     requestUri: "*",
     rtspVersion: "RTSP/2.0",
-    headers: new Headers([["CSeq", "99"]]),
+    headers: [["CSeq", "99"]],
     messageBody: new Uint8Array(0),
   });
 
   const { value: sent } = await requests.read();
   assert(isRequest(sent));
-  assertEquals(sent.headers.get("CSeq"), "1");
+  assertEquals(sent.headers, [["CSeq", "1"]]);
 });
 
-test("request leaves the caller's Headers unchanged", async () => {
+test("request keeps the place and the spelling of a CSeq the caller set", async () => {
   const { connection, requests } = serverLink();
   const client = createClient(connection);
-  const headers = new Headers([["CSeq", "99"]]);
+
+  client.request({
+    method: "DESCRIBE",
+    requestUri: "rtsp://example.com/fizzle/foo",
+    rtspVersion: "RTSP/2.0",
+    headers: [
+      ["User-Agent", "PhonyClient/1.2"],
+      ["cSEQ", "99"],
+      ["Accept", "application/sdp"],
+    ],
+    messageBody: new Uint8Array(0),
+  });
+
+  const { value: sent } = await requests.read();
+  assert(isRequest(sent));
+  assertEquals(sent.headers, [
+    ["User-Agent", "PhonyClient/1.2"],
+    ["cSEQ", "1"],
+    ["Accept", "application/sdp"],
+  ]);
+});
+
+test("request drops a second CSeq the caller set in another spelling", async () => {
+  const { connection, requests } = serverLink();
+  const client = createClient(connection);
+
+  client.request({
+    method: "OPTIONS",
+    requestUri: "*",
+    rtspVersion: "RTSP/2.0",
+    headers: [
+      ["cSEQ", "99"],
+      ["User-Agent", "PhonyClient/1.2"],
+      ["CSeq", "98"],
+    ],
+    messageBody: new Uint8Array(0),
+  });
+
+  const { value: sent } = await requests.read();
+  assert(isRequest(sent));
+  assertEquals(sent.headers, [
+    ["cSEQ", "1"],
+    ["User-Agent", "PhonyClient/1.2"],
+  ]);
+});
+
+test("request appends CSeq after the caller's header fields when they hold none", async () => {
+  const { connection, requests } = serverLink();
+  const client = createClient(connection);
+
+  client.request({
+    method: "DESCRIBE",
+    requestUri: "rtsp://example.com/fizzle/foo",
+    rtspVersion: "RTSP/2.0",
+    headers: [
+      ["User-Agent", "PhonyClient/1.2"],
+      ["Accept", "application/sdp"],
+    ],
+    messageBody: new Uint8Array(0),
+  });
+
+  const { value: sent } = await requests.read();
+  assert(isRequest(sent));
+  assertEquals(sent.headers, [
+    ["User-Agent", "PhonyClient/1.2"],
+    ["Accept", "application/sdp"],
+    ["CSeq", "1"],
+  ]);
+});
+
+test("request leaves the caller's headers unchanged", async () => {
+  const { connection, requests } = serverLink();
+  const client = createClient(connection);
+  const headers: [string, string][] = [
+    ["cSEQ", "99"],
+    ["Accept", "application/sdp"],
+    ["CSeq", "98"],
+  ];
 
   client.request({
     method: "OPTIONS",
@@ -106,10 +183,14 @@ test("request leaves the caller's Headers unchanged", async () => {
   });
   await requests.read();
 
-  assertEquals(headers.get("CSeq"), "99");
+  assertEquals(headers, [
+    ["cSEQ", "99"],
+    ["Accept", "application/sdp"],
+    ["CSeq", "98"],
+  ]);
 });
 
-test("request keeps the caller's other header fields", async () => {
+test("request sends the caller's header fields in their order and spelling", async () => {
   const { connection, requests } = serverLink();
   const client = createClient(connection);
 
@@ -117,13 +198,78 @@ test("request keeps the caller's other header fields", async () => {
     method: "DESCRIBE",
     requestUri: "rtsp://example.com/fizzle/foo",
     rtspVersion: "RTSP/2.0",
-    headers: new Headers([["Accept", "application/sdp"]]),
+    headers: [
+      ["user-AGENT", "PhonyClient/1.2"],
+      ["ACCEPT", "application/sdp"],
+      ["Accept", "application/rtsl"],
+    ],
     messageBody: new Uint8Array(0),
   });
 
   const { value: sent } = await requests.read();
   assert(isRequest(sent));
-  assertEquals(sent.headers.get("Accept"), "application/sdp");
+  assertEquals(sent.headers, [
+    ["user-AGENT", "PhonyClient/1.2"],
+    ["ACCEPT", "application/sdp"],
+    ["Accept", "application/rtsl"],
+    ["CSeq", "1"],
+  ]);
+});
+
+test("request resolves with a response whose CSeq is spelled cseq", async () => {
+  const { connection, requests, server } = serverLink();
+  const client = createClient(connection);
+
+  const response = client.request({
+    method: "OPTIONS",
+    requestUri: "*",
+    rtspVersion: "RTSP/1.0",
+    headers: [],
+    messageBody: new Uint8Array(0),
+  });
+  await requests.read();
+
+  await server.write({
+    rtspVersion: "RTSP/1.0",
+    statusCode: 200,
+    reasonPhrase: "OK",
+    headers: [["cseq", "1"]],
+    messageBody: new Uint8Array(0),
+  });
+
+  assertEquals((await response).statusCode, 200);
+});
+
+test("request resolves with the header fields as the server wrote them", async () => {
+  const { connection, requests, server } = serverLink();
+  const client = createClient(connection);
+
+  const response = client.request({
+    method: "DESCRIBE",
+    requestUri: "rtsp://example.com/fizzle/foo",
+    rtspVersion: "RTSP/1.0",
+    headers: [],
+    messageBody: new Uint8Array(0),
+  });
+  await requests.read();
+
+  await server.write({
+    rtspVersion: "RTSP/1.0",
+    statusCode: 401,
+    reasonPhrase: "Unauthorized",
+    headers: [
+      ["WWW-Authenticate", 'Digest realm="camera", nonce="abc123"'],
+      ["cseq", "1"],
+      ["WWW-Authenticate", 'Basic realm="camera"'],
+    ],
+    messageBody: new Uint8Array(0),
+  });
+
+  assertEquals((await response).headers, [
+    ["WWW-Authenticate", 'Digest realm="camera", nonce="abc123"'],
+    ["cseq", "1"],
+    ["WWW-Authenticate", 'Basic realm="camera"'],
+  ]);
 });
 
 test("requests answered out of order each resolve with their own response", async () => {
@@ -134,14 +280,14 @@ test("requests answered out of order each resolve with their own response", asyn
     method: "DESCRIBE",
     requestUri: "rtsp://example.com/fizzle/foo",
     rtspVersion: "RTSP/2.0",
-    headers: new Headers(),
+    headers: [],
     messageBody: new Uint8Array(0),
   });
   const second = client.request({
     method: "OPTIONS",
     requestUri: "*",
     rtspVersion: "RTSP/2.0",
-    headers: new Headers(),
+    headers: [],
     messageBody: new Uint8Array(0),
   });
   await requests.read();
@@ -151,14 +297,14 @@ test("requests answered out of order each resolve with their own response", asyn
     rtspVersion: "RTSP/2.0",
     statusCode: 200,
     reasonPhrase: "OK",
-    headers: new Headers([["CSeq", "2"]]),
+    headers: [["CSeq", "2"]],
     messageBody: new Uint8Array(0),
   });
   await server.write({
     rtspVersion: "RTSP/2.0",
     statusCode: 404,
     reasonPhrase: "Not Found",
-    headers: new Headers([["CSeq", "1"]]),
+    headers: [["CSeq", "1"]],
     messageBody: new Uint8Array(0),
   });
 
@@ -174,7 +320,7 @@ test("request skips a 1xx response and resolves with the final one", async () =>
     method: "SETUP",
     requestUri: "rtsp://example.com/foo/bar/baz.rm",
     rtspVersion: "RTSP/2.0",
-    headers: new Headers(),
+    headers: [],
     messageBody: new Uint8Array(0),
   });
   await requests.read();
@@ -183,14 +329,14 @@ test("request skips a 1xx response and resolves with the final one", async () =>
     rtspVersion: "RTSP/2.0",
     statusCode: 100,
     reasonPhrase: "Continue",
-    headers: new Headers([["CSeq", "1"]]),
+    headers: [["CSeq", "1"]],
     messageBody: new Uint8Array(0),
   });
   await server.write({
     rtspVersion: "RTSP/2.0",
     statusCode: 200,
     reasonPhrase: "OK",
-    headers: new Headers([["CSeq", "1"]]),
+    headers: [["CSeq", "1"]],
     messageBody: new Uint8Array(0),
   });
 
@@ -205,7 +351,7 @@ test("request ignores a response with an unknown CSeq", async () => {
     method: "OPTIONS",
     requestUri: "*",
     rtspVersion: "RTSP/2.0",
-    headers: new Headers(),
+    headers: [],
     messageBody: new Uint8Array(0),
   });
   await requests.read();
@@ -214,14 +360,14 @@ test("request ignores a response with an unknown CSeq", async () => {
     rtspVersion: "RTSP/2.0",
     statusCode: 404,
     reasonPhrase: "Not Found",
-    headers: new Headers([["CSeq", "7"]]),
+    headers: [["CSeq", "7"]],
     messageBody: new Uint8Array(0),
   });
   await server.write({
     rtspVersion: "RTSP/2.0",
     statusCode: 200,
     reasonPhrase: "OK",
-    headers: new Headers([["CSeq", "1"]]),
+    headers: [["CSeq", "1"]],
     messageBody: new Uint8Array(0),
   });
 
@@ -236,7 +382,7 @@ test("request ignores a response without a CSeq", async () => {
     method: "OPTIONS",
     requestUri: "*",
     rtspVersion: "RTSP/2.0",
-    headers: new Headers(),
+    headers: [],
     messageBody: new Uint8Array(0),
   });
   await requests.read();
@@ -245,14 +391,14 @@ test("request ignores a response without a CSeq", async () => {
     rtspVersion: "RTSP/2.0",
     statusCode: 400,
     reasonPhrase: "Bad Request",
-    headers: new Headers(),
+    headers: [],
     messageBody: new Uint8Array(0),
   });
   await server.write({
     rtspVersion: "RTSP/2.0",
     statusCode: 200,
     reasonPhrase: "OK",
-    headers: new Headers([["CSeq", "1"]]),
+    headers: [["CSeq", "1"]],
     messageBody: new Uint8Array(0),
   });
 
@@ -267,7 +413,7 @@ test("request still resolves after a server request and a $ block", async () => 
     method: "PLAY",
     requestUri: "rtsp://example.com/bar.file",
     rtspVersion: "RTSP/2.0",
-    headers: new Headers(),
+    headers: [],
     messageBody: new Uint8Array(0),
   });
   await requests.read();
@@ -276,7 +422,7 @@ test("request still resolves after a server request and a $ block", async () => 
     method: "OPTIONS",
     requestUri: "*",
     rtspVersion: "RTSP/2.0",
-    headers: new Headers([["CSeq", "1"]]),
+    headers: [["CSeq", "1"]],
     messageBody: new Uint8Array(0),
   });
   await server.write({ channelId: 0, binaryData: new Uint8Array([0x80]) });
@@ -284,7 +430,7 @@ test("request still resolves after a server request and a $ block", async () => 
     rtspVersion: "RTSP/2.0",
     statusCode: 200,
     reasonPhrase: "OK",
-    headers: new Headers([["CSeq", "1"]]),
+    headers: [["CSeq", "1"]],
     messageBody: new Uint8Array(0),
   });
 
@@ -299,7 +445,7 @@ test("a $ block on an unclaimed channel is dropped and counted", async () => {
     method: "OPTIONS",
     requestUri: "*",
     rtspVersion: "RTSP/2.0",
-    headers: new Headers(),
+    headers: [],
     messageBody: new Uint8Array(0),
   });
   await requests.read();
@@ -308,7 +454,7 @@ test("a $ block on an unclaimed channel is dropped and counted", async () => {
     rtspVersion: "RTSP/2.0",
     statusCode: 200,
     reasonPhrase: "OK",
-    headers: new Headers([["CSeq", "1"]]),
+    headers: [["CSeq", "1"]],
     messageBody: new Uint8Array(0),
   });
   await response;
@@ -324,7 +470,7 @@ test("dropped $ blocks are counted per Channel ID", async () => {
     method: "OPTIONS",
     requestUri: "*",
     rtspVersion: "RTSP/2.0",
-    headers: new Headers(),
+    headers: [],
     messageBody: new Uint8Array(0),
   });
   await requests.read();
@@ -335,7 +481,7 @@ test("dropped $ blocks are counted per Channel ID", async () => {
     rtspVersion: "RTSP/2.0",
     statusCode: 200,
     reasonPhrase: "OK",
-    headers: new Headers([["CSeq", "1"]]),
+    headers: [["CSeq", "1"]],
     messageBody: new Uint8Array(0),
   });
   await response;
@@ -398,7 +544,7 @@ test("a $ block that arrives after the readable is cancelled is counted", async 
     method: "OPTIONS",
     requestUri: "*",
     rtspVersion: "RTSP/2.0",
-    headers: new Headers(),
+    headers: [],
     messageBody: new Uint8Array(0),
   });
   await requests.read();
@@ -407,7 +553,7 @@ test("a $ block that arrives after the readable is cancelled is counted", async 
     rtspVersion: "RTSP/2.0",
     statusCode: 200,
     reasonPhrase: "OK",
-    headers: new Headers([["CSeq", "1"]]),
+    headers: [["CSeq", "1"]],
     messageBody: new Uint8Array(0),
   });
   await response;
@@ -424,7 +570,7 @@ test("a channel claimed again after a cancel reads only later $ blocks", async (
     method: "OPTIONS",
     requestUri: "*",
     rtspVersion: "RTSP/2.0",
-    headers: new Headers(),
+    headers: [],
     messageBody: new Uint8Array(0),
   });
   await requests.read();
@@ -433,7 +579,7 @@ test("a channel claimed again after a cancel reads only later $ blocks", async (
     rtspVersion: "RTSP/2.0",
     statusCode: 200,
     reasonPhrase: "OK",
-    headers: new Headers([["CSeq", "1"]]),
+    headers: [["CSeq", "1"]],
     messageBody: new Uint8Array(0),
   });
   await response;
@@ -459,7 +605,7 @@ test("cancelling the readable lets a held-back response through", async () => {
     method: "OPTIONS",
     requestUri: "*",
     rtspVersion: "RTSP/2.0",
-    headers: new Headers(),
+    headers: [],
     messageBody: new Uint8Array(0),
   });
   await held.requests.read();
@@ -467,7 +613,7 @@ test("cancelling the readable lets a held-back response through", async () => {
     method: "OPTIONS",
     requestUri: "*",
     rtspVersion: "RTSP/2.0",
-    headers: new Headers(),
+    headers: [],
     messageBody: new Uint8Array(0),
   });
   await control.requests.read();
@@ -477,7 +623,7 @@ test("cancelling the readable lets a held-back response through", async () => {
     rtspVersion: "RTSP/2.0",
     statusCode: 200,
     reasonPhrase: "OK",
-    headers: new Headers([["CSeq", "1"]]),
+    headers: [["CSeq", "1"]],
     messageBody: new Uint8Array(0),
   });
   control.server.write({ channelId: 0, binaryData: new Uint8Array([0x80]) });
@@ -486,7 +632,7 @@ test("cancelling the readable lets a held-back response through", async () => {
     rtspVersion: "RTSP/2.0",
     statusCode: 200,
     reasonPhrase: "OK",
-    headers: new Headers([["CSeq", "1"]]),
+    headers: [["CSeq", "1"]],
     messageBody: new Uint8Array(0),
   });
   await controlResponse;
@@ -519,7 +665,7 @@ test("closing a channel's writable leaves the connection open for requests", asy
     method: "OPTIONS",
     requestUri: "*",
     rtspVersion: "RTSP/2.0",
-    headers: new Headers(),
+    headers: [],
     messageBody: new Uint8Array(0),
   });
 
@@ -542,7 +688,7 @@ test("an unread $ block on a claimed channel holds back the next response", asyn
     method: "OPTIONS",
     requestUri: "*",
     rtspVersion: "RTSP/2.0",
-    headers: new Headers(),
+    headers: [],
     messageBody: new Uint8Array(0),
   });
   await held.requests.read();
@@ -550,7 +696,7 @@ test("an unread $ block on a claimed channel holds back the next response", asyn
     method: "OPTIONS",
     requestUri: "*",
     rtspVersion: "RTSP/2.0",
-    headers: new Headers(),
+    headers: [],
     messageBody: new Uint8Array(0),
   });
   await control.requests.read();
@@ -560,7 +706,7 @@ test("an unread $ block on a claimed channel holds back the next response", asyn
     rtspVersion: "RTSP/2.0",
     statusCode: 200,
     reasonPhrase: "OK",
-    headers: new Headers([["CSeq", "1"]]),
+    headers: [["CSeq", "1"]],
     messageBody: new Uint8Array(0),
   });
   control.server.write({ channelId: 0, binaryData: new Uint8Array([0x80]) });
@@ -569,7 +715,7 @@ test("an unread $ block on a claimed channel holds back the next response", asyn
     rtspVersion: "RTSP/2.0",
     statusCode: 200,
     reasonPhrase: "OK",
-    headers: new Headers([["CSeq", "1"]]),
+    headers: [["CSeq", "1"]],
     messageBody: new Uint8Array(0),
   });
 
@@ -595,7 +741,7 @@ test("reading the $ block lets the held-back response through", async () => {
     method: "OPTIONS",
     requestUri: "*",
     rtspVersion: "RTSP/2.0",
-    headers: new Headers(),
+    headers: [],
     messageBody: new Uint8Array(0),
   });
   await held.requests.read();
@@ -603,7 +749,7 @@ test("reading the $ block lets the held-back response through", async () => {
     method: "OPTIONS",
     requestUri: "*",
     rtspVersion: "RTSP/2.0",
-    headers: new Headers(),
+    headers: [],
     messageBody: new Uint8Array(0),
   });
   await control.requests.read();
@@ -613,7 +759,7 @@ test("reading the $ block lets the held-back response through", async () => {
     rtspVersion: "RTSP/2.0",
     statusCode: 200,
     reasonPhrase: "OK",
-    headers: new Headers([["CSeq", "1"]]),
+    headers: [["CSeq", "1"]],
     messageBody: new Uint8Array(0),
   });
   control.server.write({ channelId: 0, binaryData: new Uint8Array([0x80]) });
@@ -622,7 +768,7 @@ test("reading the $ block lets the held-back response through", async () => {
     rtspVersion: "RTSP/2.0",
     statusCode: 200,
     reasonPhrase: "OK",
-    headers: new Headers([["CSeq", "1"]]),
+    headers: [["CSeq", "1"]],
     messageBody: new Uint8Array(0),
   });
   await controlResponse;
@@ -637,7 +783,7 @@ test("onRequest is called with the request the server sent", async () => {
     rtspVersion: request.rtspVersion,
     statusCode: 200,
     reasonPhrase: "OK",
-    headers: new Headers(),
+    headers: [],
     messageBody: new Uint8Array(0),
   }));
   createClient({ ...connection, onRequest });
@@ -646,7 +792,7 @@ test("onRequest is called with the request the server sent", async () => {
     method: "TEARDOWN",
     requestUri: "rtsp://example.com/fizzle/foo",
     rtspVersion: "RTSP/2.0",
-    headers: new Headers([["CSeq", "7"]]),
+    headers: [["CSeq", "7"]],
     messageBody: new Uint8Array(0),
   });
   await requests.read();
@@ -655,7 +801,7 @@ test("onRequest is called with the request the server sent", async () => {
     method: "TEARDOWN",
     requestUri: "rtsp://example.com/fizzle/foo",
     rtspVersion: "RTSP/2.0",
-    headers: new Headers([["CSeq", "7"]]),
+    headers: [["CSeq", "7"]],
     messageBody: new Uint8Array(0),
   });
 });
@@ -668,7 +814,7 @@ test("the answer from onRequest is sent to the server", async () => {
       rtspVersion: "RTSP/2.0",
       statusCode: 454,
       reasonPhrase: "Session Not Found",
-      headers: new Headers(),
+      headers: [],
       messageBody: new Uint8Array(0),
     }),
   });
@@ -677,7 +823,7 @@ test("the answer from onRequest is sent to the server", async () => {
     method: "TEARDOWN",
     requestUri: "rtsp://example.com/fizzle/foo",
     rtspVersion: "RTSP/2.0",
-    headers: new Headers([["CSeq", "7"]]),
+    headers: [["CSeq", "7"]],
     messageBody: new Uint8Array(0),
   });
 
@@ -694,7 +840,7 @@ test("the answer from onRequest carries the request's CSeq", async () => {
       rtspVersion: "RTSP/2.0",
       statusCode: 200,
       reasonPhrase: "OK",
-      headers: new Headers(),
+      headers: [],
       messageBody: new Uint8Array(0),
     }),
   });
@@ -703,13 +849,13 @@ test("the answer from onRequest carries the request's CSeq", async () => {
     method: "OPTIONS",
     requestUri: "*",
     rtspVersion: "RTSP/2.0",
-    headers: new Headers([["CSeq", "7"]]),
+    headers: [["CSeq", "7"]],
     messageBody: new Uint8Array(0),
   });
 
   const { value: answer } = await requests.read();
   assert(isResponse(answer));
-  assertEquals(answer.headers.get("CSeq"), "7");
+  assertEquals(answer.headers, [["CSeq", "7"]]);
 });
 
 test("the request's CSeq overwrites a CSeq that onRequest set", async () => {
@@ -720,7 +866,7 @@ test("the request's CSeq overwrites a CSeq that onRequest set", async () => {
       rtspVersion: "RTSP/2.0",
       statusCode: 200,
       reasonPhrase: "OK",
-      headers: new Headers([["CSeq", "99"]]),
+      headers: [["CSeq", "99"]],
       messageBody: new Uint8Array(0),
     }),
   });
@@ -729,18 +875,148 @@ test("the request's CSeq overwrites a CSeq that onRequest set", async () => {
     method: "OPTIONS",
     requestUri: "*",
     rtspVersion: "RTSP/2.0",
-    headers: new Headers([["CSeq", "7"]]),
+    headers: [["CSeq", "7"]],
     messageBody: new Uint8Array(0),
   });
 
   const { value: answer } = await requests.read();
   assert(isResponse(answer));
-  assertEquals(answer.headers.get("CSeq"), "7");
+  assertEquals(answer.headers, [["CSeq", "7"]]);
 });
 
-test("the Headers of the answer from onRequest are left unchanged", async () => {
+test("the request's CSeq keeps the place and the spelling of a CSeq that onRequest set", async () => {
   const { connection, requests, server } = serverLink();
-  const headers = new Headers([["CSeq", "99"]]);
+  createClient({
+    ...connection,
+    onRequest: () => ({
+      rtspVersion: "RTSP/2.0",
+      statusCode: 200,
+      reasonPhrase: "OK",
+      headers: [
+        ["Server", "PhonyServer/1.1"],
+        ["cSEQ", "99"],
+        ["Public", "OPTIONS"],
+      ],
+      messageBody: new Uint8Array(0),
+    }),
+  });
+
+  await server.write({
+    method: "OPTIONS",
+    requestUri: "*",
+    rtspVersion: "RTSP/2.0",
+    headers: [["CSEQ", "7"]],
+    messageBody: new Uint8Array(0),
+  });
+
+  const { value: answer } = await requests.read();
+  assert(isResponse(answer));
+  assertEquals(answer.headers, [
+    ["Server", "PhonyServer/1.1"],
+    ["cSEQ", "7"],
+    ["Public", "OPTIONS"],
+  ]);
+});
+
+test("a second CSeq that onRequest set in another spelling is dropped", async () => {
+  const { connection, requests, server } = serverLink();
+  createClient({
+    ...connection,
+    onRequest: () => ({
+      rtspVersion: "RTSP/2.0",
+      statusCode: 200,
+      reasonPhrase: "OK",
+      headers: [
+        ["cSEQ", "99"],
+        ["Public", "OPTIONS"],
+        ["CSeq", "98"],
+      ],
+      messageBody: new Uint8Array(0),
+    }),
+  });
+
+  await server.write({
+    method: "OPTIONS",
+    requestUri: "*",
+    rtspVersion: "RTSP/2.0",
+    headers: [["CSeq", "7"]],
+    messageBody: new Uint8Array(0),
+  });
+
+  const { value: answer } = await requests.read();
+  assert(isResponse(answer));
+  assertEquals(answer.headers, [
+    ["cSEQ", "7"],
+    ["Public", "OPTIONS"],
+  ]);
+});
+
+test("the answer's CSeq is appended in the spelling the server used", async () => {
+  const { connection, requests, server } = serverLink();
+  createClient({
+    ...connection,
+    onRequest: () => ({
+      rtspVersion: "RTSP/2.0",
+      statusCode: 200,
+      reasonPhrase: "OK",
+      headers: [["Public", "OPTIONS"]],
+      messageBody: new Uint8Array(0),
+    }),
+  });
+
+  await server.write({
+    method: "OPTIONS",
+    requestUri: "*",
+    rtspVersion: "RTSP/2.0",
+    headers: [["cseq", "7"]],
+    messageBody: new Uint8Array(0),
+  });
+
+  const { value: answer } = await requests.read();
+  assert(isResponse(answer));
+  assertEquals(answer.headers, [
+    ["Public", "OPTIONS"],
+    ["cseq", "7"],
+  ]);
+});
+
+test("the answer to a request without a CSeq loses every CSeq that onRequest set", async () => {
+  const { connection, requests, server } = serverLink();
+  createClient({
+    ...connection,
+    onRequest: () => ({
+      rtspVersion: "RTSP/2.0",
+      statusCode: 200,
+      reasonPhrase: "OK",
+      headers: [
+        ["cSEQ", "99"],
+        ["Public", "OPTIONS"],
+        ["CSeq", "98"],
+      ],
+      messageBody: new Uint8Array(0),
+    }),
+  });
+
+  await server.write({
+    method: "OPTIONS",
+    requestUri: "*",
+    rtspVersion: "RTSP/2.0",
+    headers: [],
+    messageBody: new Uint8Array(0),
+  });
+
+  const { value: answer } = await requests.read();
+  assert(isResponse(answer));
+  assertEquals(answer.headers, [["Public", "OPTIONS"]]);
+});
+
+test("the headers of the answer from onRequest are left unchanged", async () => {
+  const { connection, requests, server } = serverLink();
+  const headers: [string, string][] = [
+    ["cSEQ", "99"],
+    ["Public", "OPTIONS"],
+    ["CSeq", "98"],
+  ];
   createClient({
     ...connection,
     onRequest: () => ({
@@ -756,12 +1032,16 @@ test("the Headers of the answer from onRequest are left unchanged", async () => 
     method: "OPTIONS",
     requestUri: "*",
     rtspVersion: "RTSP/2.0",
-    headers: new Headers([["CSeq", "7"]]),
+    headers: [["CSeq", "7"]],
     messageBody: new Uint8Array(0),
   });
   await requests.read();
 
-  assertEquals(headers.get("CSeq"), "99");
+  assertEquals(headers, [
+    ["cSEQ", "99"],
+    ["Public", "OPTIONS"],
+    ["CSeq", "98"],
+  ]);
 });
 
 test("a server request is answered 501 when there is no onRequest", async () => {
@@ -772,7 +1052,7 @@ test("a server request is answered 501 when there is no onRequest", async () => 
     method: "OPTIONS",
     requestUri: "*",
     rtspVersion: "RTSP/2.0",
-    headers: new Headers([["CSeq", "7"]]),
+    headers: [["CSeq", "7"]],
     messageBody: new Uint8Array(0),
   });
 
@@ -789,13 +1069,13 @@ test("the 501 answer carries the request's CSeq", async () => {
     method: "OPTIONS",
     requestUri: "*",
     rtspVersion: "RTSP/2.0",
-    headers: new Headers([["CSeq", "7"]]),
+    headers: [["CSeq", "7"]],
     messageBody: new Uint8Array(0),
   });
 
   const { value: answer } = await requests.read();
   assert(isResponse(answer));
-  assertEquals(answer.headers.get("CSeq"), "7");
+  assertEquals(answer.headers, [["CSeq", "7"]]);
 });
 
 test("the 501 answer uses the request's RTSP version", async () => {
@@ -806,7 +1086,7 @@ test("the 501 answer uses the request's RTSP version", async () => {
     method: "OPTIONS",
     requestUri: "*",
     rtspVersion: "RTSP/1.0",
-    headers: new Headers([["CSeq", "7"]]),
+    headers: [["CSeq", "7"]],
     messageBody: new Uint8Array(0),
   });
 
@@ -826,7 +1106,7 @@ test("a server request is answered 500 when onRequest rejects", async () => {
     method: "OPTIONS",
     requestUri: "*",
     rtspVersion: "RTSP/2.0",
-    headers: new Headers([["CSeq", "7"]]),
+    headers: [["CSeq", "7"]],
     messageBody: new Uint8Array(0),
   });
 
@@ -848,7 +1128,7 @@ test("a server request is answered 500 when onRequest throws", async () => {
     method: "OPTIONS",
     requestUri: "*",
     rtspVersion: "RTSP/2.0",
-    headers: new Headers([["CSeq", "7"]]),
+    headers: [["CSeq", "7"]],
     messageBody: new Uint8Array(0),
   });
 
@@ -868,13 +1148,13 @@ test("the 500 answer carries the request's CSeq", async () => {
     method: "OPTIONS",
     requestUri: "*",
     rtspVersion: "RTSP/2.0",
-    headers: new Headers([["CSeq", "7"]]),
+    headers: [["CSeq", "7"]],
     messageBody: new Uint8Array(0),
   });
 
   const { value: answer } = await requests.read();
   assert(isResponse(answer));
-  assertEquals(answer.headers.get("CSeq"), "7");
+  assertEquals(answer.headers, [["CSeq", "7"]]);
 });
 
 test("an onRequest that has not answered yet does not hold back a response", async () => {
@@ -889,7 +1169,7 @@ test("an onRequest that has not answered yet does not hold back a response", asy
     method: "OPTIONS",
     requestUri: "*",
     rtspVersion: "RTSP/2.0",
-    headers: new Headers(),
+    headers: [],
     messageBody: new Uint8Array(0),
   });
   await requests.read();
@@ -897,14 +1177,14 @@ test("an onRequest that has not answered yet does not hold back a response", asy
     method: "TEARDOWN",
     requestUri: "rtsp://example.com/fizzle/foo",
     rtspVersion: "RTSP/2.0",
-    headers: new Headers([["CSeq", "7"]]),
+    headers: [["CSeq", "7"]],
     messageBody: new Uint8Array(0),
   });
   await server.write({
     rtspVersion: "RTSP/2.0",
     statusCode: 200,
     reasonPhrase: "OK",
-    headers: new Headers([["CSeq", "1"]]),
+    headers: [["CSeq", "1"]],
     messageBody: new Uint8Array(0),
   });
 
@@ -919,7 +1199,7 @@ test("close rejects a request that is waiting for its response", async () => {
     method: "OPTIONS",
     requestUri: "*",
     rtspVersion: "RTSP/2.0",
-    headers: new Headers(),
+    headers: [],
     messageBody: new Uint8Array(0),
   });
   await requests.read();
@@ -954,7 +1234,7 @@ test("close rejects a request while an unread $ block holds the connection back"
     method: "OPTIONS",
     requestUri: "*",
     rtspVersion: "RTSP/2.0",
-    headers: new Headers(),
+    headers: [],
     messageBody: new Uint8Array(0),
   });
   await held.requests.read();
@@ -962,7 +1242,7 @@ test("close rejects a request while an unread $ block holds the connection back"
     method: "OPTIONS",
     requestUri: "*",
     rtspVersion: "RTSP/2.0",
-    headers: new Headers(),
+    headers: [],
     messageBody: new Uint8Array(0),
   });
   await control.requests.read();
@@ -977,7 +1257,7 @@ test("close rejects a request while an unread $ block holds the connection back"
     rtspVersion: "RTSP/2.0",
     statusCode: 200,
     reasonPhrase: "OK",
-    headers: new Headers([["CSeq", "1"]]),
+    headers: [["CSeq", "1"]],
     messageBody: new Uint8Array(0),
   });
   await controlResponse;
@@ -1052,7 +1332,7 @@ test("request rejects after close", async () => {
         method: "OPTIONS",
         requestUri: "*",
         rtspVersion: "RTSP/2.0",
-        headers: new Headers(),
+        headers: [],
         messageBody: new Uint8Array(0),
       }),
     Error,
@@ -1096,7 +1376,7 @@ test("a read error rejects a waiting request with the same error", async () => {
     method: "OPTIONS",
     requestUri: "*",
     rtspVersion: "RTSP/2.0",
-    headers: new Headers(),
+    headers: [],
     messageBody: new Uint8Array(0),
   });
   await requests.read();
@@ -1131,7 +1411,7 @@ test("request rejects with the same error after a read error", async () => {
     method: "OPTIONS",
     requestUri: "*",
     rtspVersion: "RTSP/2.0",
-    headers: new Headers(),
+    headers: [],
     messageBody: new Uint8Array(0),
   }).catch((error) => error);
 
@@ -1146,7 +1426,7 @@ test("the server ending the connection rejects a waiting request", async () => {
     method: "OPTIONS",
     requestUri: "*",
     rtspVersion: "RTSP/2.0",
-    headers: new Headers(),
+    headers: [],
     messageBody: new Uint8Array(0),
   });
   await requests.read();
@@ -1169,7 +1449,7 @@ test("the server ending the connection fails a claimed channel with the error th
     method: "OPTIONS",
     requestUri: "*",
     rtspVersion: "RTSP/2.0",
-    headers: new Headers(),
+    headers: [],
     messageBody: new Uint8Array(0),
   });
   await requests.read();
@@ -1195,7 +1475,7 @@ test("a write error rejects a request that was already written", async () => {
     method: "OPTIONS",
     requestUri: "*",
     rtspVersion: "RTSP/2.0",
-    headers: new Headers(),
+    headers: [],
     messageBody: new Uint8Array(0),
   }).catch((error) => error);
 

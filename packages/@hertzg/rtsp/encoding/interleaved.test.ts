@@ -135,14 +135,14 @@ test("isInterleavedBinaryData rejects RTSP messages and non-objects", () => {
     method: "OPTIONS",
     requestUri: "*",
     rtspVersion: "RTSP/2.0",
-    headers: new Headers(),
+    headers: [],
     messageBody: new Uint8Array(),
   };
   const response = {
     rtspVersion: "RTSP/2.0",
     statusCode: 200,
     reasonPhrase: "OK",
-    headers: new Headers(),
+    headers: [],
     messageBody: new Uint8Array(),
   };
 

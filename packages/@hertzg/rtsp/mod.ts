@@ -19,6 +19,12 @@
  * authenticate. It does not open the socket either: the caller passes the two
  * sides of a connection it already has.
  *
+ * The `headers` of a message are `[name, value]` pairs, one per header line,
+ * in the order of the lines and with each name as written. What the caller
+ * passes goes out in that order and that spelling, and what a camera sends
+ * comes back the same way. `new Headers(response.headers)` looks a name up
+ * whatever its case.
+ *
  * Every layer is its own entry point: `encoding/interleaved`,
  * `encoding/message`, `protocol/request`, `protocol/response`,
  * `protocol/message`, `streams/decode`, `streams/encode` and `client`.
@@ -39,7 +45,7 @@
  *   method: "OPTIONS",
  *   requestUri: "*",
  *   rtspVersion: "RTSP/1.0",
- *   headers: new Headers(),
+ *   headers: [],
  *   messageBody: new Uint8Array(0),
  * });
  *
@@ -70,7 +76,7 @@
  *   method: "DESCRIBE",
  *   requestUri: "rtsp://192.0.2.10/stream1",
  *   rtspVersion: "RTSP/1.0",
- *   headers: new Headers({ Accept: "application/sdp" }),
+ *   headers: [["Accept", "application/sdp"]],
  *   messageBody: new Uint8Array(0),
  * });
  * const sdp = new TextDecoder().decode(response.messageBody);
@@ -90,7 +96,7 @@ export {
 } from "./encoding/interleaved.ts";
 export type { InterleavedBinaryData } from "./encoding/interleaved.ts";
 export { decodeMessage, encodeMessage } from "./encoding/message.ts";
-export type { MessageFrame } from "./encoding/message.ts";
+export type { HeaderField, MessageFrame } from "./encoding/message.ts";
 export {
   isRequest,
   isResponse,

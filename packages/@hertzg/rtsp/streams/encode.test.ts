@@ -1,18 +1,20 @@
 import { test } from "node:test";
 import { assertEquals } from "@std/assert";
+import type { InterleavedBinaryData } from "../encoding/interleaved.ts";
+import type { RtspMessage } from "../protocol/message.ts";
 import { createRtspDecodeStream } from "./decode.ts";
 import { createRtspEncodeStream } from "./encode.ts";
 
 test("createRtspEncodeStream writes a request", async () => {
   const chunks = await Array.fromAsync(
-    ReadableStream.from([{
+    ReadableStream.from<RtspMessage | InterleavedBinaryData>([{
       method: "PLAY",
       requestUri: "rtsp://example.com/bar.file",
       rtspVersion: "RTSP/2.0",
-      headers: new Headers([
+      headers: [
         ["CSeq", "3"],
         ["Session", "OccldOFFq23KwjYpAnBbUr"],
-      ]),
+      ],
       messageBody: new Uint8Array(0),
     }]).pipeThrough(createRtspEncodeStream()),
   );
@@ -27,23 +29,23 @@ test("createRtspEncodeStream writes a request", async () => {
 
 test("createRtspEncodeStream writes a response with its message body", async () => {
   const chunks = await Array.fromAsync(
-    ReadableStream.from([{
+    ReadableStream.from<RtspMessage | InterleavedBinaryData>([{
       rtspVersion: "RTSP/2.0",
       statusCode: 200,
       reasonPhrase: "OK",
-      headers: new Headers([
+      headers: [
         ["CSeq", "312"],
         ["Content-Type", "application/sdp"],
-      ]),
+      ],
       messageBody: new TextEncoder().encode("v=0\r\n"),
     }]).pipeThrough(createRtspEncodeStream()),
   );
 
   assertEquals(chunks.map((chunk) => new TextDecoder().decode(chunk)), [
     "RTSP/2.0 200 OK\r\n" +
-    "Content-Length: 5\r\n" +
-    "Content-Type: application/sdp\r\n" +
     "CSeq: 312\r\n" +
+    "Content-Type: application/sdp\r\n" +
+    "Content-Length: 5\r\n" +
     "\r\n" +
     "v=0\r\n",
   ]);
@@ -51,7 +53,7 @@ test("createRtspEncodeStream writes a response with its message body", async () 
 
 test("createRtspEncodeStream writes interleaved binary data as a $ block", async () => {
   const chunks = await Array.fromAsync(
-    ReadableStream.from([
+    ReadableStream.from<RtspMessage | InterleavedBinaryData>([
       { channelId: 5, binaryData: new Uint8Array([0xaa, 0xbb, 0xcc]) },
     ]).pipeThrough(createRtspEncodeStream()),
   );
@@ -65,12 +67,12 @@ test("createRtspEncodeStream writes interleaved binary data as a $ block", async
 
 test("createRtspEncodeStream writes one chunk per item, in order", async () => {
   const chunks = await Array.fromAsync(
-    ReadableStream.from([
+    ReadableStream.from<RtspMessage | InterleavedBinaryData>([
       {
         method: "OPTIONS",
         requestUri: "*",
         rtspVersion: "RTSP/2.0",
-        headers: new Headers([["CSeq", "1"]]),
+        headers: [["CSeq", "1"]],
         messageBody: new Uint8Array(0),
       },
       { channelId: 0, binaryData: new Uint8Array([0x80]) },
@@ -78,7 +80,7 @@ test("createRtspEncodeStream writes one chunk per item, in order", async () => {
         rtspVersion: "RTSP/2.0",
         statusCode: 200,
         reasonPhrase: "OK",
-        headers: new Headers([["CSeq", "7"]]),
+        headers: [["CSeq", "7"]],
         messageBody: new Uint8Array(0),
       },
     ]).pipeThrough(createRtspEncodeStream()),
@@ -93,16 +95,16 @@ test("createRtspEncodeStream writes one chunk per item, in order", async () => {
 
 test("items round-trip through the encode stream and the decode stream", async () => {
   const items = await Array.fromAsync(
-    ReadableStream.from([
+    ReadableStream.from<RtspMessage | InterleavedBinaryData>([
       {
         method: "SET_PARAMETER",
         requestUri: "rtsp://example.com/fizzle/foo",
         rtspVersion: "RTSP/2.0",
-        headers: new Headers([
+        headers: [
           ["CSeq", "421"],
           ["Content-Length", "20"],
           ["Content-Type", "text/parameters"],
-        ]),
+        ],
         messageBody: new TextEncoder().encode("barparam: barstuff\r\n"),
       },
       { channelId: 6, binaryData: new Uint8Array([0x80, 0xc8, 0x00, 0x06]) },
@@ -110,7 +112,7 @@ test("items round-trip through the encode stream and the decode stream", async (
         rtspVersion: "RTSP/1.0",
         statusCode: 100,
         reasonPhrase: "Continue",
-        headers: new Headers([["CSeq", "421"]]),
+        headers: [["CSeq", "421"]],
         messageBody: new Uint8Array(0),
       },
     ])
@@ -123,13 +125,11 @@ test("items round-trip through the encode stream and the decode stream", async (
       method: "SET_PARAMETER",
       requestUri: "rtsp://example.com/fizzle/foo",
       rtspVersion: "RTSP/2.0",
-      // assertEquals compares Headers in the order the fields were added, and
-      // the encoder writes them sorted by name.
-      headers: new Headers([
+      headers: [
+        ["CSeq", "421"],
         ["Content-Length", "20"],
         ["Content-Type", "text/parameters"],
-        ["CSeq", "421"],
-      ]),
+      ],
       messageBody: new TextEncoder().encode("barparam: barstuff\r\n"),
     },
     { channelId: 6, binaryData: new Uint8Array([0x80, 0xc8, 0x00, 0x06]) },
@@ -137,7 +137,7 @@ test("items round-trip through the encode stream and the decode stream", async (
       rtspVersion: "RTSP/1.0",
       statusCode: 100,
       reasonPhrase: "Continue",
-      headers: new Headers([["CSeq", "421"]]),
+      headers: [["CSeq", "421"]],
       messageBody: new Uint8Array(0),
     },
   ]);

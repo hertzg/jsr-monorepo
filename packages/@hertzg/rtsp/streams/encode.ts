@@ -10,15 +10,18 @@
  * ```ts
  * import { assertEquals } from "@std/assert";
  * import { createRtspEncodeStream } from "@hertzg/rtsp/streams/encode";
+ * import type { RtspRequest } from "@hertzg/rtsp/protocol/request";
+ *
+ * const request: RtspRequest = {
+ *   method: "OPTIONS",
+ *   requestUri: "*",
+ *   rtspVersion: "RTSP/2.0",
+ *   headers: [["CSeq", "1"]],
+ *   messageBody: new Uint8Array(0),
+ * };
  *
  * const chunks = await Array.fromAsync(
- *   ReadableStream.from([{
- *     method: "OPTIONS",
- *     requestUri: "*",
- *     rtspVersion: "RTSP/2.0",
- *     headers: new Headers({ "CSeq": "1" }),
- *     messageBody: new Uint8Array(0),
- *   }]).pipeThrough(createRtspEncodeStream()),
+ *   ReadableStream.from([request]).pipeThrough(createRtspEncodeStream()),
  * );
  *
  * assertEquals(chunks, [
@@ -51,18 +54,24 @@ import { type RtspMessage, serializeMessage } from "../protocol/message.ts";
  * ```ts
  * import { assertEquals } from "@std/assert";
  * import { createRtspEncodeStream } from "@hertzg/rtsp/streams/encode";
+ * import type { InterleavedBinaryData } from "@hertzg/rtsp/encoding/interleaved";
+ * import type { RtspResponse } from "@hertzg/rtsp/protocol/response";
+ *
+ * const response: RtspResponse = {
+ *   rtspVersion: "RTSP/2.0",
+ *   statusCode: 200,
+ *   reasonPhrase: "OK",
+ *   headers: [["CSeq", "3"]],
+ *   messageBody: new Uint8Array(0),
+ * };
+ * const block: InterleavedBinaryData = {
+ *   channelId: 1,
+ *   binaryData: new Uint8Array([0xca, 0xfe]),
+ * };
  *
  * const chunks = await Array.fromAsync(
- *   ReadableStream.from([
- *     {
- *       rtspVersion: "RTSP/2.0",
- *       statusCode: 200,
- *       reasonPhrase: "OK",
- *       headers: new Headers({ "CSeq": "3" }),
- *       messageBody: new Uint8Array(0),
- *     },
- *     { channelId: 1, binaryData: new Uint8Array([0xca, 0xfe]) },
- *   ]).pipeThrough(createRtspEncodeStream()),
+ *   ReadableStream.from([response, block])
+ *     .pipeThrough(createRtspEncodeStream()),
  * );
  *
  * assertEquals(chunks, [
